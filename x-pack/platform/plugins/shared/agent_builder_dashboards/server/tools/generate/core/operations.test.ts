@@ -14,6 +14,7 @@ import type {
 } from '@kbn/agent-builder-dashboards-common';
 import { isSection } from '@kbn/agent-builder-dashboards-common';
 import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
+import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import type { PanelContentAttempt } from './resolve_panel';
 import type { ResolvePanelContent } from './operations/panels';
 import {
@@ -70,6 +71,17 @@ describe('executeDashboardOperations', () => {
     id,
     type: MARKDOWN_EMBEDDABLE_TYPE,
     config: { content },
+    grid,
+  });
+
+  const createCustomContentPanel = (
+    id: string,
+    prompt: string,
+    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 24, h: 6 }
+  ): AttachmentPanel => ({
+    id,
+    type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+    config: { prompt },
     grid,
   });
 
@@ -1725,6 +1737,100 @@ describe('executeDashboardOperations', () => {
       );
     });
 
+    it('edits a custom_content panel in place by panelId', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createCustomContentPanel('cc-1', 'old prompt')],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'cc-1',
+                config: {
+                  prompt: 'updated prompt',
+                  template: '<div>Updated</div>',
+                },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([]);
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({
+          id: 'cc-1',
+          type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+          config: { prompt: 'updated prompt', template: '<div>Updated</div>' },
+          grid: { x: 0, y: 0, w: 24, h: 6 },
+        })
+      );
+    });
+
+    it('records a failure when a custom_content config-source edit targets a non-custom_content panel', async () => {
+      const resolvePanelContent = jest.fn<
+        ReturnType<ResolvePanelContent>,
+        Parameters<ResolvePanelContent>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1', 0)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              {
+                source: 'config',
+                type: 'custom_content',
+                panelId: 'panel-1',
+                config: { prompt: 'new prompt' },
+              },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelContent,
+      });
+
+      expect(resolvePanelContent).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as custom content. Use source: "request" for ES|QL-backed Lens or Vega panels.`,
+        },
+      ]);
+
+      // Lens panel must be left untouched
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
+        expect.objectContaining({
+          id: 'panel-1',
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+        })
+      );
+    });
+
     it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {
       const deferred = createDeferred<PanelContentAttempt>();
       const resolvePanelContent = jest.fn<
@@ -1814,6 +1920,43 @@ describe('executeDashboardOperations', () => {
         logger,
       })
     ).rejects.toThrow('Section "nonexistent-section" not found.');
+  });
+
+  it('adds a custom_content panel and maps it to the custom_content embeddable type', async () => {
+    const result = await executeDashboardOperations({
+      dashboardData: { title: 'Test', description: 'Desc', panels: [] },
+      operations: [
+        {
+          operation: 'add_panels',
+          panels: [
+            {
+              source: 'config',
+              type: 'custom_content',
+              config: {
+                prompt: 'Show error rate KPI',
+                esqlQuery: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
+              },
+              grid: { x: 0, y: 0, w: 24, h: 6 },
+            },
+          ],
+        },
+      ],
+      logger,
+    });
+
+    expect(result.failures).toEqual([]);
+    const panels = getPanelsOnly(result.dashboardData.panels);
+    expect(panels).toHaveLength(1);
+    expect(panels[0]).toEqual(
+      expect.objectContaining({
+        type: CUSTOM_CONTENT_EMBEDDABLE_TYPE,
+        config: {
+          prompt: 'Show error rate KPI',
+          esqlQuery: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
+        },
+        grid: { x: 0, y: 0, w: 24, h: 6 },
+      })
+    );
   });
 
   it('accepts a markdown config-source panel with content and optional settings', () => {

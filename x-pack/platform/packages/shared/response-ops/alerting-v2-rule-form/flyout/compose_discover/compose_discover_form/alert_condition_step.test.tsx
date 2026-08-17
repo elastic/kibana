@@ -149,13 +149,21 @@ describe('AlertConditionStep', () => {
       expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
     });
 
-    it('shows standalone query summary for signal kind', () => {
+    it('shows a unified query summary for signal kind without alert-condition messaging', () => {
       renderStep(
         { queryCommitted: true },
         { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
       );
 
-      expect(screen.getByTestId('composeDiscoverEditQuery')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
+      expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeInTheDocument();
+      expect(screen.getByText('Query')).toBeInTheDocument();
+      expect(screen.queryByText('Base query')).not.toBeInTheDocument();
+      expect(screen.queryByText('Alert condition')).not.toBeInTheDocument();
+      expect(
+        screen.queryByText('Base query defined — no separate alert condition')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('esqlSummaryNoAlertConditionCallout')).not.toBeInTheDocument();
     });
 
     it('shows the success state with base and alert condition for alert kind', () => {
@@ -200,23 +208,6 @@ describe('AlertConditionStep', () => {
       ).toBeInTheDocument();
     });
 
-    it('shows the no-alert-condition state for an alert persisted as a standalone query', () => {
-      renderStep(
-        { queryCommitted: true },
-        {
-          formValueOverrides: {
-            kind: 'alert',
-            query: { format: 'standalone', breach: { query: 'FROM logs-* | STATS c = COUNT(*)' } },
-          },
-        }
-      );
-
-      expect(screen.getByTestId('esqlQuerySummarySection-no_alert_condition')).toBeInTheDocument();
-      expect(screen.getByTestId('esqlSummaryNoAlertConditionCallout')).toBeInTheDocument();
-      // The standalone breach query is surfaced as the base query block.
-      expect(screen.getByText(/FROM logs-\* \| STATS c = COUNT/)).toBeInTheDocument();
-    });
-
     it('shows the empty-query callout when both base and alert condition are empty', () => {
       renderStep(
         { queryCommitted: true },
@@ -256,7 +247,7 @@ describe('AlertConditionStep', () => {
         { formValueOverrides: { kind: 'signal', query: STANDALONE_QUERY } }
       );
 
-      expect(screen.getByTestId('composeDiscoverEditQuery')).toBeDisabled();
+      expect(screen.getByTestId('esqlSummaryOpenEditor')).toBeDisabled();
     });
 
     it('disables the edit CTA when child flyout is open (alert committed)', () => {

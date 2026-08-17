@@ -213,6 +213,40 @@ describe('QueryRuleOrchestrator', () => {
     });
   });
 
+  describe('upsertQuery', () => {
+    it('preserves existing features when the incoming query omits them (durability toggle)', async () => {
+      const existing = makeLink({ id: 'q1', features: [{ id: 'feat-1' }] });
+      const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });
+
+      await orchestrator.upsertQuery(
+        definition,
+        makeQuery({ id: 'q1', expires_at: '2030-01-01T00:00:00.000Z' })
+      );
+
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const op = bulkOps.find(
+        (o: { index?: { query?: { id?: string } } }) => o.index?.query?.id === 'q1'
+      );
+      expect(op?.index?.query?.features).toEqual([{ id: 'feat-1' }]);
+    });
+
+    it('lets incoming features override the stored ones', async () => {
+      const existing = makeLink({ id: 'q1', features: [{ id: 'feat-1' }] });
+      const { orchestrator, writer } = createOrchestrator({ currentLinks: [existing] });
+
+      await orchestrator.upsertQuery(
+        definition,
+        makeQuery({ id: 'q1', features: [{ id: 'feat-2' }] })
+      );
+
+      const bulkOps = (writer.bulk as jest.Mock).mock.calls[0][1];
+      const op = bulkOps.find(
+        (o: { index?: { query?: { id?: string } } }) => o.index?.query?.id === 'q1'
+      );
+      expect(op?.index?.query?.features).toEqual([{ id: 'feat-2' }]);
+    });
+  });
+
   describe('demoteQueries', () => {
     it('reads with includeExpired so an already-expired query stays demotable', async () => {
       const expiredBacked = makeLink({ id: 'expired-1', ruleBacked: true });

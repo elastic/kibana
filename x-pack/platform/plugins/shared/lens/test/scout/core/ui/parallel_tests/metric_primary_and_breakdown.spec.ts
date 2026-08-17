@@ -51,7 +51,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
     async ({ page, pageObjects: { visualize, lens, filterBar } }) => {
       await spaceTest.step('renders a metric with a primary and secondary dimension', async () => {
         await buildMetricVisualization({ visualize, lens });
-        expect(await lens.getMetricVisualizationData()).toHaveLength(1);
+        expect(await lens.metric.getMetricVisualizationData()).toHaveLength(1);
       });
 
       await spaceTest.step('enables a trendline on the primary metric', async () => {
@@ -64,7 +64,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         // `waitForVisualization` settles, so poll rather than reading the debug state once.
         await expect
           .poll(async () => {
-            const [datum] = await lens.getMetricVisualizationData();
+            const [datum] = await lens.metric.getMetricVisualizationData();
             return datum?.showingTrendline;
           })
           .toBe(true);
@@ -83,9 +83,9 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         // Number of values (5) + the "Other" bucket. `waitForVisualization` only waits for
         // rendering to settle, not for this specific tile count, so assert it explicitly first —
         // `toHaveCount` auto-retries, covering the query round-trip after the size change commits.
-        await expect(lens.metricTilesLocator).toHaveCount(6);
+        await expect(lens.metric.metricTilesLocator).toHaveCount(6);
 
-        const data = await lens.getMetricVisualizationData();
+        const data = await lens.metric.getMetricVisualizationData();
         // First 5 tiles are top IP terms, the last is the "Other" bucket (structural check;
         // the specific top-5 IPs are backend-computed and not pinned).
         for (const datum of data.slice(0, 5)) {
@@ -122,20 +122,20 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         await lens.waitForVisualization('mtrVis');
         // The progress bar lands in a render pass after the one `waitForVisualization` settles
         // on, so wait for it directly (auto-retries) rather than racing a one-shot data snapshot.
-        await expect(lens.metricProgressBar).not.toHaveCount(0);
+        await expect(lens.metric.metricProgressBar).not.toHaveCount(0);
 
-        const [datum] = await lens.getMetricVisualizationData();
+        const [datum] = await lens.metric.getMetricVisualizationData();
         expect(datum.showingBar).toBe(true);
 
         await lens.closeDimensionEditor();
-        await lens.removeAllDimensions(MAX_PANEL);
+        await lens.workspace.removeAllDimensions(MAX_PANEL);
       });
 
       await spaceTest.step('re-enables the trendline together with the breakdown', async () => {
         // Trendlines are fetched separately from the tiles, so they appear (and disappear) in a
         // render pass after the one `waitForVisualization` settles on: poll for both toggles.
         const someTileShowsTrendline = async () =>
-          (await lens.getMetricVisualizationData()).some(
+          (await lens.metric.getMetricVisualizationData()).some(
             ({ showingTrendline }) => showingTrendline
           );
 
@@ -154,12 +154,12 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         expect(await filterBar.getFilterCount()).toBe(0);
 
         // Click whichever IP the top-terms query returned first, rather than pinning one.
-        const [firstTile] = await lens.getMetricVisualizationData();
+        const [firstTile] = await lens.metric.getMetricVisualizationData();
         const title = firstTile.title ?? '';
         expect(title).toMatch(IP_TITLE);
-        await lens.clickMetricTileByTitle(title);
+        await lens.metric.clickMetricTileByTitle(title);
         // Filtering to a single IP collapses the breakdown to that one term (no "Other" bucket).
-        await expect(lens.metricTilesLocator).toHaveCount(1);
+        await expect(lens.metric.metricTilesLocator).toHaveCount(1);
 
         await expect.poll(() => filterBar.getFiltersLabel()).toStrictEqual([`ip: ${title}`]);
 
@@ -168,19 +168,21 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         // Removing the filter re-issues the query; `waitForVisualization` can settle on a
         // transient render before the full result set arrives, so also wait for the tile count
         // to be fully restored before reading tile data below.
-        await expect(lens.metricTilesLocator).toHaveCount(6);
+        await expect(lens.metric.metricTilesLocator).toHaveCount(6);
       });
 
       await spaceTest.step('applies a static color to every tile', async () => {
         await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
 
-        await lens.setColorPickerValue('#000000');
+        await lens.style.setColorPickerValue('#000000');
         await lens.waitForVisualization('mtrVis');
 
         // Tile fill color is applied on its own debounce independent of `data-rendering-count`,
         // so `waitForVisualization` alone can't be relied on to have caught up; poll for it.
         await expect
-          .poll(async () => (await lens.getMetricVisualizationData()).map(({ color }) => color))
+          .poll(async () =>
+            (await lens.metric.getMetricVisualizationData()).map(({ color }) => color)
+          )
           .toStrictEqual(new Array(6).fill(STATIC_COLOR));
       });
 
@@ -189,7 +191,9 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         await lens.waitForVisualization('mtrVis');
 
         await expect
-          .poll(async () => (await lens.getMetricVisualizationData()).map(({ color }) => color))
+          .poll(async () =>
+            (await lens.metric.getMetricVisualizationData()).map(({ color }) => color)
+          )
           .toStrictEqual(DYNAMIC_COLORS);
       });
 
@@ -199,14 +203,16 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
 
         // The 3-color palette renders 4 range inputs: the "No min"/"No max" boundaries, which
         // hold no value, plus the 2 editable thresholds asserted below.
-        const stops = await lens.getPaletteColorStops(4);
+        const stops = await lens.style.getPaletteColorStops(4);
         const thresholds = stops.map(({ stop }) => stop).filter((stop) => Boolean(stop));
         expect(thresholds).toStrictEqual(['10400.18', '15077.59']);
 
         await lens.waitForVisualization('mtrVis');
         // Colors shouldn't change just from converting the range type.
         await expect
-          .poll(async () => (await lens.getMetricVisualizationData()).map(({ color }) => color))
+          .poll(async () =>
+            (await lens.metric.getMetricVisualizationData()).map(({ color }) => color)
+          )
           .toStrictEqual(DYNAMIC_COLORS);
 
         await lens.closePalettePanelFlyout();
@@ -214,7 +220,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
       });
 
       await spaceTest.step('makes the visualization scrollable when too tall', async () => {
-        await lens.removeAllDimensions(BREAKDOWN_PANEL);
+        await lens.workspace.removeAllDimensions(BREAKDOWN_PANEL);
         await lens.configureDimension({
           dimension: `${BREAKDOWN_PANEL} > lns-empty-dimension`,
           operation: 'date_histogram',
@@ -235,7 +241,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         // retry the whole scroll instead and assert the last tile moved up.
         await expect
           .poll(async () => {
-            const tiles = await lens.getMetricTiles();
+            const tiles = await lens.metric.getMetricTiles();
             const lastTile = tiles[tiles.length - 1];
             if (!lastTile) {
               return 0;
@@ -257,7 +263,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         // The previous step leaves a max-cols=1 date-histogram grid that keeps the
         // workspace layout thrashing; collapse it before opening the formula editor
         // so the Formula tab click isn't racing ongoing reflows.
-        await lens.removeAllDimensions(BREAKDOWN_PANEL);
+        await lens.workspace.removeAllDimensions(BREAKDOWN_PANEL);
         await lens.waitForVisualization('mtrVis');
 
         await lens.dimensions.openDimensionEditor(`${PRIMARY_PANEL} > lns-dimensionTrigger`);
@@ -265,7 +271,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
         await lens.typeInFormula('', { replace: true });
         await lens.waitForVisualization('mtrVis');
 
-        await expect(lens.getMessageListItems('error')).toHaveCount(0);
+        await expect(lens.workspace.getMessageListItems('error')).toHaveCount(0);
       });
 
       await spaceTest.step(
@@ -290,7 +296,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
 
           // Extract the numeric decimals from the value without any compact suffix like k or m.
           const getDecimalsLength = async () => {
-            const [{ value }] = await lens.getMetricVisualizationData();
+            const [{ value }] = await lens.metric.getMetricVisualizationData();
             return value?.split('.')[1]?.match(/\d+/)?.[0]?.length;
           };
           // The custom format can lag one more async pass behind the visualization-switch's own
@@ -299,7 +305,7 @@ spaceTest.describe('Lens metric primary and breakdown', { tag: '@local-stateful-
           // one-shot read.
           await expect.poll(getDecimalsLength).toBe(3);
 
-          const [{ value }] = await lens.getMetricVisualizationData();
+          const [{ value }] = await lens.metric.getMetricVisualizationData();
           expect(value).toContain('blah');
         }
       );

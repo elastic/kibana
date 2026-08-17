@@ -106,7 +106,9 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await expect
       .poll(
         async () =>
-          getPieChartLabels(await lens.getCurrentChartDebugState('partitionVisChart')).sort(),
+          getPieChartLabels(
+            await lens.workspace.getCurrentChartDebugState('partitionVisChart')
+          ).sort(),
         { timeout: 20_000 }
       )
       .toStrictEqual([...expectedLabels].sort());
@@ -119,7 +121,7 @@ spaceTest.describe('Lens open in Lens — agg-based Pie', { tag: tags.deployment
     await lens.waitForVisualization('partitionVisChart');
 
     expect(await lens.getChartSwitchType()).toBe('Pie');
-    expect(await lens.getDonutHoleSize()).toBe('Small');
+    expect(await lens.style.getDonutHoleSize()).toBe('Small');
   });
 
   spaceTest('should convert Pie types correctly', async ({ pageObjects }) => {
