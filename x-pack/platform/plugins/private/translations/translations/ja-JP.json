@@ -22805,7 +22805,6 @@
     "xpack.fleet.enrollmentTokenBulkRevokeModal.title": "{count}個の登録トークンを取り消し",
     "xpack.fleet.enrollmentTokenBulkRevokeModal.titleSingle": "登録トークンを取り消し",
     "xpack.fleet.enrollmentTokensList.actionsTitle": "アクション",
-    "xpack.fleet.enrollmentTokensList.activeTitle": "アクティブ",
     "xpack.fleet.enrollmentTokensList.activeValue": "アクティブ",
     "xpack.fleet.enrollmentTokensList.bulkActionsButton": "{count, plural, one {# token} other {#個のトークン}}を選択中",
     "xpack.fleet.enrollmentTokensList.clearFiltersLink": "フィルターをクリア",
