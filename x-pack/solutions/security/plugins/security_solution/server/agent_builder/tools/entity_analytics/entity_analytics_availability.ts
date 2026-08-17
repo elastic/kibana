@@ -8,28 +8,35 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
 import { getEntitiesAlias, ENTITY_LATEST } from '@kbn/entity-store/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { Logger } from '@kbn/logging';
 import type { ExperimentalFeatures } from '../../../../common';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 
 /**
- * Gates on the generic agent builder resource availability,
- * on the `entityAnalyticsEntityStoreV2` feature flag, and
- * on the latest-entities index actually existing for the space.
+ * Shared availability gate for Entity Analytics Agent Builder tools that depend
+ * on Entity Store V2: space/resource availability, the
+ * `entityAnalyticsEntityStoreV2` feature flag, and the latest-entities index for
+ * the space.
+ *
+ * Pass `minLicense` for tools that also require a minimum license. Leave it
+ * unset for tools that only need the store.
  */
-export const getEntityStoreV2ToolAvailability = async ({
+export const getEntityAnalyticsToolAvailability = async ({
   core,
   request,
   spaceId,
   experimentalFeatures,
   logger,
+  minLicense,
 }: {
   core: SecuritySolutionPluginCoreSetupDependencies;
   request: KibanaRequest;
   spaceId: string;
   experimentalFeatures: ExperimentalFeatures;
   logger: Logger;
+  minLicense?: LicenseType;
 }): Promise<ToolAvailabilityResult> => {
   try {
     const availability = await getAgentBuilderResourceAvailability({ core, request, logger });
@@ -44,7 +51,7 @@ export const getEntityStoreV2ToolAvailability = async ({
       };
     }
 
-    const [coreStart] = await core.getStartServices();
+    const [coreStart, startPlugins] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
     // Tool is only available if the latest entity store index exists for this space
@@ -59,11 +66,21 @@ export const getEntityStoreV2ToolAvailability = async ({
       };
     }
 
+    if (minLicense !== undefined) {
+      const license = await startPlugins.licensing.getLicense();
+      if (!license.hasAtLeast(minLicense)) {
+        return {
+          status: 'unavailable',
+          reason: `This tool requires a ${minLicense} license or above.`,
+        };
+      }
+    }
+
     return availability;
   } catch (error) {
     return {
       status: 'unavailable',
-      reason: `Failed to check entity store v2 index availability: ${
+      reason: `Failed to check tool availability: ${
         error instanceof Error ? error.message : 'Unknown error'
       }`,
     };
