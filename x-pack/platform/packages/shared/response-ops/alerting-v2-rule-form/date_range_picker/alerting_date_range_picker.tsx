@@ -67,13 +67,11 @@ export interface AlertingDateRangePickerProps {
   to: string;
   onChange: (range: { from: string; to: string }) => void;
   services: AlertingDateRangePickerServices;
-  /** When provided, wires the picker's built-in auto-refresh control. */
-  onRefresh?: () => void;
   /**
-   * Renders a manual "refresh now" icon button beside the picker. Requires `onRefresh`.
-   * @default false
+   * When provided, wires the picker's built-in auto-refresh control and renders
+   * a manual "refresh now" icon button beside the picker.
    */
-  showRefreshButton?: boolean;
+  onRefresh?: () => void;
   isLoading?: boolean;
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
   width?: 'auto' | 'restricted' | 'full';
@@ -101,7 +99,6 @@ export const AlertingDateRangePicker = ({
   onChange,
   services: { data, notifications, http, application, uiSettings, featureFlags },
   onRefresh,
-  showRefreshButton = false,
   isLoading = false,
   showTimeWindowButtons = false,
   width = 'auto',
@@ -190,7 +187,7 @@ export const AlertingDateRangePicker = ({
     [onChange, timeHistory]
   );
 
-  const canManuallyRefresh = Boolean(showRefreshButton && onRefresh);
+  const canManuallyRefresh = Boolean(onRefresh);
 
   if (!isDateRangePickerEnabled) {
     return (

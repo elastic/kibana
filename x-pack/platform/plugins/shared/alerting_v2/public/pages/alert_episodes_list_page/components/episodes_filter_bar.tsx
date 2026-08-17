@@ -156,7 +156,6 @@ export const EpisodesFilterBar = ({
               onChange={onTimeChange}
               services={services}
               onRefresh={onRefresh}
-              showRefreshButton
               isLoading={isLoading}
               showTimeWindowButtons
               width="auto"

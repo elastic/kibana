@@ -270,30 +270,13 @@ describe('AlertingDateRangePicker', () => {
     );
   });
 
-  it('omits the manual refresh button by default, even when onRefresh is provided', () => {
-    const onRefresh = jest.fn();
+  it('omits the manual refresh button when onRefresh is absent', () => {
     render(
       <AlertingDateRangePicker
         from="now-15m"
         to="now"
         onChange={mockOnChange}
         services={services}
-        onRefresh={onRefresh}
-        data-test-subj="alertingDateRangePicker"
-      />
-    );
-
-    expect(screen.queryByTestId('alertingDateRangePicker-refresh')).not.toBeInTheDocument();
-  });
-
-  it('omits the manual refresh button when showRefreshButton is set without onRefresh', () => {
-    render(
-      <AlertingDateRangePicker
-        from="now-15m"
-        to="now"
-        onChange={mockOnChange}
-        services={services}
-        showRefreshButton
         data-test-subj="alertingDateRangePicker"
       />
     );
@@ -311,7 +294,6 @@ describe('AlertingDateRangePicker', () => {
         onChange={mockOnChange}
         services={services}
         onRefresh={onRefresh}
-        showRefreshButton
         data-test-subj="alertingDateRangePicker"
       />
     );
@@ -331,7 +313,6 @@ describe('AlertingDateRangePicker', () => {
         onChange={mockOnChange}
         services={services}
         onRefresh={onRefresh}
-        showRefreshButton
         isLoading
         data-test-subj="alertingDateRangePicker"
       />
@@ -341,7 +322,7 @@ describe('AlertingDateRangePicker', () => {
     expect(refreshButton).toHaveAttribute('disabled');
   });
 
-  it('shows the EuiSuperDatePicker update button only when showRefreshButton is set (feature flag off)', () => {
+  it('shows the EuiSuperDatePicker update button only when onRefresh is provided (feature flag off)', () => {
     useNewDateRangePickerFlag = false;
     const onRefresh = jest.fn();
 
@@ -351,7 +332,6 @@ describe('AlertingDateRangePicker', () => {
         to="now"
         onChange={mockOnChange}
         services={services}
-        onRefresh={onRefresh}
         data-test-subj="alertingDateRangePicker"
       />
     );
@@ -367,7 +347,6 @@ describe('AlertingDateRangePicker', () => {
         onChange={mockOnChange}
         services={services}
         onRefresh={onRefresh}
-        showRefreshButton
         data-test-subj="alertingDateRangePicker"
       />
     );

@@ -253,7 +253,6 @@ export const SignalRuleOverview: React.FC = () => {
             onChange={setTimeRange}
             services={{ data, notifications, http, application, uiSettings, featureFlags }}
             onRefresh={() => applyRefresh(refetch)}
-            showRefreshButton
             isLoading={isLoading}
             showTimeWindowButtons
             width="auto"
