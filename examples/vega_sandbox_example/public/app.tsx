@@ -68,6 +68,9 @@ const CHART_VALUES: ChartRow[] = [
 const compileBarChart = (values: ChartRow[], clickToFilter: boolean): Spec => {
   const spec = compile({
     $schema: 'https://vega.github.io/schema/vega-lite/v6.json',
+    // visTypeVega's parser defaults to this so width/height include axes and title.
+    // Vega-Lite's default is `pad`, which draws those outside the iframe and clips y=0.
+    autosize: { type: 'fit', contains: 'padding' },
     title: clickToFilter ? 'Click a bar to send applyFilter' : 'Inline bar chart',
     description: 'Inline bar chart with no Elasticsearch data',
     data: { values },
