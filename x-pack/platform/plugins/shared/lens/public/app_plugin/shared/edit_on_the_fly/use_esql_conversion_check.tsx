@@ -50,6 +50,25 @@ const getEsqlConversionDisabledSettings = (
   convertibleLayers: [],
 });
 
+const getConvertibleLayerName = (layerId: string): string =>
+  i18n.translate('xpack.lens.config.convertToEsqlLayerName', {
+    defaultMessage: 'Layer {layerId}',
+    values: { layerId: layerId.substring(0, 6) },
+  });
+
+const makeNonConvertibleLayer = (
+  layerId: string,
+  type: ConvertibleLayer['type']
+): ConvertibleLayer => ({
+  id: layerId,
+  icon: 'layers',
+  name: getConvertibleLayerName(layerId),
+  type,
+  query: '',
+  isConvertibleToEsql: false,
+  conversionData: { esAggsIdMap: {}, partialRows: false },
+});
+
 export const useEsqlConversionCheck = (
   showConvertToEsqlButton: boolean,
   {
@@ -124,29 +143,15 @@ export const useEsqlConversionCheck = (
       const layerType = activeVisualization.getLayerType(layerId, state) ?? layerTypes.DATA;
 
       if (layerType !== layerTypes.DATA) {
-        convertibleLayers.push({
-          id: layerId,
-          icon: 'layers',
-          name: `Layer ${layerId.substring(0, 6)}`,
-          type: layerType as ConvertibleLayer['type'],
-          query: '',
-          isConvertibleToEsql: false,
-          conversionData: { esAggsIdMap: {}, partialRows: false },
-        });
+        convertibleLayers.push(
+          makeNonConvertibleLayer(layerId, layerType as ConvertibleLayer['type'])
+        );
         continue;
       }
 
       const layer = layers[layerId];
       if (!layer || !layer.columnOrder || !layer.columns) {
-        convertibleLayers.push({
-          id: layerId,
-          icon: 'layers',
-          name: `Layer ${layerId.substring(0, 6)}`,
-          type: layerTypes.DATA,
-          query: '',
-          isConvertibleToEsql: false,
-          conversionData: { esAggsIdMap: {}, partialRows: false },
-        });
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA));
         continue;
       }
 
@@ -173,35 +178,19 @@ export const useEsqlConversionCheck = (
           columnRoles
         );
       } catch (e) {
-        convertibleLayers.push({
-          id: layerId,
-          icon: 'layers',
-          name: `Layer ${layerId.substring(0, 6)}`,
-          type: layerTypes.DATA,
-          query: '',
-          isConvertibleToEsql: false,
-          conversionData: { esAggsIdMap: {}, partialRows: false },
-        });
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA));
         continue;
       }
 
       if (!isEsqlQuerySuccess(esqlLayer)) {
-        convertibleLayers.push({
-          id: layerId,
-          icon: 'layers',
-          name: `Layer ${layerId.substring(0, 6)}`,
-          type: layerTypes.DATA,
-          query: '',
-          isConvertibleToEsql: false,
-          conversionData: { esAggsIdMap: {}, partialRows: false },
-        });
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA));
         continue;
       }
 
       convertibleLayers.push({
         id: layerId,
         icon: 'layers',
-        name: `Layer ${layerId.substring(0, 6)}`,
+        name: getConvertibleLayerName(layerId),
         type: layerTypes.DATA,
         query: esqlLayer.esql,
         isConvertibleToEsql: true,
