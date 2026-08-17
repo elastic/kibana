@@ -102,12 +102,13 @@ export const reconcileQueryColumns = (
     }
 
     usedColumnIds.add(existingColumn.columnId);
+    const { variable, ...restOfExistingColumn } = existingColumn;
     return {
-      ...existingColumn,
+      ...restOfExistingColumn,
       fieldName: queryColumn.id,
       label: existingColumn.customLabel ? existingColumn.label : queryColumn.name,
       meta: queryColumn.meta,
-      variable: queryColumn.variable,
+      ...(queryColumn.variable ? { variable: queryColumn.variable } : {}),
     };
   });
 };

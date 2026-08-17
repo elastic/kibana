@@ -50,7 +50,6 @@ describe('Text based languages utils', () => {
           fieldName: '@timestamp',
           label: '@timestamp',
           meta: { type: 'date' },
-          variable: undefined,
         },
         {
           columnId: 'y-axis',
@@ -58,7 +57,68 @@ describe('Text based languages utils', () => {
           label: 'Count of records',
           customLabel: true,
           meta: { type: 'number' },
-          variable: undefined,
+        },
+      ]);
+    });
+
+    it('rebinds same-type dimensions positionally when the query renames and reorders them', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'metric-a', fieldName: 'COUNT(*)', meta: { type: 'number' } },
+        { columnId: 'metric-b', fieldName: 'MEDIAN(bytes)', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'AVG(bytes)', name: 'AVG(bytes)', meta: { type: 'number' } },
+        { id: 'SUM(bytes)', name: 'SUM(bytes)', meta: { type: 'number' } },
+      ];
+
+      // no exact match: positional matching keeps existing dimension order
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'metric-a',
+          fieldName: 'AVG(bytes)',
+          label: 'AVG(bytes)',
+          meta: { type: 'number' },
+        },
+        {
+          columnId: 'metric-b',
+          fieldName: 'SUM(bytes)',
+          label: 'SUM(bytes)',
+          meta: { type: 'number' },
+        },
+      ]);
+    });
+
+    it('falls back to the first remaining same-type dimension when positional match is incompatible', () => {
+      const existingColumns: TextBasedLayerColumn[] = [
+        { columnId: 'metric-a', fieldName: 'COUNT(*)', meta: { type: 'number' } },
+        { columnId: 'metric-b', fieldName: 'MEDIAN(bytes)', meta: { type: 'number' } },
+      ];
+      const queryColumns: DatatableColumn[] = [
+        { id: 'message', name: 'message', meta: { type: 'string' } },
+        { id: 'MEDIAN(bytes)', name: 'MEDIAN(bytes)', meta: { type: 'number' } },
+        { id: 'AVG(bytes)', name: 'AVG(bytes)', meta: { type: 'number' } },
+      ];
+
+      // exact match wins for MEDIAN(bytes); the renamed metric binds to the
+      // first remaining same-type dimension (best-effort, may be ambiguous)
+      expect(reconcileQueryColumns(existingColumns, queryColumns)).toEqual([
+        {
+          columnId: 'message',
+          fieldName: 'message',
+          label: 'message',
+          meta: { type: 'string' },
+        },
+        {
+          columnId: 'metric-b',
+          fieldName: 'MEDIAN(bytes)',
+          label: 'MEDIAN(bytes)',
+          meta: { type: 'number' },
+        },
+        {
+          columnId: 'metric-a',
+          fieldName: 'AVG(bytes)',
+          label: 'AVG(bytes)',
+          meta: { type: 'number' },
         },
       ]);
     });
