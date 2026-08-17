@@ -221,15 +221,6 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
               />
             </h2>
           </EuiTitle>
-          <EuiSpacer size="xs" />
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.deployAndDetectStep.ecf.description"
-                defaultMessage="Deploy log collection via a single AWS CloudFormation stack. Click Launch to open the AWS console with your settings pre-filled."
-              />
-            </p>
-          </EuiText>
           <EuiSpacer size="m" />
 
           {/* Unified template card */}
@@ -249,32 +240,49 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                       />
                     </h3>
                   </EuiTitle>
-                  <EuiSpacer size="xs" />
-                  <EuiFlexGroup wrap gutterSize="s">
-                    {ecfUnifiedConfigs.map(({ serviceId }) => (
-                      <EuiFlexItem grow={false} key={serviceId}>
-                        <EuiBadge color="hollow">
-                          {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    href={unifiedLaunchUrl}
-                    target="_blank"
-                    iconType="external"
-                    iconSide="right"
-                    fill
-                    data-test-subj="deployAndDetectStep-ecfUnifiedLaunchButton"
-                  >
+                  <EuiText size="s" color="subdued">
                     <FormattedMessage
-                      id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.launchButton"
-                      defaultMessage="Launch CloudFormation"
+                      id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.serviceCount"
+                      defaultMessage="{count, plural, one {# service} other {# services}}"
+                      values={{ count: ecfUnifiedConfigs.length }}
                     />
-                  </EuiButton>
+                  </EuiText>
                 </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <EuiText size="s" color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.description"
+                    defaultMessage="Log collection via a single AWS CloudFormation stack — no agents required. Trigger source (S3 or CloudWatch) is configured per service in Service settings."
+                  />
+                </p>
+              </EuiText>
+              <EuiSpacer size="m" />
+              <EuiButton
+                href={unifiedLaunchUrl}
+                target="_blank"
+                iconType="external"
+                iconSide="right"
+                fill
+                data-test-subj="deployAndDetectStep-ecfUnifiedLaunchButton"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.deployAndDetectStep.ecf.unifiedStack.launchButton"
+                  defaultMessage="Launch CloudFormation"
+                />
+              </EuiButton>
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexGroup wrap gutterSize="s">
+                {ecfUnifiedConfigs.map(({ serviceId }) => (
+                  <EuiFlexItem grow={false} key={serviceId}>
+                    <EuiBadge color="hollow">
+                      {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                ))}
               </EuiFlexGroup>
             </EuiPanel>
           )}
@@ -294,32 +302,49 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                         />
                       </h3>
                     </EuiTitle>
-                    <EuiSpacer size="xs" />
-                    <EuiFlexGroup wrap gutterSize="s">
-                      {ecfOtelConfigs.map(({ serviceId }) => (
-                        <EuiFlexItem grow={false} key={serviceId}>
-                          <EuiBadge color="hollow">
-                            {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton
-                      href={otelLaunchUrl}
-                      target="_blank"
-                      iconType="external"
-                      iconSide="right"
-                      fill
-                      data-test-subj="deployAndDetectStep-ecfOtelLaunchButton"
-                    >
+                    <EuiText size="s" color="subdued">
                       <FormattedMessage
-                        id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.launchButton"
-                        defaultMessage="Launch CloudFormation"
+                        id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.serviceCount"
+                        defaultMessage="{count, plural, one {# service} other {# services}}"
+                        values={{ count: ecfOtelConfigs.length }}
                       />
-                    </EuiButton>
+                    </EuiText>
                   </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText size="s" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.description"
+                      defaultMessage="Log collection in OpenTelemetry format via a single AWS CloudFormation stack — no agents required. Trigger source (S3 or CloudWatch) is configured per service in Service settings."
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiButton
+                  href={otelLaunchUrl}
+                  target="_blank"
+                  iconType="external"
+                  iconSide="right"
+                  fill
+                  data-test-subj="deployAndDetectStep-ecfOtelLaunchButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestHub.deployAndDetectStep.ecf.otelStack.launchButton"
+                    defaultMessage="Launch CloudFormation"
+                  />
+                </EuiButton>
+                <EuiHorizontalRule margin="m" />
+                <EuiFlexGroup wrap gutterSize="s">
+                  {ecfOtelConfigs.map(({ serviceId }) => (
+                    <EuiFlexItem grow={false} key={serviceId}>
+                      <EuiBadge color="hollow">
+                        {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  ))}
                 </EuiFlexGroup>
               </EuiPanel>
             </>
@@ -344,32 +369,49 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
                         />
                       </h3>
                     </EuiTitle>
-                    <EuiSpacer size="xs" />
-                    <EuiFlexGroup wrap gutterSize="s">
-                      {ecfCrowdstrikeServices.map((serviceId) => (
-                        <EuiFlexItem grow={false} key={serviceId}>
-                          <EuiBadge color="hollow">
-                            {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
-                          </EuiBadge>
-                        </EuiFlexItem>
-                      ))}
-                    </EuiFlexGroup>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButton
-                      href={crowdstrikeLaunchUrl}
-                      target="_blank"
-                      iconType="external"
-                      iconSide="right"
-                      fill
-                      data-test-subj="deployAndDetectStep-ecfCrowdstrikeLaunchButton"
-                    >
+                    <EuiText size="s" color="subdued">
                       <FormattedMessage
-                        id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.launchButton"
-                        defaultMessage="Launch CloudFormation"
+                        id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.serviceCount"
+                        defaultMessage="{count, plural, one {# service} other {# services}}"
+                        values={{ count: ecfCrowdstrikeServices.length }}
                       />
-                    </EuiButton>
+                    </EuiText>
                   </EuiFlexItem>
+                </EuiFlexGroup>
+                <EuiSpacer size="s" />
+                <EuiText size="s" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.description"
+                      defaultMessage="Log collection via a dedicated AWS CloudFormation stack for CrowdStrike Falcon Data Replicator — no agents required."
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiButton
+                  href={crowdstrikeLaunchUrl}
+                  target="_blank"
+                  iconType="external"
+                  iconSide="right"
+                  fill
+                  data-test-subj="deployAndDetectStep-ecfCrowdstrikeLaunchButton"
+                >
+                  <FormattedMessage
+                    id="xpack.ingestHub.deployAndDetectStep.ecf.crowdstrikeStack.launchButton"
+                    defaultMessage="Launch CloudFormation"
+                  />
+                </EuiButton>
+                <EuiHorizontalRule margin="m" />
+                <EuiFlexGroup wrap gutterSize="s">
+                  {ecfCrowdstrikeServices.map((serviceId) => (
+                    <EuiFlexItem grow={false} key={serviceId}>
+                      <EuiBadge color="hollow">
+                        {AWS_SERVICES_MAP.get(serviceId)?.name ?? serviceId}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  ))}
                 </EuiFlexGroup>
               </EuiPanel>
             </>
