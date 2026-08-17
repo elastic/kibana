@@ -13,6 +13,7 @@ import type { GraphNodeUnion } from '@kbn/workflows/graph';
 import { isEnterStepTimeoutZone } from '@kbn/workflows/graph';
 import { flushState } from './persistence_loop';
 import type { WorkflowExecutionLoopParams } from './types';
+import { SYNC_WORKFLOW_UNSUPPORTED_MSG } from '../execution_functions/validate_sync_workflow';
 import {
   getHitlIdleDeadlineMsForNode,
   getHitlIdleDeadlineMsForStep,
@@ -87,7 +88,7 @@ async function scheduleWorkflowGlobalTimeoutResumeTask(
 
   await params.workflowTaskManager
     .scheduleWorkflowGlobalTimeoutResumeTask({
-      workflowExecution: workflowExecution as EsWorkflowExecution,
+      workflowExecution,
       resumeAt: new Date(resumeAtMs),
       fakeRequest: params.fakeRequest,
     })
@@ -153,7 +154,7 @@ export async function ensureWorkflowIdleTimeoutResumeAfterLoop(
 
   await params.workflowTaskManager
     .scheduleWorkflowGlobalTimeoutResumeTask({
-      workflowExecution: workflowExecution as EsWorkflowExecution,
+      workflowExecution,
       resumeAt,
       fakeRequest: params.fakeRequest,
     })
@@ -173,6 +174,14 @@ export async function handleExecutionDelay(
   const workflowExecution = params.workflowRuntime.getWorkflowExecution();
 
   const stepStatus = stepExecutionRuntime.stepExecution?.status;
+  if (
+    params.executionMode === 'sync' &&
+    (stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
+      stepStatus === ExecutionStatus.WAITING_FOR_CHILD ||
+      stepStatus === ExecutionStatus.WAITING)
+  ) {
+    throw new Error(`Step "${stepExecutionRuntime.node.stepId}" ${SYNC_WORKFLOW_UNSUPPORTED_MSG}`);
+  }
   if (
     stepStatus === ExecutionStatus.WAITING_FOR_INPUT ||
     stepStatus === ExecutionStatus.WAITING_FOR_CHILD

@@ -233,5 +233,48 @@ describe('AgentBuilder runner', () => {
         result: 'someResult',
       });
     });
+
+    it('passes conversationId as sessionId and agentId to the model provider factory', async () => {
+      const runnerDeps = createRunnerDepsMock();
+      runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+
+      const params: RunAgentParams = {
+        agentId: 'root-agent',
+        agentParams: {
+          nextInput: { message: 'hello' },
+          conversation: { id: 'conv-123', rounds: [] } as any,
+        },
+        request: scopedRunnerDeps.request,
+      };
+
+      const runner = createRunner(runnerDeps);
+      await runner.runAgent(params);
+
+      expect(runnerDeps.modelProviderFactory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          anonymizationMetadata: { sessionId: 'conv-123', agentId: 'root-agent' },
+        })
+      );
+    });
+
+    it('passes agentId with undefined sessionId when no conversation is provided', async () => {
+      const runnerDeps = createRunnerDepsMock();
+      runnerDeps.agentsService.getRegistry.mockResolvedValue(agentClient);
+
+      const params: RunAgentParams = {
+        agentId: 'standalone-agent',
+        agentParams: { nextInput: { message: 'hello' } },
+        request: scopedRunnerDeps.request,
+      };
+
+      const runner = createRunner(runnerDeps);
+      await runner.runAgent(params);
+
+      expect(runnerDeps.modelProviderFactory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          anonymizationMetadata: { sessionId: undefined, agentId: 'standalone-agent' },
+        })
+      );
+    });
   });
 });

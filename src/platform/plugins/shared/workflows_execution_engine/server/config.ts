@@ -73,6 +73,24 @@ const configSchema = schema.object({
   hitlExternalResume: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
   }),
+  syncExecution: schema.object({
+    /**
+     * Master switch for the synchronous execution path. Must be set to true alongside
+     * `xpack.inference.anonymization.workflow_driven: true` to enable workflow-driven
+     * PII anonymization. Defaults to false so the path is inert until explicitly activated.
+     */
+    enabled: schema.boolean({ defaultValue: false }),
+    /**
+     * Maximum wall-clock time allowed for a single synchronous workflow execution.
+     * When the deadline is reached the internal AbortController is aborted, which
+     * propagates cancellation through the execution loop and cancels any in-flight
+     * I/O (e.g. LLM streaming). Around-hook workflows that wrap LLM calls can take
+     * several minutes; the 10-minute default reflects this. The natural upper bound
+     * is the HTTP request timeout — if the client disconnects, that signal propagates
+     * first. Callers may impose a shorter deadline via ExecuteWorkflowOptions.abortSignal.
+     */
+    maxDurationMs: schema.number({ defaultValue: 600_000, min: 1_000 }),
+  }),
 });
 
 export type EventTriggersConfig = TypeOf<typeof EventTriggersConfigSchema>;
