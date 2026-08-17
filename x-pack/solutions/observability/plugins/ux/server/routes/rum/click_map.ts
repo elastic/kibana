@@ -27,6 +27,7 @@ import {
   type ReplayEventHitSource,
 } from '../session_replay/reassemble_events';
 import { rumEsSearchOptions } from './es_retry';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 import {
   PAGE_VIEW_FILTER,
   facetFromScriptTerms,
@@ -112,9 +113,8 @@ export const getRumClickMapRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, params }): Promise<RumClickMapResponse> => {
-    const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+  handler: async ({ context, core, params }): Promise<RumClickMapResponse> => {
+    const client = await getRumSearchClient({ context, core });
     const requestedPage = params.query.pageUrl;
     const baseFilters = rumBaseFilters(params.query);
     const clickFilters = [...baseFilters, CLICK_FILTER, CLICK_COORD_FILTER];

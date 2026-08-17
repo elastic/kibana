@@ -8,6 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsType } from '@kbn/core/server';
 import {
+  RUM_CCS_CLUSTER_NAME,
+  RUM_CCS_CLUSTER_NAME_MAX,
+  RUM_CCS_CLUSTERS_MAX,
+} from '../../common/rum_ccs';
+import {
   IGNORE_URLS_MAX_LENGTH,
   MASK_TEXT_SELECTOR_MAX_LENGTH,
   OTLP_ENDPOINT_MAX_LENGTH,
@@ -63,6 +68,21 @@ const attributesSchemaV4 = attributesSchemaV3.extends({
     min: RUM_SESSIONS_LOOKBACK_DAYS_MIN,
     max: RUM_SESSIONS_LOOKBACK_DAYS_MAX,
   }),
+});
+
+const attributesSchemaV5 = attributesSchemaV4.extends({
+  useAllRemoteClusters: schema.boolean({ defaultValue: false }),
+  selectedRemoteClusters: schema.arrayOf(
+    schema.string({
+      maxLength: RUM_CCS_CLUSTER_NAME_MAX,
+      validate: (value: string) => {
+        if (!RUM_CCS_CLUSTER_NAME.test(value)) {
+          return 'must be a remote cluster alias';
+        }
+      },
+    }),
+    { maxSize: RUM_CCS_CLUSTERS_MAX, defaultValue: [] }
+  ),
 });
 
 export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
@@ -149,6 +169,30 @@ export const sessionReplaySettingsSavedObjectType: SavedObjectsType = {
       schemas: {
         forwardCompatibility: attributesSchemaV4.extends({}, { unknowns: 'ignore' }),
         create: attributesSchemaV4,
+      },
+    },
+    5: {
+      changes: [
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => ({
+            attributes: {
+              useAllRemoteClusters: Boolean(doc.attributes.useAllRemoteClusters),
+              selectedRemoteClusters: Array.isArray(doc.attributes.selectedRemoteClusters)
+                ? doc.attributes.selectedRemoteClusters
+                    .filter(
+                      (name: unknown): name is string =>
+                        typeof name === 'string' && RUM_CCS_CLUSTER_NAME.test(name)
+                    )
+                    .slice(0, RUM_CCS_CLUSTERS_MAX)
+                : [],
+            },
+          }),
+        },
+      ],
+      schemas: {
+        forwardCompatibility: attributesSchemaV5.extends({}, { unknowns: 'ignore' }),
+        create: attributesSchemaV5,
       },
     },
   },

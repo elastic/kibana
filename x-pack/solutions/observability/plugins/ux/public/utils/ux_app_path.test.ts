@@ -71,11 +71,13 @@ describe('uxSettingsTabFromPath', () => {
   it('defaults to repository when an app is selected', () => {
     expect(uxSettingsTabFromPath('/shop/settings')).toBe('repository');
     expect(uxSettingsTabFromPath('/shop/settings/capture')).toBe('capture');
+    expect(uxSettingsTabFromPath('/shop/settings/remote-clusters')).toBe('remote-clusters');
   });
 
   it('defaults to capture without an app', () => {
     expect(uxSettingsTabFromPath('/settings')).toBe('capture');
     expect(uxSettingsTabFromPath('/settings/repository')).toBe('repository');
+    expect(uxSettingsTabFromPath('/settings/remote-clusters')).toBe('remote-clusters');
   });
 });
 

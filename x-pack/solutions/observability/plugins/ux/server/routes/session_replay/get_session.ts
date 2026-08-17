@@ -31,6 +31,7 @@ import {
   userFromHits,
   type OtelHit,
 } from './session_attributes';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 
 const EMPTY_VITALS: SessionWebVitals = {
   lcp: null,
@@ -51,10 +52,9 @@ export const getSessionRoute = createUxServerRoute({
   params: t.type({
     path: t.type({ sessionId: t.string }),
   }),
-  handler: async ({ context, params }): Promise<RumSessionDetail> => {
+  handler: async ({ context, core, params }): Promise<RumSessionDetail> => {
     const { sessionId } = params.path;
-    const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
 
     const sessionMatch = {
       bool: {

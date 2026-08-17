@@ -11,6 +11,7 @@ import {
   extractRumAlertEsqlFromLlm,
   injectLookbackAfterFrom,
   rumAlertGroupingFieldsFromQuery,
+  rumAlertTimeField,
   stripFinalWhere,
 } from './rum_alert_esql';
 
@@ -117,5 +118,13 @@ describe('rumAlertGroupingFieldsFromQuery', () => {
   it('detects BY page', () => {
     expect(rumAlertGroupingFieldsFromQuery('STATS x = COUNT(*) BY page = 1')).toEqual(['page']);
     expect(rumAlertGroupingFieldsFromQuery('STATS x = COUNT(*)')).toEqual([]);
+  });
+});
+
+describe('rumAlertTimeField', () => {
+  it('uses start_time for local and CCS session-index FROM clauses', () => {
+    expect(rumAlertTimeField('FROM ux-rum-sessions-*\n| LIMIT 1')).toBe('start_time');
+    expect(rumAlertTimeField('FROM ccs:ux-rum-sessions-*\n| LIMIT 1')).toBe('start_time');
+    expect(rumAlertTimeField('FROM logs-*.otel-*\n| LIMIT 1')).toBe('@timestamp');
   });
 });

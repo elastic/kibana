@@ -28,6 +28,7 @@ import {
 } from '../../transforms/rum_sessions_query';
 import { resolveNewTailSessionIds } from '../../transforms/rum_sessions_tail';
 import { sessionIdTermsFilter } from '../../../common/session_find';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 
 const boundedString = (max: number) =>
   new t.Type<string, string, unknown>(
@@ -62,7 +63,7 @@ export const getSessionPatternsRoute = createUxServerRoute({
     const rangeTo = params.query.rangeTo || 'now';
     const { serviceName, kuery, analyticsMode } = params.query;
     const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
     const coreStart = await core.start();
     const soClient = coreStart.savedObjects.createInternalRepository();
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {

@@ -12,9 +12,15 @@ import { i18n } from '@kbn/i18n';
 import { UX_APP_TITLE } from '../../../application/ux_breadcrumbs';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { uxAppHref } from '../../../utils/rum_search';
-import { serviceNameFromPath, uxAppPath, uxSettingsTabFromPath } from '../../../utils/ux_app_path';
+import {
+  serviceNameFromPath,
+  uxAppPath,
+  uxSettingsTabFromPath,
+  type UxSettingsTab,
+} from '../../../utils/ux_app_path';
 import { WebApplicationSelect } from '../rum_dashboard/panels/web_application_select';
 import { CaptureSettingsPanel } from './capture_settings_panel';
+import { RemoteClustersSettingsPanel } from './remote_clusters_settings_panel';
 import { RepositorySettingsPanel } from './repository_settings_panel';
 
 const SETTINGS_LABEL = i18n.translate('xpack.ux.settings.pageTitle', {
@@ -29,6 +35,10 @@ const CAPTURE_TAB_LABEL = i18n.translate('xpack.ux.settings.captureTabLabel', {
   defaultMessage: 'Capture',
 });
 
+const REMOTE_CLUSTERS_TAB_LABEL = i18n.translate('xpack.ux.settings.remoteClustersTabLabel', {
+  defaultMessage: 'Remote clusters',
+});
+
 export function RumSettingsPage() {
   const { http, observabilityShared } = useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
@@ -37,7 +47,7 @@ export function RumSettingsPage() {
   const serviceName = serviceNameFromPath(pathname);
   const tab = uxSettingsTabFromPath(pathname);
 
-  const tabHref = (next: 'repository' | 'capture') => {
+  const tabHref = (next: UxSettingsTab) => {
     const nextPath = uxAppPath(serviceName, `/settings/${next}`);
     return {
       href: history.createHref({ pathname: nextPath, search }),
@@ -101,11 +111,20 @@ export function RumSettingsPage() {
               'data-test-subj': 'uxSettingsCaptureTab',
               ...tabHref('capture'),
             },
+            {
+              id: 'remote-clusters',
+              label: REMOTE_CLUSTERS_TAB_LABEL,
+              isSelected: tab === 'remote-clusters',
+              'data-test-subj': 'uxSettingsRemoteClustersTab',
+              ...tabHref('remote-clusters'),
+            },
           ],
         }}
       >
         {tab === 'repository' ? (
           <RepositorySettingsPanel serviceName={serviceName} />
+        ) : tab === 'remote-clusters' ? (
+          <RemoteClustersSettingsPanel />
         ) : (
           <CaptureSettingsPanel />
         )}

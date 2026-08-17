@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { normalizeSelectedRemoteClusters, RUM_CCS_CLUSTERS_MAX } from './rum_ccs';
 import {
   clampLookbackDays,
   isValidEsTimeValue,
@@ -32,6 +33,10 @@ export interface SessionReplaySettings {
   syncDelay: string;
   /** Days of session-index history (`now-Nd` source lookback; retention is N+3 days). */
   sourceLookbackDays: number;
+  /** Search every configured remote cluster (`*:index`), like SLO settings. */
+  useAllRemoteClusters: boolean;
+  /** Remote cluster aliases to include in reads, in addition to the local cluster. */
+  selectedRemoteClusters: string[];
 }
 
 export const SESSION_REPLAY_SETTINGS_SO_TYPE = 'ux-session-replay-settings';
@@ -49,6 +54,7 @@ export const MASK_TEXT_SELECTOR_MAX_LENGTH = 512;
 export const URL_GROUPING_DEPTH_MIN = 1;
 export const URL_GROUPING_DEPTH_MAX = 8;
 export const SYNC_DELAY_MAX_LENGTH = 8;
+export const SELECTED_REMOTE_CLUSTERS_MAX = RUM_CCS_CLUSTERS_MAX;
 
 export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   enabled: false,
@@ -62,6 +68,8 @@ export const DEFAULT_SESSION_REPLAY_SETTINGS: SessionReplaySettings = {
   captureGraphql: false,
   syncDelay: RUM_SESSIONS_SYNC_DELAY,
   sourceLookbackDays: RUM_SESSIONS_LOOKBACK_DAYS,
+  useAllRemoteClusters: false,
+  selectedRemoteClusters: [],
 };
 
 const clampDepth = (value: unknown): number => {
@@ -93,6 +101,8 @@ export const normalizeSessionReplaySettings = (
   sourceLookbackDays: clampLookbackDays(
     input.sourceLookbackDays ?? DEFAULT_SESSION_REPLAY_SETTINGS.sourceLookbackDays
   ),
+  useAllRemoteClusters: Boolean(input.useAllRemoteClusters),
+  selectedRemoteClusters: normalizeSelectedRemoteClusters(input.selectedRemoteClusters),
 });
 
 export const groupingFromSettings = (settings: SessionReplaySettings): UrlGroupingConfig => ({

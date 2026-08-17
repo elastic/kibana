@@ -8,6 +8,7 @@
 import * as t from 'io-ts';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import { createUxServerRoute } from '../create_ux_server_route';
+import { RUM_CCS_CLUSTER_NAME_MAX, RUM_CCS_CLUSTERS_MAX } from '../../../common/rum_ccs';
 import {
   DEFAULT_SESSION_REPLAY_SETTINGS,
   SESSION_REPLAY_SETTINGS_SO_ID,
@@ -73,6 +74,22 @@ const boundedString = (max: number) =>
     t.identity
   );
 
+const boundedStringList = (maxItem: number, maxItems: number) =>
+  new t.Type<string[], string[], unknown>(
+    `BoundedStringList(${maxItem},${maxItems})`,
+    (u): u is string[] => Array.isArray(u) && u.every((item) => typeof item === 'string'),
+    (u, c) => {
+      if (!Array.isArray(u) || u.length > maxItems) {
+        return t.failure(u, c);
+      }
+      if (u.some((item) => typeof item !== 'string' || item.length > maxItem)) {
+        return t.failure(u, c);
+      }
+      return t.success(u);
+    },
+    t.identity
+  );
+
 const settingsBody = t.intersection([
   t.type({
     enabled: t.boolean,
@@ -88,6 +105,8 @@ const settingsBody = t.intersection([
     captureGraphql: t.boolean,
     syncDelay: boundedString(SYNC_DELAY_MAX_LENGTH),
     sourceLookbackDays: t.number,
+    useAllRemoteClusters: t.boolean,
+    selectedRemoteClusters: boundedStringList(RUM_CCS_CLUSTER_NAME_MAX, RUM_CCS_CLUSTERS_MAX),
   }),
 ]);
 

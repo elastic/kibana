@@ -19,6 +19,7 @@ import {
 } from '../../../common/session_replay_live';
 import { boundedString } from '../rum/query';
 import { rumEsSearchOptions } from '../rum/es_retry';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 import { reassembleReplayEventsWithCursor, type ReplayEventHitSource } from './reassemble_events';
 
 const parseOptionalInt = (raw: string | undefined): number | undefined => {
@@ -49,7 +50,7 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
       }),
     }),
   ]),
-  handler: async ({ context, params }): Promise<SessionReplayEventsResponse> => {
+  handler: async ({ context, core, params }): Promise<SessionReplayEventsResponse> => {
     const { sessionId } = params.path;
     const afterEvent = parseOptionalInt(params.query?.afterEvent);
     const requestedSize = parseOptionalInt(params.query?.size);
@@ -57,7 +58,7 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
     const size = incremental
       ? Math.min(requestedSize ?? LIVE_EVENT_PAGE_SIZE, LIVE_EVENT_PAGE_SIZE_MAX)
       : FULL_REPLAY_EVENT_PAGE_SIZE;
-    const { elasticsearch } = await context.core;
+    const client = await getRumSearchClient({ context, core });
 
     const filters: object[] = [
       {
@@ -71,7 +72,7 @@ export const getSessionReplayEventsRoute = createUxServerRoute({
       filters.push({ range: { 'attributes.rr-web.event': { gt: afterEvent } } });
     }
 
-    const result = await elasticsearch.client.asCurrentUser.search(
+    const result = await client.search(
       {
         index: SESSION_REPLAY_INDEX,
         ignore_unavailable: true,

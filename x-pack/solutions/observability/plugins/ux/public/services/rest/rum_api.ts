@@ -28,6 +28,7 @@ import type {
   RumReportResponse,
   RumReportTemplateId,
 } from '../../../common/rum_report';
+import { RUM_REMOTE_CLUSTERS_API, type RumRemoteCluster } from '../../../common/rum_ccs';
 
 export interface RumQueryParams {
   http: HttpStart;
@@ -206,4 +207,12 @@ export const fetchRumReport = async ({
       ...(funnelSteps ? { funnelSteps } : {}),
     },
   });
+};
+
+export const fetchRumRemoteClusters = async ({
+  http,
+}: {
+  http: HttpStart;
+}): Promise<RumRemoteCluster[]> => {
+  return http.get<RumRemoteCluster[]>(RUM_REMOTE_CLUSTERS_API);
 };

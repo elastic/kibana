@@ -23,6 +23,7 @@ import {
   updateSessionReplaySettingsRoute,
 } from './session_replay/settings';
 import { getRumFiltersRoute } from './rum/filters';
+import { listRumRemoteClustersRoute } from './rum/remote_clusters';
 import { getRumAppsRoute } from './rum/apps';
 import { getRumAppSettingsRoute, putRumAppSettingsRoute } from './rum/app_settings';
 import { getRumOverviewRoute } from './rum/overview';
@@ -70,6 +71,7 @@ function getTypedUxServerRouteRepository() {
     ...getSessionReplaySettingsRoute,
     ...updateSessionReplaySettingsRoute,
     ...getRumFiltersRoute,
+    ...listRumRemoteClustersRoute,
     ...getRumAppsRoute,
     ...getRumAppSettingsRoute,
     ...putRumAppSettingsRoute,

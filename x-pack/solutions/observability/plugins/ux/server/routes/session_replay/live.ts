@@ -21,6 +21,7 @@ import {
 } from '../../../common/session_replay_live';
 import { boundedString } from '../rum/query';
 import { rumEsSearchOptions } from '../rum/es_retry';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 import { REPLAY_SERVICE_NAME_SCRIPT, REPLAY_SESSION_ID_SCRIPT } from './session_id_script';
 
 interface LiveSessionBucket {
@@ -66,7 +67,7 @@ export const listLiveReplaySessionsRoute = createUxServerRoute({
       size: boundedString(8),
     }),
   }),
-  handler: async ({ context, params }): Promise<LiveReplaySessionsResponse> => {
+  handler: async ({ context, core, params }): Promise<LiveReplaySessionsResponse> => {
     const lookbackSeconds = clampInt(
       params.query.lookbackSeconds,
       LIVE_LOOKBACK_SECONDS,
@@ -75,7 +76,7 @@ export const listLiveReplaySessionsRoute = createUxServerRoute({
     );
     const size = clampInt(params.query.size, LIVE_SESSION_LIST_SIZE, 1, LIVE_SESSION_LIST_SIZE_MAX);
     const { serviceName } = params.query;
-    const { elasticsearch } = await context.core;
+    const client = await getRumSearchClient({ context, core });
 
     const filters: object[] = [{ range: { '@timestamp': { gte: `now-${lookbackSeconds}s` } } }];
     if (serviceName) {
@@ -90,7 +91,7 @@ export const listLiveReplaySessionsRoute = createUxServerRoute({
       });
     }
 
-    const result = await elasticsearch.client.asCurrentUser.search(
+    const result = await client.search(
       {
         index: SESSION_REPLAY_INDEX,
         ignore_unavailable: true,

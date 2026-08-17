@@ -13,6 +13,7 @@ import { queryRumApps } from '../../transforms/rum_apps_query';
 import { resolveRumAnalytics } from '../../transforms/rum_sessions';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { boundedString } from './query';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 
 const isAppsStage = (value: string | undefined): value is RumAppsQueryStage =>
   value === 'index' || value === 'remainder';
@@ -30,9 +31,9 @@ export const getRumAppsRoute = createUxServerRoute({
       stage: boundedString(16),
     }),
   }),
-  handler: async ({ context, params, request }): Promise<RumAppsResponse> => {
+  handler: async ({ context, core, params, request }): Promise<RumAppsResponse> => {
     const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
     const { rangeFrom, rangeTo, includeBots, analyticsMode, stage } = params.query;
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
       analyticsMode,

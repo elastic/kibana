@@ -33,6 +33,7 @@ import {
   type OtelHit,
 } from '../session_replay/session_attributes';
 import { rumEsSearchOptions } from './es_retry';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 import {
   EXCEPTION_FILTER,
   cardValue,
@@ -157,9 +158,8 @@ export const getRumErrorsRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, params }): Promise<RumErrorsResponse> => {
-    const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+  handler: async ({ context, core, params }): Promise<RumErrorsResponse> => {
+    const client = await getRumSearchClient({ context, core });
 
     const baseFilters = rumBaseFilters(params.query);
     const bounds = rangeBoundsMs(params.query.rangeFrom, params.query.rangeTo);

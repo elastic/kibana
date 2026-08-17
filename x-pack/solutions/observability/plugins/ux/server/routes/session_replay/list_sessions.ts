@@ -36,6 +36,7 @@ import {
 import { kueryFilters } from '../rum/kuery';
 import { botExclusionFilters } from '../rum/bots';
 import { rumEsSearchOptions } from '../rum/es_retry';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 import { SESSION_ID_SCRIPT } from './session_id_script';
 import {
   extraPathsForFind,
@@ -163,9 +164,9 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       analyticsMode: t.string,
     }),
   }),
-  handler: async ({ context, params }): Promise<SessionListResponse> => {
+  handler: async ({ context, core, params }): Promise<SessionListResponse> => {
     const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
     const rangeTo = params.query.rangeTo || 'now';
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
       analyticsMode: params.query.analyticsMode,

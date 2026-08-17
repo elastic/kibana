@@ -49,6 +49,8 @@ import { createUxServerRoute } from '../create_ux_server_route';
 import type { UxRouteHandlerResources } from '../types';
 import { boundedString } from './query';
 import { rumEsSearchOptions, withRumEsRetry } from './es_retry';
+import { expandRumEsqlFrom } from '../../../common/rum_ccs';
+import { getRumCcsOptions, getRumSearchClient } from '../../lib/rum_search_client';
 
 export interface RumAlertRuleSummary {
   id: string;
@@ -257,6 +259,7 @@ export const createRumAlertRoute = createUxServerRoute({
       built.query = assertRumAlertEsql(built.query);
       built.groupingFields = rumAlertGroupingFieldsFromQuery(built.query);
     }
+    built.query = expandRumEsqlFrom(built.query, await getRumCcsOptions(resources));
     const usesSessionIndex =
       isRumSessionAlertTemplate(body.templateId) || rumAlertTimeField(built.query) === 'start_time';
     if (usesSessionIndex) {
@@ -508,10 +511,8 @@ const runRumEsql = async (
   resources: UxRouteHandlerResources,
   query: string
 ): Promise<{ columns: Array<{ name: string; type: string }>; rows: unknown[][] }> => {
-  const { elasticsearch } = await resources.context.core;
-  const result = await withRumEsRetry(() =>
-    elasticsearch.client.asCurrentUser.esql.query({ query }, rumEsSearchOptions)
-  );
+  const client = await getRumSearchClient(resources);
+  const result = await withRumEsRetry(() => client.esql.query({ query }, rumEsSearchOptions));
   return {
     columns: (result.columns ?? []).map((column) => ({
       name: column.name,

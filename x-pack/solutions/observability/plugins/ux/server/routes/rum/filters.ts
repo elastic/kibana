@@ -25,15 +25,16 @@ import {
   rumBaseFilters,
   rumListQueryCodec,
 } from './query';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 
 export const getRumFiltersRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/rum/filters',
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, params }): Promise<RumFiltersResponse> => {
+  handler: async ({ context, core, params }): Promise<RumFiltersResponse> => {
     const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
     const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     if (
       canUseSessionIndex({

@@ -41,6 +41,7 @@ import {
   sessionIndexParamsFromQuery,
 } from '../../transforms/rum_sessions_query';
 import { rumEsSearchOptions } from './es_retry';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 import {
   BROWSER_SCRIPT,
   DOCUMENT_LOAD_FILTER,
@@ -160,7 +161,7 @@ export const getRumOverviewRoute = createUxServerRoute({
   params: t.type({ query: rumListQueryCodec }),
   handler: async ({ context, core, params }): Promise<RumOverviewResponse> => {
     const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
     const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     const daily = resolveRumDaily({
       pagesDaily: status.pagesDaily,

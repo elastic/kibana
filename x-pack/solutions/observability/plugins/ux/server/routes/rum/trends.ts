@@ -19,6 +19,7 @@ import {
   sessionIndexParamsFromQuery,
 } from '../../transforms/rum_sessions_query';
 import { rumEsSearchOptions } from './es_retry';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 import {
   EXCEPTION_FILTER,
   PAGE_VIEW_FILTER,
@@ -34,9 +35,9 @@ export const getRumTrendsRoute = createUxServerRoute({
   options: { access: 'internal' },
   security: { authz: { requiredPrivileges: ['apm'] } },
   params: t.type({ query: rumListQueryCodec }),
-  handler: async ({ context, params }): Promise<{ trends: RumTrendPoint[] }> => {
+  handler: async ({ context, core, params }): Promise<{ trends: RumTrendPoint[] }> => {
     const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
     const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     const query = params.query;
     const daily = resolveRumDaily({

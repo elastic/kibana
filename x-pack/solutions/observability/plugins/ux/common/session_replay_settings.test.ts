@@ -30,4 +30,24 @@ describe('normalizeSessionReplaySettings', () => {
     );
     expect(normalizeSessionReplaySettings({}).sourceLookbackDays).toBe(RUM_SESSIONS_LOOKBACK_DAYS);
   });
+
+  it('defaults CCS settings off', () => {
+    const settings = normalizeSessionReplaySettings({});
+    expect(settings.useAllRemoteClusters).toBe(false);
+    expect(settings.selectedRemoteClusters).toEqual([]);
+  });
+
+  it('keeps valid remote cluster aliases', () => {
+    expect(
+      normalizeSessionReplaySettings({
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['ccs', 'bad name', 'ok_1'],
+      })
+    ).toEqual(
+      expect.objectContaining({
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['ccs', 'ok_1'],
+      })
+    );
+  });
 });

@@ -20,7 +20,7 @@ export const UX_RESERVED_PATH_SEGMENTS = new Set([
   'settings',
 ]);
 
-export const UX_SETTINGS_TABS = ['repository', 'capture'] as const;
+export const UX_SETTINGS_TABS = ['repository', 'capture', 'remote-clusters'] as const;
 export type UxSettingsTab = (typeof UX_SETTINGS_TABS)[number];
 
 export const encodeUxServiceName = (name: string): string => encodeURIComponent(name);

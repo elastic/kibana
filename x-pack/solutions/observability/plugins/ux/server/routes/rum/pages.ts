@@ -24,6 +24,7 @@ import { getRumAnalyticsStatus } from '../../transforms/rum_sessions';
 import { resolveRumDaily } from '../../transforms/rum_daily';
 import { queryDailyPages } from '../../transforms/rum_daily_query';
 import { rumEsSearchOptions } from './es_retry';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 import { readSessionReplaySettings } from '../session_replay/settings';
 import {
   DOCUMENT_LOAD_FILTER,
@@ -250,10 +251,9 @@ export const getRumPageDetailRoute = createUxServerRoute({
   params: t.type({
     query: t.intersection([rumListQueryCodec, t.type({ pageUrl: boundedString(512) })]),
   }),
-  handler: async ({ context, params }) => {
-    const { elasticsearch } = await context.core;
+  handler: async ({ context, core, params }) => {
     return queryRawPageDetail({
-      client: elasticsearch.client.asCurrentUser,
+      client: await getRumSearchClient({ context, core }),
       query: params.query,
     });
   },
@@ -266,7 +266,7 @@ export const getRumPagesRoute = createUxServerRoute({
   params: t.type({ query: rumListQueryCodec }),
   handler: async ({ context, core, params }): Promise<RumPagesResponse> => {
     const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
     const coreStart = await core.start();
     const settings = await readSessionReplaySettings(
       coreStart.savedObjects.createInternalRepository()

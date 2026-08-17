@@ -25,6 +25,7 @@ import { resolveRumAnalytics } from '../../transforms/rum_sessions';
 import { mergeFunnelResponses, querySessionIndexFunnel } from '../../transforms/rum_sessions_query';
 import { resolveNewTailSessionIds } from '../../transforms/rum_sessions_tail';
 import { sessionIdTermsFilter } from '../../../common/session_find';
+import { getRumSearchClient } from '../../lib/rum_search_client';
 
 const boundedString = (max: number) =>
   new t.Type<string, string, unknown>(
@@ -225,7 +226,7 @@ export const getSessionFunnelRoute = createUxServerRoute({
       }),
     ]),
   }),
-  handler: async ({ context, params }): Promise<SessionFunnelResponse> => {
+  handler: async ({ context, core, params }): Promise<SessionFunnelResponse> => {
     const { rangeFrom, rangeTo, serviceName, kuery, analyticsMode } = params.body;
     const steps = params.body.steps
       .map((step) => ({
@@ -241,7 +242,7 @@ export const getSessionFunnelRoute = createUxServerRoute({
     }
 
     const { elasticsearch } = await context.core;
-    const client = elasticsearch.client.asCurrentUser;
+    const client = await getRumSearchClient({ context, core });
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
       analyticsMode,
       rangeTo,
