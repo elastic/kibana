@@ -8,7 +8,7 @@ import Module from 'node:module';
 
 // eval import() to prevent babel from translating it to a CJS require,
 // which doesn't work with the top-level await from `ink`.
-// eslint-disable-next-line no-new-func
+
 const dynamicImport = new Function('path', 'return import(path);');
 
 let ink: typeof import('ink');
