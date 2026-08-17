@@ -46,6 +46,18 @@ describe('buildFieldLinkIndexes', () => {
     const indexes = buildFieldLinkIndexes([makeDefinition({ definition: '{{{nope' })]);
     expect(indexes.all[0].identity).toBeUndefined();
   });
+
+  it('leaves identity undefined when the YAML name disagrees with the attribute name', () => {
+    // Only reachable pre-identity-lock (e.g. a direct SO write): the storage key
+    // must come from the attribute name, so a drifted YAML name can never be trusted.
+    const indexes = buildFieldLinkIndexes([
+      makeDefinition({
+        name: 'attribute_name',
+        definition: 'name: yaml_name\nlabel: My Text\ntype: keyword\ncontrol: INPUT_TEXT\n',
+      }),
+    ]);
+    expect(indexes.all[0].identity).toBeUndefined();
+  });
 });
 
 describe('resolveDefinitionForLegacyField', () => {
@@ -90,6 +102,21 @@ describe('resolveDefinitionForLegacyField', () => {
     it('classifies a legacyKey match whose YAML cannot be parsed as malformed', () => {
       const indexes = buildFieldLinkIndexes([
         makeDefinition({ legacyKey: 'text_key_1', definition: '{{{nope' }),
+      ]);
+
+      expect(resolveDefinitionForLegacyField(textField, indexes)).toEqual({
+        status: 'malformed',
+        reason: 'unparseable_definition',
+      });
+    });
+
+    it('classifies a legacyKey match with a drifted YAML name as unparseable_definition', () => {
+      const indexes = buildFieldLinkIndexes([
+        makeDefinition({
+          legacyKey: 'text_key_1',
+          name: 'attribute_name',
+          definition: 'name: yaml_name\nlabel: A\ntype: keyword\ncontrol: INPUT_TEXT\n',
+        }),
       ]);
 
       expect(resolveDefinitionForLegacyField(textField, indexes)).toEqual({

@@ -3197,6 +3197,49 @@ describe('update', () => {
       expect(updatedAttributes.extended_fields).not.toHaveProperty('priority_as_keyword');
     });
 
+    it('resolves global fields once per owner even when concurrent cases race the lazy cache', async () => {
+      // Neither case's request includes `extended_fields` or a status transition, so the
+      // pre-resolution pass (uniqueOwnersNeedingFields) skips this owner entirely — only
+      // pairing-derived extended_fields changes (from customFields) reach the LAZY fallback
+      // cache inside createPatchCasesPayload, which is where two same-owner cases processed
+      // under one Promise.all could previously race and double-fetch.
+      const clientArgs = createCasesClientMockArgs();
+      clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+      const secondCase = { ...mockCases[0], id: 'mock-id-2' };
+      setupMocks(clientArgs);
+      clientArgs.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+      clientArgs.services.caseService.patchCases.mockResolvedValue({
+        saved_objects: [mockCases[0], secondCase],
+      });
+
+      await bulkUpdate(
+        {
+          cases: [
+            {
+              id: mockCases[0].id,
+              version: mockCases[0].version ?? '',
+              customFields: patchPayload,
+            },
+            {
+              id: secondCase.id,
+              version: secondCase.version ?? '',
+              customFields: patchPayload,
+            },
+          ],
+        },
+        clientArgs,
+        casesClientMock2
+      );
+
+      const globalFieldsLookups =
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mock.calls.filter(
+          ([, options]) => options?.isGlobal === true
+        );
+      expect(globalFieldsLookups).toHaveLength(1);
+    });
+
     it('derives the linked customFields entry from a v2-originated extended_fields update', async () => {
       const clientArgs = createCasesClientMockArgs();
       clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };

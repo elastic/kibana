@@ -283,6 +283,36 @@ describe('FieldDefinitionsService', () => {
 
       expect(result).toHaveLength(2);
     });
+
+    it('pages past a single perPage when the owner has more definitions than the cap', async () => {
+      const pageOne = Array.from({ length: MAX_FIELD_DEFINITIONS_PER_OWNER }, (_, i) =>
+        makeFieldDefinitionSO({ fieldDefinitionId: `page1-${i}`, name: `field_${i}` })
+      );
+      const pageTwo = [
+        makeFieldDefinitionSO({ fieldDefinitionId: 'page2-0', name: 'field_extra' }),
+      ];
+      const total = pageOne.length + pageTwo.length;
+
+      soClient.find
+        .mockResolvedValueOnce({
+          saved_objects: pageOne,
+          total,
+          per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+          page: 1,
+        } as SavedObjectsFindResponse<FieldDefinition>)
+        .mockResolvedValueOnce({
+          saved_objects: pageTwo,
+          total,
+          per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+          page: 2,
+        } as SavedObjectsFindResponse<FieldDefinition>);
+
+      const result = await service.getFieldDefinitionSavedObjects('securitySolution');
+
+      expect(soClient.find).toHaveBeenCalledTimes(2);
+      expect(soClient.find).toHaveBeenNthCalledWith(2, expect.objectContaining({ page: 2 }));
+      expect(result).toHaveLength(total);
+    });
   });
 
   describe('createFieldDefinition', () => {

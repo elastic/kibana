@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { FieldDefinitionsService } from '../../services';
@@ -21,6 +20,9 @@ import {
 } from '../../common/utils/field_link_resolution';
 import { ensureLinkedFieldDefinition } from '../../common/utils/ensure_linked_field_definition';
 import { MAX_FIELD_DEFINITIONS_PER_OWNER } from '../../../common/constants';
+import { CASES_API_ERROR_CODES } from '../../../common/constants/error_codes';
+import type { FieldLinkageMalformedErrorAttributes } from '../../../common/constants/error_codes';
+import { createTypedApiError } from '../../common/api_errors';
 
 interface CustomFieldLike {
   key: string;
@@ -30,12 +32,7 @@ interface CustomFieldLike {
   defaultValue?: string | number | boolean | null;
 }
 
-type BlockedReason =
-  | 'duplicate_legacy_key'
-  | 'type_mismatch'
-  | 'unparseable_definition'
-  | 'ambiguous_name_match'
-  | 'capacity';
+type BlockedReason = FieldLinkageMalformedErrorAttributes['fields'][number]['reason'];
 
 const BLOCKED_REASON_DESCRIPTIONS: Record<BlockedReason, string> = {
   duplicate_legacy_key: 'multiple field definitions claim this custom field key',
@@ -192,10 +189,16 @@ export const ensureGlobalFieldDefinitions = async ({
     const details = blockedFields
       .map(({ key, reason }) => `"${key}" (${BLOCKED_REASON_DESCRIPTIONS[reason]})`)
       .join('; ');
-    throw Boom.badRequest(
-      `Cannot save the Cases configuration: the following custom fields could not be linked ` +
-        `to a field definition: ${details}. Resolve the field library state and retry.`
-    );
+    throw createTypedApiError({
+      statusCode: 400,
+      message:
+        `Cannot save the Cases configuration: the following custom fields could not be linked ` +
+        `to a field definition: ${details}. Resolve the field library state and retry.`,
+      attributes: {
+        code: CASES_API_ERROR_CODES.FIELD_LINKAGE_MALFORMED,
+        fields: blockedFields,
+      },
+    });
   }
 };
 

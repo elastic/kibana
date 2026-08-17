@@ -58,6 +58,25 @@ const isFieldDefinitionSO = (
   entry: FieldDefinitionSO | FieldDefinition
 ): entry is FieldDefinitionSO => !('fieldDefinitionId' in entry);
 
+/**
+ * Parses the YAML identity and additionally invalidates it when the YAML
+ * `name` disagrees with the persisted attribute `name`. Link resolution
+ * derives the storage key from the attribute `name` (the identity-locked
+ * one) plus the YAML `type` — a definition whose YAML name has drifted from
+ * its attribute (only reachable pre-identity-lock, e.g. via a direct SO
+ * write) must never be used for linking, since the storage key it computes
+ * would not correspond to what the YAML actually describes.
+ */
+const parseVerifiedIdentity = (
+  definition: FieldDefinition
+): FieldDefinitionIdentity | undefined => {
+  const identity = parseFieldDefinitionIdentity(definition.definition);
+  if (identity === undefined || identity.name !== definition.name) {
+    return undefined;
+  }
+  return identity;
+};
+
 export const buildFieldLinkIndexes = (
   definitions: Array<FieldDefinitionSO | FieldDefinition>
 ): FieldLinkIndexes => {
@@ -66,7 +85,7 @@ export const buildFieldLinkIndexes = (
     const attributes = isSO ? entry.attributes : entry;
     return {
       definition: attributes,
-      identity: parseFieldDefinitionIdentity(attributes.definition),
+      identity: parseVerifiedIdentity(attributes),
       version: isSO ? entry.version : undefined,
     };
   });
@@ -102,7 +121,7 @@ export const addDefinitionToIndexes = (
 ): void => {
   const linkable: LinkableFieldDefinition = {
     definition,
-    identity: parseFieldDefinitionIdentity(definition.definition),
+    identity: parseVerifiedIdentity(definition),
     version,
   };
   indexes.all.push(linkable);

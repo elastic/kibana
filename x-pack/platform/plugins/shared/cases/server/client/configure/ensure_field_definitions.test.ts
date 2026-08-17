@@ -11,6 +11,8 @@ import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/latest';
 import { createFieldDefinitionsServiceMock } from '../../services/mocks';
 import { deriveFieldDefinitionId } from '../../common/utils/field_definitions';
+import { getTypedApiErrorAttributes } from '../../common/api_errors';
+import { CASES_API_ERROR_CODES } from '../../../common/constants/error_codes';
 import { ensureGlobalFieldDefinitions } from './ensure_field_definitions';
 
 describe('ensureGlobalFieldDefinitions', () => {
@@ -175,6 +177,26 @@ describe('ensureGlobalFieldDefinitions', () => {
       /"text_key_1" \(multiple field definitions claim this custom field key\)/
     );
     expect(fieldDefinitionsService.createFieldDefinition).not.toHaveBeenCalled();
+  });
+
+  it('carries structured field_linkage_malformed attributes for API consumers', async () => {
+    fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+      asSavedObject(
+        makeDefinition({ fieldDefinitionId: 'a', name: 'one', legacyKey: 'text_key_1' })
+      ),
+      asSavedObject(
+        makeDefinition({ fieldDefinitionId: 'b', name: 'two', legacyKey: 'text_key_1' })
+      ),
+    ] as never);
+
+    const attributes = await ensure([textField])
+      .then(() => undefined)
+      .catch((error) => getTypedApiErrorAttributes(error));
+
+    expect(attributes).toEqual({
+      code: CASES_API_ERROR_CODES.FIELD_LINKAGE_MALFORMED,
+      fields: [{ key: 'text_key_1', reason: 'duplicate_legacy_key' }],
+    });
   });
 
   it('fails the configuration write when the linked definition has an incompatible type', async () => {

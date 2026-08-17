@@ -145,17 +145,42 @@ export class FieldDefinitionsService {
    * used by link resolution, which needs the SO `version` for optimistic
    * `legacyKey` repair. `getFieldDefinitions` keeps returning bare attributes
    * because its shape doubles as the find-route response body.
+   *
+   * Link resolution and the delete/demotion guards (A4) must see every
+   * definition for the owner or they can mis-link or wrongly allow a delete —
+   * a `perPage` capped exactly at `MAX_FIELD_DEFINITIONS_PER_OWNER` would
+   * silently truncate an owner that ended up over the cap (legacy data,
+   * imports, or a prior bug). Page past the cap defensively so a truncated
+   * result can never happen, even though normal writes enforce the cap.
    */
   async getFieldDefinitionSavedObjects(
     owner: string
   ): Promise<Array<SavedObject<FieldDefinition>>> {
-    const result = await this.dependencies.unsecuredSavedObjectsClient.find<FieldDefinition>({
-      type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
-      filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(owner)}"`,
-      perPage: MAX_FIELD_DEFINITIONS_PER_OWNER,
-    });
+    const filter = `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(
+      owner
+    )}"`;
+    const perPage = MAX_FIELD_DEFINITIONS_PER_OWNER;
+    const savedObjects: Array<SavedObject<FieldDefinition>> = [];
+    let page = 1;
 
-    return result.saved_objects;
+    // Bounded by `total`, itself owner-scoped data with no external control over its
+    // growth rate — a runaway loop here would require the owner's definition count to
+    // keep exceeding each successive page boundary, which normal writes already cap.
+    while (true) {
+      const result = await this.dependencies.unsecuredSavedObjectsClient.find<FieldDefinition>({
+        type: CASE_FIELD_DEFINITION_SAVED_OBJECT,
+        filter,
+        perPage,
+        page,
+      });
+      savedObjects.push(...result.saved_objects);
+      if (savedObjects.length >= result.total || result.saved_objects.length === 0) {
+        break;
+      }
+      page++;
+    }
+
+    return savedObjects;
   }
 
   /**

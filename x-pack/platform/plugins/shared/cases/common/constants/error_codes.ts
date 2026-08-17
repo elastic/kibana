@@ -50,7 +50,17 @@ export interface FieldLinkageMalformedErrorAttributes {
   fields: Array<{
     /** The v1 custom field key whose linkage is broken. */
     key: string;
-    reason: 'duplicate_legacy_key' | 'type_mismatch' | 'unparseable_definition';
+    /**
+     * `ambiguous_name_match` and `capacity` are configure-time-only reasons —
+     * they can only be reported when a new definition would need to be
+     * created for a not-yet-linked key, never for an already-resolved link.
+     */
+    reason:
+      | 'duplicate_legacy_key'
+      | 'type_mismatch'
+      | 'unparseable_definition'
+      | 'ambiguous_name_match'
+      | 'capacity';
   }>;
 }
 

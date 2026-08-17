@@ -1017,12 +1017,25 @@ const createPatchCasesPayload = async ({
 }): Promise<PatchCasesArgs> => {
   const updatedDt = new Date().toISOString();
 
+  // Concurrent callers for the same not-yet-cached owner (this runs per-case under the
+  // `Promise.all` below) must await the SAME fetch rather than each racing to see an empty
+  // `globalFieldsByOwner` and issuing their own — otherwise N cases sharing one owner cost
+  // N queries instead of 1. Caching the in-flight promise (not just the resolved value)
+  // closes that window.
+  const globalFieldsFetchesInFlight = new Map<string, Promise<InlineField[]>>();
+
   const resolveCachedGlobalFields = async (owner: string): Promise<InlineField[]> => {
-    let globalFields = globalFieldsByOwner.get(owner);
-    if (!globalFields) {
-      globalFields = await resolveGlobalFields(owner, fieldDefinitionsService);
-      globalFieldsByOwner.set(owner, globalFields);
+    const cached = globalFieldsByOwner.get(owner);
+    if (cached) {
+      return cached;
     }
+    let inFlight = globalFieldsFetchesInFlight.get(owner);
+    if (!inFlight) {
+      inFlight = resolveGlobalFields(owner, fieldDefinitionsService);
+      globalFieldsFetchesInFlight.set(owner, inFlight);
+    }
+    const globalFields = await inFlight;
+    globalFieldsByOwner.set(owner, globalFields);
     return globalFields;
   };
 
