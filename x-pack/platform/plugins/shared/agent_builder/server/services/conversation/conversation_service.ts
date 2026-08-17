@@ -11,11 +11,10 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { getUserFromRequest, isAdminFromRequest } from '../utils';
+import { getUserFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AgentsServiceStart } from '../agents';
 import type { ConversationClient } from './client';
@@ -23,7 +22,7 @@ import { createClient } from './client';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
-  getCurrentUser(options: { request: KibanaRequest }): Promise<UserIdAndName>;
+  getCurrentUser(options: { request: KibanaRequest }): Promise<CurrentUser>;
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
@@ -55,14 +54,17 @@ export class ConversationServiceImpl implements ConversationService {
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
     const user = await this.getCurrentUser({ request });
-    const isAdmin = await isAdminFromRequest({
-      esClient: this.getScopedEsClient(request).asCurrentUser,
-    });
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
 
-    return createClient({ user, isAdmin, esClient, logger: this.logger, space, agentRegistry });
+    return createClient({
+      user,
+      esClient,
+      logger: this.logger,
+      space,
+      agentRegistry,
+    });
   }
 
   /**
@@ -83,7 +85,11 @@ export class ConversationServiceImpl implements ConversationService {
       return origin.author;
     }
 
-    const user = await this.getCurrentUser({ request });
+    const user = await getUserFromRequest({
+      request,
+      security: this.security,
+      esClient: this.getScopedEsClient(request).asCurrentUser,
+    });
 
     if (user.id === undefined) {
       return undefined;
@@ -92,7 +98,7 @@ export class ConversationServiceImpl implements ConversationService {
     return { id: user.id, username: user.username };
   }
 
-  async getCurrentUser({ request }: { request: KibanaRequest }): Promise<UserIdAndName> {
+  async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
     return getUserFromRequest({
       request,
       security: this.security,

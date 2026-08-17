@@ -39,7 +39,9 @@ describe('ReadOnlyConversationClient', () => {
     internalClient = createConversationClientMock();
     const internalService: ConversationService = {
       getScopedClient: jest.fn().mockResolvedValue(internalClient),
-      getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'user' }),
+      getCurrentUser: jest
+        .fn()
+        .mockResolvedValue({ id: 'user-1', username: 'user', isAdmin: false }),
       getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
     };
     conversationsStart = createConversationsStart(internalService);

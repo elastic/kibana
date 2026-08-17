@@ -41,7 +41,7 @@ const createService = ({ agents = {} }: { agents?: object } = {}) => {
 describe('ConversationServiceImpl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane' });
+    getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane', isAdmin: false });
     isAdminFromRequestMock.mockResolvedValue(false);
   });
 
@@ -49,20 +49,37 @@ describe('ConversationServiceImpl', () => {
     const agents = { getRegistry: jest.fn().mockResolvedValue({ id: 'registry' }) };
 
     it.each([true, false])('passes isAdmin=%s through to the client', async (isAdmin) => {
-      isAdminFromRequestMock.mockResolvedValue(isAdmin);
+      getUserFromRequestMock.mockResolvedValue({ id: 'profile-1', username: 'jane', isAdmin });
 
       await createService({ agents }).getScopedClient({ request });
 
-      expect(createClientMock).toHaveBeenCalledWith(expect.objectContaining({ isAdmin }));
+      expect(createClientMock).toHaveBeenCalledWith(
+        expect.objectContaining({ user: expect.objectContaining({ isAdmin }) })
+      );
     });
 
-    it('resolves the admin privilege against the caller-scoped client, not the internal one', async () => {
+    it('uses the internal client for conversation storage', async () => {
       await createService({ agents }).getScopedClient({ request });
 
-      expect(isAdminFromRequestMock).toHaveBeenCalledWith({ esClient: asCurrentUser });
       expect(createClientMock).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: asInternalUser })
       );
+    });
+  });
+
+  describe('getCurrentUser', () => {
+    it('returns the caller identity and admin status', async () => {
+      getUserFromRequestMock.mockResolvedValue({
+        id: 'profile-1',
+        username: 'jane',
+        isAdmin: true,
+      });
+
+      await expect(createService().getCurrentUser({ request })).resolves.toEqual({
+        id: 'profile-1',
+        username: 'jane',
+        isAdmin: true,
+      });
     });
   });
 
@@ -108,7 +125,7 @@ describe('ConversationServiceImpl', () => {
 
     it('does not assign an author when the user has no profile id', async () => {
       const service = createService();
-      getUserFromRequestMock.mockResolvedValue({ username: 'jane' });
+      getUserFromRequestMock.mockResolvedValue({ username: 'jane', isAdmin: false });
 
       const author = await service.getConversationRoundAuthor({ request });
 

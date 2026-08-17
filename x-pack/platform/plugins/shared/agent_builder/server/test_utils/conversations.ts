@@ -6,7 +6,7 @@
  */
 
 import { type ConversationRound, ConversationRoundStatus } from '@kbn/agent-builder-common';
-import type { ConversationWithPermissions } from '../../common/http_api/conversations';
+import type { ConversationWithPermissions } from '../../common/http_api/permissions';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
 export type ConversationServiceMock = jest.Mocked<ConversationService> & {
@@ -75,6 +75,7 @@ export const createConversationClientMock = (): ConversationClientMock => {
 export const createConversationServiceMock = (): ConversationServiceMock => {
   return {
     getScopedClient: jest.fn().mockImplementation(async () => createConversationClientMock()),
+    getCurrentUser: jest.fn().mockResolvedValue({ id: 'user-1', username: 'user', isAdmin: false }),
     getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
   };
 };

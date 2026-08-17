@@ -121,10 +121,10 @@ describe('ConversationClient', () => {
       logger: loggerMock.create(),
       esClient: {} as never,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
-      isAdmin: false,
       user: {
         id: 'user-1',
         username: 'test-user',
+        isAdmin: false,
       },
     });
   });
@@ -1956,10 +1956,10 @@ describe('ConversationClient', () => {
         logger: loggerMock.create(),
         esClient: {} as never,
         agentRegistry: agentRegistry as unknown as AgentRegistry,
-        isAdmin: true,
         user: {
           id: 'admin-user-id',
           username: 'admin-user',
+          isAdmin: true,
         },
       });
     });

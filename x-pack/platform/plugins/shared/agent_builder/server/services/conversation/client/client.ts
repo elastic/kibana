@@ -10,7 +10,7 @@ import { OccWriter, isElasticsearchWriteConflict } from '@kbn/occ';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
-  type UserIdAndName,
+  type CurrentUser,
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
@@ -135,14 +135,12 @@ export const createClient = ({
   logger,
   esClient,
   user,
-  isAdmin,
   agentRegistry,
 }: {
   space: string;
   logger: Logger;
   esClient: ElasticsearchClient;
-  user: UserIdAndName;
-  isAdmin: boolean;
+  user: CurrentUser;
   agentRegistry: AgentRegistry;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
@@ -150,7 +148,6 @@ export const createClient = ({
     storage,
     esClient,
     user,
-    isAdmin,
     space,
     agentRegistry,
     logger,
@@ -161,8 +158,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
   private readonly esClient: ElasticsearchClient;
-  private readonly user: UserIdAndName;
-  private readonly isAdmin: boolean;
+  private readonly user: CurrentUser;
   private readonly agentRegistry: AgentRegistry;
   private readonly logger: Logger;
 
@@ -170,15 +166,13 @@ class ConversationClientImpl implements ConversationClient {
     storage,
     esClient,
     user,
-    isAdmin,
     space,
     agentRegistry,
     logger,
   }: {
     storage: ConversationStorage;
     esClient: ElasticsearchClient;
-    user: UserIdAndName;
-    isAdmin: boolean;
+    user: CurrentUser;
     space: string;
     agentRegistry: AgentRegistry;
     logger: Logger;
@@ -186,7 +180,6 @@ class ConversationClientImpl implements ConversationClient {
     this.storage = storage;
     this.esClient = esClient;
     this.user = user;
-    this.isAdmin = isAdmin;
     this.space = space;
     this.agentRegistry = agentRegistry;
     this.logger = logger;
@@ -683,19 +676,11 @@ class ConversationClientImpl implements ConversationClient {
         break;
 
       case 'rename':
-        allowed = hasConversationRenameAccess({
-          conversation,
-          user: this.user,
-          isAdmin: this.isAdmin,
-        });
+        allowed = hasConversationRenameAccess({ conversation, user: this.user });
         break;
 
       case 'delete':
-        allowed = hasConversationDeleteAccess({
-          conversation,
-          user: this.user,
-          isAdmin: this.isAdmin,
-        });
+        allowed = hasConversationDeleteAccess({ conversation, user: this.user });
         break;
 
       case 'updateAccessControl':

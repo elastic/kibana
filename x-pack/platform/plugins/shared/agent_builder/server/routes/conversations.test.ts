@@ -6,7 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConversationRoundStatus, ConversationOriginType } from '@kbn/agent-builder-common';
+import {
+  ConversationAccessControlMode,
+  ConversationRoundStatus,
+  ConversationOriginType,
+} from '@kbn/agent-builder-common';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../common/constants';
 import { registerConversationRoutes } from './conversations';
@@ -14,18 +18,19 @@ import { registerConversationRoutes } from './conversations';
 const GET_CONVERSATION_PATH = `${publicApiPath}/conversations/{conversation_id}`;
 
 describe('registerConversationRoutes', () => {
-  it('returns stored origin and author details when getting a conversation', async () => {
+  it('returns stored origin and author details with admin permissions when getting a public conversation', async () => {
     let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const conversation = {
       id: 'conversation-1',
       agent_id: 'agent-1',
       user: {
-        id: 'user-1',
-        username: 'bruno',
+        id: 'conversation-owner',
+        username: 'owner',
       },
       title: 'Slack conversation',
       created_at: '2026-07-10T00:00:00.000Z',
       updated_at: '2026-07-10T00:00:01.000Z',
+      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
       origin: {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       },
@@ -60,7 +65,9 @@ describe('registerConversationRoutes', () => {
       ],
     } as Conversation;
     const get = jest.fn().mockResolvedValue(conversation);
-    const getCurrentUser = jest.fn().mockResolvedValue({ id: 'user-1', username: 'bruno' });
+    const getCurrentUser = jest
+      .fn()
+      .mockResolvedValue({ id: 'admin-user', username: 'admin', isAdmin: true });
 
     const router = {
       versioned: {
@@ -124,7 +131,7 @@ describe('registerConversationRoutes', () => {
     expect(getCurrentUser).toHaveBeenCalled();
     expect(result.payload).toEqual({
       ...conversation,
-      permissions: { rename: true, delete: true, update_access_control: true },
+      permissions: { rename: true, delete: true, update_access_control: false },
     });
     expect(result.payload.origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -138,24 +145,27 @@ describe('registerConversationRoutes', () => {
     });
   });
 
-  it('returns stored origin details when listing conversations', async () => {
+  it('returns stored origin details with admin permissions when listing public conversations', async () => {
     let listConversationsHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const conversation = {
       id: 'conversation-1',
       agent_id: 'agent-1',
       user: {
-        id: 'user-1',
-        username: 'bruno',
+        id: 'conversation-owner',
+        username: 'owner',
       },
       title: 'Slack conversation',
       created_at: '2026-07-10T00:00:00.000Z',
       updated_at: '2026-07-10T00:00:01.000Z',
+      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
       origin: {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       },
     };
     const list = jest.fn().mockResolvedValue([conversation]);
-    const getCurrentUser = jest.fn().mockResolvedValue({ id: 'user-1', username: 'bruno' });
+    const getCurrentUser = jest
+      .fn()
+      .mockResolvedValue({ id: 'admin-user', username: 'admin', isAdmin: true });
 
     const router = {
       versioned: {
@@ -221,7 +231,7 @@ describe('registerConversationRoutes', () => {
     expect(result.payload.results[0].permissions).toEqual({
       rename: true,
       delete: true,
-      update_access_control: true,
+      update_access_control: false,
     });
   });
 
