@@ -38,7 +38,7 @@ const createPluginConfigAccessor = (maxAlertsPerRun = DEFAULT_MAX_ALERTS_PER_RUN
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
-      run: { alerts: { max: maxAlertsPerRun } },
+      run: { alerts: { max: maxAlertsPerRun }, query: { maxResponseSize: 50 * 1024 * 1024 } },
     },
     esql: { responseFormat: 'json' },
   };
@@ -50,17 +50,16 @@ describe('ExecuteRuleQueryStep', () => {
   let step: ExecuteRuleQueryStep;
   let mockEsClient: DeeplyMockedApi<ElasticsearchClient>;
   let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
 
   function createStep(
     maxAlertsPerRun?: number,
     responseFormat: EsqlConfig['responseFormat'] = 'json'
   ) {
-    const { loggerService, mockLogger: logger } = createLoggerService();
-    mockLogger = logger;
+    ({ loggerService, mockLogger } = createLoggerService());
     const mocks = createQueryService(responseFormat);
     mockEsClient = mocks.mockEsClient;
     return new ExecuteRuleQueryStep(
-      loggerService,
       mocks.queryService,
       createPluginConfigAccessor(maxAlertsPerRun)
     );
@@ -75,7 +74,10 @@ describe('ExecuteRuleQueryStep', () => {
       createEsqlResponse([{ name: 'host.name', type: 'keyword' }], [['host-a']])
     );
 
-    const state = createRulePipelineState({ rule: createRuleResponse() });
+    const state = createRulePipelineState({
+      rule: createRuleResponse(),
+      logger: loggerService,
+    });
     const results = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(results).toHaveLength(1);
@@ -203,6 +205,26 @@ describe('ExecuteRuleQueryStep', () => {
   it('marks ResponseError(400) ES|QL errors as TaskErrorSource.USER', async () => {
     mockEsClient.esql.query.mockRejectedValue(
       new errors.ResponseError({ statusCode: 400 } as DiagnosticResult)
+    );
+
+    const state = createRulePipelineState({ rule: createRuleResponse() });
+
+    const error = await getStepError(step, state);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error!)).toBe(TaskErrorSource.USER);
+  });
+
+  it('marks content-length-exceeded errors as TaskErrorSource.USER', async () => {
+    mockHelpersEsqlToArrowReader(
+      mockEsClient,
+      jest
+        .fn()
+        .mockRejectedValue(
+          new errors.RequestAbortedError(
+            'Response size exceeded the limit (content length: 52428800)'
+          )
+        )
     );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
