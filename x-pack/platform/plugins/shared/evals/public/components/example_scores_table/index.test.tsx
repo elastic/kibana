@@ -353,6 +353,15 @@ describe('ExampleScoresTable', () => {
       expect(getVerdictBadgeColor('something-bespoke', null)).toEqual('hollow');
     });
 
+    it('leaves measurements uncolored, since they are not scored out of one', () => {
+      // Latency in seconds and token counts would otherwise clear the 0.8 pass threshold.
+      expect(getVerdictBadgeColor('ms', 4.2)).toEqual('hollow');
+      expect(getVerdictBadgeColor('tokens', 40118)).toEqual('hollow');
+      expect(getVerdictBadgeColor('drift', -3)).toEqual('hollow');
+      // A label still classifies the verdict when the score itself says nothing.
+      expect(getVerdictBadgeColor('incorrect', 12)).toEqual('danger');
+    });
+
     it('keeps neutral sentinels gray whatever the score says', () => {
       expect(getVerdictBadgeColor('unavailable', 0)).toEqual('default');
       expect(getVerdictBadgeColor('not-applicable', 1)).toEqual('default');

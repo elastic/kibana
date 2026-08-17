@@ -68,9 +68,10 @@ paths:
                     items:
                       $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                     description: >-
-                      The distinct models this experiment's evaluators judged with, most used
-                      first, so consumers can tell that they differ. `evaluator_model` is the
-                      first. Empty when only code evaluators scored the experiment.
+                      The distinct models this experiment's evaluators judged with, the one that
+                      produced the most scores first, so consumers can tell that they differ.
+                      `evaluator_model` is the first. Capped at 20, which no realistic experiment
+                      reaches. Empty when only code evaluators scored the experiment.
                   execution_id:
                     type: string
                     maxLength: 1024

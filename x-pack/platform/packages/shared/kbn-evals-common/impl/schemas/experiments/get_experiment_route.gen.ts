@@ -61,7 +61,7 @@ export const GetEvaluationExperimentResponse = lazySchema(() =>
     task_model: Model.optional(),
     evaluator_model: Model.optional(),
     /**
-     * The distinct models this experiment's evaluators judged with, most used first, so consumers can tell that they differ. `evaluator_model` is the first. Empty when only code evaluators scored the experiment.
+     * The distinct models this experiment's evaluators judged with, the one that produced the most scores first, so consumers can tell that they differ. `evaluator_model` is the first. Capped at 20, which no realistic experiment reaches. Empty when only code evaluators scored the experiment.
      */
     evaluator_models: z.array(Model).max(20).optional(),
     execution_id: z.string().max(1024).optional(),

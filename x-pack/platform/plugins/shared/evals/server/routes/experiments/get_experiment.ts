@@ -12,19 +12,16 @@ import {
   buildExperimentFilterQuery,
   buildStatsAggregation,
   parseStatsAggregationResponse,
+  buildEvaluatorModelsAggregation,
+  parseEvaluatorModelsAggregation,
   buildModelDisplayId,
   GetEvaluationExperimentRequestParams,
   GetEvaluationExperimentRequestQuery,
 } from '@kbn/evals-common';
-import type { EvaluatorStats } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-
-type EvaluatorModel = NonNullable<EvaluatorStats['evaluator_model']>;
-
-const MAX_EVALUATOR_MODELS = 20;
 
 interface EvalDocSource {
   experiment_name?: string;
@@ -102,12 +99,20 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
           const aggResponse = await evalsContext.evaluationScoreService.search({
             size: 0,
             query,
-            aggs: buildStatsAggregation(),
+            aggs: {
+              ...buildStatsAggregation(),
+              evaluator_models: buildEvaluatorModelsAggregation(),
+            },
           });
 
-          const stats = parseStatsAggregationResponse(
-            aggResponse.aggregations as Record<string, unknown> | undefined
-          );
+          const aggregations = aggResponse.aggregations as Record<string, unknown> | undefined;
+          const stats = parseStatsAggregationResponse(aggregations);
+          // Evaluators can each judge with their own model, so the detail reports every distinct
+          // judge, the one that produced the most scores first, and nothing at all when only code
+          // evaluators ran. The listing summarizes the same aggregation, so the two agree on which
+          // judge is predominant; reading it off `firstDoc` instead would report whichever judge
+          // the unsorted search happened to hit.
+          const evaluatorModels = parseEvaluatorModelsAggregation(aggregations);
 
           const toModelDisplay = (model?: { id?: string; family?: string; provider?: string }) => {
             if (!model) return undefined;
@@ -117,39 +122,6 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
               provider: model.provider,
             };
           };
-
-          // Evaluators can each judge with their own model, so this summary comes from the
-          // per-evaluator stats: every distinct judge, most used first, ties broken by id to keep
-          // the answer stable, and nothing at all when only code evaluators ran. Reading it off
-          // `firstDoc` instead would report whichever judge the unsorted search happened to hit.
-          // Evaluators are counted once each, since stats carry a row per dataset an evaluator
-          // ran on and a judge should not gain weight from running on more datasets.
-          const evaluatorNamesPerModel = new Map<
-            string,
-            { model: EvaluatorModel; evaluatorNames: Set<string> }
-          >();
-          for (const { evaluator_model: model, evaluator_name: evaluatorName } of stats) {
-            if (!model?.id) continue;
-            const entry = evaluatorNamesPerModel.get(model.id);
-            if (entry) {
-              entry.evaluatorNames.add(evaluatorName);
-            } else {
-              evaluatorNamesPerModel.set(model.id, {
-                model,
-                evaluatorNames: new Set([evaluatorName]),
-              });
-            }
-          }
-          const evaluatorModels = [...evaluatorNamesPerModel.values()]
-            .sort(
-              (a, b) =>
-                b.evaluatorNames.size - a.evaluatorNames.size ||
-                a.model.id.localeCompare(b.model.id)
-            )
-            .map(({ model }) => model)
-            // Kept in step with the response schema's maxItems, which the SDK client enforces
-            // when it parses this response. No realistic experiment reaches it.
-            .slice(0, MAX_EVALUATOR_MODELS);
 
           return response.ok({
             body: {

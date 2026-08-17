@@ -238,18 +238,17 @@ const ExperimentHeader: React.FC<{
               </EuiFlexItem>
             </>
           )}
-          {evaluatorModels.length > 0 && (
-            <>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EvaluatorModelsBadge models={evaluatorModels} />
-              </EuiFlexItem>
-            </>
-          )}
+          {/* Always shown, unlike the task model above: an experiment scored only by code
+              evaluators has no judge, and the badge says so rather than leaving the reader to
+              guess whether the field is missing or empty. */}
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{i18n.STAT_EVALUATOR_MODEL}</strong>
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EvaluatorModelsBadge models={evaluatorModels} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       )}
     </EuiPanel>

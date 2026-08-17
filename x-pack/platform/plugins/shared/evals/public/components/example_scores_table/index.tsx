@@ -57,10 +57,9 @@ const OTHER_NEGATIVE_VERDICTS = ['MISSING', 'MAJOR', 'SEVERE', 'UNSAFE', 'LEAK']
 /**
  * Maps a verdict label + numeric score to an EUI badge color.
  *
- * The score decides the color whenever the evaluator reports one, because labels are free-form
- * and substring matching cannot be trusted: 'incorrect' contains 'correct', and evaluators name
- * their own scores things like 'correctness-analysis'. Keywords only classify label-only
- * verdicts, where there is no score to read.
+ * A score between 0 and 1 decides the color, because labels are free-form and substring matching
+ * cannot be trusted: 'incorrect' contains 'correct', and evaluators name their own scores things
+ * like 'correctness-analysis'. Keywords only classify verdicts with no score to read.
  */
 export const getVerdictBadgeColor = (label: string, score: number | null | undefined): string => {
   // Fold separators into underscores so 'leak-detected', 'leak detected' and 'n/a' all normalize
@@ -80,7 +79,9 @@ export const getVerdictBadgeColor = (label: string, score: number | null | undef
   )
     return 'default';
 
-  if (score != null) {
+  // Only scores on a 0-to-1 scale are judgements. Evaluators also report measurements — latency
+  // in seconds, token counts — and against those a 0.8 threshold would call every run a pass.
+  if (score != null && score >= 0 && score <= 1) {
     if (score >= 0.8) return 'success';
     if (score >= 0.5) return 'warning';
     return 'danger';

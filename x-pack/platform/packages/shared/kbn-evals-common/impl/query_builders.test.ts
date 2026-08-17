@@ -12,6 +12,8 @@ import {
   buildSpaceFilter,
   buildStatsAggregation,
   parseStatsAggregationResponse,
+  buildEvaluatorModelsAggregation,
+  parseEvaluatorModelsAggregation,
   SCORES_SORT_ORDER,
   buildExperimentsListingFilterQuery,
   buildExperimentsListingAggregation,
@@ -179,6 +181,45 @@ describe('query_builders', () => {
           provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
         },
       });
+    });
+  });
+
+  describe('buildEvaluatorModelsAggregation', () => {
+    it('collects up to twenty judges, family and provider nested under the id', () => {
+      expect(buildEvaluatorModelsAggregation()).toEqual({
+        terms: { field: 'evaluator.model.id', size: 20 },
+        aggs: {
+          family: { terms: { field: 'evaluator.model.family', size: 1 } },
+          provider: { terms: { field: 'evaluator.model.provider', size: 1 } },
+        },
+      });
+    });
+  });
+
+  describe('parseEvaluatorModelsAggregation', () => {
+    it('keeps the order the aggregation returned, so the first judge is the most used', () => {
+      expect(
+        parseEvaluatorModelsAggregation({
+          evaluator_models: {
+            buckets: [
+              {
+                key: 'gpt-4o',
+                family: { buckets: [{ key: 'GPT' }] },
+                provider: { buckets: [{ key: 'OpenAI' }] },
+              },
+              { key: 'claude-3', family: { buckets: [] }, provider: { buckets: [] } },
+            ],
+          },
+        })
+      ).toEqual([
+        { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
+        { id: 'claude-3', family: undefined, provider: undefined },
+      ]);
+    });
+
+    it('reports no judges for an experiment scored only by code evaluators', () => {
+      expect(parseEvaluatorModelsAggregation({ evaluator_models: { buckets: [] } })).toEqual([]);
+      expect(parseEvaluatorModelsAggregation(undefined)).toEqual([]);
     });
   });
 

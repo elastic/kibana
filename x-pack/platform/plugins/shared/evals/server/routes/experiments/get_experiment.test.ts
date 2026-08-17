@@ -110,6 +110,15 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
             },
           ],
         },
+        evaluator_models: {
+          buckets: [
+            {
+              key: 'claude-3',
+              family: { buckets: [{ key: 'claude-3' }] },
+              provider: { buckets: [{ key: 'anthropic' }] },
+            },
+          ],
+        },
       },
     } as any);
 
@@ -218,6 +227,20 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
             },
           ],
         },
+        evaluator_models: {
+          buckets: [
+            {
+              key: 'gpt-4o',
+              family: { buckets: [{ key: 'GPT' }] },
+              provider: { buckets: [{ key: 'OpenAI' }] },
+            },
+            {
+              key: 'claude-3',
+              family: { buckets: [{ key: 'Claude' }] },
+              provider: { buckets: [{ key: 'Anthropic' }] },
+            },
+          ],
+        },
       },
     } as any);
 
@@ -234,20 +257,21 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
       ['relevance', { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' }],
       ['latency', undefined],
     ]);
-    // The judge most evaluators used, not the one on whichever document the search returned.
+    // The judge that produced the most scores, not the one on whichever document the search
+    // returned.
     expect(response.payload.evaluator_model).toEqual({
       id: 'gpt-4o',
       family: 'GPT',
       provider: 'OpenAI',
     });
-    // And every judge, most used first, so consumers can tell that the evaluators differ.
+    // And every judge, that same one first, so consumers can tell that the evaluators differ.
     expect(response.payload.evaluator_models).toEqual([
       { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' },
       { id: 'claude-3', family: 'Claude', provider: 'Anthropic' },
     ]);
   });
 
-  it('counts each evaluator once, so a judge gains no weight from running on more datasets', async () => {
+  it('ranks judges by the scores they produced, the way the experiments listing does', async () => {
     const { handler, context, evaluationScoreService } = setup();
 
     evaluationScoreService.search.mockResolvedValueOnce({
@@ -292,8 +316,9 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
       },
     });
 
-    // One evaluator judged by claude across three datasets, two evaluators judged by gpt-4o on
-    // one dataset. Counting stats rows would crown claude 3 to 2; counting evaluators picks gpt.
+    // Two evaluators judged by gpt-4o against one judged by claude, but claude produced more
+    // scores. The judge aggregation decides, since re-ranking here would name a predominant judge
+    // the listing disagrees with.
     evaluationScoreService.search.mockResolvedValueOnce({
       aggregations: {
         by_dataset: {
@@ -310,17 +335,21 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
                 ],
               },
             },
+          ],
+        },
+        evaluator_models: {
+          buckets: [
             {
-              key: 'dataset-2',
-              dataset_name: { buckets: [{ key: 'Dataset Two' }] },
-              example_count: { value: 5 },
-              by_evaluator: { buckets: [claudeBucket('correctness')] },
+              key: 'claude-3',
+              doc_count: 300,
+              family: { buckets: [{ key: 'Claude' }] },
+              provider: { buckets: [{ key: 'Anthropic' }] },
             },
             {
-              key: 'dataset-3',
-              dataset_name: { buckets: [{ key: 'Dataset Three' }] },
-              example_count: { value: 5 },
-              by_evaluator: { buckets: [claudeBucket('correctness')] },
+              key: 'gpt-4o',
+              doc_count: 200,
+              family: { buckets: [{ key: 'GPT' }] },
+              provider: { buckets: [{ key: 'OpenAI' }] },
             },
           ],
         },
@@ -331,9 +360,9 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
 
     expect(response.status).toBe(200);
     expect(response.payload.evaluator_model).toEqual({
-      id: 'gpt-4o',
-      family: 'GPT',
-      provider: 'OpenAI',
+      id: 'claude-3',
+      family: 'Claude',
+      provider: 'Anthropic',
     });
   });
 
@@ -374,6 +403,7 @@ describe('GET /internal/evals/experiments/{experimentId}', () => {
             },
           ],
         },
+        evaluator_models: { buckets: [] },
       },
     } as any);
 
