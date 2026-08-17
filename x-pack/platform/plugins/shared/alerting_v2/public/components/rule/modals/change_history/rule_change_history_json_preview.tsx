@@ -95,7 +95,8 @@ const RuleChangeHistoryJsonPreview = ({
     diffTelemetry?.reportDiffViewed();
   }, [diffTelemetry, hasChanges, hasCompare, isLoadingCompareContext]);
 
-  const { diffContainerStyle, diffWrapperStyle, diffContentStyle, diffPartStyles} = getStyles(euiTheme);
+  const { diffContainerStyle, diffWrapperStyle, diffContentStyle, diffPartStyles } =
+    getStyles(euiTheme);
 
   if (!diffParts) {
     return (
