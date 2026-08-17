@@ -212,6 +212,25 @@ describe('AppHeaderView', () => {
     expect(onInspect).toHaveBeenCalledTimes(1);
   });
 
+  it('does not render a React node passed as a metadata label', () => {
+    renderAppHeader(
+      <AppHeaderView
+        metadata={
+          [
+            {
+              type: 'text',
+              label: <span data-test-subj="hacked-metadata-label">hack</span>,
+            },
+            { type: 'text', label: 'Created by' },
+          ] as unknown as AppHeaderMetadataItems
+        }
+      />
+    );
+
+    expect(screen.queryByTestId('hacked-metadata-label')).not.toBeInTheDocument();
+    expect(screen.getByText('Created by')).toBeInTheDocument();
+  });
+
   it('limits metadata rendering to three items', () => {
     const metadata = [
       { type: 'text', label: 'First' },
