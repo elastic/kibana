@@ -60,6 +60,7 @@ export const ConversationQueue = memo<ConversationQueueProps>(
         <EuiFlexItem grow={false}>
           <span
             style={{
+              display: 'inline-block',
               background: euiTheme.colors[CONVERSATION_CATEGORY_COLORS[briefingType]],
               width: `${CONVERSATION_QUEUE_HEADER_DOT_SIZE}px`,
               height: `${CONVERSATION_QUEUE_HEADER_DOT_SIZE}px`,
