@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IncomingMessage } from 'http';
+import type { Http2ServerRequest } from 'http2';
 import { Socket } from 'net';
 import type { DetailedPeerCertificate } from 'tls';
 import { TLSSocket } from 'tls';
-import { KibanaSocket } from './socket';
-import { resolveRawSocket } from './request';
+import { KibanaSocket, resolveRawSocket } from './socket';
 
 describe('KibanaSocket', () => {
   describe('getPeerCertificate', () => {
@@ -176,7 +177,8 @@ describe('KibanaSocket', () => {
 describe('resolveRawSocket', () => {
   it('returns req.socket for HTTP/1.1 requests (no stream property)', () => {
     const netSocket = new Socket();
-    const req = { socket: netSocket };
+    const req = { socket: netSocket } as unknown as IncomingMessage;
+
     expect(resolveRawSocket(req)).toBe(netSocket);
   });
 
@@ -185,14 +187,19 @@ describe('resolveRawSocket', () => {
     const sessionSocket = new TLSSocket(new Socket());
     const req = {
       socket: streamSocket,
-      stream: { session: { socket: sessionSocket as unknown as Socket } },
-    };
+      stream: { session: { socket: sessionSocket } },
+    } as unknown as Http2ServerRequest;
+
     expect(resolveRawSocket(req)).toBe(sessionSocket);
   });
 
   it('falls back to req.socket when stream.session is undefined (stream destroyed before request)', () => {
     const streamSocket = new Socket();
-    const req = { socket: streamSocket, stream: { session: undefined } };
+    const req = {
+      socket: streamSocket,
+      stream: { session: undefined },
+    } as unknown as Http2ServerRequest;
+
     expect(resolveRawSocket(req)).toBe(streamSocket);
   });
 
@@ -209,7 +216,8 @@ describe('resolveRawSocket', () => {
           },
         },
       },
-    };
+    } as unknown as Http2ServerRequest;
+
     expect(resolveRawSocket(req)).toBe(streamSocket);
   });
 });
