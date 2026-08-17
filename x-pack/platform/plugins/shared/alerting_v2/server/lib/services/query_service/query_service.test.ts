@@ -548,5 +548,21 @@ describe('QueryService', () => {
 
       expect(mockLogger.error).toHaveBeenCalled();
     });
+
+    it('logs debug instead of error when cancelled', async () => {
+      const { RuleExecutionCancellationError } = jest.requireActual('../../execution_context');
+      mockEsClient.esql.query.mockRejectedValue(
+        new RuleExecutionCancellationError('Streaming query aborted')
+      );
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({ query: mockQuery })) {
+          // consume
+        }
+      }).rejects.toThrow(/aborted/i);
+
+      expect(mockLogger.debug).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
   });
 });

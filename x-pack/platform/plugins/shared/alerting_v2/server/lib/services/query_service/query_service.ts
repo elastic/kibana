@@ -93,22 +93,63 @@ export class QueryService implements QueryServiceContract {
 
   /**
    * Runs the single-shot JSON query and yields the full result set as one in-memory batch,
-   * preserving the `AsyncIterable<T[]>` contract.
+   * preserving the `AsyncIterable<T[]>` contract. Cancellation is scoped to this
+   * rule-execution streaming boundary, mirroring the arrow path.
    */
-  private async *streamJson<T>(params: ExecuteQueryParams): AsyncIterable<T[]> {
+  private async *streamJson<T>({
+    query,
+    filter,
+    params,
+    abortSignal,
+  }: ExecuteQueryParams): AsyncIterable<T[]> {
+    const context = createExecutionContext(abortSignal ?? new AbortController().signal);
+
     this.logger.debug({
       message: () => `QueryService: Executing streaming query (json)`,
     });
 
-    const rows = await this.executeQueryRows<T>(params);
+    try {
+      context.throwIfAborted();
 
-    // Empty results return nothing, this mirrorss the arrow path so callers
-    // relying on `withAtLeastOne` keep the same fallback behaviour.
-    if (rows.length === 0) {
-      return;
+      const response = await this.esClient.esql.query(
+        {
+          query,
+          drop_null_columns: DROP_NULL_COLUMNS,
+          filter,
+          params,
+        },
+        { signal: context.signal }
+      );
+
+      context.throwIfAborted();
+
+      const rows = this.toRows<T>(response);
+
+      this.logger.debug({
+        message: `QueryService: Streaming query completed successfully (json)`,
+      });
+
+      // Empty results return nothing, this mirrors the arrow path so callers
+      // relying on `withAtLeastOne` keep the same fallback behaviour.
+      if (rows.length === 0) {
+        return;
+      }
+
+      yield rows;
+    } catch (error) {
+      if (isRuleExecutionCancellationError(error)) {
+        this.logger.debug({
+          message: 'QueryService: Streaming query aborted (json)',
+        });
+      } else {
+        this.logger.error({
+          error,
+          code: ALERTING_LOG_CODES.QUERY_ESQL_EXECUTION_FAILED,
+        });
+      }
+
+      throw error;
     }
-
-    yield rows;
   }
 
   private async *streamArrow<T>({
