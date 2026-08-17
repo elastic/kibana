@@ -126,6 +126,7 @@ function ClickMapContent() {
   }, [globalPage]);
 
   const load = useCallback(async () => {
+    void rangeId;
     setLoading(true);
     setError(null);
     try {

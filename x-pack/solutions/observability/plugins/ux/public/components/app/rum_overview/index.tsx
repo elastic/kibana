@@ -92,6 +92,7 @@ export function RumOverviewV2() {
   const locationFilter = typeof location === 'string' ? location : undefined;
 
   const load = useCallback(async () => {
+    void rangeId;
     setLoading(true);
     setError(null);
     try {

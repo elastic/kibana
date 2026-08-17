@@ -336,6 +336,7 @@ export function SessionReplayPanel() {
   }, []);
 
   const loadSessions = useCallback(async () => {
+    void rangeId;
     setLoading(true);
     setError(null);
     try {

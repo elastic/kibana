@@ -42,6 +42,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
   const locationFilter = typeof location === 'string' ? location : undefined;
 
   const load = useCallback(async () => {
+    void rangeId;
     setLoading(true);
     try {
       const result = await fetchRumTrends({

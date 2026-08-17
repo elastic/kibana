@@ -197,6 +197,7 @@ export function SessionFunnelPanel() {
   const [presetSteps, setPresetSteps] = useState<FunnelStepDef[] | null>(null);
 
   const loadPatterns = useCallback(async () => {
+    void rangeId;
     setPatternsLoading(true);
     setPatternsError(null);
     try {

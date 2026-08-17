@@ -352,6 +352,7 @@ export function RumPagesPanel() {
   const { items: budgets } = useRumBudgets();
 
   const load = useCallback(async () => {
+    void rangeId;
     setLoading(true);
     setError(null);
     try {

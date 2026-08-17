@@ -428,6 +428,7 @@ export function RumAppsPage() {
   const { hidden: chartHidden, toggle: toggleChart } = useInventoryChartVisibility();
 
   const load = useCallback(async () => {
+    void rangeId;
     const gen = ++loadGen.current;
     setLoading(true);
     setError(null);
