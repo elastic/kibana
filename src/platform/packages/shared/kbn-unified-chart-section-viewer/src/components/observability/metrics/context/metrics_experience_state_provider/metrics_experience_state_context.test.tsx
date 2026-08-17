@@ -13,8 +13,8 @@ import {
   MetricsExperienceStateContext,
   MetricsExperienceStateProvider,
 } from './metrics_experience_state_context';
+import { METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
 import {
-  DEFAULT_METRICS_SORT,
   FEATURE_FLAGS,
   METRICS_SORT_BY,
   METRICS_SORT_DIRECTION,
@@ -266,33 +266,42 @@ describe('MetricsExperienceStateProvider', () => {
           </ExternalServicesProvider>
         );
 
-    it('defaults to DEFAULT_METRICS_SORT when the prop is omitted', () => {
+    it('defaults to METRICS_GRID_SORT_DEFAULTS when the prop is omitted', () => {
       const { result } = renderHook(() => useMetricsExperienceState(), {
         wrapper: createSortWrapper({}),
       });
 
-      expect(result.current.metricsSort).toEqual(DEFAULT_METRICS_SORT);
+      expect(result.current.metricsSort).toEqual(METRICS_GRID_SORT_DEFAULTS);
     });
 
     it('uses the metricsSort prop sourced from the host profile state', () => {
-      const metricsSort: MetricsSort = [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc];
+      const metricsSort: MetricsSort = {
+        sortField: METRICS_SORT_BY.recency,
+        sortDirection: METRICS_SORT_DIRECTION.desc,
+      };
       const { result } = renderHook(() => useMetricsExperienceState(), {
         wrapper: createSortWrapper({ metricsSort }),
       });
 
-      expect(result.current.metricsSort).toEqual([
-        METRICS_SORT_BY.recency,
-        METRICS_SORT_DIRECTION.desc,
-      ]);
+      expect(result.current.metricsSort).toEqual({
+        sortField: METRICS_SORT_BY.recency,
+        sortDirection: METRICS_SORT_DIRECTION.desc,
+      });
     });
 
     it('forwards sort changes to the host onMetricsSortChange prop', () => {
       const onMetricsSortChange = jest.fn();
       const { result } = renderHook(() => useMetricsExperienceState(), {
-        wrapper: createSortWrapper({ metricsSort: DEFAULT_METRICS_SORT, onMetricsSortChange }),
+        wrapper: createSortWrapper({
+          metricsSort: METRICS_GRID_SORT_DEFAULTS,
+          onMetricsSortChange,
+        }),
       });
 
-      const nextSort: MetricsSort = [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc];
+      const nextSort: MetricsSort = {
+        sortField: METRICS_SORT_BY.recency,
+        sortDirection: METRICS_SORT_DIRECTION.desc,
+      };
       act(() => {
         result.current.onMetricsSortChange(nextSort);
       });
@@ -303,7 +312,10 @@ describe('MetricsExperienceStateProvider', () => {
     it('resets currentPage to 0 when the sort changes (parity with #277184)', () => {
       const onMetricsSortChange = jest.fn();
       const { result } = renderHook(() => useMetricsExperienceState(), {
-        wrapper: createSortWrapper({ metricsSort: DEFAULT_METRICS_SORT, onMetricsSortChange }),
+        wrapper: createSortWrapper({
+          metricsSort: METRICS_GRID_SORT_DEFAULTS,
+          onMetricsSortChange,
+        }),
       });
 
       act(() => {
@@ -312,10 +324,10 @@ describe('MetricsExperienceStateProvider', () => {
       expect(result.current.currentPage).toBe(2);
 
       act(() => {
-        result.current.onMetricsSortChange([
-          METRICS_SORT_BY.alphabetically,
-          METRICS_SORT_DIRECTION.desc,
-        ]);
+        result.current.onMetricsSortChange({
+          sortField: METRICS_SORT_BY.alphabetically,
+          sortDirection: METRICS_SORT_DIRECTION.desc,
+        });
       });
       expect(result.current.currentPage).toBe(0);
     });
@@ -323,7 +335,10 @@ describe('MetricsExperienceStateProvider', () => {
     it('does not reset currentPage when the sort is unchanged', () => {
       const onMetricsSortChange = jest.fn();
       const { result } = renderHook(() => useMetricsExperienceState(), {
-        wrapper: createSortWrapper({ metricsSort: DEFAULT_METRICS_SORT, onMetricsSortChange }),
+        wrapper: createSortWrapper({
+          metricsSort: METRICS_GRID_SORT_DEFAULTS,
+          onMetricsSortChange,
+        }),
       });
 
       act(() => {
@@ -332,10 +347,10 @@ describe('MetricsExperienceStateProvider', () => {
       expect(result.current.currentPage).toBe(3);
 
       act(() => {
-        result.current.onMetricsSortChange([
-          METRICS_SORT_BY.alphabetically,
-          METRICS_SORT_DIRECTION.asc,
-        ]);
+        result.current.onMetricsSortChange({
+          sortField: METRICS_SORT_BY.alphabetically,
+          sortDirection: METRICS_SORT_DIRECTION.asc,
+        });
       });
       expect(result.current.currentPage).toBe(3);
       expect(onMetricsSortChange).toHaveBeenCalled();
@@ -343,19 +358,22 @@ describe('MetricsExperienceStateProvider', () => {
 
     describe('when the sorting feature flag is disabled', () => {
       it('ignores a host-provided non-default sort and falls back to the default', () => {
-        const metricsSort: MetricsSort = [METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc];
+        const metricsSort: MetricsSort = {
+          sortField: METRICS_SORT_BY.recency,
+          sortDirection: METRICS_SORT_DIRECTION.desc,
+        };
         const { result } = renderHook(() => useMetricsExperienceState(), {
           wrapper: createSortWrapper({ metricsSort }, { sortingEnabled: false }),
         });
 
-        expect(result.current.metricsSort).toEqual(DEFAULT_METRICS_SORT);
+        expect(result.current.metricsSort).toEqual(METRICS_GRID_SORT_DEFAULTS);
       });
 
       it('swallows sort change requests without forwarding or resetting the page', () => {
         const onMetricsSortChange = jest.fn();
         const { result } = renderHook(() => useMetricsExperienceState(), {
           wrapper: createSortWrapper(
-            { metricsSort: DEFAULT_METRICS_SORT, onMetricsSortChange },
+            { metricsSort: METRICS_GRID_SORT_DEFAULTS, onMetricsSortChange },
             { sortingEnabled: false }
           ),
         });
@@ -366,15 +384,15 @@ describe('MetricsExperienceStateProvider', () => {
         expect(result.current.currentPage).toBe(2);
 
         act(() => {
-          result.current.onMetricsSortChange([
-            METRICS_SORT_BY.recency,
-            METRICS_SORT_DIRECTION.desc,
-          ]);
+          result.current.onMetricsSortChange({
+            sortField: METRICS_SORT_BY.recency,
+            sortDirection: METRICS_SORT_DIRECTION.desc,
+          });
         });
 
         expect(onMetricsSortChange).not.toHaveBeenCalled();
         expect(result.current.currentPage).toBe(2);
-        expect(result.current.metricsSort).toEqual(DEFAULT_METRICS_SORT);
+        expect(result.current.metricsSort).toEqual(METRICS_GRID_SORT_DEFAULTS);
       });
 
       it('defaults to disabled when the host provides no featureFlags service', () => {
@@ -383,7 +401,10 @@ describe('MetricsExperienceStateProvider', () => {
           wrapper: ({ children }: { children: React.ReactNode }) => (
             <MetricsExperienceStateProvider
               profileId="test-profile"
-              metricsSort={[METRICS_SORT_BY.recency, METRICS_SORT_DIRECTION.desc]}
+              metricsSort={{
+                sortField: METRICS_SORT_BY.recency,
+                sortDirection: METRICS_SORT_DIRECTION.desc,
+              }}
               onMetricsSortChange={onMetricsSortChange}
             >
               {children}
@@ -391,13 +412,13 @@ describe('MetricsExperienceStateProvider', () => {
           ),
         });
 
-        expect(result.current.metricsSort).toEqual(DEFAULT_METRICS_SORT);
+        expect(result.current.metricsSort).toEqual(METRICS_GRID_SORT_DEFAULTS);
 
         act(() => {
-          result.current.onMetricsSortChange([
-            METRICS_SORT_BY.alphabetically,
-            METRICS_SORT_DIRECTION.desc,
-          ]);
+          result.current.onMetricsSortChange({
+            sortField: METRICS_SORT_BY.alphabetically,
+            sortDirection: METRICS_SORT_DIRECTION.desc,
+          });
         });
         expect(onMetricsSortChange).not.toHaveBeenCalled();
       });

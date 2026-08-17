@@ -9,13 +9,13 @@
 
 import React, { useCallback } from 'react';
 import { createContext } from 'react';
-import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
-import type { Dimension, MetricsSort, UnifiedMetricsGridProps } from '../../../../../types';
 import {
-  DEFAULT_METRICS_SORT,
-  FEATURE_FLAGS,
-  FEATURE_FLAG_DEFAULTS,
-} from '../../../../../common/constants';
+  METRICS_GRID_SETTINGS_DEFAULTS,
+  METRICS_GRID_SORT_DEFAULTS,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
+import type { Dimension, MetricsSort, UnifiedMetricsGridProps } from '../../../../../types';
+import { FEATURE_FLAGS, FEATURE_FLAG_DEFAULTS } from '../../../../../common/constants';
 import { useFeatureFlag } from '../../../../../hooks';
 import { useRecentlyExploredMetrics } from '../../hooks';
 import {
@@ -49,7 +49,7 @@ export function MetricsExperienceStateProvider({
   profileId,
   gridSettings = METRICS_GRID_SETTINGS_DEFAULTS,
   onGridSettingsChange,
-  metricsSort = DEFAULT_METRICS_SORT,
+  metricsSort = METRICS_GRID_SORT_DEFAULTS,
   onMetricsSortChange,
   getRecentlyExploredMetrics,
   onMetricExplored,
@@ -77,7 +77,7 @@ export function MetricsExperienceStateProvider({
   );
 
   // When sorting is disabled, ignore any host-provided sort
-  const effectiveMetricsSort = isSortingEnabled ? metricsSort : DEFAULT_METRICS_SORT;
+  const effectiveMetricsSort = isSortingEnabled ? metricsSort : METRICS_GRID_SORT_DEFAULTS;
 
   const recentlyExploredMetrics = useRecentlyExploredMetrics({
     getRecentlyExploredMetrics,
@@ -120,9 +120,10 @@ export function MetricsExperienceStateProvider({
       }
 
       // compare against the current sort before forwarding the change
-      const [prevSortBy, prevDirection] = effectiveMetricsSort;
-      const [nextSortBy, nextDirection] = nextSort;
-      if (prevSortBy !== nextSortBy || prevDirection !== nextDirection) {
+      if (
+        effectiveMetricsSort.sortField !== nextSort.sortField ||
+        effectiveMetricsSort.sortDirection !== nextSort.sortDirection
+      ) {
         setCurrentPage(0);
       }
 
