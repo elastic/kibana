@@ -121,10 +121,7 @@ export const useEsqlConversionCheck = (
         continue;
       }
 
-      const layerType =
-        (
-          activeVisualization as { getLayerType?: (id: string, s: unknown) => string }
-        )?.getLayerType?.(layerId, state) ?? layerTypes.DATA;
+      const layerType = activeVisualization.getLayerType(layerId, state) ?? layerTypes.DATA;
 
       if (layerType !== layerTypes.DATA) {
         convertibleLayers.push({
