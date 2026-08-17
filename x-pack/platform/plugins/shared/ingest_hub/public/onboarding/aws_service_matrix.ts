@@ -67,7 +67,7 @@ export interface AwsServiceMatrixEntry {
   policyTemplate?: string;
   /** Override for the data stream name used in Fleet input stream keys when it differs from `id` */
   dataStream?: string;
-  /** Whether the data stream is enabled by default when the integration is installed */
+  /** Whether the data stream is enabled by default when the integration is installed. Derived from the package manifest. */
   defaultEnabled: boolean;
   /** Whether this service should be shown in the AWS onboarding UI. Defaults to true. */
   showInUI: boolean;
@@ -76,8 +76,7 @@ export interface AwsServiceMatrixEntry {
 
 /**
  * Internal type for the static routing table.
- * signalType and defaultEnabled are optional — derived at runtime from the Fleet package manifest.
- * For non-aws packages where manifest derivation is not yet fully applied, static fallbacks remain.
+ * signalType and defaultEnabled are derived at runtime from the Fleet package manifest.
  */
 type AwsServiceStaticEntry = Omit<
   AwsServiceMatrixEntry,
@@ -85,7 +84,6 @@ type AwsServiceStaticEntry = Omit<
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
   signalType?: SignalType;
-  defaultEnabled?: boolean;
   showInUI?: boolean;
 };
 
@@ -454,7 +452,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws/metrics'],
     packageName: 'aws_bedrock',
-    defaultEnabled: true,
     policyTemplate: 'aws_bedrock',
   },
   {
@@ -467,7 +464,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_bedrock',
-    defaultEnabled: true,
     policyTemplate: 'aws_bedrock',
   },
   {
@@ -478,7 +474,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws/metrics'],
     packageName: 'aws_bedrock',
-    defaultEnabled: true,
     policyTemplate: 'aws_bedrock',
   },
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
@@ -491,7 +486,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_bedrock_agentcore',
-    defaultEnabled: false,
     showInUI: false,
     policyTemplate: 'aws_bedrock_agentcore',
   },
@@ -505,7 +499,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['awsfargate/metrics'],
     packageName: 'awsfargate',
-    defaultEnabled: true,
     policyTemplate: 'awsfargate',
     dataStream: 'task_stats',
   },
@@ -521,7 +514,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_mq',
-    defaultEnabled: false,
     showInUI: false,
     policyTemplate: 'amazon_mq',
   },
@@ -536,7 +528,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_cloudtrail_otel',
-    defaultEnabled: false,
     badge: 'technical_preview',
   },
   {
@@ -548,7 +539,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_vpcflow_otel',
-    defaultEnabled: false,
     badge: 'technical_preview',
   },
   {
@@ -560,7 +550,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     inputs: [],
     requiredConfig: [],
     packageName: 'aws_waf_otel',
-    defaultEnabled: false,
     badge: 'technical_preview',
   },
 
@@ -575,7 +564,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_logs',
-    defaultEnabled: false,
     policyTemplate: 'aws_logs',
   },
 ];
@@ -598,7 +586,7 @@ export function buildAwsServiceMatrix(
     let requiredConfig = entry.requiredConfig;
     let optionalConfig: string[] | undefined;
     let mandatoryFields = entry.mandatoryFields;
-    let defaultEnabled = entry.defaultEnabled ?? true;
+    let defaultEnabled = true;
     const showInUI = entry.showInUI ?? true;
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
@@ -720,8 +708,8 @@ export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_
  * (name, category, showInUI, etc.).
  * For manifest-enriched values (deploymentMethods, identityFederationSupported)
  * use useAwsServicesMap() in React components.
- * Note: signalType and defaultEnabled may be absent for aws package entries since
- * those fields are derived from the manifest at runtime.
+ * Note: signalType and defaultEnabled are derived from the manifest at runtime;
+ * values here are placeholders — use useAwsServicesMap() where these fields matter.
  */
 export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
   AWS_SERVICES_STATIC.map((entry) => {
@@ -731,6 +719,7 @@ export const AWS_SERVICES_MAP = new Map<string, AwsServiceMatrixEntry>(
       ...rest,
       deploymentMethods,
       showInUI: entry.showInUI ?? true,
+      defaultEnabled: true,
     } as unknown as AwsServiceMatrixEntry;
     return [entry.id, base];
   })
