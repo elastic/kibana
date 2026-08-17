@@ -31,7 +31,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { RowViewer } from './row_viewer_lazy';
-import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 interface ESQLDataGridProps {
   core: CoreStart;

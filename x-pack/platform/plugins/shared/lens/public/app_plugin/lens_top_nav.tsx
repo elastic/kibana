@@ -52,7 +52,7 @@ import type { ShareableConfiguration } from './share_action';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 import { useEditorFrameService } from '../editor_frame_service/editor_frame_service_context';
-import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,

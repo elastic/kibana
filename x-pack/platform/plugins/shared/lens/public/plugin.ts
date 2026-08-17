@@ -141,7 +141,7 @@ import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggest
 import type { LensEmbeddableStartServices } from './react_embeddable/types';
 import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
 import { setLensBuilder } from './lazy_builder';
-import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 export type { SaveProps } from './app_plugin';
 

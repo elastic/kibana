@@ -35,7 +35,7 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 import { getFieldItemActions } from './get_field_item_actions';
-import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 type LensFieldListItem = IndexPatternField | DatatableColumn | DataViewField;
 
