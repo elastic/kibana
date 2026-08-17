@@ -212,6 +212,9 @@ class ConversationClientImpl implements ConversationClient {
         'read_only',
         'access_control',
         'origin',
+        'template_id',
+        'template_version',
+        'metadata',
       ],
       query: {
         bool: {
@@ -223,13 +226,15 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) => fromEsWithoutRounds(hit as Document));
+    return response.hits.hits.map((hit) =>
+      withDeserializedMetadata(fromEsWithoutRounds(hit as Document))
+    );
   }
 
   async get(conversationId: string): Promise<Conversation> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return fromEs(document);
+    return withDeserializedMetadata(fromEs(document));
   }
 
   async exists(conversationId: string): Promise<boolean> {

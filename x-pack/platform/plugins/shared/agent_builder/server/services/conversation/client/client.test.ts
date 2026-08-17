@@ -1163,6 +1163,53 @@ describe('ConversationClient', () => {
       },
     } as Document);
 
+  describe('template metadata response conversion', () => {
+    const template = makeTemplate('template-1', {
+      enabled: { input_type: 'TOGGLE', description: 'Enabled' },
+    });
+
+    beforeEach(() => {
+      getTemplateMock.mockReturnValue(template);
+    });
+
+    it('deserializes template metadata when getting a conversation', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: template.id,
+              metadata: { enabled: 'true' },
+            }),
+          ],
+        },
+      });
+
+      await expect(client.get('conversation-1')).resolves.toMatchObject({
+        metadata: { enabled: true },
+      });
+    });
+
+    it('requests and deserializes template metadata when listing conversations', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocumentWithTemplate({
+              templateId: template.id,
+              metadata: { enabled: 'true' },
+            }),
+          ],
+        },
+      });
+
+      await expect(client.list()).resolves.toMatchObject([{ metadata: { enabled: true } }]);
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _source: expect.arrayContaining(['template_id', 'template_version', 'metadata']),
+        })
+      );
+    });
+  });
+
   describe('applyTemplate', () => {
     beforeEach(() => {
       jest.clearAllMocks();
