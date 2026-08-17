@@ -1,0 +1,255 @@
+openapi: 3.0.0
+info:
+  title: Bulk action exception lists API endpoint
+  version: '1'
+paths:
+  /api/exception_lists/_bulk_action:
+    post:
+      x-labels: [serverless, ess]
+      x-internal: true
+      operationId: BulkDeleteExceptionLists
+      x-codegen-enabled: true
+      summary: Bulk action on exception lists
+      description: |
+        Perform a bulk action on exception lists. Currently supports the `delete` action,
+        which deletes multiple exception lists by their saved object `id`. Lists that are
+        referenced by one or more detection rules cannot be deleted; unlink the list from
+        all rules before retrying.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+                - action
+                - ids
+              properties:
+                action:
+                  type: string
+                  enum: [delete]
+                  description: The bulk action to perform.
+                ids:
+                  type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
+                  description: Array of exception list saved object identifiers.
+                namespace_type:
+                  description: |
+                    `single` targets lists in the current Kibana space; `agnostic` targets global
+                    lists. Applies to every list in the request.
+                  $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
+                  default: single
+            examples:
+              deleteByIds:
+                value:
+                  action: delete
+                  ids:
+                    - 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                    - b1c2d3e4-f5a6-47b8-99c0-d1e2f3a4b5c6
+                  namespace_type: single
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - results
+                  - errors
+                  - summary
+                properties:
+                  success:
+                    type: boolean
+                    description: Whether all requested operations succeeded.
+                  results:
+                    type: array
+                    items:
+                      $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionList'
+                    description: Successfully deleted exception lists.
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - message
+                        - status_code
+                        - lists
+                      properties:
+                        message:
+                          type: string
+                          description: Human-readable error description.
+                        status_code:
+                          type: integer
+                          description: HTTP status code for the error.
+                        lists:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - id
+                            properties:
+                              id:
+                                $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListId'
+                              list_id:
+                                $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionListHumanId'
+                          description: Lists affected by this error.
+                        rule_references:
+                          type: array
+                          items:
+                            type: object
+                            required:
+                              - rule_id
+                              - id
+                              - name
+                            properties:
+                              rule_id:
+                                type: string
+                                description: The rule's `rule_id` (human-assigned identifier).
+                              id:
+                                type: string
+                                description: The rule's saved object id.
+                              name:
+                                type: string
+                                description: The rule's name.
+                          description: Rules that reference the affected lists. Present only for 409 (conflict) errors.
+                    description: Per-list errors encountered during the operation.
+                  summary:
+                    type: object
+                    required:
+                      - total
+                      - succeeded
+                      - failed
+                      - skipped
+                    properties:
+                      total:
+                        type: integer
+                        description: Total number of lists in the request (after deduplication).
+                      succeeded:
+                        type: integer
+                        description: Number of lists successfully deleted.
+                      failed:
+                        type: integer
+                        description: Number of lists that could not be deleted.
+                      skipped:
+                        type: integer
+                        description: Number of duplicate entries removed before processing.
+              examples:
+                fullSuccess:
+                  value:
+                    success: true
+                    results:
+                      - id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                        list_id: simple_list_1
+                        type: detection
+                        name: Sample Detection Exception List
+                        description: This is a sample detection type exception list.
+                        immutable: false
+                        namespace_type: single
+                        os_types: [linux]
+                        tags: [malware]
+                        version: 1
+                        _version: WzIsMV0=
+                        tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                        created_at: 2025-01-07T19:34:27.942Z
+                        created_by: elastic
+                        updated_at: 2025-01-07T19:34:27.942Z
+                        updated_by: elastic
+                    errors: []
+                    summary:
+                      total: 1
+                      succeeded: 1
+                      failed: 0
+                      skipped: 0
+                partialFailure:
+                  value:
+                    success: false
+                    results:
+                      - id: 9e5fc75a-a3da-46c5-96e3-a2ec59c6bb85
+                        list_id: simple_list_1
+                        type: detection
+                        name: Sample Detection Exception List
+                        description: This is a sample detection type exception list.
+                        immutable: false
+                        namespace_type: single
+                        os_types: [linux]
+                        tags: [malware]
+                        version: 1
+                        _version: WzIsMV0=
+                        tie_breaker_id: 78f1aca1-f8ee-4eb5-9ceb-f5c3ee656cb3
+                        created_at: 2025-01-07T19:34:27.942Z
+                        created_by: elastic
+                        updated_at: 2025-01-07T19:34:27.942Z
+                        updated_by: elastic
+                    errors:
+                      - message: 'Exception list "Blocked IPs" cannot be deleted because it is linked to 2 rules. Unlink the list from all rules before retrying.'
+                        status_code: 409
+                        lists:
+                          - id: b1c2d3e4-f5a6-47b8-99c0-d1e2f3a4b5c6
+                            list_id: blocked_ips
+                        rule_references:
+                          - rule_id: my_rule_1
+                            id: abc123
+                            name: Malware Detection Rule
+                          - rule_id: my_rule_2
+                            id: def456
+                            name: Network Anomaly Rule
+                    summary:
+                      total: 2
+                      succeeded: 1
+                      failed: 1
+                      skipped: 0
+        400:
+          description: Invalid input data response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+                  - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: Unsupported action
+        401:
+          description: Unsuccessful authentication response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
+        403:
+          description: Not enough privileges response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [POST /api/exception_lists/_bulk_action] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
+        500:
+          description: Internal server error response
+          content:
+            application/json:
+              schema:
+                $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
