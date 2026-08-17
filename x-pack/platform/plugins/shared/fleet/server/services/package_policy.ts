@@ -1559,7 +1559,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: boolean;
       skipUniqueNameVerification?: boolean;
       bumpRevision?: boolean;
-    }
+    },
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     const logger = this.getLogger('update');
 
@@ -1590,7 +1591,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         'packagePolicyUpdate',
         packagePolicyUpdateWithId,
         soClient,
-        esClient
+        esClient,
+        context
       );
     } catch (error) {
       logger.error(`An error occurred executing "packagePolicyUpdate" callback: ${error}`);
@@ -2570,6 +2572,25 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             .flatMap((r) => r.policy_ids!)
         ),
       ];
+
+      // Delete agentless agent policies for successfully deleted package policies.
+      // agentPolicyService.delete() handles the agentless deployment teardown internally.
+      const agentlessPoliciesToDelete = agentlessAgentPolicies.filter((id) =>
+        uniquePolicyIdsR.includes(id)
+      );
+      for (const agentPolicyId of agentlessPoliciesToDelete) {
+        try {
+          await agentPolicyService.delete(soClient, esClient, agentPolicyId, {
+            force: options?.force,
+            user: options?.user,
+          });
+        } catch (error) {
+          logger.error(
+            `An error occurred deleting agentless agent policy ${agentPolicyId}: ${error}`
+          );
+        }
+      }
+
       uniquePolicyIdsR = without(uniquePolicyIdsR, ...agentlessAgentPolicies);
 
       const agentPoliciesWithEndpointPackagePolicies = result.reduce((acc, cur) => {
@@ -3539,7 +3560,8 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
           force?: boolean | undefined;
           skipUniqueNameVerification?: boolean | undefined;
         }
-      | undefined
+      | undefined,
+    context?: RequestHandlerContext
   ): Promise<PackagePolicy> {
     await this.#runPreflight({
       fleetAuthz: {
@@ -3547,7 +3569,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
       },
     });
 
-    return super.update(soClient, esClient, id, packagePolicyUpdate, options);
+    return super.update(soClient, esClient, id, packagePolicyUpdate, options, context);
   }
 
   async create(

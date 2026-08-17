@@ -17,8 +17,8 @@ import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugi
 import type { ProductFeaturesService } from '../../../lib/product_features_service';
 import { securityTool } from '../constants';
 import { buildRenderAttachmentTag } from './attachment_utils';
-import { getEntityStoreV2ToolAvailability } from './entity_store_v2_availability';
-import { resolveSingleEntity } from './entity_resolution';
+import { getEntityAnalyticsToolAvailability } from './entity_analytics_availability';
+import { requireResolvedEntity } from './entity_resolution';
 import {
   buildEntityGraphAttachmentId,
   ensureEntityGraphAttachment,
@@ -63,15 +63,16 @@ When the id/name resolves to multiple candidate entities, no attachment is store
     availability: {
       cacheMode: 'space',
       handler: async ({ request, spaceId }: ToolAvailabilityContext) => {
-        const entityStoreAvailability = await getEntityStoreV2ToolAvailability({
+        const entityAnalyticsAvailability = await getEntityAnalyticsToolAvailability({
           core,
           request,
           spaceId,
           experimentalFeatures,
           logger,
+          minLicense: 'platinum',
         });
-        if (entityStoreAvailability.status !== 'available') {
-          return entityStoreAvailability;
+        if (entityAnalyticsAvailability.status !== 'available') {
+          return entityAnalyticsAvailability;
         }
 
         try {
@@ -79,15 +80,6 @@ When the id/name resolves to multiple candidate entities, no attachment is store
             return {
               status: 'unavailable',
               reason: 'The entity relationship graph is not enabled for this project tier.',
-            };
-          }
-
-          const [, startPlugins] = await core.getStartServices();
-          const license = await startPlugins.licensing.getLicense();
-          if (!license.hasAtLeast('platinum')) {
-            return {
-              status: 'unavailable',
-              reason: 'The entity relationship graph requires a Platinum license or above.',
             };
           }
         } catch (error) {
@@ -119,57 +111,18 @@ When the id/name resolves to multiple candidate entities, no attachment is store
 
       try {
         const client = esClient.asCurrentUser;
-        const resolved = await resolveSingleEntity({
+        const resolved = await requireResolvedEntity({
           esClient: client,
           spaceId,
           entityId,
           entityType,
         });
-
-        if (resolved.status === 'not_found') {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: { message: `No entity found for id: ${entityId}` },
-              },
-            ],
-          };
+        if (!resolved.ok) {
+          return { results: resolved.results };
         }
 
-        if (resolved.status === 'ambiguous') {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.other,
-                data: {
-                  message: `Multiple entities matched "${entityId}". Ask the user to provide the exact entity id (EUID) to render the graph, then call this tool again.`,
-                  candidateEntityIds: resolved.candidateEntityIds,
-                },
-              },
-            ],
-          };
-        }
-
-        if (resolved.status === 'no_identity' || !resolved.identity.entityStoreId) {
-          return {
-            results: [
-              {
-                tool_result_id: getToolResultId(),
-                type: ToolResultType.error,
-                data: {
-                  message: `Resolved an entity for "${entityId}" but it has no canonical entity.id, so the relationship graph cannot be rendered.`,
-                },
-              },
-            ],
-          };
-        }
-
-        const { identifierType, identifier } = resolved.identity;
-        const entityStoreId = resolved.identity.entityStoreId;
-        const attachmentLabel = `Graph — ${identifierType}: ${identifier}`;
+        const { identifierType, identifier, entityStoreId } = resolved.identity;
+        const attachmentLabel = `${identifierType}: ${identifier}`;
 
         const attachmentResult = await ensureEntityGraphAttachment({
           attachments,

@@ -27,6 +27,7 @@ import { createEsqlDataSource } from '../../../../../common/data_sources';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
+import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 jest.mock('../../../../components/discover_grid', () => ({
   ...jest.requireActual('../../../../components/discover_grid'),
@@ -99,7 +100,10 @@ async function mountComponent({
   dataStateContainer.data$.documents$.next = jest.fn();
 
   const props = {
-    viewModeToggle: <div data-test-subj="viewModeToggle">test</div>,
+    renderViewModeToggle: jest.fn<
+      ReturnType<RenderViewModeToggle>,
+      Parameters<RenderViewModeToggle>
+    >(() => <div data-test-subj="viewModeToggle">test</div>),
     dataView: dataViewMock,
     onAddFilter: jest.fn(),
     onFieldEdited: jest.fn(),
