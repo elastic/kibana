@@ -7,8 +7,8 @@
 
 import { apiTest as baseApiTest } from '@kbn/scout';
 
+import { FIRST_CLIENT_P12 } from './constants';
 import { PkiHttp2Client } from './pki_http2_client';
-import { FIRST_CLIENT_P12 } from '../../ui/fixtures/constants';
 
 export interface PkiApiTestFixtures {
   pkiHttp2: PkiHttp2Client;
