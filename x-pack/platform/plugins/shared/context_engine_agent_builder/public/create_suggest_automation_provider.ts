@@ -12,6 +12,7 @@ import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/publi
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
+import { KI_AUTOMATION_GENERATION_SKILL_ID } from '../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
 
 const AGENT_BUILDER_CAPABILITY = 'agentBuilder';
@@ -19,8 +20,6 @@ const AGENT_BUILDER_CAPABILITY = 'agentBuilder';
 const AUTOMATION_REFRESH_TOOL_IDS: ReadonlySet<string> = new Set([
   CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
 ]);
-
-const KI_AUTOMATION_GENERATION_SKILL_ID = 'ki-automation-generation';
 
 const SUGGEST_AUTOMATION_INITIAL_MESSAGE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.suggestAutomationInitialMessage',

@@ -6,6 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import {
+  KI_AUTOMATION_GENERATION_SKILL_ID,
+  KI_RETRIEVAL_SKILL_ID,
+} from '../../common/agent_builder_skills';
 import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../common/agent_builder_tools';
 import { createAiIndexAttachmentType } from './ai_index';
 
@@ -38,6 +42,17 @@ describe('createAiIndexAttachmentType', () => {
   it('rejects invalid attachment data', async () => {
     const result = await attachmentType.validate({ id: 'only-id' });
     expect(result.valid).toBe(false);
+  });
+
+  it('describes neutral attachment usage without forcing automation skill load', () => {
+    const description = attachmentType.getAgentDescription?.();
+
+    expect(description).toContain(KI_RETRIEVAL_SKILL_ID);
+    expect(description).toContain(KI_AUTOMATION_GENERATION_SKILL_ID);
+    expect(description).not.toMatch(
+      new RegExp(`Load the \`${KI_AUTOMATION_GENERATION_SKILL_ID}\` skill and follow`)
+    );
+    expect(description).toContain(CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID);
   });
 
   it('formats the attachment for the agent', async () => {
