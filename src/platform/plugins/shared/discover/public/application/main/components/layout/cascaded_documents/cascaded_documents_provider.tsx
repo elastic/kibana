@@ -9,7 +9,6 @@
 
 import { isOfAggregateQueryType, type AggregateQuery, type TimeRange } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ReactElement } from 'react';
 import { createContext, useContext } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
@@ -23,6 +22,7 @@ import type {
 } from '../../../state_management/redux';
 import type { UpdateESQLQueryFn } from '../../../../../context_awareness';
 import type { CascadedDocumentsFetcher } from '../../../data_fetching/cascaded_documents_fetcher';
+import type { RenderViewModeToggle } from '../../../../../components/view_mode_toggle';
 
 export type CascadedDocumentsDataGridUiStateMap = Record<
   string,
@@ -37,7 +37,7 @@ export interface CascadedDocumentsContext
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange | undefined;
   isApproximate: boolean;
-  viewModeToggle: ReactElement | undefined;
+  renderViewModeToggle: RenderViewModeToggle | undefined;
   expandedDoc$: BehaviorSubject<DataTableRecord | undefined>;
   expandedDocOwner$: BehaviorSubject<string | undefined>;
   getExpandedDocSetter: (owner: string) => NonNullable<UnifiedDataTableProps['setExpandedDoc']>;
