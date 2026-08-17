@@ -32,17 +32,25 @@ const buildPanels = (
   let nextPanelId = panelId + 1;
 
   const panelItems: EuiContextMenuPanelItemDescriptor[] = items.map((item) => {
-    const { items: childItems, popoverWidth: childWidth, name, ...rest } = item;
-    const itemName = asPlainText(name);
+    // Explicit fields only — do not spread the consumer item into EUI.
+    const { items: childItems, popoverWidth: childWidth } = item;
+    const panelItem: EuiContextMenuPanelItemDescriptor = {
+      name: asPlainText(item.name),
+      icon: item.icon,
+      onClick: item.onClick,
+      disabled: item.disabled,
+      toolTipContent: asOptionalPlainText(item.toolTipContent),
+      'data-test-subj': item['data-test-subj'],
+    };
     if (childItems && childItems.length > 0) {
       const childPanelId = nextPanelId;
-      const childPanels = buildPanels(childItems, childPanelId, childWidth, itemName);
+      const childPanels = buildPanels(childItems, childPanelId, childWidth, panelItem.name);
       nextPanelId = childPanelId + childPanels.length;
       panels.push(...childPanels);
-      return { ...rest, name: itemName, panel: childPanelId };
+      return { ...panelItem, panel: childPanelId };
     }
 
-    return { ...rest, name: itemName };
+    return panelItem;
   });
 
   panels.unshift({

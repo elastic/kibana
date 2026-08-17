@@ -128,6 +128,16 @@ Description and `metadata` share the secondary row and are mutually exclusive. U
 structured entity facts such as status, owner, or creation time. Documentation links that are not
 part of a necessary description belong in the app menu via `docLink`.
 
+## Plain-text fields
+
+Title, description, metadata, badge, tab, share tooltip, and back destination copy are strings.
+TypeScript erases `string` at runtime, so a type assertion can still pass a React node into those
+fields. The header coerces consumer text to a real string before painting: a non-string becomes empty
+(or is omitted if the field is optional). Do not pass `FormattedMessage` or other nodes. Custom badge
+UI belongs in the deprecated `renderCustomBadge` hatch.
+
+Menu item text is coerced the same way in `@kbn/ui-app-menu`.
+
 ## Title size
 
 The title is `xs` with `compact` spacing and `s` with every other spacing mode. This is automatic —

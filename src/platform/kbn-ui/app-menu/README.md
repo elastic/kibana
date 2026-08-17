@@ -28,6 +28,13 @@ viewport breakpoint using the previous viewport mapping: `xs` and `s` collapse, 
 the medium layout, and `xl` shows the full menu. Menus that should preserve viewport-based behavior,
 such as the Classic and legacy Project Chrome headers, set `breakpointSource="viewport"`.
 
+## Plain-text fields
+
+Labels, descriptions, badge text, and tooltip copy are strings. TypeScript erases `string` at
+runtime, so a type assertion can still pass a React node into those fields. The menu coerces
+consumer text to a real string before painting: a non-string becomes empty (or is omitted if the
+field is optional). Do not pass `FormattedMessage` or other nodes.
+
 ## Compatibility
 
 `@kbn/core-chrome-app-menu-components` re-exports this package for existing consumers.
