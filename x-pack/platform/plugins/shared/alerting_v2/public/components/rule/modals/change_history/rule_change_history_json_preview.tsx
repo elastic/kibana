@@ -24,6 +24,44 @@ type DiffPartType = 'added' | 'removed' | 'context';
 const getDiffPartType = (part: Change): DiffPartType =>
   part.added ? 'added' : part.removed ? 'removed' : 'context';
 
+const getStyles = (euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => {
+  return {
+    diffWrapperStyle: css`
+      height: 100%;
+      min-height: 0;
+      padding: ${euiTheme.size.s};
+    `,
+
+    diffContainerStyle: css`
+      min-height: 0;
+      overflow: auto;
+      border: ${euiTheme.border.thin};
+      border-radius: ${euiTheme.border.radius.small};
+      background: ${euiTheme.colors.backgroundBasePlain};
+      font-family: ${euiTheme.font.familyCode};
+      font-size: ${euiTheme.size.m};
+      line-height: 1.5;
+      white-space: pre;
+    `,
+
+    diffContentStyle: css`
+      padding: ${euiTheme.size.m};
+    `,
+
+    diffPartStyles: {
+      added: {
+        background: euiTheme.colors.backgroundBaseSuccess,
+        color: euiTheme.colors.textSuccess,
+      },
+      removed: {
+        background: euiTheme.colors.backgroundBaseDanger,
+        color: euiTheme.colors.textDanger,
+      },
+      context: { background: 'transparent', color: euiTheme.colors.textParagraph },
+    },
+  };
+};
+
 const RuleChangeHistoryJsonPreview = ({
   change,
   compareSpec,
@@ -57,39 +95,7 @@ const RuleChangeHistoryJsonPreview = ({
     diffTelemetry?.reportDiffViewed();
   }, [diffTelemetry, hasChanges, hasCompare, isLoadingCompareContext]);
 
-  const diffWrapperStyle = css`
-    height: 100%;
-    min-height: 0;
-    padding: ${euiTheme.size.s};
-  `;
-
-  const diffContainerStyle = css`
-    min-height: 0;
-    overflow: auto;
-    border: ${euiTheme.border.thin};
-    border-radius: ${euiTheme.border.radius.small};
-    background: ${euiTheme.colors.backgroundBasePlain};
-    font-family: ${euiTheme.font.familyCode};
-    font-size: ${euiTheme.size.m};
-    line-height: 1.5;
-    white-space: pre;
-  `;
-
-  const diffContentStyle = css`
-    padding: ${euiTheme.size.m};
-  `;
-
-  const diffPartStyles: Record<DiffPartType, { background: string; color: string }> = {
-    added: {
-      background: euiTheme.colors.backgroundBaseSuccess,
-      color: euiTheme.colors.textSuccess,
-    },
-    removed: {
-      background: euiTheme.colors.backgroundBaseDanger,
-      color: euiTheme.colors.textDanger,
-    },
-    context: { background: 'transparent', color: euiTheme.colors.textParagraph },
-  };
+  const { diffContainerStyle, diffWrapperStyle, diffContentStyle, diffPartStyles} = getStyles(euiTheme);
 
   if (!diffParts) {
     return (
