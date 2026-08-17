@@ -221,18 +221,16 @@ export class SLOPlugin
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
 
+          const isCpsAvailable =
+            this.isCpsEnabled && (await (plugins.cps?.isTierEligible() ?? Promise.resolve(false)));
+
           const transformManager = new DefaultTransformManager(
-            createTransformGenerators(
-              spaceId,
-              dataViewsService,
-              this.isServerless,
-              this.isCpsEnabled
-            ),
+            createTransformGenerators(spaceId, dataViewsService, this.isServerless, isCpsAvailable),
             scopedClusterClient,
             logger
           );
           const summaryTransformManager = new DefaultSummaryTransformManager(
-            new DefaultSummaryTransformGenerator(this.isServerless, this.isCpsEnabled),
+            new DefaultSummaryTransformGenerator(this.isServerless, isCpsAvailable),
             scopedClusterClient,
             logger
           );

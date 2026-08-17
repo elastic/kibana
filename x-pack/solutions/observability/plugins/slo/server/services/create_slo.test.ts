@@ -89,7 +89,6 @@ describe('CreateSLO', () => {
             syncDelay: oneMinute(),
             frequency: oneMinute(),
             preventInitialBackfill: false,
-            preventCrossProjectSearch: false,
           },
           revision: 1,
           tags: [],
@@ -130,7 +129,6 @@ describe('CreateSLO', () => {
             syncDelay: fiveMinute(),
             frequency: oneMinute(),
             preventInitialBackfill: false,
-            preventCrossProjectSearch: false,
           },
           revision: 1,
           tags: ['one', 'two'],
@@ -163,7 +161,6 @@ describe('CreateSLO', () => {
             syncDelay: fiveMinute(),
             frequency: fiveMinute(),
             preventInitialBackfill: true,
-            preventCrossProjectSearch: false,
           },
           revision: 1,
           tags: ['one', 'two'],
@@ -174,7 +171,7 @@ describe('CreateSLO', () => {
       );
     });
 
-    it('defaults preventCrossProjectSearch to false when not provided', async () => {
+    it('does not inject preventCrossProjectSearch or projectRoutings when omitted', async () => {
       const sloParams = createSLOParams({
         indicator: createAPMTransactionErrorRateIndicator(),
       });
@@ -182,11 +179,9 @@ describe('CreateSLO', () => {
 
       await createSLO.execute(sloParams);
 
-      expect(mockRepository.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          settings: expect.objectContaining({ preventCrossProjectSearch: false }),
-        })
-      );
+      const createdSlo = mockRepository.create.mock.calls[0][0];
+      expect(createdSlo.settings.preventCrossProjectSearch).toBeUndefined();
+      expect(createdSlo.settings.projectRoutings).toBeUndefined();
     });
   });
 

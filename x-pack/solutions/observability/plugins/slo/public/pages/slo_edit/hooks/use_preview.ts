@@ -14,7 +14,8 @@ export function useDebouncedGetPreviewData(
   isIndicatorValid: boolean,
   indicator: Indicator,
   range: { from: Date; to: Date },
-  groupBy?: string | string[]
+  groupBy?: string | string[],
+  projectRoutings?: string | null
 ) {
   const serializedIndicator = JSON.stringify(indicator);
   const [indicatorState, setIndicatorState] = useState<string>(serializedIndicator);
@@ -50,5 +51,6 @@ export function useDebouncedGetPreviewData(
     indicator: JSON.parse(indicatorState),
     range,
     groupBy: JSON.parse(groupByState),
+    projectRoutings,
   });
 }

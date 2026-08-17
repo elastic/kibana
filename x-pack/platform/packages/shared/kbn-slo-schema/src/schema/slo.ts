@@ -27,14 +27,45 @@ const objectiveSchema = t.intersection([
   t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
 ]);
 
+const MAX_PROJECT_ROUTINGS_LENGTH = 1024;
+
+const boundedProjectRoutingSchema = new t.Type<string, string, unknown>(
+  'boundedProjectRoutingSchema',
+  t.string.is,
+  (input, context): Either<t.Errors, string> => {
+    if (typeof input === 'string') {
+      if (input.trim().length === 0) {
+        return t.failure(input, context, 'Invalid projectRoutings, must not be empty');
+      }
+
+      if (input.length > MAX_PROJECT_ROUTINGS_LENGTH) {
+        return t.failure(
+          input,
+          context,
+          `Invalid projectRoutings, must be at most ${MAX_PROJECT_ROUTINGS_LENGTH} characters`
+        );
+      }
+
+      return t.success(input);
+    } else {
+      return t.failure(input, context);
+    }
+  },
+  t.identity
+);
+
 const settingsSchema = t.intersection([
   t.type({
     syncDelay: durationType,
     frequency: durationType,
     preventInitialBackfill: t.boolean,
-    preventCrossProjectSearch: t.boolean,
   }),
-  t.partial({ syncField: t.union([t.string, t.null]) }),
+  t.partial({
+    syncField: t.union([t.string, t.null]),
+    /** @deprecated use projectRoutings */
+    preventCrossProjectSearch: t.boolean,
+    projectRoutings: t.union([boundedProjectRoutingSchema, t.null]),
+  }),
 ]);
 
 const groupBySchema = allOrAnyStringOrArray;
@@ -43,7 +74,9 @@ const optionalSettingsSchema = t.partial({
   syncDelay: durationType,
   frequency: durationType,
   preventInitialBackfill: t.boolean,
+  /** @deprecated use projectRoutings */
   preventCrossProjectSearch: t.boolean,
+  projectRoutings: t.union([boundedProjectRoutingSchema, t.null]),
   syncField: t.union([t.string, t.null]),
 });
 
@@ -114,6 +147,7 @@ const sloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithIdSchema
 const storedSloDefinitionSchema = t.intersection([baseSloSchema, artifactsWithRefIdSchema]);
 
 export {
+  boundedProjectRoutingSchema,
   budgetingMethodSchema,
   dashboardsWithIdSchema,
   groupBySchema,

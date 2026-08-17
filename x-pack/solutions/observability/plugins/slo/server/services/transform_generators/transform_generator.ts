@@ -13,6 +13,7 @@ import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { ALL_VALUE, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type { TransformSettings } from '../../assets/transform_templates/slo_transform_template';
 import type { SLODefinition } from '../../domain/models';
+import { getSloProjectRouting } from '../utils/get_slo_project_routing';
 
 export abstract class TransformGenerator {
   constructor(
@@ -23,6 +24,13 @@ export abstract class TransformGenerator {
   ) {}
 
   public abstract getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest>;
+
+  protected getProjectRouting(slo: SLODefinition): string | undefined {
+    return getSloProjectRouting(slo, {
+      isServerless: this.isServerless,
+      isCpsEnabled: this.isCpsEnabled,
+    });
+  }
 
   public buildCommonRuntimeMappings(dataView?: DataView): MappingRuntimeFields {
     return dataView?.getRuntimeMappings?.() ?? {};
