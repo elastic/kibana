@@ -149,13 +149,9 @@ async function main() {
       // Index may not exist yet — try creating it explicitly
     }
     if (idxAttempt === 30) {
-      process.stdout.write(
-        `.ccm-inference not ready after 30 attempts; trying PUT anyway\n`
-      );
+      process.stdout.write(`.ccm-inference not ready after 30 attempts; trying PUT anyway\n`);
     } else {
-      process.stdout.write(
-        `Waiting for .ccm-inference (${idxAttempt}/30)...\n`
-      );
+      process.stdout.write(`Waiting for .ccm-inference (${idxAttempt}/30)...\n`);
       await sleep(10_000);
     }
   }
@@ -177,9 +173,7 @@ async function main() {
       break;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      process.stdout.write(
-        `CCM attempt ${ccmAttempt}/${maxCcmAttempts} failed: ${msg}\n`
-      );
+      process.stdout.write(`CCM attempt ${ccmAttempt}/${maxCcmAttempts} failed: ${msg}\n`);
       if (ccmAttempt === maxCcmAttempts) {
         throw err;
       }

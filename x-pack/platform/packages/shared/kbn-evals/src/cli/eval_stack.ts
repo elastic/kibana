@@ -303,7 +303,7 @@ export const ensureEvalStack = async ({
     const esConfigPath = Path.join(repoRoot, SCOUT_LOCAL_CONFIG);
     let esUrl = 'http://localhost:9220';
     try {
-      const config = JSON.parse(await Fs.readFile(esConfigPath, 'utf-8'));
+      const config = JSON.parse(Fs.readFileSync(esConfigPath, 'utf-8'));
       const es = config.servers?.elasticsearch;
       if (es) {
         esUrl = `${es.protocol}://${es.hostname}:${es.port}`;
