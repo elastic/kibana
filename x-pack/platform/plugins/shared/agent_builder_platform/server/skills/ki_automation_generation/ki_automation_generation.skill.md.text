@@ -159,10 +159,24 @@ Follow these phases in order. Do not skip ahead.
 
 ### When an `ai_index` attachment is present
 
-If the conversation includes a `platform.context_engine.ai_index` attachment, **skip Phases 1–3
-entirely** — the attachment is the source of truth for destination, sources, and existing
+If the conversation includes a `platform.context_engine.ai_index` attachment, **skip Phase 1
+only** — the attachment is the source of truth for destination, sources, and existing
 automations. Do not call `platform.core.list_indices`, run open-ended discovery, or re-ask the
-user to pick sources/destination unless the attachment is clearly incomplete. Follow Phase 4
+user to pick sources/destination unless the attachment is clearly incomplete.
+
+**Still run Phases 2 and 3** when they add value:
+
+- **Phase 2 (strategy):** After sampling sources, pick a KI strategy per configured source from
+  the strategy catalog. If the attachment description and source types already make the strategy
+  obvious, state your recommendation briefly and proceed. If multiple strategies fit, or the
+  description is thin, call `ask_user_question` with one option per plausible strategy before
+  drafting.
+- **Phase 3 (corpus filter):** Before calling `generate_workflow`, agree on a corpus filter
+  (time window, status/condition, or numeric cap) per **Phase 3** below. Do not skip this just
+  because the attachment lists sources — encourage a filter even when the user might accept
+  "no filter" after you note the cost/bloat risk.
+
+Then continue to Phase 4.
 
 **Sample sources** (referenced below): ES|QL sources via `platform.core.execute_esql` against the
 configured query; connector sources via `platform.workflows.get_connectors` for the listed
@@ -187,17 +201,20 @@ sources or calling `generate_workflow`:
    c. Re-sample sources with `platform.core.execute_esql` only if the edit needs fresh data.
    d. Call `platform.core.generate_workflow` with the workflow `attachmentId` and the user's edit
       intent. Continue to Phase 4, updating the existing workflow rather than creating a duplicate.
-4. **Create new:** sample sources, then propose something materially different from the existing
-   automations (different strategy/source/granularity) based on their name + description — only
-   load an existing workflow's YAML (`includeYaml: true`, no `attach`) if the user asks to compare.
-   If your pilot still overlaps, confirm with the user before calling `generate_workflow`. Continue
-   to Phase 4.
+4. **Create new:** sample sources, run **Phase 2** (strategy per source — confirm via
+   `ask_user_question` when unclear), then **Phase 3** (corpus filter), then propose something
+   materially different from the existing automations (different strategy/source/granularity)
+   based on their name + description — only load an existing workflow's YAML (`includeYaml: true`,
+   no `attach`) if the user asks to compare. If your pilot still overlaps, confirm with the user
+   before calling `generate_workflow`. Continue to Phase 4.
 
 #### No existing automations on the AI index
 
 1. Sample sources.
-2. Propose a KI strategy per source from the strategy catalog; confirm with the user if unclear.
-3. Continue to Phase 4.
+2. **Phase 2:** Propose a KI strategy per source from the strategy catalog; call
+   `ask_user_question` when the attachment description does not make the choice obvious.
+3. **Phase 3:** Agree on a corpus filter before drafting (see Phase 3 below).
+4. Continue to Phase 4.
 
 ### Phase 1 — Discover
 

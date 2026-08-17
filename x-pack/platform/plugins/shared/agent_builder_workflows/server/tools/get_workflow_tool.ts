@@ -81,6 +81,14 @@ export function registerGetWorkflowTool(
   agentBuilder.tools.register({
     id: workflowTools.getWorkflow,
     type: ToolType.builtin,
+    // Read of a saved workflow; `attach` only writes conversation-local scratch state.
+    annotations: {
+      title: 'Get workflow',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     description: `Retrieve a saved workflow by id from the current Kibana space.
 
 Use this tool when you need metadata (name, description, enabled state) about an existing workflow,

@@ -99,6 +99,14 @@ export const createSaveAutomationTool = ({
   id: CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
   type: ToolType.builtin,
   tags: ['context_engine', 'workflows'],
+  // Create/upsert write: persists a workflow and attaches it to the AI index.
+  annotations: {
+    title: 'Save workflow automation',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   description: dedent`
     Save a generated workflow and/or attach it to a Context Engine AI index as an automation.
     - To persist a draft from generate_workflow, pass workflowAttachmentId.
