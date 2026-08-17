@@ -97,7 +97,11 @@ export const normalizeLegacyVerdict = (signal: LegacySignal): SignalEntry => {
     // retro-compat: `confirmed` was a boolean field that was replaced with `verification.assessment`
     (signal.confirmed === true && signal.evidence?.result === 'found' ? 'confirms' : undefined) ??
     (signal.confirmed === false && signal.evidence?.result === 'found' ? 'refutes' : undefined) ??
-    (signal.evidence === undefined || signal.evidence === null ? 'not_checked' : 'inconclusive');
+    (signal.evidence === undefined || signal.evidence === null
+      ? 'not_checked'
+      : signal.evidence.result === 'found'
+      ? 'off_topic'
+      : 'inconclusive');
 
   return { ...normalizedSignal, verdict } as SignalEntry;
 };

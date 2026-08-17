@@ -138,40 +138,57 @@ export const SIGNAL_VERDICTS = [
 ] as const;
 export type SignalVerdict = (typeof SIGNAL_VERDICTS)[number];
 
-const signalBaseSchema = z
-  .object({
-    stream_name: z
-      .string()
-      .max(MAX_ID_LENGTH)
-      .describe('Data stream this signal was collected from.'),
-    description: z
-      .string()
-      .max(MAX_TEXT_LENGTH)
-      .describe(
-        dedent`
-        Compact observation account for detection signals — use Found / Impact only. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
+const signalBaseSchema = z.object({
+  stream_name: z
+    .string()
+    .max(MAX_ID_LENGTH)
+    .describe('Data stream this signal was collected from.'),
+  description: z
+    .string()
+    .max(MAX_TEXT_LENGTH)
+    .describe(
+      dedent`
+      Compact observation account for detection signals — use Found / Impact only. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
 
-        Found names the concrete row signature and failing target; never say only that rows were returned. Impact names what is blocked, degraded, or unaffected using outcome language only. The structured verdict carries whether this confirms, refutes, is off-topic, is inconclusive, or was not checked; do not repeat a Verdict label here.
+      Found names the concrete row signature and failing target; never say only that rows were returned. Impact names what is blocked, degraded, or unaffected using outcome language only. The structured verdict carries whether this confirms, refutes, is off-topic, is inconclusive, or was not checked; do not repeat a Verdict label here.
 
-        Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
-        ${NO_RAW_SENSITIVE_VALUES_RULE}
-      `
-      ),
-    verdict: z
-      .enum(SIGNAL_VERDICTS)
-      .describe(
-        'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion; not_checked = no query was available.'
-      ),
-    collected_at: z.iso
-      .datetime({ offset: true })
-      .optional()
-      .describe('ISO timestamp when this signal was collected.'),
-    evidence: signalEvidenceSchema
-      .nullable()
-      .optional()
-      .describe(
-        'ES|QL query verification for this signal. Present when a query was executed to confirm or refute the signal; null when no verification was run.'
-      ),
+      Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
+      ${NO_RAW_SENSITIVE_VALUES_RULE}
+    `
+    ),
+  verdict: z
+    .enum(SIGNAL_VERDICTS)
+    .describe(
+      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion; not_checked = no query was available.'
+    ),
+  collected_at: z.iso
+    .datetime({ offset: true })
+    .optional()
+    .describe('ISO timestamp when this signal was collected.'),
+  evidence: signalEvidenceSchema
+    .nullable()
+    .optional()
+    .describe(
+      'ES|QL query verification for this signal. Present when a query was executed to confirm or refute the signal; null when no verification was run.'
+    ),
+});
+
+const detectionSignalMetadataSchema = detectionSchema
+  .omit({
+    '@timestamp': true,
+    alert_index: true,
+    workflow_execution_id: true,
+    processed: true,
+    stream_name: true,
+  })
+  .describe(
+    'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
+  );
+
+const detectionSignalSchema = signalBaseSchema
+  .extend({
+    type: z.literal('detection'),
+    metadata: detectionSignalMetadataSchema,
   })
   .superRefine((signal, context) => {
     const result = signal.evidence?.result;
@@ -215,23 +232,6 @@ const signalBaseSchema = z
       });
     }
   });
-
-const detectionSignalMetadataSchema = detectionSchema
-  .omit({
-    '@timestamp': true,
-    alert_index: true,
-    workflow_execution_id: true,
-    processed: true,
-    stream_name: true,
-  })
-  .describe(
-    'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
-  );
-
-const detectionSignalSchema = signalBaseSchema.extend({
-  type: z.literal('detection'),
-  metadata: detectionSignalMetadataSchema,
-});
 
 /** Extensible discriminated union of signal sources accepted from agents. */
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);

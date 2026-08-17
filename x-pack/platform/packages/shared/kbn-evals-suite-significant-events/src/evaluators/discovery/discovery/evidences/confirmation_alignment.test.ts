@@ -103,7 +103,7 @@ describe('confirmationAlignmentEvaluator', () => {
       {
         event_id: 'e1',
         signals: [
-          detection('r1', true),
+          detection('r1'),
           {
             ...detection('r2'),
             evidence: { result: 'found' },

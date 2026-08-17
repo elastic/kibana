@@ -101,6 +101,12 @@ describe('EventClient', () => {
       [{ confirmed: false }, 'not_checked'],
       [{ evidence: null }, 'not_checked'],
       [{ evidence: { esql_query: 'FROM logs.test', result: 'error' } }, 'inconclusive'],
+      [
+        {
+          evidence: { esql_query: 'FROM logs.test', result: 'found' },
+        },
+        'off_topic',
+      ],
     ] as const)('normalizes %o to %s', (legacyFields, verdict) => {
       const signal = normalizeLegacyVerdict({
         type: 'detection',
@@ -118,6 +124,8 @@ describe('EventClient', () => {
       expect(signal.verdict).toBe(verdict);
       expect(signal).not.toHaveProperty('confirmed');
       expect(signal).not.toHaveProperty('verification');
+      const normalizedEvent = { ...createEvent(), signals: [signal] };
+      expect(storedEventSchema.safeParse(normalizedEvent).success).toBe(true);
     });
   });
 
