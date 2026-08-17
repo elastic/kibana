@@ -36,7 +36,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('drop fields onto existing and empty dimension triggers', async () => {
-          await lens.dragFieldToDimensionTrigger(
+          await lens.dragDrop.dragFieldToDimensionTrigger(
             'clientip',
             'lnsDatatable_rows > lns-dimensionTrigger'
           );
@@ -44,14 +44,14 @@ spaceTest.describe(
             ['Top 9 values of clientip']
           );
 
-          await lens.dragFieldToDimensionTrigger(
+          await lens.dragDrop.dragFieldToDimensionTrigger(
             'bytes',
             'lnsDatatable_rows > lns-empty-dimension'
           );
           await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText(
             ['Top 9 values of clientip', 'bytes']
           );
-          await lens.dragFieldToDimensionTrigger(
+          await lens.dragDrop.dragFieldToDimensionTrigger(
             '@message.raw',
             'lnsDatatable_rows > lns-empty-dimension'
           );
@@ -61,7 +61,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('reorder table row dimensions', async () => {
-          await lens.reorderDimensions('lnsDatatable_rows', 3, 1);
+          await lens.dragDrop.reorderDimensions('lnsDatatable_rows', 3, 1);
           await lens.waitForVisualization();
           await expect(lens.dimensions.getDimensionTriggersLocator('lnsDatatable_rows')).toHaveText(
             ['Top 9 values of @message.raw', 'Top 9 values of clientip', 'bytes']
@@ -77,7 +77,7 @@ spaceTest.describe(
             lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
           ).toHaveText(['Top 9 values of clientip']);
 
-          await lens.dragDimensionToDimension({
+          await lens.dragDrop.dragDimensionToDimension({
             from: 'lns-layerPanel-0 > lnsXY_xDimensionPanel > lns-dimensionTrigger',
             to: 'lns-layerPanel-0 > lnsXY_splitDimensionPanel > lns-dimensionTrigger',
           });
@@ -91,7 +91,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('move column to non-compatible dimension group', async () => {
-          await lens.dragDimensionToDimension({
+          await lens.dragDrop.dragDimensionToDimension({
             from: 'lnsXY_splitDimensionPanel > lns-dimensionTrigger',
             to: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
           });
@@ -105,11 +105,11 @@ spaceTest.describe(
         });
 
         await spaceTest.step('duplicate column within the same group', async () => {
-          await lens.dragDimensionToDimension({
+          await lens.dragDrop.dragDimensionToDimension({
             from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
             to: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           });
-          await lens.dragDimensionToDimension({
+          await lens.dragDrop.dragDimensionToDimension({
             from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
             to: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           });
@@ -123,7 +123,7 @@ spaceTest.describe(
         });
 
         await spaceTest.step('move duplicated column to non-compatible group', async () => {
-          await lens.dragDimensionToDimension({
+          await lens.dragDrop.dragDimensionToDimension({
             from: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
             to: 'lnsXY_xDimensionPanel > lns-empty-dimension',
           });

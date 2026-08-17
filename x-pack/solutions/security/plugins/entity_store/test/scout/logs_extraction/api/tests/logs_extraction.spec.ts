@@ -1403,7 +1403,12 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
 
   apiTest(
     'Should succeed when a data stream matched by the data view has a closed backing index',
-    async ({ apiClient, esClient }) => {
+    async ({ apiClient, esClient, config }) => {
+      // Closing a backing index is an operator-only action (#274882); serverless disables index actions, so this scenario is stateful-only.
+      apiTest.skip(
+        config.serverless,
+        'Closed backing indices cannot occur on serverless (index actions disabled)'
+      );
       const DATA_STREAM = 'logs-closed-smoke';
       const FROM = '2026-06-24T09:59:00Z';
       const TO = '2026-06-24T11:00:00Z';
