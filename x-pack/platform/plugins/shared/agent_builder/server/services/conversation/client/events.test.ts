@@ -87,6 +87,7 @@ describe('ConversationClient timeline events', () => {
       logger: loggerMock.create(),
       esClient: esClient as unknown as ElasticsearchClient,
       user,
+      isAdmin: false,
       agentRegistry: agentRegistry as unknown as AgentRegistry,
     });
   });

@@ -28,7 +28,7 @@ export const createConversation$ = ({
   title$,
   roundCompletedEvents$,
 }: {
-  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'origin'>;
+  conversation: Pick<Conversation, 'id' | 'agent_id' | 'access_control' | 'origin' | 'read_only'>;
   conversationClient: ConversationClient;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
@@ -44,6 +44,7 @@ export const createConversation$ = ({
         agent_id: conversation.agent_id,
         access_control: conversation.access_control,
         origin: conversation.origin,
+        read_only: conversation.read_only,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
         read: false,
@@ -140,6 +141,7 @@ export const getConversation = async ({
   conversationClient,
   accessControl,
   origin,
+  readOnly,
 }: {
   agentId: string;
   conversationId: string | undefined;
@@ -147,6 +149,7 @@ export const getConversation = async ({
   conversationClient: ConversationClient;
   accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
+  readOnly?: boolean;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
@@ -160,7 +163,7 @@ export const getConversation = async ({
     }
 
     return {
-      ...placeholderConversation({ agentId, accessControl, origin }),
+      ...placeholderConversation({ agentId, accessControl, origin, readOnly }),
       operation: 'CREATE',
     };
   }
@@ -183,7 +186,7 @@ export const getConversation = async ({
     };
   } else {
     return {
-      ...placeholderConversation({ conversationId, agentId, accessControl, origin }),
+      ...placeholderConversation({ conversationId, agentId, accessControl, origin, readOnly }),
       operation: 'CREATE',
     };
   }
@@ -194,17 +197,20 @@ export const placeholderConversation = ({
   conversationId,
   accessControl,
   origin,
+  readOnly,
 }: {
   agentId: string;
   conversationId?: string;
   accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
+  readOnly?: boolean;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
     title: 'New conversation',
     agent_id: agentId,
     access_control: normalizeConversationAccessControl(accessControl),
+    read_only: readOnly ?? false,
     rounds: [],
     ...(origin ? { origin } : {}),
     updated_at: new Date().toISOString(),

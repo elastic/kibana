@@ -34,7 +34,8 @@
     "@kbn/code-editor-mock",
     "@kbn/core-http-server",
     "@kbn/ui-callout",
-    "@kbn/shared-ux-ai-components"
+    "@kbn/shared-ux-ai-components",
+    "@kbn/data-views-plugin"
   ],
   "exclude": ["target/**/*"]
 }
