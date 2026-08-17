@@ -26,6 +26,7 @@ import {
   generateEsqlQuery,
   isEsqlQuerySuccess,
   esqlConversionFailureReasonMessages,
+  type EsqlConversionFailureReason,
   type ColumnRoles,
 } from '@kbn/lens-common';
 import type { ConvertibleLayer } from './esql_conversion_types';
@@ -58,7 +59,8 @@ const getConvertibleLayerName = (layerId: string): string =>
 
 const makeNonConvertibleLayer = (
   layerId: string,
-  type: ConvertibleLayer['type']
+  type: ConvertibleLayer['type'],
+  failureReason?: EsqlConversionFailureReason
 ): ConvertibleLayer => ({
   id: layerId,
   icon: 'layers',
@@ -67,6 +69,7 @@ const makeNonConvertibleLayer = (
   query: '',
   isConvertibleToEsql: false,
   conversionData: { esAggsIdMap: {}, partialRows: false },
+  failureReason,
 });
 
 export const useEsqlConversionCheck = (
@@ -151,7 +154,7 @@ export const useEsqlConversionCheck = (
 
       const layer = layers[layerId];
       if (!layer || !layer.columnOrder || !layer.columns) {
-        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA));
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, 'unknown'));
         continue;
       }
 
@@ -178,12 +181,12 @@ export const useEsqlConversionCheck = (
           columnRoles
         );
       } catch (e) {
-        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA));
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, 'unknown'));
         continue;
       }
 
       if (!isEsqlQuerySuccess(esqlLayer)) {
-        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA));
+        convertibleLayers.push(makeNonConvertibleLayer(layerId, layerTypes.DATA, esqlLayer.reason));
         continue;
       }
 

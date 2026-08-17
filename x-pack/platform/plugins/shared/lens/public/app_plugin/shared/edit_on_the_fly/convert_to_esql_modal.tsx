@@ -21,6 +21,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiLink,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -32,6 +33,7 @@ import { i18n } from '@kbn/i18n';
 import { esql } from '@elastic/esql';
 
 import { layerTypes } from '../../..';
+import { getFailureTooltip } from '../../../datasources/form_based/to_esql_failure_reasons';
 import type { ConvertibleLayer, LayerType } from './esql_conversion_types';
 
 const typeLabels: Record<LayerType, (count: number) => string> = {
@@ -105,6 +107,27 @@ export const ConvertToEsqlModal: React.FunctionComponent<{
         name: 'Layer',
         width: `${parseInt(euiTheme.size.xl, 10) * 5}px`,
         truncateText: true,
+        render: (name: string, layer: ConvertibleLayer) => {
+          if (layer.isConvertibleToEsql || layer.type !== layerTypes.DATA) {
+            return name;
+          }
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  type="warning"
+                  color="warning"
+                  content={getFailureTooltip(layer.failureReason)}
+                  iconProps={{
+                    'aria-label': getFailureTooltip(layer.failureReason),
+                    'data-test-subj': `lnsEsqlConversionFailureReason-${layer.id}`,
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        },
       },
       {
         field: 'type',
