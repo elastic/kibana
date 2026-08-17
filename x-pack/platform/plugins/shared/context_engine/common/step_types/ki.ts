@@ -17,6 +17,7 @@ export const MAX_KI_TAG_LENGTH = 256;
 export const MAX_KI_TAGS = 100;
 export const MAX_KI_ATTRIBUTE_KEY_LENGTH = 256;
 export const MAX_KI_ATTRIBUTE_VALUE_LENGTH = 1024;
+export const MAX_KI_ATTRIBUTES = 100;
 
 export const aiIndexIdSchema = z
   .string()
@@ -61,6 +62,9 @@ export const kiFieldsSchema = z.object({
       z.string().min(1).max(MAX_KI_ATTRIBUTE_KEY_LENGTH),
       z.union([z.string().max(MAX_KI_ATTRIBUTE_VALUE_LENGTH), z.number(), z.boolean()])
     )
+    .refine((attrs) => Object.keys(attrs).length <= MAX_KI_ATTRIBUTES, {
+      message: `attributes must have at most ${MAX_KI_ATTRIBUTES} entries`,
+    })
     .optional()
     .describe('Arbitrary key-value attributes attached to the KI'),
 });
