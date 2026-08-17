@@ -298,6 +298,16 @@ export class SpacesPage {
     return this.page.testSubj.locator('space-edit-page-user-impact-warning');
   }
 
+  /** Confirm modal shown by `useUnsavedChangesPrompt` when leaving a dirty form. */
+  navigationBlockConfirmModalLocator() {
+    return this.page.testSubj.locator('navigationBlockConfirmModal');
+  }
+
+  /** Clicks the Kibana logo in the header, navigating away from the spaces app. */
+  async clickLogo() {
+    await this.page.testSubj.click('logo');
+  }
+
   // ---- delete-space confirm modal (edit page) ----
 
   async clickDeleteSpaceOnEditPage() {

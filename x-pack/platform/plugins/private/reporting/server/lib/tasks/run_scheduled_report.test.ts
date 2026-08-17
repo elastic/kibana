@@ -9,11 +9,14 @@ import { Transform } from 'stream';
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
-import { JOB_STATUS, KibanaShuttingDownError } from '@kbn/reporting-common';
-import type { ReportDocument } from '@kbn/reporting-common/types';
+import type { CancellationToken } from '@kbn/reporting-common';
+import { JOB_STATUS, KibanaShuttingDownError, QueueTimeoutError } from '@kbn/reporting-common';
+import type { ReportDocument, TaskRunResult } from '@kbn/reporting-common/types';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { type ExportType, type ReportingConfigType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { EventTracker } from '../../usage';
@@ -86,7 +89,7 @@ function createStreamMock({
   return mock as StreamMock;
 }
 
-const mockStream = createStreamMock();
+let mockStream = createStreamMock();
 const mockGetContentStream = jest.fn();
 jest.mock('../content_stream', () => ({
   getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
@@ -855,6 +858,188 @@ describe('Run Scheduled Report Task', () => {
     jest.useRealTimers();
   });
 
+  describe('timeout classification', () => {
+    // Runs a scheduled report whose runTask resolves (with the given result) only once the
+    // internal queue timeout cancels it - mirroring how the CSV searchsource path returns
+    // partial data on timeout - and exhausts every retry attempt. Returns the rejected error
+    // and the runTask mock so callers can assert the retry count.
+    const runTimedOutScheduledTask = async (
+      result: Partial<TaskRunResult>,
+      { maxAttempts }: { maxAttempts: number }
+    ): Promise<{ error: Error | undefined; runTaskMock: jest.Mock }> => {
+      jest.useFakeTimers();
+      // A 1ms queue timeout ensures the internal timer cancels each attempt promptly.
+      configType = createMockConfigSchema({ capture: { maxAttempts }, queue: { timeout: 1 } });
+      mockReporting = await createMockReportingCore(configType);
+      mockStream = createStreamMock();
+
+      const timedOutRunTaskFn = jest.fn().mockImplementation(
+        ({ cancellationToken }: { cancellationToken: CancellationToken }) =>
+          new Promise<TaskRunResult>((resolve) => {
+            cancellationToken.on(() => resolve(result as TaskRunResult));
+          })
+      );
+      mockReporting.getExportTypesRegistry().register({
+        id: 'test2',
+        name: 'Test2',
+        setup: jest.fn(),
+        start: jest.fn(),
+        createJob: () => new Promise(() => {}),
+        runTask: timedOutRunTaskFn,
+        shouldNotifyUsage: () => true,
+        getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+        notifyUsage: jest.fn(),
+        jobContentEncoding: 'base64',
+        jobType: 'test2',
+        validLicenses: [],
+      } as unknown as ExportType);
+
+      const store = await mockReporting.getStore();
+      const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test2' });
+      store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+      store.setReportFailed = jest.fn(() =>
+        Promise.resolve({
+          _id: 'test',
+          jobtype: 'test1',
+          status: 'processing',
+        } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+      );
+      store.setReportError = jest.fn();
+
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+
+      const taskDef = task.getTaskDefinition();
+      const taskRunner = taskDef.createTaskRunner({
+        taskInstance: {
+          id: 'report-so-id',
+          runAt: new Date('2023-10-01T00:00:00Z'),
+          params: {
+            id: 'report-so-id',
+            jobtype: 'test2',
+            schedule: {
+              rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' },
+            },
+          },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      let error: Error | undefined;
+      const runPromise = taskRunner.run().catch((err) => {
+        error = err;
+      });
+      // Advance past the internal queue timeout(s) and all retry delays.
+      for (let i = 0; i < 10; i++) {
+        await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+      }
+      await runPromise;
+      jest.useRealTimers();
+
+      return { error, runTaskMock: timedOutRunTaskFn };
+    };
+
+    it('classifies a timed-out run as a user error after exhausting retries', async () => {
+      const { error, runTaskMock } = await runTimedOutScheduledTask(
+        { content_type: 'text/csv', warnings: ['row count mismatch'], user_error: true },
+        { maxAttempts: 2 }
+      );
+
+      expect(runTaskMock).toHaveBeenCalledTimes(2); // times out on every retry
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+      expect(getErrorSource(error!)).toEqual(TaskErrorSource.USER);
+    });
+
+    it('does not classify a timed-out run as a user error when user_error is falsy', async () => {
+      const { error, runTaskMock } = await runTimedOutScheduledTask(
+        { content_type: 'text/csv', warnings: [] },
+        { maxAttempts: 2 }
+      );
+
+      expect(runTaskMock).toHaveBeenCalledTimes(2);
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+      expect(getErrorSource(error!)).not.toEqual(TaskErrorSource.USER);
+    });
+
+    it('force-fails a run whose runTask never honors the cancellation token', async () => {
+      jest.useFakeTimers();
+      configType = createMockConfigSchema({ capture: { maxAttempts: 1 }, queue: { timeout: 1 } });
+      mockReporting = await createMockReportingCore(configType);
+      mockStream = createStreamMock();
+
+      // Never resolves, and ignores the cancellation token entirely.
+      const hangingRunTaskFn = jest
+        .fn()
+        .mockImplementation(() => new Promise<TaskRunResult>(() => {}));
+      mockReporting.getExportTypesRegistry().register({
+        id: 'test3',
+        name: 'Test3',
+        setup: jest.fn(),
+        start: jest.fn(),
+        createJob: () => new Promise(() => {}),
+        runTask: hangingRunTaskFn,
+        shouldNotifyUsage: () => true,
+        getFeatureUsageName: () => 'Reporting: test3 scheduled export',
+        notifyUsage: jest.fn(),
+        jobContentEncoding: 'base64',
+        jobType: 'test3',
+        validLicenses: [],
+      } as unknown as ExportType);
+
+      const store = await mockReporting.getStore();
+      const thisSavedReport = new SavedReport({ ...savedReportData, jobtype: 'test3' });
+      store.addReport = jest.fn().mockImplementation(async () => thisSavedReport);
+      store.setReportFailed = jest.fn(() =>
+        Promise.resolve({
+          _id: 'test',
+          jobtype: 'test3',
+          status: 'processing',
+        } as unknown as estypes.UpdateUpdateWriteResponseBase<ReportDocument>)
+      );
+      store.setReportError = jest.fn();
+
+      const task = new RunScheduledReportTask({
+        reporting: mockReporting,
+        config: configType,
+        logger,
+      });
+      const mockTaskManager = taskManagerMock.createStart();
+      await task.init(mockTaskManager, emailNotificationService);
+
+      const taskDef = task.getTaskDefinition();
+      const taskRunner = taskDef.createTaskRunner({
+        taskInstance: {
+          id: 'report-so-id',
+          runAt: new Date('2023-10-01T00:00:00Z'),
+          params: {
+            id: 'report-so-id',
+            jobtype: 'test3',
+            schedule: { rrule: { freq: Frequency.DAILY, interval: 2, tzid: 'UTC' } },
+          },
+        },
+        fakeRequest: fakeRawRequest,
+      } as unknown as RunContext);
+
+      let error: Error | undefined;
+      const runPromise = taskRunner.run().catch((err) => {
+        error = err;
+      });
+      // Advance past the internal queue timeout, the hard-timeout grace period, and all retry delays.
+      for (let i = 0; i < 10; i++) {
+        await jest.advanceTimersByTimeAsync(MAX_DELAY_SECONDS * 2 * 1000);
+      }
+      await runPromise;
+      jest.useRealTimers();
+
+      expect(hangingRunTaskFn).toHaveBeenCalled();
+      expect(error).toBeInstanceOf(QueueTimeoutError);
+    });
+  });
   // Regression test for https://github.com/elastic/kibana/issues/255230: after an attempt advances
   // the doc's seq_no, the retry must refresh the OCC values instead of reusing the stale ones.
   it('retries with fresh seq_no/primary_term and tears down the failed stream', async () => {

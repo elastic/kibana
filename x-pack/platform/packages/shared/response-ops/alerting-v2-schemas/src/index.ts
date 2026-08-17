@@ -6,10 +6,12 @@
  */
 
 export * from './rule_data_schema';
+export * from './artifact_data_schemas';
 export * from './rule_attachment_schema';
 export * from './error_response_schema';
 export * from './constants';
-export { durationSchema, tagsSchema } from './common';
+export { durationSchema, tagsResponseSchema, tagsSchema } from './common';
+export type { TagsResponse } from './common';
 export {
   validateDuration,
   validateMaxDuration,
@@ -20,6 +22,7 @@ export {
 export * from './action_policy_data_schema';
 export * from './action_policy_response_schema';
 export * from './action_policy_attachment_schema';
+export * from './episode_attachment_schema';
 export * from './alert_episode_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';

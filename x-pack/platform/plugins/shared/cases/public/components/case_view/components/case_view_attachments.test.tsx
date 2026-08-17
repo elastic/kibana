@@ -74,7 +74,7 @@ const buildRegistry = () => {
   registry.register({
     id: 'comment',
     displayName: 'Comment',
-    icon: 'editorComment',
+    icon: 'comment',
     getAttachmentViewObject: () => ({ event: 'added a comment' }),
     schema: z.object({}),
   });

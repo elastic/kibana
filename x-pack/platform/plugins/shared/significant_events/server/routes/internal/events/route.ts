@@ -115,7 +115,7 @@ const eventsSearchRoute = createServerRoute({
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    const { status, stream, search, severity, ...rest } = params.query;
+    const { status, stream, search, severity, ...rest } = params.query ?? {};
 
     return getEventClient().findLatestByCurrentStatePaginated({
       ...rest,

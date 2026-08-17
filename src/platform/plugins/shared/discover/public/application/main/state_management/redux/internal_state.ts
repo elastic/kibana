@@ -17,15 +17,15 @@ import {
   type PayloadActionCreator,
   type SerializableStateInvariantMiddlewareOptions,
   type ThunkAction,
-  type ThunkDispatch,
   type TypedStartListening,
+  type UnknownAction,
   type ListenerEffect,
   configureStore,
   createSlice,
   createListenerMiddleware,
   createAction,
   isAnyOf,
-} from 'redux-toolkit-v1';
+} from '@reduxjs/toolkit';
 import { dismissFlyouts, DiscoverFlyouts } from '@kbn/discover-utils';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -79,7 +79,6 @@ const initialState: DiscoverInternalState = {
   defaultProfileAdHocDataViewIds: [],
   defaultProfileEsqlQuery: undefined,
   savedDataViews: [],
-  isESQLToDataViewTransitionModalVisible: false,
   tabsBarVisibility: TabsBarVisibility.default,
   tabs: {
     areInitializing: false,
@@ -147,7 +146,7 @@ const syncProfileAppStateSnapshot = (
   profileAppStateSnapshots[profileId] = profileAppStateSnapshot;
 };
 
-export const internalStateSlice = createSlice({
+const internalStateSliceDef = createSlice({
   name: 'internalState',
   initialState,
   reducers: {
@@ -407,10 +406,6 @@ export const internalStateSlice = createSlice({
         tab.esqlVariables = action.payload.esqlVariables;
       }),
 
-    setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
-      state.isESQLToDataViewTransitionModalVisible = action.payload;
-    },
-
     setProfileAppStateDefaultFieldsToReset: {
       prepare: (
         payload: TabActionPayload<Pick<TabState['profileAppStateDefaults'], 'fieldsToReset'>>
@@ -601,6 +596,17 @@ export const internalStateSlice = createSlice({
   },
 });
 
+/**
+ * immer 11.1.3+ resolves case reducer `state` params to `WritableNonArrayDraft`, which it doesn't
+ * export, so declaration emit inlines the full state per reducer and fails (TS4023/TS7056). The
+ * export must therefore shed every member reaching the case reducers: `caseReducers` and
+ * `injectInto` directly (both unused here), and `actions` via the unresolved `CaseReducerActions`
+ * mapped type, which the spread resolves. Collapse to a plain exported `createSlice` once
+ * https://github.com/immerjs/immer/pull/1197 is fixed.
+ */
+const { caseReducers, injectInto, ...rest } = internalStateSliceDef;
+export const internalStateSlice = { ...rest, actions: { ...internalStateSliceDef.actions } };
+
 export const syncLocallyPersistedTabState = createAction<TabActionPayload>(
   'internalState/syncLocallyPersistedTabState'
 );
@@ -771,9 +777,9 @@ export type InternalStateDispatch = InternalStateStore['dispatch'];
 
 export type InternalStateThunkAction<TReturn = void> = ThunkAction<
   TReturn,
-  InternalStateDispatch extends ThunkDispatch<infer TState, never, never> ? TState : never,
-  InternalStateDispatch extends ThunkDispatch<never, infer TExtra, never> ? TExtra : never,
-  InternalStateDispatch extends ThunkDispatch<never, never, infer TAction> ? TAction : never
+  DiscoverInternalState,
+  InternalStateDependencies,
+  UnknownAction
 >;
 
 export type InternalStateThunkActionCreator<TArgs extends unknown[] = [], TReturn = void> = (

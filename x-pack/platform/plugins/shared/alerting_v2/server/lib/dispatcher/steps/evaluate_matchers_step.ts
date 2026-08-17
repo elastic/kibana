@@ -12,6 +12,7 @@ import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type {
   ActionPolicy,
   ActionPolicyId,
@@ -74,13 +75,11 @@ export class EvaluateMatchersStep implements DispatcherStep {
         let isMatch = false;
         try {
           isMatch = evaluateKql(policy.matcher, context);
-        } catch (err) {
-          const rawReason = err instanceof Error ? err.message : String(err);
-          const reason = truncate(rawReason, MAX_LOGGED_TEXT_LENGTH);
-          const truncatedMatcher = truncate(policy.matcher, MAX_LOGGED_TEXT_LENGTH);
+        } catch {
           this.logger.warn({
-            message: () =>
-              `Failed to evaluate KQL matcher for policy ${policy.id} (episode ${episode.episode_id}): ${reason}. Matcher: ${truncatedMatcher}. Treating as no-match.`,
+            message: 'Policy matcher failed to evaluate; treating as no-match',
+            code: ALERTING_LOG_CODES.POLICY_MATCHER_KQL_INVALID,
+            labels: { policy_id: policy.id, episode_id: episode.episode_id },
           });
           continue;
         }
@@ -93,10 +92,4 @@ export class EvaluateMatchersStep implements DispatcherStep {
 
     return matched;
   }
-}
-
-const MAX_LOGGED_TEXT_LENGTH = 500;
-
-function truncate(value: string, max: number): string {
-  return value.length > max ? `${value.slice(0, max)}…` : value;
 }

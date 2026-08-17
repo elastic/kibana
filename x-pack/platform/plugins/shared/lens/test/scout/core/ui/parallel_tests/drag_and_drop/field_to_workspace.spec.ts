@@ -29,7 +29,7 @@ spaceTest.describe(
       const { lens } = pageObjects;
 
       await lens.dragFieldToWorkspace('machine.os.raw', testData.XY_CHART);
-      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+      await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
         'Top 9 values of machine.os.raw'
       );
       expect(await lens.getChartSwitchType()).toBe('Bar');
@@ -39,7 +39,7 @@ spaceTest.describe(
       const { lens } = pageObjects;
 
       await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
-      await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
+      await expect(lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText(
         '@timestamp'
       );
       expect(await lens.getChartSwitchType()).toBe('Line');
@@ -55,11 +55,13 @@ spaceTest.describe(
           async () => {
             await lens.dragFieldToWorkspace('@timestamp', testData.XY_CHART);
             await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
-            await expect(lens.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')).toHaveText([
-              'Top 9 values of clientip',
-            ]);
-            await lens.openDimensionEditor('lnsXY_splitDimensionPanel > lns-dimensionTrigger');
-            expect(await lens.isTopLevelAggregation()).toBe(true);
+            await expect(
+              lens.dimensions.getDimensionTriggersLocator('lnsXY_splitDimensionPanel')
+            ).toHaveText(['Top 9 values of clientip']);
+            await lens.dimensions.openDimensionEditor(
+              'lnsXY_splitDimensionPanel > lns-dimensionTrigger'
+            );
+            expect(await lens.dimensions.isTopLevelAggregation()).toBe(true);
             await lens.closeDimensionEditor();
           }
         );
@@ -67,13 +69,13 @@ spaceTest.describe(
         await spaceTest.step(
           'overwrite time dimension with utc_time via field search',
           async () => {
-            await lens.searchField('utc');
+            await lens.dragDrop.searchField('utc');
             await lens.dragFieldToWorkspace('utc_time', testData.XY_CHART);
-            await lens.searchField('client');
+            await lens.dragDrop.searchField('client');
             await lens.dragFieldToWorkspace('clientip', testData.XY_CHART);
-            await expect(lens.getDimensionTriggersLocator('lnsXY_xDimensionPanel')).toHaveText([
-              'utc_time',
-            ]);
+            await expect(
+              lens.dimensions.getDimensionTriggersLocator('lnsXY_xDimensionPanel')
+            ).toHaveText(['utc_time']);
           }
         );
       }

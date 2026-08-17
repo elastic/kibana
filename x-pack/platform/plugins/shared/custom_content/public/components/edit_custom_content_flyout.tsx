@@ -28,7 +28,7 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { getServices } from '../services';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
@@ -40,10 +40,15 @@ export interface EditCustomContentFlyoutProps {
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: TimeRange | undefined;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   panelTitle?: string;
   isNewPanel?: boolean;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
   onClose: () => void;
+  onRunPreview: (html: string) => void;
 }
 
 export const EditCustomContentFlyout = ({
@@ -51,12 +56,17 @@ export const EditCustomContentFlyout = ({
   esqlQuery,
   template,
   timeRange,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
   panelTitle,
   isNewPanel,
   onSave,
   onClose,
+  onRunPreview,
 }: EditCustomContentFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const { agentBuilder } = getServices();
 
   const {
@@ -65,11 +75,24 @@ export const EditCustomContentFlyout = ({
     draftTemplate,
     setDraftTemplate,
     isAiAvailable,
-    isPreviewLoading,
-    previewData,
-    previewError,
-    handlePreview,
-  } = useEditFlyoutState({ esqlQuery, template, timeRange });
+    isDataLoading,
+    esqlData,
+    esqlDataError,
+    handleFetchData,
+    isRenderLoading,
+    hasPreviewedCurrentDraft,
+    handleRender,
+  } = useEditFlyoutState({
+    esqlQuery,
+    template,
+    timeRange,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+    colorMode,
+    onRunPreview,
+  });
 
   const handleGenerateWithChat = useCallback(() => {
     if (!agentBuilder) return;
@@ -217,7 +240,7 @@ export const EditCustomContentFlyout = ({
             >
               <EuiButtonIcon
                 css={copyButtonCss}
-                iconType="copyClipboard"
+                iconType="copy"
                 aria-label={i18n.translate('xpack.customContent.editFlyout.copyTemplate', {
                   defaultMessage: 'Copy template',
                 })}
@@ -233,10 +256,10 @@ export const EditCustomContentFlyout = ({
         <EsqlPreviewSection
           esqlQuery={draftEsqlQuery}
           onEsqlQueryChange={setDraftEsqlQuery}
-          isPreviewLoading={isPreviewLoading}
-          previewData={previewData}
-          previewError={previewError}
-          onPreview={handlePreview}
+          isDataLoading={isDataLoading}
+          esqlData={esqlData}
+          esqlDataError={esqlDataError}
+          onFetchData={handleFetchData}
         />
       </EuiFlyoutBody>
 
@@ -250,11 +273,28 @@ export const EditCustomContentFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleSave} disabled={!hasChanges}>
-              {i18n.translate('xpack.customContent.editFlyout.applyButton', {
-                defaultMessage: 'Apply and close',
-              })}
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  iconType="play"
+                  isLoading={isRenderLoading}
+                  disabled={!hasChanges || hasPreviewedCurrentDraft}
+                  onClick={handleRender}
+                >
+                  {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
+                    defaultMessage: 'Run Preview',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={handleSave} disabled={!hasChanges}>
+                  {i18n.translate('xpack.customContent.editFlyout.applyButton', {
+                    defaultMessage: 'Apply and close',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
