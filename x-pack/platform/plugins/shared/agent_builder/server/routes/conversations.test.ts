@@ -18,19 +18,18 @@ import { registerConversationRoutes } from './conversations';
 const GET_CONVERSATION_PATH = `${publicApiPath}/conversations/{conversation_id}`;
 
 describe('registerConversationRoutes', () => {
-  it('returns stored origin and author details with admin permissions when getting a public conversation', async () => {
+  it('returns stored origin and author details when getting a conversation', async () => {
     let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const conversation = {
       id: 'conversation-1',
       agent_id: 'agent-1',
       user: {
-        id: 'conversation-owner',
-        username: 'owner',
+        id: 'user-1',
+        username: 'bruno',
       },
       title: 'Slack conversation',
       created_at: '2026-07-10T00:00:00.000Z',
       updated_at: '2026-07-10T00:00:01.000Z',
-      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
       origin: {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       },
@@ -67,7 +66,7 @@ describe('registerConversationRoutes', () => {
     const get = jest.fn().mockResolvedValue(conversation);
     const getCurrentUser = jest
       .fn()
-      .mockResolvedValue({ id: 'admin-user', username: 'admin', isAdmin: true });
+      .mockResolvedValue({ id: 'user-1', username: 'bruno', isAdmin: false });
 
     const router = {
       versioned: {
@@ -131,7 +130,7 @@ describe('registerConversationRoutes', () => {
     expect(getCurrentUser).toHaveBeenCalled();
     expect(result.payload).toEqual({
       ...conversation,
-      permissions: { rename: true, delete: true, update_access_control: false },
+      permissions: { rename: true, delete: true, update_access_control: true },
     });
     expect(result.payload.origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -145,19 +144,18 @@ describe('registerConversationRoutes', () => {
     });
   });
 
-  it('returns stored origin details with admin permissions when listing public conversations', async () => {
+  it('returns stored origin details when listing conversations', async () => {
     let listConversationsHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
     const conversation = {
       id: 'conversation-1',
       agent_id: 'agent-1',
       user: {
-        id: 'conversation-owner',
-        username: 'owner',
+        id: 'user-1',
+        username: 'bruno',
       },
       title: 'Slack conversation',
       created_at: '2026-07-10T00:00:00.000Z',
       updated_at: '2026-07-10T00:00:01.000Z',
-      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
       origin: {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       },
@@ -165,7 +163,7 @@ describe('registerConversationRoutes', () => {
     const list = jest.fn().mockResolvedValue([conversation]);
     const getCurrentUser = jest
       .fn()
-      .mockResolvedValue({ id: 'admin-user', username: 'admin', isAdmin: true });
+      .mockResolvedValue({ id: 'user-1', username: 'bruno', isAdmin: false });
 
     const router = {
       versioned: {
@@ -229,6 +227,95 @@ describe('registerConversationRoutes', () => {
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     });
     expect(result.payload.results[0].permissions).toEqual({
+      rename: true,
+      delete: true,
+      update_access_control: true,
+    });
+  });
+
+  it('reports rename and delete permissions for an admin viewing a public conversation owned by another user', async () => {
+    let getConversationHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    let listConversationsHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
+    const conversation = {
+      id: 'conversation-1',
+      agent_id: 'agent-1',
+      user: { id: 'conversation-owner', username: 'owner' },
+      title: 'Public conversation',
+      created_at: '2026-07-10T00:00:00.000Z',
+      updated_at: '2026-07-10T00:00:01.000Z',
+      access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
+      rounds: [],
+    } as Conversation;
+    const get = jest.fn().mockResolvedValue(conversation);
+    const list = jest.fn().mockResolvedValue([conversation]);
+
+    const router = {
+      versioned: {
+        get: jest.fn().mockImplementation((config: { path: string }) => ({
+          addVersion: jest
+            .fn()
+            .mockImplementation(
+              (
+                _versionConfig: unknown,
+                handler: (ctx: any, req: any, res: any) => Promise<any>
+              ) => {
+                if (config.path === GET_CONVERSATION_PATH) {
+                  getConversationHandler = handler;
+                }
+                if (config.path === `${publicApiPath}/conversations`) {
+                  listConversationsHandler = handler;
+                }
+              }
+            ),
+        })),
+        delete: jest.fn().mockImplementation(() => ({
+          addVersion: jest.fn(),
+        })),
+        put: jest.fn().mockImplementation(() => ({
+          addVersion: jest.fn(),
+        })),
+      },
+    };
+
+    registerConversationRoutes({
+      router,
+      getInternalServices: jest.fn().mockReturnValue({
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({ get, list }),
+          getCurrentUser: jest
+            .fn()
+            .mockResolvedValue({ id: 'admin-user', username: 'admin', isAdmin: true }),
+        },
+      }),
+      logger: loggingSystemMock.createLogger(),
+    } as never);
+
+    const context = {
+      core: Promise.resolve({}),
+      licensing: Promise.resolve({
+        license: { status: 'active', hasAtLeast: jest.fn().mockReturnValue(true) },
+      }),
+    };
+    const response = {
+      ok: jest.fn(({ body }) => ({ status: 200, payload: body })),
+      forbidden: jest.fn(),
+      customError: jest.fn(),
+      notFound: jest.fn(),
+    };
+
+    const getResult = await getConversationHandler!(
+      context,
+      { params: { conversation_id: conversation.id } },
+      response
+    );
+    const listResult = await listConversationsHandler!(context, { query: {} }, response);
+
+    expect(getResult.payload.permissions).toEqual({
+      rename: true,
+      delete: true,
+      update_access_control: false,
+    });
+    expect(listResult.payload.results[0].permissions).toEqual({
       rename: true,
       delete: true,
       update_access_control: false,
