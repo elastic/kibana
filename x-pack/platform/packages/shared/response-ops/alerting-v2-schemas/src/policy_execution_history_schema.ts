@@ -113,7 +113,7 @@ export const namedRefSchema = z.object({
 const MAX_WORKFLOWS_PER_ITEM = 100;
 // Cap for the embedded `rules` array in each item. A broad Action Policy can
 // emit one event referencing thousands of rules; the response only carries a
-// bounded sample and clients rely on `totalRuleCount` for the true count.
+// bounded sample and clients rely on `total_rule_count` for the true count.
 export const MAX_EMBEDDED_RULES_PER_ITEM = 20;
 // Cap for the embedded `episodes` array in each item.
 export const MAX_EMBEDDED_EPISODES_PER_ITEM = 50;
@@ -137,9 +137,9 @@ export const policyExecutionHistoryItemSchema = z.object({
     .array(namedRefSchema)
     .max(MAX_EMBEDDED_RULES_PER_ITEM)
     .describe(
-      'Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `totalRuleCount` for the full count.'
+      'Rules referenced by this event, bounded to MAX_EMBEDDED_RULES_PER_ITEM. When a search or rule filter narrows the match, this array is intersected with the matched subset server-side. Use `total_rule_count` for the full count.'
     ),
-  totalRuleCount: z
+  total_rule_count: z
     .number()
     .describe(
       'Total number of rules referenced by this event after search / rule-filter narrowing. May exceed `rules.length` when the embedded array is truncated to the cap.'
@@ -160,10 +160,10 @@ export type SearchMatchCounts = z.infer<typeof searchMatchCountsSchema>;
 export const listPolicyExecutionHistoryResponseSchema = z.object({
   items: z.array(policyExecutionHistoryItemSchema),
   page: z.number().int().min(1),
-  // Allows 0 for count-only reads (perPage=0), unlike the rule executions response.
-  perPage: z.number().int().min(0),
-  totalEvents: z.number().int().nonnegative(),
-  searchMatches: searchMatchCountsSchema
+  // Allows 0 for count-only reads (per_page=0), unlike the rule executions response.
+  per_page: z.number().int().min(0),
+  total_events: z.number().int().nonnegative(),
+  search_matches: searchMatchCountsSchema
     .nullable()
     .describe(
       'Per-type match counts for the active search, plus the cap used as filter. Null when no search was provided. When policies > cap or rules > cap the result is truncated.'
