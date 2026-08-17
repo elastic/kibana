@@ -16,10 +16,14 @@ import type { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
 import type { ColorMappingInputData } from '../categorical_color_mapping';
 import type { GradientColorMode } from '../config/types';
-import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../config/default_color_mapping';
+import {
+  DEFAULT_NEUTRAL_PALETTE_INDEX,
+  getOtherBucketColor,
+} from '../config/default_color_mapping';
 import { getColorAssignmentMatcher } from './color_assignment_matcher';
 import { getValueKey } from './utils';
 import { getOtherAssignmentColor } from '../config/utils';
+import { OTHER_BUCKET_VALUE } from '../special_tokens';
 
 const FALLBACK_ASSIGNMENT_COLOR = 'red';
 
@@ -95,6 +99,7 @@ export function getColorFactory(
       ? data.categories // data.categories contains the serialized values
           .map((category: SerializedValue) => deserializeField(category)) // convert to rawValues/instances like MultiFieldKey etc
           .filter((category: RawValue) => {
+            if (category === OTHER_BUCKET_VALUE) return false;
             // remove categories one maching an assignment
             return !assignmentMatcher.hasMatch(category);
           })
@@ -168,6 +173,11 @@ export function getColorFactory(
         assignments.length
       );
     }
+
+    if (rawValue === OTHER_BUCKET_VALUE) {
+      return getColor(getOtherBucketColor(isDarkMode), palettes);
+    }
+
     return getColor(
       {
         type: 'categorical',

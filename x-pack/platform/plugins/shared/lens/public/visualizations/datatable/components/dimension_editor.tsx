@@ -366,6 +366,9 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 categories={getColorCategories(currentData?.rows, [accessor], [null])}
                 formatter={formatter}
                 allowCustomMatch={allowCustomMatch}
+                hasOthersAggregation={
+                  datasource?.getOperationForColumnId(accessor)?.hasOthersAggregation
+                }
               />
             ) : (
               <ColorMappingByValues

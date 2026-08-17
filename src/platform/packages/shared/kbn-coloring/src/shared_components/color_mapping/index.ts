@@ -22,6 +22,9 @@ export { type ColorAssignmentMatcher } from './color/color_assignment_matcher';
 export {
   DEFAULT_COLOR_MAPPING_CONFIG,
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
+  isOtherBucketRule,
+  withOtherBucketAssignment,
+  withoutOtherBucketAssignment,
   getPaletteColors,
   getColorsFromMapping,
 } from './config/default_color_mapping';

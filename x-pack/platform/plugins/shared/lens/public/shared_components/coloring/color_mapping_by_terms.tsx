@@ -6,7 +6,7 @@
  */
 
 import type { MutableRefObject } from 'react';
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -29,6 +29,8 @@ import {
   CategoricalColorMapping,
   SPECIAL_TOKENS_STRING_CONVERSION,
   getConfigFromPalette,
+  withOtherBucketAssignment,
+  withoutOtherBucketAssignment,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import type { KbnPaletteId, KbnPalettes } from '@kbn/palettes';
@@ -54,6 +56,7 @@ interface ColorMappingByTermsProps {
   categories: SerializedValue[];
   formatter?: IFieldFormat;
   allowCustomMatch?: boolean;
+  hasOthersAggregation?: boolean;
 }
 
 export function ColorMappingByTerms({
@@ -70,9 +73,24 @@ export function ColorMappingByTerms({
   categories,
   formatter,
   allowCustomMatch,
+  hasOthersAggregation,
 }: ColorMappingByTermsProps) {
   const { euiTheme } = useEuiTheme();
   const [useLegacyPalettes, setUseLegacyPalettes] = useState(Boolean(!colorMapping && palette));
+
+  const model = useMemo(() => {
+    if (hasOthersAggregation) {
+      return withOtherBucketAssignment(colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG, isDarkMode);
+    }
+    return colorMapping ?? DEFAULT_COLOR_MAPPING_CONFIG;
+  }, [colorMapping, isDarkMode, hasOthersAggregation]);
+
+  const onModelUpdate = useCallback(
+    (updatedModel: ColorMapping.Config) => {
+      setColorMapping(withoutOtherBucketAssignment(updatedModel));
+    },
+    [setColorMapping]
+  );
 
   return (
     <EuiFormRow
@@ -181,8 +199,8 @@ export function ColorMappingByTerms({
               {!useLegacyPalettes ? (
                 <CategoricalColorMapping
                   isDarkMode={isDarkMode}
-                  model={colorMapping ?? { ...DEFAULT_COLOR_MAPPING_CONFIG }}
-                  onModelUpdate={setColorMapping}
+                  model={model}
+                  onModelUpdate={onModelUpdate}
                   specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                   palettes={palettes}
                   formatter={formatter}
