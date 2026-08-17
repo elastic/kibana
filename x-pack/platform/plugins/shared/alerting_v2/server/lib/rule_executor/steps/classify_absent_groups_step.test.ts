@@ -30,7 +30,11 @@ const createPluginConfigAccessor = () => {
     rules: {
       minimumScheduleInterval: '1m',
       maxScheduledPerMinute: 400,
-      run: { alerts: { max: 10000 }, query: { maxResponseSize: 50 * 1024 * 1024 } },
+      run: {
+        alerts: { max: 10000 },
+        maxGroupsPerExecution: 10000,
+        query: { maxResponseSize: 50 * 1024 * 1024 },
+      },
     },
   };
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;

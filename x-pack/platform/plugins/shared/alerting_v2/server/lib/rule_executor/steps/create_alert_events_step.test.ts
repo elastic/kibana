@@ -32,7 +32,11 @@ describe('CreateAlertEventsStep', () => {
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
-        run: { alerts: { max: 10000 }, maxGroupsPerExecution: 10000 },
+        run: {
+          alerts: { max: 10000 },
+          maxGroupsPerExecution: 10000,
+          query: { maxResponseSize: 50 * 1024 * 1024 },
+        },
         ...rulesConfigOverrides,
       },
     };
@@ -163,7 +167,13 @@ describe('CreateAlertEventsStep', () => {
 
   describe('maxGroupsPerExecution', () => {
     it('drops new groups past the limit and logs a warning exactly once', async () => {
-      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 2 } });
+      step = createStep({
+        run: {
+          alerts: { max: 10000 },
+          maxGroupsPerExecution: 2,
+          query: { maxResponseSize: 50 * 1024 * 1024 },
+        },
+      });
 
       const input = createRuleExecutionInput();
       const rule = createRuleResponse({ kind: 'alert' });
@@ -204,7 +214,13 @@ describe('CreateAlertEventsStep', () => {
     });
 
     it('counts distinct dropped groups, not dropped rows, when a group spans multiple rows', async () => {
-      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 1 } });
+      step = createStep({
+        run: {
+          alerts: { max: 10000 },
+          maxGroupsPerExecution: 1,
+          query: { maxResponseSize: 50 * 1024 * 1024 },
+        },
+      });
 
       const input = createRuleExecutionInput();
       const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
@@ -234,7 +250,13 @@ describe('CreateAlertEventsStep', () => {
     });
 
     it('does not warn when the number of groups stays within the limit', async () => {
-      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 10 } });
+      step = createStep({
+        run: {
+          alerts: { max: 10000 },
+          maxGroupsPerExecution: 10,
+          query: { maxResponseSize: 50 * 1024 * 1024 },
+        },
+      });
 
       const input = createRuleExecutionInput();
       const rule = createRuleResponse({ kind: 'alert' });
@@ -256,7 +278,13 @@ describe('CreateAlertEventsStep', () => {
     });
 
     it('honors the limit across multiple batches and warns only once', async () => {
-      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 2 } });
+      step = createStep({
+        run: {
+          alerts: { max: 10000 },
+          maxGroupsPerExecution: 2,
+          query: { maxResponseSize: 50 * 1024 * 1024 },
+        },
+      });
 
       const input = createRuleExecutionInput();
       const rule = createRuleResponse({ kind: 'alert' });
@@ -307,7 +335,13 @@ describe('CreateAlertEventsStep', () => {
       });
 
     it('never drops an active group and preserves the active set on state for reuse', async () => {
-      step = createStep({ run: { alerts: { max: 10000 }, maxGroupsPerExecution: 1 } });
+      step = createStep({
+        run: {
+          alerts: { max: 10000 },
+          maxGroupsPerExecution: 1,
+          query: { maxResponseSize: 50 * 1024 * 1024 },
+        },
+      });
 
       const input = createRuleExecutionInput();
       const rule = createRuleResponse({ kind: 'alert', grouping: { fields: ['host.name'] } });
