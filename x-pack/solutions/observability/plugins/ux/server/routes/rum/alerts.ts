@@ -28,6 +28,8 @@ import {
   RUM_ALERT_NOTIFICATIONS_SO_TYPE,
   RUM_ALERT_TAG,
   RUM_ALERT_TEMPLATE_TAG_PREFIX,
+  rumAlertServiceFromQuery,
+  rumAlertServiceFromTags,
   type RumAlertTemplateId,
 } from '../../../common/rum_alerts';
 import {
@@ -53,6 +55,7 @@ export interface RumAlertRuleSummary {
   name: string;
   enabled: boolean;
   templateId: RumAlertTemplateId | null;
+  serviceName?: string;
   description: string;
   every: string;
   lookback?: string;
@@ -110,11 +113,18 @@ const templateFromTags = (tags: string[] | undefined): RumAlertTemplateId | null
   return isRumAlertTemplateId(id) ? id : null;
 };
 
+const breachQueryOf = (rule: RuleResponse): string => {
+  const query = rule.query as { breach?: { query?: string } } | undefined;
+  return typeof query?.breach?.query === 'string' ? query.breach.query : '';
+};
+
 const toSummary = (rule: RuleResponse): RumAlertRuleSummary => ({
   id: rule.id,
   name: rule.metadata.name,
   enabled: rule.enabled,
   templateId: templateFromTags(rule.metadata.tags),
+  serviceName:
+    rumAlertServiceFromTags(rule.metadata.tags) ?? rumAlertServiceFromQuery(breachQueryOf(rule)),
   description: rule.metadata.description ?? '',
   every: rule.schedule.every,
   lookback: rule.schedule.lookback,
@@ -251,7 +261,7 @@ export const createRumAlertRoute = createUxServerRoute({
       isRumSessionAlertTemplate(body.templateId) || rumAlertTimeField(built.query) === 'start_time';
     if (usesSessionIndex) {
       const { elasticsearch } = await resources.context.core;
-      const analytics = await getRumAnalyticsStatus(elasticsearch.client.asCurrentUser);
+      const analytics = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
       if (!analytics.installed) {
         throw new Error(
           'Session analytics must be installed before creating a session-level alert'
@@ -525,7 +535,7 @@ export const previewRumAlertEsqlRoute = createUxServerRoute({
     const { elasticsearch } = await resources.context.core;
     const analytics =
       rumAlertTimeField(query) === 'start_time'
-        ? await getRumAnalyticsStatus(elasticsearch.client.asCurrentUser)
+        ? await getRumAnalyticsStatus(elasticsearch.client.asInternalUser)
         : undefined;
     const watermark = analytics?.watermark ?? undefined;
     const chartQuery = injectLookbackAfterFrom(stripFinalWhere(query), lookback, { watermark });

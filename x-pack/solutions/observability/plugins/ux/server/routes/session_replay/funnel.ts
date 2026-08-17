@@ -242,7 +242,10 @@ export const getSessionFunnelRoute = createUxServerRoute({
 
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
-    const analytics = await resolveRumAnalytics(client, { analyticsMode, rangeTo });
+    const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
+      analyticsMode,
+      rangeTo,
+    });
 
     if (!analytics.useIndex) {
       return queryRawFunnel({ client, rangeFrom, rangeTo, serviceName, kuery, steps });

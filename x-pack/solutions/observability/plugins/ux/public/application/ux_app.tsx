@@ -7,15 +7,14 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Redirect } from 'react-router-dom';
+import type { RouteComponentProps, RouteProps } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import {
   RouterProvider,
   createRouter,
   RouteRenderer,
-  useParams,
+  Outlet,
 } from '@kbn/typed-react-router-config';
-import { i18n } from '@kbn/i18n';
-import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import * as t from 'io-ts';
@@ -29,18 +28,24 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerContextProvider } from '@kbn/observability-plugin/public';
 import { InspectorContextProvider, useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { CsmSharedContextProvider } from '../components/app/rum_dashboard/csm_shared_context';
-import { DASHBOARD_LABEL, RumHome } from '../components/app/rum_dashboard/rum_home';
+import { RumAppsPage } from '../components/app/rum_apps/rum_apps_page';
+import { RumGlobalErrorsPage } from '../components/app/rum_global_errors';
+import { DASHBOARD_LABEL, RumHome, type UxHomeTab } from '../components/app/rum_dashboard/rum_home';
 import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
+import { UxDefaultDateRange } from '../hooks/use_date_range_redirect';
+import { useKibanaServices } from '../hooks/use_kibana_services';
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
 import { PluginContext } from '../context/plugin_context';
 import { SessionPlayerPage } from '../components/session_replay/session_player_page';
 import { SessionDetailPage } from '../components/session_replay/session_detail_page';
-import { SessionReplaySettingsPage } from '../components/session_replay/session_replay_settings_page';
-import { UX_BREADCRUMBS } from './ux_breadcrumbs';
-import { isRumReportTemplateId, rumReportTitle } from '../../common/rum_report';
+import { RumSettingsPage } from '../components/app/rum_settings/rum_settings_page';
+import { uxAppHref, serviceNameFromSearch, uxQueryString } from '../utils/rum_search';
+import { serviceNameFromPath, uxAppPath, uxTabSuffix } from '../utils/ux_app_path';
+import { uxHomeBreadcrumbs } from './ux_breadcrumbs';
+import { UX_HOME_PATHS, UX_TAB_SUFFIXES, matchUxHomeRoute } from './ux_home_route';
 
 export type BreadcrumbTitle<T = {}> =
   | string
@@ -61,240 +66,210 @@ export const uxRoutes: RouteDefinition[] = [
   },
 ];
 
-function UxDashboardPage() {
-  useBreadcrumbs(UX_BREADCRUMBS);
+function UxHomePage({
+  tab,
+  templateId,
+  serviceName,
+  inventoryHref,
+  overviewHref,
+}: {
+  tab: UxHomeTab;
+  templateId?: string;
+  serviceName: string;
+  inventoryHref: string;
+  overviewHref: string;
+}) {
+  useBreadcrumbs(uxHomeBreadcrumbs({ tab, templateId, serviceName, inventoryHref, overviewHref }));
 
   return (
     <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="overview" />
+      <RumHome tab={tab} templateId={templateId} />
     </div>
   );
 }
 
-function UxPagesPage() {
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.pages', {
-        defaultMessage: 'Pages',
-      }),
-    },
-  ]);
+// Parent stays mounted across tab changes so the app selector / date picker
+// do not remount and refetch. Session detail and settings skip this chrome.
+function UxHomeChrome() {
+  const { pathname, search } = useLocation();
+  const home = matchUxHomeRoute(pathname);
+  const pathServiceName = home?.serviceName;
+  const queryServiceName = serviceNameFromSearch(search);
+  const { http } = useKibanaServices();
+
+  if (queryServiceName && queryServiceName !== pathServiceName) {
+    const suffix = pathServiceName
+      ? uxTabSuffix(pathname)
+      : home?.templateId
+      ? `/reports/${encodeURIComponent(home.templateId)}`
+      : home && home.tab !== 'overview'
+      ? pathname.replace(/\/+$/, '')
+      : '';
+    return (
+      <Redirect
+        to={{
+          pathname: uxAppPath(queryServiceName, suffix),
+          search: uxQueryString(search, { serviceName: '' }).replace(/^\?/, ''),
+        }}
+      />
+    );
+  }
+
+  if (!home) {
+    return <Outlet />;
+  }
+
+  if (!pathServiceName) {
+    if (home.tab === 'errors') {
+      return <RumGlobalErrorsPage />;
+    }
+    if (home.tab !== 'overview') {
+      return <Redirect to={{ pathname: '/', search }} />;
+    }
+    return <RumAppsPage />;
+  }
 
   return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="pages" />
-    </div>
+    <UxHomePage
+      tab={home.tab}
+      templateId={home.templateId}
+      serviceName={pathServiceName}
+      inventoryHref={uxAppHref(http.basePath.prepend, { search })}
+      overviewHref={uxAppHref(http.basePath.prepend, { search, serviceName: pathServiceName })}
+    />
   );
 }
 
-function UxErrorsPage() {
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.errors', {
-        defaultMessage: 'Errors',
-      }),
-    },
-  ]);
+const uxHomeChild = <></>;
 
+const serviceNameParams = t.type({
+  path: t.type({
+    serviceName: t.string,
+  }),
+});
+
+const sessionParams = t.type({
+  path: t.type({
+    sessionId: t.string,
+  }),
+});
+
+const serviceNameSessionParams = t.type({
+  path: t.type({
+    serviceName: t.string,
+    sessionId: t.string,
+  }),
+});
+
+const templateParams = t.type({
+  path: t.type({
+    templateId: t.string,
+  }),
+});
+
+const serviceNameTemplateParams = t.type({
+  path: t.type({
+    serviceName: t.string,
+    templateId: t.string,
+  }),
+});
+
+const settingsTabParams = t.type({
+  path: t.type({
+    tab: t.string,
+  }),
+});
+
+const serviceNameSettingsTabParams = t.type({
+  path: t.type({
+    serviceName: t.string,
+    tab: t.string,
+  }),
+});
+
+function LegacySessionSettingsRedirect() {
+  const { pathname, search } = useLocation();
   return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="errors" />
-    </div>
+    <Redirect
+      to={{
+        pathname: uxAppPath(serviceNameFromPath(pathname), '/settings/capture'),
+        search,
+      }}
+    />
   );
 }
 
-function UxSessionReplayPage() {
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.sessionReplay', {
-        defaultMessage: 'Sessions',
-      }),
-    },
-  ]);
+const legacyTabRoutes = Object.fromEntries(
+  Object.keys(UX_HOME_PATHS).map((path) => [path, { element: uxHomeChild }])
+);
 
-  return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="session-replay" />
-    </div>
-  );
-}
-
-function UxSessionFunnelPage() {
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.journeys', {
-        defaultMessage: 'Journeys',
-      }),
-    },
-  ]);
-
-  return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="journeys" />
-    </div>
-  );
-}
-
-function UxReportsPage() {
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.reports', {
-        defaultMessage: 'Reporting',
-      }),
-    },
-  ]);
-
-  return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="reports" />
-    </div>
-  );
-}
-
-function UxAiPage() {
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.aiAnalyst', {
-        defaultMessage: 'AI Analyst',
-      }),
-    },
-  ]);
-
-  return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="ai" />
-    </div>
-  );
-}
-
-function UxAlertsPage() {
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.alerts', {
-        defaultMessage: 'Alerts',
-      }),
-    },
-  ]);
-
-  return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="alerts" />
-    </div>
-  );
-}
-
-function UxBudgetsPage() {
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.budgetsTitle', {
-        defaultMessage: 'Budgets',
-      }),
-    },
-  ]);
-
-  return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="budgets" />
-    </div>
-  );
-}
-
-function UxReportViewPage() {
-  const { path } = useParams('/reports/{templateId}') as unknown as {
-    path: { templateId: string };
-  };
-  const templateId = path.templateId;
-  const reportLabel = isRumReportTemplateId(templateId)
-    ? rumReportTitle(templateId)
-    : i18n.translate('xpack.ux.breadcrumbs.reportFallback', {
-        defaultMessage: 'Report',
-      });
-
-  useBreadcrumbs([
-    UX_BREADCRUMBS[0],
-    {
-      text: i18n.translate('xpack.ux.breadcrumbs.reports', {
-        defaultMessage: 'Reporting',
-      }),
-    },
-    { text: reportLabel },
-  ]);
-
-  return (
-    <div className={APP_WRAPPER_CLASS} data-test-subj="csmMainContainer">
-      <RumHome tab="reports" templateId={templateId} />
-    </div>
-  );
-}
+const appTabRoutes = Object.fromEntries(
+  Object.keys(UX_TAB_SUFFIXES)
+    .filter((suffix) => suffix.length > 0)
+    .map((suffix) => [
+      `/{serviceName}${suffix}`,
+      { params: serviceNameParams, element: uxHomeChild },
+    ])
+);
 
 const uxRouter = createRouter({
   '/': {
-    element: <UxDashboardPage />,
-  },
-  '/pages': {
-    element: <UxPagesPage />,
-  },
-  '/errors': {
-    element: <UxErrorsPage />,
-  },
-  '/session-replay': {
-    element: <UxSessionReplayPage />,
-  },
-  '/funnels': {
-    element: <UxSessionFunnelPage />,
-  },
-  '/patterns': {
-    element: <UxSessionFunnelPage />,
-  },
-  '/journeys': {
-    element: <UxSessionFunnelPage />,
-  },
-  '/reports': {
-    element: <UxReportsPage />,
-  },
-  '/ai': {
-    element: <UxAiPage />,
-  },
-  '/alerts': {
-    element: <UxAlertsPage />,
-  },
-  '/budgets': {
-    element: <UxBudgetsPage />,
-  },
-  '/reports/{templateId}': {
-    params: t.type({
-      path: t.type({
-        templateId: t.string,
-      }),
-    }),
-    element: <UxReportViewPage />,
-  },
-  '/session-replay/settings': {
-    element: <SessionReplaySettingsPage />,
-  },
-  '/session-replay/{sessionId}': {
-    params: t.type({
-      path: t.type({
-        sessionId: t.string,
-      }),
-    }),
-    element: <SessionDetailPage />,
-  },
-  '/session-replay/{sessionId}/replay': {
-    params: t.type({
-      path: t.type({
-        sessionId: t.string,
-      }),
-    }),
-    element: <SessionPlayerPage />,
+    element: <UxHomeChrome />,
+    children: {
+      '/': { element: uxHomeChild },
+      ...legacyTabRoutes,
+      '/reports/{templateId}': {
+        params: templateParams,
+        element: uxHomeChild,
+      },
+      '/settings': {
+        element: <RumSettingsPage />,
+      },
+      '/settings/{tab}': {
+        params: settingsTabParams,
+        element: <RumSettingsPage />,
+      },
+      '/session-replay/settings': {
+        element: <LegacySessionSettingsRedirect />,
+      },
+      '/session-replay/{sessionId}': {
+        params: sessionParams,
+        element: <SessionDetailPage />,
+      },
+      '/session-replay/{sessionId}/replay': {
+        params: sessionParams,
+        element: <SessionPlayerPage />,
+      },
+      '/{serviceName}': {
+        params: serviceNameParams,
+        element: uxHomeChild,
+      },
+      ...appTabRoutes,
+      '/{serviceName}/reports/{templateId}': {
+        params: serviceNameTemplateParams,
+        element: uxHomeChild,
+      },
+      '/{serviceName}/settings': {
+        params: serviceNameParams,
+        element: <RumSettingsPage />,
+      },
+      '/{serviceName}/settings/{tab}': {
+        params: serviceNameSettingsTabParams,
+        element: <RumSettingsPage />,
+      },
+      '/{serviceName}/session-replay/settings': {
+        params: serviceNameParams,
+        element: <LegacySessionSettingsRedirect />,
+      },
+      '/{serviceName}/session-replay/{sessionId}': {
+        params: serviceNameSessionParams,
+        element: <SessionDetailPage />,
+      },
+      '/{serviceName}/session-replay/{sessionId}/replay': {
+        params: serviceNameSessionParams,
+        element: <SessionPlayerPage />,
+      },
+    },
   },
 });
 
@@ -379,15 +354,17 @@ export function UXAppRoot({
                 }}
               >
                 <RouterProvider history={history} router={uxRouter as any}>
-                  <DatePickerContextProvider>
-                    <InspectorContextProvider>
-                      <UrlParamsProvider>
-                        <CsmSharedContextProvider>
-                          <RouteRenderer />
-                        </CsmSharedContextProvider>
-                      </UrlParamsProvider>
-                    </InspectorContextProvider>
-                  </DatePickerContextProvider>
+                  <UxDefaultDateRange>
+                    <DatePickerContextProvider>
+                      <InspectorContextProvider>
+                        <UrlParamsProvider>
+                          <CsmSharedContextProvider>
+                            <RouteRenderer />
+                          </CsmSharedContextProvider>
+                        </UrlParamsProvider>
+                      </InspectorContextProvider>
+                    </DatePickerContextProvider>
+                  </UxDefaultDateRange>
                 </RouterProvider>
               </PluginContext.Provider>
             </KibanaThemeProvider>

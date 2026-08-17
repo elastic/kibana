@@ -117,6 +117,9 @@ describe('rumNormalizePipeline', () => {
     expect(source).toContain("r['session.id'] == null");
     expect(source).toContain("a['user.key'] == null");
     expect(source).toContain("a['rum.has_replay'] == null");
+    expect(source).toContain("a['screen.name']");
+    expect(source).toContain("r['rum.platform'] == null");
+    expect(source).toContain("ev == 'app.crash'");
     expect(source).not.toContain('ctx.remove');
   });
 });

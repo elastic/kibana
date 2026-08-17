@@ -37,19 +37,26 @@ import {
   type RumErrorGroup,
   type RumErrorsKpis,
 } from '../../../../common/rum_app';
+import { emptyRumAppSettings, type RumAppSettings } from '../../../../common/rum_app_settings';
+import {
+  rumGithubLinksForError,
+  type RumGithubLinks as RumGithubLinkSet,
+} from '../../../../common/rum_repository_links';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
-import { fetchRumErrors } from '../../../services/rest/rum_api';
+import { fetchRumAppSettings, fetchRumErrors } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { formatRelativeTime, formatTime, shortenPath } from '../../session_replay/session_ui';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
+import { RumGithubLinks } from '../rum_settings/rum_github_links';
 import { ErrorsOverTimeChart } from './errors_over_time_chart';
+import { ErrorPatternBadge, SharedFailureBadge } from './error_pattern_badge';
 import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../../trace/trace_waterfall_flyout';
 
 type ErrorSortField = 'count' | 'sessionCount' | 'userCount' | 'firstSeen' | 'lastSeen';
 
-const MiniTrend = ({ values }: { values: number[] }) => {
+export const MiniTrend = ({ values }: { values: number[] }) => {
   const { euiTheme } = useEuiTheme();
   const max = Math.max(1, ...values);
   return (
@@ -137,24 +144,30 @@ const ErrorsKpiStrip = ({ kpis }: { kpis: RumErrorsKpis }) => {
   );
 };
 
-const ErrorDetailFlyout = ({
+export const ErrorDetailFlyout = ({
   group,
   apmHref,
   traceHref,
+  githubLinks,
+  onAddRepository,
   onClose,
   onViewSessions,
   onWatchReplay,
   onOpenPage,
   onViewTrace,
+  onOpenApp,
 }: {
   group: RumErrorGroup;
   apmHref: string | null;
   traceHref: string | null;
+  githubLinks: RumGithubLinkSet;
+  onAddRepository?: () => void;
   onClose: () => void;
   onViewSessions: () => void;
   onWatchReplay: () => void;
   onOpenPage: (path: string) => void;
   onViewTrace?: (target: TraceFlyoutTarget) => void;
+  onOpenApp?: (serviceName: string) => void;
 }) => (
   <EuiFlyout size="m" onClose={onClose} aria-labelledby="uxErrorDetailTitle">
     <EuiFlyoutHeader hasBorder>
@@ -164,11 +177,12 @@ const ErrorDetailFlyout = ({
             <h2 id="uxErrorDetailTitle">{group.type}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        {group.isNew && (
+        <EuiFlexItem grow={false}>
+          <ErrorPatternBadge pattern={group.pattern} />
+        </EuiFlexItem>
+        {group.affectedApps.length > 1 && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="accent">
-              {i18n.translate('xpack.ux.errors.newBadge', { defaultMessage: 'New' })}
-            </EuiBadge>
+            <SharedFailureBadge />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -228,6 +242,37 @@ const ErrorDetailFlyout = ({
                 >
                   {shortenPath(page.path, 28)}
                 </EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
+      )}
+      {group.affectedApps.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.ux.errors.detail.appsLabel', {
+              defaultMessage: 'Affected applications',
+            })}
+          </EuiText>
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {group.affectedApps.map((app) => (
+              <EuiFlexItem grow={false} key={app.name}>
+                {onOpenApp ? (
+                  <EuiBadge
+                    onClick={() => onOpenApp(app.name)}
+                    onClickAriaLabel={i18n.translate('xpack.ux.errors.detail.appAriaLabel', {
+                      defaultMessage: 'Open errors for {name}',
+                      values: { name: app.name },
+                    })}
+                  >
+                    {app.name} · {app.count}
+                  </EuiBadge>
+                ) : (
+                  <EuiBadge>
+                    {app.name} · {app.count}
+                  </EuiBadge>
+                )}
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
@@ -325,6 +370,8 @@ const ErrorDetailFlyout = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EuiSpacer />
+      <RumGithubLinks links={githubLinks} onAddRepository={onAddRepository} />
     </EuiFlyoutBody>
   </EuiFlyout>
 );
@@ -334,6 +381,7 @@ export function RumErrorsPanel() {
   const history = useHistory();
   const { open: openAlert } = useRumAlertFlyout();
   const {
+    rangeId,
     urlParams: {
       rangeFrom = 'now-24h',
       rangeTo = 'now',
@@ -354,6 +402,9 @@ export function RumErrorsPanel() {
   const [kpis, setKpis] = useState<RumErrorsKpis>(emptyErrorsKpis());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [settings, setSettings] = useState<RumAppSettings>(() =>
+    emptyRumAppSettings(serviceName ?? '')
+  );
   useRumPageLoading('errors', loading);
   const [selected, setSelected] = useState<RumErrorGroup | null>(null);
   const [traceTarget, setTraceTarget] = useState<TraceFlyoutTarget | null>(null);
@@ -406,7 +457,29 @@ export function RumErrorsPanel() {
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, rangeId]);
+
+  useEffect(() => {
+    if (!serviceName) {
+      setSettings(emptyRumAppSettings(''));
+      return;
+    }
+    let cancelled = false;
+    fetchRumAppSettings({ http, serviceName })
+      .then((result) => {
+        if (!cancelled) {
+          setSettings(result);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSettings(emptyRumAppSettings(serviceName));
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [http, serviceName]);
 
   const sortedGroups = useMemo(() => {
     const copy = [...groups];
@@ -472,9 +545,7 @@ export function RumErrorsPanel() {
             </EuiFlexItem>
             {item.isNew && (
               <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">
-                  {i18n.translate('xpack.ux.errors.newBadge', { defaultMessage: 'New' })}
-                </EuiBadge>
+                <ErrorPatternBadge pattern={item.pattern ?? 'new'} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
@@ -696,6 +767,15 @@ export function RumErrorsPanel() {
             group={selected}
             apmHref={apmErrorHref(selected)}
             traceHref={apmTraceHref(selected)}
+            githubLinks={rumGithubLinksForError(settings, selected, { rangeFrom, rangeTo })}
+            onAddRepository={
+              serviceName
+                ? () => {
+                    setSelected(null);
+                    pushRumPath(history, '/settings');
+                  }
+                : undefined
+            }
             onClose={() => setSelected(null)}
             onViewSessions={() => openSessions(selected, false)}
             onWatchReplay={() => openSessions(selected, true)}

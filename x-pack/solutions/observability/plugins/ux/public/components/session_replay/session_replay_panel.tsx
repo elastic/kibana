@@ -44,7 +44,7 @@ import type {
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplaySessions } from '../../services/rest/session_replay_api';
-import { mergeRumSearch } from '../../utils/rum_search';
+import { mergeRumSearch, pushRumPath } from '../../utils/rum_search';
 import { TabTrendChart } from '../app/rum_overview/tab_trend_chart';
 import {
   SessionReplayInjectButton,
@@ -163,7 +163,7 @@ const FacetSelect = ({
       closePopover={() => setOpen(false)}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={open}
           onClick={() => setOpen((v) => !v)}
           hasActiveFilters={Boolean(value)}
@@ -253,6 +253,7 @@ export function SessionReplayPanel() {
   const { http } = useKibanaServices();
   const history = useHistory();
   const {
+    rangeId,
     urlParams: {
       rangeFrom = 'now-24h',
       rangeTo = 'now',
@@ -413,6 +414,7 @@ export function SessionReplayPanel() {
     connection,
     device,
     analyticsMode,
+    rangeId,
   ]);
 
   useEffect(() => {
@@ -421,20 +423,14 @@ export function SessionReplayPanel() {
 
   const openDetail = useCallback(
     (sessionId: string) => {
-      history.push({
-        pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
-        search: history.location.search,
-      });
+      pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`);
     },
     [history]
   );
 
   const openPlayer = useCallback(
     (sessionId: string) => {
-      history.push({
-        pathname: `/session-replay/${encodeURIComponent(sessionId)}/replay`,
-        search: history.location.search,
-      });
+      pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}/replay`);
     },
     [history]
   );
@@ -680,7 +676,7 @@ export function SessionReplayPanel() {
   const [injectOpen, setInjectOpen] = useState(false);
 
   const openSettings = useCallback(() => {
-    history.push({ pathname: '/session-replay/settings' });
+    pushRumPath(history, '/settings');
   }, [history]);
 
   return (
@@ -755,7 +751,7 @@ export function SessionReplayPanel() {
               data-test-subj="uxSessionReplaySettingsButton"
             >
               {i18n.translate('xpack.ux.sessions.settingsButton', {
-                defaultMessage: 'Capture settings',
+                defaultMessage: 'Settings',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>

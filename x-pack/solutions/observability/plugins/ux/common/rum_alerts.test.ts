@@ -11,6 +11,8 @@ import {
   buildRumEmailWorkflowYaml,
   esqlString,
   rumAlertDefaults,
+  rumAlertServiceFromQuery,
+  rumAlertServiceFromTags,
   RUM_ALERT_TEMPLATE_IDS,
 } from './rum_alerts';
 
@@ -39,7 +41,7 @@ describe('buildRumAlertEsql', () => {
     expect(built.query).toContain('samples >= 8');
     expect(built.query).toContain('resource.attributes.service.name');
     expect(built.groupingFields).toEqual(['page']);
-    expect(built.tags).toEqual(['ux-rum', 'ux-rum:web_vital']);
+    expect(built.tags).toEqual(['ux-rum', 'ux-rum:web_vital', 'ux-rum-service:shop']);
   });
 
   it('builds an error-rate query without page grouping', () => {
@@ -106,7 +108,7 @@ describe('buildRumAlertEsql', () => {
     expect(built.query).toContain('COUNT_DISTINCT');
     expect(built.query).toContain('sessions > 80');
     expect(built.query).not.toContain('sessions <');
-    expect(built.tags).toEqual(['ux-rum', 'ux-rum:traffic_spike']);
+    expect(built.tags).toEqual(['ux-rum', 'ux-rum:traffic_spike', 'ux-rum-service:shop']);
     expect(built.description).toContain('> 80');
   });
 
@@ -182,6 +184,22 @@ describe('ES|QL parser', () => {
       filters: { serviceName: 'shop' },
     });
     expect(validateEsqlQuery(built.query)).toBeUndefined();
+  });
+});
+
+describe('rumAlertServiceFromTags', () => {
+  it('reads the scoped service tag', () => {
+    expect(rumAlertServiceFromTags(['ux-rum', 'ux-rum-service:shop'])).toBe('shop');
+    expect(rumAlertServiceFromTags(['ux-rum'])).toBeUndefined();
+  });
+});
+
+describe('rumAlertServiceFromQuery', () => {
+  it('parses OTel and session service predicates', () => {
+    expect(
+      rumAlertServiceFromQuery('`resource.attributes.service.name` == "weather-demo-app"')
+    ).toBe('weather-demo-app');
+    expect(rumAlertServiceFromQuery('`service.name` == "shop"')).toBe('shop');
   });
 });
 

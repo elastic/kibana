@@ -21,6 +21,7 @@ import { sessionReplaySettingsSavedObjectType } from './saved_objects/session_re
 import { rumReportScheduleSavedObjectType } from './saved_objects/rum_report_schedule';
 import { rumAlertNotificationsSavedObjectType } from './saved_objects/rum_alert_notifications';
 import { conversionGoalSavedObjectType } from './saved_objects/conversion_goal';
+import { rumAppSavedObjectType } from './saved_objects/rum_app';
 import {
   installRumAnalystAgent,
   registerRumAnalystAgentType,
@@ -54,6 +55,7 @@ export class Plugin implements PluginType {
     core.savedObjects.registerType(rumReportScheduleSavedObjectType);
     core.savedObjects.registerType(rumAlertNotificationsSavedObjectType);
     core.savedObjects.registerType(conversionGoalSavedObjectType);
+    core.savedObjects.registerType(rumAppSavedObjectType);
 
     const dependencies: Omit<UxRouteHandlerResources, keyof DefaultRouteHandlerResources> = {
       core: {

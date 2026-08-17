@@ -37,7 +37,7 @@ export const getRumTrendsRoute = createUxServerRoute({
   handler: async ({ context, params }): Promise<{ trends: RumTrendPoint[] }> => {
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
-    const status = await getRumAnalyticsStatus(client);
+    const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     const query = params.query;
     const daily = resolveRumDaily({
       pagesDaily: status.pagesDaily,

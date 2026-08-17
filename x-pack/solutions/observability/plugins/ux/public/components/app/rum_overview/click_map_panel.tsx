@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiText,
@@ -28,7 +29,6 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumClickMap } from '../../../services/rest/rum_api';
 import { pushRumPath } from '../../../utils/rum_search';
-import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 import { ClickMapStage } from './click_map_stage';
 
 const clickMapTitle = i18n.translate('xpack.ux.overview.clickMap.title', {
@@ -93,6 +93,7 @@ function ClickMapContent() {
   const { http } = useKibanaServices();
   const history = useHistory();
   const {
+    rangeId,
     urlParams: {
       rangeFrom = 'now-24h',
       rangeTo = 'now',
@@ -119,7 +120,6 @@ function ClickMapContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const cancelledRef = useRef(false);
-  useRumPageLoading('click-map', loading);
 
   useEffect(() => {
     setUserPage('');
@@ -177,6 +177,7 @@ function ClickMapContent() {
     breakpoint,
     connection,
     device,
+    rangeId,
   ]);
 
   useEffect(() => {
@@ -200,7 +201,18 @@ function ClickMapContent() {
   const lockedToFilter = Boolean(globalPage);
 
   return (
-    <>
+    <div style={{ position: 'relative' }}>
+      {loading && (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          position="absolute"
+          data-test-subj="uxClickMapLoading"
+          aria-label={i18n.translate('xpack.ux.overview.clickMap.loadingAriaLabel', {
+            defaultMessage: 'Loading click map',
+          })}
+        />
+      )}
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center" gutterSize="m" wrap>
         {pageOptions.options.length > 0 && (
           <EuiFlexItem grow={false} style={{ minWidth: 220 }}>
@@ -241,7 +253,12 @@ function ClickMapContent() {
       {(pageOptions.options.length > 0 || data?.snapshot?.sessionId) && <EuiSpacer size="m" />}
 
       {loading && !data && (
-        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          style={{ minHeight: 200 }}
+          data-test-subj="uxClickMapSpinner"
+        >
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="l" />
           </EuiFlexItem>
@@ -318,6 +335,6 @@ function ClickMapContent() {
           </p>
         </EuiCallOut>
       )}
-    </>
+    </div>
   );
 }

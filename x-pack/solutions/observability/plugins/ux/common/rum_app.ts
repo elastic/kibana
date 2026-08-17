@@ -346,6 +346,21 @@ export interface RumErrorAffectedPage {
   count: number;
 }
 
+export interface RumErrorAppCount {
+  name: string;
+  count: number;
+}
+
+export type RumErrorPattern = 'new' | 'regressed' | 'persistent' | 'improving';
+
+export interface RumFailingApp {
+  name: string;
+  errorEvents: number;
+  impactedSessions: number;
+  totalSessions: number;
+  errorRate: number;
+}
+
 export interface RumErrorTrendPoint {
   timestamp: string;
   count: number;
@@ -370,6 +385,9 @@ export interface RumErrorGroup {
   samplePage: string | null;
   sampleAction: string | null;
   sampleTraceId: string | null;
+  affectedApps: RumErrorAppCount[];
+  previousCount: number;
+  pattern: RumErrorPattern;
 }
 
 export interface RumErrorsKpis {
@@ -378,6 +396,11 @@ export interface RumErrorsKpis {
   totalSessions: number;
   impactedUsers: number;
   newGroups: number;
+  affectedApps: number;
+  totalApps: number;
+  sharedGroups: number;
+  previousErrorEvents: number;
+  previousImpactedSessions: number;
 }
 
 export const emptyErrorsKpis = (): RumErrorsKpis => ({
@@ -386,6 +409,11 @@ export const emptyErrorsKpis = (): RumErrorsKpis => ({
   totalSessions: 0,
   impactedUsers: 0,
   newGroups: 0,
+  affectedApps: 0,
+  totalApps: 0,
+  sharedGroups: 0,
+  previousErrorEvents: 0,
+  previousImpactedSessions: 0,
 });
 
 export const emptyPagesKpis = (): RumPagesKpis => ({
@@ -397,14 +425,73 @@ export const emptyPagesKpis = (): RumPagesKpis => ({
 
 export const emptyErrorImpact = (): Pick<
   RumErrorGroup,
-  'trendPoints' | 'firstSeen' | 'lastSeen' | 'isNew' | 'affectedPages'
+  | 'trendPoints'
+  | 'firstSeen'
+  | 'lastSeen'
+  | 'isNew'
+  | 'affectedPages'
+  | 'affectedApps'
+  | 'previousCount'
+  | 'pattern'
 > => ({
   trendPoints: [],
   firstSeen: null,
   lastSeen: null,
   isNew: false,
   affectedPages: [],
+  affectedApps: [],
+  previousCount: 0,
+  pattern: 'persistent',
 });
+
+/** Prefer OTel `service.name` buckets when the same app also appears on the classic field. */
+export const mergePreferOtelByName = <T extends { name: string }>(otel: T[], classic: T[]): T[] => {
+  const names = new Set(otel.map((row) => row.name));
+  return [...otel, ...classic.filter((row) => !names.has(row.name))];
+};
+
+/** New = first seen in this window; regressed = returned after a quiet previous window. */
+export const classifyErrorPattern = ({
+  isNew,
+  count,
+  previousCount,
+}: {
+  isNew: boolean;
+  count: number;
+  previousCount: number;
+}): RumErrorPattern => {
+  if (previousCount <= 0) {
+    return isNew ? 'new' : 'regressed';
+  }
+  if (count < previousCount * 0.8) {
+    return 'improving';
+  }
+  return 'persistent';
+};
+
+export const rumFailingApps = (
+  errorRows: Array<{ name: string; errorEvents: number; impactedSessions: number }>,
+  sessionRows: Array<{ name: string; totalSessions: number }>
+): RumFailingApp[] => {
+  const sessionsByName = new Map(sessionRows.map((row) => [row.name, row.totalSessions]));
+  return [...errorRows]
+    .map((row) => {
+      const totalSessions = sessionsByName.get(row.name) ?? 0;
+      return {
+        name: row.name,
+        errorEvents: row.errorEvents,
+        impactedSessions: row.impactedSessions,
+        totalSessions,
+        errorRate: totalSessions > 0 ? row.impactedSessions / totalSessions : 0,
+      };
+    })
+    .sort((a, b) => {
+      if (b.errorEvents !== a.errorEvents) {
+        return b.errorEvents - a.errorEvents;
+      }
+      return a.name.localeCompare(b.name);
+    });
+};
 
 export const OTHER_ERROR_TREND_ID = '__other__';
 
@@ -454,6 +541,7 @@ export interface RumErrorsResponse {
   groups: RumErrorGroup[];
   total: number;
   kpis: RumErrorsKpis;
+  topFailingApps: RumFailingApp[];
 }
 
 /**

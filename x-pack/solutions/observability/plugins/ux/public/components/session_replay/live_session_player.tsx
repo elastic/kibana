@@ -23,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useHistory } from 'react-router-dom';
 import type { HttpStart } from '@kbn/core/public';
+import { pushRumPath } from '../../utils/rum_search';
 import {
   clampReplayOffsetMs,
   formatReplayClock,
@@ -466,10 +467,7 @@ export function LiveSessionPlayer({ http, sessionId, pollMs, active }: Props) {
   }, [destroyPlayer]);
 
   const openRecording = useCallback(() => {
-    history.push({
-      pathname: `/session-replay/${encodeURIComponent(sessionId)}/replay`,
-      search: history.location.search,
-    });
+    pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}/replay`);
   }, [history, sessionId]);
 
   const onTimelineClick = (event: React.MouseEvent<HTMLDivElement>) => {

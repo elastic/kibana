@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { mergeRumSearch, parseReplayOffsetMs, sessionsPatch } from './rum_search';
+import {
+  mergeRumSearch,
+  parseReplayOffsetMs,
+  pushRumPath,
+  serviceNameFromSearch,
+  sessionsPatch,
+  uxAppHref,
+  uxQueryString,
+} from './rum_search';
 
 describe('mergeRumSearch', () => {
   it('adds and removes filter params while keeping the rest', () => {
@@ -39,6 +47,12 @@ describe('mergeRumSearch', () => {
   it('stores session analytics flags', () => {
     expect(mergeRumSearch('?rangeFrom=now-24h', { includeRaw: 'true', analyticsMode: 'raw' })).toBe(
       'rangeFrom=now-24h&includeRaw=true&analyticsMode=raw'
+    );
+  });
+
+  it('stores inventory platform and environment facets', () => {
+    expect(mergeRumSearch('?rangeFrom=now-24h', { platform: 'android', environment: 'prod' })).toBe(
+      'rangeFrom=now-24h&platform=android&environment=prod'
     );
   });
 
@@ -110,5 +124,72 @@ describe('parseReplayOffsetMs', () => {
     expect(parseReplayOffsetMs('?rangeFrom=now-24h')).toBeNull();
     expect(parseReplayOffsetMs('?t=nope')).toBeNull();
     expect(parseReplayOffsetMs('?t=-12')).toBeNull();
+  });
+});
+
+describe('serviceNameFromSearch', () => {
+  it('reads a trimmed service name', () => {
+    expect(serviceNameFromSearch('?serviceName=shop&rangeFrom=now-24h')).toBe('shop');
+  });
+
+  it('returns undefined when missing or blank', () => {
+    expect(serviceNameFromSearch('?rangeFrom=now-24h')).toBeUndefined();
+    expect(serviceNameFromSearch('?serviceName=%20')).toBeUndefined();
+  });
+});
+
+describe('uxQueryString', () => {
+  it('prefixes a question mark and can drop serviceName', () => {
+    expect(uxQueryString('?rangeFrom=now-24h&serviceName=shop', { serviceName: '' })).toBe(
+      '?rangeFrom=now-24h'
+    );
+  });
+});
+
+describe('uxAppHref', () => {
+  const prepend = (path: string) => `/session-replay${path}`;
+
+  it('builds the inventory href without a serviceName query', () => {
+    expect(uxAppHref(prepend, { search: '?rangeFrom=now-24h&serviceName=shop' })).toBe(
+      '/session-replay/app/ux?rangeFrom=now-24h'
+    );
+  });
+
+  it('puts the app name in the path', () => {
+    expect(
+      uxAppHref(prepend, {
+        serviceName: 'weather-demo-app',
+        suffix: '/pages',
+        search: '?rangeFrom=now-24h',
+      })
+    ).toBe('/session-replay/app/ux/weather-demo-app/pages?rangeFrom=now-24h');
+  });
+});
+
+describe('pushRumPath', () => {
+  it('puts serviceName in the path and strips it from search', () => {
+    const pushed: Array<{ pathname: string; search: string }> = [];
+    const history = {
+      location: { pathname: '/', search: '?rangeFrom=now-24h' },
+      push: (next: { pathname: string; search: string }) => {
+        pushed.push(next);
+      },
+    };
+    pushRumPath(history as never, '/', { serviceName: 'weather-demo-app' });
+    expect(pushed).toEqual([{ pathname: '/weather-demo-app', search: 'rangeFrom=now-24h' }]);
+  });
+
+  it('keeps the current app when navigating to a tab', () => {
+    const pushed: Array<{ pathname: string; search: string }> = [];
+    const history = {
+      location: { pathname: '/weather-demo-app', search: '?rangeFrom=now-24h' },
+      push: (next: { pathname: string; search: string }) => {
+        pushed.push(next);
+      },
+    };
+    pushRumPath(history as never, '/pages', { pageUrl: 'home' });
+    expect(pushed).toEqual([
+      { pathname: '/weather-demo-app/pages', search: 'rangeFrom=now-24h&pageUrl=home' },
+    ]);
   });
 });

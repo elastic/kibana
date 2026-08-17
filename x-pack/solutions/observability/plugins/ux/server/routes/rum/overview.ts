@@ -161,7 +161,7 @@ export const getRumOverviewRoute = createUxServerRoute({
   handler: async ({ context, core, params }): Promise<RumOverviewResponse> => {
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
-    const status = await getRumAnalyticsStatus(client);
+    const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     const daily = resolveRumDaily({
       pagesDaily: status.pagesDaily,
       serviceDaily: status.serviceDaily,

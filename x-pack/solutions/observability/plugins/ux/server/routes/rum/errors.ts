@@ -7,15 +7,23 @@
 
 import dateMath from '@kbn/datemath';
 import * as t from 'io-ts';
-import { createUxServerRoute } from '../create_ux_server_route';
-import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
+import { SERVICE_NAME } from '../../../common/elasticsearch_fieldnames';
+import { OTEL_SERVICE_NAME } from '../../../common/otel_rum';
 import {
+  classifyErrorPattern,
   isNewInRange,
   makeErrorGroupKey,
+  mergePreferOtelByName,
+  rumFailingApps,
+  type RumErrorAppCount,
   type RumErrorGroup,
   type RumErrorTrendPoint,
   type RumErrorsResponse,
+  type RumFailingApp,
 } from '../../../common/rum_app';
+import { previousEqualPeriod } from '../../../common/rum_report';
+import { RUM_SESSION_SOURCE_INDEX } from '../../../common/session_replay';
+import { createUxServerRoute } from '../create_ux_server_route';
 import { SAMPLE_SOURCE } from '../session_replay/list_sessions';
 import {
   attrString,
@@ -93,6 +101,57 @@ const ERROR_GROUP_SCRIPT = `
   }
 `;
 
+const GROUP_SIZE = 50;
+const APP_BREAKDOWN_SIZE = 8;
+const FAILING_APP_SIZE = 20;
+
+const appTerms = (size: number, withSessions: boolean) => ({
+  otelApps: {
+    terms: { field: OTEL_SERVICE_NAME, size },
+    ...(withSessions ? { aggs: { sessions: sessionCardinality } } : {}),
+  },
+  classicApps: {
+    terms: { field: SERVICE_NAME, size },
+    ...(withSessions ? { aggs: { sessions: sessionCardinality } } : {}),
+  },
+});
+
+const namedCounts = (agg: unknown): RumErrorAppCount[] =>
+  termsBuckets(agg)
+    .map((bucket) => ({ name: String(bucket.key), count: bucket.doc_count }))
+    .filter((row) => row.name.length > 0);
+
+const failingRows = (
+  agg: unknown
+): Array<{
+  name: string;
+  errorEvents: number;
+  impactedSessions: number;
+}> =>
+  termsBuckets(agg)
+    .map((bucket) => ({
+      name: String(bucket.key),
+      errorEvents: bucket.doc_count,
+      impactedSessions: cardValue(bucket.sessions),
+    }))
+    .filter((row) => row.name.length > 0);
+
+const sessionRows = (agg: unknown): Array<{ name: string; totalSessions: number }> =>
+  termsBuckets(agg)
+    .map((bucket) => ({
+      name: String(bucket.key),
+      totalSessions: cardValue(bucket.sessions),
+    }))
+    .filter((row) => row.name.length > 0);
+
+const previousCounts = (agg: unknown): Map<string, number> => {
+  const counts = new Map<string, number>();
+  for (const bucket of termsBuckets(agg)) {
+    counts.set(String(bucket.key), bucket.doc_count);
+  }
+  return counts;
+};
+
 export const getRumErrorsRoute = createUxServerRoute({
   endpoint: 'GET /internal/ux/rum/errors',
   options: { access: 'internal' },
@@ -104,8 +163,19 @@ export const getRumErrorsRoute = createUxServerRoute({
 
     const baseFilters = rumBaseFilters(params.query);
     const bounds = rangeBoundsMs(params.query.rangeFrom, params.query.rangeTo);
+    const period = previousEqualPeriod(
+      params.query.rangeFrom || 'now-24h',
+      params.query.rangeTo || 'now'
+    );
+    const previousFilters = period
+      ? rumBaseFilters({
+          ...params.query,
+          rangeFrom: period.compareFrom,
+          rangeTo: period.compareTo,
+        })
+      : null;
 
-    const [result, sessionTotal] = await Promise.all([
+    const [result, sessionTotal, previous] = await Promise.all([
       client.search(
         {
           index: RUM_SESSION_SOURCE_INDEX,
@@ -119,7 +189,7 @@ export const getRumErrorsRoute = createUxServerRoute({
             groups: {
               terms: {
                 script: { source: ERROR_GROUP_SCRIPT, lang: 'painless' },
-                size: 50,
+                size: GROUP_SIZE,
               },
               aggs: {
                 sessions: sessionCardinality,
@@ -137,8 +207,10 @@ export const getRumErrorsRoute = createUxServerRoute({
                     _source: SAMPLE_SOURCE,
                   },
                 },
+                ...appTerms(APP_BREAKDOWN_SIZE, false),
               },
             },
+            ...appTerms(FAILING_APP_SIZE, true),
           },
         },
         rumEsSearchOptions
@@ -150,11 +222,39 @@ export const getRumErrorsRoute = createUxServerRoute({
           allow_no_indices: true,
           size: 0,
           query: { bool: { filter: baseFilters } },
-          aggs: { sessions: sessionCardinality },
+          aggs: {
+            sessions: sessionCardinality,
+            ...appTerms(FAILING_APP_SIZE, true),
+          },
         },
         rumEsSearchOptions
       ),
+      previousFilters
+        ? client.search(
+            {
+              index: RUM_SESSION_SOURCE_INDEX,
+              ignore_unavailable: true,
+              allow_no_indices: true,
+              size: 0,
+              query: { bool: { filter: [...previousFilters, EXCEPTION_FILTER] } },
+              aggs: {
+                sessions: sessionCardinality,
+                groups: {
+                  terms: {
+                    script: { source: ERROR_GROUP_SCRIPT, lang: 'painless' },
+                    size: GROUP_SIZE,
+                  },
+                },
+              },
+            },
+            rumEsSearchOptions
+          )
+        : Promise.resolve(null),
     ]);
+
+    const previousByKey = previousCounts(
+      (previous?.aggregations as { groups?: unknown } | undefined)?.groups
+    );
 
     const groups: RumErrorGroup[] = termsBuckets(
       (result.aggregations as { groups?: unknown } | undefined)?.groups
@@ -183,9 +283,16 @@ export const getRumErrorsRoute = createUxServerRoute({
         bucket.last_seen as { value_as_string?: string; value?: number | null }
       );
       const firstSeenMs = firstSeen ? Date.parse(firstSeen) : NaN;
+      const key = String(bucket.key) || makeErrorGroupKey(type, message);
+      const previousCount = previousByKey.get(key) ?? 0;
+      const isNew = isNewInRange(firstSeenMs, bounds.from, bounds.to);
+      const affectedApps = mergePreferOtelByName(
+        namedCounts(bucket.otelApps),
+        namedCounts(bucket.classicApps)
+      );
 
       return {
-        key: String(bucket.key) || makeErrorGroupKey(type, message),
+        key,
         type,
         message,
         count: bucket.doc_count,
@@ -200,7 +307,7 @@ export const getRumErrorsRoute = createUxServerRoute({
         trendPoints,
         firstSeen,
         lastSeen,
-        isNew: isNewInRange(firstSeenMs, bounds.from, bounds.to),
+        isNew,
         affectedPages: termsBuckets(bucket.pages)
           .map((page) => ({ path: String(page.key), count: page.doc_count }))
           .filter((page) => page.path.length > 0),
@@ -208,25 +315,61 @@ export const getRumErrorsRoute = createUxServerRoute({
         sampleAction:
           attrString(source, 'user_action.name') ?? attrString(source, 'user_action.id'),
         sampleTraceId: traceIdFromHit(source),
+        affectedApps,
+        previousCount,
+        pattern: classifyErrorPattern({ isNew, count: bucket.doc_count, previousCount }),
       };
     });
 
     const errorEvents = groups.reduce((sum, group) => sum + group.count, 0);
     const aggs = result.aggregations as
-      | { sessions?: unknown; users?: { count?: { value?: number } } }
+      | {
+          sessions?: unknown;
+          users?: { count?: { value?: number } };
+          otelApps?: unknown;
+          classicApps?: unknown;
+        }
       | undefined;
+    const sessionAggs = sessionTotal.aggregations as
+      | { sessions?: unknown; otelApps?: unknown; classicApps?: unknown }
+      | undefined;
+
+    const topFailingApps: RumFailingApp[] = rumFailingApps(
+      mergePreferOtelByName(failingRows(aggs?.otelApps), failingRows(aggs?.classicApps)),
+      mergePreferOtelByName(
+        sessionRows(sessionAggs?.otelApps),
+        sessionRows(sessionAggs?.classicApps)
+      )
+    );
+
+    const affectedAppNames = new Set(
+      groups.flatMap((group) => group.affectedApps.map((app) => app.name))
+    );
+    const totalAppNames = new Set(topFailingApps.map((app) => app.name));
+    for (const row of mergePreferOtelByName(
+      sessionRows(sessionAggs?.otelApps),
+      sessionRows(sessionAggs?.classicApps)
+    )) {
+      totalAppNames.add(row.name);
+    }
 
     return {
       groups,
       total: errorEvents,
+      topFailingApps,
       kpis: {
         errorEvents,
         impactedSessions: cardValue(aggs?.sessions),
-        totalSessions: cardValue(
-          (sessionTotal.aggregations as { sessions?: unknown } | undefined)?.sessions
-        ),
+        totalSessions: cardValue(sessionAggs?.sessions),
         impactedUsers: aggs?.users?.count?.value ?? 0,
-        newGroups: groups.filter((group) => group.isNew).length,
+        newGroups: groups.filter((group) => group.pattern === 'new').length,
+        affectedApps: affectedAppNames.size,
+        totalApps: totalAppNames.size,
+        sharedGroups: groups.filter((group) => group.affectedApps.length > 1).length,
+        previousErrorEvents: [...previousByKey.values()].reduce((sum, count) => sum + count, 0),
+        previousImpactedSessions: cardValue(
+          (previous?.aggregations as { sessions?: unknown } | undefined)?.sessions
+        ),
       },
     };
   },

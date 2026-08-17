@@ -34,7 +34,7 @@ export const getRumFiltersRoute = createUxServerRoute({
   handler: async ({ context, params }): Promise<RumFiltersResponse> => {
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
-    const status = await getRumAnalyticsStatus(client);
+    const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     if (
       canUseSessionIndex({
         installed: status.installed,

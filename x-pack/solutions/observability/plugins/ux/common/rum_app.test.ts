@@ -8,12 +8,14 @@
 import {
   OTHER_ERROR_TREND_ID,
   applySessionIndexTrendSessions,
+  classifyErrorPattern,
   durationToMs,
   emptyPageImpact,
   emptyVitalAttribution,
   isBotUserAgent,
   isNewInRange,
   makeErrorGroupKey,
+  mergePreferOtelByName,
   mergeRumPageRows,
   pagePassesCwv,
   pagePathFromKey,
@@ -21,6 +23,7 @@ import {
   ranksFromCounts,
   ranksFromPercentileRanks,
   rateVital,
+  rumFailingApps,
   sessionTrendAlignKey,
   stackErrorTrends,
   summarizePagesKpis,
@@ -179,6 +182,72 @@ describe('isNewInRange', () => {
 
   it('rejects non-finite timestamps', () => {
     expect(isNewInRange(Number.NaN, 1, 2)).toBe(false);
+  });
+});
+
+describe('classifyErrorPattern', () => {
+  it('marks first-seen-in-range groups as new when they were absent last window', () => {
+    expect(classifyErrorPattern({ isNew: true, count: 12, previousCount: 0 })).toBe('new');
+  });
+
+  it('marks a return as regressed when the group is older than this window', () => {
+    expect(classifyErrorPattern({ isNew: false, count: 8, previousCount: 0 })).toBe('regressed');
+  });
+
+  it('marks a drop of 20% or more as improving', () => {
+    expect(classifyErrorPattern({ isNew: false, count: 79, previousCount: 100 })).toBe('improving');
+    expect(classifyErrorPattern({ isNew: false, count: 80, previousCount: 100 })).toBe(
+      'persistent'
+    );
+  });
+});
+
+describe('mergePreferOtelByName', () => {
+  it('keeps the OTel row when both fields report the same app', () => {
+    expect(
+      mergePreferOtelByName(
+        [{ name: 'shop', count: 10 }],
+        [
+          { name: 'shop', count: 10 },
+          { name: 'legacy', count: 3 },
+        ]
+      )
+    ).toEqual([
+      { name: 'shop', count: 10 },
+      { name: 'legacy', count: 3 },
+    ]);
+  });
+});
+
+describe('rumFailingApps', () => {
+  it('joins error events to session totals for an error rate', () => {
+    expect(
+      rumFailingApps(
+        [
+          { name: 'shop', errorEvents: 20, impactedSessions: 4 },
+          { name: 'blog', errorEvents: 5, impactedSessions: 5 },
+        ],
+        [
+          { name: 'shop', totalSessions: 40 },
+          { name: 'blog', totalSessions: 5 },
+        ]
+      )
+    ).toEqual([
+      {
+        name: 'shop',
+        errorEvents: 20,
+        impactedSessions: 4,
+        totalSessions: 40,
+        errorRate: 0.1,
+      },
+      {
+        name: 'blog',
+        errorEvents: 5,
+        impactedSessions: 5,
+        totalSessions: 5,
+        errorRate: 1,
+      },
+    ]);
   });
 });
 

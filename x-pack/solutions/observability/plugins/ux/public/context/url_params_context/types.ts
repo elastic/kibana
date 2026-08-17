@@ -10,6 +10,7 @@ import type { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
 export type UrlParams = {
   end?: string;
   environment?: string;
+  platform?: string;
   rangeFrom?: string;
   rangeTo?: string;
   refreshInterval?: number;

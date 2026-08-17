@@ -179,9 +179,11 @@ export const UserCell = ({
 export const Sparkline = ({
   buckets,
   height = 26,
+  ariaLabel,
 }: {
   buckets: SessionActivityBucket[];
   height?: number;
+  ariaLabel?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   if (!buckets || buckets.length === 0) {
@@ -200,9 +202,12 @@ export const Sparkline = ({
         gap: 2px;
         height: ${height}px;
       `}
-      aria-label={i18n.translate('xpack.ux.sessions.sparklineAria', {
-        defaultMessage: 'Activity over the session',
-      })}
+      aria-label={
+        ariaLabel ??
+        i18n.translate('xpack.ux.sessions.sparklineAria', {
+          defaultMessage: 'Activity over the session',
+        })
+      }
     >
       {buckets.map((bucket, index) => {
         const h = Math.max(2, Math.round((bucket.count / max) * height));

@@ -26,7 +26,7 @@ export const getRumAnalyticsStatusRoute = createUxServerRoute({
       const settings = await readSessionReplaySettings(
         coreStart.savedObjects.createInternalRepository()
       );
-      return await getRumAnalyticsStatus(elasticsearch.client.asCurrentUser, {
+      return await getRumAnalyticsStatus(elasticsearch.client.asInternalUser, {
         syncDelay: settings.syncDelay,
         sourceLookbackDays: settings.sourceLookbackDays,
       });

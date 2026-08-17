@@ -85,6 +85,18 @@ export const parseEsTimeValueSeconds = (value: string): number => {
   return amount * 3600;
 };
 
+/** Watermark used when transform stats are unreadable (read-only / no monitor). */
+export const approximateCheckpointWatermark = (
+  syncDelay: string,
+  nowMs = Date.now()
+): { watermark: string; lagSeconds: number } => {
+  const lagSeconds = parseEsTimeValueSeconds(syncDelay);
+  return {
+    watermark: new Date(nowMs - lagSeconds * 1000).toISOString(),
+    lagSeconds,
+  };
+};
+
 export const rumSessionsLagWarnSeconds = (syncDelay = RUM_SESSIONS_SYNC_DELAY): number =>
   parseEsTimeValueSeconds(syncDelay) + RUM_SESSIONS_LAG_SLACK_SECONDS;
 

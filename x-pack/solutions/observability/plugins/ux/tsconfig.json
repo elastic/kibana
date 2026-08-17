@@ -14,6 +14,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/custom-icons",
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/home-plugin",

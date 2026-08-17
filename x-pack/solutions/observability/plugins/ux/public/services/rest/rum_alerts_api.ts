@@ -18,6 +18,7 @@ export interface RumAlertRuleSummary {
   name: string;
   enabled: boolean;
   templateId: RumAlertTemplateId | null;
+  serviceName?: string;
   description: string;
   every: string;
   lookback?: string;

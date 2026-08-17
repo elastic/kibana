@@ -6,14 +6,15 @@
  */
 
 import {
-  emptyRumAnalyticsStatus,
+  approximateCheckpointWatermark,
   canUseSessionIndex,
   clampLookbackDays,
+  emptyRumAnalyticsStatus,
   eventSequenceToken,
-  normalizeSequenceToken,
   isValidEsTimeValue,
   isValidLookbackDays,
   newSessionIds,
+  normalizeSequenceToken,
   parseEsTimeValueSeconds,
   parseIncludeRaw,
   parseLookbackDays,
@@ -184,6 +185,16 @@ describe('parseEsTimeValueSeconds', () => {
     expect(parseEsTimeValueSeconds('30s')).toBe(30);
     expect(parseEsTimeValueSeconds('1h')).toBe(3600);
     expect(parseEsTimeValueSeconds('nope')).toBe(5 * 60);
+  });
+});
+
+describe('approximateCheckpointWatermark', () => {
+  it('subtracts the sync delay from now', () => {
+    const nowMs = Date.parse('2026-08-17T12:00:00.000Z');
+    expect(approximateCheckpointWatermark('5m', nowMs)).toEqual({
+      watermark: '2026-08-17T11:55:00.000Z',
+      lagSeconds: 5 * 60,
+    });
   });
 });
 

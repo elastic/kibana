@@ -51,6 +51,30 @@ export const collapseRumAlertEpisodes = <T extends RumAlertEpisodeEvent>(
   return latest;
 };
 
+export const rumFiringServiceNames = (
+  rules: Array<{ id: string; serviceName?: string }>,
+  events: RumAlertEpisodeEvent[]
+): Set<string> => {
+  const latestByRule = new Map<string, RumAlertEpisodeEvent>();
+  for (const event of events) {
+    if (!event.ruleId || latestByRule.has(event.ruleId)) {
+      continue;
+    }
+    latestByRule.set(event.ruleId, event);
+  }
+  const firing = new Set<string>();
+  for (const rule of rules) {
+    if (!rule.serviceName) {
+      continue;
+    }
+    const latest = latestByRule.get(rule.id);
+    if (latest && isRumAlertFireStatus(latest.status)) {
+      firing.add(rule.serviceName);
+    }
+  }
+  return firing;
+};
+
 export const lastRumAlertFiredAt = (
   events: RumAlertEpisodeEvent[],
   ruleId: string

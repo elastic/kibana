@@ -15,6 +15,7 @@ import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
   const { http } = useKibanaServices();
   const {
+    rangeId,
     urlParams: {
       rangeFrom = 'now-24h',
       rangeTo = 'now',
@@ -84,6 +85,7 @@ export function useRumTrends(): { points: RumTrendPoint[]; loading: boolean } {
     connection,
     device,
     analyticsMode,
+    rangeId,
   ]);
 
   useEffect(() => {

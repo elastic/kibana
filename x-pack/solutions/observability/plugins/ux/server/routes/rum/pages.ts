@@ -271,7 +271,7 @@ export const getRumPagesRoute = createUxServerRoute({
     const settings = await readSessionReplaySettings(
       coreStart.savedObjects.createInternalRepository()
     );
-    const status = await getRumAnalyticsStatus(client);
+    const status = await getRumAnalyticsStatus(elasticsearch.client.asInternalUser);
     const daily = resolveRumDaily({
       pagesDaily: status.pagesDaily,
       serviceDaily: status.serviceDaily,

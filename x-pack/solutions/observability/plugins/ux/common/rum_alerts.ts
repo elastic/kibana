@@ -11,6 +11,7 @@ import { RUM_SESSIONS_INDEX_PATTERN } from './rum_sessions';
 
 export const RUM_ALERT_TAG = 'ux-rum';
 export const RUM_ALERT_TEMPLATE_TAG_PREFIX = 'ux-rum:';
+export const RUM_ALERT_SERVICE_TAG_PREFIX = 'ux-rum-service:';
 export const RUM_ALERT_NOTIFICATIONS_SO_TYPE = 'ux-rum-alert-notifications';
 export const RUM_ALERT_NOTIFICATIONS_SO_ID = 'default';
 
@@ -40,6 +41,22 @@ export type RumSessionAlertTemplateId = (typeof RUM_SESSION_ALERT_TEMPLATE_IDS)[
 
 export const isRumAlertTemplateId = (value: string): value is RumAlertTemplateId =>
   (RUM_ALERT_TEMPLATE_IDS as readonly string[]).includes(value);
+
+export const rumAlertServiceFromTags = (tags: string[] | undefined): string | undefined => {
+  const tagged = (tags ?? []).find((tag) => tag.startsWith(RUM_ALERT_SERVICE_TAG_PREFIX));
+  if (!tagged) {
+    return undefined;
+  }
+  const name = tagged.slice(RUM_ALERT_SERVICE_TAG_PREFIX.length).trim();
+  return name ? name : undefined;
+};
+
+export const rumAlertServiceFromQuery = (query: string): string | undefined => {
+  const match =
+    query.match(/`resource\.attributes\.service\.name`\s*==\s*"([^"]{1,256})"/) ??
+    query.match(/`service\.name`\s*==\s*"([^"]{1,256})"/);
+  return match?.[1];
+};
 
 export const isRumTrafficAlertTemplate = (templateId: RumAlertTemplateId): boolean =>
   templateId === 'traffic_drop' ||
@@ -271,6 +288,9 @@ export const buildRumAlertEsql = (params: RumAlertParams): RumAlertEsqlBuild => 
     ? sessionFilterClauses(params.filters)
     : filterClauses(params.filters);
   const tags = [RUM_ALERT_TAG, `${RUM_ALERT_TEMPLATE_TAG_PREFIX}${params.templateId}`];
+  if (params.filters.serviceName) {
+    tags.push(`${RUM_ALERT_SERVICE_TAG_PREFIX}${params.filters.serviceName}`);
+  }
   const groupByPage =
     params.groupByPage &&
     !isRumTrafficAlertTemplate(params.templateId) &&

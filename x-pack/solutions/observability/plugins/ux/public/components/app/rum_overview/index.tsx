@@ -64,6 +64,7 @@ export function RumOverviewV2() {
   const { hasData, loading: hasDataLoading } = useHasRumData();
   const [trendChartType, setTrendChartType] = useTrendChartType();
   const {
+    rangeId,
     urlParams: {
       rangeFrom = 'now-24h',
       rangeTo = 'now',
@@ -136,6 +137,7 @@ export function RumOverviewV2() {
     connection,
     device,
     analyticsMode,
+    rangeId,
   ]);
 
   useEffect(() => {

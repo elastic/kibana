@@ -65,7 +65,10 @@ export const getSessionPatternsRoute = createUxServerRoute({
     const client = elasticsearch.client.asCurrentUser;
     const coreStart = await core.start();
     const soClient = coreStart.savedObjects.createInternalRepository();
-    const analytics = await resolveRumAnalytics(client, { analyticsMode, rangeTo });
+    const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
+      analyticsMode,
+      rangeTo,
+    });
 
     if (!analytics.useIndex) {
       return queryRawPatterns({ client, soClient, rangeFrom, rangeTo, serviceName, kuery });

@@ -9,6 +9,7 @@ import type { Location } from 'history';
 import { toQuery } from '@kbn/observability-plugin/public';
 import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
+import { serviceNameFromPath } from '../../utils/ux_app_path';
 import { getDateRange, removeUndefinedProps, toBoolean, toNumber, toString } from './helpers';
 import type { UrlParams, UxUrlParams } from './types';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
@@ -31,6 +32,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     rangeFrom,
     rangeTo,
     environment,
+    platform,
     searchTerm,
     percentile,
     frustration,
@@ -55,6 +57,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
   } = query;
 
   const localUIFilters = pickKeys(query, ...uxLocalUIFilterNames);
+  const pathServiceName = serviceNameFromPath(location.pathname);
 
   return removeUndefinedProps({
     // date params
@@ -66,6 +69,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
 
     // query params
     environment: toString(environment) || ENVIRONMENT_ALL.value,
+    platform: toString(platform),
     sortDirection,
     sortField,
     page: toNumber(page) || 0,
@@ -93,5 +97,6 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     hasReplay: toString(hasReplay),
 
     ...localUIFilters,
+    ...(pathServiceName ? { serviceName: pathServiceName } : {}),
   });
 }

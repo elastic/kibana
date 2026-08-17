@@ -167,7 +167,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
     const { elasticsearch } = await context.core;
     const client = elasticsearch.client.asCurrentUser;
     const rangeTo = params.query.rangeTo || 'now';
-    const analytics = await resolveRumAnalytics(client, {
+    const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
       analyticsMode: params.query.analyticsMode,
       rangeTo,
     });

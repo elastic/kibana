@@ -59,7 +59,8 @@ import {
   updateConversionGoal,
 } from '../../services/rest/conversion_goal_api';
 import { fetchSessionFunnel } from '../../services/rest/session_replay_api';
-import { mergeRumSearch } from '../../utils/rum_search';
+import { mergeRumSearch, pushRumPath } from '../../utils/rum_search';
+import { serviceNameFromPath, uxAppPath } from '../../utils/ux_app_path';
 import { ConversionGoalSequence } from './conversion_goal_sequence';
 
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
@@ -777,13 +778,14 @@ function GoalResults({
                       <EuiLink
                         data-test-subj={`uxGoalDroppedSession-${sessionId}`}
                         href={history.createHref({
-                          pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
+                          pathname: uxAppPath(
+                            serviceNameFromPath(history.location.pathname),
+                            `/session-replay/${encodeURIComponent(sessionId)}`
+                          ),
                         })}
                         onClick={(e: React.MouseEvent) => {
                           e.preventDefault();
-                          history.push({
-                            pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
-                          });
+                          pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`);
                         }}
                       >
                         {sessionId.slice(0, 8)}

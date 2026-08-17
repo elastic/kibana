@@ -23,12 +23,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
-import { useParams } from '@kbn/typed-react-router-config';
 import { css } from '@emotion/react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionReplayEvents } from '../../services/rest/session_replay_api';
-import { mergeRumSearch, parseReplayOffsetMs } from '../../utils/rum_search';
+import {
+  uxAppHref,
+  mergeRumSearch,
+  parseReplayOffsetMs,
+  pushRumPath,
+} from '../../utils/rum_search';
+import { serviceNameFromPath, uxSessionIdFromPath } from '../../utils/ux_app_path';
 
 interface ReplayerMirror {
   getId: (node: Node) => number;
@@ -342,16 +347,12 @@ const InspectorPanel = ({ node }: { node: InspectedNode }) => {
 
 export function SessionPlayerPage() {
   const { euiTheme } = useEuiTheme();
-  const {
-    path: { sessionId: rawSessionId },
-  } = useParams('/session-replay/{sessionId}/replay') as unknown as {
-    path: { sessionId: string };
-  };
-  const sessionId = decodeURIComponent(rawSessionId ?? '');
-  const { http, observabilityShared } = useKibanaServices();
-  const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
   const history = useHistory();
   const location = useLocation();
+  const sessionId = uxSessionIdFromPath(location.pathname) ?? '';
+  const serviceName = serviceNameFromPath(location.pathname);
+  const { http, observabilityShared } = useKibanaServices();
+  const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const shellRef = useRef<HTMLDivElement | null>(null);
   const timelineRef = useRef<HTMLDivElement | null>(null);
@@ -571,27 +572,32 @@ export function SessionPlayerPage() {
       text: i18n.translate('xpack.ux.sessionReplay.breadcrumbs.root', {
         defaultMessage: 'User Experience',
       }),
-      href: http.basePath.prepend('/app/ux'),
+      href: uxAppHref(http.basePath.prepend, { search: location.search }),
     },
     {
       text: i18n.translate('xpack.ux.sessionReplay.breadcrumbs.list', {
         defaultMessage: 'Sessions',
       }),
-      href: http.basePath.prepend('/app/ux/session-replay'),
+      href: uxAppHref(http.basePath.prepend, {
+        serviceName,
+        suffix: '/session-replay',
+        search: location.search,
+      }),
       onClick: (e: React.MouseEvent) => {
         e.preventDefault();
-        history.push('/session-replay');
+        pushRumPath(history, '/session-replay');
       },
     },
     {
       text: sessionId ? sessionId.slice(0, 8) : '—',
-      href: http.basePath.prepend(`/app/ux/session-replay/${encodeURIComponent(sessionId)}`),
+      href: uxAppHref(http.basePath.prepend, {
+        serviceName,
+        suffix: `/session-replay/${encodeURIComponent(sessionId)}`,
+        search: location.search,
+      }),
       onClick: (e: React.MouseEvent) => {
         e.preventDefault();
-        history.push({
-          pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
-          search: history.location.search,
-        });
+        pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`);
       },
     },
     {
@@ -1123,10 +1129,7 @@ export function SessionPlayerPage() {
               key="back"
               iconType="arrowLeft"
               onClick={() =>
-                history.push({
-                  pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
-                  search: history.location.search,
-                })
+                pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`)
               }
             >
               {i18n.translate('xpack.ux.sessionReplay.player.back', {

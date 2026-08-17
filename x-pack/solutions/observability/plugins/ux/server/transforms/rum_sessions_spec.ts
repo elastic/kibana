@@ -257,6 +257,8 @@ export const rumNormalizePipeline = {
             def page = a['page.url.path'];
             if (page == null) { page = a['url.path']; }
             if (page == null) { page = a['page.url']; }
+            if (page == null) { page = a['screen.name']; }
+            if (page == null) { page = a['activity.name']; }
             if (page != null) { a['url.path.grouped'] = page.toString(); }
           }
           if (a['user.key'] == null) {
@@ -270,12 +272,33 @@ export const rumNormalizePipeline = {
             a['browser.name'] = r['browser.name'].toString();
           }
           if (a['os.name'] == null) {
-            def os = a['browser.platform'];
+            def os = r['os.name'];
+            if (os == null) { os = a['browser.platform']; }
             if (os == null) { os = r['browser.platform']; }
             if (os != null) { a['os.name'] = os.toString(); }
           }
+          if (r['rum.platform'] == null) {
+            def osName = r['os.name'] != null ? r['os.name'].toString() : '';
+            def osType = r['os.type'] != null ? r['os.type'].toString() : '';
+            if (osName == 'Android' || osType == 'android') {
+              r['rum.platform'] = 'android';
+            } else if (osName == 'iOS' || osName == 'iPadOS' || osType == 'ios') {
+              r['rum.platform'] = 'ios';
+            } else if (r['browser.name'] != null) {
+              r['rum.platform'] = 'web';
+            }
+          }
+          if (a['rum.platform'] == null && r['rum.platform'] != null) {
+            a['rum.platform'] = r['rum.platform'].toString();
+          }
           if (a['error.group'] == null && a['exception.type'] != null) {
             a['error.group'] = a['exception.type'].toString();
+          }
+          if (a['event.outcome'] == null) {
+            def ev = ctx.event_name;
+            if (ev == null && ctx.event instanceof Map) { ev = ctx.event.name; }
+            if (ev == null) { ev = a['event.name']; }
+            if (ev == 'app.crash' || ev == 'crash') { a['event.outcome'] = 'failure'; }
           }
           if (a['rum.has_replay'] == null && r['rum.has_replay'] != null) {
             a['rum.has_replay'] = r['rum.has_replay'];

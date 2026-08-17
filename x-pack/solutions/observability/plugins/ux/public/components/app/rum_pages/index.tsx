@@ -322,6 +322,7 @@ export function RumPagesPanel() {
   const { http } = useKibanaServices();
   const history = useHistory();
   const {
+    rangeId,
     urlParams: {
       rangeFrom = 'now-24h',
       rangeTo = 'now',
@@ -394,6 +395,7 @@ export function RumPagesPanel() {
     connection,
     device,
     analyticsMode,
+    rangeId,
   ]);
 
   useEffect(() => {

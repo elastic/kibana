@@ -40,6 +40,7 @@ import { fetchSessionPatterns } from '../../services/rest/session_replay_api';
 import { ConversionGoalPanel } from './conversion_goal_panel';
 import { shortenPath } from './session_ui';
 import { pushRumPath, sessionsPatch } from '../../utils/rum_search';
+import { serviceNameFromPath, uxAppPath } from '../../utils/ux_app_path';
 
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
 
@@ -80,13 +81,14 @@ const SessionIdLinks = ({ sessionIds }: { sessionIds: string[] }) => {
           <EuiLink
             data-test-subj={`uxPatternSession-${sessionId}`}
             href={history.createHref({
-              pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
+              pathname: uxAppPath(
+                serviceNameFromPath(history.location.pathname),
+                `/session-replay/${encodeURIComponent(sessionId)}`
+              ),
             })}
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
-              history.push({
-                pathname: `/session-replay/${encodeURIComponent(sessionId)}`,
-              });
+              pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`);
             }}
           >
             {sessionId.slice(0, 8)}
@@ -185,6 +187,7 @@ export function SessionFunnelPanel() {
   const { http } = useKibanaServices();
   const history = useHistory();
   const {
+    rangeId,
     urlParams: { rangeFrom = 'now-24h', rangeTo = 'now', serviceName, kuery, analyticsMode },
   } = useLegacyUrlParams();
 
@@ -212,7 +215,7 @@ export function SessionFunnelPanel() {
     } finally {
       setPatternsLoading(false);
     }
-  }, [http, rangeFrom, rangeTo, serviceName, kuery, analyticsMode]);
+  }, [http, rangeFrom, rangeTo, serviceName, kuery, analyticsMode, rangeId]);
 
   useEffect(() => {
     void loadPatterns();

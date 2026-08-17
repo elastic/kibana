@@ -9,17 +9,23 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import {
-  EuiBetaBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSection,
   EuiSpacer,
   EuiTab,
   EuiTabs,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { AppHeader } from '@kbn/app-header';
 import { useHistory, useLocation } from 'react-router-dom';
+import { UX_APP_TITLE } from '../../../application/ux_breadcrumbs';
+import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
+import { pushRumPath, uxAppHref } from '../../../utils/rum_search';
+import { serviceNameFromPath, uxAppPath } from '../../../utils/ux_app_path';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { useHasRumData } from './hooks/use_has_rum_data';
 import { RumDatePicker } from './rum_datepicker';
@@ -97,6 +103,9 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
     useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
   const { hasData, loading: isLoading, dataViewTitle } = useHasRumData();
+  const {
+    urlParams: { serviceName },
+  } = useLegacyUrlParams();
 
   const noDataConfig: NoDataConfig | undefined = !hasData
     ? {
@@ -164,13 +173,7 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
           paddingSize: 'none',
         }}
       >
-        <AppHeader
-          title={i18n.translate('xpack.ux.home.title', {
-            defaultMessage: 'User Experience',
-          })}
-          menu={appMenu}
-          spacing="standard"
-        />
+        <AppHeader title={serviceName || UX_APP_TITLE} menu={appMenu} spacing="standard" />
 
         <EuiPageSection paddingSize="m" restrictWidth={false}>
           <DashboardToolbar tab={tab} />
@@ -198,23 +201,104 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
   );
 }
 
+function InventoryBackButton() {
+  const history = useHistory();
+  const { search } = useLocation();
+  const { http } = useKibanaServices();
+  const href = uxAppHref(http.basePath.prepend, { search });
+  const tooltip = i18n.translate('xpack.ux.home.backToInventoryTooltip', {
+    defaultMessage: 'to {destination}',
+    values: { destination: UX_APP_TITLE },
+  });
+
+  return (
+    <EuiToolTip content={tooltip} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="sortLeft"
+        color="text"
+        display="base"
+        size="s"
+        href={href}
+        aria-label={tooltip}
+        data-test-subj="uxAppInventoryBackButton"
+        onClick={(event) => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+          }
+          event.preventDefault();
+          pushRumPath(history, '/', { serviceName: '' });
+        }}
+      />
+    </EuiToolTip>
+  );
+}
+
+function AppSettingsButton() {
+  const history = useHistory();
+  const { pathname, search } = useLocation();
+  const { http } = useKibanaServices();
+  const href = uxAppHref(http.basePath.prepend, {
+    search,
+    serviceName: serviceNameFromPath(pathname),
+    suffix: '/settings',
+  });
+  const tooltip = i18n.translate('xpack.ux.home.settingsTooltip', {
+    defaultMessage: 'Settings',
+  });
+
+  return (
+    <EuiToolTip content={tooltip} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="gear"
+        color="text"
+        display="base"
+        size="s"
+        href={href}
+        aria-label={tooltip}
+        data-test-subj="uxAppSettingsButton"
+        onClick={(event) => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+            return;
+          }
+          event.preventDefault();
+          pushRumPath(history, '/settings');
+        }}
+      />
+    </EuiToolTip>
+  );
+}
+
 function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
+  const {
+    urlParams: { serviceName },
+  } = useLegacyUrlParams();
+
   return (
     <div className={tab === 'reports' ? 'uxRumReportNoPrint' : undefined}>
       <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={false}>
-          <EuiBetaBadge
-            label={i18n.translate('xpack.ux.sessionReplay.experimentalBadge', {
-              defaultMessage: 'Technical preview',
-            })}
-            tooltipContent={i18n.translate('xpack.ux.sessionReplay.experimentalTooltip', {
-              defaultMessage:
-                'OTel-first RUM views, sessions, journeys, and Session Replay are an experimental POC and may change or be removed.',
-            })}
-          />
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <InventoryBackButton />
+            </EuiFlexItem>
+            {serviceName ? (
+              <EuiFlexItem grow={false}>
+                <EuiTitle>
+                  <h1 className="eui-textNoWrap">{serviceName}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-          <RumDatePicker />
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <AppSettingsButton />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <RumDatePicker />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -243,25 +327,23 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
 function UxHomeTabs({ tab }: { tab: UxHomeTab }) {
   const history = useHistory();
   const location = useLocation();
+  const serviceName = serviceNameFromPath(location.pathname);
 
-  const tabHref = (pathname: string) => ({
-    href: history.createHref({ pathname, search: location.search }),
-    onClick: (e: React.MouseEvent) => {
-      e.preventDefault();
-      history.push({ pathname, search: location.search });
-    },
-  });
+  const tabHref = (suffix: string) => {
+    const pathname = uxAppPath(serviceName, suffix === '/' ? '' : suffix);
+    return {
+      href: history.createHref({ pathname, search: location.search }),
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault();
+        history.push({ pathname, search: location.search });
+      },
+    };
+  };
 
   return (
     <EuiTabs>
       <EuiTab isSelected={tab === 'overview'} data-test-subj="uxDashboardTab" {...tabHref('/')}>
         {DASHBOARD_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'pages'} data-test-subj="uxPagesTab" {...tabHref('/pages')}>
-        {PAGES_LABEL}
-      </EuiTab>
-      <EuiTab isSelected={tab === 'errors'} data-test-subj="uxErrorsTab" {...tabHref('/errors')}>
-        {ERRORS_LABEL}
       </EuiTab>
       <EuiTab
         isSelected={tab === 'session-replay'}
@@ -270,6 +352,12 @@ function UxHomeTabs({ tab }: { tab: UxHomeTab }) {
       >
         {SESSIONS_LABEL}
       </EuiTab>
+      <EuiTab isSelected={tab === 'pages'} data-test-subj="uxPagesTab" {...tabHref('/pages')}>
+        {PAGES_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'errors'} data-test-subj="uxErrorsTab" {...tabHref('/errors')}>
+        {ERRORS_LABEL}
+      </EuiTab>
       <EuiTab
         isSelected={tab === 'journeys'}
         data-test-subj="uxFunnelsTab"
@@ -277,17 +365,17 @@ function UxHomeTabs({ tab }: { tab: UxHomeTab }) {
       >
         {JOURNEYS_LABEL}
       </EuiTab>
-      <EuiTab isSelected={tab === 'reports'} data-test-subj="uxReportsTab" {...tabHref('/reports')}>
-        {REPORTS_LABEL}
-      </EuiTab>
       <EuiTab isSelected={tab === 'ai'} data-test-subj="uxAiTab" {...tabHref('/ai')}>
         {AI_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'budgets'} data-test-subj="uxBudgetsTab" {...tabHref('/budgets')}>
+        {BUDGETS_LABEL}
       </EuiTab>
       <EuiTab isSelected={tab === 'alerts'} data-test-subj="uxAlertsTab" {...tabHref('/alerts')}>
         {ALERTS_LABEL}
       </EuiTab>
-      <EuiTab isSelected={tab === 'budgets'} data-test-subj="uxBudgetsTab" {...tabHref('/budgets')}>
-        {BUDGETS_LABEL}
+      <EuiTab isSelected={tab === 'reports'} data-test-subj="uxReportsTab" {...tabHref('/reports')}>
+        {REPORTS_LABEL}
       </EuiTab>
     </EuiTabs>
   );

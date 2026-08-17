@@ -9,7 +9,7 @@ import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiTitle } from '@elastic
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 
-export function EmptyStateLoading() {
+export function EmptyStateLoading({ message }: { message?: string }) {
   return (
     <EuiEmptyPrompt
       body={
@@ -18,9 +18,10 @@ export function EmptyStateLoading() {
           <EuiSpacer />
           <EuiTitle size="l">
             <h2>
-              {i18n.translate('xpack.ux.emptyState.loadingMessage', {
-                defaultMessage: 'Loading…',
-              })}
+              {message ??
+                i18n.translate('xpack.ux.emptyState.loadingMessage', {
+                  defaultMessage: 'Loading…',
+                })}
             </h2>
           </EuiTitle>
         </Fragment>

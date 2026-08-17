@@ -44,12 +44,13 @@ import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ApmSharedPluginStart } from '@kbn/apm-shared/public';
+import { OBLT_UX_APP_ID } from '@kbn/deeplinks-observability';
+import { UX_APP_TITLE } from './application/ux_breadcrumbs';
 
 export type UxPluginSetup = void;
 export type UxPluginStart = void;
@@ -157,17 +158,25 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
             return [
               // UX navigation
               {
-                label: 'User Experience',
+                label: UX_APP_TITLE,
                 sortKey: 600,
                 entries: [
                   {
-                    label: i18n.translate('xpack.ux.overview.heading', {
-                      defaultMessage: 'Overview',
+                    label: i18n.translate('xpack.ux.nav.applicationsLabel', {
+                      defaultMessage: 'Applications',
                     }),
                     app: OBLT_UX_APP_ID,
                     path: '/',
                     matchFullPath: false,
                     ignoreTrailingSlash: true,
+                  },
+                  {
+                    label: i18n.translate('xpack.ux.nav.errorsLabel', {
+                      defaultMessage: 'Errors',
+                    }),
+                    app: OBLT_UX_APP_ID,
+                    path: '/errors',
+                    matchFullPath: true,
                   },
                 ],
               },
@@ -183,7 +192,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
 
     core.application.register({
       id: OBLT_UX_APP_ID,
-      title: 'User Experience',
+      title: UX_APP_TITLE,
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
@@ -224,8 +233,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
     });
   }
   public start(core: CoreStart, plugins: ApmPluginStartDeps) {
-    // Session capture is toggled at runtime via a saved object (see the UX
-    // "Capture settings" page); the bootstrap reads it and no-ops when disabled.
+    // Session capture is toggled at runtime via a saved object (see Settings →
+    // Capture); the bootstrap reads it and no-ops when disabled.
     import('./session_replay/start_session_replay')
       .then(({ startSessionReplay }) => startSessionReplay(core))
       .catch(() => {

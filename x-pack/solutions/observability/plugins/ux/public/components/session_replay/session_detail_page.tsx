@@ -28,14 +28,14 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { useParams } from '@kbn/typed-react-router-config';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { PageVisit, RumSessionDetail, SessionAction } from '../../../common/session_replay';
 import { summarizeBackendCallsFromActions } from '../../../common/rum_backend';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionDetail } from '../../services/rest/session_replay_api';
 import { UserCell, WebVitalBadges, formatDurationMs, formatTime } from './session_ui';
-import { mergeRumSearch, pushRumPath, sessionsPatch } from '../../utils/rum_search';
+import { uxAppHref, mergeRumSearch, pushRumPath, sessionsPatch } from '../../utils/rum_search';
+import { serviceNameFromPath, uxAppPath, uxSessionIdFromPath } from '../../utils/ux_app_path';
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { BackendCallsPanel } from '../trace/backend_calls_panel';
 import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../trace/trace_waterfall_flyout';
@@ -635,13 +635,11 @@ const SummaryStat = ({
 
 export function SessionDetailPage() {
   const { euiTheme } = useEuiTheme();
-  const {
-    path: { sessionId: rawSessionId },
-  } = useParams('/session-replay/{sessionId}') as unknown as { path: { sessionId: string } };
-  const sessionId = decodeURIComponent(rawSessionId ?? '');
+  const history = useHistory();
+  const sessionId = uxSessionIdFromPath(history.location.pathname) ?? '';
+  const serviceName = serviceNameFromPath(history.location.pathname);
   const { http, observabilityShared } = useKibanaServices();
   const PageTemplateComponent = observabilityShared.navigation.PageTemplate;
-  const history = useHistory();
   const {
     urlParams: { rangeFrom = 'now-24h', rangeTo = 'now' },
   } = useLegacyUrlParams();
@@ -669,16 +667,20 @@ export function SessionDetailPage() {
       text: i18n.translate('xpack.ux.sessionDetail.breadcrumbs.root', {
         defaultMessage: 'User Experience',
       }),
-      href: http.basePath.prepend('/app/ux'),
+      href: uxAppHref(http.basePath.prepend, { search: history.location.search }),
     },
     {
       text: i18n.translate('xpack.ux.sessionDetail.breadcrumbs.list', {
         defaultMessage: 'Sessions',
       }),
-      href: http.basePath.prepend('/app/ux/session-replay'),
+      href: uxAppHref(http.basePath.prepend, {
+        serviceName,
+        suffix: '/session-replay',
+        search: history.location.search,
+      }),
       onClick: (e: React.MouseEvent) => {
         e.preventDefault();
-        history.push('/session-replay');
+        pushRumPath(history, '/session-replay');
       },
     },
     { text: sessionId ? sessionId.slice(0, 8) : '—' },
@@ -720,11 +722,11 @@ export function SessionDetailPage() {
             })
           : history.location.search;
       history.push({
-        pathname: `/session-replay/${encodeURIComponent(sessionId)}/replay`,
+        pathname: uxAppPath(serviceName, `/session-replay/${encodeURIComponent(sessionId)}/replay`),
         search,
       });
     },
-    [history, sessionId]
+    [history, serviceName, sessionId]
   );
 
   const pageColors = usePageColors(detail?.pageVisits ?? []);
@@ -750,9 +752,7 @@ export function SessionDetailPage() {
         key="back"
         iconType="arrowLeft"
         data-test-subj="uxSessionDetailBack"
-        onClick={() =>
-          history.push({ pathname: '/session-replay', search: history.location.search })
-        }
+        onClick={() => pushRumPath(history, '/session-replay')}
       >
         {i18n.translate('xpack.ux.sessionDetail.back', { defaultMessage: 'Back to sessions' })}
       </EuiButtonEmpty>,

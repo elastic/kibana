@@ -7,6 +7,7 @@
 
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import type { History } from 'history';
+import { serviceNameFromPath, uxAppPath } from './ux_app_path';
 
 export interface RumFilterPatch {
   frustration?: string;
@@ -25,6 +26,9 @@ export interface RumFilterPatch {
   breakpoint?: string;
   connection?: string;
   device?: string;
+  serviceName?: string;
+  environment?: string;
+  platform?: string;
   /** Replay playhead offset in ms (`?t=`). */
   t?: string;
   rangeFrom?: string;
@@ -56,10 +60,45 @@ export const mergeRumSearch = (search: string, patch: RumFilterPatch): string =>
   return fromQuery(next);
 };
 
+export const serviceNameFromSearch = (search: string): string | undefined => {
+  const current = toQuery(search) as { serviceName?: string };
+  const name = current.serviceName?.trim();
+  return name ? name : undefined;
+};
+
+export const uxQueryString = (search: string, patch: RumFilterPatch = {}): string => {
+  const next = mergeRumSearch(search, patch);
+  return next ? `?${next}` : '';
+};
+
+export const uxAppHref = (
+  prepend: (path: string) => string,
+  {
+    serviceName,
+    suffix = '',
+    search,
+    patch,
+  }: {
+    serviceName?: string;
+    suffix?: string;
+    search: string;
+    patch?: RumFilterPatch;
+  }
+): string => {
+  const path = uxAppPath(serviceName, suffix);
+  const qs = uxQueryString(search, { ...patch, serviceName: '' });
+  return prepend(`${path === '/' ? '/app/ux' : `/app/ux${path}`}${qs}`);
+};
+
 export const pushRumPath = (history: History, pathname: string, patch: RumFilterPatch = {}) => {
+  const nextApp =
+    patch.serviceName === undefined
+      ? serviceNameFromPath(history.location.pathname)
+      : patch.serviceName.trim() || undefined;
+  const { serviceName: _serviceName, ...searchPatch } = patch;
   history.push({
-    pathname,
-    search: mergeRumSearch(history.location.search, patch),
+    pathname: uxAppPath(nextApp, pathname === '/' ? '' : pathname),
+    search: mergeRumSearch(history.location.search, { ...searchPatch, serviceName: '' }),
   });
 };
 
@@ -70,8 +109,8 @@ export interface RumAiLocationState {
 /** Open AI Analyst with a follow-up prompt, keeping the current filters. */
 export const pushRumAiFollowUp = (history: History, prompt: string) => {
   history.push({
-    pathname: '/ai',
-    search: history.location.search,
+    pathname: uxAppPath(serviceNameFromPath(history.location.pathname), '/ai'),
+    search: mergeRumSearch(history.location.search, { serviceName: '' }),
     state: { rumAiFollowUp: prompt } satisfies RumAiLocationState,
   });
 };

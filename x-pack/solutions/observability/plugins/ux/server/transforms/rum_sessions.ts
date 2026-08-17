@@ -8,7 +8,6 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   clampLookbackDays,
-  emptyRumAnalyticsStatus,
   isValidEsTimeValue,
   parseLookbackDays,
   RUM_NORMALIZE_PIPELINE_NAME,
@@ -47,13 +46,12 @@ import {
 } from './rum_index_sort';
 import {
   installedSyncDelay,
-  isEsNotFound,
   installedSourceLookbackGte,
   putOrReplaceTransform,
+  readRollupStatus,
   removePreviousTransform,
   restartUnhealthyTransform,
   startTransformIgnoreRunning,
-  toTransformState,
   updateTransformSourceWindow,
   updateTransformSyncDelay,
 } from './rum_transform_utils';
@@ -129,54 +127,32 @@ const loadRumAnalyticsStatus = async (
   resolvedDelay: string,
   resolvedLookbackDays: number
 ): Promise<RumAnalyticsStatus> => {
-  try {
-    const [stats, current] = await Promise.all([
-      client.transform.getTransformStats({
-        transform_id: RUM_SESSIONS_TRANSFORM_ID,
-      }),
-      client.transform.getTransform({ transform_id: RUM_SESSIONS_TRANSFORM_ID }).catch(() => null),
-    ]);
-    const row = stats.transforms[0];
-    if (!row) {
-      return withDailyStatuses(client, {
-        ...emptyRumAnalyticsStatus(),
-        syncDelay: resolvedDelay,
-        sourceLookbackDays: resolvedLookbackDays,
-      });
-    }
-    const checkpoint = row.checkpointing?.last as
-      | { time_upper_bound_millis?: number; timestamp_millis?: number }
-      | undefined;
-    const watermarkMs = checkpoint?.time_upper_bound_millis ?? checkpoint?.timestamp_millis;
-    const watermark =
-      typeof watermarkMs === 'number' && Number.isFinite(watermarkMs)
-        ? new Date(watermarkMs).toISOString()
-        : null;
-    const lagSeconds =
-      watermarkMs != null ? Math.max(0, Math.round((Date.now() - watermarkMs) / 1000)) : null;
-    const installedDays = parseLookbackDays(installedSourceLookbackGte(current));
-    return withDailyStatuses(client, {
-      installed: true,
-      state: toTransformState(row.state),
-      watermark,
-      lagSeconds,
+  const [rollup, current] = await Promise.all([
+    readRollupStatus(client, {
       transformId: RUM_SESSIONS_TRANSFORM_ID,
       index: RUM_SESSIONS_INDEX,
       syncDelay: resolvedDelay,
-      sourceLookbackDays: installedDays ?? resolvedLookbackDays,
-    });
-  } catch (error) {
-    if (isEsNotFound(error)) {
-      return withDailyStatuses(client, {
-        ...emptyRumAnalyticsStatus(),
-        syncDelay: resolvedDelay,
-        sourceLookbackDays: resolvedLookbackDays,
-      });
-    }
-    throw error;
-  }
+    }),
+    client.transform.getTransform({ transform_id: RUM_SESSIONS_TRANSFORM_ID }).catch(() => null),
+  ]);
+  const watermarkMs = rollup.watermark != null ? Date.parse(rollup.watermark) : NaN;
+  const lagSeconds = Number.isFinite(watermarkMs)
+    ? Math.max(0, Math.round((Date.now() - watermarkMs) / 1000))
+    : null;
+  const installedDays = parseLookbackDays(installedSourceLookbackGte(current));
+  return withDailyStatuses(client, {
+    installed: rollup.installed,
+    state: rollup.state,
+    watermark: rollup.watermark,
+    lagSeconds,
+    transformId: RUM_SESSIONS_TRANSFORM_ID,
+    index: RUM_SESSIONS_INDEX,
+    syncDelay: resolvedDelay,
+    sourceLookbackDays: installedDays ?? resolvedLookbackDays,
+  });
 };
 
+/** Transform stats/get are cluster monitor APIs — pass `asInternalUser`. */
 export const getRumAnalyticsStatus = async (
   client: ElasticsearchClient,
   {
@@ -310,6 +286,7 @@ export const ensureRumSessionsTransform = async ({
   });
 };
 
+/** Transform stats/get are cluster monitor APIs — pass `asInternalUser`. */
 export const resolveRumAnalytics = async (
   client: ElasticsearchClient,
   {

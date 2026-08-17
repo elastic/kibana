@@ -11,6 +11,7 @@ import {
   lastRumAlertFiredAt,
   rumAlertEpisodeRange,
   rumAlertInvestigateTarget,
+  rumFiringServiceNames,
 } from './rum_alert_episodes';
 
 const event = (
@@ -98,6 +99,25 @@ describe('rumAlertInvestigateTarget', () => {
       pathname: '/session-replay',
       frustration: 'rage',
     });
+  });
+});
+
+describe('rumFiringServiceNames', () => {
+  it('maps the latest fire status onto scoped rules', () => {
+    expect(
+      rumFiringServiceNames(
+        [
+          { id: 'rule-1', serviceName: 'shop' },
+          { id: 'rule-2', serviceName: 'legacy' },
+          { id: 'rule-3' },
+        ],
+        [
+          event({ ruleId: 'rule-1', status: 'active' }),
+          event({ ruleId: 'rule-2', status: 'inactive' }),
+          event({ ruleId: 'rule-3', status: 'pending' }),
+        ]
+      )
+    ).toEqual(new Set(['shop']));
   });
 });
 

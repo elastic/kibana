@@ -210,7 +210,7 @@ const FacetSelect = ({
       closePopover={() => setOpen(false)}
       button={
         <EuiFilterButton
-          iconType="arrowDown"
+          iconType="chevronSingleDown"
           isSelected={open}
           onClick={() => setOpen((current) => !current)}
           hasActiveFilters={Boolean(value)}
@@ -536,7 +536,7 @@ export function OtelFilterBar() {
               })}
               button={
                 <EuiFilterButton
-                  iconType="plusInCircle"
+                  iconType="plusCircle"
                   isSelected={addOpen}
                   onClick={() => setAddOpen((current) => !current)}
                   grow={false}

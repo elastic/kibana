@@ -7,28 +7,31 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
+  approximateCheckpointWatermark,
   emptyRumRollupStatus,
   parseLookbackDays,
   RUM_CANONICAL_SESSION_ID_FIELD,
+  RUM_SESSIONS_SYNC_DELAY,
   sessionsRetentionMaxAge,
   sessionsSourceLookback,
   type RumRollupStatus,
   type RumSessionsTransformState,
 } from '../../common/rum_sessions';
 
-export const isEsNotFound = (error: unknown): boolean => {
-  const status =
-    typeof error === 'object' && error != null
-      ? (error as { statusCode?: number; meta?: { statusCode?: number } }).statusCode ??
-        (error as { meta?: { statusCode?: number } }).meta?.statusCode
-      : undefined;
-  return status === 404;
+export const esStatusCode = (error: unknown): number | undefined => {
+  if (typeof error !== 'object' || error == null) {
+    return undefined;
+  }
+  const withStatus = error as { statusCode?: number; meta?: { statusCode?: number } };
+  return withStatus.statusCode ?? withStatus.meta?.statusCode;
 };
 
-export const esStatusCode = (error: unknown): number | undefined =>
-  typeof error === 'object' && error != null
-    ? (error as { statusCode?: number }).statusCode
-    : undefined;
+export const isEsNotFound = (error: unknown): boolean => esStatusCode(error) === 404;
+
+export const isEsAuthzDenied = (error: unknown): boolean => {
+  const status = esStatusCode(error);
+  return status === 401 || status === 403;
+};
 
 export const toTransformState = (raw: string | undefined): RumSessionsTransformState => {
   if (
@@ -66,6 +69,9 @@ export const installedSourceIndex = (current: unknown): string | string[] | unde
   ).transforms?.[0]?.source?.index;
 
 export const installedSourceLookbackGte = (current: unknown): string | undefined => {
+  if (typeof current !== 'object' || current == null) {
+    return undefined;
+  }
   const filters = (
     current as {
       transforms?: Array<{
@@ -121,15 +127,58 @@ export const transformSourceWindowUpdate = ({
   },
 });
 
+const destIndexIsReadable = async (
+  client: ElasticsearchClient,
+  index: string
+): Promise<boolean> => {
+  try {
+    await client.search({
+      index,
+      size: 0,
+      terminate_after: 1,
+      track_total_hits: false,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/** Infer install from dest search when transform monitor APIs are missing or forbidden. */
+export const readRollupStatusFromDest = async (
+  client: ElasticsearchClient,
+  {
+    transformId,
+    index,
+    syncDelay = RUM_SESSIONS_SYNC_DELAY,
+  }: { transformId: string; index: string; syncDelay?: string }
+): Promise<RumRollupStatus> => {
+  if (!(await destIndexIsReadable(client, index))) {
+    return emptyRumRollupStatus(transformId, index);
+  }
+  const { watermark } = approximateCheckpointWatermark(syncDelay);
+  return {
+    installed: true,
+    state: 'unknown',
+    watermark,
+    transformId,
+    index,
+  };
+};
+
 export const readRollupStatus = async (
   client: ElasticsearchClient,
-  { transformId, index }: { transformId: string; index: string }
+  {
+    transformId,
+    index,
+    syncDelay = RUM_SESSIONS_SYNC_DELAY,
+  }: { transformId: string; index: string; syncDelay?: string }
 ): Promise<RumRollupStatus> => {
   try {
     const stats = await client.transform.getTransformStats({ transform_id: transformId });
     const row = stats.transforms[0];
     if (!row) {
-      return emptyRumRollupStatus(transformId, index);
+      return readRollupStatusFromDest(client, { transformId, index, syncDelay });
     }
     const checkpoint = row.checkpointing?.last as
       | { time_upper_bound_millis?: number; timestamp_millis?: number }
@@ -147,8 +196,8 @@ export const readRollupStatus = async (
       index,
     };
   } catch (error) {
-    if (isEsNotFound(error)) {
-      return emptyRumRollupStatus(transformId, index);
+    if (isEsNotFound(error) || isEsAuthzDenied(error)) {
+      return readRollupStatusFromDest(client, { transformId, index, syncDelay });
     }
     throw error;
   }

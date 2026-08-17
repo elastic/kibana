@@ -6,6 +6,12 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import {
+  RUM_APP_SETTINGS_API,
+  type RumAppSettings,
+  type RumAppSettingsBody,
+} from '../../../common/rum_app_settings';
+import type { RumAppsQueryStage, RumAppsResponse } from '../../../common/rum_apps';
 import type {
   RumErrorsResponse,
   RumFiltersResponse,
@@ -84,6 +90,48 @@ export const fetchRumFilters = async ({
   ...params
 }: RumQueryParams): Promise<RumFiltersResponse> => {
   return http.get<RumFiltersResponse>('/internal/ux/rum/filters', { query: rumQuery(params) });
+};
+
+export const fetchRumAppSettings = async ({
+  http,
+  serviceName,
+}: Pick<RumQueryParams, 'http'> & { serviceName: string }): Promise<RumAppSettings> => {
+  return http.get<RumAppSettings>(
+    `${RUM_APP_SETTINGS_API}/${encodeURIComponent(serviceName)}/settings`
+  );
+};
+
+export const updateRumAppSettings = async ({
+  http,
+  serviceName,
+  settings,
+}: Pick<RumQueryParams, 'http'> & {
+  serviceName: string;
+  settings: RumAppSettingsBody;
+}): Promise<RumAppSettings> => {
+  return http.put<RumAppSettings>(
+    `${RUM_APP_SETTINGS_API}/${encodeURIComponent(serviceName)}/settings`,
+    { body: JSON.stringify(settings) }
+  );
+};
+
+export const fetchRumApps = async ({
+  http,
+  rangeFrom,
+  rangeTo,
+  includeBots,
+  stage,
+}: Pick<RumQueryParams, 'http' | 'rangeFrom' | 'rangeTo' | 'includeBots'> & {
+  stage?: RumAppsQueryStage;
+}): Promise<RumAppsResponse> => {
+  return http.get<RumAppsResponse>('/internal/ux/rum/apps', {
+    query: {
+      rangeFrom,
+      rangeTo,
+      ...(includeBots ? { includeBots } : {}),
+      ...(stage ? { stage } : {}),
+    },
+  });
 };
 
 export const fetchRumOverview = async ({
