@@ -17,7 +17,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -59,12 +58,18 @@ const CAUSAL_FEATURES_TITLE = i18n.translate(
   { defaultMessage: 'Causal features' }
 );
 
+const SIGNALS_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.signalsTitle',
+  {
+    defaultMessage: 'Signals',
+  }
+);
+
 interface GridState {
   rows: ESQLRow[];
   columns: DatatableColumn[];
   dataView: DataView;
 }
-
 interface DetectionSignalRowProps {
   signal: Extract<SignalEntry, { type: 'detection' }>;
 }
@@ -265,21 +270,22 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
       )}
 
       {detectionSignals.length > 0 && (
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.significantEventsApp.significantEventsTab.flyout.signals', {
-                defaultMessage: 'Signals ({count})',
-                values: { count: detectionSignals.length },
-              })}
-            </h3>
-          </EuiTitle>
+        <InfoPanel
+          title={
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>{SIGNALS_TITLE}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">{detectionSignals.length}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
           <SignalListPanel>
             {detectionSignals.map((signal, idx) => {
               return <DetectionSignalRow key={idx} signal={signal} />;
             })}
           </SignalListPanel>
-        </EuiFlexGroup>
+        </InfoPanel>
       )}
     </EuiFlexGroup>
   );
