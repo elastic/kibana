@@ -210,6 +210,27 @@ describe('ProjectPicker', () => {
     expect(onApplyChanges).toHaveBeenCalledTimes(1);
   });
 
+  it('does not expose the revert to space defaults action in the flyout variant', async () => {
+    render(
+      <ProjectPickerFlyout
+        availableProjects={[createProject('p1'), createProject('p2')]}
+        onApplyChanges={jest.fn()}
+        onClose={jest.fn()}
+        onDiscardChanges={jest.fn()}
+        projectRouting="_id:p1"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('projectPickerHeaderActionsButton'));
+
+    expect(screen.getByText('Clear project tag filters')).toBeInTheDocument();
+    expect(screen.queryByText('Revert to space defaults')).not.toBeInTheDocument();
+  });
+
   it('does not reset custom flyout routing while projects are loading', async () => {
     const onProjectRoutingChange = jest.fn();
     const props = {

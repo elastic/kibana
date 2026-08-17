@@ -35,10 +35,14 @@ interface HeaderContextMenuItemProps
   isDisabled?: (props: HeaderContextMenuClickActionContext) => boolean;
 }
 
-const getContextMenuItems = (
-  actions: ReturnType<typeof useProjectPickerActions>
-): Array<HeaderContextMenuItemProps>[] => [
-  [
+const getContextMenuItems = ({
+  actions,
+  showRevertToSpaceDefaultsAction,
+}: {
+  actions: ReturnType<typeof useProjectPickerActions>;
+  showRevertToSpaceDefaultsAction: boolean;
+}): Array<HeaderContextMenuItemProps>[] => {
+  const defaultItems: HeaderContextMenuItemProps[] = [
     {
       icon: 'eraser',
       label: i18n.translate('cpsUtils.projectPicker.frameHeader.clearProjectFilters', {
@@ -51,7 +55,10 @@ const getContextMenuItems = (
         return state.filterExpressions.size === 0 || Boolean(state.isReadOnly);
       },
     },
-    {
+  ];
+
+  if (showRevertToSpaceDefaultsAction) {
+    defaultItems.push({
       icon: 'clockCounter',
       label: i18n.translate('cpsUtils.projectPicker.frameHeader.revertToSpaceDefaults', {
         defaultMessage: 'Revert to space defaults',
@@ -65,32 +72,38 @@ const getContextMenuItems = (
           Boolean(state.isReadOnly)
         );
       },
-    },
-  ],
-  // TODO: These actions are not yet supported and only show placeholder labels.
-  // Hide these until they are supported.
-  // [
-  //   {
-  //     icon: 'controls',
-  //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaultsAction', {
-  //       defaultMessage: 'Adjust space defaults',
-  //     }),
-  //   },
-  //   {
-  //     icon: 'gear',
-  //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.manageCrossProjectSearch', {
-  //       defaultMessage: 'Manage cross-project search',
-  //     }),
-  //     external: true,
-  //   },
-  // ],
-];
+    });
+  }
+
+  return [
+    defaultItems,
+    // TODO: These actions are not yet supported and only show placeholder labels.
+    // Hide these until they are supported.
+    // [
+    //   {
+    //     icon: 'controls',
+    //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.adjustSpaceDefaultsAction', {
+    //       defaultMessage: 'Adjust space defaults',
+    //     }),
+    //   },
+    //   {
+    //     icon: 'gear',
+    //     label: i18n.translate('cpsUtils.projectPicker.frameHeader.manageCrossProjectSearch', {
+    //       defaultMessage: 'Manage cross-project search',
+    //     }),
+    //     external: true,
+    //   },
+    // ],
+  ];
+};
 
 interface ProjectPickerFrameHeaderActionsProps {
   showSpaceDefaultsBadge?: boolean;
+  showRevertToSpaceDefaultsAction?: boolean;
 }
 
 export function ProjectPickerFrameHeaderActions({
+  showRevertToSpaceDefaultsAction = true,
   showSpaceDefaultsBadge = true,
 }: ProjectPickerFrameHeaderActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -106,7 +119,10 @@ export function ProjectPickerFrameHeaderActions({
   );
 
   const closePopover = useCallback(() => setIsOpen(false), []);
-  const contextMenuConfig = useMemo(() => getContextMenuItems(actions), [actions]);
+  const contextMenuConfig = useMemo(
+    () => getContextMenuItems({ actions, showRevertToSpaceDefaultsAction }),
+    [actions, showRevertToSpaceDefaultsAction]
+  );
 
   return (
     <EuiFlexGroup responsive={false}>
@@ -132,6 +148,7 @@ export function ProjectPickerFrameHeaderActions({
             >
               <EuiButtonIcon
                 aria-labelledby={contextMenuTooltipId}
+                data-test-subj="projectPickerHeaderActionsButton"
                 iconType="ellipsis"
                 onClick={() => setIsOpen(true)}
                 color="text"

@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 
 import type { ProjectPickerState } from '../../../../state/reducers';
-import { ProjectPickerFrameHeader } from './header';
+import { ProjectPickerFrameHeader, ProjectPickerFrameHeaderActions } from './header';
 import {
   FilterOperator,
   getFilterExpressionLookupKey,
@@ -72,6 +72,25 @@ const renderHeader = (stateOverrides: Partial<ProjectPickerState> = {}) => {
   );
 };
 
+const renderHeaderActions = ({
+  stateOverrides = {},
+  showRevertToSpaceDefaultsAction,
+}: {
+  stateOverrides?: Partial<ProjectPickerState>;
+  showRevertToSpaceDefaultsAction?: boolean;
+}) => {
+  mockUseProjectPickerState.mockReturnValue(createState(stateOverrides));
+  mockUseProjectPickerActions.mockReturnValue(defaultActions);
+
+  return render(
+    <EuiThemeProvider>
+      <ProjectPickerFrameHeaderActions
+        showRevertToSpaceDefaultsAction={showRevertToSpaceDefaultsAction}
+      />
+    </EuiThemeProvider>
+  );
+};
+
 const openGlobalActionsMenu = async () => {
   const user = userEvent.setup();
   const [menuButton] = screen.getAllByRole('button');
@@ -104,5 +123,17 @@ describe('ProjectPickerFrameHeader', () => {
 
     expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
     expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
+  });
+
+  it('can hide the revert to space defaults menu item', async () => {
+    renderHeaderActions({
+      stateOverrides: { ...stateWithFilters, isReadOnly: false },
+      showRevertToSpaceDefaultsAction: false,
+    });
+
+    await openGlobalActionsMenu();
+
+    expect(screen.getByText('Clear project tag filters')).toBeInTheDocument();
+    expect(screen.queryByText('Revert to space defaults')).not.toBeInTheDocument();
   });
 });
