@@ -192,9 +192,14 @@ export class TransactionDetailsPage {
   async revealCustomLink(label: string) {
     const link = this.page.getByRole('link', { name: label });
     const showAllButton = this.page.getByTestId('apmBottomSectionButton');
-    // `.first()` avoids a strict-mode violation when the link is already among the
-    // directly-rendered entries and the overflow toggle is also present (both match).
-    await link.or(showAllButton).first().waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+    // Wait for either the target link or the overflow toggle — whichever appears first
+    // once the custom-links API responds. Using separate locators (instead of .or() which
+    // would require .first() and trigger the no-nth-methods lint rule) avoids strict-mode
+    // violations while still short-circuiting as soon as either element is visible.
+    await Promise.race([
+      link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
+      showAllButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
+    ]);
     if (!(await link.isVisible()) && (await showAllButton.isVisible())) {
       await showAllButton.click();
     }
