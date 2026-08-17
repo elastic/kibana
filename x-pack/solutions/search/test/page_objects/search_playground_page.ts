@@ -719,8 +719,8 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         expect(await nameTitle.getVisibleText()).to.be(name);
       },
       async clickEditPlaygroundNameButton() {
-        await testSubjects.existOrFail('appHeaderTitleEditIcon');
-        await testSubjects.click('appHeaderTitleEditIcon');
+        await testSubjects.existOrFail('appHeaderTitleButton');
+        await testSubjects.click('appHeaderTitleButton');
         await testSubjects.existOrFail('appHeaderTitleInput');
       },
       async setPlaygroundNameInEditInput(name: string) {
