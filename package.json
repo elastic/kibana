@@ -1269,8 +1269,6 @@
     "@kbn/ui-app-menu": "link:src/platform/kbn-ui/app-menu",
     "@kbn/ui-callout": "link:src/platform/kbn-ui/callout",
     "@kbn/ui-chrome-layout": "link:src/platform/kbn-ui/chrome-layout",
-    "@kbn/ui-chrome-layout-constants": "link:src/platform/kbn-ui/chrome-layout-constants",
-    "@kbn/ui-chrome-layout-utils": "link:src/platform/kbn-ui/chrome-layout-utils",
     "@kbn/ui-feedback": "link:src/platform/kbn-ui/feedback",
     "@kbn/ui-settings-plugin": "link:src/platform/test/plugin_functional/plugins/ui_settings_plugin",
     "@kbn/ui-shared-deps-npm": "link:src/platform/packages/private/kbn-ui-shared-deps-npm",

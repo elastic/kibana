@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/src/platform/kbn-ui/chrome-layout-constants'],
-  setupFilesAfterEnv: [],
-  modulePathIgnorePatterns: ['<rootDir>/src/platform/kbn-ui/chrome-layout-constants/packaging'],
-};
+export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';

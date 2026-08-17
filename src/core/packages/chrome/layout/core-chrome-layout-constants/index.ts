@@ -6,9 +6,36 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { MAIN_CONTENT_SELECTORS as UI_MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout-constants';
 
-export * from '@kbn/ui-chrome-layout-constants';
-
-export const APP_FIXED_VIEWPORT_ID = 'app-fixed-viewport';
-export const MAIN_CONTENT_SELECTORS = [...UI_MAIN_CONTENT_SELECTORS, '.kbnAppWrapper'];
+export {
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  layoutVar,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  layoutVarName,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  layoutLevels,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  APP_MAIN_SCROLL_CONTAINER_ID,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  FLYOUT_SELECTOR,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  MAIN_CONTENT_SELECTORS,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  SIDE_PANEL_CONTENT_GAP,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  euiIncludeSelectorInFocusTrap,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  APP_FIXED_VIEWPORT_ID,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  type LayoutVarName,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  type CSSVarName,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  type LayoutComponent,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  type LayoutProperty,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  type ApplicationComponent,
+  /** @deprecated Import from `@kbn/core-chrome-layout` instead. */
+  type ApplicationVarName,
+} from '@kbn/core-chrome-layout';

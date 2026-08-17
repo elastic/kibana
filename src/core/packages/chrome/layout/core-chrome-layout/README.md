@@ -10,6 +10,7 @@ Top-level layout wiring for Kibana's Chrome application shell. Bridges core serv
 - **Composes the shell** — header, navigation, sidebar, banner, app menu bar, footer, and the application content area — into a CSS Grid layout via `ChromeLayout` from `@kbn/ui-chrome-layout`.
 - **Applies Kibana integration styles** for legacy variables, application wrappers, and the fixed chart viewport around the reusable layout (`KibanaGridLayoutGlobalStyles`).
 - **Provides layout config** (`ChromeLayoutConfigProvider`) with dimensions (header height, banner height, sidebar width, etc.) consumed by layout components via CSS custom properties.
+- **Re-exports layout constants and utilities** (`layoutVar`, `APP_MAIN_SCROLL_CONTAINER_ID`, scroll helpers, and Kibana-only IDs such as `APP_FIXED_VIEWPORT_ID`) as the Kibana plugin API.
 
 ## Available Layouts
 

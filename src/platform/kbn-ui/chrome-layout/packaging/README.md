@@ -3,9 +3,7 @@
 This directory contains the build infrastructure that produces a self-contained
 `@kbn/ui-chrome-layout` tarball for use outside of Kibana (e.g. Cloud UI).
 
-The tarball includes layout components, constants, and utilities. In Kibana,
-`@kbn/ui-chrome-layout-constants` and `@kbn/ui-chrome-layout-utils` remain as
-named re-export shims of this package.
+The tarball includes layout components, constants, and utilities.
 
 ## Building
 
