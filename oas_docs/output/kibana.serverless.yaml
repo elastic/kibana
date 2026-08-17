@@ -19492,6 +19492,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/delete:
     delete:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19499,7 +19500,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+        **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -19534,6 +19535,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/disable:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19541,7 +19543,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+        **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
       operationId: DisableMonitoringEngine
       responses:
         '200':
@@ -19563,6 +19565,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/init:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19570,7 +19573,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+        **Deprecated in 9.4.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
       operationId: InitMonitoringEngine
       responses:
         '200':
@@ -19605,6 +19608,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19612,7 +19616,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+        **Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
@@ -19653,6 +19657,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/privileges/health:
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19660,7 +19665,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+        **Deprecated in 9.4.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
       operationId: PrivMonHealth
       responses:
         '200':
@@ -19710,14 +19715,17 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/privileges</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Check if the current user has all required permissions for Privilege Monitoring
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+        Check if the current user has all required permissions for Privilege Monitoring.
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -19744,12 +19752,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users:
     post:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
       operationId: CreatePrivMonUser
@@ -19801,12 +19812,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/_csv</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
       operationId: PrivmonBulkUploadUsersCSV
@@ -19870,12 +19884,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/{id}:
     delete:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
@@ -19915,12 +19932,15 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     put:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Updates the details of an existing monitored privileged user by their document ID.
       operationId: UpdatePrivMonUser
@@ -19980,12 +20000,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/list:
     get:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/list</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
       operationId: ListPrivMonUsers
