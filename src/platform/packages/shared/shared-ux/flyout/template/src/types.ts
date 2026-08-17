@@ -37,8 +37,6 @@ export interface FlyoutBodyProps {
 
 /** Props shared by the declarative footer action parts. */
 export interface FlyoutFooterActionBaseProps {
-  /** Optional explicit instance id; auto-generated when omitted. */
-  id?: string;
   /** Button label. */
   label: ReactNode;
   onClick: MouseEventHandler<HTMLButtonElement>;
