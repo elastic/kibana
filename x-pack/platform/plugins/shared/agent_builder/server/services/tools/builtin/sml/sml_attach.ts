@@ -44,9 +44,9 @@ export const createSmlAttachTool = ({
   tags: ['sml', 'attachment'],
   annotations: {
     title: 'Attach SML Item',
-    readOnlyHint: false,
+    readOnlyHint: true,
     destructiveHint: false,
-    idempotentHint: false,
+    idempotentHint: true,
     openWorldHint: false,
   },
   availability: {
