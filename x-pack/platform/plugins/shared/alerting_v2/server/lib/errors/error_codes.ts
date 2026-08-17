@@ -36,6 +36,11 @@ export const ALERTING_ERROR_CODES = {
   /** A signal rule's merged shape violates signal constraints. */
   INVALID_SIGNAL_RULE: 'INVALID_SIGNAL_RULE',
   /**
+   * A rule's merged shape has a recovery/no-data query block that is
+   * inconsistent with its `recovery_strategy`/`no_data_strategy`.
+   */
+  INVALID_RULE_QUERY_CONFIG: 'INVALID_RULE_QUERY_CONFIG',
+  /**
    * A by-query bulk operation was submitted with `force: true` and the filter
    * matched more resources than a single request may process. Rejected before
    * any resource is mutated so the caller sees an all-or-nothing outcome (no
@@ -469,9 +474,7 @@ export const ALERTING_LOG_CODES = {
   AGENT_BUILDER_MANAGE_RULE_FAILED: 'AGENT_BUILDER_MANAGE_RULE_FAILED',
   /** `manage_action_policy` tool failed; returns an error result. */
   AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED: 'AGENT_BUILDER_MANAGE_ACTION_POLICY_FAILED',
-  /** Skill schema docs could not be generated; skill registration aborted (error). */
-  AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED: 'AGENT_BUILDER_SKILL_SCHEMA_DOCS_FAILED',
-  /** Agent Builder skill registration failed (error); skills unavailable until fixed. */
+  /** Agent Builder skill registration failed; the skill is skipped and Kibana start continues. */
   AGENT_BUILDER_SKILL_REGISTER_FAILED: 'AGENT_BUILDER_SKILL_REGISTER_FAILED',
 
   // ─────────────────────────────── Tasks ─────────────────────────────
