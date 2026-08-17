@@ -6,6 +6,7 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import type { ApiClientFixture } from '@kbn/scout';
 import {
   INTERNAL_HEADERS,
   GET_NOTIFICATIONS_PATH,
@@ -63,22 +64,6 @@ export const clearNotifications = async (esClient: Client, namespace: string) =>
   });
 };
 
-interface ApiClientOptions {
-  headers?: Record<string, string>;
-  body?: unknown;
-  responseType?: 'json' | 'text' | 'buffer';
-}
-
-interface ApiClientResponse {
-  statusCode: number;
-  body: any;
-}
-
-export interface ApiClient {
-  get(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-  post(url: string, options?: ApiClientOptions): Promise<ApiClientResponse>;
-}
-
 export type QueryParams = Record<string, string | string[]>;
 
 /** apiClient takes no query option, so encode params into the path (arrays become repeated keys). */
@@ -98,16 +83,16 @@ export const createHelpers = (authHeaderGetter: () => Record<string, string>) =>
   const headers = () => ({ ...INTERNAL_HEADERS, ...authHeaderGetter() });
 
   return {
-    getNotifications: (apiClient: ApiClient, params?: QueryParams) =>
+    getNotifications: (apiClient: ApiClientFixture, params?: QueryParams) =>
       apiClient.get(withQuery(GET_NOTIFICATIONS_PATH, params), {
         headers: headers(),
         responseType: 'json',
       }),
 
-    markRead: (apiClient: ApiClient, body: unknown) =>
+    markRead: (apiClient: ApiClientFixture, body: unknown) =>
       apiClient.post(MARK_READ_PATH, { headers: headers(), body, responseType: 'json' }),
 
-    markAllRead: (apiClient: ApiClient) =>
+    markAllRead: (apiClient: ApiClientFixture) =>
       apiClient.post(MARK_ALL_READ_PATH, { headers: headers(), responseType: 'json' }),
   };
 };
