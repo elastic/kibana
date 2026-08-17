@@ -93,101 +93,101 @@ export type OtlpTlsCurvePreference = 'X25519' | 'P521' | 'P256' | 'P384';
 interface OtlpExporterTlsConfig {
   insecure?: boolean;
   insecure_skip_verify?: boolean;
-  ca_pem?: string;
-  cert_pem?: string;
-  key_pem?: string;
-  ca_file?: string;
-  cert_file?: string;
-  key_file?: string;
+  ca_pem?: string | null;
+  cert_pem?: string | null;
+  key_pem?: string | null;
+  ca_file?: string | null;
+  cert_file?: string | null;
+  key_file?: string | null;
   include_system_ca_certs_pool?: boolean;
   include_insecure_cipher_suites?: boolean;
-  min_version?: string;
-  max_version?: string;
-  reload_interval?: string;
-  server_name_override?: string;
-  cipher_suites?: string[];
-  curve_preferences?: OtlpTlsCurvePreference[];
+  min_version?: string | null;
+  max_version?: string | null;
+  reload_interval?: string | null;
+  server_name_override?: string | null;
+  cipher_suites?: string[] | null;
+  curve_preferences?: OtlpTlsCurvePreference[] | null;
   tpm?: {
     enabled?: boolean;
-    path?: string;
-    owner_auth?: string;
-    auth?: string;
-  };
+    path?: string | null;
+    owner_auth?: string | null;
+    auth?: string | null;
+  } | null;
 }
 
 interface OtlpExporterSendingQueueConfig {
   enabled?: boolean;
-  num_consumers?: number;
-  queue_size?: number;
+  num_consumers?: number | null;
+  queue_size?: number | null;
   sizer?: 'requests' | 'items' | 'bytes';
   wait_for_result?: boolean;
   block_on_overflow?: boolean;
   batch?: {
-    flush_timeout?: string;
-    min_size?: number;
-    max_size?: number;
+    flush_timeout?: string | null;
+    min_size?: number | null;
+    max_size?: number | null;
     sizer?: 'items' | 'bytes';
     partition?: {
-      metadata_keys?: string[];
-    };
-  };
+      metadata_keys?: string[] | null;
+    } | null;
+  } | null;
 }
 
 interface OtlpExporterRetryConfig {
   enabled?: boolean;
-  initial_interval?: string;
-  randomization_factor?: number;
-  multiplier?: number;
-  max_interval?: string;
-  max_elapsed_time?: string;
+  initial_interval?: string | null;
+  randomization_factor?: number | null;
+  multiplier?: number | null;
+  max_interval?: string | null;
+  max_elapsed_time?: string | null;
 }
 
 interface OtlpExporterBaseConfig {
   endpoint: string;
-  headers?: Record<string, string>;
-  timeout?: string;
-  tls?: OtlpExporterTlsConfig;
-  sending_queue?: OtlpExporterSendingQueueConfig;
-  retry_on_failure?: OtlpExporterRetryConfig;
+  headers?: Record<string, string> | null;
+  timeout?: string | null;
+  tls?: OtlpExporterTlsConfig | null;
+  sending_queue?: OtlpExporterSendingQueueConfig | null;
+  retry_on_failure?: OtlpExporterRetryConfig | null;
 }
 
 export interface OtlpGrpcExporterConfig extends OtlpExporterBaseConfig {
   protocol: typeof otlpProtocol.Grpc;
   compression?: OtlpGrpcCompression;
-  balancer_name?: string;
+  balancer_name?: string | null;
   keepalive?: {
-    time?: string;
-    timeout?: string;
+    time?: string | null;
+    timeout?: string | null;
     permit_without_stream?: boolean;
-  };
-  read_buffer_size?: number;
-  write_buffer_size?: number;
+  } | null;
+  read_buffer_size?: number | null;
+  write_buffer_size?: number | null;
   wait_for_ready?: boolean;
-  user_agent?: string;
-  authority?: string;
+  user_agent?: string | null;
+  authority?: string | null;
 }
 
 export interface OtlpHttpExporterConfig extends OtlpExporterBaseConfig {
   protocol: typeof otlpProtocol.HttpProtobuf;
   compression?: OtlpHttpCompression;
   encoding?: 'proto' | 'json';
-  traces_endpoint?: string;
-  metrics_endpoint?: string;
-  logs_endpoint?: string;
-  profiles_endpoint?: string;
-  read_buffer_size?: number;
-  write_buffer_size?: number;
-  proxy_url?: string;
-  max_idle_conns?: number;
-  max_idle_conns_per_host?: number;
-  max_conns_per_host?: number;
-  idle_conn_timeout?: string;
+  traces_endpoint?: string | null;
+  metrics_endpoint?: string | null;
+  logs_endpoint?: string | null;
+  profiles_endpoint?: string | null;
+  read_buffer_size?: number | null;
+  write_buffer_size?: number | null;
+  proxy_url?: string | null;
+  max_idle_conns?: number | null;
+  max_idle_conns_per_host?: number | null;
+  max_conns_per_host?: number | null;
+  idle_conn_timeout?: string | null;
   disable_keep_alives?: boolean;
-  http2_read_idle_timeout?: string;
-  http2_ping_timeout?: string;
+  http2_read_idle_timeout?: string | null;
+  http2_ping_timeout?: string | null;
   force_attempt_http2?: boolean;
-  compression_params?: { level?: number };
-  cookies?: { enabled?: boolean };
+  compression_params?: { level?: number } | null;
+  cookies?: { enabled?: boolean } | null;
 }
 
 export type OtlpExporterConfig = OtlpGrpcExporterConfig | OtlpHttpExporterConfig;
