@@ -4,6 +4,7 @@ env:
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
+    key: pre_build
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2404
@@ -15,8 +16,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  # e2e suites (FTR, Scout, Cypress) intentionally do not run here; they run
-  # post-merge in kibana-on-merge. Only Jest unit tests gate the queue.
+  # E2E suites (FTR, Scout, Cypress) intentionally do not run in the merge queue.
+  # Only Jest unit tests gate the queue.
   - command: .buildkite/scripts/steps/test/pick_test_group_run_order.sh
     label: 'Pick Test Group Run Order'
     agents:
@@ -50,7 +51,8 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - wait
+  - wait: ~
+    depends_on: pre_build
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
