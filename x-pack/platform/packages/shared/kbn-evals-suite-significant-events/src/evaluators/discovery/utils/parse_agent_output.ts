@@ -114,6 +114,12 @@ export const extractRequestedEventIdsFromToolCall = (steps: ConverseStep[]): str
       .filter((eventId): eventId is string => typeof eventId === 'string' && eventId.length > 0)
   );
 
+/** Extract raw events_write request items before handler-side merges or ID assignment. */
+export const extractWriteItemsFromToolCall = (steps: ConverseStep[]): Partial<SignificantEvent>[] =>
+  toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) =>
+    getBulkItems(step.params)
+  );
+
 /**
  * Extract significant events from `events_write` tool call steps.
  * Merges generated identifiers from successful tool results into their corresponding inputs.

@@ -20,11 +20,12 @@ export class DispatcherService implements DispatcherServiceContract {
 
   public async run({
     previousStartedAt = new Date(),
+    logger,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
     const executionUuid = uuidV4();
 
-    await this.pipeline.execute({ startedAt, previousStartedAt, executionUuid });
+    await this.pipeline.execute({ startedAt, previousStartedAt, executionUuid, logger });
 
     return { startedAt };
   }

@@ -159,6 +159,13 @@ export function createEventsWriteTool({
       same exact stream+rule identity. If found, returns it without writing (written: false,
       reason: existing_active_event). Otherwise creates a new event with a generated event_id.
     `,
+    annotations: {
+      title: 'Write Significant Events',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     schema: eventsWriteSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),
