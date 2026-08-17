@@ -17,7 +17,6 @@ import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_
 
 jest.mock('./components/custom_content_component', () => ({
   CustomContentComponent: (props: {
-    prompt: string | undefined;
     esqlQuery: string | undefined;
     savedTemplate: string | undefined;
     generationVersion: number;
@@ -25,7 +24,6 @@ jest.mock('./components/custom_content_component', () => ({
     return (
       <div
         data-test-subj="mockCustomContentComponent"
-        data-prompt={props.prompt ?? ''}
         data-esql-query={props.esqlQuery ?? ''}
         data-saved-template={props.savedTemplate ?? ''}
         data-generation-version={props.generationVersion}
@@ -143,7 +141,7 @@ describe('customContentEmbeddableFactory', () => {
       expect(listener).toHaveBeenCalled();
     });
 
-    it('emits when prompt or template changes via applySerializedState', async () => {
+    it('emits when template changes via applySerializedState', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       const listener = jest.fn();
       embeddable.api.anyStateChange$.subscribe(listener);
@@ -157,12 +155,11 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('Component', () => {
-    it('passes prompt, esqlQuery and savedTemplate to CustomContentComponent', async () => {
+    it('passes esqlQuery and savedTemplate to CustomContentComponent', async () => {
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
       const el = screen.getByTestId('mockCustomContentComponent');
-      expect(el).toHaveAttribute('data-prompt', 'Show KPI cards');
       expect(el).toHaveAttribute('data-esql-query', baseState.esqlQuery);
       expect(el).toHaveAttribute('data-saved-template', '<div>static html</div>');
     });

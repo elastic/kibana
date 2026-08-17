@@ -24,14 +24,10 @@ import {
 import { mergeAndResolveCustomContentEdit } from './panel_creation';
 import { defineOperation } from './types';
 
-/**
- * An edit that passed validation. `existingPanel` is only carried for
- * `source: 'request'` edits (the resolver needs it); `source: 'config'` edits
- * don't have one.
- */
+/** An edit that passed validation, always carrying the existing panel snapshot. */
 interface ValidEdit {
   panelInput: EditPanelItem;
-  existingPanel?: AttachmentPanel;
+  existingPanel: AttachmentPanel;
 }
 
 const missingPanelResolverError =

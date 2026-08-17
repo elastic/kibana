@@ -15,7 +15,6 @@ import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 
 interface CustomContentComponentProps {
   embeddableId: string;
-  prompt: string | undefined;
   esqlQuery: string | undefined;
   timeRange: TimeRange | undefined;
   generationVersion: number;
@@ -45,7 +44,6 @@ const iframeCss = css({
 
 export const CustomContentComponent = ({
   embeddableId,
-  prompt,
   esqlQuery,
   timeRange,
   generationVersion,
