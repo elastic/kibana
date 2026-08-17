@@ -294,6 +294,20 @@ describe('EventClient', () => {
         .find((q) => !q.includes('STATS total'));
       expect(dataQuery).toContain('event_id IN ("checkout-failure")');
     });
+
+    it('matches a typed search against event_id as well as text fields', async () => {
+      const { client, query } = createSearchClient({
+        hits: [],
+        total: 0,
+      });
+
+      await client.findLatestByCurrentStatePaginated({ search: 'checkout-failure' });
+
+      const dataQuery = query.mock.calls
+        .map((call) => (call[0] as { query: string }).query)
+        .find((q) => !q.includes('STATS total'));
+      expect(dataQuery).toContain('TO_LOWER(event_id) == TO_LOWER("checkout-failure")');
+    });
   });
 
   describe('findLatestActive', () => {

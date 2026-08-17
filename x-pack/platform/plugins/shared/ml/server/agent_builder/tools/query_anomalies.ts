@@ -166,6 +166,13 @@ Example (with placeholders — bind every ?name):
 
 Allowed indices (internal user): \`.ml-anomalies-*\`, \`.ml-config\`, \`.ml-notifications-*\`, \`.ml-annotations-*\`.
 For source-data indices use \`platform.core.execute_esql\` instead.`,
+  annotations: {
+    title: 'Query Anomalies',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   experimental: true,
   schema,
   handler: async (

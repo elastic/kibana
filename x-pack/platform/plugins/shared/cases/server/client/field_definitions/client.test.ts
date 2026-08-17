@@ -139,6 +139,35 @@ describe('createFieldDefinitionsSubClient', () => {
         'A field definition with name "MY_FIELD" already exists for this owner.'
       );
     });
+
+    it('throws 400 when the name attribute does not match the YAML name', async () => {
+      // FAILURE SCENARIO: caller submits name "other_field" while the YAML says
+      // "my_field" — the two would diverge forever since both become immutable.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+
+      await expect(client.createFieldDefinition({ ...input, name: 'other_field' })).rejects.toThrow(
+        'The name attribute ("other_field") must match the name in the YAML definition ("my_field").'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('defers malformed YAML to service validation instead of the name-match check', async () => {
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions: [],
+        total: 0,
+      });
+      clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockResolvedValue(so);
+
+      await client.createFieldDefinition({ ...input, definition: 'not: [valid' });
+
+      expect(clientArgs.services.fieldDefinitionsService.createFieldDefinition).toHaveBeenCalled();
+    });
   });
 
   describe('updateFieldDefinition', () => {
@@ -148,60 +177,166 @@ describe('createFieldDefinitionsSubClient', () => {
       definition: 'name: my_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
     };
 
-    it('updates a field definition when no name conflict exists', async () => {
+    const expectIdentityConflict = async (
+      updateInput: typeof input,
+      changed: Array<'name' | 'type'>
+    ) => {
+      await expect(client.updateFieldDefinition('fd-1', updateInput)).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: {
+          casesApiErrorAttributes: { code: 'field_identity_immutable', changed },
+        },
+      });
+      expect(
+        clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+      ).not.toHaveBeenCalled();
+    };
+
+    beforeEach(() => {
       const so = makeFieldDefinitionSO();
       clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
-      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-        fieldDefinitions: [so.attributes],
-        total: 1,
-      });
       clientArgs.services.fieldDefinitionsService.updateFieldDefinition.mockResolvedValue(so);
-
-      const result = await client.updateFieldDefinition('fd-1', input);
-
-      expect(result).toBe(so);
     });
 
-    it('allows updating a field to keep its own name', async () => {
-      const so = makeFieldDefinitionSO({ id: 'fd-1', name: 'my_field' });
-      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
-      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-        fieldDefinitions: [so.attributes],
-        total: 1,
+    it('updates metadata without changing identity', async () => {
+      const result = await client.updateFieldDefinition('fd-1', {
+        ...input,
+        description: 'new description',
+        definition: 'name: my_field\nlabel: "New Label"\ncontrol: INPUT_TEXT\ntype: keyword\n',
       });
-      clientArgs.services.fieldDefinitionsService.updateFieldDefinition.mockResolvedValue(so);
 
-      await expect(client.updateFieldDefinition('fd-1', input)).resolves.toBe(so);
+      expect(result.attributes.name).toBe('my_field');
+      expect(clientArgs.services.fieldDefinitionsService.updateFieldDefinition).toHaveBeenCalled();
     });
 
-    it('throws 409 when another field has the same name', async () => {
-      const so = makeFieldDefinitionSO({ id: 'fd-1', name: 'my_field' });
-      const other = makeFieldDefinitionSO({ id: 'fd-2', name: 'new_name' });
-      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
-      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-        fieldDefinitions: [so.attributes, other.attributes],
-        total: 2,
-      });
+    it('does not run a name-uniqueness lookup on update', async () => {
+      await client.updateFieldDefinition('fd-1', input);
 
-      await expect(
-        client.updateFieldDefinition('fd-1', { ...input, name: 'new_name' })
-      ).rejects.toThrow('A field definition with name "new_name" already exists for this owner.');
+      expect(
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitions
+      ).not.toHaveBeenCalled();
     });
 
-    it('is case-insensitive when checking for name conflicts on update', async () => {
-      const so = makeFieldDefinitionSO({ id: 'fd-1', name: 'my_field' });
-      const other = makeFieldDefinitionSO({ id: 'fd-2', name: 'Other_Field' });
-      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
-      clientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
-        fieldDefinitions: [so.attributes, other.attributes],
-        total: 2,
-      });
-
-      await expect(
-        client.updateFieldDefinition('fd-1', { ...input, name: 'other_field' })
-      ).rejects.toThrow(
-        'A field definition with name "Other_Field" already exists for this owner.'
+    it('throws a structured 409 when the name changes', async () => {
+      // FAILURE SCENARIO: renaming my_field -> new_name would orphan every case
+      // value stored under my_field_as_keyword and break analytics.
+      await expectIdentityConflict(
+        {
+          ...input,
+          name: 'new_name',
+          definition: 'name: new_name\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        },
+        ['name']
       );
+    });
+
+    it('throws a structured 409 when the type changes', async () => {
+      // FAILURE SCENARIO: retyping keyword -> integer changes the storage key
+      // suffix (_as_keyword -> _as_integer), stranding existing values.
+      await expectIdentityConflict(
+        {
+          ...input,
+          definition: 'name: my_field\ncontrol: INPUT_NUMBER\ntype: integer\n',
+        },
+        ['type']
+      );
+    });
+
+    it('throws a structured 409 listing both when name and type change', async () => {
+      await expectIdentityConflict(
+        {
+          ...input,
+          name: 'new_name',
+          definition: 'name: new_name\ncontrol: INPUT_NUMBER\ntype: integer\n',
+        },
+        ['name', 'type']
+      );
+    });
+
+    it('throws 400 when the name attribute does not match the YAML name', async () => {
+      // FAILURE SCENARIO: attribute says my_field but YAML says other_field —
+      // malformed input, rejected before any identity comparison.
+      await expect(
+        client.updateFieldDefinition('fd-1', {
+          ...input,
+          definition: 'name: other_field\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        })
+      ).rejects.toThrow(
+        'The name attribute ("my_field") must match the name in the YAML definition ("other_field").'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('increments identity rejection counters for the changed parts', async () => {
+      const usageCounter = { domainId: 'cases', incrementCounter: jest.fn() };
+      client = createFieldDefinitionsSubClient({ ...clientArgs, usageCounter });
+
+      await expect(
+        client.updateFieldDefinition('fd-1', {
+          ...input,
+          name: 'new_name',
+          definition: 'name: new_name\ncontrol: INPUT_NUMBER\ntype: integer\n',
+        })
+      ).rejects.toMatchObject({ output: { statusCode: 409 } });
+
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'fieldIdentityImmutableName',
+      });
+      expect(usageCounter.incrementCounter).toHaveBeenCalledWith({
+        counterName: 'fieldIdentityImmutableType',
+      });
+    });
+
+    it('still returns the 409 when the usage counter throws', async () => {
+      // FAILURE SCENARIO: telemetry backend hiccup — the counter throwing must
+      // not mask or replace the structured identity conflict.
+      const usageCounter = {
+        domainId: 'cases',
+        incrementCounter: jest.fn().mockImplementation(() => {
+          throw new Error('counter unavailable');
+        }),
+      };
+      client = createFieldDefinitionsSubClient({ ...clientArgs, usageCounter });
+
+      await expect(
+        client.updateFieldDefinition('fd-1', {
+          ...input,
+          name: 'new_name',
+          definition: 'name: new_name\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: {
+          casesApiErrorAttributes: { code: 'field_identity_immutable', changed: ['name'] },
+        },
+      });
+    });
+
+    it('skips the type check when the persisted YAML is malformed but still guards the name', async () => {
+      // Imported/legacy SO whose stored YAML no longer parses: the type cannot
+      // be determined, but a rename is still an identity change.
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(
+        makeFieldDefinitionSO({ definition: 'not: [valid' })
+      );
+
+      await expectIdentityConflict(
+        {
+          ...input,
+          name: 'new_name',
+          definition: 'name: new_name\ncontrol: INPUT_TEXT\ntype: keyword\n',
+        },
+        ['name']
+      );
+    });
+
+    it('defers malformed submitted YAML to service validation', async () => {
+      await client.updateFieldDefinition('fd-1', { ...input, definition: 'not: [valid' });
+
+      expect(
+        clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+      ).toHaveBeenCalledWith('fd-1', { ...input, definition: 'not: [valid' });
     });
   });
 
