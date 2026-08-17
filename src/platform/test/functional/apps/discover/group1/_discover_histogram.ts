@@ -9,7 +9,7 @@
 
 /**
  * Migration recommendation: MIGRATE TO SCOUT.
- * Aim to group tests into a "New Discover session / Persisted Discover session" Histogram behavior part 
+ * Aim to group tests into a "New Discover session / Persisted Discover session" Histogram behavior part
  * Merge test suites by using Scout steps, rather than navigating to Discover too often
  */
 
