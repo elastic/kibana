@@ -8,6 +8,7 @@
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -29,6 +30,7 @@ import type {
 } from '../../common/embeddable/types';
 
 export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
+  CanCancelRequests &
   HasDrilldowns &
   Partial<HasEditCapabilities> &
   HasInspectorAdapters &

@@ -123,21 +123,12 @@ export const GreyNoiseConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        await ctx.client.get('https://api.greynoise.io/v2/noise/quick/8.8.8.8');
-        return {
-          ok: true,
-          message: 'Successfully connected to GreyNoise API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      await ctx.client.get('https://api.greynoise.io/v2/noise/quick/8.8.8.8');
+      return {};
     },
     description: i18n.translate('connectorSpecs.greynoise.test.description', {
       defaultMessage: 'Verifies GreyNoise API key',
     }),
+    enabled: true,
   },
 };

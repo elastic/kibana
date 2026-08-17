@@ -219,6 +219,18 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
   },
+  test: {
+    description: i18n.translate('core.kibanaConnectorSpecs.jira.test.description', {
+      defaultMessage: 'Verifies Jira Cloud connection by fetching the current user',
+    }),
+    handler: async (ctx) => {
+      const baseUrl = buildBaseUrl(ctx);
+      await ctx.client.get(`${baseUrl}/rest/api/3/myself`);
+      return {};
+    },
+    enabled: true,
+  },
+
   skill: [
     'Typical patterns:',
     '- Discovery: getProjects → getProject (by key) → searchIssuesWithJql (scoped to project)',

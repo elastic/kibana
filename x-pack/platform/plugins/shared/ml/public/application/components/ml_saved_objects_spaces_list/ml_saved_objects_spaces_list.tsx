@@ -112,7 +112,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
       <EuiButtonEmpty
         disabled={disabled}
         onClick={() => setShowFlyout(true)}
-        style={{ height: 'auto' }}
+        style={{ height: 'auto', padding: 0 }}
         data-test-subj="mlJobListRowManageSpacesButton"
         aria-label={i18n.translate(
           'xpack.ml.management.jobsSpacesList.manageSpacesButtonAriaLabel',

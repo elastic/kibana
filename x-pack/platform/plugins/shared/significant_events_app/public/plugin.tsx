@@ -11,19 +11,13 @@ import {
   type CoreSetup,
   type CoreStart,
   type Plugin,
-  type PluginInitializerContext,
 } from '@kbn/core/public';
 import {
   SIGNIFICANT_EVENTS_APP_ID,
   type SignificantEventsLinkId,
 } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import {
-  SIGNIFICANT_EVENTS_TIERED_FEATURE,
-  STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-} from '@kbn/significant-events-plugin/common';
-import type { Observable } from 'rxjs';
-import { combineLatest, distinctUntilChanged, from, map, shareReplay, switchMap } from 'rxjs';
+import { catchError, from, map, of, switchMap } from 'rxjs';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { SIGNIFICANT_EVENTS_APP_ROUTE } from '../common/constants';
 import { SignificantEventsAppLocatorDefinition } from '../common/locators';
@@ -48,13 +42,10 @@ export class SignificantEventsAppPlugin
 {
   // Built in start(); core guarantees every plugin start() runs before any app mount,
   // so the mount callback below can safely read it.
-  private availability$!: Observable<boolean>;
   private focusedSignificantEventService!: FocusedSignificantEventService;
   private cleanupSignificantEventAttachment?: () => void;
   private stopped = false;
   private knowledgeIndicatorsPanel?: KnowledgeIndicatorsPanelComponent;
-
-  constructor(private readonly context: PluginInitializerContext) {}
 
   setup(
     coreSetup: CoreSetup<SignificantEventsAppStartDependencies>,
@@ -111,12 +102,20 @@ export class SignificantEventsAppPlugin
         },
       ],
       updater$: from(startServicesPromise).pipe(
-        switchMap(() =>
-          this.availability$.pipe(
-            // Standalone app: surface in global search whenever the client gate is
-            // on. Nightshift and other consumers link here independently of Streams
-            // navigation status.
-            distinctUntilChanged(),
+        switchMap(([, pluginsStart]) =>
+          // The server endpoint is the single source of truth for availability
+          // (rollout flag, project type, pricing tier, license, required plugins).
+          // Standalone app: surface in global search whenever it reports available.
+          // Nightshift and other consumers link here independently of Streams
+          // navigation status.
+          from(
+            pluginsStart.significantEvents.significantEventsRepositoryClient.fetch(
+              'GET /internal/significant_events/availability',
+              { signal: null }
+            )
+          ).pipe(
+            map(({ available }) => available),
+            catchError(() => of(false)),
             map(
               (visible): AppUpdater =>
                 (app) => ({
@@ -137,7 +136,6 @@ export class SignificantEventsAppPlugin
         ]);
 
         const services: SignificantEventsAppServices = {
-          availability$: this.availability$,
           focusedSignificantEventService: this.focusedSignificantEventService,
         };
 
@@ -151,7 +149,6 @@ export class SignificantEventsAppPlugin
           services,
           coreStart,
           pluginsStart,
-          isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
         });
       },
     });
@@ -163,25 +160,6 @@ export class SignificantEventsAppPlugin
     coreStart: CoreStart,
     pluginsStart: SignificantEventsAppStartDependencies
   ): SignificantEventsAppPublicStart {
-    // Created once and multicast (refCount: false keeps the chain alive across
-    // subscriber churn): every flag evaluation POSTs to the feature-flags usage
-    // counter endpoint, so consumers must share this single subscription chain
-    // instead of recreating it.
-    this.availability$ = combineLatest([
-      coreStart.featureFlags.getBooleanValue$(STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG, false),
-      pluginsStart.licensing.license$,
-    ]).pipe(
-      map(([flagEnabled, license]) =>
-        Boolean(
-          flagEnabled &&
-            license?.hasAtLeast('enterprise') &&
-            coreStart.pricing.isFeatureAvailable(SIGNIFICANT_EVENTS_TIERED_FEATURE.id)
-        )
-      ),
-      distinctUntilChanged(),
-      shareReplay(1)
-    );
-
     this.focusedSignificantEventService = new FocusedSignificantEventService();
 
     if (pluginsStart.agentBuilder) {
@@ -206,13 +184,10 @@ export class SignificantEventsAppPlugin
     }
 
     const services: SignificantEventsAppServices = {
-      availability$: this.availability$,
       focusedSignificantEventService: this.focusedSignificantEventService,
     };
-    const isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
 
     return {
-      availability$: this.availability$,
       getKnowledgeIndicatorsPanel: () => {
         if (!this.knowledgeIndicatorsPanel) {
           this.knowledgeIndicatorsPanel = dynamic(() =>
@@ -223,7 +198,6 @@ export class SignificantEventsAppPlugin
                 coreStart,
                 pluginsStart,
                 services,
-                isServerless,
               }),
             }))
           );

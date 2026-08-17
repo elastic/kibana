@@ -15,6 +15,7 @@ import type { InvestigationStatus } from '@kbn/investigation-output';
 import { EventInvestigation } from './event_investigation';
 
 const mockOpenChat = jest.fn();
+const mockGetRedirectUrl = jest.fn<string | undefined, [unknown]>();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
@@ -23,8 +24,10 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      http: { get: jest.fn() },
       agentBuilder: { openChat: mockOpenChat },
+      share: {
+        url: { locators: { get: () => ({ getRedirectUrl: mockGetRedirectUrl }) } },
+      },
     },
   }),
 }));
@@ -94,6 +97,8 @@ const renderInvestigation = (
 describe('EventInvestigation', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
+    mockGetRedirectUrl.mockReset();
+    mockGetRedirectUrl.mockReturnValue(undefined);
   });
 
   it('renders the empty state when there is no investigation', () => {
@@ -198,6 +203,88 @@ describe('EventInvestigation', () => {
       'aria-selected',
       'true'
     );
+  });
+
+  it('shows the evidence behind a hypothesis, unlinked when Discover is unavailable', () => {
+    renderInvestigation(mockEvent(), {
+      investigation: {
+        workflow_execution_id: 'exec-latest',
+        started_at: '2026-07-10T12:00:00Z',
+        completed_at: '2026-07-10T12:05:00Z',
+      },
+      state: {
+        ...completeState,
+        hypotheses: [
+          {
+            ...completeState.hypotheses[0],
+            reason: 'Pool utilization jumped to 100% at the deploy timestamp.',
+            evidence: [
+              {
+                description: 'Pool utilization saturates at the deploy timestamp.',
+                esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
+                time_range: { from: '2026-07-10T11:30:00Z', to: '2026-07-10T12:30:00Z' },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutHypothesis-0Toggle'));
+
+    expect(
+      screen.getByText('Pool utilization saturates at the deploy timestamp.')
+    ).toBeInTheDocument();
+    // The locator mock resolves to nothing, so the query renders read-only rather than breaking.
+    expect(screen.queryByTestId('investigationEvidenceQueryLink')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('FROM metrics-* | STATS max = MAX(pool.utilization)')
+    ).toBeInTheDocument();
+  });
+
+  it('links a hypothesis to the Discover view its evidence came from', () => {
+    const discoverUrl = 'http://localhost:5601/app/discover#/?_a=(query:(esql:...))';
+
+    mockGetRedirectUrl.mockReturnValue(discoverUrl);
+
+    renderInvestigation(mockEvent(), {
+      investigation: {
+        workflow_execution_id: 'exec-latest',
+        started_at: '2026-07-10T12:00:00Z',
+        completed_at: '2026-07-10T12:05:00Z',
+      },
+      state: {
+        ...completeState,
+        hypotheses: [
+          {
+            ...completeState.hypotheses[0],
+            evidence: [
+              {
+                description: 'Pool utilization saturates at the deploy timestamp.',
+                esql_query: 'FROM metrics-* | STATS max = MAX(pool.utilization)',
+                time_range: { from: '2026-07-10T11:30:00Z', to: '2026-07-10T12:30:00Z' },
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationShowDetailsButton'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutTab-hypotheses'));
+    fireEvent.click(screen.getByTestId('nightshiftInvestigationFlyoutHypothesis-0Toggle'));
+
+    expect(screen.getByTestId('investigationEvidenceQueryLink')).toHaveAttribute(
+      'href',
+      discoverUrl
+    );
+    expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      query: { esql: 'FROM metrics-* | STATS max = MAX(pool.utilization)' },
+      timeRange: { from: '2026-07-10T11:30:00Z', to: '2026-07-10T12:30:00Z' },
+      interval: 'auto',
+    });
   });
 
   it('shows ongoing investigation content when the hook reports running status', () => {

@@ -48,6 +48,7 @@ const getBaseRequest = (): IngestScoresRequestBody => ({
         id: 'example-1',
         index: 1,
         input: { question: 'What is Kibana?' },
+        metadata: { category: 'es-and-cases-creation' },
         dataset: {
           id: 'dataset-1',
           name: 'Dataset 1',
@@ -130,6 +131,11 @@ describe('EvaluationScoreService', () => {
         hostname: request.metadata.hostname,
         git: request.metadata.git,
         ci: request.metadata.ci,
+      },
+      example: {
+        id: request.scores[0].example.id,
+        metadata: request.scores[0].example.metadata,
+        dataset: request.scores[0].example.dataset,
       },
       task: { model: request.task_model, repetition_index: 0 },
       evaluator: { model: request.evaluator_model, name: 'correctness' },

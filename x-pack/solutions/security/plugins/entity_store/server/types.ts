@@ -43,9 +43,9 @@ import type { RemoteLogsExtractionClient } from './domain/logs_extraction/remote
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { EntityMetadataClient } from './domain/entity_metadata';
+import type { RelationshipsClient } from './domain/relationships';
 import type { ResolutionClient } from './domain/resolution';
 import type { ResolutionRulesClient } from './domain/resolution/rules';
-import type { EntityStorePreferencesClient } from './domain/saved_objects';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 import type { TelemetryReporter } from './telemetry/events';
 
@@ -71,9 +71,9 @@ export interface EntityStoreApiRequestHandlerContext {
   logger: Logger;
   assetManagerClient: AssetManagerClient;
   entityMaintainersClient: EntityMaintainersClient;
-  preferencesClient: EntityStorePreferencesClient;
   crudClient: CRUDClient;
   entityMetadataClient: EntityMetadataClient;
+  relationshipsClient: RelationshipsClient;
   resolutionClient: ResolutionClient;
   entityResolutionRuleClient: ResolutionRulesClient;
   remoteLogsExtractionClient: RemoteLogsExtractionClient;
@@ -108,6 +108,10 @@ export interface EntityStoreStartContract {
     esClient: ElasticsearchClient,
     namespace: string
   ) => EntityMetadataClient;
+  createRelationshipsClient: (
+    esClient: ElasticsearchClient,
+    namespace: string
+  ) => RelationshipsClient;
   createResolutionClient: (esClient: ElasticsearchClient, namespace: string) => ResolutionClient;
   getMaintainerStatus: (
     namespace: string,

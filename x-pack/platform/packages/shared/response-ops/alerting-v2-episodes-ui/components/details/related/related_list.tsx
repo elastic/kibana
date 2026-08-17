@@ -11,7 +11,7 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import {
   RelatedAlertEpisode,
   type RelatedAlertEpisodeProps,
