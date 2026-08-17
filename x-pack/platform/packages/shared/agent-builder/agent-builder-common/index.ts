@@ -267,6 +267,30 @@ export {
   createRelevantSkillsStep,
   isRelevantSkillsStep,
   type ConversationListOptions,
+  CONVERSATION_SCHEMA_VERSION,
+  EventActorType,
+  TimelineTriggerType,
+  TimelineEventType,
+  type EventActor,
+  type BaseTimelineEventInput,
+  type BaseTimelineEvent,
+  type UserMessageEventData,
+  type UserMessageEvent,
+  type PromptResponseEventData,
+  type PromptResponseEvent,
+  type ExecutionStartedEventData,
+  type ExecutionStartedEvent,
+  type PromptRequestedEventData,
+  type PromptRequestedEvent,
+  type ExecutionCompletedEventData,
+  type ExecutionCompletedEvent,
+  type ExecutionFailedEventData,
+  type ExecutionFailedEvent,
+  type ExecutionAbortedEventData,
+  type ExecutionAbortedEvent,
+  type TimelineEvent,
+  type TimelineEventInput,
+  type ActiveExecution,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -318,3 +342,10 @@ export {
   OAuthClientType,
 } from './oauth_clients';
 export { MCP_SERVER_PATH } from './mcp';
+export type {
+  ConversationTemplate,
+  ConversationTemplateInputType,
+  ConversationTemplateFieldDefinition,
+  MetadataFieldValue,
+  SerializedMetadataValue,
+} from './templates';
