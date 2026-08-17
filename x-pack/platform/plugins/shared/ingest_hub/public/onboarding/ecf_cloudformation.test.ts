@@ -57,6 +57,24 @@ describe('getEcfServiceConfigs()', () => {
     expect(wafConfig?.bucketArn).toBeUndefined();
   });
 
+  it('excludes stale ARN from the deselected transport when the user switches triggers', () => {
+    // Simulate: user entered a bucket_arn on S3 trigger, then switched to CloudWatch and
+    // entered a log_group_arn. Both values survive in vars due to merge-not-prune semantics.
+    // Only the log_group_arn (matching the active trigger) should appear in the config.
+    const serviceVars: Record<string, ServiceVars> = {
+      cloudtrail: {
+        trigger: 'aws-cloudwatch',
+        vars: {
+          bucket_arn: 'arn:aws:s3:::stale-bucket',
+          log_group_arn: 'arn:aws:logs:us-east-1:123:log-group:ct',
+        },
+      },
+    };
+    const [config] = getEcfServiceConfigs(['cloudtrail'], serviceVars);
+    expect(config.logGroupArn).toBe('arn:aws:logs:us-east-1:123:log-group:ct');
+    expect(config.bucketArn).toBeUndefined();
+  });
+
   it('trims whitespace from ARN values and treats blank as undefined', () => {
     const serviceVars: Record<string, ServiceVars> = {
       cloudtrail: { trigger: 'aws-s3', vars: { bucket_arn: '  ', log_group_arn: '' } },

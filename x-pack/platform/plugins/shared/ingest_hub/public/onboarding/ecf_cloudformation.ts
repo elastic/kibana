@@ -93,12 +93,17 @@ export const getEcfServiceConfigs = (
     const entry = AWS_SERVICES_MAP.get(serviceId);
     if (!entry?.ecfLogType) continue;
 
-    const vars = serviceVars[serviceId]?.vars ?? {};
+    const entryVars = serviceVars[serviceId];
+    const vars = entryVars?.vars ?? {};
+    const trigger = entryVars?.trigger;
     configs.push({
       serviceId,
       ecfLogType: entry.ecfLogType,
-      bucketArn: vars.bucket_arn?.trim() || undefined,
-      logGroupArn: vars.log_group_arn?.trim() || undefined,
+      // Gate each ARN on the selected trigger so stale values from a previous transport
+      // selection don't end up in the launch URL and misconfigure the ECF stack.
+      bucketArn: trigger === 'aws-s3' ? vars.bucket_arn?.trim() || undefined : undefined,
+      logGroupArn:
+        trigger === 'aws-cloudwatch' ? vars.log_group_arn?.trim() || undefined : undefined,
     });
   }
 
