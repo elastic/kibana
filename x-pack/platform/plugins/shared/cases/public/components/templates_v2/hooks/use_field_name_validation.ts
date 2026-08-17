@@ -219,9 +219,7 @@ function getInvalidNameMessage(
   if (violation === 'charset') return charsetNameMessage(name);
 
   const collidingName = foldedNameIndex.get(getFoldedFieldName(name));
-  return collidingName !== undefined
-    ? foldedNameCollisionMessage(name, collidingName)
-    : undefined;
+  return collidingName !== undefined ? foldedNameCollisionMessage(name, collidingName) : undefined;
 }
 
 export function createDuplicateFieldMarkers(
