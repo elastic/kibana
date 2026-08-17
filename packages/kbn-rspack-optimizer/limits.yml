@@ -21,7 +21,7 @@ pageLoadAssetSize:
   charts: 1188
   clientApps: 1368
   cloud: 9539
-  cloudConnect: 5266
+  cloudConnect: 5844
   cloudDataMigration: 2042
   cloudDefend: 3328
   cloudExperiments: 67663
@@ -137,23 +137,23 @@ pageLoadAssetSize:
   observability: 4071
   observabilityAgentBuilder: 948
   observabilityAIAssistant: 2236
-  observabilityAIAssistantApp: 7186
+  observabilityAIAssistantApp: 6186
   observabilityAiAssistantManagement: 2280
   observabilityLogsExplorer: 1351
-  observabilityOnboarding: 7954
-  observabilityShared: 8142
-  osquery: 14327
+  observabilityOnboarding: 7767
+  observabilityShared: 7496
+  osquery: 14507
   painlessLab: 2550
-  pnd: 3424
+  pnd: 4769
   presentationUtil: 350
-  productDocBase: 4486
-  productIntercept: 5007
-  profiling: 13359
+  productDocBase: 4218
+  productIntercept: 4738
+  profiling: 12944
   queryActivity: 1149
   reindexService: 1964
-  remoteClusters: 6106
-  reporting: 29596
-  rollup: 8274
+  remoteClusters: 5794
+  reporting: 27953
+  rollup: 8005
   runtimeFields: 569
   sampleDataIngest: 1353
   savedObjects: 365
@@ -214,7 +214,7 @@ pageLoadAssetSize:
   urlForwarding: 1412
   usageCollection: 223
   ux: 2687
-  vendors: 4845404
+  vendors: 4798959
   vendors-heavy: 2182561
   visDefaultEditor: 738
   visTypeGauge: 7638
