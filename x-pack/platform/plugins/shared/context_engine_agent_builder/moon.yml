@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/context-engine-plugin'
   - '@kbn/i18n'
-  - '@kbn/kibana-react-plugin'
   - '@kbn/workflows-management-plugin'
   - '@kbn/security-plugin'
   - '@kbn/zod'
