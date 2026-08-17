@@ -607,30 +607,26 @@ export class DiscoverApp {
     await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
     await expect(saveModal).toBeVisible();
 
-    // The destination defaults to "existing dashboard" with nothing selected, which keeps
-    // the confirm button disabled, so "new" has to be picked. Pick it before typing the
-    // title, because filling the title re-renders the modal and can leave the radio
-    // failing Playwright's stability check. The EuiRadio input is visually hidden, so the
-    // click has to land on its label.
+    // The modal defaults to "existing dashboard" with nothing selected, which keeps the
+    // confirm button disabled, so "new" has to be picked. Pick it before filling the title,
+    // which re-renders the modal. The EuiRadio input is visually hidden, so click its label.
     await saveModal.locator('label[for="new-dashboard-option"]').click();
     await this.page.testSubj.fill('savedObjectTitle', title);
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
 
-    // Saving hands the panel to the dashboard app through session storage and then
-    // navigates (`transferBackToEditor` in Discover's embeddable_editor_service); the
-    // dashboard consumes that package once, on arrival. Leaving a session with unsaved
-    // changes prompts for confirmation first, and that prompt can unmount on its own as
-    // navigation starts, so confirming it is best-effort — landing on a dashboard is what
-    // proves the panel was handed over. The save modal closing only proves `onSave` ran,
-    // which happens whether or not the navigation follows.
+    // Leaving a session with unsaved changes prompts for confirmation. The prompt can also
+    // unmount on its own once navigation starts, so confirming it is best effort.
     await this.page.testSubj
       .locator('appLeaveConfirmModal')
       .getByTestId('confirmModalConfirmButton')
-      .click({ timeout: 10_000 })
+      .click()
       .catch(() => {});
 
     await expect(saveModal).toBeHidden({ timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
-    await this.page.waitForURL(/\/app\/dashboards/, { timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
+    // The panel travels to the dashboard in session storage and is consumed on arrival, so
+    // only reaching the dashboard proves it was handed over. The save modal closes as soon
+    // as `onSave` runs, whether or not the navigation follows.
+    await this.page.waitForURL(/\/app\/dashboards/);
   }
 
   async getSharedUrl(): Promise<string> {

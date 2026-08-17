@@ -98,16 +98,15 @@ spaceTest.describe(
       }
     );
 
-    // The dashboard is built through the UI and left unsaved on purpose. Reuse of the
-    // existing control depends on `AddDiscoverSessionPanelAction` snapshotting the
-    // dashboard's ES|QL controls via `getAllEsqlControls()`, which reads only the
-    // container children registered at that moment. A control that is still mounting is
-    // missing from the snapshot, and an empty snapshot is truthy, so it slips past the
-    // `if (!dashboardControlGroupState)` guard in `reconcileControlGroupState` and leaves
-    // no variable to match — the Discover-side panel id then survives as a second
-    // control. Unlinking creates the control in-session, so it is always registered here.
-    // Starting from a saved dashboard instead reintroduces that race
-    // (https://github.com/elastic/kibana/issues/265636), which is why FTR skipped this.
+    // The dashboard is built through the UI and left unsaved on purpose, so that unlinking
+    // creates the control in-session and it is registered before the panel is added.
+    // Reusing it depends on `AddDiscoverSessionPanelAction` snapshotting the dashboard's
+    // controls via `getAllEsqlControls()`, which reads only the container children present
+    // at that moment. A control still mounting is missing from the snapshot, and an empty
+    // snapshot is truthy, so it passes the `if (!dashboardControlGroupState)` guard in
+    // `reconcileControlGroupState` with no variable to match and the Discover-side panel id
+    // survives as a second control. Loading an already-saved dashboard here reintroduces
+    // that race (https://github.com/elastic/kibana/issues/265636).
     spaceTest(
       'should update the existing dashboard control instead of creating a duplicate',
       async ({ page, pageObjects }) => {
@@ -122,10 +121,9 @@ spaceTest.describe(
           pageObjects.dashboard.getOptionsListSelectionsLocator(initialDashboardControlId)
         ).toHaveText(INITIAL_SELECTION);
 
-        // Add a second Discover panel that declares a control for the same variable.
-        // Filter the flyout before clicking, as the FTR suite did: the panel-selection
-        // flyout lists many actions, so clicking an unfiltered entry is position
-        // dependent and intermittently misses.
+        // Add a second Discover panel that declares a control for the same variable. The
+        // panel-selection flyout lists many actions, so filter it first: clicking an entry
+        // in the unfiltered list is position dependent.
         await pageObjects.dashboard.openAddPanelFlyout();
         await page.testSubj.fill('dashboardPanelSelectionFlyout__searchInput', 'Discover session');
         await page.testSubj.click('create-action-Discover session');
@@ -145,11 +143,9 @@ spaceTest.describe(
         await pageObjects.dashboard.optionsListEnsurePopoverIsClosed();
         await pageObjects.discover.waitUntilTabIsLoaded();
 
-        // Changing the selection re-runs the control's ES|QL query, so this waits on
-        // Elasticsearch rather than on rendering — hence the longer budget.
         await expect(
           pageObjects.discover.controls.getSelectionsLocator(discoverControlId)
-        ).toHaveText(UPDATED_SELECTION, { timeout: 30_000 });
+        ).toHaveText(UPDATED_SELECTION);
 
         await pageObjects.discover.saveAndReturnToEditor();
         await pageObjects.dashboard.waitForRenderComplete();
@@ -159,7 +155,7 @@ spaceTest.describe(
         expect(updatedDashboardControlId).toBe(initialDashboardControlId);
         await expect(
           pageObjects.dashboard.getOptionsListSelectionsLocator(updatedDashboardControlId)
-        ).toHaveText(UPDATED_SELECTION, { timeout: 30_000 });
+        ).toHaveText(UPDATED_SELECTION);
       }
     );
   }

@@ -15,10 +15,10 @@
  * Migrated from `src/platform/test/functional/apps/discover/esql_4/_esql_controls.ts`
  * (`when viewing / editing an unlinked by-value ES|QL panel in Discover` groups).
  *
- * The first test keeps the FTR suite's UI-driven setup, because unlinking a library
- * panel is itself the behavior under test. The editing tests start from
- * {@link testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE} instead, since for
- * them the by-value dashboard is only a precondition.
+ * The first test drives the unlink through the UI, because that conversion is the behavior
+ * under test. The editing tests start from
+ * {@link testData.ESQL_CONTROLS_BY_VALUE_DASHBOARD_KBN_ARCHIVE} instead, since for them the
+ * by-value dashboard is only a precondition.
  */
 
 import { expect } from '@kbn/scout/ui';
