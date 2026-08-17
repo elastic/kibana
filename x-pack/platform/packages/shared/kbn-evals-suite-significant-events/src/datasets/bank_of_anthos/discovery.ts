@@ -390,7 +390,7 @@ export const discovery: DatasetConfig['discovery'] = [
         },
         {
           id: 'cascade-full-grouping',
-          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed database-connectivity and cache failure hypothesis (SQLState 08001 / connection-refused mechanism and compatible impacts) rather than split into separate service-scoped discoveries.',
+          text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed database-connectivity and cache failure hypothesis rather than split into separate service-scoped discoveries.',
           score: 2,
         },
         {
