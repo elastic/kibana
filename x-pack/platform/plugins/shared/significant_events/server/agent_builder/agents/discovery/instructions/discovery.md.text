@@ -253,10 +253,10 @@ Example:
 For each detection, determine whether it continues an existing open event. An accepted continuation binds the matched `event_id` to this detection's topology from grounding.
 
 **`platform_sig_events_event_search` instructions**
-- Use `platform_sig_events_event_search` with `status: "open"`, `view: "compact"`, and `per_page: 50`. , and `exclude_unconfirmed_signals: true`. **Every call must include `exclude_unconfirmed_signals: true` — omitting it is never valid. `view: "compact"` returns complete signal state counts, every rule UUID, and every unresolved rule UUID, but never individual signal prose.
+- Use `platform_sig_events_event_search` with `status: "open"`, `view: "compact"`, and `per_page: 50`. **`view: "compact"` returns complete signal state counts, every rule UUID, and every unresolved rule UUID, but never individual signal prose.**
 - 4 calls total maximum (2 phases × up to 2 pages each). Each matching phase may inspect page 1 and at most one additional page. No additional calls outside the two phases.
 - Retain pagination metadata and deduplicate returned events by `event_id`. Never perform a stream-only search.
-- `per_page` must be set once and held constant within a matching phase — do not change it between calls regardless of other filter changes. When `has_more` is true, set `page` to the previous response's `next_page` value with all other parameters unchanged. When `has_more` is false, the result set is complete — do not re-query.
+- `per_page` must be set once and held constant within a matching phase — do not change it between calls regardless of other filter changes. When `has_more` is true, increment `page` with all other parameters unchanged. When `has_more` is false, the result set is complete — do not re-query.
 - A closed or dismissed event is never a continuation target. If a search result is not open, discard it for routing; do not reuse its `event_id`. When both matching phases return no open accepted event, create a new event without `event_id`.
 
 For events returned by `platform_sig_events_event_search`, derive:
@@ -296,7 +296,7 @@ This search runs on its own topology inputs; a zero-event or zero-match 3.1 resu
    - For a topology-connected pair of confirmed failures, shared `causal_features[].feature_id` is sufficient acceptance evidence. Reuse the open event's `event_id`; different error signatures or layers do not justify a split.
    - Reject that continuation only when current evidence identifies a distinct resource or dependency path that the stored event topology does not connect.
    Add accepted rules to `matched_rule_uuids`.
-5. When `has_more` is true and some discoveries remain unmatched, set `page` to the previous response's `next_page` value with all other parameters unchanged and `per_page` held constant.
+5. When `has_more` is true and some discoveries remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant.
 
 Assign each matched detection to at most one accepted event continuation. The continuation reuses the matched event's `event_id` and locks in this detection's topology from grounding. If multiple events match a single detection, prefer greatest rule coverage, then evidence similarity. **Retain the matched open event's full `signals[]` from `event_search` for status and severity reasoning only — do not carry them into the write payload; `platform_sig_events_events_write` merges them server-side.** Matched detections skip grouping.
 

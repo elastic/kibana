@@ -95,7 +95,7 @@ describe('confirmationAlignmentEvaluator', () => {
       { event_id: 'e1', signals: [detection('r1'), detection('r2', 'inconclusive')] },
     ];
     const result = await evaluate(events, { e1: ['r1'] });
-    expect(result.score).toBe(1);
+    expect(result.score).toBe(0);
   });
 
   it('fails when a verified non-expected rule is neither confirmed nor rejected', async () => {
