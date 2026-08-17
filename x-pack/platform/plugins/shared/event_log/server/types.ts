@@ -99,6 +99,7 @@ export interface IEventLogClient {
   ): Promise<QueryEventsBySavedObjectSearchAfterResult>;
   closePointInTime(pitId: string): Promise<void>;
   refreshIndex(): Promise<void>;
+  updateGapsByRuleIds(ruleIds: string[]): Promise<void>;
 }
 
 export interface IEventLogger {

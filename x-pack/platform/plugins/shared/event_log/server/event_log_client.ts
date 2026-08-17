@@ -239,6 +239,12 @@ export class EventLogClient implements IEventLogClient {
     await this.esContext.esAdapter.refreshIndex();
   }
 
+  public async updateGapsByRuleIds(ruleIds: string[]): Promise<void> {
+    // Rule IDs are globally unique, so gaps are matched by `rule.id` alone
+    // (intentionally cross-space) rather than being scoped to the caller's namespace.
+    await this.esContext.esAdapter.updateGapsByRuleIds(ruleIds);
+  }
+
   public async findEventsBySavedObjectIdsSearchAfter(
     type: string,
     ids: string[],

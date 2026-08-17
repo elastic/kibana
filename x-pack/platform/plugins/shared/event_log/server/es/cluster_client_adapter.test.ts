@@ -2817,6 +2817,104 @@ describe('refreshIndex', () => {
     );
   });
 });
+
+describe('updateGapsByRuleIds', () => {
+  beforeEach(() => {
+    clusterClient.updateByQuery.mockResolvedValue({
+      updated: 1,
+      version_conflicts: 0,
+      failures: [],
+    } as estypes.UpdateByQueryResponse);
+  });
+
+  test('sends a single blocking update_by_query with the expected body', async () => {
+    await clusterClientAdapter.updateGapsByRuleIds(['rule-1', 'rule-2']);
+
+    expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
+    expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+      index: 'kibana-event-log-ds',
+      conflicts: 'proceed',
+      slices: 'auto',
+      requests_per_second: 1000,
+      query: {
+        bool: {
+          must: [
+            { term: { 'event.action': 'gap' } },
+            { term: { 'event.provider': 'alerting' } },
+            { terms: { 'rule.id': ['rule-1', 'rule-2'] } },
+          ],
+          must_not: [{ term: { 'kibana.alert.rule.gap.deleted': true } }],
+        },
+      },
+      script: {
+        source:
+          'if (ctx._source.kibana?.alert?.rule?.gap != null) { ctx._source.kibana.alert.rule.gap.deleted = true; }',
+        lang: 'painless',
+      },
+    });
+  });
+
+  test('does not wait_for_completion (blocking) and never passes it', async () => {
+    await clusterClientAdapter.updateGapsByRuleIds(['rule-1']);
+
+    const [call] = clusterClient.updateByQuery.mock.calls[0];
+    expect(call).not.toHaveProperty('wait_for_completion');
+  });
+
+  test('sends no request for an empty rule id list', async () => {
+    await clusterClientAdapter.updateGapsByRuleIds([]);
+
+    expect(clusterClient.updateByQuery).not.toHaveBeenCalled();
+  });
+
+  const getTermsRuleIds = (callIndex: number): string[] => {
+    const request = clusterClient.updateByQuery.mock.calls[
+      callIndex
+    ][0] as estypes.UpdateByQueryRequest;
+    const must = (request.query?.bool?.must ?? []) as estypes.QueryDslQueryContainer[];
+    const terms = (must[2]?.terms ?? {}) as Record<string, string[]>;
+    return terms['rule.id'] ?? [];
+  };
+
+  test('chunks rule ids at 10,000 per request', async () => {
+    const ruleIds = times(15_000, (i) => `rule-${i}`);
+
+    await clusterClientAdapter.updateGapsByRuleIds(ruleIds);
+
+    expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(2);
+    expect(getTermsRuleIds(0)).toHaveLength(10_000);
+    expect(getTermsRuleIds(1)).toHaveLength(5_000);
+  });
+
+  test('logs an error and continues with the next chunk when a request throws', async () => {
+    const ruleIds = times(15_000, (i) => `rule-${i}`);
+    clusterClient.updateByQuery.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce({
+      updated: 1,
+      version_conflicts: 0,
+      failures: [],
+    } as estypes.UpdateByQueryResponse);
+
+    await clusterClientAdapter.updateGapsByRuleIds(ruleIds);
+
+    expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(2);
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to soft delete gaps')
+    );
+  });
+
+  test('warns when the response reports version conflicts or failures', async () => {
+    clusterClient.updateByQuery.mockResolvedValue({
+      updated: 2,
+      version_conflicts: 3,
+      failures: [],
+    } as estypes.UpdateByQueryResponse);
+
+    await clusterClientAdapter.updateGapsByRuleIds(['rule-1']);
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('version_conflicts=3'));
+  });
+});
+
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;
