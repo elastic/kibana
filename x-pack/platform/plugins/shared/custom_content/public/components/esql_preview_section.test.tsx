@@ -30,10 +30,10 @@ const mockGetESQLTimeField = getESQLTimeField as jest.MockedFunction<typeof getE
 const defaultProps = {
   esqlQuery: '',
   onEsqlQueryChange: jest.fn(),
-  isPreviewLoading: false,
-  previewData: null,
-  previewError: null,
-  onPreview: jest.fn(),
+  isDataLoading: false,
+  esqlData: null,
+  esqlDataError: null,
+  onFetchData: jest.fn(),
 };
 
 describe('EsqlPreviewSection', () => {
@@ -76,20 +76,20 @@ describe('EsqlPreviewSection', () => {
     expect(screen.getByText(/connect to the dashboard time picker/i)).toBeInTheDocument();
   });
 
-  it('shows the preview error callout when previewError is provided', () => {
-    render(<EsqlPreviewSection {...defaultProps} previewError="query failed" />);
+  it('shows the error callout when esqlDataError is provided', () => {
+    render(<EsqlPreviewSection {...defaultProps} esqlDataError="query failed" />);
     expect(screen.getByText('Preview failed')).toBeInTheDocument();
     expect(screen.getByText('query failed')).toBeInTheDocument();
   });
 
-  it('shows the preview data table when previewData has columns and values', () => {
-    const previewData = {
+  it('shows the data table when esqlData has columns and values', () => {
+    const esqlData = {
       columns: [{ name: 'count', type: 'long' }],
       values: [[42]],
       all_columns: [],
     } as unknown as EsqlDataResult;
 
-    render(<EsqlPreviewSection {...defaultProps} previewData={previewData} />);
+    render(<EsqlPreviewSection {...defaultProps} esqlData={esqlData} />);
 
     expect(screen.getByText('count')).toBeInTheDocument();
     expect(screen.getByText('42')).toBeInTheDocument();

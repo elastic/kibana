@@ -25,6 +25,7 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerSignalRoutes } from './routes/signals';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
 import { SignalsService } from './signals/service';
@@ -105,6 +106,17 @@ export class ContextEnginePlugin
         const [, startDeps] = await coreSetup.getStartServices();
         return startDeps.actions;
       },
+    });
+
+    // Read-only Signals routes (reads run as the current user, scoped to the active space).
+    registerSignalRoutes({
+      router,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      // Reads the current value at request time (assigned in start(), after this setup() runs).
+      getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
     return {
