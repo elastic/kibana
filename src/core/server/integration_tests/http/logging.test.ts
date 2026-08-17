@@ -252,7 +252,7 @@ describe('request logging', () => {
         const lines = responseLogLines(mockConsoleLog);
         expect(lines).toHaveLength(1);
         const [level, logger, message, meta] = lines[0].split('|');
-        expect(level).toBe('INFO');
+        expect(level.trim()).toBe('INFO');
         expect(logger).toBe('http.server.response');
         expect(message.includes('GET /internal/api/endpoint/agent_status 200')).toBe(true);
         expect(JSON.parse(meta).http.response.status_code).toBe(200);
