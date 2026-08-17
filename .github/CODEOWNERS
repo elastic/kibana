@@ -2604,6 +2604,8 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /x-pack/platform/test/fixtures/es_archives/rules_scheduled_task_id @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/solutions/**/test/serverless/**/test_suites/rules/ @elastic/response-ops
+/x-pack/platform/test/serverless/api_integration/test_suites/task_manager_uiam @elastic/response-ops
+/x-pack/platform/test/serverless/api_integration/configs/security/config.task_manager_uiam.ts @elastic/response-ops
 
 # Connectors auth
 ## Client credentials with jwt
@@ -2963,6 +2965,7 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ki_automatio
 
 /x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule @elastic/security-threat-hunting @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/entity_graph @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/entity_risk_score_history @elastic/security-entity-analytics
 
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detection-engineering @elastic/security-threat-hunting
 
@@ -3642,6 +3645,7 @@ x-pack/solutions/security/plugins/security_solution/common/security_integrations
 x-pack/solutions/security/plugins/security_solution/public/security_integrations @elastic/cloud-services
 x-pack/solutions/security/plugins/security_solution/server/security_integrations @elastic/cloud-services
 x-pack/solutions/security/plugins/security_solution/server/lib/security_integrations @elastic/cloud-services
+x-pack/solutions/security/plugins/security_solution/test/scout/security_integrations/ @elastic/cloud-services
 
 # Kibana design
 # scss overrides should be below this line for specificity

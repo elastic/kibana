@@ -455,8 +455,10 @@ describe('ActionPoliciesTable', () => {
         target: { value: 'pro' },
       });
 
-      await waitFor(() => expect(screen.getByText('production')).toBeInTheDocument());
-      expect(screen.getByText('critical')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('production')).toBeInTheDocument();
+        expect(screen.getByText('critical')).toBeInTheDocument();
+      });
     });
 
     it('shows the cap guidance only when the tags cap is reached', async () => {

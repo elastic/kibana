@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const BACK_DEFAULT = i18n.translate('xpack.pnd.pageHeader.backDefault', {
-  defaultMessage: 'Back',
-});
+export { createEntityRiskScoreHistoryAttachmentDefinition } from './entity_risk_score_history_attachment';
+export type {
+  EntityRiskScoreHistoryAttachment,
+  EntityRiskScoreHistoryAttachmentData,
+} from './types';
