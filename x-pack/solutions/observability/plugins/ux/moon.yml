@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/observability/plugins/ux
 dependsOn:
   - '@kbn/core'
+  - '@kbn/custom-icons'
   - '@kbn/data-plugin'
   - '@kbn/embeddable-plugin'
   - '@kbn/home-plugin'
