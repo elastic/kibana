@@ -15369,10 +15369,15 @@ paths:
           name: kind
           required: false
           schema:
-            enum:
-              - alert
-              - signal
-            type: string
+            anyOf:
+              - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+                enum:
+                  - alert
+                type: string
+              - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+                enum:
+                  - signal
+                type: string
       responses:
         '200':
           content:
@@ -82085,12 +82090,20 @@ components:
       oneOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_workflow_action_policy_destination'
     Kibana_HTTP_APIs_alerting_action_policy_grouping_mode:
+      anyOf:
+        - description: one notification per alert episode lifecycle (default).
+          enum:
+            - per_episode
+          type: string
+        - description: a single notification for all matching episodes.
+          enum:
+            - all
+          type: string
+        - description: group by specified `groupBy` fields.
+          enum:
+            - per_field
+          type: string
       description: 'The grouping mode: per_episode groups by episode lifecycle, all sends a single notification for all alerts, per_field groups by the specified fields.'
-      enum:
-        - per_episode
-        - all
-        - per_field
-      type: string
     Kibana_HTTP_APIs_alerting_action_policy_list_response:
       additionalProperties: false
       description: Paginated list of action policies.
@@ -82193,13 +82206,24 @@ components:
               nullable: true
               type: string
             strategy:
+              anyOf:
+                - description: notify only on episode status transitions (default for `per_episode`).
+                  enum:
+                    - on_status_change
+                  type: string
+                - description: notify on transitions and at regular intervals.
+                  enum:
+                    - per_status_interval
+                  type: string
+                - description: notify at regular intervals regardless of status (default for `all`/`per_field`).
+                  enum:
+                    - time_interval
+                  type: string
+                - description: notify on every evaluation cycle (high volume).
+                  enum:
+                    - every_time
+                  type: string
               description: The throttle strategy.
-              enum:
-                - on_status_change
-                - per_status_interval
-                - time_interval
-                - every_time
-              type: string
           required:
             - interval
         updated_at:
@@ -82238,13 +82262,24 @@ components:
           nullable: true
           type: string
         strategy:
+          anyOf:
+            - description: notify only on episode status transitions (default for `per_episode`).
+              enum:
+                - on_status_change
+              type: string
+            - description: notify on transitions and at regular intervals.
+              enum:
+                - per_status_interval
+              type: string
+            - description: notify at regular intervals regardless of status (default for `all`/`per_field`).
+              enum:
+                - time_interval
+              type: string
+            - description: notify on every evaluation cycle (high volume).
+              enum:
+                - every_time
+              type: string
           description: The throttle strategy.
-          enum:
-            - on_status_change
-            - per_status_interval
-            - time_interval
-            - every_time
-          type: string
     Kibana_HTTP_APIs_alerting_activate_alert_action:
       additionalProperties: false
       type: object
@@ -82728,30 +82763,54 @@ components:
         grouping:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         kind:
-          description: 'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
-          enum:
-            - alert
-            - signal
-          type: string
+          anyOf:
+            - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+              enum:
+                - alert
+              type: string
+            - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+              enum:
+                - signal
+              type: string
+          description: The kind of the rule.
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_metadata'
         no_data_strategy:
+          anyOf:
+            - description: Holds the last known episode status when no data is present.
+              enum:
+                - last_known_status
+              type: string
+            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+              enum:
+                - emit
+              type: string
+            - description: Forces recovery when no data is present.
+              enum:
+                - recover
+              type: string
+            - description: No-data situations are ignored (default).
+              enum:
+                - none
+              type: string
           description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
-          enum:
-            - last_known_status
-            - emit
-            - recover
-            - none
-          type: string
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
+          anyOf:
+            - description: recovers groups that stop breaching (default).
+              enum:
+                - no_breach
+              type: string
+            - description: uses a custom recovery query to detect recovery.
+              enum:
+                - query
+              type: string
+            - description: disables recovery entirely.
+              enum:
+                - none
+              type: string
           description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
-          enum:
-            - no_breach
-            - query
-            - none
-          type: string
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
@@ -83201,30 +83260,54 @@ components:
           description: Unique rule identifier.
           type: string
         kind:
-          description: 'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
-          enum:
-            - alert
-            - signal
-          type: string
+          anyOf:
+            - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+              enum:
+                - alert
+              type: string
+            - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+              enum:
+                - signal
+              type: string
+          description: The kind of the rule.
         metadata:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_response_metadata'
         no_data_strategy:
+          anyOf:
+            - description: Holds the last known episode status when no data is present.
+              enum:
+                - last_known_status
+              type: string
+            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+              enum:
+                - emit
+              type: string
+            - description: Forces recovery when no data is present.
+              enum:
+                - recover
+              type: string
+            - description: No-data situations are ignored (default).
+              enum:
+                - none
+              type: string
           description: How to handle no-data situations. "last_known_status" holds the last known status; "recover" forces recovery; "none" disables no-data detection. "emit" is not currently accepted by the create/update API. Standalone-format rules must provide a `no_data` query block when this is not "none"; composed-format rules use `base` as the data-presence query.
-          enum:
-            - last_known_status
-            - emit
-            - recover
-            - none
-          type: string
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
+          anyOf:
+            - description: recovers groups that stop breaching (default).
+              enum:
+                - no_breach
+              type: string
+            - description: uses a custom recovery query to detect recovery.
+              enum:
+                - query
+              type: string
+            - description: disables recovery entirely.
+              enum:
+                - none
+              type: string
           description: How recovery is detected. "no_breach" recovers groups that stop breaching; "query" uses a custom recovery query; "none" disables recovery.
-          enum:
-            - no_breach
-            - query
-            - none
-          type: string
         schedule:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_schedule'
         state_transition:
@@ -83580,22 +83663,41 @@ components:
               minItems: 1
               type: array
         no_data_strategy:
-          enum:
-            - last_known_status
-            - emit
-            - recover
-            - none
+          anyOf:
+            - description: Holds the last known episode status when no data is present.
+              enum:
+                - last_known_status
+              type: string
+            - description: Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.
+              enum:
+                - emit
+              type: string
+            - description: Forces recovery when no data is present.
+              enum:
+                - recover
+              type: string
+            - description: No-data situations are ignored (default).
+              enum:
+                - none
+              type: string
           nullable: true
-          type: string
         query:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_query'
         recovery_strategy:
-          enum:
-            - no_breach
-            - query
-            - none
+          anyOf:
+            - description: recovers groups that stop breaching (default).
+              enum:
+                - no_breach
+              type: string
+            - description: uses a custom recovery query to detect recovery.
+              enum:
+                - query
+              type: string
+            - description: disables recovery entirely.
+              enum:
+                - none
+              type: string
           nullable: true
-          type: string
         schedule:
           additionalProperties: false
           nullable: true
