@@ -24,7 +24,7 @@ const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof us
 beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => useState(initial));
   mockUseOnboardingFlow.mockReturnValue({
-    servicesStep: { selectedServiceIds: ['cloudtrail'] },
+    servicesStep: { selectedServiceIds: ['guardduty'] },
     removeDeployInstance: jest.fn(),
     awsServicesMap: AWS_SERVICES_MAP,
   } as unknown as ReturnType<typeof useOnboardingFlow>);
@@ -35,26 +35,26 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('cloudtrail', 'AWS CloudTrail [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);
-    expect(ids).toContain('cloudtrail__dup-1');
+    expect(ids).toContain('guardduty__dup-1');
   });
 
   it('assigns __dup-2 for the second duplicate', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('cloudtrail', 'AWS CloudTrail [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
     });
     act(() => {
-      result.current.addDuplicate('cloudtrail', 'AWS CloudTrail [Duplicate 2]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, null);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);
-    expect(ids).toContain('cloudtrail__dup-1');
-    expect(ids).toContain('cloudtrail__dup-2');
+    expect(ids).toContain('guardduty__dup-1');
+    expect(ids).toContain('guardduty__dup-2');
   });
 
   it('skips already-used id after remove+re-duplicate', () => {
@@ -65,22 +65,22 @@ describe('useServiceSettings — addDuplicate instanceId generation', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
     act(() => {
-      result.current.addDuplicate('cloudtrail', 'AWS CloudTrail [Duplicate]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate]', {}, null);
     });
     act(() => {
-      result.current.addDuplicate('cloudtrail', 'AWS CloudTrail [Duplicate 2]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 2]', {}, null);
     });
     act(() => {
-      result.current.removeInstance('cloudtrail__dup-1');
+      result.current.removeInstance('guardduty__dup-1');
     });
     act(() => {
-      result.current.addDuplicate('cloudtrail', 'AWS CloudTrail [Duplicate 3]', {}, null);
+      result.current.addDuplicate('guardduty', 'AWS GuardDuty [Duplicate 3]', {}, null);
     });
 
     const ids = result.current.instances.map((i) => i.instanceId);
-    expect(ids).not.toContain('cloudtrail__dup-1'); // removed
-    expect(ids).toContain('cloudtrail__dup-2'); // still present
-    expect(ids).toContain('cloudtrail__dup-3'); // new — not a collision
+    expect(ids).not.toContain('guardduty__dup-1'); // removed
+    expect(ids).toContain('guardduty__dup-2'); // still present
+    expect(ids).toContain('guardduty__dup-3'); // new — not a collision
     expect(new Set(ids).size).toBe(ids.length); // all unique
   });
 });

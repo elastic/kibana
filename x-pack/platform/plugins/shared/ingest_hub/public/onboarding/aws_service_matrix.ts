@@ -56,7 +56,7 @@ export interface AwsServiceMatrixEntry {
   inputs?: string[];
   /** Manifest var names the user must configure to activate this data stream */
   requiredConfig?: string[];
-  /** Manifest var names that are optional but surfaced in the UI (e.g. regions, metrics) */
+  /** Manifest var names that are optional and surfaced in the UI. Derived from manifest vars with required: false && show_user: true. */
   optionalConfig?: string[];
   /** Boolean manifest vars that are required: true in the package but have default values */
   mandatoryFields?: string[];
@@ -81,7 +81,7 @@ export interface AwsServiceMatrixEntry {
  */
 type AwsServiceStaticEntry = Omit<
   AwsServiceMatrixEntry,
-  'deploymentMethods' | 'signalType' | 'defaultEnabled' | 'showInUI'
+  'deploymentMethods' | 'signalType' | 'defaultEnabled' | 'showInUI' | 'optionalConfig'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
   signalType?: SignalType;
@@ -104,7 +104,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'apigateway_metrics',
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'apigateway',
   },
@@ -112,7 +111,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'lambda',
     name: 'AWS Lambda',
     category: 'Compute',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'lambda',
   },
@@ -136,7 +134,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'ec2_metrics',
     name: 'AWS EC2',
     category: 'Compute',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ec2',
   },
@@ -144,7 +141,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'ecs_metrics',
     name: 'AWS ECS',
     category: 'Compute',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ecs',
   },
@@ -161,7 +157,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'emr_metrics',
     name: 'AWS EMR',
     category: 'Compute',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'emr',
   },
@@ -171,7 +166,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'awshealth',
     name: 'AWS Health',
     category: 'Management and Governance',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'awshealth',
   },
@@ -186,7 +180,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'cloudwatch_metrics',
     name: 'AWS CloudWatch',
     category: 'Management and Governance',
-    optionalConfig: ['regions', 'metrics'],
     packageName: 'aws',
     policyTemplate: 'cloudwatch',
   },
@@ -203,7 +196,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'usage',
     name: 'AWS Usage',
     category: 'Cloud Financial Management',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'usage',
   },
@@ -253,7 +245,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'firewall',
     showInUI: false, // TODO confirm if only agent_based and if should be included in onboarding flow
@@ -311,7 +302,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'elb_metrics',
     name: 'AWS ELB',
     category: 'Networking and Content Delivery',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'elb',
   },
@@ -319,7 +309,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'natgateway',
     name: 'AWS NAT Gateway',
     category: 'Networking and Content Delivery',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'natgateway',
   },
@@ -345,7 +334,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'transitgateway',
     name: 'AWS Transit Gateway',
     category: 'Networking and Content Delivery',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'transitgateway',
   },
@@ -362,7 +350,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'vpn',
     name: 'AWS VPN',
     category: 'Networking and Content Delivery',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'vpn',
   },
@@ -372,7 +359,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'ebs',
     name: 'AWS EBS',
     category: 'Storage',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'ebs',
   },
@@ -380,7 +366,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 's3_daily_storage',
     name: 'AWS S3 (Storage metrics)',
     category: 'Storage',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3',
   },
@@ -388,7 +373,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 's3_request',
     name: 'AWS S3 (Request metrics)',
     category: 'Storage',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3',
   },
@@ -404,7 +388,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 's3_storage_lens',
     name: 'AWS S3 Storage Lens',
     category: 'Storage',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 's3_storage_lens',
   },
@@ -414,7 +397,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'dynamodb',
     name: 'AWS DynamoDB',
     category: 'Databases',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'dynamodb',
   },
@@ -422,7 +404,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'rds',
     name: 'AWS RDS',
     category: 'Databases',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'rds',
   },
@@ -430,7 +411,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'redshift',
     name: 'AWS Redshift',
     category: 'Databases',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'redshift',
   },
@@ -440,7 +420,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'kafka_metrics',
     name: 'AWS MSK (Kafka)',
     category: 'Management and Governance',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'kafka',
   },
@@ -448,7 +427,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'kinesis',
     name: 'AWS Kinesis',
     category: 'Management and Governance',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'kinesis',
   },
@@ -456,7 +434,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'sns',
     name: 'AWS SNS',
     category: 'Management and Governance',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'sns',
   },
@@ -464,7 +441,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'sqs',
     name: 'AWS SQS',
     category: 'Management and Governance',
-    optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'sqs',
   },
@@ -477,7 +453,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     signalType: 'metrics',
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
     packageName: 'aws_bedrock',
     defaultEnabled: true,
     policyTemplate: 'aws_bedrock',
@@ -502,7 +477,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     signalType: 'metrics',
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['aws/metrics'],
-    optionalConfig: ['regions'],
     packageName: 'aws_bedrock',
     defaultEnabled: true,
     policyTemplate: 'aws_bedrock',
@@ -530,7 +504,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     signalType: 'metrics',
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     inputs: ['awsfargate/metrics'],
-    optionalConfig: ['regions'],
     packageName: 'awsfargate',
     defaultEnabled: true,
     policyTemplate: 'awsfargate',
@@ -609,8 +582,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
 
 /**
  * Merge the static routing table with data from any Fleet package manifest.
- * Derives managed_integration, signalType, inputs, requiredConfig, mandatoryFields,
- * defaultEnabled, and identityFederationSupported from the manifest for all packages.
+ * Derives managed_integration, signalType, inputs, requiredConfig, optionalConfig,
+ * mandatoryFields, defaultEnabled, and identityFederationSupported from the manifest.
  * Static fallback values are used when the manifest does not provide a field.
  */
 export function buildAwsServiceMatrix(
@@ -623,6 +596,7 @@ export function buildAwsServiceMatrix(
     let signalType = entry.signalType;
     let inputs = entry.inputs;
     let requiredConfig = entry.requiredConfig;
+    let optionalConfig: string[] | undefined;
     let mandatoryFields = entry.mandatoryFields;
     let defaultEnabled = entry.defaultEnabled ?? true;
     const showInUI = entry.showInUI ?? true;
@@ -676,6 +650,15 @@ export function buildAwsServiceMatrix(
         mandatoryFields = mandFields;
       }
 
+      const optVars: string[] = [
+        ...new Set(
+          allVars.filter((v: any) => !v.required && v.show_user).map((v: any) => v.name as string)
+        ),
+      ];
+      if (optVars.length > 0) {
+        optionalConfig = optVars;
+      }
+
       if ((ds as any)?.streams?.length > 0) {
         defaultEnabled = !(ds as any).streams.some((s: any) => s.enabled === false);
       }
@@ -717,6 +700,7 @@ export function buildAwsServiceMatrix(
       signalType: (signalType ?? entry.signalType) as SignalType,
       inputs,
       requiredConfig,
+      optionalConfig,
       mandatoryFields,
       varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
       defaultEnabled,
