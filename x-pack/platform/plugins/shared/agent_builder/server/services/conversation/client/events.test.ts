@@ -288,8 +288,19 @@ describe('ConversationClient timeline events', () => {
     const appendedEvents = (): TimelineEvent[] =>
       esClient.update.mock.calls[0][0].script.params.new_events;
 
-    it('appends user_message + execution_started + execution_completed for a fresh turn', async () => {
-      await client.appendRoundTimelineEvents(conversation, round(), { resumed: false });
+    const storedEvent: TimelineEvent = {
+      id: 'e0',
+      type: TimelineEventType.userMessage,
+      created_at: '2026-01-01T00:00:00.000Z',
+      actor: { type: EventActorType.user, id: 'user-1' },
+      data: { message: 'earlier' },
+    };
+
+    it('appends user_message + execution_started + execution_completed for a new conversation', async () => {
+      await client.appendRoundTimelineEvents(conversation, round(), {
+        resumed: false,
+        created: true,
+      });
 
       const events = appendedEvents();
       expect(events.map((e) => e.type)).toEqual([
@@ -306,10 +317,51 @@ describe('ConversationClient timeline events', () => {
       expect(started.execution_id).toBe(completed.execution_id);
     });
 
+    it('appends on an update when the conversation already has stored events', async () => {
+      mockStorageClient.search.mockResolvedValue({ hits: { hits: [makeDoc([storedEvent])] } });
+
+      await client.appendRoundTimelineEvents(conversation, round(), {
+        resumed: false,
+        created: false,
+      });
+
+      expect(appendedEvents().map((e) => e.type)).toEqual([
+        TimelineEventType.userMessage,
+        TimelineEventType.executionStarted,
+        TimelineEventType.executionCompleted,
+      ]);
+    });
+
+    it('appends nothing on an update to a legacy conversation (no stored events)', async () => {
+      // default search mock returns makeDoc() with events: []
+      await client.appendRoundTimelineEvents(conversation, round(), {
+        resumed: false,
+        created: false,
+      });
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
+    it('appends nothing for a paused (awaiting_prompt) round — HITL is a follow-up', async () => {
+      await client.appendRoundTimelineEvents(
+        conversation,
+        round({ status: ConversationRoundStatus.awaitingPrompt, pending_prompts: [] }),
+        { resumed: false, created: true }
+      );
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
+    it('appends nothing for a resumed round — HITL is a follow-up', async () => {
+      await client.appendRoundTimelineEvents(conversation, round(), {
+        resumed: true,
+        created: false,
+      });
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
     it('is best-effort: a failed append is swallowed, not thrown', async () => {
       esClient.update.mockRejectedValueOnce(new Error('es down'));
       await expect(
-        client.appendRoundTimelineEvents(conversation, round(), { resumed: false })
+        client.appendRoundTimelineEvents(conversation, round(), { resumed: false, created: true })
       ).resolves.toBeUndefined();
     });
   });

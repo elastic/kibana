@@ -142,7 +142,7 @@ export interface ConversationClient {
   appendRoundTimelineEvents(
     conversation: Conversation,
     round: ConversationRound,
-    options: { resumed: boolean }
+    options: { resumed: boolean; created: boolean }
   ): Promise<void>;
 }
 
@@ -575,10 +575,13 @@ class ConversationClientImpl implements ConversationClient {
   ): Promise<TimelineEvent[]> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
+    // A conversation is events-native once it has any stored events (its timeline is written
+    // from the first round). A legacy, rounds-only conversation has none, so convert its rounds
+    // on read. The producer never writes a partial events array (see appendRoundTimelineEvents),
+    // so a present-but-nonempty array is always the full timeline.
+    const storedEvents = document._source!.events;
     let events: TimelineEvent[] =
-      document._source!.events !== undefined
-        ? document._source!.events
-        : roundsToEvents(fromEs(document));
+      storedEvents && storedEvents.length > 0 ? storedEvents : roundsToEvents(fromEs(document));
 
     if (options.afterEventId) {
       const index = events.findIndex((event) => event.id === options.afterEventId);
@@ -600,13 +603,27 @@ class ConversationClientImpl implements ConversationClient {
   async appendRoundTimelineEvents(
     conversation: Conversation,
     round: ConversationRound,
-    options: { resumed: boolean }
+    options: { resumed: boolean; created: boolean }
   ): Promise<void> {
     if (options.resumed || round.status !== ConversationRoundStatus.completed) {
       return;
     }
 
     try {
+      // Only write events for a timeline we own: a brand-new conversation (created this run), or
+      // one that already has stored events. Skip a legacy rounds-only conversation — getEvents
+      // converts its rounds on read, and appending here would leave a PARTIAL events array
+      // (just this round), dropping the earlier rounds from the timeline.
+      if (!options.created) {
+        const existing = await this.getDocumentWithAccess({
+          conversationId: conversation.id,
+          access: 'converse',
+        });
+        if ((existing._source?.events?.length ?? 0) === 0) {
+          return;
+        }
+      }
+
       const executionId = uuidv4();
       const userMessageId = uuidv4();
       const agent = agentActor(conversation);

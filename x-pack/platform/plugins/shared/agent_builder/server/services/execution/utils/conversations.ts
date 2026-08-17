@@ -61,7 +61,7 @@ export const createConversation$ = ({
       await conversationClient.appendRoundTimelineEvents(
         createdConversation,
         roundCompletedEvent.data.round,
-        { resumed: false }
+        { resumed: false, created: true }
       );
 
       return createConversationCreatedEvent(createdConversation);
@@ -115,7 +115,10 @@ export const updateConversation$ = ({
       );
 
       // Dual-write: also append the coarse timeline events for this round.
-      await conversationClient.appendRoundTimelineEvents(updatedConversation, round, { resumed });
+      await conversationClient.appendRoundTimelineEvents(updatedConversation, round, {
+        resumed,
+        created: false,
+      });
 
       return createConversationUpdatedEvent(updatedConversation);
     })
