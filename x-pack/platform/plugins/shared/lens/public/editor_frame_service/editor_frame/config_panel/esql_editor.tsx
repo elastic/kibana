@@ -261,6 +261,48 @@ export function ESQLEditor({
     setIsInitialized,
   });
 
+  // Initial ES|QL results grid load for the layer-scoped path: fetch grid attrs
+  // for the last submitted layer query without re-submitting it to the layer state.
+  useEffect(() => {
+    if (!onLayerQuerySubmit || dataGridAttrs) {
+      return;
+    }
+    const lastSubmittedQuery = submittedQueryRef.current;
+    if (!isOfAggregateQueryType(lastSubmittedQuery)) {
+      return;
+    }
+    const abortController = new AbortController();
+    getGridAttrs(
+      lastSubmittedQuery,
+      adHocDataViews,
+      data,
+      http,
+      uiSettings,
+      abortController,
+      esqlVariables,
+      isApproximate
+    )
+      .then((gridAttrs) => {
+        addColumnsToCache(lastSubmittedQuery, gridAttrs.columns);
+        setDataGridAttrs(gridAttrs);
+      })
+      .catch(() => {
+        // The chart itself will surface query errors via its own error handling path
+      });
+    return () => {
+      abortController.abort();
+    };
+  }, [
+    onLayerQuerySubmit,
+    dataGridAttrs,
+    adHocDataViews,
+    data,
+    http,
+    uiSettings,
+    esqlVariables,
+    isApproximate,
+  ]);
+
   // Track and report query state to parent
   useEffect(() => {
     onTextBasedQueryStateChange?.({
