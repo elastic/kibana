@@ -31,8 +31,8 @@ import {
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
 import {
   type IndexDataVisualizerViewProps,
@@ -92,7 +92,7 @@ const DataVisualizerESQLStateContextProvider = () => {
 
   if (!isEsqlEnabled) {
     return (
-      <EuiCallOut
+      <KbnInfoCallout
         announceOnMount={false}
         title={
           <FormattedMessage

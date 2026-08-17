@@ -49,6 +49,13 @@ export const createInvestigationProgressReportTool = ({
   id: SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
   type: ToolType.builtin,
   description: toolDescription,
+  annotations: {
+    title: 'Report Investigation Progress',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   schema: investigationStateSchema,
   tags: ['streams', 'investigation'],
   availability: createSignificantEventsAvailability({ server, logger }),
