@@ -29,7 +29,8 @@
     "@kbn/ui-callout",
     "@kbn/shared-ux-ai-components",
     "@kbn/data-views-plugin",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/presentation-util"
   ],
   "exclude": ["target/**/*"]
 }

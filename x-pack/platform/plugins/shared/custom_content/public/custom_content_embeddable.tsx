@@ -24,6 +24,7 @@ import {
   apiPublishesTimeRange,
   fetch$,
 } from '@kbn/presentation-publishing';
+import { tracksOverlays } from '@kbn/presentation-util';
 import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { lazy, Suspense, useCallback, useEffect, useState } from 'react';
@@ -142,6 +143,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           defaultMessage: 'Custom content',
         }),
       onEdit: async ({ isNewPanel } = {}) => {
+        if (tracksOverlays(parentApi)) parentApi.clearOverlays();
         isFlyoutOpen$.next(true);
       },
       isEditingEnabled: () => true,
