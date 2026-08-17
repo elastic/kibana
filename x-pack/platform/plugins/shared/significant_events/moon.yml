@@ -77,6 +77,7 @@ dependsOn:
   - '@kbn/apm-utils'
   - '@kbn/datemath'
   - '@kbn/core-http-server-utils'
+  - '@kbn/cps-server-utils'
 tags:
   - plugin
   - prod
