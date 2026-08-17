@@ -111,7 +111,7 @@ export class SearchNavigationPlugin
     if (this.onAppMountHandlers.length === 0) return;
 
     try {
-      await Promise.all(this.onAppMountHandlers);
+      await Promise.all(this.onAppMountHandlers.map((handler) => handler()));
     } catch (e) {
       this.logger.warn('Error handling app mount functions for search navigation');
       this.logger.warn(e);

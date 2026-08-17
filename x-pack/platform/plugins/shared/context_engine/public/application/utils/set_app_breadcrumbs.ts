@@ -20,5 +20,5 @@ export const setAppBreadcrumbsViaCore = (
 };
 
 export const clearAppBreadcrumbsViaCore = (chrome: ChromeStart): void => {
-  chrome.setBreadcrumbs([]);
+  chrome.setBreadcrumbs([], { project: { value: [] } });
 };

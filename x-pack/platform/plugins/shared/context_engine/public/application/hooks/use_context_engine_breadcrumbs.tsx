@@ -12,7 +12,7 @@ import { CONTEXT_ENGINE_APP_PATH } from '../../../common/features';
 import { clearAppBreadcrumbsViaCore, setAppBreadcrumbsViaCore } from '../utils/set_app_breadcrumbs';
 import { useKibana } from './use_kibana';
 
-const contextTitle = i18n.translate('xpack.contextEngine.landing.title', {
+const contextTitle = i18n.translate('xpack.contextEngine.landing.breadcrumbs.title', {
   defaultMessage: 'Context',
 });
 

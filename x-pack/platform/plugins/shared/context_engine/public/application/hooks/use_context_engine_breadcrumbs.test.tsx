@@ -151,6 +151,8 @@ describe('useContextEngineBreadcrumbs', () => {
     const { unmount } = renderHook(() => useContextEngineBreadcrumbs('my-ai-index'));
     unmount();
 
-    expect(core.chrome.setBreadcrumbs).toHaveBeenLastCalledWith([]);
+    expect(core.chrome.setBreadcrumbs).toHaveBeenLastCalledWith([], {
+      project: { value: [] },
+    });
   });
 });
