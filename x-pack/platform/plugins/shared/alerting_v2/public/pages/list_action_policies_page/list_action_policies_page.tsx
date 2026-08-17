@@ -35,7 +35,7 @@ const getActionPoliciesListMenu = ({
       label: i18n.translate('xpack.alertingV2.actionPoliciesList.createPolicyButton', {
         defaultMessage: 'Create policy',
       }),
-      iconType: 'plusInCircle',
+      iconType: 'plusCircle',
       run: navigateToCreate,
       testId: 'createActionPolicyButton',
     },

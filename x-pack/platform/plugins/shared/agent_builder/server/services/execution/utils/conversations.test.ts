@@ -68,6 +68,7 @@ describe('conversations utils', () => {
 
         expect(result.access_control).toEqual({
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         });
       });
 
@@ -85,6 +86,7 @@ describe('conversations utils', () => {
 
         expect(result.access_control).toEqual({
           access_mode: ConversationAccessControlMode.Public,
+          entries: [],
         });
       });
 
@@ -160,6 +162,7 @@ describe('conversations utils', () => {
         const existingConversation = createEmptyConversation({
           access_control: {
             access_mode: ConversationAccessControlMode.Private,
+            entries: [],
           },
         });
         conversationClient.exists.mockResolvedValue(true);
@@ -178,6 +181,7 @@ describe('conversations utils', () => {
         expect(result.operation).toBe('UPDATE');
         expect(result.access_control).toEqual({
           access_mode: ConversationAccessControlMode.Private,
+          entries: [],
         });
       });
     });

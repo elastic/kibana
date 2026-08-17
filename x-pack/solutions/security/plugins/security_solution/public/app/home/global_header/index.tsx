@@ -24,10 +24,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import {
-  getScopeFromPath,
-  showDataViewPickerByPath,
-} from '../../../sourcerer/containers/sourcerer_paths';
+import { getScopeFromPath, showDataViewPickerByPath } from '../../../data_view_manager/utils/paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
 

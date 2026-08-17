@@ -66,7 +66,7 @@ const INLINE_DEFS = [
   {
     id: 'email',
     label: 'Email',
-    iconType: 'email',
+    iconType: 'mail',
     connectorTypeId: '.email',
     paramsTemplate: 'to: ""\n',
   },

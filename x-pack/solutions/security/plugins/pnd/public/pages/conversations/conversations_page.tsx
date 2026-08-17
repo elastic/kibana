@@ -184,11 +184,11 @@ export const ConversationsPage: React.FC = () => {
       ) : null}
 
       {error ? (
-        <EuiEmptyPrompt iconType="alert" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
+        <EuiEmptyPrompt iconType="warning" title={<h2>{QUEUE_PAGE_INFO.loadError}</h2>} />
       ) : null}
 
       {!isLoading && !error && filteredQueueItems.length === 0 ? (
-        <EuiEmptyPrompt iconType="visTagCloud" title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>} />
+        <EuiEmptyPrompt iconType="chartTagCloud" title={<h2>{QUEUE_PAGE_INFO.emptyQueue}</h2>} />
       ) : null}
 
       {!isLoading && !error
