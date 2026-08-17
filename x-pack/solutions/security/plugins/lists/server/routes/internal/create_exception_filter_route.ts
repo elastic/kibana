@@ -14,11 +14,11 @@ import type {
 import { INTERNAL_EXCEPTION_FILTER } from '@kbn/securitysolution-list-constants';
 import { APP_ID } from '@kbn/security-solution-features/constants';
 import { buildExceptionFilter } from '../../services/exception_lists/build_exception_filter';
-
-const MAX_EXCEPTION_LIST_IDS = 10_000;
 import type { ListsPluginRouter } from '../../types';
 import { getExceptionFilterRequest } from '../../../common/api';
 import { buildRouteValidation, buildSiemResponse } from '../utils';
+
+const MAX_EXCEPTION_LIST_IDS = 10_000;
 
 export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
   router.versioned
@@ -112,7 +112,7 @@ export const getExceptionFilterRoute = (router: ListsPluginRouter): void => {
             exceptionItems.push(...exceptions);
           }
 
-          const { filter } = await buildExceptionFilter({ 
+          const { filter } = await buildExceptionFilter({
             alias,
             chunkSize,
             excludeExceptions,
