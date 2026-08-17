@@ -8,8 +8,8 @@
  */
 
 import { css } from '@emotion/react';
-import { layoutVar, layoutLevels } from '../constants';
 import { euiOverflowScroll, euiShadow, type UseEuiTheme } from '@elastic/eui';
+import { layoutVar, layoutLevels } from '../constants';
 import { getHighContrastBorder } from '../utils';
 import type { LayoutAppearance } from '../layout.types';
 import type { EmotionFn } from '../types';
