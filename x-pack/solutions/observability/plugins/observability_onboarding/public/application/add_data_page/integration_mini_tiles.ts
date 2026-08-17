@@ -16,6 +16,12 @@ export interface IntegrationMiniTileData {
   eprPackage?: string;
   /** Internal onboarding-app route the tile opens. */
   route?: string;
+  /**
+   * Fleet integration group whose chooser this tile opens instead of
+   * navigating, when Fleet's collection tiles provide the group. Falls back to
+   * the tile's normal navigation otherwise.
+   */
+  collectionGroup?: string;
 }
 
 export const INTEGRATION_MINI_TILES: readonly IntegrationMiniTileData[] = [
@@ -27,6 +33,7 @@ export const INTEGRATION_MINI_TILES: readonly IntegrationMiniTileData[] = [
     ),
     logo: 'prometheus',
     eprPackage: 'prometheus',
+    collectionGroup: 'prometheus',
   },
   {
     id: 'supabase',

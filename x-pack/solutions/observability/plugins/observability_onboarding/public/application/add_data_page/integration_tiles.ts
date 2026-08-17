@@ -22,6 +22,12 @@ export interface IntegrationTileData {
   eprPackage?: string;
   /** Optional policy template selected on the detail page, appended as ?integration=. */
   eprIntegration?: string;
+  /**
+   * Fleet integration group whose chooser this tile opens instead of
+   * navigating, when Fleet's collection tiles provide the group. Falls back to
+   * the tile's normal navigation otherwise.
+   */
+  collectionGroup?: string;
 }
 
 export interface IntegrationCategory {
@@ -105,6 +111,7 @@ export const INTEGRATION_TILES: readonly IntegrationCategory[] = [
         ),
         logo: 'docker',
         eprPackage: 'docker',
+        collectionGroup: 'docker',
       },
       {
         id: 'aws_ecs',

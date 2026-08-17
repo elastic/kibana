@@ -10,12 +10,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { matchers } from '@emotion/jest';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { CompatRouter, useSearchParams } from 'react-router-dom-v5-compat';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { createCallApi } from '../../services/rest/create_call_api';
@@ -52,18 +52,15 @@ jest.mock('../shared/use_managed_otlp_service_availability', () => ({
 
 jest.mock('../add_data_page/observability_search_results', () => ({
   ObservabilitySearchResults: ({
-    collectionToOpen,
     onOpenCollection,
   }: {
-    collectionToOpen?: string;
-    onOpenCollection: (card: unknown) => void;
+    onOpenCollection: (groupId: string) => void;
   }) => (
     <div data-test-subj="observabilitySearchResultsStub">
-      <div data-test-subj="collectionToOpen">{collectionToOpen ?? ''}</div>
       <button
         type="button"
         data-test-subj="stubOpenCollection"
-        onClick={() => onOpenCollection({ id: 'collection:nginx', name: 'nginx' })}
+        onClick={() => onOpenCollection('nginx')}
       >
         open chooser
       </button>
@@ -71,18 +68,70 @@ jest.mock('../add_data_page/observability_search_results', () => ({
   ),
 }));
 
-// The flyout's own contents are covered by its unit test; here only the page's
-// open/close wiring and its url bookkeeping matter.
-jest.mock('../add_data_page/collection_flyout', () => ({
-  CollectionFlyout: ({ card, onClose }: { card: { id: string }; onClose: () => void }) => (
-    <div data-test-subj="collectionFlyoutStub">
-      <div data-test-subj="flyoutCardId">{card.id}</div>
-      <button type="button" data-test-subj="stubCloseFlyout" onClick={onClose}>
-        close
-      </button>
-    </div>
-  ),
-}));
+// The page hosts a FleetCardsProvider whose module load and package query are
+// real code paths; only Fleet's data hook and its icon renderer are stubbed.
+const mockUseAvailablePackages = jest.fn();
+jest.mock('@kbn/fleet-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/fleet-plugin/public');
+  const ReactActual = jest.requireActual('react');
+  return {
+    ...actual,
+    AvailablePackagesHook: () =>
+      Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
+    CardIcon: () => ReactActual.createElement('span', { 'data-test-subj': 'variantRowIconStub' }),
+  };
+});
+
+const member = (name: string, title: string) => ({
+  id: `epr:${name}`,
+  name,
+  title,
+  description: 'Member.',
+  categories: ['observability'],
+  icons: [],
+  url: `/app/integrations/detail/${name}`,
+  version: '1.0.0',
+  integration: '',
+  type: 'integration',
+});
+
+const collectionCard = (groupId: string, title: string, members: string[]) => ({
+  id: `collection:${groupId}`,
+  name: groupId,
+  title,
+  description: 'Choose a collection method.',
+  categories: ['observability'],
+  icons: [],
+  url: `/app/integrations/collection/${groupId}`,
+  version: '',
+  integration: '',
+  isCollectionCard: true,
+  groupMembers: members.map((name) => member(name, name)),
+});
+
+// Docker is a curated tile, so it covers a chooser opened outside the results.
+const collectionCards = [
+  collectionCard('nginx', 'Nginx', ['nginx', 'nginx_otel']),
+  collectionCard('docker', 'Docker', ['docker', 'docker_otel']),
+];
+
+const memberHrefs = () =>
+  screen
+    .getAllByTestId(/^collectionVariantRow-/)
+    .map((row) => row.querySelector('a')?.getAttribute('href') ?? '');
+
+beforeEach(() => {
+  mockUseAvailablePackages.mockReturnValue({
+    isLoading: false,
+    eprPackageLoadingError: undefined,
+    allCards: collectionCards,
+  });
+});
+
+// Collection-aware tiles start as ordinary links and turn into chooser buttons
+// when Fleet's packages land, so tests that click one wait for the swap.
+const waitForCollectionTile = (tileId: string) =>
+  waitFor(() => expect(screen.getByTestId(tileId)).not.toHaveAttribute('href'));
 
 const LocationDisplay = () => {
   const location = useLocation();
@@ -92,6 +141,50 @@ const LocationDisplay = () => {
 const LocationSearchDisplay = () => {
   const location = useLocation();
   return <div data-test-subj="locationSearch">{location.search}</div>;
+};
+
+// Stands in for the browser back button or a deep link: something other than
+// the flyout's own close button taking the group id out of the url.
+const CollectionParamControls = () => {
+  const [params, setParams] = useSearchParams();
+  const dropCollection = () => {
+    const next = new URLSearchParams(params);
+    next.delete('collection');
+    setParams(next);
+  };
+  return (
+    <button type="button" data-test-subj="stubDropCollectionParam" onClick={dropCollection}>
+      drop collection
+    </button>
+  );
+};
+
+// Models Fleet's react-query data arriving late: only its own hook consumer
+// re-renders, as in the app, so a page-level re-render cannot fake the update.
+const createPackagesFeed = (initialCards: unknown[]) => {
+  let cards = initialCards;
+  const listeners = new Set<() => void>();
+
+  const usePackages = () => {
+    const [, bump] = React.useState(0);
+    React.useEffect(() => {
+      const listener = () => bump((count) => count + 1);
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    }, []);
+    return { isLoading: false, eprPackageLoadingError: undefined, allCards: cards };
+  };
+
+  const publish = (nextCards: unknown[]) => {
+    cards = nextCards;
+    act(() => {
+      listeners.forEach((listener) => listener());
+    });
+  };
+
+  return { usePackages, publish };
 };
 
 const createObservabilityServices = (
@@ -182,6 +275,7 @@ const renderLandingAtPathWithSearch = (initialPath: string) => {
           <CompatRouter>
             <LandingPage />
             <LocationSearchDisplay />
+            <CollectionParamControls />
           </CompatRouter>
         </MemoryRouter>
       </KibanaContextProvider>
@@ -295,24 +389,81 @@ describe('LandingPage search (V2, Variant A)', () => {
   });
 });
 
-describe('LandingPage collection chooser restore (V2)', () => {
-  it('hands the url collection to the results so the chooser can reopen', () => {
+describe('LandingPage collection chooser (V2)', () => {
+  // Returning from a member's detail page (or refreshing with the chooser
+  // open) lands with the group id in the url, and the page opens the flyout
+  // once Fleet's packages contain its card.
+  it('opens the chooser named in the url once packages load', async () => {
     renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
-    expect(screen.getByTestId('collectionToOpen')).toHaveTextContent('nginx');
+
+    expect(await screen.findByTestId('collectionFlyout')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Nginx' })).toBeInTheDocument();
+  });
+
+  // The url names the open chooser, so a refresh or a shared link restores it.
+  it('writes the collection param when the chooser opens', async () => {
+    const user = userEvent.setup();
+    renderLandingAtPathWithSearch('/?search=nginx');
+
+    await user.click(screen.getByTestId('stubOpenCollection'));
+    expect(await screen.findByTestId('collectionFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('locationSearch')).toHaveTextContent('collection=nginx');
   });
 
   // Without the strip, a refresh after closing would resurrect the chooser.
   it('drops the collection param when the chooser closes, keeping the search', async () => {
     const user = userEvent.setup();
     renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+    await screen.findByTestId('collectionFlyout');
 
-    await user.click(screen.getByTestId('stubOpenCollection'));
-    expect(screen.getByTestId('flyoutCardId')).toHaveTextContent('collection:nginx');
-
-    await user.click(screen.getByTestId('stubCloseFlyout'));
-    expect(screen.queryByTestId('collectionFlyoutStub')).not.toBeInTheDocument();
+    await user.click(screen.getByTestId('euiFlyoutCloseButton'));
+    expect(screen.queryByTestId('collectionFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('locationSearch')).toHaveTextContent('?search=nginx');
     expect(screen.getByTestId('locationSearch')).not.toHaveTextContent('collection');
+  });
+
+  // The url is the single source of the open chooser, so anything that clears
+  // the param closes the flyout: the browser back button, a deep link, or the
+  // search term changing.
+  it('closes the chooser when the collection param leaves the url', async () => {
+    const user = userEvent.setup();
+    renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+    await screen.findByTestId('collectionFlyout');
+
+    await user.click(screen.getByTestId('stubDropCollectionParam'));
+    expect(screen.queryByTestId('collectionFlyout')).not.toBeInTheDocument();
+  });
+
+  it('follows refreshed package data while the chooser is open', async () => {
+    const feed = createPackagesFeed(collectionCards);
+    mockUseAvailablePackages.mockImplementation(feed.usePackages);
+    renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
+    await screen.findByTestId('collectionFlyout');
+    expect(screen.getAllByTestId(/^collectionVariantRow-/)).toHaveLength(2);
+
+    feed.publish([
+      collectionCard('nginx', 'Nginx', ['nginx', 'nginx_otel', 'nginx_otel_hostmetrics']),
+    ]);
+
+    await waitFor(() => expect(screen.getAllByTestId(/^collectionVariantRow-/)).toHaveLength(3));
+  });
+
+  // A chooser opened from a curated tile has to return the user to the search
+  // they had running, not just to the chooser.
+  it('keeps the active search in member links of a chooser opened from a curated tile', async () => {
+    const user = userEvent.setup();
+    renderLandingAtPathWithSearch('/?search=docker');
+    await waitForCollectionTile('observabilityOnboardingIntegrationTile-docker');
+
+    await user.click(screen.getByTestId('observabilityOnboardingIntegrationTile-docker'));
+    await screen.findByTestId('collectionFlyout');
+
+    expect(screen.getByTestId('locationSearch')).toHaveTextContent('search=docker');
+    for (const href of memberHrefs()) {
+      expect(href).toContain(
+        `returnPath=${encodeURIComponent('?search=docker&collection=docker')}`
+      );
+    }
   });
 });
 

@@ -6,43 +6,32 @@
  */
 
 import { useMemo } from 'react';
-import type {
-  AvailablePackagesHookType,
-  IntegrationCardItem,
-  UseLocalSearchType,
-} from '@kbn/fleet-plugin/public';
-import {
-  rewriteCardUrl,
-  useCardUrlRewrite,
-} from '../package_list_search_form/use_card_url_rewrite';
-import { getCollectionGroupId, isCollectionCard } from './collection_card';
+import type { IntegrationCardItem, UseLocalSearchType } from '@kbn/fleet-plugin/public';
+import { useCardUrlRewrite } from '../package_list_search_form/use_card_url_rewrite';
 
 const ALLOWED_CATEGORIES = new Set(['observability', 'os_system']);
 
 /**
  * The o11y item pipeline feeding AddDataSearchResults: category filter, text
  * match (Fleet's own `useLocalSearch`, so results agree with the Integrations
- * app by construction), return-path URL rewrite. A collection card's member
- * links are what actually navigate, so they get the same rewrite as top-level
- * cards plus the group id that reopens their chooser on return. The curated
- * tiles are not mirrored in: they stay visible below the
- * results, so mirroring only produced duplicates of the EPR cards. Both Fleet
- * hooks arrive as arguments because the caller loads the module async.
+ * app by construction), return-path URL rewrite. A collection card only opens
+ * the chooser, so its member links are rewritten where the chooser renders
+ * them, not here. The curated tiles are not mirrored in: they stay visible
+ * below the results, so mirroring only produced duplicates of the EPR cards.
+ * Package data arrives from the page-level FleetCardsProvider; `useLocalSearch`
+ * comes as an argument because the caller gates on the async-loaded module.
  */
 export function useAddDataResultItems({
   searchTerm,
-  useAvailablePackages,
+  allCards,
+  isLoading,
   useLocalSearch,
 }: {
   searchTerm: string;
-  useAvailablePackages: AvailablePackagesHookType;
+  allCards: IntegrationCardItem[];
+  isLoading: boolean;
   useLocalSearch: UseLocalSearchType;
-}): { items: IntegrationCardItem[]; isLoading: boolean; error?: Error } {
-  // `allCards`, not `filteredCards`: the latter is pre-filtered by Fleet's own
-  // router-derived category state, which is wrong outside the onboarding route.
-  const { allCards, isLoading, eprPackageLoadingError } = useAvailablePackages({
-    prereleaseIntegrationsEnabled: true,
-  });
+}): { items: IntegrationCardItem[] } {
   const rewriteUrl = useCardUrlRewrite({ category: null, search: searchTerm });
 
   const categoryFiltered = useMemo(
@@ -64,20 +53,8 @@ export function useAddDataResultItems({
     const results = matchedIds
       ? categoryFiltered.filter(({ id }) => matchedIds.has(id))
       : categoryFiltered;
-    return results.map((card) => {
-      const rewritten = rewriteUrl(card);
-      if (!isCollectionCard(rewritten)) return rewritten;
-      // Members are the only cards that navigate away, so they alone carry the
-      // group id that reopens this chooser on return.
-      const collection = getCollectionGroupId(rewritten);
-      return {
-        ...rewritten,
-        groupMembers: rewritten.groupMembers.map((member) =>
-          rewriteCardUrl(member, { category: null, search: searchTerm, collection })
-        ),
-      };
-    });
+    return results.map(rewriteUrl);
   }, [categoryFiltered, localSearch, searchTerm, rewriteUrl]);
 
-  return { items, isLoading, error: eprPackageLoadingError ?? undefined };
+  return { items };
 }

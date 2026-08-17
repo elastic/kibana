@@ -90,9 +90,7 @@ describe('createRenderResultCard', () => {
     expect(card.querySelector('a')).not.toBeInTheDocument();
 
     await user.click(screen.getByText('Nginx'));
-    expect(onOpenCollection).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'collection:nginx' })
-    );
+    expect(onOpenCollection).toHaveBeenCalledWith('nginx');
   });
 
   it('renders a singleton collection as a plain card, mirroring Fleet degradation', () => {

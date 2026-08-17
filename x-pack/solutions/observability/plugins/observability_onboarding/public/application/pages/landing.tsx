@@ -8,13 +8,13 @@
 import { EuiHorizontalRule, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { AddDataSearchBar, DocsLinksSection } from '../add_data_grid';
-import type { CollectionCardItem } from '../add_data_page/collection_card';
-import { CollectionFlyout } from '../add_data_page/collection_flyout';
+import { CollectionChooser } from '../add_data_page/collection_chooser';
+import { FleetCardsProvider } from '../add_data_page/fleet_cards_provider';
 import { ObservabilityIntegrationsSection } from '../add_data_page/integrations_section';
 import { useObservabilityDocsLinks } from '../add_data_page/observability_docs_links';
 import { ObservabilitySearchResults } from '../add_data_page/observability_search_results';
@@ -32,22 +32,28 @@ const ObservabilityDocsLinksSection = () => {
 const AddDataPageV2 = () => {
   const [searchValue, setSearchValue] = useAddDataSearchUrlSync();
   const searchTerm = searchValue.trim();
-  // Hosted here rather than inside the results, so surfaces other than a
-  // search result card can open the same chooser.
-  const [openCollection, setOpenCollection] = useState<CollectionCardItem | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  // Return state written by member links, so coming back from a member's detail
-  // page lands on the chooser it was picked from rather than a bare search.
-  const collectionToOpen = searchParams.get('collection') ?? undefined;
+  // The url is the only record of which chooser is open: written on open,
+  // dropped on close, carried by member links. That keeps the chooser alive
+  // across a refresh or a return from a member's detail page, makes it
+  // shareable, and leaves nothing to fall out of step with it.
+  const openCollection = searchParams.get('collection') ?? undefined;
 
-  const closeCollection = useCallback(() => {
-    setOpenCollection(null);
-    if (!searchParams.has('collection')) return;
-    // Dropped on close so a refresh afterwards does not resurrect the chooser.
-    const next = new URLSearchParams(searchParams);
-    next.delete('collection');
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+  const setCollectionParam = useCallback(
+    (groupId?: string) => {
+      if ((searchParams.get('collection') ?? undefined) === groupId) return;
+      const next = new URLSearchParams(searchParams);
+      if (groupId) {
+        next.set('collection', groupId);
+      } else {
+        next.delete('collection');
+      }
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams]
+  );
+
+  const closeCollection = useCallback(() => setCollectionParam(undefined), [setCollectionParam]);
 
   return (
     <EuiPageTemplate paddingSize="none" data-test-subj="addDataPageV2">
@@ -61,23 +67,30 @@ const AddDataPageV2 = () => {
           })}
           data-test-subj="observabilityOnboardingIntegrationsSearchFieldSearch"
         />
-        {searchTerm !== '' && (
-          <>
-            <EuiSpacer size="l" />
-            <ObservabilitySearchResults
-              searchTerm={searchTerm}
-              onOpenCollection={setOpenCollection}
-              collectionToOpen={collectionToOpen}
-            />
-          </>
-        )}
-        <EuiHorizontalRule margin="xl" />
-        <ObservabilityIntegrationsSection />
+        <FleetCardsProvider>
+          {searchTerm !== '' && (
+            <>
+              <EuiSpacer size="l" />
+              <ObservabilitySearchResults
+                searchTerm={searchTerm}
+                onOpenCollection={setCollectionParam}
+              />
+            </>
+          )}
+          <EuiHorizontalRule margin="xl" />
+          <ObservabilityIntegrationsSection onOpenCollection={setCollectionParam} />
+          {/* Inside the provider because it reads Fleet's cards, and a flyout
+              portals out of here anyway. */}
+          <CollectionChooser
+            collection={openCollection}
+            searchTerm={searchTerm}
+            onClose={closeCollection}
+          />
+        </FleetCardsProvider>
         <ApiEndpoints titleTag="h2" />
         <EuiHorizontalRule margin="xl" />
         <ObservabilityDocsLinksSection />
       </EuiPageTemplate.Section>
-      {openCollection && <CollectionFlyout card={openCollection} onClose={closeCollection} />}
     </EuiPageTemplate>
   );
 };

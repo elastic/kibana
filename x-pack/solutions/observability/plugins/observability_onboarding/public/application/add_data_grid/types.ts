@@ -37,6 +37,22 @@ export interface MiniTile {
   icon: ReactElement;
   href?: string;
   onClick?: MouseEventHandler;
+  /** Optional badge rendered under the title, e.g. a collection's variant count. */
+  badge?: ReactNode;
+  'data-test-subj'?: string;
+}
+
+/**
+ * Host-built view-model for one collection method inside a chooser: the
+ * technologies that ship several ways to collect the same data.
+ */
+export interface CollectionVariant {
+  id: string;
+  title: string;
+  description: string;
+  icon: ReactElement;
+  href?: string;
+  onClick?: MouseEventHandler;
   'data-test-subj'?: string;
 }
 

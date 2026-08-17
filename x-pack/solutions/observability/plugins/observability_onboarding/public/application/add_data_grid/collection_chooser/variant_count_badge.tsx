@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-/** How many collection methods a grouped technology card collapses (ingest-dev#8480). */
-export const GroupVariantBadge = ({ count }: { count: number }) => (
+/** How many collection variants a card collapses into its chooser. */
+export const VariantCountBadge = ({ count }: { count: number }) => (
   <EuiBadge color="hollow">
-    {i18n.translate('xpack.observability_onboarding.groupVariantBadge.count', {
+    {i18n.translate('xpack.observability_onboarding.addDataGrid.variantCountBadge.label', {
       defaultMessage: '{count, plural, one {# variant} other {# variants}}',
       values: { count },
     })}

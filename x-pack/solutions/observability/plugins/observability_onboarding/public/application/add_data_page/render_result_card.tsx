@@ -8,10 +8,8 @@
 import React from 'react';
 import { CardIcon } from '@kbn/fleet-plugin/public';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { CuratedTileCard } from '../add_data_grid';
-import type { CollectionCardItem } from './collection_card';
-import { isCollectionCard } from './collection_card';
-import { GroupVariantBadge } from './group_variant_badge';
+import { CuratedTileCard, VariantCountBadge } from '../add_data_grid';
+import { getCollectionGroupId, isCollectionCard } from './collection_card';
 
 const EXTERNAL_URL_PATTERN = /^https?:\/\//;
 
@@ -35,7 +33,8 @@ const renderPlainCard = (item: IntegrationCardItem): React.ReactNode => (
 );
 
 export interface RenderResultCardOptions {
-  onOpenCollection: (card: CollectionCardItem) => void;
+  /** Names the chooser to open in the url, which is what renders the flyout. */
+  onOpenCollection: (groupId: string) => void;
 }
 
 /**
@@ -58,8 +57,8 @@ export const createRenderResultCard =
           icon: (
             <CardIcon icons={item.icons} packageName={item.name} version={item.version} size="xl" />
           ),
-          badge: <GroupVariantBadge count={item.groupMembers.length} />,
-          onClick: () => onOpenCollection(item),
+          badge: <VariantCountBadge count={item.groupMembers.length} />,
+          onClick: () => onOpenCollection(getCollectionGroupId(item)),
           'data-test-subj': `addDataResultCard-${item.id}`,
         }}
       />

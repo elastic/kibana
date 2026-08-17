@@ -37,9 +37,6 @@ const makeCard = (overrides: Partial<IntegrationCardItem>): IntegrationCardItem 
   ...overrides,
 });
 
-const mockPackages = (allCards: IntegrationCardItem[], eprPackageLoadingError?: Error) =>
-  jest.fn().mockReturnValue({ isLoading: false, allCards, eprPackageLoadingError });
-
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider>
     <KibanaContextProvider services={coreMock.createStart()}>
@@ -50,9 +47,15 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   </I18nProvider>
 );
 
+const renderItems = (searchTerm: string, allCards: IntegrationCardItem[]) =>
+  renderHook(
+    () => useAddDataResultItems({ searchTerm, allCards, isLoading: false, useLocalSearch }),
+    { wrapper }
+  );
+
 describe('useAddDataResultItems', () => {
   it('filters to the allowed categories, text-matches, and rewrites integration URLs', () => {
-    const useAvailablePackages = mockPackages([
+    const { result } = renderItems('redis', [
       makeCard({}),
       makeCard({ id: 'epr:redis', name: 'redis', title: 'Redis', description: 'KV store.' }),
       makeCard({
@@ -64,13 +67,6 @@ describe('useAddDataResultItems', () => {
       }),
     ]);
 
-    const { result } = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'redis', useAvailablePackages, useLocalSearch }),
-      { wrapper }
-    );
-
-    expect(result.current.isLoading).toBe(false);
-    expect(result.current.error).toBeUndefined();
     expect(result.current.items.map(({ name }) => name)).toEqual(['redis']);
     expect(result.current.items[0].url).toContain('returnAppId=');
   });
@@ -78,19 +74,17 @@ describe('useAddDataResultItems', () => {
   // The curated tiles are always visible below the results, so mirroring them
   // into the result list only produced duplicates of the EPR cards.
   it('does not mirror curated tiles into the results', () => {
-    const useAvailablePackages = mockPackages([
+    const { result } = renderItems('docker', [
       makeCard({ id: 'epr:docker', name: 'docker', title: 'Docker', description: 'Containers.' }),
     ]);
-
-    const { result } = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'docker', useAvailablePackages, useLocalSearch }),
-      { wrapper }
-    );
 
     expect(result.current.items.map(({ id }) => id)).toEqual(['epr:docker']);
   });
 
-  it('rewrites collection member urls alongside the top-level cards', () => {
+  // A collection card only opens the chooser, and the chooser rewrites the
+  // members it renders. Rewriting them here too would append the return params
+  // twice on the same url.
+  it('passes collection members through untouched', () => {
     const collection: IntegrationCardItem = {
       ...makeCard({ id: 'collection:nginx', url: '/app/integrations/collection/nginx' }),
       isCollectionCard: true,
@@ -99,12 +93,8 @@ describe('useAddDataResultItems', () => {
         makeCard({ id: 'epr:nginx_otel', name: 'nginx_otel', title: 'Nginx (OpenTelemetry)' }),
       ],
     };
-    const useAvailablePackages = mockPackages([collection]);
 
-    const { result } = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'nginx', useAvailablePackages, useLocalSearch }),
-      { wrapper }
-    );
+    const { result } = renderItems('nginx', [collection]);
 
     const [resultCard] = result.current.items;
     if (!isCollectionCard(resultCard)) {
@@ -112,69 +102,18 @@ describe('useAddDataResultItems', () => {
     }
     expect(resultCard.groupMembers).toHaveLength(2);
     for (const memberUrl of resultCard.groupMembers.map(({ url }) => url)) {
-      expect(memberUrl).toContain('returnAppId=');
+      expect(memberUrl).not.toContain('returnAppId=');
     }
-  });
-
-  // Return navigation happens across apps, so the flyout cannot be restored from
-  // component state. Only the member links carry the group id, so browsing the
-  // page never writes it into history.
-  it('points collection member return paths back at the open collection', () => {
-    const collection: IntegrationCardItem = {
-      ...makeCard({ id: 'collection:nginx', url: '/app/integrations/collection/nginx' }),
-      isCollectionCard: true,
-      groupMembers: [
-        makeCard({}),
-        makeCard({ id: 'epr:nginx_otel', name: 'nginx_otel', title: 'Nginx (OpenTelemetry)' }),
-      ],
-    };
-    const useAvailablePackages = mockPackages([collection]);
-
-    const { result } = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'nginx', useAvailablePackages, useLocalSearch }),
-      { wrapper }
-    );
-
-    const [resultCard] = result.current.items;
-    if (!isCollectionCard(resultCard)) {
-      throw new Error('expected the collection card to survive the pipeline');
-    }
-    for (const memberUrl of resultCard.groupMembers.map(({ url }) => url)) {
-      expect(memberUrl).toContain(
-        `returnPath=${encodeURIComponent('?search=nginx&collection=nginx')}`
-      );
-    }
-    // The collection card itself is not a return target, so it stays clean.
-    expect(resultCard.url).not.toContain('collection%3Dnginx');
-  });
-
-  it('surfaces the Fleet package loading error', () => {
-    const useAvailablePackages = mockPackages([], new Error('registry down'));
-
-    const { result } = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'redis', useAvailablePackages, useLocalSearch }),
-      { wrapper }
-    );
-
-    expect(result.current.error).toEqual(new Error('registry down'));
   });
 
   // Matching is Fleet's useLocalSearch. These two assertions lock the semantics
   // this page was built around (token prefix, no mid-word) so a Fleet change
   // shows up here instead of silently changing the page.
   it('matches on token prefix but not mid-word', () => {
-    const useAvailablePackages = mockPackages([makeCard({})]);
-
-    const prefix = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'ngi', useAvailablePackages, useLocalSearch }),
-      { wrapper }
-    );
+    const prefix = renderItems('ngi', [makeCard({})]);
     expect(prefix.result.current.items.map(({ name }) => name)).toEqual(['nginx']);
 
-    const midWord = renderHook(
-      () => useAddDataResultItems({ searchTerm: 'ginx', useAvailablePackages, useLocalSearch }),
-      { wrapper }
-    );
+    const midWord = renderItems('ginx', [makeCard({})]);
     expect(midWord.result.current.items).toEqual([]);
   });
 });

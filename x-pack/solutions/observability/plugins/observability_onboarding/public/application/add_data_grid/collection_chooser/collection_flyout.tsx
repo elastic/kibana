@@ -7,6 +7,8 @@
 
 import React from 'react';
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -15,20 +17,28 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { CollectionCardItem } from './collection_card';
-import { VariantChooser } from './variant_chooser';
+import type { CollectionVariant } from '../types';
+import { VariantRow } from './variant_row';
 
 export interface CollectionFlyoutProps {
-  card: CollectionCardItem;
+  title: string;
+  description: string;
+  variants: readonly CollectionVariant[];
   onClose: () => void;
 }
 
 /**
- * The chooser surface for a grouped technology (ingest-dev#8480): design chose
- * a flyout for the Add Data page because it keeps the user in the page context.
- * The page hosts it, so surfaces other than a search result can open it too.
+ * The chooser for a technology that ships several collection methods
+ * (ingest-dev#8480): design chose a flyout so the user keeps the page they
+ * searched behind it. Content is host-supplied, so the Integrations catalog can
+ * put its own cards through the same surface.
  */
-export const CollectionFlyout = ({ card, onClose }: CollectionFlyoutProps) => {
+export const CollectionFlyout = ({
+  title,
+  description,
+  variants,
+  onClose,
+}: CollectionFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'collectionFlyoutTitle' });
 
   return (
@@ -41,15 +51,21 @@ export const CollectionFlyout = ({ card, onClose }: CollectionFlyoutProps) => {
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={titleId}>{card.title}</h2>
+          <h2 id={titleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText size="s" color="subdued">
-          <p>{card.description}</p>
+          <p>{description}</p>
         </EuiText>
         <EuiSpacer size="m" />
-        <VariantChooser members={card.groupMembers} />
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {variants.map((variant) => (
+            <EuiFlexItem key={variant.id}>
+              <VariantRow variant={variant} />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
       </EuiFlyoutBody>
     </EuiFlyout>
   );
