@@ -8,8 +8,9 @@
 import { Parser } from '@elastic/esql';
 
 /**
- * Returns a FROM-only query (e.g. `FROM logs-*`) extracted from a full ES|QL
- * pipeline. Used for index-level field lookups such as resolving the time field.
+ * Returns the source command (e.g. `FROM logs-*` or `TS metrics-*`) extracted
+ * from a full ES|QL pipeline. Used for index-level field lookups such as
+ * resolving the time field.
  */
 export function extractFromSourceQuery(query: string): string {
   const trimmed = query.trim();
@@ -26,7 +27,7 @@ export function extractFromSourceQuery(query: string): string {
 
     return trimmed.slice(fromCmd.location.min, fromCmd.location.max + 1).trim();
   } catch {
-    const match = trimmed.match(/^\s*(FROM\s+[^|]+)/i);
+    const match = trimmed.match(/^\s*((?:FROM|TS)\s+[^|]+)/i);
     return match ? match[1].trim() : '';
   }
 }

@@ -8,7 +8,7 @@
 import type { RuleQuery } from '../../form/types';
 import { getBreachQuery } from '../../form/utils/query_helpers';
 
-const FROM_QUERY_PATTERN = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i;
+const SOURCE_QUERY_PATTERN = /^\s*(?:FROM|TS)\s+[a-zA-Z0-9_.*-]/i;
 
 /**
  * Returns the ES|QL query used to resolve index date fields for time-field
@@ -28,5 +28,5 @@ export function getTimeFieldResolutionQuery(
   const fullQuery = getBreachQuery(query);
   // Prefer composed base for alerts; YAML-only standalone alerts only have breach.query.
   const candidate = isAlert ? baseQuery || fullQuery : fullQuery;
-  return FROM_QUERY_PATTERN.test(candidate) && queryCommitted ? candidate : '';
+  return SOURCE_QUERY_PATTERN.test(candidate) && queryCommitted ? candidate : '';
 }

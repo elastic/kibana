@@ -31,7 +31,7 @@ describe('extractFromSourceQuery', () => {
     );
   });
 
-  it('returns empty string when query has no FROM', () => {
+  it('returns empty string when query has no FROM or TS source command', () => {
     expect(extractFromSourceQuery('SHOW INFO')).toBe('');
   });
 
@@ -39,5 +39,17 @@ describe('extractFromSourceQuery', () => {
     expect(extractFromSourceQuery('FROM logs-*, metrics-* | LIMIT 10')).toBe(
       'FROM logs-*, metrics-*'
     );
+  });
+
+  it('extracts TS from a simple timeseries query', () => {
+    expect(extractFromSourceQuery('TS metrics-* | LIMIT 10')).toBe('TS metrics-*');
+  });
+
+  it('extracts TS from a STATS pipeline', () => {
+    expect(
+      extractFromSourceQuery(
+        'TS metrics-kubeletstatsreceiver.otel-* | STATS COUNT(*) BY @timestamp | WHERE throttled == true'
+      )
+    ).toBe('TS metrics-kubeletstatsreceiver.otel-*');
   });
 });

@@ -40,7 +40,7 @@ describe('getTimeFieldResolutionQuery', () => {
     expect(getTimeFieldResolutionQuery(composedQuery, true, false)).toBe('');
   });
 
-  it('returns empty when the candidate query has no FROM clause', () => {
+  it('returns empty when the candidate query has no FROM or TS source command', () => {
     expect(
       getTimeFieldResolutionQuery(
         { format: 'composed', base: '', breach: { segment: '| WHERE count > 1' } },
@@ -48,5 +48,22 @@ describe('getTimeFieldResolutionQuery', () => {
         true
       )
     ).toBe('');
+  });
+
+  it('returns a committed TS composed base query in alert mode', () => {
+    const tsQuery: RuleQuery = {
+      format: 'composed',
+      base: 'TS metrics-kubeletstatsreceiver.otel-* | STATS COUNT(*) BY @timestamp',
+      breach: { segment: '| WHERE throttled == true' },
+    };
+    expect(getTimeFieldResolutionQuery(tsQuery, true, true)).toBe(tsQuery.base);
+  });
+
+  it('returns a committed TS standalone query in signal mode', () => {
+    const tsQuery: RuleQuery = {
+      format: 'standalone',
+      breach: { query: 'TS metrics-* | LIMIT 10' },
+    };
+    expect(getTimeFieldResolutionQuery(tsQuery, false, true)).toBe(tsQuery.breach.query);
   });
 });
