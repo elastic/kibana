@@ -8,6 +8,7 @@
  */
 
 import { Container, LazyServiceIdentifier } from 'inversify';
+import { injectionServiceMock, setup, start } from '@kbn/core-di-mocks';
 import { KibanaContainerModule } from './module';
 import { OnSetup, OnStart } from './services/plugin';
 
@@ -19,18 +20,14 @@ describe('KibanaContainerModule', () => {
   let container: Container;
 
   beforeEach(() => {
-    container = new Container();
+    container = injectionServiceMock.createSetupContract().getContainer();
   });
-
-  function trigger(hook: typeof OnSetup | typeof OnStart, context = container): void {
-    return context.getAll(hook, { chained: true }).forEach((fn) => fn(context));
-  }
 
   describe('bind', () => {
     describe.each([
-      { name: 'onSetup' as const, hook: OnSetup },
-      { name: 'onStart' as const, hook: OnStart },
-    ])('$name', ({ hook, name }) => {
+      { name: 'onSetup' as const, hook: OnSetup, trigger: setup },
+      { name: 'onStart' as const, hook: OnStart, trigger: start },
+    ])('$name', ({ hook, name, trigger }) => {
       let handler: jest.Mock;
       let module: KibanaContainerModule;
 
@@ -49,14 +46,14 @@ describe('KibanaContainerModule', () => {
       });
 
       it('should not fail if there are no registered services', () => {
-        expect(() => trigger(hook)).not.toThrow();
+        expect(() => trigger(container)).not.toThrow();
         expect(handler).not.toHaveBeenCalled();
       });
 
       it('should activate a bound service', () => {
         container.bind(token).toConstantValue('value');
 
-        expect(() => trigger(hook)).not.toThrow();
+        expect(() => trigger(container)).not.toThrow();
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(
           expect.objectContaining({ get: expect.any(Function) }),
@@ -68,7 +65,7 @@ describe('KibanaContainerModule', () => {
         container.bind(token).toConstantValue('value1');
         container.bind(token).toConstantValue('value2');
 
-        expect(() => trigger(hook)).not.toThrow();
+        expect(() => trigger(container)).not.toThrow();
         expect(handler).toHaveBeenCalledTimes(2);
         expect(handler).toHaveBeenNthCalledWith(1, expect.anything(), 'value1');
         expect(handler).toHaveBeenNthCalledWith(2, expect.anything(), 'value2');
@@ -80,7 +77,7 @@ describe('KibanaContainerModule', () => {
         const child = new Container({ parent: container });
         child.bind(token).toConstantValue('value2');
 
-        expect(() => trigger(hook, child)).not.toThrow();
+        expect(() => trigger(child)).not.toThrow();
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(
           expect.objectContaining({ get: expect.any(Function) }),
@@ -93,7 +90,7 @@ describe('KibanaContainerModule', () => {
 
         const child = new Container({ parent: container });
 
-        expect(() => trigger(hook, child)).not.toThrow();
+        expect(() => trigger(child)).not.toThrow();
         expect(handler).not.toHaveBeenCalled();
       });
 
@@ -110,7 +107,7 @@ describe('KibanaContainerModule', () => {
         child.bind(dependencyToken).toConstantValue('overridden');
         child.bind(token).toConstantValue('value2');
 
-        expect(() => trigger(hook, child)).not.toThrow();
+        expect(() => trigger(child)).not.toThrow();
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(
           expect.objectContaining({ get: expect.any(Function) }),
@@ -156,7 +153,7 @@ describe('KibanaContainerModule', () => {
         );
         container.bind(token).toConstantValue('value');
 
-        expect(() => trigger(hook)).not.toThrow();
+        expect(() => trigger(container)).not.toThrow();
         expect(handler).toHaveBeenCalledTimes(1);
         expect(handler).toHaveBeenCalledWith(
           expect.objectContaining({ get: expect.any(Function) }),
@@ -184,7 +181,7 @@ describe('KibanaContainerModule', () => {
       await new Promise(process.nextTick);
 
       expect(factory).not.toHaveBeenCalled();
-      expect(() => trigger(OnStart)).not.toThrow();
+      expect(() => start(container)).not.toThrow();
       await new Promise(process.nextTick);
 
       expect(factory).toHaveBeenCalled();
@@ -203,7 +200,7 @@ describe('KibanaContainerModule', () => {
       const child = new Container({ parent: container });
       child.bind(dependencyToken).toConstantValue('something');
 
-      expect(() => trigger(OnStart)).not.toThrow();
+      expect(() => start(container)).not.toThrow();
       await expect(child.getAsync(token)).resolves.toBe('value:something');
     });
 
@@ -249,7 +246,7 @@ describe('KibanaContainerModule', () => {
         })
       );
 
-      expect(() => trigger(OnStart)).not.toThrow();
+      expect(() => start(container)).not.toThrow();
       await expect(container.getAsync(token)).resolves.toEqual(expected);
     });
 
@@ -275,8 +272,8 @@ describe('KibanaContainerModule', () => {
         );
         child.bind(token).toConstantValue('value');
 
-        expect(() => trigger(OnSetup, child)).not.toThrow();
-        expect(() => trigger(OnStart, child)).not.toThrow();
+        expect(() => setup(child)).not.toThrow();
+        expect(() => start(child)).not.toThrow();
         await new Promise(process.nextTick);
         expect(resolved).toBe('something');
       });
