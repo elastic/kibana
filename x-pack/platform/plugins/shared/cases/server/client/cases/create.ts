@@ -249,8 +249,7 @@ export const create = async (
 
     // Server-derived assignee identity: resolve profile uids to username /
     // full_name / email so downstream consumers (e.g. cases-as-data analytics)
-    // can read human-readable assignees. Gated until the MV10 mapping is rolled
-    // out fleet-wide (off by default on serverless).
+    // can read human-readable assignees. Gated by feature flag `assigneeIdentity`.
     if (clientArgs.config.assigneeIdentity.enabled) {
       attributes.assignees =
         (await populateAssigneesIdentity(
