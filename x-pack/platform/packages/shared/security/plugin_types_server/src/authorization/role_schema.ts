@@ -322,10 +322,7 @@ const FEATURE_NAME_VALUE_REGEX = /^[a-zA-Z0-9_-]+$/;
  */
 export const getKibanaRoleSchema = (
   getBasePrivilegeNames: () => { global: string[]; space: string[] },
-  // Resolving the known base privilege names builds the full Kibana privilege map, which is an
-  // expensive and request-independent computation. The per-element validators below consult it for
-  // every base privilege in the payload, so memoize it to avoid rebuilding the map once per entry.
-  // The set of base privilege names is constant, so resolving it a single time is safe.
+  // Memoize: resolving base privilege names rebuilds the full privilege map on every call.
   getMemoizedBasePrivilegeNames = _.once(getBasePrivilegeNames)
 ) =>
   schema.arrayOf(
@@ -435,9 +432,7 @@ export const getKibanaRoleSchema = (
       }
     ),
     {
-      // Bound the number of privilege entries. Each entry drives per-element base-privilege
-      // validation and the O(n^2) space-overlap check below, so an unbounded array would be an
-      // unbounded-input DoS vector for an otherwise low-cost request.
+      // Bound the number of privilege entries: each drives per-element validation and the O(n^2) space-overlap check below.
       maxSize: 1000,
       validate(value) {
         for (const [indexA, valueA] of value.entries()) {
