@@ -20,6 +20,7 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type {
   TypedLensSerializedState,
   DatasourceMap,
+  DatasourceStates,
   VisualizationMap,
   LensAppServices,
   LensStoreDeps,
