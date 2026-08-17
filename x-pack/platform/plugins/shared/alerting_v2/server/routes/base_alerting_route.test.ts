@@ -290,7 +290,7 @@ describe('BaseAlertingRoute', () => {
         expect.objectContaining({
           access: 'public',
           tags: ['oas-tag:alerting-v2'],
-          availability: { stability: 'experimental' },
+          availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
         })
       );
@@ -303,7 +303,7 @@ describe('BaseAlertingRoute', () => {
         expect.objectContaining({
           access: 'public',
           tags: ['oas-tag:alerting-v2'],
-          availability: { stability: 'experimental' },
+          availability: { stability: 'experimental', since: '9.5.0' },
           summary: 'Get a rule',
           oasOperationObject: expect.any(Function),
         })
@@ -317,7 +317,7 @@ describe('BaseAlertingRoute', () => {
         expect.objectContaining({
           access: 'internal',
           tags: ['oas-tag:alerting-v2'],
-          availability: { stability: 'experimental' },
+          availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
         })
       );
@@ -330,7 +330,7 @@ describe('BaseAlertingRoute', () => {
         expect.objectContaining({
           access: 'public',
           tags: ['oas-tag:alerting-v2', 'extra-tag'],
-          availability: { stability: 'experimental' },
+          availability: { stability: 'experimental', since: '9.5.0' },
           oasOperationObject: expect.any(Function),
         })
       );

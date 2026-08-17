@@ -48,7 +48,7 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   protected static readonly defaultOptions: RouteConfigOptions<RouteMethod> = {
     access: 'public',
     tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
+    availability: { stability: 'experimental', since: '9.5.0' },
   };
 
   protected static readonly routeOptions: RouteConfigOptions<RouteMethod> = {};
