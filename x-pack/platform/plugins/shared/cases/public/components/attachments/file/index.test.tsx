@@ -13,7 +13,11 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { basicCase, basicFileMock } from '../../../containers/mock';
 import { getFileAttachmentType } from '.';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
-import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
+import {
+  allCasesPermissions,
+  buildCasesPermissions,
+  renderWithTestingProviders,
+} from '../../../common/mock';
 import type { FileViewProps } from '.';
 
 describe('getFileType', () => {
@@ -50,6 +54,7 @@ describe('getFileType', () => {
       createdBy: { username: 'elastic', fullName: null, email: null, profileUid: undefined },
       version: '1',
       caseData: { title: basicCase.title, id: basicCase.id },
+      permissions: allCasesPermissions(),
       rowContext: {
         appId: 'cases',
         manageMarkdownEditIds: [],
@@ -144,6 +149,23 @@ describe('getFileType', () => {
         wrapperProps: { permissions: buildCasesPermissions({ delete: false }) },
       });
 
+      expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
+    });
+
+    it('getActions omits the delete action entirely without delete permission', () => {
+      const noDeletePermissions = buildCasesPermissions({ delete: false });
+      const attachmentViewObject = fileType.getAttachmentViewObject({
+        ...attachmentViewProps,
+        permissions: noDeletePermissions,
+      });
+
+      const actions =
+        attachmentViewObject.getActions?.({
+          ...attachmentViewProps,
+          permissions: noDeletePermissions,
+        }) ?? [];
+
+      expect(actions.length).toBe(1);
       expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
     });
 

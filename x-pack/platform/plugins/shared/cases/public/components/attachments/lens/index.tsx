@@ -19,6 +19,7 @@ import {
   type LensAttachmentData,
 } from '../../../../common/types/domain_zod/attachment/lens/v2';
 import { LENS_SO_TYPE } from '../../../../common/constants/attachments';
+import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from './translations';
 
 import {
@@ -49,13 +50,21 @@ function getOpenLensButton(savedObjectId: string, props: LensProps) {
   );
 }
 
-const getVisualizationAttachmentActions = (savedObjectId: string, props: LensProps) => [
-  {
-    type: AttachmentActionType.CUSTOM as const,
-    render: () => getOpenLensButton(savedObjectId, props),
-    isPrimary: false,
-  },
-];
+const getVisualizationAttachmentActions = (savedObjectId: string, props: LensProps) => {
+  const canUseEditor = KibanaServices.get().lens.canUseEditor();
+
+  if (!canUseEditor || !isOpenLensActionCompatible(props.attributes)) {
+    return [];
+  }
+
+  return [
+    {
+      type: AttachmentActionType.CUSTOM as const,
+      render: () => getOpenLensButton(savedObjectId, props),
+      isPrimary: false,
+    },
+  ];
+};
 
 const toLensProps = (data: LensAttachmentData) => {
   if (isLensPersistableData(data)) {

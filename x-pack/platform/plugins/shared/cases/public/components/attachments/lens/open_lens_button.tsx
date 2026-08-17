@@ -19,7 +19,7 @@ export const isOpenLensActionCompatible = (attributes: LensProps['attributes']):
 
 const OpenLensButtonComponent: React.FC<Props> = ({ savedObjectId, attributes, timeRange }) => {
   const {
-    lens: { navigateToPrefilledEditor, canUseEditor },
+    lens: { navigateToPrefilledEditor },
   } = useKibana().services;
 
   const onClick = useCallback(() => {
@@ -34,12 +34,6 @@ const OpenLensButtonComponent: React.FC<Props> = ({ savedObjectId, attributes, t
       }
     );
   }, [savedObjectId, attributes, navigateToPrefilledEditor, timeRange]);
-
-  const hasLensPermissions = canUseEditor();
-
-  if (!hasLensPermissions || !isOpenLensActionCompatible(attributes)) {
-    return null;
-  }
 
   return (
     <EuiButtonEmpty
