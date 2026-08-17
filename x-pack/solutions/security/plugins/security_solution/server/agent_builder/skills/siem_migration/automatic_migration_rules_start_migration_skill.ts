@@ -14,6 +14,7 @@ import {
   SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
   SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
+  SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID,
 } from '../../tools/siem_migrations';
 import {
   AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK,
@@ -58,9 +59,87 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
   partial / untranslatable / installable / failed). Returns an empty zero-shape for no items.
 - \`security.siem_migration.get_migration_rules\` — resolve rule **titles** to rule **item ids**
   for \`selection.ids\` (page is zero-based).
+- \`security.siem_migration.get_missing_rule_migration_resources\` — list resources the migration
+  is still missing (macros, lookups, reference sets, watchlists). Used as a pre-flight check on
+  fresh STARTs (see Pre-flight section below).
 - \`security.siem_migration.start_rule_migration\` — the mutating action. See decision policy below.
 - \`platform.core.list_inference_endpoints\` — list available inference endpoints (AI connectors)
   so the user can pick one.
+
+
+## Vendor-specific resource terminology
+
+  When displaying missing resources, use the vocabulary the user already knows for their vendor.
+  The migration's \`vendor\` is in the \`get_all_rule_migration_stats\` response.
+
+  | Vendor | Internal \`type\` values | Display name for the user |
+  |---|---|---|
+  | \`splunk\` | \`macro\` | Macro |
+  | \`splunk\` | \`lookup\` | Lookup |
+  | \`qradar\` | \`lookup\`| Reference Set |
+  | \`microsoft - sentinel\` | \`lookup\` | Watchlist |
+
+  Example output for a Splunk migration with missing resources:
+
+  > The following resources are missing. Rules that reference them may fail to translate or produce partial results:
+  >
+  > - **Macros (2):** \`my_macro\`, \`another_macro\`
+> - **Lookups (1):** \`threat_intel_lookup\`
+  >
+  > You can upload them in the Automatic Migration UI, or start now and reprocess affected rules afterward.
+
+  Example output for a QRadar migration:
+
+  > The following resources are missing:
+  >
+  > - **Reference Sets (3):** \`threat_ip_list\`, \`blocked_domains\`, \`geo_exceptions\`
+  >
+> You can upload them in the Automatic Migration UI, or start now and reprocess affected rules afterward.
+
+## Pre-Flight Checks
+
+**Rules:**
+1. **Missing resources comes first** — resolve the missing-resources question before asking about the connector or skip-prebuilt setting. Once the user has answered the missing-resources question, the connector and skip-prebuilt questions can be asked together.
+2. **Ask each question at most once** — before executing any check, scan the conversation history for the user's prior answers. If this question already has an answer, treat it as answered and skip to the next check. Never re-ask.
+3. Treat these pre-flight checks as todo list and once all are answered, Don't ask them again.
+
+### Pre-flight: Missing Resources
+
+> **Skip if already answered** — check the conversation history first. If the user has already responded to the missing-resources question, use their stated preference and proceed to the next check. Do not call \`get_missing_rule_migration_resources\` again.
+
+- Applicable only for **fresh START** (task status \`ready\`) and **REPROCESS**. Skip this check on **RESUME**.
+
+Call \`get_missing_rule_migration_resources\` for the resolved migration id.
+
+- **Empty array** → no missing resources; proceed silently to the next pre-flight check.
+- **Non-empty array** → group the results by \`type\` and show the user a summary, for example:
+
+  > The following resources are missing and rules that reference them may fail to translate or
+  > produce partial results:
+  >
+  > - **Macros (2):** \`my_macro\`, \`another_macro\`
+  > - **Lookups (1):** \`threat_intel_lookup\`
+  >
+  > You can upload missing resources in the Automatic Migration UI before starting, or start now
+  > and reprocess the affected rules after uploading. Which would you prefer?
+
+  Do **not** block the user — they may still confirm and start with missing resources.
+  - If they want to proceed, continue to Connector Selection.
+  - If they want to upload first, direct them to **LaunchPad → Manage Automatic Migrations**.
+
+### Pre-flight: Connector Selection
+
+> **Skip if already answered** — if the user has already chosen a connector in this conversation, use that choice directly without calling \`list_ai_connectors\` again.
+
+- Applicable for **fresh START** and **REPROCESS** only. For **RESUME**, skip this check and use the connector from \`last_execution\` in \`get_rule_migration_stats\`.
+
+Call \`list_ai_connectors\` and present the options as a multiple-choice question. Do **not** choose one automatically.
+
+### Pre-flight: Skip Prebuilt Rules Matching
+
+> **Skip if already answered** — if the user has already stated their preference in this conversation, use it directly.
+
+- Applicable for **fresh START** and **REPROCESS** only. For **RESUME**, skip this check and use the value from \`last_execution\` in \`get_rule_migration_stats\`.
 
 ## Workflow
 
@@ -69,12 +148,12 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 2. **Inspect state**: call \`get_rule_migration_stats\` and \`get_rule_migration_translation_stats\`
    to read the task status and translation counts. Use the decision matrix below to pick the
    request body.
-3. **Resolve the inference endpoint (AI connector)** (START and RESUME only): call
-   \`list_inference_endpoints\`, present the options, and ALWAYS ask the user which inference
-   endpoint (AI connector) to use. Never choose one automatically.
-4. **Confirm**: state exactly what you will do (START / REPROCESS / RESUME), which rules are
-   affected, and that it consumes connector credits. Wait for explicit confirmation.
-5. **Execute**: call \`start_rule_migration\` with the body chosen in step 2.
+3. **Pre-flight checks** — for each check (missing resources → connector → skip-prebuilt), first
+   verify the todo list if all question are answered. If not,  **Only ask unanswered questions.**
+   If all are already answered, proceed directly to step 4.
+4. **Report**: state exactly what you will do (START / REPROCESS / RESUME), which rules are
+   affected, and that it consumes connector credits. Show the complete request body in a table before proceeding.
+5. **Execute**: call \`start_rule_migration\`.
 
 ## START vs REPROCESS vs RESUME Decision Matrix
 
@@ -96,7 +175,6 @@ between them.
 
 #### START
 - It is the first execution of a \`ready\` migration. complete \`settings\`  object is required and values must be confirmed with user.
-- Ask user for both which inference endpoint (AI connector) they want to use and whether they want to skip prebuilt rules matching. No retry, no selection.
 
 #### REPROCESS ( Also called retry)
 - Re-runs a subset of rules. By default, reuse the connector and skip_prebuilt_rules_matching
@@ -122,11 +200,6 @@ between them.
   re-check progress with the summarize skill.
 - \`started: false\` — the task did not start (e.g. already running(\`status\` field in migration stats), or no matching items for the retry filter). Report this plainly and suggest re-inspecting the state.
 
-## Before Starting
-
-- Don't ask a question again if you have already got the answer from the user in previous steps. For example, if you have already asked for connector_id and skip_prebuilt_rules_matching, don't ask again.
-- Show users complete all the parameters in form of table before running the tool in all cases i.e. START, REPROCESS and RESUME.
-
 ${AUTOMATIC_MIGRATION_NAVIGATION_BLOCK}
 
 If the user asks to install rules, delete a migration, or update an index
@@ -138,6 +211,7 @@ pattern, route them to the relevant sibling skill — this skill only starts/rep
     SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
+    SIEM_MIGRATION_GET_MISSING_RULE_MIGRATION_RESOURCES_TOOL_ID,
     SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
     platformCoreTools.listInferenceEndpoints,
   ],
