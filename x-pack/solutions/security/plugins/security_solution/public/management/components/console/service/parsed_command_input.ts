@@ -114,6 +114,8 @@ export const getCommandNameFromTextInput = (input: string): string => {
 };
 
 export const getArgumentsForCommand = (command: CommandDefinition): string[] => {
+  // TODO:PT refactor needed. Remove this utlity in favor of `buildCommandUsageList` under `x-pack/solutions/security/plugins/security_solution/public/management/components/console/service/utils.ts`
+
   let requiredArgs = '';
   let optionalArgs = '';
   const exclusiveOrArgs: string[] = [];

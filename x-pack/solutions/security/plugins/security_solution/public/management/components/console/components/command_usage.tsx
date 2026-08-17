@@ -10,8 +10,8 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiDescriptionList, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { buildCommandUsageList } from '../service/utils';
 import { ConsoleCodeBlock } from './console_code_block';
-import { getArgumentsForCommand } from '../service/parsed_command_input';
 import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
@@ -74,19 +74,13 @@ export const CommandInputUsage = memo<CommandInputUsageProps>(
         return <ConsoleCodeBlock>{commandDef.helpUsage}</ConsoleCodeBlock>;
       }
 
-      const commandArgs = getArgumentsForCommand(commandDef);
-
-      if (commandArgs.length === 0) {
-        return <ConsoleCodeBlock>{commandDef.name}</ConsoleCodeBlock>;
-      }
-
       return (
         <>
-          {commandArgs.map((usage, index) => {
+          {buildCommandUsageList(commandDef).map((usage, index) => {
             return (
               <React.Fragment key={`helpUsage-${index}`}>
                 {index > 0 && <EuiSpacer size="xs" />}
-                <ConsoleCodeBlock>{`${commandDef.name} ${usage}`}</ConsoleCodeBlock>
+                <ConsoleCodeBlock>{usage}</ConsoleCodeBlock>
               </React.Fragment>
             );
           })}
