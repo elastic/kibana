@@ -41,7 +41,7 @@ export function getStateManagementForInlineEditing(
     const vis = getAttributes();
     const activeDatasourceId = resolveActiveDatasourceId(datasourceId);
     // drop loading/uninitialized entries so they never get serialized into the attributes
-    const loadedDatasourceStates = Object.fromEntries(
+    const loadedDatasourceStates: DatasourceStates = Object.fromEntries(
       Object.entries(allDatasourceStates ?? {}).filter(
         ([, { isLoading, state }]) => !isLoading && state !== null && state !== undefined
       )
