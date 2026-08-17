@@ -216,15 +216,10 @@ describe('ExecuteRuleQueryStep', () => {
   });
 
   it('marks content-length-exceeded errors as TaskErrorSource.USER', async () => {
-    mockHelpersEsqlToArrowReader(
-      mockEsClient,
-      jest
-        .fn()
-        .mockRejectedValue(
-          new errors.RequestAbortedError(
-            'Response size exceeded the limit (content length: 52428800)'
-          )
-        )
+    // The maxResponseSize guard only fires on the JSON (non-streaming) path, which
+    // checks Content-Length; the arrow path uses chunked transfer encoding.
+    mockEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
     );
 
     const state = createRulePipelineState({ rule: createRuleResponse() });
