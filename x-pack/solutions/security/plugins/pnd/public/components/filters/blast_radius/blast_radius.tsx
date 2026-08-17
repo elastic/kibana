@@ -66,14 +66,19 @@ export const BlastRadius: React.FC<BlastRadiusProps> = ({
         {surfaces.map((surface) => (
           <EuiFlexItem key={surface} grow={false}>
             <EuiBadge
-              style={{ padding: euiTheme.size.s, textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              style={{ padding: euiTheme.size.xs, textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
               color={surfaceFilter === surface ? 'primary' : 'hollow'}
               onClick={() => onSurfaceFilterChange(surfaceFilter === surface ? null : surface)}
               onClickAriaLabel={surface}
             >
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} direction="row">
+              <EuiFlexGroup
+                gutterSize="none"
+                alignItems="center"
+                responsive={false}
+                direction="row"
+              >
                 <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
+                  <EuiText size="xs" style={{ padding: `0 ${euiTheme.size.xs}` }}>
                     <EuiTextTruncate text={surface} width={120} truncation="end" />
                   </EuiText>
                 </EuiFlexItem>

@@ -7,15 +7,16 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
+  EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiHorizontalRule,
   EuiPopover,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { type Investigation } from '@kbn/pnd-common';
-import { CardActionIconButton } from './action_icon_button';
+import { ActionButton } from './action_button';
+import { ACTIONS_TRANSLATIONS } from './translations';
 
 interface ActionConfig {
   key: string;
@@ -61,24 +62,35 @@ const useContextMenuItems = (
 export type CardActionType = 'openIncident' | 'dismiss' | 'assign';
 export interface BaseActionsProps {
   investigation: Investigation;
+  isFlyout?: boolean;
   onClickAction: (action: CardActionType, conversationId: Investigation['recordId']) => void;
   'data-test-subj'?: string;
 }
 
 export const BaseActions = memo<BaseActionsProps>(
-  ({ investigation, onClickAction, 'data-test-subj': dataTestSubj }) => {
+  ({ investigation, isFlyout = false, onClickAction, 'data-test-subj': dataTestSubj }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     const handleClose = useCallback(() => setIsOpen(false), []);
     const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
-    const button = (
-      <CardActionIconButton
+    const button = isFlyout ? (
+      <EuiButton
+        size="s"
+        color="primary"
+        fill
+        iconType="chevronSingleDown"
+        iconSide="right"
+        onClick={handleToggle}
+        data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
+      >
+        {ACTIONS_TRANSLATIONS.buttons.actions}
+      </EuiButton>
+    ) : (
+      <ActionButton
         data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
         iconType="boxesVertical"
-        tooltipContent={i18n.translate('xpack.pnd.baseActions.openMenu', {
-          defaultMessage: 'More actions',
-        })}
+        tooltipContent={ACTIONS_TRANSLATIONS.tooltips.openMenu}
         onClick={handleToggle}
       />
     );
@@ -88,28 +100,22 @@ export const BaseActions = memo<BaseActionsProps>(
         {
           key: 'openIncident',
           icon: 'document',
-          name: i18n.translate('xpack.pnd.baseActions.openAnIncident', {
-            defaultMessage: 'Open an incident',
-          }),
+          name: ACTIONS_TRANSLATIONS.buttons.openIncident,
           onClick: () => onClickAction('openIncident', investigation.recordId),
-          // TODO: Add a isdisabled for actions that are disabled
+          // TODO: Add a isDisabled for actions that are disabled
           // might apply to openIncident if the investigation already has an incident created
         },
         {
           key: 'assign',
           icon: 'user',
-          name: i18n.translate('xpack.pnd.baseActions.assign', {
-            defaultMessage: 'Assign',
-          }),
+          name: ACTIONS_TRANSLATIONS.buttons.assign,
           onClick: () => onClickAction('assign', investigation.recordId),
           separator: true,
         },
         {
           key: 'dismiss',
           icon: 'trash',
-          name: i18n.translate('xpack.pnd.baseActions.dismiss', {
-            defaultMessage: 'Dismiss',
-          }),
+          name: ACTIONS_TRANSLATIONS.buttons.dismiss,
           onClick: () => onClickAction('dismiss', investigation.recordId),
         },
       ],
@@ -126,9 +132,7 @@ export const BaseActions = memo<BaseActionsProps>(
         button={button}
         isOpen={isOpen}
         closePopover={handleClose}
-        aria-label={i18n.translate('xpack.pnd.baseActions.popover.ariaLabel', {
-          defaultMessage: 'Actions menu',
-        })}
+        aria-label={ACTIONS_TRANSLATIONS.popover.ariaLabel}
       >
         <EuiContextMenuPanel
           css={`

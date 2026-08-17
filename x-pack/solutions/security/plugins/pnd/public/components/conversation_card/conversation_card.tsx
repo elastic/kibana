@@ -6,11 +6,19 @@
  */
 
 import React, { useCallback, memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+  EuiTextTruncate,
+} from '@elastic/eui';
 import { type Investigation } from '@kbn/pnd-common';
 import { useHistory } from 'react-router-dom';
-import type { BaseActionsProps } from './base_actions';
-import { ConversationsActionsGroup } from './actions_group';
+import type { BaseActionsProps } from '../actions';
+import { ConversationsActionsGroup, type ConversationsActionsGroupProps } from './actions_group';
 import { ConversationMetaInfo } from './conversation_meta_info';
 
 const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
@@ -18,14 +26,12 @@ const CONVERSATION_CARD_RISK_SCORE_SIZE = 40;
 export const ConversationCard = memo<{
   investigation: Investigation;
   hasBorder: boolean;
+  onClickRecommendedAction: ConversationsActionsGroupProps['onClickRecommendedAction'];
   onClickAction: BaseActionsProps['onClickAction'];
-}>(({ investigation, hasBorder, onClickAction }) => {
+  onClickCard: (recordId: Investigation['recordId']) => void;
+}>(({ investigation, hasBorder, onClickRecommendedAction, onClickAction, onClickCard }) => {
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
-
-  const onOpen = useCallback(() => {
-    history.push(`/investigations/${investigation.id}`);
-  }, [history, investigation.id]);
 
   const onOpenChat = useCallback(() => {
     history.push(`/chats`);
@@ -51,13 +57,7 @@ export const ConversationCard = memo<{
       }}
       hasBorder={false}
       hasShadow={false}
-      onClick={onOpen}
-      onKeyDown={(event: React.KeyboardEvent) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onOpen();
-        }
-      }}
+      onClick={() => onClickCard(investigation.recordId)}
     >
       <EuiFlexGroup
         alignItems="center"
@@ -88,7 +88,7 @@ export const ConversationCard = memo<{
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>
-          <EuiFlexGroup gutterSize="s" responsive direction="column">
+          <EuiFlexGroup gutterSize="xs" responsive direction="column">
             <EuiFlexItem grow={false}>
               <EuiFlexGroup
                 alignItems="center"
@@ -103,15 +103,15 @@ export const ConversationCard = memo<{
                 />
                 <ConversationsActionsGroup
                   investigation={investigation}
-                  onOpen={onOpen}
+                  onClickRecommendedAction={onClickRecommendedAction}
                   onOpenChat={onOpenChat}
                   onClickAction={onClickAction}
                 />
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{investigation.title}</h3>
+              <EuiTitle size="xxs">
+                <p>{investigation.title}</p>
               </EuiTitle>
             </EuiFlexItem>
             {investigation.summary ? (

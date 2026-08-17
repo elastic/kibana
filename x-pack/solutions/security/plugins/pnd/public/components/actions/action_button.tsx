@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
-export const CardActionIconButton = memo(
+export const ActionButton = memo(
   ({
     iconType,
     onClick,
@@ -35,4 +35,4 @@ export const CardActionIconButton = memo(
   }
 );
 
-CardActionIconButton.displayName = 'CardActionIconButton';
+ActionButton.displayName = 'ActionButton';

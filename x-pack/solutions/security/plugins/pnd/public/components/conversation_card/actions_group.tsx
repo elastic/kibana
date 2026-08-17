@@ -10,8 +10,7 @@ import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { type Investigation, type RecommendedAction } from '@kbn/pnd-common';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
-import { BaseActions, type BaseActionsProps } from './base_actions';
-import { CardActionIconButton } from './action_icon_button';
+import { ActionButton, BaseActions, type BaseActionsProps } from '../actions';
 
 const ACTION_ICONS_MAP: Record<RecommendedAction, 'gear' | 'lock' | 'flag' | 'external'> = {
   contain: 'lock',
@@ -36,15 +35,21 @@ const getActionButtonIcon = (
   return ACTION_ICONS_MAP[investigation.recommendedAction];
 };
 
-interface ConversationsActionsGroupProps {
+export interface ConversationsActionsGroupProps {
   investigation: Investigation;
-  onOpen: () => void;
+  onClickRecommendedAction: ({
+    recordId,
+    recommendedAction,
+  }: {
+    recordId: Investigation['recordId'];
+    recommendedAction: Investigation['recommendedAction'];
+  }) => void;
   onOpenChat: () => void;
   onClickAction: BaseActionsProps['onClickAction'];
 }
 
 export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
-  ({ investigation, onOpen, onOpenChat, onClickAction }) => {
+  ({ investigation, onClickRecommendedAction, onOpenChat, onClickAction }) => {
     const { euiTheme } = useEuiTheme();
 
     return (
@@ -72,7 +77,10 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
                 size="xs"
                 onClick={(event: React.MouseEvent) => {
                   event.stopPropagation();
-                  onOpen();
+                  onClickRecommendedAction({
+                    recordId: investigation.recordId,
+                    recommendedAction: investigation.recommendedAction,
+                  });
                 }}
               >
                 {investigation.primaryActionLabel ?? CONVERSATION_CARD_ACTIONS.default}
@@ -94,7 +102,7 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           })}
         />
         <EuiFlexItem grow={false}>
-          <CardActionIconButton
+          <ActionButton
             iconType="productAgent"
             tooltipContent={CONVERSATION_CARD_ACTIONS.openChat}
             onClick={onOpenChat}
