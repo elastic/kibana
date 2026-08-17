@@ -28,6 +28,12 @@ Use this skill when reviewing or preparing changes to a **connector spec** (spec
   they operate on (e.g., "Search messages, list public channels, and send messages in Slack"). Flag descriptions that
   are vague ("Connect to X to pull data"), say nothing about capabilities ("Kibana Stack Connector for X"), or omit
   actions the connector actually provides. Keep to one sentence, ~15 words.
+- **`supportedFeatureIds` on a brand-new connector type**: A new connector must reach Production-NonCanary
+  before it can declare user-facing features, otherwise a rollout or rollback can leave a node without the
+  type and break any user action referencing it. A PR that adds a connector may only declare
+  `['agentBuilder']`. Flag `'workflows'` or any other user-facing feature ID on a newly added
+  connector and ask for it to move to a follow-up PR. A PR that adds feature IDs to an existing connector
+  is fine as long as that connector is already registered in every Production-NonCanary version.
 - **Schema UI**: Every config field in `schema` has `.meta()` with at least `label` (or uses a `UISchemas.*` helper).
   Otherwise fields render as unlabeled.
 - **No numeric config fields**: Flag any `z.number()` (or `.int()`) field in the connector-level `config`
@@ -182,8 +188,14 @@ actual documented behavior — flag them even without live access to the API, ba
   (a new connector cannot have been available before any feature it references). Flag any doc where it
   is missing or where the version is lower than another version referenced in the same file.
 - `docs/reference/toc.yml` entry exists in the correct section and matches alphabetical order in that section.
-- **Icon**: Connector has an icon (ConnectorIconsMap entry and icon component or asset). No
-  placeholder icons or generated icons. If a brand icon does not exist elsewhere in the repo, prompt the user to provide one.
+- **Icon**: Connector has an icon (ConnectorIconsMap entry and icon component or asset). The SVG
+  must be the vendor's official brand mark — sourced from the vendor's press kit, brand guidelines
+  site, or a curated icon set like [Simple Icons](https://simpleicons.org/) (which tracks official
+  sources). Flag SVGs that look AI-generated or hand-drawn: telltale signs are polygon-based
+  approximations, inline comments describing the shape (e.g. `<!-- Top triangle -->`), non-standard
+  brand colors, or a viewBox that doesn't match the vendor's standard. If a genuine brand icon is
+  not yet available, prompt the user to obtain one from the vendor — do not accept a generated
+  placeholder.
 
 #### Docs quality checks
 

@@ -25,14 +25,14 @@ Your primary goal is to analyze the provided context about a user's log dataset 
 Features are structured facts about the environment extracted from logs. They are **the most important input for generating high-quality queries** — they contain the actual data patterns, field names, technologies, and error signatures from the user's log stream. You retrieve them using the `get_stream_features` tool.
 
 There are two categories of features:
-- **Computed features** (`dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`) — generated directly from the raw data. These are especially valuable because they show you what's actually in the logs: field schemas, value distributions, message patterns, and real error examples.
+- **Computed features** — generated directly from the raw data (the exact types available to you are described under *Computed Feature Types* below). These are especially valuable because they show you what's actually in the logs: field schemas, value distributions, message patterns, and real error examples.
 - **Inferred features** (`technology`, `infrastructure`, `entity`, `dependency`, `schema`) — extracted by analyzing the log content. These tell you about the technology stack, system components, and their relationships.
 
 ### Feature Structure
 
 Each feature includes:
 - `id`: Unique identifier for the feature. Use this value in the `feature_ids` field when submitting queries via `add_queries`.
-- `type`: Identifies the kind of feature. Common types include `entity`, `infrastructure`, `technology`, `dependency`, `schema`, `dataset_analysis`, `log_samples`, `log_patterns`, and `error_logs`.
+- `type`: Identifies the kind of feature. Inferred types include `entity`, `infrastructure`, `technology`, `dependency`, and `schema`; the computed types available to you are listed under *Computed Feature Types* below. The authoritative set of values you can request is in `{{{available_feature_types}}}`.
 - `subtype`: Optional sub-classification within the type
 - `title`: Short display name
 - `description`: Summary of what the feature represents
@@ -99,7 +99,7 @@ Schema features indicate the **log schema family** (ecs, otel, or custom) detect
 
 **All queries must be grounded in feature evidence.** Use the following strategy:
 
-1.  **Start with computed features** (`dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`) to understand what's actually in the data — available fields, value distributions, message patterns, and existing errors. This is the foundation for all queries.
+1.  **Start with computed features** (see *Computed Feature Types* for the ones available to you) to understand what's actually in the data — available fields, value distributions, message patterns, and existing errors. This is the foundation for all queries.
 2.  **Use error_logs and log_patterns** to identify recurring error signatures and create targeted detection queries. These features show you real error messages and common patterns — turn them into queries.
 3.  **Use entities** to understand the system's components. Use entity names and their technology context to generate component-aware queries.
 4.  **Use technology and infrastructure features** to determine the specific error patterns, log formats, and failure modes relevant to the stack.
@@ -121,7 +121,7 @@ Schema features indicate the **log schema family** (ecs, otel, or custom) detect
 
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
-| `get_stream_features` | Fetches stream features for this stream. | **MUST be called first before any `add_queries` call.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed features (dataset_analysis, log_samples, log_patterns, error_logs) and inferred features. Supported values: `{{{available_feature_types}}}`. |
+| `get_stream_features` | Fetches stream features for this stream. | **MUST be called first before any `add_queries` call.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed and inferred features. Supported values: `{{{available_feature_types}}}`. |
 | `add_queries` | Submits one or more ES|QL queries for the user. | Payload is a list of objects, each with `title`, `description`, `esql`, `category`, `severity_score`, `feature_ids` (array of feature `id` values from `get_stream_features` that informed this query), optional `type` ("match" or "stats"), optional `evidence`, and optional `replaces` (ID of an existing query this one supersedes — see Existing Queries section). |
 | `reason()` | **Begin a Reasoning Monologue** | Outputs your private thoughts. Must use sentinel tags (`<<<BEGIN_INTERNAL>>>`...`<<<END_INTERNAL>>>`). |
 | `complete()` | Declare readiness to answer | Ends the loop and triggers the **Definitive Output**. |

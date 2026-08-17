@@ -33,6 +33,7 @@ import {
   DISCOVER_SESSION_API_BASE_PATH,
   DISCOVER_SESSION_API_VERSION,
 } from '../../../../../common/constants';
+import { LookupIndexEditor } from './page_objects';
 import * as testData from './constants';
 
 type DiscoverSessionCreateClassicTab = Partial<DiscoverSessionApiClassicTab> &
@@ -50,7 +51,7 @@ export interface DiscoverScoutSpace extends ScoutSpaceParallelFixture {
   setupDiscoverDefaults: (options?: { loadFlightsDataView?: boolean }) => Promise<void>;
   teardownDiscoverDefaults: () => Promise<void>;
   getDataViewId: (title: string) => string;
-  createDiscoverSession: (data: DiscoverSessionCreateData) => Promise<void>;
+  createDiscoverSession: (data: DiscoverSessionCreateData) => Promise<string>;
 }
 
 export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
@@ -60,6 +61,7 @@ export type DiscoverWorkerFixtures = ScoutParallelWorkerFixtures & {
 export type DiscoverPageObjects = PageObjects & {
   inspector: Inspector;
   unifiedFieldList: UnifiedFieldList;
+  lookupIndexEditor: LookupIndexEditor;
   docViewer: DocViewer;
 };
 
@@ -74,6 +76,7 @@ const extendWithDiscoverPageObjects = (
   ...pageObjects,
   inspector: createLazyPageObject(Inspector, page),
   unifiedFieldList: createLazyPageObject(UnifiedFieldList, page),
+  lookupIndexEditor: createLazyPageObject(LookupIndexEditor, page, pageObjects.dataGrid),
   docViewer: createLazyPageObject(DocViewer, page),
 });
 
@@ -110,7 +113,7 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
           return dataViewIds.get(title) ?? title;
         },
         createDiscoverSession: async (data) => {
-          const response = await kbnClient.request({
+          const response = await kbnClient.request<{ id: string }>({
             method: 'POST',
             path: `/s/${scoutSpace.id}${DISCOVER_SESSION_API_BASE_PATH}`,
             headers: {
@@ -124,6 +127,8 @@ export const spaceTest = spaceBaseTest.extend<DiscoverTestFixtures, DiscoverWork
           if (response.status !== 201) {
             throw new Error(`Failed to create Discover session: ${response.status}`);
           }
+
+          return response.data.id;
         },
       };
 

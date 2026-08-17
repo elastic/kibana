@@ -62,11 +62,54 @@ apiTest.describe('GET /api/discover_sessions', { tag: tags.deploymentAgnostic },
     expect(response.body.data[0].id).toBe(TEST_DISCOVER_SESSION_ID);
 
     for (const session of response.body.data) {
-      expect(Object.keys(session.data).sort()).toStrictEqual(['description', 'title']);
+      expect(Object.keys(session.data).sort()).toStrictEqual(['description', 'tags', 'title']);
+      expect(session.data.tags).toStrictEqual([]);
       expect(session.id).toBeDefined();
       expect(session.meta.managed).toBe(false);
       expect(session.meta.version).toBeDefined();
     }
+  });
+
+  apiTest('filters summaries by tag ID', async ({ apiClient, kbnClient }) => {
+    const id = `tagged-session-${Date.now()}`;
+    const tagId = `${id}-tag`;
+    const existingSession = await kbnClient.savedObjects.get({
+      type: 'search',
+      id: TEST_DISCOVER_SESSION_ID,
+    });
+
+    await kbnClient.savedObjects.create({
+      type: 'search',
+      id,
+      overwrite: false,
+      attributes: {
+        ...existingSession.attributes,
+        title: 'Tagged Discover session',
+        description: '',
+      },
+      references: [
+        ...existingSession.references,
+        { type: 'tag', id: tagId, name: `tag-ref-${tagId}` },
+      ],
+    });
+
+    const response = await apiClient.get(buildUrl({ tags: tagId }), {
+      headers: {
+        ...COMMON_HEADERS,
+        ...viewerCredentials.apiKeyHeader,
+      },
+      responseType: 'json',
+    });
+
+    expect(response).toHaveStatusCode(200);
+    expect(response.body.data).toHaveLength(1);
+    expect(response.body.data[0]).toMatchObject({
+      id,
+      data: {
+        title: 'Tagged Discover session',
+        tags: [tagId],
+      },
+    });
   });
 
   apiTest('paginates beyond the first page', async ({ apiClient }) => {

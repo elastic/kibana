@@ -1,5 +1,5 @@
 {
-  "sha1": "1e5094cab3c7b2417c0e87ae14e69e6d736771ec",
+  "sha1": "026b049612374d79517bf4c9a3630e6231fafcb9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -15,13 +15,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/chrome_navigation.spec.ts",
-        "line": 44,
-        "column": 7
+        "line": 34,
+        "column": 28
       }
     },
     {
-      "id": "812af1a47e79982-0f9e47ea106efeb",
-      "title": "chrome navigation mechanics breadcrumbs update on navigation and the logo navigates home",
+      "id": "812af1a47e79982-0b4bd4dad98be7f",
+      "title": "chrome navigation mechanics navigation updates the URL and the logo navigates home",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -29,8 +29,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/chrome_navigation.spec.ts",
-        "line": 57,
-        "column": 7
+        "line": 40,
+        "column": 44
       }
     },
     {
@@ -43,8 +43,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/customize_nav_link_disabled_in_classic.spec.ts",
-        "line": 33,
-        "column": 9
+        "line": 27,
+        "column": 10
       }
     },
     {
@@ -57,13 +57,13 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/customize_nav_link_with_access.spec.ts",
-        "line": 87,
-        "column": 9
+        "line": 77,
+        "column": 26
       }
     },
     {
-      "id": "3062dc2ecefce96-1f9111e774c722b",
-      "title": "nav search reveal, fill, select and conceal",
+      "id": "3062dc2ecefce96-59d26c7cd585480",
+      "title": "nav search opens search and selects a result",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -71,8 +71,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/navigation/test/scout/ui/tests/nav_search.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 34,
+        "column": 28
       }
     }
   ]

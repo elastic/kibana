@@ -158,7 +158,7 @@ export const ColumnCard = ({
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <div {...(dragHandleProps ?? {})} aria-label="Drag handle">
-            <EuiIcon type="grab" size="s" aria-hidden={true} />
+            <EuiIcon type="dragVertical" size="s" aria-hidden={true} />
           </div>
         </EuiFlexItem>
 
@@ -176,7 +176,7 @@ export const ColumnCard = ({
           <EuiFlexItem grow={false}>
             <EuiToolTip content={isExpanded ? 'Collapse' : 'Expand'} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                 size="xs"
                 aria-label={isExpanded ? 'Collapse' : 'Expand'}
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -267,7 +267,7 @@ export const DraggableCard = ({ label, dragHandleProps, onRemove }: DraggableCar
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
         <div {...(dragHandleProps ?? {})} aria-label="Drag handle">
-          <EuiIcon type="grab" size="s" aria-hidden={true} />
+          <EuiIcon type="dragVertical" size="s" aria-hidden={true} />
         </div>
       </EuiFlexItem>
 

@@ -148,6 +148,51 @@ export function redactUrl(url) {
   return `${base}?${redacted}${hash}`;
 }
 
+// Chromium auto-generates this exact console message for every failed
+// resource load, regardless of whether app code logs anything of its own —
+// verified against a real browser via the browser_run_code_unsafe bridge
+// (see __tests__/fixtures/action-500-already-surfaced-browser-native.json).
+// Critically, this auto-generated text never includes the request's
+// path/URL, unlike the hand-authored "500 @ /api/foo"-style messages some
+// app code produces. classify-console.js's own `\b50[0-9]\b` rule has no
+// path requirement either, so this message ALWAYS makes Detector B report a
+// Level 1 `server_error` for it — meaning a 5xx that produced this message
+// is already surfaced by console, full stop, regardless of path. Without
+// recognizing this pattern, `alreadySurfaced` below required a path match
+// that this real, common message shape can never satisfy, so the "avoid
+// double-reporting relative to Detector B" guard silently never fired for
+// the single most common form of a truly-unhandled failed request.
+// Verified against Chromium only — Firefox's equivalent browser-native
+// message has not been captured, may differ in wording, and must not be
+// assumed to match this pattern.
+//
+// Global + capturing (not scoped to a single status via interpolation) so
+// one pass over consoleText can count *how many* native messages exist per
+// status — see `countBrowserNativeLoadFailuresByStatus` below. Counting
+// (rather than a bare presence test) matters because consoleText is the
+// whole action's console joined together: presence alone would let one
+// native 500 message wrongly cover *every* 500 in the action regardless of
+// which specific request produced it, silently missing a second,
+// genuinely-unsurfaced 500 to a different path.
+//
+// `.` intentionally does NOT match newlines here (no `s`/dotAll flag) —
+// consoleText is newline-joined, and without that constraint "Failed to
+// load resource:" from one console message could pair across a `\n` with a
+// status number that actually belongs to a different, later message.
+// `g` is required for `matchAll` to return every occurrence rather than just
+// the first; it's constructed fresh on every call below rather than hoisted
+// to module scope so nothing can accidentally call `.test()`/`.exec()` on a
+// shared instance and get alternating results from its mutated `lastIndex`.
+function countBrowserNativeLoadFailuresByStatus(consoleText) {
+  const pattern = /Failed to load resource:.*\bresponded with a status of (\d+)\b/g;
+  const counts = new Map();
+  for (const match of consoleText.matchAll(pattern)) {
+    const status = Number(match[1]);
+    counts.set(status, (counts.get(status) || 0) + 1);
+  }
+  return counts;
+}
+
 // Pathname only (no scheme/host/query/hash) — this is what actually appears
 // in console-message text like "500 @ /api/foo", so it's what "already
 // surfaced via console" needs to match against, and it reads better in a
@@ -157,6 +202,34 @@ function pathnameOf(url) {
     return new URL(url).pathname;
   } catch {
     return url.split('#')[0].split('?')[0];
+  }
+}
+
+// A character that can extend a URL path segment. If either side of a
+// `text.indexOf(path)` match is one of these, the match is only a
+// prefix/suffix of a *longer* path mentioned in the text, not a standalone
+// mention of `path` itself — e.g. "/api/data" is a substring of
+// "/api/data/export", but a message about "/api/data/export" is not a
+// message about "/api/data". Whitespace, punctuation, and end-of-string are
+// all valid path terminators; `/`, letters, digits, and `-_.~` are not.
+const PATH_CONTINUATION_CHAR = /[A-Za-z0-9\-_.~/]/;
+
+// Presence test for "does `text` mention this exact path", not a substring
+// test — see PATH_CONTINUATION_CHAR above. Scans every occurrence of `path`
+// in `text` (there is no message-authoring convention this reducer can rely
+// on to jump straight to the right one) and accepts the first whose
+// boundaries on both sides are not path-continuation characters.
+function textMentionsExactPath(text, path) {
+  let fromIndex = 0;
+  while (true) {
+    const idx = text.indexOf(path, fromIndex);
+    if (idx === -1) return false;
+    const before = idx > 0 ? text[idx - 1] : '';
+    const after = idx + path.length < text.length ? text[idx + path.length] : '';
+    if (!PATH_CONTINUATION_CHAR.test(before) && !PATH_CONTINUATION_CHAR.test(after)) {
+      return true;
+    }
+    fromIndex = idx + 1;
   }
 }
 
@@ -197,6 +270,136 @@ export function reduceAction(action, priorState) {
   // this reducer does not re-derive react-warning/infinite-rerender findings).
   const consoleText = consoleMessages.map((m) => m.text || '').join('\n');
 
+  // ── Silent server errors: a 5xx that produced no console message ─────────
+  // Excludes abandonedByNavigation: its `status` reflects headers that
+  // genuinely arrived, but the request never completed from the app's
+  // perspective — the page moved on before it could act on that response.
+  // Reporting it as a Level 1 silent_server_error alongside the Level 3
+  // request_abandoned_by_navigation finding for the exact same event would
+  // be misleading double-counting, not a second independent problem.
+  //
+  // Deliberately action-wide (over all `network` events, sorted by time, not
+  // grouped by signature) rather than nested inside the per-signature loop
+  // below: `nativeFailureCountByStatus` is a shared pool consumed across
+  // every event regardless of URL, so it must be walked in one pass in a
+  // stable global order — grouping by signature first would let the
+  // insertion order of unrelated signatures perturb which event claims which
+  // native message.
+  //
+  // Two phases, deliberately not merged into one pass: an event with its own
+  // path-specific console message (e.g. "500 @ /api/foo") is surfaced
+  // regardless of native-message credits, so it must never compete for a
+  // shared credit a *different*, genuinely-silent event needs. Checking
+  // credits first (one combined pass, credit check before the path check)
+  // let whichever event happened to sort first claim the only credit
+  // available even when it didn't need one — a same-status, different-path
+  // 500 pair could then flip between "both surfaced" and "one wrongly
+  // silent" purely based on requestedAt order. Marking path-matches first
+  // removes that dependency entirely: phase 2 only ever has to arbitrate
+  // among events that truly have nothing of their own.
+  const nativeFailureCountByStatus = countBrowserNativeLoadFailuresByStatus(consoleText);
+  const networkByTime = [...network].sort((a, b) => a.requestedAt - b.requestedAt);
+  const qualifying = networkByTime.filter(
+    (ev) => ev.status != null && ev.status >= 500 && !ev.abandonedByNavigation
+  );
+
+  // Phase 1 consumes individual console messages, not a per-(status, path)
+  // count — a per-key count still let two *different* keys double-spend the
+  // *same* message whenever one path was a substring of the other. Tracking
+  // consumed message indices in one shared Set, across every key, means a
+  // message can back at most one surfaced event in total.
+  //
+  // Matching uses `textMentionsExactPath`, not a plain substring test: a
+  // message about "/api/data/export" is not a message about "/api/data",
+  // even though the shorter path is a literal substring of the longer one.
+  // Unlike phase 2's native-message pool (which carries no path at all, so
+  // attributing a shared credit is genuinely undecidable from the data), an
+  // own-path message *does* name a specific path — treating "/api/data" as
+  // a match there was needless imprecision, not an inherent ambiguity, and
+  // it actively misattributed a real message to the wrong, unrelated
+  // request rather than merely picking arbitrarily between equally
+  // plausible candidates. Iterating `qualifying` in time order and taking
+  // the first unconsumed *exact* match is still a first-come heuristic when
+  // more than one qualifying event shares the exact same path (a real,
+  // narrower ambiguity `textMentionsExactPath` cannot resolve), but a
+  // message can no longer be misattributed across genuinely different
+  // paths.
+  const consumedMessageIndices = new Set();
+  const surfacedByOwnMessage = new Set();
+  for (const ev of qualifying) {
+    const path = pathnameOf(ev.url);
+    const statusPattern = new RegExp(`\\b${ev.status}\\b`);
+    const matchIndex = consoleMessages.findIndex((msg, idx) => {
+      if (consumedMessageIndices.has(idx)) return false;
+      const text = msg.text || '';
+      return statusPattern.test(text) && textMentionsExactPath(text, path);
+    });
+    if (matchIndex !== -1) {
+      consumedMessageIndices.add(matchIndex);
+      surfacedByOwnMessage.add(ev);
+    }
+  }
+
+  // Phase 2: distribute remaining native-message credits, in request order,
+  // among whatever's left over from phase 1. Order can still matter here —
+  // a native message carries no path, so when two or more qualifying
+  // events share a status and credits are scarcer than events, which
+  // *specific* event reads as silent is a heuristic, not a guarantee. This
+  // is a narrower, accepted limitation (which event gets flagged among
+  // otherwise-indistinguishable candidates) than the phase-1 bug fixed
+  // above (a message silently covering an event it could not plausibly
+  // describe, once it named an exact, different path).
+  //
+  // A native message carries no URL at all, so it can't be attributed to a
+  // specific event even in principle — including an `abandonedByNavigation`
+  // one, which is excluded from `qualifying` and therefore never claims its
+  // own credit even when it plausibly produced the message. Reserving one
+  // credit per (status, abandoned event) — subtracted from the shared pool
+  // before any qualifying event gets to claim one — treats that ambiguity
+  // conservatively: it assumes the abandoned event *did* produce the
+  // message, so a qualifying event of the same status is reported as
+  // silent rather than risk wrongly suppressing a genuinely-silent one. The
+  // trade-off runs the other way from phase 1's fix: this can occasionally
+  // flag a qualifying event that in fact had legitimate native coverage,
+  // once an abandoned event of the same status has reserved it away — an
+  // accepted false-positive risk in a detector whose whole purpose is
+  // surfacing errors a false negative would otherwise hide.
+  const abandonedCountByStatus = new Map();
+  for (const ev of network) {
+    if (ev.abandonedByNavigation && ev.status != null) {
+      abandonedCountByStatus.set(ev.status, (abandonedCountByStatus.get(ev.status) || 0) + 1);
+    }
+  }
+  for (const [status, reserved] of abandonedCountByStatus) {
+    const available = nativeFailureCountByStatus.get(status) || 0;
+    nativeFailureCountByStatus.set(status, Math.max(0, available - reserved));
+  }
+
+  const surfacedByNativeCredit = new Set();
+  for (const ev of qualifying) {
+    if (surfacedByOwnMessage.has(ev)) continue;
+    const remaining = nativeFailureCountByStatus.get(ev.status) || 0;
+    if (remaining > 0) {
+      nativeFailureCountByStatus.set(ev.status, remaining - 1);
+      surfacedByNativeCredit.add(ev);
+    }
+  }
+
+  for (const ev of qualifying) {
+    if (surfacedByOwnMessage.has(ev) || surfacedByNativeCredit.has(ev)) continue;
+    const path = pathnameOf(ev.url);
+    const redacted = redactUrl(ev.url);
+
+    level1.push({
+      type: 'silent_server_error',
+      method: ev.method,
+      path,
+      url: redacted,
+      status: ev.status,
+      text: `${ev.method} ${redacted} returned HTTP ${ev.status} with no corresponding console error — Detector B alone would miss this`,
+    });
+  }
+
   // Group by exact signature (method + full URL) — NOT method+path. Grouping
   // by path alone (as the legacy dedup-network.js does) misclassifies
   // meaningfully-different query strings (e.g. ?page=1 vs ?page=2) as
@@ -217,32 +420,11 @@ export function reduceAction(action, priorState) {
       for (const ev of events) {
         suppressed.push({ type: 'noise', text: `${method} ${redacted} (known polling endpoint)` });
       }
-      // Silent-server-error detection below still runs for polling paths —
+      // Silent-server-error detection above already ran for polling paths —
       // suppressing duplicate noise is not the same as hiding a real outage.
     }
 
     events.sort((a, b) => a.requestedAt - b.requestedAt);
-
-    // ── Silent server errors: a 5xx that produced no console message ───────
-    // Excludes abandonedByNavigation: its `status` reflects headers that
-    // genuinely arrived, but the request never completed from the app's
-    // perspective — the page moved on before it could act on that response.
-    // Reporting it as a Level 1 silent_server_error alongside the Level 3
-    // request_abandoned_by_navigation finding for the exact same event would
-    // be misleading double-counting, not a second independent problem.
-    for (const ev of events) {
-      if (ev.status == null || ev.status < 500 || ev.abandonedByNavigation) continue;
-      const alreadySurfaced = new RegExp(`\\b${ev.status}\\b`).test(consoleText) && consoleText.includes(path);
-      if (alreadySurfaced) continue;
-      level1.push({
-        type: 'silent_server_error',
-        method,
-        path,
-        url: redacted,
-        status: ev.status,
-        text: `${method} ${redacted} returned HTTP ${ev.status} with no corresponding console error — Detector B alone would miss this`,
-      });
-    }
 
     // ── Pending / stuck / navigation-abandoned requests ─────────────────────
     // "Still open" is decided by `respondedAt` (true completion), never by

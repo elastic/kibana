@@ -49,14 +49,17 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
-import type {
-  DatasetExample,
-  EvaluationExperimentSummary,
-  EvaluationScoreDocument,
+import {
+  MAX_DATASET_DESCRIPTION_LENGTH,
+  type DatasetExample,
+  type DatasetMaturity,
+  type EvaluationExperimentSummary,
+  type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import {
   useAddExamples,
   useDataset,
+  useDatasetTagSuggestions,
   useDeleteExample,
   useEvalsTraceFetcher,
   useExampleScores,
@@ -66,6 +69,16 @@ import {
 } from '../../hooks/use_evals_api';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { DeleteDatasetModal } from '../../components/delete_dataset_modal';
+import { DatasetTagsFields, DatasetTagsSummary } from '../../components/dataset_tags';
+import {
+  DatasetSharedNotice,
+  DatasetSpacesBadge,
+  DatasetSpacesPicker,
+  SharedChangeConfirmModal,
+  getRemovedSpaceIds,
+  useDatasetSharing,
+} from '../../components/dataset_spaces';
+import { getErrorMessage } from '../../utils/get_error_message';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -92,6 +105,9 @@ const parseJsonObject = (value: string, fieldLabel: string): JsonObject => {
 
 const formatDate = (value?: string) => (value ? new Date(value).toLocaleString() : '-');
 
+const isSameSpaceSelection = (a: string[], b: string[]): boolean =>
+  a.length === b.length && a.every((spaceId) => b.includes(spaceId));
+
 const formatScore = (score: number | null | undefined) =>
   score == null ? i18n.SCORE_NOT_AVAILABLE : score.toFixed(2);
 
@@ -111,6 +127,11 @@ export const DatasetDetailPage: React.FC = () => {
 
   const { data: dataset, isLoading: isDatasetLoading, error: datasetError } = useDataset(datasetId);
   const {
+    isEnabled: spacesEnabled,
+    isShared: isDatasetShared,
+    activeSpaceId,
+  } = useDatasetSharing(dataset?.space_ids);
+  const {
     data: runsData,
     isLoading: isRunsLoading,
     error: runsError,
@@ -126,7 +147,14 @@ export const DatasetDetailPage: React.FC = () => {
   const deleteExample = useDeleteExample();
 
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
+  const suggestedTags = useDatasetTagSuggestions({ enabled: isMetadataModalOpen });
   const [metadataDescription, setMetadataDescription] = useState('');
+  const [metadataTags, setMetadataTags] = useState<string[]>([]);
+  const [metadataMaturity, setMetadataMaturity] = useState<DatasetMaturity | null>(null);
+  const [metadataSpaceIds, setMetadataSpaceIds] = useState<string[]>([]);
+  const [pendingSharedChange, setPendingSharedChange] = useState<
+    'edit-dataset' | 'edit-example' | null
+  >(null);
   const [selectedExample, setSelectedExample] = useState<DatasetExample | null>(null);
   const [isEditingExample, setIsEditingExample] = useState(false);
   const [editInput, setEditInput] = useState('');
@@ -159,6 +187,9 @@ export const DatasetDetailPage: React.FC = () => {
 
   const openMetadataModal = () => {
     setMetadataDescription(dataset?.description ?? '');
+    setMetadataTags(dataset?.tags ?? []);
+    setMetadataMaturity(dataset?.maturity ?? null);
+    setMetadataSpaceIds(dataset?.space_ids ?? (activeSpaceId ? [activeSpaceId] : []));
     setFormError(null);
     setIsMetadataModalOpen(true);
   };
@@ -210,37 +241,100 @@ export const DatasetDetailPage: React.FC = () => {
     setFormError(null);
   };
 
-  const onSubmitMetadata = async () => {
+  const currentSpaceIds = dataset?.space_ids ?? [];
+  const removedSpaceIds = getRemovedSpaceIds(currentSpaceIds, metadataSpaceIds);
+
+  const saveMetadata = async () => {
     if (!dataset) return;
     try {
       setFormError(null);
+      const isDescriptionEdited = metadataDescription !== (dataset.description ?? '');
+      const isSpacesEdited =
+        spacesEnabled && !isSameSpaceSelection(metadataSpaceIds, currentSpaceIds);
+
       await updateDataset.mutateAsync({
         datasetId: dataset.id,
-        updates: { description: metadataDescription },
+        updates: {
+          ...(isDescriptionEdited ? { description: metadataDescription } : {}),
+          ...(isSpacesEdited ? { space_ids: metadataSpaceIds } : {}),
+          tags: metadataTags,
+          maturity: metadataMaturity,
+        },
       });
+      setPendingSharedChange(null);
       setIsMetadataModalOpen(false);
     } catch (error) {
-      setFormError(String(error));
+      setPendingSharedChange(null);
+      setFormError(getErrorMessage(error));
+    }
+  };
+
+  const onSubmitMetadata = async () => {
+    if (!dataset) return;
+
+    if (spacesEnabled && metadataSpaceIds.length === 0) {
+      setFormError(i18n.SPACES_REQUIRED_ERROR);
+      return;
+    }
+
+    // Leaving a shared dataset means dropping the space being viewed, which is
+    // the delete button's job and has its own confirmation.
+    if (spacesEnabled && activeSpaceId && !metadataSpaceIds.includes(activeSpaceId)) {
+      setFormError(i18n.CANNOT_LEAVE_SPACE_BY_EDITING_ERROR);
+      return;
+    }
+
+    if (isDatasetShared || removedSpaceIds.length > 0) {
+      setFormError(null);
+      setPendingSharedChange('edit-dataset');
+      return;
+    }
+
+    await saveMetadata();
+  };
+
+  const parseExampleEdits = () => ({
+    input: parseJsonObject(editInput, i18n.JSON_INPUT_LABEL),
+    output: parseJsonObject(editOutput, i18n.JSON_OUTPUT_LABEL),
+    metadata: parseJsonObject(editMetadata, i18n.JSON_METADATA_LABEL),
+  });
+
+  const saveEditExample = async () => {
+    if (!selectedExample) return;
+    try {
+      setFormError(null);
+      await updateExample.mutateAsync({
+        datasetId,
+        exampleId: selectedExample.id,
+        updates: parseExampleEdits(),
+      });
+      setPendingSharedChange(null);
+      setIsEditingExample(false);
+      setSelectedExample(null);
+    } catch (error) {
+      setPendingSharedChange(null);
+      setFormError(getErrorMessage(error));
     }
   };
 
   const onSaveEditExample = async () => {
     if (!selectedExample) return;
+
+    // Report malformed JSON before asking whether to publish to other spaces.
     try {
-      setFormError(null);
-      const input = parseJsonObject(editInput, i18n.JSON_INPUT_LABEL);
-      const output = parseJsonObject(editOutput, i18n.JSON_OUTPUT_LABEL);
-      const metadata = parseJsonObject(editMetadata, i18n.JSON_METADATA_LABEL);
-      await updateExample.mutateAsync({
-        datasetId,
-        exampleId: selectedExample.id,
-        updates: { input, output, metadata },
-      });
-      setIsEditingExample(false);
-      setSelectedExample(null);
+      parseExampleEdits();
     } catch (error) {
-      setFormError(String(error));
+      setFormError(getErrorMessage(error));
+      return;
     }
+
+    if (isDatasetShared) {
+      setFormError(null);
+      setPendingSharedChange('edit-example');
+      return;
+    }
+
+    await saveEditExample();
   };
 
   const onCreateExample = async () => {
@@ -255,7 +349,7 @@ export const DatasetDetailPage: React.FC = () => {
       });
       setIsCreateExampleOpen(false);
     } catch (error) {
-      setFormError(String(error));
+      setFormError(getErrorMessage(error));
     }
   };
 
@@ -273,7 +367,7 @@ export const DatasetDetailPage: React.FC = () => {
       }
       setDeletingExample(null);
     } catch (error) {
-      setFormError(String(error));
+      setFormError(getErrorMessage(error));
     }
   };
 
@@ -598,7 +692,7 @@ export const DatasetDetailPage: React.FC = () => {
                 <EuiFlexItem key={traceId} grow={false}>
                   <EuiButtonEmpty
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     onClick={() => setSelectedTraceId(traceId)}
                   >
                     {truncate(traceId, 12)}
@@ -628,7 +722,7 @@ export const DatasetDetailPage: React.FC = () => {
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiEmptyPrompt
           color={isNotFound ? 'subdued' : 'danger'}
-          iconType={isNotFound ? 'search' : 'warning'}
+          iconType={isNotFound ? 'magnify' : 'warning'}
           title={
             <h2>{isNotFound ? i18n.DATASET_NOT_FOUND_TITLE : i18n.DATASET_LOAD_ERROR_TITLE}</h2>
           }
@@ -654,21 +748,28 @@ export const DatasetDetailPage: React.FC = () => {
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
           <EuiFlexItem>
-            <EuiTitle size="m">
-              <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
-            </EuiTitle>
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="m">
+                  <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <DatasetSpacesBadge spaceIds={dataset?.space_ids} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
           {dataset && canManage ? (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiToolTip content={i18n.EDIT_DESCRIPTION_BUTTON} disableScreenReaderOutput>
+                  <EuiToolTip content={i18n.EDIT_DATASET_BUTTON} disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType="pencil"
                       display="base"
                       size="m"
                       onClick={openMetadataModal}
-                      aria-label={i18n.EDIT_DESCRIPTION_BUTTON}
+                      aria-label={i18n.EDIT_DATASET_BUTTON}
                       data-test-subj="editDatasetMetadataButton"
                     />
                   </EuiToolTip>
@@ -690,7 +791,7 @@ export const DatasetDetailPage: React.FC = () => {
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="s" />
 
         {runsError ? (
           <EuiText color="danger" size="s">
@@ -714,6 +815,12 @@ export const DatasetDetailPage: React.FC = () => {
                 <EuiText size="s" color="subdued">
                   <p>{dataset.description}</p>
                 </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
+            {dataset.maturity || dataset.tags?.length ? (
+              <>
+                <DatasetTagsSummary maturity={dataset.maturity} tags={dataset.tags} />
                 <EuiSpacer size="s" />
               </>
             ) : null}
@@ -751,7 +858,7 @@ export const DatasetDetailPage: React.FC = () => {
               </EuiFlexItem>
               {canManage ? (
                 <EuiFlexItem grow={false}>
-                  <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
+                  <EuiButton iconType="plusCircle" onClick={openCreateExampleFlyout} fill>
                     {i18n.ADD_EXAMPLE_BUTTON}
                   </EuiButton>
                 </EuiFlexItem>
@@ -1020,6 +1127,12 @@ export const DatasetDetailPage: React.FC = () => {
                 <EuiSpacer size="m" />
               </>
             ) : null}
+            {isDatasetShared ? (
+              <>
+                <DatasetSharedNotice spaceIds={dataset?.space_ids} action="add-example" />
+                <EuiSpacer size="m" />
+              </>
+            ) : null}
             <EuiForm component="form">
               <EuiFormRow label={i18n.FLYOUT_INPUT_SECTION} fullWidth>
                 <CodeEditor
@@ -1090,10 +1203,10 @@ export const DatasetDetailPage: React.FC = () => {
 
       {/* Edit metadata modal */}
       {isMetadataModalOpen ? (
-        <EuiModal onClose={closeModals} aria-labelledby="editDescriptionModalTitle">
+        <EuiModal onClose={closeModals} aria-labelledby="editDatasetModalTitle">
           <EuiModalHeader>
-            <EuiModalHeaderTitle id="editDescriptionModalTitle">
-              {i18n.EDIT_DESCRIPTION_MODAL_TITLE}
+            <EuiModalHeaderTitle id="editDatasetModalTitle">
+              {i18n.EDIT_DATASET_MODAL_TITLE}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
@@ -1106,12 +1219,22 @@ export const DatasetDetailPage: React.FC = () => {
               </>
             ) : null}
             <EuiForm component="form">
-              <EuiFormRow label={i18n.METADATA_DESCRIPTION_LABEL}>
+              <EuiFormRow label={i18n.METADATA_DESCRIPTION_LABEL} fullWidth>
                 <EuiTextArea
                   value={metadataDescription}
                   onChange={(event) => setMetadataDescription(event.target.value)}
+                  maxLength={MAX_DATASET_DESCRIPTION_LENGTH}
+                  fullWidth
                 />
               </EuiFormRow>
+              <DatasetTagsFields
+                tags={metadataTags}
+                maturity={metadataMaturity}
+                onTagsChange={setMetadataTags}
+                onMaturityChange={setMetadataMaturity}
+                suggestedTags={suggestedTags}
+              />
+              <DatasetSpacesPicker value={metadataSpaceIds} onChange={setMetadataSpaceIds} />
             </EuiForm>
           </EuiModalBody>
           <EuiModalFooter>
@@ -1129,6 +1252,7 @@ export const DatasetDetailPage: React.FC = () => {
           datasetId={dataset.id}
           datasetName={dataset.name}
           examplesCount={dataset.examples.length}
+          spaceIds={dataset.space_ids}
           onClose={() => setIsDeleteDatasetModalOpen(false)}
           onDeleted={() => history.push('/datasets')}
         />
@@ -1144,10 +1268,29 @@ export const DatasetDetailPage: React.FC = () => {
           cancelButtonText={i18n.MODAL_CANCEL_BUTTON}
           confirmButtonText={i18n.MODAL_DELETE_BUTTON}
           buttonColor="danger"
-          defaultFocusedButton="confirm"
+          defaultFocusedButton={isDatasetShared ? 'cancel' : 'confirm'}
         >
           <p>{i18n.CONFIRM_DELETE_EXAMPLE_BODY}</p>
+          {isDatasetShared ? (
+            <>
+              <EuiSpacer size="m" />
+              <DatasetSharedNotice spaceIds={dataset?.space_ids} action="delete-example" />
+            </>
+          ) : null}
         </EuiConfirmModal>
+      ) : null}
+
+      {/* Shared dataset edit confirmation */}
+      {pendingSharedChange ? (
+        <SharedChangeConfirmModal
+          spaceIds={dataset?.space_ids}
+          action={pendingSharedChange}
+          removedSpaceIds={pendingSharedChange === 'edit-dataset' ? removedSpaceIds : undefined}
+          nextSpaceIds={pendingSharedChange === 'edit-dataset' ? metadataSpaceIds : undefined}
+          onCancel={() => setPendingSharedChange(null)}
+          onConfirm={pendingSharedChange === 'edit-dataset' ? saveMetadata : saveEditExample}
+          isLoading={updateDataset.isLoading || updateExample.isLoading}
+        />
       ) : null}
 
       {selectedTraceId ? (
