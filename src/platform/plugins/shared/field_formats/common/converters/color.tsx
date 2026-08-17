@@ -43,15 +43,18 @@ export class ColorFormat extends FieldFormat {
           }
         });
 
-      case 'number':
-        if (typeof val !== 'number') {
+      case 'number': {
+        const numericVal = Number(val);
+        if (Number.isNaN(numericVal)) {
           return null;
         }
+
         return findLast(this.param('colors'), ({ range }) => {
           if (!range) return;
           const [start, end] = range.split(':');
-          return val >= Number(start) && val <= Number(end);
+          return numericVal >= Number(start) && numericVal <= Number(end);
         });
+      }
 
       case 'boolean':
         return findLast(this.param('colors'), ({ boolean }) => {

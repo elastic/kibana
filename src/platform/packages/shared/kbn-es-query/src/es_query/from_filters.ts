@@ -39,7 +39,12 @@ const filterNegate = (reverse: boolean) => (filter: Filter) => {
  */
 const translateToQuery = (filter: Partial<Filter>): estypes.QueryDslQueryContainer => {
   const query = filter.query;
-  return (query ?? filter) as estypes.QueryDslQueryContainer;
+  if (query) {
+    return query as estypes.QueryDslQueryContainer;
+  }
+
+  const cleanedFilter = filter as Record<string, unknown>;
+  return cleanedFilter as estypes.QueryDslQueryContainer;
 };
 
 /**

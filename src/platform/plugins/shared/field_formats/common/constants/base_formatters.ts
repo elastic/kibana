@@ -43,6 +43,6 @@ export const baseFormatters: FieldFormatInstanceType[] = [
   StaticLookupFormat,
   StringFormat,
   TruncateFormat,
-  UrlFormat as FieldFormatInstanceType,
+  UrlFormat,
   HistogramFormat,
 ];
