@@ -2256,12 +2256,27 @@
       "@emotion/core": ["./typings/@emotion"],
       // We need the custom typings "proxy" because our current import-resolver doesn't support "exports" in package.json.
       // We should be able to remove this once we support cjs/esm interop.
-      "@elastic/opentelemetry-node/sdk": ["./typings/@elastic/opentelemetry-node/sdk"],
+      "@elastic/opentelemetry-node/sdk": [
+        "./node_modules/@elastic/opentelemetry-node/types/sdk.d.ts"
+      ],
+      // The 8.19 Elasticsearch client predates package export entries for its public type subpaths.
+      // Keep the existing imports working with TS7's export-aware module resolution.
+      "@elastic/elasticsearch/*": ["./node_modules/@elastic/elasticsearch/*"],
+      "antlr4": ["./node_modules/antlr4/src/antlr4/index.d.ts"],
       "@typescript-eslint/parser": ["./typings/@typescript-eslint/parser"],
       "zod": ["./typings/zod/v3"],
+      "zod/v3/standard-schema.cjs": ["./node_modules/zod/v3/standard-schema.d.cts"],
       "zod/v4": ["./typings/zod/v4"],
-      "vega-lite": ["./typings/vega/vega_lite"],
-      "vega-tooltip": ["./typings/vega/vega_tooltip"],
+      "fflate": ["./node_modules/fflate/lib/index.d.ts"],
+      "canvg": ["./node_modules/canvg/lib/index.d.ts"],
+      "immer/dist/types/types-external": [
+        "./node_modules/immer/dist/types/types-external.d.ts"
+      ],
+      "vega-lite": ["./node_modules/vega-lite/build/index.d.ts"],
+      "vega-tooltip": ["./node_modules/vega-tooltip/build/index.d.ts"],
+      "@langchain/core/dist/*": ["./node_modules/@langchain/core/dist/*"],
+      "@langchain/google-common/dist/*": ["./node_modules/@langchain/google-common/dist/*"],
+      "react-hook-form/dist/types": ["./node_modules/react-hook-form/dist/types/index.d.ts"],
       "@langchain/langgraph/prebuilt": ["./node_modules/@langchain/langgraph/dist/prebuilt"],
       "@langchain/classic/chains": ["./node_modules/@langchain/classic/dist/chains"],
       "@langchain/classic/evaluation": ["./node_modules/@langchain/classic/dist/evaluation"],
@@ -2314,6 +2329,8 @@
     // and is the replacement for the deprecated "node" (a.k.a. "node10")
     // strategy. Requires `module: "preserve"` or es2015+.
     "moduleResolution": "bundler",
+    // 8.19 predates ambient declarations for stylesheet side-effect imports.
+    "noUncheckedSideEffectImports": false,
     // "resolveJsonModule" allows for importing, extracting types from and generating .json files.
     "resolveJsonModule": true,
     // Disallow inconsistently-cased references to the same file.
