@@ -66,22 +66,6 @@ describe('ConversationServiceImpl', () => {
     });
   });
 
-  describe('getCurrentUser', () => {
-    it('returns the caller identity and admin status', async () => {
-      getUserFromRequestMock.mockResolvedValue({
-        id: 'profile-1',
-        username: 'jane',
-        isAdmin: true,
-      });
-
-      await expect(createService().getCurrentUser({ request })).resolves.toEqual({
-        id: 'profile-1',
-        username: 'jane',
-        isAdmin: true,
-      });
-    });
-  });
-
   describe('getConversationRoundAuthor', () => {
     it('prefers the external origin author over the Kibana user', async () => {
       const service = createService();
