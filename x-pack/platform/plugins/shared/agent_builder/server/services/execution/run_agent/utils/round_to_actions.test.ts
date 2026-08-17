@@ -72,6 +72,14 @@ const someResult: ToolResult = {
   data: { some: 'data' },
 };
 
+const questions = [
+  {
+    question: 'How should we proceed?',
+    options: [{ label: 'Start now' }, { label: 'Upload first' }],
+    multi_select: false,
+  },
+];
+
 describe('roundToActions', () => {
   it('returns tool call and execute actions for completed steps without reasoning', () => {
     const steps: ConversationRoundStep[] = [

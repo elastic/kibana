@@ -16,6 +16,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { AgentActionType } from '../actions';
 import type { ToolCallAction } from '../actions';
 import { buildPendingRoundActions } from './build_pending_round_actions';
+import type { ExecuteToolAction, ToolCallAction } from '../actions';
 
 describe('buildPendingRoundActions', () => {
   const baseRound = {
@@ -199,5 +200,33 @@ describe('buildPendingRoundActions', () => {
         args: { questions: pending.questions },
       },
     ]);
+=======
+      steps: [answeredStep, pendingStep],
+    };
+    const eventEmitter = jest.fn();
+
+    const result = buildPendingRoundActions({
+      round,
+      promptState: {
+        responses: {
+          s2: {
+            type: AgentPromptType.ask_user_question,
+            response: { answers: [{ choice: [0] }] },
+          },
+        },
+      } as any,
+      toolIdMapping: new Map(),
+      eventEmitter,
+    });
+
+    expect(result.actions).toHaveLength(4);
+    const answeredExecute = result.actions[1] as ExecuteToolAction;
+    const pendingCall = result.actions[2] as ToolCallAction;
+    expect(answeredExecute.tool_results[0].content).toContain('Start now');
+    expect(pendingCall.tool_calls[0].args.questions[0].question).toContain('connector');
+    expect(result.consumedPromptIds).toEqual(['s2']);
+    expect(eventEmitter).toHaveBeenCalledTimes(1);
+    expect(eventEmitter.mock.calls[0][0].data.prompt_id).toBe('s2');
+>>>>>>> 826720b99bb1 (fix: preserve answered clarification history on resume)
   });
 });
