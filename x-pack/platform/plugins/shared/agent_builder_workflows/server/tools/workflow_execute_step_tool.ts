@@ -551,7 +551,7 @@ Provide \`yaml\` to execute a step without needing a workflow.yaml attachment (u
 
 If the user declines a confirmation, do NOT retry the same step. Acknowledge the cancellation and continue with other unrelated work.
 
-API documentation — Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows`,
+API documentation — Workflows guide: https://www.elastic.co/docs/explore-analyze/workflows — Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows`,
     schema: z.object({
       stepName: z.string().describe('Name of the step to execute'),
       yaml: z

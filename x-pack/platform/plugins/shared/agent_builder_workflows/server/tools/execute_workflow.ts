@@ -79,6 +79,7 @@ If set to false, or if the workflow does not complete within the timeout, the to
 - If the status is not terminal (still running), call \`${platformCoreTools.getWorkflowExecutionStatus}\` later to get the final outcome.
 
 ## API documentation
+- Workflows guide: https://www.elastic.co/docs/explore-analyze/workflows
 - Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows
 `),
     schema: executeWorkflowSchema,
