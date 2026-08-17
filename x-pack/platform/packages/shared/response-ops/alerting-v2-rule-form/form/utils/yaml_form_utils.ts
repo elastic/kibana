@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { isPlainObject } from 'lodash';
 import type { Query } from '@kbn/alerting-v2-schemas';
 import { noDataStrategy as noDataStrategyEnum } from '@kbn/alerting-v2-schemas';
-import { dump, load } from 'js-yaml';
+import { parse, stringify } from 'yaml';
 import type {
   FormValues,
   StateTransition,
@@ -165,7 +165,7 @@ const parseQuery = (queryObj: Record<string, unknown> | undefined): RuleQuery =>
 export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   let parsed: unknown;
   try {
-    parsed = load(yamlString);
+    parsed = parse(yamlString);
   } catch (error) {
     return {
       values: null,
@@ -275,7 +275,16 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
 
 /**
  * Serialize current form values to YAML string
+ *
+ * `singleQuote` keeps scalars that need quoting in the single-quoted style users
+ * already see in the editor (e.g. `time_field: '@timestamp'`), and
+ * `aliasDuplicateObjects: false` inlines repeated objects rather than emitting
+ * anchors/aliases, which are undesirable in hand-editable rule YAML.
  */
 export const serializeFormToYaml = (values: FormValues): string => {
-  return dump(formValuesToYamlObject(values), { lineWidth: 120, noRefs: true });
+  return stringify(formValuesToYamlObject(values), {
+    lineWidth: 120,
+    singleQuote: true,
+    aliasDuplicateObjects: false,
+  });
 };

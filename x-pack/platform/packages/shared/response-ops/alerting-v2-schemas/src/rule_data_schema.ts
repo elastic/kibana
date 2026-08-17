@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT, DEFAULT_TIME_FIELD } from '@kbn/alerting-v2-constants';
 import { ARTIFACT_DATA_SCHEMAS } from './artifact_data_schemas';
 import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
-import { durationSchema, tagsSchema } from './common';
+import { durationSchema, tagsResponseSchema, tagsSchema } from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
   MAX_DESCRIPTION_LENGTH,
@@ -42,10 +42,19 @@ export const esqlQuerySchema = z
 /** Kind */
 
 export const ruleKindSchema = z
-  .enum(['alert', 'signal'])
-  .describe(
-    'Rule kind: "alert" for stateful alerting with transitions, "signal" for stateless detection.'
-  );
+  .union([
+    z
+      .literal('alert')
+      .describe(
+        'Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.'
+      ),
+    z
+      .literal('signal')
+      .describe(
+        'Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.'
+      ),
+  ])
+  .describe('The kind of the rule.');
 
 export type RuleKind = z.infer<typeof ruleKindSchema>;
 
@@ -106,8 +115,16 @@ export const queryFormat = queryFormatSchema.enum;
 export type QueryFormat = z.infer<typeof queryFormatSchema>;
 
 /** Recovery strategy. */
-export const recoveryStrategySchema = z.enum(['no_breach', 'query', 'none']);
-export const recoveryStrategy = recoveryStrategySchema.enum;
+export const recoveryStrategySchema = z.union([
+  z.literal('no_breach').describe('recovers groups that stop breaching (default).'),
+  z.literal('query').describe('uses a custom recovery query to detect recovery.'),
+  z.literal('none').describe('disables recovery entirely.'),
+]);
+export const recoveryStrategy = {
+  no_breach: 'no_breach',
+  query: 'query',
+  none: 'none',
+} as const;
 export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
 
 /**
@@ -116,8 +133,24 @@ export type RecoveryStrategy = z.infer<typeof recoveryStrategySchema>;
  * Note: `'emit'` is a valid stored/engine value but is temporarily rejected as
  * write-API input (create/update).
  */
-export const noDataStrategySchema = z.enum(['last_known_status', 'emit', 'recover', 'none']);
-export const noDataStrategy = noDataStrategySchema.enum;
+export const noDataStrategySchema = z.union([
+  z
+    .literal('last_known_status')
+    .describe('Holds the last known episode status when no data is present.'),
+  z
+    .literal('emit')
+    .describe(
+      'Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.'
+    ),
+  z.literal('recover').describe('Forces recovery when no data is present.'),
+  z.literal('none').describe('No-data situations are ignored (default).'),
+]);
+export const noDataStrategy = {
+  last_known_status: 'last_known_status',
+  emit: 'emit',
+  recover: 'recover',
+  none: 'none',
+} as const;
 export type NoDataStrategy = z.infer<typeof noDataStrategySchema>;
 
 /**
@@ -640,10 +673,10 @@ export const ruleResponseSchema = createRuleDataBaseSchema.extend({
       ),
   }),
   enabled: z.boolean().describe('Whether the rule is enabled.'),
-  createdBy: z.string().nullable().describe('User who created the rule.'),
-  createdAt: z.string().describe('ISO timestamp when the rule was created.'),
-  updatedBy: z.string().nullable().describe('User who last updated the rule.'),
-  updatedAt: z.string().describe('ISO timestamp when the rule was last updated.'),
+  created_by: z.string().nullable().describe('User who created the rule.'),
+  created_at: z.string().describe('ISO timestamp when the rule was created.'),
+  updated_by: z.string().nullable().describe('User who last updated the rule.'),
+  updated_at: z.string().describe('ISO timestamp when the rule was last updated.'),
   version: z
     .string()
     .optional()
@@ -687,29 +720,28 @@ export const findRulesResponseSchema = z
     items: z.array(ruleResponseSchema).describe('The list of rules.'),
     total: z.number().describe('The total number of rules matching the query.'),
     page: z.number().describe('The current page number.'),
-    perPage: z.number().describe('The number of rules per page.'),
+    per_page: z.number().describe('The number of rules per page.'),
   })
   .describe('Paginated list of rules.');
 
 export type FindRulesResponse = z.infer<typeof findRulesResponseSchema>;
 
 /** Query parameters for the rule tags API. */
-export const ruleTagsParamsSchema = z.object({
-  filter: z
-    .string()
-    .max(1024)
-    .optional()
-    .describe('The filter to apply when aggregating rule tags.'),
-});
+export const ruleTagsParamsSchema = z
+  .object({
+    search: z
+      .string()
+      .max(256)
+      .optional()
+      .describe('Prefix to filter tags by. Returns all most-used tags when omitted.'),
+    kind: ruleKindSchema.optional().describe('Restrict tags to rules of the given kind.'),
+  })
+  .strict();
 
 export type RuleTagsParams = z.infer<typeof ruleTagsParamsSchema>;
 
 /** Rule tags response schema. */
-export const ruleTagsResponseSchema = z
-  .object({
-    tags: z.array(z.string()).describe('The list of unique rule tags.'),
-  })
-  .describe('All unique tags across rules.');
+export const ruleTagsResponseSchema = tagsResponseSchema.describe('All unique tags across rules.');
 
 export type RuleTagsResponse = z.infer<typeof ruleTagsResponseSchema>;
 
