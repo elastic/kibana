@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './build';
-export * from './job';
-export * from './pipeline';
+export * from './build.ts';
+export * from './job.ts';
+export * from './pipeline.ts';

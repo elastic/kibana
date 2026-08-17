@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Minimatch } from 'minimatch';
+import minimatch from 'minimatch';
 
-// Don't annotate the return type as `Minimatch[]`: the installed
-// @types/minimatch exports `Minimatch` as a value (not a type), and ts-node
-// will reject it. Inference + `ReturnType` keeps the file ts-node-clean.
+const { Minimatch } = minimatch;
+
+// Inference + `ReturnType` avoids depending on the legacy @types/minimatch
+// value/type export shape.
 const compileMatchers = (patterns: readonly string[]) =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 

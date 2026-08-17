@@ -7,15 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CiStatsClient } from './client.ts';
-
-const ciStats = new CiStatsClient();
-
-export async function onMetricsViable() {
-  if (!process.env.CI_STATS_BUILD_ID) {
-    return;
-  }
-
-  console.log('Marking build as a "valid baseline" so that it can be used to power PR reports');
-  await ciStats.markBuildAsValidBaseline(process.env.CI_STATS_BUILD_ID);
-}
+module.exports = {
+  parserOptions: {
+    ecmaVersion: 2022,
+  },
+  rules: {
+    '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
+  },
+};

@@ -53,7 +53,7 @@ if is_pr; then
   fi
 
   echo --- Post Saved Objects PR comment
-  ts-node .buildkite/scripts/steps/checks/notify_saved_objects_changes.ts --report-path "$SO_REPORT_PATH" || echo "Warning: failed to post Saved Objects PR notification"
+  node .buildkite/scripts/steps/checks/notify_saved_objects_changes.ts --report-path "$SO_REPORT_PATH" || echo "Warning: failed to post Saved Objects PR notification"
 
   if [[ "$CHECK_EXIT" -ne 0 ]]; then
     exit "$CHECK_EXIT"

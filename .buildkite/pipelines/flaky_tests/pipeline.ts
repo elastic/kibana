@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { groups } from './groups.json';
-import { TestSuiteType } from './constants';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
+import { TestSuiteType } from './constants.ts';
 import type { BuildkiteStep } from '#pipeline-utils';
 import {
   expandAgentQueue,
@@ -16,6 +17,11 @@ import {
   getTrackedBranch,
   retryOnPreemption,
 } from '#pipeline-utils';
+
+const requireJson = createRequire(
+  resolve(process.cwd(), '.buildkite/pipelines/flaky_tests/pipeline.ts')
+);
+const { groups } = requireJson('./groups.json') as typeof import('./groups.json');
 
 const TEST_STEP_TIMEOUT_MINUTES = 80;
 
@@ -435,7 +441,7 @@ pipeline.steps.push({
 });
 
 pipeline.steps.push({
-  command: 'ts-node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
+  command: 'node .buildkite/pipelines/flaky_tests/post_stats_on_pr.ts',
   label: 'Post results on Github pull request',
   agents: expandAgentQueue('n2-4-spot'),
   timeout_in_minutes: 15,

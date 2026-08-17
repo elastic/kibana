@@ -11,8 +11,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { execSync } from 'child_process';
 import * as JSON5 from 'json5';
-import { getKibanaDir } from '../utils';
-import { UNCATEGORIZED_MODULE_ID } from './const';
+import { getKibanaDir } from '../utils.ts';
+import { UNCATEGORIZED_MODULE_ID } from './const.ts';
 
 export interface ModuleLookup {
   /**

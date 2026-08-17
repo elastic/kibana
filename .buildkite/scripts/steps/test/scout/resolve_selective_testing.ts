@@ -17,7 +17,7 @@
  * (critical-files check, tests-only fast path, dependency-tree fallback).
  *
  * Usage:
- *   ts-node resolve_selective_testing.ts <mergeBase> <outPath>
+ *   node resolve_selective_testing.ts <mergeBase> <outPath>
  *
  * Args:
  *   mergeBase  — git ref to diff against (required)
@@ -38,9 +38,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers';
-import { shouldSkipScoutTests } from './scout_ftr_modules';
-import { computeMoonShadow } from './moon_shadow';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import { shouldSkipScoutTests } from './scout_ftr_modules.ts';
+import { computeMoonShadow } from './moon_shadow.ts';
 import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 
 const log = new ToolingLog({ level: 'info', writeTo: process.stderr });

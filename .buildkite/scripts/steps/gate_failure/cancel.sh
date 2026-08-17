@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-# cancel.ts only depends on .buildkite/node_modules (ts-node, #pipeline-utils,
+# cancel.ts only depends on .buildkite/node_modules (node, #pipeline-utils,
 # buildkite-agent CLI). A full repo bootstrap is unnecessary and can fail if
 # cache steps haven't finished yet.
-.buildkite/node_modules/.bin/ts-node "$(dirname "${0}")/cancel.ts"
+.buildkite/node_modules/.bin/node "$(dirname "${0}")/cancel.ts"

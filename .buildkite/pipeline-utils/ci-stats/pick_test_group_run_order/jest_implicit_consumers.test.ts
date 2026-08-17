@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { expandJestImplicitConsumers } from './jest_implicit_consumers';
+import { expandJestImplicitConsumers } from './jest_implicit_consumers.ts';
 
 describe('expandJestImplicitConsumers', () => {
   it('adds encrypted_saved_objects when an upstream plugin changes SO model versions', () => {

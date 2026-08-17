@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseLinkHeader } from './parse_link_header';
+import { parseLinkHeader } from './parse_link_header.ts';
 
 describe('parseLinkHeader', () => {
   it('should parse link header', () => {

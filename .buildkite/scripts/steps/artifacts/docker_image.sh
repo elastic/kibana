@@ -132,7 +132,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
   gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMMIT"
 
   echo "--- Validate CDN assets"
-  ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+  node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
     "$GCS_SA_CDN_URL" \
     "$CDN_ASSETS_FOLDER"
 

@@ -2765,7 +2765,7 @@ module.exports = {
       },
     },
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
      */
     {
       files: '.buildkite/**/*.{js,ts}',
@@ -2776,7 +2776,7 @@ module.exports = {
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
+     * Repository tooling packages run outside the standard application bundles and need a few targeted lint overrides.
      */
     {
       files: [

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isScoutTestsOnlyDiff, isScoutPathOnlyDiff } from './selective_scout';
+import { isScoutTestsOnlyDiff, isScoutPathOnlyDiff } from './selective_scout.ts';
 
 describe('isScoutTestsOnlyDiff', () => {
   it('returns false for an empty diff (no signal)', () => {

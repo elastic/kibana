@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
 import { parse } from 'yaml';
-import {
-  getMoonChangedFiles,
-  getAffectedMoonProjectsFromChangedFiles,
-  type MoonProject,
-} from '@kbn/moon';
 
-export { type MoonProject };
+export interface MoonProject {
+  id: string;
+  sourceRoot: string;
+}
 
 export const KBN_UI_ROOT_RELATIVE = 'src/platform/kbn-ui';
 export const FORCE_ALL_CHANGED_PATHS = new Set<string>([
@@ -37,6 +36,90 @@ interface ResolveAffectedPackagesOptions {
   packageNames: string[];
   kbnUiRoot: string;
 }
+
+interface MoonChangedFilesResponse {
+  files: string[];
+}
+
+interface MoonProjectsResponse {
+  projects: Array<{
+    id: string;
+    source: string;
+    config?: {
+      project?: {
+        metadata?: {
+          sourceRoot?: string;
+        };
+      };
+    };
+  }>;
+}
+
+const getMoonExecutablePath = (repoRoot: string): string => {
+  const moonBinPath = path.resolve(repoRoot, 'node_modules/.bin/moon');
+  if (fs.existsSync(moonBinPath)) {
+    return moonBinPath;
+  }
+
+  return execFileSync('yarn', ['--silent', 'which', 'moon'], {
+    cwd: repoRoot,
+    encoding: 'utf8',
+  }).trim();
+};
+
+const runMoonQuery = (repoRoot: string, args: string[], input?: string): string =>
+  execFileSync(getMoonExecutablePath(repoRoot), args, {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      CI_STATS_DISABLED: 'true',
+    },
+    input,
+  });
+
+const getMoonChangedFiles = ({
+  base,
+  head,
+  repoRoot,
+}: {
+  base: string;
+  head: string;
+  repoRoot: string;
+}): string[] => {
+  const { files } = JSON.parse(
+    runMoonQuery(repoRoot, ['query', 'changed-files', '--base', base, '--head', head])
+  ) as MoonChangedFilesResponse;
+
+  return files
+    .map((file) => path.normalize(file).split(path.sep).join('/'))
+    .filter((file) => fs.existsSync(path.resolve(repoRoot, file)))
+    .sort((a, b) => a.localeCompare(b));
+};
+
+const getAffectedMoonProjectsFromChangedFiles = ({
+  changedFiles,
+  repoRoot,
+}: {
+  changedFiles: string[];
+  repoRoot: string;
+}): MoonProject[] => {
+  const { projects } = JSON.parse(
+    runMoonQuery(
+      repoRoot,
+      ['query', 'projects', '--affected', '--downstream', 'deep'],
+      JSON.stringify({ files: changedFiles })
+    )
+  ) as MoonProjectsResponse;
+
+  return projects.map((project) => ({
+    id: project.id,
+    sourceRoot: path
+      .normalize(project.config?.project?.metadata?.sourceRoot ?? project.source)
+      .split(path.sep)
+      .join('/'),
+  }));
+};
 
 const getAllPackageNames = (kbnUiRoot: string): string[] =>
   fs
@@ -150,9 +233,12 @@ export const resolveAffectedPackages = ({
   return topologicallySortPackages(Array.from(affectedPackageNames), kbnUiRoot);
 };
 
-const usage = (): string => 'usage: affected_packages.ts <base-ref> [head-ref]';
+const usage = (): string => 'usage: kbn_ui_affected_packages.ts <base-ref> [head-ref]';
 
-const main = async (argv = process.argv.slice(2)): Promise<void> => {
+export const main = async (
+  argv = process.argv.slice(2),
+  repoRoot = process.cwd()
+): Promise<void> => {
   if (argv.length < 1) {
     process.stderr.write(`${usage()}\n`);
     process.exitCode = 2;
@@ -160,16 +246,13 @@ const main = async (argv = process.argv.slice(2)): Promise<void> => {
   }
 
   const [baseRef, headRef = 'HEAD'] = argv;
-  const kbnUiRoot = path.dirname(__dirname);
+  const kbnUiRoot = path.resolve(repoRoot, KBN_UI_ROOT_RELATIVE);
   const packageNames = getAllPackageNames(kbnUiRoot);
-  const changedFiles = await getMoonChangedFiles({ scope: 'branch', base: baseRef, head: headRef });
+  const changedFiles = getMoonChangedFiles({ base: baseRef, head: headRef, repoRoot });
 
   let affectedProjects: MoonProject[] = [];
   if (changedFiles.length > 0 && !shouldForceAllPackages(changedFiles)) {
-    affectedProjects = await getAffectedMoonProjectsFromChangedFiles({
-      changedFilesJson: JSON.stringify({ files: changedFiles }),
-      downstream: 'deep',
-    });
+    affectedProjects = getAffectedMoonProjectsFromChangedFiles({ changedFiles, repoRoot });
   }
 
   for (const packageName of resolveAffectedPackages({
@@ -181,10 +264,3 @@ const main = async (argv = process.argv.slice(2)): Promise<void> => {
     process.stdout.write(`${packageName}\n`);
   }
 };
-
-if (require.main === module) {
-  main().catch((err) => {
-    process.stderr.write(`${(err as Error).stack ?? err}\n`);
-    process.exit(1);
-  });
-}

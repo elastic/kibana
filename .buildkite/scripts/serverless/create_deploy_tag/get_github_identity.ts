@@ -8,7 +8,8 @@
  */
 
 // Query the GitHub API for the user's GitHub identity
-import { octokit } from './shared';
+import { basename } from 'node:path';
+import { octokit } from './shared.ts';
 
 const getGitHubIdentity = async (): Promise<{
   login: string;
@@ -24,7 +25,7 @@ const getGitHubIdentity = async (): Promise<{
   };
 };
 
-async function main() {
+export async function main() {
   try {
     const identity = await getGitHubIdentity();
 
@@ -48,10 +49,8 @@ async function main() {
   }
 }
 
-if (require.main === module) {
+if (basename(process.argv[1] ?? '') === 'get_github_identity.ts') {
   main().then((identity) => {
     console.log(JSON.stringify(identity));
   });
-} else {
-  module.exports = main;
 }

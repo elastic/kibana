@@ -19,7 +19,7 @@ import {
   findUnrecognizedTeams,
   getCodeownersTeams,
   getRegistryGithubTeams,
-} from './verify_codeowners_teams';
+} from './verify_codeowners_teams.ts';
 
 const mockGetTeams = jest.mocked(getTeams);
 const mockGetCodeOwnersEntries = jest.mocked(getCodeOwnersEntries);

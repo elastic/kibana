@@ -15,9 +15,10 @@
             }
         ] */
 
-import prConfigs from '../../../pull_requests.json';
-import { runPreBuild } from './pre_build';
-import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline';
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
+import { runPreBuild } from './pre_build.ts';
+import { getEvalTriggerStep } from '../../../pipelines/evals/eval_pipeline.ts';
 import {
   areChangesSkippable,
   doAnyChangesMatch,
@@ -33,6 +34,13 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
+
+const requireJson = createRequire(
+  resolve(process.cwd(), '.buildkite/scripts/pipelines/pull_request/pipeline.ts')
+);
+const prConfigs = requireJson(
+  '../../../pull_requests.json'
+) as typeof import('../../../pull_requests.json');
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 const emptyStep = `steps: []`;

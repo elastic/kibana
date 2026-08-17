@@ -15,7 +15,7 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import { expandWithImplicitConsumers } from './scout_implicit_consumers';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
 import { getAffectedProjectsMoon } from '#pipeline-utils';
 
 export interface MoonShadowResult {

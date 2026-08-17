@@ -1,7 +1,7 @@
 #!/bin/bash
 # Index per-(package, dep) dependency usage docs into Elasticsearch.
 #
-# Requires: Node 24+ (uses --experimental-strip-types to run TS natively)
+# Requires: Node 24+ (runs TypeScript natively)
 #           and root node_modules installed (yarn install).
 #
 # Usage:
@@ -24,8 +24,8 @@
 #   ELASTICSEARCH_API_KEY=id:key \
 #   bash scripts/index_dependency_usage.sh --group solutions
 
-# Node 24 runs TypeScript natively via --experimental-strip-types.
+# Node 24 runs TypeScript natively.
 # NODE_TLS_REJECT_UNAUTHORIZED=0 allows self-signed certs used by local
 # serverless clusters; has no effect against valid Elastic Cloud certs.
 NODE_OPTIONS="--max-old-space-size=8192" NODE_NO_WARNINGS=1 NODE_TLS_REJECT_UNAUTHORIZED=0 \
-node --experimental-strip-types packages/kbn-dependency-usage/src/indexer/cli.ts "$@"
+node packages/kbn-dependency-usage/src/indexer/cli.ts "$@"

@@ -30,7 +30,7 @@ import {
   discoverJestUnitConfigs,
   expandShardedJestConfigs,
   globsForSolutions,
-} from './jest_configs';
+} from './jest_configs.ts';
 
 describe('expandShardedJestConfigs', () => {
   it('passes configs not in the shard map through unchanged', () => {

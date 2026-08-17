@@ -164,7 +164,7 @@ fi
 # --- Post a PR comment ----------------------------------------------------
 if [[ -n "${pr_number}" && -n "${GITHUB_FILE}" && -f "${GITHUB_FILE}" ]]; then
   echo "--- Posting triage as a PR comment (elastic/kibana#${pr_number})"
-  if ! ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+  if ! node .buildkite/scripts/lifecycle/comment_on_pr.ts \
     --message "$(cat "$GITHUB_FILE")" \
     --context "evals-triage-${suite_key_safe}" \
     --clear-previous \

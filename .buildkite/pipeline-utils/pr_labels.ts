@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum FIPS_VERSION {
-  TWO = '140-2',
-  THREE = '140-3',
-}
+export const FIPS_VERSION = {
+  TWO: '140-2',
+  THREE: '140-3',
+} as const;
+
+export type FipsVersion = (typeof FIPS_VERSION)[keyof typeof FIPS_VERSION];
 
 export const FIPS_GH_LABELS = {
   [FIPS_VERSION.TWO]: 'ci:enable-fips-140-2-agent',
@@ -20,7 +22,7 @@ export const FIPS_GH_LABELS = {
 /**
  * Checks if the PR has a specific FIPS label or ANY FIPS label when no version is passed.
  */
-export function prHasFIPSLabel(version?: FIPS_VERSION): boolean {
+export function prHasFIPSLabel(version?: FipsVersion): boolean {
   const labels = process.env.GITHUB_PR_LABELS ?? '';
 
   if (!labels) {

@@ -13,7 +13,7 @@ jest.mock('#pipeline-utils', () => ({
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getAffectedProjectsMoon } from '#pipeline-utils';
-import { computeMoonShadow } from './moon_shadow';
+import { computeMoonShadow } from './moon_shadow.ts';
 
 const mockGetAffectedProjectsMoon = getAffectedProjectsMoon as jest.Mock;
 

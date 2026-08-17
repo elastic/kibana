@@ -12,8 +12,8 @@ jest.mock('node:fs', () => ({
 }));
 
 import { readFileSync } from 'node:fs';
-import { ftrManifest } from './ftr_manifests';
-import { ftrTestChannel } from './test_channels';
+import { ftrManifest } from './ftr_manifests.ts';
+import { ftrTestChannel } from './test_channels.ts';
 
 describe('ftrTestChannel.fromString', () => {
   it('throws for an unknown channel', () => {

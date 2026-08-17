@@ -7,12 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createRequire } from 'node:module';
+import { resolve } from 'node:path';
 import * as globby from 'globby';
 
-import DISABLED_JEST_CONFIGS from '../../../disabled_jest_configs.json';
-import SHARDED_JEST_CONFIGS from '../../../sharded_jest_configs.json';
-import { filterEmptyJestConfigs } from '../get_tests_from_config';
+import { filterEmptyJestConfigs } from '../get_tests_from_config.ts';
 import { getKibanaDir } from '#pipeline-utils';
+
+const requireJson = createRequire(
+  resolve(
+    process.cwd(),
+    '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/jest_configs.ts'
+  )
+);
+const DISABLED_JEST_CONFIGS = requireJson(
+  '../../../disabled_jest_configs.json'
+) as typeof import('../../../disabled_jest_configs.json');
+const SHARDED_JEST_CONFIGS = requireJson(
+  '../../../sharded_jest_configs.json'
+) as typeof import('../../../sharded_jest_configs.json');
 
 export const SHARD_ANNOTATION_SEP = '||shard=';
 

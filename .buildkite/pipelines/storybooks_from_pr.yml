@@ -5,7 +5,7 @@ steps:
       - |
           STORYBOOK_URL=$$(buildkite-agent meta-data get pr_comment:storybooks:head)
 
-          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+          node .buildkite/scripts/lifecycle/comment_on_pr.ts \
             --message "$$STORYBOOK_URL" \
             --context "kibana-storybooks-from-pr" \
             --clear-previous
