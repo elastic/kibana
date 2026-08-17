@@ -188,7 +188,7 @@ export default function (providerContext: FtrProviderContext) {
           logger,
           retry,
           entitiesIndex: defaultSpaceIndex,
-          expectedCount: 53,
+          expectedCount: 58,
         });
       });
 
