@@ -432,7 +432,6 @@ export const getKibanaRoleSchema = (
       }
     ),
     {
-      // Bound the number of privilege entries: each drives per-element validation and the O(n^2) space-overlap check below.
       maxSize: 1000,
       validate(value) {
         for (const [indexA, valueA] of value.entries()) {
