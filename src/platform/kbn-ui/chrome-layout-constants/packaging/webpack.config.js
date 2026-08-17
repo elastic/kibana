@@ -29,8 +29,9 @@ module.exports = {
 
   target: 'web',
 
-  // No runtime dependencies to externalize — all imports are type-only.
-  externals: {},
+  externals: {
+    '@kbn/ui-chrome-layout': 'commonjs @kbn/ui-chrome-layout',
+  },
 
   module: {
     rules: [

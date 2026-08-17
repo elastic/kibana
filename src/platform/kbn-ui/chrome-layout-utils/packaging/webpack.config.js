@@ -30,6 +30,7 @@ module.exports = {
   target: 'web',
 
   externals: {
+    '@kbn/ui-chrome-layout': 'commonjs @kbn/ui-chrome-layout',
     '@elastic/eui': 'commonjs @elastic/eui',
     react: 'commonjs react',
   },
@@ -53,14 +54,6 @@ module.exports = {
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
-    alias: {
-      // Resolve @kbn/ui-chrome-layout-constants from its built output so this
-      // package can be bundled without the full Kibana monorepo at build time.
-      '@kbn/ui-chrome-layout-constants': path.resolve(
-        __dirname,
-        '../../chrome-layout-constants/target/index.js'
-      ),
-    },
   },
 
   optimization: {

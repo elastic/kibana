@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
-      "node"
+      "node",
+      "react"
     ]
   },
   "include": [

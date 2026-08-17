@@ -1,10 +1,12 @@
 #!/bin/bash
 
 # Build script for @kbn/ui-chrome-layout-constants standalone package.
+# Re-exports the constants surface from @kbn/ui-chrome-layout.
 #
 # Steps:
+#   0. Build @kbn/ui-chrome-layout if its target is missing.
 #   1. Validate types.
-#   2. Bundle via webpack (pure TS — no runtime deps, no externals).
+#   2. Bundle via webpack (@kbn/ui-chrome-layout externalized).
 #   3. Generate TypeScript declarations from standalone types.ts.
 #   4. Copy package.json into output directory.
 #   5. Stamp a content-hash version.
@@ -21,6 +23,14 @@ KIBANA_ROOT="$(cd "$KBN_UI_ROOT/../../.." && pwd)"
 TOOLING_DIR="$KBN_UI_ROOT/_tooling"
 TARGET_DIR="${BUILD_OUTPUT_DIR:-$PKG_ROOT/target}"
 KBN_BIN="$KIBANA_ROOT/node_modules/.bin"
+
+echo "==> Step 0: Dependencies"
+if [[ ! -f "$KBN_UI_ROOT/chrome-layout/target/index.js" ]]; then
+  echo "    Building @kbn/ui-chrome-layout (missing target)..."
+  bash "$KBN_UI_ROOT/chrome-layout/packaging/scripts/build.sh"
+else
+  echo "    @kbn/ui-chrome-layout target OK"
+fi
 
 echo "==> Step 1: Type validation"
 "$KBN_BIN/tsc" --project "$PACKAGING_DIR/tsconfig.json" --noEmit

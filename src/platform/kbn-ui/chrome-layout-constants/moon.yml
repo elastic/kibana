@@ -16,9 +16,10 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/platform/kbn-ui/chrome-layout-constants
-dependsOn: []
+dependsOn:
+  - '@kbn/ui-chrome-layout'
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-platform

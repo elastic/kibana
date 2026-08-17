@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/ui-chrome-layout-constants",
   "owner": "@elastic/appex-sharedux",
   "group": "platform",

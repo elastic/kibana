@@ -2,7 +2,7 @@
   "name": "@kbn/ui-chrome-layout-utils",
   "version": "0.1.0",
   "private": true,
-  "description": "Standalone Elastic chrome layout utilities for non-Kibana applications",
+  "description": "Standalone Elastic chrome layout utilities for non-Kibana applications. Re-exports @kbn/ui-chrome-layout.",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
@@ -13,6 +13,7 @@
     "package.json"
   ],
   "peerDependencies": {
+    "@kbn/ui-chrome-layout": "*",
     "@elastic/eui": ">=112.0.0",
     "react": ">=18.0.0"
   },

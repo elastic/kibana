@@ -1,17 +1,17 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    // Type-validation only; everything (bundler resolution, module: preserve,
-    // strict, esModuleInterop, skipLibCheck) is inherited from the repo base so
-    // this config no longer drifts.
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@kbn/ui-chrome-layout": [
+        "../../chrome-layout/target/index.d.ts"
+      ]
+    }
   },
   "include": [
-    "../index.ts",
-    "../src/**/*.ts"
+    "../index.ts"
   ],
   "exclude": [
-    "../src/**/*.test.*",
     "node_modules"
   ]
 }

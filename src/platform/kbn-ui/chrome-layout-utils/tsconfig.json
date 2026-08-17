@@ -17,6 +17,6 @@
     "packaging/target/**/*"
   ],
   "kbn_references": [
-    "@kbn/ui-chrome-layout-constants"
+    "@kbn/ui-chrome-layout"
   ]
 }

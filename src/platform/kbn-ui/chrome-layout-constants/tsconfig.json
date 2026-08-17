@@ -16,5 +16,7 @@
     "target/**/*",
     "packaging/target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/ui-chrome-layout"
+  ]
 }

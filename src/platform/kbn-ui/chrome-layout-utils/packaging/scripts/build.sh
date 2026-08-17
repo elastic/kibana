@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Build script for @kbn/ui-chrome-layout-utils standalone package.
+# Re-exports the utils surface from @kbn/ui-chrome-layout.
 #
 # Steps:
-#   0. Build @kbn/ui-chrome-layout-constants if its target is missing.
+#   0. Build @kbn/ui-chrome-layout if its target is missing.
 #   1. Validate types.
-#   2. Bundle via webpack (@elastic/eui externalized; constants resolved from built output).
+#   2. Bundle via webpack (@kbn/ui-chrome-layout externalized).
 #   3. Generate TypeScript declarations from standalone types.ts.
 #   4. Copy package.json into output directory.
 #   5. Stamp a content-hash version.
@@ -24,12 +25,12 @@ TARGET_DIR="${BUILD_OUTPUT_DIR:-$PKG_ROOT/target}"
 KBN_BIN="$KIBANA_ROOT/node_modules/.bin"
 
 echo "==> Step 0: Dependencies"
-CONSTANTS_TARGET="$KBN_UI_ROOT/chrome-layout-constants/target/index.js"
-if [[ ! -f "$CONSTANTS_TARGET" ]]; then
-  echo "    Building @kbn/ui-chrome-layout-constants (missing target)..."
-  bash "$KBN_UI_ROOT/chrome-layout-constants/packaging/scripts/build.sh"
+LAYOUT_TARGET="$KBN_UI_ROOT/chrome-layout/target/index.js"
+if [[ ! -f "$LAYOUT_TARGET" ]]; then
+  echo "    Building @kbn/ui-chrome-layout (missing target)..."
+  bash "$KBN_UI_ROOT/chrome-layout/packaging/scripts/build.sh"
 else
-  echo "    @kbn/ui-chrome-layout-constants target OK"
+  echo "    @kbn/ui-chrome-layout target OK"
 fi
 
 echo "==> Step 1: Type validation"

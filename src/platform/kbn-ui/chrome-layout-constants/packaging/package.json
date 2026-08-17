@@ -2,7 +2,7 @@
   "name": "@kbn/ui-chrome-layout-constants",
   "version": "0.1.0",
   "private": true,
-  "description": "Standalone Elastic chrome layout constants for non-Kibana applications",
+  "description": "Standalone Elastic chrome layout constants for non-Kibana applications. Re-exports @kbn/ui-chrome-layout.",
   "main": "index.js",
   "types": "index.d.ts",
   "files": [
@@ -12,5 +12,8 @@
     "metadata.json",
     "package.json"
   ],
+  "peerDependencies": {
+    "@kbn/ui-chrome-layout": "*"
+  },
   "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0"
 }

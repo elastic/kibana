@@ -8,7 +8,7 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/ui-chrome-layout-constants';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '../constants';
 import {
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,

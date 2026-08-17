@@ -19,7 +19,7 @@ project:
 dependsOn:
   - '@kbn/ui-chrome-layout-constants'
 tags:
-  - shared-common
+  - shared-browser
   - package
   - prod
   - group-platform

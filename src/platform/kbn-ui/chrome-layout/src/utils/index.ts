@@ -19,9 +19,15 @@ export {
   getScrollDimensions,
   scrollBy,
   isAtBottomOfPage,
+} from './scroll';
+
+export {
   type HighContrastSeparatorOptions,
   getHighContrastBorder,
   getHighContrastSeparator,
+} from './high_contrast';
+
+export {
   useCurrentChromeApplicationBreakpoint,
   useIsWithinChromeApplicationBreakpoints,
-} from '@kbn/ui-chrome-layout';
+} from './application_breakpoints';

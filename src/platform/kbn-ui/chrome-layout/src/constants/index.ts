@@ -7,16 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  layoutVar,
-  layoutVarName,
-  layoutLevels,
-  APP_MAIN_SCROLL_CONTAINER_ID,
-  FLYOUT_SELECTOR,
-  MAIN_CONTENT_SELECTORS,
-  SIDE_PANEL_CONTENT_GAP,
-  euiIncludeSelectorInFocusTrap,
-} from '@kbn/ui-chrome-layout';
+export { layoutVar, layoutVarName } from './css_variables';
 export type {
   LayoutVarName,
   CSSVarName,
@@ -24,4 +15,20 @@ export type {
   LayoutProperty,
   ApplicationComponent,
   ApplicationVarName,
-} from '@kbn/ui-chrome-layout';
+} from './css_variables';
+export { layoutLevels } from './levels';
+
+export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
+
+export const FLYOUT_SELECTOR = '.euiFlyout[role="dialog"]';
+
+export const MAIN_CONTENT_SELECTORS = ['main', '[role="main"]', `#${APP_MAIN_SCROLL_CONTAINER_ID}`];
+
+export const SIDE_PANEL_CONTENT_GAP = 8;
+
+export const euiIncludeSelectorInFocusTrap = {
+  prop: {
+    'data-eui-includes-in-flyout-focus-trap': true,
+  },
+  selector: `[data-eui-includes-in-flyout-focus-trap="true"]`,
+};
