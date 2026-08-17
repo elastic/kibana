@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { evaluate } from '../../src/evaluate';
 import {
@@ -12,16 +13,19 @@ import {
   waitForTransformPropagation,
   seedScenario,
 } from '../../src/data_generators/endpoint_data';
-import { cleanupSeededData } from '../../src/data_generators/cleanup';
+import { cleanupResponseActionsData } from '../../src/data_generators/cleanup';
 
 const SKILL_PATH = 'skills/security/endpoint/endpoint-response-actions/SKILL.md';
 
 evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, () => {
-  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, chatClient, log }) => {
+  evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
     await waitForEndpointPackage(kbnClient, esClient, log);
 
     try {
-      await chatClient.converse({ message: 'hello' });
+      await agentBuilderClient.converse({
+        agentId: agentBuilderDefaultAgentId,
+        input: 'hello',
+      });
     } catch (e) {
       log.warning(`Warmup failed: ${e}`);
     }
@@ -50,7 +54,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
   });
 
   evaluate.afterAll(async ({ esClient, internalEsClient }) => {
-    await cleanupSeededData({ esClient, internalEsClient });
+    await cleanupResponseActionsData({ esClient, internalEsClient });
   });
 
   // ---------------------------------------------------------------------------
@@ -77,7 +81,9 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 'Called the endpoint-response-actions.isolate_host inline tool',
                 'Reported the isolation result (success or pending) back to the user',
               ],
+              tool_sequence: ['endpoint-response-actions.isolate_host'],
             },
+            metadata: { golden_id: 'era-001-isolate-host', row_type: 'happy' },
           },
         ],
       },
@@ -107,7 +113,9 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 'Called the endpoint-response-actions.unisolate_host inline tool',
                 'Reported the release result back to the user',
               ],
+              tool_sequence: ['endpoint-response-actions.unisolate_host'],
             },
+            metadata: { golden_id: 'era-002-release-host', row_type: 'happy' },
           },
         ],
       },
@@ -136,7 +144,9 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 'Returned a list of endpoints including at least eval-host-isolate and eval-host-release',
                 'Did not attempt to isolate any host without explicit user confirmation',
               ],
+              tool_sequence: ['endpoint-response-actions.list_endpoints'],
             },
+            metadata: { golden_id: 'era-003-list-endpoints', row_type: 'happy' },
           },
         ],
       },
@@ -167,7 +177,9 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 'Did not use platform.core.search or raw Elasticsearch queries to look up the action status',
                 'Reported the lookup result to the analyst (action status if found, or a clear not-found message)',
               ],
+              tool_sequence: ['endpoint-response-actions.get_response_action_status'],
             },
+            metadata: { golden_id: 'era-004-action-status-by-id', row_type: 'happy' },
           },
           {
             input: {
@@ -181,7 +193,9 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 'Did not dispatch a new scan or other write action just to check status',
                 'Reported the current action status or a clear not-found message to the analyst',
               ],
+              tool_sequence: ['endpoint-response-actions.get_response_action_status'],
             },
+            metadata: { golden_id: 'era-005-pending-scan-status', row_type: 'happy' },
           },
           {
             input: {
@@ -194,6 +208,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
                 'Did not attempt to isolate, release, or scan any endpoint',
               ],
             },
+            metadata: { golden_id: 'era-distractor-weather', row_type: 'distractor' },
           },
         ],
       },
