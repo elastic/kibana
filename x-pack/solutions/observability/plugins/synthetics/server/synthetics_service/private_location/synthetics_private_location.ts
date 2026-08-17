@@ -346,7 +346,7 @@ export class SyntheticsPrivateLocation {
   }
 
   private getReferencedPrivateLocations(
-    configs: Array<{ config: Pick<HeartbeatConfig, 'locations'> }>,
+    configs: Array<{ config: Pick<HeartbeatConfig, ConfigKey.LOCATIONS> }>,
     privateLocations: SyntheticsPrivateLocations
   ): SyntheticsPrivateLocations {
     const locationIds = new Set(

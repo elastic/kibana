@@ -735,7 +735,9 @@ describe('SyntheticsPrivateLocation', () => {
           },
         },
       } as unknown as SyntheticsServerSetup);
-      const inspect = jest.spyOn(PackagePolicyService.prototype, 'inspect').mockResolvedValue({});
+      const inspect = jest
+        .spyOn(PackagePolicyService.prototype, 'inspect')
+        .mockResolvedValue(testMonitorPolicy);
 
       await syntheticsPrivateLocation.inspectPackagePolicy({
         privateConfig: {
