@@ -8,20 +8,6 @@
 import { createHash } from 'crypto';
 import type { Observation, ObservationSeverity } from './types';
 
-export const computeEntityIdentityKey = ({
-  entities,
-}: {
-  entities: ReadonlyArray<{ type: string; id?: string; name: string }>;
-}) => {
-  const sortedEntities = [...entities]
-    .map((e) => ({ type: e.type, key: e.id ?? e.name }))
-    .sort((a, b) => a.type.localeCompare(b.type) || a.key.localeCompare(b.key));
-
-  return createHash('sha256')
-    .update(JSON.stringify({ entities: sortedEntities }))
-    .digest('hex');
-};
-
 const OBSERVATION_SEVERITY_RANK: Readonly<Record<ObservationSeverity, number>> = {
   low: 1,
   medium: 2,

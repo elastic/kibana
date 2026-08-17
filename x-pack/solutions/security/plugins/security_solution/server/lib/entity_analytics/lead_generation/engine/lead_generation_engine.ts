@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import type {
   Lead,
   LeadEntity,
@@ -15,7 +16,6 @@ import type {
   ObservationModule,
 } from '../types';
 import { computeStaleness, DEFAULT_ENGINE_CONFIG } from '../types';
-import { computeEntityIdentityKey } from '../lead_matching';
 import { llmSynthesizeBatch, type CohortContext, type ScoredEntityInput } from './llm_synthesize';
 
 interface LeadGenerationEngineDeps {
@@ -28,7 +28,7 @@ export interface LeadCandidate {
   readonly entity: LeadEntity;
   readonly priority: number;
   readonly observations: Observation[];
-  readonly entityIdentityKey: string;
+  readonly leadId: string;
 }
 
 export const createLeadGenerationEngine = ({
@@ -85,15 +85,13 @@ export const createLeadGenerationEngine = ({
       return [];
     }
 
-    // 4. Compute entity identity key and content hash for each qualifying entity
+    // 4. Format lead candidates
     const candidates = qualifyingEntities.map((scored) => {
       return {
         entity: scored.entity,
         priority: scored.priority,
         observations: scored.observations,
-        entityIdentityKey: computeEntityIdentityKey({
-          entities: [{ type: scored.entity.type, name: scored.entity.name, id: scored.entity.id }],
-        }),
+        leadId: hashEuid(scored.entity.id),
       };
     });
 
@@ -270,105 +268,83 @@ const groupIntoLeads = async (
   logger: Logger,
   chatModel: InferenceChatModel
 ): Promise<Lead[]> => {
-  const groups = groupByObservationPattern(candidates);
   const now = new Date();
-
-  const cohort = computeCohortContext(groups);
+  const cohort = computeCohortContext(candidates);
 
   const synthStart = Date.now();
-  const llmResults = await llmSynthesizeBatch(chatModel, groups, logger, cohort);
+  const llmResults = await llmSynthesizeBatch(chatModel, candidates, logger, cohort);
   logger.debug(
-    `[LeadGenerationEngine] LLM synthesis: ${Date.now() - synthStart}ms (${groups.length} leads)`
+    `[LeadGenerationEngine] LLM synthesis: ${Date.now() - synthStart}ms (${
+      candidates.length
+    } leads)`
   );
 
-  return groups.map((group, i) => {
-    const allObservations = group.flatMap((e) => e.observations);
-    const maxPriority = Math.max(...group.map((e) => e.priority));
+  return candidates.map((candidate, i) => {
+    const { entity, priority, observations } = candidate;
     const llm = llmResults[i];
-    const entities = group.map((e) => e.entity);
 
     return {
-      id: computeEntityIdentityKey({ entities }),
+      id: hashEuid(entity.id),
       title: llm.title,
-      byline: llm.byline?.trim() ? llm.byline : buildByline(group, allObservations),
+      byline: llm.byline?.trim() ? llm.byline : buildByline(candidate),
       description: llm.description,
-      entities,
+      entity,
       tags: llm.tags,
-      priority: maxPriority,
+      priority,
       chatRecommendations: llm.recommendations,
       timestamp: now.toISOString(),
       staleness: computeStaleness(now, now),
-      observations: allObservations,
+      observations,
     };
   });
 };
-
-/**
- * Each entity gets its own lead. In a future phase, entities can be grouped
- * into a single lead when they are linked to the same incident or campaign.
- */
-const groupByObservationPattern = (
-  candidates: ReadonlyArray<ScoredEntityInput>
-): ScoredEntityInput[][] => candidates.map((candidate) => [candidate]);
 
 /**
  * Aggregates cross-entity ("peer") context across the batch so a single lead's
  * narrative can convey scope — e.g. how many other candidate entities exhibit
  * the same observation type. Each entity is counted once per observation type.
  */
-export const computeCohortContext = (groups: ScoredEntityInput[][]): CohortContext => {
+export const computeCohortContext = (
+  candidates: ReadonlyArray<ScoredEntityInput>
+): CohortContext => {
   const entityCountByObservationType: Record<string, number> = {};
 
-  for (const group of groups) {
-    for (const scored of group) {
-      const typesForEntity = new Set(scored.observations.map((o) => o.type));
-      for (const type of typesForEntity) {
-        entityCountByObservationType[type] = (entityCountByObservationType[type] ?? 0) + 1;
-      }
+  for (const candidate of candidates) {
+    const typesForEntity = new Set(candidate.observations.map((o) => o.type));
+    for (const type of typesForEntity) {
+      entityCountByObservationType[type] = (entityCountByObservationType[type] ?? 0) + 1;
     }
   }
 
-  const totalCandidates = groups.reduce((sum, group) => sum + group.length, 0);
-  return { totalCandidates, entityCountByObservationType };
+  return { totalCandidates: candidates.length, entityCountByObservationType };
 };
 
-const buildByline = (group: ScoredEntityInput[], observations: Observation[]): string => {
-  if (group.length === 1) {
-    const { entity } = group[0];
-    const entityObs = observations.filter((o) => o.entityId === entity.id);
+const buildByline = (candidate: ScoredEntityInput): string => {
+  const { entity, observations } = candidate;
 
-    const totalAlerts = extractNumber(entityObs, 'total_alerts');
-    const distinctRules =
-      extractNumber(entityObs, 'distinct_rules') || extractNumber(entityObs, 'distinct_rule_count');
-    const riskScore = extractNumber(entityObs, 'calculated_score_norm');
+  const totalAlerts = extractNumber(observations, 'total_alerts');
+  const distinctRules =
+    extractNumber(observations, 'distinct_rules') ||
+    extractNumber(observations, 'distinct_rule_count');
+  const riskScore = extractNumber(observations, 'calculated_score_norm');
 
-    const parts: string[] = [];
-    if (riskScore > 0) {
-      parts.push(`risk score ${riskScore.toFixed(1)}`);
-    }
-    if (totalAlerts > 0) {
-      parts.push(`${totalAlerts} alerts`);
-    }
-    if (distinctRules > 0) {
-      parts.push(`${distinctRules} detection rules`);
-    }
-
-    if (parts.length > 0) {
-      return `${capitalize(entity.type)} ${entity.name} with ${parts.join(
-        ', '
-      )} in the last 7 days.`;
-    }
-    return `${capitalize(entity.type)} ${entity.name} with ${
-      entityObs.length
-    } observations in the last 7 days.`;
+  const parts: string[] = [];
+  if (riskScore > 0) {
+    parts.push(`risk score ${riskScore.toFixed(1)}`);
+  }
+  if (totalAlerts > 0) {
+    parts.push(`${totalAlerts} alerts`);
+  }
+  if (distinctRules > 0) {
+    parts.push(`${distinctRules} detection rules`);
   }
 
-  const names = group
-    .map((e) => e.entity.name)
-    .slice(0, 3)
-    .join(', ');
-  const extra = group.length > 3 ? ` and ${group.length - 3} more` : '';
-  return `${group.length} entities (${names}${extra}) with correlated activity in the last 7 days.`;
+  if (parts.length > 0) {
+    return `${capitalize(entity.type)} ${entity.name} with ${parts.join(', ')} in the last 7 days.`;
+  }
+  return `${capitalize(entity.type)} ${entity.name} with ${
+    observations.length
+  } observations in the last 7 days.`;
 };
 
 const extractNumber = (observations: Observation[], key: string): number => {

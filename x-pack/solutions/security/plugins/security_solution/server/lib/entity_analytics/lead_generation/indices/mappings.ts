@@ -15,7 +15,7 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
     title: { type: 'text', fields: { keyword: { type: 'keyword' } } },
     byline: { type: 'text' },
     description: { type: 'text' },
-    entities: {
+    entity: {
       type: 'object',
       properties: {
         type: { type: 'keyword' },
@@ -48,6 +48,5 @@ export const generateLeadIndexMappings = (): MappingTypeMapping => ({
     changed_at: { type: 'date' },
     version: { type: 'integer' },
     content_hash: { type: 'keyword' },
-    entity_identity_key: { type: 'keyword' },
   },
 });

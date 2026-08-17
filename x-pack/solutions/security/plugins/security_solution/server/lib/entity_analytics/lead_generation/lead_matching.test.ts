@@ -5,61 +5,15 @@
  * 2.0.
  */
 
-import { compareSignals, computeContentHash, computeEntityIdentityKey } from './lead_matching';
+import { compareSignals, computeContentHash } from './lead_matching';
 import type { LeadSignal } from './lead_matching';
 
-const BASE_ENTITIES = [{ type: 'user', id: 'user:alice', name: 'alice' }];
+const BASE_ENTITY = { type: 'user', id: 'user:alice', name: 'alice' };
 
 const BASE_OBSERVATIONS: LeadSignal[] = [
   { moduleId: 'risk_analysis', type: 'high_risk_score', severity: 'high' },
   { moduleId: 'alert_analysis', type: 'alert_spike', severity: 'medium' },
 ];
-
-describe('computeEntityIdentityKey', () => {
-  it('returns the same key for the same entities', () => {
-    expect(computeEntityIdentityKey({ entities: BASE_ENTITIES })).toBe(
-      computeEntityIdentityKey({ entities: BASE_ENTITIES })
-    );
-  });
-
-  it('is stable regardless of entity array order', () => {
-    const entities = [
-      { type: 'host', id: 'host:web01', name: 'web01' },
-      { type: 'user', id: 'user:alice', name: 'alice' },
-    ];
-    const a = computeEntityIdentityKey({ entities });
-    const b = computeEntityIdentityKey({ entities: [...entities].reverse() });
-    expect(a).toBe(b);
-  });
-
-  it('produces different keys for different entities', () => {
-    const a = computeEntityIdentityKey({ entities: BASE_ENTITIES });
-    const b = computeEntityIdentityKey({
-      entities: [{ type: 'user', id: 'user:bob', name: 'bob' }],
-    });
-    expect(a).not.toBe(b);
-  });
-
-  it('falls back to name when id is missing', () => {
-    const withId = computeEntityIdentityKey({
-      entities: [{ type: 'user', id: 'alice', name: 'alice' }],
-    });
-    const withoutId = computeEntityIdentityKey({
-      entities: [{ type: 'user', name: 'alice' }],
-    });
-    expect(withId).toBe(withoutId);
-  });
-
-  it('includes entity type so the same id under different types differs', () => {
-    const user = computeEntityIdentityKey({
-      entities: [{ type: 'user', id: 'shared', name: 'shared' }],
-    });
-    const host = computeEntityIdentityKey({
-      entities: [{ type: 'host', id: 'shared', name: 'shared' }],
-    });
-    expect(user).not.toBe(host);
-  });
-});
 
 describe('compareSignals', () => {
   it('returns equal for identical sets', () => {
@@ -144,13 +98,13 @@ describe('computeContentHash', () => {
     expect(a).toBe(b);
   });
 
-  it('does not depend on entities — entity identity is a separate key', () => {
+  it('does not depend on the entity — entity identity is a separate key', () => {
     const a = computeContentHash({ observations: BASE_OBSERVATIONS });
     const b = computeContentHash({ observations: BASE_OBSERVATIONS });
     expect(a).toBe(b);
     // Same signals for different entities still share a content hash; lookup is
-    // scoped by entity_identity_key before comparing content_hash.
-    expect(a).not.toBe(computeEntityIdentityKey({ entities: BASE_ENTITIES }));
+    // scoped by the lead id (derived from the entity's EUID) before comparing content_hash.
+    expect(a).not.toBe(BASE_ENTITY.id);
   });
 
   it('produces different hashes for different observation types', () => {

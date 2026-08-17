@@ -78,8 +78,8 @@ describe('LeadGenerationEngine', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLlmSynthesizeBatch.mockImplementation(async (_model, groups) =>
-      groups.map(() => ({
+    mockLlmSynthesizeBatch.mockImplementation(async (_model, entities) =>
+      entities.map(() => ({
         title: 'LLM title',
         byline: 'LLM byline',
         description: 'LLM description',
@@ -402,7 +402,7 @@ describe('LeadGenerationEngine', () => {
 
       // Bob has only 1 observation, threshold is 2
       expect(leads).toHaveLength(1);
-      expect(leads[0].entities[0].name).toBe('alice');
+      expect(leads[0].entity.name).toBe('alice');
     });
 
     it('limits output to maxLeads', async () => {
@@ -702,13 +702,13 @@ describe('computeCohortContext', () => {
   });
 
   it('counts each entity once per observation type', () => {
-    const groups: ScoredEntityInput[][] = [
-      [scored('user:a', ['risk_escalation_24h', 'risk_escalation_24h', 'ml_anomaly'])],
-      [scored('user:b', ['risk_escalation_24h'])],
-      [scored('user:c', ['governance_gap'])],
+    const candidates: ScoredEntityInput[] = [
+      scored('user:a', ['risk_escalation_24h', 'risk_escalation_24h', 'ml_anomaly']),
+      scored('user:b', ['risk_escalation_24h']),
+      scored('user:c', ['governance_gap']),
     ];
 
-    expect(computeCohortContext(groups)).toEqual({
+    expect(computeCohortContext(candidates)).toEqual({
       totalCandidates: 3,
       entityCountByObservationType: {
         risk_escalation_24h: 2,

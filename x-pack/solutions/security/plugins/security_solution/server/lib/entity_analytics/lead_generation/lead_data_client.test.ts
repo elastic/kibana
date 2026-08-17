@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
 jest.mock('./indices/lead_index_service', () => ({
   createLeadIndexService: () => ({
@@ -18,7 +19,6 @@ jest.mock('./indices/lead_index_service', () => ({
 import { createLeadDataClient } from './lead_data_client';
 import type { LeadDataClient } from './lead_data_client';
 import { getLeadsIndexName } from '../../../../common/entity_analytics/lead_generation/constants';
-import { computeEntityIdentityKey } from './lead_matching';
 import type { LeadSignal } from './lead_matching';
 import { encodeCursor } from './change_cursor';
 import type { Lead as SynthesizedLead } from './types';
@@ -33,7 +33,7 @@ const makeEsSecurityException = () => ({
 });
 
 const makeTestLead = (overrides: Partial<SynthesizedLead> = {}): SynthesizedLead => {
-  const entities = overrides.entities ?? [{ type: 'user', name: 'admin', id: 'user:admin' }];
+  const entity = overrides.entity ?? { type: 'user', name: 'admin', id: 'user:admin' };
   const observations = overrides.observations ?? [
     {
       entityId: 'user:admin',
@@ -58,7 +58,7 @@ const makeTestLead = (overrides: Partial<SynthesizedLead> = {}): SynthesizedLead
     chatRecommendations: ['What alerts exist?', 'Check risk score history'],
     staleness: 'fresh',
     ...overrides,
-    entities: entities.map((e) => ({ ...e, record: {} })),
+    entity: { ...entity, record: {} },
     observations,
     timestamp,
   };
@@ -81,7 +81,7 @@ describe('LeadDataClient', () => {
 
   const toCandidate = (lead: SynthesizedLead) => ({
     lead,
-    entityIdentityKey: computeEntityIdentityKey({ entities: lead.entities }),
+    leadId: hashEuid(lead.entity.id),
     observations: lead.observations,
   });
 
@@ -102,7 +102,6 @@ describe('LeadDataClient', () => {
           found: true,
           _source: {
             observations: toObservationSource(existing.observations),
-            entity_identity_key: entityKey,
             version: 1,
             status: existing.status,
           },
@@ -114,7 +113,7 @@ describe('LeadDataClient', () => {
   describe('classifyLeadCandidates', () => {
     it('returns create when no lead exists for the entity', async () => {
       const candidate = toCandidate(makeTestLead());
-      mockExistingLead(candidate.entityIdentityKey);
+      mockExistingLead(candidate.leadId);
 
       const [result] = await client.classifyLeadCandidates([candidate]);
 
@@ -123,7 +122,7 @@ describe('LeadDataClient', () => {
 
     it('returns dedup when an active lead has equal evidence', async () => {
       const candidate = toCandidate(makeTestLead());
-      mockExistingLead(candidate.entityIdentityKey, {
+      mockExistingLead(candidate.leadId, {
         observations: candidate.observations,
         status: 'active',
       });
@@ -132,7 +131,7 @@ describe('LeadDataClient', () => {
 
       expect(result.decision).toEqual({
         type: 'dedup',
-        existingId: candidate.entityIdentityKey,
+        existingId: candidate.leadId,
       });
     });
 
@@ -154,7 +153,7 @@ describe('LeadDataClient', () => {
           },
         ],
       });
-      mockExistingLead(candidate.entityIdentityKey, {
+      mockExistingLead(candidate.leadId, {
         observations: [candidate.observations[0]],
         status: 'active',
       });
@@ -163,14 +162,14 @@ describe('LeadDataClient', () => {
 
       expect(result.decision).toEqual({
         type: 'version',
-        existingId: candidate.entityIdentityKey,
+        existingId: candidate.leadId,
         allowReopen: false,
       });
     });
 
     it('classifies as "skip" when a dismissed lead has equal evidence', async () => {
       const candidate = toCandidate(makeTestLead());
-      mockExistingLead(candidate.entityIdentityKey, {
+      mockExistingLead(candidate.leadId, {
         observations: candidate.observations,
         status: 'dismissed',
       });
@@ -198,7 +197,7 @@ describe('LeadDataClient', () => {
           },
         ],
       });
-      mockExistingLead(candidate.entityIdentityKey, {
+      mockExistingLead(candidate.leadId, {
         observations: [candidate.observations[0]],
         status: 'dismissed',
       });
@@ -207,14 +206,14 @@ describe('LeadDataClient', () => {
 
       expect(result.decision).toEqual({
         type: 'version',
-        existingId: candidate.entityIdentityKey,
+        existingId: candidate.leadId,
         allowReopen: true,
       });
     });
 
     it('classifies as "skip" when a dismissed lead has decayed evidence', async () => {
       const candidate = toCandidate(makeTestLead());
-      mockExistingLead(candidate.entityIdentityKey, {
+      mockExistingLead(candidate.leadId, {
         observations: [
           ...candidate.observations,
           { moduleId: 'anomaly_detection', type: 'ml_anomaly', severity: 'high' },
@@ -259,7 +258,7 @@ describe('LeadDataClient', () => {
 
     it('handles leads creation successfully', async () => {
       const lead = makeTestLead();
-      const entityKey = computeEntityIdentityKey({ entities: lead.entities });
+      const entityKey = hashEuid(lead.entity.id);
       esClient.bulk.mockResolvedValueOnce({ errors: false, items: [], took: 1 });
 
       const result = await client.persistLeads({
@@ -282,13 +281,13 @@ describe('LeadDataClient', () => {
 
     it('returns the failed item count when bulk has errors', async () => {
       const leadOk = makeTestLead({
-        entities: [{ type: 'user', name: 'a', id: 'user:a', record: {} }],
+        entity: { type: 'user', name: 'a', id: 'user:a', record: {} },
       });
       const leadFail = makeTestLead({
-        entities: [{ type: 'user', name: 'b', id: 'user:b', record: {} }],
+        entity: { type: 'user', name: 'b', id: 'user:b', record: {} },
       });
-      const okKey = computeEntityIdentityKey({ entities: leadOk.entities });
-      const failKey = computeEntityIdentityKey({ entities: leadFail.entities });
+      const okKey = hashEuid(leadOk.entity.id);
+      const failKey = hashEuid(leadFail.entity.id);
 
       esClient.bulk.mockResolvedValueOnce({
         errors: true,
@@ -370,7 +369,7 @@ describe('LeadDataClient', () => {
         title: 'Test Lead',
         byline: 'Entity X',
         description: 'Details',
-        entities: [{ type: 'user', name: 'admin', id: 'user:admin' }],
+        entity: { type: 'user', name: 'admin', id: 'user:admin' },
         tags: ['brute_force'],
         priority: 8,
         chat_recommendations: ['Question 1'],
@@ -395,7 +394,6 @@ describe('LeadDataClient', () => {
         changed_at: '2026-03-10T00:00:00.000Z',
         version: 1,
         content_hash: 'abc123',
-        entity_identity_key: 'def456',
       };
 
       esClient.search.mockResolvedValueOnce({
@@ -428,19 +426,17 @@ describe('LeadDataClient', () => {
       expect(lead.changedAt).toBe('2026-03-10T00:00:00.000Z');
     });
 
-    it('reads the entity EUID (`entities[].id`) back from the stored document', async () => {
+    it('reads the entity EUID (`entity.id`) back from the stored document', async () => {
       const esDoc = {
         id: 'lead-euid',
         title: 'Test Lead',
         byline: 'Entity X',
         description: 'Details',
-        entities: [
-          {
-            type: 'host',
-            name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-            id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          },
-        ],
+        entity: {
+          type: 'host',
+          name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+        },
         tags: [],
         priority: 8,
         chat_recommendations: [],
@@ -454,7 +450,6 @@ describe('LeadDataClient', () => {
         changed_at: '2026-03-10T00:00:00.000Z',
         version: 1,
         content_hash: 'hash',
-        entity_identity_key: 'key',
       };
 
       esClient.search.mockResolvedValueOnce({
@@ -466,13 +461,11 @@ describe('LeadDataClient', () => {
 
       const result = await client.findLeads({ page: 1, perPage: 10 });
 
-      expect(result.leads[0].entities).toEqual([
-        {
-          type: 'host',
-          name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-          id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
-        },
-      ]);
+      expect(result.leads[0].entity).toEqual({
+        type: 'host',
+        name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+        id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+      });
     });
 
     it('applies status filter when provided', async () => {

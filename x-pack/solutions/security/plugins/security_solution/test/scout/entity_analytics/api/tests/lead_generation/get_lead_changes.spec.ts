@@ -74,7 +74,7 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         expect(response.body.changed).toHaveLength(1);
-        expect(response.body.changed[0].entities[0].name).toBe('alice');
+        expect(response.body.changed[0].entity.name).toBe('alice');
       }
     );
 
@@ -147,7 +147,7 @@ apiTest.describe(
         expect(typeof page2.body.cursor).toBe('string');
 
         const allNames = [...page1.body.changed, ...page2.body.changed].map(
-          (l: { entities: Array<{ name: string }> }) => l.entities[0].name
+          (l: { entity: { name: string } }) => l.entity.name
         );
         expect(allNames.sort()).toStrictEqual(['alice', 'bob', 'carol']);
       }
@@ -182,7 +182,7 @@ apiTest.describe(
 
         expect(secondPoll).toHaveStatusCode(200);
         expect(secondPoll.body.changed).toHaveLength(1);
-        expect(secondPoll.body.changed[0].entities[0].name).toBe('carol');
+        expect(secondPoll.body.changed[0].entity.name).toBe('carol');
       }
     );
 
@@ -215,7 +215,7 @@ apiTest.describe(
 
         expect(secondPoll).toHaveStatusCode(200);
         expect(secondPoll.body.changed).toHaveLength(1);
-        expect(secondPoll.body.changed[0].entities[0].name).toBe('alice');
+        expect(secondPoll.body.changed[0].entity.name).toBe('alice');
       }
     );
 

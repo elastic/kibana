@@ -48,13 +48,8 @@ export type Observation = z.infer<typeof observationSchema>;
 export const leadEntitySchema = z.object({
   type: z.string(),
   name: z.string(),
-  /**
-   * Entity Store unique identifier (EUID, e.g. `"host:8c67cb16-..."`). Used to
-   * open the correct entity flyout by id rather than by (potentially
-   * ambiguous) display name. Optional for backwards compatibility with leads
-   * persisted before this field was introduced.
-   */
-  id: z.string().optional(),
+  // Entity Store unique identifier (EUID, e.g. `"host:8c67cb16-..."`)
+  id: z.string(),
 });
 
 export type LeadEntity = z.infer<typeof leadEntitySchema>;
@@ -68,7 +63,7 @@ export const leadSchema = z.object({
   title: z.string(),
   byline: z.string(),
   description: z.string(),
-  entities: z.array(leadEntitySchema),
+  entity: leadEntitySchema,
   tags: z.array(z.string()),
   priority: z.number().min(1).max(10),
   chatRecommendations: z.array(z.string()),

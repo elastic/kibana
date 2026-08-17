@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
 import {
   getLeadsIndexName,
@@ -18,7 +19,7 @@ import {
   type LeadStaleness,
   LeadStatusEnum,
 } from '../../../../common/entity_analytics/lead_generation/types';
-import { compareSignals, computeContentHash, computeEntityIdentityKey } from './lead_matching';
+import { compareSignals, computeContentHash } from './lead_matching';
 import type { LeadSignal } from './lead_matching';
 import type { CursorPayload } from './change_cursor';
 import { encodeCursor, decodeCursor } from './change_cursor';
@@ -36,7 +37,7 @@ export interface LeadDataClientDeps {
 }
 
 interface LeadActionCandidate {
-  readonly entityIdentityKey: string;
+  readonly leadId: string;
   readonly observations: LeadSignal[];
 }
 
@@ -157,7 +158,7 @@ interface EsLeadDoc {
   title: string;
   byline: string;
   description: string;
-  entities: Array<{ type: string; name: string; id?: string }>;
+  entity: { type: string; name: string; id: string };
   tags: string[];
   priority: number;
   chat_recommendations: string[];
@@ -169,20 +170,17 @@ interface EsLeadDoc {
   source_type: string;
   version: number;
   content_hash: string;
-  entity_identity_key: string;
 }
 
 interface ExistingLeadLookup {
   id: string;
   signals: LeadSignal[];
-  entityIdentityKey: string;
   version: number;
   status: LeadStatus;
 }
 
 /** Partial `_source` returned by the matching-lead mget. */
 interface LeadLookupSource {
-  entity_identity_key?: string;
   version?: number;
   status?: string;
   observations?: Array<{ module_id: string; type: string; severity: string }>;
@@ -194,13 +192,13 @@ const leadToEsDoc = (
   sourceType: LeadGenerationMode,
   timestamp: string
 ): EsLeadDoc => {
-  const entityIdentityKey = computeEntityIdentityKey({ entities: lead.entities });
+  const leadId = hashEuid(lead.entity.id);
   return {
-    id: entityIdentityKey,
+    id: leadId,
     title: lead.title,
     byline: lead.byline,
     description: lead.description,
-    entities: lead.entities.map(({ type, name, id }) => ({ type, name, id })),
+    entity: { type: lead.entity.type, name: lead.entity.name, id: lead.entity.id },
     tags: lead.tags,
     priority: lead.priority,
     chat_recommendations: lead.chatRecommendations,
@@ -221,7 +219,6 @@ const leadToEsDoc = (
     source_type: sourceType,
     version: 1,
     content_hash: computeContentHash({ observations: lead.observations }),
-    entity_identity_key: entityIdentityKey,
   };
 };
 
@@ -234,7 +231,7 @@ const esDocToLead = (doc: Record<string, unknown>): Lead => {
     title: doc.title as string,
     byline: (doc.byline as string) ?? '',
     description: (doc.description as string) ?? '',
-    entities: (doc.entities as Array<{ type: string; name: string; id?: string }>) ?? [],
+    entity: doc.entity as { type: string; name: string; id: string },
     tags: (doc.tags as string[]) ?? [],
     priority: (doc.priority as number) ?? 1,
     chatRecommendations: (doc.chat_recommendations as string[]) ?? [],
@@ -277,14 +274,13 @@ const LEAD_UPDATE_SCRIPT_SOURCE = `
 def now = ${PAINLESS_NOW_ISO};
 if (ctx.op == 'create') {
   ctx._source.id = params.id;
-  ctx._source.entity_identity_key = params.entity_identity_key;
   ctx._source.observations = params.observations;
   ctx._source.title = params.title;
   ctx._source.byline = params.byline;
   ctx._source.description = params.description;
   ctx._source.tags = params.tags;
   ctx._source.chat_recommendations = params.chat_recommendations;
-  ctx._source.entities = params.entities;
+  ctx._source.entity = params.entity;
   ctx._source.priority = params.priority;
   ctx._source.staleness = params.staleness;
   ctx._source.content_hash = params.content_hash;
@@ -305,14 +301,13 @@ if (ctx.op == 'create') {
   }
 } else {
   ctx._source.id = params.id;
-  ctx._source.entity_identity_key = params.entity_identity_key;
   ctx._source.observations = params.observations;
   ctx._source.title = params.title;
   ctx._source.byline = params.byline;
   ctx._source.description = params.description;
   ctx._source.tags = params.tags;
   ctx._source.chat_recommendations = params.chat_recommendations;
-  ctx._source.entities = params.entities;
+  ctx._source.entity = params.entity;
   ctx._source.priority = params.priority;
   ctx._source.staleness = params.staleness;
   ctx._source.content_hash = params.content_hash;
@@ -367,7 +362,6 @@ export const createLeadDataClient = ({
         index: indexName,
         ids: uniqueKeys,
         _source: [
-          'entity_identity_key',
           'version',
           'status',
           'observations.module_id',
@@ -385,7 +379,6 @@ export const createLeadDataClient = ({
               type: obs.type,
               severity: obs.severity as LeadSignal['severity'],
             })),
-            entityIdentityKey: doc._source.entity_identity_key ?? doc._id,
             version: doc._source.version ?? 1,
             status: LeadStatusEnum.safeParse(doc._source.status).data ?? 'active',
           });
@@ -418,10 +411,10 @@ export const createLeadDataClient = ({
       return [];
     }
 
-    const matchingLeads = await findMatchingLeads(candidates.map((c) => c.entityIdentityKey));
+    const matchingLeads = await findMatchingLeads(candidates.map((c) => c.leadId));
 
     return candidates.map((candidate) => {
-      const matchingLead = matchingLeads.get(candidate.entityIdentityKey);
+      const matchingLead = matchingLeads.get(candidate.leadId);
       if (!matchingLead) {
         return { candidate, decision: { type: 'create' } };
       }
@@ -430,10 +423,7 @@ export const createLeadDataClient = ({
 
       if (matchingLead.status === 'dismissed') {
         if (observationsDelta !== 'escalated') {
-          logger.debug(
-            `[LeadGeneration] Lead previously dismissed for entity ` +
-              `${candidate.entityIdentityKey}`
-          );
+          logger.debug(`[LeadGeneration] Lead previously dismissed for entity ${candidate.leadId}`);
           return { candidate, decision: { type: 'skip' } };
         }
 

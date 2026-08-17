@@ -7,6 +7,7 @@
 
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 
 const mockListEntities = jest.fn();
 
@@ -47,7 +48,6 @@ jest.mock('./lead_data_client', () => ({
 }));
 
 import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
-import { computeEntityIdentityKey } from './lead_matching';
 import { runLeadGenerationPipeline } from './run_pipeline';
 
 describe('runLeadGenerationPipeline', () => {
@@ -114,7 +114,7 @@ describe('runLeadGenerationPipeline', () => {
           metadata: {},
         },
       ],
-      entityIdentityKey: 'entity-key-1',
+      leadId: 'entity-key-1',
       contentHash: 'hash-1',
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
@@ -165,7 +165,7 @@ describe('runLeadGenerationPipeline', () => {
       entity: mockEntity,
       priority: 5,
       observations: [],
-      entityIdentityKey: computeEntityIdentityKey({ entities: [mockEntity] }),
+      leadId: hashEuid(mockEntity.id),
       contentHash: 'hash-create',
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
@@ -176,7 +176,7 @@ describe('runLeadGenerationPipeline', () => {
       title: 'Test Lead',
       byline: '',
       description: '',
-      entities: [mockEntity],
+      entity: mockEntity,
       tags: [],
       priority: 5,
       chatRecommendations: [],
@@ -217,7 +217,7 @@ describe('runLeadGenerationPipeline', () => {
     );
     const persisted = mockPersistLeads.mock.calls[0][0].creates[0];
     expect(persisted).not.toHaveProperty('contentHash');
-    expect(persisted).not.toHaveProperty('entityIdentityKey');
+    expect(persisted).not.toHaveProperty('leadId');
     expect(persisted).not.toHaveProperty('status');
     expect(persisted).not.toHaveProperty('version');
     expect(persisted).not.toHaveProperty('createdAt');
@@ -241,7 +241,7 @@ describe('runLeadGenerationPipeline', () => {
       entity: mockEntity,
       priority: 8,
       observations: [],
-      entityIdentityKey: computeEntityIdentityKey({ entities: [mockEntity] }),
+      leadId: hashEuid(mockEntity.id),
       contentHash: 'hash-new',
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
@@ -257,7 +257,7 @@ describe('runLeadGenerationPipeline', () => {
         title: 'Updated',
         byline: '',
         description: '',
-        entities: [mockEntity],
+        entity: mockEntity,
         tags: [],
         priority: 8,
         chatRecommendations: [],
@@ -307,7 +307,7 @@ describe('runLeadGenerationPipeline', () => {
       entity: mockEntity,
       priority: 3,
       observations: [],
-      entityIdentityKey: 'entity-key-d',
+      leadId: 'entity-key-d',
       contentHash: 'hash-d',
     };
     mockPrepareLeadCandidates.mockResolvedValueOnce([candidate]);
@@ -348,17 +348,17 @@ describe('runLeadGenerationPipeline', () => {
       entity: mockEntity,
       priority: 5,
       observations: [],
-      entityIdentityKey: computeEntityIdentityKey({ entities: [mockEntity] }),
+      leadId: hashEuid(mockEntity.id),
       contentHash: 'hash-create',
     };
     const skipCandidate = {
       ...createCandidate,
-      entityIdentityKey: 'entity-key-skip',
+      leadId: 'entity-key-skip',
       contentHash: 'hash-skip',
     };
     const resurfaceCandidate = {
       ...createCandidate,
-      entityIdentityKey: 'entity-key-resurface',
+      leadId: 'entity-key-resurface',
       contentHash: 'hash-resurface',
     };
 
@@ -381,7 +381,7 @@ describe('runLeadGenerationPipeline', () => {
         title: 'Test Lead',
         byline: '',
         description: '',
-        entities: [mockEntity],
+        entity: mockEntity,
         tags: [],
         priority: 5,
         chatRecommendations: [],

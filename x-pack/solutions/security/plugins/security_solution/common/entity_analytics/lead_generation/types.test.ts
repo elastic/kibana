@@ -46,11 +46,17 @@ describe('Lead generation Zod schemas', () => {
 
   describe('leadEntitySchema', () => {
     it('accepts a valid entity reference', () => {
-      expect(() => leadEntitySchema.parse({ type: 'user', name: 'alice' })).not.toThrow();
+      expect(() =>
+        leadEntitySchema.parse({ type: 'user', name: 'alice', id: 'user:alice' })
+      ).not.toThrow();
     });
 
     it('rejects missing name', () => {
-      expect(() => leadEntitySchema.parse({ type: 'user' })).toThrow();
+      expect(() => leadEntitySchema.parse({ type: 'user', id: 'user:alice' })).toThrow();
+    });
+
+    it('rejects missing id', () => {
+      expect(() => leadEntitySchema.parse({ type: 'user', name: 'alice' })).toThrow();
     });
   });
 
@@ -60,7 +66,7 @@ describe('Lead generation Zod schemas', () => {
       title: 'Suspicious lateral movement',
       byline: 'User alice with risk score 90',
       description: 'Detailed investigation guide here',
-      entities: [{ type: 'user', name: 'alice' }],
+      entity: { type: 'user', name: 'alice', id: 'user:alice' },
       tags: ['lateral_movement'],
       priority: 8,
       chatRecommendations: ['Investigate recent logins'],

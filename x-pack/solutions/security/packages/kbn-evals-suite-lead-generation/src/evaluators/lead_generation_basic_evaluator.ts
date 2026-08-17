@@ -20,7 +20,8 @@ const isValidLead = (lead: unknown): lead is Lead => {
     l.title.length > 0 &&
     typeof l.byline === 'string' &&
     typeof l.description === 'string' &&
-    Array.isArray(l.entities) &&
+    typeof l.entity === 'object' &&
+    l.entity !== null &&
     typeof l.priority === 'number' &&
     l.priority >= 1 &&
     l.priority <= 10 &&

@@ -7,11 +7,9 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Client } from '@elastic/elasticsearch';
+import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation/constants';
-import {
-  computeContentHash,
-  computeEntityIdentityKey,
-} from '../../../../../server/lib/entity_analytics/lead_generation/lead_matching';
+import { computeContentHash } from '../../../../../server/lib/entity_analytics/lead_generation/lead_matching';
 
 export const DEFAULT_SPACE_ID = 'default';
 
@@ -24,7 +22,7 @@ interface EsLeadDoc {
   title: string;
   byline: string;
   description: string;
-  entities: Array<{ type: string; name: string; id?: string }>;
+  entity: { type: string; name: string; id: string };
   tags: string[];
   priority: number;
   chat_recommendations: string[];
@@ -47,7 +45,6 @@ interface EsLeadDoc {
   changed_at: string;
   version: number;
   content_hash: string;
-  entity_identity_key: string;
 }
 
 export interface SeedLeadOptions {
@@ -58,8 +55,9 @@ export interface SeedLeadOptions {
   readonly changedAt?: string;
   readonly sourceType?: 'adhoc' | 'scheduled';
   /**
-   * Distinct entity name. Lead `_id` is the entity identity key, so seeding
-   * more than one lead in the same test requires a unique `entityName` per call.
+   * Distinct entity name. Lead `_id` is derived from the entity's EUID, so
+   * seeding more than one lead in the same test requires a unique
+   * `entityName` per call.
    */
   readonly entityName?: string;
 }
@@ -68,8 +66,8 @@ export interface SeedLeadOptions {
  * Seeds a minimal but fully valid lead document directly into the leads index,
  * bypassing the `POST /generate` route and its LLM dependency entirely.
  *
- * Document `_id` and `id` are the entity identity key, matching production writes.
- * Returns that `id` so callers can reference it in API calls.
+ * Document `_id` and `id` are the hash of the entity's EUID, matching
+ * production writes. Returns that `id` so callers can reference it in API calls.
  */
 export const seedLead = async (
   esClient: Client,
@@ -87,7 +85,7 @@ export const seedLead = async (
 
   const executionUuid = uuidv4();
   const entityId = `user:${entityName}`;
-  const entities = [{ type: 'user', id: entityId, name: entityName }];
+  const entity = { type: 'user', id: entityId, name: entityName };
   const observations = [
     {
       entityId,
@@ -101,8 +99,7 @@ export const seedLead = async (
     },
   ];
   const contentHash = computeContentHash({ observations });
-  const entityIdentityKey = computeEntityIdentityKey({ entities });
-  const id = entityIdentityKey;
+  const id = hashEuid(entityId);
 
   const doc: EsLeadDoc = {
     id,
@@ -110,7 +107,7 @@ export const seedLead = async (
     byline: `User ${entityName} shows multiple high-severity signals`,
     description:
       'Risk score escalated significantly over the past 24 hours with concurrent high-severity alerts.',
-    entities,
+    entity,
     tags: ['risk_escalation', 'high_severity_alerts'],
     priority,
     chat_recommendations: [
@@ -136,7 +133,6 @@ export const seedLead = async (
     changed_at: changedAt,
     version: 1,
     content_hash: contentHash,
-    entity_identity_key: entityIdentityKey,
   };
 
   const index = getLeadsIndexName(spaceId);
