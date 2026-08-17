@@ -1939,10 +1939,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@104.0.0-amsterdam.1":
-  version "104.0.0-amsterdam.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.1.tgz#3a731f92afa67c6e7c88f2059ea8740243ff7fbd"
-  integrity sha512-HPDffYvt8reHwXNzORGix/bBJ1aNSHvYKxBaEni0cz1O4oQupdY6A9U2wu571f7O0F4qZdZ+CyfqEtimcDXkjQ==
+"@elastic/eui@104.0.0-amsterdam.2":
+  version "104.0.0-amsterdam.2"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-104.0.0-amsterdam.2.tgz#405ac2034651e95f350becfe0b17b1c92c4367e1"
+  integrity sha512-Lo29yuzJtV8q7TrG2PHE5we/kDwo2S2TCkAVP/L4A52ynDfpFUMnrk79lML+GvMylKKX44CdV7LL2KBANOIg+g==
   dependencies:
     "@elastic/eui-theme-common" "2.0.0"
     "@elastic/prismjs-esql" "^1.1.0"
@@ -1977,7 +1977,7 @@
     unified "^9.2.2"
     unist-util-visit "^2.0.3"
     url-parse "^1.5.10"
-    uuid "^8.3.0"
+    uuid "^14.0.0"
     vfile "^4.2.1"
 
 "@elastic/filesaver@1.1.2":
@@ -30619,7 +30619,7 @@ uuid@^3.3.3:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
-uuid@^8.3.0, uuid@^8.3.2:
+uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
