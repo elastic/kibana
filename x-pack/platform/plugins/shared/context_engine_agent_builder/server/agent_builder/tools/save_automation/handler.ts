@@ -16,6 +16,7 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import { parseYamlToJSONWithoutValidation } from '@kbn/workflows-yaml';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
   AI_INDEX_ATTACHMENT_TYPE,
@@ -52,17 +53,13 @@ const isWorkflowYamlData = (data: unknown): data is WorkflowYamlAttachmentData =
 };
 
 export const parseWorkflowNameFromYaml = (yaml: string): string | undefined => {
-  const match = /^name:\s*(.+)$/m.exec(yaml);
-  if (!match) {
+  const parsed = parseYamlToJSONWithoutValidation(yaml);
+  if (!parsed.success || parsed.json == null || typeof parsed.json !== 'object') {
     return undefined;
   }
 
-  const raw = match[1].trim();
-  if ((raw.startsWith('"') && raw.endsWith('"')) || (raw.startsWith("'") && raw.endsWith("'"))) {
-    return raw.slice(1, -1);
-  }
-
-  return raw;
+  const name = (parsed.json as Record<string, unknown>).name;
+  return typeof name === 'string' && name.trim() !== '' ? name : undefined;
 };
 
 export const tryResolveWorkflowDisplayNameFromAttachments = (

@@ -87,8 +87,14 @@ describe('resolveAiIndexIdFromAttachments', () => {
 });
 
 describe('save automation confirmation labels', () => {
-  it('parses workflow names from yaml', () => {
+  it('parses workflow names from yaml via the workflows yaml parser', () => {
     expect(parseWorkflowNameFromYaml('name: "Pilot Workflow"\nsteps: []')).toBe('Pilot Workflow');
+    expect(parseWorkflowNameFromYaml('name: "My \\"escaped\\" value"\nsteps: []')).toBe(
+      'My "escaped" value'
+    );
+    expect(parseWorkflowNameFromYaml('name: |\n  A multiline\n  name\nsteps: []')).toBe(
+      'A multiline\nname\n'
+    );
   });
 
   it('resolves workflow display names from attachments', () => {
