@@ -109,9 +109,7 @@ export const EditTransformFlyout: FC<EditAction> = ({
                 </>
               }
             >
-              <EditTransformFlyoutForm
-                onOpenProjectScope={setProjectScopeProjects}
-              />
+              <EditTransformFlyoutForm onOpenProjectScope={setProjectScopeProjects} />
               <EditTransformApiErrorCallout />
             </EuiFlyoutBody>
             <EuiFlyoutFooter>

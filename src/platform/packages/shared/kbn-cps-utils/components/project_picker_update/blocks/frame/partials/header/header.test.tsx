@@ -105,5 +105,4 @@ describe('ProjectPickerFrameHeader', () => {
     expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
     expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
   });
-
 });

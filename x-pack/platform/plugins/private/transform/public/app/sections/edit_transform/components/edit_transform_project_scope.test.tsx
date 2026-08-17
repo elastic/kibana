@@ -146,9 +146,9 @@ describe('EditTransformProjectScope', () => {
       );
     });
 
-    expect(appDependencies.useAppDependencies().cps?.cpsManager?.fetchProjects).toHaveBeenCalledWith(
-      '_type:security'
-    );
+    expect(
+      appDependencies.useAppDependencies().cps?.cpsManager?.fetchProjects
+    ).toHaveBeenCalledWith('_type:security');
   });
 
   it('counts projects from route-scoped fetches for named routing', async () => {
@@ -160,8 +160,8 @@ describe('EditTransformProjectScope', () => {
       );
     });
 
-    expect(appDependencies.useAppDependencies().cps?.cpsManager?.fetchProjects).toHaveBeenCalledWith(
-      '@security-projects'
-    );
+    expect(
+      appDependencies.useAppDependencies().cps?.cpsManager?.fetchProjects
+    ).toHaveBeenCalledWith('@security-projects');
   });
 });

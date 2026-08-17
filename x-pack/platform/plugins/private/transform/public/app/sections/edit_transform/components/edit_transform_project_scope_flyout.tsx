@@ -40,8 +40,9 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
   const { value } = useFormField('projectRouting');
   const { setFormField } = useEditTransformFlyoutActions();
   const persistedProjectRouting = (value || PROJECT_ROUTING.ORIGIN) as NonNullable<ProjectRouting>;
-  const [stagedProjectRouting, setStagedProjectRouting] =
-    useState<NonNullable<ProjectRouting> | undefined>();
+  const [stagedProjectRouting, setStagedProjectRouting] = useState<
+    NonNullable<ProjectRouting> | undefined
+  >();
   const draftProjectRouting = stagedProjectRouting ?? persistedProjectRouting;
   const [pickerResetCounter, setPickerResetCounter] = useState(0);
   const availableProjects = useMemo(
