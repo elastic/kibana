@@ -21,7 +21,7 @@ const getVaultAddr = (): string => process.env.VAULT_ADDR || DEFAULT_VAULT_ADDR;
  * Vault-backed config used by @kbn/evals CI and local development.
  *
  * This is intentionally minimal: we store OpenRouter credentials (preferred) and
- * optionally legacy LiteLLM fields for backward compatibility, plus credentials
+ * legacy LiteLLM fields for backward compatibility, plus credentials
  * for the centralized Elasticsearch cluster where eval results are exported.
  */
 
@@ -56,43 +56,39 @@ const configSchema = schema.object(
     creation_date: schema.maybe(schema.string()),
     refresh_interval: schema.maybe(schema.string()),
 
-    openrouter: schema.maybe(
-      schema.object(
-        {
-          baseUrl: schema.string({ minLength: 1 }),
-          /**
-           * OpenRouter API key used for non-EIS models.
-           */
-          apiKey: schema.string({ minLength: 1 }),
-        },
-        { unknowns: 'allow' }
-      )
+    openrouter: schema.object(
+      {
+        baseUrl: schema.string({ minLength: 1 }),
+        /**
+         * OpenRouter API key used for non-EIS models.
+         */
+        apiKey: schema.string({ minLength: 1 }),
+      },
+      { unknowns: 'allow' }
     ),
 
     /**
-     * Legacy LiteLLM credentials. Optional for backward compatibility.
+     * Legacy LiteLLM credentials for backward compatibility.
      */
-    litellm: schema.maybe(
-      schema.object(
-        {
-          baseUrl: schema.string({ minLength: 1 }),
-          /**
-           * LiteLLM *virtual key* (sk-...) used to call the proxy (and to query team metadata).
-           * This should not be the proxy master key.
-           */
-          virtualKey: schema.string({ minLength: 1 }),
-          /**
-           * Optional team id used by CI to discover models for connector generation.
-           * If omitted, CI may use a baked-in default.
-           */
-          teamId: schema.maybe(schema.string({ minLength: 1 })),
-          /**
-           * Optional, human-readable team name (not used for auth).
-           */
-          teamName: schema.maybe(schema.string({ minLength: 1 })),
-        },
-        { unknowns: 'allow' }
-      )
+    litellm: schema.object(
+      {
+        baseUrl: schema.string({ minLength: 1 }),
+        /**
+         * LiteLLM *virtual key* (sk-...) used to call the proxy (and to query team metadata).
+         * This should not be the proxy master key.
+         */
+        virtualKey: schema.string({ minLength: 1 }),
+        /**
+         * Optional team id used by CI to discover models for connector generation.
+         * If omitted, CI may use a baked-in default.
+         */
+        teamId: schema.maybe(schema.string({ minLength: 1 })),
+        /**
+         * Optional, human-readable team name (not used for auth).
+         */
+        teamName: schema.maybe(schema.string({ minLength: 1 })),
+      },
+      { unknowns: 'allow' }
     ),
 
     /**
