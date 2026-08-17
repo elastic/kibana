@@ -8,18 +8,17 @@ This page explains how logging works in Scout: the `log` fixture used inside tes
 
 ## The `log` fixture [scout-logging-fixture]
 
-Scout exposes a worker-scoped `log` fixture backed by `ScoutLogger`, a thin wrapper around `@kbn/tooling-log`'s `ToolingLog`. Each worker gets its own logger instance tagged with a context string, and messages are written to stdout.
+Scout exposes a worker-scoped `log` fixture backed by `ScoutLogger`, a thin wrapper around `@kbn/tooling-log`'s `ToolingLog`. Each worker gets its own logger instance tagged with a context string, and messages are written to stdout. This is logging for the **test process itself** — separate from the server-side logs of the systems under test (Kibana, Elasticsearch, and so on), covered later on this page.
 
 Use it inside a test or fixture like any other fixture:
 
 ```ts
 test('does the thing', async ({ log }) => {
-  log.info('starting the thing');
   log.debug('detailed state: %o', someState);
 });
 ```
 
-Standard levels are available: `error`, `warning`, `success`, `info`, `debug`, and `verbose`.
+Standard levels are available: `error`, `warning`, `success`, `info`, `debug`, and `verbose`. Prefer `debug` for ad hoc diagnostic logging in your test — avoid adding `info`-level logs too liberally, since `info` is the default level and prints on every run.
 
 Scout's own services and fixtures log their setup at the `debug` level (for example, `[serviceName] loaded`), so if you want to see fixture wiring and lifecycle messages, run with `debug` (see below).
 
@@ -47,13 +46,19 @@ SCOUT_LOG_LEVEL=debug node scripts/scout run-tests \
 
 See also [Debug Scout test runs](./debugging.md) for other debugging tips.
 
+## Server logs (Kibana, Elasticsearch) [scout-logging-servers]
+
+When Scout starts a local Kibana/Elasticsearch stack (for example via `node scripts/scout start-server`), server logs print directly to that same console by default. To capture them to files instead, pass `--logToFile`, which writes `kibana.log` and `es-cluster-<name>.log` under a generated directory in `data/ftr_servers_logs/`.
+
+This only applies to servers Scout manages directly (local runs). It doesn't apply when running against Cloud (ECH) or MKI serverless projects — see the next section for how to find server logs in that case.
+
 ## Inspecting serverless project logs in MKI [scout-logging-mki]
 
 ::::{note}
 This section is for Elasticians only, and applies when your Scout tests run against a serverless project in MKI rather than a local stack.
 ::::
 
-When a Scout test runs against a serverless project in MKI, the project's own server-side logs aren't printed to your local console — they're shipped to Elastic's internal **Overview cluster**.
+When a Scout test runs against a serverless project in MKI, the project's own server-side logs aren't printed to your local console and Scout doesn't manage the servers directly — they're shipped to Elastic's internal **Overview cluster**.
 
 **Access**: the Overview cluster is a separate organization from your personal QA cloud account, so you likely won't see the relevant data by default. Request readonly access to it (for example, via an internal access-request tool) before you can query it.
 
