@@ -122,7 +122,7 @@ export class QueryService implements QueryServiceContract {
           filter,
           params,
         },
-        { signal: context.signal }
+        { signal: abortSignal, ...(maxResponseSize !== undefined ? { maxResponseSize } : {}) }
       );
 
       context.throwIfAborted();
@@ -161,6 +161,7 @@ export class QueryService implements QueryServiceContract {
     filter,
     params,
     abortSignal,
+    maxResponseSize,
   }: ExecuteQueryParams): AsyncIterable<T[]> {
     const context = createExecutionContext(abortSignal ?? new AbortController().signal);
 
