@@ -531,26 +531,32 @@ const InstallContentCard: React.FunctionComponent<{
                   </EuiFlexItem>
                 </EuiFlexGroup>
               }
-              extraAction={
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id={`awsOnboardingSelectAllContent-${type}`}
-                      checked={groupSelectedCount === items.length && items.length > 0}
-                      indeterminate={groupSelectedCount > 0 && groupSelectedCount < items.length}
-                      onChange={(e) => setGroupSelected(items, e.target.checked)}
-                      aria-label={`Select all ${TYPE_GROUP_LABELS[type]}`}
-                      data-test-subj={`awsOnboardingSelectAllContent-${type}`}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiText size="xs" color="subdued">
-                      {`${groupInstalled} of ${items.length} installed`}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
             >
+              <EuiSpacer size="s" />
+              {/* Toolbar row for this group — "select all" gets a real
+                  visible label instead of living as a bare, unlabeled
+                  checkbox off to the side, and sits alongside the
+                  installed count rather than competing with the
+                  accordion's own title row. */}
+              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiCheckbox
+                    id={`awsOnboardingSelectAllContent-${type}`}
+                    label="Select all"
+                    checked={groupSelectedCount === items.length && items.length > 0}
+                    indeterminate={groupSelectedCount > 0 && groupSelectedCount < items.length}
+                    onChange={(e) => setGroupSelected(items, e.target.checked)}
+                    data-test-subj={`awsOnboardingSelectAllContent-${type}`}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {`${groupInstalled} of ${items.length} installed`}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="s" />
+              <EuiHorizontalRule margin="none" />
               <EuiSpacer size="s" />
               {items.map((item, i) => (
                 <React.Fragment key={item.id}>

@@ -15,6 +15,8 @@ import {
   EuiCheckableCard,
   EuiEmptyPrompt,
   EuiFieldSearch,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -378,19 +380,21 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
             </EuiFlexItem>
             {/* Secondary to the step title, but a real clickable control —
                 not just quiet text — so it's actually discoverable. Most
-                users still won't need to touch it. */}
+                users still won't need to touch it. Styled like the
+                EuiSuperDatePicker's quick-select trigger (bordered,
+                icon + label) rather than a plain button with an edit
+                pencil, which isn't an EUI convention. */}
             <EuiFlexItem grow={false}>
               <EuiToolTip content="Determines which package variant installs for each service.">
-                <EuiButtonEmpty
-                  size="s"
-                  color="text"
-                  iconType="pencil"
-                  iconSide="right"
-                  onClick={openSchemaModal}
-                  data-test-subj="awsOnboardingEditSchema"
-                >
-                  {`Data format: ${AWS_SCHEMA_META[schema].label}`}
-                </EuiButtonEmpty>
+                <EuiFilterGroup>
+                  <EuiFilterButton
+                    iconType="controlsHorizontal"
+                    onClick={openSchemaModal}
+                    data-test-subj="awsOnboardingEditSchema"
+                  >
+                    {`Data format: ${AWS_SCHEMA_META[schema].label}`}
+                  </EuiFilterButton>
+                </EuiFilterGroup>
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -406,6 +410,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
             <EuiFlexItem>
               <EuiFieldSearch
                 fullWidth
+                compressed
                 placeholder="Search services"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -414,13 +419,13 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/* Default ("m") button size, to match EuiFieldSearch's height
-                  — "compressed" made this row look uneven next to it. */}
+              {/* Both compressed, so the row's height is even end to end. */}
               <EuiButtonGroup
                 legend="Filter services by data type"
                 options={DATA_TYPE_OPTIONS}
                 idSelected={dataTypeFilter}
                 onChange={(id) => setDataTypeFilter(id as DataTypeFilterId)}
+                buttonSize="compressed"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
