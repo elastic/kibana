@@ -7,7 +7,11 @@
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { AgentBuilderAccessChecker } from './access/access';
-import type { AgentBuilderStartDependencies, OpenConversationSidebarReturn } from '../types';
+import type {
+  AgentBuilderStartDependencies,
+  OpenConversationMetadataOptions,
+  OpenConversationSidebarReturn,
+} from '../types';
 import type { OpenSidebarInternalOptions } from '../sidebar/types';
 import type { AgentService } from './agents';
 import type { AttachmentsService } from './attachments';
@@ -43,4 +47,5 @@ export interface AgentBuilderInternalService {
   isEarsEnabled: boolean;
   isEarsExperimentalEnabled: boolean;
   openSidebarConversation: (options?: OpenSidebarInternalOptions) => OpenConversationSidebarReturn;
+  openConversationMetadata: (options: OpenConversationMetadataOptions) => Promise<() => void>;
 }

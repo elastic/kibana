@@ -145,6 +145,14 @@ export interface OpenConversationSidebarOptions extends EmbeddableConversationPr
 }
 
 /**
+ * Options passed when opening the conversation metadata flyout.
+ */
+export interface OpenConversationMetadataOptions {
+  conversationId: string;
+  onClose?: () => void;
+}
+
+/**
  * Handle to control a conversation sidebar programmatically.
  */
 export interface ConversationSidebarRef {
@@ -284,4 +292,5 @@ export interface AgentBuilderPluginStart {
   EmbeddableConversationInput: ComponentType<
     PublicEmbeddableConversationInputProps & RefAttributes<EmbeddableConversationInputRef>
   >;
+  openConversationMetadata: (options: OpenConversationMetadataOptions) => Promise<() => void>;
 }

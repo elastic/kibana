@@ -37,12 +37,7 @@ export const ChatInfoButton: React.FC = () => {
       >
         {labels.chatInfo}
       </EuiButtonEmpty>
-      {isFlyoutOpen && (
-        <ConversationMetadataFlyout
-          conversationId={conversationId}
-          onClose={() => setIsFlyoutOpen(false)}
-        />
-      )}
+      {isFlyoutOpen && <ConversationMetadataFlyout onClose={() => setIsFlyoutOpen(false)} />}
     </>
   );
 };

@@ -54,6 +54,7 @@ import type {
   AgentBuilderSetupDependencies,
   AgentBuilderStartDependencies,
   ConversationSidebarRef,
+  OpenConversationMetadataOptions,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
 import type {
@@ -67,6 +68,7 @@ import {
   setSidebarRuntimeContext,
   clearSidebarRuntimeContext,
 } from './sidebar';
+import { openConversationMetadataFlyout } from './flyout/open_conversation_metadata_flyout';
 import { storageKeys } from './application/storage_keys';
 import { AGENTBUILDER_APP_ID } from '../common/features';
 
@@ -221,6 +223,13 @@ export class AgentBuilderPlugin
       return { chatRef: sidebarRef };
     };
 
+    const handleOpenConversationMetadata = ({
+      conversationId,
+      onClose,
+    }: OpenConversationMetadataOptions): Promise<() => void> => {
+      return openConversationMetadataFlyout(core, conversationsService, conversationId, onClose);
+    };
+
     const internalServices: AgentBuilderInternalService = {
       agentService,
       attachmentsService,
@@ -243,6 +252,7 @@ export class AgentBuilderPlugin
       openSidebarConversation: (options?: OpenSidebarInternalOptions) => {
         return openSidebarInternal(options);
       },
+      openConversationMetadata: handleOpenConversationMetadata,
     };
 
     this.internalServices = internalServices;
@@ -359,6 +369,7 @@ export class AgentBuilderPlugin
       },
       EmbeddableConversation: PublicEmbeddableConversation,
       EmbeddableConversationInput: PublicEmbeddableConversationInput,
+      openConversationMetadata: handleOpenConversationMetadata,
     };
 
     if (hasAgentBuilder) {
