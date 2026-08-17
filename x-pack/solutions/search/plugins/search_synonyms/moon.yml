@@ -39,6 +39,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/share-plugin'
   - '@kbn/react-query'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod
