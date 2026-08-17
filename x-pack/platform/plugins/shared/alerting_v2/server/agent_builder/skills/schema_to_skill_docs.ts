@@ -10,17 +10,93 @@ import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
   alertEventSeveritySchema,
+  alertEpisodeStatusSchema,
+  ruleKindSchema,
+  recoveryStrategySchema,
+  recoveryStrategy,
+  noDataStrategySchema,
+  groupingModeSchema,
+  throttleStrategySchema,
+  PER_EPISODE_STRATEGIES,
+  AGGREGATE_STRATEGIES,
+  STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
 import {
   ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID,
   builtinWorkflowInputDefinitions,
 } from '@kbn/workflows';
-import { ruleOperationSchema } from '../tools/manage_rule/operations';
+import {
+  ruleOperationSchema,
+  setStateTransitionOperationSchema,
+} from '../tools/manage_rule/operations';
 import { actionPolicyOperationSchema } from '../tools/manage_action_policy/operations';
+
+type JsonSchemaNode = Record<string, unknown>;
+
+interface FieldInfo {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string;
+  constraints: string;
+}
+
+export interface DescribedEnumValue {
+  value: string;
+  description: string;
+}
 
 const LARGE_ENUM_THRESHOLD = 20;
 
-type JsonSchemaNode = Record<string, unknown>;
+export class SchemaTranslationError extends Error {
+  constructor(message: string, public readonly cause?: unknown) {
+    super(message);
+    this.name = 'SchemaTranslationError';
+  }
+}
+
+const throwIfNotZodUnion = (schema: z.ZodType, schemaName: string): z.ZodUnion => {
+  if (!(schema instanceof z.ZodUnion)) {
+    throw new SchemaTranslationError(
+      `${schemaName} is not a union of described literals. Use z.union of z.literal(...).describe(...) on each value.`
+    );
+  }
+  return schema;
+};
+
+const throwIfMissingDescribes = (missing: string[], subject: string, detail?: string): void => {
+  if (missing.length === 0) {
+    return;
+  }
+  const suffix = detail ? ` ${detail}` : '';
+  throw new SchemaTranslationError(
+    `Missing .describe() on ${subject}: ${missing.join(', ')}.${suffix}`
+  );
+};
+
+const throwIfMissingOperationDescribes = (
+  variants: JsonSchemaNode[] | undefined,
+  title: string
+): void => {
+  const missing = (variants ?? [])
+    .filter(
+      (variant) =>
+        typeof variant.description !== 'string' || variant.description.trim().length === 0
+    )
+    .map((variant) => {
+      const operation = (variant.properties as JsonSchemaNode | undefined)?.operation as
+        | JsonSchemaNode
+        | undefined;
+      const value = operation?.const ?? (operation?.enum as string[] | undefined)?.[0];
+      return typeof value === 'string' ? value : '(unnamed variant)';
+    });
+
+  throwIfMissingDescribes(
+    missing,
+    'operation variant(s)',
+    `Add a top-level .describe() explaining the user goal to each listed variant (${title}).`
+  );
+};
 
 /**
  * Replaces large enum arrays with a compact description to keep token counts
@@ -52,29 +128,17 @@ function compactLargeEnums(node: unknown): unknown {
   return result;
 }
 
-export class SchemaTranslationError extends Error {
-  constructor(message: string, public readonly cause?: unknown) {
-    super(message);
-    this.name = 'SchemaTranslationError';
-  }
-}
-
 function zodToJsonSchema(schema: z.ZodType): unknown {
   try {
     const jsonSchema = z.toJSONSchema(schema, { target: 'draft-7', unrepresentable: 'any' });
     return compactLargeEnums(jsonSchema);
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    throw new SchemaTranslationError(`Failed to convert Zod schema to JSON Schema: ${message}`, e);
+    throw new SchemaTranslationError(
+      `Failed to convert Zod schema to JSON Schema: ${message}. Check the Zod schema passed to skill-doc generation.`,
+      e
+    );
   }
-}
-
-interface FieldInfo {
-  name: string;
-  type: string;
-  required: boolean;
-  description: string;
-  constraints: string;
 }
 
 /** Builds the parenthetical constraint text for a field-table Description cell. */
@@ -116,7 +180,11 @@ function resolveType(prop: JsonSchemaNode): string {
     return (prop.anyOf as JsonSchemaNode[]).map(resolveType).join(' | ');
   }
   if (prop.oneOf !== undefined && Array.isArray(prop.oneOf)) {
-    return (prop.oneOf as JsonSchemaNode[])
+    const variants = prop.oneOf as JsonSchemaNode[];
+    if (variants.every((variant) => variant.const !== undefined)) {
+      return variants.map(resolveType).join(' | ');
+    }
+    return variants
       .map((variant) => {
         const disc = variant.properties as JsonSchemaNode | undefined;
         if (disc) {
@@ -204,14 +272,15 @@ function formatVariantSchemas(jsonSchema: unknown): string {
 
     const fields = jsonSchemaToFieldTable(variant);
     if (fields.length > 0) {
-      sections.push(`#### ${label}\n\n${formatFieldTable(fields)}`);
+      const description =
+        typeof variant.description === 'string' && variant.description.trim().length > 0
+          ? `${variant.description}\n\n`
+          : '';
+      sections.push(`#### ${label}\n\n${description}${formatFieldTable(fields)}`);
     }
   }
   return sections.join('\n\n');
 }
-
-const DEFAULT_API_SCHEMA_SOURCE =
-  '`@kbn/alerting-v2-schemas`. This is the source of truth for field names, types, and constraints.';
 
 /**
  * Generates markdown for a create/update API Zod schema (top-level field table,
@@ -219,27 +288,17 @@ const DEFAULT_API_SCHEMA_SOURCE =
  */
 export const generateApiSchemaDoc = ({
   title,
-  source = DEFAULT_API_SCHEMA_SOURCE,
   schema,
   extraSections,
 }: {
   title: string;
-  source?: string;
   schema: z.ZodType;
   extraSections?: (jsonSchema: unknown) => Array<{ heading: string; content: string }> | undefined;
 }): string => {
   const jsonSchema = zodToJsonSchema(schema);
   const fieldTable = formatFieldTable(jsonSchemaToFieldTable(jsonSchema));
 
-  const sections = [
-    `# ${title}`,
-    '',
-    `Auto-generated from ${source}`,
-    '',
-    '## Top-Level Fields',
-    '',
-    fieldTable,
-  ];
+  const sections = [`# ${title}`, '', '## Top-Level Fields', '', fieldTable];
 
   for (const extra of extraSections?.(jsonSchema) ?? []) {
     if (extra.content) {
@@ -274,16 +333,18 @@ export const generateRuleSchemaDoc = (): string =>
  */
 export const generateOperationsDoc = ({
   title,
-  source,
   schema,
 }: {
   title: string;
-  source: string;
   schema: z.ZodType;
 }): string => {
-  const variants = formatVariantSchemas(zodToJsonSchema(schema));
+  const jsonSchema = zodToJsonSchema(schema) as JsonSchemaNode;
+  throwIfMissingOperationDescribes(
+    (jsonSchema.oneOf ?? jsonSchema.anyOf) as JsonSchemaNode[] | undefined,
+    title
+  );
 
-  return [`# ${title}`, '', `Auto-generated from ${source}.`, '', variants].join('\n');
+  return [`# ${title}`, '', formatVariantSchemas(jsonSchema)].join('\n');
 };
 
 /**
@@ -292,11 +353,281 @@ export const generateOperationsDoc = ({
 export const generateRuleOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Rule Operations Schema Reference',
-    source: 'the `manage_rule` tool Zod schemas',
     schema: ruleOperationSchema,
   });
 
 export const getSeverityValues = (): string[] => alertEventSeveritySchema.options;
+
+/**
+ * Reads per-value `.describe()` copy from a Zod union of literals.
+ * Throws if a value has no description. Callers catch this during skill
+ * registration and log rather than aborting Kibana start.
+ */
+export const getDescribedEnumValues = (
+  schema: z.ZodType,
+  schemaName: string
+): DescribedEnumValue[] => {
+  const union = throwIfNotZodUnion(schema, schemaName);
+
+  const missing: string[] = [];
+  const values: DescribedEnumValue[] = [];
+  for (const option of union.options) {
+    if (!(option instanceof z.ZodLiteral) || typeof option.value !== 'string') {
+      missing.push('(non-literal value)');
+      continue;
+    }
+    const description = option.description?.trim() ?? '';
+    if (!description) {
+      missing.push(option.value);
+      continue;
+    }
+    values.push({ value: option.value, description });
+  }
+
+  throwIfMissingDescribes(missing, `${schemaName} value(s)`);
+  return values;
+};
+
+export const getEpisodeStatusValues = (): string[] =>
+  getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema').map(
+    ({ value }) => value
+  );
+
+const getGroupingModeValues = (): string[] =>
+  getDescribedEnumValues(groupingModeSchema, 'groupingModeSchema').map(({ value }) => value);
+
+/** Returns the user-facing state transition field names from the operation schema (excludes internal operator fields and `operation`). */
+const getStateTransitionFields = (): string[] =>
+  Object.keys(setStateTransitionOperationSchema.shape).filter((k) => k !== 'operation');
+
+/**
+ * Builds a markdown table from a schema's described literal values.
+ */
+const generateEnumTable = ({
+  header,
+  schema,
+  schemaName,
+}: {
+  header: [string, string];
+  schema: z.ZodType;
+  schemaName: string;
+}): string => {
+  const rows = getDescribedEnumValues(schema, schemaName).map(
+    ({ value, description }) => `| \`${value}\` | ${escapeTableCell(description)} |`
+  );
+  return [`| ${header[0]} | ${header[1]} |`, '|---|---|', ...rows].join('\n');
+};
+
+/**
+ * Builds a markdown bullet list from a schema's described literal values.
+ */
+const generateEnumList = ({
+  schema,
+  schemaName,
+}: {
+  schema: z.ZodType;
+  schemaName: string;
+}): string =>
+  getDescribedEnumValues(schema, schemaName)
+    .map(({ value, description }) => `- \`${value}\`: ${description}`)
+    .join('\n');
+
+/** Formats enum values as an inline comma-separated backtick list. */
+export const formatEnumValuesList = (values: readonly string[]): string =>
+  values.map((v) => `\`${v}\``).join(', ');
+
+/** Formats a set of strategy values as an inline backtick list. */
+const formatStrategySet = (strategies: Set<string>): string =>
+  formatEnumValuesList([...strategies]);
+
+/**
+ * Generates the Throttle / Grouping Compatibility section with heading and
+ * strategy-set bullets, derived from the schema's strategy sets.
+ */
+export const generateThrottleGroupingCompatibilityDoc = (): string => {
+  const groupingModes = getGroupingModeValues();
+  const perEpisodeMode = groupingModes.find((m) => m === 'per_episode') ?? 'per_episode';
+  const aggregateModes = groupingModes.filter((m) => m !== perEpisodeMode);
+
+  const lines = [
+    '### Throttle / Grouping Compatibility',
+    '',
+    'The throttle strategy must be compatible with the grouping mode:',
+    `- For \`${perEpisodeMode}\`: ${formatStrategySet(PER_EPISODE_STRATEGIES)}.`,
+    `- For ${aggregateModes.map((m) => `\`${m}\``).join(' / ')}: ${formatStrategySet(
+      AGGREGATE_STRATEGIES
+    )}.`,
+    `- ${formatStrategySet(
+      STRATEGIES_REQUIRING_INTERVAL
+    )} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,
+  ];
+  return lines.join('\n');
+};
+
+/** Generates the Rule Kind section with heading, per-kind subsections, and immutability note. */
+export const generateRuleKindDoc = (): string => {
+  const kinds = getDescribedEnumValues(ruleKindSchema, 'ruleKindSchema');
+  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const transitionFields = formatEnumValuesList(getStateTransitionFields());
+
+  const kindSections = kinds.flatMap(({ value, description }, i) => {
+    const heading = `### ${value.charAt(0).toUpperCase()}${value.slice(1)} (\`kind: ${value}\`)`;
+    const lines = [heading, description];
+    if (value === 'alert') {
+      lines.push(`Episode statuses: ${episodeStatuses}.`);
+      lines.push(`State transition fields: ${transitionFields}.`);
+    }
+    return i > 0 ? ['', ...lines] : lines;
+  });
+
+  return [
+    '## Rule Kind: Alert vs Signal',
+    '',
+    'Rules declare a `kind` of `alert` or `signal`. This is the most important behavioral split in the system.',
+    '',
+    ...kindSections,
+    '',
+    '### Immutability',
+    '`kind` is **immutable on persisted rules** — it can only be set at creation time. The update API rejects changes to `kind`. For draft (in-memory) rules, `set_kind` can change it freely.',
+  ].join('\n');
+};
+
+/** Generates the State Transition section with heading, field list from schema, and constraints. */
+export const generateStateTransitionDoc = (): string => {
+  const fields = getStateTransitionFields();
+  const jsonSchema = zodToJsonSchema(setStateTransitionOperationSchema) as JsonSchemaNode;
+  const properties = (jsonSchema.properties ?? {}) as JsonSchemaNode;
+
+  const bullets = fields.map((f) => {
+    const prop = properties[f] as JsonSchemaNode | undefined;
+    const description = prop?.description as string | undefined;
+    if (!description) {
+      throw new SchemaTranslationError(
+        `Missing .describe() on set_state_transition field "${f}". Add .describe() to that field on setStateTransitionOperationSchema.`
+      );
+    }
+    return `- \`${f}\` — ${description}`;
+  });
+
+  return [
+    '## State Transition',
+    '',
+    'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.',
+    '',
+    ...bullets,
+    '',
+    'State transition is only allowed on `kind: alert` rules. Refer to the [rule-operations-schema reference](./references/rule-operations-schema.md) for the full field schema.',
+  ].join('\n');
+};
+
+/** Generates the Episode Lifecycle section with heading, prose, and status table. */
+export const generateEpisodeLifecycleDoc = (): string => {
+  const table = generateEnumTable({
+    header: ['Status', 'Meaning'],
+    schema: alertEpisodeStatusSchema,
+    schemaName: 'alertEpisodeStatusSchema',
+  });
+
+  return [
+    '## Episode Lifecycle',
+    '',
+    'Episodes are the unit of alert state. Each unique group (by `group_hash`) has its own episode. Each episode has a status that reflects where it is in the lifecycle:',
+    '',
+    table,
+    '',
+    'Only `kind: alert` rules produce episodes. `kind: signal` rules write raw signal events with no episode tracking.',
+  ].join('\n');
+};
+
+/** Generates the Alert Event Severity section with heading, valid values, and ES|QL patterns. */
+export const generateSeverityDoc = (): string => {
+  const values = formatEnumValuesList(getSeverityValues());
+
+  return [
+    '## Alert Event Severity',
+    '',
+    'Severity is a per-event property on alert events and episodes, not a rule-level field. It is extracted at execution time from a column named `severity` in the ES|QL breach query output.',
+    '',
+    `- **Valid values**: ${values} (case-insensitive).`,
+    '- If the breach query does not produce a `severity` column, alert events have no severity.',
+    '- Different groups can produce different severities in the same rule execution (the value comes from each row).',
+    '- Action policies can match on `severity` to route high-severity episodes differently (e.g. PagerDuty for critical, email for low).',
+    '',
+    '### Setting Severity in ES|QL',
+    '',
+    'Severity is set by adding a `severity` column to the breach query via `EVAL`:',
+    '',
+    '- **Literal severity** — all alerts from the rule share the same severity:',
+    '  `| EVAL severity = "critical"`',
+    '- **Conditional severity** — severity varies per group based on data:',
+    '  `| EVAL severity = CASE(cpu > 0.95, "critical", cpu > 0.8, "high", "medium")`',
+  ].join('\n');
+};
+
+/** Generates the No-Data Strategy section with heading, prose, and value table. */
+export const generateNoDataStrategyDoc = (): string => {
+  const table = generateEnumTable({
+    header: ['Value', 'Behaviour'],
+    schema: noDataStrategySchema,
+    schemaName: 'noDataStrategySchema',
+  });
+
+  return [
+    '## No-Data Strategy',
+    '',
+    '`no_data_strategy` is a **top-level rule field** that controls behaviour when no data is present.',
+    '',
+    table,
+    '',
+    "When setting `no_data_strategy` to anything other than `'none'`, add a `no_data` block to the standalone query:",
+    "`no_data: { query: 'FROM heartbeat-* | STATS count = COUNT(*) BY host.name | WHERE count >= 1' }`. For composed query format, the `base` query is used as the data query.",
+    '',
+    'Signal rules cannot set `no_data_strategy`.',
+    'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
+  ].join('\n');
+};
+
+/** Generates the Recovery Strategy section with heading, prose, and value list. */
+export const generateRecoveryStrategyDoc = (): string => {
+  const list = generateEnumList({
+    schema: recoveryStrategySchema,
+    schemaName: 'recoveryStrategySchema',
+  });
+
+  return [
+    '## Recovery Strategy',
+    '',
+    '`recovery_strategy` is a **top-level rule field** (not inside the query). It controls how episodes transition from active to recovering/inactive. Signal rules (`kind: signal`) cannot set `recovery_strategy`.',
+    '',
+    list,
+    '',
+    `When using \`recovery_strategy: '${recoveryStrategy.query}'\`, add a \`set_query\` operation that includes a \`recovery\` block alongside \`breach\`:`,
+    "- **Composed**: `recovery: { segment: 'WHERE cpu < 0.5' }`",
+    "- **Standalone**: `recovery: { query: 'FROM metrics-* | WHERE cpu < 0.5' }`",
+    '',
+    'Refer to the [rule-schema reference](./references/rule-schema.md) for allowed values and constraints.',
+  ].join('\n');
+};
+
+/** Generates the Grouping Modes section with heading and bullet list. */
+export const generateGroupingModesDoc = (): string => {
+  const list = generateEnumList({
+    schema: groupingModeSchema,
+    schemaName: 'groupingModeSchema',
+  });
+
+  return ['### Grouping Modes', list].join('\n');
+};
+
+/** Generates the Throttle Strategies section with heading and bullet list. */
+export const generateThrottleStrategiesDoc = (): string => {
+  const list = generateEnumList({
+    schema: throttleStrategySchema,
+    schemaName: 'throttleStrategySchema',
+  });
+
+  return ['### Throttle Strategies', list].join('\n');
+};
 
 /**
  * Generates concise markdown documentation from the create-action-policy Zod schema.
@@ -313,7 +644,6 @@ export const generateActionPolicySchemaDoc = (): string =>
 export const generateActionPolicyOperationsDoc = (): string =>
   generateOperationsDoc({
     title: 'Action Policy Operations Schema Reference',
-    source: 'the `manage_action_policy` tool Zod schemas',
     schema: actionPolicyOperationSchema,
   });
 
@@ -330,7 +660,7 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     builtinWorkflowInputDefinitions[ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID];
   if (!jsonSchema) {
     throw new SchemaTranslationError(
-      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}"`
+      `Missing built-in workflow input definition "${ALERTING_V2_NOTIFICATION_GROUP_INPUT_DEFINITION_ID}" required by generateActionPolicyWorkflowPayloadDoc.`
     );
   }
 
