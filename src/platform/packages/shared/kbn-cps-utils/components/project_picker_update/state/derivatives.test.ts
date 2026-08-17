@@ -10,6 +10,7 @@
 import type { CPSProject } from '../../../types';
 import type { FilterEntry, ProjectPickerState } from './reducers';
 import {
+  computeIsUsingSpaceDefaults,
   computeSelectedProjects,
   computeVisibleProjectIds,
   projectPickerDerivatives,
@@ -240,6 +241,50 @@ describe('computeVisibleProjectIds', () => {
   });
 });
 
+describe('computeIsUsingSpaceDefaults', () => {
+  const fourProjects = new Map(
+    ['p1', 'p2', 'p3', 'p4'].map((id) => [id, createProject({ _id: id })])
+  );
+
+  it('is true when a snapshot-shaped default resolves to the committed exclusions, regardless of order', () => {
+    expect(
+      computeIsUsingSpaceDefaults(
+        createState({
+          availableProjects: fourProjects,
+          defaultProjectRouting: '_id:p1 OR _id:p2',
+          excludedOverrides: ['p4', 'p3'],
+        })
+      )
+    ).toBe(true);
+  });
+
+  it('is false when the committed exclusions diverge from what the default resolves to', () => {
+    expect(
+      computeIsUsingSpaceDefaults(
+        createState({
+          availableProjects: fourProjects,
+          defaultProjectRouting: '_id:p1 OR _id:p2',
+          excludedOverrides: ['p3'],
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('is false when the committed filters diverge from the default filters', () => {
+    expect(
+      computeIsUsingSpaceDefaults(
+        createState({
+          availableProjects: fourProjects,
+          defaultProjectRouting: '_type:security',
+          filterExpressions: createFilterExpressions([
+            [{ operator: FilterOperator.EQUALS, tagName: '_type', tagValue: 'observability' }],
+          ]),
+        })
+      )
+    ).toBe(false);
+  });
+});
+
 describe('projectPickerDerivatives', () => {
   it('excludes _id from filteringDimensions', () => {
     const availableProjects = new Map([['p1', createProject({ _id: 'p1', _type: 'security' })]]);
@@ -303,6 +348,30 @@ describe('projectPickerDerivatives', () => {
     );
 
     expect(derivedState.isUsingSpaceDefaults).toBe(false);
+  });
+
+  it('computes isUsingSpaceDefaults as true under the snapshot strategy despite the re-encoded routing differing from the default string', () => {
+    const availableProjects = new Map([
+      ['p1', createProject({ _id: 'p1', _type: 'security' })],
+      ['p2', createProject({ _id: 'p2', _type: 'security' })],
+    ]);
+
+    const derivedState = applyStoreDerivatives(
+      createState({
+        availableProjects,
+        projectRoutingStrategy: 'snapshot',
+        defaultProjectRouting: '_type:security',
+        filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+        filteredProjectIds: ['p1', 'p2'],
+        excludedOverrides: [],
+      }),
+      [...projectPickerDerivatives]
+    );
+
+    // the snapshot encoder expands the selection into explicit _id clauses, so string
+    // equality with the default can never hold — the semantic comparison must
+    expect(derivedState.currentProjectRouting).toBe('_type:security AND (_id:p1 OR _id:p2)');
+    expect(derivedState.isUsingSpaceDefaults).toBe(true);
   });
 
   describe('displayedFilterExpressions / isFilterProposalPending', () => {

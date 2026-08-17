@@ -484,6 +484,58 @@ describe('ProjectPickerStateProvider', () => {
       });
     });
 
+    it('recovers after a snapshot-mode revert and reports the default routing verbatim', async () => {
+      const user = userEvent.setup();
+      const onStateChange = jest.fn();
+      let currentRouting: ProjectRouting = '_organisation:test-org';
+      const onProjectRoutingChange = jest.fn((routing: ProjectRouting) => {
+        currentRouting = routing;
+      });
+
+      render(
+        <ProjectPickerStateProvider
+          {...defaultProviderProps}
+          projectRoutingStrategy="snapshot"
+          defaultProjectRoutingGetter={() => '_organisation:test-org'}
+          currentProjectRoutingGetter={() => currentRouting}
+          onProjectRoutingChange={onProjectRoutingChange}
+        >
+          <ReadPickerState onChange={onStateChange} />
+          <ProjectPickerFrameHeader />
+          <ProjectPickerList />
+        </ProjectPickerStateProvider>
+      );
+
+      await waitFor(() => {
+        expect(onStateChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ isUsingSpaceDefaults: true })
+        );
+      });
+
+      await toggleProjectListItemSwitch(user, linkedProjectOne._id);
+
+      // the exclusion re-encodes to an explicit snapshot enumeration and leaves defaults
+      await waitFor(() => {
+        expect(onProjectRoutingChange).toHaveBeenLastCalledWith(
+          '_organisation:test-org AND (_id:origin OR _id:linked2)'
+        );
+      });
+      expect(onStateChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ isUsingSpaceDefaults: false })
+      );
+
+      await clickRevertToSpaceDefaults(user);
+
+      // reverting reports the default string verbatim — not the snapshot enumeration the
+      // encoder would produce — and the state registers as back on space defaults
+      await waitFor(() => {
+        expect(onProjectRoutingChange).toHaveBeenLastCalledWith('_organisation:test-org');
+      });
+      expect(onStateChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({ isUsingSpaceDefaults: true })
+      );
+    });
+
     it('becomes false when the user changes project exclusions', async () => {
       const user = userEvent.setup();
       const onStateChange = jest.fn();

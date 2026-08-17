@@ -12,6 +12,8 @@ import type { StoreDerivative } from './store';
 import type { FilterEntry, ProjectPickerState } from './reducers';
 import { type FilterExpressionValue } from '../utils/filter_input_codec';
 import { PROJECT_SELECTION_DIMENSION, projectRoutingCodec } from '../utils/project_routing_codec';
+import { createFilterExpressionsMap, parseDefaultProjectRouting } from '../utils';
+import { getEnabledFiltersIdentity } from '../utils/state_utils';
 
 export const hasActiveFilterExpressions = (
   filterExpressions: Map<string, FilterEntry>
@@ -70,6 +72,52 @@ export const computeIsFilterProposalPending = (
   state: Pick<ProjectPickerState, 'proposedFilters'>
 ): boolean => state.proposedFilters !== null;
 
+/**
+ * Whether the committed state is semantically equivalent to the space default routing.
+ *
+ * Compares the parsed default's filters and exclusions against the committed state rather
+ * than comparing routing strings: re-encoding is not string-stable — under the `snapshot`
+ * strategy the encoder always appends an explicit `_id:…` enumeration, and even `dynamic`
+ * defaults need not re-encode byte-for-byte (e.g. `'_alias:origin AND _id:*'` collapses to
+ * `'_alias:origin'`) — so string equality would report `false` forever after a revert.
+ */
+export const computeIsUsingSpaceDefaults = (
+  state: Pick<
+    ProjectPickerState,
+    | 'defaultProjectRouting'
+    | 'availableProjects'
+    | 'originProjectId'
+    | 'filterExpressions'
+    | 'excludedOverrides'
+  >
+): boolean => {
+  // A blank default means the space has no default routing configured, so there is nothing
+  // to be "using" (and nothing the revert action could restore).
+  if (!state.defaultProjectRouting?.trim()) {
+    return false;
+  }
+
+  const parsed = parseDefaultProjectRouting(
+    state.defaultProjectRouting,
+    Array.from(state.availableProjects.keys()),
+    state.originProjectId
+  );
+
+  const filtersMatch =
+    getEnabledFiltersIdentity(createFilterExpressionsMap(parsed.filterExpressions)) ===
+    getEnabledFiltersIdentity(state.filterExpressions);
+
+  if (!filtersMatch) {
+    return false;
+  }
+
+  const defaultExclusions = new Set(parsed.excludedOverrides);
+  return (
+    state.excludedOverrides.length === defaultExclusions.size &&
+    state.excludedOverrides.every((id) => defaultExclusions.has(id))
+  );
+};
+
 export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
   const routing = projectRoutingCodec.encode({
     filterExpressions: Array.from(state.filterExpressions.values()).reduce((acc, entry) => {
@@ -127,7 +175,6 @@ export const projectPickerDerivatives = [
   },
   {
     key: 'isUsingSpaceDefaults',
-    compute: (state: ProjectPickerState) =>
-      state.currentProjectRouting === state.defaultProjectRouting,
+    compute: (state: ProjectPickerState) => computeIsUsingSpaceDefaults(state),
   },
 ] as const satisfies Array<StoreDerivative<ProjectPickerState, keyof ProjectPickerState>>;

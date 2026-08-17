@@ -267,7 +267,13 @@ export const ProjectPickerStateProvider = ({
   }, [proposedFiltersIdentity, availableProjects, runFilterSearch]);
 
   useEffect(() => {
-    const routing = store.state.currentProjectRouting;
+    // When the state is semantically back on the space defaults (e.g. after a revert), report
+    // the default routing string verbatim: re-encoding is not string-stable (the `snapshot`
+    // strategy in particular expands the selection into an explicit `_id:…` enumeration), and
+    // the app should land back on the actual default value rather than an equivalent rewrite.
+    const routing = store.state.isUsingSpaceDefaults
+      ? store.state.defaultProjectRouting
+      : store.state.currentProjectRouting;
 
     // Only report routing changes that originate from user edits, once any pending proposal has
     // been confirmed or has failed — never rewrite the incoming routing on mount, even when it
@@ -284,6 +290,8 @@ export const ProjectPickerStateProvider = ({
     }
   }, [
     store.state.currentProjectRouting,
+    store.state.isUsingSpaceDefaults,
+    store.state.defaultProjectRouting,
     onProjectRoutingChange,
     currentProjectRoutingGetter,
     store.state.controlsState,
