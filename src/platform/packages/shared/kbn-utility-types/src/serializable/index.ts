@@ -42,10 +42,9 @@ export type SerializableRecord<AllowedKeys extends string | number | symbol = st
  *   foo: string;
  * }
  * 
- * // Valid example without recursive references
- * interface MyRecord {
+ * // Example without recursive references
+ * interface MySerializableRecord = AsSerializableRecord<{
  *   foo: string;
- * }
- * interface MySerializableRecord = AsSerializableRecord<MyRecord>;
+ * }>;
  */
 export type AsSerializableRecord<T extends SerializableRecord<keyof T>> = T;

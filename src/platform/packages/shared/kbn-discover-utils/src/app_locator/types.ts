@@ -16,10 +16,12 @@ import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ESQLControlVariable } from '@kbn/esql-types';
-import type { ProfileStateMap } from './context_awareness';
-import type { VIEW_MODE, NEW_TAB_ID } from './constants';
+import type { NEW_TAB_ID, VIEW_MODE } from '../constants';
 
-export const DISCOVER_APP_LOCATOR = 'DISCOVER_APP_LOCATOR';
+/**
+ * A map of profile state blobs keyed by their registered definition key.
+ */
+export type ProfileStateMap = Record<string, SerializableRecord | undefined>;
 
 export type DiscoverAppLocatorParams = AsSerializableRecord<{
   /**

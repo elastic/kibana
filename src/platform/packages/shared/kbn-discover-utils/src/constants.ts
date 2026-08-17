@@ -54,3 +54,16 @@ export enum UnifiedHistogramSuggestionType {
   histogramForESQL = 'histogramForESQL',
   histogramForDataView = 'histogramForDataView',
 }
+
+/**
+ * The id value used to indicate that a link should open in a new Discover tab.
+ * It will be used in the `_tab` URL param to indicate that a new tab should be created.
+ * Once created, the new tab will have a unique id.
+ */
+export const NEW_TAB_ID = 'new' as const;
+
+export enum VIEW_MODE {
+  DOCUMENT_LEVEL = 'documents',
+  AGGREGATED_LEVEL = 'aggregated',
+  PATTERN_LEVEL = 'patterns',
+}

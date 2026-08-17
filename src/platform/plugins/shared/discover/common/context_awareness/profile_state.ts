@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ProfileStateMap } from '@kbn/discover-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 
@@ -55,11 +56,6 @@ export interface ProfileStateDefinition<TState extends SerializableRecord> {
    */
   defaultState: TState;
 }
-
-/**
- * A map of profile state blobs keyed by their registered definition key.
- */
-export type ProfileStateMap = Record<string, SerializableRecord | undefined>;
 
 /**
  * Controls how registered default values are handled when filtering profile state.

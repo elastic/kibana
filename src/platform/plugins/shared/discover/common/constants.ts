@@ -14,12 +14,6 @@ import { isObject } from 'lodash';
 export const DEFAULT_ROWS_PER_PAGE = 100;
 export const ROWS_PER_PAGE_OPTIONS = [10, 25, 50, DEFAULT_ROWS_PER_PAGE, 250, 500];
 
-export enum VIEW_MODE {
-  DOCUMENT_LEVEL = 'documents',
-  AGGREGATED_LEVEL = 'aggregated',
-  PATTERN_LEVEL = 'patterns',
-}
-
 export const getDefaultRowsPerPage = (uiSettings: IUiSettingsClient): number => {
   return parseInt(uiSettings.get(SAMPLE_ROWS_PER_PAGE_SETTING), 10) || DEFAULT_ROWS_PER_PAGE;
 };
@@ -51,13 +45,6 @@ export const isPersistedQueryMode = (value: unknown): value is PersistedQueryMod
     (castedValue.defaultMode === 'classic' || castedValue.defaultMode === 'esql')
   );
 };
-
-/**
- * The id value used to indicate that a link should open in a new Discover tab.
- * It will be used in the `_tab` URL param to indicate that a new tab should be created.
- * Once created, the new tab will have a unique id.
- */
-export const NEW_TAB_ID = 'new' as const;
 
 /**
  * The query param key used to store the Discover app state in the URL

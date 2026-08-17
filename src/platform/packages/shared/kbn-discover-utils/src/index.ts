@@ -27,3 +27,12 @@ export type {
   DiscoverAppMenuContext,
   DiscoverAppMenuConfig,
 } from './components/app_menu/types';
+
+export type {
+  DiscoverAppLocator,
+  DiscoverAppLocatorGetLocation,
+  DiscoverAppLocatorParams,
+  MainHistoryLocationState,
+  ProfileStateMap,
+} from './app_locator';
+export { DISCOVER_APP_LOCATOR } from './app_locator';

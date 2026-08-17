@@ -98,6 +98,7 @@ export {
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
   METRICS_GRID_SETTINGS_DEFAULTS,
+  DISCOVER_APP_LOCATOR,
 } from './src';
 
 export type {
@@ -111,6 +112,11 @@ export type {
   HistogramPercentile,
   MetricsGridSettings,
   SimpleAggregation,
+  DiscoverAppLocator,
+  DiscoverAppLocatorGetLocation,
+  DiscoverAppLocatorParams,
+  MainHistoryLocationState,
+  ProfileStateMap,
 } from './src';
 
 export * from './src/types';
