@@ -75,10 +75,8 @@ export const useObservabilityCuratedCategories = ({
         synthetic_monitor: { href: syntheticsLocator?.getRedirectUrl({ scope: 'create' }) },
       };
 
-    // A tile whose Fleet integration group produced a collection card opens
-    // the chooser like a collection search result: click instead of navigate,
-    // variant count badge. Without the card (Fleet flag off, group retired,
-    // packages still loading) the tile keeps its normal navigation.
+    // A grouped tile opens the chooser like a collection search result. Without a
+    // card (flag off, group retired, still loading) it keeps its normal navigation.
     const collectionNavigation = (collectionGroup?: string) => {
       const collection = collectionGroup ? collections.get(collectionGroup) : undefined;
       if (!collection || !collectionGroup) return undefined;

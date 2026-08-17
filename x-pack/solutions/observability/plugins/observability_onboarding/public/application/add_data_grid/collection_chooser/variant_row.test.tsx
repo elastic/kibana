@@ -33,9 +33,8 @@ describe('VariantRow', () => {
     expect(row.querySelector('a')).toHaveAttribute('href', '/app/integrations/detail/nginx');
   });
 
-  // Registry titles inside one collection often share a long prefix, so a
-  // single-line row turns "Nginx Ingress Controller Logs" and "…Metrics" into
-  // the same truncated string and there is nothing left to choose between.
+  // One line turned "Nginx Ingress Controller Logs" and "…Metrics" into the same
+  // truncated string, leaving nothing to choose between.
   it('gives titles two lines so variants sharing a prefix stay distinguishable', () => {
     const { container } = render(
       <VariantRow

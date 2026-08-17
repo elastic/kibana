@@ -353,8 +353,7 @@ describe('collection chooser tiles', () => {
     expect(onOpenCollection).toHaveBeenCalledWith('docker');
   });
 
-  // Fleet's packages arrive after the first paint, so the tile spends a moment
-  // as its ordinary self and must stay usable rather than dead.
+  // The tile spends a moment before Fleet's packages land and must stay usable.
   it('keeps the docker tile navigating while the packages are still loading', async () => {
     const { result } = renderHook(
       () => useObservabilityCuratedCategories({ onOpenCollection: jest.fn() }),

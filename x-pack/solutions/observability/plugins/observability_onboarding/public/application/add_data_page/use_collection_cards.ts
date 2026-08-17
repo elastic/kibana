@@ -11,10 +11,8 @@ import { getCollectionGroupId, isCollectionCard } from './collection_card';
 import { useFleetCards } from './fleet_cards_provider';
 
 /**
- * Fleet's collection cards keyed by group id, as they came from Fleet. Member
- * urls are rewritten by whoever renders them, because the return params depend
- * on the page state at that moment. Empty until Fleet's packages load, or with
- * the collection tiles flag off, so callers fall back to plain navigation.
+ * Fleet's collection cards keyed by group id, untouched. Empty until Fleet's packages
+ * load and with the collection tiles flag off, so callers fall back to plain navigation.
  */
 export const useCollectionCards = (): Map<string, CollectionCardItem> => {
   const { allCards } = useFleetCards();

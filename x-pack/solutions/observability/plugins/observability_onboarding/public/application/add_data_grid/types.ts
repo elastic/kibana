@@ -42,10 +42,7 @@ export interface MiniTile {
   'data-test-subj'?: string;
 }
 
-/**
- * Host-built view-model for one collection method inside a chooser: the
- * technologies that ship several ways to collect the same data.
- */
+/** Host-built view-model for one collection method inside a chooser. */
 export interface CollectionVariant {
   id: string;
   title: string;

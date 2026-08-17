@@ -63,10 +63,8 @@ const FleetCardsContext = createContext<FleetCardsValue>({
 export const useFleetCards = (): FleetCardsValue => useContext(FleetCardsContext);
 
 /**
- * Runs Fleet's package query and hands the result up to the provider. Rendering
- * nothing and memoizing keeps it out of the update it causes: Fleet rebuilds
- * `allCards` on every render, so a pump that re-rendered along with the
- * consumers it just refreshed would publish forever.
+ * Publishes Fleet's package query up to the provider. Renderless and memoized so
+ * the update it causes cannot re-render it: Fleet rebuilds `allCards` every render.
  */
 const PackagesPump = memo(
   ({
@@ -91,11 +89,9 @@ const PackagesPump = memo(
 );
 
 /**
- * Loads Fleet's package data once for the whole Add Data page, so the curated
- * grid (variant badges), the search results and the open chooser all read one
- * source. The module arrives async, so the tree above the children stays fixed
- * and only the renderless pump comes and goes: swapping the wrapper instead
- * would remount the grid and the results underneath it.
+ * Loads Fleet's package data once for the whole Add Data page. Only the renderless
+ * pump comes and goes when the async module lands; swapping the wrapper around
+ * `children` would remount the grid and the results under it.
  */
 export const FleetCardsProvider = ({ children }: { children: React.ReactNode }) => {
   const hooksRef = useRef<FleetHooks | null>(null);
@@ -111,8 +107,8 @@ export const FleetCardsProvider = ({ children }: { children: React.ReactNode }) 
 
   const retry = useCallback(() => {
     if (asyncLoading) return;
-    // The pump unmounts while the module reloads, so what it published goes
-    // with it, or the failure it reported shows again on the way back.
+    // The pump unmounts while the module reloads, so drop what it published
+    // rather than show a stale failure on the way back.
     setPackages(null);
     retryAsyncLoad();
   }, [asyncLoading, retryAsyncLoad]);
@@ -124,7 +120,7 @@ export const FleetCardsProvider = ({ children }: { children: React.ReactNode }) 
   const value = useMemo<FleetCardsValue>(
     () => ({
       allCards: packages?.allCards ?? EMPTY_CARDS,
-      // No snapshot yet means the pump is still on its way to its first one.
+      // No snapshot yet: the pump has not reported, so loading unless the module failed.
       isLoading: packages ? packages.isLoading : !moduleError,
       error: packages?.error ?? moduleError,
       retry,

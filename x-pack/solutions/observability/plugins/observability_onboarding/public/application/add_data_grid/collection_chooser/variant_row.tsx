@@ -10,13 +10,11 @@ import { css } from '@emotion/react';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
 import type { CollectionVariant } from '../types';
 
+// Two lines, unlike the grid tiles: variants in one collection are often the same
+// registry title with a different suffix, which one line truncates to one string.
 const TITLE_LINES = 2;
 const DESCRIPTION_LINES = 2;
 
-// Two lines for the title, unlike the grid tiles: variants inside one
-// collection are often the same registry title with a different suffix, and a
-// single line truncates them all to the same string. Rows are stacked in a
-// flyout, so growing one costs nothing in alignment.
 const clampStyle = (lines: number) => css`
   display: -webkit-box;
   -webkit-box-orient: vertical;

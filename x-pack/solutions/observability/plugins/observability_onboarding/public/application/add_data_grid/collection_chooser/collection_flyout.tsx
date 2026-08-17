@@ -28,10 +28,8 @@ export interface CollectionFlyoutProps {
 }
 
 /**
- * The chooser for a technology that ships several collection methods
- * (ingest-dev#8480): design chose a flyout so the user keeps the page they
- * searched behind it. Content is host-supplied, so the Integrations catalog can
- * put its own cards through the same surface.
+ * Chooser for a technology that ships several collection methods. Content is
+ * host-supplied, so any catalog can put its own cards through the same surface.
  */
 export const CollectionFlyout = ({
   title,

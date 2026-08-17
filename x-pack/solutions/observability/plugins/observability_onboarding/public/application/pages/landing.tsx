@@ -33,10 +33,8 @@ const AddDataPageV2 = () => {
   const [searchValue, setSearchValue] = useAddDataSearchUrlSync();
   const searchTerm = searchValue.trim();
   const [searchParams, setSearchParams] = useSearchParams();
-  // The url is the only record of which chooser is open: written on open,
-  // dropped on close, carried by member links. That keeps the chooser alive
-  // across a refresh or a return from a member's detail page, makes it
-  // shareable, and leaves nothing to fall out of step with it.
+  // The url is the only record of which chooser is open, so it survives a refresh
+  // and a return from a member's detail page with nothing to fall out of step.
   const openCollection = searchParams.get('collection') ?? undefined;
 
   const setCollectionParam = useCallback(
@@ -79,8 +77,7 @@ const AddDataPageV2 = () => {
           )}
           <EuiHorizontalRule margin="xl" />
           <ObservabilityIntegrationsSection onOpenCollection={setCollectionParam} />
-          {/* Inside the provider because it reads Fleet's cards, and a flyout
-              portals out of here anyway. */}
+          {/* Inside the provider because it reads Fleet's cards; the flyout portals out. */}
           <CollectionChooser
             collection={openCollection}
             searchTerm={searchTerm}

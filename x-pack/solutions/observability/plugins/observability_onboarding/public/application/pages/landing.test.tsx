@@ -68,8 +68,8 @@ jest.mock('../add_data_page/observability_search_results', () => ({
   ),
 }));
 
-// The page hosts a FleetCardsProvider whose module load and package query are
-// real code paths; only Fleet's data hook and its icon renderer are stubbed.
+// Only Fleet's data hook and icon renderer are stubbed; the provider's module load
+// and package query stay real code paths.
 const mockUseAvailablePackages = jest.fn();
 jest.mock('@kbn/fleet-plugin/public', () => {
   const actual = jest.requireActual('@kbn/fleet-plugin/public');
@@ -128,8 +128,8 @@ beforeEach(() => {
   });
 });
 
-// Collection-aware tiles start as ordinary links and turn into chooser buttons
-// when Fleet's packages land, so tests that click one wait for the swap.
+// Collection-aware tiles start as ordinary links and lose the href once Fleet's
+// packages land, so tests that click one wait for the swap.
 const waitForCollectionTile = (tileId: string) =>
   waitFor(() => expect(screen.getByTestId(tileId)).not.toHaveAttribute('href'));
 
@@ -143,8 +143,8 @@ const LocationSearchDisplay = () => {
   return <div data-test-subj="locationSearch">{location.search}</div>;
 };
 
-// Stands in for the browser back button or a deep link: something other than
-// the flyout's own close button taking the group id out of the url.
+// Stands in for the back button or a deep link: something other than the flyout's
+// own close button taking the group id out of the url.
 const CollectionParamControls = () => {
   const [params, setParams] = useSearchParams();
   const dropCollection = () => {
@@ -160,7 +160,7 @@ const CollectionParamControls = () => {
 };
 
 // Models Fleet's react-query data arriving late: only its own hook consumer
-// re-renders, as in the app, so a page-level re-render cannot fake the update.
+// re-renders, so a page-level re-render cannot fake the update.
 const createPackagesFeed = (initialCards: unknown[]) => {
   let cards = initialCards;
   const listeners = new Set<() => void>();
@@ -390,9 +390,7 @@ describe('LandingPage search (V2, Variant A)', () => {
 });
 
 describe('LandingPage collection chooser (V2)', () => {
-  // Returning from a member's detail page (or refreshing with the chooser
-  // open) lands with the group id in the url, and the page opens the flyout
-  // once Fleet's packages contain its card.
+  // The path a refresh and a return from a member's detail page both take.
   it('opens the chooser named in the url once packages load', async () => {
     renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
 
@@ -422,9 +420,7 @@ describe('LandingPage collection chooser (V2)', () => {
     expect(screen.getByTestId('locationSearch')).not.toHaveTextContent('collection');
   });
 
-  // The url is the single source of the open chooser, so anything that clears
-  // the param closes the flyout: the browser back button, a deep link, or the
-  // search term changing.
+  // Covers the back button, a deep link, and the search term changing.
   it('closes the chooser when the collection param leaves the url', async () => {
     const user = userEvent.setup();
     renderLandingAtPathWithSearch('/?search=nginx&collection=nginx');
@@ -448,8 +444,7 @@ describe('LandingPage collection chooser (V2)', () => {
     await waitFor(() => expect(screen.getAllByTestId(/^collectionVariantRow-/)).toHaveLength(3));
   });
 
-  // A chooser opened from a curated tile has to return the user to the search
-  // they had running, not just to the chooser.
+  // The grid stays visible during a search, so a tile can be clicked with one running.
   it('keeps the active search in member links of a chooser opened from a curated tile', async () => {
     const user = userEvent.setup();
     renderLandingAtPathWithSearch('/?search=docker');

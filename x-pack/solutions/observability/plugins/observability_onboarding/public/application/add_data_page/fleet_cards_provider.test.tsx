@@ -67,9 +67,8 @@ describe('FleetCardsProvider', () => {
     expect(await screen.findByText('1')).toBeInTheDocument();
   });
 
-  // Fleet's hooks arrive as an async chunk. Swapping the element that wraps the
-  // children when it lands would throw away the whole grid and search results
-  // below, along with anything the user had going in them.
+  // A remount here throws away the grid and results below, along with anything
+  // the user had going in them.
   it('keeps its children mounted when the Fleet module arrives', async () => {
     renderProvider();
 
@@ -77,9 +76,8 @@ describe('FleetCardsProvider', () => {
     expect(onMount).toHaveBeenCalledTimes(1);
   });
 
-  // Fleet's `useAvailablePackages` rebuilds `allCards` on every render, so
-  // publishing it through state loops unless the publishing render is kept out
-  // of the loop.
+  // Fleet really does rebuild `allCards` every render, which loops unless the
+  // publishing render is kept out of the cycle.
   it('settles instead of looping when Fleet rebuilds its cards each render', async () => {
     mockUseAvailablePackages.mockImplementation(() => ({
       isLoading: false,

@@ -81,9 +81,8 @@ describe('useAddDataResultItems', () => {
     expect(result.current.items.map(({ id }) => id)).toEqual(['epr:docker']);
   });
 
-  // A collection card only opens the chooser, and the chooser rewrites the
-  // members it renders. Rewriting them here too would append the return params
-  // twice on the same url.
+  // The chooser rewrites the members it renders, so doing it here too would append
+  // the return params twice on one url.
   it('passes collection members through untouched', () => {
     const collection: IntegrationCardItem = {
       ...makeCard({ id: 'collection:nginx', url: '/app/integrations/collection/nginx' }),
@@ -106,9 +105,8 @@ describe('useAddDataResultItems', () => {
     }
   });
 
-  // Matching is Fleet's useLocalSearch. These two assertions lock the semantics
-  // this page was built around (token prefix, no mid-word) so a Fleet change
-  // shows up here instead of silently changing the page.
+  // Matching is Fleet's `useLocalSearch`, so this pins its semantics at our seam:
+  // a Fleet change surfaces here instead of silently changing the page.
   it('matches on token prefix but not mid-word', () => {
     const prefix = renderItems('ngi', [makeCard({})]);
     expect(prefix.result.current.items.map(({ name }) => name)).toEqual(['nginx']);

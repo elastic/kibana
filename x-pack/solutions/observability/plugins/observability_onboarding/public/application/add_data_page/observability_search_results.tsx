@@ -53,9 +53,8 @@ const LoadedResults = ({
 };
 
 /**
- * The search results half of the Add Data page. Package data comes from the
- * page-level FleetCardsProvider, shared with the curated grid; this component
- * only mounts the search pipeline once Fleet's hook module has arrived.
+ * The search results half of the Add Data page, reading the package data the
+ * page-level FleetCardsProvider already shares with the curated grid.
  */
 export const ObservabilitySearchResults = ({ searchTerm, onOpenCollection }: Props) => {
   const fleetCards: FleetCardsValue = useFleetCards();
@@ -66,8 +65,7 @@ export const ObservabilitySearchResults = ({ searchTerm, onOpenCollection }: Pro
 
   const { useLocalSearch, allCards, isLoading, error, retry } = fleetCards;
 
-  // `useLocalSearch` doubles as the module-loaded signal: until it exists, the
-  // search index hook cannot be called, so render the loading or error shell.
+  // `useLocalSearch` doubles as the module-loaded signal: no hook to call yet.
   if (useLocalSearch === null) {
     return (
       <AddDataSearchResults

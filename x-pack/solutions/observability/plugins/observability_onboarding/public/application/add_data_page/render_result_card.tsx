@@ -38,8 +38,8 @@ export interface RenderResultCardOptions {
 }
 
 /**
- * Collection cards open the page-hosted chooser flyout instead of navigating,
- * so the renderer closes over that callback instead of being a static function.
+ * Collection cards open the page-hosted chooser instead of navigating, so the
+ * renderer closes over that callback instead of being a static function.
  */
 export const createRenderResultCard =
   ({ onOpenCollection }: RenderResultCardOptions) =>

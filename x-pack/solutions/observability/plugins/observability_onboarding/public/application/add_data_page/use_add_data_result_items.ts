@@ -12,14 +12,10 @@ import { useCardUrlRewrite } from '../package_list_search_form/use_card_url_rewr
 const ALLOWED_CATEGORIES = new Set(['observability', 'os_system']);
 
 /**
- * The o11y item pipeline feeding AddDataSearchResults: category filter, text
- * match (Fleet's own `useLocalSearch`, so results agree with the Integrations
- * app by construction), return-path URL rewrite. A collection card only opens
- * the chooser, so its member links are rewritten where the chooser renders
- * them, not here. The curated tiles are not mirrored in: they stay visible
- * below the results, so mirroring only produced duplicates of the EPR cards.
- * Package data arrives from the page-level FleetCardsProvider; `useLocalSearch`
- * comes as an argument because the caller gates on the async-loaded module.
+ * The o11y item pipeline feeding AddDataSearchResults: category filter, text match
+ * (Fleet's own `useLocalSearch`, so results agree with the Integrations app by
+ * construction), return-path URL rewrite. `useLocalSearch` comes as an argument
+ * because the caller gates on Fleet's async-loaded module.
  */
 export function useAddDataResultItems({
   searchTerm,

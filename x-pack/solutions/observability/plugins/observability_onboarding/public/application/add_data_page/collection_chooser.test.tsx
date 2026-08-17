@@ -104,10 +104,8 @@ describe('CollectionChooser', () => {
     expect(screen.queryByTestId('collectionFlyout')).not.toBeInTheDocument();
   });
 
-  // The url is the only record of the open chooser, so it has to survive a
-  // refresh and a return from a member's detail page. Both land before Fleet's
-  // packages exist, which is why the chooser waits for them rather than
-  // deciding once on mount.
+  // A refresh and a return from a member's detail page both land before Fleet's
+  // packages exist, so the chooser waits rather than deciding once on mount.
   it('opens the chooser named in the url once the cards arrive', async () => {
     renderChooser({ collection: 'nginx' });
 
@@ -125,8 +123,7 @@ describe('CollectionChooser', () => {
     }
   });
 
-  // A chooser opened from a curated grid tile has no search term, so its
-  // members return to the bare page with only the chooser reopened.
+  // How a chooser opened from a curated grid tile arrives: no search term.
   it('leaves the search out of member return paths when there is none', async () => {
     renderChooser({ collection: 'nginx' });
 
