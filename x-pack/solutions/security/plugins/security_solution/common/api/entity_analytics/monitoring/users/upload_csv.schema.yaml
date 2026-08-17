@@ -9,7 +9,11 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: PrivmonBulkUploadUsersCSV
-      summary: Upsert multiple monitored users via CSV upload
+      deprecated: true
+      summary: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+        Upsert multiple monitored users via CSV upload
       requestBody:
         content:
           multipart/form-data:

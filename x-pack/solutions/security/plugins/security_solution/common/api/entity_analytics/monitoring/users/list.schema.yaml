@@ -9,7 +9,11 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: ListPrivMonUsers
-      summary: List all monitored users
+      deprecated: true
+      summary: |
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
+
+        List all monitored users
       parameters:
         - name: kql
           in: query
