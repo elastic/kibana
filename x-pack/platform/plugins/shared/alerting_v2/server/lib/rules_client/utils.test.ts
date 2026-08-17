@@ -508,11 +508,52 @@ describe('utils', () => {
       );
     });
 
+    it('throws INVALID_RULE_QUERY_CONFIG when a composed query.recovery segment has no "query" strategy', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'no_breach',
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE error' },
+          recovery: { segment: 'WHERE NOT error' },
+        },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          isBoom: true,
+          output: expect.objectContaining({ statusCode: 400 }),
+          message: 'query.recovery is only allowed when recovery_strategy is "query".',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
     it('throws INVALID_RULE_QUERY_CONFIG when recovery_strategy "query" has no recovery block', () => {
       const attrs = createRuleSoAttributes({
         kind: 'alert',
         recovery_strategy: 'query',
         query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
+        expect.objectContaining({
+          message: 'query.recovery is required when recovery_strategy is "query".',
+          data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
+        })
+      );
+    });
+
+    it('throws INVALID_RULE_QUERY_CONFIG when a composed rule sets recovery_strategy "query" with no recovery segment', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        recovery_strategy: 'query',
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE error' },
+        },
       });
 
       expect(() => validateMergedRuleAttributes('rule-1', attrs)).toThrow(
@@ -557,6 +598,20 @@ describe('utils', () => {
           data: { code: 'INVALID_RULE_QUERY_CONFIG', details: { rule_id: 'rule-1' } },
         })
       );
+    });
+
+    it('does not require a no_data block for a composed-format rule (base query is the data-presence query)', () => {
+      const attrs = createRuleSoAttributes({
+        kind: 'alert',
+        no_data_strategy: 'last_known_status',
+        query: {
+          format: 'composed',
+          base: 'FROM logs-*',
+          breach: { segment: 'WHERE error' },
+        },
+      });
+
+      expect(() => validateMergedRuleAttributes('rule-1', attrs)).not.toThrow();
     });
   });
 
