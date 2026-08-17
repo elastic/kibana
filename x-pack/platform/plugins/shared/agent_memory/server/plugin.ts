@@ -121,6 +121,7 @@ export class AgentMemoryPlugin
         getStorage: getMemoryStorage,
         getSecurityStart,
         getCoreSecurity,
+        writeConfirmation: this.config.writeConfirmation,
       })
     );
     tools.register(
@@ -128,6 +129,7 @@ export class AgentMemoryPlugin
         getStorage: getMemoryStorage,
         getSecurityStart,
         getCoreSecurity,
+        writeConfirmation: this.config.writeConfirmation,
       })
     );
 

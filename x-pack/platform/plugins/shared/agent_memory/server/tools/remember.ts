@@ -6,6 +6,7 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
+import type { ToolConfirmationPolicyMode } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { platformMemoryTools } from '@kbn/agent-builder-common/tools';
@@ -31,10 +32,12 @@ export const createRememberTool = ({
   getStorage,
   getSecurityStart,
   getCoreSecurity,
+  writeConfirmation = 'always',
 }: {
   getStorage: GetMemoryStorage;
   getSecurityStart: () => SecurityPluginStart;
   getCoreSecurity: () => SecurityServiceStart;
+  writeConfirmation?: ToolConfirmationPolicyMode;
 }): BuiltinToolDefinition<typeof rememberInputSchema> => ({
   id: platformMemoryTools.remember,
   type: ToolType.builtin,
@@ -54,7 +57,7 @@ On success returns { id, revision, action } where action is 'created' or 'update
   schema: rememberInputSchema,
   tags: [],
   confirmation: {
-    askUser: 'always',
+    askUser: writeConfirmation,
     getConfirmation: ({ toolParams }) => ({
       title: i18n.translate('xpack.agentMemory.agentBuilder.tools.remember.confirmationTitle', {
         defaultMessage: 'Remember "{title}"',
