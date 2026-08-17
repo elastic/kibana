@@ -249,7 +249,6 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
     if (requiresNewBuffer) {
       getInspectorAdapters(getState()).vectorTiles.setTiles(getTilesForExtent(nextZoom, extent));
     }
-
     dispatch({
       type: MAP_EXTENT_CHANGED,
       mapViewContext: {
