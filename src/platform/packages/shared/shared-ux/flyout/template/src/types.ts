@@ -41,7 +41,6 @@ export interface FlyoutFooterActionBaseProps {
   label: ReactNode;
   onClick: MouseEventHandler<HTMLButtonElement>;
   iconType?: EuiButtonProps['iconType'];
-  color?: EuiButtonProps['color'];
   isLoading?: boolean;
   isDisabled?: boolean;
   'data-test-subj'?: string;

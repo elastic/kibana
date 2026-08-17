@@ -18,7 +18,6 @@ export const PrimaryAction = primaryActionPart.createComponent<FlyoutFooterPrima
     label,
     onClick,
     iconType,
-    color,
     isLoading,
     isDisabled,
     fill = true,
@@ -28,7 +27,6 @@ export const PrimaryAction = primaryActionPart.createComponent<FlyoutFooterPrima
       EuiButton,
       {
         fill,
-        color,
         iconType,
         isLoading,
         isDisabled,

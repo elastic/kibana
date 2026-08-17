@@ -46,7 +46,7 @@ The root forwards a fixed subset of `EuiFlyoutProps` — `onClose`, `size`, `min
 - `FlyoutTemplate.Footer.PrimaryAction` — rendered as an `EuiButton`, filled unless `fill={false}`.
 - `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
 
-Both actions take `label`, `onClick`, and optional `iconType`, `color`, `isLoading`, `isDisabled`, `data-test-subj`.
+Both actions take `label`, `onClick`, and optional `iconType`, `isLoading`, `isDisabled`, `data-test-subj`.
 
 ## Behavior
 

@@ -19,7 +19,6 @@ export const SecondaryAction =
       label,
       onClick,
       iconType,
-      color,
       isLoading,
       isDisabled,
       'data-test-subj': dataTestSubj,
@@ -27,7 +26,6 @@ export const SecondaryAction =
       React.createElement(
         EuiButtonEmpty,
         {
-          color,
           iconType,
           isLoading,
           isDisabled,
