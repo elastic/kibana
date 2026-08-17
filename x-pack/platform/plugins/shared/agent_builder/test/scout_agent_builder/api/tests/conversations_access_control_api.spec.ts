@@ -979,7 +979,11 @@ apiTest.describe(
           }
           expect(accessControl.entries).toHaveLength(1);
           expect(accessControl.entries[0].id).toBe(bobId);
-          expect(body.permissions).toStrictEqual({ update_access_control: false });
+          expect(body.permissions).toStrictEqual({
+            rename: false,
+            delete: false,
+            update_access_control: false,
+          });
 
           expect(
             await setAccessControlAs(apiClient, bob, conversationId, {
