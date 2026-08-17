@@ -186,6 +186,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
@@ -193,6 +194,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       feature_id: 'frontend-transactionhistory-http',
       source: 'frontend',
       target: 'transactionhistory',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
@@ -200,6 +202,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       feature_id: 'frontend-ledgerwriter-http',
       source: 'frontend',
       target: 'ledgerwriter',
+      protocol: 'http',
       stream_name: 'logs',
     },
     {
@@ -207,6 +210,7 @@ const LEDGER_DB_CASCADE_EVENT: Partial<SignificantEvent> = {
       feature_id: 'ledgerwriter-balancereader-http',
       source: 'ledgerwriter',
       target: 'balancereader',
+      protocol: 'http',
       stream_name: 'logs',
     },
   ],
@@ -246,7 +250,6 @@ const BENIGN_LOGIN_EVENT: Partial<SignificantEvent> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
 /** Benign signup spike — must stay a SEPARATE event from the failure cascade and from login. */
@@ -279,7 +282,6 @@ const BENIGN_SIGNUP_EVENT: Partial<SignificantEvent> = {
       },
     },
   ],
-  causal_features: [{ feature_id: 'userservice', name: 'userservice', stream_name: 'logs' }],
 };
 
 const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
@@ -318,7 +320,7 @@ const BALANCE_READER_ISOLATED_EVENT: Partial<SignificantEvent> = {
   blast_radius: [
     {
       type: 'dependency',
-      feature_id: 'frontend-balancereader',
+      feature_id: 'frontend-balancereader-http',
       source: 'frontend',
       target: 'balancereader',
       stream_name: 'logs',

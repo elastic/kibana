@@ -1,5 +1,5 @@
 {
-  "sha1": "a26bf54bb74b38b9cb8efd1b9a591cea91ddc9c6",
+  "sha1": "dfe23b271442b1de5d1e45cee349bde7287b001b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -127,7 +127,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/ui/tests/getting_started.spec.ts",
-        "line": 16,
+        "line": 19,
         "column": 5
       }
     },

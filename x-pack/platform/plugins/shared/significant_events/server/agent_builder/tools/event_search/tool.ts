@@ -200,6 +200,13 @@ export function createSearchEventsTool({
           'The "compact" response never returns individual signals, signal descriptions, queries, p-values, or detection IDs. Do not close an event while unresolved_rule_uuids is non-empty. For evidence details, call "full" with exactly one event_id; its signals are deterministically ordered and bounded to one page.',
       })}
     `,
+    annotations: {
+      title: 'Search Significant Events',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: searchEventsSchema,
     tags: ['streams', 'significant-events'],
     availability: createSignificantEventsAvailability({ server, logger }),

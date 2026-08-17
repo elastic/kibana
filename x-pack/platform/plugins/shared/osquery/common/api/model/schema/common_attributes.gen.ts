@@ -274,6 +274,11 @@ export const ObjectQueriesItem = lazySchema(() =>
     saved_query_id: SavedQueryIdOrUndefined.optional(),
     removed: RemovedOrUndefined.optional(),
     snapshot: SnapshotOrUndefined.optional(),
+    /**
+      * Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+
+      */
+    interval: z.number().int().nullable().optional(),
     schedule_type: ScheduleTypeOrUndefined.optional(),
     rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
   })
