@@ -74,6 +74,31 @@ const buildBeliefFilter = (
   return filters;
 };
 
+const buildBm25Query = (query: string): QueryDslQueryContainer => ({
+  bool: {
+    must: [
+      {
+        multi_match: {
+          query,
+          fields: ['title^2', 'description'],
+          type: 'best_fields',
+        },
+      },
+    ],
+    // Recency only reorders relevant matches; it cannot admit an unrelated memory.
+    should: [
+      {
+        distance_feature: {
+          field: '@timestamp',
+          origin: 'now',
+          pivot: '30d',
+          boost: 0.1,
+        },
+      },
+    ],
+  },
+});
+
 export const buildKeywordRetriever = ({
   query,
   space_id,
@@ -81,13 +106,7 @@ export const buildKeywordRetriever = ({
   category,
 }: BuildRetrieverParams): RetrieverContainer => ({
   standard: {
-    query: {
-      multi_match: {
-        query,
-        fields: ['title^2', 'description'],
-        type: 'best_fields',
-      },
-    },
+    query: buildBm25Query(query),
     filter: {
       bool: {
         filter: buildBeliefFilter(space_id, author, category),
@@ -119,13 +138,7 @@ export const buildRetriever = ({
   // Leg 1: BM25 keyword match
   const bm25Leg: RetrieverContainer = {
     standard: {
-      query: {
-        multi_match: {
-          query,
-          fields: ['title^2', 'description'],
-          type: 'best_fields',
-        },
-      },
+      query: buildBm25Query(query),
     },
   };
 
