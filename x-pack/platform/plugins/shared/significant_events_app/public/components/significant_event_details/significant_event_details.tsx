@@ -6,8 +6,10 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { BasicPrettyPrinter, Parser } from '@elastic/esql';
 import {
   EuiAccordion,
+  EuiBadge,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +30,7 @@ import type {
 } from '@kbn/significant-events-schema';
 import { ESQLDataGrid } from '@kbn/esql-datagrid/public';
 import {
-  appendToESQLQuery,
+  appendLimitToQuery,
   formatESQLColumns,
   getESQLAdHocDataview,
   getESQLResults,
@@ -40,6 +42,7 @@ import { formatTimestamp } from '../../util/formatters';
 import { InfoPanel } from '../info_panel';
 import { useKibana } from '../../hooks/use_kibana';
 
+const SAMPLE_LOG_LIMIT = 5;
 const DESCRIPTION_TITLE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.flyout.descriptionTitle',
   { defaultMessage: 'Description' }
@@ -51,6 +54,10 @@ const LOAD_ERROR_TITLE = i18n.translate('xpack.significantEventsApp.signalEviden
 const ESQL_QUERY_TITLE = i18n.translate('xpack.significantEventsApp.signalEvidence.esqlTitle', {
   defaultMessage: 'ES|QL query',
 });
+const CAUSAL_FEATURES_TITLE = i18n.translate(
+  'xpack.significantEventsApp.significantEventsTab.flyout.causalFeatures',
+  { defaultMessage: 'Causal features' }
+);
 
 interface GridState {
   rows: ESQLRow[];
@@ -61,6 +68,16 @@ interface GridState {
 interface DetectionSignalRowProps {
   signal: Extract<SignalEntry, { type: 'detection' }>;
 }
+
+const replaceESQLLimit = (query: string) => {
+  const { root } = Parser.parse(query);
+  const queryWithoutLimit = BasicPrettyPrinter.print({
+    ...root,
+    commands: root.commands.filter((command) => command.name !== 'limit'),
+  });
+
+  return queryWithoutLimit;
+};
 
 const DetectionSignalRow = ({ signal }: DetectionSignalRowProps) => {
   const { core, dependencies } = useKibana();
@@ -74,14 +91,19 @@ const DetectionSignalRow = ({ signal }: DetectionSignalRowProps) => {
   const hasFetchStarted = useRef(false);
 
   const esqlQuery = signal.evidence?.esql_query;
+  const normalizedQuery = useMemo(
+    () => (esqlQuery ? replaceESQLLimit(esqlQuery) : undefined),
+    [esqlQuery]
+  );
 
   const onToggle = useCallback(
     (isOpen: boolean) => {
-      if (!isOpen || hasFetchStarted.current || !esqlQuery) return;
+      if (!isOpen || hasFetchStarted.current || !normalizedQuery) return;
       hasFetchStarted.current = true;
+      setFetchError(null);
       setIsLoading(true);
 
-      const limitedQuery = appendToESQLQuery(esqlQuery, '| LIMIT 5');
+      const limitedQuery = appendLimitToQuery(normalizedQuery, SAMPLE_LOG_LIMIT);
 
       Promise.all([
         getESQLAdHocDataview({
@@ -100,13 +122,14 @@ const DetectionSignalRow = ({ signal }: DetectionSignalRowProps) => {
           });
         })
         .catch((err) => {
+          hasFetchStarted.current = false;
           setFetchError(err instanceof Error ? err.message : String(err));
         })
         .finally(() => {
           setIsLoading(false);
         });
     },
-    [esqlQuery, data, core.http]
+    [normalizedQuery, data, core.http]
   );
 
   // Header wraps in the accordion button so multiple signals don't overflow.
@@ -159,7 +182,7 @@ const DetectionSignalRow = ({ signal }: DetectionSignalRowProps) => {
         )}
 
         <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-          {esqlQuery && (
+          {normalizedQuery && (
             <EuiFlexGroup direction="column" responsive={false} gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
@@ -174,18 +197,18 @@ const DetectionSignalRow = ({ signal }: DetectionSignalRowProps) => {
                   isCopyable
                   overflowHeight={120}
                 >
-                  {esqlQuery}
+                  {normalizedQuery}
                 </EuiCodeBlock>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {grid && esqlQuery && (
+          {grid && normalizedQuery && (
             <EuiFlexItem grow={false}>
               <ESQLDataGrid
                 rows={grid.rows}
                 columns={grid.columns}
                 dataView={grid.dataView}
-                query={{ esql: esqlQuery }}
+                query={{ esql: normalizedQuery }}
                 flyoutType="overlay"
                 initialRowHeight={0}
               />
@@ -226,6 +249,18 @@ export const SignificantEventDetails = ({ event }: SignificantEventDetailsProps)
           <EuiText size="s">
             <p>{event.summary}</p>
           </EuiText>
+        </InfoPanel>
+      )}
+
+      {event.causal_features && event.causal_features.length > 0 && (
+        <InfoPanel title={CAUSAL_FEATURES_TITLE}>
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {event.causal_features.map((feature) => (
+              <EuiFlexItem grow={false} key={feature.feature_id}>
+                <EuiBadge>{feature.name}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
         </InfoPanel>
       )}
 
