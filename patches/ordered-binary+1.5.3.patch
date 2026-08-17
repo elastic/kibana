@@ -1,0 +1,36 @@
+diff --git a/node_modules/ordered-binary/dist/index.cjs b/node_modules/ordered-binary/dist/index.cjs
+index 85c488a..fa6a943 100644
+--- a/node_modules/ordered-binary/dist/index.cjs
++++ b/node_modules/ordered-binary/dist/index.cjs
+@@ -357 +357,27 @@ function finishUtf8(byte1, src) {
++function evalStringReader() {
++	try {
++		// Preserve the generated fast path when string code generation is allowed.
++		return eval(makeStringBuilder())
++	} catch (error) {
++		if (!(error instanceof EvalError))
++			throw error
++		// Kibana disallows string code generation, so LMDB needs a decoder that avoids eval.
++		return (source) => {
++			let value = '';
++			while (true) {
++				let character = source[position++];
++				if (!(character > 4)) {
++					// Values 0-3 terminate the string; 4 escapes the next control byte.
++					if (character !== 4)
++						return value
++					character = source[position++];
++				} else if (character >= 0x80) {
++					character = finishUtf8(character, source);
++				}
++				value += fromCharCode(character);
++			}
++		}
++	}
++}
++
+ const readString =
+@@ -373,2 +399,2 @@ const readString =
+-		eval(makeStringBuilder());
++		evalStringReader();
+ function readStringSafely(source, end) {
