@@ -95,8 +95,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'apigateway_logs',
     name: 'AWS API Gateway',
     category: 'Networking and Content Delivery',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'apigateway' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'apigateway' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'apigateway',
   },
@@ -152,8 +152,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'emr_logs',
     name: 'AWS EMR',
     category: 'Compute',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'emr' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'emr' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'emr',
   },
@@ -213,8 +213,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'cloudtrail',
     name: 'AWS CloudTrail',
     category: 'Management and Governance',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'cloudtrail' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'cloudtrail' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'cloudtrail',
   },
@@ -244,8 +244,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'firewall_logs',
     name: 'AWS Network Firewall',
     category: 'Security, Identity and Compliance',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'firewall' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'firewall' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'firewall',
   },
@@ -257,6 +257,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     optionalConfig: ['regions'],
     packageName: 'aws',
     policyTemplate: 'firewall',
+    showInUI: false, // TODO confirm if only agent_based and if should be included in onboarding flow
   },
   {
     id: 'securityhub_findings',
@@ -283,8 +284,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'waf',
     name: 'AWS WAF',
     category: 'Security, Identity and Compliance',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'waf' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'waf' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'waf',
   },
@@ -296,6 +297,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Networking and Content Delivery',
     // ECF: CloudFront is in the edot-cloud-forwarder-aws#452 DoD but no released template yet
     deploymentMethods: [{ method: 'ecf', preferred: true }],
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'cloudfront',
   },
@@ -326,8 +328,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'route53_public_logs',
     name: 'AWS Route 53 Public DNS',
     category: 'Networking and Content Delivery',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'route53' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'route53' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'route53',
   },
@@ -335,8 +337,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'route53_resolver_logs',
     name: 'AWS Route 53 Resolver',
     category: 'Networking and Content Delivery',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'route53' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'route53' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'route53',
   },
@@ -352,8 +354,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'vpcflow',
     name: 'AWS VPC Flow',
     category: 'Networking and Content Delivery',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'vpcflow' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'vpcflow' policy template
+    showInUI: false,
     packageName: 'aws',
     policyTemplate: 'vpcflow',
   },
@@ -486,8 +488,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Bedrock (Invocation)',
     category: 'Machine Learning',
     signalType: 'logs',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_bedrock' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_bedrock' policy template
+    showInUI: false,
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_bedrock',
@@ -596,8 +598,8 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Logs (Generic)',
     category: 'Management and Governance',
     signalType: 'logs',
-    // TODO: remove once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_logs' policy template
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    // TODO: enable once elastic/integrations sets deployment_modes.agentless.enabled on 'aws_logs' policy template
+    showInUI: false,
     inputs: ['aws-s3', 'aws-cloudwatch'],
     requiredConfig: ['bucket_arn', 'log_group_arn', 'region', 'region_name'],
     packageName: 'aws_logs',
