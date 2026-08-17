@@ -1366,12 +1366,12 @@ export const StepAuthentication: React.FunctionComponent<{
 
   const servicesCount = services.length;
 
-  const isAgentSetupAccessComplete =
-    agentAccessKeyId.trim().length > 0 && agentSecretAccessKey.trim().length > 0;
-
-  // Sequential ("only one open at a time") accordions for each path's card
-  // pair — the first card starts open, the second closed, and completing
-  // the active card advances to the next after a short, deliberate delay.
+  // Sequential ("only one open at a time") accordions for the managed
+  // path's card pair — the first card starts open, the second closed, and
+  // completing the active card advances to the next after a short,
+  // deliberate delay. The agent path only has one card left (Setup access's
+  // fields moved into the Deployment method panel above), so it doesn't
+  // need this pairing — it just manages its own open/closed state.
   const [isManagedIntegrationsComplete, setIsManagedIntegrationsComplete] = useState(false);
   const [isCloudFormationComplete, setIsCloudFormationComplete] = useState(false);
   const managedAccordion = useSequentialAccordion(
@@ -1379,11 +1379,7 @@ export const StepAuthentication: React.FunctionComponent<{
     [isManagedIntegrationsComplete, isCloudFormationComplete]
   );
 
-  const [isWhereToAddComplete, setIsWhereToAddComplete] = useState(false);
-  const agentAccordion = useSequentialAccordion(
-    ['whereToAdd', 'setupAccess'],
-    [isWhereToAddComplete, isAgentSetupAccessComplete]
-  );
+  const [isWhereToAddOpen, setIsWhereToAddOpen] = useState(true);
 
   const openModal = () => {
     setPendingMethod(deploymentMethod);
@@ -1457,32 +1453,13 @@ export const StepAuthentication: React.FunctionComponent<{
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>
-      </EuiPanel>
 
-      <EuiHorizontalRule margin="l" />
-
-      {deploymentMethod === 'agent' ? (
-        <>
-          <WhereToAddCard
-            services={services}
-            isEnrolled={isAgentEnrolled}
-            onEnrolled={onAgentEnrolled}
-            receivedCount={agentReceivedCount}
-            isOpen={agentAccordion.isOpen('whereToAdd')}
-            onToggle={() => agentAccordion.toggle('whereToAdd')}
-            onCompleteChange={setIsWhereToAddComplete}
-          />
-          <EuiSpacer size="m" />
-          <AccordionCard
-            id="awsOnboardingAgentSetupAccessAccordion"
-            iconType="rocket"
-            title="Setup access"
-            servicesCount={servicesCount}
-            isComplete={isAgentSetupAccessComplete}
-            isOpen={agentAccordion.isOpen('setupAccess')}
-            onToggle={() => agentAccordion.toggle('setupAccess')}
-            data-test-subj="awsOnboardingAgentSetupAccessCollapseToggle"
-          >
+        {/* Setup access's fields live here directly for the agent path now
+            — with only "Where to add this integration?" left below, a
+            separate Setup access card was redundant. */}
+        {deploymentMethod === 'agent' && (
+          <>
+            <EuiSpacer size="l" />
             <EuiFormRow
               label={
                 <span>
@@ -1529,10 +1506,26 @@ export const StepAuthentication: React.FunctionComponent<{
                 data-test-subj="awsOnboardingAgentSecretAccessKey"
               />
             </EuiFormRow>
-          </AccordionCard>
+          </>
+        )}
+      </EuiPanel>
+
+      {deploymentMethod === 'agent' ? (
+        <>
+          <EuiSpacer size="l" />
+          <WhereToAddCard
+            services={services}
+            isEnrolled={isAgentEnrolled}
+            onEnrolled={onAgentEnrolled}
+            receivedCount={agentReceivedCount}
+            isOpen={isWhereToAddOpen}
+            onToggle={() => setIsWhereToAddOpen((v) => !v)}
+            onCompleteChange={() => {}}
+          />
         </>
       ) : (
         <>
+          <EuiHorizontalRule margin="l" />
           <ManagedIntegrationsWidget
             servicesCount={servicesCount}
             onValidityChange={setManagedIntegrationsValid}
