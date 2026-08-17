@@ -132,6 +132,7 @@ describe('RuleLibraryPage', () => {
     expect(await screen.findByText('CPU usage')).toBeInTheDocument();
     expect(screen.getByText('High CPU')).toBeInTheDocument();
     expect(screen.getByText('prod')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Install' })).toBeInTheDocument();
     expect(screen.getByTestId(CONTENT_LIST_TEST_SUBJECTS.table)).toBeInTheDocument();
   });
 

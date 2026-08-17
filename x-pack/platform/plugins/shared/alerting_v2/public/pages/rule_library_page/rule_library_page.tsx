@@ -151,12 +151,13 @@ export const RuleLibraryPage = () => {
             scrollableInline
             responsiveBreakpoint={false}
           >
-            <Column.Name showDescription />
+            <Column.Name showDescription width="40em" />
             <Column
               id="tags"
               name={i18n.translate('xpack.alertingV2.ruleLibrary.column.tags', {
                 defaultMessage: 'Tags',
               })}
+              width="16em"
               render={(item: ContentListItem) => {
                 const tags = toTemplate(item).rule.metadata.tags;
                 if (!tags?.length) return null;
@@ -171,12 +172,12 @@ export const RuleLibraryPage = () => {
                 );
               }}
             />
-            <Column.Actions>
+            <Column.Actions width="10em" sticky={false}>
               <Action
                 id="install"
                 name={INSTALL_ACTION_NAME}
                 description={INSTALL_ACTION_NAME}
-                icon="plusInCircle"
+                type="button"
                 enabled={(item: ContentListItem) =>
                   canWrite && !(isInstalling && installingTemplate?.id === item.id)
                 }
