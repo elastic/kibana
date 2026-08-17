@@ -14,23 +14,16 @@ const asSet = (values: string[]): Set<string> => new Set(values);
 const getRuleSignals = (event: SignificantEvent) =>
   (event.signals ?? []).flatMap((signal) =>
     signal.type === 'detection' && signal.metadata?.rule_uuid
-      ? [{ ruleUuid: signal.metadata.rule_uuid, verdict: signal.verdict }]
+      ? [
+          {
+            ruleUuid: signal.metadata.rule_uuid,
+            collected_at: signal.collected_at,
+            evidence: signal.evidence,
+            verdict: signal.verdict,
+          },
+        ]
       : []
   );
-
-const sharedRuleCount = (event: SignificantEvent, expectedRuleUuids: Set<string>) => {
-  const eventRuleUuids = new Set(
-    getRuleSignals(event)
-      .filter(
-        (signal) =>
-          signal.verdict === 'confirms' ||
-          signal.verdict === 'inconclusive' ||
-          signal.verdict === 'not_checked'
-      )
-      .map((signal) => signal.ruleUuid)
-  );
-  return [...eventRuleUuids].filter((ruleUuid) => expectedRuleUuids.has(ruleUuid)).length;
-};
 
 export const confirmationAlignmentEvaluator: DiscoveryEvaluator = {
   name: 'confirmation_alignment',

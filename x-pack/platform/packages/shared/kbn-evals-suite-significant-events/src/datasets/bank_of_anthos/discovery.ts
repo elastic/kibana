@@ -391,6 +391,11 @@ export const discovery: DatasetConfig['discovery'] = [
           score: 3,
         },
         {
+          id: 'cascade-transactionhistory-cluster',
+          text: 'Groups the SQL connection failure, the shared cache errors, and the frontend→transactionhistory connection failures into a single discovery (transactionhistory service cluster).',
+          score: 1,
+        },
+        {
           id: 'cascade-full-grouping',
           text: 'Further collapses the frontend→balancereader connection failures and the ledgerwriter balance-retrieval, payment, and deposit failures into the same cascading discovery as the transactionhistory cluster — all seven detections linked by the evidence-backed database-connectivity and cache failure hypothesis rather than split into separate service-scoped discoveries.',
           score: 2,

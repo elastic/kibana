@@ -54,7 +54,7 @@ const searchEventsSchema = significantEventSchema
           defaultMessage:
             'Optional substring search over the event title, summary, and symptom hypothesis fields. ' +
             'Defaults to no text filter. Use it to narrow results to a known incident. ' +
-            'Matching is case-insensitive and not semantic.',
+            'Matching is case-insensitive and not semantic — omit it when you want all events for a stream or state.',
         })
       ),
     rule_uuids: z
