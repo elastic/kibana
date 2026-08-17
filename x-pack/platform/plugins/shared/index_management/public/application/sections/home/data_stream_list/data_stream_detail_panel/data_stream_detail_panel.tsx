@@ -97,7 +97,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   let content;
 
-  const discoverLocator = url?.locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = url?.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
   useEffect(() => {
     if (!dataStream || dataStream._meta?.managed_by !== 'streams') {

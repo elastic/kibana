@@ -16,7 +16,7 @@ import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import { getComparatorScript } from '../../../../common';
 import type { OnlyEsQueryRuleParams, EsQuerySourceFields } from '../types';
@@ -57,7 +57,7 @@ export async function fetchEsQuery({
   sourceFields,
 }: FetchEsQueryOpts) {
   const { scopedClusterClient, logger, ruleResultService, share } = services;
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)!;
   const esClient = scopedClusterClient.asCurrentUser;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);

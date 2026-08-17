@@ -74,7 +74,7 @@ const DiscoverAppLink: FunctionComponent<Omit<Props, 'showInfoParagraph'>> = ({
 
   useEffect(() => {
     const getDiscoveryUrl = async () => {
-      const locator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+      const locator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
       if (!locator) {
         return;
       }

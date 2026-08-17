@@ -7,13 +7,14 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiButtonEmpty } from '@elastic/eui';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 interface LinkFilter {
   filter: QueryDslQueryContainer;
@@ -70,7 +71,7 @@ export const DiscoverLink = React.memo(
     );
 
     const discoverLocator = useMemo(
-      () => share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR'),
+      () => share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR),
       [share.url.locators]
     );
 

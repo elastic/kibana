@@ -19,6 +19,8 @@ import type { ResultLinks } from '@kbn/file-upload-common';
 import type { GetAdditionalLinks } from '@kbn/file-upload-common/src/types';
 import type { LinkCardProps } from './link_card';
 import { useFileUploadKibana } from '../../kibana_context';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 interface Props {
   index: string;
@@ -71,7 +73,7 @@ export const ResultsLinks: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover_v2?.show ?? false;
       if (!isDiscoverAvailable) return;
-      const discoverLocator = url.locators.get('DISCOVER_APP_LOCATOR');
+      const discoverLocator = url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
       if (!discoverLocator) {
         // eslint-disable-next-line no-console

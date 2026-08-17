@@ -9,6 +9,8 @@
 import { from, where } from '@kbn/esql-composer';
 import { castArray } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../plugin';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 type WhereClause = ReturnType<typeof where>;
 
@@ -31,7 +33,7 @@ export function useGetGenerateDiscoverLink({
     },
   } = getUnifiedDocViewerServices();
   const timeRange = data.query.timefilter.timefilter.getAbsoluteTime();
-  const discoverLocator = locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const indices = castArray(indexPattern).filter(Boolean);
 
   const settingsPrefix = unmappedFieldsPolicy

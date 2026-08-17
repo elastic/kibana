@@ -13,7 +13,6 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { AnalyzeMetricButton } from './analyze_metric_button';
 
-const DISCOVER_APP_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';
 const DISCOVER_HREF = '/app/discover#/';
 
 function createDiscoverLocatorMock() {

@@ -17,6 +17,8 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 const viewInDiscoverMessage = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.viewInDiscover',
@@ -29,7 +31,7 @@ export const useViewInDiscoverAction = (dataViewId?: string): TableItemAction =>
   const { application, share, data } = useAiopsAppContext();
 
   const discoverLocator = useMemo(
-    () => share?.url.locators.get('DISCOVER_APP_LOCATOR'),
+    () => share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR),
     [share?.url.locators]
   );
 

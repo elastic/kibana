@@ -60,7 +60,7 @@ export const KibanaTabContent: FC<Props> = ({ module, selectedKibanaSubTab }) =>
         }
 
         if (savedSearchIds.length > 0) {
-          const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+          const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
           if (discoverLocator) {
             savedSearchIds.forEach((id) => {
               const url = discoverLocator.getRedirectUrl({

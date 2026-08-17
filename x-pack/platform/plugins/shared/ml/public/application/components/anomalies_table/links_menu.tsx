@@ -260,7 +260,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   useEffect(() => {
-    const discoverLocator = share.url.locators.get('DISCOVER_APP_LOCATOR');
+    const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     if (dataViewIdWithTemporary === null) return;
 

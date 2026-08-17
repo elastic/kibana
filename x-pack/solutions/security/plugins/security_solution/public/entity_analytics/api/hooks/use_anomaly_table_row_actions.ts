@@ -196,7 +196,7 @@ export const useAnomalyTableRowActions = ({
 
       const { kqlQuery, from, to } = buildAnomalyQueryParams(record);
 
-      const discoverLocator = share?.url.locators.get('DISCOVER_APP_LOCATOR');
+      const discoverLocator = share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
       if (!discoverLocator) return;
 
       const datafeedQuery = job?.datafeed_config?.query;

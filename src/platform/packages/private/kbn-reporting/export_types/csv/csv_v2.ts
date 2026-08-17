@@ -36,6 +36,7 @@ import {
 } from '@kbn/reporting-server';
 
 import type { ReportingRequestHandlerContext } from './types';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 
@@ -81,7 +82,7 @@ export class CsvV2ExportType extends ExportType<
       !locatorParams ||
       !Array.isArray(locatorParams) ||
       locatorParams.length !== 1 ||
-      id !== 'DISCOVER_APP_LOCATOR' ||
+      id !== DISCOVER_APP_LOCATOR ||
       !params
     ) {
       throw Boom.badRequest('Invalid Job params: must contain a single Discover App locator');

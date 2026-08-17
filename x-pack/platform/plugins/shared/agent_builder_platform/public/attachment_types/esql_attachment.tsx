@@ -47,7 +47,7 @@ export const createEsqlAttachmentDefinition = ({
   locators: ILocatorClient;
 }): AttachmentUIDefinition<EsqlAttachment> => {
   const getDiscoverUrl = (esqlQuery: string): string | undefined => {
-    const discoverLocator = locators.get('DISCOVER_APP_LOCATOR');
+    const discoverLocator = locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
     return discoverLocator?.getRedirectUrl({ query: { esql: esqlQuery } });
   };
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 import { getAllLogsDataViewSpec } from '@kbn/discover-utils/src';
 import type { TimeRange } from '@kbn/es-query';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
@@ -42,7 +42,7 @@ export class LogsLocatorDefinition implements LocatorDefinition<LogsLocatorParam
 
   public readonly getLocation = async (params: LogsLocatorParams) => {
     const discoverAppLocator =
-      this.deps.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
+      this.deps.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)!;
 
     const isEsqlDefault = await this.deps.getIsEsqlDefault();
 

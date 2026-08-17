@@ -21,6 +21,8 @@ import type { LinkCardProps } from '../../../common/components/results_links/lin
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { LinkCard } from '../../../common/components/results_links/link_card';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 interface Props {
   dataView: DataView;
@@ -58,7 +60,7 @@ export const ActionsPanel: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover_v2?.show ?? false;
       if (!isDiscoverAvailable) return;
-      const discoverLocator = url?.locators.get('DISCOVER_APP_LOCATOR');
+      const discoverLocator = url?.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
       if (!discoverLocator) {
         // eslint-disable-next-line no-console

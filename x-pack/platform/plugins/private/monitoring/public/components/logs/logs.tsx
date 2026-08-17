@@ -156,7 +156,7 @@ function getDiscoverLink(
   }
 
   const filter = params.join(' and ');
-  const discoverLocator = sharePlugin?.url.locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = sharePlugin?.url.locators.get<DiscoverAppLocatorParams>DISCOVER_APP_LOCATOR);
 
   const base = discoverLocator?.getRedirectUrl({
     dataViewSpec: {

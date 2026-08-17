@@ -88,7 +88,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     services: { extensionsService, notificationService },
     url,
   } = useAppContext();
-  const discoverLocator = url?.locators.get('DISCOVER_APP_LOCATOR');
+  const discoverLocator = url?.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   const hasMLPermissions = capabilities?.ml?.canGetTrainedModels ? true : false;
 
   const indexErrors = useIndexErrors(index, ml, hasMLPermissions);

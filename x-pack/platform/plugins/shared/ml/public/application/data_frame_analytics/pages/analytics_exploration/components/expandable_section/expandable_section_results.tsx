@@ -150,7 +150,7 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
   const dataViewId = dataView?.id;
 
   const discoverLocator = useMemo(
-    () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
+    () => share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR),
     [share.url.locators]
   );
 

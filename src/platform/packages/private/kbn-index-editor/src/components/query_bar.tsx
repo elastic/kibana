@@ -14,6 +14,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import type { EditLookupIndexContentContext, KibanaContextExtra } from '../types';
+import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 const openInDiscoverTooltip = i18n.translate('indexEditor.toolbar.openInDiscoverTooltip', {
   defaultMessage: 'Open in Discover',
@@ -46,7 +48,7 @@ export const QueryBar = ({
   const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
 
   const discoverLocator = useMemo(() => {
-    return share?.url.locators.get('DISCOVER_APP_LOCATOR');
+    return share?.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
   }, [share?.url.locators]);
 
   // Only used as fallback if onOpenIndexInDiscover is not provided

@@ -26,7 +26,7 @@ export const EsqlResults: React.FC<EsqlResultsProps> = ({ result: { data } }) =>
     url: { locators },
   } = share;
 
-  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+  const discoverLocator = useMemo(() => locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR), [locators]);
 
   const { query: esqlQuery } = data;
 

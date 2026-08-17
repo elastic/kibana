@@ -17,7 +17,6 @@ import {
   type NodeTypeForLink,
 } from './metrics_node_details_link';
 
-const DISCOVER_APP_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';
 const ASSET_HREF = '/app/metrics/link-to/asset-detail';
 const DISCOVER_HREF = '/app/discover#/';
 

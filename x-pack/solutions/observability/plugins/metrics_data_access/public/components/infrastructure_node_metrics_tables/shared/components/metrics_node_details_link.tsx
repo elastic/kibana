@@ -13,8 +13,6 @@ import type { InventoryItemType } from '../../../../../common/inventory_models/t
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRedirect } from '../../../../pages/link_to/use_asset_details_redirect';
 
-const DISCOVER_APP_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';
-
 /** Fallback index pattern when infrastructure metric indices are not available. */
 const DEFAULT_METRICS_INDEX = 'metrics-*';
 

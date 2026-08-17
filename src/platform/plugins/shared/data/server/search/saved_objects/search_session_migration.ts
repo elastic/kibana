@@ -10,6 +10,7 @@
 import type { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import type { SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest } from '../../../common';
 import { SearchSessionStatus } from '../../../common';
+import { DASHBOARD_APP_LOCATOR, DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 
 /**
  * Search sessions were released in 7.12.0
@@ -73,8 +74,8 @@ export type SearchSessionSavedObjectAttributesPre$8$6$0 = Omit<
 
 function getLocatorId(urlGeneratorId?: string) {
   if (!urlGeneratorId) return;
-  if (urlGeneratorId === 'DISCOVER_APP_URL_GENERATOR') return 'DISCOVER_APP_LOCATOR';
-  if (urlGeneratorId === 'DASHBOARD_APP_URL_GENERATOR') return 'DASHBOARD_APP_LOCATOR';
+  if (urlGeneratorId === 'DISCOVER_APP_URL_GENERATOR') return DISCOVER_APP_LOCATOR;
+  if (urlGeneratorId === 'DASHBOARD_APP_URL_GENERATOR') return DASHBOARD_APP_LOCATOR;
   throw new Error(`No migration found for search session URL generator ${urlGeneratorId}`);
 }
 

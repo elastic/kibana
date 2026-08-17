@@ -113,7 +113,7 @@ beforeEach(() => {
         url: {
           locators: {
             get: (id: string) =>
-              id === 'DISCOVER_APP_LOCATOR' ? { getRedirectUrl: mockGetRedirectUrl } : undefined,
+              id === DISCOVER_APP_LOCATOR ? { getRedirectUrl: mockGetRedirectUrl } : undefined,
           },
         },
       },

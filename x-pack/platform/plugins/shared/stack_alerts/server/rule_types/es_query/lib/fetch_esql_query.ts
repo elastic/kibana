@@ -14,7 +14,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { EsqlEsqlShardFailure, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { hasStartEndParams, appendLimitToQuery } from '@kbn/esql-utils';
@@ -48,7 +48,7 @@ export async function fetchEsqlQuery({
   sourceFields,
 }: FetchEsqlQueryOpts) {
   const { logger, scopedClusterClient, share, ruleResultService } = services;
-  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR)!;
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 

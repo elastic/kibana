@@ -98,7 +98,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
   const id = useMemo(() => htmlIdGenerator()(), []);
 
   const discoverLocator = useMemo(
-    () => share.url.locators.get('DISCOVER_APP_LOCATOR'),
+    () => share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR),
     [share.url.locators]
   );
 
