@@ -28,17 +28,16 @@ describe('handleSourceColumnState', () => {
     expect(handleSourceColumnState(state, createUiSettings())).toEqual(state);
   });
 
-  it('collapses sole Summary column to an empty list', () => {
-    expect(handleSourceColumnState({ columns: [SOURCE_COLUMN] }, createUiSettings())).toEqual({
-      columns: [],
-    });
+  it('keeps sole Summary column unchanged', () => {
+    const state = { columns: [SOURCE_COLUMN] };
+    expect(handleSourceColumnState(state, createUiSettings())).toBe(state);
   });
 
-  it('does not apply field defaultColumns when collapsing sole Summary', () => {
+  it('does not apply field defaultColumns when sole Summary is present', () => {
     expect(
       handleSourceColumnState({ columns: [SOURCE_COLUMN] }, createUiSettings(['bytes']))
     ).toEqual({
-      columns: [],
+      columns: [SOURCE_COLUMN],
     });
   });
 
@@ -56,9 +55,9 @@ describe('handleSourceColumnState', () => {
     });
   });
 
-  it('treats classic ["_source"] defaults as summary-only empty columns', () => {
+  it('uses Summary when configured as the default column', () => {
     expect(handleSourceColumnState({ columns: [] }, createUiSettings([SOURCE_COLUMN]))).toEqual({
-      columns: [],
+      columns: [SOURCE_COLUMN],
     });
   });
 
