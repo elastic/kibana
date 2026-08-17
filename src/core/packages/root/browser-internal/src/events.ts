@@ -15,3 +15,9 @@ export const LOAD_CORE_CREATED = 'core_created';
 export const LOAD_SETUP_DONE = 'setup_done';
 export const LOAD_START_DONE = 'start_done';
 export const LOAD_FIRST_NAV = 'first_app_nav';
+
+// Chromium reports this benign ResizeObserver condition as an uncaught error.
+export const RESIZE_OBSERVER_LOOP_ERROR =
+  'ResizeObserver loop completed with undelivered notifications.';
+
+export const IGNORED_EVENTS_LIST = [RESIZE_OBSERVER_LOOP_ERROR];
