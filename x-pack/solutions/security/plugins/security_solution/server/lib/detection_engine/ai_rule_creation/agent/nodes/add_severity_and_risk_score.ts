@@ -32,7 +32,7 @@ const isValidSeverity = (value: string): value is Severity =>
 /**
  * Clamps risk_score to the valid 0–100 range and rounds to an integer.
  */
-const sanitizeRiskScore = (raw: unknown): number | undefined => {
+export const sanitizeRiskScore = (raw: unknown): number | undefined => {
   const num = typeof raw === 'number' ? raw : Number(raw);
   if (!Number.isFinite(num)) return undefined;
   return Math.min(100, Math.max(0, Math.round(num)));
@@ -42,7 +42,7 @@ const sanitizeRiskScore = (raw: unknown): number | undefined => {
  * Accepts the model's risk score when it is within ±10 of the canonical default
  * for the given severity; otherwise falls back to the canonical value.
  */
-const resolveRiskScore = (severity: Severity, rawScore: number | undefined): number => {
+export const resolveRiskScore = (severity: Severity, rawScore: number | undefined): number => {
   const canonical = defaultRiskScoreBySeverity[severity];
   if (rawScore === undefined) return canonical;
   return Math.abs(rawScore - canonical) <= 10 ? rawScore : canonical;
