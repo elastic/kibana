@@ -49,14 +49,42 @@ const MOCK_PACKAGES: Record<string, any> = {
       streams: [{ input: 'aws-s3', vars: [], enabled: true }],
     })),
   },
-  aws_bedrock: { policy_templates: [], data_streams: [] },
-  aws_bedrock_agentcore: { policy_templates: [], data_streams: [] },
-  awsfargate: { policy_templates: [], data_streams: [] },
-  aws_mq: { policy_templates: [], data_streams: [] },
-  aws_cloudtrail_otel: { policy_templates: [], data_streams: [] },
-  aws_vpcflow_otel: { policy_templates: [], data_streams: [] },
-  aws_waf_otel: { policy_templates: [], data_streams: [] },
-  aws_logs: { policy_templates: [], data_streams: [] },
+  aws_bedrock: {
+    policy_templates: [],
+    data_streams: [
+      { path: 'guardrails', type: 'metrics', streams: [] },
+      { path: 'invocation', type: 'logs', streams: [] },
+      { path: 'runtime', type: 'metrics', streams: [] },
+    ],
+  },
+  aws_bedrock_agentcore: {
+    policy_templates: [],
+    data_streams: [{ path: 'bedrock_agentcore', type: 'logs', streams: [] }],
+  },
+  awsfargate: {
+    policy_templates: [],
+    data_streams: [{ path: 'task_stats', type: 'metrics', streams: [] }],
+  },
+  aws_mq: {
+    policy_templates: [],
+    data_streams: [{ path: 'mq', type: 'metrics', streams: [] }],
+  },
+  aws_cloudtrail_otel: {
+    policy_templates: [],
+    data_streams: [{ path: 'cloudtrail_otel', type: 'logs', streams: [] }],
+  },
+  aws_vpcflow_otel: {
+    policy_templates: [],
+    data_streams: [{ path: 'vpcflow_otel', type: 'logs', streams: [] }],
+  },
+  aws_waf_otel: {
+    policy_templates: [],
+    data_streams: [{ path: 'waf_otel', type: 'logs', streams: [] }],
+  },
+  aws_logs: {
+    policy_templates: [],
+    data_streams: [{ path: 'aws_logs', type: 'logs', streams: [] }],
+  },
 };
 
 const BUILT_MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);

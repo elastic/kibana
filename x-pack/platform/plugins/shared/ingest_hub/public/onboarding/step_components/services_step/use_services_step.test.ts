@@ -13,14 +13,63 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServicesStep } from './use_services_step';
-import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from '../../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 
-// AWS_SERVICES_MAP applies showInUI ?? true — use it as the matrix mock so entries pass the
-// `s.showInUI` filter in useServicesStep. AWS_SERVICES_STATIC omits the default, which
-// makes showInUI === undefined (falsy) for most entries.
-const MATRIX = [...AWS_SERVICES_MAP.values()];
+// Build the matrix with minimal mocked packages so signalType is derived from data_stream.type.
+// AWS_SERVICES_MAP would have signalType:undefined (no manifest data), breaking signal-filter tests.
+const MOCK_PACKAGES: Record<string, any> = {
+  aws: {
+    policy_templates: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws' && e.policyTemplate)
+      .map((e) => e.policyTemplate!)
+      .filter((name, i, arr) => arr.indexOf(name) === i)
+      .map((name) => ({ name, deployment_modes: { agentless: { enabled: true } } })),
+    data_streams: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
+      path: e.dataStream ?? e.id,
+      type: 'logs',
+      streams: [{ input: 'aws-s3', vars: [], enabled: true }],
+    })),
+  },
+  aws_bedrock: {
+    policy_templates: [],
+    data_streams: [
+      { path: 'guardrails', type: 'metrics', streams: [] },
+      { path: 'invocation', type: 'logs', streams: [] },
+      { path: 'runtime', type: 'metrics', streams: [] },
+    ],
+  },
+  aws_bedrock_agentcore: {
+    policy_templates: [],
+    data_streams: [{ path: 'bedrock_agentcore', type: 'logs', streams: [] }],
+  },
+  awsfargate: {
+    policy_templates: [],
+    data_streams: [{ path: 'task_stats', type: 'metrics', streams: [] }],
+  },
+  aws_mq: {
+    policy_templates: [],
+    data_streams: [{ path: 'mq', type: 'metrics', streams: [] }],
+  },
+  aws_cloudtrail_otel: {
+    policy_templates: [],
+    data_streams: [{ path: 'cloudtrail_otel', type: 'logs', streams: [] }],
+  },
+  aws_vpcflow_otel: {
+    policy_templates: [],
+    data_streams: [{ path: 'vpcflow_otel', type: 'logs', streams: [] }],
+  },
+  aws_waf_otel: {
+    policy_templates: [],
+    data_streams: [{ path: 'waf_otel', type: 'logs', streams: [] }],
+  },
+  aws_logs: {
+    policy_templates: [],
+    data_streams: [{ path: 'aws_logs', type: 'logs', streams: [] }],
+  },
+};
+
+const MATRIX = buildAwsServiceMatrix(MOCK_PACKAGES, AWS_SERVICES_STATIC);
 
 // Use a real writable ref so setSelectedServiceIds triggers re-renders.
 function setupFlow(initial: string[] = []) {
