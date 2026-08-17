@@ -12,7 +12,6 @@ import {
   type CPSProject,
   type ICPSManager,
   PROJECT_ROUTING,
-  projectRoutingCodec,
   useFetchProjects,
 } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
@@ -62,46 +61,17 @@ const getCustomProjectScopeLabel = (selectedCount: number, totalCount: number): 
     values: { selectedCount, totalCount },
   });
 
-const getSelectedProjectCount = ({
-  availableProjects,
-  originProjectId,
-  projectRouting,
-}: {
-  availableProjects: CPSProject[];
-  originProjectId?: string;
-  projectRouting: ProjectRouting;
-}): number => {
-  if (projectRouting === PROJECT_ROUTING.ALL) {
-    return availableProjects.length;
-  }
-
-  if (projectRouting === PROJECT_ROUTING.ORIGIN) {
-    return originProjectId ? 1 : 0;
-  }
-
-  const { excludedProjectIds, selectedProjectIds } = projectRoutingCodec.decode(projectRouting);
-
-  if (selectedProjectIds.length > 0) {
-    return selectedProjectIds.filter((projectId) =>
-      availableProjects.some((project) => project._id === projectId)
-    ).length;
-  }
-
-  if (excludedProjectIds.length > 0) {
-    return availableProjects.filter((project) => !excludedProjectIds.includes(project._id)).length;
-  }
-
-  return availableProjects.length;
-};
+const getProjectCount = (originProject: CPSProject | null, linkedProjects: CPSProject[]): number =>
+  (originProject ? 1 : 0) + linkedProjects.length;
 
 const getProjectScopeButtonLabel = ({
-  availableProjects,
-  originProjectId,
   projectRouting,
+  selectedProjectCount,
+  totalProjectCount,
 }: {
-  availableProjects: CPSProject[];
-  originProjectId?: string;
   projectRouting: ProjectRouting;
+  selectedProjectCount: number;
+  totalProjectCount: number;
 }): string => {
   if (projectRouting === PROJECT_ROUTING.ALL) {
     return allProjectsLabel;
@@ -111,13 +81,7 @@ const getProjectScopeButtonLabel = ({
     return thisProjectLabel;
   }
 
-  const selectedProjectCount = getSelectedProjectCount({
-    availableProjects,
-    originProjectId,
-    projectRouting,
-  });
-
-  return getCustomProjectScopeLabel(selectedProjectCount, availableProjects.length);
+  return getCustomProjectScopeLabel(selectedProjectCount, totalProjectCount);
 };
 
 interface EditTransformProjectScopeProps {
@@ -141,41 +105,49 @@ const EditTransformProjectScopeButton: FC<EditTransformProjectScopeButtonProps> 
     fetchProjects,
     PROJECT_ROUTING.ALL
   );
-  const availableProjects = useMemo(
-    () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
-    [linkedProjects, originProject]
-  );
+  const {
+    originProject: routedOriginProject,
+    linkedProjects: routedLinkedProjects,
+    isLoading: isRoutingLoading,
+    error: routingError,
+  } = useFetchProjects(fetchProjects, value || PROJECT_ROUTING.ORIGIN);
+  const totalProjectCount = getProjectCount(originProject, linkedProjects);
+  const selectedProjectCount = getProjectCount(routedOriginProject, routedLinkedProjects);
+  const hasError = Boolean(error || routingError);
+  const isProjectScopeLoading = isLoading || isRoutingLoading;
+  const hasLinkedProjects = linkedProjects.length > 0;
   const projectRouting = (value || PROJECT_ROUTING.ORIGIN) as ProjectRouting;
+  const buttonLabel = useMemo(
+    () =>
+      getProjectScopeButtonLabel({
+        projectRouting,
+        selectedProjectCount,
+        totalProjectCount,
+      }),
+    [projectRouting, selectedProjectCount, totalProjectCount]
+  );
 
-  if (!isLoading && !error && linkedProjects.length === 0) {
+  if (!isProjectScopeLoading && !hasError && !hasLinkedProjects) {
     return null;
   }
-
-  const buttonLabel = isLoading
-    ? loadingLabel
-    : getProjectScopeButtonLabel({
-        availableProjects,
-        originProjectId: originProject?._id,
-        projectRouting,
-      });
 
   return (
     <>
       <EuiFormRow
-        error={error ? unavailableLabel : undefined}
-        isInvalid={Boolean(error)}
+        error={hasError ? unavailableLabel : undefined}
+        isInvalid={hasError}
         label={projectScopeLabel}
       >
         <EuiButton
           color="text"
           data-test-subj="transformEditProjectScopeButton"
           iconType="crossProjectSearch"
-          isDisabled={isLoading || Boolean(error)}
-          isLoading={isLoading}
+          isDisabled={isProjectScopeLoading || hasError}
+          isLoading={isProjectScopeLoading}
           onClick={onOpenProjectScope}
           size="m"
         >
-          {error ? unavailableLabel : buttonLabel}
+          {hasError ? unavailableLabel : isProjectScopeLoading ? loadingLabel : buttonLabel}
         </EuiButton>
       </EuiFormRow>
       <EuiSpacer size="l" />

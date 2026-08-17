@@ -19,10 +19,39 @@ import { EditTransformProjectScope } from './edit_transform_project_scope';
 
 jest.mock('../../../app_dependencies');
 
-const renderProjectScope = () => {
+const originProject = {
+  _id: 'origin-id',
+  _alias: 'local_project',
+  _organisation: 'org',
+  _type: 'security',
+};
+
+const linkedSecurityProject = {
+  _id: 'linked-security-id',
+  _alias: 'linked_security_project',
+  _organisation: 'org',
+  _type: 'security',
+};
+
+const linkedObservabilityProject = {
+  _id: 'linked-observability-id',
+  _alias: 'linked_observability_project',
+  _organisation: 'org',
+  _type: 'observability',
+};
+
+const renderProjectScope = (projectRouting?: string) => {
   const onOpenProjectScope = jest.fn();
+  const config = {
+    ...getTransformConfigMock(),
+    source: {
+      ...getTransformConfigMock().source,
+      ...(projectRouting ? { project_routing: projectRouting } : {}),
+    },
+  };
+
   renderWithI18n(
-    <EditTransformFlyoutProvider config={getTransformConfigMock()}>
+    <EditTransformFlyoutProvider config={config}>
       <EditTransformProjectScope onOpenProjectScope={onOpenProjectScope} />
     </EditTransformFlyoutProvider>
   );
@@ -35,21 +64,25 @@ describe('EditTransformProjectScope', () => {
     appDeps.cps = {
       isTierEligible: true,
       cpsManager: {
-        fetchProjects: jest.fn().mockResolvedValue({
-          origin: {
-            _id: 'origin-id',
-            _alias: 'local_project',
-            _organisation: 'org',
-            _type: 'security',
-          },
-          linkedProjects: [
-            {
-              _id: 'linked-id',
-              _alias: 'linked_project',
-              _organisation: 'org',
-              _type: 'security',
-            },
-          ],
+        fetchProjects: jest.fn(async (routing?: string) => {
+          if (routing === PROJECT_ROUTING.ALL) {
+            return {
+              origin: originProject,
+              linkedProjects: [linkedSecurityProject, linkedObservabilityProject],
+            };
+          }
+
+          if (routing === '_type:security' || routing === '@security-projects') {
+            return {
+              origin: originProject,
+              linkedProjects: [linkedSecurityProject],
+            };
+          }
+
+          return {
+            origin: originProject,
+            linkedProjects: [],
+          };
         }),
         getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
       },
@@ -77,5 +110,33 @@ describe('EditTransformProjectScope', () => {
     fireEvent.click(screen.getByTestId('transformEditProjectScopeButton'));
 
     expect(onOpenProjectScope).toHaveBeenCalledTimes(1);
+  });
+
+  it('counts projects from route-scoped fetches for filtered routing', async () => {
+    renderProjectScope('_type:security');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformEditProjectScopeButton')).toHaveTextContent(
+        '2/3 projects'
+      );
+    });
+
+    expect(appDependencies.useAppDependencies().cps?.cpsManager?.fetchProjects).toHaveBeenCalledWith(
+      '_type:security'
+    );
+  });
+
+  it('counts projects from route-scoped fetches for named routing', async () => {
+    renderProjectScope('@security-projects');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformEditProjectScopeButton')).toHaveTextContent(
+        '2/3 projects'
+      );
+    });
+
+    expect(appDependencies.useAppDependencies().cps?.cpsManager?.fetchProjects).toHaveBeenCalledWith(
+      '@security-projects'
+    );
   });
 });
