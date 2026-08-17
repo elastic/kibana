@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiEmptyPrompt, EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import React, { useEffect, useMemo } from 'react';
 import { useCustomContentHtml } from '../hooks/use_custom_content_html';
 
@@ -19,8 +19,13 @@ interface CustomContentComponentProps {
   timeRange: TimeRange | undefined;
   generationVersion: number;
   savedTemplate: string | undefined;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   onTemplateChange: (template: string) => void;
   onErrorChange?: (error: string | undefined) => void;
+  previewHtml: string | null;
 }
 
 const iframeContainerCss = css({
@@ -45,8 +50,13 @@ export const CustomContentComponent = ({
   timeRange,
   generationVersion,
   savedTemplate,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
   onTemplateChange,
   onErrorChange,
+  previewHtml,
 }: CustomContentComponentProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
   const { html, isLoading, error, isAiUnavailable } = useCustomContentHtml({
@@ -57,6 +67,10 @@ export const CustomContentComponent = ({
     generationVersion,
     savedTemplate,
     colorMode,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
     onTemplateChange,
   });
 
@@ -113,12 +127,20 @@ export const CustomContentComponent = ({
           {error}
         </EuiCallOut>
       )}
-      {!isAiUnavailable && !error && html && (
+      {previewHtml != null ? (
         <div css={iframeContainerCss}>
-          <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+          <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title="Custom content panel" />
         </div>
+      ) : (
+        <>
+          {!isAiUnavailable && !error && html && (
+            <div css={iframeContainerCss}>
+              <iframe css={iframeCss} srcDoc={html} sandbox="" title="Custom content panel" />
+            </div>
+          )}
+          {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+        </>
       )}
-      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </div>
   );
 };

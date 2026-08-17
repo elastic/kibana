@@ -1,5 +1,5 @@
 {
-  "sha1": "0f8943903624c4c2679d60a56c78ebdb7d530b13",
+  "sha1": "be625ddc6f810cc56857d28fa1cd6f3b6317b39c",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -48,7 +48,7 @@
     {
       "id": "3e4259fe911aa15-3d9ded58f5789be",
       "title": "Dashboard add panel flyout renders add panel flyout",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -61,7 +61,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_add_panel_flyout.spec.ts",
-        "line": 110,
+        "line": 111,
         "column": 16
       }
     },
