@@ -776,7 +776,8 @@ exports[`Flyout elasticsearch part two should show instructions to disable inter
             <EuiText>
               <p>
                 <Memo(MemoizedFormattedMessage)
-                  defaultMessage="Disable self monitoring of Elasticsearch monitoring metrics. Set {monospace} to false on each server in the production cluster."
+                  defaultMessage="Disable self monitoring of Elasticsearch monitoring metrics.
+            Set {monospace} to false on each server in the production cluster."
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.disableInternalCollectionDescription"
                   values={
                     Object {
@@ -872,7 +873,8 @@ exports[`Flyout elasticsearch part two should show instructions to migrate to me
             <EuiText>
               <p>
                 <Memo(MemoizedFormattedMessage)
-                  defaultMessage="By default the module collects Elasticsearch metrics from {url}. If the local server has a different address, add it to the hosts setting in {module}."
+                  defaultMessage="By default the module collects Elasticsearch metrics from {url}.
+              If the local server has a different address, add it to the hosts setting in {module}."
                   id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.enableMetricbeatModuleDescription"
                   values={
                     Object {

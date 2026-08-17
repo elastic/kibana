@@ -29,15 +29,18 @@ Array [
       <code>
         xpack.monitoring.enabled
       </code>
-       is set to 
+      
+            is set to 
       <code>
         false
       </code>
-       set, which disables monitoring. Removing the 
+       set, which disables monitoring.
+            Removing the 
       <code>
         xpack.monitoring.enabled: false
       </code>
-       setting from your configuration will put the default into effect and enable Monitoring.
+       setting
+            from your configuration will put the default into effect and enable Monitoring.
     </p>
   </div>,
 ]

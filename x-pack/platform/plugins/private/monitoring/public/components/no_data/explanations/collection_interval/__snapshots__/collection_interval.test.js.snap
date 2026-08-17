@@ -14,7 +14,9 @@ Array [
     class="euiText emotion-euiText-m"
   >
     <p>
-      As soon as monitoring data appears in your cluster the page will automatically refresh with your monitoring dashboard. This only takes only a few seconds.
+      As soon as monitoring data appears in your
+              cluster the page will automatically refresh with your monitoring
+              dashboard. This only takes only a few seconds.
     </p>
   </div>,
   <div
@@ -57,14 +59,16 @@ Array [
       <code>
         xpack.monitoring.collection.interval
       </code>
-       is set to 
+      
+              is set to 
       <code>
         -1
       </code>
       .
     </p>
     <p>
-      The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+      The collection interval setting needs to be a positive integer
+              (10s is recommended) in order for the collection agents to be active.
     </p>
     <p>
       Would you like us to change it and enable monitoring?
@@ -131,14 +135,16 @@ Array [
       <code>
         xpack.monitoring.collection.interval
       </code>
-       is set to 
+      
+              is set to 
       <code>
         -1
       </code>
       .
     </p>
     <p>
-      The collection interval setting needs to be a positive integer (10s is recommended) in order for the collection agents to be active.
+      The collection interval setting needs to be a positive integer
+              (10s is recommended) in order for the collection agents to be active.
     </p>
     <p>
       Would you like us to change it and enable monitoring?
