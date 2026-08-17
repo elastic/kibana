@@ -7,16 +7,15 @@
 
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
-  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiHorizontalRule,
   EuiPopover,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { type Investigation } from '@kbn/pnd-common';
+import { CardActionIconButton } from './action_icon_button';
 
 interface ActionConfig {
   key: string;
@@ -74,25 +73,14 @@ export const BaseActions = memo<BaseActionsProps>(
     const handleToggle = useCallback(() => setIsOpen((prev) => !prev), []);
 
     const button = (
-      <EuiToolTip
-        content={i18n.translate('xpack.pnd.baseActions.openMenu', {
+      <CardActionIconButton
+        data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
+        iconType="boxesVertical"
+        tooltipContent={i18n.translate('xpack.pnd.baseActions.openMenu', {
           defaultMessage: 'More actions',
         })}
-        disableScreenReaderOutput
-      >
-        <EuiButtonIcon
-          data-test-subj={dataTestSubj ? `${dataTestSubj}-button` : undefined}
-          iconType="boxesVertical"
-          color="text"
-          onClick={(event: React.MouseEvent) => {
-            event.stopPropagation();
-            handleToggle();
-          }}
-          aria-label={i18n.translate('xpack.pnd.baseActions.openMenu', {
-            defaultMessage: 'More actions',
-          })}
-        />
-      </EuiToolTip>
+        onClick={handleToggle}
+      />
     );
 
     const actionConfigs = useMemo<ActionConfig[]>(

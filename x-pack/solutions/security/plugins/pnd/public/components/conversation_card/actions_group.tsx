@@ -7,18 +7,11 @@
 
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { type Investigation, type RecommendedAction } from '@kbn/pnd-common';
 import { CONVERSATION_CARD_ACTIONS } from './translations';
 import { BaseActions, type BaseActionsProps } from './base_actions';
+import { CardActionIconButton } from './action_icon_button';
 
 const ACTION_ICONS_MAP: Record<RecommendedAction, 'gear' | 'lock' | 'flag' | 'external'> = {
   contain: 'lock',
@@ -101,18 +94,11 @@ export const ConversationsActionsGroup = memo<ConversationsActionsGroupProps>(
           })}
         />
         <EuiFlexItem grow={false}>
-          <EuiToolTip content={CONVERSATION_CARD_ACTIONS.openChat} disableScreenReaderOutput>
-            <EuiButtonIcon
-              size="s"
-              aria-label={CONVERSATION_CARD_ACTIONS.openChat}
-              iconType="productAgent"
-              color="text"
-              onClick={(event: React.MouseEvent) => {
-                event.stopPropagation();
-                onOpenChat();
-              }}
-            />
-          </EuiToolTip>
+          <CardActionIconButton
+            iconType="productAgent"
+            tooltipContent={CONVERSATION_CARD_ACTIONS.openChat}
+            onClick={onOpenChat}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <BaseActions investigation={investigation} onClickAction={onClickAction} />
