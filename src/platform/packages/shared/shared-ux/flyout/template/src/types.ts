@@ -47,10 +47,7 @@ export interface FlyoutFooterActionBaseProps {
 }
 
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
-export interface FlyoutFooterPrimaryActionProps extends FlyoutFooterActionBaseProps {
-  /** Whether to render the primary button as filled. Defaults to `true`. */
-  fill?: boolean;
-}
+export type FlyoutFooterPrimaryActionProps = FlyoutFooterActionBaseProps;
 
 /** Props for the declarative `FlyoutTemplate.Footer.SecondaryAction` part. */
 export type FlyoutFooterSecondaryActionProps = FlyoutFooterActionBaseProps;

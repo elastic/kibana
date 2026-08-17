@@ -43,7 +43,7 @@ The root forwards a fixed subset of `EuiFlyoutProps` — `onClose`, `size`, `min
 
 **`FlyoutTemplate.Footer`** renders `PrimaryAction` and `SecondaryAction` right-aligned inside `EuiFlyoutFooter`, secondary first. If neither action is present, the footer is omitted entirely — no default Cancel button is added. Only the first instance of each action is rendered.
 
-- `FlyoutTemplate.Footer.PrimaryAction` — rendered as an `EuiButton`, filled unless `fill={false}`.
+- `FlyoutTemplate.Footer.PrimaryAction` — rendered as an `EuiButton`, filled.
 - `FlyoutTemplate.Footer.SecondaryAction` — rendered as an `EuiButtonEmpty`.
 
 Both actions take `label`, `onClick`, and optional `iconType`, `isLoading`, `isDisabled`, `data-test-subj`.
