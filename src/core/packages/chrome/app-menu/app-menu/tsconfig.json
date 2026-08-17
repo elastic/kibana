@@ -2,18 +2,17 @@
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
+    "types": [
+      "node"
+    ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "**/*.ts"
   ],
   "exclude": [
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/core-chrome-browser",
-    "@kbn/use-observable",
-    "@kbn/core-chrome-browser-context",
-    "@kbn/app-menu",
+    "@kbn/ui-app-menu"
   ]
 }
