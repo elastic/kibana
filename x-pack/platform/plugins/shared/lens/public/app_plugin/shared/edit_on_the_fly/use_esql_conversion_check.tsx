@@ -17,6 +17,7 @@ import type {
   LensDatasourceId,
   TypedLensSerializedState,
   LensDocument,
+  Visualization,
 } from '@kbn/lens-common';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -62,7 +63,7 @@ export const useEsqlConversionCheck = (
     datasourceId: LensDatasourceId;
     layerIds: string[];
     visualization: VisualizationState;
-    activeVisualization: unknown;
+    activeVisualization: Visualization | undefined;
   },
   {
     framePublicAPI,
@@ -120,10 +121,7 @@ export const useEsqlConversionCheck = (
         continue;
       }
 
-      const layerType =
-        (
-          activeVisualization as { getLayerType?: (id: string, s: unknown) => string }
-        )?.getLayerType?.(layerId, state) ?? layerTypes.DATA;
+      const layerType = activeVisualization.getLayerType(layerId, state) ?? layerTypes.DATA;
 
       if (layerType !== layerTypes.DATA) {
         convertibleLayers.push({
