@@ -44,9 +44,7 @@ test.describe(
       await test.step('core alerts UI is visible', async () => {
         await expect(serviceDetailsPage.alertsTab.globalQueryBar).toBeVisible();
         await expect(serviceDetailsPage.alertsTab.alertsTableEmptyState).toBeVisible();
-        await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-          'opbeans-java'
-        );
+        await expect(page.getByTestId('appHeaderTitle')).toHaveText('opbeans-java');
       });
 
       await test.step('renders the expected filter controls', async () => {
