@@ -164,6 +164,21 @@ describe('getVisualizationAttachmentType', () => {
       expect('children' in attachmentViewObject).toBe(false);
     });
 
+    it('does not set custom actions for an ES|QL visualization', () => {
+      const lensType = getVisualizationAttachmentType();
+      const attachmentViewObject = lensType.getAttachmentViewObject({
+        ...attachmentViewProps,
+        data: {
+          state: {
+            attributes: { state: { query: { esql: '' } } },
+            timeRange: {},
+          },
+        },
+      });
+
+      expect(attachmentViewObject.getActions).toBeUndefined();
+    });
+
     it('renders the open visualization button correctly', () => {
       const lensType = getVisualizationAttachmentType();
       const actions = lensType

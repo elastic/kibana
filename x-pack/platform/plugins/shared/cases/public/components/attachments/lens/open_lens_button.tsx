@@ -14,6 +14,9 @@ import type { LensProps } from './types';
 
 type Props = LensProps & { savedObjectId: string };
 
+export const isOpenLensActionCompatible = (attributes: LensProps['attributes']): boolean =>
+  !isOfAggregateQueryType(attributes.state.query);
+
 const OpenLensButtonComponent: React.FC<Props> = ({ savedObjectId, attributes, timeRange }) => {
   const {
     lens: { navigateToPrefilledEditor, canUseEditor },
@@ -33,9 +36,8 @@ const OpenLensButtonComponent: React.FC<Props> = ({ savedObjectId, attributes, t
   }, [savedObjectId, attributes, navigateToPrefilledEditor, timeRange]);
 
   const hasLensPermissions = canUseEditor();
-  const isESQLQuery = isOfAggregateQueryType(attributes.state.query);
 
-  if (!hasLensPermissions || isESQLQuery) {
+  if (!hasLensPermissions || !isOpenLensActionCompatible(attributes)) {
     return null;
   }
 
@@ -44,7 +46,6 @@ const OpenLensButtonComponent: React.FC<Props> = ({ savedObjectId, attributes, t
       aria-label={OPEN_IN_VISUALIZATION}
       data-test-subj="cases-open-in-visualization-btn"
       iconType="lensApp"
-      isDisabled={!hasLensPermissions}
       onClick={onClick}
     >
       {OPEN_IN_VISUALIZATION}

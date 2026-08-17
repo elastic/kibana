@@ -27,7 +27,7 @@ import {
   type UnifiedHybridAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import type { LensProps } from './types';
-import { OpenLensButton } from './open_lens_button';
+import { isOpenLensActionCompatible, OpenLensButton } from './open_lens_button';
 import { LensRenderer } from './lens_renderer';
 import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
@@ -106,10 +106,11 @@ const getVisualizationAttachmentViewObject = ({
       i18n.ADDED_VISUALIZATION
     );
   const lensProps = data ? toLensProps(data) : undefined;
+  const showOpenLensAction = lensProps != null && isOpenLensActionCompatible(lensProps.attributes);
   return {
     event,
     timelineAvatar: 'lensApp',
-    ...(lensProps
+    ...(showOpenLensAction
       ? { getActions: () => getVisualizationAttachmentActions(openLensId, lensProps) }
       : {}),
     hideDefaultActions: false,

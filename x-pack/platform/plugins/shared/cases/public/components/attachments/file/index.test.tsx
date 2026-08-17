@@ -13,7 +13,7 @@ import { AttachmentActionType } from '../../../client/attachment_framework/types
 import { basicCase, basicFileMock } from '../../../containers/mock';
 import { getFileAttachmentType } from '.';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
-import { renderWithTestingProviders } from '../../../common/mock';
+import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import type { FileViewProps } from '.';
 
 describe('getFileType', () => {
@@ -133,6 +133,18 @@ describe('getFileType', () => {
       await userEvent.click(deleteButton);
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+    });
+
+    it('getActions delete control is hidden without delete permission', async () => {
+      const attachmentViewObject = fileType.getAttachmentViewObject(attachmentViewProps);
+      const actions = attachmentViewObject.getActions?.(attachmentViewProps) ?? [];
+
+      // @ts-expect-error: render exists on CustomAttachmentAction
+      renderWithTestingProviders(actions[1].render(), {
+        wrapperProps: { permissions: buildCasesPermissions({ delete: false }) },
+      });
+
+      expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
     });
 
     it('empty metadata returns blank FileAttachmentViewObject', () => {
