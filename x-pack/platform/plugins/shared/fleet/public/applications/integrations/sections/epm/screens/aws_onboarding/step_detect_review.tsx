@@ -542,7 +542,11 @@ const InstallContentCard: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <EuiCheckbox
                     id={`awsOnboardingSelectAllContent-${type}`}
-                    label="Select all"
+                    label={
+                      <EuiText size="xs" color="primary">
+                        Select all
+                      </EuiText>
+                    }
                     checked={groupSelectedCount === items.length && items.length > 0}
                     indeterminate={groupSelectedCount > 0 && groupSelectedCount < items.length}
                     onChange={(e) => setGroupSelected(items, e.target.checked)}
