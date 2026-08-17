@@ -9,6 +9,7 @@ import type {
   AlertEpisodeStatus,
   AlertEventSeverity,
 } from '../../resources/datastreams/alert_events';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { DispatchFailureReason } from './steps/constants';
 
 export type RuleId = string;
@@ -48,6 +49,7 @@ export interface AlertEpisodeSuppression {
 export interface DispatcherExecutionParams {
   previousStartedAt?: Date;
   signal?: AbortSignal;
+  logger: LoggerServiceContract;
 }
 
 export interface DispatcherExecutionResult {
@@ -147,10 +149,12 @@ export interface DispatcherPipelineInput {
   readonly startedAt: Date;
   readonly previousStartedAt: Date;
   readonly executionUuid: string;
+  readonly logger: LoggerServiceContract;
 }
 
 export interface DispatcherPipelineState {
   readonly input: DispatcherPipelineInput;
+  readonly logger: LoggerServiceContract;
   readonly episodes?: AlertEpisode[];
   readonly suppressions?: AlertEpisodeSuppression[];
   readonly dispatchable?: AlertEpisode[];
@@ -168,7 +172,7 @@ export interface DispatcherPipelineState {
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions';
 
 export type DispatcherStepOutput =
-  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
+  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input' | 'logger'>> }
   | { type: 'halt'; reason: DispatcherHaltReason };
 
 export interface DispatcherStep {
