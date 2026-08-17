@@ -8,6 +8,7 @@
 import {
   isRequestApiKeyType,
   getApiKeyFromRequest,
+  getUiamApiKeySecret,
   createApiKey,
   getApiKeyAndUserScope,
 } from './api_key_utils';
@@ -33,6 +34,28 @@ describe('api_key_utils', () => {
     test('should return false if the request is made by a user', () => {
       const mockUser = { authentication_type: 'basic' } as AuthenticatedUser;
       expect(isRequestApiKeyType(mockUser)).toBeFalsy();
+    });
+  });
+
+  describe('getUiamApiKeySecret', () => {
+    test('returns a raw UIAM credential as-is (grant path format)', () => {
+      expect(getUiamApiKeySecret('essu_raw_secret')).toBe('essu_raw_secret');
+    });
+
+    test('extracts the secret from the `base64(id:secret)` format (UIAM provisioning path)', () => {
+      const stored = Buffer.from('key-id:essu_converted_secret').toString('base64');
+
+      expect(getUiamApiKeySecret(stored)).toBe('essu_converted_secret');
+    });
+
+    test('returns the stored value untouched when it decodes to a non-UIAM credential', () => {
+      const stored = Buffer.from('key-id:not-a-uiam-secret').toString('base64');
+
+      expect(getUiamApiKeySecret(stored)).toBe(stored);
+    });
+
+    test('returns the stored value untouched when it is neither raw nor base64 encoded', () => {
+      expect(getUiamApiKeySecret('!!!not-base64!!!')).toBe('!!!not-base64!!!');
     });
   });
 

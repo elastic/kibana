@@ -82,6 +82,15 @@ export const RUN_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   }
 );
 
+/** Onboard-stream tooltip, extended with the cross-project generation disclosure. */
+export const RUN_STREAM_ONBOARDING_CROSS_PROJECT_TOOLTIP = i18n.translate(
+  'xpack.significantEventsApp.streamsTree.runStreamOnboardingCrossProjectTooltip',
+  {
+    defaultMessage:
+      'Onboard stream. Analyzes data from all projects linked through cross-project search, regardless of the project scope configured for this space.',
+  }
+);
+
 export const STOP_STREAM_ONBOARDING_BUTTON_LABEL = i18n.translate(
   'xpack.significantEventsApp.streamsTree.stopStreamOnboardingButtonEmptyLabel',
   {
