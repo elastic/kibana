@@ -92,7 +92,9 @@ export function registerValidateWorkflowTool(
 Use this tool AFTER generating or modifying workflow YAML and BEFORE proposing changes to the user.
 It checks YAML syntax, schema conformance, step name uniqueness, and Liquid template syntax.
 When validation fails, step type definitions used in the workflow are automatically included to help fix issues.
-If validation fails, fix the issues and re-validate until the YAML is valid.`,
+If validation fails, fix the issues and re-validate until the YAML is valid.
+
+API documentation — Workflows API: https://www.elastic.co/docs/api/doc/kibana/group/endpoint-workflows`,
     schema: z.object({
       yaml: z.string().describe('The complete workflow YAML string to validate'),
     }),
