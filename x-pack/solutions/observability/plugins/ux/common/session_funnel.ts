@@ -11,6 +11,14 @@ export const FUNNEL_MAX_STEPS = 8;
 export const FUNNEL_MIN_STEPS = 2;
 export const FUNNEL_SESSION_SAMPLE_SIZE = 8;
 
+/** Short labels must stay unique — prefix slices collide on ids like acme-funnel-0042. */
+export const formatSampleSessionId = (sessionId: string): string => {
+  if (sessionId.length <= 20) {
+    return sessionId;
+  }
+  return `${sessionId.slice(0, 6)}…${sessionId.slice(-4)}`;
+};
+
 export type FunnelStepType = 'page' | 'activity';
 
 export interface FunnelStepDef {

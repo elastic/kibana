@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { computeFunnel, type FunnelStepDef } from './session_funnel';
+import { computeFunnel, formatSampleSessionId, type FunnelStepDef } from './session_funnel';
 
 const steps: FunnelStepDef[] = [
   { type: 'page', value: 'catalog', label: 'Catalog' },
@@ -40,5 +40,15 @@ describe('computeFunnel', () => {
     const result = computeFunnel([{ sessionId: 'same-ts', firstTs: [5, 5, 5] }], steps);
     expect(result.steps.map((s) => s.count)).toEqual([1, 1, 1]);
     expect(result.steps[2].conversionFromStart).toBe(1);
+  });
+});
+
+describe('formatSampleSessionId', () => {
+  it('keeps short ids intact so acme-funnel samples stay distinct', () => {
+    expect(formatSampleSessionId('acme-funnel-0042')).toBe('acme-funnel-0042');
+  });
+
+  it('keeps the unique suffix on long ids', () => {
+    expect(formatSampleSessionId('aa0a8c12-7e3b-4d91-9c2f-1b8e4f0a1234')).toBe('aa0a8c…1234');
   });
 });

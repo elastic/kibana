@@ -75,9 +75,13 @@ export function ConversionGoalSequence({
 
   const railCss = css`
     display: flex;
+    flex-wrap: wrap;
     align-items: stretch;
-    gap: ${euiTheme.size.s};
-    overflow-x: auto;
+    column-gap: ${euiTheme.size.s};
+    row-gap: ${euiTheme.size.l};
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
     padding: ${euiTheme.size.xs} 0 ${euiTheme.size.s};
   `;
 
@@ -149,8 +153,9 @@ function StepCard({
   const accent = isActivity ? euiTheme.colors.accent : euiTheme.colors.primary;
 
   const cardCss = css`
-    flex: 0 0 220px;
-    min-width: 220px;
+    flex: 1 1 200px;
+    min-width: 180px;
+    max-width: 240px;
     padding: ${euiTheme.size.s};
     border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
     border-top: ${euiTheme.size.xs} solid ${accent};
@@ -295,7 +300,7 @@ function StepCard({
 function AddStepCard({ onClick }: { onClick: () => void }) {
   const { euiTheme } = useEuiTheme();
   const cardCss = css`
-    flex: 0 0 140px;
+    flex: 0 1 140px;
     min-width: 140px;
     display: flex;
     align-items: center;

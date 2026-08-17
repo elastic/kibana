@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -21,8 +22,8 @@ import {
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiPopover,
-  EuiProgress,
   EuiSelect,
   EuiSpacer,
   EuiStat,
@@ -33,7 +34,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import {
   CONVERSION_CURRENCIES,
   CONVERSION_GOAL_NAME_MAX,
@@ -49,7 +50,11 @@ import {
   type ConversionGoalDraft,
   type ConversionGoalPreset,
 } from '../../../common/conversion_goal';
-import type { FunnelStepDef, SessionFunnelResponse } from '../../../common/session_funnel';
+import {
+  formatSampleSessionId,
+  type FunnelStepDef,
+  type SessionFunnelResponse,
+} from '../../../common/session_funnel';
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import {
@@ -59,8 +64,10 @@ import {
   updateConversionGoal,
 } from '../../services/rest/conversion_goal_api';
 import { fetchSessionFunnel } from '../../services/rest/session_replay_api';
-import { mergeRumSearch, pushRumPath } from '../../utils/rum_search';
+import { mergeRumSearch, pushRumPath, sessionsPatch } from '../../utils/rum_search';
 import { serviceNameFromPath, uxAppPath } from '../../utils/ux_app_path';
+import { ConversionFunnelGraph } from './conversion_funnel_graph';
+import { hasFunnelDropOff } from './conversion_funnel_graph_data';
 import { ConversionGoalSequence } from './conversion_goal_sequence';
 
 const percent = (ratio: number): string => `${Math.round(ratio * 1000) / 10}%`;
@@ -85,6 +92,52 @@ const toDraft = (goal: ConversionGoalDraft): ConversionGoalDraft => ({
   value: goal.value,
   currency: goal.currency,
 });
+
+const funnelStepTrail = (steps: FunnelStepDef[]): string =>
+  steps
+    .map((step) => step.label?.trim() || step.value.trim())
+    .filter((label) => label.length > 0)
+    .join(' → ');
+
+export interface FunnelPageLocationState {
+  funnelPresetSteps?: FunnelStepDef[];
+}
+
+export function ConversionFunnelPage() {
+  const history = useHistory();
+  const location = useLocation<FunnelPageLocationState | undefined>();
+  const presetSteps = location.state?.funnelPresetSteps ?? null;
+
+  return (
+    <EuiPanel paddingSize="m" data-test-subj="uxConversionFunnelPage">
+      <EuiTitle size="xs">
+        <h2>
+          {i18n.translate('xpack.ux.funnels.pageTitle', {
+            defaultMessage: 'Funnels',
+          })}
+        </h2>
+      </EuiTitle>
+      <EuiText size="s" color="subdued">
+        <p>
+          {i18n.translate('xpack.ux.funnels.pageDescription', {
+            defaultMessage:
+              'Select a funnel to see conversion for this time range. Open Edit when you need to change steps.',
+          })}
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <ConversionGoalPanel
+        presetSteps={presetSteps}
+        onPresetConsumed={() => {
+          history.replace({
+            pathname: history.location.pathname,
+            search: history.location.search,
+          });
+        }}
+      />
+    </EuiPanel>
+  );
+}
 
 export function ConversionGoalPanel({
   presetSteps,
@@ -113,6 +166,7 @@ export function ConversionGoalPanel({
     selectedId: null,
     ...createEmptyGoalDraft(),
   }));
+  const [editing, setEditing] = useState(false);
   const [result, setResult] = useState<SessionFunnelResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -121,6 +175,7 @@ export function ConversionGoalPanel({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const hydratedRef = useRef(false);
   const editorRef = useRef(editor);
+  const previousIdRef = useRef<string | null>(null);
   editorRef.current = editor;
 
   const setGoalIdInUrl = useCallback(
@@ -215,6 +270,9 @@ export function ConversionGoalPanel({
     if (pick) {
       applyGoal(pick, !wanted);
       editorRef.current = { selectedId: pick.id, ...toDraft(pick) };
+      setEditing(false);
+    } else {
+      setEditing(true);
     }
     void runFunnel();
   }, [applyGoal, goalId, goals, goalsLoading, runFunnel]);
@@ -234,6 +292,7 @@ export function ConversionGoalPanel({
       currency: current.currency,
     });
     setGoalIdInUrl(null);
+    setEditing(false);
     onPresetConsumed();
     editorRef.current = {
       ...editorRef.current,
@@ -254,12 +313,15 @@ export function ConversionGoalPanel({
     return [...codes].map((code) => ({ value: code, text: code }));
   }, [editor.currency]);
 
-  const runSelectedGoal = (goal: ConversionGoal) => {
+  const openGoal = (goal: ConversionGoal) => {
+    applyGoal(goal, true);
     editorRef.current = { selectedId: goal.id, ...toDraft(goal) };
+    setEditing(false);
     void runFunnel();
   };
 
   const startDraft = (preset?: ConversionGoalPreset) => {
+    previousIdRef.current = editor.selectedId;
     const next = preset
       ? {
           name: preset.name,
@@ -271,8 +333,24 @@ export function ConversionGoalPanel({
     setEditor({ selectedId: null, ...next });
     setResult(null);
     setError(null);
+    setEditing(true);
     setGoalIdInUrl(null);
     setPresetOpen(false);
+  };
+
+  const cancelEdit = () => {
+    if (selected) {
+      applyGoal(selected, false);
+      setEditing(false);
+      setError(null);
+      return;
+    }
+    const back = goals.find((goal) => goal.id === previousIdRef.current) ?? goals[0];
+    if (back) {
+      openGoal(back);
+      return;
+    }
+    setEditing(true);
   };
 
   const onSave = async () => {
@@ -293,11 +371,14 @@ export function ConversionGoalPanel({
       const list = await loadGoals();
       const next = list.find((goal) => goal.id === saved.id) ?? saved;
       applyGoal(next, true);
+      editorRef.current = { selectedId: next.id, ...toDraft(next) };
+      setEditing(false);
       notifications.toasts.addSuccess(
         i18n.translate('xpack.ux.goals.savedToast', {
           defaultMessage: 'Conversion goal saved',
         })
       );
+      void runFunnel();
     } catch (err) {
       notifications.toasts.addDanger({
         title: i18n.translate('xpack.ux.goals.saveErrorTitle', {
@@ -325,7 +406,7 @@ export function ConversionGoalPanel({
         })
       );
       if (list[0]) {
-        applyGoal(list[0], true);
+        openGoal(list[0]);
       } else {
         startDraft();
       }
@@ -342,307 +423,279 @@ export function ConversionGoalPanel({
   };
 
   const impact = result ? computeGoalImpact(result, editor.value) : null;
-  const startCount = result?.steps[0]?.count ?? 0;
-  const maxCount = Math.max(startCount, 1);
-
-  const shellCss = css`
-    padding: ${euiTheme.size.m};
-    border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
-    border-radius: ${euiTheme.border.radius.medium};
-    background: ${euiTheme.colors.backgroundBaseSubdued};
-  `;
-
-  const tileCss = (active: boolean) => css`
-    min-width: 160px;
-    padding: ${euiTheme.size.s} ${euiTheme.size.m};
-    border: ${euiTheme.border.width.thin} solid
-      ${active ? euiTheme.colors.primary : euiTheme.colors.borderBaseSubdued};
-    border-radius: ${euiTheme.border.radius.medium};
-    background: ${euiTheme.colors.backgroundBasePlain};
-    cursor: pointer;
-    text-align: left;
-  `;
+  const showDraftRow = editor.selectedId == null;
 
   return (
-    <div css={shellCss} data-test-subj="uxConversionGoalPanel">
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="bullseye" color="success" size="l" aria-hidden={true} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.ux.goals.panelTitle', {
-                defaultMessage: 'Conversion goals',
-              })}
-            </h3>
-          </EuiTitle>
-          <EuiText size="s" color="subdued">
-            {i18n.translate('xpack.ux.goals.panelDescription', {
-              defaultMessage:
-                'Save a step sequence and a value per conversion. Next visit, pick the goal and run it again.',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup gutterSize="s" wrap responsive={false}>
-        {goalsLoading && goals.length === 0 ? (
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-        ) : (
-          goals.map((goal) => {
-            const active = goal.id === editor.selectedId;
-            return (
-              <EuiFlexItem grow={false} key={goal.id}>
-                <button
-                  type="button"
-                  css={tileCss(active)}
-                  aria-pressed={active}
-                  data-test-subj={`uxGoalTile-${goal.id}`}
-                  onClick={() => {
-                    applyGoal(goal, true);
-                    runSelectedGoal(goal);
-                  }}
-                >
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon
-                        type={goalIcon(goal)}
-                        color={active ? 'primary' : 'subdued'}
-                        aria-hidden={true}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <EuiText size="s">
-                        <strong>{goal.name}</strong>
-                      </EuiText>
-                      <EuiText size="xs" color="subdued">
-                        {goal.value > 0
-                          ? i18n.translate('xpack.ux.goals.tileMetaWithValueLabel', {
-                              defaultMessage:
-                                '{value} · {count, plural, one {# step} other {# steps}}',
-                              values: {
-                                value: formatGoalMoney(goal.value, goal.currency),
-                                count: goal.steps.length,
-                              },
-                            })
-                          : i18n.translate('xpack.ux.goals.tileMetaStepsOnlyLabel', {
-                              defaultMessage: '{count, plural, one {# step} other {# steps}}',
-                              values: { count: goal.steps.length },
-                            })}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </button>
-              </EuiFlexItem>
-            );
-          })
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            aria-label={i18n.translate('xpack.ux.goals.newGoalPresetsAriaLabel', {
-              defaultMessage: 'New goal presets',
-            })}
-            button={
-              <EuiButtonEmpty
-                data-test-subj="uxGoalNewButton"
-                size="s"
-                iconType="plusCircle"
-                onClick={() => setPresetOpen((open) => !open)}
-              >
-                {i18n.translate('xpack.ux.goals.newButtonLabel', { defaultMessage: 'New goal' })}
-              </EuiButtonEmpty>
-            }
-            isOpen={presetOpen}
-            closePopover={() => setPresetOpen(false)}
-            panelPaddingSize="s"
-          >
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              {CONVERSION_GOAL_PRESETS.map((preset) => (
-                <EuiFlexItem key={preset.id}>
+    <div data-test-subj="uxConversionGoalPanel">
+      <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={true}>
+        <EuiFlexItem grow={false} style={{ width: 280, minWidth: 240 }}>
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+            <EuiFlexItem>
+              <EuiTitle size="xxs">
+                <h3>
+                  {i18n.translate('xpack.ux.funnels.savedListTitle', {
+                    defaultMessage: 'Saved funnels',
+                  })}
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                aria-label={i18n.translate('xpack.ux.goals.newGoalPresetsAriaLabel', {
+                  defaultMessage: 'New goal presets',
+                })}
+                button={
                   <EuiButtonEmpty
+                    data-test-subj="uxGoalNewButton"
                     size="s"
-                    iconType={goalIcon(preset)}
-                    onClick={() => startDraft(preset)}
-                    data-test-subj={`uxGoalPreset-${preset.id}`}
+                    iconType="plusInCircle"
+                    onClick={() => setPresetOpen((open) => !open)}
                   >
-                    {preset.name}
+                    {i18n.translate('xpack.ux.goals.newButtonLabel', { defaultMessage: 'New' })}
                   </EuiButtonEmpty>
-                </EuiFlexItem>
+                }
+                isOpen={presetOpen}
+                closePopover={() => setPresetOpen(false)}
+                panelPaddingSize="s"
+              >
+                <EuiFlexGroup direction="column" gutterSize="xs">
+                  {CONVERSION_GOAL_PRESETS.map((preset) => (
+                    <EuiFlexItem key={preset.id}>
+                      <EuiButtonEmpty
+                        size="s"
+                        iconType={goalIcon(preset)}
+                        onClick={() => startDraft(preset)}
+                        data-test-subj={`uxGoalPreset-${preset.id}`}
+                      >
+                        {preset.name}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          {goalsLoading && goals.length === 0 ? (
+            <EuiLoadingSpinner size="m" />
+          ) : (
+            <div
+              css={css`
+                display: flex;
+                flex-direction: column;
+                gap: ${euiTheme.size.xs};
+                max-height: 520px;
+                overflow-y: auto;
+              `}
+            >
+              {showDraftRow ? (
+                <FunnelListRow
+                  active={true}
+                  icon="plusInCircle"
+                  name={
+                    editor.name.trim() ||
+                    i18n.translate('xpack.ux.funnels.draftListLabel', {
+                      defaultMessage: 'Untitled funnel',
+                    })
+                  }
+                  trail={funnelStepTrail(editor.steps)}
+                  badge={i18n.translate('xpack.ux.goals.unsavedDraftBadge', {
+                    defaultMessage: 'Not saved yet',
+                  })}
+                />
+              ) : null}
+              {goals.map((goal) => (
+                <FunnelListRow
+                  key={goal.id}
+                  active={goal.id === editor.selectedId}
+                  icon={goalIcon(goal)}
+                  name={goal.name}
+                  trail={funnelStepTrail(goal.steps)}
+                  testSubj={`uxGoalTile-${goal.id}`}
+                  onClick={() => openGoal(goal)}
+                />
               ))}
-            </EuiFlexGroup>
-          </EuiPopover>
+            </div>
+          )}
         </EuiFlexItem>
-      </EuiFlexGroup>
 
-      <EuiSpacer size="m" />
+        <EuiFlexItem style={{ minWidth: 0 }}>
+          <EuiFlexGroup alignItems="flexStart" justifyContent="spaceBetween" gutterSize="m" wrap>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>{editor.name.trim() || untitledFallback()}</h3>
+              </EuiTitle>
+              {!editing ? (
+                <EuiText size="s" color="subdued">
+                  <p>{funnelStepTrail(editor.steps)}</p>
+                </EuiText>
+              ) : null}
+              {dirty ? (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiBadge color="hollow" iconType="dot">
+                    {editor.selectedId
+                      ? i18n.translate('xpack.ux.goals.unsavedChangesBadge', {
+                          defaultMessage: 'Unsaved changes',
+                        })
+                      : i18n.translate('xpack.ux.goals.unsavedDraftBadge', {
+                          defaultMessage: 'Not saved yet',
+                        })}
+                  </EuiBadge>
+                </>
+              ) : null}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+                {editing ? (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        size="s"
+                        onClick={cancelEdit}
+                        data-test-subj="uxGoalCancelEditButton"
+                      >
+                        {i18n.translate('xpack.ux.goals.cancelEditButtonLabel', {
+                          defaultMessage: 'Cancel',
+                        })}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        fill
+                        iconType="save"
+                        onClick={() => void onSave()}
+                        isLoading={saving}
+                        isDisabled={!dirty || !canSave}
+                        data-test-subj="uxGoalSaveButton"
+                      >
+                        {editor.selectedId
+                          ? i18n.translate('xpack.ux.goals.updateButtonLabel', {
+                              defaultMessage: 'Update',
+                            })
+                          : i18n.translate('xpack.ux.goals.saveButtonLabel', {
+                              defaultMessage: 'Save funnel',
+                            })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </>
+                ) : (
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        iconType="pencil"
+                        onClick={() => setEditing(true)}
+                        data-test-subj="uxGoalEditButton"
+                      >
+                        {i18n.translate('xpack.ux.goals.editButtonLabel', {
+                          defaultMessage: 'Edit',
+                        })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                    {dirty && canSave ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          size="s"
+                          iconType="save"
+                          onClick={() => void onSave()}
+                          isLoading={saving}
+                          data-test-subj="uxGoalSaveButton"
+                        >
+                          {i18n.translate('xpack.ux.goals.saveButtonLabel', {
+                            defaultMessage: 'Save funnel',
+                          })}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        size="s"
+                        fill
+                        iconType={result ? 'refresh' : 'play'}
+                        onClick={() => void runFunnel()}
+                        isLoading={loading}
+                        data-test-subj="uxGoalRunButton"
+                      >
+                        {result
+                          ? i18n.translate('xpack.ux.goals.refreshButtonLabel', {
+                              defaultMessage: 'Refresh funnel',
+                            })
+                          : i18n.translate('xpack.ux.goals.runButtonLabel', {
+                              defaultMessage: 'Run funnel',
+                            })}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </>
+                )}
+                {editor.selectedId ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiToolTip
+                      content={i18n.translate('xpack.ux.goals.deleteTooltip', {
+                        defaultMessage: 'Delete saved goal',
+                      })}
+                    >
+                      <EuiButtonIcon
+                        aria-label={i18n.translate('xpack.ux.goals.deleteAriaLabel', {
+                          defaultMessage: 'Delete saved goal',
+                        })}
+                        iconType="trash"
+                        color="danger"
+                        onClick={() => setConfirmDelete(true)}
+                        data-test-subj="uxGoalDeleteButton"
+                      />
+                    </EuiToolTip>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-      <ConversionGoalSequence
-        steps={editor.steps}
-        onChange={(steps) => setEditor((current) => ({ ...current, steps }))}
-      />
+          <EuiSpacer size="m" />
 
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup gutterSize="m" alignItems="flexEnd" wrap>
-        <EuiFlexItem grow={2}>
-          <EuiFormRow
-            label={i18n.translate('xpack.ux.goals.nameLabel', { defaultMessage: 'Goal name' })}
-          >
-            <EuiFieldText
-              compressed
-              value={editor.name}
-              maxLength={CONVERSION_GOAL_NAME_MAX}
-              prepend={<EuiIcon type="flag" size="s" aria-hidden={true} />}
-              onChange={(event) =>
-                setEditor((current) => ({ ...current, name: event.target.value }))
-              }
-              data-test-subj="uxGoalName"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: 160 }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.ux.goals.valueLabel', {
-              defaultMessage: 'Value per conversion',
-            })}
-          >
-            <EuiFieldNumber
-              compressed
-              min={0}
-              max={CONVERSION_GOAL_VALUE_MAX}
-              value={editor.value}
-              prepend={<EuiIcon type="money" size="s" aria-hidden={true} />}
-              onChange={(event) =>
-                setEditor((current) => ({
-                  ...current,
-                  value: event.target.value === '' ? 0 : Number(event.target.value),
-                }))
-              }
-              data-test-subj="uxGoalValue"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: 110 }}>
-          <EuiFormRow
-            label={i18n.translate('xpack.ux.goals.currencyLabel', { defaultMessage: 'Currency' })}
-          >
-            <EuiSelect
-              compressed
-              options={currencyOptions}
-              value={editor.currency}
-              onChange={(event) =>
-                setEditor((current) => ({ ...current, currency: event.target.value }))
-              }
-              data-test-subj="uxGoalCurrency"
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            fill
-            iconType="play"
-            onClick={() => void runFunnel()}
-            isLoading={loading}
-            data-test-subj="uxGoalRunButton"
-          >
-            {i18n.translate('xpack.ux.goals.runButtonLabel', { defaultMessage: 'Run funnel' })}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="save"
-            onClick={() => void onSave()}
-            isLoading={saving}
-            isDisabled={!dirty || !canSave}
-            data-test-subj="uxGoalSaveButton"
-          >
-            {editor.selectedId
-              ? i18n.translate('xpack.ux.goals.updateButtonLabel', { defaultMessage: 'Update' })
-              : i18n.translate('xpack.ux.goals.saveButtonLabel', { defaultMessage: 'Save goal' })}
-          </EuiButton>
-        </EuiFlexItem>
-        {editor.selectedId && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={i18n.translate('xpack.ux.goals.deleteTooltip', {
-                defaultMessage: 'Delete saved goal',
+          {editing ? (
+            <FunnelEditor editor={editor} currencyOptions={currencyOptions} onChange={setEditor} />
+          ) : error ? (
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              size="s"
+              title={i18n.translate('xpack.ux.goals.errorTitle', {
+                defaultMessage: 'Could not run this goal',
               })}
             >
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.ux.goals.deleteAriaLabel', {
-                  defaultMessage: 'Delete saved goal',
-                })}
-                iconType="trash"
-                color="danger"
-                onClick={() => setConfirmDelete(true)}
-                data-test-subj="uxGoalDeleteButton"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      {dirty && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiBadge color="hollow" iconType="dot">
-            {editor.selectedId
-              ? i18n.translate('xpack.ux.goals.unsavedChangesBadge', {
-                  defaultMessage: 'Unsaved changes',
-                })
-              : i18n.translate('xpack.ux.goals.unsavedDraftBadge', {
-                  defaultMessage: 'Not saved yet',
-                })}
-          </EuiBadge>
-        </>
-      )}
-
-      <EuiSpacer size="m" />
-
-      {error && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            size="s"
-            title={i18n.translate('xpack.ux.goals.errorTitle', {
-              defaultMessage: 'Could not run this goal',
-            })}
-          >
-            <p>{error}</p>
-          </EuiCallOut>
-          <EuiSpacer size="m" />
-        </>
-      )}
-
-      {loading && !result ? (
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              {i18n.translate('xpack.ux.goals.loadingLabel', {
-                defaultMessage: 'Computing funnel…',
+              <p>{error}</p>
+            </EuiCallOut>
+          ) : loading && !result ? (
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="s">
+                  {i18n.translate('xpack.ux.goals.loadingLabel', {
+                    defaultMessage: 'Computing funnel…',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ) : result && result.steps.length > 0 && impact ? (
+            <GoalResults
+              result={result}
+              impact={impact}
+              value={editor.value}
+              currency={editor.currency}
+            />
+          ) : (
+            <EuiText size="s" color="subdued">
+              {i18n.translate('xpack.ux.funnels.noResultsLabel', {
+                defaultMessage: 'Run this funnel to see conversion for the selected time range.',
               })}
             </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : result && result.steps.length > 0 && impact ? (
-        <GoalResults
-          result={result}
-          impact={impact}
-          value={editor.value}
-          currency={editor.currency}
-          maxCount={maxCount}
-        />
-      ) : null}
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {confirmDelete && (
         <EuiConfirmModal
@@ -674,24 +727,221 @@ export function ConversionGoalPanel({
   );
 }
 
+const untitledFallback = (): string =>
+  i18n.translate('xpack.ux.funnels.untitledDetailTitle', {
+    defaultMessage: 'Untitled funnel',
+  });
+
+function FunnelListRow({
+  active,
+  icon,
+  name,
+  trail,
+  badge,
+  testSubj,
+  onClick,
+}: {
+  active: boolean;
+  icon: string;
+  name: string;
+  trail: string;
+  badge?: string;
+  testSubj?: string;
+  onClick?: () => void;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <button
+      type="button"
+      data-test-subj={testSubj}
+      aria-pressed={active}
+      disabled={!onClick}
+      onClick={onClick}
+      css={css`
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: ${euiTheme.size.s} ${euiTheme.size.m};
+        border: 1px solid
+          ${active ? euiTheme.colors.borderStrongPrimary : euiTheme.colors.borderBaseSubdued};
+        border-radius: ${euiTheme.border.radius.medium};
+        background: ${active
+          ? euiTheme.colors.backgroundBasePrimary
+          : euiTheme.colors.backgroundBasePlain};
+        cursor: ${onClick ? 'pointer' : 'default'};
+      `}
+    >
+      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={icon} color={active ? 'primary' : 'subdued'} aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>{name}</strong>
+          </EuiText>
+          {trail ? (
+            <EuiText size="xs" color="subdued">
+              <p
+                css={css`
+                  margin: 0;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                {trail}
+              </p>
+            </EuiText>
+          ) : null}
+          {badge ? (
+            <>
+              <EuiSpacer size="xs" />
+              <EuiBadge color="hollow">{badge}</EuiBadge>
+            </>
+          ) : null}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </button>
+  );
+}
+
+function FunnelEditor({
+  editor,
+  currencyOptions,
+  onChange,
+}: {
+  editor: ConversionGoalDraft & { selectedId: string | null };
+  currencyOptions: Array<{ value: string; text: string }>;
+  onChange: React.Dispatch<
+    React.SetStateAction<ConversionGoalDraft & { selectedId: string | null }>
+  >;
+}) {
+  return (
+    <>
+      {editor.selectedId == null ? (
+        <>
+          <EuiCallOut
+            announceOnMount
+            color="primary"
+            size="s"
+            title={i18n.translate('xpack.ux.funnels.newDraftCalloutTitle', {
+              defaultMessage: 'New funnel',
+            })}
+          >
+            <p>
+              {i18n.translate('xpack.ux.funnels.newDraftCalloutBody', {
+                defaultMessage: 'Set the steps and name, then save to add it to the list.',
+              })}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
+      ) : null}
+
+      <EuiTitle size="xxs">
+        <h4>
+          {i18n.translate('xpack.ux.funnels.stepsTitle', {
+            defaultMessage: 'Steps',
+          })}
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <ConversionGoalSequence
+        steps={editor.steps}
+        onChange={(steps) => onChange((current) => ({ ...current, steps }))}
+      />
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m" alignItems="flexEnd" wrap>
+        <EuiFlexItem grow={2}>
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.goals.nameLabel', { defaultMessage: 'Goal name' })}
+          >
+            <EuiFieldText
+              compressed
+              value={editor.name}
+              maxLength={CONVERSION_GOAL_NAME_MAX}
+              prepend={<EuiIcon type="flag" size="s" aria-hidden={true} />}
+              onChange={(event) =>
+                onChange((current) => ({ ...current, name: event.target.value }))
+              }
+              data-test-subj="uxGoalName"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 160 }}>
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.goals.valueLabel', {
+              defaultMessage: 'Value per conversion',
+            })}
+          >
+            <EuiFieldNumber
+              compressed
+              min={0}
+              max={CONVERSION_GOAL_VALUE_MAX}
+              value={editor.value}
+              prepend={<EuiIcon type="money" size="s" aria-hidden={true} />}
+              onChange={(event) =>
+                onChange((current) => ({
+                  ...current,
+                  value: event.target.value === '' ? 0 : Number(event.target.value),
+                }))
+              }
+              data-test-subj="uxGoalValue"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 110 }}>
+          <EuiFormRow
+            label={i18n.translate('xpack.ux.goals.currencyLabel', { defaultMessage: 'Currency' })}
+          >
+            <EuiSelect
+              compressed
+              options={currencyOptions}
+              value={editor.currency}
+              onChange={(event) =>
+                onChange((current) => ({ ...current, currency: event.target.value }))
+              }
+              data-test-subj="uxGoalCurrency"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+}
+
 function GoalResults({
   result,
   impact,
   value,
   currency,
-  maxCount,
 }: {
   result: SessionFunnelResponse;
   impact: ReturnType<typeof computeGoalImpact>;
   value: number;
   currency: string;
-  maxCount: number;
 }) {
-  const history = useHistory();
   const showMoney = value > 0;
+  const dropRows = result.steps.slice(1).map((step, index) => ({
+    id: `${step.type}-${step.value}-${index}`,
+    from: result.steps[index].label,
+    to: step.label,
+    dropOffCount: step.dropOffCount,
+    rate: 1 - step.conversionFromPrevious,
+    missed: step.dropOffCount * value,
+    sampleDroppedSessionIds: step.sampleDroppedSessionIds,
+  }));
 
   return (
-    <>
+    <EuiPanel hasBorder paddingSize="m" data-test-subj="uxGoalResultsPanel">
+      <EuiTitle size="xxs">
+        <h4>
+          {i18n.translate('xpack.ux.funnels.resultsTitle', {
+            defaultMessage: 'Results',
+          })}
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiFlexGroup wrap>
         <EuiFlexItem grow={false}>
           <EuiStat
@@ -745,87 +995,171 @@ function GoalResults({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
 
-      {result.steps.map((step, index) => (
-        <div key={`${step.type}-${step.value}-${index}`}>
-          {index > 0 && (
-            <EuiText size="xs" color="subdued" style={{ margin: '4px 0 8px 0' }}>
-              {i18n.translate('xpack.ux.goals.dropOffLabel', {
-                defaultMessage: '{count} dropped off ({rate} of previous step)',
-                values: {
-                  count: step.dropOffCount,
-                  rate: percent(1 - step.conversionFromPrevious),
-                },
+      <ConversionFunnelGraph steps={result.steps} />
+
+      {hasFunnelDropOff(result.steps) ? (
+        <>
+          <EuiSpacer size="m" />
+
+          <EuiTitle size="xxs">
+            <h4>
+              {i18n.translate('xpack.ux.funnels.dropOffTitle', {
+                defaultMessage: 'Drop-off',
               })}
-              {showMoney && step.dropOffCount > 0 && (
-                <>
-                  {' · '}
-                  <strong>
-                    {formatGoalMoney(step.dropOffCount * value, currency)}
-                    {i18n.translate('xpack.ux.goals.dropOffMoneySuffix', {
-                      defaultMessage: ' missed here',
-                    })}
-                  </strong>
-                </>
-              )}
-              {step.sampleDroppedSessionIds.length > 0 && (
-                <>
-                  {' · '}
-                  {step.sampleDroppedSessionIds.map((sessionId, sIdx) => (
-                    <span key={sessionId}>
-                      {sIdx > 0 ? ', ' : ''}
-                      <EuiLink
-                        data-test-subj={`uxGoalDroppedSession-${sessionId}`}
-                        href={history.createHref({
-                          pathname: uxAppPath(
-                            serviceNameFromPath(history.location.pathname),
-                            `/session-replay/${encodeURIComponent(sessionId)}`
-                          ),
-                        })}
-                        onClick={(e: React.MouseEvent) => {
-                          e.preventDefault();
-                          pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`);
-                        }}
-                      >
-                        {sessionId.slice(0, 8)}
-                      </EuiLink>
-                    </span>
-                  ))}
-                </>
-              )}
-            </EuiText>
-          )}
-          <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false} style={{ width: 180 }}>
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon
-                    type={step.type === 'page' ? 'document' : 'tokenEvent'}
-                    aria-hidden={true}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiText size="s">
-                    <strong>{step.label}</strong>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiProgress value={step.count} max={maxCount} color="primary" size="l" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ minWidth: 120, textAlign: 'right' }}>
-              <EuiText size="s">
-                <strong>{step.count}</strong>
-                {' · '}
-                {percent(step.conversionFromStart)}
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+            </h4>
+          </EuiTitle>
           <EuiSpacer size="s" />
-        </div>
-      ))}
-    </>
+          <EuiBasicTable
+            tableCaption={i18n.translate('xpack.ux.funnels.dropOffTableCaption', {
+              defaultMessage: 'Drop-off between funnel steps',
+            })}
+            items={dropRows}
+            itemId="id"
+            rowHeader="to"
+            columns={[
+              {
+                field: 'from',
+                name: i18n.translate('xpack.ux.goals.dropOffFromColumnLabel', {
+                  defaultMessage: 'From',
+                }),
+              },
+              {
+                field: 'to',
+                name: i18n.translate('xpack.ux.goals.dropOffToColumnLabel', {
+                  defaultMessage: 'To',
+                }),
+              },
+              {
+                field: 'dropOffCount',
+                name: i18n.translate('xpack.ux.goals.dropOffCountColumnLabel', {
+                  defaultMessage: 'Dropped',
+                }),
+              },
+              {
+                name: i18n.translate('xpack.ux.goals.dropOffRateColumnLabel', {
+                  defaultMessage: 'Of previous',
+                }),
+                render: (row: (typeof dropRows)[number]) => percent(row.rate),
+              },
+              ...(showMoney
+                ? [
+                    {
+                      name: i18n.translate('xpack.ux.goals.dropOffMissedColumnLabel', {
+                        defaultMessage: 'Missed',
+                      }),
+                      render: (row: (typeof dropRows)[number]) =>
+                        formatGoalMoney(row.missed, currency),
+                    },
+                  ]
+                : []),
+              {
+                name: i18n.translate('xpack.ux.goals.dropOffSessionsColumnLabel', {
+                  defaultMessage: 'Sessions',
+                }),
+                render: (row: (typeof dropRows)[number]) => (
+                  <DropOffSessionsPopover rowId={row.id} sessionIds={row.sampleDroppedSessionIds} />
+                ),
+              },
+            ]}
+          />
+        </>
+      ) : null}
+    </EuiPanel>
+  );
+}
+
+function DropOffSessionsPopover({ rowId, sessionIds }: { rowId: string; sessionIds: string[] }) {
+  const history = useHistory();
+  const [open, setOpen] = useState(false);
+
+  if (sessionIds.length === 0) {
+    return (
+      <EuiText size="xs" color="subdued">
+        {i18n.translate('xpack.ux.goals.dropOffNoSessionsLabel', {
+          defaultMessage: '—',
+        })}
+      </EuiText>
+    );
+  }
+
+  return (
+    <EuiPopover
+      aria-label={i18n.translate('xpack.ux.goals.dropOffSessionsPopoverAriaLabel', {
+        defaultMessage: 'Dropped sessions',
+      })}
+      button={
+        <EuiButtonEmpty
+          size="s"
+          flush="left"
+          iconType="arrowDown"
+          iconSide="right"
+          data-test-subj={`uxGoalDroppedSessions-${rowId}`}
+          onClick={() => setOpen((current) => !current)}
+        >
+          {i18n.translate('xpack.ux.goals.dropOffViewSessionsButtonLabel', {
+            defaultMessage: 'View {count, plural, one {# session} other {# sessions}}',
+            values: { count: sessionIds.length },
+          })}
+        </EuiButtonEmpty>
+      }
+      isOpen={open}
+      closePopover={() => setOpen(false)}
+      panelPaddingSize="s"
+      anchorPosition="downLeft"
+    >
+      <div
+        css={css`
+          min-width: 180px;
+        `}
+      >
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          {sessionIds.map((sessionId) => (
+            <EuiFlexItem key={sessionId} grow={false}>
+              <EuiLink
+                data-test-subj={`uxGoalDroppedSession-${sessionId}`}
+                href={history.createHref({
+                  pathname: uxAppPath(
+                    serviceNameFromPath(history.location.pathname),
+                    `/session-replay/${encodeURIComponent(sessionId)}`
+                  ),
+                })}
+                onClick={(event: React.MouseEvent) => {
+                  event.preventDefault();
+                  setOpen(false);
+                  pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`);
+                }}
+              >
+                {formatSampleSessionId(sessionId)}
+              </EuiLink>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+        {sessionIds.length > 1 ? (
+          <>
+            <EuiSpacer size="s" />
+            <EuiButtonEmpty
+              size="s"
+              flush="left"
+              iconType="popout"
+              data-test-subj={`uxGoalDroppedSessionsAll-${rowId}`}
+              onClick={() => {
+                setOpen(false);
+                pushRumPath(
+                  history,
+                  '/session-replay',
+                  sessionsPatch({ sessionIds: sessionIds.join(',') })
+                );
+              }}
+            >
+              {i18n.translate('xpack.ux.goals.dropOffViewAllSessionsButtonLabel', {
+                defaultMessage: 'Open all in Sessions',
+              })}
+            </EuiButtonEmpty>
+          </>
+        ) : null}
+      </div>
+    </EuiPopover>
   );
 }

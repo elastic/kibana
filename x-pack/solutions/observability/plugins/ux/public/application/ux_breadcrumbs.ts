@@ -42,6 +42,9 @@ const UX_HOME_TAB_CRUMB: Record<Exclude<UxHomeTab, 'overview'>, string> = {
   journeys: i18n.translate('xpack.ux.breadcrumbs.journeys', {
     defaultMessage: 'Journeys',
   }),
+  funnels: i18n.translate('xpack.ux.breadcrumbs.funnels', {
+    defaultMessage: 'Funnels',
+  }),
   reports: i18n.translate('xpack.ux.breadcrumbs.reports', {
     defaultMessage: 'Reporting',
   }),

@@ -33,6 +33,14 @@ describe('matchUxHomeRoute', () => {
       tab: 'journeys',
       serviceName: 'weather-demo-app',
     });
+    expect(matchUxHomeRoute('/weather-demo-app/funnels')).toEqual({
+      tab: 'funnels',
+      serviceName: 'weather-demo-app',
+    });
+    expect(matchUxHomeRoute('/weather-demo-app/patterns')).toEqual({
+      tab: 'journeys',
+      serviceName: 'weather-demo-app',
+    });
   });
 
   it('maps a report template under an app', () => {

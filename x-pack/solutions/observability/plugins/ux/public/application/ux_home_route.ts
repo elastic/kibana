@@ -20,7 +20,7 @@ export const UX_TAB_SUFFIXES: Record<string, UxHomeTab> = {
   '/pages': 'pages',
   '/errors': 'errors',
   '/session-replay': 'session-replay',
-  '/funnels': 'journeys',
+  '/funnels': 'funnels',
   '/patterns': 'journeys',
   '/journeys': 'journeys',
   '/reports': 'reports',

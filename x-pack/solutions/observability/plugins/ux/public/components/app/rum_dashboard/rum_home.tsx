@@ -47,6 +47,7 @@ import { RumBudgetsPanel } from '../rum_budgets';
 import { RumBudgetFlyoutProvider } from '../rum_budgets/budget_flyout_context';
 import { SessionReplayPanel } from '../../session_replay/session_replay_panel';
 import { SessionFunnelPanel } from '../../session_replay/session_funnel_panel';
+import { ConversionFunnelPage } from '../../session_replay/conversion_goal_panel';
 import { OtelFilterBar } from '../rum_filters/otel_filter_bar';
 import { RumKueryBar } from '../rum_filters/rum_kuery_bar';
 import { RumPageLoadingBar, RumPageLoadingProvider } from './rum_page_loading';
@@ -71,6 +72,10 @@ const JOURNEYS_LABEL = i18n.translate('xpack.ux.journeys.tab', {
   defaultMessage: 'Journeys',
 });
 
+const FUNNELS_LABEL = i18n.translate('xpack.ux.funnels.tab', {
+  defaultMessage: 'Funnels',
+});
+
 const REPORTS_LABEL = i18n.translate('xpack.ux.reports.tab', {
   defaultMessage: 'Reporting',
 });
@@ -93,6 +98,7 @@ export type UxHomeTab =
   | 'errors'
   | 'session-replay'
   | 'journeys'
+  | 'funnels'
   | 'reports'
   | 'ai'
   | 'alerts'
@@ -187,6 +193,7 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
                 {tab === 'errors' && <RumErrorsPanel />}
                 {tab === 'session-replay' && <SessionReplayPanel />}
                 {tab === 'journeys' && <SessionFunnelPanel />}
+                {tab === 'funnels' && <ConversionFunnelPage />}
                 {tab === 'reports' &&
                   (templateId ? <RumReportView templateId={templateId} /> : <RumReportsCatalog />)}
                 {tab === 'ai' && <RumAiPanel />}
@@ -360,10 +367,13 @@ function UxHomeTabs({ tab }: { tab: UxHomeTab }) {
       </EuiTab>
       <EuiTab
         isSelected={tab === 'journeys'}
-        data-test-subj="uxFunnelsTab"
+        data-test-subj="uxJourneysTab"
         {...tabHref('/journeys')}
       >
         {JOURNEYS_LABEL}
+      </EuiTab>
+      <EuiTab isSelected={tab === 'funnels'} data-test-subj="uxFunnelsTab" {...tabHref('/funnels')}>
+        {FUNNELS_LABEL}
       </EuiTab>
       <EuiTab isSelected={tab === 'ai'} data-test-subj="uxAiTab" {...tabHref('/ai')}>
         {AI_LABEL}

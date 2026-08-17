@@ -8,12 +8,13 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { RumApplicationOption } from '../../../../../../common/rum_platform';
 import { useLegacyUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { mergeRumSearch } from '../../../../../utils/rum_search';
 import { uxAppPath, uxTabSuffix } from '../../../../../utils/ux_app_path';
+import { applicationsForFilter } from './applications_for_filter';
 
 interface Props {
   applications?: RumApplicationOption[];
@@ -45,39 +46,28 @@ function ServiceNameFilter({ loading, applications }: Props) {
     urlParams: { serviceName: selectedServiceName },
   } = useLegacyUrlParams();
 
-  const serviceNames = (applications ?? []).map((application) => application.name);
+  const apps = useMemo(
+    () => applicationsForFilter(applications, selectedServiceName),
+    [applications, selectedServiceName]
+  );
 
-  const options = (applications ?? []).map((application) => ({
+  const options = apps.map((application) => ({
     value: application.name,
     inputDisplay: <ApplicationOptionDisplay {...application} />,
     dropdownDisplay: <ApplicationOptionDisplay {...application} />,
   }));
 
   const updateServiceName = useCallback(
-    (serviceN: string, replaceHistory?: boolean) => {
+    (serviceN: string) => {
       const suffix = uxTabSuffix(history.location.pathname);
-      const newLocation = {
+      history.push({
         ...history.location,
         pathname: serviceN ? uxAppPath(serviceN, suffix) : '/',
         search: mergeRumSearch(history.location.search, { serviceName: '' }),
-      };
-      if (replaceHistory) {
-        history.replace(newLocation);
-      } else {
-        history.push(newLocation);
-      }
+      });
     },
     [history]
   );
-
-  useEffect(() => {
-    if (loading) {
-      return;
-    }
-    if (selectedServiceName && !serviceNames.includes(selectedServiceName)) {
-      updateServiceName('', true);
-    }
-  }, [serviceNames, selectedServiceName, updateServiceName, loading]);
 
   const applicationLabel = i18n.translate('xpack.ux.localFilters.titles.applicationLabel', {
     defaultMessage: 'Application',
@@ -94,7 +84,7 @@ function ServiceNameFilter({ loading, applications }: Props) {
       data-cy="serviceNameFilter"
       options={options}
       valueOfSelected={
-        selectedServiceName && serviceNames.includes(selectedServiceName)
+        selectedServiceName && apps.some((app) => app.name === selectedServiceName)
           ? selectedServiceName
           : undefined
       }

@@ -26,7 +26,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import { FUNNEL_MIN_STEPS, type FunnelStepDef } from '../../../common/session_funnel';
+import {
+  FUNNEL_MIN_STEPS,
+  formatSampleSessionId,
+  type FunnelStepDef,
+} from '../../../common/session_funnel';
 import type {
   ExitPattern,
   FrictionPattern,
@@ -37,7 +41,7 @@ import type {
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import { fetchSessionPatterns } from '../../services/rest/session_replay_api';
-import { ConversionGoalPanel } from './conversion_goal_panel';
+import type { FunnelPageLocationState } from './conversion_goal_panel';
 import { shortenPath } from './session_ui';
 import { pushRumPath, sessionsPatch } from '../../utils/rum_search';
 import { serviceNameFromPath, uxAppPath } from '../../utils/ux_app_path';
@@ -91,7 +95,7 @@ const SessionIdLinks = ({ sessionIds }: { sessionIds: string[] }) => {
               pushRumPath(history, `/session-replay/${encodeURIComponent(sessionId)}`);
             }}
           >
-            {sessionId.slice(0, 8)}
+            {formatSampleSessionId(sessionId)}
           </EuiLink>
         </span>
       ))}
@@ -138,8 +142,8 @@ const PatternRow = ({
       {onInspect && steps.length >= FUNNEL_MIN_STEPS && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" onClick={onInspect} data-test-subj="uxPatternInspectButton">
-            {i18n.translate('xpack.ux.patterns.inspectButtonLabel', {
-              defaultMessage: 'Inspect',
+            {i18n.translate('xpack.ux.journeys.openAsFunnelButtonLabel', {
+              defaultMessage: 'Open as funnel',
             })}
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -194,7 +198,6 @@ export function SessionFunnelPanel() {
   const [patterns, setPatterns] = useState<SessionPatternsResponse | null>(null);
   const [patternsLoading, setPatternsLoading] = useState(true);
   const [patternsError, setPatternsError] = useState<string | null>(null);
-  const [presetSteps, setPresetSteps] = useState<FunnelStepDef[] | null>(null);
 
   const loadPatterns = useCallback(async () => {
     void rangeId;
@@ -223,7 +226,14 @@ export function SessionFunnelPanel() {
   }, [loadPatterns]);
 
   const inspect = (kind: PathPatternKind, steps: string[]) => {
-    setPresetSteps(toFunnelSteps(kind, steps));
+    const state: FunnelPageLocationState = {
+      funnelPresetSteps: toFunnelSteps(kind, steps),
+    };
+    history.push({
+      pathname: uxAppPath(serviceNameFromPath(history.location.pathname), '/funnels'),
+      search: history.location.search,
+      state,
+    });
   };
 
   const viewSessions = (ids: string[]) => {
@@ -251,16 +261,11 @@ export function SessionFunnelPanel() {
         <p>
           {i18n.translate('xpack.ux.journeys.pageDescription', {
             defaultMessage:
-              'Save conversion sequences with a dollar value, then mine recurring journeys from recent sessions. Inspect a pattern to load it as a goal.',
+              'Recurring page paths, click sequences, and exits from recent sessions. Open a pattern as a funnel to measure conversion.',
           })}
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <ConversionGoalPanel
-        presetSteps={presetSteps}
-        onPresetConsumed={() => setPresetSteps(null)}
-      />
-      <EuiSpacer size="l" />
 
       {patternsError && (
         <>
@@ -311,7 +316,6 @@ export function SessionFunnelPanel() {
         />
       ) : patterns ? (
         <>
-          <EuiHorizontalRule margin="l" />
           <EuiTitle size="xs">
             <h3>
               {i18n.translate('xpack.ux.patterns.minedTitle', {
