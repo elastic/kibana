@@ -494,7 +494,10 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
       )}
 
       {/* ── Navigation ──────────────────────────────────────────────────── */}
-      {(onBack || allAgentlessSucceeded) && (
+      {/* ECF-only users have no agentless statuses, so allAgentlessSucceeded is always false for
+          them. Allow continue whenever ECF services are present (user launched the CF stack) or
+          all agentless services have succeeded. */}
+      {(onBack || allAgentlessSucceeded || hasAnyEcf) && (
         <>
           <EuiSpacer size="l" />
           <EuiFlexGroup justifyContent="spaceBetween">
@@ -509,7 +512,7 @@ export function DeployAndDetectStep({ onContinue, onBack }: DeployAndDetectStepP
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {allAgentlessSucceeded && (
+              {(allAgentlessSucceeded || hasAnyEcf) && (
                 <EuiButton
                   fill
                   onClick={onContinue}
