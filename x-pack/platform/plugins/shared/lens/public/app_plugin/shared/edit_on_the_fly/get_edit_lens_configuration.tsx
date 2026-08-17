@@ -20,6 +20,7 @@ import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type {
   TypedLensSerializedState,
   DatasourceMap,
+  DatasourceStates,
   VisualizationMap,
   LensAppServices,
   LensStoreDeps,
@@ -27,6 +28,7 @@ import type {
   LensSerializedState,
   LensByRefSerializedState,
   LensByValueSerializedState,
+  LensDatasourceId,
 } from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { getActiveDatasourceIdFromDoc } from '../../../utils';
@@ -67,7 +69,9 @@ function LoadingSpinnerWithOverlay() {
 type UpdaterType = (
   datasourceState: unknown,
   visualizationState: unknown,
-  visualizationType?: string
+  visualizationType?: string,
+  datasourceId?: LensDatasourceId,
+  allDatasourceStates?: DatasourceStates
 ) => void;
 
 // exported for testing
@@ -104,7 +108,9 @@ export const updatingMiddleware =
       updater(
         datasourceStates[activeDatasourceId].state,
         visualization.state,
-        visualization.activeId
+        visualization.activeId,
+        undefined,
+        datasourceStates
       );
     }
   };
