@@ -17,11 +17,12 @@ import { FleetCardsProvider } from './fleet_cards_provider';
 
 const mockUseAvailablePackages = jest.fn();
 
+// Stubbed rather than required from the real module, which executes Fleet's whole
+// public bundle. The chooser renders members and never searches.
 jest.mock('@kbn/fleet-plugin/public', () => {
   const ReactActual = jest.requireActual('react');
-  const { LocalSearchHook } = jest.requireActual('@kbn/fleet-plugin/public');
   return {
-    LocalSearchHook,
+    LocalSearchHook: () => Promise.resolve({ useLocalSearch: jest.fn() }),
     AvailablePackagesHook: () =>
       Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
     CardIcon: () => ReactActual.createElement('span', { 'data-test-subj': 'variantRowIconStub' }),
@@ -67,7 +68,7 @@ const renderChooser = ({
       <KibanaContextProvider services={coreMock.createStart()}>
         <MemoryRouter initialEntries={['/']}>
           <CompatRouter>
-            <FleetCardsProvider>
+            <FleetCardsProvider enabled>
               <CollectionChooser
                 collection={collection}
                 searchTerm={searchTerm}

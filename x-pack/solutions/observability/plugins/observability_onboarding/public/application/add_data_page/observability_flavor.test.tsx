@@ -21,14 +21,12 @@ import {
 
 const mockUseAvailablePackages = jest.fn();
 
-jest.mock('@kbn/fleet-plugin/public', () => {
-  const { LocalSearchHook } = jest.requireActual('@kbn/fleet-plugin/public');
-  return {
-    LocalSearchHook,
-    AvailablePackagesHook: () =>
-      Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
-  };
-});
+// Stubbed rather than required from the real module, which executes Fleet's whole
+// public bundle. These tests build tiles and never search.
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  LocalSearchHook: () => Promise.resolve({ useLocalSearch: jest.fn() }),
+  AvailablePackagesHook: () => Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
+}));
 
 const makeCollectionCard = (groupId: string, memberCount: number) => ({
   id: `collection:${groupId}`,
@@ -115,7 +113,7 @@ const createProviderWrapper = () => {
       <KibanaContextProvider services={buildServices()}>
         <MemoryRouter initialEntries={['/']}>
           <CompatRouter>
-            <FleetCardsProvider>{children}</FleetCardsProvider>
+            <FleetCardsProvider enabled>{children}</FleetCardsProvider>
           </CompatRouter>
         </MemoryRouter>
       </KibanaContextProvider>

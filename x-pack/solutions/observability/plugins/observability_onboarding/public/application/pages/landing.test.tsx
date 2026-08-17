@@ -121,6 +121,9 @@ const memberHrefs = () =>
     .map((row) => row.querySelector('a')?.getAttribute('href') ?? '');
 
 beforeEach(() => {
+  // Call counts are assertions here, not just plumbing: one test asserts the page
+  // never asks for packages.
+  mockUseAvailablePackages.mockClear();
   mockUseAvailablePackages.mockReturnValue({
     isLoading: false,
     eprPackageLoadingError: undefined,
@@ -187,10 +190,19 @@ const createPackagesFeed = (initialCards: unknown[]) => {
   return { usePackages, publish };
 };
 
+// The page reads Fleet's browser-exposed experimental flags to decide whether
+// collection cards can arrive at all, so tests state that as service config.
+const fleetServiceWithGrouping = (enabled: boolean) =>
+  ({
+    config: { enableExperimental: enabled ? ['enableIntegrationCollectionTiles'] : [] },
+  } as unknown as NonNullable<ObservabilityOnboardingAppServices['fleet']>);
+
 const createObservabilityServices = (
-  coreStart: ReturnType<typeof coreMock.createStart>
+  coreStart: ReturnType<typeof coreMock.createStart>,
+  { grouping = true }: { grouping?: boolean } = {}
 ): ObservabilityOnboardingAppServices => ({
   ...coreStart,
+  fleet: fleetServiceWithGrouping(grouping),
   share: sharePluginMock.createStartContract(),
   context: {
     isDev: false,
@@ -220,13 +232,17 @@ const createObservabilityServices = (
   } as ObservabilityPublicStart,
 });
 
-const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
+const renderWithFlag = (
+  enabled: boolean,
+  initialPath: string = '/',
+  { grouping = true }: { grouping?: boolean } = {}
+) => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
   createCallApi(coreStart);
-  const services = createObservabilityServices(coreStart);
+  const services = createObservabilityServices(coreStart, { grouping });
   return render(
     <I18nProvider>
       <KibanaContextProvider services={services}>
@@ -386,6 +402,24 @@ describe('LandingPage search (V2, Variant A)', () => {
     const searchBar = screen.getByTestId('observabilityOnboardingIntegrationsSearchFieldSearch');
     const heading = screen.getByRole('heading', { name: 'All integrations' });
     expect(searchBar.compareDocumentPosition(heading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+});
+
+describe('LandingPage package loading (V2)', () => {
+  // Grid badges are the only reason to hold packages without a search, so a page
+  // that cannot show them should leave the registry alone.
+  it('asks Fleet for packages on arrival when grouping is on', async () => {
+    renderWithFlag(true);
+
+    await waitFor(() => expect(mockUseAvailablePackages).toHaveBeenCalled());
+  });
+
+  it('asks for nothing on arrival when grouping is off', async () => {
+    renderWithFlag(true, '/', { grouping: false });
+
+    await screen.findByTestId('addDataPageV2');
+    await act(async () => {});
+    expect(mockUseAvailablePackages).not.toHaveBeenCalled();
   });
 });
 

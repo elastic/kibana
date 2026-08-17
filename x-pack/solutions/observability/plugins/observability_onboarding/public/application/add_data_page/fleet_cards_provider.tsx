@@ -91,9 +91,16 @@ const PackagesPump = memo(
 /**
  * Loads Fleet's package data once for the whole Add Data page. Only the renderless
  * pump comes and goes when the async module lands; swapping the wrapper around
- * `children` would remount the grid and the results under it.
+ * `children` would remount the grid and the results under it. `enabled` gates the
+ * load itself, so a page with nothing to show for it never asks the registry.
  */
-export const FleetCardsProvider = ({ children }: { children: React.ReactNode }) => {
+export const FleetCardsProvider = ({
+  enabled,
+  children,
+}: {
+  enabled: boolean;
+  children: React.ReactNode;
+}) => {
   const hooksRef = useRef<FleetHooks | null>(null);
   const [packages, setPackages] = useState<PackagesSnapshot | null>(null);
 
@@ -102,8 +109,9 @@ export const FleetCardsProvider = ({ children }: { children: React.ReactNode }) 
     retry: retryAsyncLoad,
     loading: asyncLoading,
   } = useAsyncRetry(async () => {
+    if (!enabled) return;
     hooksRef.current = await fetchFleetHooks();
-  });
+  }, [enabled]);
 
   const retry = useCallback(() => {
     if (asyncLoading) return;
@@ -113,20 +121,21 @@ export const FleetCardsProvider = ({ children }: { children: React.ReactNode }) 
     retryAsyncLoad();
   }, [asyncLoading, retryAsyncLoad]);
 
-  const fleetHooks = asyncLoading ? null : hooksRef.current;
+  const fleetHooks = enabled && !asyncLoading ? hooksRef.current : null;
   // `useAsyncRetry` keeps the previous error while retrying, so loading wins.
-  const moduleError = errorLoading && !asyncLoading ? errorLoading : undefined;
+  const moduleError = enabled && errorLoading && !asyncLoading ? errorLoading : undefined;
 
   const value = useMemo<FleetCardsValue>(
     () => ({
-      allCards: packages?.allCards ?? EMPTY_CARDS,
-      // No snapshot yet: the pump has not reported, so loading unless the module failed.
-      isLoading: packages ? packages.isLoading : !moduleError,
-      error: packages?.error ?? moduleError,
+      allCards: enabled ? packages?.allCards ?? EMPTY_CARDS : EMPTY_CARDS,
+      // Nothing is on its way while disabled. Otherwise no snapshot yet means the
+      // pump has not reported, so loading unless the module failed.
+      isLoading: enabled ? (packages ? packages.isLoading : !moduleError) : false,
+      error: enabled ? packages?.error ?? moduleError : undefined,
       retry,
       useLocalSearch: fleetHooks?.useLocalSearch ?? null,
     }),
-    [packages, moduleError, retry, fleetHooks]
+    [enabled, packages, moduleError, retry, fleetHooks]
   );
 
   return (

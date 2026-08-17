@@ -10,15 +10,15 @@ import React, { useEffect } from 'react';
 import { FleetCardsProvider, useFleetCards } from './fleet_cards_provider';
 
 const mockUseAvailablePackages = jest.fn();
+const mockAvailablePackagesHook = jest.fn();
 
-jest.mock('@kbn/fleet-plugin/public', () => {
-  const { LocalSearchHook } = jest.requireActual('@kbn/fleet-plugin/public');
-  return {
-    LocalSearchHook,
-    AvailablePackagesHook: () =>
-      Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
-  };
-});
+// Both hooks are stubbed rather than pulled from the real module: requiring it
+// executes Fleet's whole public bundle, which costs more than Jest's timeout on a
+// cold cache. Nothing here searches, so the search index hook is never called.
+jest.mock('@kbn/fleet-plugin/public', () => ({
+  LocalSearchHook: () => Promise.resolve({ useLocalSearch: jest.fn() }),
+  AvailablePackagesHook: () => mockAvailablePackagesHook(),
+}));
 
 const redisCard = {
   id: 'epr:redis',
@@ -44,15 +44,16 @@ const Consumer = () => {
   return <div data-test-subj="consumerCardCount">{allCards.length}</div>;
 };
 
-const renderProvider = () =>
+const renderProvider = (enabled = true) =>
   render(
-    <FleetCardsProvider>
+    <FleetCardsProvider enabled={enabled}>
       <Consumer />
     </FleetCardsProvider>
   );
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockAvailablePackagesHook.mockResolvedValue({ useAvailablePackages: mockUseAvailablePackages });
   mockUseAvailablePackages.mockReturnValue({
     isLoading: false,
     eprPackageLoadingError: undefined,
@@ -89,5 +90,27 @@ describe('FleetCardsProvider', () => {
     await screen.findByText('1');
     await waitFor(() => expect(mockUseAvailablePackages).toHaveBeenCalled());
     expect(onRender.mock.calls.length).toBeLessThan(10);
+  });
+
+  // A page with no search and no grouping flag has nothing to show for the
+  // packages, so it should not reach the registry at all.
+  it('loads nothing while disabled, then loads once enabled', async () => {
+    const { rerender } = render(
+      <FleetCardsProvider enabled={false}>
+        <Consumer />
+      </FleetCardsProvider>
+    );
+
+    expect(await screen.findByText('0')).toBeInTheDocument();
+    expect(mockAvailablePackagesHook).not.toHaveBeenCalled();
+
+    rerender(
+      <FleetCardsProvider enabled={true}>
+        <Consumer />
+      </FleetCardsProvider>
+    );
+
+    expect(await screen.findByText('1')).toBeInTheDocument();
+    expect(mockAvailablePackagesHook).toHaveBeenCalled();
   });
 });
