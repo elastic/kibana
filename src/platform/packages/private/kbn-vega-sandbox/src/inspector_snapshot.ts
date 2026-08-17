@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const NON_SERIALIZABLE_FIELD_LABEL = '(..)';
-
 export interface VegaInspectorRuntimeView {
   addSignalListener: (name: string, handler: (name: string, value: unknown) => void) => unknown;
   removeSignalListener: (name: string, handler: (name: string, value: unknown) => void) => unknown;
@@ -44,7 +42,7 @@ export const serializeCell = (cell: unknown): string => {
   try {
     return typeof cell === 'object' ? JSON.stringify(cell) : `${cell}`;
   } catch {
-    return NON_SERIALIZABLE_FIELD_LABEL;
+    return '(..)';
   }
 };
 

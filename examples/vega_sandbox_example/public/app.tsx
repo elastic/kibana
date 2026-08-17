@@ -36,23 +36,6 @@ import {
 import { PLUGIN_NAME, VEGA_SANDBOX_EXAMPLE_FRAME_PATH } from '../common';
 
 const IFRAME_HEIGHT = 360;
-const IFRAME_HEIGHT_EXPANDED = 520;
-
-/** Demo-only tooltip CSS. visTypeVega will serialize EUI `.vgaVis__tooltip` styles instead. */
-const EXAMPLE_TOOLTIP_CSS = `
-.vgaVis__tooltip {
-  background: #1d1e24;
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font: 12px/1.4 sans-serif;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-  z-index: 1;
-}
-.vgaVis__tooltip table { border-collapse: collapse; }
-.vgaVis__tooltip td { padding: 2px 4px; }
-.vgaVis__tooltip td.key { text-align: right; opacity: 0.75; }
-`;
 
 interface ChartRow {
   amount: number;
@@ -209,7 +192,21 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
         inbound.push({
           type: 'init',
           protocolVersion: VEGA_SANDBOX_PROTOCOL_VERSION,
-          tooltipCss: EXAMPLE_TOOLTIP_CSS,
+          // Demo-only. visTypeVega will serialize EUI `.vgaVis__tooltip` styles instead.
+          tooltipCss: `
+.vgaVis__tooltip {
+  background: #1d1e24;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font: 12px/1.4 sans-serif;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 1;
+}
+.vgaVis__tooltip table { border-collapse: collapse; }
+.vgaVis__tooltip td { padding: 2px 4px; }
+.vgaVis__tooltip td.key { text-align: right; opacity: 0.75; }
+`,
         });
       }
       inbound.push({
@@ -290,7 +287,7 @@ export const VegaSandboxExampleApp = ({ http }: VegaSandboxExampleAppProps) => {
 
   const onResize = () => {
     const iframe = iframeRef.current;
-    const nextHeight = iframeHeight === IFRAME_HEIGHT ? IFRAME_HEIGHT_EXPANDED : IFRAME_HEIGHT;
+    const nextHeight = iframeHeight === IFRAME_HEIGHT ? 520 : IFRAME_HEIGHT;
     setIframeHeight(nextHeight);
     const message: VegaSandboxInboundMessage = {
       type: 'resize',

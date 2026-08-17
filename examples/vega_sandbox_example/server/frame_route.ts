@@ -12,13 +12,6 @@ import type { CoreSetup } from '@kbn/core/server';
 import { VEGA_SANDBOX_BUNDLE_FILE, VEGA_SANDBOX_BUNDLE_PUBLIC_PATH } from '@kbn/vega-sandbox';
 import { VEGA_SANDBOX_EXAMPLE_FRAME_PATH } from '../common';
 
-const HTML_HEADERS = {
-  'content-type': 'text/html; charset=utf-8',
-  'cache-control': 'no-store',
-} as const;
-
-const createNonce = (): string => randomBytes(16).toString('base64');
-
 /**
  * Demo-only CSP for this example frame.
  * Production visTypeVega owns img-src / externalUrl.policy; do not copy this policy.
@@ -120,12 +113,15 @@ export const registerFrameRoute = (core: CoreSetup): void => {
       },
     },
     async (_context, request, response) => {
-      const nonce = createNonce();
+      const nonce = randomBytes(16).toString('base64');
       responseCspByRequestId.set(request.uuid, createExampleFrameCsp(nonce));
 
       return response.ok({
         body: renderFrameDocument(nonce, bundleSrc),
-        headers: HTML_HEADERS,
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+          'cache-control': 'no-store',
+        },
       });
     }
   );

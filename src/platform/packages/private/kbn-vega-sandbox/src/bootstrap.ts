@@ -45,7 +45,6 @@ const pendingExternalUrlValidations = new Map<
 >();
 
 const TOOLTIP_STYLE_ID = 'vega-kibana-sandbox-tooltip-styles';
-const EXTERNAL_URL_VALIDATION_TIMEOUT_MS = 5_000;
 
 const getRoot = (): HTMLElement => {
   const root = document.getElementById('vega-sandbox-root');
@@ -89,7 +88,7 @@ const requestValidateExternalUrl = (
     const timeout = window.setTimeout(() => {
       pendingExternalUrlValidations.delete(requestId);
       reject(new Error('Timed out validating external URL with the Kibana parent.'));
-    }, EXTERNAL_URL_VALIDATION_TIMEOUT_MS);
+    }, 5_000);
 
     pendingExternalUrlValidations.set(requestId, {
       resolve: (value) => {
@@ -191,8 +190,6 @@ const handleInit = ({
   initialized = true;
 };
 
-const OMIT_RESTORE_SIGNALS = ['width', 'height', 'padding', 'autosize', 'background'] as const;
-
 const toRestorableState = (state: unknown): unknown => {
   if (!state || typeof state !== 'object' || Array.isArray(state)) {
     return undefined;
@@ -202,8 +199,7 @@ const toRestorableState = (state: unknown): unknown => {
     record.signals && typeof record.signals === 'object' && !Array.isArray(record.signals)
       ? Object.fromEntries(
           Object.entries(record.signals as Record<string, unknown>).filter(
-            ([name]) =>
-              !OMIT_RESTORE_SIGNALS.includes(name as (typeof OMIT_RESTORE_SIGNALS)[number])
+            ([name]) => !['width', 'height', 'padding', 'autosize', 'background'].includes(name)
           )
         )
       : undefined;
