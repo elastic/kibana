@@ -32,9 +32,7 @@ import {
   type TimeWindowButtonsConfig,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets, type PresetItem } from '@kbn/date-range-picker-presets';
-
-/** Same platform flag as unified search — when disabled, fall back to EuiSuperDatePicker. */
-const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
+import { DATE_RANGE_PICKER_FEATURE_FLAG } from './constants';
 
 const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
   roundRelativeTime: false,

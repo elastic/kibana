@@ -14,8 +14,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { DateRangePickerOnChangeProps, DateRangePickerProps } from '@kbn/date-range-picker';
 import { AlertingDateRangePicker } from './alerting_date_range_picker';
 import type { AlertingDateRangePickerServices } from './alerting_date_range_picker';
-
-const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
+import { DATE_RANGE_PICKER_FEATURE_FLAG } from './constants';
 
 const mockOnChange = jest.fn();
 let lastPickerProps: DateRangePickerProps | undefined;
