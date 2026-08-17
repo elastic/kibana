@@ -270,17 +270,41 @@ const mergeInventoryRow = (
   };
 };
 
+const nearestTimestamp = (keys: readonly number[], timestamp: number): number => {
+  let nearest = keys[0];
+  let best = Math.abs(keys[0] - timestamp);
+  for (const key of keys) {
+    const dist = Math.abs(key - timestamp);
+    if (dist < best) {
+      nearest = key;
+      best = dist;
+    }
+  }
+  return nearest;
+};
+
+/**
+ * Fold a finer remainder histogram into the indexed cadence.
+ * Inserting tail auto_date_histogram keys collapses Elastic Charts bar width
+ * to the smallest gap, which makes the fleet chart flash then go blank.
+ */
 export const mergeRumSessionTraffic = (
   left: RumSessionTrafficPoint[],
   right: RumSessionTrafficPoint[]
 ): RumSessionTrafficPoint[] => {
-  const byTs = new Map<number, number>();
-  for (const point of [...left, ...right]) {
-    byTs.set(point.timestamp, (byTs.get(point.timestamp) ?? 0) + point.sessions);
+  if (left.length === 0) {
+    return right;
   }
-  return [...byTs.entries()]
-    .sort((a, b) => a[0] - b[0])
-    .map(([timestamp, sessions]) => ({ timestamp, sessions }));
+  if (right.length === 0) {
+    return left;
+  }
+  const byTs = new Map(left.map((point) => [point.timestamp, point.sessions]));
+  const keys = [...byTs.keys()].sort((a, b) => a - b);
+  for (const point of right) {
+    const timestamp = nearestTimestamp(keys, point.timestamp);
+    byTs.set(timestamp, (byTs.get(timestamp) ?? 0) + point.sessions);
+  }
+  return keys.map((timestamp) => ({ timestamp, sessions: byTs.get(timestamp) ?? 0 }));
 };
 
 /** Add open-tail rows onto a sessions-index inventory without replacing indexed vitals. */

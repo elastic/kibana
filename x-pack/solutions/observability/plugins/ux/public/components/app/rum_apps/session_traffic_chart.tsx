@@ -96,6 +96,7 @@ export function SessionTrafficChart({
                   chartMargins: { left: 0, right: 8, top: 8, bottom: 16 },
                   chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
                   background: { color: 'transparent' },
+                  scales: { barsPadding: 0.18 },
                 },
                 ...theme,
               ]}
@@ -136,6 +137,10 @@ export function SessionTrafficChart({
               xAccessor="x"
               yAccessors={['y']}
               data={data}
+              enableHistogramMode
+              barSeriesStyle={{
+                rect: { opacity: 0.85 },
+              }}
             />
           </Chart>
         )}

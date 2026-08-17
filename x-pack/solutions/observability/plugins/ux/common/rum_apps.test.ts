@@ -279,4 +279,38 @@ describe('mergeRumAppsResponses', () => {
     expect(merged.sessionTraffic).toEqual([{ timestamp: 1, sessions: 12 }]);
     expect(merged.remainder).toBe(false);
   });
+
+  it('folds a finer remainder histogram into indexed bucket timestamps', () => {
+    const indexed = {
+      apps: [
+        rumAppFromBucket({
+          name: 'shop',
+          sessions: 10,
+          pageViews: 20,
+          errorSessions: 0,
+          p75Lcp: null,
+          platformKeys: ['web'],
+        }),
+      ],
+      sessionTraffic: [
+        { timestamp: 0, sessions: 4 },
+        { timestamp: 86_400_000, sessions: 6 },
+      ],
+      source: 'sessions' as const,
+      remainder: true,
+    };
+    const live = {
+      apps: [],
+      sessionTraffic: [
+        { timestamp: 86_400_000 + 60_000, sessions: 1 },
+        { timestamp: 86_400_000 + 120_000, sessions: 2 },
+      ],
+      source: 'raw' as const,
+      remainder: false,
+    };
+    expect(mergeRumAppsResponses(indexed, live).sessionTraffic).toEqual([
+      { timestamp: 0, sessions: 4 },
+      { timestamp: 86_400_000, sessions: 9 },
+    ]);
+  });
 });
