@@ -49,7 +49,7 @@ export const BULK_QUERY_SAMPLE_SIZE = 100;
 /** Maximum length for an Elasticsearch field name (e.g. `host.name`, `service.environment`). */
 export const MAX_FIELD_NAME_LENGTH = 256;
 
-/** Maximum number of fields used to group alerts (rule grouping, action policy groupBy). */
+/** Maximum number of fields used to group alerts (rule grouping, action policy group_by). */
 export const MAX_GROUPING_FIELDS = 16;
 
 /** Maximum number of items processed in a single bulk-action request body. */
