@@ -43,7 +43,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { MANAGED_INTEGRATION_EXAMPLES, type AwsServiceEntry } from './aws_services_data';
+import {
+  AWS_SCHEMA_META,
+  MANAGED_INTEGRATION_EXAMPLES,
+  type AwsSchema,
+  type AwsServiceEntry,
+} from './aws_services_data';
 
 // Light lavender-white tint used for card header bands, matched to the
 // design reference (Step 14.svg / Deploy & Detect mockups).
@@ -361,6 +366,7 @@ const ConfirmableFieldText: React.FunctionComponent<{
 // Open/closed state is controlled by the parent's sequential accordion.
 const CloudFormationWidget: React.FunctionComponent<{
   services: AwsServiceEntry[];
+  schema: AwsSchema;
   region: string;
   onRegionChange: (value: string) => void;
   isLaunched: boolean;
@@ -375,6 +381,7 @@ const CloudFormationWidget: React.FunctionComponent<{
   onCompleteChange: (isComplete: boolean) => void;
 }> = ({
   services,
+  schema,
   region,
   onRegionChange,
   isLaunched,
@@ -415,9 +422,10 @@ const CloudFormationWidget: React.FunctionComponent<{
     >
       <EuiText size="s">
         <p>
-          Log collection via a single AWS CloudFormation stack — no agents required. Trigger
-          source (S3 or CloudWatch) is configured per service in Service settings. Launch
-          CloudFormation to deploy.
+          Log collection via a single AWS CloudFormation stack — no agents required. Deploys the{' '}
+          <strong>{AWS_SCHEMA_META[schema].label}</strong> template, per the data format chosen in
+          Step 1. Trigger source (S3 or CloudWatch) is configured per service in Service settings.
+          Launch CloudFormation to deploy.
         </p>
       </EuiText>
       <EuiSpacer size="m" />
@@ -1230,6 +1238,7 @@ sudo ./elastic-agent install --url=https://4fc1b088ce026fc9e70a6a0c28b0c58f.flee
 
 export const StepAuthentication: React.FunctionComponent<{
   services: AwsServiceEntry[];
+  schema: AwsSchema;
   deploymentMethod: DeploymentMethod;
   onDeploymentMethodChange: (method: DeploymentMethod) => void;
   onCredentialsValidChange: (isValid: boolean) => void;
@@ -1252,6 +1261,7 @@ export const StepAuthentication: React.FunctionComponent<{
   agentReceivedCount: number;
 }> = ({
   services,
+  schema,
   deploymentMethod,
   onDeploymentMethodChange,
   onCredentialsValidChange,
@@ -1463,6 +1473,7 @@ export const StepAuthentication: React.FunctionComponent<{
           <EuiSpacer size="m" />
           <CloudFormationWidget
             services={services}
+            schema={schema}
             region={deployRegion}
             onRegionChange={onDeployRegionChange}
             isLaunched={isDeployed}
