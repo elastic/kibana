@@ -128,7 +128,7 @@ describe('SignificantEventDetails', () => {
     expect(appendLimitMock).toHaveBeenCalledWith(ESQL_QUERY, 5);
   });
 
-  it('replaces a legacy query limit while retaining its projection and sort', async () => {
+  it('replaces a legacy query LIMIT and KEEP while retaining its SORT', async () => {
     renderDetails({
       ...baseEvent,
       signals: [
@@ -142,9 +142,9 @@ describe('SignificantEventDetails', () => {
 
     expect(await screen.findByTestId('esqlDataGrid')).toBeInTheDocument();
     const [queryWithoutLimit, limit] = appendLimitMock.mock.calls[0];
-    expect(queryWithoutLimit).toContain('KEEP @timestamp, body.text');
     expect(queryWithoutLimit).toContain('SORT @timestamp ASC');
     expect(queryWithoutLimit).not.toContain('LIMIT');
+    expect(queryWithoutLimit).not.toContain('KEEP');
     expect(limit).toBe(5);
   });
 

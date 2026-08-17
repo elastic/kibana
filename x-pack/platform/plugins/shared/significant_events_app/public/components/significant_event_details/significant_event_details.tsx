@@ -78,7 +78,9 @@ const replaceESQLLimit = (query: string) => {
   const { root } = Parser.parse(query);
   const queryWithoutLimit = BasicPrettyPrinter.print({
     ...root,
-    commands: root.commands.filter((command) => command.name !== 'limit'),
+    commands: root.commands.filter(
+      (command) => command.name !== 'limit' && command.name !== 'keep'
+    ),
   });
 
   return queryWithoutLimit;
