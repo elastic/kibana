@@ -340,7 +340,7 @@ describe('Discover url generator', () => {
           boxColor: 'transparent',
           unknownValue: 'ignored',
         },
-        metricsGridSettings: {
+        metricsState: {
           counterAggregation: 'max',
           gaugeAggregation: 'last_value',
           histogramPercentile: 'p90',
@@ -362,7 +362,7 @@ describe('Discover url generator', () => {
         exampleProfileState: {
           rowControlColor: 'text',
         },
-        metricsGridSettings: {
+        metricsState: {
           counterAggregation: 'max',
           gaugeAggregation: 'last_value',
           histogramPercentile: 'p90',
