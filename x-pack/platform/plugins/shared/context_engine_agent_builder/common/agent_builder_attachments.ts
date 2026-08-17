@@ -6,7 +6,10 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { aiIndexAttachmentDataSchema, type AiIndexAttachmentData } from './ai_index_schemas';
+import {
+  aiIndexAttachmentDataSchema,
+  type AiIndexAttachmentData,
+} from '@kbn/context-engine-plugin/common/ai_index_schemas';
 
 export { aiIndexAttachmentDataSchema, type AiIndexAttachmentData };
 

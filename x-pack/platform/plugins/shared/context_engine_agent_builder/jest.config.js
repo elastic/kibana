@@ -8,6 +8,9 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/context_engine_agent_builder/server'],
+  roots: [
+    '<rootDir>/x-pack/platform/plugins/shared/context_engine_agent_builder/server',
+    '<rootDir>/x-pack/platform/plugins/shared/context_engine_agent_builder/public',
+  ],
   setupFiles: [],
 };

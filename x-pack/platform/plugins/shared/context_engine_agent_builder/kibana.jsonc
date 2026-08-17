@@ -6,7 +6,7 @@
   "visibility": "shared",
   "plugin": {
     "id": "contextEngineAgentBuilder",
-    "browser": false,
+    "browser": true,
     "server": true,
     "requiredPlugins": ["agentBuilder", "contextEngine", "workflowsManagement", "security"]
   }

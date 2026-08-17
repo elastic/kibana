@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { AnalyzeAndImproveContext, ChatOpener } from '../../types';
+import type { AgentBuilderIntegration, AnalyzeAndImproveContext } from '../../types';
 
 /**
- * Invokes the registered "Analyze & improve" chat opener. Resolves the opener via `getChatOpener`
- * at call time (so a late-registered opener still fires) and is a no-op when none is registered
- * (the button that triggers this is hidden in that case).
+ * Invokes the registered "Analyze & improve" chat opener. Resolves the opener via
+ * `getAgentBuilderIntegration` at call time (so a late-registered opener still fires) and is a
+ * no-op when none is registered (the button that triggers this is hidden in that case).
  */
 export const analyzeAndImprove = (
-  getChatOpener: (() => ChatOpener | undefined) | undefined,
+  getAgentBuilderIntegration: (() => AgentBuilderIntegration | undefined) | undefined,
   context: AnalyzeAndImproveContext
 ): void => {
-  getChatOpener?.()?.(context);
+  getAgentBuilderIntegration?.()?.analyzeAndImprove.analyzeAndImprove(context);
 };

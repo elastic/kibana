@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type {
-  ChatOpener,
-  ContextEnginePluginStart,
-  ContextEngineStartDependencies,
-} from '../types';
+import type { ContextEngineStartDependencies, AgentBuilderIntegration } from '../types';
 import type { ContextEngineServices } from './hooks/use_kibana';
-import { resolveAgentBuilderStart } from './resolve_agent_builder';
 import { ContextEngineRoutes } from './routes';
 
 const queryClient = new QueryClient({
@@ -29,29 +24,24 @@ const queryClient = new QueryClient({
 export const mountApp = async ({
   core,
   plugins,
-  coreSetup,
   element,
   history,
-  getChatOpener,
+  getAgentBuilderIntegration,
 }: {
   core: CoreStart;
   plugins: ContextEngineStartDependencies;
-  coreSetup: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>;
   element: HTMLElement;
   history: ScopedHistory;
-  getChatOpener?: () => ChatOpener | undefined;
+  getAgentBuilderIntegration?: () => AgentBuilderIntegration | undefined;
 }) => {
-  const agentBuilder = await resolveAgentBuilderStart(coreSetup);
-
   const services: ContextEngineServices = {
     ...core,
-    agentBuilder,
     data: plugins.data,
     share: plugins.share,
     triggersActionsUi: plugins.triggersActionsUi,
     console: plugins.console,
     spaces: plugins.spaces,
-    getChatOpener,
+    getAgentBuilderIntegration,
   };
 
   ReactDOM.render(

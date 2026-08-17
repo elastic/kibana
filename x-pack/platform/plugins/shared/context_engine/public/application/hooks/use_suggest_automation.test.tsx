@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { ChatEventType, ToolResultType } from '@kbn/agent-builder-common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { AI_INDEX_ATTACHMENT_TYPE } from '../../../common/agent_builder_attachments';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../../../common/agent_builder_tools';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
+import type { AnalyzeAndImproveProvider, SuggestAutomationProvider } from '../../types';
 import type { ContextEngineServices } from './use_kibana';
 import { useSuggestAutomation } from './use_suggest_automation';
 
@@ -32,45 +29,46 @@ const aiIndex: GetAiIndexResponse = {
 const renderSuggestHook = ({
   aiIndex: index = aiIndex,
   isManaged = false,
-  hasAgentBuilder = true,
-  hasPrivilege = true,
+  canSuggest = true,
+  hasProvider = true,
   onSaved = jest.fn(),
 }: {
   aiIndex?: GetAiIndexResponse;
   isManaged?: boolean;
-  hasAgentBuilder?: boolean;
-  hasPrivilege?: boolean;
+  canSuggest?: boolean;
+  hasProvider?: boolean;
   onSaved?: jest.Mock;
 } = {}) => {
-  const openChat = jest.fn();
-  const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({
-    id: 'conversation-1',
+  const canSuggestMock = jest.fn().mockReturnValue(canSuggest);
+  const suggestAutomationMock = jest.fn();
+  let automationSavedCallback: (() => void) | undefined;
+  const subscribeToAutomationSavedMock = jest.fn((_aiIndexId: string, callback: () => void) => {
+    automationSavedCallback = callback;
+    return jest.fn();
   });
-  const chatEvents$ = new Subject<{
-    type: ChatEventType;
-    data: Record<string, unknown>;
-  }>();
-  const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
+
+  const provider: SuggestAutomationProvider = {
+    canSuggest: canSuggestMock,
+    suggestAutomation: suggestAutomationMock,
+    subscribeToAutomationSaved: subscribeToAutomationSavedMock,
+  };
+
+  const analyzeAndImproveProvider: AnalyzeAndImproveProvider = {
+    canAnalyze: () => false,
+    analyzeAndImprove: jest.fn(),
+  };
 
   const services = {
     ...coreMock.createStart(),
     share: {} as ContextEngineServices['share'],
     triggersActionsUi: {} as ContextEngineServices['triggersActionsUi'],
-    agentBuilder: hasAgentBuilder
-      ? {
-          openChat,
-          events: {
-            ui: { activeConversation$ },
-            getChatEvents$,
-          },
-        }
+    getAgentBuilderIntegration: hasProvider
+      ? () => ({
+          analyzeAndImprove: analyzeAndImproveProvider,
+          suggestAutomation: provider,
+        })
       : undefined,
   } as unknown as ContextEngineServices;
-
-  services.application.capabilities = {
-    ...services.application.capabilities,
-    agentBuilder: { show: hasPrivilege },
-  };
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (
     <I18nProvider>
@@ -82,164 +80,73 @@ const renderSuggestHook = ({
     wrapper,
   });
 
-  return { ...view, services, chatEvents$, onSaved, getChatEvents$ };
+  return {
+    ...view,
+    canSuggestMock,
+    suggestAutomationMock,
+    subscribeToAutomationSavedMock,
+    triggerAutomationSaved: () => automationSavedCallback?.(),
+    onSaved,
+  };
 };
 
 describe('useSuggestAutomation', () => {
-  it('returns canSuggest false when agent builder is unavailable', () => {
-    const { result } = renderSuggestHook({ hasAgentBuilder: false });
+  it('returns canSuggest false when no provider is registered', () => {
+    const { result } = renderSuggestHook({ hasProvider: false });
 
     expect(result.current.canSuggest).toBe(false);
   });
 
-  it('returns canSuggest false for managed AI indexes', () => {
-    const { result } = renderSuggestHook({ isManaged: true });
+  it('delegates canSuggest to the provider', () => {
+    const { result, canSuggestMock } = renderSuggestHook();
+
+    expect(canSuggestMock).toHaveBeenCalledWith({ aiIndex, isManaged: false });
+    expect(result.current.canSuggest).toBe(true);
+  });
+
+  it('returns canSuggest false when the provider rejects the request', () => {
+    const { result } = renderSuggestHook({ canSuggest: false });
 
     expect(result.current.canSuggest).toBe(false);
   });
 
-  it('returns canSuggest false without agent builder privilege', () => {
-    const { result } = renderSuggestHook({ hasPrivilege: false });
-
-    expect(result.current.canSuggest).toBe(false);
-  });
-
-  it('opens agent builder chat with the AI index attachment', () => {
-    const { result, services } = renderSuggestHook();
-    const openChat = services.agentBuilder?.openChat;
+  it('delegates suggestAutomation to the provider', () => {
+    const { result, suggestAutomationMock } = renderSuggestHook();
 
     result.current.suggestAutomation();
 
-    expect(openChat).toHaveBeenCalledWith(
-      expect.objectContaining({
-        newConversation: true,
-        autoSendInitialMessage: false,
-        initialMessage: expect.stringMatching(
-          /\[\/ki-automation-generation\]\(skill:\/\/ki-automation-generation\).*When an ai_index attachment is present/s
-        ),
-        sessionTag: 'context-engine-ai-index-my-ai-index',
-        attachments: [
-          expect.objectContaining({
-            id: 'my-ai-index',
-            type: AI_INDEX_ATTACHMENT_TYPE,
-            data: {
-              id: 'my-ai-index',
-              description: 'Support tickets',
-              dest: aiIndex.dest,
-              sources: aiIndex.sources,
-              automations: aiIndex.automations,
-            },
-          }),
-        ],
-      })
+    expect(suggestAutomationMock).toHaveBeenCalledWith({
+      aiIndex,
+      onSaved: expect.any(Function),
+    });
+  });
+
+  it('does not call suggestAutomation when canSuggest is false', () => {
+    const { result, suggestAutomationMock } = renderSuggestHook({ canSuggest: false });
+
+    result.current.suggestAutomation();
+
+    expect(suggestAutomationMock).not.toHaveBeenCalled();
+  });
+
+  it('subscribes to automation saved events via the provider', () => {
+    const { subscribeToAutomationSavedMock, triggerAutomationSaved, onSaved } = renderSuggestHook();
+
+    expect(subscribeToAutomationSavedMock).toHaveBeenCalledWith(
+      'my-ai-index',
+      expect.any(Function)
     );
-  });
-
-  it('refreshes the page when save automation succeeds for the current AI index', () => {
-    const { chatEvents$, onSaved, getChatEvents$ } = renderSuggestHook();
-
-    expect(getChatEvents$).toHaveBeenCalledWith('conversation-1');
 
     act(() => {
-      chatEvents$.next({
-        type: ChatEventType.toolResult,
-        data: {
-          tool_call_id: 'tool-call-1',
-          tool_id: CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
-          results: [
-            {
-              tool_result_id: 'result-1',
-              type: ToolResultType.other,
-              data: {
-                aiIndexId: 'my-ai-index',
-                workflowId: 'wf-new',
-                status: 'attached',
-              },
-            },
-          ],
-        },
-      });
+      triggerAutomationSaved();
     });
 
     expect(onSaved).toHaveBeenCalledTimes(1);
   });
 
-  it('refreshes the page when save automation persists and attaches for the current AI index', () => {
-    const { chatEvents$, onSaved } = renderSuggestHook();
+  it('does not subscribe when canSuggest is false', () => {
+    const { subscribeToAutomationSavedMock } = renderSuggestHook({ canSuggest: false });
 
-    act(() => {
-      chatEvents$.next({
-        type: ChatEventType.toolResult,
-        data: {
-          tool_call_id: 'tool-call-2',
-          tool_id: CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
-          results: [
-            {
-              tool_result_id: 'result-2',
-              type: ToolResultType.other,
-              data: {
-                aiIndexId: 'my-ai-index',
-                workflowId: 'wf-new',
-                status: 'saved_and_attached',
-              },
-            },
-          ],
-        },
-      });
-    });
-
-    expect(onSaved).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not refresh when save automation fails', () => {
-    const { chatEvents$, onSaved } = renderSuggestHook();
-
-    act(() => {
-      chatEvents$.next({
-        type: ChatEventType.toolResult,
-        data: {
-          tool_call_id: 'tool-call-1',
-          tool_id: CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
-          results: [
-            {
-              tool_result_id: 'result-1',
-              type: ToolResultType.error,
-              data: {
-                message: 'Failed to save workflow automation',
-              },
-            },
-          ],
-        },
-      });
-    });
-
-    expect(onSaved).not.toHaveBeenCalled();
-  });
-
-  it('does not refresh when save automation succeeds for a different AI index', () => {
-    const { chatEvents$, onSaved } = renderSuggestHook();
-
-    act(() => {
-      chatEvents$.next({
-        type: ChatEventType.toolResult,
-        data: {
-          tool_call_id: 'tool-call-1',
-          tool_id: CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
-          results: [
-            {
-              tool_result_id: 'result-1',
-              type: ToolResultType.other,
-              data: {
-                aiIndexId: 'other-ai-index',
-                workflowId: 'wf-new',
-                status: 'attached',
-              },
-            },
-          ],
-        },
-      });
-    });
-
-    expect(onSaved).not.toHaveBeenCalled();
+    expect(subscribeToAutomationSavedMock).not.toHaveBeenCalled();
   });
 });

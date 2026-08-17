@@ -5,25 +5,37 @@
  * 2.0.
  */
 
-import type { AnalyzeAndImproveContext } from '../../types';
+import type { AnalyzeAndImproveContext, SuggestAutomationProvider } from '../../types';
 import { analyzeAndImprove } from './analyze_and_improve';
+
+const suggestAutomationProvider: SuggestAutomationProvider = {
+  canSuggest: () => false,
+  suggestAutomation: jest.fn(),
+  subscribeToAutomationSaved: () => () => {},
+};
 
 describe('analyzeAndImprove', () => {
   const context = { aiIndex: { id: 'idx' } } as unknown as AnalyzeAndImproveContext;
 
-  it('resolves the opener via the getter and invokes it with the context', () => {
-    const opener = jest.fn();
+  it('resolves the provider via the getter and invokes analyzeAndImprove with the context', () => {
+    const analyzeAndImproveMock = jest.fn();
+    const provider = {
+      canAnalyze: () => true,
+      analyzeAndImprove: analyzeAndImproveMock,
+    };
 
-    analyzeAndImprove(() => opener, context);
+    analyzeAndImprove(
+      () => ({
+        analyzeAndImprove: provider,
+        suggestAutomation: suggestAutomationProvider,
+      }),
+      context
+    );
 
-    expect(opener).toHaveBeenCalledWith(context);
+    expect(analyzeAndImproveMock).toHaveBeenCalledWith(context);
   });
 
-  it('is a no-op when the getter resolves to no opener', () => {
-    expect(() => analyzeAndImprove(() => undefined, context)).not.toThrow();
-  });
-
-  it('is a no-op when no getter is provided', () => {
+  it('is a no-op when no integration is registered', () => {
     expect(() => analyzeAndImprove(undefined, context)).not.toThrow();
   });
 });

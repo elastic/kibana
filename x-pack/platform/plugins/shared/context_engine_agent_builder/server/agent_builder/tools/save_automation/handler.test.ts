@@ -8,7 +8,7 @@
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { AI_INDEX_ATTACHMENT_TYPE } from '@kbn/context-engine-plugin/common/agent_builder_attachments';
+import { AI_INDEX_ATTACHMENT_TYPE } from '../../../../common/agent_builder_attachments';
 import { MAX_AI_INDEX_AUTOMATIONS } from '@kbn/context-engine-plugin/common/constants';
 import {
   AiIndexConflictError,

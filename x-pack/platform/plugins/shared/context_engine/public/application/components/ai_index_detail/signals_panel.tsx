@@ -40,10 +40,10 @@ interface SignalsPanelProps {
  */
 export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
   const {
-    services: { getChatOpener },
+    services: { getAgentBuilderIntegration },
   } = useKibana();
-  // Resolved at render time rather than captured once at mount.
-  const chatOpener = getChatOpener?.();
+  const analyzeAndImproveProvider = getAgentBuilderIntegration?.()?.analyzeAndImprove;
+  const canAnalyze = analyzeAndImproveProvider?.canAnalyze({ aiIndex }) ?? false;
 
   // Signals (generation + this panel) are gated on the global feedback-loop setting. Without this
   // the panel would render a permanently-empty "No signals yet" surface whenever the loop is off.
@@ -61,7 +61,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
 
   const handleAnalyze = () => {
     if (aiIndex) {
-      analyzeAndImprove(getChatOpener, { aiIndex, tag: undefined });
+      analyzeAndImprove(getAgentBuilderIntegration, { aiIndex, tag: undefined });
     }
   };
 
@@ -82,7 +82,7 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {chatOpener && (
+        {canAnalyze && (
           <EuiFlexItem grow={false}>
             <EuiButton
               size="s"

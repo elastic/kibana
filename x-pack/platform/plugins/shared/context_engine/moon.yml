@@ -53,8 +53,6 @@ dependsOn:
   - '@kbn/index-management-shared-types'
   - '@kbn/code-editor'
   - '@kbn/ui-callout'
-  - '@kbn/agent-builder-browser'
-  - '@kbn/agent-builder-common'
   - '@kbn/content-list'
   - '@kbn/content-list-provider'
   - '@kbn/content-list-provider-client'

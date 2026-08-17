@@ -21,7 +21,7 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import type {
-  ChatOpener,
+  AgentBuilderIntegration,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
@@ -47,12 +47,8 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
-  /**
-   * The registered "Analyze & improve" chat opener, or `undefined` until one is registered. A
-   * getter over this field is threaded into the app so the button reacts to an opener registered
-   * after mount, rather than a value snapshotted once at mount time.
-   */
-  private chatOpener?: ChatOpener;
+  /** Registered Agent Builder hooks. */
+  private agentBuilderIntegration?: AgentBuilderIntegration;
 
   constructor(_context: PluginInitializerContext) {}
 
@@ -62,7 +58,8 @@ export class ContextEnginePlugin
     const startServices = core.getStartServices();
     // Captured in a closure so `mount` (where `this` is the app config) can read the opener
     // registered on `start`.
-    const getChatOpener = () => this.chatOpener;
+    const getAgentBuilderIntegration = (): AgentBuilderIntegration | undefined =>
+      this.agentBuilderIntegration;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -96,10 +93,9 @@ export class ContextEnginePlugin
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
-          coreSetup: core,
           element: params.element,
           history: params.history,
-          getChatOpener,
+          getAgentBuilderIntegration,
         });
       },
     });
@@ -109,8 +105,8 @@ export class ContextEnginePlugin
 
   start(_core: CoreStart): ContextEnginePluginStart {
     return {
-      registerChatOpener: (opener: ChatOpener) => {
-        this.chatOpener = opener;
+      registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => {
+        this.agentBuilderIntegration = integration;
       },
     };
   }

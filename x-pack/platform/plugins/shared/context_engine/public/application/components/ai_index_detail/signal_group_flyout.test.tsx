@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import type { ChatOpener } from '../../../types';
+import type { AnalyzeAndImproveProvider, ChatOpener, SuggestAutomationProvider } from '../../../types';
 import { useSignals } from '../../hooks/use_signals';
 import { SignalGroupFlyout } from './signal_group_flyout';
 import { buildSignal } from './signal_test_fixtures';
@@ -45,13 +45,31 @@ const signalsResult = (overrides = {}) => ({
   ...overrides,
 });
 
-const renderFlyout = ({ chatOpener }: { chatOpener?: ChatOpener } = {}) => {
+const noopSuggestAutomationProvider: SuggestAutomationProvider = {
+  canSuggest: () => false,
+  suggestAutomation: jest.fn(),
+  subscribeToAutomationSaved: () => () => {},
+};
+
+const renderFlyout = ({
+  canAnalyze = false,
+  analyzeAndImprove = jest.fn(),
+}: { canAnalyze?: boolean; analyzeAndImprove?: ChatOpener } = {}) => {
+  const analyzeAndImproveProvider: AnalyzeAndImproveProvider = {
+    canAnalyze: () => canAnalyze,
+    analyzeAndImprove,
+  };
   const onClose = jest.fn();
   const services = {
     ...coreMock.createStart(),
     data: { search: { search: jest.fn() } },
     spaces: undefined,
-    getChatOpener: () => chatOpener,
+    getAgentBuilderIntegration: canAnalyze
+      ? () => ({
+          analyzeAndImprove: analyzeAndImproveProvider,
+          suggestAutomation: noopSuggestAutomationProvider,
+        })
+      : undefined,
   };
   render(
     <I18nProvider>
@@ -106,13 +124,13 @@ describe('SignalGroupFlyout', () => {
     expect(screen.getByTestId('contextSignalsGroupLoadMore')).toBeInTheDocument();
   });
 
-  it('invokes the chat opener with the group tag when Analyze & improve is clicked', () => {
-    const opener = jest.fn();
+  it('invokes analyzeAndImprove with the group tag when Analyze & improve is clicked', () => {
+    const analyzeAndImproveMock = jest.fn();
     mockUseSignals.mockReturnValue(signalsResult({ signals: [buildSignal()], total: 1 }));
-    renderFlyout({ chatOpener: opener });
+    renderFlyout({ canAnalyze: true, analyzeAndImprove: analyzeAndImproveMock });
 
     fireEvent.click(screen.getByTestId('contextSignalGroupAnalyzeButton'));
-    expect(opener).toHaveBeenCalledWith({ aiIndex, tag: 'query_error' });
+    expect(analyzeAndImproveMock).toHaveBeenCalledWith({ aiIndex, tag: 'query_error' });
   });
 
   it('stacks the signal detail flyout when a row is opened', () => {

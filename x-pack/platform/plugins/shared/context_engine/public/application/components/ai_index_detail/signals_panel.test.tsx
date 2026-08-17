@@ -12,7 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import type { ChatOpener } from '../../../types';
+import type { AnalyzeAndImproveProvider, ChatOpener, SuggestAutomationProvider } from '../../../types';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
 import { useSignals } from '../../hooks/use_signals';
@@ -59,14 +59,34 @@ const signalsResult = (overrides = {}) => ({
   ...overrides,
 });
 
+const noopSuggestAutomationProvider: SuggestAutomationProvider = {
+  canSuggest: () => false,
+  suggestAutomation: jest.fn(),
+  subscribeToAutomationSaved: () => () => {},
+};
+
 const renderPanel = ({
   isLoading = false,
-  chatOpener,
-}: { isLoading?: boolean; chatOpener?: ChatOpener } = {}) => {
+  canAnalyze = false,
+  analyzeAndImprove = jest.fn(),
+}: {
+  isLoading?: boolean;
+  canAnalyze?: boolean;
+  analyzeAndImprove?: ChatOpener;
+} = {}) => {
+  const analyzeAndImproveProvider: AnalyzeAndImproveProvider = {
+    canAnalyze: () => canAnalyze,
+    analyzeAndImprove,
+  };
   const services = {
     ...coreMock.createStart(),
     data: { search: { search: jest.fn() } },
-    getChatOpener: () => chatOpener,
+    getAgentBuilderIntegration: canAnalyze
+      ? () => ({
+          analyzeAndImprove: analyzeAndImproveProvider,
+          suggestAutomation: noopSuggestAutomationProvider,
+        })
+      : undefined,
   };
   render(
     <I18nProvider>
@@ -141,19 +161,19 @@ describe('SignalsPanel', () => {
     expect(screen.getByTestId('contextSignalRow')).toBeInTheDocument();
   });
 
-  it('hides the Analyze & improve button when no opener is registered', () => {
+  it('hides the Analyze & improve button when analyze is unavailable', () => {
     renderPanel();
     expect(screen.queryByTestId('contextSignalsAnalyzeButton')).not.toBeInTheDocument();
   });
 
-  it('shows the Analyze & improve button and invokes the registered opener without signals', () => {
-    const opener = jest.fn();
-    renderPanel({ chatOpener: opener });
+  it('shows the Analyze & improve button and invokes the registered provider without signals', () => {
+    const analyzeAndImproveMock = jest.fn();
+    renderPanel({ canAnalyze: true, analyzeAndImprove: analyzeAndImproveMock });
 
     fireEvent.click(screen.getByTestId('contextSignalsAnalyzeButton'));
 
-    expect(opener).toHaveBeenCalledWith({ aiIndex, tag: undefined });
-    expect(opener.mock.calls[0][0]).not.toHaveProperty('signals');
+    expect(analyzeAndImproveMock).toHaveBeenCalledWith({ aiIndex, tag: undefined });
+    expect(analyzeAndImproveMock.mock.calls[0][0]).not.toHaveProperty('signals');
   });
 
   it('renders a distinct error state when the groups query fails', () => {

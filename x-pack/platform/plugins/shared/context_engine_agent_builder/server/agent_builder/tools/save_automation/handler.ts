@@ -16,11 +16,11 @@ import type { CoreStart, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
   AI_INDEX_ATTACHMENT_TYPE,
   WORKFLOW_YAML_ATTACHMENT_TYPE,
-} from '@kbn/context-engine-plugin/common/agent_builder_attachments';
-import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+} from '../../../../common/agent_builder_attachments';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 
 export interface SaveAutomationParams {
