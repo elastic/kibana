@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { MwsCalloutContent } from './mws_callout_content';
 import { MwsPendingSyncCallout } from './mws_pending_sync_callout';
+import { MwsAgentVersionCallout } from './mws_agent_version_callout';
 import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
 import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 import { selectOverviewStatus } from '../../../state/overview_status';
@@ -22,8 +23,8 @@ export const MonitorsMWsCallout = () => {
     [allConfigs]
   );
 
-  // Folded into whichever MW callout is already showing below, rather than a
-  // standalone callout, to keep this surface to a single box.
+  // Folded into whichever MW callout is already showing below. Only when
+  // neither active nor pending applies does it get its own callout.
   const hasOutdatedAgent = useMemo(
     () =>
       outdatedLocationIds.size > 0 &&
@@ -45,6 +46,10 @@ export const MonitorsMWsCallout = () => {
     return (
       <MwsPendingSyncCallout syncInterval={syncInterval} hasOutdatedAgent={hasOutdatedAgent} />
     );
+  }
+
+  if (hasOutdatedAgent) {
+    return <MwsAgentVersionCallout />;
   }
 
   return null;

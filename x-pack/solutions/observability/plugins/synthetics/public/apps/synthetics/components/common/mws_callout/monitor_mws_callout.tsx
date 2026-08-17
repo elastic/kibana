@@ -8,6 +8,7 @@
 import React from 'react';
 import { MwsCalloutContent } from './mws_callout_content';
 import { MwsPendingSyncCallout } from './mws_pending_sync_callout';
+import { MwsAgentVersionCallout } from './mws_agent_version_callout';
 import { useHasPendingMwChanges } from './use_has_pending_mw_changes';
 import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 import { ConfigKey, isExternalSyntheticsMonitor } from '../../../../../../common/runtime_types';
@@ -29,17 +30,25 @@ export const MonitorMWsCallout = () => {
     return null;
   }
 
+  const hasOutdatedAgent =
+    monitorMWIds.length > 0 &&
+    (monitor.locations ?? []).some((location) => outdatedLocationIds.has(location.id));
+
+  // Folded into whichever of these is already showing (rather than a
+  // separate callout) to keep the page to a single MW-related box. Only
+  // when none apply does the outdated agent get its own callout below.
   if (activeMWs.length) {
-    // Folded into this same callout (rather than a separate one) to keep the
-    // page to a single MW-related box.
-    const hasOutdatedAgent = (monitor.locations ?? []).some((location) =>
-      outdatedLocationIds.has(location.id)
-    );
     return <MwsCalloutContent activeMWs={activeMWs} hasOutdatedAgent={hasOutdatedAgent} />;
   }
 
   if (hasPendingChanges) {
-    return <MwsPendingSyncCallout syncInterval={syncInterval} />;
+    return (
+      <MwsPendingSyncCallout syncInterval={syncInterval} hasOutdatedAgent={hasOutdatedAgent} />
+    );
+  }
+
+  if (hasOutdatedAgent) {
+    return <MwsAgentVersionCallout />;
   }
 
   return null;
