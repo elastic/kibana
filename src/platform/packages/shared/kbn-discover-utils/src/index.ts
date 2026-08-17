@@ -35,4 +35,3 @@ export type {
   MainHistoryLocationState,
   ProfileStateMap,
 } from './app_locator';
-export { DISCOVER_APP_LOCATOR } from './app_locator';
