@@ -22,6 +22,7 @@ import {
   useBatchedPublishingSubjects,
   apiPublishesReload,
   apiPublishesTimeRange,
+  apiIsPresentationContainer,
   fetch$,
 } from '@kbn/presentation-publishing';
 import { tracksOverlays } from '@kbn/presentation-util';
@@ -79,6 +80,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
+    const isNewPanel$ = new BehaviorSubject<boolean>(false);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(initialState.esqlQuery));
     const isApproximate$ = new BehaviorSubject<boolean>(false);
@@ -144,6 +146,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }),
       onEdit: async ({ isNewPanel } = {}) => {
         if (tracksOverlays(parentApi)) parentApi.clearOverlays();
+        isNewPanel$.next(isNewPanel ?? false);
         isFlyoutOpen$.next(true);
       },
       isEditingEnabled: () => true,
@@ -236,6 +239,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
         const handleFlyoutSave = useCallback(
           (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
+            isNewPanel$.next(false);
             previewHtml$.next(null);
             applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
             setGenerationVersion((v) => v + 1);
@@ -284,6 +288,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         const handleFlyoutClose = useCallback(() => {
+          if (isNewPanel$.getValue() && apiIsPresentationContainer(parentApi)) {
+            parentApi.removePanel(uuid);
+          }
+          isNewPanel$.next(false);
           previewHtml$.next(null);
           isFlyoutOpen$.next(false);
         }, []);

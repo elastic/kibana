@@ -15,6 +15,16 @@ import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 
+jest.mock('@kbn/presentation-publishing', () => {
+  const actual = jest.requireActual('@kbn/presentation-publishing');
+  return { ...actual, apiIsPresentationContainer: jest.fn(() => false) };
+});
+
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
+const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.MockedFunction<
+  typeof apiIsPresentationContainer
+>;
+
 let capturedComponentProps: { onGenerateWithChat?: () => void } | undefined;
 
 jest.mock('./components/custom_content_component', () => ({
@@ -64,16 +74,17 @@ const baseState: CustomContentEmbeddableState = {
   template: '<div>static html</div>',
 };
 
-const buildEmbeddable = async (initialState: CustomContentEmbeddableState) => {
-  const parentApiStub = {};
+const buildEmbeddable = async (
+  initialState: CustomContentEmbeddableState,
+  parentApi: Record<string, unknown> = {}
+) => {
   const uuid = 'test-uuid';
 
   const embeddable = await customContentEmbeddableFactory.buildEmbeddable({
     initializeDrilldownsManager: jest.fn(),
     initialState,
-    parentApi: parentApiStub,
-    finalizeApi: (api) =>
-      ({ ...api, uuid, parentApi: parentApiStub } as unknown as CustomContentApi),
+    parentApi,
+    finalizeApi: (api) => ({ ...api, uuid, parentApi } as unknown as CustomContentApi),
     uuid,
   });
 
@@ -84,6 +95,7 @@ describe('customContentEmbeddableFactory', () => {
   afterEach(() => {
     mockAgentBuilder = undefined;
     capturedComponentProps = undefined;
+    mockApiIsPresentationContainer.mockReturnValue(false);
   });
 
   describe('serializeState', () => {
@@ -219,6 +231,57 @@ describe('customContentEmbeddableFactory', () => {
 
       await act(async () => capturedFlyoutProps!.onClose());
       await waitFor(() => expect(screen.queryByTestId('mockEditCustomContentFlyout')).toBeNull());
+    });
+
+    it('cancelling on a new panel removes it from the parent', async () => {
+      const removePanel = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onClose());
+
+      expect(removePanel).toHaveBeenCalledWith('test-uuid');
+    });
+
+    it('cancelling an existing panel does not remove it', async () => {
+      const removePanel = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onClose());
+
+      expect(removePanel).not.toHaveBeenCalled();
+    });
+
+    it('saving a new panel does not remove it on subsequent cancel', async () => {
+      const removePanel = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onSave('FROM logs', '<div>saved</div>'));
+
+      await act(async () => embeddable.api.onEdit());
+      await act(async () => capturedFlyoutProps!.onClose());
+
+      expect(removePanel).not.toHaveBeenCalled();
     });
   });
 
