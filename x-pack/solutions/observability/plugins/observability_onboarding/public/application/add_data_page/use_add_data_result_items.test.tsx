@@ -14,7 +14,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
-import type { GroupedIntegrationCardItem } from './collection_card';
 import { isCollectionCard } from './collection_card';
 import { useAddDataResultItems } from './use_add_data_result_items';
 
@@ -92,7 +91,7 @@ describe('useAddDataResultItems', () => {
   });
 
   it('rewrites collection member urls alongside the top-level cards', () => {
-    const collection: GroupedIntegrationCardItem = {
+    const collection: IntegrationCardItem = {
       ...makeCard({ id: 'collection:nginx', url: '/app/integrations/collection/nginx' }),
       isCollectionCard: true,
       groupMembers: [
@@ -121,7 +120,7 @@ describe('useAddDataResultItems', () => {
   // component state. Only the member links carry the group id, so browsing the
   // page never writes it into history.
   it('points collection member return paths back at the open collection', () => {
-    const collection: GroupedIntegrationCardItem = {
+    const collection: IntegrationCardItem = {
       ...makeCard({ id: 'collection:nginx', url: '/app/integrations/collection/nginx' }),
       isCollectionCard: true,
       groupMembers: [
