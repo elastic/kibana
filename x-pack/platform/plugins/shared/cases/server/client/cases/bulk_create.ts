@@ -30,7 +30,12 @@ import {
   validateRequiredCustomFields,
   resolveGlobalFields,
   validateCaseExtendedFields,
+  resolveTemplateFieldsForClose,
 } from './validators';
+import {
+  buildExtendedFieldsDefaults,
+  pickExtendedFieldsDifferingFromDefaults,
+} from '../../../common/utils/template_fields';
 import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseRequest } from './utils';
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
@@ -208,6 +213,41 @@ export const bulkCreate = async (
       );
     }
 
+    // Reuses the same per-owner cache createBulkCreateCaseRequest populated above.
+    const resolveCachedGlobalFieldsForUserActions = async (
+      owner: string
+    ): Promise<InlineField[]> => {
+      let globalFields = globalFieldsByOwner.get(owner);
+      if (!globalFields) {
+        globalFields = await resolveGlobalFields(owner, fieldDefinitionsService);
+        globalFieldsByOwner.set(owner, globalFields);
+      }
+      return globalFields;
+    };
+
+    // Per-template-id cache of resolved defaults: multiple cases in one bulk request commonly
+    // share the same (connector-resolved) template, so this avoids re-fetching/re-parsing it.
+    const templateFieldDefaultsById = new Map<string, Record<string, string>>();
+    const resolveTemplateFieldDefaults = async (template: {
+      id: string;
+      version: number;
+    }): Promise<Record<string, string>> => {
+      const cacheKey = `${template.id}@${template.version}`;
+      let defaults = templateFieldDefaultsById.get(cacheKey);
+      if (!defaults) {
+        const resolvedFields = await resolveTemplateFieldsForClose({
+          templateId: template.id,
+          templateVersion: template.version,
+          templatesService,
+          fieldDefinitionsService,
+          logger,
+        });
+        defaults = buildExtendedFieldsDefaults(resolvedFields);
+        templateFieldDefaultsById.set(cacheKey, defaults);
+      }
+      return defaults;
+    };
+
     for (const theCase of casesSOs) {
       userActions.push(createBulkCreateUserActionsRequest({ theCase, user }));
 
@@ -236,15 +276,41 @@ export const bulkCreate = async (
       // customFields value, or the caller can supply it directly — either way, create_case's
       // payload strips extended_fields, so without a dedicated entry a non-empty extended_fields
       // on the persisted case has zero record in the activity log.
+      //
+      // bulkCreate has no server-side template expansion (its only caller, the cases connector,
+      // resolves and injects template defaults itself before calling in), so unlike create.ts the
+      // persisted map can't be split into "caller-supplied" vs "server-injected default" by
+      // construction. Re-resolve the applied template's own defaults here (global defaults win on
+      // a storage-key collision, matching create.ts's precedence) purely to filter the activity
+      // log — a connector-created case from a template must not read as if every field, including
+      // ones the connector filled from the template, was explicitly set.
       const persistedExtendedFields = theCase.attributes.extended_fields;
       if (persistedExtendedFields && Object.keys(persistedExtendedFields).length > 0) {
-        userActions.push({
-          type: UserActionTypes.extended_fields,
-          caseId: theCase.id,
-          user,
-          payload: { extended_fields: persistedExtendedFields },
-          owner: theCase.attributes.owner,
-        });
+        const globalFieldsDefaults = buildExtendedFieldsDefaults(
+          await resolveCachedGlobalFieldsForUserActions(theCase.attributes.owner)
+        );
+        const templateFieldDefaults = theCase.attributes.template
+          ? await resolveTemplateFieldDefaults(theCase.attributes.template)
+          : {};
+        const activityDefaultsBaseline = Object.fromEntries(
+          Object.keys(templateFieldDefaults).map((key) => [
+            key,
+            globalFieldsDefaults[key] ?? templateFieldDefaults[key],
+          ])
+        );
+        const activityExtendedFields = pickExtendedFieldsDifferingFromDefaults(
+          persistedExtendedFields,
+          activityDefaultsBaseline
+        );
+        if (Object.keys(activityExtendedFields).length > 0) {
+          userActions.push({
+            type: UserActionTypes.extended_fields,
+            caseId: theCase.id,
+            user,
+            payload: { extended_fields: activityExtendedFields },
+            owner: theCase.attributes.owner,
+          });
+        }
       }
 
       if (theCase.attributes.assignees && theCase.attributes.assignees.length !== 0) {
@@ -383,6 +449,16 @@ const createBulkCreateCaseRequest = async ({
 }> => {
   const { id, ...caseWithoutId } = theCase;
 
+  // Caller intent, captured before pairing/normalization can populate extended_fields from a
+  // linked customFields value or a template default — mirrors create.ts's
+  // hadExtendedFieldsBeforeDefaults. bulkCreate's only caller (the cases connector) has no way to
+  // supply values for fields it doesn't know about, so validating as if it explicitly submitted
+  // the final (pairing/default-populated) map would enforce "required" against fields the caller
+  // never had a chance to fill in — silently breaking every automated case creation in a space
+  // that has any required field the connector doesn't touch (e.g. any required Field Library
+  // entry, once that owner has even one legacy custom field that pairing mirrors).
+  const hadExtendedFieldsBeforeDefaults = caseWithoutId.extended_fields !== undefined;
+
   const resolveCachedGlobalFields = async (): Promise<InlineField[]> => {
     let globalFields = globalFieldsByOwner.get(theCase.owner);
     if (!globalFields) {
@@ -447,9 +523,11 @@ const createBulkCreateCaseRequest = async ({
   // Single authoritative validation pass over the FINAL, post-pairing representations — mirrors
   // create.ts. Unlike the pairing checks above (which only cover actively-linked fields), this
   // rejects unknown extended_fields keys, wrong-typed values, and missing required fields for
-  // every case — including pure v2-native fields with no linked v1 customField. bulkCreate has
-  // no server-side template/global-defaults expansion, so `partial: false` always applies (no
-  // defaults-injection leniency to preserve, unlike create.ts).
+  // every case — including pure v2-native fields with no linked v1 customField. `partial` reflects
+  // the caller's original direct intent (see hadExtendedFieldsBeforeDefaults above), not whether
+  // pairing populated extended_fields from a linked customFields value — matching create.ts's
+  // manual-path leniency: a required field with no value anywhere is only enforced when the caller
+  // explicitly sent extended_fields themselves.
   validateRequiredCustomFields({
     requestCustomFields: normalizedCase.customFields,
     customFieldsConfiguration,
@@ -464,7 +542,7 @@ const createBulkCreateCaseRequest = async ({
       templatesService,
       fieldDefinitionsService,
       owner: theCase.owner,
-      partial: false,
+      partial: !hadExtendedFieldsBeforeDefaults,
     });
   }
 
