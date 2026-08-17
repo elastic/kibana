@@ -1393,7 +1393,7 @@ describe('Output Service', () => {
           canEncrypt: true,
         } as any);
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-          managedOtlpOutput: true,
+          enableOtlpOutput: true,
         } as any);
       });
 
@@ -1404,7 +1404,7 @@ describe('Output Service', () => {
       it('should throw if OTLP output type is not enabled', async () => {
         const soClient = getMockedSoClient();
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-          managedOtlpOutput: false,
+          enableOtlpOutput: false,
         } as any);
 
         await expect(
@@ -3026,7 +3026,7 @@ describe('Output Service', () => {
     describe('otlp output', () => {
       beforeEach(() => {
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-          managedOtlpOutput: true,
+          enableOtlpOutput: true,
         } as any);
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
@@ -3039,7 +3039,7 @@ describe('Output Service', () => {
       it('Should throw if OTLP output type is not enabled on update', async () => {
         const soClient = getMockedSoClient({});
         mockedAppContextService.getExperimentalFeatures.mockReturnValue({
-          managedOtlpOutput: false,
+          enableOtlpOutput: false,
         } as any);
 
         await expect(

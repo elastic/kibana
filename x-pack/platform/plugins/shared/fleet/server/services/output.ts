@@ -639,7 +639,7 @@ class OutputService {
 
     validateFleetSavedObjectId(options?.id);
 
-    if (isOtlpOutput(output) && !appContextService.getExperimentalFeatures().managedOtlpOutput) {
+    if (isOtlpOutput(output) && !appContextService.getExperimentalFeatures().enableOtlpOutput) {
       throw new OutputInvalidError('OTLP output type is not enabled');
     }
 
@@ -1104,7 +1104,7 @@ class OutputService {
 
     if (
       mergedType === outputType.Otlp &&
-      !appContextService.getExperimentalFeatures().managedOtlpOutput
+      !appContextService.getExperimentalFeatures().enableOtlpOutput
     ) {
       throw new OutputInvalidError('OTLP output type is not enabled');
     }
