@@ -16,6 +16,7 @@ import {
   getLineRemainderWithoutConsoleComments,
   isInsideConsoleComment,
   isInsideConsoleString,
+  isRequestLineWithUrl,
 } from '@kbn/monaco/src/languages/console/utils';
 import { i18n } from '@kbn/i18n';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
@@ -688,6 +689,38 @@ export class MonacoEditorActionsProvider {
     return isInsideConsoleComment(getContentThroughPosition(model, position));
   }
 
+  /** Returns the nearest request starting at or before the line, if any. */
+  private async getRequestEndingAtOrBeforeLine(
+    model: monaco.editor.ITextModel,
+    lineNumber: number
+  ): Promise<AdjustedParsedRequest | undefined> {
+    const requests = await this.getRequestsBetweenLines(model, 1, lineNumber);
+    return requests.at(-1);
+  }
+
+  /**
+   * True when the line sits after the start of a request the parser could not finish
+   * (no `endOffset`, e.g. an unclosed body). Such lines belong to that request's body even
+   * when they fall outside the request's computed line range, which stops at the last
+   * non-empty line.
+   */
+  private async isPositionInsideUnfinishedRequest(
+    model: monaco.editor.ITextModel,
+    lineNumber: number
+  ): Promise<boolean> {
+    const request = await this.getRequestEndingAtOrBeforeLine(model, lineNumber);
+    if (
+      request === undefined ||
+      request.endOffset !== undefined ||
+      request.startLineNumber >= lineNumber
+    ) {
+      return false;
+    }
+    const startColumn = this.getRequestStartColumn(model, request, request.startLineNumber);
+    const requestLine = model.getLineContent(request.startLineNumber).slice(startColumn - 1);
+    return isRequestLineWithUrl(requestLine);
+  }
+
   private async getAutocompleteType(
     model: monaco.editor.ITextModel,
     { lineNumber, column }: monaco.Position
@@ -707,6 +740,13 @@ export class MonacoEditorActionsProvider {
     // trigger method suggestions.
     // https://github.com/elastic/kibana/issues/186767
     if (!currentRequest) {
+      // A whitespace-only line inside an unfinished body parses as outside any request
+      // (request ranges stop at the last non-empty line), but it is a body position, not
+      // the start of a new request: `{ "type": "url",` followed by an empty line must get
+      // body suggestions, not methods.
+      if (await this.isPositionInsideUnfinishedRequest(model, lineNumber)) {
+        return AutocompleteType.BODY;
+      }
       if (isRequestLineStart(model.getLineContent(lineNumber))) {
         return AutocompleteType.METHOD;
       }
@@ -814,13 +854,14 @@ export class MonacoEditorActionsProvider {
       if (context.triggerCharacter && context.triggerCharacter !== '"') {
         return { suggestions: [] };
       }
-      const requests = await this.getRequestsBetweenLines(
-        model,
-        position.lineNumber,
-        position.lineNumber
-      );
-      const request = requests.at(0);
-      const requestStartLineNumber = requests[0].startLineNumber;
+      // The containing request: for a whitespace-only line inside an unfinished body the
+      // request's computed line range stops before this line, so look at the nearest
+      // request above the position instead of only at the position's own line.
+      const request = await this.getRequestEndingAtOrBeforeLine(model, position.lineNumber);
+      if (!request) {
+        return { suggestions: [] };
+      }
+      const requestStartLineNumber = request.startLineNumber;
       const suggestions = await getBodyCompletionItems(
         model,
         position,

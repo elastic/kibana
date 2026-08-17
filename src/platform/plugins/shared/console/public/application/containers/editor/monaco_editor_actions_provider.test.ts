@@ -75,7 +75,7 @@ describe('Editor actions provider', () => {
         }
         remainingOffset -= line.length + 1;
       }
-      return { lineNumber: lines.length, column: lines.at(-1)?.length ?? 1 };
+      return { lineNumber: lines.length, column: (lines.at(-1)?.length ?? 0) + 1 };
     });
     const getOffsetAt = jest.fn(({ lineNumber, column }: monaco.IPosition) => {
       const precedingLinesLength = lines
@@ -127,6 +127,16 @@ describe('Editor actions provider', () => {
       getWordUntilPosition,
     } as unknown as jest.Mocked<monaco.editor.ITextModel>;
   };
+
+  it.each([
+    { lines: ['abc'], offset: 4, expectedPosition: { lineNumber: 1, column: 4 } },
+    { lines: ['abc', ''], offset: 5, expectedPosition: { lineNumber: 2, column: 1 } },
+  ])(
+    'SHOULD clamp offset $offset past EOF to Monaco position $expectedPosition',
+    ({ lines, offset, expectedPosition }) => {
+      expect(createModel(lines).getPositionAt(offset)).toEqual(expectedPosition);
+    }
+  );
 
   const createDisposableModel = (lines: string[]) => {
     let isDisposed = false;
@@ -2449,6 +2459,61 @@ describe('Editor actions provider', () => {
         const model = setup(['GET _search', '{}', '']);
 
         const { suggestions } = await provideCompletionItems(model, { lineNumber: 3, column: 1 });
+
+        expect(suggestions.map(({ label }) => label)).toEqual(
+          expect.arrayContaining(['GET', 'POST'])
+        );
+      });
+
+      it('does not return method completion items on a whitespace-only line inside an unfinished body', async () => {
+        // The request's computed line range stops at the last non-empty line, so a
+        // whitespace-only line below it parses as outside any request. It must still be
+        // treated as a body position of the unfinished request above, not as the start
+        // of a new request.
+        mockGetParsedRequests.mockResolvedValue(unterminatedRequest);
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: 'repository' }];
+        });
+        const model = setup(['POST _snapshot/test_repo', '{', '  "type": "url",', '  ']);
+
+        const { suggestions } = await provideCompletionItems(model, { lineNumber: 4, column: 3 });
+
+        expect(suggestions.map(({ label }) => label)).toEqual(['repository']);
+      });
+
+      it('uses the nearest unfinished request when earlier requests exist', async () => {
+        const lines = [
+          'GET _search',
+          '{}',
+          '',
+          'POST _snapshot/test_repo',
+          '{',
+          '  "type": "url",',
+          '  ',
+        ];
+        const secondRequestStartOffset = lines.slice(0, 3).join('\n').length + 1;
+        mockGetParsedRequests.mockResolvedValue([
+          { startOffset: 0, endOffset: lines.slice(0, 2).join('\n').length },
+          { startOffset: secondRequestStartOffset },
+        ]);
+        mockPopulateContext.mockImplementation((...args) => {
+          const context = args[0][1];
+          context.autoCompleteSet = [{ name: 'repository' }];
+        });
+        const model = setup(lines, 7, 3);
+
+        const { suggestions } = await provideCompletionItems(model, { lineNumber: 7, column: 3 });
+
+        expect(suggestions.map(({ label }) => label)).toEqual(['repository']);
+      });
+
+      it('still returns method completion items after malformed non-request text', async () => {
+        const lines = ['nonsense', '  '];
+        mockGetParsedRequests.mockResolvedValue(createParser()(lines.join('\n'))?.requests ?? []);
+        const model = setup(lines, 2, 3);
+
+        const { suggestions } = await provideCompletionItems(model, { lineNumber: 2, column: 3 });
 
         expect(suggestions.map(({ label }) => label)).toEqual(
           expect.arrayContaining(['GET', 'POST'])
