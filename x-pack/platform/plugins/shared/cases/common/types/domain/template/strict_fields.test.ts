@@ -15,7 +15,10 @@ import {
   StrictInlineFieldSchema,
   StrictFieldSchema,
   StrictFieldsArraySchema,
+  buildStrictFieldsArraySchema,
+  collectExistingFieldNames,
 } from './strict_fields';
+import type { Field } from './fields';
 
 /**
  * Tests for strict_fields.ts.
@@ -184,5 +187,189 @@ describe('StrictFieldsArraySchema', () => {
     ];
     const result = StrictFieldsArraySchema.safeParse(fields);
     expect(result.success).toBe(true);
+  });
+});
+
+describe('collectExistingFieldNames', () => {
+  it('collects inline field names', () => {
+    const fields = [
+      { control: 'INPUT_TEXT', name: 'legacy-field', type: 'keyword' },
+      { control: 'INPUT_NUMBER', name: 'severity_count', type: 'long' },
+    ] as Field[];
+    expect(collectExistingFieldNames(fields)).toEqual(new Set(['legacy-field', 'severity_count']));
+  });
+
+  it('collects $ref aliases but not $ref targets', () => {
+    const fields = [
+      { $ref: 'my_library_field', name: 'legacy-alias' },
+      { $ref: 'other-library-field' },
+    ] as Field[];
+    expect(collectExistingFieldNames(fields)).toEqual(new Set(['legacy-alias']));
+  });
+
+  it('returns an empty set for an empty fields array', () => {
+    expect(collectExistingFieldNames([])).toEqual(new Set());
+  });
+
+  it('excludes display-only (MARKDOWN) names — they are exempt, not grandfathered', () => {
+    const fields = [
+      { control: 'MARKDOWN', name: 'Triage instructions!', metadata: { content: 'Read me' } },
+      { control: 'INPUT_TEXT', name: 'legacy-field', type: 'keyword' },
+    ] as Field[];
+    expect(collectExistingFieldNames(fields)).toEqual(new Set(['legacy-field']));
+  });
+});
+
+describe('buildStrictFieldsArraySchema — grandfathering', () => {
+  it('with no grandfathered names, behaves identically to StrictFieldsArraySchema', () => {
+    const fields = [{ control: 'INPUT_TEXT', name: 'bad name!', type: 'keyword' }];
+    expect(buildStrictFieldsArraySchema().safeParse(fields).success).toBe(false);
+    expect(buildStrictFieldsArraySchema(new Set()).safeParse(fields).success).toBe(false);
+  });
+
+  it('accepts an untouched field whose name predates the authoring-charset rule', () => {
+    const fields = [
+      { control: 'INPUT_TEXT', name: 'legacy-field', type: 'keyword' },
+      { control: 'INPUT_TEXT', name: 'new_valid_field', type: 'keyword' },
+    ];
+    const schema = buildStrictFieldsArraySchema(new Set(['legacy-field']));
+    const result = schema.safeParse(fields);
+    expect(result.success).toBe(true);
+  });
+
+  it('still rejects a brand-new field with an invalid name alongside a grandfathered one', () => {
+    const fields = [
+      { control: 'INPUT_TEXT', name: 'legacy-field', type: 'keyword' },
+      { control: 'INPUT_TEXT', name: 'brand new field', type: 'keyword' },
+    ];
+    const schema = buildStrictFieldsArraySchema(new Set(['legacy-field']));
+    const result = schema.safeParse(fields);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toContain('brand new field');
+    }
+  });
+
+  it('does NOT grandfather a rename to a different invalid name (byte-exact match only)', () => {
+    // "legacy-field" was grandfathered; renaming it to "legacy-field-2" is a NEW name that
+    // happens to also be invalid, and must be rejected like any other new invalid name.
+    const fields = [{ control: 'INPUT_TEXT', name: 'legacy-field-2', type: 'keyword' }];
+    const schema = buildStrictFieldsArraySchema(new Set(['legacy-field']));
+    const result = schema.safeParse(fields);
+    expect(result.success).toBe(false);
+  });
+
+  it('grandfathers a $ref alias the same way as an inline name', () => {
+    const fields = [{ $ref: 'my_field', name: 'legacy-alias' }];
+    const schema = buildStrictFieldsArraySchema(new Set(['legacy-alias']));
+    expect(schema.safeParse(fields).success).toBe(true);
+  });
+
+  it('grandfathering a display-only (MARKDOWN) field name is a no-op (already exempt)', () => {
+    const fields = [
+      {
+        control: 'MARKDOWN',
+        name: 'legacy label with spaces',
+        metadata: { content: 'Some instructions' },
+      },
+    ];
+    expect(buildStrictFieldsArraySchema().safeParse(fields).success).toBe(true);
+  });
+});
+
+describe('buildStrictFieldsArraySchema — folded-twin collisions', () => {
+  const parseWithExisting = (name: string, existingNames: string[]) =>
+    buildStrictFieldsArraySchema(new Set(existingNames)).safeParse([
+      { control: 'INPUT_TEXT', name, type: 'keyword' },
+    ]);
+
+  it('rejects an underscore twin of an existing hyphenated name', () => {
+    const result = parseWithExisting('my_field', ['my-field']);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toContain('my_field');
+      expect(result.error.issues[0].message).toContain('my-field');
+    }
+  });
+
+  it('rejects a camelCase twin of an existing snake_case name', () => {
+    const result = parseWithExisting('myField', ['my_field']);
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts a new name whose folded form matches no existing name', () => {
+    const result = parseWithExisting('unrelated_name', ['my-field']);
+    expect(result.success).toBe(true);
+  });
+
+  it('does not twin-reject the grandfathered name itself (byte-exact match wins)', () => {
+    const result = parseWithExisting('my-field', ['my-field']);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects a $ref alias that folds onto an existing name', () => {
+    const result = buildStrictFieldsArraySchema(new Set(['my-field'])).safeParse([
+      { $ref: 'library_field', name: 'my_field' },
+    ]);
+    expect(result.success).toBe(false);
+  });
+
+  it('applies no twin check on create (no existing names)', () => {
+    const result = buildStrictFieldsArraySchema().safeParse([
+      { control: 'INPUT_TEXT', name: 'my_field', type: 'keyword' },
+    ]);
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects turning a stored MARKDOWN entry into a value-bearing field with its exempt name', () => {
+    // The markdown label was exempt (not grandfathered) — see `collectExistingFieldNames` —
+    // so switching the control to an input must re-run the full name checks and fail.
+    const storedFields = [
+      { control: 'MARKDOWN', name: 'Triage instructions!', metadata: { content: 'Read me' } },
+    ] as Field[];
+    const schema = buildStrictFieldsArraySchema(collectExistingFieldNames(storedFields));
+    const result = schema.safeParse([
+      { control: 'INPUT_TEXT', name: 'Triage instructions!', type: 'keyword' },
+    ]);
+    expect(result.success).toBe(false);
+  });
+
+  it('does not twin-reject a valid new name that folds onto a stored MARKDOWN label', () => {
+    // Markdown fields hold no value, so a fold collision with their label is harmless.
+    const storedFields = [
+      { control: 'MARKDOWN', name: 'triage instructions', metadata: { content: 'Read me' } },
+    ] as Field[];
+    const schema = buildStrictFieldsArraySchema(collectExistingFieldNames(storedFields));
+    const result = schema.safeParse([
+      { control: 'INPUT_TEXT', name: 'triage_instructions', type: 'keyword' },
+    ]);
+    expect(result.success).toBe(true);
+  });
+});
+
+describe('StrictFieldsArraySchema — length failures get a length message', () => {
+  it('reports the length limit, not the charset rule, for an over-long clean name', () => {
+    // Clean snake_case, but the derived `<name>_as_keyword` key exceeds MAX_SNAKE_KEY_LENGTH.
+    const longName = 'a'.repeat(300);
+    const result = StrictFieldsArraySchema.safeParse([
+      { control: 'INPUT_TEXT', name: longName, type: 'keyword' },
+    ]);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toContain('too long');
+      expect(result.error.issues[0].message).toContain('256');
+      expect(result.error.issues[0].message).not.toContain('must contain only letters');
+    }
+  });
+
+  it('keeps the charset message for a charset failure', () => {
+    const result = StrictFieldsArraySchema.safeParse([
+      { control: 'INPUT_TEXT', name: 'bad name', type: 'keyword' },
+    ]);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toContain('must contain only letters');
+      expect(result.error.issues[0].message).not.toContain('too long');
+    }
   });
 });

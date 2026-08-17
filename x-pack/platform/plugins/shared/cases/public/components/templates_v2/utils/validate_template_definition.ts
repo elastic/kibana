@@ -7,7 +7,10 @@
 
 import { parse as parseYaml } from 'yaml';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
-import { StrictFieldsArraySchema } from '../../../../common/types/domain/template/strict_fields';
+import {
+  buildStrictFieldsArraySchema,
+  collectExistingFieldNames,
+} from '../../../../common/types/domain/template/strict_fields';
 import {
   TEMPLATE_DEFINITION_EMPTY,
   INVALID_YAML_NON_OBJECT,
@@ -32,8 +35,32 @@ export type TemplateDefinitionValidationResult =
 export const getMissingRequiredKeys = (definition: Record<string, unknown>): string[] =>
   REQUIRED_TEMPLATE_ROOT_KEYS.filter((key) => !(key in definition));
 
+/**
+ * Best-effort: the field names/aliases already present in the template's currently-stored
+ * definition, for grandfathering the authoring-charset check on update (mirrors the server-side
+ * `TemplatesService.getExistingFieldNames`). Falls back to an empty set — no grandfathering, fully
+ * strict — if the stored YAML fails to parse; that can only make the check MORE restrictive.
+ */
+export const getExistingFieldNames = (existingDefinition: string): ReadonlySet<string> => {
+  try {
+    const parsed = ParsedTemplateDefinitionSchema.parse(
+      normalizeTemplateCaseDefaultsForValidation(parseYaml(existingDefinition))
+    );
+    return collectExistingFieldNames(parsed.fields);
+  } catch {
+    return new Set();
+  }
+};
+
+/**
+ * `existingDefinition` — the template's currently-stored definition when editing an existing
+ * template (undefined when creating) — grandfathers field names that predate the
+ * authoring-charset rule, so editing a legacy-named template doesn't permanently disable Save.
+ * Mirrors the server-side grandfathering in `TemplatesService.updateTemplate`.
+ */
 export const validateTemplateDefinitionYaml = (
-  definition: string
+  definition: string,
+  existingDefinition?: string
 ): TemplateDefinitionValidationResult => {
   try {
     if (!definition || definition.trim() === '') {
@@ -55,7 +82,11 @@ export const validateTemplateDefinitionYaml = (
     // After the lenient structural parse, apply the authoring-charset check so the Save button
     // disables and the footer names the offending field before the user hits the server.
     // Read and preview paths keep the lenient schema — this function is only called at write time.
-    const strictFieldsResult = StrictFieldsArraySchema.safeParse(result.data.fields);
+    const grandfatheredNames =
+      existingDefinition !== undefined ? getExistingFieldNames(existingDefinition) : undefined;
+    const strictFieldsResult = buildStrictFieldsArraySchema(grandfatheredNames).safeParse(
+      result.data.fields
+    );
     if (!strictFieldsResult.success) {
       return {
         success: false,
