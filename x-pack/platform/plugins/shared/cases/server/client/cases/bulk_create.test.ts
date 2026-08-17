@@ -834,6 +834,159 @@ describe('bulkCreate', () => {
     });
   });
 
+  describe('global defaults injection and relaxRequiredFields', () => {
+    const priorityWithDefault = {
+      fieldDefinitionId: 'fd-priority',
+      name: 'priority',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition:
+        'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\nmetadata:\n  default: "p3"\n',
+    };
+
+    const priorityRequiredNoDefault = {
+      fieldDefinitionId: 'fd-priority',
+      name: 'priority',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition:
+        'name: priority\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Priority\nvalidation:\n  required: true\n',
+    };
+
+    const notesField = {
+      fieldDefinitionId: 'fd-notes',
+      name: 'notes',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition: 'name: notes\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Notes\n',
+    };
+
+    const countField = {
+      fieldDefinitionId: 'fd-count',
+      name: 'count',
+      owner: SECURITY_SOLUTION_OWNER,
+      description: '',
+      isGlobal: true,
+      definition: 'name: count\ntype: long\ncontrol: INPUT_NUMBER\nlabel: Count\n',
+    };
+
+    const setup = (fieldDefinitions: Array<typeof priorityWithDefault>) => {
+      const localClientArgs = createCasesClientMockArgs();
+      const localCasesClient = createCasesClientMock();
+      localCasesClient.configure.get = jest.fn().mockResolvedValue([]);
+      localClientArgs.services.fieldDefinitionsService.getFieldDefinitions.mockResolvedValue({
+        fieldDefinitions,
+        total: fieldDefinitions.length,
+      });
+      localClientArgs.services.caseService.bulkCreateCases.mockResolvedValue({
+        saved_objects: [caseSO],
+      });
+      return { localClientArgs, localCasesClient };
+    };
+
+    it('injects a global default the caller did not send', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityWithDefault]);
+
+      await bulkCreate({ cases: getCases() }, localClientArgs, localCasesClient);
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toEqual({ priority_as_keyword: 'p3' });
+    });
+
+    it('lets a caller-sent value win over the injected global default', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityWithDefault]);
+
+      await bulkCreate(
+        { cases: getCases({ extended_fields: { priority_as_keyword: 'p1' } }) },
+        localClientArgs,
+        localCasesClient
+      );
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toEqual({ priority_as_keyword: 'p1' });
+    });
+
+    it('does not inject anything for a global field without a default', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityRequiredNoDefault]);
+
+      await bulkCreate({ cases: getCases() }, localClientArgs, localCasesClient);
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toBeUndefined();
+    });
+
+    it('does not inject global defaults when the templates flag is disabled', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityWithDefault]);
+      localClientArgs.config = {
+        ...localClientArgs.config,
+        templates: { enabled: false },
+      };
+
+      await bulkCreate({ cases: getCases() }, localClientArgs, localCasesClient);
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toBeUndefined();
+    });
+
+    it('rejects a required no-default global field when the caller sent extended_fields and no relax option', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityRequiredNoDefault, notesField]);
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ extended_fields: { notes_as_keyword: 'x' } }) },
+          localClientArgs,
+          localCasesClient
+        )
+      ).rejects.toThrow('Field "Priority" is required');
+
+      expect(localClientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+
+    it('relaxRequiredFields skips required enforcement for fields the caller could not fill', async () => {
+      const { localClientArgs, localCasesClient } = setup([priorityRequiredNoDefault, notesField]);
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ extended_fields: { notes_as_keyword: 'x' } }) },
+          localClientArgs,
+          localCasesClient,
+          { relaxRequiredFields: true }
+        )
+      ).resolves.not.toThrow();
+
+      expect(
+        localClientArgs.services.caseService.bulkCreateCases.mock.calls[0][0].cases[0]
+          .extended_fields
+      ).toEqual({ notes_as_keyword: 'x' });
+    });
+
+    it('relaxRequiredFields still validates the values that ARE present', async () => {
+      const { localClientArgs, localCasesClient } = setup([countField]);
+
+      await expect(
+        bulkCreate(
+          { cases: getCases({ extended_fields: { count_as_long: 'not-a-number' } }) },
+          localClientArgs,
+          localCasesClient,
+          { relaxRequiredFields: true }
+        )
+      ).rejects.toThrow('Field "Count" must be a number');
+
+      expect(localClientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
+    });
+  });
+
   describe('title', () => {
     const clientArgs = createCasesClientMockArgs();
     clientArgs.services.caseService.bulkCreateCases.mockResolvedValue({ saved_objects: [caseSO] });

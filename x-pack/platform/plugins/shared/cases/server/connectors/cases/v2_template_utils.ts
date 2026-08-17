@@ -11,6 +11,7 @@ import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import {
   buildExtendedFieldsDefaults,
+  parseFieldDefinitionsToInlineFields,
   resolveTemplateFields,
 } from '../../../common/utils/template_fields';
 import type { FieldDefinitionsFindRequest } from '../../../common/types/api/field_definition/v1';
@@ -154,7 +155,14 @@ export const resolveV2TemplateForLegacyKey = async (
 
 /**
  * Fetches the owner's field-definition library and resolves all template fields
- * (both inline and `$ref` entries) into a flat `extended_fields` map of defaults.
+ * (both inline and `$ref` entries) into a flat `extended_fields` map of defaults,
+ * merged with the owner's global (isGlobal) field defaults — the global definition
+ * wins on a storage-key collision, matching the injection precedence in create.ts.
+ *
+ * Fields with no default are omitted entirely rather than sent as `''`: the connector
+ * has no user to fill them in, an empty entry can't satisfy a `required` check anyway,
+ * and on the reopen path an explicit `''` would overwrite values users typed into the
+ * previously created cases' fields.
  *
  * Called once per connector run on the v2 template path, before case creation.
  */
@@ -169,5 +177,20 @@ export const buildExtendedFieldsFromTemplate = async (
     owner: owner as FieldDefinitionsFindRequest['owner'],
   });
   const resolved = resolveTemplateFields(definition.fields ?? [], fieldDefinitions);
-  return buildExtendedFieldsDefaults(resolved);
+  const templateDefaults = buildExtendedFieldsDefaults(resolved);
+
+  // Filter empty global defaults BEFORE merging (mirroring create.ts): a global definition
+  // with no default must not clobber a real default the template set for the same storage key
+  // (e.g. a `$ref` to the global field with a `metadata.default` override).
+  const globalDefaults = Object.fromEntries(
+    Object.entries(
+      buildExtendedFieldsDefaults(
+        parseFieldDefinitionsToInlineFields(fieldDefinitions.filter((fd) => fd.isGlobal === true))
+      )
+    ).filter(([, value]) => value !== '')
+  );
+
+  return Object.fromEntries(
+    Object.entries({ ...templateDefaults, ...globalDefaults }).filter(([, value]) => value !== '')
+  );
 };

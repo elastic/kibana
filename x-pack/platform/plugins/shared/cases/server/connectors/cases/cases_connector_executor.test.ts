@@ -348,6 +348,9 @@ describe('CasesConnectorExecutor', () => {
                     },
                   ],
                 },
+                Object {
+                  "relaxRequiredFields": true,
+                },
               ],
             ]
           `);
@@ -1918,6 +1921,12 @@ fields: []
             expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
               { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
             ]);
+
+            // The connector is an automated caller: required-field enforcement must be relaxed
+            // on this create path too, not only on upsertCases.
+            expect(casesClientMock.cases.bulkCreate.mock.calls[0][1]).toEqual({
+              relaxRequiredFields: true,
+            });
 
             expect(casesClientMock.cases.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
               Object {
@@ -3903,6 +3912,9 @@ fields: []
                       "title": "Test rule - Grouping by field_value_3 (Auto-created)",
                     },
                   ],
+                },
+                Object {
+                  "relaxRequiredFields": true,
                 },
               ],
             ]

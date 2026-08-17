@@ -785,11 +785,18 @@ export class CasesConnectorExecutor {
     );
 
     /**
-     * cases.bulkCreate throws an error on errors
+     * cases.bulkCreate throws an error on errors.
+     *
+     * relaxRequiredFields: the connector can only fill fields whose defaults it resolved from
+     * the template/global definitions — a required field with no default must not fail the
+     * whole run (and with it the alert->case flow for the space).
      */
-    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
-      cases: bulkCreateReq,
-    });
+    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate(
+      {
+        cases: bulkCreateReq,
+      },
+      { relaxRequiredFields: true }
+    );
 
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][upsertCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`,
@@ -1220,11 +1227,15 @@ export class CasesConnectorExecutor {
     );
 
     /**
-     * cases.bulkCreate throws an error on errors
+     * cases.bulkCreate throws an error on errors.
+     * relaxRequiredFields: see upsertCases — same automated-caller reasoning.
      */
-    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
-      cases: bulkCreateReq,
-    });
+    const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate(
+      {
+        cases: bulkCreateReq,
+      },
+      { relaxRequiredFields: true }
+    );
 
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`,

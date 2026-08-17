@@ -58,10 +58,27 @@ import {
   throwIfInvalidLinkedFieldValues,
 } from '../../common/utils/pair_field_representations';
 
+/**
+ * Internal (non-wire) options for bulkCreate. These are only settable by in-process callers
+ * through the cases client — bulkCreate has no HTTP route, so they can never arrive from
+ * outside the Kibana server.
+ */
+export interface BulkCreateCasesClientOptions {
+  /**
+   * Skip `required` enforcement on extended_fields (value/type/pattern validation still runs
+   * on every field that carries a value). For automated writers like the cases connector:
+   * "required" is a promise the UI extracts from a human filling a form, and an automated
+   * caller has no human to ask — without this, one required no-default field definition in a
+   * space silently breaks every automated case creation in it.
+   */
+  relaxRequiredFields?: boolean;
+}
+
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
   clientArgs: CasesClientArgs,
-  casesClient: CasesClient
+  casesClient: CasesClient,
+  options: BulkCreateCasesClientOptions = {}
 ): Promise<BulkCreateCasesResponse> => {
   const {
     services: {
@@ -139,6 +156,8 @@ export const bulkCreate = async (
         templatesService,
         fieldDefinitionsService,
         globalFieldsByOwner,
+        templatesEnabled: clientArgs.config.templates.enabled,
+        relaxRequiredFields: options.relaxRequiredFields === true,
       });
       bulkCreateRequest.push(request);
     }
@@ -432,6 +451,8 @@ const createBulkCreateCaseRequest = async ({
   templatesService,
   fieldDefinitionsService,
   globalFieldsByOwner,
+  templatesEnabled,
+  relaxRequiredFields,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
@@ -444,6 +465,9 @@ const createBulkCreateCaseRequest = async ({
   fieldDefinitionsService: FieldDefinitionsService;
   /** Per-owner (isGlobal) field-definition cache, shared and populated across the whole bulk request. */
   globalFieldsByOwner: Map<string, InlineField[]>;
+  templatesEnabled: boolean;
+  /** See {@link BulkCreateCasesClientOptions.relaxRequiredFields}. */
+  relaxRequiredFields: boolean;
 }): Promise<{
   request: BulkCreateCasesArgs['cases'][number];
 }> => {
@@ -481,6 +505,26 @@ const createBulkCreateCaseRequest = async ({
    */
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
+
+  // Global (isGlobal) field-definition defaults are injected here for the same reason as
+  // create.ts: the caller only sends the fields it knows about (the connector sends the
+  // template's resolved defaults), which previously left every global field empty on
+  // bulk-created cases — even globals that have defaults. Precedence matches create.ts:
+  // caller-sent values always win, and only real (non-empty) defaults are injected. Runs
+  // BEFORE pairing so a linked global field's injected default can cross into its
+  // customFields counterpart, and BEFORE validation so the merged map is what's validated.
+  if (templatesEnabled) {
+    const globalFields = await resolveCachedGlobalFields();
+    const globalFieldsDefaults = Object.fromEntries(
+      Object.entries(buildExtendedFieldsDefaults(globalFields)).filter(([, value]) => value !== '')
+    );
+    if (Object.keys(globalFieldsDefaults).length > 0) {
+      normalizedCase.extended_fields = {
+        ...globalFieldsDefaults,
+        ...(normalizedCase.extended_fields ?? {}),
+      };
+    }
+  }
 
   // Pair the two representations of every linked field, applying the create
   // default precedence of addendum A2 (explicit caller value on either side —
@@ -527,7 +571,9 @@ const createBulkCreateCaseRequest = async ({
   // the caller's original direct intent (see hadExtendedFieldsBeforeDefaults above), not whether
   // pairing populated extended_fields from a linked customFields value — matching create.ts's
   // manual-path leniency: a required field with no value anywhere is only enforced when the caller
-  // explicitly sent extended_fields themselves.
+  // explicitly sent extended_fields themselves. `relaxRequiredFields` overrides that inference
+  // outright: an automated caller sends whatever defaults it could resolve, so "did it send
+  // extended_fields" says nothing about its ability to fill the fields it didn't.
   validateRequiredCustomFields({
     requestCustomFields: normalizedCase.customFields,
     customFieldsConfiguration,
@@ -542,7 +588,7 @@ const createBulkCreateCaseRequest = async ({
       templatesService,
       fieldDefinitionsService,
       owner: theCase.owner,
-      partial: !hadExtendedFieldsBeforeDefaults,
+      partial: relaxRequiredFields || !hadExtendedFieldsBeforeDefaults,
     });
   }
 

@@ -380,4 +380,120 @@ describe('buildExtendedFieldsFromTemplate', () => {
     );
     expect(result).toEqual({});
   });
+
+  it('omits template fields that have no default instead of sending empty strings', async () => {
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'no_default',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'No default',
+            validation: { required: true },
+          },
+          {
+            name: 'with_default',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'With default',
+            metadata: { default: 'value' },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result).toEqual({ with_default_as_keyword: 'value' });
+  });
+
+  it('merges global field defaults the template does not reference', async () => {
+    const globalDef: FieldDefinition = {
+      fieldDefinitionId: 'fd-global',
+      name: 'global_field',
+      owner: 'securitySolution',
+      isGlobal: true,
+      definition:
+        'name: global_field\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Global\nmetadata:\n  default: "from-global"',
+    };
+
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([globalDef]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'template_field',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'Template',
+            metadata: { default: 'from-template' },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result).toEqual({
+      template_field_as_keyword: 'from-template',
+      global_field_as_keyword: 'from-global',
+    });
+  });
+
+  it('resolves a storage-key collision to the global default (create.ts precedence)', async () => {
+    const globalDef: FieldDefinition = {
+      fieldDefinitionId: 'fd-global',
+      name: 'shared_field',
+      owner: 'securitySolution',
+      isGlobal: true,
+      definition:
+        'name: shared_field\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Shared\nmetadata:\n  default: "from-global"',
+    };
+
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([globalDef]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'shared_field',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'Shared',
+            metadata: { default: 'from-template' },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result).toEqual({ shared_field_as_keyword: 'from-global' });
+  });
+
+  it('does not let a global definition without a default clobber a template default', async () => {
+    const globalDef: FieldDefinition = {
+      fieldDefinitionId: 'fd-global',
+      name: 'shared_field',
+      owner: 'securitySolution',
+      isGlobal: true,
+      definition: 'name: shared_field\ntype: keyword\ncontrol: INPUT_TEXT\nlabel: Shared',
+    };
+
+    const result = await buildExtendedFieldsFromTemplate(
+      makeClientWithDefs([globalDef]),
+      {
+        name: 'T',
+        fields: [
+          {
+            name: 'shared_field',
+            type: 'keyword',
+            control: 'INPUT_TEXT',
+            label: 'Shared',
+            metadata: { default: 'from-template' },
+          },
+        ],
+      },
+      'securitySolution'
+    );
+    expect(result).toEqual({ shared_field_as_keyword: 'from-template' });
+  });
 });
