@@ -482,6 +482,35 @@ describe('ComposeDiscoverFlyout', () => {
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
+    it('starts on step 1 with the query committed when create is seeded from a rule', () => {
+      renderFlyout({
+        mode: 'create',
+        rule: {
+          id: 'template-1',
+          kind: 'signal',
+          enabled: true,
+          metadata: { name: 'CPU usage', version: 1, owner: 'test', tags: ['prod'] },
+          time_field: '@timestamp',
+          schedule: { every: '1m', lookback: '5m' },
+          query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+          created_by: null,
+          created_at: '2026-01-01T00:00:00Z',
+          updated_by: null,
+          updated_at: '2026-01-01T00:00:00Z',
+        },
+      });
+
+      const formProps = getLatestFormProps();
+      expect(formProps.state.step).toBe(0);
+      expect(formProps.state.queryCommitted).toBe(true);
+      expect(formProps.state.mode).toBe('create');
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'standalone',
+        breach: { query: 'FROM metrics-*' },
+      });
+    });
+
     it('advances to recovery step when validateStep passes', async () => {
       renderFlyout({ mode: 'create' });
       commitValidAlertQuery();

@@ -12,6 +12,7 @@ import type {
 } from '@kbn/alerting-v2-rule-form';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -22,6 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
+import { templateToRuleResponse } from '../lib/template_to_rule_response';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useSetupRuleNotifications } from './use_setup_rule_notifications';
@@ -181,6 +183,11 @@ export const useComposeDiscoverFlyout = ({
     [openRuleFlyout]
   );
 
+  const openCreateFromTemplate = useCallback(
+    (template: RuleTemplateResponse) => openRuleFlyout(templateToRuleResponse(template), 'create'),
+    [openRuleFlyout]
+  );
+
   const flyout = flyoutOpen ? (
     <ComposeDiscoverFlyout
       historyKey={historyKey}
@@ -234,6 +241,7 @@ export const useComposeDiscoverFlyout = ({
     flyout,
     openCreateFlyout,
     openCreateBuilderFlyout,
+    openCreateFromTemplate,
     openEditFlyout,
     openCloneFlyout,
   };

@@ -172,7 +172,10 @@ const getInitialRecoveryType = (
 export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
-  /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
+  /**
+   * Existing rule (edit/clone) or a template-shaped payload (create).
+   * When set, seeds the RHF form and stepper across every step.
+   */
   rule?: Parameters<typeof mapRuleToComposeFormValues>[0];
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
@@ -274,12 +277,12 @@ export function ComposeDiscoverFlyout({
    */
   const baseServices = services;
 
-  const initialMapped =
-    (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
+  const initialMapped = rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'alert';
   const hasInitialCustomRecovery =
     initialMapped?.query?.format === 'composed' && !!initialMapped.query.recovery?.segment?.trim();
   const initialRecoveryType = getInitialRecoveryType(hasInitialCustomRecovery, rule);
+  const isSeededFromRule = Boolean(rule);
 
   const forceYamlMode = Boolean(rule && isNonRepresentableRule(rule));
 
@@ -302,7 +305,7 @@ export function ComposeDiscoverFlyout({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
     initialRecoveryType,
-    isQueryPrePopulated: isDiscoverQueryComplete,
+    isQueryPrePopulated: isDiscoverQueryComplete || isSeededFromRule,
     forceYamlMode,
   });
 

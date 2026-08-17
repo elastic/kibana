@@ -8,6 +8,7 @@
 import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, act, waitFor } from '@testing-library/react';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import type { RuleApiResponse } from '../services/rules_api';
 
 const mockCreateMutate = jest.fn();
@@ -61,6 +62,16 @@ const editRule = {
   id: 'rule-1',
   metadata: { name: 'My rule' },
 } as unknown as RuleApiResponse;
+
+const seedTemplate = {
+  id: 'template-1',
+  engine: 'v2',
+  rule: {
+    kind: 'signal',
+    metadata: { name: 'CPU usage' },
+    query: { format: 'standalone', breach: { query: 'FROM metrics-*' } },
+  },
+} as unknown as RuleTemplateResponse;
 
 const updatedRule = {
   id: 'rule-1',
@@ -139,6 +150,32 @@ describe('useComposeDiscoverFlyout — create submission wiring', () => {
     expect(capturedFlyoutProps.mode).toBe('create');
     expect(capturedFlyoutProps.ruleId).toBeUndefined();
     expect(capturedFlyoutProps.onCreateRule).toBeDefined();
+  });
+
+  it('opens create mode seeded from a template', async () => {
+    render(<Harness />);
+    act(() => {
+      hookApi!.openCreateFromTemplate(seedTemplate);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('mockComposeDiscoverFlyout')).toBeInTheDocument();
+    });
+
+    expect(capturedFlyoutProps.mode).toBe('create');
+    expect(capturedFlyoutProps.ruleId).toBeUndefined();
+    expect(capturedFlyoutProps.rule).toEqual(
+      expect.objectContaining({
+        id: seedTemplate.id,
+        kind: seedTemplate.rule.kind,
+        metadata: expect.objectContaining({
+          name: seedTemplate.rule.metadata.name,
+          version: 1,
+        }),
+        query: seedTemplate.rule.query,
+        enabled: true,
+      })
+    );
   });
 
   it('creates the rule then sets up notifications and redirects on success', async () => {

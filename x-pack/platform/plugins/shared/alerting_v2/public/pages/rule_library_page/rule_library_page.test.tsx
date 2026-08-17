@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { CreateRuleData, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
@@ -62,6 +62,14 @@ jest.mock('../../hooks/use_install_rule_template', () => ({
     mutate: mockInstallMutate,
     isLoading: mockInstallIsLoading,
     variables: mockInstallVariables,
+  }),
+}));
+
+const mockOpenCreateFromTemplate = jest.fn();
+jest.mock('../../hooks/use_compose_discover_flyout', () => ({
+  useComposeDiscoverFlyout: () => ({
+    flyout: null,
+    openCreateFromTemplate: mockOpenCreateFromTemplate,
   }),
 }));
 
@@ -133,6 +141,7 @@ describe('RuleLibraryPage', () => {
     expect(screen.getByText('High CPU')).toBeInTheDocument();
     expect(screen.getByText('prod')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Install' })).toBeInTheDocument();
+    expect(screen.getByTestId('ruleLibraryMoreActions')).toBeInTheDocument();
     expect(screen.getByTestId(CONTENT_LIST_TEST_SUBJECTS.table)).toBeInTheDocument();
   });
 
@@ -181,6 +190,32 @@ describe('RuleLibraryPage', () => {
     renderPage();
 
     const installAction = await screen.findByTestId('ruleLibraryInstallAction');
-    expect(installAction).toHaveAttribute('aria-disabled', 'true');
+    expect(installAction).toBeDisabled();
+  });
+
+  it('opens the create flyout from Review and Create seeded with the template', async () => {
+    const user = userEvent.setup();
+    const template = createTemplate();
+    mockFindItems.mockResolvedValue({
+      items: [
+        {
+          id: template.id,
+          title: template.rule.metadata.name,
+          description: template.rule.metadata.description,
+          tags: template.rule.metadata.tags,
+          template,
+        },
+      ],
+      total: 1,
+    });
+
+    renderPage();
+
+    await user.click(await screen.findByTestId('ruleLibraryMoreActions'));
+    fireEvent.click(screen.getByTestId('ruleLibraryReviewAndCreateAction'));
+
+    await waitFor(() => {
+      expect(mockOpenCreateFromTemplate).toHaveBeenCalledWith(template);
+    });
   });
 });
