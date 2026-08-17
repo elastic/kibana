@@ -70,12 +70,10 @@ export function getStateColumnActions({
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
     // The next line should be gone when classic table will be removed
     // Strip display-only prepended time field before persisting
-    const colsWithoutDisplayTime =
+    const actualColumns =
       !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
         ? (nextColumns || []).slice(1)
         : nextColumns;
-    // Keep `_source` when present (including alone) so a pin survives removing other fields
-    const actualColumns = colsWithoutDisplayTime;
     // Clean against nextColumns so display-only prepended time field width is preserved
     let nextSettings = cleanColumnSettings(nextColumns, settings);
 

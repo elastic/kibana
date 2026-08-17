@@ -81,7 +81,7 @@ import type {
 } from '../types';
 import {
   getDisplayedColumns,
-  hasSummaryColumn,
+  getShowSummaryColumn,
   isSummaryOnlyColumn as getIsSummaryOnlyColumn,
   SOURCE_COLUMN,
 } from '../utils/columns';
@@ -638,7 +638,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
     const displayedColumns = getDisplayedColumns(columns, dataView);
     const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
-    const hasSummaryColumns = hasSummaryColumn(displayedColumns);
+    const showSummaryColumn = getShowSummaryColumn(displayedColumns);
     const docMap = useMemo<DocMap>(
       () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
       [rows]
@@ -1255,7 +1255,7 @@ const InternalUnifiedDataTable = React.forwardRef<
                 showSummaryColumnToggle && toolbarProps.columnControl ? (
                   <ColumnControlWithSummary
                     columnControl={toolbarProps.columnControl}
-                    showSummaryColumn={hasSummaryColumns}
+                    showSummaryColumn={showSummaryColumn}
                     isSummaryColumnToggleDisabled={isSummaryOnlyColumn}
                     onChangeShowSummaryColumn={onChangeShowSummaryColumn}
                   />
@@ -1283,7 +1283,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         showSummaryColumnToggle,
         additionalControls,
         inTableSearchControl,
-        hasSummaryColumns,
+        showSummaryColumn,
         isSummaryOnlyColumn,
         onChangeShowSummaryColumn,
       ]
@@ -1406,7 +1406,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
       // Don't use row "overscan" when showing Summary column since
       // rendering so much DOM content in each cell impacts performance
-      if (hasSummaryColumns) {
+      if (showSummaryColumn) {
         return options;
       }
 
@@ -1414,7 +1414,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         ...VIRTUALIZATION_OPTIONS,
         ...options,
       };
-    }, [hasSummaryColumns, paginationMode, throttledHandleOnScroll]);
+    }, [showSummaryColumn, paginationMode, throttledHandleOnScroll]);
 
     const isRenderComplete = loadingState !== DataLoadingState.loading;
 

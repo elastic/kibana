@@ -91,8 +91,6 @@ spaceTest.describe(
       await expectSingleToastThenDismiss(page);
     });
 
-    // Do not assert Copy name on Summary (_source): that action is intentionally hidden.
-    // An older step only passed because a `__source` typo left the button visible by mistake.
     spaceTest('copies a column name to clipboard', async ({ page, pageObjects }) => {
       const { dataGrid } = pageObjects;
 
