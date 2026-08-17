@@ -13,12 +13,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import type { MetricsGridSettings } from '@kbn/discover-utils';
 import { UnifiedMetricsExperienceGrid } from '@kbn/unified-chart-section-viewer';
 import type { MetricsSort } from '@kbn/unified-chart-section-viewer';
-import {
-  internalStateActions,
-  useAppStateSelector,
-  useCurrentTabAction,
-  useInternalStateDispatch,
-} from '../../../../../application/main/state_management/redux';
+import { useAppStateSelector } from '../../../../../application/main/state_management/redux';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import type { DiscoverAppState } from '../../../../../application/main/state_management/redux';
 import type { DataSourceProfileProvider } from '../../../../profiles';
@@ -28,8 +23,10 @@ import { METRICS_STATE_DEF, type MetricsState } from '../../../../../../common/c
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 import { RecentMetricsStorage } from './recent_metrics_storage';
 /**
- * Wrapper component that reads breakdownField from Discover's app state
- * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
+ * Wrapper component that reads breakdownField from Discover's app state and passes it to
+ * UnifiedMetricsExperienceGrid, which uses it only to seed dimensions once (on mount) for
+ * backward compatibility with pre-existing links. Changes to dimensions are no longer
+ * written back to breakdownField.
  */
 const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & {
@@ -39,8 +36,6 @@ const MetricsExperienceGridWrapper = (
 ) => {
   const { metricsStateAdapter } = props;
   const breakdownField = useAppStateSelector((state: DiscoverAppState) => state.breakdownField);
-  const dispatch = useInternalStateDispatch();
-  const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const { discoverShared, dataViews, notifications, docLinks, logger, core, storage } =
     useDiscoverServices();
 
@@ -54,11 +49,13 @@ const MetricsExperienceGridWrapper = (
       counterAggregation: metricsState.counterAggregation,
       gaugeAggregation: metricsState.gaugeAggregation,
       histogramPercentile: metricsState.histogramPercentile,
+      dimensions: metricsState.dimensions,
     }),
     [
       metricsState.counterAggregation,
       metricsState.gaugeAggregation,
       metricsState.histogramPercentile,
+      metricsState.dimensions,
     ]
   );
 
@@ -82,13 +79,6 @@ const MetricsExperienceGridWrapper = (
       metricsStateAdapter.updateState(next);
     },
     [metricsStateAdapter]
-  );
-
-  const onBreakdownFieldChange = useCallback(
-    (nextBreakdownField?: string) => {
-      dispatch(updateAppState({ appState: { breakdownField: nextBreakdownField } }));
-    },
-    [dispatch, updateAppState]
   );
 
   const recentMetricsStorage = useMemo(
@@ -124,7 +114,6 @@ const MetricsExperienceGridWrapper = (
       actions={props.actions}
       profileId={METRICS_DATA_SOURCE_PROFILE_ID}
       breakdownField={breakdownField}
-      onBreakdownFieldChange={onBreakdownFieldChange}
       externalServices={externalServices}
       gridSettings={gridSettings}
       onGridSettingsChange={onGridSettingsChange}

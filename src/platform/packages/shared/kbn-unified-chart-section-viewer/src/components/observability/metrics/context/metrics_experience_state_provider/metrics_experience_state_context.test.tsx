@@ -204,9 +204,8 @@ describe('MetricsExperienceStateProvider', () => {
       act(() => {
         result.current.onDimensionsChange([{ name: 'host.name' }]);
       });
-      // currentPage must be preserved — this is the duplicate-tab scenario:
-      // useDiscoverFieldForBreakdown fires an internal sync after restore,
-      // which must not reset the page the user was on.
+      // currentPage must be preserved -- resetting it on a dimensions change is owned
+      // exclusively by useResetPageOnDimensionsChange in the grid component, not here.
       expect(result.current.currentPage).toBe(4);
     });
   });
