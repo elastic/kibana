@@ -150,7 +150,7 @@ const sessionsOf = (bucket: { sessions?: unknown; doc_count?: number }): number 
     : 0;
 };
 
-const errorSessionsOf = (bucket: { error_sessions?: unknown }): number => {
+const errorSessionsOf = (bucket: { error_sessions?: unknown; [name: string]: unknown }): number => {
   const nested = bucket.error_sessions as { sessions?: unknown; doc_count?: number } | undefined;
   if (nested?.sessions != null) {
     return cardValue(nested.sessions);
@@ -331,7 +331,7 @@ const searchRawApps = async ({
   request?: KibanaRequest;
   operationName: string;
 }): Promise<RumAppsResponse & { _inspect?: InspectResponse }> => {
-  const period = compare ? previousEqualPeriod(rangeFrom, rangeTo) : undefined;
+  const period = compare ? previousEqualPeriod(rangeFrom, rangeTo) : null;
   const wideFrom = period?.compareFrom ?? rangeFrom;
   const wideTo = period?.currentTo ?? rangeTo;
   const searchRequest = {
