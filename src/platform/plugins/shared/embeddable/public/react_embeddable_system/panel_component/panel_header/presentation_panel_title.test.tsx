@@ -48,6 +48,20 @@ describe('PresentationPanelTitle', () => {
       expect(mark).toBeInTheDocument();
       expect(mark?.textContent?.toLowerCase()).toBe('cpu');
     });
+
+    it('highlights multiple separate title matches', () => {
+      const { container } = renderWithTheme(
+        <PresentationPanelTitle
+          {...defaultProps}
+          panelTitle="System CPU Usage"
+          titleHighlight={['system', 'usage']}
+        />
+      );
+
+      expect(
+        Array.from(container.querySelectorAll('mark')).map(({ textContent }) => textContent)
+      ).toEqual(['System', 'Usage']);
+    });
   });
 
   describe('title tooltip (no description)', () => {
