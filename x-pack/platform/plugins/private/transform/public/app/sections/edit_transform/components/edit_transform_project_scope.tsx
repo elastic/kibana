@@ -84,8 +84,13 @@ const getProjectScopeButtonLabel = ({
   return getCustomProjectScopeLabel(selectedProjectCount, totalProjectCount);
 };
 
+export interface LoadedTransformProjectScopeProjects {
+  originProject: CPSProject | null;
+  linkedProjects: CPSProject[];
+}
+
 interface EditTransformProjectScopeProps {
-  onOpenProjectScope: () => void;
+  onOpenProjectScope: (projects: LoadedTransformProjectScopeProjects) => void;
 }
 
 interface EditTransformProjectScopeButtonProps extends EditTransformProjectScopeProps {
@@ -126,6 +131,9 @@ const EditTransformProjectScopeButton: FC<EditTransformProjectScopeButtonProps> 
       }),
     [projectRouting, selectedProjectCount, totalProjectCount]
   );
+  const openProjectScope = useCallback(() => {
+    onOpenProjectScope({ originProject, linkedProjects });
+  }, [linkedProjects, onOpenProjectScope, originProject]);
 
   if (!isProjectScopeLoading && !hasError && !hasLinkedProjects) {
     return null;
@@ -144,7 +152,7 @@ const EditTransformProjectScopeButton: FC<EditTransformProjectScopeButtonProps> 
           iconType="crossProjectSearch"
           isDisabled={isProjectScopeLoading || hasError}
           isLoading={isProjectScopeLoading}
-          onClick={onOpenProjectScope}
+          onClick={openProjectScope}
           size="m"
         >
           {hasError ? unavailableLabel : isProjectScopeLoading ? loadingLabel : buttonLabel}

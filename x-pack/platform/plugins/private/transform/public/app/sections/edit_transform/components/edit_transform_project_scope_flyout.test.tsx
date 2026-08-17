@@ -59,7 +59,10 @@ const renderFlyout = (projectRouting: string) => {
   renderWithI18n(
     <EditTransformFlyoutProvider config={config}>
       <ProjectRoutingProbe />
-      <EditTransformProjectScopeFlyout onClose={onClose} />
+      <EditTransformProjectScopeFlyout
+        onClose={onClose}
+        projects={{ originProject, linkedProjects: [linkedProject] }}
+      />
     </EditTransformFlyoutProvider>
   );
 

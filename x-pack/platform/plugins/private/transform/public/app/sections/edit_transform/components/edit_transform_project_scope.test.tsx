@@ -112,6 +112,31 @@ describe('EditTransformProjectScope', () => {
     expect(onOpenProjectScope).toHaveBeenCalledTimes(1);
   });
 
+  it('surfaces project fetch failures on the project scope button and does not open the flyout', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    appDeps.cps = {
+      isTierEligible: true,
+      cpsManager: {
+        fetchProjects: jest.fn().mockRejectedValue(new Error('Project fetch failed')),
+        getDefaultProjectRouting: jest.fn(() => PROJECT_ROUTING.ALL),
+      },
+    } as any;
+    const { onOpenProjectScope } = renderProjectScope();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('transformEditProjectScopeButton')).toHaveTextContent(
+        'Project scope unavailable'
+      );
+    });
+
+    expect(screen.getAllByText('Project scope unavailable')).toHaveLength(2);
+    expect(screen.getByTestId('transformEditProjectScopeButton')).toBeDisabled();
+
+    fireEvent.click(screen.getByTestId('transformEditProjectScopeButton'));
+
+    expect(onOpenProjectScope).not.toHaveBeenCalled();
+  });
+
   it('counts projects from route-scoped fetches for filtered routing', async () => {
     renderProjectScope('_type:security');
 

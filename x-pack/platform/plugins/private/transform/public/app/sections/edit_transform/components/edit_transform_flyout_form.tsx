@@ -15,10 +15,13 @@ import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_t
 import { EditTransformFlyoutFormTextArea } from './edit_transform_flyout_form_text_area';
 import { EditTransformRetentionPolicy } from './edit_transform_retention_policy';
 import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
-import { EditTransformProjectScope } from './edit_transform_project_scope';
+import {
+  EditTransformProjectScope,
+  type LoadedTransformProjectScopeProjects,
+} from './edit_transform_project_scope';
 
 interface EditTransformFlyoutFormProps {
-  onOpenProjectScope: () => void;
+  onOpenProjectScope: (projects: LoadedTransformProjectScopeProjects) => void;
 }
 
 export const EditTransformFlyoutForm: FC<EditTransformFlyoutFormProps> = ({

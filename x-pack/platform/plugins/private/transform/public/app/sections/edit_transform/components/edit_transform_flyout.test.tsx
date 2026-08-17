@@ -20,8 +20,15 @@ jest.mock('../state_management/edit_transform_flyout_state', () => ({
 }));
 
 jest.mock('./edit_transform_flyout_form', () => ({
-  EditTransformFlyoutForm: ({ onOpenProjectScope }: { onOpenProjectScope: () => void }) => (
-    <button data-test-subj="openProjectScopeButton" onClick={onOpenProjectScope}>
+  EditTransformFlyoutForm: ({
+    onOpenProjectScope,
+  }: {
+    onOpenProjectScope: (projects: { originProject: null; linkedProjects: [] }) => void;
+  }) => (
+    <button
+      data-test-subj="openProjectScopeButton"
+      onClick={() => onOpenProjectScope({ originProject: null, linkedProjects: [] })}
+    >
       Open project scope
     </button>
   ),

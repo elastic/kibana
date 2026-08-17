@@ -7,13 +7,12 @@
 
 import React, { type FC, useCallback, useMemo, useState } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
-import { PROJECT_ROUTING, ProjectScopePickerFlyoutContent, useFetchProjects } from '@kbn/cps-utils';
+import { PROJECT_ROUTING, ProjectScopePickerFlyoutContent } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
-
-import { useAppDependencies } from '../../../app_dependencies';
 
 import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
 import { useFormField } from '../state_management/selectors/form_field';
+import type { LoadedTransformProjectScopeProjects } from './edit_transform_project_scope';
 
 const changeProjectScopeTitle = i18n.translate(
   'xpack.transform.transformList.editFlyoutProjectScopeFlyoutTitle',
@@ -31,13 +30,13 @@ const backToEditTransformLabel = i18n.translate(
 
 interface EditTransformProjectScopeFlyoutProps {
   onClose: () => void;
+  projects: LoadedTransformProjectScopeProjects;
 }
 
 export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyoutProps> = ({
   onClose,
+  projects,
 }) => {
-  const { cps } = useAppDependencies();
-  const cpsManager = cps?.cpsManager;
   const { value } = useFormField('projectRouting');
   const { setFormField } = useEditTransformFlyoutActions();
   const persistedProjectRouting = (value || PROJECT_ROUTING.ORIGIN) as NonNullable<ProjectRouting>;
@@ -45,18 +44,12 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
     useState<NonNullable<ProjectRouting> | undefined>();
   const draftProjectRouting = stagedProjectRouting ?? persistedProjectRouting;
   const [pickerResetCounter, setPickerResetCounter] = useState(0);
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) =>
-      cpsManager?.fetchProjects(routing) ?? Promise.resolve({ origin: null, linkedProjects: [] }),
-    [cpsManager]
-  );
-  const { originProject, linkedProjects, isLoading, error } = useFetchProjects(
-    fetchProjects,
-    PROJECT_ROUTING.ALL
-  );
   const availableProjects = useMemo(
-    () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
-    [linkedProjects, originProject]
+    () =>
+      projects.originProject
+        ? [projects.originProject, ...projects.linkedProjects]
+        : projects.linkedProjects,
+    [projects.linkedProjects, projects.originProject]
   );
 
   const applyProjectScope = useCallback(() => {
@@ -85,14 +78,12 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
           defaultMessage: 'Discard changes',
         }
       )}
-      isApplyDisabled={Boolean(error) || isLoading}
-      isReadOnly={Boolean(error) || isLoading}
       key={pickerResetCounter}
       onApplyChanges={applyProjectScope}
       onClose={onClose}
       onDiscardChanges={discardProjectScopeChanges}
       onProjectRoutingChange={setStagedProjectRouting}
-      originProjectId={originProject?._id}
+      originProjectId={projects.originProject?._id}
       projectRouting={draftProjectRouting}
       title={changeProjectScopeTitle}
       titleId="transformEditProjectScopeFlyoutTitle"
