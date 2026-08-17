@@ -229,7 +229,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'guardduty',
     name: 'AWS GuardDuty',
     category: 'Security, Identity and Compliance',
-    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
     packageName: 'aws',
     policyTemplate: 'guardduty',
   },
