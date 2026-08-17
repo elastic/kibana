@@ -13,11 +13,13 @@ import { Writable } from 'stream';
 
 import del from 'del';
 import LmdbStore = require('lmdb');
+import type { RootDatabaseOptions } from 'lmdb';
 
 import { LmdbCache } from './lmdb_cache';
+import { utf8StringKeyEncoder } from './lmdb_key_encoder';
 
 const DIR = Path.resolve(__dirname, '../__tmp__/cache');
-const DB_DIR = Path.resolve(DIR, 'v1');
+const DB_DIR = Path.resolve(DIR, 'v2');
 const DAY = 1000 * 60 * 60 * 24;
 const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
 
@@ -40,11 +42,17 @@ const getExpectedMetadataKey = (path: string) => {
   return `prefix:stat:${keyParts.join(':')}:${Path.resolve(path)}`;
 };
 
-const openDb = () =>
-  LmdbStore.open<unknown, string>(DB_DIR, {
+const openDb = () => {
+  const databaseOptions: RootDatabaseOptions & {
+    keyEncoder: typeof utf8StringKeyEncoder;
+  } = {
     name: 'db',
     encoding: 'json',
-  });
+    keyEncoder: utf8StringKeyEncoder,
+  };
+
+  return LmdbStore.open<unknown, string>(DB_DIR, databaseOptions);
+};
 
 const waitForAsyncWrites = () => new Promise((resolve) => setTimeout(resolve, 50));
 
@@ -156,6 +164,23 @@ it('stores code and source maps separately', async () => {
   await db.close();
 });
 
+it('supports UTF-8 cache keys', async () => {
+  const cache = makeCache({
+    dir: DIR,
+    prefix: 'prefix',
+  });
+  const key = 'prefix:日本語:🚀';
+
+  await cache.update(key, {
+    code: 'var utf8 = true',
+  });
+  await cache.close();
+
+  const db = openDb();
+  expect(Array.from(db.getKeys())).toContain(`code:${key}`);
+  await db.close();
+});
+
 it('does not write source maps for transforms without source maps', async () => {
   const cache = makeCache({
     dir: DIR,
@@ -232,10 +257,11 @@ it('prunes stale code entries and their source maps', async () => {
   db.putSync('legacy', [GLOBAL_ATIME - 31 * DAY, 'legacy', { legacy: true }]);
   await db.close();
 
-  makeCache({
+  const cache = makeCache({
     dir: DIR,
     prefix: 'prefix',
   });
+  await cache.close();
 
   const updatedDb = openDb();
   expect(updatedDb.get('code:old')).toBe(undefined);

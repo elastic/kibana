@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { errors, type DiagnosticResult } from '@elastic/elasticsearch';
 import { actionsClientMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type { ActionResult } from '@kbn/actions-plugin/server';
+import type { ActionResult, ConnectorType } from '@kbn/actions-plugin/server';
 import type { Type } from '@kbn/config-schema';
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
@@ -15,6 +16,7 @@ import {
   MAX_AI_INDEX_SOURCES,
   MAX_AI_INDEX_SOURCE_VALUE_LENGTH,
   aiIndexByIdPath,
+  aiIndexKiSummaryPath,
   aiIndexPath,
 } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
@@ -39,6 +41,19 @@ interface RegisteredRoute {
     | { request?: { params?: Type<unknown>; query?: Type<unknown>; body?: Type<unknown> } };
 }
 
+const SUPPORTED_TYPE_IDS = [
+  '.google_drive',
+  '.one_drive',
+  '.notion',
+  '.amazon_s3',
+  '.github',
+  '.box',
+  '.dropbox',
+  '.google_cloud_storage',
+  '.salesforce',
+  '.zendesk',
+];
+
 const buildConnector = (id: string, actionTypeId: string): ActionResult => ({
   id,
   actionTypeId,
@@ -48,6 +63,13 @@ const buildConnector = (id: string, actionTypeId: string): ActionResult => ({
   isSystemAction: false,
   isConnectorTypeDeprecated: false,
 });
+
+const buildConnectorType = (id: string): ConnectorType =>
+  ({
+    id,
+    name: `Type ${id}`,
+    supportedFeatureIds: ['contextEngine'],
+  } as unknown as ConnectorType);
 
 const aiIndexItem: AiIndexHttpItem = {
   id: 'customer_support',
@@ -70,6 +92,7 @@ describe('ai indices routes', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
   let actions: ReturnType<typeof actionsMock.createStart>;
   let auditLogger: { log: jest.Mock };
+  let esqlQuery: jest.Mock;
 
   const createContext = () =>
     ({
@@ -78,6 +101,13 @@ describe('ai indices routes', () => {
           client: { get: jest.fn().mockImplementation(async () => featureFlagEnabled) },
         },
         security: { audit: { logger: auditLogger } },
+        elasticsearch: {
+          client: {
+            asCurrentUser: {
+              esql: { query: esqlQuery },
+            },
+          },
+        },
       }),
     } as unknown as Parameters<RequestHandler>[0]);
 
@@ -94,7 +124,9 @@ describe('ai indices routes', () => {
     actionsClient = actionsClientMock.create();
     actions = actionsMock.createStart();
     actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
+    actionsClient.listTypes.mockResolvedValue(SUPPORTED_TYPE_IDS.map(buildConnectorType));
     auditLogger = { log: jest.fn() };
+    esqlQuery = jest.fn();
     aiIndexService = {
       create: jest.fn(),
       put: jest.fn(),
@@ -143,10 +175,11 @@ describe('ai indices routes', () => {
     await callRoute('POST', aiIndexPath, { body: { id: 'a' } });
     await callRoute('PUT', aiIndexByIdPath, { params: { aiIndexId: 'a' }, body: {} });
     await callRoute('GET', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
+    await callRoute('GET', aiIndexKiSummaryPath, { params: { aiIndexId: 'a' } });
     await callRoute('GET', aiIndexPath, {});
     await callRoute('DELETE', aiIndexByIdPath, { params: { aiIndexId: 'a' } });
 
-    expect(response.notFound).toHaveBeenCalledTimes(5);
+    expect(response.notFound).toHaveBeenCalledTimes(6);
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
@@ -154,7 +187,7 @@ describe('ai indices routes', () => {
     expect(aiIndexService.delete).not.toHaveBeenCalled();
   });
 
-  it('registers all routes as public with the expected privileges', () => {
+  it('registers routes with the expected access and privileges', () => {
     expect(getRoute('POST', aiIndexPath).config).toMatchObject({
       access: 'public',
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
@@ -165,6 +198,10 @@ describe('ai indices routes', () => {
     });
     expect(getRoute('GET', aiIndexByIdPath).config).toMatchObject({
       access: 'public',
+      security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
+    });
+    expect(getRoute('GET', aiIndexKiSummaryPath).config).toMatchObject({
+      access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
     expect(getRoute('GET', aiIndexPath).config).toMatchObject({
@@ -384,6 +421,82 @@ describe('ai indices routes', () => {
           kibana: { saved_object: { type: 'ai_index', id: 'customer_support' } },
         })
       );
+    });
+  });
+
+  describe('GET /internal/context_engine/ai_index/{aiIndexId}/ki_summary', () => {
+    it('returns the Knowledge Indicator count for the destination', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esqlQuery.mockResolvedValue({
+        columns: [{ name: 'type' }, { name: 'count' }],
+        values: [
+          ['index_metadata', 10],
+          ['document', 8],
+          ['detection', 7],
+        ],
+      });
+
+      await callRoute('GET', aiIndexKiSummaryPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(esqlQuery).toHaveBeenCalledWith({
+        query:
+          'FROM ai-index-ds-customer_support* | STATS count = COUNT(*) BY type | INLINE STATS total = SUM(count) | SORT count DESC | LIMIT 5',
+      });
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          count: 25,
+          dest: aiIndexItem.dest,
+          counts_by_type: [
+            { type: 'index_metadata', count: 10 },
+            { type: 'document', count: 8 },
+            { type: 'detection', count: 7 },
+          ],
+        },
+      });
+    });
+
+    it('returns 404 when the AI index does not exist', async () => {
+      aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+      await callRoute('GET', aiIndexKiSummaryPath, {
+        params: { aiIndexId: 'missing' },
+      });
+
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('returns 0 when the backing store does not exist yet', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esqlQuery.mockRejectedValue(
+        new errors.ResponseError({
+          meta: {
+            aborted: false,
+            attempts: 1,
+            connection: null,
+            context: null,
+            name: 'verification_exception',
+            request: {} as unknown as DiagnosticResult['meta']['request'],
+          },
+          warnings: [],
+          body: { error: { type: 'verification_exception', reason: 'Unknown index' } },
+          statusCode: 400,
+          headers: {},
+        })
+      );
+
+      await callRoute('GET', aiIndexKiSummaryPath, {
+        params: { aiIndexId: 'customer_support' },
+      });
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: {
+          count: 0,
+          dest: aiIndexItem.dest,
+          counts_by_type: [],
+        },
+      });
     });
   });
 
@@ -880,14 +993,14 @@ describe('ai indices routes', () => {
       return validate.request.params.validate(params);
     };
 
-    it.each(['customer_support', 'logs-app', 'index-123', 'a', '1', 'a_b-c'])(
-      'accepts a valid id %p',
-      (aiIndexId) => {
+    const validIds = ['customer_support', 'logs-app', 'index-123', 'a', '1', 'a_b-c'] as const;
+    validIds.forEach((aiIndexId) => {
+      it(`accepts a valid id ${aiIndexId}`, () => {
         expect(() => validateParams({ aiIndexId })).not.toThrow();
-      }
-    );
+      });
+    });
 
-    it.each([
+    const invalidIds = [
       'Customer_Support',
       'has space',
       'has.dot',
@@ -896,8 +1009,11 @@ describe('ai indices routes', () => {
       'tilde~',
       '_leading_underscore',
       '-leading-hyphen',
-    ])('rejects an id with disallowed characters %p', (aiIndexId) => {
-      expect(() => validateParams({ aiIndexId })).toThrow(/lowercase letters, numbers, hyphens/);
+    ] as const;
+    invalidIds.forEach((aiIndexId) => {
+      it(`rejects an id with disallowed characters ${aiIndexId}`, () => {
+        expect(() => validateParams({ aiIndexId })).toThrow(/lowercase letters, numbers, hyphens/);
+      });
     });
 
     it('rejects an empty id', () => {

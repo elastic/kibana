@@ -33,4 +33,22 @@ describe('getDeepLinks', () => {
     expect(workflowsDeepLink).toEqual(expect.objectContaining({ id: 'list', path: '/' }));
     expect(workflowsDeepLink.visibleIn).toBeUndefined();
   });
+
+  it('includes projectSideNav in visibleIn for the executions deep link when executionsViewEnabled', () => {
+    const deepLinks = getDeepLinks({ executionsViewEnabled: true });
+    const executionsLink = deepLinks.find((l) => l.id === 'executions');
+
+    expect(executionsLink).toEqual(
+      expect.objectContaining({
+        id: 'executions',
+        visibleIn: ['globalSearch', 'projectSideNav'],
+      })
+    );
+  });
+
+  it('omits the executions deep link when executionsViewEnabled is false', () => {
+    const deepLinks = getDeepLinks({ executionsViewEnabled: false });
+
+    expect(deepLinks.find((l) => l.id === 'executions')).toBeUndefined();
+  });
 });

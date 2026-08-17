@@ -16,7 +16,7 @@ import {
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_SECTION_ID,
-} from '../../../common/management_apps';
+} from '@kbn/alerting-v2-constants';
 
 describe('registerFeaturePrivileges', () => {
   const getRegisteredFeature = (id: string): KibanaFeatureConfig => {
@@ -55,6 +55,19 @@ describe('registerFeaturePrivileges', () => {
 
     expect(rulesFeature.privileges?.all.alerts).toBeUndefined();
     expect(rulesFeature.privileges?.read.alerts).toBeUndefined();
+  });
+
+  it('grants read access to rule templates on the rules feature (catalog SOs)', () => {
+    const rulesFeature = getRegisteredFeature(ALERTING_V2_FEATURES.rules.id);
+
+    expect(rulesFeature.privileges?.all.savedObject).toEqual({
+      all: ['alerting_rule'],
+      read: ['alerting_rule_template'],
+    });
+    expect(rulesFeature.privileges?.read.savedObject).toEqual({
+      all: [],
+      read: ['alerting_rule', 'alerting_rule_template'],
+    });
   });
 
   describe('management app gating', () => {

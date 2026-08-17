@@ -72,6 +72,29 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
 
   const selectedSet = useMemo(() => new Set(selectedServiceIds), [selectedServiceIds]);
 
+  // Signal-filtered but search-independent set: matches what "Select all" operates on,
+  // so total/selected in the badge stay reachable under the active signal filter.
+  const signalFilteredServices = useMemo(
+    () =>
+      AWS_SERVICES_MATRIX.filter(
+        (s) => s.showInUI && (signalFilter === 'all' || s.signalType === signalFilter)
+      ),
+    [signalFilter]
+  );
+
+  const categoryStats = useMemo(() => {
+    const stats = new Map<ServiceCategory, { total: number; selected: number; preview: string }>();
+    for (const cat of categories) {
+      const catServices = signalFilteredServices.filter((s) => s.category === cat);
+      const total = catServices.length;
+      const selected = catServices.filter((s) => selectedSet.has(s.id)).length;
+      const uniqueNames = [...new Set(catServices.map((s) => s.name))];
+      const preview = uniqueNames.slice(0, 2).join(', ') + (uniqueNames.length > 2 ? ', ...' : '');
+      stats.set(cat, { total, selected, preview });
+    }
+    return stats;
+  }, [categories, signalFilteredServices, selectedSet]);
+
   const isReady = selectedServiceIds.length > 0;
 
   const handleToggle = useCallback(
@@ -116,6 +139,7 @@ export function useServicesStep({ onContinue }: { onContinue: () => void }) {
     servicesInCategory,
     duplicateNamesInCategory,
     selectedSet,
+    categoryStats,
     isReady,
     handleToggle,
     allInCategorySelected,

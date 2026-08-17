@@ -16,6 +16,7 @@ export type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/
 export { EntityMaintainerTaskStatus } from './tasks/entity_maintainers/types';
 export type { EntityUpdateClient, BulkObject, BulkObjectResponse } from './domain/crud';
 export type { EntityMetadataClient } from './domain/entity_metadata';
+export type { RelationshipsClient } from './domain/relationships';
 export type { ResolutionClient } from './domain/resolution';
 export type { BulkDropTypeSummary } from './infra/elasticsearch/bulk_drop_aggregator';
 export { formatBulkDropSummary } from './infra/elasticsearch/bulk_drop_aggregator';
