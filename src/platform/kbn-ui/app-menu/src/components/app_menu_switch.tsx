@@ -37,6 +37,10 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
     margin-right: ${euiTheme.size.s};
   `;
 
+  const labelCss = css`
+    font-weight: ${euiTheme.font.weight.medium};
+  `;
+
   const handleChange = (e: EuiSwitchEvent) => {
     onChange(e.target.checked);
   };
@@ -48,7 +52,10 @@ export const AppMenuSwitchComponent = ({ switchConfig }: AppMenuSwitchComponentP
     <EuiSwitch
       id={id}
       label={label}
-      labelProps={labelProps}
+      labelProps={{
+        ...labelProps,
+        css: labelCss,
+      }}
       checked={checked}
       onChange={handleChange}
       disabled={disabled}
