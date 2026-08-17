@@ -9,7 +9,7 @@ import { createPlaywrightConfig } from '@kbn/scout';
 
 // The `scout_alerting_v2_arrow` path selects the `alerting_v2_arrow` server
 // config set, which enables `xpack.alerting_v2.esql.responseFormat: arrow`.
-const config = createPlaywrightConfig({ testDir: '../../scout_alerting_v2/api/tests' });
+const config = createPlaywrightConfig({ testDir: '../../scout_alerting_v2/engine/api/tests' });
 config.testMatch = '**/rule_executor.spec.ts';
 
 export default config;
