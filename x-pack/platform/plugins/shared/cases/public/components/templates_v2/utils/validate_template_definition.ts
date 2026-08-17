@@ -7,6 +7,7 @@
 
 import { parse as parseYaml } from 'yaml';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/v1';
+import { StrictFieldsArraySchema } from '../../../../common/types/domain/template/strict_fields';
 import {
   TEMPLATE_DEFINITION_EMPTY,
   INVALID_YAML_NON_OBJECT,
@@ -49,6 +50,18 @@ export const validateTemplateDefinitionYaml = (
     const result = ParsedTemplateDefinitionSchema.safeParse(normalizedDefinition);
     if (!result.success) {
       return { success: false, message: result.error.message };
+    }
+
+    // After the lenient structural parse, apply the authoring-charset check so the Save button
+    // disables and the footer names the offending field before the user hits the server.
+    // Read and preview paths keep the lenient schema — this function is only called at write time.
+    const strictFieldsResult = StrictFieldsArraySchema.safeParse(result.data.fields);
+    if (!strictFieldsResult.success) {
+      return {
+        success: false,
+        message:
+          strictFieldsResult.error.issues[0]?.message ?? 'One or more field names are invalid.',
+      };
     }
 
     const missingKeys = getMissingRequiredKeys(normalizedDefinition as Record<string, unknown>);

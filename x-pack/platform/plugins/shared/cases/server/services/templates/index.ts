@@ -371,6 +371,7 @@ export class TemplatesService {
       );
     }
 
+    this.assertFieldNamesAreAuthorable(parsedDefinition.fields);
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
@@ -434,6 +435,7 @@ export class TemplatesService {
       );
     }
 
+    this.assertFieldNamesAreAuthorable(parsedDefinition.fields);
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
@@ -637,19 +639,9 @@ export class TemplatesService {
       );
     }
 
-    // Validate field names against the authoring charset. This runs after the lenient parse so
-    // that charset errors produce a clear message naming the offending field, separate from any
-    // YAML structural errors. Uses the strict variant (no hyphens, no spaces, etc.) — the lenient
-    // read schema above intentionally stays unchanged so stored templates with pre-existing
-    // invalid names still load.
-    const strictFieldsResult = StrictFieldsArraySchema.safeParse(parsedDefinition.fields);
-    if (!strictFieldsResult.success) {
-      const firstIssue = strictFieldsResult.error.issues[0];
-      throw Boom.badRequest(firstIssue?.message ?? 'One or more field names are invalid.');
-    }
-
     // Keep dry_run faithful to the real write: mirror the same resource-limit assertions each write
     // path runs (including the SO `definition` maxLength, which otherwise only surfaces on apply).
+    this.assertFieldNamesAreAuthorable(parsedDefinition.fields);
     this.assertFieldCountWithinLimit(parsedDefinition.fields.length);
     this.assertTemplateDefaultValuesWithinLimit(parsedDefinition.fields);
     this.assertDefinitionLengthWithinLimit(normalizedDefinition);
@@ -675,6 +667,22 @@ export class TemplatesService {
     if (definition.length > MAX_TEMPLATE_DEFINITION_LENGTH) {
       throw Boom.badRequest(
         `Template definition exceeds the maximum length of ${MAX_TEMPLATE_DEFINITION_LENGTH} characters.`
+      );
+    }
+  }
+
+  /**
+   * Rejects field names whose derived `<name>_as_<type>` storage key falls outside the authoring
+   * charset (`AUTHORABLE_SNAKE_KEY`). Enforced on every write path — create, update, and the
+   * `dry_run` preflight — but never on read, so a template stored before this rule still loads.
+   * Runs after the lenient `ParsedTemplateDefinitionSchema` parse so the message names the
+   * offending field instead of surfacing as a generic schema failure.
+   */
+  private assertFieldNamesAreAuthorable(fields: ParsedTemplate['definition']['fields']): void {
+    const result = StrictFieldsArraySchema.safeParse(fields);
+    if (!result.success) {
+      throw Boom.badRequest(
+        result.error.issues[0]?.message ?? 'One or more field names are invalid.'
       );
     }
   }

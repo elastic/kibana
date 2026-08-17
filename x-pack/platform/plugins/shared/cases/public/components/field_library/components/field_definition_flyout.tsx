@@ -36,6 +36,7 @@ import {
   InlineFieldSchema,
   UserPickerDefaultSchema,
 } from '../../../../common/types/domain/template/fields';
+import { StrictInlineFieldSchema } from '../../../../common/types/domain/template/strict_fields';
 import {
   type FieldDefaultValue,
   updateFieldDefinitionDefault,
@@ -89,7 +90,16 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
     }
   }, [definition]);
 
-  const isDefinitionValid = parsedDefinition?.success === true;
+  // On create the server enforces the authoring charset (strict); on update the server uses the
+  // lenient schema because the name is immutable anyway. Mirror that split in the UI so the Save
+  // button only enables when the definition matches what the server will accept.
+  const isDefinitionValid = useMemo(() => {
+    if (!parsedDefinition?.success) return false;
+    if (!isEditing) {
+      return StrictInlineFieldSchema.safeParse(parsedDefinition.data).success;
+    }
+    return true;
+  }, [parsedDefinition, isEditing]);
 
   // A definition's name and (YAML) type are its permanent identity: they form the
   // storage key for case values and the Cases analytics field. Editing them is

@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { parse } from 'yaml';
 import { monaco } from '@kbn/monaco';
+import { isAuthorableExtendedFieldName } from '../../../../common/utils/template_fields';
 
 interface FieldNameInfo {
   name: string;
@@ -62,7 +63,10 @@ function validateFieldNames(model: monaco.editor.ITextModel, yamlContent: string
     }
 
     const fieldInfos = collectFieldNames(yamlContent, fields);
-    const markers = createDuplicateFieldMarkers(fieldInfos);
+    const markers = [
+      ...createDuplicateFieldMarkers(fieldInfos),
+      ...createInvalidNameMarkers(fieldInfos, fields),
+    ];
 
     monaco.editor.setModelMarkers(model, FIELD_NAME_VALIDATION_OWNER, markers);
   } catch (error) {
@@ -121,6 +125,46 @@ export function collectFieldNames(yamlContent: string, fields: unknown[]): Field
   }
 
   return fieldInfos;
+}
+
+/**
+ * Places a Monaco error marker on every field name that fails the authoring charset
+ * (`AUTHORABLE_SNAKE_KEY`: letters, digits, underscores — no hyphens, spaces, dots, or quotes).
+ * Runs alongside `createDuplicateFieldMarkers` so the editor shows inline squiggles before Save.
+ */
+export function createInvalidNameMarkers(
+  fieldInfos: FieldNameInfo[],
+  rawFields: unknown[]
+): monaco.editor.IMarkerData[] {
+  const markers: monaco.editor.IMarkerData[] = [];
+
+  for (let i = 0; i < fieldInfos.length; i++) {
+    const info = fieldInfos[i];
+    const rawField = rawFields[i];
+
+    if (info) {
+      const type =
+        typeof rawField === 'object' && rawField !== null && 'type' in rawField
+          ? (rawField as { type: unknown }).type
+          : undefined;
+
+      // Only inline (non-$ref) fields have a type; $ref aliases are rare in the template editor
+      // and are validated by the strict schema on save, so we skip them here.
+      if (typeof type === 'string' && !isAuthorableExtendedFieldName(info.name, type)) {
+        markers.push({
+          startLineNumber: info.startLineNumber,
+          startColumn: info.startColumn,
+          endLineNumber: info.endLineNumber,
+          endColumn: info.endColumn,
+          severity: 8, // Error
+          message: `Field name "${info.name}" produces an invalid storage key. Names must contain only letters (A-Z, a-z), digits, and underscores.`,
+          source: FIELD_NAME_VALIDATION_OWNER,
+        });
+      }
+    }
+  }
+
+  return markers;
 }
 
 export function createDuplicateFieldMarkers(
