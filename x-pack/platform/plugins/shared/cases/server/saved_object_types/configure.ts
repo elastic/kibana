@@ -104,5 +104,23 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
         create: schema.object({}, { unknowns: 'allow' }),
       },
     },
+    /**
+     * v2 adds the optional server-managed `legacyFieldValuesReconciled` marker
+     * ({ at, linkFingerprint }) written by the templates-migration task once a
+     * space's linked v1/v2 case field values are verified consistent. It is
+     * intentionally **unmapped** (nothing searches, filters, sorts, or
+     * aggregates on it — the task reads it from `_source` on the O(spaces)
+     * configure documents), so this model version has no mappings change.
+     * Ordinary configuration API callers cannot supply it: the domain types and
+     * request schemas do not include it, and only the task's internal
+     * repository writes it.
+     */
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: (attrs) => attrs,
+        create: schema.object({}, { unknowns: 'allow' }),
+      },
+    },
   },
 };

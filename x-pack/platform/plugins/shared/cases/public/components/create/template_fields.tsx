@@ -38,10 +38,20 @@ interface CreateCaseTemplateFieldsProps {
    * Omit (or false) when a divider already separates this block from content above.
    */
   addTopSpacing?: boolean;
+  /**
+   * `legacyKey`s of the legacy (v1) custom fields currently rendered as inputs elsewhere on
+   * this form (see `CaseFormFields`). A global field definition linked to one of these keys is
+   * excluded below so it isn't shown a second time here — without this, the untouched global
+   * control would submit its default/empty value as an explicit `extended_fields` entry
+   * alongside the legacy `customFields` value for the same linked field, which the write path
+   * treats as a genuine dual-input conflict (`FIELD_REPRESENTATIONS_CONFLICT`).
+   */
+  visibleLegacyCustomFieldKeys?: ReadonlySet<string>;
 }
 
 export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> = ({
   addTopSpacing = false,
+  visibleLegacyCustomFieldKeys,
 }) => {
   const parentForm = useParentFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
@@ -63,12 +73,19 @@ export const CreateCaseTemplateFields: React.FC<CreateCaseTemplateFieldsProps> =
   // Resolve global field definitions to inline fields and compute their snake keys.
   // globalFieldKeys tracks ALL global fields for form-state preservation in useTemplateFormSync,
   // even those hidden because the active template already renders them via $ref.
+  //
+  // A definition linked (via legacyKey) to a legacy custom field that is itself visible on this
+  // form is dropped before parsing — it already has an input in the legacy section, and
+  // rendering it here too would let its untouched control submit a conflicting extended_fields
+  // entry (see the prop doc above).
   const { globalInlineFields, globalFieldKeys } = useMemo(() => {
-    const defs = globalFieldDefsData?.fieldDefinitions ?? [];
+    const defs = (globalFieldDefsData?.fieldDefinitions ?? []).filter(
+      (def) => def.legacyKey === undefined || !visibleLegacyCustomFieldKeys?.has(def.legacyKey)
+    );
     const inlineFields = parseFieldDefinitionsToInlineFields(defs);
     const keys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
     return { globalInlineFields: inlineFields, globalFieldKeys: keys };
-  }, [globalFieldDefsData]);
+  }, [globalFieldDefsData, visibleLegacyCustomFieldKeys]);
 
   const innerForm = useForm<FormShape>({
     defaultValues: { [CASE_EXTENDED_FIELDS]: {} },

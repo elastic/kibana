@@ -116,6 +116,11 @@ interface CasesClientFactoryArgs {
    * unconditionally.
    */
   analyticsV2DataViewRefresher: CasesAnalyticsV2DataViewRefresher;
+  /**
+   * Best-effort `runSoon` nudge for the templates-migration singleton task —
+   * see `CasesClientArgs.nudgeFieldValueReconciliation`.
+   */
+  nudgeFieldValueReconciliation?: () => void;
 }
 
 /**
@@ -220,6 +225,7 @@ export class CasesClientFactory {
       casesEventBus: this.options.casesEventBus,
       request,
       closeReasonValidator: boundCloseReasonValidator,
+      nudgeFieldValueReconciliation: this.options.nudgeFieldValueReconciliation,
     });
   }
 

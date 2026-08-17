@@ -25,14 +25,33 @@ import type {
   CasePostRequest,
 } from '../../../common/types/api';
 import { BulkCreateCasesResponseRt, BulkCreateCasesRequestRt } from '../../../common/types/api';
-import { validateCustomFields } from './validators';
+import {
+  validateCustomFieldsStructure,
+  validateRequiredCustomFields,
+  resolveGlobalFields,
+  validateCaseExtendedFields,
+} from './validators';
 import { applyProfilesToAssignees, getUserProfilesSafe, normalizeCreateCaseRequest } from './utils';
 import { ensureTemplateVersionIsPinned } from './expand_template_defaults';
 import type { BulkCreateCasesArgs } from '../../services/cases/types';
 import type { NotifyAssigneesArgs } from '../../services/notifications/types';
 import type { CaseTransformedAttributes } from '../../common/types/case';
-import { mergeCustomFieldsIntoExtendedFields } from '../../../common/utils/template_fields';
-import { validateExtendedFieldValueSizes } from '../../../common/types/domain/template/validate_extended_fields';
+import type { InlineField } from '../../../common/types/domain/template/fields';
+import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
+import {
+  loadFieldLinkIndexes,
+  logUnresolvedMirrorKeys,
+  throwIfMalformedFieldLinkage,
+} from '../../common/utils/mirror_custom_fields';
+import type { ActiveLinkMaps } from '../../common/utils/pair_field_representations';
+import {
+  buildActiveLinkMaps,
+  incrementPairedWriteCounter,
+  pairCreatedCaseFields,
+  throwIfFieldRepresentationConflicts,
+  throwIfInvalidLinkedFieldValues,
+} from '../../common/utils/pair_field_representations';
 
 export const bulkCreate = async (
   data: BulkCreateCasesRequest,
@@ -46,6 +65,7 @@ export const bulkCreate = async (
       licensingService,
       notificationService,
       templatesService,
+      fieldDefinitionsService,
     },
     user,
     logger,
@@ -81,19 +101,41 @@ export const bulkCreate = async (
 
     const bulkCreateRequest: BulkCreateCasesArgs['cases'] = [];
 
+    // Per-owner caches: the request may span owners, but every case of one owner
+    // shares the same active-link maps and (isGlobal) field definitions.
+    const linkMapsByOwner = new Map<string, ActiveLinkMaps>();
+    const globalFieldsByOwner = new Map<string, InlineField[]>();
+
     for (const theCase of casesWithIds) {
       const customFieldsConfiguration = customFieldsConfigurationMap.get(theCase.owner);
 
       validateRequest({ theCase, customFieldsConfiguration, hasPlatinumLicenseOrGreater });
 
-      bulkCreateRequest.push(
-        createBulkCreateCaseRequest({
-          theCase,
-          user,
-          customFieldsConfiguration,
-          templatesEnabled: clientArgs.config.templates.enabled,
-        })
-      );
+      // Pairing for existing links runs independently of the templates feature
+      // flag (addendum A1) — any owner with configured customFields pays one
+      // bounded definitions fetch.
+      let links: ActiveLinkMaps | undefined;
+      if (customFieldsConfiguration?.length) {
+        links = linkMapsByOwner.get(theCase.owner);
+        if (!links) {
+          const linkIndexes = await loadFieldLinkIndexes(theCase.owner, fieldDefinitionsService);
+          links = buildActiveLinkMaps(customFieldsConfiguration, linkIndexes);
+          linkMapsByOwner.set(theCase.owner, links);
+        }
+      }
+
+      const { request } = await createBulkCreateCaseRequest({
+        theCase,
+        user,
+        customFieldsConfiguration,
+        links,
+        logger,
+        usageCounter: clientArgs.usageCounter,
+        templatesService,
+        fieldDefinitionsService,
+        globalFieldsByOwner,
+      });
+      bulkCreateRequest.push(request);
     }
 
     // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
@@ -141,8 +183,69 @@ export const bulkCreate = async (
       });
     }
 
+    // Resolve names of applied templates so the "applied template" user action records a
+    // point-in-time snapshot — a template's name can change across versions, so it must reflect
+    // the exact version applied, not the current latest. Deduped by "id@version". Gated on the
+    // templates flag, matching create.ts: a caller-pinned template with the flag off leaves no
+    // trace here (pre-expansion behavior).
+    const templateNamesByKey = new Map<string, string>();
+    if (clientArgs.config.templates.enabled) {
+      const appliedTemplates = [
+        ...new Map(
+          casesSOs
+            .map((c) => c.attributes.template)
+            .filter((t): t is NonNullable<typeof t> => t != null)
+            .map((t) => [`${t.id}@${t.version}`, t] as const)
+        ).values(),
+      ];
+      await Promise.all(
+        appliedTemplates.map(async ({ id, version }) => {
+          const templateSO = await templatesService.getTemplate(id, String(version));
+          if (templateSO) {
+            templateNamesByKey.set(`${id}@${version}`, templateSO.attributes.name);
+          }
+        })
+      );
+    }
+
     for (const theCase of casesSOs) {
       userActions.push(createBulkCreateUserActionsRequest({ theCase, user }));
+
+      // The create_case user action payload does not carry `template` (CreateCaseUserActionRt
+      // strips it), so a dedicated entry is needed for the activity log to reflect which template
+      // (if any) the case was created from — mirrors create.ts's single-case equivalent.
+      if (clientArgs.config.templates.enabled && theCase.attributes.template != null) {
+        const { id: templateId, version: templateVersion } = theCase.attributes.template;
+        const templateName = templateNamesByKey.get(`${templateId}@${templateVersion}`);
+        userActions.push({
+          type: UserActionTypes.template,
+          caseId: theCase.id,
+          user,
+          payload: {
+            template: {
+              id: templateId,
+              version: templateVersion,
+              ...(templateName ? { name: templateName } : {}),
+            },
+          },
+          owner: theCase.attributes.owner,
+        });
+      }
+
+      // Pairing (independent of the templates flag) can populate extended_fields from a linked
+      // customFields value, or the caller can supply it directly — either way, create_case's
+      // payload strips extended_fields, so without a dedicated entry a non-empty extended_fields
+      // on the persisted case has zero record in the activity log.
+      const persistedExtendedFields = theCase.attributes.extended_fields;
+      if (persistedExtendedFields && Object.keys(persistedExtendedFields).length > 0) {
+        userActions.push({
+          type: UserActionTypes.extended_fields,
+          caseId: theCase.id,
+          user,
+          payload: { extended_fields: persistedExtendedFields },
+          owner: theCase.attributes.owner,
+        });
+      }
 
       if (theCase.attributes.assignees && theCase.attributes.assignees.length !== 0) {
         const assigneesWithoutCurrentUser = theCase.attributes.assignees.filter(
@@ -219,7 +322,9 @@ const validateRequest = ({
     customFieldsConfiguration,
   };
 
-  validateCustomFields(customFieldsValidationParams);
+  // Structural checks only; required-ness is checked later, after pairing (in
+  // createBulkCreateCaseRequest), against the effective post-pair customFields array.
+  validateCustomFieldsStructure(customFieldsValidationParams);
   validateAssigneesUsage({ assignees: theCase.assignees, hasPlatinumLicenseOrGreater });
 
   // bulkCreate has no HTTP route — its callers (the cases connector) resolve templates
@@ -251,18 +356,47 @@ const validateAssigneesUsage = ({
   }
 };
 
-const createBulkCreateCaseRequest = ({
+const createBulkCreateCaseRequest = async ({
   theCase,
   customFieldsConfiguration,
   user,
-  templatesEnabled,
+  links,
+  logger,
+  usageCounter,
+  templatesService,
+  fieldDefinitionsService,
+  globalFieldsByOwner,
 }: {
   theCase: { id: string } & BulkCreateCasesRequest['cases'][number];
   customFieldsConfiguration?: CustomFieldsConfiguration;
   user: User;
-  templatesEnabled: boolean;
-}): BulkCreateCasesArgs['cases'][number] => {
+  /** Preloaded per-owner active-link maps; undefined when the owner has no configured customFields. */
+  links?: ActiveLinkMaps;
+  logger: CasesClientArgs['logger'];
+  usageCounter: CasesClientArgs['usageCounter'];
+  templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
+  /** Per-owner (isGlobal) field-definition cache, shared and populated across the whole bulk request. */
+  globalFieldsByOwner: Map<string, InlineField[]>;
+}): Promise<{
+  request: BulkCreateCasesArgs['cases'][number];
+}> => {
   const { id, ...caseWithoutId } = theCase;
+
+  const resolveCachedGlobalFields = async (): Promise<InlineField[]> => {
+    let globalFields = globalFieldsByOwner.get(theCase.owner);
+    if (!globalFields) {
+      globalFields = await resolveGlobalFields(theCase.owner, fieldDefinitionsService);
+      globalFieldsByOwner.set(theCase.owner, globalFields);
+    }
+    return globalFields;
+  };
+
+  // NOTE: extended_fields is validated once, below — after pairing resolves any linked field
+  // supplied only via customFields into its extended_fields counterpart. Validating here (before
+  // pairing) would reject a request pairing would have made valid: e.g. two required linked
+  // fields, one supplied via customFields and the other via extended_fields — a pre-pair check
+  // only sees the latter and rejects the former as missing.
 
   /**
    * Trim title, category, description and tags
@@ -272,35 +406,76 @@ const createBulkCreateCaseRequest = ({
 
   const normalizedCase = normalizeCreateCaseRequest(caseWithoutId, customFieldsConfiguration);
 
-  // Mirror customFields into extended_fields so that automations writing to the legacy API
-  // keep the v2 analytics / UI surface populated. CustomFields-win semantics: the incoming
-  // value overrides any pre-set mirror key (e.g. a template default in the request).
+  // Pair the two representations of every linked field, applying the create
+  // default precedence of addendum A2 (explicit caller value on either side —
+  // conflicting dual input rejects the whole bulk create with a structured
+  // 400 — then the v1 configuration default is copied to v2). bulkCreate has
+  // no server-side template expansion, so a template default only exists here
+  // as an explicit extended_fields entry pre-resolved by the caller.
   //
-  // Pass the RAW request customFields (caseWithoutId.customFields), not the post-fill array
-  // (normalizedCase.customFields). fillMissingCustomFields pads absent optional-no-default
-  // fields with { key, value: null }; those synthetic nulls would otherwise hit the merge's
-  // delete branch and wipe mirror keys the request never intended to clear.
-  if (templatesEnabled) {
-    normalizedCase.extended_fields =
-      mergeCustomFieldsIntoExtendedFields(
-        caseWithoutId.customFields,
-        normalizedCase.extended_fields
-      ) ?? undefined;
+  // Caller intent is the RAW request (caseWithoutId.customFields /
+  // caseWithoutId.extended_fields), never the post-fill array —
+  // fillMissingCustomFields pads absent optional-no-default fields with
+  // synthetic nulls that must not be mistaken for explicit input.
+  if (links) {
+    const paired = pairCreatedCaseFields({
+      callerCustomFields: caseWithoutId.customFields,
+      callerExtendedFields: caseWithoutId.extended_fields,
+      effectiveCustomFields: normalizedCase.customFields ?? [],
+      effectiveExtendedFields: normalizedCase.extended_fields,
+      links,
+    });
+    throwIfMalformedFieldLinkage(paired.malformedFields);
+    throwIfFieldRepresentationConflicts(paired.conflictFields, usageCounter);
+    throwIfInvalidLinkedFieldValues(paired.invalidValues);
+    logUnresolvedMirrorKeys(paired.unresolvedKeys, { owner: theCase.owner, logger });
+    incrementPairedWriteCounter(
+      usageCounter,
+      paired,
+      paired.extendedFields !== normalizedCase.extended_fields || paired.customFields !== undefined
+    );
+
+    normalizedCase.extended_fields = (paired.extendedFields as Record<string, string>) ?? undefined;
+    if (paired.customFields !== undefined) {
+      // Values were decoded through the per-type codecs, so they satisfy the
+      // customFields union even though the adapter is structurally typed.
+      normalizedCase.customFields =
+        paired.customFields as unknown as typeof normalizedCase.customFields;
+    }
   }
 
-  const extendedFieldValueErrors = validateExtendedFieldValueSizes(
-    normalizedCase.extended_fields ?? {}
-  );
-  if (extendedFieldValueErrors.length > 0) {
-    throw Boom.badRequest(`Invalid extended_fields: ${extendedFieldValueErrors.join('; ')}`);
+  // Single authoritative validation pass over the FINAL, post-pairing representations — mirrors
+  // create.ts. Unlike the pairing checks above (which only cover actively-linked fields), this
+  // rejects unknown extended_fields keys, wrong-typed values, and missing required fields for
+  // every case — including pure v2-native fields with no linked v1 customField. bulkCreate has
+  // no server-side template/global-defaults expansion, so `partial: false` always applies (no
+  // defaults-injection leniency to preserve, unlike create.ts).
+  validateRequiredCustomFields({
+    requestCustomFields: normalizedCase.customFields,
+    customFieldsConfiguration,
+  });
+
+  if (normalizedCase.extended_fields) {
+    const globalFields = await resolveCachedGlobalFields();
+    await validateCaseExtendedFields({
+      extendedFields: normalizedCase.extended_fields,
+      templateId: theCase.template?.id,
+      globalFields,
+      templatesService,
+      fieldDefinitionsService,
+      owner: theCase.owner,
+      partial: false,
+    });
   }
 
   return {
-    id,
-    ...transformNewCase({
-      user,
-      newCase: normalizedCase,
-    }),
+    request: {
+      id,
+      ...transformNewCase({
+        user,
+        newCase: normalizedCase,
+      }),
+    },
   };
 };
 

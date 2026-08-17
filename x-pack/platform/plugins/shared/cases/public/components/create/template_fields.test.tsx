@@ -323,6 +323,70 @@ describe('CreateCaseTemplateFields', () => {
     expect(screen.getAllByTestId('control-Incident_Type')).toHaveLength(1);
   });
 
+  it('hides a global field linked to a legacy custom field that is currently visible', () => {
+    mockUseFormData.mockReturnValue([{ templateId: undefined }]);
+    mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'priority',
+            definition: yamlStringify({
+              name: 'priority',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Priority',
+            }),
+            owner: 'securitySolution',
+            isGlobal: true,
+            legacyKey: 'cf_priority',
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(
+      <CreateCaseTemplateFields visibleLegacyCustomFieldKeys={new Set(['cf_priority'])} />
+    );
+
+    // The legacy input for cf_priority is already visible elsewhere on the form — rendering
+    // its linked global counterpart here too would double-submit the field (see prop doc).
+    expect(screen.queryByTestId('control-priority')).not.toBeInTheDocument();
+  });
+
+  it('shows a global field linked to a legacy custom field that is NOT currently visible', () => {
+    mockUseFormData.mockReturnValue([{ templateId: undefined }]);
+    mockUseTemplateFormSync.mockReturnValue({ template: undefined, isLoading: false });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: {
+        fieldDefinitions: [
+          {
+            fieldDefinitionId: 'fd-1',
+            name: 'priority',
+            definition: yamlStringify({
+              name: 'priority',
+              type: 'keyword',
+              control: 'INPUT_TEXT',
+              label: 'Priority',
+            }),
+            owner: 'securitySolution',
+            isGlobal: true,
+            legacyKey: 'cf_priority',
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    renderWithTestingProviders(
+      <CreateCaseTemplateFields visibleLegacyCustomFieldKeys={new Set()} />
+    );
+
+    expect(screen.getByTestId('control-priority')).toBeInTheDocument();
+  });
+
   it('shows a global field when it is NOT referenced by the template', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseTemplateFormSync.mockReturnValue({

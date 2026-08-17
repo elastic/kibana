@@ -69,6 +69,15 @@ export interface CasesClientArgs {
   readonly casesEventBus?: CasesEventBus;
   readonly request: KibanaRequest;
   readonly closeReasonValidator?: (closeReason: string, owner: string) => Promise<boolean>;
+  /**
+   * Best-effort `runSoon` nudge for the templates-migration singleton task
+   * (plan addendum A3). The configure client fires it after a successful
+   * configuration write that may have changed the active v1→v2 link
+   * fingerprint, so field-value reconciliation starts promptly instead of
+   * waiting for the task's low-frequency interval. Fire-and-forget: a lost
+   * nudge is recovered by the durable stale fingerprint on the next interval.
+   */
+  readonly nudgeFieldValueReconciliation?: () => void;
 }
 
 export type CasesSearchParams = Partial<

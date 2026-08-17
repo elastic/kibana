@@ -60,6 +60,23 @@ export const validateCustomFields = (params: CustomFieldValidationParams) => {
 };
 
 /**
+ * Structural-only customFields validation — duplicate keys, unknown keys, and type mismatches.
+ * Deliberately excludes `validateRequiredCustomFields`: a create path that pairs customFields
+ * with extended_fields (see create.ts / bulk_create.ts) must resolve that pairing first, since a
+ * required linked field supplied only via extended_fields is not yet reflected in the raw request
+ * customFields the required-check inspects. Callers using this run `validateRequiredCustomFields`
+ * separately, after pairing, against the effective (post-pair) customFields array.
+ */
+export const validateCustomFieldsStructure = (params: CustomFieldValidationParams) => {
+  validateDuplicatedKeysInRequest({
+    requestFields: params.requestCustomFields,
+    fieldName: 'customFields',
+  });
+  validateCustomFieldKeysAgainstConfiguration(params);
+  validateCustomFieldTypesInRequest(params);
+};
+
+/**
  * Throws if the type doesn't match the configuration.
  */
 export function validateCustomFieldTypesInRequest({

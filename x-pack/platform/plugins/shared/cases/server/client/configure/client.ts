@@ -389,6 +389,24 @@ export async function update(
           }`;
     }
 
+    // Linked field definitions are ensured BEFORE the configuration is persisted so a
+    // configured v1 custom field can never become active without its v2 definition; a
+    // linkage failure fails the whole update (addendum A1). Runs regardless of the
+    // templates feature flag — the definition substrate must stay consistent either way.
+    // Skipped entirely when the patch omits customFields: the pre-patch set is already
+    // linked (a no-op), and re-running it would re-validate every existing link on writes
+    // that never touch custom fields (e.g. a connector-only patch) — a link that's since
+    // gone stale (imported duplicate legacyKey, etc.) would then block an unrelated edit.
+    if (request.customFields !== undefined) {
+      await ensureGlobalFieldDefinitions({
+        owner: configuration.attributes.owner,
+        spaceId: clientArgs.spaceId,
+        customFields: request.customFields,
+        fieldDefinitionsService,
+        logger,
+      });
+    }
+
     const patch = await caseConfigureService.patch({
       unsecuredSavedObjectsClient,
       configurationId: configuration.id,
@@ -402,16 +420,11 @@ export async function update(
       originalConfiguration: configuration,
     });
 
-    if (clientArgs.config.templates.enabled) {
-      // Mirror any new custom fields into global field definitions. When the patch omits
-      // customFields, falls back to the pre-patch set (all names already exist → cheap no-op).
-      // Non-fatal: logged and swallowed inside the helper.
-      await ensureGlobalFieldDefinitions({
-        owner: configuration.attributes.owner,
-        customFields: request.customFields ?? configuration.attributes.customFields,
-        fieldDefinitionsService,
-        logger,
-      });
+    // The persisted update may have changed the active v1→v2 link fingerprint —
+    // nudge the reconciliation singleton (best-effort, A3). Only fired when the
+    // patch touched customFields; the durable stale fingerprint covers the rest.
+    if (request.customFields != null) {
+      clientArgs.nudgeFieldValueReconciliation?.();
     }
 
     const res = {
@@ -534,6 +547,16 @@ export async function create(
         : `Error creating mapping for ${validatedConfigurationRequest.connector.name}`;
     }
 
+    // Ensure linked field definitions BEFORE persisting the configuration (addendum A1);
+    // a linkage failure fails the create. Runs regardless of the templates feature flag.
+    await ensureGlobalFieldDefinitions({
+      owner: validatedConfigurationRequest.owner,
+      spaceId: clientArgs.spaceId,
+      customFields: validatedConfigurationRequest.customFields ?? [],
+      fieldDefinitionsService,
+      logger,
+    });
+
     const post = await caseConfigureService.post({
       unsecuredSavedObjectsClient,
       attributes: {
@@ -550,14 +573,10 @@ export async function create(
       id: savedObjectID,
     });
 
-    if (clientArgs.config.templates.enabled) {
-      // Mirror new custom fields into global field definitions. Non-fatal: logged and swallowed.
-      await ensureGlobalFieldDefinitions({
-        owner: validatedConfigurationRequest.owner,
-        customFields: validatedConfigurationRequest.customFields ?? [],
-        fieldDefinitionsService,
-        logger,
-      });
+    // A new configuration with custom fields establishes new active links —
+    // nudge the reconciliation singleton (best-effort, A3).
+    if ((validatedConfigurationRequest.customFields?.length ?? 0) > 0) {
+      clientArgs.nudgeFieldValueReconciliation?.();
     }
 
     const res = {
