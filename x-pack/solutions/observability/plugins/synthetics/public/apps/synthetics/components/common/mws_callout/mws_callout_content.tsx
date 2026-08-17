@@ -10,10 +10,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SyntheticsMaintenanceWindow } from '../../../hooks';
 import { MaintenanceWindowsLink } from '../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn';
+import { MIN_MW_SUPPORTED_AGENT_VERSION } from '../../../../../../common/utils/agent_mw_support';
 import { useSyncInterval } from './use_sync_interval';
 import { SyncNowLink } from './sync_now_link';
 
-export const MwsCalloutContent = ({ activeMWs }: { activeMWs: SyntheticsMaintenanceWindow[] }) => {
+export const MwsCalloutContent = ({
+  activeMWs,
+  hasOutdatedAgent = false,
+}: {
+  activeMWs: SyntheticsMaintenanceWindow[];
+  /** Adds a line noting that an outdated agent may keep running through this monitor's active window, instead of a separate callout — keeps this surface to one box. */
+  hasOutdatedAgent?: boolean;
+}) => {
   const syncInterval = useSyncInterval();
 
   if (activeMWs.length) {
@@ -52,6 +60,15 @@ export const MwsCalloutContent = ({ activeMWs }: { activeMWs: SyntheticsMaintena
               values={{ syncInterval, syncNowLink: <SyncNowLink /> }}
             />
           </EuiText>
+          {hasOutdatedAgent && (
+            <EuiText size="xs" data-test-subj="maintenanceWindowAgentVersionWarningLine">
+              <FormattedMessage
+                id="xpack.synthetics.maintenanceWindowCallout.agentVersionWarningLine"
+                defaultMessage="One or more agents serving this monitor predate {minVersion} and don't support maintenance windows — this monitor may keep running during this window until they're upgraded."
+                values={{ minVersion: MIN_MW_SUPPORTED_AGENT_VERSION }}
+              />
+            </EuiText>
+          )}
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>
