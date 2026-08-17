@@ -56,7 +56,7 @@ function getExpectedDiscoverPluginIds(projectType: string | undefined): string[]
  * meaningful in that mode, so only total size and bundle count are checked.
  */
 const BUNDLE_SIZE_LIMITS = {
-  totalSize: 4.5 * 1024 * 1024,
+  totalSize: 3 * 1024 * 1024,
   bundleCount: 70,
 } as const;
 
