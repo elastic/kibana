@@ -73,6 +73,7 @@ export async function getDiverseSampleDocuments({
 
   const window = selectStratifiedWindow(rows, { iteration, size });
 
+  // Skip symbol-only values: MATCH_PHRASE analyzes the string and matches nothing when it tokenizes to zero terms.
   const sampleValues = Array.from(
     new Set(window.map((row) => row.sample).filter((sample) => /[\p{L}\p{N}]/u.test(sample)))
   );
