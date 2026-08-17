@@ -8,9 +8,8 @@
  */
 
 import { type Container, ContainerModule } from 'inversify';
-import { OnSetup } from '@kbn/core-di';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
-import { injectionServiceMock } from '@kbn/core-di-mocks';
+import { injectionServiceMock, setup } from '@kbn/core-di-mocks';
 import {
   CapabilitiesProvider,
   CapabilitiesResolver,
@@ -30,10 +29,6 @@ describe('loadCapabilities', () => {
   let capabilitiesStart: ReturnType<typeof capabilitiesServiceMock.createStartContract>;
   let request: KibanaRequest;
 
-  function setup() {
-    container.get(OnSetup)(container);
-  }
-
   beforeEach(() => {
     jest.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
@@ -50,7 +45,7 @@ describe('loadCapabilities', () => {
   it('should register capabilities', () => {
     const capabilitiesProvider = () => ({});
     container.bind(CapabilitiesProvider).toConstantValue(capabilitiesProvider);
-    setup();
+    setup(container);
 
     expect(capabilitiesSetup.registerProvider).toHaveBeenCalledWith(capabilitiesProvider);
   });
@@ -61,7 +56,7 @@ describe('loadCapabilities', () => {
       switch: () => ({}),
     };
     container.bind(CapabilitiesSwitcher).toConstantValue(switcher);
-    setup();
+    setup(container);
 
     expect(capabilitiesSetup.registerSwitcher).toHaveBeenCalledWith(
       switcher.switch,
