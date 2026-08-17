@@ -973,8 +973,12 @@ apiTest.describe(
           expect(response).toHaveStatusCode(200);
 
           const body = response.body as GetConversationResponse;
-          expect(body.access_control.entries).toHaveLength(1);
-          expect(body.access_control.entries[0].id).toBe(bobId);
+          const { access_control: accessControl } = body;
+          if (!accessControl) {
+            throw new Error('Expected the conversation response to include access control');
+          }
+          expect(accessControl.entries).toHaveLength(1);
+          expect(accessControl.entries[0].id).toBe(bobId);
           expect(body.permissions).toStrictEqual({ update_access_control: false });
 
           expect(
