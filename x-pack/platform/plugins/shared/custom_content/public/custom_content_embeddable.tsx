@@ -76,6 +76,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
+    const previewHtml$ = new BehaviorSubject<string | null>(null);
     const usesEsql$ = new BehaviorSubject<boolean>(Boolean(initialState.esqlQuery));
     const isApproximate$ = new BehaviorSubject<boolean>(false);
     const projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
@@ -186,6 +187,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           projectRouting,
           query,
           filters,
+          previewHtml,
         ] = useBatchedPublishingSubjects(
           prompt$,
           esqlQuery$,
@@ -195,7 +197,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isApproximate$,
           projectRouting$,
           query$,
-          filters$
+          filters$,
+          previewHtml$
         );
         const [generationVersion, setGenerationVersion] = useState(0);
         const [timeRange, setTimeRange] = useState<TimeRange | undefined>(
@@ -230,6 +233,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
         const handleFlyoutSave = useCallback(
           (newEsqlQuery: string | undefined, newTemplate: string | undefined) => {
+            previewHtml$.next(null);
             applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
             setGenerationVersion((v) => v + 1);
           },
@@ -277,8 +281,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         }, []);
 
         const handleFlyoutClose = useCallback(() => {
+          previewHtml$.next(null);
           isFlyoutOpen$.next(false);
         }, []);
+
+        const handleRunPreview = useCallback((html: string) => previewHtml$.next(html), []);
 
         return (
           <>
@@ -294,6 +301,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               query={query}
               filters={filters}
               onTemplateChange={onTemplateChange}
+              previewHtml={previewHtml}
             />
             {isFlyoutOpen && (
               <Suspense fallback={null}>
@@ -302,9 +310,14 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   esqlQuery={esqlQuery}
                   template={savedTemplate}
                   timeRange={timeRange}
+                  isApproximate={isApproximate}
+                  projectRouting={projectRouting}
+                  query={query}
+                  filters={filters}
                   panelTitle={panelTitle ?? undefined}
                   onSave={handleFlyoutSave}
                   onClose={handleFlyoutClose}
+                  onRunPreview={handleRunPreview}
                 />
               </Suspense>
             )}
