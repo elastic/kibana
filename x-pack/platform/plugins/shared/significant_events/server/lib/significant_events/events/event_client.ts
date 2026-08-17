@@ -157,7 +157,9 @@ export class EventClient {
           'summary'
         )}) LIKE ${pattern} OR TO_LOWER(${esql.col(
           'symptom_hypothesis'
-        )}) LIKE ${pattern} OR ${esql.col(FIELD_EVENT_ID)} == ${esql.str(options.search)})`
+        )}) LIKE ${pattern} OR TO_LOWER(${esql.col(FIELD_EVENT_ID)}) == TO_LOWER(${esql.str(
+          options.search
+        )}))`
       );
     }
 

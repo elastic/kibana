@@ -14,6 +14,8 @@ import { useFetchSignificantEvents } from '../../../../hooks/use_fetch_significa
 import { useSignificantEventsUrlState } from './use_significant_events_url_state';
 import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
 
+const mockUpdateTimeRange = jest.fn();
+
 jest.mock('../../../../hooks/use_fetch_significant_event_lifecycle', () => ({
   useFetchSignificantEventLifecycle: jest.fn(() => ({
     data: undefined,
@@ -81,7 +83,7 @@ jest.mock('../../../../hooks/use_timefilter', () => ({
   })),
 }));
 jest.mock('../../../../hooks/use_time_range_update', () => ({
-  useTimeRangeUpdate: jest.fn(() => ({ updateTimeRange: jest.fn() })),
+  useTimeRangeUpdate: jest.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
 }));
 jest.mock('../knowledge_indicators_table/ki_generation_context', () => ({
   useKiGeneration: jest.fn(() => ({ filteredStreams: [] })),

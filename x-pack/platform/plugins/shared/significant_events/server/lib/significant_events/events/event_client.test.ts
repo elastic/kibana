@@ -306,7 +306,7 @@ describe('EventClient', () => {
       const dataQuery = query.mock.calls
         .map((call) => (call[0] as { query: string }).query)
         .find((q) => !q.includes('STATS total'));
-      expect(dataQuery).toContain('event_id == "checkout-failure"');
+      expect(dataQuery).toContain('TO_LOWER(event_id) == TO_LOWER("checkout-failure")');
     });
   });
 

@@ -151,13 +151,6 @@ const TABLE_CAPTION = i18n.translate(
     defaultMessage: 'Significant Events',
   }
 );
-const EVENT_NOT_FOUND_TITLE = i18n.translate(
-  'xpack.significantEventsApp.significantEventsTab.eventNotFound',
-  {
-    defaultMessage:
-      'The linked significant event was not found. It may have been deleted or expired.',
-  }
-);
 const LOADING_MESSAGE = i18n.translate(
   'xpack.significantEventsApp.significantEventsTab.loadingMessage',
   {
@@ -396,10 +389,6 @@ export const SignificantEventsTab = () => {
     () => (openEventId ? (data?.hits ?? []).find((e) => e.event_id === openEventId) : undefined),
     [openEventId, data?.hits]
   );
-
-  // Not-found only applies to the selectedEvent (deep-link) path — once the list fetch
-  // settles and no event matches, the deep link target no longer exists.
-  const eventNotFound = Boolean(selectedEventId && isSuccess && (data?.total ?? 0) === 0);
 
   // Drop a stale openEvent param once the fetch settles without the event (shared URL to
   // another page of results, or the event left the list after a status change) — otherwise
@@ -664,17 +653,6 @@ export const SignificantEventsTab = () => {
       {isError && (
         <EuiFlexItem grow={false}>
           <KbnDangerCallout announceOnMount title={FETCH_ERROR_TITLE} size="s" />
-        </EuiFlexItem>
-      )}
-      {eventNotFound && (
-        <EuiFlexItem grow={false}>
-          <KbnDangerCallout
-            announceOnMount
-            title={EVENT_NOT_FOUND_TITLE}
-            size="s"
-            onDismiss={clearSelectedEvent}
-            data-test-subj="significantEventNotFoundCallout"
-          />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
