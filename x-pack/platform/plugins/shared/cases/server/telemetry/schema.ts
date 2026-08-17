@@ -31,8 +31,14 @@ const countSchema: CountSchema = {
 };
 
 const attachmentTypeStatsSchema: AttachmentTypeStatsSchema = {
-  total: long,
-  average: long,
+  total: {
+    type: 'long',
+    _meta: { description: 'Total number of attachments of this type, across all cases' },
+  },
+  average: {
+    type: 'long',
+    _meta: { description: 'Average number of attachments of this type per case' },
+  },
 };
 
 const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
@@ -40,8 +46,22 @@ const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
     DYNAMIC_KEY: attachmentTypeStatsSchema,
   },
   bySavedObject: {
-    legacy: { total: long },
-    unified: { total: long },
+    legacy: {
+      total: {
+        type: 'long',
+        _meta: {
+          description: 'Total number of attachments stored on the legacy comment saved object',
+        },
+      },
+    },
+    unified: {
+      total: {
+        type: 'long',
+        _meta: {
+          description: 'Total number of attachments stored on the unified attachment saved object',
+        },
+      },
+    },
   },
   files: {
     averageSize: long,

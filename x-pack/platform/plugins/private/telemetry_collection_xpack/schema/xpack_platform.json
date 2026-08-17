@@ -8162,10 +8162,16 @@
                         "DYNAMIC_KEY": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
                             },
                             "average": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
                             }
                           }
                         }
@@ -8176,14 +8182,20 @@
                         "legacy": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments stored on the legacy comment saved object"
+                              }
                             }
                           }
                         },
                         "unified": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments stored on the unified attachment saved object"
+                              }
                             }
                           }
                         }
@@ -8367,10 +8379,16 @@
                         "DYNAMIC_KEY": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
                             },
                             "average": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
                             }
                           }
                         }
@@ -8381,14 +8399,20 @@
                         "legacy": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments stored on the legacy comment saved object"
+                              }
                             }
                           }
                         },
                         "unified": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments stored on the unified attachment saved object"
+                              }
                             }
                           }
                         }
@@ -8516,10 +8540,16 @@
                         "DYNAMIC_KEY": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
                             },
                             "average": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
                             }
                           }
                         }
@@ -8530,14 +8560,20 @@
                         "legacy": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments stored on the legacy comment saved object"
+                              }
                             }
                           }
                         },
                         "unified": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments stored on the unified attachment saved object"
+                              }
                             }
                           }
                         }
@@ -8665,10 +8701,16 @@
                         "DYNAMIC_KEY": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments of this type, across all cases"
+                              }
                             },
                             "average": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Average number of attachments of this type per case"
+                              }
                             }
                           }
                         }
@@ -8679,14 +8721,20 @@
                         "legacy": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments stored on the legacy comment saved object"
+                              }
                             }
                           }
                         },
                         "unified": {
                           "properties": {
                             "total": {
-                              "type": "long"
+                              "type": "long",
+                              "_meta": {
+                                "description": "Total number of attachments stored on the unified attachment saved object"
+                              }
                             }
                           }
                         }
