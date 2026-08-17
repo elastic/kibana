@@ -2189,7 +2189,7 @@ paths:
               type: object
               properties:
                 access_mode:
-                  description: 'Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation agent can read and continue it).'
+                  description: "Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation's agent can read and continue it)."
                   enum:
                     - private
                     - public
