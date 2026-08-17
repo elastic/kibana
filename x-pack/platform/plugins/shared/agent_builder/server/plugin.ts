@@ -12,6 +12,7 @@ import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import {
   AGENT_BUILDER_IMAGE_FILE_KIND,
   SUPPORTED_IMAGE_MIME_TYPES,
+  MAX_IMAGE_BYTES,
 } from '@kbn/agent-builder-common/attachments';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
@@ -41,8 +42,6 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
-
-const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
 export class AgentBuilderPlugin
   implements

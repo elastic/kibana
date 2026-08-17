@@ -132,6 +132,8 @@ export type SupportedImageMimeType = (typeof SUPPORTED_IMAGE_MIME_TYPES)[number]
 
 export const AGENT_BUILDER_IMAGE_FILE_KIND = 'agentBuilderImages';
 
+export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+
 export const imageAttachmentDataSchema = z.object({
   file_id: z.string(),
   name: z.string(),
