@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core-plugins-server';
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { SavedObjectsExamplePlugin } = await import('./plugin');
-  return new SavedObjectsExamplePlugin(initializerContext);
-}
+export { default as cordisPlugin } from './plugin';

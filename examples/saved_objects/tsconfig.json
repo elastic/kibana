@@ -16,6 +16,7 @@
     "@kbn/core",
     "@kbn/core-plugins-server",
     "@kbn/core-security-server",
+    "@kbn/cordis",
     "@kbn/es-errors",
   ]
 }

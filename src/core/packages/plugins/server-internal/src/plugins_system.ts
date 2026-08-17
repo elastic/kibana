@@ -375,6 +375,7 @@ export class PluginsSystem<T extends PluginType> {
       this.cordisCtx.provide('core.deprecations', deprecations);
       this.cordisCtx.provide('core.elasticsearch', elasticsearch);
       this.cordisCtx.provide('core.http', http);
+      this.cordisCtx.provide('core.logger', this.coreContext.logger);
       this.cordisCtx.provide('core.logging', logging);
       this.cordisCtx.provide('core.savedObjects', savedObjects);
       this.cordisCtx.provide('core.status', status);

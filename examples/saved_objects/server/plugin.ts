@@ -7,33 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  Plugin,
-  Logger,
-  CoreStart,
-} from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { typeA, typeB } from './saved_objects';
 import { registerSearchExampleRoutes } from './search_example_routes';
 import { registerEsqlExampleRoutes } from './esql_example_routes';
 
-export class SavedObjectsExamplePlugin implements Plugin {
-  private readonly logger: Logger;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class SavedObjectsExamplePlugin extends Service {
+  static readonly inject = ['core.savedObjects', 'core.http'];
+  static readonly provide = 'savedObjectsExample';
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(ctx: Context, _config: never) {
+    super(ctx, 'savedObjectsExample');
+    const savedObjects = ctx.get('core.savedObjects') as any;
+    const http = ctx.get('core.http') as any;
+    const logger = (ctx.get('core.logger') as any).get('plugins', 'savedObjects');
+
+    savedObjects.registerType(typeA);
+    savedObjects.registerType(typeB);
+    const router = http.createRouter();
+    registerSearchExampleRoutes(router, logger);
+    registerEsqlExampleRoutes(router, logger);
   }
-
-  public setup(core: CoreSetup) {
-    core.savedObjects.registerType(typeA);
-    core.savedObjects.registerType(typeB);
-    const router = core.http.createRouter();
-    registerSearchExampleRoutes(router, this.logger);
-    registerEsqlExampleRoutes(router, this.logger);
-  }
-
-  public start(core: CoreStart) {}
-
-  public stop() {}
 }
