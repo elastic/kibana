@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { InlineFieldSchema, FieldSchema, isRefField } from './fields';
+import { InlineFieldSchema, FieldSchema, isRefField, isDisplayOnlyField } from './fields';
 import type { Field, InlineField, RefField } from './fields';
 import { isAuthorableExtendedFieldName } from '../../../utils/template_fields';
 import { LONGEST_STORAGE_TYPE } from '../../../constants';
@@ -23,6 +23,12 @@ const invalidNameMessage = (name: string): string =>
   `Note: renaming a field does not migrate values already stored under the old key.`;
 
 const assertInlineFieldName = (field: InlineField, ctx: z.RefinementCtx): void => {
+  // Display-only fields (MARKDOWN) hold no value and are excluded from `extended_fields` and
+  // from the analytics data-view — their `name` never becomes a storage key or reaches a Painless
+  // literal, so the charset restriction has no safety benefit there and would unnecessarily
+  // reject template entries whose markdown label contains spaces, hyphens, etc.
+  if (isDisplayOnlyField(field)) return;
+
   if (!isAuthorableExtendedFieldName(field.name, field.type)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
