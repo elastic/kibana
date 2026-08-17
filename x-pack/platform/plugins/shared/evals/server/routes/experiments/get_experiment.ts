@@ -107,11 +107,9 @@ export const registerGetExperimentRoute = ({ router, logger, getSpaceId }: Route
 
           const aggregations = aggResponse.aggregations as Record<string, unknown> | undefined;
           const stats = parseStatsAggregationResponse(aggregations);
-          // Evaluators can each judge with their own model, so the detail reports every distinct
-          // judge, the one that produced the most scores first, and nothing at all when only code
-          // evaluators ran. The listing summarizes the same aggregation, so the two agree on which
-          // judge is predominant; reading it off `firstDoc` instead would report whichever judge
-          // the unsorted search happened to hit.
+          // Every distinct judge, most scores first; empty when only code evaluators ran. Derived
+          // from the same aggregation as the listing so both agree on the predominant judge,
+          // unlike `firstDoc`, which reflects whichever judge the unsorted search happens to hit.
           const evaluatorModels = parseEvaluatorModelsAggregation(aggregations);
 
           const toModelDisplay = (model?: { id?: string; family?: string; provider?: string }) => {
