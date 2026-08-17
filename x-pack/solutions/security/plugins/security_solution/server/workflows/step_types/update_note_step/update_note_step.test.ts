@@ -27,22 +27,36 @@ describe('updateNoteStepDefinition', () => {
     mockContext = {
       input: {
         note_id: 'note-1',
+        document_id: 'alert-1',
         text: 'Updated text',
       },
       contextManager: mockContextManager,
     } as unknown as StepHandlerContext<typeof updateNoteInputSchema>;
   });
 
-  it('updates the note text without touching the document association', async () => {
-    mockContextManager.callKibanaApi.mockResolvedValue({
-      status: 200,
-      headers: {},
-      body: { note: { noteId: 'note-1' } },
-    });
+  it('fetches the note and echoes back an empty timelineId for a document note', async () => {
+    mockContextManager.callKibanaApi
+      // GET notes for the document
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body: { notes: [{ noteId: 'note-1', timelineId: '' }] },
+      })
+      // PATCH update
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body: { note: { noteId: 'note-1' } },
+      });
 
     const result = await updateNoteStepDefinition.handler(mockContext);
 
-    expect(mockContextManager.callKibanaApi).toHaveBeenCalledWith({
+    expect(mockContextManager.callKibanaApi).toHaveBeenNthCalledWith(1, {
+      method: 'GET',
+      path: NOTE_URL,
+      query: { documentIds: 'alert-1' },
+    });
+    expect(mockContextManager.callKibanaApi).toHaveBeenNthCalledWith(2, {
       method: 'PATCH',
       path: NOTE_URL,
       body: {
@@ -59,6 +73,50 @@ describe('updateNoteStepDefinition', () => {
       note_id: 'note-1',
       message: 'Successfully updated note note-1',
     });
+  });
+
+  it('preserves an existing timeline association by echoing back the real timelineId', async () => {
+    mockContextManager.callKibanaApi
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body: { notes: [{ noteId: 'note-1', timelineId: 'timeline-42' }] },
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: {},
+        body: { note: { noteId: 'note-1' } },
+      });
+
+    await updateNoteStepDefinition.handler(mockContext);
+
+    expect(mockContextManager.callKibanaApi).toHaveBeenNthCalledWith(2, {
+      method: 'PATCH',
+      path: NOTE_URL,
+      body: {
+        noteId: 'note-1',
+        note: {
+          note: 'Updated text',
+          timelineId: 'timeline-42',
+        },
+      },
+    });
+  });
+
+  it('throws when the note is not found on the document', async () => {
+    mockContextManager.callKibanaApi.mockResolvedValueOnce({
+      status: 200,
+      headers: {},
+      body: { notes: [{ noteId: 'some-other-note', timelineId: '' }] },
+    });
+
+    await expect(updateNoteStepDefinition.handler(mockContext)).rejects.toMatchObject({
+      type: 'ApiError',
+      message: 'Note note-1 was not found on document alert-1',
+    });
+
+    // No PATCH should be attempted.
+    expect(mockContextManager.callKibanaApi).toHaveBeenCalledTimes(1);
   });
 
   it('persists only status (not the raw body/headers) when callKibanaApi throws on a non-2xx', async () => {

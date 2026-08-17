@@ -46,3 +46,10 @@ export const MAX_NOTE_TEXT_LENGTH = 60000;
  * We use 256 here to safely accommodate them while preventing unbounded string input (DoS).
  */
 export const MAX_NOTE_ID_LENGTH = 256;
+
+/**
+ * Maximum length for document IDs.
+ * Document IDs are Elasticsearch `_id` values (typically UUIDs, ~36 characters).
+ * We use 256 here to safely accommodate them while preventing unbounded string input (DoS).
+ */
+export const MAX_DOCUMENT_ID_LENGTH = 256;

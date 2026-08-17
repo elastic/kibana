@@ -10,6 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import type { BaseStepDefinition } from '@kbn/workflows';
 import { i18n } from '@kbn/i18n';
 import {
+  MAX_DOCUMENT_ID_LENGTH,
   MAX_NOTE_ID_LENGTH,
   MAX_NOTE_TEXT_LENGTH,
   MAX_WORKFLOW_MESSAGE_LENGTH,
@@ -23,6 +24,13 @@ export const updateNoteInputSchema = z.object({
     .min(1)
     .max(MAX_NOTE_ID_LENGTH)
     .describe('The `savedObjectId` of the note to update.'),
+  document_id: z
+    .string()
+    .min(1)
+    .max(MAX_DOCUMENT_ID_LENGTH)
+    .describe(
+      'The Elasticsearch `_id` of the alert, attack, or document the note is attached to. Used to locate the note and preserve its associations.'
+    ),
   text: z
     .string()
     .min(1)
@@ -45,7 +53,7 @@ export const updateNoteStepCommonDefinition: BaseStepDefinition<
     defaultMessage: 'Update Note',
   }),
   description: i18n.translate('xpack.securitySolution.workflows.steps.updateNote.description', {
-    defaultMessage: 'Update the text content of an existing note, identified by its note ID.',
+    defaultMessage: 'Update the text content of an existing note on an alert, attack, or document.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: updateNoteInputSchema,
@@ -56,16 +64,17 @@ export const updateNoteStepCommonDefinition: BaseStepDefinition<
       'xpack.securitySolution.workflows.steps.updateNote.documentation.details',
       {
         defaultMessage:
-          "Updates the text of an existing note identified by `note_id`. The note's association with its document (alert, attack, or document) is preserved.",
+          "Updates the text of an existing note identified by `note_id` on the document (`document_id`) it is attached to. The note's document association is preserved. If the note belongs to a Timeline, that association is preserved as well.",
       }
     ),
     examples: [
-      `## Update the text of a note
+      `## Update the text of a note on an alert
 \`\`\`yaml
 - name: update_note
   type: security.updateNote
   with:
     note_id: "{{ steps.create_alert_note.output.note_id }}"
+    document_id: "{{ variables.alert_id }}"
     text: "Updated with enrichment findings: {{ steps.enrich.output.summary }}"
 \`\`\``,
     ],

@@ -13,11 +13,28 @@ import { toApiExecutionError } from '../../utils/to_api_execution_error';
 export const updateNoteStepDefinition = createServerStepDefinition({
   ...updateNoteStepCommonDefinition,
   handler: async (context) => {
-    const { note_id: noteId, text } = context.input;
+    const { note_id: noteId, document_id: documentId, text } = context.input;
 
     try {
-      // `eventId` is intentionally omitted so the note's existing document
-      // (alert/attack) association is preserved by the partial saved-object update.
+      // The persist API requires `timelineId` in the body and overwrites the note's
+      // timeline reference with whatever is sent (an empty string detaches the note from
+      // its Timeline). We therefore fetch the note first and echo its current `timelineId`
+      // back unchanged. `eventId` is a plain attribute that the partial update preserves
+      // when omitted, so we do not need to resend it.
+      const { body: getBody } = await context.contextManager.callKibanaApi<{
+        notes?: Array<{ noteId?: string; timelineId?: string | null }>;
+      }>({
+        method: 'GET',
+        path: NOTE_URL,
+        query: { documentIds: documentId },
+      });
+
+      const existingNote = (getBody?.notes ?? []).find((note) => note.noteId === noteId);
+
+      if (!existingNote) {
+        throw new Error(`Note ${noteId} was not found on document ${documentId}`);
+      }
+
       const { body } = await context.contextManager.callKibanaApi<{
         note?: { noteId?: string };
       }>({
@@ -27,7 +44,7 @@ export const updateNoteStepDefinition = createServerStepDefinition({
           noteId,
           note: {
             note: text,
-            timelineId: '',
+            timelineId: existingNote.timelineId ?? '',
           },
         },
       });
