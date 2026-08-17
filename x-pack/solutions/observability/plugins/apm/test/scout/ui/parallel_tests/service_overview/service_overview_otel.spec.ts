@@ -151,9 +151,7 @@ test.describe(
       });
 
       await test.step('Click service icon and verify metadata popup shows framework name', async () => {
-        await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(
-          testData.SERVICE_OTEL_SENDOTLP
-        );
+        await expect(page.getByTestId('appHeaderTitle')).toHaveText(testData.SERVICE_OTEL_SENDOTLP);
         await serviceDetailsPage.overviewTab.clickServiceIcon();
         await expect(page.getByText('go', { exact: true })).toBeVisible();
       });
