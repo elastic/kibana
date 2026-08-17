@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ProfileStateMap } from '@kbn/discover-utils';
+import type { ProfileStateMap } from '@kbn/discover-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isEqual } from 'lodash';
 

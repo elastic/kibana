@@ -23,7 +23,9 @@ export const titleFromLocatorFactory = (services: LocatorServicesDeps) => {
    *
    * @public
    */
-  const titleFromLocator = async (params: DiscoverAppLocatorParams & { title?: string }): Promise<string> => {
+  const titleFromLocator = async (
+    params: DiscoverAppLocatorParams & { title?: string }
+  ): Promise<string> => {
     const { savedSearchId, title: paramsTitle } = params;
 
     if (paramsTitle) {
