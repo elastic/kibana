@@ -84,7 +84,7 @@ If set to false, or if the workflow does not complete within the timeout, the to
       readOnlyHint: false,
       destructiveHint: true,
       idempotentHint: false,
-      openWorldHint: false,
+      openWorldHint: true,
     },
     handler: async ({ workflowId, yaml, attachmentId, inputs, waitForCompletion }, toolContext) => {
       const providedModes = [workflowId, yaml, attachmentId].filter((v) => v !== undefined).length;
