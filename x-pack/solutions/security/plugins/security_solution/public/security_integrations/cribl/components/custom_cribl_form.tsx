@@ -9,7 +9,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiComboBox,
   EuiFieldText,
   EuiFlexGroup,
@@ -23,12 +22,17 @@ import type {
   NewPackagePolicy,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
 } from '@kbn/fleet-plugin/public/types';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getFleetManagedIndexTemplates } from '../api/api';
 import type { RouteEntry } from '../../../../common/security_integrations/cribl/types';
 import {
   getPolicyConfigValueFromRouteEntries,
   getRouteEntriesFromPolicyConfig,
 } from '../../../../common/security_integrations/cribl/translator';
+import {
+  DATA_ID_MAX_LENGTH,
+  isValidDataId,
+} from '../../../../common/security_integrations/cribl/sanitize';
 import { allRouteEntriesArePaired, hasAtLeastOneValidRouteEntry } from './util/validator';
 
 const getDefaultRouteEntry = () => {
@@ -57,6 +61,22 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
     onDeleteEntry,
   }) => {
     const routeEntry = routeEntries[index]; // the route entry for this row
+<<<<<<< HEAD
+=======
+    const namespaceValidation = routeEntry.namespace
+      ? isValidNamespace(routeEntry.namespace, false)
+      : undefined;
+    const isNamespaceInvalid = !!(namespaceValidation && !namespaceValidation.valid);
+    const isDataIdInvalid = !!routeEntry.dataId && !isValidDataId(routeEntry.dataId);
+    const dataIdError = i18n.translate(
+      'xpack.securitySolution.securityIntegration.cribl.invalidDataId',
+      {
+        defaultMessage:
+          "Invalid Cribl dataId. Only letters, numbers, '.', '_', and '-' are allowed (max {maxLength} characters).",
+        values: { maxLength: DATA_ID_MAX_LENGTH },
+      }
+    );
+>>>>>>> 1dc192114fa3 ([Security Solution] Fix Cribl routing pipeline dataId handling (#284863))
 
     const options = datastreamOpts.map((o) => ({
       label: o,
@@ -68,9 +88,14 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
       <>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow label="Cribl _dataId field">
+            <EuiFormRow
+              label="Cribl _dataId field"
+              isInvalid={isDataIdInvalid}
+              error={isDataIdInvalid ? dataIdError : undefined}
+            >
               <EuiFieldText
                 value={routeEntry.dataId}
+                isInvalid={isDataIdInvalid}
                 onChange={(e) => onChangeCriblDataId(index, e.currentTarget.value)}
               />
             </EuiFormRow>
@@ -197,10 +222,26 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
         },
       };
 
+<<<<<<< HEAD
       // must have at least one filled in and all entries must have both filled in or neither
       const isValid =
         hasAtLeastOneValidRouteEntry(updatedRouteEntries) &&
         allRouteEntriesArePaired(updatedRouteEntries);
+=======
+      const allNamespacesValid = updatedRouteEntries.every(
+        (entry) => !entry.namespace || isValidNamespace(entry.namespace, false).valid
+      );
+      const allDataIdsValid = updatedRouteEntries.every(
+        (entry) => !entry.dataId || isValidDataId(entry.dataId)
+      );
+
+      // must have at least one filled in and all entries must have both filled in or neither
+      const isValid =
+        hasAtLeastOneValidRouteEntry(updatedRouteEntries) &&
+        allRouteEntriesArePaired(updatedRouteEntries) &&
+        allNamespacesValid &&
+        allDataIdsValid;
+>>>>>>> 1dc192114fa3 ([Security Solution] Fix Cribl routing pipeline dataId handling (#284863))
 
       onChange({
         isValid,
@@ -212,7 +253,12 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       <>
         {missingReqPermissions && (
           <>
+<<<<<<< HEAD
             <EuiCallOut
+=======
+            <KbnInfoCallout
+              announceOnMount={false}
+>>>>>>> 1dc192114fa3 ([Security Solution] Fix Cribl routing pipeline dataId handling (#284863))
               size="s"
               title={i18n.translate(
                 'xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutTitle',
@@ -220,15 +266,15 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
                   defaultMessage: 'Be sure you have the necessary privileges',
                 }
               )}
-              iconType="question"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutDescription"
-                  defaultMessage="To configure this integration, you must have `manage_index_templates` privileges and `manage_pipeline` or `manage_ingest_pipelines` privileges."
-                />
-              </p>
-            </EuiCallOut>
+              text={
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutDescription"
+                    defaultMessage="To configure this integration, you must have `manage_index_templates` privileges and `manage_pipeline` or `manage_ingest_pipelines` privileges."
+                  />
+                </p>
+              }
+            />
             <EuiSpacer size="l" />
           </>
         )}

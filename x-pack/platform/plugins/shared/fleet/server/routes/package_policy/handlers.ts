@@ -452,7 +452,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
       request.params.packagePolicyId,
       newData,
       { user, force },
-      packagePolicy.package?.version
+      context
     );
     return response.ok({
       body: {
