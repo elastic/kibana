@@ -49,6 +49,12 @@
       "reason": "Downloads geckodriver required for functional tests"
     },
     {
+      "path": "isolated-vm",
+      "lifecycle": "install",
+      "required": false,
+      "reason": "Builds native V8 isolate bindings for the JavaScript workflow step. Prebuilds shipped in the package are sufficient."
+    },
+    {
       "path": "lmdb",
       "lifecycle": "install",
       "required": false,
