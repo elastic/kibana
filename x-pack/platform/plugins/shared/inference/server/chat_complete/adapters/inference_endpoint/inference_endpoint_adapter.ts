@@ -16,6 +16,7 @@ import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
+import { InferenceEndpointProvider } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import {
   processOpenAIStream,
@@ -28,7 +29,9 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 import type { InferenceEndpointExecutor } from '../../utils/inference_endpoint_executor';
+import { sanitizeToolSchemasForVertex } from './sanitize_tool_schemas_for_vertex';
 import type { OpenAIRequest } from '../openai/types';
 
 export interface InferenceEndpointAdapterChatCompleteOptions {
@@ -39,6 +42,9 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
   functionCalling?: FunctionCallingMode;
   temperature?: number;
   modelName?: string;
+  // Endpoint model identity is authoritative for parameter support.
+  endpointModelId?: string;
+  provider?: string;
   abortSignal?: AbortSignal;
   metadata?: ChatCompleteMetadata;
   stream?: boolean;
@@ -58,8 +64,10 @@ export const inferenceEndpointAdapter = {
       toolChoice,
       tools,
       functionCalling,
-      temperature = 0,
+      temperature,
       modelName,
+      endpointModelId,
+      provider,
       logger,
       abortSignal,
       timeout,
@@ -68,14 +76,20 @@ export const inferenceEndpointAdapter = {
 
     const useSimulatedFunctionCalling = functionCalling === 'simulated';
 
+    const sanitizedTools =
+      provider === InferenceEndpointProvider.GoogleVertexAI
+        ? sanitizeToolSchemasForVertex(tools)
+        : tools;
+
     const request = createEndpointRequest({
       system,
       messages,
       toolChoice,
-      tools,
+      tools: sanitizedTools,
       simulatedFunctionCalling: useSimulatedFunctionCalling,
       temperature,
       modelName,
+      endpointModelId,
     });
 
     return defer(() =>
@@ -87,7 +101,8 @@ export const inferenceEndpointAdapter = {
       })
     ).pipe(
       switchMap((stream) => eventSourceStreamIntoObservable(stream)),
-      processOpenAIStream(),
+      // Elasticsearch's Anthropic stream emits valid OpenAI-compatible chunks with `object: null`.
+      processOpenAIStream({ allowNullObjectWithChoices: true }),
       emitTokenCountEstimateIfMissing({ request, logger }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
@@ -100,8 +115,9 @@ const createEndpointRequest = ({
   toolChoice,
   tools,
   simulatedFunctionCalling,
-  temperature = 0,
+  temperature,
   modelName,
+  endpointModelId,
 }: {
   system?: string;
   messages: Message[];
@@ -110,7 +126,12 @@ const createEndpointRequest = ({
   simulatedFunctionCalling: boolean;
   temperature?: number;
   modelName?: string;
+  endpointModelId?: string;
 }): OpenAIRequest => {
+  const temperatureOptions = getTemperatureIfValid(temperature, {
+    modelId: endpointModelId ?? modelName,
+  });
+
   if (simulatedFunctionCalling) {
     const wrapped = wrapWithSimulatedFunctionCalling({
       system,
@@ -119,7 +140,7 @@ const createEndpointRequest = ({
       tools,
     });
     return {
-      ...(temperature >= 0 ? { temperature } : {}),
+      ...temperatureOptions,
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
     };
@@ -129,7 +150,7 @@ const createEndpointRequest = ({
   const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
 
   return {
-    ...(temperature >= 0 ? { temperature } : {}),
+    ...temperatureOptions,
     model: modelName,
     messages: messagesToOpenAI({ system, messages }),
     ...(hasTools

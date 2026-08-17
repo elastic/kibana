@@ -11321,8 +11321,8 @@ paths:
     get:
       tags:
         - Dashboards
-      summary: Get dashboards
-      operationId: get-dashboards-redirect
+      summary: Search dashboards
+      operationId: search-dashboards
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11334,7 +11334,7 @@ paths:
       tags:
         - Dashboards
       summary: Create a dashboard
-      operationId: create-dashboard-redirect
+      operationId: create-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11347,7 +11347,7 @@ paths:
       tags:
         - Dashboards
       summary: Get a dashboard
-      operationId: get-dashboard-redirect
+      operationId: get-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11358,8 +11358,8 @@ paths:
     put:
       tags:
         - Dashboards
-      summary: Update a dashboard
-      operationId: update-dashboard-redirect
+      summary: Upsert a dashboard
+      operationId: upsert-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11371,7 +11371,7 @@ paths:
       tags:
         - Dashboards
       summary: Delete a dashboard
-      operationId: delete-dashboard-redirect
+      operationId: delete-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -34430,6 +34430,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, delete the package even if it has active package policies
           in: query
@@ -34502,6 +34503,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, returns the package even if the signature cannot be verified
           in: query
@@ -34609,6 +34611,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, allow installing prerelease versions
           in: query
@@ -34724,6 +34727,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -42365,7 +42369,8 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -42440,7 +42445,8 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -63680,8 +63686,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get visualizations
-      operationId: get-visualizations-redirect
+      summary: Search visualizations
+      operationId: search-visualizations
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63692,8 +63698,8 @@ paths:
     post:
       tags:
         - Visualizations
-      summary: Create a visualization
-      operationId: create-visualization-redirect
+      summary: Create visualization
+      operationId: create-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63705,8 +63711,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get a visualization
-      operationId: get-visualization-redirect
+      summary: Get visualization
+      operationId: get-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63717,8 +63723,8 @@ paths:
     put:
       tags:
         - Visualizations
-      summary: Update a visualization
-      operationId: update-visualization-redirect
+      summary: Upsert visualization
+      operationId: upsert-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63729,8 +63735,8 @@ paths:
     delete:
       tags:
         - Visualizations
-      summary: Delete a visualization
-      operationId: delete-visualization-redirect
+      summary: Delete visualization
+      operationId: delete-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -65411,7 +65417,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -65524,7 +65530,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -66118,7 +66124,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -72933,6 +72939,53 @@ components:
                 type: array
               success:
                 type: boolean
+              warnings:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    baseTemplateName:
+                      maxLength: 1000
+                      type: string
+                    conflictingTemplates:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          conflictType:
+                            enum:
+                              - overrides_fleet
+                              - blocked_by_same_priority
+                              - overridden_by_fleet
+                            type: string
+                          name:
+                            maxLength: 1000
+                            type: string
+                          priority:
+                            type: number
+                        required:
+                          - name
+                          - priority
+                          - conflictType
+                      maxItems: 100
+                      type: array
+                    dataStreamName:
+                      maxLength: 1000
+                      type: string
+                    namespace:
+                      maxLength: 255
+                      type: string
+                    nsTemplateName:
+                      maxLength: 1000
+                      type: string
+                  required:
+                    - dataStreamName
+                    - namespace
+                    - baseTemplateName
+                    - nsTemplateName
+                    - conflictingTemplates
+                maxItems: 100
+                type: array
             required:
               - name
               - success
@@ -76630,8 +76683,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -76762,11 +76814,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -76786,11 +76843,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -77485,6 +77547,12 @@ components:
       additionalProperties: false
       description: Duration format between time units.
       properties:
+        compact:
+          description: When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.
+          type: boolean
+        decimals:
+          description: Number of decimal places to display. Defaults to `0`. Ignored for `auto-approximate`.
+          type: number
         from:
           description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
           enum:
@@ -81882,8 +81950,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -87444,8 +87511,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -87528,11 +87594,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -87552,11 +87623,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -92075,8 +92151,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -92151,11 +92226,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -92175,11 +92255,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -92295,8 +92380,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -92375,11 +92459,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -92399,11 +92488,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -93699,6 +93793,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -95007,6 +95103,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -96493,8 +96591,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -96573,11 +96670,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -96597,11 +96699,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -97952,8 +98059,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -98050,11 +98156,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -98074,11 +98185,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -101786,8 +101902,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -101862,11 +101977,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -101886,11 +102006,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -101942,11 +102067,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -101966,11 +102096,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -102616,8 +102751,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -102696,11 +102830,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -102720,11 +102859,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -103772,6 +103916,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -104374,6 +104520,53 @@ components:
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_get_package_info'
+        warnings:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              baseTemplateName:
+                maxLength: 1000
+                type: string
+              conflictingTemplates:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    conflictType:
+                      enum:
+                        - overrides_fleet
+                        - blocked_by_same_priority
+                        - overridden_by_fleet
+                      type: string
+                    name:
+                      maxLength: 1000
+                      type: string
+                    priority:
+                      type: number
+                  required:
+                    - name
+                    - priority
+                    - conflictType
+                maxItems: 100
+                type: array
+              dataStreamName:
+                maxLength: 1000
+                type: string
+              namespace:
+                maxLength: 255
+                type: string
+              nsTemplateName:
+                maxLength: 1000
+                type: string
+            required:
+              - dataStreamName
+              - namespace
+              - baseTemplateName
+              - nsTemplateName
+              - conflictingTemplates
+          maxItems: 100
+          type: array
       required:
         - item
       title: update_package_response
@@ -105122,8 +105315,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -105202,11 +105394,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -105226,11 +105423,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -107503,8 +107705,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -107589,11 +107790,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -107613,11 +107819,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -109496,8 +109707,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -109568,11 +109778,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -109592,11 +109807,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -126138,6 +126358,11 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        interval:
+          description: |
+            Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:

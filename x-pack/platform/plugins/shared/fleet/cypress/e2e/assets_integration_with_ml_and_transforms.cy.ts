@@ -127,7 +127,7 @@ describe('Assets - Real API for integration with ML and transforms', () => {
 
     cy.wait('@getPackageInfo').then((interception) => {
       const packageInfo = interception.response?.body.item;
-      const assetCount = calculateAssetCount(packageInfo);
+      const assetCount = calculateAssetCount(packageInfo, { includeKnowledgeBase: false });
 
       cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
       // Assert against the actual asset count from the package

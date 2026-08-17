@@ -1,5 +1,5 @@
 {
-  "sha1": "07032a804bf22dd57aa215646b7fe9ac499474e7",
+  "sha1": "734624b72ba43a0c99220e1fa2d36082349227b3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -3078,8 +3078,8 @@
       }
     },
     {
-      "id": "cc9a34904e9a16a-83bc236f03503c6",
-      "title": "Related user alias resolution integration tests enables alias resolution, links related user candidate by priority target, then preserves link when disabled",
+      "id": "cc9a34904e9a16a-272fcc149650c56",
+      "title": "Related user alias resolution integration tests enables alias resolution, links related user candidate to the seed target, then preserves link when disabled",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3105,13 +3105,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 204,
+        "line": 207,
         "column": 12
       }
     },
     {
-      "id": "cc9a34904e9a16a-138d45ef641d800",
-      "title": "Related user alias resolution integration tests cascades candidate aliases to the priority target",
+      "id": "cc9a34904e9a16a-d34261d1940580b",
+      "title": "Related user alias resolution integration tests cascades candidate aliases to the seed target",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -3121,7 +3121,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/api/tests/related_user_alias_resolution.spec.ts",
-        "line": 237,
+        "line": 240,
         "column": 12
       }
     },

@@ -306,7 +306,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.indexManagement.clickNextButton();
           await pageObjects.header.waitUntilLoadingHasFinished();
 
-          expect(await testSubjects.exists('saveTemplateError')).to.be(true);
+          await testSubjects.existOrFail('saveTemplateError');
 
           await testSubjects.click('stepReviewPreviewTab');
           await pageObjects.header.waitUntilLoadingHasFinished();
