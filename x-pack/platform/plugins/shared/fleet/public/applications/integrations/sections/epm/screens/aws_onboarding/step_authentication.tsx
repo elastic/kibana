@@ -1039,12 +1039,14 @@ const WhereToAddCard: React.FunctionComponent<{
                 <EuiText size="s">1 agent enrolled</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiLink
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="plus"
                   onClick={() => setIsAddAgentFlyoutOpen(true)}
                   data-test-subj="awsOnboardingAddAnotherAgent"
                 >
                   Add another agent
-                </EuiLink>
+                </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
