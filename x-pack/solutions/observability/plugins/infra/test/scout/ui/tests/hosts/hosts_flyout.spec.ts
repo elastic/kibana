@@ -12,8 +12,6 @@ import {
   HOST1_NAME,
   HOSTS,
   SERVICE_PER_HOST_COUNT,
-  DATE_WITH_HOSTS_DATA_FROM,
-  DATE_WITH_HOSTS_DATA_TO,
   EXTENDED_TIMEOUT,
 } from '../../fixtures/constants';
 import {
@@ -24,6 +22,8 @@ import {
 } from '../../fixtures/sequential_hosts_synthtrace';
 
 const CUSTOM_DASHBOARDS_SETTING = 'observability:enableInfrastructureAssetCustomDashboards';
+const HOSTS_FLYOUT_DATA_FROM = '2024-04-04T18:20:00.000Z';
+const HOSTS_FLYOUT_DATA_TO = '2024-04-04T18:21:00.000Z';
 
 test.describe(
   'Hosts Page - Flyout',
@@ -40,7 +40,10 @@ test.describe(
       await cleanHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
 
       log.info('Sequential suite: ingesting ECS hosts + logs + APM services for flyout tests');
-      await ingestHostsFlyoutSynthtraceData({ esClient, kbnUrl, log, config });
+      await ingestHostsFlyoutSynthtraceData(
+        { esClient, kbnUrl, log, config },
+        { from: HOSTS_FLYOUT_DATA_FROM, to: HOSTS_FLYOUT_DATA_TO }
+      );
 
       log.info('Sequential suite: waiting for hosts metrics to be searchable before navigating');
       await expect
@@ -51,8 +54,8 @@ test.describe(
                 method: 'POST',
                 path: '/api/metrics/infra/host',
                 body: {
-                  from: DATE_WITH_HOSTS_DATA_FROM,
-                  to: DATE_WITH_HOSTS_DATA_TO,
+                  from: HOSTS_FLYOUT_DATA_FROM,
+                  to: HOSTS_FLYOUT_DATA_TO,
                   metrics: ['cpuV2', 'diskSpaceUsage', 'memory', 'memoryFree', 'normalizedLoad1m'],
                   limit: 100,
                   schema: 'ecs',
@@ -79,8 +82,8 @@ test.describe(
       test.setTimeout(120_000);
       await browserAuth.loginAsViewer();
       await hostsPage.goToPage({
-        from: DATE_WITH_HOSTS_DATA_FROM,
-        to: DATE_WITH_HOSTS_DATA_TO,
+        from: HOSTS_FLYOUT_DATA_FROM,
+        to: HOSTS_FLYOUT_DATA_TO,
         preferredSchema: 'ecs',
       });
       await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
@@ -227,7 +230,7 @@ test.describe(
       await test.step('verify date range is preserved', async () => {
         const datePicker = page.getByTestId('superDatePickerstartDatePopoverButton');
         await expect(datePicker).toBeVisible({ timeout: EXTENDED_TIMEOUT });
-        await expect(datePicker).toContainText('Mar 28, 2023');
+        await expect(datePicker).toContainText('Apr 4, 2024');
       });
 
       await test.step('return to hosts view', async () => {
@@ -244,8 +247,8 @@ test.describe(
       // Re-navigate so the page picks up the enabled setting (the beforeEach
       // navigation happened with the setting still off).
       await hostsPage.goToPage({
-        from: DATE_WITH_HOSTS_DATA_FROM,
-        to: DATE_WITH_HOSTS_DATA_TO,
+        from: HOSTS_FLYOUT_DATA_FROM,
+        to: HOSTS_FLYOUT_DATA_TO,
         preferredSchema: 'ecs',
       });
       await expect(hostsPage.tableRows).toHaveCount(HOSTS.length);
