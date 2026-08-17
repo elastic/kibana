@@ -91,7 +91,7 @@ export class TransactionDetailsPage {
     await this.page
       .getByRole('heading', { name: 'Transactions', exact: true })
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await expect(this.page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(serviceName);
+    await expect(this.page.getByTestId('appHeaderTitle')).toHaveText(serviceName);
     await expect(this.page.getByTestId('appNotFoundPageContent')).toBeHidden();
   }
 
