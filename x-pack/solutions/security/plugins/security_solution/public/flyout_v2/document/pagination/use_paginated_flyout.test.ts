@@ -76,7 +76,12 @@ describe('usePaginatedFlyout', () => {
     const { result } = renderHook(() => usePaginatedFlyout(makeOptions()));
 
     act(() => {
-      result.current.setState({ flyoutDocumentIndex: 3, totalDocumentCount: 10 });
+      result.current.setState({
+        flyoutDocumentIndex: 3,
+        flyoutDocumentId: 'alert-1',
+        flyoutDocumentIndexName: 'index-1',
+        totalDocumentCount: 10,
+      });
     });
 
     act(() => {
@@ -85,7 +90,8 @@ describe('usePaginatedFlyout', () => {
 
     // Document-state fields are cleared
     expect(result.current.slice.flyoutDocumentIndex).toBeNull();
-    expect(result.current.slice.flyoutDocument).toBeNull();
+    expect(result.current.slice.flyoutDocumentId).toBeNull();
+    expect(result.current.slice.flyoutDocumentIndexName).toBeNull();
     expect(result.current.slice.isFlyoutDocumentLoading).toBe(false);
     // totalDocumentCount is source-level state and survives the soft-reset
     expect(result.current.slice.totalDocumentCount).toBe(10);

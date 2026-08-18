@@ -49,7 +49,9 @@ const onFetchMoreRecordsMock = jest.fn();
 const openFlyoutMock = jest.fn();
 const mockOpenSystemFlyout = jest.fn();
 const mockUiSettingsGet = jest.fn().mockReturnValue(false);
-const mockDocumentFlyout = jest.fn((_props?: unknown) => <div>{'MockDocumentFlyout'}</div>);
+const mockPaginatedDocumentFlyout = jest.fn((_props?: unknown) => (
+  <div>{'MockPaginatedDocumentFlyout'}</div>
+));
 
 const updateSampleSizeSpy = jest.spyOn(timelineActions, 'updateSampleSize');
 
@@ -57,8 +59,8 @@ jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
 }));
-jest.mock('../../../../../flyout_v2/document/main', () => ({
-  DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
+jest.mock('../../../../../flyout_v2/document/pagination/paginated_document_flyout', () => ({
+  PaginatedDocumentFlyout: (props: unknown) => mockPaginatedDocumentFlyout(props),
 }));
 jest.mock('../../../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../../../common/lib/kibana');
@@ -220,7 +222,7 @@ describe('unified data table', () => {
         expect(mockOpenSystemFlyout).toHaveBeenCalled();
       });
 
-      // element is the PaginationStoreProvider wrapper around DocumentFlyout
+      // element is the PaginationStoreProvider wrapper around PaginatedDocumentFlyout
       const element = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
       expect(element.props.value).toMatchObject({
         subscribe: expect.any(Function),
@@ -230,7 +232,7 @@ describe('unified data table', () => {
       expect(element.props.children.props.onAlertUpdated).toBe(refetchMock);
 
       expect(flyoutApi.openDocumentFlyoutFromIndex).not.toHaveBeenCalled();
-      expect(mockDocumentFlyout).not.toHaveBeenCalled();
+      expect(mockPaginatedDocumentFlyout).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );
@@ -278,7 +280,7 @@ describe('unified data table', () => {
         expect(mockOpenSystemFlyout).toHaveBeenCalled();
       });
 
-      // element is the PaginationStoreProvider; DocumentFlyout is its children
+      // element is the PaginationStoreProvider; PaginatedDocumentFlyout is its children
       const flyoutBody = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
       const { renderCellActions } = flyoutBody.props.children.props;
 
@@ -322,7 +324,7 @@ describe('unified data table', () => {
 
       // attack rows no longer go through the inline system flyout or the document flyout api
       expect(mockOpenSystemFlyout).not.toHaveBeenCalled();
-      expect(mockDocumentFlyout).not.toHaveBeenCalled();
+      expect(mockPaginatedDocumentFlyout).not.toHaveBeenCalled();
     },
     SPECIAL_TEST_TIMEOUT
   );

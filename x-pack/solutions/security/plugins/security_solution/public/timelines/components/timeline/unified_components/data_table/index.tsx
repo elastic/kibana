@@ -60,7 +60,7 @@ import { DocumentEventTypes, FLYOUT_ORIGIN } from '../../../../../common/lib/tel
 import { getTimelineRowTypeIndicator } from './get_row_indicator';
 import { isAttackDiscoveryRow } from './is_attack_discovery_row';
 import { getAttackTitleValue } from '../../../../../flyout_v2/attack/utils/get_attack_title';
-import { DocumentFlyout } from '../../../../../flyout_v2/document/main';
+import { PaginatedDocumentFlyout } from '../../../../../flyout_v2/document/pagination/paginated_document_flyout';
 import { usePaginatedFlyout } from '../../../../../flyout_v2/document/pagination/use_paginated_flyout';
 import { documentFlyoutHistoryKey } from '../../../../../flyout_v2/shared/constants/flyout_history';
 
@@ -197,15 +197,20 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     // Body factory for the V2 paginated timeline flyout.
     const getTimelineBody = useCallback(
       () => (
-        <DocumentFlyout onAlertUpdated={refetch} renderCellActions={timelineCellActionRenderer} />
+        <PaginatedDocumentFlyout
+          onAlertUpdated={refetch}
+          renderCellActions={timelineCellActionRenderer}
+        />
       ),
       [refetch, timelineCellActionRenderer]
     );
 
-    // Resolves the document at an absolute row index (0-based across the full
-    // result set) from the currently-loaded rows. Returns null when the row is
-    // not in memory — the parallel cross-page query will resolve it and call
-    // openPaginatedFlyout again once the data is available.
+    // Resolves the identity of the document at an absolute row index (0-based
+    // across the full result set) from the currently-loaded rows. Returns null
+    // when the row is not in memory — the parallel cross-page query will resolve
+    // it and call openPaginatedFlyout again once the data is available. The
+    // flyout fetches the document itself from `_id`/`_index`, as it did before
+    // pagination was introduced.
     const resolveDocument = useCallback(
       (documentIndex: number) => {
         const targetRow = tableRows[documentIndex];
@@ -213,7 +218,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           return null;
         }
         return {
-          flyoutDocument: targetRow,
+          flyoutDocumentId: targetRow._id,
+          flyoutDocumentIndexName: targetRow.ecs._index ?? null,
           totalDocumentCount: tableRows.length,
         };
       },

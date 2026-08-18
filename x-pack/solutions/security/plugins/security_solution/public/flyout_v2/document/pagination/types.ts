@@ -6,7 +6,6 @@
  */
 
 import type React from 'react';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FlyoutOrigin } from '../../../common/lib/telemetry';
 
 /**
@@ -37,10 +36,18 @@ export interface ScopedPaginationSlice {
    */
   readonly isFlyoutDocumentLoading: boolean;
   /**
-   * Resolved document at `flyoutDocumentIndex`, or `null` while no document is
-   * expanded. Alerts and Timeline events share this representation.
+   * Elasticsearch `_id` of the document at `flyoutDocumentIndex`, or `null`
+   * while no document is expanded. Only the document's identity is kept here:
+   * the flyout body resolves the document itself (see `DocumentFlyoutWrapper`)
+   * so it always renders the complete document and can refetch it after a
+   * mutation. Alerts and Timeline events share this representation.
    */
-  readonly flyoutDocument: DataTableRecord | null;
+  readonly flyoutDocumentId: string | null;
+  /**
+   * Concrete `_index` of the document at `flyoutDocumentIndex`, or `null` while
+   * no document is expanded.
+   */
+  readonly flyoutDocumentIndexName: string | null;
   /**
    * Implementation registered by the source that opens (or swaps) the
    * document-details flyout for a given absolute index. Lives in the store
@@ -63,7 +70,8 @@ export const absentSlice: ScopedPaginationSlice = {
   pageSize: 0,
   totalDocumentCount: 0,
   isFlyoutDocumentLoading: false,
-  flyoutDocument: null,
+  flyoutDocumentId: null,
+  flyoutDocumentIndexName: null,
   openDocumentFlyoutImpl: null,
 };
 
@@ -145,8 +153,8 @@ export interface UsePaginatedFlyoutReturn {
   ) => void;
   /**
    * Soft-reset this source's pagination slice (clear displayed-document
-   * fields: `flyoutDocumentIndex`, `flyoutDocument`, and
-   * `isFlyoutDocumentLoading`) and close any open V2 system
+   * fields: `flyoutDocumentIndex`, `flyoutDocumentId`,
+   * `flyoutDocumentIndexName` and `isFlyoutDocumentLoading`) and close any open V2 system
    * flyout. The slice itself is NOT removed — `openDocumentFlyoutImpl` and
    * `pageSize` survive so the source can call `openPaginatedFlyout` again
    * without re-registering. Full slice removal on unmount is auto-handled by

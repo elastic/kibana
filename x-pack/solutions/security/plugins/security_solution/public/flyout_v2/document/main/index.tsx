@@ -25,7 +25,6 @@ import { getFieldValue } from '@kbn/discover-utils';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useFlyoutPagination } from '../pagination/use_flyout_pagination';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
@@ -91,7 +90,7 @@ export interface DocumentFlyoutProps {
   /**
    * The document to display
    */
-  hit?: DataTableRecord;
+  hit: DataTableRecord;
   /**
    * Cell action renderer for the analyzer
    */
@@ -104,39 +103,25 @@ export interface DocumentFlyoutProps {
    * Optional test subject applied to the existing flyout header.
    */
   dataTestSubj?: string;
+  /**
+   * `true` while in-flyout pagination is resolving the document on another page
+   * of the source. The previously displayed document is kept mounted (so the
+   * header keeps its pagination controls) while the body shows a spinner.
+   */
+  isPaginationLoading?: boolean;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
-export const DocumentFlyout = memo((props: DocumentFlyoutProps) => {
-  const { flyoutDocument, isFlyoutDocumentLoading } = useFlyoutPagination();
-  const hit = flyoutDocument ?? props.hit;
-
-  if (!hit) {
-    return null;
-  }
-
-  return (
-    <DocumentFlyoutContent {...props} hit={hit} isPaginationLoading={isFlyoutDocumentLoading} />
-  );
-});
-
-DocumentFlyout.displayName = 'DocumentFlyout';
-
-type DocumentFlyoutContentProps = Omit<DocumentFlyoutProps, 'hit'> & {
-  hit: DataTableRecord;
-  isPaginationLoading: boolean;
-};
-
-const DocumentFlyoutContent = memo(
+export const DocumentFlyout = memo(
   ({
     hit,
     onAlertUpdated,
     renderCellActions,
     dataTestSubj,
-    isPaginationLoading,
-  }: DocumentFlyoutContentProps) => {
+    isPaginationLoading = false,
+  }: DocumentFlyoutProps) => {
     const { openNotes, openDocumentFlyoutFromPattern } = useFlyoutApi();
     const isAlert = useMemo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
@@ -330,4 +315,4 @@ const DocumentFlyoutContent = memo(
   }
 );
 
-DocumentFlyoutContent.displayName = 'DocumentFlyoutContent';
+DocumentFlyout.displayName = 'DocumentFlyout';
