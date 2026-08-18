@@ -8,6 +8,7 @@
  */
 
 import { of } from 'rxjs';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { EsqlQueryParser } from './esql_query_parser';
 
@@ -26,7 +27,7 @@ const mockFilters = {
   },
 };
 
-function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}) {
+function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}, esqlVariables) {
   const timeCache = {
     getTimeBounds: () => ({ min, max }),
   };
@@ -37,7 +38,7 @@ function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}) {
 
   const onWarning = jest.fn();
 
-  const parser = new EsqlQueryParser(timeCache, searchAPI, dashboardCtx, onWarning);
+  const parser = new EsqlQueryParser(timeCache, searchAPI, dashboardCtx, onWarning, esqlVariables);
   parser.$$$warnCount = 0;
   parser._onWarning = (...args) => {
     parser.$$$warnCount++;
@@ -235,6 +236,47 @@ describe('EsqlQueryParser.populateData', () => {
 
     expect(requests[0].dataObject.values).toEqual([{ total: 100 }]);
     expect(requests[1].dataObject.values).toEqual([{ total: 200 }]);
+  });
+
+  test('binds dashboard variables per ES|QL data source', async () => {
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+      { key: 'color', value: 'blue', type: ESQLVariableType.VALUES },
+    ]);
+
+    searchAPI.searchEsql.mockReturnValue(of([]));
+
+    await parser.populateData([
+      {
+        url: { query: 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz' },
+        dataObject: { name: 'os_query' },
+      },
+      {
+        url: { query: 'FROM logs-* | WHERE color.keyword == ?color' },
+        dataObject: { name: 'color_query' },
+      },
+    ]);
+
+    const [first, second] = searchAPI.searchEsql.mock.calls[0][0];
+    expect(first.params).toEqual([{ fizzbuzz: 'ios' }]);
+    expect(second.params).toEqual([{ color: 'blue' }]);
+  });
+
+  test('sends the rewritten identifier query without mutating the source query', async () => {
+    const storedQuery = 'FROM logs-* | STATS COUNT(?field)';
+    const { parser, searchAPI } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'field', value: 'bytes', type: ESQLVariableType.FIELDS },
+    ]);
+
+    searchAPI.searchEsql.mockReturnValue(of([]));
+
+    const url = { query: storedQuery };
+    await parser.populateData([{ url, dataObject: { name: 'field_query' } }]);
+
+    expect(searchAPI.searchEsql.mock.calls[0][0][0].query).toBe(
+      'FROM logs-* | STATS COUNT(??field)'
+    );
+    expect(url.query).toBe(storedQuery);
   });
 
   test('binds time params when the query contains ?_tstart/?_tend without %timefield%', async () => {
@@ -682,6 +724,92 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     expect(result.params).toHaveLength(2);
     expect(result.params[0]).toHaveProperty('_tstart');
     expect(result.params[1]).toHaveProperty('_tend');
+  });
+
+  test('binds an example user-named values variable by key', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.query).toBe(query);
+    expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
+  });
+
+  test('binds a different user-named values variable the same way', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'os', value: 'windows', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?os';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.params).toEqual([{ os: 'windows' }]);
+  });
+
+  test('omits unused dashboard variables from the request params', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+      { key: 'color', value: 'blue', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
+  });
+
+  test('rewrites identifier ?field to ??field on the request only', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'field', value: 'host.name', type: ESQLVariableType.FIELDS },
+    ]);
+
+    const query = 'FROM logs-* | STATS COUNT(?field)';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.query).toBe('FROM logs-* | STATS COUNT(??field)');
+    expect(result.params).toEqual([{ field: 'host.name' }]);
+  });
+
+  test('dashboard control values win collisions with static spec params', () => {
+    const { parser } = createParser(rangeStart, rangeEnd, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE machine.os.keyword == ?fizzbuzz';
+    const result = parser._injectNamedParams(query, {
+      query,
+      params: [{ fizzbuzz: 'hardcoded' }],
+    });
+
+    expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
+  });
+
+  test('keeps static spec params whose keys are not bound by dashboard controls', () => {
+    const { parser } = createParser();
+
+    const query = 'FROM logs-* | WHERE level == ?level';
+    const result = parser._injectNamedParams(query, {
+      query,
+      params: [{ level: 'ERROR' }],
+    });
+
+    expect(result.params).toEqual([{ level: 'ERROR' }]);
+  });
+
+  test('still binds time params together with a user-named variable', () => {
+    const { parser } = createParser(1000000, 2000000, {}, [
+      { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
+    ]);
+
+    const query = 'FROM logs-* | WHERE @timestamp >= ?_tstart AND machine.os.keyword == ?fizzbuzz';
+    const result = parser._injectNamedParams(query, { query });
+
+    expect(result.params).toHaveLength(2);
+    expect(result.params[0]).toEqual({ _tstart: new Date(1000000).toISOString() });
+    expect(result.params[1]).toEqual({ fizzbuzz: 'ios' });
   });
 });
 
