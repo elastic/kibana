@@ -6,6 +6,10 @@ navigation_title: Logging
 
 This page explains how logging works in Scout: the `log` [fixture](./fixtures.md) used inside tests, and how to inspect logs from the systems under test (Kibana, Elasticsearch, the browser, and UIAM) when running against a serverless project in MKI.
 
+::::{note}
+**Inspecting serverless MKI project logs**: see the Elasticians-only internal [Troubleshoot Cloud test failures](https://codex.elastic.dev/r/kibana-team/testing/elastic-cloud-testing/troubleshoot-cloud-test-failures) guide.
+::::
+
 ## The `log` fixture [scout-logging-fixture]
 
 `log` is a [fixture](./fixtures.md) available in every Scout test, for logging from the **test process itself** — separate from the server-side logs of the systems under test (Kibana, Elasticsearch, and so on), covered later on this page.
@@ -61,13 +65,7 @@ See also [Debug Scout test runs](./debugging.md) for other debugging tips.
 
 When Scout starts a local Kibana/Elasticsearch stack (for example via `node scripts/scout start-server`), server logs print directly to that same console by default. To capture them to files instead, pass `--logToFile`, which writes `kibana.log` and `es-cluster-<name>.log` under a generated directory in `data/ftr_servers_logs/` (yes, `ftr_servers_logs` — Scout reuses the legacy FTR server-management code and its log directory naming).
 
-This only applies to servers Scout manages directly (local runs). It doesn't apply when running against Cloud (ECH) or MKI serverless projects — see the next section for how to find server logs in that case.
-
-## Inspecting serverless project logs in MKI [scout-logging-mki]
-
-::::{note}
-Elasticians only: for how to inspect Kibana, Elasticsearch, and UIAM logs for a serverless project in MKI via the Overview cluster, see the internal [Troubleshoot Cloud test failures](https://codex.elastic.dev/r/kibana-team/testing/elastic-cloud-testing/troubleshoot-cloud-test-failures) guide.
-::::
+This only applies to servers Scout manages directly (local runs). It doesn't apply when running against Cloud (ECH) or MKI serverless projects — see the note at the top of this page for how to find server logs in that case.
 
 ## Browser logs [scout-logging-browser]
 
