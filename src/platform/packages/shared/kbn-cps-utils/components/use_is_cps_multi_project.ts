@@ -11,14 +11,17 @@ import { useEffect, useState } from 'react';
 import type { ICPSManager } from '../types';
 
 /**
- * `true` once cross-project search is ready and has at least one linked project. Use it to gate
- * UI that only makes sense with more than one project, e.g. scope pickers or cross-project copy.
+ * `true` once cross-project search is ready and has at least one linked project, `false` once
+ * ready with none (or when `cpsManager` isn't provided), and `undefined` while readiness is
+ * still pending. Use it to gate UI that only makes sense with more than one project, e.g. scope
+ * pickers or cross-project copy; treat it as falsy if you don't need to distinguish "not yet
+ * known" from "no linked projects".
  *
  * Waits for `cpsManager.whenReady()` before reading `hasLinkedProjects()`, since reading it
  * synchronously on first render would report `false` even in a multi-project deployment.
  */
-export const useIsCpsMultiProject = (cpsManager?: ICPSManager): boolean => {
-  const [isCpsMultiProject, setIsCpsMultiProject] = useState(false);
+export const useIsCpsMultiProject = (cpsManager?: ICPSManager): boolean | undefined => {
+  const [isCpsMultiProject, setIsCpsMultiProject] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     if (!cpsManager) {
@@ -27,6 +30,7 @@ export const useIsCpsMultiProject = (cpsManager?: ICPSManager): boolean => {
     }
 
     let isMounted = true;
+    setIsCpsMultiProject(undefined);
 
     const resolveLinkedProjects = async () => {
       try {

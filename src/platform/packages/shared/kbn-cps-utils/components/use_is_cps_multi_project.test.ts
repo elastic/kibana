@@ -42,6 +42,16 @@ describe('useIsCpsMultiProject', () => {
     expect(result.current).toBe(false);
   });
 
+  it('is undefined while readiness is still pending', () => {
+    const cpsManager = createCpsManager({
+      whenReady: jest.fn().mockReturnValue(new Promise<void>(() => {})),
+    });
+
+    const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
+
+    expect(result.current).toBeUndefined();
+  });
+
   it('is true once readiness resolves and a linked project is present', async () => {
     const cpsManager = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(true) });
 
@@ -65,7 +75,7 @@ describe('useIsCpsMultiProject', () => {
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
 
-    expect(result.current).toBe(false);
+    expect(result.current).toBeUndefined();
     expect(cpsManager.hasLinkedProjects).not.toHaveBeenCalled();
 
     markReady();
