@@ -414,7 +414,9 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('Alerts (`kind: alert`)');
       expect(doc).toContain('Events (`kind: signal`)');
       expect(doc).toContain('**Explain the difference**');
-      expect(doc).toContain('If the rule is a **draft (in-memory)**: use `set_kind` to change it to `alert`');
+      expect(doc).toContain(
+        'If the rule is a **draft (in-memory)**: use `set_kind` to change it to `alert`'
+      );
       expect(doc).toContain('If the rule is **persisted**: `kind` is immutable after creation');
       expect(doc).toContain('existing Events (`kind: signal`) rule cannot be converted');
       expect(doc).toContain('After ensuring the rule is `kind: alert`');
