@@ -248,7 +248,11 @@ export class LensClient {
     return result.data.map(({ id, data }) => {
       const chartType = this.builder?.getType(data);
 
-      if (this.builder?.isEnabled && this.builder?.isSupported(chartType) && isLensAPIFormat(data)) {
+      if (
+        this.builder?.isEnabled &&
+        this.builder?.isSupported(chartType) &&
+        isLensAPIFormat(data)
+      ) {
         const config = data as LensApiConfig;
         return {
           id,
