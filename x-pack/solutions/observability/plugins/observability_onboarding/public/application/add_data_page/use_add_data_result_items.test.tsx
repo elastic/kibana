@@ -12,8 +12,7 @@ import type { IntegrationCardItem, UseLocalSearchType } from '@kbn/fleet-plugin/
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { useAddDataResultItems } from './use_add_data_result_items';
 
 // The real Fleet matcher, loaded the same way production does.
@@ -42,9 +41,7 @@ const mockPackages = (allCards: IntegrationCardItem[], eprPackageLoadingError?: 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider>
     <KibanaContextProvider services={coreMock.createStart()}>
-      <MemoryRouter initialEntries={['/']}>
-        <CompatRouter>{children}</CompatRouter>
-      </MemoryRouter>
+      <MemoryRouter initialEntries={['/']}>{children}</MemoryRouter>
     </KibanaContextProvider>
   </I18nProvider>
 );
@@ -74,16 +71,19 @@ describe('useAddDataResultItems', () => {
     expect(result.current.items[0].url).toContain('returnAppId=');
   });
 
-  it('includes matching quickstart cards from the curated tiles', () => {
-    const useAvailablePackages = mockPackages([]);
+  // The curated tiles are always visible below the results, so mirroring them
+  // into the result list only produced duplicates of the EPR cards.
+  it('does not mirror curated tiles into the results', () => {
+    const useAvailablePackages = mockPackages([
+      makeCard({ id: 'epr:docker', name: 'docker', title: 'Docker', description: 'Containers.' }),
+    ]);
 
     const { result } = renderHook(
-      () =>
-        useAddDataResultItems({ searchTerm: 'kubernetes', useAvailablePackages, useLocalSearch }),
+      () => useAddDataResultItems({ searchTerm: 'docker', useAvailablePackages, useLocalSearch }),
       { wrapper }
     );
 
-    expect(result.current.items.some(({ id }) => id === 'quickstart-kubernetes')).toBe(true);
+    expect(result.current.items.map(({ id }) => id)).toEqual(['epr:docker']);
   });
 
   it('surfaces the Fleet package loading error', () => {
