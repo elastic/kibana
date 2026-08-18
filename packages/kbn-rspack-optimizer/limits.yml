@@ -10,7 +10,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 17111
+  alertingVTwo: 18827
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 906
@@ -79,7 +79,7 @@ pageLoadAssetSize:
   expressionTagcloud: 6629
   expressionXY: 566
   features: 1218
-  feedback: 3622
+  feedback: 4484
   fieldFormats: 4136
   fieldsMetadata: 1568
   files: 3957
