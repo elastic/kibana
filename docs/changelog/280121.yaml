@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/280121
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-08-18
+- product: kibana
+title: Fix metric threshold conditions silently disappearing when source config is slow/fails (#279610)
+description: Fixed the Metric Threshold rule form silently showing no conditions when its backing source-configuration request was slow or failed, instead of showing a loading or error state. The source-status Elasticsearch request also now times out instead of hanging indefinitely.

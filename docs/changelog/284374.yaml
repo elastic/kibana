@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/284374
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-08-18
+- product: kibana
+title: Update landing page to use ContentList
+description: 'Refactored the Context Engine landing page AI Index list to use the shared ContentList component. Label: `release_note:feature`.'

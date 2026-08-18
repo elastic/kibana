@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/282619
+issues:
+- https://github.com/elastic/kibana/issues/270744
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-08-18
+- product: kibana
+title: 'Fix logsdb smoke flake: re-sync data view picker list when data views load'

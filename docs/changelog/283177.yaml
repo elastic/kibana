@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/283177
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-08-18
+- product: kibana
+title: Fix special tokens in prompt throws error & text content blocks must be non-empty for Claude models
