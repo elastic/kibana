@@ -179,6 +179,9 @@ export class LensApp {
         }
     ) & { saveAsNew?: boolean }
   ) {
+    // Dismiss leftover toasts before opening the modal. Clicking a toast close
+    // while the modal is open is an EUI `ownFocus` outside click and closes it.
+    await this.page.components.toast().closeAll();
     await this.saveButton.click();
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
@@ -202,7 +205,6 @@ export class LensApp {
       await libraryOption.check();
     }
 
-    await this.page.components.toast().closeAll();
     await this.confirmSaveButton.click();
     await this.saveModal.waitFor({ state: 'hidden' });
   }
@@ -391,8 +393,10 @@ export class LensApp {
    */
   async closeDimensionEditor() {
     // Suggested-value panels can remount and exceed the 10s actionTimeout.
-    // Save toasts can sit over the close control and make Playwright time out after scroll.
-    await this.page.components.toast().closeAll();
+    // Do not dismiss toasts here: the dimension editor is an EUI flyout with
+    // `ownFocus`, so a toast-close click is an outside click and unmounts it
+    // (same pattern as FilterBar.addFilter). Playwright's click already waits
+    // if a toast is covering the control.
     await this.closeDimensionEditorButton.click({ timeout: 15_000 });
     await this.closeDimensionEditorButton.waitFor({ state: 'hidden', timeout: 15_000 });
   }

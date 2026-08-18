@@ -19,6 +19,7 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
   // Prefer API-created DVs over the kbn archive: the archive uses saved-object id
   // `long-window-logstash-*`, and the unencoded `*` in data-view URLs 404s under CI load.
   let longWindowDataViewId: string | undefined;
+  let flightsDataViewId: string | undefined;
 
   spaceTest.beforeAll(async ({ scoutSpace, apiServices }) => {
     const { data: longWindowDv } = await apiServices.dataViews.create({
@@ -30,12 +31,13 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
     });
     longWindowDataViewId = longWindowDv.id;
 
-    await apiServices.dataViews.create({
+    const { data: flightsDv } = await apiServices.dataViews.create({
       title: testData.DATA_VIEW_ID.FLIGHTS,
       name: testData.DATA_VIEW_ID.FLIGHTS,
       timeFieldName: 'timestamp',
       spaceId: scoutSpace.id,
     });
+    flightsDataViewId = flightsDv.id;
 
     await scoutSpace.uiSettings.set({
       'courier:ignoreFilterIfFieldNotInIndex': true,
@@ -50,14 +52,21 @@ spaceTest.describe('Lens with multiple data views', { tag: '@local-stateful-clas
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  spaceTest.afterAll(async ({ scoutSpace }) => {
+  spaceTest.afterAll(async ({ scoutSpace, apiServices }) => {
     await scoutSpace.uiSettings.unset(
       'courier:ignoreFilterIfFieldNotInIndex',
       'defaultIndex',
       'dateFormat:tz',
       'timepicker:timeDefaults'
     );
-    await scoutSpace.savedObjects.cleanStandardList();
+    if (longWindowDataViewId) {
+      await apiServices.dataViews.delete(longWindowDataViewId, scoutSpace.id);
+    }
+    if (flightsDataViewId) {
+      await apiServices.dataViews.delete(flightsDataViewId, scoutSpace.id);
+    }
+    // Do not `cleanStandardList()` — parallel describes share this worker space and
+    // later suites reuse `lens_basic` (see createLogstashLensEditorSuiteSetup.afterAll).
   });
 
   // Tests 1-3 form a sequential journey: build → filter → reopen with changed setting.
