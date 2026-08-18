@@ -789,38 +789,6 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
               data-test-subj="awsOnboardingManagedFederatedIdentityName"
             />
           </EuiFormRow>
-          <EuiSpacer size="s" />
-          <EuiAccordion id="awsOnboardingStepsToAssumeRole" buttonContent="Steps to assume role">
-            <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued">
-              <ol>
-                <li>
-                  Log in as an <strong>admin</strong> in the AWS account you want to onboard
-                </li>
-                <li>
-                  (Optional) Change the <strong>AWS region</strong> in the upper right corner to
-                  the region you want to deploy your stack to
-                </li>
-                <li>
-                  Tick the checkbox under <strong>capabilities</strong> in the opened
-                  CloudFormation stack review form:{' '}
-                  <strong>
-                    I acknowledge that AWS CloudFormation might create IAM resources.
-                  </strong>
-                </li>
-                <li>
-                  Click <strong>Create stack</strong>.
-                </li>
-                <li>
-                  Once stack status is <strong>CREATE_COMPLETE</strong> then click the Outputs tab
-                </li>
-                <li>
-                  Copy <strong>Role ARN</strong> and <strong>External ID</strong> then paste the
-                  role credentials below
-                </li>
-              </ol>
-            </EuiText>
-          </EuiAccordion>
           <EuiSpacer size="m" />
           <EuiFormRow
             label="Role ARN"
