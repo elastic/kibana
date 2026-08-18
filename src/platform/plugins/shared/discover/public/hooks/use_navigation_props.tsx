@@ -20,7 +20,7 @@ import { useDiscoverServices } from './use_discover_services';
 import { TAB_STATE_URL_KEY } from '../../common/constants';
 
 export interface UseNavigationProps {
-  dataView: DataView;
+  dataView?: DataView;
   rowIndex: string | undefined;
   rowId: string | undefined;
   columns: string[];
@@ -93,7 +93,7 @@ export const useNavigationProps = ({
   const [contextViewHref, setContextViewHref] = useState('');
 
   const index = useMemo(
-    () => (dataView.isPersisted() ? dataView.id! : dataView.toSpec(false)),
+    () => (dataView?.isPersisted() ? dataView.id! : dataView?.toSpec(false)),
     [dataView]
   );
 
@@ -111,7 +111,7 @@ export const useNavigationProps = ({
   );
 
   useEffect(() => {
-    if (!rowIndex || !rowId) {
+    if (!rowIndex || !rowId || index === undefined) {
       return;
     }
     const dataViewId = typeof index === 'object' ? index.id : index;
@@ -132,7 +132,7 @@ export const useNavigationProps = ({
   ]);
 
   useEffect(() => {
-    if (!rowIndex || !rowId) {
+    if (!rowIndex || !rowId || index === undefined) {
       return;
     }
     const params = buildParams();
@@ -161,7 +161,7 @@ export const useNavigationProps = ({
 
   const onOpenSingleDoc: MouseEventHandler = useCallback(
     (event) => {
-      if (isModifiedEvent(event) || !rowIndex || !rowId) {
+      if (isModifiedEvent(event) || !rowIndex || !rowId || index === undefined) {
         return;
       }
       event.preventDefault();
@@ -177,7 +177,7 @@ export const useNavigationProps = ({
 
   const onOpenContextView: MouseEventHandler = useCallback(
     (event) => {
-      if (isModifiedEvent(event) || !rowId) {
+      if (isModifiedEvent(event) || !rowId || index === undefined) {
         return;
       }
       event.preventDefault();

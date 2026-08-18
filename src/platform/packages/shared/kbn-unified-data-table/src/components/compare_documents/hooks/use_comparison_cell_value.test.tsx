@@ -9,7 +9,8 @@
 
 import type { EuiDataGridCellValueElementProps, EuiDataGridSetCellProps } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { columnsMetaWithCustomField, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
+import { fieldList } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen, renderHook, within } from '@testing-library/react';
 import React from 'react';
@@ -56,7 +57,6 @@ const fieldColumnId = 'fieldColumnId';
 const renderComparisonCellValue = (props: Partial<UseComparisonCellValueProps> = {}) => {
   const defaultProps: UseComparisonCellValueProps = {
     dataView: dataViewWithTimefieldMock,
-    columnsMeta: undefined,
     comparisonFields: ['message', 'extension', 'bytes'],
     fieldColumnId,
     selectedDocIds: ['0', '1', '2'],
@@ -449,9 +449,51 @@ describe('useComparisonCellValue', () => {
     expect(calculateDiff).toHaveBeenCalledTimes(6);
   });
 
-  it('should render icons from fields defined in columnsMeta (ES|QL computed columns)', () => {
+  it('should render icons from fields defined on the data view (ES|QL computed columns)', () => {
+    // `useComparisonCellValue` resolves fields purely from `dataView.fields` (no separate
+    // columnsMeta/dataSource input), so a computed ES|QL field must be modeled as a field on
+    // the data view itself.
+    const dataViewWithComputedField = buildDataViewMock({
+      name: 'index-pattern-with-timefield',
+      fields: fieldList([
+        { name: '_index', type: 'string', scripted: false, searchable: true, aggregatable: false },
+        { name: 'timestamp', type: 'date', scripted: false, searchable: true, aggregatable: true },
+        {
+          name: 'message',
+          type: 'string',
+          scripted: false,
+          searchable: false,
+          aggregatable: false,
+        },
+        {
+          name: 'extension',
+          type: 'string',
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+        },
+        { name: 'bytes', type: 'number', scripted: false, searchable: true, aggregatable: true },
+        {
+          name: 'scripted',
+          type: 'number',
+          scripted: true,
+          searchable: false,
+          aggregatable: false,
+        },
+        {
+          name: 'custom_esql_field',
+          type: 'number',
+          esTypes: ['long'],
+          scripted: false,
+          searchable: true,
+          aggregatable: true,
+        },
+      ]),
+      timeFieldName: 'timestamp',
+    });
+
     const { renderCellValue } = renderComparisonCellValue({
-      columnsMeta: columnsMetaWithCustomField,
+      dataView: dataViewWithComputedField,
       comparisonFields: ['custom_esql_field'],
     });
     const customFieldCell = renderComparisonCell({

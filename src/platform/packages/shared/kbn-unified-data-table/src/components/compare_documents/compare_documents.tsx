@@ -18,7 +18,6 @@ import type {
 } from '@elastic/eui';
 import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DATA_GRID_STYLE_DEFAULT } from '../../constants';
@@ -37,8 +36,7 @@ export interface CompareDocumentsProps {
   consumer: string;
   ariaDescribedBy: string;
   ariaLabelledBy: string;
-  dataView: DataView;
-  columnsMeta?: DataTableColumnsMeta;
+  dataView?: DataView;
   isPlainRecord: boolean;
   selectedFieldNames: string[];
   selectedDocIds: string[];
@@ -68,7 +66,6 @@ const CompareDocuments = ({
   ariaDescribedBy,
   ariaLabelledBy,
   dataView,
-  columnsMeta,
   isPlainRecord,
   selectedFieldNames,
   selectedDocIds: originalSelectedDocIds,
@@ -120,7 +117,6 @@ const CompareDocuments = ({
   const fieldColumnId = useGeneratedHtmlId({ prefix: 'fields' });
   const { comparisonFields, totalFields } = useComparisonFields({
     dataView,
-    columnsMeta,
     selectedFieldNames,
     selectedDocIds,
     showAllFields: Boolean(forceShowAllFields || showAllFields),
@@ -200,7 +196,6 @@ const CompareDocuments = ({
   );
   const renderCellValue = useComparisonCellValue({
     dataView,
-    columnsMeta,
     comparisonFields,
     fieldColumnId,
     selectedDocIds,

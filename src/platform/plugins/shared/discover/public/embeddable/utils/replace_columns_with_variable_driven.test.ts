@@ -9,7 +9,18 @@
 
 import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import { EsqlSource } from '@kbn/data-source';
 import { replaceColumnsWithVariableDriven } from './replace_columns_with_variable_driven';
+
+const createDataSourceFromColumnsMeta = (columnsMeta: Record<string, DatatableColumnMeta>) =>
+  EsqlSource.create({
+    query: 'FROM logs',
+    resultColumns: Object.entries(columnsMeta).map(([name, meta]) => ({
+      id: name,
+      name,
+      meta,
+    })),
+  });
 
 describe('replaceColumnsWithVariableDriven', () => {
   const mockColumnsMeta: Record<string, DatatableColumnMeta> = {
@@ -25,12 +36,13 @@ describe('replaceColumnsWithVariableDriven', () => {
   ];
 
   describe('when not in ESQL mode', () => {
-    it('should return original columns when isEsql is false', () => {
+    it('should return original columns when isEsql is false', async () => {
       const savedSearchColumns = ['timestamp', 'message', 'nonExistentColumn'];
+      const mockDataSource = await createDataSourceFromColumnsMeta(mockColumnsMeta);
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockDataSource,
         mockEsqlVariables,
         false
       );
@@ -39,8 +51,8 @@ describe('replaceColumnsWithVariableDriven', () => {
     });
   });
 
-  describe('when columnsMeta is not provided', () => {
-    it('should return original columns when columnsMeta is undefined', () => {
+  describe('when dataSource is not provided', () => {
+    it('should return original columns when dataSource is undefined', () => {
       const savedSearchColumns = ['timestamp', 'message'];
 
       const result = replaceColumnsWithVariableDriven(
@@ -55,17 +67,18 @@ describe('replaceColumnsWithVariableDriven', () => {
   });
 
   describe('when no variable-driven columns exist', () => {
-    it('should return original columns when no columns match ESQL variables', () => {
+    it('should return original columns when no columns match ESQL variables', async () => {
       const columnsMetaWithoutVariables: Record<string, DatatableColumnMeta> = {
         timestamp: { type: 'date' },
         message: { type: 'string' },
         host: { type: 'string' },
       };
       const savedSearchColumns = ['timestamp', 'message'];
+      const mockDataSource = await createDataSourceFromColumnsMeta(columnsMetaWithoutVariables);
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        columnsMetaWithoutVariables,
+        mockDataSource,
         mockEsqlVariables,
         true
       );
@@ -73,12 +86,13 @@ describe('replaceColumnsWithVariableDriven', () => {
       expect(result).toEqual(savedSearchColumns);
     });
 
-    it('should return original columns when esqlVariables is undefined', () => {
+    it('should return original columns when esqlVariables is undefined', async () => {
       const savedSearchColumns = ['timestamp', 'message'];
+      const mockDataSource = await createDataSourceFromColumnsMeta(mockColumnsMeta);
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockDataSource,
         undefined,
         true
       );
@@ -88,12 +102,13 @@ describe('replaceColumnsWithVariableDriven', () => {
   });
 
   describe('when variable-driven columns exist', () => {
-    it('should replace non-existent columns with variable-driven column', () => {
+    it('should replace non-existent columns with variable-driven column', async () => {
       const savedSearchColumns = ['timestamp', 'nonExistentColumn', 'message'];
+      const mockDataSource = await createDataSourceFromColumnsMeta(mockColumnsMeta);
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockDataSource,
         mockEsqlVariables,
         true
       );
@@ -101,12 +116,13 @@ describe('replaceColumnsWithVariableDriven', () => {
       expect(result).toEqual(['timestamp', 'variableColumn', 'message']);
     });
 
-    it('should keep existing columns that are present in columnsMeta', () => {
+    it('should keep existing columns that are present in columnsMeta', async () => {
       const savedSearchColumns = ['timestamp', 'message', 'host'];
+      const mockDataSource = await createDataSourceFromColumnsMeta(mockColumnsMeta);
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockDataSource,
         mockEsqlVariables,
         true
       );
@@ -114,12 +130,13 @@ describe('replaceColumnsWithVariableDriven', () => {
       expect(result).toEqual(['timestamp', 'message', 'host']);
     });
 
-    it('should remove duplicates from the final result', () => {
+    it('should remove duplicates from the final result', async () => {
       const savedSearchColumns = ['nonExistent1', 'nonExistent2', 'timestamp'];
+      const mockDataSource = await createDataSourceFromColumnsMeta(mockColumnsMeta);
 
       const result = replaceColumnsWithVariableDriven(
         savedSearchColumns,
-        mockColumnsMeta,
+        mockDataSource,
         mockEsqlVariables,
         true
       );

@@ -7,7 +7,8 @@
 
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataSource } from '@kbn/data-source';
 import type {
   DatasourceMap,
   OperationDescriptor,
@@ -28,7 +29,7 @@ export interface ChartInfo {
 }
 
 export interface ChartLayerDescriptor {
-  dataView?: DataView;
+  dataSource?: DataSource;
   layerId: string;
   layerType: string;
   chartType?: string;
@@ -76,7 +77,7 @@ export const createChartInfoApi = async (
         });
         return {
           ...l,
-          dataView: dataSource?.dataView,
+          dataSource: dataSource?.dataSource,
           dimensions: updatedDimensions,
         };
       });

@@ -7,34 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { useMemo } from 'react';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { DataTableColumnsMeta } from '@kbn/discover-utils/types';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
+import { type DataSource, EsqlSource, IndexPatternSource } from '@kbn/data-source';
 
 interface UseFieldTypesProps {
   fields: string[];
-  dataView: DataView;
-  columnsMeta?: DataTableColumnsMeta;
+  dataSource?: DataSource;
 }
 
 export const useDataViewFields = ({
   fields,
-  dataView,
-  columnsMeta,
+  dataSource,
 }: UseFieldTypesProps): { dataViewFields: Record<string, DataViewField | undefined> } => {
   const dataViewFields = useMemo(
     () =>
       fields.reduce((acc, fieldName) => {
-        acc[fieldName] = getDataViewFieldOrCreateFromColumnMeta({
-          fieldName,
-          dataView,
-          columnMeta: columnsMeta?.[fieldName],
-        });
-
+        acc[fieldName] = resolveField(dataSource, fieldName);
         return acc;
       }, {} as Record<string, DataViewField | undefined>),
-    [fields, dataView, columnsMeta]
+    [fields, dataSource]
   );
 
   return { dataViewFields };
 };
+
+function resolveField(dataSource: DataSource | undefined, fieldName: string) {
+  if (!dataSource) return undefined;
+  if (dataSource instanceof IndexPatternSource) {
+    return dataSource.getDataView().fields.getByName(fieldName);
+  }
+  if (dataSource instanceof EsqlSource) {
+    const column = dataSource.resultColumns.find((c) => c.name === fieldName);
+    return column ? new DataViewField(convertDatatableColumnToDataViewFieldSpec(column)) : undefined;
+  }
+  return undefined;
+}

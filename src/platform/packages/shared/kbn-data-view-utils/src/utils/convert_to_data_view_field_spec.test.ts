@@ -58,4 +58,29 @@ describe('convertDatatableColumnToDataViewFieldSpec', () => {
       })
     );
   });
+
+  it('preserves isComputedColumn = true from the input column', () => {
+    const column = {
+      id: 'avg_bytes',
+      name: 'avg_bytes',
+      meta: {
+        esType: 'double',
+        type: 'number' as DatatableColumnType,
+      },
+      isComputedColumn: true,
+    };
+    expect(convertDatatableColumnToDataViewFieldSpec(column).isComputedColumn).toBe(true);
+  });
+
+  it('sets isComputedColumn = false for index-sourced columns', () => {
+    const column = {
+      id: 'bytes',
+      name: 'bytes',
+      meta: {
+        esType: 'long',
+        type: 'number' as DatatableColumnType,
+      },
+    };
+    expect(convertDatatableColumnToDataViewFieldSpec(column).isComputedColumn).toBe(false);
+  });
 });

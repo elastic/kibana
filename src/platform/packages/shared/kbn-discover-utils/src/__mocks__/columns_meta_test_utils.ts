@@ -8,8 +8,9 @@
  */
 
 import { fieldList } from '@kbn/data-views-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { EsqlSource } from '@kbn/data-source';
 import { buildDataViewMock } from './data_view';
-import type { DataTableColumnsMeta } from '../types';
 import * as formatValueModule from '../utils/format_value';
 
 /**
@@ -86,27 +87,28 @@ export const createDataViewWithoutCustomField = () =>
     ]),
   });
 
-/**
- * columnsMeta that overrides bytes from number to string/keyword.
- * Used for testing when ES|QL query returns a field with a different
- * type than defined in the data view.
- */
-export const columnsMetaOverridingBytesType: DataTableColumnsMeta = {
-  bytes: {
-    type: 'string',
-    esType: 'keyword',
-  },
-};
+const BYTES_OVERRIDE_COLUMNS: DatatableColumn[] = [
+  { id: 'bytes', name: 'bytes', meta: { type: 'string', esType: 'keyword' } },
+];
+
+const CUSTOM_FIELD_COLUMNS: DatatableColumn[] = [
+  { id: 'custom_esql_field', name: 'custom_esql_field', meta: { type: 'number', esType: 'long' } },
+];
 
 /**
- * columnsMeta for a custom ES|QL field not in the data view.
+ * Builds an `EsqlSource` whose `bytes` result column overrides the data view's
+ * `number` type with `string`/`keyword`. Used for testing when an ES|QL query
+ * returns a field with a different type than defined in the data view.
  */
-export const columnsMetaWithCustomField: DataTableColumnsMeta = {
-  custom_esql_field: {
-    type: 'number',
-    esType: 'long',
-  },
-};
+export const createEsqlSourceOverridingBytesType = () =>
+  EsqlSource.create({ query: 'FROM test-data-view', resultColumns: BYTES_OVERRIDE_COLUMNS });
+
+/**
+ * Builds an `EsqlSource` with a `custom_esql_field` result column not present
+ * in the data view.
+ */
+export const createEsqlSourceWithCustomField = () =>
+  EsqlSource.create({ query: 'FROM test-data-view', resultColumns: CUSTOM_FIELD_COLUMNS });
 
 /**
  * Creates a spy on formatFieldValueReact that returns 'formatted'.

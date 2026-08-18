@@ -18,6 +18,7 @@ import type {
 import { LENS_METRIC_GROUP_ID } from '@kbn/lens-common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { EsqlSource } from '@kbn/data-source';
 import { getTextBasedDatasource } from './text_based_languages';
 import { generateId } from '../../id_generator';
 jest.mock('../../id_generator');
@@ -1470,6 +1471,18 @@ describe('Textbased Data Source', () => {
         TextBasedDatasource.getRenderEventCounters(state);
 
       expect(counters).toEqual(['esql_chart']);
+    });
+  });
+
+  describe('#getDatasourceInfo', () => {
+    it('returns an EsqlSource per layer, without a dataViewsService', async () => {
+      const info = await TextBasedDatasource.getDatasourceInfo(baseState, undefined, undefined);
+
+      expect(info).toHaveLength(1);
+      expect(info[0].layerId).toBe('a');
+      expect(info[0].dataSource).toBeInstanceOf(EsqlSource);
+      expect(info[0].dataSource?.title).toBe('foo');
+      expect(info[0].columns).toHaveLength(1);
     });
   });
 });

@@ -10,9 +10,6 @@
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  createDataViewWithoutCustomField,
-  columnsMetaOverridingBytesType,
-  columnsMetaWithCustomField,
   createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '../__mocks__';
@@ -212,7 +209,6 @@ describe('formatHitReact', () => {
       () => true,
       2,
       fieldFormatsMock,
-      undefined,
       { skipNullishValues: true }
     );
 
@@ -245,7 +241,6 @@ describe('formatHitReact', () => {
       () => true,
       3,
       fieldFormatsMock,
-      undefined,
       { skipNullishValues: true }
     );
 
@@ -270,7 +265,7 @@ describe('formatHitReact', () => {
       formatFieldValueReactSpy.mockRestore();
     });
 
-    it('should pass data view field to formatFieldValueReact when columnsMeta is undefined', () => {
+    it('should pass data view field to formatFieldValueReact', () => {
       const testDataView = createDataViewWithBytesField();
       const testHit = buildDataTableRecord(
         { _id: '1', _index: 'logs', fields: { bytes: [100] } },
@@ -282,42 +277,11 @@ describe('formatHitReact', () => {
       expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'number');
     });
 
-    it('should pass field with columnsMeta type to formatFieldValueReact when types differ', () => {
-      const testDataView = createDataViewWithBytesField();
-      const testHit = buildDataTableRecord(
-        { _id: '1', _index: 'logs', fields: { bytes: ['100'] } },
-        testDataView
-      );
-
-      formatHitReact(
-        testHit,
-        testDataView,
-        () => true,
-        220,
-        fieldFormatsMock,
-        columnsMetaOverridingBytesType
-      );
-
-      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
-    });
-
-    it('should pass field created from columnsMeta to formatFieldValueReact for fields not in data view', () => {
-      const testDataView = createDataViewWithoutCustomField();
-      const testHit = buildDataTableRecord(
-        { _id: '1', _index: 'logs', fields: { custom_esql_field: [42] } },
-        testDataView
-      );
-
-      formatHitReact(
-        testHit,
-        testDataView,
-        () => true,
-        220,
-        fieldFormatsMock,
-        columnsMetaWithCustomField
-      );
-
-      expectFieldCallToMatch(formatFieldValueReactSpy, 'custom_esql_field', 'number', ['long']);
-    });
+    // NOTE: the two "columnsMeta type override" test cases that used to live here were removed
+    // as part of the DataSource refactor (kibana#222924). `formatHitReact` no longer accepts any
+    // per-column type override — it only takes a `DataView`. There is currently no equivalent way
+    // to exercise "ES|QL overrides a mapped field's type" through this function. This is a known
+    // coverage gap; Phase 2's planned `getFormatter`/`getColumnLabel` interface additions may
+    // restore equivalent coverage.
   });
 });

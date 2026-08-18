@@ -11,7 +11,15 @@ import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { BehaviorSubject } from 'rxjs';
-import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  firstValueFrom,
+  race,
+  shareReplay,
+  switchMap,
+} from 'rxjs';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { updateVolatileSearchSource } from './update_search_source';
 import {
@@ -132,56 +140,65 @@ export function fetchAll(
 
     // Handle results of the individual queries and forward the results to the corresponding dataSubjects
     response
-      .then(({ records, esqlQueryColumns, interceptedWarnings = [], esqlHeaderWarning }) => {
-        fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
+      .then(
+        ({
+          records,
+          esqlQueryColumns,
+          interceptedWarnings = [],
+          esqlHeaderWarning,
+          dataSource,
+        }) => {
+          fetchAllRequestsOnlyTracker.reportEvent({ requestAdapter: inspectorAdapters.requests });
 
-        if (isEsqlQuery) {
-          const fetchStatus =
-            interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
-              ? FetchStatus.ERROR
-              : FetchStatus.COMPLETE;
-          dataSubjects.totalHits$.next({
-            fetchStatus,
-            result: records.length,
-          });
-        } else {
-          const currentTotalHits = dataSubjects.totalHits$.getValue();
-          // If the total hits (or chart) query is still loading, emit a partial
-          // hit count that's at least our retrieved document count
-          if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
-            // trigger `partial` only for the first request (if no total hits value yet)
+          if (isEsqlQuery) {
+            const fetchStatus =
+              interceptedWarnings.filter(({ type }) => type === 'incomplete').length > 0
+                ? FetchStatus.ERROR
+                : FetchStatus.COMPLETE;
             dataSubjects.totalHits$.next({
-              fetchStatus: FetchStatus.PARTIAL,
+              fetchStatus,
               result: records.length,
             });
+          } else {
+            const currentTotalHits = dataSubjects.totalHits$.getValue();
+            // If the total hits (or chart) query is still loading, emit a partial
+            // hit count that's at least our retrieved document count
+            if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
+              // trigger `partial` only for the first request (if no total hits value yet)
+              dataSubjects.totalHits$.next({
+                fetchStatus: FetchStatus.PARTIAL,
+                result: records.length,
+              });
+            }
           }
+
+          /**
+           * Determine the appropriate fetch status
+           *
+           * The partial state for ES|QL mode is necessary to limit data table renders.
+           * Depending on the type of query new columns can be added to AppState to ensure the data table
+           * shows the updated columns. The partial state was introduced to prevent
+           * too frequent state changes that cause the table to re-render too often, which can cause
+           * race conditions, poor user experience, and potential test flakiness.
+           *
+           * For non-ES|QL queries, we always use COMPLETE status as they don't require this
+           * special handling.
+           */
+          const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
+
+          dataSubjects.documents$.next({
+            fetchStatus,
+            result: records,
+            esqlQueryColumns,
+            esqlHeaderWarning,
+            interceptedWarnings,
+            query,
+            dataSource,
+          });
+
+          checkHitCount(dataSubjects.main$, records.length);
         }
-
-        /**
-         * Determine the appropriate fetch status
-         *
-         * The partial state for ES|QL mode is necessary to limit data table renders.
-         * Depending on the type of query new columns can be added to AppState to ensure the data table
-         * shows the updated columns. The partial state was introduced to prevent
-         * too frequent state changes that cause the table to re-render too often, which can cause
-         * race conditions, poor user experience, and potential test flakiness.
-         *
-         * For non-ES|QL queries, we always use COMPLETE status as they don't require this
-         * special handling.
-         */
-        const fetchStatus = isEsqlQuery ? FetchStatus.PARTIAL : FetchStatus.COMPLETE;
-
-        dataSubjects.documents$.next({
-          fetchStatus,
-          result: records,
-          esqlQueryColumns,
-          esqlHeaderWarning,
-          interceptedWarnings,
-          query,
-        });
-
-        checkHitCount(dataSubjects.main$, records.length);
-      })
+      )
       // In the case that the request was aborted (e.g. a refresh), swallow the abort error
       .catch((e) => {
         if (!abortController.signal.aborted) throw e;
@@ -194,16 +211,30 @@ export function fetchAll(
         sendErrorMsg(dataSubjects.main$, e);
       });
 
+    const documentsComplete$ = isComplete(dataSubjects.documents$).pipe(
+      switchMap(async () => onFetchRecordsComplete?.()),
+      shareReplay(1)
+    );
+
+    // For DSL queries, `noResultsFound` winning intentionally skips `onFetchRecordsComplete` (some
+    // of its post-fetch state logic assumes it only ever runs when records were found — calling it
+    // unconditionally there is a separate, pre-existing issue, out of scope here).
+    //
+    // ES|QL is different: `documents$` only reaches a terminal status once `esqlFetchSubscribe`
+    // (a separate, async subscriber — see `build_esql_fetch_subscribe.ts`) re-emits it as COMPLETE.
+    // That extra async hop can lose the race to `noResultsFound` for a 0-record ES|QL query, which
+    // resolves almost synchronously — silently skipping `onFetchRecordsComplete`'s state cleanup
+    // (e.g. clearing `fieldsToReset`). Requiring `documentsComplete$` in both race branches only for
+    // ES|QL closes that gap without changing existing DSL behavior.
+    const noResultsFoundBranch = isEsqlQuery
+      ? combineLatest([documentsComplete$, noResultsFound(dataSubjects.main$)])
+      : noResultsFound(dataSubjects.main$);
+
     // Return a promise that will resolve once all the requests have finished or failed, or no results are found
     return firstValueFrom(
       race(
-        combineLatest([
-          isComplete(dataSubjects.documents$).pipe(
-            switchMap(async () => onFetchRecordsComplete?.())
-          ),
-          isComplete(dataSubjects.totalHits$),
-        ]),
-        noResultsFound(dataSubjects.main$)
+        combineLatest([documentsComplete$, isComplete(dataSubjects.totalHits$)]),
+        noResultsFoundBranch
       )
     ).then(() => {
       // Send a complete message to main$ once all queries are done and if main$

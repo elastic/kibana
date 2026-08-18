@@ -7,19 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumn, DatatableColumnMeta } from '@kbn/expressions-plugin/common';
-
-type TextBasedColumnTypes = Record<string, DatatableColumnMeta>;
-
-/**
- * Columns meta for text based searches
- * @param textBasedColumns
- */
-export const getTextBasedColumnsMeta = (
-  textBasedColumns: DatatableColumn[]
-): TextBasedColumnTypes => {
-  return textBasedColumns.reduce<TextBasedColumnTypes>((map, next) => {
-    map[next.name] = next.meta;
-    return map;
-  }, {});
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-data-source'],
 };

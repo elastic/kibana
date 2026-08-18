@@ -22,6 +22,7 @@ import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { RenderDocumentViewCallback, SortOrder } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import {
   DataLoadingState,
   UnifiedDataTable,
@@ -180,6 +181,10 @@ export const AlertEpisodesListPage = () => {
     sortState,
     timeRange,
   });
+  const dataSource = useMemo(
+    () => (dataView ? new IndexPatternSource(dataView) : undefined),
+    [dataView]
+  );
 
   const { data: kpis } = useEpisodesKpisQuery({ services, filterState, timeRange });
 
@@ -495,7 +500,7 @@ export const AlertEpisodesListPage = () => {
                       cellPadding: 'l',
                       header: 'shade',
                     }}
-                    dataView={dataView}
+                    dataSource={dataSource}
                     columns={visibleColumns}
                     onSetColumns={onSetColumns}
                     canDragAndDropColumns

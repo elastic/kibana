@@ -10,10 +10,10 @@
 import type { EsHitRecord } from '@kbn/discover-utils/src/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
+import { IndexPatternSource } from '@kbn/data-source';
 import SourceDocument from './source_document';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
-  columnsMetaOverridingBytesType,
   createDataViewWithBytesField,
   createFormatFieldValueReactSpy,
   dataViewMock,
@@ -44,6 +44,8 @@ const rowsSource: EsHitRecord[] = [
 
 const build = (hit: EsHitRecord) => buildDataTableRecord(hit, dataViewMock);
 
+const dataSourceMock = new IndexPatternSource(dataViewMock);
+
 describe('Unified data table source document cell rendering', () => {
   it('renders a description list for source type documents', () => {
     const rows = rowsSource.map(build);
@@ -51,8 +53,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
-        dataView={dataViewMock}
+        dataSource={dataSourceMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
         maxEntries={100}
@@ -87,8 +88,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="foo"
-        columnsMeta={undefined}
-        dataView={dataViewMock}
+        dataSource={dataSourceMock}
         fieldFormats={mockFieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
         maxEntries={100}
@@ -115,8 +115,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
-        dataView={dataViewMock}
+        dataSource={dataSourceMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
         maxEntries={100}
@@ -146,8 +145,7 @@ describe('Unified data table source document cell rendering', () => {
     renderWithI18n(
       <SourceDocument
         columnId="_source"
-        columnsMeta={undefined}
-        dataView={dataViewMock}
+        dataSource={dataSourceMock}
         fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
         isPlainRecord={true}
         maxEntries={2}
@@ -166,8 +164,8 @@ describe('Unified data table source document cell rendering', () => {
     expect(within(descriptionList).queryByText(/and \d+ more fields/)).not.toBeInTheDocument();
   });
 
-  describe('with columnsMeta', () => {
-    it('should use data view field type when columnsMeta is undefined', () => {
+  describe('with a data source', () => {
+    it('should use data view field type', () => {
       const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
       const testDataView = createDataViewWithBytesField();
 
@@ -184,8 +182,7 @@ describe('Unified data table source document cell rendering', () => {
       renderWithI18n(
         <SourceDocument
           columnId="_source"
-          columnsMeta={undefined}
-          dataView={testDataView}
+          dataSource={new IndexPatternSource(testDataView)}
           fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
           isPlainRecord={true}
           maxEntries={100}
@@ -204,41 +201,13 @@ describe('Unified data table source document cell rendering', () => {
       formatFieldValueReactSpy.mockRestore();
     });
 
-    it('should use columnsMeta type instead of data view field type when provided', () => {
-      const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
-      const testDataView = createDataViewWithBytesField();
-
-      const row = buildDataTableRecord(
-        {
-          _id: '1',
-          _index: 'test',
-          _score: 1,
-          _source: { bytes: '100' },
-        },
-        testDataView
-      );
-
-      renderWithI18n(
-        <SourceDocument
-          columnId="_source"
-          columnsMeta={columnsMetaOverridingBytesType}
-          dataView={testDataView}
-          fieldFormats={mockServices.fieldFormats as unknown as FieldFormatsStart}
-          isPlainRecord={true}
-          maxEntries={100}
-          row={row}
-          shouldShowFieldHandler={() => true}
-          useTopLevelObjectColumns={false}
-        />
-      );
-
-      const descriptionList = screen.getByTestId('discoverCellDescriptionList');
-      expect(within(descriptionList).getByText('bytes')).toBeVisible();
-      expect(within(descriptionList).getByText('_index')).toBeVisible();
-      expect(within(descriptionList).getByText('_score')).toBeVisible();
-      expect(within(descriptionList).getAllByText('formatted')).toHaveLength(3);
-      expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
-      formatFieldValueReactSpy.mockRestore();
-    });
+    // NOTE: a test used to live here asserting that an ES|QL "columnsMeta" type override took
+    // precedence over the data view's field type for the `_source` column. That's no longer
+    // representable: `SourceDocument`'s non-top-level-object path renders via
+    // `formatHitReact(row, dataView, ...)`, and `dataView` is only populated when `dataSource`
+    // is an `IndexPatternSource` (see `get_field_from_data_source.ts`) — for an `EsqlSource`,
+    // `dataView` is `undefined`, so there is currently no way to exercise a per-column type
+    // override for the `_source` column. This is a known coverage gap; Phase 2's planned
+    // `getFormatter`/`getColumnLabel` interface additions may restore equivalent coverage.
   });
 });

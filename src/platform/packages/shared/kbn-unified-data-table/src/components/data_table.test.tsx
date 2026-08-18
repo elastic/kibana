@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import type {
   EuiDataGridCellValueElementProps,
@@ -35,6 +34,7 @@ import {
   INPUT_TEST_SUBJ,
 } from '@kbn/data-grid-in-table-search';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-browser-mocks';
+import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { DataLoadingState, UnifiedDataTable } from './data_table';
 import { dataViewsMock } from '../../__mocks__/data_views';
@@ -83,6 +83,7 @@ const dataViewMock = buildDataViewMock({
   name: 'the-data-view',
   timeFieldName: '@timestamp',
 });
+const dataSourceMock = new IndexPatternSource(dataViewMock);
 
 const getProps = (): UnifiedDataTableProps => {
   const services = servicesMock;
@@ -94,7 +95,7 @@ const getProps = (): UnifiedDataTableProps => {
       someKey: 'someValue',
     },
     columns: [],
-    dataView: dataViewMock,
+    dataSource: dataSourceMock,
     expandedDoc: undefined,
     loadingState: DataLoadingState.loaded,
     onFilter: jest.fn(),
@@ -1027,7 +1028,12 @@ describe('UnifiedDataTable', () => {
         },
       };
 
-      const columnsMetaOverride = { testField: { type: 'number' as DatatableColumnType } };
+      // A distinct dataSource instance, so we can assert it's the one threaded through to
+      // `renderDocumentView` rather than just any dataSource.
+      const testDataSource = await EsqlSource.create({
+        query: 'FROM test-data-view',
+        resultColumns: [{ id: 'testField', name: 'testField', meta: { type: 'number' } }],
+      });
 
       const renderDocumentViewMock = jest.fn((hit: DataTableRecord) => (
         <div data-test-subj="test-document-view">{hit.id}</div>
@@ -1037,7 +1043,7 @@ describe('UnifiedDataTable', () => {
 
       await renderComponent({
         ...getProps(),
-        columnsMeta: columnsMetaOverride,
+        dataSource: testDataSource,
         expandedDoc,
         externalControlColumns: [testLeadingControlColumn],
         renderDocumentView: renderDocumentViewMock,
@@ -1051,7 +1057,7 @@ describe('UnifiedDataTable', () => {
         expandedDoc,
         getProps().rows,
         ['_source'],
-        columnsMetaOverride
+        testDataSource
       );
     },
     EXTENDED_JEST_TIMEOUT

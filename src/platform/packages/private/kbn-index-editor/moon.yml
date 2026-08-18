@@ -46,6 +46,7 @@ dependsOn:
   - '@kbn/field-utils'
   - '@kbn/es-query'
   - '@kbn/kql'
+  - '@kbn/data-source'
 tags:
   - shared-browser
   - package

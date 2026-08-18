@@ -12,6 +12,7 @@ import type {
 } from '@kbn/unified-data-table';
 import { DataGridDensity, useColumns } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
@@ -179,6 +180,10 @@ export const CloudSecurityDataTable = ({
 
   const styles = useStyles();
   const { dataView, dataViewIsRefetching } = useDataViewContext();
+  const dataSource = useMemo(
+    () => (dataView ? new IndexPatternSource(dataView) : undefined),
+    [dataView]
+  );
   const { capabilities } = application;
   const {
     columns: currentColumns,
@@ -342,7 +347,7 @@ export const CloudSecurityDataTable = ({
           ariaLabelledBy={title}
           columns={currentColumns}
           expandedDoc={expandedDoc}
-          dataView={dataView}
+          dataSource={dataSource}
           loadingState={loadingState}
           onFilter={onAddFilter as DocViewFilterFn}
           onResize={onResize}

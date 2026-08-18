@@ -13,6 +13,7 @@ import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { IndexPatternSource } from '@kbn/data-source';
 
 import { discoverServiceMock } from '../__mocks__/services';
 import { initializeFetch } from './initialize_fetch';
@@ -82,6 +83,8 @@ describe('initialize fetch', () => {
     );
     expect(stateManager.totalHitCount.getValue()).toEqual(2);
     expect(stateManager.inspectorAdapters.getValue().requests).toBeDefined();
+    expect(stateManager.dataSource.getValue()).toBeInstanceOf(IndexPatternSource);
+    expect(stateManager.dataSource.getValue()?.id).toBe(dataViewMock.id);
   });
 
   it('should catch and emit error', async () => {

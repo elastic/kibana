@@ -10,6 +10,7 @@
 import React from 'react';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import { IndexPatternSource } from '@kbn/data-source';
 import type {
   AllSummaryColumnProps,
   SummaryColumnProps,
@@ -30,7 +31,9 @@ export const getTracesSummaryColumn = (
   params: SummaryColumnGetterDeps,
   toolkit: ContextAwarenessToolkit
 ) => {
-  const { dataView, density, rowHeight } = params;
+  const { dataSource, density, rowHeight } = params;
+  // DSL-only: field visibility rules are defined against a real DataView.
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
   const shouldShowFieldHandler = createGetShouldShowFieldHandler(dataView);
 
   return (props: Omit<SummaryColumnProps, 'core' | 'share'>) => (
@@ -45,7 +48,10 @@ export const getTracesSummaryColumn = (
   );
 };
 
-const createGetShouldShowFieldHandler = (dataView: DataView) => {
+const createGetShouldShowFieldHandler = (dataView: DataView | undefined) => {
+  if (!dataView) {
+    return () => true;
+  }
   const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
   return getShouldShowFieldHandler(dataViewFields, dataView, true);
 };

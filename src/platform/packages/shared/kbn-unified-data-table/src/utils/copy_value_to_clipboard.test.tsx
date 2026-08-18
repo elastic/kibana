@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { IndexPatternSource } from '@kbn/data-source';
 import {
   dataTableContextComplexMock,
   dataTableContextComplexRowsMock,
 } from '../../__mocks__/table_context';
+import { dataViewComplexMock } from '../../__mocks__/data_view_complex';
 import { servicesMock } from '../../__mocks__/services';
 import {
   CopyAsTextFormat,
@@ -26,15 +28,16 @@ import type { ValueToStringConverter } from '../types';
 const execCommandMock = (global.document.execCommand = jest.fn());
 const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
+const dataSourceComplex = new IndexPatternSource(dataViewComplexMock);
+
 describe('copyValueToClipboard', () => {
   const valueToStringConverter: ValueToStringConverter = (rowIndex, columnId, options) =>
     convertValueToString({
       rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
+      dataSource: dataSourceComplex,
       fieldFormats: servicesMock.fieldFormats,
       rowIndex,
       columnId,
-      columnsMeta: undefined,
       options,
     });
 

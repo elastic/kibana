@@ -11,9 +11,11 @@ import React from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
+import type { DataSource } from '@kbn/data-source';
+import { EsqlSource } from '@kbn/data-source';
 import {
   DataGridDensity,
   UnifiedDataTable,
@@ -47,11 +49,7 @@ const expandedDoc = buildDataTableRecord(esHitsMock[0], dataViewWithTimefieldMoc
 const nextExpandedDoc = buildDataTableRecord(esHitsMock[1], dataViewWithTimefieldMock);
 const cellData = [expandedDoc, nextExpandedDoc];
 const cellId = 'leaf-1';
-const cascadedColumnsMeta: DataTableColumnsMeta = {
-  category: {
-    type: 'string',
-  },
-};
+let cascadedDataSource: DataSource;
 
 const createVirtualizerController = () =>
   createChildVirtualizerController({ getRootVirtualizer: () => undefined });
@@ -60,9 +58,9 @@ const createCascadedDocumentsFetcher = (services: DiscoverServices) => {
   const stateManager: CascadedDocumentsStateManager = {
     getIsActiveInstance: jest.fn(() => true),
     getCascadedDocuments: jest.fn(() => undefined),
-    getColumnsMeta: jest.fn(() => ({})),
+    getDataSource: jest.fn(() => undefined),
     setCascadedDocuments: jest.fn(),
-    setColumnsMeta: jest.fn(),
+    setDataSource: jest.fn(),
   };
   const scopedProfilesManager = services.profilesManager.createScopedProfilesManager({
     scopedEbtManager: services.ebtManager.createScopedEBTManager(),
@@ -91,7 +89,6 @@ const renderLeafCellWithContext = ({
           virtualizerController={virtualizerController}
           dataGridDensityState={DataGridDensity.COMPACT}
           showTimeCol={true}
-          dataView={dataViewWithTimefieldMock}
           showKeyboardShortcuts={false}
           onUpdateDataGridDensity={jest.fn()}
         />
@@ -137,7 +134,7 @@ const createContextValue = ({
     availableCascadeGroups: ['category'],
     selectedCascadeGroups: ['category'],
     cascadedDocumentsFetcher: createCascadedDocumentsFetcher(services),
-    cascadedColumnsMeta,
+    cascadedDataSource,
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
@@ -164,6 +161,13 @@ const createContextValue = ({
 };
 
 describe('ESQLDataCascadeLeafCell', () => {
+  beforeAll(async () => {
+    cascadedDataSource = await EsqlSource.create({
+      query: esqlQuery.esql,
+      resultColumns: [{ id: 'category', name: 'category', meta: { type: 'string' } }],
+    });
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -187,7 +191,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     expect(getExpandedDocSetter).toHaveBeenCalledWith(cellId);
     expect(getRenderDocumentViewMetaSetter).toHaveBeenCalledWith(cellId);
     expect(unifiedDataTableProps.rows).toEqual(cellData);
-    expect(unifiedDataTableProps.columnsMeta).toEqual(cascadedColumnsMeta);
+    expect(unifiedDataTableProps.dataSource).toEqual(cascadedDataSource);
     expect(unifiedDataTableProps.renderDocumentView).toBe('external');
     expect(unifiedDataTableProps.expandedDoc).toEqual(expandedDoc);
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
@@ -212,7 +216,7 @@ describe('ESQLDataCascadeLeafCell', () => {
     );
 
     let unifiedDataTableProps = unifiedDataTableMock.mock.lastCall?.[0]!;
-    expect(unifiedDataTableProps.columnsMeta).toEqual(cascadedColumnsMeta);
+    expect(unifiedDataTableProps.dataSource).toEqual(cascadedDataSource);
     expect(unifiedDataTableProps.expandedDoc).toBeUndefined();
     expect(unifiedDataTableProps.setExpandedDoc).toBe(ownerBoundSetExpandedDoc);
     expect(unifiedDataTableProps.setRenderDocumentViewMeta).toBeUndefined();

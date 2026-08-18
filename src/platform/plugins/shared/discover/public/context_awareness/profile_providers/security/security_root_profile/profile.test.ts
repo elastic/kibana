@@ -17,9 +17,9 @@ import { createSecurityRootProfileProvider } from './profile';
 
 const MockComponent: FunctionComponent<DataGridCellValueElementProps> = () => null;
 
-const createMockDataView = (indexPattern: string, ipFields: Array<{ name: string }> = []) => ({
-  getIndexPattern: () => indexPattern,
-  fields: { getByType: (type: string) => (type === 'ip' ? ipFields : []) },
+const createMockDataSource = (title: string, ipFieldNames: string[] = []) => ({
+  title,
+  getColumns: () => ipFieldNames.map((name) => ({ name, type: 'ip' as const })),
 });
 
 const createProvider = (
@@ -84,8 +84,8 @@ describe('createSecurityRootProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const result = getCellRenderers({
-        dataView: createMockDataView('logs-*'),
-      } as Parameters<typeof getCellRenderers>[0]);
+        dataSource: createMockDataSource('logs-*'),
+      } as unknown as Parameters<typeof getCellRenderers>[0]);
       expect(result).toEqual({});
     });
 
@@ -98,8 +98,8 @@ describe('createSecurityRootProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const result = getCellRenderers({
-        dataView: createMockDataView(`${ALERTS_INDEX_PATTERN}default`),
-      } as Parameters<typeof getCellRenderers>[0]);
+        dataSource: createMockDataSource(`${ALERTS_INDEX_PATTERN}default`),
+      } as unknown as Parameters<typeof getCellRenderers>[0]);
       expect(result['kibana.alert.workflow_status']).toBeDefined();
     });
 
@@ -112,8 +112,8 @@ describe('createSecurityRootProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const result = getCellRenderers({
-        dataView: createMockDataView(`${ALERTS_INDEX_PATTERN}default`),
-      } as Parameters<typeof getCellRenderers>[0]);
+        dataSource: createMockDataSource(`${ALERTS_INDEX_PATTERN}default`),
+      } as unknown as Parameters<typeof getCellRenderers>[0]);
       expect(result['user.name']).toBeDefined();
     });
 
@@ -128,11 +128,11 @@ describe('createSecurityRootProfileProvider', () => {
         }
       );
       const result = getCellRenderers({
-        dataView: createMockDataView(`${ALERTS_INDEX_PATTERN}default`, [
-          { name: 'source.ip' },
-          { name: 'destination.ip' },
+        dataSource: createMockDataSource(`${ALERTS_INDEX_PATTERN}default`, [
+          'source.ip',
+          'destination.ip',
         ]),
-      } as Parameters<typeof getCellRenderers>[0]);
+      } as unknown as Parameters<typeof getCellRenderers>[0]);
       expect(result['source.ip']).toBe(ExistingRenderer);
       expect(result['destination.ip']).toBeDefined();
     });

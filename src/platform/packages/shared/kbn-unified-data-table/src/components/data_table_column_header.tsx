@@ -12,17 +12,16 @@ import type { CSSObject } from '@emotion/react';
 import { css } from '@emotion/react';
 import { EuiIconTip, useEuiTheme } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
+import { FieldIcon } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import type { DataTableColumnsMeta } from '../types';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   columnName: string | null;
   columnDisplayName: string;
-  columnsMeta?: DataTableColumnsMeta;
   headerRowHeight?: number;
   showColumnTokens?: boolean;
 }
@@ -31,32 +30,25 @@ export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = ({
   columnDisplayName,
   showColumnTokens,
   columnName,
-  columnsMeta,
-  dataView,
+  dataSource,
   headerRowHeight,
 }) => {
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {showColumnTokens && (
-        <DataTableColumnToken
-          columnName={columnName}
-          columnsMeta={columnsMeta}
-          dataView={dataView}
-        />
-      )}
+      {showColumnTokens && <DataTableColumnToken columnName={columnName} dataSource={dataSource} />}
       <DataTableColumnTitle columnDisplayName={columnDisplayName} />
     </ColumnHeaderTruncateContainer>
   );
 };
 
 const DataTableColumnToken: React.FC<
-  Pick<DataTableColumnHeaderProps, 'columnName' | 'columnsMeta' | 'dataView'>
+  Pick<DataTableColumnHeaderProps, 'columnName' | 'dataSource'>
 > = (props) => {
   const { euiTheme } = useEuiTheme();
-  const { columnName, columnsMeta, dataView } = props;
+  const { columnName, dataSource } = props;
   const columnToken = useMemo(
-    () => getRenderedToken({ columnName, columnsMeta, dataView }),
-    [columnName, columnsMeta, dataView]
+    () => getRenderedToken({ columnName, dataSource }),
+    [columnName, dataSource]
   );
 
   return columnToken ? <span css={{ paddingRight: euiTheme.size.xs }}>{columnToken}</span> : null;
@@ -71,30 +63,29 @@ const DataTableColumnTitle: React.FC<Pick<DataTableColumnHeaderProps, 'columnDis
 const fieldIconCss: CSSObject = { verticalAlign: 'bottom' };
 
 function getRenderedToken({
-  dataView,
+  dataSource,
   columnName,
-  columnsMeta,
-}: Pick<DataTableColumnHeaderProps, 'dataView' | 'columnName' | 'columnsMeta'>) {
-  if (!columnName || columnName === '_source') {
+}: Pick<DataTableColumnHeaderProps, 'dataSource' | 'columnName'>) {
+  if (!columnName || columnName === '_source' || !dataSource) {
     return null;
   }
 
-  // for text-based searches
-  if (columnsMeta) {
-    const columnMeta = columnsMeta[columnName];
-    const columnIconType = getTextBasedColumnIconType(columnMeta);
-    return columnIconType && columnIconType !== 'unknown' ? ( // renders an icon or nothing
-      <FieldIcon type={columnIconType} css={fieldIconCss} />
-    ) : null;
+  const iconType = dataSource.getColumnIconType(columnName);
+  if (iconType) {
+    // DSL-only: decorate scripted fields. `scripted` has no ES|QL equivalent,
+    // so it's not part of the polymorphic `getColumnIconType` contract.
+    const scripted =
+      dataSource instanceof IndexPatternSource &&
+      dataSource.getDataView().getFieldByName(columnName)?.scripted;
+    return <FieldIcon type={iconType} scripted={scripted} css={fieldIconCss} />;
   }
 
-  const dataViewField = dataView.getFieldByName(columnName);
-
-  if (dataViewField) {
-    return <FieldIcon {...getFieldIconProps(dataViewField)} css={fieldIconCss} />;
-  }
-
-  if (isNestedFieldParent(columnName, dataView)) {
+  // DSL-only fallback: a "nested" token for the parent of a nested field group,
+  // which isn't a column in its own right so it has no icon type of its own.
+  if (
+    dataSource instanceof IndexPatternSource &&
+    isNestedFieldParent(columnName, dataSource.getDataView())
+  ) {
     return <FieldIcon type="nested" css={fieldIconCss} />;
   }
 
@@ -142,8 +133,7 @@ export const DataTableScoreColumnHeader = ({
   isSorted,
   showColumnTokens,
   columnName,
-  columnsMeta,
-  dataView,
+  dataSource,
   headerRowHeight,
   columnDisplayName,
 }: DataTableColumnHeaderProps & { isSorted?: boolean }) => {
@@ -155,11 +145,7 @@ export const DataTableScoreColumnHeader = ({
   return (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {showColumnTokens && isSorted && (
-        <DataTableColumnToken
-          columnName={columnName}
-          columnsMeta={columnsMeta}
-          dataView={dataView}
-        />
+        <DataTableColumnToken columnName={columnName} dataSource={dataSource} />
       )}
       {!isSorted && (
         <span css={{ paddingRight: euiTheme.size.xs }}>

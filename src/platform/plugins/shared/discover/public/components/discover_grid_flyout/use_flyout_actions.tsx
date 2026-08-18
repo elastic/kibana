@@ -35,7 +35,7 @@ export const useFlyoutActions = (
       },
       {
         id: 'surroundingDocument',
-        enabled: Boolean(dataView.isTimeBased() && dataView.id),
+        enabled: Boolean(dataView?.isTimeBased() && dataView.id),
         dataTestSubj: 'docTableRowAction',
         iconType: 'documents',
         href: contextViewHref,

@@ -9,6 +9,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
+import type { DataSourceService } from '@kbn/data-source';
 import { UnifiedSearchPublicPlugin } from './plugin';
 
 export type { IndexPatternSelectProps } from './index_pattern_select';
@@ -34,11 +35,12 @@ export async function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
   coreStart: CoreStart,
+  dataSources: DataSourceService,
   id: string,
   type: string
 ) {
   const { createFilterAction: createAction } = await import('./actions/actions_module');
-  return createAction(filterManager, timeFilter, coreStart, id, type);
+  return createAction(filterManager, timeFilter, coreStart, dataSources, id, type);
 }
 
 export function plugin() {

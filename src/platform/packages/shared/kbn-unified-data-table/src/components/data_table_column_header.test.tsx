@@ -12,6 +12,7 @@ import {
   createStubDataView,
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
+import { EsqlSource, IndexPatternSource } from '@kbn/data-source';
 import { DataTableColumnHeader } from './data_table_column_header';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
@@ -58,7 +59,7 @@ describe('DataTableColumnHeader', () => {
       <DataTableColumnHeader
         columnDisplayName="bytesDisplayName"
         columnName="bytes"
-        dataView={stubLogstashDataView}
+        dataSource={new IndexPatternSource(stubLogstashDataView)}
         showColumnTokens
       />
     );
@@ -68,17 +69,16 @@ describe('DataTableColumnHeader', () => {
   });
 
   it('should render a correct token for a custom column type (in case of text-based queries)', async () => {
+    const dataSource = await EsqlSource.create({
+      query: 'FROM logstash-*',
+      resultColumns: [{ id: 'bytes', name: 'bytes', meta: { type: 'string', esType: 'keyword' } }],
+    });
+
     renderWithKibanaRenderContext(
       <DataTableColumnHeader
         columnDisplayName="bytesDisplayName"
-        columnsMeta={{
-          bytes: {
-            type: 'string',
-            esType: 'keyword',
-          },
-        }}
         columnName="bytes"
-        dataView={stubLogstashDataView}
+        dataSource={dataSource}
         showColumnTokens
       />
     );
@@ -92,7 +92,7 @@ describe('DataTableColumnHeader', () => {
       <DataTableColumnHeader
         columnDisplayName="Document"
         columnName="_source"
-        dataView={stubLogstashDataView}
+        dataSource={new IndexPatternSource(stubLogstashDataView)}
         showColumnTokens
       />
     );
@@ -108,7 +108,7 @@ describe('DataTableColumnHeader', () => {
       <DataTableColumnHeader
         columnDisplayName="Nested User"
         columnName="nested_user"
-        dataView={stubDataViewWithNested}
+        dataSource={new IndexPatternSource(stubDataViewWithNested)}
         showColumnTokens
       />
     );

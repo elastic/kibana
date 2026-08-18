@@ -7,6 +7,7 @@
 
 import type { LensPublicStart, ChartInfo } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
+import { IndexPatternSource } from '@kbn/data-source';
 import { i18n } from '@kbn/i18n';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import type { LensApi } from '@kbn/lens-plugin/public';
@@ -94,7 +95,10 @@ export class VisualizationExtractor {
       );
     }
 
-    if (!layer.dataView) {
+    const dataView =
+      layer.dataSource instanceof IndexPatternSource ? layer.dataSource.getDataView() : undefined;
+
+    if (!dataView) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.noDataViews', {
           defaultMessage: 'No data views can be found in the visualization.',
@@ -102,7 +106,7 @@ export class VisualizationExtractor {
       );
     }
 
-    if (timeField.operation.fields[0] !== layer.dataView.timeFieldName) {
+    if (timeField.operation.fields[0] !== dataView.timeFieldName) {
       throw Error(
         i18n.translate('xpack.ml.newJob.fromLens.createJob.error.timeFieldNotInDataView', {
           defaultMessage:
@@ -111,7 +115,7 @@ export class VisualizationExtractor {
       );
     }
 
-    return { fields: metricFields, timeField, splitField, dataView: layer.dataView };
+    return { fields: metricFields, timeField, splitField, dataView };
   }
 
   private async getLayers(chartInfo: ChartInfo, lens: LensPublicStart): Promise<LayerResult[]> {

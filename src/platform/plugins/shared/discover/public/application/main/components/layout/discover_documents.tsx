@@ -33,8 +33,6 @@ import type {
 import {
   DataLoadingState,
   useColumns,
-  type DataTableColumnsMeta,
-  getTextBasedColumnsMeta,
   getRenderCustomToolbarWithElements,
   getDataGridDensity,
   getRowHeight,
@@ -334,13 +332,7 @@ function DiscoverDocumentsComponent({
     [uiSettings, query]
   );
 
-  const columnsMeta: DataTableColumnsMeta | undefined = useMemo(
-    () =>
-      documentState.esqlQueryColumns
-        ? getTextBasedColumnsMeta(documentState.esqlQueryColumns)
-        : undefined,
-    [documentState.esqlQueryColumns]
-  );
+  const currentDataSource = documentState.dataSource;
   const filters = useCurrentTabSelector(selectTabCombinedFilters);
 
   const cellActionsMetadata = useAdditionalCellActions({
@@ -406,11 +398,12 @@ function DiscoverDocumentsComponent({
   );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
-      dataView,
+      actions: { addFilter: onAddFilter },
+      dataSource: currentDataSource,
       density: cellRendererDensity,
       rowHeight: cellRendererRowHeight,
     }),
-    [dataView, cellRendererDensity, cellRendererRowHeight]
+    [onAddFilter, currentDataSource, cellRendererDensity, cellRendererRowHeight]
   );
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
@@ -480,7 +473,7 @@ function DiscoverDocumentsComponent({
   const {
     availableCascadeGroups,
     selectedCascadeGroups,
-    columnsMeta: cascadedColumnsMeta,
+    dataSource: cascadedDataSource,
   } = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
@@ -503,7 +496,7 @@ function DiscoverDocumentsComponent({
       cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
-      cascadedColumnsMeta,
+      cascadedDataSource,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
@@ -528,7 +521,7 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
-    cascadedColumnsMeta,
+    cascadedDataSource,
     dispatch,
     esqlVariables,
     expandedDoc$,
@@ -548,12 +541,12 @@ function DiscoverDocumentsComponent({
     renderViewModeToggle,
   ]);
 
-  const flyoutColumnsMeta = useMemo(() => {
+  const flyoutDataSource = useMemo(() => {
     if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
-      return columnsMeta;
+      return currentDataSource;
     }
-    return cascadedColumnsMeta;
-  }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
+    return cascadedDataSource;
+  }, [expandedDocOwner, currentDataSource, cascadedDataSource]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -585,7 +578,7 @@ function DiscoverDocumentsComponent({
             ariaLabelledBy="documentsAriaLabel"
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
-            columnsMeta={columnsMeta}
+            dataSource={currentDataSource}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
             loadingState={
@@ -649,7 +642,7 @@ function DiscoverDocumentsComponent({
           hits={renderDocumentViewMeta.displayedRows}
           // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
           columns={renderDocumentViewMeta.displayedColumns}
-          columnsMeta={flyoutColumnsMeta}
+          dataSource={flyoutDataSource}
           savedSearchId={persistedDiscoverSession?.id!}
           query={query}
           initialTabId={initialDocViewerTabId}

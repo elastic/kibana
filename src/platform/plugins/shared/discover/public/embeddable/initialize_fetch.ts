@@ -35,8 +35,8 @@ import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/in
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { SearchResponseIncompleteWarning } from '@kbn/search-response-warnings/src/types';
-import { getTextBasedColumnsMeta } from '@kbn/unified-data-table';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
+import { IndexPatternSource } from '@kbn/data-source';
 import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import type { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
@@ -228,9 +228,7 @@ export function initializeFetch({
               esqlApproximation: fetchContext.isApproximate,
             });
             return {
-              columnsMeta: result.esqlQueryColumns
-                ? getTextBasedColumnsMeta(result.esqlQueryColumns)
-                : undefined,
+              dataSource: result.dataSource,
               rows: result.records,
               hitCount: result.records.length,
               fetchContext,
@@ -268,6 +266,7 @@ export function initializeFetch({
           });
 
           return {
+            dataSource: new IndexPatternSource(dataView),
             warnings: interceptedWarnings,
             rows: buildDataTableRecordList({
               records: resp.hits.hits,
@@ -295,8 +294,8 @@ export function initializeFetch({
 
       api.fetchWarnings$.next(next.warnings ?? []);
       api.fetchContext$.next(next.fetchContext);
-      if (Object.hasOwn(next, 'columnsMeta')) {
-        stateManager.columnsMeta.next(next.columnsMeta);
+      if (Object.hasOwn(next, 'dataSource')) {
+        stateManager.dataSource.next(next.dataSource);
       }
     });
 

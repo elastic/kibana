@@ -35,7 +35,7 @@ describe('getPinControl', () => {
       dataView,
       fieldFormats: {} as FieldFormatsStart,
       isPinned: false,
-      columnsMeta: undefined,
+      dataSource: undefined,
     }),
   ];
 

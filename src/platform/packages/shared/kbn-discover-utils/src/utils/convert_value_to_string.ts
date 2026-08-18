@@ -28,7 +28,7 @@ export const convertValueToString = ({
   fieldFormats,
   options,
 }: {
-  dataView: DataView;
+  dataView?: DataView;
   dataViewField?: DataViewField;
   flattenedValue: unknown;
   dataTableRecord: DataTableRecord;

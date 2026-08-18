@@ -9,6 +9,7 @@
 
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataSourceService } from '@kbn/data-source';
 import { createDatatableUtilitiesMock } from '../common/mocks';
 import type { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
@@ -18,6 +19,14 @@ import { createDateRangePickerPresetsServiceMock } from './date_range_picker_pre
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
+
+const createDataSourcesMock = (): jest.Mocked<DataSourceService> =>
+  ({
+    get: jest.fn(),
+    fromDataView: jest.fn(),
+    registerEsqlSource: jest.fn(),
+    unregisterEsqlSource: jest.fn(),
+  } as unknown as jest.Mocked<DataSourceService>);
 
 const createSetupContract = (): Setup => {
   const querySetupMock = queryServiceMock.createSetupContract();
@@ -39,6 +48,7 @@ const createStartContract = (): Start => {
     },
     dataViews: dataViewsMock,
     datatableUtilities: createDatatableUtilitiesMock(),
+    dataSources: createDataSourcesMock(),
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,

@@ -43,6 +43,7 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/dashboard-plugin",
     "@kbn/data-plugin",
+    "@kbn/data-source",
     "@kbn/data-view-editor-plugin",
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",

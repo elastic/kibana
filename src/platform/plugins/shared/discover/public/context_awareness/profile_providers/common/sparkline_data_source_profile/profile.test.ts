@@ -8,7 +8,6 @@
  */
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceType } from '../../../../../common/data_sources';
 import type { ContextWithProfileId } from '../../../profile_service';
 import type { DataSourceProfileProviderParams, RootContext } from '../../../profiles';
@@ -177,8 +176,9 @@ describe('sparklineDataSourceProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       return getCellRenderers({
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
-        dataView: {} as DataView,
+        dataSource: undefined,
         density: undefined,
       });
     };
@@ -205,8 +205,9 @@ describe('sparklineDataSourceProfileProvider', () => {
         toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
       });
       const params = {
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
-        dataView: {} as DataView,
+        dataSource: undefined,
         density: undefined,
       };
       const renderers = getCellRenderers(params);
@@ -226,8 +227,9 @@ describe('sparklineDataSourceProfileProvider', () => {
         }
       );
       const renderers = getCellRenderers({
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
-        dataView: {} as DataView,
+        dataSource: undefined,
         density: undefined,
       });
       expect(renderers).toHaveProperty('existing_col', existingRenderer);
@@ -247,8 +249,9 @@ describe('sparklineDataSourceProfileProvider', () => {
         }
       );
       const renderers = getCellRenderers({
+        actions: { addFilter: jest.fn() },
         rowHeight: 1,
-        dataView: {} as DataView,
+        dataSource: undefined,
         density: undefined,
       });
       expect(renderers.some_other_col).toBe(nonSparklineRenderer);

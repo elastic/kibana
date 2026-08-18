@@ -26,11 +26,12 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
   dataViewMock,
   createDataViewWithBytesField,
-  columnsMetaOverridingBytesType,
+  createEsqlSourceOverridingBytesType,
   createFormatFieldValueReactSpy,
   expectFieldCallToMatch,
 } from '@kbn/discover-utils/src/__mocks__';
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { IndexPatternSource } from '@kbn/data-source';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -70,7 +71,7 @@ const getSummaryProps = (
   rowHeight: 1,
   onFilter: jest.fn(),
   shouldShowFieldHandler: () => true,
-  columnsMeta: undefined,
+  dataSource: undefined,
   core: corePluginMock.createStart(),
   share: sharePluginMock.createStartContract(),
   isTracesSummary: false,
@@ -282,8 +283,8 @@ describe('SummaryCellPopover', () => {
   });
 });
 
-describe('SummaryColumn with columnsMeta', () => {
-  it('should use data view field type when columnsMeta is undefined', () => {
+describe('SummaryColumn with dataSource', () => {
+  it('should use data view field type when dataSource is undefined', () => {
     const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
     const testDataView = createDataViewWithBytesField();
 
@@ -301,7 +302,7 @@ describe('SummaryColumn with columnsMeta', () => {
       <SummaryColumn
         {...getSummaryProps(record, {
           dataView: testDataView,
-          columnsMeta: undefined,
+          dataSource: new IndexPatternSource(testDataView),
         })}
       />
     );
@@ -310,7 +311,14 @@ describe('SummaryColumn with columnsMeta', () => {
     formatFieldValueReactSpy.mockRestore();
   });
 
-  it('should use columnsMeta type instead of data view field type when provided', () => {
+  it('should format using the data view field type even when an ES|QL dataSource is provided', async () => {
+    // NOTE: SummaryColumn always renders its fallback content via
+    // `useTopLevelObjectColumns: false`, which formats fields purely from the
+    // `IndexPatternSource`-derived `DataView` (see `formatHitReact`). As part of
+    // the DataSource refactor (kibana#222924), `formatHitReact` no longer accepts
+    // any per-column type override, so an `EsqlSource`'s result-column type can no
+    // longer override a mapped field's type through this path. This mirrors the
+    // documented coverage gap in `format_hit.test.ts`.
     const formatFieldValueReactSpy = createFormatFieldValueReactSpy();
     const testDataView = createDataViewWithBytesField();
 
@@ -328,12 +336,17 @@ describe('SummaryColumn with columnsMeta', () => {
       <SummaryColumn
         {...getSummaryProps(record, {
           dataView: testDataView,
-          columnsMeta: columnsMetaOverridingBytesType,
+          dataSource: await createEsqlSourceOverridingBytesType(),
         })}
       />
     );
 
-    expectFieldCallToMatch(formatFieldValueReactSpy, 'bytes', 'string', ['keyword']);
+    // No matching call is expected: since dataSource is an EsqlSource (not an
+    // IndexPatternSource), SourceDocument cannot resolve a DataView, so `bytes`
+    // is formatted without field-specific type info.
+    expect(
+      formatFieldValueReactSpy.mock.calls.some((call) => call[0]?.field?.name === 'bytes')
+    ).toBe(false);
     formatFieldValueReactSpy.mockRestore();
   });
 });

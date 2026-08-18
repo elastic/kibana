@@ -16,7 +16,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';
-import { getIndexPatterns } from '../../services';
+import type { DataSource, DataSourceService } from '@kbn/data-source';
 import { ApplyFiltersPopoverContent } from './apply_filter_popover_content';
 import { ACTION_GLOBAL_APPLY_FILTER } from '../constants';
 
@@ -37,6 +37,7 @@ export function createFilterAction(
   filterManager: FilterManager,
   timeFilter: TimefilterContract,
   coreStart: CoreStart,
+  dataSources: DataSourceService,
   id: string = ACTION_GLOBAL_APPLY_FILTER,
   type: string = ACTION_GLOBAL_APPLY_FILTER
 ): UiActionsActionDefinition<ApplyGlobalFilterActionContext> {
@@ -63,11 +64,9 @@ export function createFilterAction(
       let selectedFilters: Filter[] = filters;
 
       if (selectedFilters.length > 1) {
-        const indexPatterns = await Promise.all(
-          filters.map((filter) => {
-            return getIndexPatterns().get(filter.meta.index!);
-          })
-        );
+        const indexPatterns = (
+          await Promise.all(filters.map((filter) => dataSources.get(filter.meta.index!)))
+        ).filter((dataSource): dataSource is DataSource => dataSource !== undefined);
 
         const filterSelectionPromise: Promise<Filter[]> = new Promise((resolve) => {
           const overlay = coreStart.overlays.openModal(

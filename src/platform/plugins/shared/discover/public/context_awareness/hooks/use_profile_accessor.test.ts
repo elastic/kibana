@@ -15,6 +15,7 @@ import { getDataTableRecords } from '../../__fixtures__/real_hits';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { useProfiles } from './use_profiles';
 import { DataGridDensity } from '@kbn/unified-data-table';
+import { IndexPatternSource } from '@kbn/data-source';
 
 let mockProfiles: AppliedProfile[] = [];
 
@@ -33,7 +34,8 @@ jest.mock('../composable_profile', () => {
 const record = getDataTableRecords(dataViewWithTimefieldMock)[0];
 
 const getCellRenderersParams = {
-  dataView: dataViewWithTimefieldMock,
+  actions: { addFilter: jest.fn() },
+  dataSource: new IndexPatternSource(dataViewWithTimefieldMock),
   density: DataGridDensity.COMPACT,
   rowHeight: 0,
 };

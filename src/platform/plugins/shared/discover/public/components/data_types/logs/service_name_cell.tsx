@@ -37,7 +37,7 @@ export const getServiceNameCell =
   (props: DataGridCellValueElementProps) => {
     const { core, share } = useDiscoverServices();
     const serviceNameValue = getFieldValue(props.row, serviceNameField);
-    const field = props.dataView.getFieldByName(serviceNameField);
+    const field = props.dataView?.getFieldByName(serviceNameField);
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
     const otelSdkLanguage = getFieldValue(
       props.row,

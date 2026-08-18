@@ -24,6 +24,7 @@ const createDiscoverHistogramCustomFilterAction = async (
     services.customDataService.query.filterManager,
     services.customDataService.query.timefilter.timefilter,
     coreStart,
+    services.customDataService.dataSources,
     EsqlInTimelineAction.VIS_FILTER_ACTION,
     EsqlInTimelineAction.VIS_FILTER_ACTION
   );

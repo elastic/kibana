@@ -8,8 +8,9 @@
  */
 
 import { getDocId, type EsHitRecord } from '@kbn/discover-utils';
-import type { ExecutionContract } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, ExecutionContract } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { EsqlSource } from '@kbn/data-source';
 import moment from 'moment';
 import { of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
@@ -17,6 +18,9 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 import { fetchEsql, getTextBasedQueryStateToAstProps } from './fetch_esql';
 import type { TimeRange } from '@kbn/es-query';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../context_awareness';
+
+const toDatatableColumns = (names: string[]): DatatableColumn[] =>
+  names.map((name) => ({ id: name, name, meta: { type: 'string' } }));
 
 describe('fetchEsql', () => {
   beforeEach(() => {
@@ -47,13 +51,14 @@ describe('fetchEsql', () => {
       raw: hit,
       flattened: hit,
     }));
+    const columns = toDatatableColumns(['_id', 'foo']);
     const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
     expressionsExecuteSpy.mockReturnValueOnce({
       cancel: jest.fn(),
       getData: jest.fn(() =>
         of({
           result: {
-            columns: ['_id', 'foo'],
+            columns,
             rows: hits,
           },
         })
@@ -62,9 +67,10 @@ describe('fetchEsql', () => {
     const resolveDocumentProfileSpy = jest.spyOn(scopedProfilesManager, 'resolveDocumentProfile');
     expect(await fetchEsql(fetchEsqlMockProps)).toEqual({
       records,
-      esqlQueryColumns: ['_id', 'foo'],
+      esqlQueryColumns: columns,
       esqlHeaderWarning: undefined,
       interceptedWarnings: [],
+      dataSource: expect.any(EsqlSource),
     });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: records[0] });
@@ -81,13 +87,14 @@ describe('fetchEsql', () => {
         { _id: '2', foo: 'baz' },
       ] as unknown as EsHitRecord[];
       const responseTime = moment().format('YYYY-MM-DD_HH_mm_ss');
+      const columns = toDatatableColumns(['_id', 'foo']);
       const expressionsExecuteSpy = jest.spyOn(discoverServiceMock.expressions, 'execute');
       expressionsExecuteSpy.mockReturnValueOnce({
         cancel: jest.fn(),
         getData: jest.fn(() =>
           of({
             result: {
-              columns: ['_id', 'foo'],
+              columns,
               rows: hits,
             },
           })
@@ -107,9 +114,10 @@ describe('fetchEsql', () => {
             flattened: hits[1],
           },
         ],
-        esqlQueryColumns: ['_id', 'foo'],
+        esqlQueryColumns: columns,
         esqlHeaderWarning: undefined,
         interceptedWarnings: [],
+        dataSource: expect.any(EsqlSource),
       });
     } finally {
       jest.useRealTimers();
@@ -131,7 +139,7 @@ describe('fetchEsql', () => {
           getData: jest.fn(() =>
             of({
               result: {
-                columns: ['_id', '_index', 'foo'],
+                columns: toDatatableColumns(['_id', '_index', 'foo']),
                 rows: hits,
               },
             })
@@ -168,7 +176,7 @@ describe('fetchEsql', () => {
           getData: jest.fn(() =>
             of({
               result: {
-                columns: ['_id', 'foo'],
+                columns: toDatatableColumns(['_id', 'foo']),
                 rows: hits,
               },
             })
@@ -241,7 +249,7 @@ describe('fetchEsql', () => {
       getData: jest.fn(() =>
         of({
           result: {
-            columns: ['_id', 'snippets'],
+            columns: toDatatableColumns(['_id', 'snippets']),
             rows: hits,
           },
         })

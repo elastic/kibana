@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import { type DataSource, IndexPatternSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { convertValueToString as commonConvertValueToString } from '@kbn/discover-utils';
+import { getFieldFromDataSource } from './get_field_from_data_source';
 
 interface ConvertedResult {
   formattedString: string;
@@ -25,17 +25,15 @@ export const convertValueToString = ({
   rowIndex,
   rows,
   columnId,
-  dataView,
+  dataSource,
   fieldFormats,
-  columnsMeta,
   options,
 }: {
   rowIndex: number;
   rows: DataTableRecord[];
   columnId: string;
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   fieldFormats: FieldFormatsStart;
-  columnsMeta: DataTableColumnsMeta | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
   };
@@ -48,11 +46,8 @@ export const convertValueToString = ({
   }
   const rowFlattened = rows[rowIndex].flattened;
   const value = rowFlattened?.[columnId];
-  const field = getDataViewFieldOrCreateFromColumnMeta({
-    fieldName: columnId,
-    dataView,
-    columnMeta: columnsMeta?.[columnId],
-  });
+  const field = getFieldFromDataSource(dataSource, columnId);
+  const dataView = dataSource instanceof IndexPatternSource ? dataSource.getDataView() : undefined;
 
   return commonConvertValueToString({
     dataView,

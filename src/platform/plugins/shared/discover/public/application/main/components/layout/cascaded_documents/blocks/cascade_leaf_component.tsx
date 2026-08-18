@@ -33,7 +33,6 @@ interface ESQLDataCascadeLeafCellProps
       UnifiedDataTableProps,
       | 'dataGridDensityState'
       | 'showTimeCol'
-      | 'dataView'
       | 'showKeyboardShortcuts'
       | 'externalCustomRenderers'
       | 'onUpdateDataGridDensity'
@@ -161,7 +160,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
     cellId,
     dataGridDensityState,
     showTimeCol,
-    dataView,
     externalCustomRenderers,
     virtualizerController,
     rowIndex,
@@ -169,7 +167,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
   }: ESQLDataCascadeLeafCellProps) => {
     const services = useDiscoverServices();
     const {
-      cascadedColumnsMeta,
+      cascadedDataSource,
       expandedDoc$,
       expandedDocOwner$,
       getExpandedDocSetter,
@@ -269,7 +267,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
     return (
       <UnifiedDataTable
         isPlainRecord
-        dataView={dataView}
+        dataSource={cascadedDataSource}
         showTimeCol={showTimeCol}
         services={services}
         sort={EMPTY_SORT}
@@ -280,7 +278,6 @@ export const ESQLDataCascadeLeafCell = React.memo(
         rows={cellData}
         loadingState={DataLoadingState.loaded}
         columns={selectedColumns}
-        columnsMeta={cascadedColumnsMeta}
         onSetColumns={setSelectedColumns}
         renderCustomToolbar={renderCustomToolbarWithElements}
         expandedDoc={expandedDocOwner === cellId ? expandedDoc : undefined}

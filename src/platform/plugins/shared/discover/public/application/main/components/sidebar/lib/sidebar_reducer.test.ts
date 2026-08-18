@@ -20,6 +20,7 @@ import {
 } from './sidebar_reducer';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import { EsqlSource } from '@kbn/data-source';
 
 describe('sidebar reducer', function () {
   it('should set an initial state', function () {
@@ -68,7 +69,7 @@ describe('sidebar reducer', function () {
     );
   });
 
-  it('should handle "documents loaded" action', function () {
+  it('should handle "documents loaded" action', async function () {
     const dataViewFieldName = stubDataViewWithoutTimeField.fields[0].name;
     const unmappedFieldName = 'field1';
     const fieldCounts = { [unmappedFieldName]: 1, [dataViewFieldName]: 1 };
@@ -97,30 +98,37 @@ describe('sidebar reducer', function () {
       status: DiscoverSidebarReducerStatus.COMPLETED,
     });
 
+    const esqlDataSource = await EsqlSource.create({
+      query: 'FROM logs',
+      resultColumns: [
+        {
+          id: '1',
+          name: 'text1',
+          meta: {
+            type: 'number',
+          },
+          isNull: true,
+          isComputedColumn: true,
+        },
+        {
+          id: '2',
+          name: 'text2',
+          meta: {
+            type: 'string',
+            esType: 'keyword',
+          },
+          isComputedColumn: true,
+        },
+      ] as DatatableColumn[],
+    });
+
     const resultForEsqlQuery = discoverSidebarReducer(state, {
       type: DiscoverSidebarReducerActionType.DOCUMENTS_LOADED,
       payload: {
         isEsqlMode: true,
         dataView: stubDataViewWithoutTimeField,
         fieldCounts: {},
-        esqlQueryColumns: [
-          {
-            id: '1',
-            name: 'text1',
-            meta: {
-              type: 'number',
-            },
-            isNull: true,
-          },
-          {
-            id: '2',
-            name: 'text2',
-            meta: {
-              type: 'string',
-              esType: 'keyword',
-            },
-          },
-        ] as DatatableColumn[],
+        dataSource: esqlDataSource,
       },
     });
     expect(resultForEsqlQuery).toStrictEqual({

@@ -21,13 +21,14 @@ import type { CellAction, CellActionExecutionContext, CellActionsData } from '@k
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { OmitIndexSignature } from 'type-fest';
-import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type {
   ChartSectionProps,
   UnifiedHistogramTopPanelHeightContext,
 } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
+import type { DataSource } from '@kbn/data-source';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
 
@@ -185,9 +186,9 @@ export interface DocViewerExtensionParams {
  */
 export interface RowIndicatorExtensionParams {
   /**
-   * The current data view
+   * The current data source. Present for both DSL and ES|QL queries.
    */
-  dataView: DataView;
+  dataSource: DataSource | undefined;
 }
 
 /**
@@ -272,9 +273,18 @@ export interface ModifiedVisAttributesExtensionParams {
  */
 export interface CellRenderersExtensionParams {
   /**
-   * The current data view
+   * Available actions for cell renderers
    */
-  dataView: DataView;
+  actions: {
+    /**
+     * Adds a filter to the current search in data view mode, or a where clause in ESQL mode
+     */
+    addFilter?: DocViewFilterFn;
+  };
+  /**
+   * The current data source. Present for both DSL and ES|QL queries.
+   */
+  dataSource: DataSource | undefined;
   /**
    * The current density applied to the data grid component
    */
@@ -290,9 +300,9 @@ export interface CellRenderersExtensionParams {
  */
 export interface RowControlsExtensionParams {
   /**
-   * The current data view
+   * The current data source. Present for both DSL and ES|QL queries.
    */
-  dataView: DataView;
+  dataSource: DataSource | undefined;
   /**
    * The current query
    */

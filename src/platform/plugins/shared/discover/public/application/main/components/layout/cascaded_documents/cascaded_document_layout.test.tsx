@@ -128,7 +128,7 @@ const createWrapper = async (overrides?: Partial<CascadedDocumentsContext>) => {
     availableCascadeGroups: ['category'],
     selectedCascadeGroups: ['category'],
     cascadedDocumentsFetcher: createMockFetcher(),
-    cascadedColumnsMeta: {},
+    cascadedDataSource: undefined,
     esqlQuery,
     esqlVariables: undefined,
     timeRange: undefined,
