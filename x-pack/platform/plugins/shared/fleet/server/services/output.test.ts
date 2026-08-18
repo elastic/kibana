@@ -3221,6 +3221,60 @@ describe('Output Service', () => {
         );
       });
 
+      it('Should null gRPC-only compression when switching from gRPC with snappy/zstd to HTTP', async () => {
+        const soClient = getMockedSoClient({});
+        // Override the stored output to have a gRPC-only compression value
+        esoClientMock.getDecryptedAsInternalUser.mockResolvedValueOnce(
+          mockOutputSO('existing-otlp-output', {
+            type: 'otlp',
+            is_default: false,
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+              compression: 'zstd',
+            },
+          })
+        );
+
+        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+          },
+        });
+
+        expect(soClient.update).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            otlp_exporter: expect.objectContaining({
+              protocol: 'http/protobuf',
+              compression: null,
+            }),
+          })
+        );
+      });
+
+      it('Should propagate a null container to soClient.update untouched on OTLP partial update', async () => {
+        const soClient = getMockedSoClient({});
+
+        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+            tls: null,
+          },
+        });
+
+        expect(soClient.update).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            otlp_exporter: expect.objectContaining({ tls: null }),
+          })
+        );
+      });
+
       it('Should write tls secrets as plaintext on OTLP update when secret storage is disabled', async () => {
         const soClient = getMockedSoClient({});
 
