@@ -65,6 +65,12 @@ export interface DocumentFlyoutWrapperProps {
    * Optional test subject forwarded to the document flyout header without adding a layout wrapper.
    */
   dataTestSubj?: string;
+  /**
+   * `true` while in-flyout pagination is still resolving which document to show (e.g. it navigated
+   * to a page the source hasn't loaded yet). Forwarded to `DocumentFlyout` so the previously
+   * displayed document stays mounted behind a spinner instead of unmounting the whole flyout.
+   */
+  isPaginationLoading?: boolean;
 }
 
 /**
@@ -79,6 +85,7 @@ export const DocumentFlyoutWrapper = memo(
     renderCellActions,
     onAlertUpdated,
     dataTestSubj,
+    isPaginationLoading,
   }: DocumentFlyoutWrapperProps) => {
     const { dataView, status } = useDataView(PageScope.default);
 
@@ -155,6 +162,7 @@ export const DocumentFlyoutWrapper = memo(
             renderCellActions={renderCellActions}
             onAlertUpdated={handleAlertUpdated}
             dataTestSubj={dataTestSubj}
+            isPaginationLoading={isPaginationLoading}
           />
         </>
       );

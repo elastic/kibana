@@ -26,7 +26,8 @@ import type {
  */
 const SOFT_RESET: Partial<ScopedPaginationSlice> = {
   flyoutDocumentIndex: null,
-  flyoutDocument: null,
+  flyoutDocumentId: null,
+  flyoutDocumentIndexName: null,
   isFlyoutDocumentLoading: false,
 };
 

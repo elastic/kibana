@@ -27,8 +27,6 @@ import {
 import type { SetOptional } from 'type-fest';
 import { isEmpty, noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
-import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import {
   AlertsTable as ResponseOpsAlertsTable,
   alertsTableQueryClient,
@@ -41,8 +39,9 @@ import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
-import { DocumentFlyout } from '../../../flyout_v2/document/main';
+import { PaginatedDocumentFlyout } from '../../../flyout_v2/document/pagination/paginated_document_flyout';
 import { usePaginatedFlyout } from '../../../flyout_v2/document/pagination/use_paginated_flyout';
+import type { ScopedPaginationSlice } from '../../../flyout_v2/document/pagination/types';
 import { cellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
 import { alertsTableRef } from './alerts_table_ref';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
@@ -337,7 +336,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
 
   const getDocumentFlyoutBody = useCallback(
     () => (
-      <DocumentFlyout
+      <PaginatedDocumentFlyout
         renderCellActions={renderFlyoutCellActions}
         onAlertUpdated={handleFlyoutAlertUpdated}
       />
@@ -345,10 +344,13 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     [handleFlyoutAlertUpdated, renderFlyoutCellActions]
   );
 
-  // Resolves the document at an absolute alert index (0-based across the full
-  // result set) from the currently-loaded page. Returns null when the alert is
-  // on a different page — the parallel cross-page query will resolve it and
-  // call openPaginatedFlyout again once the data is available.
+  // Resolves the identity of the alert at an absolute index (0-based across the
+  // full result set) from the currently-loaded page. Returns null when the alert
+  // is on a different page — the parallel cross-page query will resolve it and
+  // call openPaginatedFlyout again once the data is available. Only `_id` and
+  // `_index` are handed over: the flyout fetches the document itself, so it
+  // renders the full document rather than the subset of fields backing the
+  // table's columns.
   const resolveDocument = useCallback(
     (alertIndex: number) => {
       if (reduxItemsPerPage <= 0 || !tableContext) return null;
@@ -357,9 +359,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       const offset = alertIndex - tablePageIndex * reduxItemsPerPage;
       const alert = isInPage ? (tableContext.alerts?.[offset] as Alert | undefined) : undefined;
       if (!alert) return null;
-      return {
-        flyoutDocument: buildDocumentFromAlert(alert),
-      };
+      return getDocumentIdentity(alert);
     },
     [reduxItemsPerPage, tableContext, tablePageIndex]
   );
@@ -488,19 +488,24 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     tablePageIndex,
   ]);
 
-  // Push the resolved alert into the shared store once the parallel query
-  // returns it, for the cross-page case. The synchronous in-page case is
+  // Push the resolved alert identity into the shared store once the parallel
+  // query returns it, for the cross-page case. The synchronous in-page case is
   // handled by `usePaginatedFlyout` / `onOpen` so that re-clicking the same
   // row after closing the flyout reliably re-opens it.
+  //
+  // Note there is deliberately no equivalent effect for the table's own page:
+  // re-resolving the displayed document from the table's positional index on
+  // every refetch would repoint the flyout at a different alert whenever the
+  // result set shifts underneath it (closing an alert removes it from a table
+  // filtered on open alerts). The document is fetched by `_id` in the flyout,
+  // which refetches itself after a mutation.
   useEffect(() => {
     if (flyoutDocumentIndex == null || reduxItemsPerPage <= 0) return;
     if (flyoutPageIndex === tablePageIndex) return;
     const offset = flyoutDocumentIndex - flyoutPageIndex * reduxItemsPerPage;
     const alert = flyoutAlertsData?.alerts?.[offset] as Alert | undefined;
     if (!alert) return;
-    openPaginatedFlyout(flyoutDocumentIndex, {
-      flyoutDocument: buildDocumentFromAlert(alert),
-    });
+    openPaginatedFlyout(flyoutDocumentIndex, getDocumentIdentity(alert));
   }, [
     flyoutDocumentIndex,
     flyoutAlertsData?.alerts,
@@ -510,27 +515,6 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     tablePageIndex,
   ]);
 
-  // Keep the store's `flyoutDocument` in sync with the table's own page when
-  // that page refetches (e.g. `alertsTableRef.current?.refresh()` after an
-  // assignee/status mutation from the flyout's `Take action` menu). Without
-  // this, `flyoutDocument` is only ever written on open or on cross-page
-  // navigation (the effect above), so the flyout kept rendering pre-mutation
-  // data for same-page alerts.
-  useEffect(() => {
-    if (flyoutDocumentIndex == null || reduxItemsPerPage <= 0) return;
-    if (flyoutPageIndex !== tablePageIndex) return;
-    const offset = flyoutDocumentIndex - tablePageIndex * reduxItemsPerPage;
-    const alert = tableContext?.alerts?.[offset] as Alert | undefined;
-    if (!alert) return;
-    setState({ flyoutDocument: buildDocumentFromAlert(alert) });
-  }, [
-    flyoutDocumentIndex,
-    flyoutPageIndex,
-    reduxItemsPerPage,
-    setState,
-    tableContext?.alerts,
-    tablePageIndex,
-  ]);
   const userProfiles = useFetchUserProfilesFromAlerts({
     alerts: tableContext?.alerts ?? [],
     columns: tableContext?.columns ?? [],
@@ -747,12 +731,13 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
 
 const MemoizedAlertsTable = memo(AlertsTableComponent);
 
-const buildDocumentFromAlert = (alert: Alert): DataTableRecord =>
-  buildDataTableRecord({
-    _id: alert._id,
-    _index: alert._index,
-    _source: alert as Record<string, unknown>,
-  } as EsHitRecord);
+// The pagination slice carries the identity of the displayed alert, not the alert itself: the
+// flyout resolves the document by `_id`/`_index` so it gets the complete document (a table row
+// only holds the fields backing its columns) and can refetch it after a mutation.
+const getDocumentIdentity = (alert: Alert): Partial<ScopedPaginationSlice> => ({
+  flyoutDocumentId: alert._id,
+  flyoutDocumentIndexName: alert._index,
+});
 
 // Wrapping the table in a `QueryClientProvider` here (rather than relying on
 // the provider rendered inside `<ResponseOpsAlertsTable>`) is what lets the
