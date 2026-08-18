@@ -196,6 +196,7 @@ emcc \
   -s EXPORT_NAME="createYaraValidateModule" \
   -s ENVIRONMENT=node \
   -s ALLOW_MEMORY_GROWTH=1 \
+  -s DYNAMIC_EXECUTION=0 \
   -s STACK_SIZE=1048576 \
   -s NO_FILESYSTEM=1 \
   -s ERROR_ON_UNDEFINED_SYMBOLS=1 \
