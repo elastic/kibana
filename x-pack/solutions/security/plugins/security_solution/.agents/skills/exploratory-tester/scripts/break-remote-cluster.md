@@ -1,6 +1,6 @@
 # Breaking and restoring a remote cluster (CCS sessions only)
 
-Used from `phases/2-explore.md` → "CCS-specific techniques" → "Testing an unreachable remote cluster", when a flow's `expected` describes how the UI should behave while the remote cluster is unreachable or degraded.
+Used from `phases/2-flow-core.md` → "CCS-specific techniques" → "Testing an unreachable remote cluster", when a flow's `expected` describes how the UI should behave while the remote cluster is unreachable or degraded.
 
 **Requires:** an admin API key (`config.json → credentials.api_key`) and **explicit user confirmation before every run**. A remote cluster is shared, cluster-level infrastructure on the SOURCE deployment — not session-local state like a space or a test index. Breaking it affects every user and every app on that deployment until it is restored. **Never** run the break step without a fresh yes from the user, and **always** restore the exact original config before ending the session, even if a flow fails partway.
 

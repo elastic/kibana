@@ -66,7 +66,7 @@ const CopyStatusIcon = (props: Props) => {
   if (hasUnresolvableErrors) {
     return (
       <EuiIconTip
-        type={'alert'}
+        type={'warning'}
         color={'danger'}
         iconProps={{
           'data-test-subj': getDataTestSubj('failed'),
@@ -115,7 +115,7 @@ const CopyStatusIcon = (props: Props) => {
           onDestinationMapChange={onDestinationMapChange}
         />
         <EuiIconTip
-          type={'alert'}
+          type={'warning'}
           color={'warning'}
           iconProps={{
             'data-test-subj': getDataTestSubj('conflicts'),

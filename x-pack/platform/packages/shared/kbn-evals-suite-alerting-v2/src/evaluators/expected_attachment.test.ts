@@ -7,6 +7,7 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { TaskOutput } from '@kbn/evals';
+import { ACTION_POLICY_ATTACHMENT_TYPE, RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import {
   RENDER_ATTACHMENT_TAG_RE,
   createExpectedAttachmentDataEvaluator,
@@ -114,17 +115,27 @@ describe('createExpectedRenderAttachmentEvaluator', () => {
           '<render_attachment id="policy-1" version="1"/>',
         ].join('\n'),
         [
-          attachment('rule-1', 'rule'),
+          attachment('rule-1', RULE_ATTACHMENT_TYPE),
           attachment('wf-1', 'workflow.yaml'),
-          attachment('policy-1', 'action_policy'),
+          attachment('policy-1', ACTION_POLICY_ATTACHMENT_TYPE),
         ]
       ),
-      { expectRenderAttachment: ['rule', 'workflow.yaml', 'action_policy'] }
+      {
+        expectRenderAttachment: [
+          RULE_ATTACHMENT_TYPE,
+          'workflow.yaml',
+          ACTION_POLICY_ATTACHMENT_TYPE,
+        ],
+      }
     );
     expect(result.score).toBe(1);
     expect(result.metadata).toEqual(
       expect.objectContaining({
-        renderedTypes: expect.arrayContaining(['rule', 'workflow.yaml', 'action_policy']),
+        renderedTypes: expect.arrayContaining([
+          RULE_ATTACHMENT_TYPE,
+          'workflow.yaml',
+          ACTION_POLICY_ATTACHMENT_TYPE,
+        ]),
         missingTypes: [],
       })
     );
@@ -133,23 +144,23 @@ describe('createExpectedRenderAttachmentEvaluator', () => {
   it('scores 0 when an expected attachment type was not rendered', async () => {
     const result = await runRender(
       conversation('<render_attachment id="rule-1" version="1"/>', [
-        attachment('rule-1', 'rule'),
-        attachment('policy-1', 'action_policy'),
+        attachment('rule-1', RULE_ATTACHMENT_TYPE),
+        attachment('policy-1', ACTION_POLICY_ATTACHMENT_TYPE),
       ]),
-      { expectRenderAttachment: ['rule', 'action_policy'] }
+      { expectRenderAttachment: [RULE_ATTACHMENT_TYPE, ACTION_POLICY_ATTACHMENT_TYPE] }
     );
     expect(result.score).toBe(0);
     expect(result.metadata).toEqual(
       expect.objectContaining({
-        renderedTypes: ['rule'],
-        missingTypes: ['action_policy'],
+        renderedTypes: [RULE_ATTACHMENT_TYPE],
+        missingTypes: [ACTION_POLICY_ATTACHMENT_TYPE],
       })
     );
   });
 
   it('scores 0 when no render tag is present', async () => {
     const result = await runRender(conversation('I created a rule but forgot to render it.'), {
-      expectRenderAttachment: ['rule'],
+      expectRenderAttachment: [RULE_ATTACHMENT_TYPE],
     });
     expect(result.score).toBe(0);
   });
@@ -158,7 +169,7 @@ describe('createExpectedRenderAttachmentEvaluator', () => {
 describe('createExpectedAttachmentDataEvaluator', () => {
   it('skips when there is no expectAttachmentData expectation', async () => {
     const result = await runAttachmentData(
-      { attachments: [attachment('a1', 'rule')] } as TaskOutput,
+      { attachments: [attachment('a1', RULE_ATTACHMENT_TYPE)] } as TaskOutput,
       {}
     );
     expect(result.score).toBeNull();
@@ -175,10 +186,18 @@ describe('createExpectedAttachmentDataEvaluator', () => {
 
   it('scores 1 when the callback passes', async () => {
     const result = await runAttachmentData(
-      { attachments: [attachment('a1', 'rule'), attachment('a2', 'action_policy')] } as TaskOutput,
+      {
+        attachments: [
+          attachment('a1', RULE_ATTACHMENT_TYPE),
+          attachment('a2', ACTION_POLICY_ATTACHMENT_TYPE),
+        ],
+      } as TaskOutput,
       {
         expectAttachmentData: (attachments: VersionedAttachment[]) => {
-          expect(attachments.map((a) => a.type)).toEqual(['rule', 'action_policy']);
+          expect(attachments.map((a) => a.type)).toEqual([
+            RULE_ATTACHMENT_TYPE,
+            ACTION_POLICY_ATTACHMENT_TYPE,
+          ]);
         },
       }
     );
@@ -187,7 +206,7 @@ describe('createExpectedAttachmentDataEvaluator', () => {
 
   it('scores 0 when the callback throws', async () => {
     const result = await runAttachmentData(
-      { attachments: [attachment('a1', 'rule')] } as TaskOutput,
+      { attachments: [attachment('a1', RULE_ATTACHMENT_TYPE)] } as TaskOutput,
       {
         expectAttachmentData: (attachments: VersionedAttachment[]) => {
           expect(attachments).toHaveLength(2);

@@ -86,14 +86,10 @@ export class DiscoverPageObject extends FtrService {
   public async saveAsSearch(searchName: string) {
     await this.clickSaveAsSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
@@ -113,14 +109,10 @@ export class DiscoverPageObject extends FtrService {
     const isStandaloneSession = await this.isStandaloneDiscoverSession();
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     if (tags.length) {
       await this.testSubjects.click('savedObjectTagSelector');
@@ -177,14 +169,10 @@ export class DiscoverPageObject extends FtrService {
       await this.clickSaveSearchButton();
     }
 
-    await this.retry.waitFor(
-      `saved search title is set to ${searchName} and save button is clickable`,
-      async () => {
-        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
-        await this.testSubjects.setValue('savedObjectTitle', searchName);
-        return (await saveButton.getAttribute('disabled')) !== 'true';
-      }
-    );
+    await this.retry.waitFor(`saved search title is set to ${searchName}`, async () => {
+      await this.testSubjects.setValue('savedObjectTitle', searchName);
+      return (await this.testSubjects.getAttribute('savedObjectTitle', 'value')) === searchName;
+    });
 
     if (storeTimeRange !== undefined) {
       await this.retry.waitFor(`store time range switch is set`, async () => {
@@ -407,8 +395,12 @@ export class DiscoverPageObject extends FtrService {
 
   public async getBreakdownFieldValue() {
     const breakdownButton = await this.testSubjects.find('unifiedHistogramBreakdownSelectorButton');
+    const visibleText = await breakdownButton.getVisibleText();
 
-    return breakdownButton.getVisibleText();
+    // The button label truncates long field names via an absolutely positioned
+    // overlay, which the browser's visible-text computation renders as if it
+    // were on its own line. Collapse that whitespace since it isn't visible on screen.
+    return visibleText.replace(/\s+/g, ' ').trim();
   }
 
   public async chooseBreakdownField(field: string, value?: string) {
@@ -896,17 +888,10 @@ export class DiscoverPageObject extends FtrService {
     });
   }
 
-  public async selectDataViewMode(options: { discardModal: boolean } | undefined = undefined) {
+  public async selectDataViewMode() {
     await this.clickSelectedTabMenuItem('unifiedTabs_tabMenuItem_switchToClassic');
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
-    if (options?.discardModal) {
-      await this.testSubjects.exists('discover-esql-to-dataview-modal');
-      await this.testSubjects.click('discover-esql-to-dataview-no-save-btn');
-      await this.retry.waitFor('the modal to close', async () => {
-        return !(await this.testSubjects.exists('discover-esql-to-dataview-modal'));
-      });
-    }
   }
 
   public async removeHeaderColumn(name: string) {
@@ -1006,21 +991,32 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async assertViewModeToggleNotExists() {
-    await this.testSubjects.missingOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+    await this.testSubjects.missingOrFail('dscViewModeToggleButton', { timeout: 2 * 1000 });
   }
 
   public async assertViewModeToggleExists() {
-    await this.testSubjects.existOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+    await this.testSubjects.existOrFail('dscViewModeToggleButton', { timeout: 2 * 1000 });
   }
 
   public async assertFieldStatsTableNotExists() {
     await this.testSubjects.missingOrFail('dscFieldStatsEmbeddedContent', { timeout: 2 * 1000 });
   }
 
+  /**
+   * Opens the view mode selector dropdown and selects the option with the given test subject
+   * (one of `dscViewModeDocumentOption`, `dscViewModePatternAnalysisOption`, `dscViewModeFieldStatsOption`).
+   */
+  public async selectViewMode(optionTestSubject: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.click('dscViewModeToggleButton');
+      await this.testSubjects.existOrFail('dscViewModeToggleSelectable');
+    });
+    await this.testSubjects.clickWhenNotDisabledWithoutRetry(optionTestSubject);
+  }
+
   public async clickViewModeFieldStatsButton() {
     await this.retry.tryForTime(2 * 1000, async () => {
-      await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
-      await this.testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModeFieldStatsButton');
+      await this.selectViewMode('dscViewModeFieldStatsOption');
       await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
     });
   }

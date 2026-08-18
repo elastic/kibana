@@ -12,13 +12,18 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_FIELD_DEFINITION_SAVED_OBJECT,
+  MAX_FIELD_DEFINITIONS_PER_OWNER,
 } from '../../../common/constants';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import type { FieldDefinition } from '../../../common/types/domain/field_definition/v1';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
 import type { Template } from '../../../common/types/domain/template/v1';
 import { toFieldDefinitions, trimFieldDefaults } from '../../services/templates/utils';
-import { buildFieldDefinitionYaml } from '../../common/utils/field_definitions';
+import {
+  buildFieldDefinitionYaml,
+  buildFieldDefinitionNameIndex,
+  normalizeFieldDefinitionName,
+} from '../../common/utils/field_definitions';
 import { buildTemplateYaml } from './build_template_yaml';
 import type { LegacyCustomField, LegacyTemplate, MigrationCounts } from './types';
 
@@ -104,10 +109,18 @@ const migrateFieldDefinitions = async (
   let reused = 0;
 
   const existingFieldDefs = await findFieldDefinitionsForOwner(repo, owner, nsOption);
-  const existingByName = new Map(existingFieldDefs.map((fd) => [fd.attributes.name, fd]));
+  // Case-insensitive index (first-wins on pre-existing duplicates), matching the
+  // uniqueness semantics enforced by the field-definitions sub-client at the API layer.
+  const existingByName = buildFieldDefinitionNameIndex(
+    existingFieldDefs,
+    (so) => so.attributes.name
+  );
+  let totalCount = existingFieldDefs.length;
+
+  const skippedKeys: string[] = [];
 
   for (const cf of legacyCustomFields) {
-    const existingDef = existingByName.get(cf.key);
+    const existingDef = existingByName.get(normalizeFieldDefinitionName(cf.key));
     if (existingDef) {
       const existingParsed = parseYaml(existingDef.attributes.definition ?? '') as Record<
         string,
@@ -133,6 +146,10 @@ const migrateFieldDefinitions = async (
       refNamesByKey.set(cf.key, cf.key);
       libraryDefs.push(existingDef.attributes);
       reused++;
+    } else if (totalCount >= MAX_FIELD_DEFINITIONS_PER_OWNER) {
+      // Same cap the sub-client enforces at the API layer; the hook
+      // (ensureGlobalFieldDefinitions) applies the identical guard.
+      skippedKeys.push(cf.key);
     } else {
       try {
         const { yaml } = buildFieldDefinitionYaml(cf);
@@ -145,11 +162,22 @@ const migrateFieldDefinitions = async (
           description: cf.label,
           isGlobal: true,
         };
-        await repo.create<FieldDefinition>(CASE_FIELD_DEFINITION_SAVED_OBJECT, attributes, {
-          id: fdId,
-          ...(nsOption ? { namespace: nsOption } : {}),
-          refresh: false,
-        });
+        const createdSo = await repo.create<FieldDefinition>(
+          CASE_FIELD_DEFINITION_SAVED_OBJECT,
+          attributes,
+          {
+            id: fdId,
+            ...(nsOption ? { namespace: nsOption } : {}),
+            // Use 'wait_for' so a concurrent configure PATCH's find sees this definition
+            // and avoids creating a duplicate. Field definitions per owner are O(10s) so
+            // the per-document refresh cost is negligible for this one-shot task.
+            refresh: 'wait_for',
+          }
+        );
+        // Insert into the index so intra-request duplicate custom-field keys (which the
+        // API blocks but imported/legacy SOs may contain) only produce one SO.
+        existingByName.set(normalizeFieldDefinitionName(cf.key), createdSo);
+        totalCount++;
         refNamesByKey.set(cf.key, cf.key);
         libraryDefs.push(attributes);
         created++;
@@ -161,6 +189,16 @@ const migrateFieldDefinitions = async (
         );
       }
     }
+  }
+
+  if (skippedKeys.length > 0) {
+    // Skipped keys are deliberately NOT added to refNamesByKey — buildTemplateYaml then
+    // omits them from migrated templates with its own per-key warning.
+    log.warn(
+      `[${executionId}] Reached the maximum of ${MAX_FIELD_DEFINITIONS_PER_OWNER} field ` +
+        `definitions for owner "${owner}" in namespace "${namespace}" — the following legacy ` +
+        `custom fields were not migrated: ${skippedKeys.join(', ')}`
+    );
   }
 
   return {

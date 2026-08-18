@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import type {
   ActionPolicy,
   AlertEpisode,
   AlertEpisodeSuppression,
+  DispatchFailure,
   DispatcherPipelineInput,
   DispatcherPipelineState,
   DispatcherStep,
@@ -17,6 +19,7 @@ import type {
   ActionGroup,
   Rule,
 } from '../types';
+import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 
 export function createDispatcherPipelineInput(
   overrides: Partial<DispatcherPipelineInput> = {}
@@ -25,16 +28,19 @@ export function createDispatcherPipelineInput(
     startedAt: new Date('2026-01-22T08:00:00.000Z'),
     previousStartedAt: new Date('2026-01-22T07:30:00.000Z'),
     executionUuid: '00000000-0000-4000-8000-000000000000',
+    logger: createLoggerService().loggerService,
     ...overrides,
   };
 }
 
 export function createDispatcherPipelineState(
-  state?: Partial<DispatcherPipelineState>
+  state: Partial<DispatcherPipelineState> = {}
 ): DispatcherPipelineState {
+  const input = state.input ?? createDispatcherPipelineInput();
   return {
-    input: createDispatcherPipelineInput(),
     ...state,
+    input,
+    logger: state.logger ?? input.logger,
   };
 }
 
@@ -116,6 +122,19 @@ export function createActionGroup(overrides: Partial<ActionGroup> = {}): ActionG
     groupKey: {},
     episodes: [createAlertEpisode()],
     rules: {},
+    ...overrides,
+  };
+}
+
+export function createDispatchFailure(overrides: Partial<DispatchFailure> = {}): DispatchFailure {
+  return {
+    policyId: 'policy-1',
+    spaceId: 'default',
+    actionGroupId: 'group-1',
+    workflowId: 'workflow-1',
+    episodes: [createAlertEpisode()],
+    reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
+    message: 'Dispatch failed',
     ...overrides,
   };
 }

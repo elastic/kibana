@@ -13,6 +13,7 @@ export {
   CONTEXT_TIE_BREAKER_FIELDS_SETTING,
   DEFAULT_ALLOWED_LOGS_BASE_PATTERNS,
   DEFAULT_COLUMNS_SETTING,
+  DEFAULT_ESQL_QUERY_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
   FIELDS_LIMIT_SETTING,
   HIDE_ANNOUNCEMENTS,
@@ -97,6 +98,7 @@ export {
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
   METRICS_GRID_SETTINGS_DEFAULTS,
+  METRICS_GRID_SORT_DEFAULTS,
 } from './src';
 
 export type {
@@ -109,6 +111,9 @@ export type {
   DiscoverSessionFinderAttributes,
   HistogramPercentile,
   MetricsGridSettings,
+  MetricsGridSort,
+  MetricsGridSortDirection,
+  MetricsGridSortField,
   SimpleAggregation,
 } from './src';
 

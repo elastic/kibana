@@ -12,7 +12,6 @@ import { ATTACK_DISCOVERY_AD_HOC_RULE_ID } from '@kbn/elastic-assistant-common';
 import { useBulkGetUserProfiles } from '../../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { getSummaryPlainText, Subtitle } from './subtitle';
 import { getMockAttackDiscoveryAlerts } from '../../../../../attack_discovery/pages/mock/mock_attack_discovery_alerts';
-
 import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time';
 
 jest.mock(
@@ -29,16 +28,34 @@ jest.mock('../../../../../common/lib/kibana', () => ({
 jest.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
   () => ({
-    AttackDiscoveryMarkdownFormatter: jest.fn(({ markdown, alertIds }) => (
-      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
-        {markdown}
-      </div>
-    )),
+    AttackDiscoveryMarkdownFormatter: jest.fn(
+      ({
+        markdown,
+        alertIds,
+        disableActions,
+      }: {
+        markdown: string;
+        alertIds?: string[];
+        disableActions?: boolean;
+      }) => (
+        <div
+          data-test-subj="mock-markdown-formatter"
+          data-alert-ids={JSON.stringify(alertIds)}
+          data-disable-actions={String(disableActions)}
+        >
+          {markdown}
+        </div>
+      )
+    ),
   })
 );
 
 jest.mock('../../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => ({
   useBulkGetUserProfiles: jest.fn(),
+}));
+
+jest.mock('../../../../../attack_discovery/helpers', () => ({
+  getOriginalAlertIds: jest.fn((alertIds: string[]) => alertIds),
 }));
 
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
@@ -70,9 +87,7 @@ describe('Subtitle', () => {
     const scheduledAttack = { ...mockAttack, alertRuleUuid: 'some_other_rule_id' };
     const { getByTestId } = render(<Subtitle attack={scheduledAttack} />);
 
-    expect(getByTestId('attack-subtitle')).toHaveTextContent(
-      'Detected on 2023-10-27 10:00:00|Malware and credential theft detected on {{ host.name SRVMAC08 }} by {{ user.name james }}.'
-    );
+    expect(getByTestId('attack-subtitle')).toHaveTextContent('Detected on 2023-10-27 10:00:00');
     expect(getByTestId('mock-markdown-formatter')).toHaveTextContent(
       'Malware and credential theft detected on {{ host.name SRVMAC08 }} by {{ user.name james }}.'
     );
@@ -83,7 +98,7 @@ describe('Subtitle', () => {
     const scheduledAttack = { ...mockAttack, alertRuleUuid: 'some_other_rule_id' };
     render(<Subtitle attack={scheduledAttack} />);
 
-    await user.hover(screen.getByTestId('mock-markdown-formatter'));
+    await user.hover(screen.getByTestId('attack-subtitle-summary-text'));
 
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'Malware and credential theft detected on SRVMAC08 by james.'
@@ -99,8 +114,8 @@ describe('Subtitle', () => {
     const { getByTestId, queryByTestId } = render(<Subtitle attack={attackWithoutSummary} />);
 
     expect(getByTestId('attack-subtitle')).toHaveTextContent('Detected on 2023-10-27 10:00:00');
-    expect(queryByTestId('mock-markdown-formatter')).not.toBeInTheDocument();
     expect(queryByTestId('attack-subtitle-summary')).not.toBeInTheDocument();
+    expect(queryByTestId('attack-subtitle-summary-text')).not.toBeInTheDocument();
   });
 
   it('should render anonymized summary when showAnonymized is true', () => {
@@ -202,7 +217,14 @@ describe('Subtitle', () => {
 
     expect(getByTestId('mock-markdown-formatter')).toHaveAttribute(
       'data-alert-ids',
-      JSON.stringify(['original-1', 'alert-2'])
+      JSON.stringify(['alert-1', 'alert-2'])
     );
+  });
+
+  it('should pass disableActions=true to AttackDiscoveryMarkdownFormatter when showAnonymized', () => {
+    const scheduledAttack = { ...mockAttack, alertRuleUuid: 'some_other_rule_id' };
+    const { getByTestId } = render(<Subtitle attack={scheduledAttack} showAnonymized={true} />);
+
+    expect(getByTestId('mock-markdown-formatter')).toHaveAttribute('data-disable-actions', 'true');
   });
 });

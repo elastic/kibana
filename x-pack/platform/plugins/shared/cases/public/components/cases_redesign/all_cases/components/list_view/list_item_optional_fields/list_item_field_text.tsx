@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 
 interface ListItemFieldTextProps {
   label: string;
@@ -33,13 +33,26 @@ export const ListItemFieldText: React.FC<ListItemFieldTextProps> = ({
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued" data-test-subj={testSubj}>
-        <span css={styles.label}>
-          {label}
-          {':'}
-        </span>{' '}
-        {children}
-      </EuiText>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="xs"
+        responsive={false}
+        data-test-subj={testSubj}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <span css={styles.label}>
+              {label}
+              {': '}
+            </span>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {children}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexItem>
   );
 };

@@ -32,12 +32,14 @@
 
 import type {
   ApmFields,
+  ApmOtelFields,
   LogDocument,
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/synthtrace-client';
-import { apm, log, timerange } from '@kbn/synthtrace-client';
-import { RICH_TRACE, MINIMAL_TRACE, PRODUCER_TRACE, DEEP_TRACE } from '../constants';
+import { apm, apmOtel, log, timerange } from '@kbn/synthtrace-client';
+
+import { RICH_TRACE, MINIMAL_TRACE, OTEL_SERVICE, PRODUCER_TRACE, DEEP_TRACE } from '../constants';
 
 const FRONTEND_SERVICE = RICH_TRACE.SERVICE_NAME;
 const BACKEND_SERVICE = PRODUCER_TRACE.SERVICE_NAME;
@@ -385,6 +387,42 @@ export function minimalTraceCorrelatedLogs({
         .defaults({ 'trace.id': traceId, 'span.id': transactionId })
         .timestamp(timestamp + 50),
     ]);
+}
+
+/**
+ * Generates minimal unprocessed OTel spans for a single service.
+ * Used to verify the service flyout renders correctly for OTel schema services.
+ */
+export function otelTrace({
+  from,
+  to,
+}: {
+  from: number;
+  to: number;
+}): SynthtraceGenerator<ApmOtelFields> {
+  const instance = apmOtel
+    .service({
+      name: OTEL_SERVICE.SERVICE_NAME,
+      namespace: OTEL_SERVICE.NAMESPACE,
+      sdkName: 'opentelemetry',
+      sdkLanguage: 'java',
+    })
+    .instance('instance-otel');
+
+  const events = Array.from(
+    timerange(from, to)
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp) =>
+        instance.span({ name: 'GET /api', kind: 'Server' }).timestamp(timestamp).duration(100)
+      )
+  );
+
+  function* generator(): SynthtraceGenerator<ApmOtelFields> {
+    yield* events;
+  }
+
+  return generator();
 }
 
 /**

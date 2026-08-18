@@ -13,12 +13,18 @@ import {
   reverseMap,
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  ChatAgentEvent,
+  RoundInput,
+  SerializedMetadataValue,
+} from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   AgentExecutionMode,
   isToolCallStep,
+  isRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -38,6 +44,11 @@ import {
   estimatePerRoundTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
+import {
+  selectRelevantSkills,
+  buildRecentContext,
+  type RelevantSkillSelection,
+} from './utils/relevant_skills/select_relevant_skills';
 import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
@@ -52,6 +63,8 @@ import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
+import { conversationIndexName } from '../../conversation/client/storage';
+import { getTemplate } from '../../conversation/templates/registry';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -136,6 +149,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
+  // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
+  // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
+  // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
+  const relevantSkillsEnabled =
+    experimentalFeatures.relevantSkills && (await modelProvider.hasFastModel());
+
   const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
   const skillIdsOverride = configurationOverrides?.skill_ids;
   const filteredPluginSkillIds =
@@ -166,6 +185,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     previousRounds: conversation?.rounds ?? [],
     context,
     action,
+    metadata: conversation?.metadata,
+    templateId: conversation?.template_id,
   });
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
@@ -175,6 +196,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentId,
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
+
+  const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
+    relevantSkillsEnabled && !pendingRound
+      ? selectRelevantSkills({
+          skills: filteredSkills,
+          context: {
+            userMessage: processedConversation.nextInput.message,
+            recentContext: buildRecentContext(processedConversation.previousRounds),
+          },
+          modelProvider,
+          logger,
+          abortSignal,
+        })
+      : undefined;
 
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
@@ -202,6 +237,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
   ]);
 
+  const conversationId = conversation?.id;
+  const updateConversationMetadata =
+    conversationId && conversation?.template_id
+      ? async (updates: Record<string, SerializedMetadataValue>) => {
+          // Painless script merge — preserves any metadata keys written by concurrent tool
+          // calls in the same run that a doc-replace update would silently discard.
+          await context.esClient.asInternalUser.update({
+            index: conversationIndexName,
+            id: conversationId,
+            script: {
+              lang: 'painless',
+              source:
+                'if (ctx._source.metadata == null) { ctx._source.metadata = params.updates; } else { ctx._source.metadata.putAll(params.updates); }',
+              params: { updates },
+            },
+            retry_on_conflict: 3,
+          });
+        }
+      : undefined;
+
+  const conversationTemplate = conversation?.template_id
+    ? getTemplate(conversation.template_id)
+    : undefined;
+
   await registerInternalTools({
     context,
     agentId,
@@ -209,6 +268,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities,
     abortSignal,
     backgroundExecutionService,
+    updateConversationMetadata,
+    conversationTemplate,
+    filteredSkills,
+    relevantSkillsEnabled,
   });
 
   // Then add dynamic tools
@@ -256,8 +319,23 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     eventEmitter: events.emit,
   });
 
-  // Reassign to the (possibly compacted) conversation for prompt construction
-  processedConversation = compactionResult.processedConversation;
+  // Reassign to the (possibly compacted) conversation for prompt construction.
+  // Re-propagate conversation-level fields that compaction does not touch.
+  processedConversation = {
+    ...compactionResult.processedConversation,
+    metadata: conversation?.metadata,
+    template_id: conversation?.template_id,
+  };
+
+  let relevantSkillsSelection: RelevantSkillSelection | undefined;
+  if (relevantSkillsEnabled) {
+    if (pendingRound) {
+      const persisted = pendingRound.steps.find(isRelevantSkillsStep);
+      relevantSkillsSelection = persisted ? { skills: persisted.skills } : undefined;
+    } else if (relevantSkillsSelectionPromise) {
+      relevantSkillsSelection = await relevantSkillsSelectionPromise;
+    }
+  }
 
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
@@ -269,6 +347,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
+    relevantSkillsEnabled,
+    relevantSkills: relevantSkillsSelection,
     renderers: renderers?.getRegisteredRenderers() ?? [],
   });
 
@@ -285,6 +365,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     promptFactory,
     backgroundExecutionService,
     roundId,
+    sessionId: conversation?.id ?? executionId,
+    cacheControl: { type: 'ephemeral', ttl: '5m' },
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -354,12 +436,14 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       pendingRound,
       startTime,
       modelProvider,
+      mainConnectorId: model.connector.connectorId,
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
       compactionResult,
       roundId,
       initialTodos,
+      relevantSkillsSelection,
       getWorkspaceId: () => context.bashService?.getWorkspaceId(),
     }),
     evictInternalEvents(),

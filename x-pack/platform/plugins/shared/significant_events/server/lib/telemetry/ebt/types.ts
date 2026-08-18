@@ -9,12 +9,6 @@ import type { SignificantEventsToolUsage } from '@kbn/streams-ai';
 import type { StreamType } from '@kbn/streams-schema';
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
-interface EndpointLatencyProps {
-  name: string;
-  endpoint: string;
-  duration_ms: number;
-}
-
 interface KnowledgeIndicatorQueriesGeneratedProps {
   count: number;
   connector_id: string;
@@ -155,15 +149,6 @@ interface AgentToolEventWriteProps {
   error_message?: string;
 }
 
-interface AgentToolDiscoveryWriteProps {
-  success: boolean;
-  kind: 'discovery' | 'clearance' | 'handled';
-  event_id: string;
-  stream_names: string[];
-  written: boolean;
-  error_message?: string;
-}
-
 interface AgentToolEventSearchProps {
   success: boolean;
   result_count: number;
@@ -178,7 +163,6 @@ interface AgentToolEventSearchProps {
 export {
   type AgentBuilderKnowledgeIndicatorCreatedProps,
   type AgentToolKnowledgeIndicatorIdentificationStartedProps,
-  type AgentToolDiscoveryWriteProps,
   type AgentToolEventCreateProps,
   type AgentToolEventInvestigationAttachProps,
   type AgentToolEventSearchProps,
@@ -187,7 +171,6 @@ export {
   type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,
-  type EndpointLatencyProps,
   type KnowledgeIndicatorQueriesGeneratedProps,
   type KnowledgeIndicatorFeaturesIdentifiedProps,
   type KnowledgeIndicatorOnboardingScheduledProps,

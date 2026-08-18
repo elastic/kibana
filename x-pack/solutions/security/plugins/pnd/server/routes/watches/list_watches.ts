@@ -15,7 +15,7 @@ export const registerListWatchesRoute = ({
   logger,
   config,
   getSpaceId,
-  getWatchProjection,
+  getWatchesService,
 }: RouteDependencies) => {
   router.versioned
     .get({
@@ -37,12 +37,7 @@ export const registerListWatchesRoute = ({
       },
       async (_context, request, response) => {
         try {
-          const projection = getWatchProjection?.();
-          if (!projection) {
-            return response.ok({ body: { watches: [] } });
-          }
-
-          const body: ListWatchesResponse = await projection.list(request, getSpaceId(request));
+          const body: ListWatchesResponse = await getWatchesService().list(getSpaceId(request));
           return response.ok({ body });
         } catch (error) {
           logger.error(`Failed to list watches: ${error}`);
