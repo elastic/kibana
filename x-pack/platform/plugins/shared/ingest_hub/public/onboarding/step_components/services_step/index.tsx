@@ -209,7 +209,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {onBack && (
-            <EuiButtonEmpty iconType="arrowLeft" iconSide="left" onClick={onBack}>
+            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
               <FormattedMessage
                 id="xpack.ingestHub.servicesStep.backButton"
                 defaultMessage="Back"
@@ -224,10 +224,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
             isDisabled={!isReady}
             data-test-subj="servicesStep-continueButton"
           >
-            <FormattedMessage
-              id="xpack.ingestHub.servicesStep.continueButton"
-              defaultMessage="Continue"
-            />
+            <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

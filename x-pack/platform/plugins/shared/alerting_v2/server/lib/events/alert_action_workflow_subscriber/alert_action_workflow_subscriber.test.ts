@@ -100,7 +100,7 @@ describe('AlertActionWorkflowSubscriber', () => {
           space_id: episodeAssignedEvent.spaceId,
           episode_id: episodeAssignedEvent.episodeId,
           rule_id: episodeAssignedEvent.ruleId,
-          code: ALERTING_LOG_CODES.ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILURE,
+          code: ALERTING_LOG_CODES.EVENTS_ALERT_ACTION_WORKFLOW_SUBSCRIBER_FAILED,
         },
         error: expect.objectContaining({ message: 'workflows unreachable' }),
       });

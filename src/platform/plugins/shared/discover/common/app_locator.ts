@@ -150,7 +150,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   /**
    * When true, ES|QL queries use approximate execution for faster, estimated results.
    */
-  isApproximate?: boolean;
+  esqlApproximation?: boolean;
   /**
    * Profile state carried by generated links. URL fields are written to `_p`; persistent fields
    * are carried in the navigation state.

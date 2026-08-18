@@ -144,7 +144,7 @@ export class EventLogService implements EventLogServiceContract {
         error: new Error(
           `Dropped ${droppedCount} of ${response.hits.hits.length} task-run hit(s) on the rule executions read path. The normalizer rejected rows the ES query is supposed to have excluded. Investigate Task Manager schema drift or rule_executions_query filter coverage.`
         ),
-        code: ALERTING_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_REJECTED_EVENTS,
+        code: ALERTING_LOG_CODES.EXECUTION_HISTORY_NORMALIZER_DEGRADED,
       });
     }
 
