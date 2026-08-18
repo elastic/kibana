@@ -67,6 +67,14 @@ describe('AppMenuLoading', () => {
     expect(menuRectangles()).toHaveLength(1);
   });
 
+  it('collapses a primary-only menu to a single overflow placeholder', () => {
+    mockCurrentBreakpoint = 'xs';
+
+    render(<AppMenuLoading buttonCount={0} hasPrimary />);
+
+    expect(menuRectangles()).toHaveLength(1);
+  });
+
   it('shows overflow + primary at the minimal application breakpoint', () => {
     mockCurrentBreakpoint = 's';
 

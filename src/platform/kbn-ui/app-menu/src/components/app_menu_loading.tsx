@@ -83,8 +83,9 @@ export const AppMenuLoading = ({
   ));
 
   const content: Record<AppMenuLayout, React.ReactNode> = {
-    // Primary lives inside the overflow popover when the menu is collapsed.
-    collapsed: overflowSkeleton ?? primarySkeleton,
+    // Collapsed menus always use a single overflow control; primary (if any) lives
+    // inside that popover, so a primary-only menu must not show the 96px rectangle.
+    collapsed: <IconSkeleton announce />,
     minimal: (
       <>
         {overflowSkeleton}
