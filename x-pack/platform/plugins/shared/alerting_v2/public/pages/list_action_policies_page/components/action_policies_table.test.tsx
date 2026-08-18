@@ -161,16 +161,16 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
-  groupBy: null,
+  group_by: null,
   tags: null,
-  groupingMode: null,
+  grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
-  snoozedUntil: null,
-  auth: { owner: 'elastic', createdByUser: false },
-  createdBy: 'elastic_profile_uid',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'elastic_profile_uid',
-  updatedAt: '2026-01-02T03:04:05.000Z',
+  snoozed_until: null,
+  auth: { owner: 'elastic', created_by_user: false },
+  created_by: 'elastic_profile_uid',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: 'elastic_profile_uid',
+  updated_at: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });
 
@@ -455,8 +455,10 @@ describe('ActionPoliciesTable', () => {
         target: { value: 'pro' },
       });
 
-      await waitFor(() => expect(screen.getByText('production')).toBeInTheDocument());
-      expect(screen.getByText('critical')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('production')).toBeInTheDocument();
+        expect(screen.getByText('critical')).toBeInTheDocument();
+      });
     });
 
     it('shows the cap guidance only when the tags cap is reached', async () => {
