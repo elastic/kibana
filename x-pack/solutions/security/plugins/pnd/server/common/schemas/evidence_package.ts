@@ -26,6 +26,25 @@ export const evidencePackageSchema = z.object({
   createdAt: z.string(),
   alertId: z.string().optional(),
   tactics: z.array(z.string()).optional(),
+  // FR-DP-04: Forensics-specific fields (required when kind === 'forensic')
+  scope: z
+    .object({
+      hosts: z.array(z.string()),
+      timeRange: z.object({ from: z.string(), to: z.string() }),
+    })
+    .optional(),
+  evidence: z
+    .array(
+      z.object({
+        type: z.string(),
+        description: z.string(),
+        source: z.string().optional(),
+        timestamp: z.string().optional(),
+      })
+    )
+    .optional(),
+  unresolvedQuestions: z.array(z.string()).optional(),
+  recommendedActions: z.array(z.string()).optional(),
 });
 export type EvidencePackage = z.infer<typeof evidencePackageSchema>;
 
@@ -58,3 +77,23 @@ export const buildEvidencePackageFromWorkerRun = (args: BuildEvidenceArgs): Evid
     alertId: args.alertId,
     tactics: args.tactics,
   });
+
+/**
+ * Validate that a forensic evidence package is 'sufficient' per FR-DP-04.
+ * A forensic package must include scope, evidence items, and unresolved questions.
+ * Throws on missing required forensics fields.
+ */
+export const validateForensicEvidencePackage = (pkg: EvidencePackage): void => {
+  if (pkg.kind !== 'forensic') {
+    return;
+  }
+  if (!pkg.scope) {
+    throw new Error('evidence-package: forensic package missing required scope');
+  }
+  if (!pkg.evidence || pkg.evidence.length === 0) {
+    throw new Error('evidence-package: forensic package missing required evidence items');
+  }
+  if (!pkg.unresolvedQuestions || pkg.unresolvedQuestions.length === 0) {
+    throw new Error('evidence-package: forensic package missing required unresolvedQuestions');
+  }
+};
