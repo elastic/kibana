@@ -108,6 +108,12 @@ const casesSchemaObject = schema.maybe(
   })
 );
 
+const aiIndexSchemaObject = schema.maybe(
+  schema.object({
+    read: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+  })
+);
+
 const kibanaPrivilegeSchema = schema.object({
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   requireAllSpaces: schema.maybe(schema.boolean()),
@@ -128,11 +134,7 @@ const kibanaPrivilegeSchema = schema.object({
     })
   ),
   cases: casesSchemaObject,
-  aiIndex: schema.maybe(
-    schema.object({
-      read: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-    })
-  ),
+  aiIndex: aiIndexSchemaObject,
   alerts: schema.maybe(
     schema.object({
       read: schema.maybe(schema.boolean()),
@@ -186,11 +188,7 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
     })
   ),
   cases: casesSchemaObject,
-  aiIndex: schema.maybe(
-    schema.object({
-      read: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
-    })
-  ),
+  aiIndex: aiIndexSchemaObject,
   alerts: schema.maybe(
     schema.object({
       read: schema.maybe(schema.boolean()),
