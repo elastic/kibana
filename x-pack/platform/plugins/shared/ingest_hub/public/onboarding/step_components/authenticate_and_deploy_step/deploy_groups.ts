@@ -9,7 +9,10 @@ import { sendCreateAgentlessPolicy, sendGetPackageInfoByKey } from '@kbn/fleet-p
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { DeploySettingsStepState, ServiceChipState } from '../../onboarding_flow_context';
+import type {
+  AuthenticateAndDeployStepState,
+  ServiceChipState,
+} from '../../onboarding_flow_context';
 import type { ServiceVars, ServiceInstance } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
 
@@ -138,12 +141,12 @@ export async function deployGroup(
     namespace,
     globalRegion,
     storedServiceVars,
-    deploySettingsStep,
+    authenticateAndDeployStep,
   }: {
     namespace: string;
     globalRegion: string;
     storedServiceVars: Record<string, ServiceVars>;
-    deploySettingsStep: DeploySettingsStepState;
+    authenticateAndDeployStep: AuthenticateAndDeployStepState;
   }
 ): Promise<GroupDeployOutcome> {
   // All members share the same packageName — use the first for pkg info.
@@ -155,7 +158,7 @@ export async function deployGroup(
     throw new Error(`Package ${firstService.packageName} is not installed`);
   }
 
-  const { connectorId, staticKeys } = deploySettingsStep;
+  const { connectorId, staticKeys } = authenticateAndDeployStep;
 
   // Build a vars map keyed by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.

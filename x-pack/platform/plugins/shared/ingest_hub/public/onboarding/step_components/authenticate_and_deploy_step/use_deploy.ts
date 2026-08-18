@@ -41,7 +41,7 @@ export interface UseDeployResult {
 export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeployResult {
   const {
     servicesStep,
-    deploySettingsStep,
+    authenticateAndDeployStep,
     deployAndDetectStep,
     updateDeployAndDetectStep,
     getLatestFailedInstances,
@@ -156,7 +156,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
             namespace,
             globalRegion,
             storedServiceVars,
-            deploySettingsStep,
+            authenticateAndDeployStep,
           })
         )
       );
@@ -189,7 +189,7 @@ export function useDeploy({ onContinue }: { onContinue: () => void }): UseDeploy
       deployGroups,
       nonAgentlessServices,
       serviceSettings,
-      deploySettingsStep,
+      authenticateAndDeployStep,
       namespace,
       onContinue,
       updateDeployAndDetectStep,
