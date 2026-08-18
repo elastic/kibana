@@ -117,11 +117,8 @@ export const causalFeatureSchema = z.object({
 export type CausalFeature = z.infer<typeof causalFeatureSchema>;
 
 /** Query-based verification attached to a signal when the agent ran an ES|QL check. */
-const signalEvidenceSchema = z.object({
-  esql_query: z
-    .string()
-    .max(MAX_TEXT_LENGTH)
-    .describe('The ES|QL query executed to verify this signal.'),
+export const signalEvidenceSchema = z.object({
+  esql_query: z.string().max(MAX_TEXT_LENGTH).describe('The ES|QL query that verified this signal'),
   result: z
     .enum(['found', 'empty', 'error'])
     .describe(
