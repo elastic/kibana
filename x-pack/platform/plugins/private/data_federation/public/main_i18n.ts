@@ -162,8 +162,11 @@ export const mainTranslations = {
       addFlow2Label: i18n.translate('xpack.dataFederation.setsAddFlow2Label', {
         defaultMessage: 'Flow 2',
       }),
-      addFlow3Label: i18n.translate('xpack.dataFederation.setsAddFlow3Label', {
-        defaultMessage: 'Flow 3',
+      addFlow3aLabel: i18n.translate('xpack.dataFederation.setsAddFlow3aLabel', {
+        defaultMessage: 'Flow 3a',
+      }),
+      addFlow3bLabel: i18n.translate('xpack.dataFederation.setsAddFlow3bLabel', {
+        defaultMessage: 'Flow 3b',
       }),
     },
   },

@@ -66,10 +66,16 @@ describe('DatasetsTable', () => {
     expect(onCreate).toHaveBeenCalledWith('flow_2');
 
     fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
-    fireEvent.click(getByTestId('dataSetsSetsCreateFlow3Button'));
+    fireEvent.click(getByTestId('dataSetsSetsCreateFlow3aButton'));
 
     expect(onCreate).toHaveBeenCalledTimes(2);
-    expect(onCreate).toHaveBeenLastCalledWith('flow_3');
+    expect(onCreate).toHaveBeenLastCalledWith('flow_3a');
+
+    fireEvent.click(getByTestId('dataSetsSetsCreateButton'));
+    fireEvent.click(getByTestId('dataSetsSetsCreateFlow3bButton'));
+
+    expect(onCreate).toHaveBeenCalledTimes(3);
+    expect(onCreate).toHaveBeenLastCalledWith('flow_3b');
   });
 
   it('renders the data source filter button', () => {
