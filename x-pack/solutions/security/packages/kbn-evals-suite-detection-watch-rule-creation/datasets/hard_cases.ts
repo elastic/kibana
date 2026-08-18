@@ -108,7 +108,7 @@ export const hardCases: RuleCreationExample[] = [
 | WHERE host.os.type == "linux"
   AND event.type == "start"
   AND process.name IN ("kubectl", "docker")
-  AND process.args == "run"
+  AND process.command_line LIKE "%run%"
   AND (
     process.command_line LIKE "%bash%"
     OR process.command_line LIKE "%sh -c%"
