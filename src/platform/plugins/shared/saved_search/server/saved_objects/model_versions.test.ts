@@ -92,7 +92,7 @@ describe('model_versions', () => {
       expect(typeVersionGuesser(createDocument(attributes))).toBe(12);
     });
 
-    it('should return a discover session (non-legacy) version for v13 documents', () => {
+    it('should return a non-legacy version for v13+ documents', () => {
       const attributes: TypeOf<typeof SCHEMA_DISCOVER_SESSION_V13> = {
         title: 'discover session',
         description: '',
