@@ -10,7 +10,10 @@
 import { readdirSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 import type { CodeOwnersEntry } from '@kbn/code-owners';
-import { getCodeOwnersEntries, getTeams } from '@kbn/code-owners';
+import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
+
+const { getCodeOwnersEntries, getTeams } =
+  loadKibanaModule<typeof import('@kbn/code-owners')>('@kbn/code-owners');
 
 const CONNECTOR_SPECS_ROOT_PATTERN = 'src/platform/packages/shared/kbn-connector-specs/src/specs';
 const CONNECTOR_SPECS_ROOT = resolve(process.cwd(), CONNECTOR_SPECS_ROOT_PATTERN);
