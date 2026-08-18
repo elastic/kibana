@@ -238,7 +238,7 @@ describe('registerConversationRoutes', () => {
     }) => {
       let capturedHandler: ((ctx: any, req: any, res: any) => Promise<any>) | undefined;
 
-      const captureFor = (routeMethod: 'get' | 'put' | 'delete') =>
+      const captureFor = (routeMethod: 'get' | 'put' | 'delete' | 'post') =>
         jest.fn().mockImplementation((config: { path: string }) => ({
           addVersion: jest
             .fn()
@@ -259,6 +259,7 @@ describe('registerConversationRoutes', () => {
           versioned: {
             get: captureFor('get'),
             put: captureFor('put'),
+            post: captureFor('post'),
             delete: captureFor('delete'),
           },
         },
@@ -322,6 +323,7 @@ describe('POST /conversations', () => {
     versioned: {
       get: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
       delete: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
+      put: jest.fn().mockImplementation(() => ({ addVersion: jest.fn() })),
       post: jest.fn().mockImplementation((config: { path: string }) => ({
         addVersion: jest.fn().mockImplementation((_versionConfig: unknown, handler: any) => {
           if (config.path === CREATE_CONVERSATION_PATH) {
