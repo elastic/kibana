@@ -18,10 +18,6 @@ project:
   sourceRoot: x-pack/platform/packages/shared/response-ops/alerting-v2-browser-shared
 dependsOn:
   - '@kbn/core'
-  - '@kbn/core-application-browser-mocks'
-  - '@kbn/core-http-browser-mocks'
-  - '@kbn/core-notifications-browser-mocks'
-  - '@kbn/core-ui-settings-browser-mocks'
   - '@kbn/data-plugin'
   - '@kbn/date-range-picker'
   - '@kbn/date-range-picker-presets'
