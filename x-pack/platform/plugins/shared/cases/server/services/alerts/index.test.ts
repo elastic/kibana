@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  elasticsearchServiceMock,
+  loggingSystemMock,
+  httpServerMock,
+} from '@kbn/core/server/mocks';
 import { alertsClientMock } from '@kbn/rule-registry-plugin/server/alert_data_client/alerts_client.mock';
 import { CaseStatuses } from '../../../common/types/domain';
 import { AlertService } from '.';
+import { CasesEventBus } from '../../events/event_bus';
 
 describe('updateAlertsStatus', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -832,5 +837,90 @@ describe('updateAlertsStatus', () => {
         /Failed to verify referenced events exist/
       );
     });
+  });
+});
+
+describe('updateAlertsStatus — event bus', () => {
+  const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  const logger = loggingSystemMock.create().get('case');
+  const alertsClient = alertsClientMock.create();
+  const request = httpServerMock.createKibanaRequest();
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2022-02-21T17:35:00Z'));
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
+  });
+
+  it('emits alertStatusChanged after updating statuses', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({
+      docs: [{ found: true, _id: 'a1', _source: { 'kibana.alert.workflow_status': 'open' } }],
+    } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['a1']);
+    expect(payload.status).toBe('closed');
+    expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'open' }]);
+
+    bus.removeAllListeners();
+  });
+
+  it('emits one event per distinct target status', async () => {
+    const bus = new CasesEventBus();
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    esClient.mget.mockResolvedValueOnce({ docs: [] } as never);
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      { id: 'a2', index: '.siem-signals', status: CaseStatuses.open },
+    ]);
+
+    // 'closed' maps to 'closed', 'open' maps to 'open' — two distinct target statuses
+    expect(listener).toHaveBeenCalledTimes(2);
+
+    bus.removeAllListeners();
+  });
+
+  it('logs warn and still completes update when mget prefetch fails', async () => {
+    const bus = new CasesEventBus();
+    esClient.mget.mockRejectedValueOnce(new Error('mget failure'));
+
+    const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
+    await expect(
+      alertService.updateAlertsStatus([
+        { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+      ])
+    ).resolves.not.toThrow();
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Failed to prefetch previous alert statuses')
+    );
+  });
+
+  it('does not call mget when no event bus is provided', async () => {
+    const alertService = new AlertService(esClient, logger, alertsClient);
+    await alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+
+    expect(esClient.mget).not.toHaveBeenCalled();
   });
 });

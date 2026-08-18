@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type { Owner } from '../../common/constants/types';
 
 /**
@@ -45,11 +46,24 @@ export interface AttachmentsAddedEventPayload extends BaseCaseEventPayload {
   readonly attachmentType: string;
 }
 
+/**
+ * Event: alert status changed (emitted by Cases when it updates alert workflow statuses)
+ */
+export interface AlertStatusChangedEventPayload {
+  readonly alertIds: readonly string[];
+  readonly status: STATUS_VALUES;
+  readonly previousStatuses: ReadonlyArray<{
+    readonly id: string;
+    readonly previousStatus: STATUS_VALUES;
+  }>;
+}
+
 interface CasesDomainEventPayloadByType {
   readonly caseCreated: CaseCreatedEventPayload;
   readonly caseUpdated: CaseUpdatedEventPayload;
   readonly caseStatusChanged: CaseStatusChangedEventPayload;
   readonly attachmentsAdded: AttachmentsAddedEventPayload;
+  readonly alertStatusChanged: AlertStatusChangedEventPayload;
 }
 
 export type CasesDomainEventType = keyof CasesDomainEventPayloadByType;

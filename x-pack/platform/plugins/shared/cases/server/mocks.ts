@@ -774,6 +774,7 @@ const casesClientMock = createCasesClientMock();
 export const mockCasesContract = (): CasesServerStart => ({
   getCasesClientWithRequest: jest.fn().mockResolvedValue(casesClientMock),
   getUnifiedAttachmentTypeRegistry: jest.fn(),
+  onAlertStatusChanged: jest.fn(),
   config: {
     enabled: true,
     assigneeIdentity: { enabled: true },

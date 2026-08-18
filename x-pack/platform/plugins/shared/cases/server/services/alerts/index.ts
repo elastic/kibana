@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import { isEmpty } from 'lodash';
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { isNonLocalIndexName } from '@kbn/es-query';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import {
@@ -30,12 +30,15 @@ import type {
   UpdateAlertStatusRequest,
 } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import type { CasesEventBus } from '../../events/event_bus';
 
 export class AlertService {
   constructor(
     private readonly scopedClusterClient: ElasticsearchClient,
     private readonly logger: Logger,
-    private readonly alertsClient: PublicMethodsOf<AlertsClient>
+    private readonly alertsClient: PublicMethodsOf<AlertsClient>,
+    private readonly casesEventBus?: CasesEventBus,
+    private readonly request?: KibanaRequest
   ) {}
 
   public async executeAggregations({
@@ -90,9 +93,19 @@ export class AlertService {
 
   public async updateAlertsStatus(alerts: UpdateAlertStatusRequest[]): Promise<number> {
     try {
-      // Map of <index, <alert status, <alert close reason, alerts to update>>
       const bucketedAlerts = this.bucketAlerts(alerts);
       const indexBuckets = Array.from(bucketedAlerts.entries());
+
+      let previousStatusMap: Map<string, STATUS_VALUES> | undefined;
+      if (this.casesEventBus && this.request) {
+        try {
+          previousStatusMap = await this.prefetchPreviousStatuses(alerts);
+        } catch (err) {
+          this.logger.warn(
+            `Failed to prefetch previous alert statuses for Cases event bus: ${err}`
+          );
+        }
+      }
 
       const updateResults = await pMap(
         indexBuckets,
@@ -100,12 +113,75 @@ export class AlertService {
         { concurrency: MAX_CONCURRENT_SEARCHES }
       );
 
+      if (this.casesEventBus && this.request) {
+        this.emitStatusChangedEvents(
+          alerts,
+          previousStatusMap ?? new Map(),
+          this.casesEventBus,
+          this.request
+        );
+      }
+
       return updateResults.reduce((acc, updatedCount) => acc + updatedCount, 0);
     } catch (error) {
       throw createCaseError({
         message: `Failed to update alert status ids: ${JSON.stringify(alerts)}: ${error}`,
         error,
         logger: this.logger,
+      });
+    }
+  }
+
+  private async prefetchPreviousStatuses(
+    alerts: UpdateAlertStatusRequest[]
+  ): Promise<Map<string, STATUS_VALUES>> {
+    const docs = alerts
+      .filter((a) => !AlertService.isEmptyAlert(a))
+      .map((a) => ({ _id: a.id, _index: a.index }));
+    if (docs.length === 0) return new Map();
+    const response = await this.scopedClusterClient.mget({
+      docs,
+      _source_includes: [ALERT_WORKFLOW_STATUS],
+    });
+    const result = new Map<string, STATUS_VALUES>();
+    for (const doc of response.docs) {
+      if ('found' in doc && doc.found && doc._id != null) {
+        const source = doc._source as Record<string, unknown> | undefined;
+        const v = source?.[ALERT_WORKFLOW_STATUS];
+        const status: STATUS_VALUES =
+          v === 'open' || v === 'acknowledged' || v === 'in-progress' || v === 'closed'
+            ? v
+            : 'open';
+        result.set(doc._id, status);
+      }
+    }
+    return result;
+  }
+
+  private emitStatusChangedEvents(
+    alerts: UpdateAlertStatusRequest[],
+    previousStatusMap: Map<string, STATUS_VALUES>,
+    casesEventBus: CasesEventBus,
+    request: KibanaRequest
+  ) {
+    const byStatus = new Map<STATUS_VALUES, string[]>();
+    for (const alert of alerts) {
+      if (!AlertService.isEmptyAlert(alert)) {
+        const translated = this.translateStatus(alert);
+        if (!byStatus.has(translated)) byStatus.set(translated, []);
+        const ids = byStatus.get(translated);
+        if (ids) ids.push(alert.id);
+      }
+    }
+    for (const [status, alertIds] of byStatus.entries()) {
+      const previousStatuses = alertIds.map((id) => ({
+        id,
+        previousStatus: (previousStatusMap.get(id) ?? 'open') as STATUS_VALUES,
+      }));
+      casesEventBus.emitAlertStatusChanged(request, {
+        alertIds,
+        status,
+        previousStatuses,
       });
     }
   }
