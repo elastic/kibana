@@ -55,11 +55,9 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
   rootLogger.info('Kibana is starting');
 
-  // We will invert this message once we switch from opt-in to opt-out for code generation from strings.
-  // See https://github.com/elastic/kibana/issues/272315
-  if (isCodeGenerationFromStringsDisallowed()) {
-    rootLogger.info(
-      'Code generation from strings has been disallowed on this Kibana instance (--disallow-code-generation-from-strings)'
+  if (!isCodeGenerationFromStringsDisallowed()) {
+    rootLogger.warn(
+      'Code generation from strings is allowed on this Kibana instance. This hardening measure was disabled (KBN_DISALLOW_CODE_GEN_FROM_STRINGS=false / --disallow-code-generation-from-strings not set).'
     );
   }
 
