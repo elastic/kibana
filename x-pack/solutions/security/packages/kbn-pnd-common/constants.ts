@@ -17,9 +17,13 @@ export const PND_INTERNAL_URL = '/internal/pnd' as const;
 
 export const PND_WATCHES_URL = `${PND_INTERNAL_URL}/watches` as const;
 export const PND_WATCH_URL_TEMPLATE = `${PND_WATCHES_URL}/{watchId}` as const;
+export const PND_WATCH_SCHEDULE_URL_TEMPLATE = `${PND_WATCH_URL_TEMPLATE}/_schedule` as const;
 
 export const buildWatchUrl = (watchId: string) =>
   `${PND_WATCHES_URL}/${encodeURIComponent(watchId)}`;
+
+export const buildWatchScheduleUrl = (watchId: string) =>
+  `${PND_WATCHES_URL}/${encodeURIComponent(watchId)}/_schedule`;
 
 /** Global worker / skill catalogs — shared across watches. */
 export const PND_WORKERS_URL = `${PND_INTERNAL_URL}/workers` as const;
