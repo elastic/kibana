@@ -20,7 +20,12 @@ test('does the thing', async ({ log }) => {
 });
 ```
 
-You'll see this output in your local console, in the Buildkite job log for CI runs, and in the Scout HTML report (attached to each test).
+You'll see this output in your local console, in the Buildkite job log for CI runs, and in the Scout HTML report (attached to each test, under **Output Logs**):
+
+```
+info [scout-worker-2] Running tests against local stateful cluster
+succ [scout-worker-2] deleted 4 objects
+```
 
 Scout's own services and fixtures log their setup at the `debug` level (for example, `[serviceName] loaded`), so if you want to see fixture wiring and lifecycle messages, run with `debug` (see below).
 
