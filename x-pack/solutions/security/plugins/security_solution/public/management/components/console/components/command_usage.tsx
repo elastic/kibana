@@ -10,7 +10,13 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { EuiDescriptionList, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { buildCommandUsageList } from '../service/utils';
+import type { ArgNameAndDefinition } from '../service/utils';
+import {
+  getExclusiveOrArgGroups,
+  buildCommandUsageList,
+  getOptionalArgs,
+  getRequiredArgs,
+} from '../service/utils';
 import { ConsoleCodeBlock } from './console_code_block';
 import type { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
@@ -124,7 +130,6 @@ export interface CommandUsageProps {
 
 export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
-  const hasArgs = useMemo(() => Object.keys(commandDef.args ?? []).length > 0, [commandDef.args]);
 
   type CommandDetails = Array<{
     title: string;
@@ -132,42 +137,24 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef, errorMessage 
   }>;
 
   const commandOptions = useMemo(() => {
-    if (!hasArgs || !commandDef.args) {
+    const toCommandDetails = ({
+      name,
+      definition: { about },
+    }: ArgNameAndDefinition): CommandDetails[number] => {
       return {
-        required: [],
-        exclusiveOr: [],
-        optional: [],
+        title: `--${name}`,
+        description: about,
       };
-    }
+    };
 
-    const enteredCommands = Object.entries(commandDef.args).reduce<{
-      required: CommandDetails;
-      exclusiveOr: CommandDetails;
-      optional: CommandDetails;
-    }>(
-      (acc, curr) => {
-        const item = {
-          title: `--${curr[0]}`,
-          description: curr[1].about,
-        };
-        if (curr[1].required) {
-          acc.required.push(item);
-        } else if (curr[1].exclusiveOr) {
-          acc.exclusiveOr.push(item);
-        } else {
-          acc.optional.push(item);
-        }
-
-        return acc;
-      },
-      {
-        required: [],
-        exclusiveOr: [],
-        optional: [],
-      }
-    );
-    return enteredCommands;
-  }, [commandDef.args, hasArgs]);
+    return {
+      required: getRequiredArgs(commandDef).map(toCommandDetails),
+      exclusiveOr: Object.values(getExclusiveOrArgGroups(commandDef)).flat().map(toCommandDetails),
+      optional: getOptionalArgs(commandDef, { includeConditionallyRequired: true }).map(
+        toCommandDetails
+      ),
+    };
+  }, [commandDef]);
 
   const parametersDescriptionList = (title: string, parameters: CommandDetails) => {
     const description = parameters.map((item) => (

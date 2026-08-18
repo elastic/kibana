@@ -7,9 +7,9 @@
 
 import { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { buildCommandUsageList } from '../../../service/utils';
 import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
-import { getArgumentsForCommand } from '../../../service/parsed_command_input';
 import type { CommandDefinition } from '../../..';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
@@ -84,15 +84,14 @@ export const useInputHints = () => {
         //
         // Generated usage is only created if the command has arguments.
         if (!hint || !exampleUsage) {
-          const commandArguments = getArgumentsForCommand(commandEnteredDefinition);
-
-          if (commandArguments.length > 0) {
-            hint += `${commandEnteredDefinition.name} ${commandArguments}`;
+          if (commandEnteredDefinition.args) {
+            hint +=
+              (hint.length > 0 ? ' | ' : '') +
+              buildCommandUsageList(commandEnteredDefinition).shift();
           } else {
             hint += NO_ARGUMENTS_HINT;
           }
         }
-
         dispatch({
           type: 'updateFooterContent',
           payload: { value: hint },
