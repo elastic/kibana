@@ -91,12 +91,12 @@ describe('PresentationPanelTitle', () => {
 
   describe('keyboard accessibility in edit mode', () => {
     beforeEach(() => {
-      (isApiCompatibleWithCustomizePanelAction as jest.Mock).mockReturnValue(true);
-      (openCustomizePanelFlyout as jest.Mock).mockClear();
+      jest.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(true);
+      jest.mocked(openCustomizePanelFlyout).mockClear();
     });
 
     afterEach(() => {
-      (isApiCompatibleWithCustomizePanelAction as jest.Mock).mockReturnValue(false);
+      jest.mocked(isApiCompatibleWithCustomizePanelAction).mockReturnValue(false);
     });
 
     it('opens the customize panel flyout when Enter is pressed on the editable title', () => {
