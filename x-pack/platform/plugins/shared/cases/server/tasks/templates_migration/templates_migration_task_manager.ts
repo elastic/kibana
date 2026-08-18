@@ -166,10 +166,11 @@ export class TemplatesMigrationTaskManager {
     // reflects whether real case-backfill work was outstanding when the run began. Derived from the
     // restart-durable `legacyCasesMigrated` flags rather than a per-run write count, so it stays
     // correct even when the final run of a multi-run backfill re-scans already-written cases and
-    // writes nothing (e.g. after a restart wiped the in-progress cursor). Drives the one-shot
-    // analytics re-index nudge on completion — see `onCaseBackfillComplete`. A no-op restart of a
+    // writes nothing (e.g. after a restart wiped the in-progress cursor). Combined below with a
+    // post-Phase-1 recheck into `hadRealBackfillWork`, which drives the one-shot analytics
+    // re-index nudge on completion — see `onCaseBackfillComplete`. A no-op restart of a
     // fully-migrated cluster has every space flagged, so this is `false` and no re-index is triggered.
-    const hadPendingCaseBackfill = hasPendingCaseBackfill(configures);
+    const pendingCaseBackfillAtStart = hasPendingCaseBackfill(configures);
 
     // Aggregate counts so the whole run emits a single summary INFO line, not one per space.
     const totals = {
@@ -242,6 +243,16 @@ export class TemplatesMigrationTaskManager {
       { concurrency: MAX_CONCURRENT_MIGRATIONS }
     );
 
+    // Re-check AFTER Phase 1: a fresh configuration (no migration flags) cannot count as pending
+    // at the start of the run — `configureNeedsCaseBackfill` requires the Phase-1 flags to be set.
+    // When Phase 1 and the whole backfill complete in this same run (small deployments), the
+    // start-of-run snapshot alone would report "no pending work" and the terminal analytics nudge
+    // would never fire, permanently stranding the backfilled values from Cases Analytics v2 (raw
+    // repository writes do not advance the domain updated_at cursor). The OR keeps both sources of
+    // truth: work that was already pending across runs, and work that became pending in this run.
+    const pendingCaseBackfillAfterPhase1 = hasPendingCaseBackfill(configures);
+    const hadRealBackfillWork = pendingCaseBackfillAtStart || pendingCaseBackfillAfterPhase1;
+
     // ── Phase 2: existing-case backfill (resumable, budgeted across runs) ────────────────────────
     const backfill = await runCaseBackfillPhase(
       repo,
@@ -274,7 +285,7 @@ export class TemplatesMigrationTaskManager {
     // Backfill fully done and no space is stuck on an unresolved Phase-1 error — delete this
     // one-shot task.
     if (backfill.complete && !phase1HasErrors) {
-      await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
+      await this.notifyCaseBackfillComplete(hadRealBackfillWork, executionId);
       return { state: {}, shouldDeleteTask: true };
     }
 
@@ -300,7 +311,7 @@ export class TemplatesMigrationTaskManager {
       // nudge analytics to re-index so those aren't stranded. A later restart re-runs the
       // migration and completes it, firing this again (idempotent) once the remaining work
       // succeeds.
-      await this.notifyCaseBackfillComplete(hadPendingCaseBackfill, executionId);
+      await this.notifyCaseBackfillComplete(hadRealBackfillWork, executionId);
       return { state: {}, shouldDeleteTask: true };
     }
 
@@ -318,9 +329,11 @@ export class TemplatesMigrationTaskManager {
 
   /**
    * Fires the `onCaseBackfillComplete` hook exactly at the migration's terminal points, and only
-   * when there was outstanding case-backfill work when the final run began. Called from the two
-   * `shouldDeleteTask` branches, so it runs once per migration lifetime (the task deletes itself
-   * after; a subsequent restart of a fully-migrated cluster sees no pending work and does not fire).
+   * when real case-backfill work existed during the final run — either already pending when the
+   * run began, or newly eligible after this run's Phase 1 (a first-run same-run completion).
+   * Called from the two `shouldDeleteTask` branches, so it runs once per migration lifetime (the
+   * task deletes itself after; a subsequent restart of a fully-migrated cluster sees no pending
+   * work and does not fire).
    *
    * Best-effort by contract: the hook is awaited so its own logging orders sensibly, but any error
    * is caught and swallowed. Letting it throw would prevent the caller from returning
@@ -328,10 +341,10 @@ export class TemplatesMigrationTaskManager {
    * the hook — a pointless retry loop. The migration's own success does not depend on the hook.
    */
   private async notifyCaseBackfillComplete(
-    hadPendingCaseBackfill: boolean,
+    hadRealBackfillWork: boolean,
     executionId: string
   ): Promise<void> {
-    if (!hadPendingCaseBackfill || this.onCaseBackfillComplete == null) {
+    if (!hadRealBackfillWork || this.onCaseBackfillComplete == null) {
       return;
     }
     try {

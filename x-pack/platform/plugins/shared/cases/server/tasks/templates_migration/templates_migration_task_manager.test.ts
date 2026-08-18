@@ -2291,6 +2291,29 @@ describe('TemplatesMigrationTaskManager', () => {
       expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
     });
 
+    it('fires when Phase 1 and the whole backfill complete in the same first run (fresh configuration)', async () => {
+      // REGRESSION (the bug this guards): pending-backfill eligibility used to be computed only
+      // from the START-of-run snapshot. A fresh configuration (custom fields, none of the three
+      // migration flags) is not yet eligible at that point — Phase 1 must set the flags first — so
+      // a small deployment that migrated AND backfilled everything in one run finished without ever
+      // firing the hook, permanently stranding the backfilled values from Cases Analytics v2.
+      const configSO = buildConfigureSO({
+        customFields: [buildLegacyCustomField('cf_text')],
+        // No legacyCustomFieldsMigrated / legacyTemplatesMigrated / legacyCasesMigrated flags.
+      });
+      mockFindByType(configSO, [
+        buildCaseSO('case-1', [{ key: 'cf_text', type: CustomFieldTypes.TEXT, value: 'hello' }]),
+      ]);
+      const hook = jest.fn().mockResolvedValue(undefined);
+
+      const result = await getTaskRunner(await buildWithHook(hook)).run();
+
+      // Phase 2 backfilled the case in the same run Phase 1 made the space eligible.
+      expect(repo.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(hook).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(expect.objectContaining({ shouldDeleteTask: true }));
+    });
+
     it('fires when the space had pending backfill work even if this run wrote nothing (multi-run finish / post-restart re-scan)', async () => {
       // Space is pending (customFields present, legacyCasesMigrated not set) but every case already
       // has its extended_fields - the boundary case where the completing run writes 0 cases yet the
