@@ -75,6 +75,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         },
         async () => {
           await pageObjects.svlManagementPage.clickDataUsageManagementCard();
+          // Hold interception open until the async data_streams fetch has landed and rendered.
+          await retry.waitFor('data streams filter to show the 3 mocked streams', async () => {
+            const filterButton =
+              await pageObjects.svlDataUsagePage.findDatastreamsDropdownFilterButton();
+            const badge = await filterButton.findByCssSelector('.euiNotificationBadge');
+            return (await badge.getVisibleText()) === '3';
+          });
         }
       );
     });
