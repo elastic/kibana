@@ -179,19 +179,19 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'config',
-    name: 'AWS Config',
+    // name: 'AWS Config',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
   },
   {
     id: 'guardduty',
-    name: 'AWS GuardDuty',
+    // name: 'AWS GuardDuty',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
   },
   {
     id: 'inspector',
-    name: 'AWS Inspector',
+    // name: 'AWS Inspector',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
   },
@@ -209,19 +209,19 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'securityhub_findings',
-    name: 'AWS Security Hub',
+    // name: 'AWS Security Hub',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
   },
   {
     id: 'securityhub_findings_full_posture',
-    name: 'AWS Security Hub (Full Posture / CSPM)',
+    // name: 'AWS Security Hub (Full Posture / CSPM)',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
   },
   {
     id: 'securityhub_insights',
-    name: 'AWS Security Hub (Insights)',
+    // name: 'AWS Security Hub (Insights)',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
   },
@@ -352,26 +352,26 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
     id: 'guardrails',
-    name: 'AWS Bedrock (Guardrails)',
+    // name: 'AWS Bedrock (Guardrails)',
     category: 'Machine Learning',
     packageName: 'aws_bedrock',
   },
   {
     id: 'invocation',
-    name: 'AWS Bedrock (Invocation)',
+    // name: 'AWS Bedrock (Invocation)',
     category: 'Machine Learning',
     packageName: 'aws_bedrock',
   },
   {
     id: 'runtime',
-    name: 'AWS Bedrock (Runtime)',
+    // name: 'AWS Bedrock (Runtime)',
     category: 'Machine Learning',
     packageName: 'aws_bedrock',
   },
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'bedrock_agentcore',
-    name: 'AWS Bedrock AgentCore',
+    // name: 'AWS Bedrock AgentCore',
     category: 'Machine Learning',
     packageName: 'aws_bedrock_agentcore',
     showInUI: false,
@@ -380,7 +380,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── awsfargate package — Containers ─────────────────────────────────────
   {
     id: 'task_stats',
-    name: 'AWS Fargate',
+    // name: 'AWS Fargate',
     category: 'Containers',
     packageName: 'awsfargate',
   },
@@ -389,7 +389,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'mq',
-    name: 'AWS MQ',
+    // name: 'AWS MQ',
     category: 'Application Integration',
     packageName: 'aws_mq',
     showInUI: false,
@@ -398,7 +398,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws_logs package — Management and Governance ──────────────────────────
   {
     id: 'aws_logs',
-    name: 'AWS Logs (Generic)',
+    // name: 'AWS Logs (Generic)',
     category: 'Management and Governance',
     packageName: 'aws_logs',
   },
@@ -492,14 +492,15 @@ export function buildAwsServiceMatrix(
         defaultEnabled = !(ds as any).streams.some((s: any) => s.enabled === false);
       }
 
-      // Derive identityFederationSupported: true when none of this data stream's inputs
-      // hide 'identity_federation' in the 'credential_type' var_group.
+      // Derive identityFederationSupported: true when at least one of this data stream's
+      // inputs does NOT hide 'identity_federation' in the 'credential_type' var_group.
+      // False only when every applicable input blocks it (no IF-compatible input path exists).
       const ptInputs: any[] = (pt as any)?.inputs ?? [];
       const dsInputTypes = new Set(((ds as any)?.streams ?? []).map((s: any) => s.input as string));
       if (ptInputs.length > 0 && dsInputTypes.size > 0) {
         const relevantInputs = ptInputs.filter((i: any) => dsInputTypes.has(i.type));
         if (relevantInputs.length > 0) {
-          identityFederationSupported = relevantInputs.every(
+          identityFederationSupported = relevantInputs.some(
             (i: any) =>
               !(i.hide_in_var_group_options?.credential_type ?? []).includes('identity_federation')
           );

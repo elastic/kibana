@@ -228,9 +228,11 @@ describe('AWS service matrix', () => {
       expect(cloudtrail?.identityFederationSupported).toBe(false);
     });
 
-    it('is false when any input hides identity_federation', () => {
+    it('is true when at least one input does not hide identity_federation', () => {
+      // elb_logs has aws-s3 (no hide) and aws-cloudwatch (hides IF).
+      // Supported because one valid IF input path exists.
       const elbLogs = IF_MATRIX.find((e) => e.id === 'elb_logs');
-      expect(elbLogs?.identityFederationSupported).toBe(false);
+      expect(elbLogs?.identityFederationSupported).toBe(true);
     });
 
     it('is undefined when data stream has no matching streams in manifest', () => {
