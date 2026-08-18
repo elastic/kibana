@@ -38,6 +38,7 @@ export interface IdentifyComputedFeaturesOptions {
   request?: KibanaRequest;
   /** Optional telemetry client to record code_analysis grounding outcomes. */
   telemetry?: EbtTelemetryClient;
+  signal?: AbortSignal;
 }
 
 export interface IdentifyComputedFeaturesResult {
@@ -57,6 +58,7 @@ export async function identifyComputedFeatures({
   agentBuilderTools,
   request,
   telemetry,
+  signal,
 }: IdentifyComputedFeaturesOptions): Promise<IdentifyComputedFeaturesResult> {
   const providers: Record<string, ComputedFeatureProvider> | undefined =
     agentBuilderTools && request
@@ -86,6 +88,7 @@ export async function identifyComputedFeatures({
     esClient,
     logger: logger.get('computed_features'),
     providers,
+    signal,
   });
 
   const reconciledComputedFeatures = reconcileComputedFeatures({

@@ -6,6 +6,7 @@
  */
 
 import type { BaseFeature } from '@kbn/significant-events-schema';
+import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
 import { codeAnalysisGenerator } from './code_analysis';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 import { errorLogsGenerator } from './error_logs';
@@ -99,9 +100,11 @@ export interface ComputedFeatureGenerationResult {
 export async function generateAllComputedFeatures(
   options: ComputedFeatureGeneratorOptions
 ): Promise<ComputedFeatureGenerationResult> {
+  const timeoutSignal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
+  const signal = options.signal ? AbortSignal.any([options.signal, timeoutSignal]) : timeoutSignal;
   const allGenerators = registry.getAll();
   const results = await Promise.allSettled(
-    allGenerators.map((generator) => generator.generate(options))
+    allGenerators.map((generator) => generator.generate({ ...options, signal }))
   );
 
   const errors: Array<{ feature: string; error: string }> = [];

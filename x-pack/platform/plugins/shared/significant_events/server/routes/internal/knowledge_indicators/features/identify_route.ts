@@ -308,6 +308,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
         kiClient,
         logger: routeLogger,
         runId,
+        signal: getRequestAbortSignal(request),
         ...(codeGroundingEnabled
           ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
           : {}),
