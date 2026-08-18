@@ -45,6 +45,7 @@ export const registerAutoAttach = <FocusedItem>({
   let lastStagedOrigin: string | undefined;
   let lastStagedId: string | undefined;
   let lastConversationId: string | undefined;
+  let isAgentBuilderOpen = false;
 
   const cancelPendingAddAttachment = () => {
     if (pendingAddAttachmentTimeout !== undefined) {
@@ -66,7 +67,7 @@ export const registerAutoAttach = <FocusedItem>({
       focusedItem$,
       agentBuilder.events.ui.activeConversation$,
     ]).subscribe(([appId, focused, conversation]) => {
-      const isAgentBuilderOpen = appId === AGENTBUILDER_FEATURE_ID && conversation !== null;
+      isAgentBuilderOpen = appId === AGENTBUILDER_FEATURE_ID && conversation !== null;
 
       if (conversation !== null) {
         const conversationId = conversation.id;
@@ -81,6 +82,13 @@ export const registerAutoAttach = <FocusedItem>({
 
       if (!isAgentBuilderOpen || !focused) {
         cancelPendingAddAttachment();
+
+        if (!focused && isAgentBuilderOpen && lastStagedId) {
+          agentBuilder.removeAttachment(lastStagedId);
+          lastStagedId = undefined;
+          lastStagedOrigin = undefined;
+        }
+
         return;
       }
 
@@ -118,5 +126,9 @@ export const registerAutoAttach = <FocusedItem>({
   return () => {
     subscription.unsubscribe();
     cancelPendingAddAttachment();
+
+    if (isAgentBuilderOpen && lastStagedId) {
+      agentBuilder.removeAttachment(lastStagedId);
+    }
   };
 };

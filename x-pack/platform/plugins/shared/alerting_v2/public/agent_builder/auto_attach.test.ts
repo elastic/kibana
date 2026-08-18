@@ -219,6 +219,87 @@ describe('registerAutoAttach', () => {
     expect(addAttachment).toHaveBeenCalledTimes(1);
   });
 
+  it('removes the staged attachment when the focused item becomes undefined', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+
+    focusedItem$.next(createItem({ id: 'item-1' }));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(1);
+
+    focusedItem$.next(undefined);
+
+    expect(removeAttachment).toHaveBeenCalledTimes(1);
+    expect(removeAttachment).toHaveBeenCalledWith('test:item-1');
+  });
+
+  it('stages cleanly after navigating away and back with a different item', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+
+    focusedItem$.next(createItem({ id: 'item-1' }));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(1);
+
+    focusedItem$.next(undefined);
+
+    expect(removeAttachment).toHaveBeenCalledTimes(1);
+    expect(removeAttachment).toHaveBeenCalledWith('test:item-1');
+
+    focusedItem$.next(createItem({ id: 'item-2' }));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(2);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'test:item-2' })
+    );
+    expect(removeAttachment).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not remove when focused becomes undefined while sidebar is closed', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+
+    focusedItem$.next(createItem({ id: 'item-1' }));
+    jest.runOnlyPendingTimers();
+
+    currentAppId$.next(null);
+    focusedItem$.next(undefined);
+
+    expect(removeAttachment).not.toHaveBeenCalled();
+  });
+
+  it('removes the staged attachment on cleanup when the sidebar is open', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+
+    focusedItem$.next(createItem({ id: 'item-1' }));
+    jest.runOnlyPendingTimers();
+
+    expect(addAttachment).toHaveBeenCalledTimes(1);
+
+    cleanup();
+
+    expect(removeAttachment).toHaveBeenCalledTimes(1);
+    expect(removeAttachment).toHaveBeenCalledWith('test:item-1');
+  });
+
+  it('does not remove on cleanup when the sidebar is closed', () => {
+    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
+    activeConversation$.next({ id: undefined });
+
+    focusedItem$.next(createItem({ id: 'item-1' }));
+    jest.runOnlyPendingTimers();
+
+    currentAppId$.next(null);
+
+    cleanup();
+
+    expect(removeAttachment).not.toHaveBeenCalled();
+  });
+
   it('unsubscribes on cleanup', () => {
     cleanup();
 
