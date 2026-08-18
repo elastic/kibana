@@ -24,7 +24,7 @@ const DEFAULT_QUICK_ACTION_VIEW: QuickActionIds = [
 
 export type LensWrapperProps = {
   lensProps: LensProps;
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
   onViewDetails?: () => void;
   onCopyToDashboard?: () => void;
   onExploreInDiscoverTab?: UnifiedMetricsGridProps['actions']['openInNewTab'];

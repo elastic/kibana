@@ -52,9 +52,11 @@ Things to specifically check in the artifacts before forming a root-cause hypoth
 
 If artifacts are not available (expired, not uploaded, no `read_artifacts` token), say so in the report rather than fabricating a hypothesis. "Screenshot would have resolved this; not available" is a valid open question.
 
-### List failure artifacts
+### List and download failure artifacts
 
 `bk artifacts list <build> -p <pipeline> --job-uuid <jobId> --json` returns a JSON listing of every artifact uploaded for the failing job. Pass `--job-uuid <jobId>` for the failed attempt (without it, `bk` only returns the latest attempt and hides retried failures). If a build retried to green, failure artifacts only live on the failed job's listing; don't conclude "no screenshot" until you've scoped to the right job UUID.
+
+Each listing entry carries an artifact ID. `bk artifacts download` has no destination argument — it writes to the current directory — so `cd` into your target dir first and pass `-y` so it doesn't stall on a confirmation prompt: `cd <dest-dir> && bk artifacts download <artifact-id> --build <build> -p <pipeline> -y`. Download only the artifacts you will actually read — the failure screenshot, the DOM/HTML snapshot, the relevant `target/test_failures/*.log` — not the whole listing. For a large text log, `grep`/`sed` around the failure timestamp instead of reading it end to end. Use these commands directly instead of rediscovering the syntax from scratch; only fall back to `bk ... --help` if one doesn't work as documented here.
 
 ### Where the Kibana & Elasticsearch logs live
 
