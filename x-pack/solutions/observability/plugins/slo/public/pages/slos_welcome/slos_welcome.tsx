@@ -14,7 +14,6 @@ import {
   EuiLink,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { monitoringLogs } from '@elastic/eui-illustrations';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -86,7 +85,11 @@ export function SlosWelcomePage() {
         <EuiFlexItem grow={false}>
           <EuiEmptyPrompt
             icon={
-              <EuiIllustration type={monitoringLogs} alt="" style={{ maxInlineSize: 240, marginInline: 'auto' }}/>
+              <EuiIllustration
+                type={monitoringLogs}
+                alt=""
+                style={{ maxInlineSize: 240, marginInline: 'auto' }}
+              />
             }
             title={
               <h2>
