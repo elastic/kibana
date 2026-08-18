@@ -12,6 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/cordis",
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/react-kibana-context-render",

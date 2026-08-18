@@ -5,35 +5,22 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { registerAndroidRoutes } from './platforms/android/routes';
 
-export class ClientAppsPlugin implements Plugin {
-  private readonly logger: Logger;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ClientAppsPlugin extends Service {
+  static readonly inject = ['core.http'];
+  static readonly provide = 'clientApps';
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-    const params = { router, logger: this.logger };
+  constructor(ctx: Context, _config: never) {
+    super(ctx, 'clientApps');
+    const router = (ctx.get('core.http') as any).createRouter();
+    const params = { router, logger: (ctx.get('core.logger') as any).get('plugins', 'clientApps') };
 
     registerAndroidRoutes(params);
 
-    this.logger.info('Client Apps plugin routes registered');
-    return {};
+    (ctx.get('core.logger') as any).get('plugins', 'clientApps').info('Client Apps plugin routes registered');
   }
-
-  public start(_core: CoreStart) {
-    return {};
-  }
-
-  public stop() {}
 }

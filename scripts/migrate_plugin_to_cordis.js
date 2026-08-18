@@ -35,7 +35,7 @@ const path = require('path');
 const fs = require('fs');
 const { Project, SyntaxKind } = require('ts-morph');
 
-const LICENSE_HEADER = `/*
+const OSS_LICENSE_HEADER = `/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the "Elastic License
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
@@ -43,6 +43,16 @@ const LICENSE_HEADER = `/*
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */`;
+
+/** Extract the license header comment from the start of a source file, or fall back to the OSS header. */
+function extractLicenseHeader(srcPath) {
+  try {
+    const text = fs.readFileSync(srcPath, 'utf8');
+    const match = text.match(/^(\/\*[\s\S]*?\*\/)/);
+    if (match) return match[1];
+  } catch (_) { /* fall through */ }
+  return OSS_LICENSE_HEADER;
+}
 
 // Known core.* service keys provided by the Cordis driver (Stage 4)
 const CORE_SETUP_KEYS = new Set([
@@ -62,6 +72,8 @@ function run(pluginDir) {
     console.error(`No server/plugin.ts found at ${pluginFile}`);
     process.exit(1);
   }
+
+  const licenseHeader = extractLicenseHeader(pluginFile);
 
   const project = new Project({ addFilesFromTsConfig: false });
   const sourceFile = project.addSourceFileAtPath(pluginFile);
@@ -170,7 +182,7 @@ ${indentedCtorBody}${indentedStop}${startTodo}
 }`;
 
   const finalContent = [
-    LICENSE_HEADER,
+    licenseHeader,
     '',
     "import { Service } from '@kbn/cordis';",
     "import type { Context } from '@kbn/cordis';",
@@ -183,8 +195,9 @@ ${indentedCtorBody}${indentedStop}${startTodo}
   fs.writeFileSync(pluginFile, finalContent, 'utf8');
   console.log(`  ✓ Rewrote ${pluginFile}`);
 
-  // Rewrite server/index.ts
-  const newIndex = `${LICENSE_HEADER}
+  // Rewrite server/index.ts — preserve its existing license header if present
+  const indexLicenseHeader = extractLicenseHeader(indexFile);
+  const newIndex = `${indexLicenseHeader}
 
 export { default as cordisPlugin } from './plugin';
 `;
