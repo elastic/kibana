@@ -336,12 +336,12 @@ describe('ConversationClient timeline events', () => {
         TimelineEventType.executionStarted,
         TimelineEventType.executionCompleted,
       ]);
-      const [userMessage, started, completed] = events;
-      expect(userMessage.actor).toMatchObject({ type: EventActorType.user, id: 'user-1' });
+      const [userMessageEvent, started, completed] = events;
+      expect(userMessageEvent.actor).toMatchObject({ type: EventActorType.user, id: 'user-1' });
       expect(started.actor).toMatchObject({ type: EventActorType.agent, id: 'agent-1' });
       // linkage: the run points back at the user message and shares one execution id
-      expect(started.trigger_event_id).toBe(userMessage.id);
-      expect(completed.trigger_event_id).toBe(userMessage.id);
+      expect(started.trigger_event_id).toBe(userMessageEvent.id);
+      expect(completed.trigger_event_id).toBe(userMessageEvent.id);
       expect(started.execution_id).toBe(completed.execution_id);
     });
 
