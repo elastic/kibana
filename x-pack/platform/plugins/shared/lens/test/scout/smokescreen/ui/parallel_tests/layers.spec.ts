@@ -66,7 +66,7 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
 
   spaceTest(
     'transitions the selected layer in a multi-layer bar using layer chart switch',
-    async ({ page, pageObjects: { lens } }) => {
+    async ({ pageObjects: { lens } }) => {
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -113,7 +113,7 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
 
   spaceTest(
     'transitions from a multi-layer stacked bar to a treemap chart using suggestions',
-    async ({ page, pageObjects: { lens } }) => {
+    async ({ pageObjects: { lens } }) => {
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'terms',
