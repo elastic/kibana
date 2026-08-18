@@ -104,6 +104,7 @@
     "@kbn/agent-builder-server",
     "@kbn/logging-mocks",
     "@kbn/cps-utils",
-    "@kbn/cps"
+    "@kbn/cps",
+    "@kbn/core-http-server-mocks"
   ]
 }
