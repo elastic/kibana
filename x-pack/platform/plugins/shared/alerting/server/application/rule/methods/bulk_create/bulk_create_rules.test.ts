@@ -1193,17 +1193,25 @@ describe('bulkCreateRules', () => {
       expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledTimes(2);
       expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
         'alerting_rule_created',
-        expect.objectContaining({
+        {
           rule_id: 'mock-id-1',
           rule_type_id: '123',
           enabled: false,
           consumer: 'siem',
           producer: 'alerts',
-        })
+          created_at: '2019-02-12T21:01:22.479Z',
+        }
       );
       expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
         'alerting_rule_created',
-        expect.objectContaining({ rule_id: 'mock-id-2' })
+        {
+          rule_id: 'mock-id-2',
+          rule_type_id: '123',
+          enabled: false,
+          consumer: 'siem',
+          producer: 'alerts',
+          created_at: '2019-02-12T21:01:22.479Z',
+        }
       );
     });
 
@@ -1218,7 +1226,15 @@ describe('bulkCreateRules', () => {
 
       expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
         'alerting_rule_created',
-        expect.objectContaining({ template_id: 'my-template' })
+        {
+          rule_id: 'mock-id-1',
+          template_id: 'my-template',
+          rule_type_id: '123',
+          enabled: false,
+          consumer: 'siem',
+          producer: 'alerts',
+          created_at: '2019-02-12T21:01:22.479Z',
+        }
       );
     });
 
@@ -1237,7 +1253,14 @@ describe('bulkCreateRules', () => {
       expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledTimes(1);
       expect(rulesClientParams.analytics!.reportEvent).toHaveBeenCalledWith(
         'alerting_rule_created',
-        expect.objectContaining({ rule_id: 'mock-id-1' })
+        {
+          rule_id: 'mock-id-1',
+          rule_type_id: '123',
+          enabled: false,
+          consumer: 'siem',
+          producer: 'alerts',
+          created_at: '2019-02-12T21:01:22.479Z',
+        }
       );
     });
 
