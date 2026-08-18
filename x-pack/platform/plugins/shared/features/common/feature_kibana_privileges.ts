@@ -306,8 +306,10 @@ export interface FeatureKibanaPrivileges {
   };
 
   /**
-   * If your feature's content is indexed into AI Index (`ai-index-idx-*` or `ai-index-ds-*`) and should be readable from
-   * there, list the KI types this privilege grants read access to.
+   * If your feature's content is indexed into an AI Index (`ai-index-idx-*` or `ai-index-ds-*`),
+   * including the Elastic AI Index (formerly known as SML), and should be readable from
+   * there, list the KI (Knowledge Indicator) types this privilege grants read access to.
+   * In the case of Elastic AI Index, a KI Type is the same as the formerly known SML type.
    *
    * Each entry produces an `ai_index:<kiType>/read` action.
    *
@@ -317,6 +319,10 @@ export interface FeatureKibanaPrivileges {
    *    aiIndex: { read: ['dashboard'] }
    *  }
    * ```
+   *
+   * An AI index is an ES index that is used to store high-level facts (KIs) about the underlying
+   * user-owned data, and used by AI agents at retrieval time to improve relevance and token consumption.
+   * For more details, see x-pack/platform/plugins/shared/context_engine/README.md.
    */
   aiIndex?: {
     read?: readonly string[];
