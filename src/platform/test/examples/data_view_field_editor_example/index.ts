@@ -18,6 +18,7 @@ export default function ({
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const es = getService('es');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'header', 'settings']);
 
   describe('data view field editor example', function () {
@@ -32,6 +33,11 @@ export default function ({
 
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('blogs', null);
+      // data views no longer become the default on creation, so set it explicitly
+      const {
+        saved_objects: [dataView],
+      } = await kibanaServer.savedObjects.find({ type: 'index-pattern' });
+      await kibanaServer.uiSettings.update({ defaultIndex: dataView.id });
       await PageObjects.common.navigateToApp('dataViewFieldEditorExample');
     });
 

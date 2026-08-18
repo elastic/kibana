@@ -1433,9 +1433,13 @@ export class DataViewsService {
       const exists = this.savedObjectsCache.some((obj) => obj.id === configuredDefaultId);
       if (exists) return configuredDefaultId;
     }
-    const sorted = [...this.savedObjectsCache].sort(
-      (a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime()
-    );
+    const sorted = [...this.savedObjectsCache].sort((a, b) => {
+      const createdAtDiff =
+        new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+      // break ties deterministically (e.g. objects imported in the same bulk request
+      // can share an identical created_at timestamp)
+      return createdAtDiff !== 0 ? createdAtDiff : a.id.localeCompare(b.id);
+    });
     return sorted[0]?.id ?? null;
   }
 
