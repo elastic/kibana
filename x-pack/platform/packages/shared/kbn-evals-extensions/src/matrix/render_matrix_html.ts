@@ -105,7 +105,11 @@ const inlineMd = (s: string): string =>
   s
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, text: string, url: string) =>
+      // Only allow http(s) links — the markdown source is untrusted model
+      // output, and escaped schemes like `javascript:` still execute.
+      /^https?:\/\//i.test(url) ? `<a href="${url}">${text}</a>` : text
+    );
 
 /** Minimal markdown → HTML (headings, lists, bold, code, hr). */
 const mdToHtml = (md: string): string => {

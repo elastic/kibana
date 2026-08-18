@@ -133,11 +133,33 @@ describe('renderMatrixHtml', () => {
     };
 
     const html = renderMatrixHtml(matrixWithSuite, configWithSuite, {}, traces);
+    // The 'triage' column resolves its trace via the suite ID fallback.
     expect(html).toContain('Triage this alert');
     expect(html).toContain('alert.load');
-    // The 'triage' column should have a trace; the 'Overall' column won't.
-    // Check that at least the triage section shows the question, not 'Trace unavailable'.
-    expect(html).toContain('Triage this alert');
-    expect(html).toContain('alert.load');
+  });
+
+  it('strips non-http(s) link targets from markdown answers', () => {
+    const traces: MatrixTraceData = {
+      'test-model:alert': {
+        question: 'q',
+        toolTrail: [],
+        answer:
+          'Safe: [elastic](https://elastic.co) and [guide](http://example.com). ' +
+          'Bad: [click](javascript:alert(1)) and [x](data:text/html;base64,AAAA).',
+        stepCount: 0,
+        toolCount: 0,
+      },
+    };
+
+    const html = renderMatrixHtml(mockMatrix, mockConfig, {}, traces);
+    // Safe links render as anchors.
+    expect(html).toContain('<a href="https://elastic.co">elastic</a>');
+    expect(html).toContain('<a href="http://example.com">guide</a>');
+    // Dangerous schemes are not emitted into href attributes.
+    expect(html).not.toContain('href="javascript:');
+    expect(html).not.toContain('href="data:');
+    // The link text is preserved (dropped back to plain text).
+    expect(html).toContain('click');
+    expect(html).toContain('x');
   });
 });
