@@ -183,6 +183,7 @@ describe('getInitialAppState', () => {
         "hideSidebar": undefined,
         "hideTable": undefined,
         "interval": "auto",
+        "jsonModeSettings": undefined,
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -197,6 +198,7 @@ describe('getInitialAppState', () => {
             "desc",
           ],
         ],
+        "sourceDisplayMode": undefined,
         "viewMode": undefined,
       }
     `);
@@ -230,6 +232,7 @@ describe('getInitialAppState', () => {
         "hideSidebar": undefined,
         "hideTable": undefined,
         "interval": "auto",
+        "jsonModeSettings": undefined,
         "query": Object {
           "language": "kuery",
           "query": "",
@@ -239,6 +242,7 @@ describe('getInitialAppState', () => {
         "sampleSize": undefined,
         "savedQuery": undefined,
         "sort": Array [],
+        "sourceDisplayMode": undefined,
         "viewMode": undefined,
       }
     `);

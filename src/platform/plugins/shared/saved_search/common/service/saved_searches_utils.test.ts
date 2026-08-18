@@ -70,6 +70,7 @@ describe('saved_searches_utils', () => {
           "hideTable": false,
           "id": "id",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "managed": false,
           "references": undefined,
           "refreshInterval": undefined,
@@ -102,6 +103,7 @@ describe('saved_searches_utils', () => {
           },
           "sharingSavedObjectProps": undefined,
           "sort": Array [],
+          "sourceDisplayMode": undefined,
           "tabs": Array [
             Object {
               "attributes": Object {

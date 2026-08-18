@@ -391,6 +391,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "the-saved-search-id-with-timefield",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "managed": true,
           "references": undefined,
           "refreshInterval": Object {
@@ -407,6 +408,7 @@ describe('tab mapping utils', () => {
               "desc",
             ],
           ],
+          "sourceDisplayMode": undefined,
           "tags": Array [
             "tag1",
             "tag2",
@@ -460,6 +462,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 1",
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -469,6 +472,7 @@ describe('tab mapping utils', () => {
             "index": "test-data-view-1",
           },
           "sort": Array [],
+          "sourceDisplayMode": undefined,
           "timeRange": undefined,
           "timeRestore": false,
           "usesAdHocDataView": false,
@@ -500,6 +504,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 1",
           "refreshInterval": Object {
             "pause": true,
@@ -512,6 +517,7 @@ describe('tab mapping utils', () => {
             "index": "test-data-view-1",
           },
           "sort": Array [],
+          "sourceDisplayMode": undefined,
           "timeRange": Object {
             "from": "now-7d",
             "to": "now",
@@ -614,6 +620,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 1",
           "refreshInterval": undefined,
           "rowHeight": undefined,
@@ -627,6 +634,7 @@ describe('tab mapping utils', () => {
             },
           },
           "sort": Array [],
+          "sourceDisplayMode": undefined,
           "timeRange": undefined,
           "timeRestore": false,
           "usesAdHocDataView": undefined,
@@ -658,6 +666,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "2",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 2",
           "refreshInterval": Object {
             "pause": false,
@@ -674,6 +683,7 @@ describe('tab mapping utils', () => {
             },
           },
           "sort": Array [],
+          "sourceDisplayMode": undefined,
           "timeRange": Object {
             "from": "now-15m",
             "to": "now",
@@ -715,6 +725,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "1",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 1",
           "refreshInterval": Object {
             "pause": false,
@@ -731,6 +742,7 @@ describe('tab mapping utils', () => {
             },
           },
           "sort": Array [],
+          "sourceDisplayMode": undefined,
           "timeRange": Object {
             "from": "now-15m",
             "to": "now",
@@ -763,6 +775,7 @@ describe('tab mapping utils', () => {
           "hideTable": false,
           "id": "2",
           "isTextBasedQuery": false,
+          "jsonModeSettings": undefined,
           "label": "Tab 2",
           "refreshInterval": Object {
             "pause": false,
@@ -779,6 +792,7 @@ describe('tab mapping utils', () => {
             },
           },
           "sort": Array [],
+          "sourceDisplayMode": undefined,
           "timeRange": Object {
             "from": "now-15m",
             "to": "now",

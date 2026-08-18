@@ -26,6 +26,8 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
+  JsonModeSettings,
+  SourceDisplayMode,
   UnifiedDataTableProps,
   UnifiedDataTableRestorableState,
   UseColumnsProps,
@@ -133,6 +135,8 @@ function DiscoverDocumentsComponent({
     columns,
     sampleSizeState,
     density,
+    sourceDisplayMode,
+    jsonModeSettings,
   ] = useAppStateSelector((state) => {
     return [
       state.dataSource,
@@ -145,6 +149,8 @@ function DiscoverDocumentsComponent({
       state.columns,
       state.sampleSize,
       state.density,
+      state.sourceDisplayMode,
+      state.jsonModeSettings,
     ];
   });
   const expandedDoc = useCurrentTabSelector((state) => state.expandedDoc);
@@ -328,6 +334,20 @@ function DiscoverDocumentsComponent({
     [dispatch, updateAppState]
   );
 
+  const onUpdateSourceDisplayMode = useCallback(
+    (newSourceDisplayMode: SourceDisplayMode) => {
+      dispatch(updateAppState({ appState: { sourceDisplayMode: newSourceDisplayMode } }));
+    },
+    [dispatch, updateAppState]
+  );
+
+  const onUpdateJsonModeSettings = useCallback(
+    (newJsonModeSettings: JsonModeSettings) => {
+      dispatch(updateAppState({ appState: { jsonModeSettings: newJsonModeSettings } }));
+    },
+    [dispatch, updateAppState]
+  );
+
   // should be aligned with embeddable `showTimeCol` prop
   const showTimeCol = useMemo(
     () => showTimeFieldColumn({ uiSettings, query }),
@@ -387,12 +407,6 @@ function DiscoverDocumentsComponent({
       dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
     },
     [dispatch, setDataGridUiState]
-  );
-
-  // This is temporary, sourceDisplayMode should be get from the app state.
-  const sourceDisplayMode = useMemo(
-    () => (discoverFeatureFlags.getDataTableJsonViewEnabled() ? 'json' : 'summary'),
-    [discoverFeatureFlags]
   );
 
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
@@ -645,6 +659,9 @@ function DiscoverDocumentsComponent({
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
             sourceDisplayMode={sourceDisplayMode}
+            onUpdateSourceDisplayMode={onUpdateSourceDisplayMode}
+            jsonModeSettings={jsonModeSettings}
+            onUpdateJsonModeSettings={onUpdateJsonModeSettings}
           />
         </CellActionsProvider>
       </div>

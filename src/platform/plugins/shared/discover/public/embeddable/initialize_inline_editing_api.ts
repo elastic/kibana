@@ -128,6 +128,8 @@ export const initializeInlineEditingApi = ({
       headerRowHeight: stateManager.headerRowHeight.getValue(),
       viewMode: stateManager.viewMode.getValue(),
       density: stateManager.density.getValue(),
+      sourceDisplayMode: stateManager.sourceDisplayMode.getValue(),
+      jsonModeSettings: stateManager.jsonModeSettings.getValue(),
     };
 
     draftSelectedTabId$.next(selectedTabId$.getValue());

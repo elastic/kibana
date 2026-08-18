@@ -38,6 +38,8 @@ export function getSearchEmbeddableComparators(
     rowsPerPage: 'referenceEquality',
     headerRowHeight: 'referenceEquality',
     density: 'referenceEquality',
+    sourceDisplayMode: 'referenceEquality',
+    jsonModeSettings: 'deepEquality',
     grid: 'deepEquality',
     ...(isByValue
       ? { attributes: 'skip' }

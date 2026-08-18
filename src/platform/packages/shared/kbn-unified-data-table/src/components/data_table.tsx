@@ -79,6 +79,7 @@ import type {
   CustomBulkActions,
   DocMap,
   SourceDisplayMode,
+  JsonModeSettings,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -530,7 +531,21 @@ interface InternalUnifiedDataTableProps {
    * instead of the Summary column. Defualt is summary.
    */
   sourceDisplayMode?: SourceDisplayMode;
+  /**
+   * Update the source display mode state. When omitted, the view mode toggle is hidden.
+   */
+  onUpdateSourceDisplayMode?: (sourceDisplayMode: SourceDisplayMode) => void;
+  /**
+   * Settings that only apply while the source column is rendered in JSON mode.
+   */
+  jsonModeSettings?: JsonModeSettings;
+  /**
+   * Update the JSON mode settings state.
+   */
+  onUpdateJsonModeSettings?: (jsonModeSettings: JsonModeSettings) => void;
 }
+
+const EMPTY_JSON_MODE_SETTINGS: JsonModeSettings = {};
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
@@ -621,6 +636,9 @@ const InternalUnifiedDataTable = React.forwardRef<
       onFullScreenChange,
       hideFilteringOnComputedColumns,
       sourceDisplayMode = 'summary',
+      onUpdateSourceDisplayMode,
+      jsonModeSettings = EMPTY_JSON_MODE_SETTINGS,
+      onUpdateJsonModeSettings,
     },
     ref
   ) => {
@@ -1309,6 +1327,10 @@ const InternalUnifiedDataTable = React.forwardRef<
               lineCountInput={lineCountInput}
               headerLineCountInput={headerLineCountInput}
               densityControl={densityControl}
+              sourceDisplayMode={sourceDisplayMode}
+              onChangeSourceDisplayMode={onUpdateSourceDisplayMode}
+              jsonModeSettings={jsonModeSettings}
+              onChangeJsonModeSettings={onUpdateJsonModeSettings}
             />
           </>
         ),
@@ -1328,6 +1350,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateDataGridDensity,
       lineCountInput,
       headerLineCountInput,
+      sourceDisplayMode,
+      onUpdateSourceDisplayMode,
+      jsonModeSettings,
+      onUpdateJsonModeSettings,
     ]);
 
     const toolbarVisibility = useMemo(

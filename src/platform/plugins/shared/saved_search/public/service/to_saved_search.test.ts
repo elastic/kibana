@@ -77,6 +77,7 @@ describe('toSavedSearch', () => {
         "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
+        "jsonModeSettings": undefined,
         "managed": false,
         "references": Array [
           Object {
@@ -122,6 +123,7 @@ describe('toSavedSearch', () => {
             "desc",
           ],
         ],
+        "sourceDisplayMode": undefined,
         "tabs": Array [
           Object {
             "attributes": Object {
@@ -215,6 +217,7 @@ describe('toSavedSearch', () => {
         "hideTable": false,
         "id": undefined,
         "isTextBasedQuery": false,
+        "jsonModeSettings": undefined,
         "managed": false,
         "references": Array [
           Object {
@@ -260,6 +263,7 @@ describe('toSavedSearch', () => {
             "desc",
           ],
         ],
+        "sourceDisplayMode": undefined,
         "tabs": Array [
           Object {
             "attributes": Object {
