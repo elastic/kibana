@@ -32,8 +32,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover saved search embeddable', () => {
     before(async function () {
-      // TEMPORARY - DO NOT MERGE: shortened from `360_000` so this hook times out and CI exercises
-      // the cascading hook failure reporting. Restore `this.timeout(360_000)` before merging.
+      // TEMPORARY - DO NOT MERGE: shortened so this hook times out and CI exercises the cascading
+      // hook failure reporting. Restore `this.timeout(360_000)` before merging.
       //
       // This hook drives a full Discover UI flow (ad-hoc data view + save search) on top of
       // two esArchiver loads, which legitimately runs ~2 min and overruns the 120s default hook

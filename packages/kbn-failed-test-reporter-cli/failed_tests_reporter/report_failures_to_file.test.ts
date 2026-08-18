@@ -130,13 +130,22 @@ describe('reportFailuresToFile', () => {
     expect(readHtml()).not.toContain('Run aborted after this failure');
   });
 
-  it('shows the trimmed error and keeps the full stack behind a toggle', async () => {
+  it('offers the full stack behind a toggle when repository frames were cut', async () => {
+    const frames = Array.from({ length: 9 }, (_, i) => `    at fn${i} (x-pack/a.ts:${i}:1)`);
+    await report([makeFailure('a', { failure: ['Error: boom', ...frames].join('\n') })]);
+
+    const html = readHtml();
+    expect(html).toContain('... 3 more stack frames hidden');
+    expect(html).toContain('<summary>Full stack trace</summary>');
+    expect(html).toContain('at fn8 (x-pack/a.ts:8:1)');
+  });
+
+  it('omits the full stack toggle when the summary lost nothing worth reading', async () => {
     await report([makeFailure('a')]);
 
     const html = readHtml();
-    expect(html).toContain('... 1 stack frame hidden');
-    expect(html).toContain('<summary>Full stack trace</summary>');
-    expect(html).toContain('at listOnTimeout (node:internal/timers:605:17)');
+    expect(html).not.toContain('Full stack trace');
+    expect(html).not.toContain('stack frames hidden');
   });
 
   it('renders the failure details', async () => {

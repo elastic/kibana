@@ -31,7 +31,7 @@ const MAX_STACK_FRAMES = 6;
 
 export interface TrimmedFailureText {
   summary: string;
-  /** true when `summary` left frames out, so the original is still worth offering */
+  /** true when repository frames were left out, so the original is still worth offering */
   trimmed: boolean;
 }
 
@@ -57,17 +57,16 @@ export const trimFailureText = (text: string): TrimmedFailureText => {
   // `util.inspect` prints an error's own properties after the stack, opening that object at the end
   // of the last frame line ("at processTimers (...) {"), so the brace must survive frame removal.
   const opensProperties = /\{\s*$/.test(frames[frames.length - 1]);
-  const keptFrames = frames
-    .filter((frame) => !INTERNAL_STACK_FRAME_RE.test(frame))
-    .slice(0, MAX_STACK_FRAMES)
-    .map(stripTrailingBrace);
-  const hiddenFrames = frames.length - keptFrames.length;
+  const repoFrames = frames.filter((frame) => !INTERNAL_STACK_FRAME_RE.test(frame));
+  const keptFrames = repoFrames.slice(0, MAX_STACK_FRAMES).map(stripTrailingBrace);
+  // Internal frames are dropped silently; offering them back would just repeat the summary.
+  const hiddenFrames = repoFrames.length - keptFrames.length;
 
   const summary = [
     ...lines.slice(0, firstFrame),
     ...keptFrames,
     ...(hiddenFrames > 0
-      ? [`    ... ${hiddenFrames} stack frame${hiddenFrames === 1 ? '' : 's'} hidden`]
+      ? [`    ... ${hiddenFrames} more stack frame${hiddenFrames === 1 ? '' : 's'} hidden`]
       : []),
     ...(opensProperties ? ['{'] : []),
     ...lines.slice(lastFrame + 1),

@@ -45,7 +45,7 @@ describe('toRepoRelativePaths', () => {
 });
 
 describe('trimFailureText', () => {
-  it('drops runtime frames and keeps the error properties readable', () => {
+  it('drops runtime frames without counting them as trimmed', () => {
     const { summary, trimmed } = trimFailureText(
       [
         'Error: Timeout of 120000ms exceeded. (x-pack/a/find.ts)',
@@ -57,11 +57,10 @@ describe('trimFailureText', () => {
       ].join('\n')
     );
 
-    expect(trimmed).toBe(true);
+    expect(trimmed).toBe(false);
     expect(summary).toBe(
       [
         'Error: Timeout of 120000ms exceeded. (x-pack/a/find.ts)',
-        '    ... 2 stack frames hidden',
         '{',
         "  code: 'ERR_MOCHA_TIMEOUT',",
         '  timeout: 120000,',
@@ -79,12 +78,11 @@ describe('trimFailureText', () => {
       ].join('\n')
     );
 
-    expect(trimmed).toBe(true);
+    expect(trimmed).toBe(false);
     expect(summary).toBe(
       [
         'Error: retry.try timeout',
         '    at lastError (src/platform/test/common/services/retry/retry_for_success.ts:28:9)',
-        '    ... 1 stack frame hidden',
       ].join('\n')
     );
   });
@@ -103,7 +101,7 @@ describe('trimFailureText', () => {
     expect(summary.split('\n')).toEqual([
       'Error: boom',
       ...frames.slice(0, 6),
-      '    ... 3 stack frames hidden',
+      '    ... 3 more stack frames hidden',
     ]);
   });
 
