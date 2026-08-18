@@ -86,15 +86,7 @@ export function SlosWelcomePage() {
         <EuiFlexItem grow={false}>
           <EuiEmptyPrompt
             icon={
-              <span
-                css={css`
-                  display: block;
-                  width: 75%;
-                  margin-inline: auto;
-                `}
-              >
-                <EuiIllustration type={monitoringLogs} alt="" />
-              </span>
+              <EuiIllustration type={monitoringLogs} alt="" style={{ maxInlineSize: 240, marginInline: 'auto' }}/>
             }
             title={
               <h2>
