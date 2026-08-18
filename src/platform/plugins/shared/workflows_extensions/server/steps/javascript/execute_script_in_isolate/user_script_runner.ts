@@ -75,6 +75,9 @@ const USER_SCRIPT_RUNNER = `
     }
     const keys = _objectKeys(value);
     if (!isPlainObject(value) && !_arraySome.call(keys, (k) => _setHas.call(FORBIDDEN_KEYS, k))) {
+      for (let i = 0; i < keys.length; i++) {
+        value[keys[i]] = sanitize(value[keys[i]], ancestors);
+      }
       _weakSetDelete.call(ancestors, value);
       return value;
     }

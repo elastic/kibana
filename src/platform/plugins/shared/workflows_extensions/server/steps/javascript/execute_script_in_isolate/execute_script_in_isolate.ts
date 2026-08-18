@@ -34,6 +34,9 @@ export const executeScriptInIsolate = async ({
     memoryLimitMb,
     logger,
   });
+  // Suppress unhandledRejection if onCatastrophicError fires before catastrophicPromise
+  // is consumed by the Promise.race below (e.g. OOM during createContext or jail setup).
+  catastrophicPromise.catch(() => {});
 
   const { promise: wallClockTimeout, cancel: cancelWallClockTimeout } = createWallClockTimeout(
     isolate,
