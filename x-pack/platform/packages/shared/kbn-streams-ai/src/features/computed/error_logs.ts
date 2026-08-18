@@ -61,7 +61,7 @@ export const errorLogsGenerator: ComputedFeatureGenerator = {
 Use the \`properties.samples\` array to see actual error log entries.
 This is useful for understanding error patterns, identifying recurring issues, and diagnosing problems in the system.`,
 
-  generate: async ({ stream, start, end, esClient, signal }) => {
+  generate: async ({ stream, start, end, esClient }) => {
     const { hits } = await getSampleDocumentsEsql({
       esClient,
       index: getStreamSamplingSource(stream),
@@ -70,7 +70,6 @@ This is useful for understanding error patterns, identifying recurring issues, a
       sampleSize: SAMPLE_SIZE,
       whereCondition: ERROR_WHERE_CONDITION,
       requestTimeout: DEFAULT_ESQL_QUERY_TIMEOUT_MS,
-      signal,
     });
 
     return {

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
+import {
+  describeDataset,
+  formatDocumentAnalysis,
+  DEFAULT_ESQL_QUERY_TIMEOUT_MS,
+} from '@kbn/ai-tools';
 import { getStreamSamplingSource } from '@kbn/streams-schema';
 import { DATASET_ANALYSIS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import type { ComputedFeatureGenerator } from './types';
@@ -19,13 +23,13 @@ export const datasetAnalysisGenerator: ComputedFeatureGenerator = {
 Use the \`properties.analysis\` field to understand available fields and their value distributions.
 This is useful for understanding what fields are available for querying and what values they typically contain.`,
 
-  generate: async ({ stream, start, end, esClient, signal }) => {
+  generate: async ({ stream, start, end, esClient }) => {
     const analysis = await describeDataset({
       esClient,
       index: getStreamSamplingSource(stream),
       start,
       end,
-      signal,
+      signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
     });
 
     const formattedAnalysis = formatDocumentAnalysis(analysis, {

@@ -57,7 +57,6 @@ interface GetSampleDocumentsEsqlParams {
    */
   dslFilter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   requestTimeout: number;
-  signal?: AbortSignal;
 }
 
 interface GetSampleDocumentsEsqlResponse {
@@ -168,7 +167,6 @@ export async function getSampleDocumentsEsql({
   unmappedFields,
   dslFilter,
   requestTimeout,
-  signal: callerSignal,
 }: GetSampleDocumentsEsqlParams): Promise<GetSampleDocumentsEsqlResponse> {
   const indices = Array.isArray(index) ? index : [index];
   const extraDslClauses = dslFilter ? castArray(dslFilter) : [];
@@ -179,8 +177,7 @@ export async function getSampleDocumentsEsql({
   // One deadline for every request this call makes (count + sample can be two
   // sequential requests), so `requestTimeout` bounds the whole call rather than
   // resetting on each individual request.
-  const timeoutSignal = AbortSignal.timeout(requestTimeout);
-  const signal = callerSignal ? AbortSignal.any([callerSignal, timeoutSignal]) : timeoutSignal;
+  const signal = AbortSignal.timeout(requestTimeout);
   const runQuery = (params: { query: string; filter: typeof filter; drop_null_columns: true }) =>
     esClient.esql.query(params, { signal }) as unknown as Promise<ESQLSearchResponse>;
 
