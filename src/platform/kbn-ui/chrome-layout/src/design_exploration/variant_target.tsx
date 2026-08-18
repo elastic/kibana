@@ -81,7 +81,7 @@ const targetGridTemplateColumns = (navWidth: number) =>
 
 export const createTargetStyles = (euiTheme: UseEuiTheme) => {
   const scope = designExplorationVariantScope(TARGET_VARIANT_ID);
-  const { colors } = euiTheme.euiTheme;
+  const { colors, levels } = euiTheme.euiTheme;
   const isDarkMode = euiTheme.colorMode === 'DARK';
 
   // Still a single shared hairline for anywhere a border remains, but it's
@@ -1164,29 +1164,36 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     /* Discover: session tabs arrive via titleAppend (same primary row as the
        title). Stack title + tabs so the menu stays on the title row — POC
-       stand-in for a real AppHeader tabsContent slot. */
-    ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
-      [class*='css-'][class*='-app_header_shell--primaryRow'] {
+       stand-in for a real AppHeader tabsContent slot.
+       Selectors follow AppHeaderShell DOM, not Emotion labels. */
+    ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar']) > div:first-child {
       align-items: flex-start !important;
     }
 
     ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
-      [class*='css-'][class*='-app_header_shell--titleCluster'] {
+      > div:first-child
+      > div:first-child {
       flex-direction: column !important;
       align-items: stretch !important;
     }
 
     ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
-      [class*='css-'][class*='-app_header_shell--titleGroup'],
+      > div:first-child
+      > div:first-child
+      > div:first-child,
     ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
-      [class*='css-'][class*='-app_header_shell--titleAppend'] {
+      > div:first-child
+      > div:first-child
+      > div:has([data-test-subj='unifiedTabs_tabsBar']) {
       max-width: none !important;
       width: 100% !important;
       flex: 0 0 auto !important;
     }
 
     ${scope} [data-test-subj='appHeader']:has([data-test-subj='unifiedTabs_tabsBar'])
-      [class*='css-'][class*='-app_header_shell--titleAppend'] {
+      > div:first-child
+      > div:first-child
+      > div:has([data-test-subj='unifiedTabs_tabsBar']) {
       justify-content: flex-start !important;
       margin-block-start: 16px !important;
     }
@@ -1204,8 +1211,14 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       margin-inline: 0 !important;
     }
 
+    ${scope} [data-test-subj='unifiedTabs_tabsBar'] [data-test-subj^='unifiedTabs_tab_'] > div,
+    ${scope} [data-test-subj='unifiedTabs_tabsBar'] .unifiedTabs__tabLabel {
+      padding-inline: 0 !important;
+    }
+
     ${scope} [class*='css-'][class*='-tab--getTabContentCss'] {
       height: 32px !important;
+      padding-inline: 0 !important;
     }
 
     ${scope} [class*='css-'][class*='-tab--getTabContainerCss'] .unifiedTabs__tabActions {
@@ -1362,10 +1375,10 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       margin-right: 8px !important;
     }
 
-    /* Offset the dashboard query bar only when chrome owns a separate top-bar slot. */
-    ${scope} .kbnChromeLayoutApplication:has(.kbnChromeLayoutApplicationTopBar)
-      div:has(> #dashboardTitle) {
-      top: ${TARGET_TOP_BAR_HEIGHT}px !important;
+    /* Dashboard search bar + controls stick to the application scrollport. */
+    ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
+      position: sticky !important;
+      z-index: ${levels.mask} !important;
       width: 100% !important;
       border-block-end: ${TARGET_HAIRLINE} !important;
       box-shadow: none !important;
@@ -1376,16 +1389,14 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       transition: top ${TARGET_APP_HEADER_TRANSITION_MS}ms ease !important;
     }
 
+    ${scope} .kbnChromeLayoutApplication:has(.kbnChromeLayoutApplicationTopBar)
+      div:has(> #dashboardTitle) {
+      top: ${TARGET_TOP_BAR_HEIGHT}px !important;
+    }
+
     ${scope} .kbnChromeLayoutApplication:not(:has(.kbnChromeLayoutApplicationTopBar))
       div:has(> #dashboardTitle) {
       top: 0 !important;
-      width: 100% !important;
-      border-block-end: ${TARGET_HAIRLINE} !important;
-      box-shadow: none !important;
-      background-color: ${knobVar('surface')} !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      margin-inline: 0 !important;
     }
 
     /* Fullscreen hides chrome — no app header to offset against; pin top nav immediately. */
@@ -1428,6 +1439,26 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       top: 0 !important;
       transition: top ${TARGET_APP_HEADER_TRANSITION_MS}ms ease
         ${TARGET_APP_HEADER_TRANSITION_MS}ms !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
+      .kbnChromeLayoutApplication:not(:has(.kbnChromeLayoutApplicationTopBar))
+      div:has(> #dashboardTitle)
+      [data-test-subj='appHeader'] {
+      height: 0 !important;
+      min-height: 0 !important;
+      overflow: hidden !important;
+      opacity: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: none !important;
+      border: none !important;
+    }
+
+    ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
+      .kbnChromeLayoutApplication:not(:has(.kbnChromeLayoutApplicationTopBar))
+      div:has(> [data-test-subj='appHeader']) {
+      min-height: 0 !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
