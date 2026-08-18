@@ -25,8 +25,8 @@ jest.mock('./step_components', () => ({
       Continue
     </button>
   ),
-  DeploySettingsStep: ({ onContinue }: { onContinue: () => void }) => (
-    <button data-test-subj="deploySettingsStep-continue" onClick={onContinue}>
+  AuthenticateAndDeployStep: ({ onContinue }: { onContinue: () => void }) => (
+    <button data-test-subj="authenticateAndDeployStep-continue" onClick={onContinue}>
       Continue
     </button>
   ),
@@ -44,8 +44,8 @@ beforeEach(() => {
   mockUseSessionStorage.mockImplementation((_key, initial) => React.useState(initial));
 });
 
-// apigateway_logs  → cloud_forwarder (non-agentless): needsDeploySettingsStep = false
-// apigateway_metrics → agentless: needsDeploySettingsStep = true
+// apigateway_logs  → cloud_forwarder (non-agentless): needsAuthenticateAndDeployStep = false
+// apigateway_metrics → agentless: needsAuthenticateAndDeployStep = true
 const NON_AGENTLESS_ID = 'apigateway_logs';
 const AGENTLESS_ID = 'apigateway_metrics';
 
@@ -97,7 +97,7 @@ describe('OnboardingShell — downstream step invalidation', () => {
     it('marks service-settings incomplete after the service selection changes', async () => {
       const { history, setIds } = renderShell('#services');
 
-      // Select an agentless service so needsDeploySettingsStep = true
+      // Select an agentless service so needsAuthenticateAndDeployStep = true
       // and Continue goes to service-settings (not skipped).
       await setIds([AGENTLESS_ID]);
 
@@ -107,7 +107,7 @@ describe('OnboardingShell — downstream step invalidation', () => {
 
       // Complete service-settings → now marked complete in the stepper
       act(() => screen.getByTestId('serviceSettingsStep-continue').click());
-      expect(history.location.hash).toBe('#deploy-settings');
+      expect(history.location.hash).toBe('#authenticate-and-deploy');
 
       // Go back to services
       act(() => history.push('/aws#services'));
@@ -121,34 +121,34 @@ describe('OnboardingShell — downstream step invalidation', () => {
   });
 
   /**
-   * Path 2: deploy-settings auto-complete / agentless flip.
+   * Path 2: authenticate-and-deploy auto-complete / agentless flip.
    *
    * With only non-agentless services selected, Continue from services
-   * auto-marks deploy-settings complete and skips it. Adding an agentless
-   * service (which requires deploy-settings) must invalidate that stale
+   * auto-marks authenticate-and-deploy complete and skips it. Adding an agentless
+   * service (which requires authenticate-and-deploy) must invalidate that stale
    * complete flag so the credentials step can no longer be skipped.
    */
-  describe('path 2: agentless flip — deploy-settings wrongly skipped', () => {
-    it('marks deploy-settings incomplete when selection switches to include an agentless service', async () => {
+  describe('path 2: agentless flip — authenticate-and-deploy wrongly skipped', () => {
+    it('marks authenticate-and-deploy incomplete when selection switches to include an agentless service', async () => {
       const { history, setIds } = renderShell('#services');
 
-      // Select only a non-agentless service: needsDeploySettingsStep = false.
+      // Select only a non-agentless service: needsAuthenticateAndDeployStep = false.
       await setIds([NON_AGENTLESS_ID]);
 
-      // Continue from services — deploy-settings is auto-marked complete and
+      // Continue from services — authenticate-and-deploy is auto-marked complete and
       // the flow jumps past it to deploy-and-detect.
       act(() => screen.getByTestId('servicesStep-continue').click());
       expect(history.location.hash).toBe('#deploy-and-detect');
-      expect(stepIndicatorStatus('deploy-settings')).toBe('complete');
+      expect(stepIndicatorStatus('authenticate-and-deploy')).toBe('complete');
 
       // Go back to services
       act(() => history.push('/aws#services'));
 
-      // Add an agentless service — now needsDeploySettingsStep = true.
-      // The previously auto-completed deploy-settings must be invalidated.
+      // Add an agentless service — now needsAuthenticateAndDeployStep = true.
+      // The previously auto-completed authenticate-and-deploy must be invalidated.
       await setIds([NON_AGENTLESS_ID, AGENTLESS_ID]);
 
-      expect(stepIndicatorStatus('deploy-settings')).toBe('incomplete');
+      expect(stepIndicatorStatus('authenticate-and-deploy')).toBe('incomplete');
     });
   });
 });
