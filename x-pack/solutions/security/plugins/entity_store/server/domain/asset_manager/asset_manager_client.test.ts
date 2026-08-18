@@ -27,6 +27,7 @@ import {
   stopHistorySnapshotTask,
 } from '../../tasks/history_snapshot_task';
 import { scheduleStatusReportTask, stopStatusReportTask } from '../../tasks/status_report_task';
+import { scheduleResilienceTask, stopResilienceTask } from '../../tasks/resilience_task';
 import { removeEntityMaintainer } from '../../tasks/entity_maintainers';
 import { entityMaintainersRegistry } from '../../tasks/entity_maintainers/entity_maintainers_registry';
 import { stopAndRemoveV1, stopAndRemoveV1SharedTasks } from '../../infra/remove_v1';
@@ -36,6 +37,7 @@ jest.mock('./euid_stored_scripts');
 jest.mock('../../tasks/extract_entity_task');
 jest.mock('../../tasks/history_snapshot_task');
 jest.mock('../../tasks/status_report_task');
+jest.mock('../../tasks/resilience_task');
 jest.mock('../../tasks/entity_maintainers', () => ({
   removeEntityMaintainer: jest.fn(),
 }));
@@ -78,6 +80,10 @@ const mockScheduleStatusReportTask = scheduleStatusReportTask as jest.MockedFunc
 const mockStopStatusReportTask = stopStatusReportTask as jest.MockedFunction<
   typeof stopStatusReportTask
 >;
+const mockScheduleResilienceTask = scheduleResilienceTask as jest.MockedFunction<
+  typeof scheduleResilienceTask
+>;
+const mockStopResilienceTask = stopResilienceTask as jest.MockedFunction<typeof stopResilienceTask>;
 const mockRemoveEntityMaintainer = removeEntityMaintainer as jest.MockedFunction<
   typeof removeEntityMaintainer
 >;
@@ -122,6 +128,8 @@ describe('AssetManagerClient', () => {
     mockStopHistorySnapshotTask.mockResolvedValue(undefined);
     mockScheduleStatusReportTask.mockResolvedValue(undefined);
     mockStopStatusReportTask.mockResolvedValue(undefined);
+    mockScheduleResilienceTask.mockResolvedValue(undefined);
+    mockStopResilienceTask.mockResolvedValue(undefined);
     mockRemoveEntityMaintainer.mockResolvedValue(undefined);
     mockEntityMaintainersGetAll.mockReturnValue([
       { id: 'automated-resolution', interval: '1h', minLicense: 'basic' },
@@ -520,5 +528,132 @@ describe('AssetManagerClient', () => {
         })
       );
     });
+  });
+});
+
+describe('AssetManagerClient.reinstallSharedAssetsIfMissing', () => {
+  const namespace = 'default';
+
+  let client: AssetManagerClient;
+  let mockUserEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockLogger: ReturnType<typeof loggerMock.create>;
+
+  const buildClient = (
+    overrides: Partial<{
+      latestExists: boolean;
+      updatesExists: boolean;
+      metadataExists: boolean;
+    }> = {}
+  ) => {
+    const { latestExists = true, updatesExists = true, metadataExists = true } = overrides;
+
+    mockUserEsClient = {
+      indices: {
+        exists: jest.fn().mockResolvedValue(latestExists),
+        getDataStream: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
+          if (name.includes('updates')) {
+            return updatesExists ? { data_streams: [{ name }] } : { data_streams: [] };
+          } else {
+            return metadataExists ? { data_streams: [{ name }] } : { data_streams: [] };
+          }
+        }),
+      },
+    } as unknown as jest.Mocked<ElasticsearchClient>;
+
+    mockLogger = loggerMock.create();
+
+    client = new AssetManagerClient({
+      logger: mockLogger,
+      esClient: mockUserEsClient,
+      internalEsClient: {} as jest.Mocked<ElasticsearchClient>,
+      taskManager: {} as jest.Mocked<TaskManagerStartContract>,
+      engineDescriptorClient: {
+        getAll: jest.fn().mockResolvedValue([]),
+        init: jest.fn(),
+        update: jest.fn(),
+        delete: jest.fn(),
+      } as unknown as import('../saved_objects').EngineDescriptorClient,
+      globalStateClient: {
+        init: jest.fn(),
+        findOrThrow: jest.fn(),
+        find: jest.fn(),
+        delete: jest.fn(),
+      } as unknown as import('../saved_objects').EntityStoreGlobalStateClient,
+      remoteLogExtractionStateClient: {
+        delete: jest.fn(),
+      } as unknown as import('../saved_objects/remote_log_extraction_state').RemoteLogExtractionStateClient,
+      namespace,
+      isServerless: false,
+      logsExtractionClient: {} as unknown as import('../logs_extraction').LogsExtractionClient,
+      security: {} as import('@kbn/security-plugin/server').SecurityPluginStart,
+      analytics: {
+        reportEvent: jest.fn(),
+      } as unknown as import('../../telemetry/events').TelemetryReporter,
+      savedObjectsClient: {} as SavedObjectsClientContract,
+    });
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockInstallSharedElasticsearchAssets.mockResolvedValue(undefined);
+  });
+
+  it('returns false and does not reinstall when all assets are present', async () => {
+    buildClient({ latestExists: true, updatesExists: true, metadataExists: true });
+
+    const result = await client.reinstallSharedAssetsIfMissing();
+
+    expect(result).toBe(false);
+    expect(mockInstallSharedElasticsearchAssets).not.toHaveBeenCalled();
+  });
+
+  it('returns true and reinstalls when the latest index is missing', async () => {
+    buildClient({ latestExists: false, updatesExists: true, metadataExists: true });
+
+    const result = await client.reinstallSharedAssetsIfMissing();
+
+    expect(result).toBe(true);
+    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('.entities.v2.latest.security_default-00001')
+    );
+  });
+
+  it('returns true and reinstalls when the updates data stream is missing', async () => {
+    buildClient({ latestExists: true, updatesExists: false, metadataExists: true });
+
+    const result = await client.reinstallSharedAssetsIfMissing();
+
+    expect(result).toBe(true);
+    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('.entities.v2.updates.security_default')
+    );
+  });
+
+  it('returns true and reinstalls when the metadata data stream is missing', async () => {
+    buildClient({ latestExists: true, updatesExists: true, metadataExists: false });
+
+    const result = await client.reinstallSharedAssetsIfMissing();
+
+    expect(result).toBe(true);
+    expect(mockInstallSharedElasticsearchAssets).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('.entities.v2.metadata.security_default')
+    );
+  });
+
+  it('propagates non-404 errors from getDataStream instead of treating them as missing', async () => {
+    buildClient();
+
+    mockUserEsClient.indices.getDataStream = jest
+      .fn()
+      .mockRejectedValue({ statusCode: 503, message: 'Service Unavailable' });
+
+    await expect(client.reinstallSharedAssetsIfMissing()).rejects.toMatchObject({
+      statusCode: 503,
+    });
+    expect(mockInstallSharedElasticsearchAssets).not.toHaveBeenCalled();
+    expect(mockLogger.warn).not.toHaveBeenCalled();
   });
 });
