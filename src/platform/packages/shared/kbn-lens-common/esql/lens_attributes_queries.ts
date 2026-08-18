@@ -74,6 +74,11 @@ const viewDatasourceStates = (
  * stub next to their `formBased` state, so a document only counts as
  * text-based when it has text-based layers, or a `textBased` state without
  * any form-based layers (e.g. a freshly created ES|QL document).
+ *
+ * Legacy `indexpattern`-era (≤8.5) documents predate the `textBased` key
+ * (introduced in 8.6, alongside the `indexpattern` → `formBased` rename) and
+ * therefore never reach the no-form-based-layers fallback — the `'textBased'
+ * in` gate classifies them as form-based.
  */
 export const isTextBasedAttributes = (attributes: MinimalLensAttributes | undefined): boolean => {
   const datasourceStates = viewDatasourceStates(attributes);

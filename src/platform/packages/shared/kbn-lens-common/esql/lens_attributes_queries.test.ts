@@ -125,6 +125,19 @@ describe('getRepresentativeQuery', () => {
   });
 });
 
+describe('isTextBasedAttributes legacy indexpattern-era docs', () => {
+  it('classifies unmigrated indexpattern-only documents as form-based', () => {
+    // ≤8.5 vintage: `indexpattern` key, no `textBased` key (predates it)
+    const legacyIndexPatternDoc: MinimalLensAttributes = {
+      state: {
+        query: kqlQuery,
+        datasourceStates: { indexpattern: { layers: { layer1: {} } } },
+      },
+    };
+    expect(isTextBasedAttributes(legacyIndexPatternDoc)).toBe(false);
+  });
+});
+
 describe('getChartScopedFilterQuery', () => {
   it('passes through KQL/Lucene queries', () => {
     expect(getChartScopedFilterQuery(kqlQuery)).toEqual(kqlQuery);
