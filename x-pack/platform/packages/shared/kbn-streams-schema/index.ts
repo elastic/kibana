@@ -83,6 +83,7 @@ export {
   extractStatsGroupColumns,
   extractWhereExpression,
   findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getFromSources,
   getStatsQueryHints,
   hasStatsCommand,

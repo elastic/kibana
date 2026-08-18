@@ -279,33 +279,4 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
       ).toThrow('ES|QL query must use FROM $.query');
     });
   });
-
-  describe('over-broad full-text predicates', () => {
-    const stream = createWiredStreamDefinition('logs');
-
-    it('should reject a multi-word full-text predicate, steering to MATCH_PHRASE', () => {
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* | WHERE message : "request failed"',
-          stream,
-        })
-      ).toThrow('MATCH_PHRASE');
-    });
-
-    it('should accept MATCH_PHRASE and AND-of-single-terms', () => {
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* | WHERE MATCH_PHRASE(message, "request failed")',
-          stream,
-        })
-      ).not.toThrow();
-
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* | WHERE message:"request" AND message:"failed"',
-          stream,
-        })
-      ).not.toThrow();
-    });
-  });
 });

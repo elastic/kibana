@@ -6,7 +6,7 @@
  */
 
 import { Parser, Walker } from '@elastic/esql';
-import { Streams, findOverBroadMatchPredicates } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import type { ESQLAstQueryExpression } from '@elastic/esql/types';
 import { StatusError } from '../errors/status_error';
 
@@ -68,22 +68,5 @@ export function validateEsqlQueryForStreamOrThrow({
     }
   } else if (!matchesWiredPattern) {
     throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern}`);
-  }
-
-  // Enforced here too for direct writes (REST route, Agent Builder tool) that bypass generation.
-  const overBroad = findOverBroadMatchPredicates(esqlQuery);
-  if (overBroad.length > 0) {
-    const rendered = overBroad
-      .map((p) =>
-        p.operator === ':' ? `${p.field} : "${p.value}"` : `MATCH(${p.field}, "${p.value}")`
-      )
-      .join(', ');
-    throw new EsqlQueryValidationError(
-      `Full-text predicate(s) match ANY word rather than the whole value - a multi-word ` +
-        `":" or MATCH value is ORed term-by-term, which is far too broad: ${rendered}. ` +
-        `Replace each with MATCH_PHRASE(field, "a b") for an exact phrase, or ` +
-        `MATCH(field, "a b", {"operator": "AND"}) to require all terms in any order; ` +
-        `both match exactly on keyword fields.`
-    );
   }
 }

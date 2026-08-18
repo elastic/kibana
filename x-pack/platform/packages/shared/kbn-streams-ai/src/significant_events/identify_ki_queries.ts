@@ -11,6 +11,7 @@ import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
   findOverBroadMatchPredicates,
+  renderOverBroadMatchError,
   getSourcesForStream,
   getStatsQueryHints,
   normalizeEsqlSafe,
@@ -448,20 +449,13 @@ export async function identifyKIQueries({
                 const overBroadPredicates = findOverBroadMatchPredicates(rewritten);
                 if (overBroadPredicates.length > 0) {
                   hasNonIntentFailures = true;
-                  const rendered = overBroadPredicates
-                    .map((p) =>
-                      p.operator === ':'
-                        ? `${p.field} : "${p.value}"`
-                        : `MATCH(${p.field}, "${p.value}")`
-                    )
-                    .join(', ');
                   return {
                     query,
                     valid: false,
                     status: 'Failed to add' as const,
                     failureReason: 'validation_error' as const,
                     exactDuplicate,
-                    error: `Full-text predicate(s) match ANY word rather than the whole value - a multi-word \`:\` or \`MATCH\` value is ORed term-by-term, which is far too broad: ${rendered}. Replace each with MATCH_PHRASE(field, "a b") for an exact phrase, or MATCH(field, "a b", {"operator": "AND"}) to require all terms in any order; both match exactly on keyword fields.`,
+                    error: renderOverBroadMatchError(overBroadPredicates),
                   };
                 }
 

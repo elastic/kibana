@@ -22,6 +22,7 @@ import type {
   ESQLFunction,
   ESQLSingleAstItem,
   ESQLSource,
+  ESQLStringLiteral,
 } from '@elastic/esql/types';
 
 // ---------------------------------------------------------------------------
@@ -562,24 +563,26 @@ export interface OverBroadMatchPredicate {
   operator: ':' | 'MATCH';
 }
 
+function isKeywordLiteral(node: ESQLAstItem | undefined): node is ESQLStringLiteral {
+  return (
+    !!node &&
+    !Array.isArray(node) &&
+    'type' in node &&
+    node.type === 'literal' &&
+    node.literalType === 'keyword'
+  );
+}
+
 function getUnquotedLiteral(node: ESQLAstItem | undefined): string | null {
-  if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'literal') return null;
-  const { valueUnquoted } = node as { valueUnquoted?: unknown };
-  return typeof valueUnquoted === 'string' ? valueUnquoted : null;
+  return isKeywordLiteral(node) ? node.valueUnquoted : null;
 }
 
 function matchOptionsForceAndOperator(node: ESQLAstItem | undefined): boolean {
   if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'map') return false;
-  const { entries } = node as {
-    entries?: Array<{ key?: { valueUnquoted?: unknown }; value?: { valueUnquoted?: unknown } }>;
-  };
-  if (!Array.isArray(entries)) return false;
-  return entries.some(
+  return node.entries.some(
     (entry) =>
-      typeof entry.key?.valueUnquoted === 'string' &&
-      entry.key.valueUnquoted.toLowerCase() === 'operator' &&
-      typeof entry.value?.valueUnquoted === 'string' &&
-      entry.value.valueUnquoted.toLowerCase() === 'and'
+      getUnquotedLiteral(entry.key)?.toLowerCase() === 'operator' &&
+      getUnquotedLiteral(entry.value)?.toLowerCase() === 'and'
   );
 }
 
@@ -613,6 +616,21 @@ export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredic
     },
   });
   return issues;
+}
+
+/** Shared rejection message for {@link findOverBroadMatchPredicates} results, so callers stay identical. */
+export function renderOverBroadMatchError(predicates: OverBroadMatchPredicate[]): string {
+  const rendered = predicates
+    .map((p) =>
+      p.operator === ':' ? `${p.field} : "${p.value}"` : `MATCH(${p.field}, "${p.value}")`
+    )
+    .join(', ');
+  return (
+    `Full-text predicate(s) match ANY word rather than the whole value - a multi-word ":" or ` +
+    `MATCH value is ORed term-by-term, which is far too broad: ${rendered}. Replace each with ` +
+    `MATCH_PHRASE(field, "a b") for an exact phrase, or MATCH(field, "a b", {"operator": "AND"}) ` +
+    `to require all terms in any order; both match exactly on keyword fields.`
+  );
 }
 
 type ByArg = ESQLCommand['args'][number];

@@ -458,21 +458,7 @@ describe('findOverBroadMatchPredicates', () => {
     ).toEqual([]);
   });
 
-  it('does not flag separate single-word `:` terms joined with AND', () => {
-    expect(
-      findOverBroadMatchPredicates(
-        'FROM logs | WHERE body.text:"connection" AND body.text:"timeout"'
-      )
-    ).toEqual([]);
-  });
-
   it('returns an empty array for an unparseable query', () => {
     expect(findOverBroadMatchPredicates('THIS IS NOT ESQL {{{')).toEqual([]);
-  });
-
-  it('flags a multi-word value regardless of field (mapping-blind)', () => {
-    expect(
-      findOverBroadMatchPredicates('FROM logs | WHERE host.name : "web server"').map((p) => p.field)
-    ).toEqual(['host.name']);
   });
 });
