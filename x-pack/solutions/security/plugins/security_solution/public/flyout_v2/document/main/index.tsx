@@ -138,7 +138,11 @@ export const DocumentFlyout = memo(
     // Maps each ancestor document id to the index it lives in, so a Source event value in the Table
     // tab can open that specific ancestor document. Threshold rules are excluded (see helper).
     const ancestorsIndexById = useMemo(
-      () => getAncestorsIndexById(getTimelineEventsDetailsFromRecord(hit)),
+      () =>
+        getAncestorsIndexById(
+          getTimelineEventsDetailsFromRecord(hit),
+          hit.raw._index ?? (getFieldValue(hit, '_index') as string) ?? ''
+        ),
       [hit]
     );
 
