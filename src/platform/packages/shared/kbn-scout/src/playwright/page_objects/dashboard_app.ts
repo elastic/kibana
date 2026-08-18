@@ -144,9 +144,14 @@ export class DashboardApp {
     await this.page.gotoApp('dashboards');
   }
 
-  async openDashboardWithId(id: string) {
+  async openDashboardWithId(
+    id: string,
+    opts: { waitForRender?: boolean } = { waitForRender: true }
+  ) {
     await this.page.gotoApp('dashboards', { hash: `/view/${id}` });
-    await this.waitForRenderComplete();
+    if (opts.waitForRender) {
+      await this.waitForRenderComplete();
+    }
   }
 
   /** Navigates to the new dashboard creation page and waits for the editor toolbar to load. */
@@ -1070,11 +1075,11 @@ export class DashboardApp {
   }
 
   async addNewLensPanel() {
-    await this.addNewPanel('Visualization');
+    await this.addNewPanel('Create visualization');
   }
 
   async addNewESQLPanel() {
-    await this.addNewPanel('Visualization (query)');
+    await this.addNewPanel('Create visualization (query)');
   }
 
   /** Opens the add-panel flyout, selects the given panel type, and waits for the flyout to close. */

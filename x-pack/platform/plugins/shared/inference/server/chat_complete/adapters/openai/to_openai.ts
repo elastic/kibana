@@ -19,6 +19,9 @@ import type { Message, ToolOptions, InferenceConnector } from '@kbn/inference-co
 import { MessageRole } from '@kbn/inference-common';
 import { OpenAiProviderType } from './types';
 
+/** Non-empty stand-in when an assistant turn has no text and no tool calls. */
+const EMPTY_ASSISTANT_CONTENT_PLACEHOLDER = '...';
+
 /**
  * Recursively processes a schema to ensure all array types have an `items` property.
  * OpenAI requires `items` to be present for array types.
@@ -129,29 +132,43 @@ export function messagesToOpenAI({
     ? { role: 'system', content: system }
     : undefined;
 
+  // Anthropic (via external inference) rejects empty text content blocks.
+  // - Tool-call assistants: omit `content` entirely (not null — ES rejects null; not "" — Anthropic rejects "").
+  // - Empty assistants without tool calls: keep the turn with a placeholder so Agent Builder
+  //   empty-response retries are not collapsed by consecutive-user merging.
   const converted = messages.map((message): ChatCompletionMessageParam => {
     const role = message.role;
 
     switch (role) {
-      case MessageRole.Assistant:
+      case MessageRole.Assistant: {
+        const toolCalls = message.toolCalls?.length
+          ? message.toolCalls.map((toolCall) => {
+              return {
+                function: {
+                  name: toolCall.function.name,
+                  arguments:
+                    'arguments' in toolCall.function
+                      ? JSON.stringify(toolCall.function.arguments)
+                      : '{}',
+                },
+                id: toolCall.toolCallId,
+                type: 'function' as const,
+              };
+            })
+          : undefined;
+        const rawContent = message.content ?? '';
+        const contentIsEmpty = typeof rawContent !== 'string' || rawContent.trim().length === 0;
         const assistantMessage: ChatCompletionAssistantMessageParam = {
           role: 'assistant',
-          content: message.content ?? '',
-          tool_calls: message.toolCalls?.map((toolCall) => {
-            return {
-              function: {
-                name: toolCall.function.name,
-                arguments:
-                  'arguments' in toolCall.function
-                    ? JSON.stringify(toolCall.function.arguments)
-                    : '{}',
-              },
-              id: toolCall.toolCallId,
-              type: 'function',
-            };
-          }),
+          ...(contentIsEmpty
+            ? toolCalls
+              ? {} // omit content when tool calls are present
+              : { content: EMPTY_ASSISTANT_CONTENT_PLACEHOLDER }
+            : { content: rawContent }),
+          ...(toolCalls ? { tool_calls: toolCalls } : {}),
         };
         return assistantMessage;
+      }
 
       case MessageRole.User:
         const userMessage: ChatCompletionUserMessageParam = {
@@ -215,16 +232,26 @@ function mergeConsecutiveMessages(
       } else if (message.role === 'assistant' && previous.role === 'assistant') {
         const prevContent = (previous as ChatCompletionAssistantMessageParam).content ?? '';
         const curContent = (message as ChatCompletionAssistantMessageParam).content ?? '';
-        (previous as ChatCompletionAssistantMessageParam).content = [prevContent, curContent]
-          .filter(Boolean)
-          .join('\n');
+        const joined = [prevContent, curContent].filter(Boolean).join('\n');
         const prevCalls = (previous as ChatCompletionAssistantMessageParam).tool_calls;
         const curCalls = (message as ChatCompletionAssistantMessageParam).tool_calls;
-        if (curCalls?.length) {
-          (previous as ChatCompletionAssistantMessageParam).tool_calls = [
-            ...(prevCalls ?? []),
-            ...curCalls,
-          ];
+        const mergedCalls =
+          curCalls?.length || prevCalls?.length
+            ? [...(prevCalls ?? []), ...(curCalls ?? [])]
+            : undefined;
+
+        if (joined) {
+          (previous as ChatCompletionAssistantMessageParam).content = joined;
+        } else if (mergedCalls?.length) {
+          // Tool-call-only merged message: omit empty content (do not set null/"").
+          delete (previous as ChatCompletionAssistantMessageParam).content;
+        } else {
+          (previous as ChatCompletionAssistantMessageParam).content =
+            EMPTY_ASSISTANT_CONTENT_PLACEHOLDER;
+        }
+
+        if (mergedCalls?.length) {
+          (previous as ChatCompletionAssistantMessageParam).tool_calls = mergedCalls;
         }
       }
     } else {

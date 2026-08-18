@@ -26,6 +26,7 @@ const retryOnTransientError = (failureCount: number, error: unknown): boolean =>
   return true;
 };
 
+// TODO: update the API schemas as well for renaming investigations to conversations and remove the ListInvestigationsResponse type
 export const useInvestigations = () => {
   const { services } = useKibana();
 

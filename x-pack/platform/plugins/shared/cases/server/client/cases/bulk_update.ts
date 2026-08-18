@@ -47,14 +47,9 @@ import {
   isAlertAttachmentType,
   UNIFIED_ALERT_TYPES_ARRAY,
 } from '../../../common/utils/attachments';
+import { getCaseToUpdate, buildFilter, combineFilters, NodeBuilderOperators } from '../utils';
 import {
-  arraysDifference,
-  getCaseToUpdate,
-  buildFilter,
-  combineFilters,
-  NodeBuilderOperators,
-} from '../utils';
-import {
+  applyProfilesToAssignees,
   dedupAssignees,
   fillMissingCustomFields,
   getCloseReasonIfValid,
@@ -62,6 +57,7 @@ import {
   getDurationForUpdate,
   getInProgressInfoForUpdate,
   getTimingMetricsForUpdate,
+  getUserProfilesSafe,
 } from './utils';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import type { LicensingService } from '../../services/licensing';
@@ -733,6 +729,28 @@ export const bulkUpdate = async (
     await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
     notifyPlatinumUsage(licensingService, casesToUpdate);
 
+    // Server-derived assignee identity, gated by feature flag `assigneeIdentity`
+    if (clientArgs.config.assigneeIdentity.enabled) {
+      const allUids = new Set(
+        patchCasesPayload.cases.flatMap(
+          ({ updatedAttributes }) => updatedAttributes.assignees?.map(({ uid }) => uid) ?? []
+        )
+      );
+
+      if (allUids.size > 0) {
+        const profiles = await getUserProfilesSafe(clientArgs.securityStartPlugin, allUids, logger);
+
+        if (profiles) {
+          for (const patchCase of patchCasesPayload.cases) {
+            const { assignees } = patchCase.updatedAttributes;
+            if (assignees && assignees.length > 0) {
+              patchCase.updatedAttributes.assignees = applyProfilesToAssignees(assignees, profiles);
+            }
+          }
+        }
+      }
+    }
+
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
 
     // If a status update occurred and the case is synced then we need to update all alerts' status
@@ -1062,16 +1080,18 @@ const getCasesAndAssigneesToNotifyForAssignment = (
       return acc;
     }
 
-    const alreadyAssignedToCase = originalCaseSO.attributes.assignees;
-    const comparedAssignees = arraysDifference(
-      alreadyAssignedToCase,
-      updatedCase.attributes.assignees ?? []
+    // Compare by uid, not object identity: server-derived identity fields make an enriched
+    // assignee unequal to the legacy uid-only record, so a deep diff would flag every retained
+    // assignee on a pre-rollout case as newly added and re-notify them.
+    const alreadyAssignedUids = new Set(originalCaseSO.attributes.assignees.map(({ uid }) => uid));
+    const addedAssignees = (updatedCase.attributes.assignees ?? []).filter(
+      ({ uid }) => !alreadyAssignedUids.has(uid)
     );
 
-    if (comparedAssignees && comparedAssignees.addedItems.length > 0) {
+    if (addedAssignees.length > 0) {
       const theCase = mergeOriginalSOWithUpdatedSO(originalCaseSO, updatedCase);
 
-      const assigneesWithoutCurrentUser = comparedAssignees.addedItems.filter(
+      const assigneesWithoutCurrentUser = addedAssignees.filter(
         (assignee) => assignee.uid !== user.profile_uid
       );
 

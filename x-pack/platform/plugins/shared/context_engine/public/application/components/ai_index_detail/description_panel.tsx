@@ -28,9 +28,15 @@ interface DescriptionPanelProps {
   isLoading: boolean;
   aiIndex: GetAiIndexResponse | undefined;
   onSaved: () => void;
+  isManaged: boolean;
 }
 
-export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPanelProps) => {
+export const DescriptionPanel = ({
+  isLoading,
+  aiIndex,
+  onSaved,
+  isManaged,
+}: DescriptionPanelProps) => {
   const { saveDescription, isSaving } = useSaveAiIndexDescription();
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -64,9 +70,9 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        {!isEditing && (
+        {!isEditing && !isManaged && !isLoading && (
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiButtonEmpty
               size="s"
               iconType="pencil"
               onClick={startEditing}
@@ -77,7 +83,7 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
                 id="xpack.contextEngine.aiIndexDetail.description.editButton"
                 defaultMessage="Edit"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -133,12 +139,18 @@ export const DescriptionPanel = ({ isLoading, aiIndex, onSaved }: DescriptionPan
       ) : (
         <EuiText size="s" color={aiIndex?.description ? undefined : 'subdued'}>
           <p>
-            {aiIndex?.description ?? (
-              <FormattedMessage
-                id="xpack.contextEngine.aiIndexDetail.description.empty"
-                defaultMessage="No sources yet — add a source and a summary will be generated automatically."
-              />
-            )}
+            {aiIndex?.description ??
+              (isManaged ? (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.emptyManaged"
+                  defaultMessage="No description yet."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.contextEngine.aiIndexDetail.description.empty"
+                  defaultMessage="No description yet. Add one to help agents understand this AI index."
+                />
+              ))}
           </p>
         </EuiText>
       )}

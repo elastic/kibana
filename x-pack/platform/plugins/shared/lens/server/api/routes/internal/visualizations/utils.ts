@@ -8,7 +8,7 @@
 import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
 import type { LensConfigBuilder, LensApiConfig } from '@kbn/lens-embeddable-utils';
 
-import type { LensSavedObject, LensUpdateIn } from '../../../../content_management';
+import type { LensSavedObject, LensUpdateIn } from '../../../../content_management/zod';
 import type {
   LensCreateRequestBody,
   LensItemMeta,

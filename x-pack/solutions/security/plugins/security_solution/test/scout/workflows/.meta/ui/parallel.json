@@ -1,5 +1,9 @@
 {
-  "sha1": "919f7493839d2368c7e8254f2a86acfd2d96611c",
+  "sha1": "a1d5974696140aa6cb8674ce5f893089ba90c241",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
       "id": "d1d2851ca1bb822-62e78b299821a45",
@@ -8,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -22,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 40,
-        "column": 12
+        "line": 31,
+        "column": 13
       }
     },
     {
@@ -36,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 112,
-        "column": 12
+        "line": 99,
+        "column": 9
       }
     },
     {
@@ -50,8 +54,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/workflows/ui/parallel_tests/run_workflow_action.spec.ts",
-        "line": 130,
-        "column": 12
+        "line": 115,
+        "column": 5
       }
     }
   ]

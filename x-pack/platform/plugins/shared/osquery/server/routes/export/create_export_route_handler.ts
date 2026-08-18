@@ -19,6 +19,8 @@ import { getQueryFilter } from '../../utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { buildExportResultsIndex } from '../../utils/build_export_results_index';
 import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { getReadEsClient } from '../../utils/get_read_es_client';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 import { exportResultsToStream } from '../../lib/export_results_to_stream';
 import { createFormatter } from '../../lib/format_results';
 import type { ExportFormat, ExportMetadata } from '../../lib/format_results';
@@ -38,6 +40,11 @@ export interface ExportRouteParams {
   /** Filename prefix (e.g. `osquery-results-{id}` or `osquery-scheduled-results-{id}-{count}`) */
   fileNamePrefix: string;
   /**
+   * When false, default-space export reads match only documents with an explicit
+   * `space_id: default` stamp. Required for URL-supplied scheduled exports under CPS.
+   */
+  matchMissingSpaceId?: boolean;
+  /**
    * ECS mapping from the originating action/saved query. Plumbed into the
    * row-flattener so the export surfaces the same ECS-mapped columns users
    * see in the UI.
@@ -53,7 +60,13 @@ export const createExportRouteHandler =
     response: KibanaResponseFactory,
     params: ExportRouteParams
   ) => {
-    const { baseFilter, metadata: routeMetadata, fileNamePrefix, ecsMapping } = params;
+    const {
+      baseFilter,
+      metadata: routeMetadata,
+      fileNamePrefix,
+      ecsMapping,
+      matchMissingSpaceId,
+    } = params;
     const { format } = request.query;
     const kuery = request.body?.kuery;
     const agentIds = request.body?.agentIds;
@@ -106,9 +119,10 @@ export const createExportRouteHandler =
     }
 
     const coreContext = await context.core;
-
-    // PIT lifecycle stays in route; data plugin search context does not expose PIT lifecycle (design D5).
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
+    const [coreStart] = await osqueryContext.getStartServices();
+    const clusterClient = coreStart.elasticsearch.client;
+    const internalEsClient = clusterClient.asInternalUser;
+    const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
 
     // Resolve integration namespaces once and reuse them for both the PIT scope
     // (buildExportResultsIndex below) and the factory's search body, so the PIT
@@ -174,11 +188,11 @@ export const createExportRouteHandler =
     // provided, so the PIT itself must carry the correct index scope.
     // ignore_unavailable mirrors query.all_results.dsl.ts.
     // If openPointInTime throws, there is no PIT to close — handle separately.
-    const ccsEnabled = await hasConnectedRemoteClusters(esClient);
+    const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
 
     let pitId: string;
     try {
-      const pitResponse = await esClient.openPointInTime({
+      const pitResponse = await readEsClient.openPointInTime({
         index: buildExportResultsIndex({ integrationNamespaces, ccsEnabled }),
         keep_alive: '5m',
         ignore_unavailable: true,
@@ -206,7 +220,7 @@ export const createExportRouteHandler =
       pitClosed = true;
 
       try {
-        await esClient.closePointInTime({ id });
+        await readEsClient.closePointInTime({ id });
       } catch (e) {
         // An unclosed PIT holds cluster memory until keep_alive expires (5m).
         // Surface at warn so cluster-memory pressure is visible in ops dashboards.
@@ -237,7 +251,12 @@ export const createExportRouteHandler =
           ? (['agent.name', 'agent.id', ...Object.keys(ecsMapping)] as string[])
           : undefined;
 
-      const searchContext = await context.search;
+      const searchContext = await getScopedSearch(
+        context,
+        request,
+        osqueryContext.cpsEnabled,
+        osqueryContext.getStartServices
+      );
 
       const result = await exportResultsToStream({
         search: searchContext,
@@ -253,6 +272,7 @@ export const createExportRouteHandler =
           ecsMapping,
           integrationNamespaces,
           spaceId,
+          ...(matchMissingSpaceId !== undefined ? { matchMissingSpaceId } : {}),
         },
         formatter,
         metadata: {

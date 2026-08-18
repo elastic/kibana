@@ -26,6 +26,7 @@ import { AppHeader } from '@kbn/app-header';
 import { useQueryClient } from '@kbn/react-query';
 import { useService } from '@kbn/core-di-browser';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchEpisodeQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query';
 import { useFetchEpisodeActions } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions';
@@ -126,10 +127,13 @@ export function EpisodeDetailsPage() {
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 
+  const episodeData = parseEpisodeDataJson(episode?.episode_data);
+  const episodeDataRuleName =
+    typeof episodeData.rule_name === 'string' ? episodeData.rule_name : undefined;
   const episodeBreadcrumbTitle =
     showRuleDependentUi && ruleState.rule.metadata.name
       ? ruleState.rule.metadata.name
-      : i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
+      : episodeDataRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 

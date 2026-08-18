@@ -36,7 +36,7 @@ const mapStepsToSkipFlags = (
   skipQueries: !steps.includes(KIsOnboardingStep.QueriesGeneration),
 });
 
-export const onboardingExecuteRoute = createServerRoute({
+const onboardingExecuteRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{streamName}/onboarding/_execute',
   options: {
     access: 'internal',
@@ -139,7 +139,7 @@ export const onboardingExecuteRoute = createServerRoute({
   },
 });
 
-export const onboardingStatusRoute = createServerRoute({
+const onboardingStatusRoute = createServerRoute({
   endpoint: 'GET /internal/streams/{streamName}/onboarding/_status',
   options: {
     access: 'internal',
@@ -177,7 +177,7 @@ export const onboardingStatusRoute = createServerRoute({
   },
 });
 
-export const onboardingBulkStatusRoute = createServerRoute({
+const onboardingBulkStatusRoute = createServerRoute({
   endpoint: 'POST /internal/streams/onboarding/_bulk_status',
   options: {
     access: 'internal',

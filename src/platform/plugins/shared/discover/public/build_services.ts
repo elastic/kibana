@@ -80,6 +80,7 @@ import {
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
 } from './constants';
 import { EmbeddableEditorService } from './plugin_imports/embeddable_editor_service';
+import { InitialTabStateService } from './plugin_imports/initial_tab_state_service';
 
 /**
  * Location state of internal Discover history instance
@@ -119,6 +120,7 @@ export interface DiscoverServices {
   embeddable: EmbeddableStart;
   history: History<HistoryLocationState>;
   getScopedHistory: <T>() => ScopedHistory<T | undefined> | undefined;
+  initialTabStateService: InitialTabStateService;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
@@ -166,6 +168,7 @@ export interface DiscoverServices {
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
   logger: Logger;
+  feedback?: DiscoverStartPlugins['feedback'];
 }
 
 export const buildServices = ({
@@ -231,6 +234,7 @@ export const buildServices = ({
     filterManager: plugins.data.query.filterManager,
     history,
     getScopedHistory: <T>() => scopedHistory as ScopedHistory<T | undefined>,
+    initialTabStateService: new InitialTabStateService(),
     setHeaderActionMenu,
     dataViews: plugins.data.dataViews,
     inspector: plugins.inspector,
@@ -279,5 +283,6 @@ export const buildServices = ({
       core.application
     ),
     logger: context.logger.get(),
+    feedback: plugins.feedback,
   };
 };

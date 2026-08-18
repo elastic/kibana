@@ -123,10 +123,10 @@ export const elasticAssetCheckerFactory = (getService: FtrProviderContext['getSe
   };
 
   const expectEntitiesIndexExists = async (entityType: string, namespace: string) =>
-    expectIndexStatus(`.entities.v1.latest.security_${entityType}_${namespace}`, true);
+    expectIndexStatus(`.entities.v1.latest.${entityType}_${namespace}`, true);
 
   const expectEntitiesIndexNotFound = async (entityType: string, namespace: string) =>
-    expectIndexStatus(`.entities.v1.latest.security_${entityType}_${namespace}`, false);
+    expectIndexStatus(`.entities.v1.latest.${entityType}_${namespace}`, false);
 
   return {
     expectComponentTemplateExists,
