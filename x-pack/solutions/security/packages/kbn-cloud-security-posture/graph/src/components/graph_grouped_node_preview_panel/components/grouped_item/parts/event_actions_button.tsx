@@ -82,7 +82,7 @@ export const EventActionsButton = ({ item, scopeId, onShowDocument }: EventActio
       button={
         <EuiToolTip content={actionsButtonAriaLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
             aria-label={actionsButtonAriaLabel}
             color="text"
             onClick={togglePopover}

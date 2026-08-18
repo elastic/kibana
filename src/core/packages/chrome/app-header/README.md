@@ -8,8 +8,9 @@ Chrome Next uses one shared header view with two placement models:
 - Chrome-owned rendering, where the app registers `ChromeAppHeaderConfig` and Chrome renders the
   layout top-bar slot.
 
-Prefer inline rendering for new migrations. Use Chrome-owned registration as a transitional path when
-the page cannot safely own the header placement yet.
+Prefer inline rendering when the page owns its header placement. Use Chrome-owned registration when
+Chrome must own the top-bar slot, including apps with sticky or shared top-nav constraints such as
+Discover, Dashboard, and Lens.
 
 ## Folder layout
 
@@ -126,6 +127,21 @@ To add a URL rendered with the fixed label "Learn more", use the object form:
 Description and `metadata` share the secondary row and are mutually exclusive. Use metadata for
 structured entity facts such as status, owner, or creation time. Documentation links that are not
 part of a necessary description belong in the app menu via `docLink`.
+
+## Strict props
+
+The public types are the contract: strings, callbacks, known unions. A type assertion can still
+pass a React node as a `label`, or extra keys that get spread into EUI. Either path paints custom
+UI and the header stops looking like one component.
+
+The renderer only uses declared fields, and only as real strings. A non-string becomes empty (or is
+omitted if optional); leftover keys are dropped. In development this logs a one-time `console.warn`.
+Do not pass `FormattedMessage` or other nodes.
+
+If a layout cannot be expressed with the public API, extend the API. The deprecated
+`renderCustomBadge` hatch is the only supported custom-UI path today.
+
+Menu item text is coerced the same way in `@kbn/ui-app-menu`.
 
 ## Title size
 
@@ -271,7 +287,7 @@ different buckets while the migration is in progress:
 | Bucket | Preferred API | When to use |
 |---|---|---|
 | Inline-ready | `AppHeader` | The page can colocate header state with its React tree. |
-| Chrome-owned transitional | `ChromeAppHeaderRegistration` | Chrome should own the top-bar slot while the route keeps existing layout constraints. |
+| Chrome-owned | `ChromeAppHeaderRegistration` | Chrome should own the top-bar slot because the route has sticky, shared top-nav, or layout constraints. |
 | Fallback-only | Legacy Chrome state | Temporary safety net for routes that have not explicitly migrated. |
 
 ### Fallback-only
@@ -285,4 +301,13 @@ Chrome can still render a minimal app header as a fallback by deriving:
 
 This is a compatibility fallback, not a migration target. If breadcrumbs are missing, stale, or point
 to the wrong parent, the fallback back button inherits the same problem. Move routes in this bucket
-to explicit `AppHeader` or `ChromeAppHeaderRegistration` configuration.
+to `AppHeader`. Existing apps with approved Chrome-owned placement should provide explicit
+`ChromeAppHeaderRegistration` configuration instead of relying on fallback state.
+
+The legacy menu, badge, and breadcrumb-extension setters that feed this fallback are deprecated. Keep
+existing calls until their route migrates, but do not add new consumers.
+
+Do not use project breadcrumb overrides to configure app-header back navigation. The
+`ChromeSetBreadcrumbsParams.project` and serverless `setBreadcrumbs` paths remain only to protect
+fallback-only routes during migration and can be deprecated independently of `chrome.setBreadcrumbs`,
+which still owns visible breadcrumbs in classic Chrome.

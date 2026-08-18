@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type {
   AppHeaderBack as CoreAppHeaderBack,
   AppHeaderBadge as CoreAppHeaderBadge,
@@ -17,6 +17,7 @@ import type {
   AppHeaderEditableTitle as CoreAppHeaderEditableTitle,
   AppHeaderFavoriteAction as CoreAppHeaderFavoriteAction,
   AppHeaderFavoriteStatus as CoreAppHeaderFavoriteStatus,
+  AppHeaderShareAction as CoreAppHeaderShareAction,
   AppHeaderMetadataButtonItem as CoreAppHeaderMetadataButtonItem,
   AppHeaderMetadataHealthItem as CoreAppHeaderMetadataHealthItem,
   AppHeaderMetadataItem as CoreAppHeaderMetadataItem,
@@ -42,6 +43,7 @@ export type AppHeaderDescription = CoreAppHeaderDescription;
 export type AppHeaderEditableTitle = CoreAppHeaderEditableTitle;
 export type AppHeaderFavoriteAction = CoreAppHeaderFavoriteAction;
 export type AppHeaderFavoriteStatus = CoreAppHeaderFavoriteStatus;
+export type AppHeaderShareAction = CoreAppHeaderShareAction;
 export type AppHeaderMetadataButtonItem = CoreAppHeaderMetadataButtonItem;
 export type AppHeaderMetadataHealthItem = CoreAppHeaderMetadataHealthItem;
 export type AppHeaderMetadataItem = CoreAppHeaderMetadataItem;

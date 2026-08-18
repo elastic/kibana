@@ -94,7 +94,7 @@ export class RuleExecutorWorkflowSubscriber {
 
       this.logger.error({
         error: err,
-        code: ALERTING_LOG_CODES.RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILURE,
+        code: ALERTING_LOG_CODES.EVENTS_RULE_EXECUTOR_WORKFLOW_SUBSCRIBER_FAILED,
         labels: {
           event_type: trigger.eventType,
           rule_id: 'ruleId' in rule ? rule.ruleId : rule.id,
