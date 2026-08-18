@@ -206,7 +206,7 @@ const renderAbortedRunSection = (cascading: TestFailure[]) => {
   }
 
   return `<section>
-    <h2>Run aborted after this failure</h2>
+    <h2>This failure aborted the run</h2>
     <p>
       This timeout aborted the config run, so the ${cascading.length} hook${
     cascading.length === 1 ? '' : 's'
