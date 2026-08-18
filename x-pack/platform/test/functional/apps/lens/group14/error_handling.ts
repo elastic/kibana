@@ -125,10 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // TODO: This test behavior changes when apiFormat flag is true (the default).
-    // Panel 3 (unknown datasource) shows "Visualization type not found." instead of
-    // "Could not find datasource for the visualization". Needs investigation.
-    it.skip('displays fundamental configuration issues on dashboard', async () => {
+    it('displays fundamental configuration issues on dashboard', async () => {
       await kibanaServer.importExport.load(
         'x-pack/platform/test/functional/fixtures/kbn_archives/lens/fundamental_config_errors_on_dashboard'
       );
