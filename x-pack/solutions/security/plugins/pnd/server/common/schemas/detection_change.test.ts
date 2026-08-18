@@ -90,3 +90,37 @@ describe('Detection Watch tier contract (lockdown)', () => {
     expect(WatchTier.safeParse('detection').success).toBe(true);
   });
 });
+
+// --- validateDetectionChangeSignal boundary validation tests (issue #18730) ---
+
+import { validateDetectionChangeSignal } from './detection_change';
+
+describe('validateDetectionChangeSignal', () => {
+  const valid = {
+    sourceWatch: 'watch-deep' as const,
+    runId: 'run-1',
+    investigationId: 'inv-1',
+    gaps: [{ technique: 'T1059.001', evidence: 'PowerShell execution', confidence: 0.8 }],
+  };
+
+  it('returns parsed signal for valid input', () => {
+    const result = validateDetectionChangeSignal(valid);
+    expect(result.investigationId).toBe('inv-1');
+  });
+
+  it('throws on missing investigationId', () => {
+    expect(() => validateDetectionChangeSignal({ ...valid, investigationId: undefined })).toThrow();
+  });
+
+  it('throws on missing sourceWatch', () => {
+    expect(() => validateDetectionChangeSignal({ ...valid, sourceWatch: undefined })).toThrow();
+  });
+
+  it('throws on empty gaps array', () => {
+    expect(() => validateDetectionChangeSignal({ ...valid, gaps: [] })).toThrow();
+  });
+
+  it('throws on empty object', () => {
+    expect(() => validateDetectionChangeSignal({})).toThrow();
+  });
+});

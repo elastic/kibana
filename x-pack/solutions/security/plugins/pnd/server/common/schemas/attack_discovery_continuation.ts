@@ -105,3 +105,41 @@ export const buildProposalFromAttackDiscovery = (
     createdAt,
   };
 };
+
+/**
+ * Validate that an incoming AD discovery has the minimum required fields to
+ * be actionable: must have alertIds OR summaryMarkdown, plus id and title.
+ * Throws on unactionable discoveries.
+ */
+export const validateAttackDiscoveryInput = (discovery: AttackDiscovery): void => {
+  if (isDiscoveryUnactionable(discovery)) {
+    throw new Error(
+      'attack-discovery-continuation: discovery is unactionable (no alertIds and no summaryMarkdown)'
+    );
+  }
+  if (!discovery.id) {
+    throw new Error('attack-discovery-continuation: discovery missing required id field');
+  }
+  if (!discovery.title) {
+    throw new Error('attack-discovery-continuation: discovery missing required title field');
+  }
+};
+
+/**
+ * Validate that a produced Proposal conforms to the D17 canonical shape:
+ * must carry template_id: "proposal" and a non-empty parentConversationId.
+ */
+export const validateProposalOutput = (proposal: Proposal): void => {
+  // D17: every Proposal must carry template_id: 'proposal' and a non-empty
+  // parentConversationId. Use a Record cast because the spike-local Proposal
+  // type may not yet declare these fields (they are added downstream).
+  const record = proposal as unknown as Record<string, unknown>;
+  if (record.template_id !== 'proposal') {
+    throw new Error(
+      `attack-discovery-continuation: proposal missing D17 template_id (expected "proposal", got "${record.template_id}")`
+    );
+  }
+  if (!record.parentConversationId) {
+    throw new Error('attack-discovery-continuation: proposal missing D17 parentConversationId');
+  }
+};

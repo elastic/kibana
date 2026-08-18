@@ -132,3 +132,74 @@ describe('attack_discovery_continuation (D11)', () => {
     });
   });
 });
+
+// --- validateAttackDiscoveryInput + validateProposalOutput tests (issue #18730, D17) ---
+
+import {
+  validateAttackDiscoveryInput,
+  validateProposalOutput,
+} from './attack_discovery_continuation';
+
+const testDiscovery: AttackDiscovery = {
+  id: 'ad-1',
+  title: 'Test Discovery',
+  alertIds: ['alert-1', 'alert-2'],
+  summaryMarkdown: 'Suspicious PowerShell activity detected',
+  detailsMarkdown: '',
+} as unknown as AttackDiscovery;
+
+const testProposal = {
+  id: 'prop-1',
+  schemaVersion: '1.0.0',
+  sourceWatch: 'watch-ad',
+  investigationId: 'inv-1',
+  title: 'Test Proposal',
+  status: 'new',
+  confidence: 0,
+  recommendation: 'Assess attack',
+  reasoning: '',
+  evidenceRefs: ['alert-1'],
+  approvals: [],
+  requiredApproverCount: 1,
+  draft: false,
+  approvalRequired: true,
+  createdAt: '2026-08-18T12:00:00Z',
+  template_id: 'proposal',
+  parentConversationId: 'inv-1',
+} as any;
+
+describe('validateAttackDiscoveryInput', () => {
+  it('does not throw for a discovery with alertIds', () => {
+    expect(() => validateAttackDiscoveryInput(testDiscovery)).not.toThrow();
+  });
+
+  it('throws for an unactionable discovery (no alertIds, no summary)', () => {
+    const hollow = {
+      ...testDiscovery,
+      alertIds: [],
+      summaryMarkdown: '',
+    } as unknown as AttackDiscovery;
+    expect(() => validateAttackDiscoveryInput(hollow)).toThrow();
+  });
+
+  it('throws for a discovery missing id', () => {
+    const noId = { ...testDiscovery, id: '' } as unknown as AttackDiscovery;
+    expect(() => validateAttackDiscoveryInput(noId)).toThrow();
+  });
+});
+
+describe('validateProposalOutput', () => {
+  it('does not throw for a D17-compliant proposal', () => {
+    expect(() => validateProposalOutput(testProposal)).not.toThrow();
+  });
+
+  it('throws when template_id is not "proposal"', () => {
+    const wrong = { ...testProposal, template_id: 'investigation' };
+    expect(() => validateProposalOutput(wrong)).toThrow();
+  });
+
+  it('throws when parentConversationId is missing', () => {
+    const noParent = { ...testProposal, parentConversationId: undefined };
+    expect(() => validateProposalOutput(noParent)).toThrow();
+  });
+});

@@ -47,3 +47,15 @@ export const watchEscalationSchema = z.object({
   indicators: z.array(z.string().min(1)).min(1),
 });
 export type WatchEscalation = z.infer<typeof watchEscalationSchema>;
+
+/**
+ * Validate an escalation payload at the Watch seam boundary. Throws on
+ * missing required fields, wrong types, or invalid enum values.
+ *
+ * Use this in emit_proposal.ts and escalate_proposal.ts to reject malformed
+ * handoffs at the boundary rather than letting them corrupt downstream state
+ * (the direct cause of bug #9).
+ */
+export const validateEscalationPayload = (input: unknown): WatchEscalation => {
+  return watchEscalationSchema.parse(input);
+};

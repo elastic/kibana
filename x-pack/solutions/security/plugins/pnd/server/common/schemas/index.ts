@@ -15,3 +15,4 @@ export * from './detection_change';
 export * from './watch_escalation';
 export * from './orchestration_identity';
 export * from './attack_discovery_continuation';
+export * from './investigation_threading';

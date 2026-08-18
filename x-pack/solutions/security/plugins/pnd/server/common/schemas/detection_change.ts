@@ -47,3 +47,14 @@ export const ruleTuningTriggerSchema = z.object({
   investigationId: z.string(),
 });
 export type RuleTuningTrigger = z.infer<typeof ruleTuningTriggerSchema>;
+
+/**
+ * Validate a Detection Change Signal at the boundary. Throws on missing
+ * required fields or invalid enum values.
+ *
+ * Wire this into emit_proposal.ts detection-change handling path to reject
+ * malformed signals before they reach the Detection Watch.
+ */
+export const validateDetectionChangeSignal = (input: unknown): DetectionChangeSignal => {
+  return detectionChangeSignalSchema.parse(input);
+};

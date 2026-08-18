@@ -59,3 +59,35 @@ describe('watch_escalation schema (Floor -> Dark -> Deep seam contract)', () => 
     }
   });
 });
+
+// --- validateEscalationPayload boundary validation tests (issue #18730) ---
+
+import { validateEscalationPayload } from './watch_escalation';
+
+describe('validateEscalationPayload', () => {
+  const valid = {
+    fromWatch: 'watch-floor' as const,
+    toWatch: 'watch-dark' as const,
+    reason: 'Suspected phishing-delivered PowerShell execution.',
+    confidence: 0.93,
+    investigationId: 'inv-123',
+    indicators: ['T1566'],
+  };
+
+  it('returns parsed payload for valid input', () => {
+    const result = validateEscalationPayload(valid);
+    expect(result.investigationId).toBe('inv-123');
+  });
+
+  it('throws on missing investigationId', () => {
+    expect(() => validateEscalationPayload({ ...valid, investigationId: undefined })).toThrow();
+  });
+
+  it('throws on missing fromWatch', () => {
+    expect(() => validateEscalationPayload({ ...valid, fromWatch: undefined })).toThrow();
+  });
+
+  it('throws on empty object', () => {
+    expect(() => validateEscalationPayload({})).toThrow();
+  });
+});
