@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { stringify as stringifyYaml } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getUnsupportedReason, loadApi, targetSchema, toDescribedSchema } from '../../api';
 import type { ApiRegistryDefinition, ApiTarget } from '../../api';
@@ -36,7 +36,7 @@ const describeSchema = z.object({
     ),
 });
 
-export const createDescribeApiTool = (): BuiltinToolDefinition<typeof describeSchema> => {
+export const createDescribeApiTool = (): InternalBuiltinToolDefinition<typeof describeSchema> => {
   return {
     id: internalTools.describeApi,
     type: ToolType.builtin,

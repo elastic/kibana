@@ -16,7 +16,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { AgentCapabilities, ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 
@@ -89,7 +89,7 @@ export const createSubagentTool = ({
   subAgentExecutor: SubAgentExecutor;
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
-}): BuiltinToolDefinition<typeof schema> => {
+}): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: SubAgentToolName,
     description: toolDescription,
