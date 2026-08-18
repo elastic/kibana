@@ -52,6 +52,8 @@ export class LensWorkspace {
   private readonly emptyWorkspacePrompt;
   private readonly applyChangesPrompt;
   private readonly suggestionPanelToggle;
+  /** Error badge on the current-visualization suggestion card. */
+  readonly currentSuggestionError;
   readonly shareButton;
   readonly exportButton;
   private readonly shareModal;
@@ -76,6 +78,9 @@ export class LensWorkspace {
     this.emptyWorkspacePrompt = this.page.testSubj.locator('workspace-drag-drop-prompt');
     this.applyChangesPrompt = this.page.testSubj.locator('workspace-apply-changes-prompt');
     this.suggestionPanelToggle = this.page.testSubj.locator('lensSuggestionsPanelToggleButton');
+    this.currentSuggestionError = this.page.testSubj.locator(
+      'lnsSuggestion-currentVisualization > lnsSuggestionPanel__error'
+    );
     this.shareButton = this.page.testSubj.locator('lnsApp_shareButton');
     this.exportButton = this.page.testSubj.locator('lnsApp_exportButton');
     this.shareModal = this.page.testSubj.locator('shareContextModal');
@@ -391,6 +396,21 @@ export class LensWorkspace {
   /** Waits for the workspace "apply changes" prompt (shown when auto-apply is disabled). */
   async waitForWorkspaceWithApplyChangesPrompt() {
     await this.applyChangesPrompt.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Applies a Lens suggestion by its card test-subj prefix, then waits until the
+   * resulting workspace chart has rendered.
+   *
+   * @param suggestionTestSubj - card prefix (e.g. `lnsSuggestion-treemap`)
+   * @param chartTestSubj - `data-test-subj` of the chart that apply should produce
+   *   (e.g. `partitionVisChart` for treemap/pie, `xyVisChart` for bar/line/area).
+   */
+  async applySuggestion(suggestionTestSubj: string, chartTestSubj: string) {
+    const suggestion = this.page.testSubj.locator(`${suggestionTestSubj} > lnsSuggestion`);
+    await suggestion.waitFor({ state: 'visible' });
+    await suggestion.click();
+    await this.deps.waitForVisualization(chartTestSubj);
   }
 
   /**

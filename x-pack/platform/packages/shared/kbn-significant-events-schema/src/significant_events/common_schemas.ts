@@ -117,17 +117,23 @@ export const causalFeatureSchema = z.object({
 export type CausalFeature = z.infer<typeof causalFeatureSchema>;
 
 /** Query-based verification attached to a signal when the agent ran an ES|QL check. */
-const signalEvidenceSchema = z.object({
-  esql_query: z
-    .string()
-    .max(MAX_TEXT_LENGTH)
-    .describe('The ES|QL query executed to verify this signal.'),
+export const signalEvidenceSchema = z.object({
+  esql_query: z.string().max(MAX_TEXT_LENGTH).describe('The ES|QL query that verified this signal'),
   result: z
     .enum(['found', 'empty', 'error'])
     .describe(
       '"found" = query returned rows; "empty" = 0 rows returned (non-confirming); "error" = query failed to execute.'
     ),
 });
+
+export const SIGNAL_VERDICTS = [
+  'confirms',
+  'refutes',
+  'off_topic',
+  'inconclusive',
+  'not_checked',
+] as const;
+export type SignalVerdict = (typeof SIGNAL_VERDICTS)[number];
 
 const signalBaseSchema = z.object({
   stream_name: z
@@ -139,21 +145,18 @@ const signalBaseSchema = z.object({
     .max(MAX_TEXT_LENGTH)
     .describe(
       dedent`
-        Compact verification account for detection signals — do not use alternative shapes. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
+      Compact observation account for detection signals — use Found / Impact only. Max ${MAX_SIGNAL_DESCRIPTION_LENGTH} chars; shorten Found before omitting Impact on confirms.
 
-        Confirms: "Found: [signature, target, or endpoint from the row]. Impact: [who/what is blocked or degraded]. Verdict: confirms."
-        Refutes/inconclusive: "Found: [signature or absence]. Impact: [none or why inconclusive]. Verdict: refutes | inconclusive."
-        Omit Impact only for zero-row refutes: "Found: no match. Verdict: refutes."
+      Found names the concrete row signature and failing target; never say only that rows were returned. Impact names what is blocked, degraded, or unaffected using outcome language only. The structured verdict carries whether this confirms, refutes, is off-topic, is inconclusive, or was not checked; do not repeat a Verdict label here.
 
-        Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
-        ${NO_RAW_SENSITIVE_VALUES_RULE}
-      `
+      Do not name dependency chains, upstream causes, or topology here — use causal_features and blast_radius for that.
+      ${NO_RAW_SENSITIVE_VALUES_RULE}
+    `
     ),
-  confirmed: z
-    .boolean()
-    .optional()
+  verdict: z
+    .enum(SIGNAL_VERDICTS)
     .describe(
-      "Whether verified evidence supports this record's failure, material degradation, sensitive-data exposure, or evidenced cascade. True means aligned incident evidence; false means verified healthy, positive, non-confirming, or unrelated evidence; omission means unverified."
+      'Conclusion for the authored rule hypothesis: confirms = matching failure or degradation; refutes = verified healthy, positive, or no-failure result; off_topic = query found an observation unrelated to the rule; inconclusive = the check could not establish a conclusion; not_checked = no query was available.'
     ),
   collected_at: z.iso
     .datetime({ offset: true })
@@ -179,10 +182,53 @@ const detectionSignalMetadataSchema = detectionSchema
     'Immutable detection identity and alert metadata. Copy the complete metadata object verbatim from the matching input detection; do not reconstruct or alter its fields.'
   );
 
-const detectionSignalSchema = signalBaseSchema.extend({
-  type: z.literal('detection'),
-  metadata: detectionSignalMetadataSchema,
-});
+const detectionSignalSchema = signalBaseSchema
+  .extend({
+    type: z.literal('detection'),
+    metadata: detectionSignalMetadataSchema,
+  })
+  .superRefine((signal, context) => {
+    const result = signal.evidence?.result;
+    if (signal.verdict === 'confirms' && result !== 'found') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A confirming verdict requires found query evidence.',
+      });
+    }
+    if (signal.verdict === 'off_topic' && result !== 'found') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'An off-topic verdict requires found query evidence.',
+      });
+    }
+    if (signal.verdict === 'refutes' && result !== 'found' && result !== 'empty') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A refuting verdict requires found or empty query evidence.',
+      });
+    }
+    if (signal.verdict === 'inconclusive' && result !== 'empty' && result !== 'error') {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'An inconclusive verdict requires empty or error query evidence.',
+      });
+    }
+    if (
+      signal.verdict === 'not_checked' &&
+      signal.evidence !== undefined &&
+      signal.evidence !== null
+    ) {
+      context.addIssue({
+        code: 'custom',
+        path: ['verdict'],
+        message: 'A not-checked verdict cannot include query evidence.',
+      });
+    }
+  });
 
 /** Extensible discriminated union of signal sources accepted from agents. */
 export const signalEntrySchema = z.discriminatedUnion('type', [detectionSignalSchema]);
