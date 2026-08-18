@@ -37,11 +37,20 @@ export const createConversationPublicClient = ({
         throw createConversationAlreadyExistsError({ conversationId: id });
       }
 
+      const now = new Date().toISOString();
       return client.create({
         agent_id: effectiveAgentId,
         id,
         title: title ?? DEFAULT_CONVERSATION_TITLE,
-        access_control: accessControl,
+        access_control: accessControl
+          ? {
+              access_mode: accessControl.access_mode,
+              entries: (accessControl.entries ?? []).map((entry) => ({
+                ...entry,
+                added_at: now,
+              })),
+            }
+          : undefined,
         rounds: [],
       });
     },

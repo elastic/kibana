@@ -24,6 +24,7 @@ import {
   isConversationAccessControlRole,
   normalizeConversationAccessControl,
   createBadRequestError,
+  createConversationAlreadyExistsError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
   createInternalError,
@@ -353,7 +354,7 @@ class ConversationClientImpl implements ConversationClient {
       });
     } catch (error) {
       if (isVersionConflictError(error)) {
-        throw createConversationNotFoundError({ conversationId: id });
+        throw createConversationAlreadyExistsError({ conversationId: id });
       }
 
       throw error;
