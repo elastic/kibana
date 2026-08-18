@@ -9,10 +9,18 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
-import { KbnInfoCallout } from '@kbn/ui-callout';
 import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
+
+const FakeCallout = () => null;
+
+/** Minimal body used across header-focused tests. */
+const minimalBody = (
+  <FlyoutTemplate.Body>
+    <p>content</p>
+  </FlyoutTemplate.Body>
+);
 
 const renderTemplate = (ui: React.ReactElement) => render(ui);
 
@@ -114,7 +122,9 @@ describe('FlyoutTemplate', () => {
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never">
         <FlyoutTemplate.Body>
-          <KbnInfoCallout title="Data is delayed" />
+          {/* A component, not an intrinsic element: the body opts into these deliberately. */}
+          <FakeCallout />
+          <p>content</p>
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
@@ -318,17 +328,16 @@ describe('FlyoutTemplate unstructured header content', () => {
   );
 
   const unsupportedMessage =
-    '[FlyoutTemplate] <KbnInfoCallout> is not a Header part and is not rendered; ' +
-    'put free-form content in the Body.';
+    '[FlyoutTemplate] <FakeCallout> is not a Header part and is not rendered; put free-form content in the Body.';
 
   it('does not render a component that is not a header part, and warns once', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
     renderTemplate(
       <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
         <FlyoutTemplate.Header title="Alert details">
-          <KbnInfoCallout title="Data is delayed" />
+          <FakeCallout />
         </FlyoutTemplate.Header>
-        {body}
+        {minimalBody}
       </FlyoutTemplate>
     );
 

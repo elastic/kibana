@@ -12,6 +12,5 @@
   ],
   "kbn_references": [
     "@kbn/ui-react-assembly",
-    "@kbn/ui-callout"
   ]
 }
