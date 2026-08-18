@@ -30,6 +30,9 @@
     "@kbn/agent-builder-common",
     "@kbn/logging-mocks",
     "@kbn/scout-security",
-    "@kbn/elastic-assistant-common"
+    "@kbn/elastic-assistant-common",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/workflows-execution-engine",
+    "@kbn/agent-builder-server"
   ]
 }

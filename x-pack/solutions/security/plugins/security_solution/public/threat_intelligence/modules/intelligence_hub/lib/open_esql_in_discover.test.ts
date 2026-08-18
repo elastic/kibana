@@ -19,7 +19,7 @@ const buildShare = (redirectUrl?: string): SharePluginStart =>
             : undefined,
       },
     },
-  }) as unknown as SharePluginStart;
+  } as unknown as SharePluginStart);
 
 describe('getEsqlDiscoverUrl', () => {
   it('returns undefined when the query is blank', () => {

@@ -96,7 +96,8 @@ export const ForensicEvidence: React.FC<ForensicEvidenceProps> = ({ investigatio
       <EuiPanel hasBorder color="subdued">
         <EuiTitle size="xxs">
           <h4>
-            <EuiIcon type="visVisualBuilderWidget" /> Forensic Evidence (Endpoint Telemetry)
+            <EuiIcon type="visVisualBuilderWidget" aria-hidden={true} /> Forensic Evidence (Endpoint
+            Telemetry)
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
@@ -113,8 +114,8 @@ export const ForensicEvidence: React.FC<ForensicEvidenceProps> = ({ investigatio
     <EuiPanel hasBorder>
       <EuiTitle size="xxs">
         <h4>
-          <EuiIcon type="visVisualBuilderWidget" /> Forensic Evidence — {hostname} ({events.length}{' '}
-          events)
+          <EuiIcon type="visVisualBuilderWidget" aria-hidden={true} /> Forensic Evidence —{' '}
+          {hostname} ({events.length} events)
         </h4>
       </EuiTitle>
       <EuiSpacer size="s" />

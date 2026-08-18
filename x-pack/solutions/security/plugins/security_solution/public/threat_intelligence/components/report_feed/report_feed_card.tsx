@@ -27,11 +27,7 @@ import type { ThreatReportFeedItem } from './types';
 import { SEVERITY_HEX } from './constants';
 import { getSeverityColor, getSeverityLabel } from './severity_labels';
 import { ThreatCategoryBadge } from './threat_category_badge';
-import {
-  getSourceFaviconUrl,
-  isBrowsableReportUrl,
-  onBrowsableReportUrlClick,
-} from './utils';
+import { getSourceFaviconUrl, isBrowsableReportUrl, onBrowsableReportUrlClick } from './utils';
 
 const metaDividerCss = css({
   opacity: 0.4,

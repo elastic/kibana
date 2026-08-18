@@ -229,8 +229,10 @@ export const THREAT_INTELLIGENCE_API_BASE = '/api/threat_intelligence' as const;
  * `server/routes/` and by exactly one shared service module in
  * `server/services/`.
  */
-export const FIND_THREAT_REPORTS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/find_threat_reports` as const;
-export const CREATE_THREAT_REPORT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/create_threat_report` as const;
+export const FIND_THREAT_REPORTS_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/find_threat_reports` as const;
+export const CREATE_THREAT_REPORT_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/create_threat_report` as const;
 export const HUNT_BEHAVIOR_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_behavior` as const;
 export const HUNT_FOR_THREAT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_for_threat` as const;
 /**

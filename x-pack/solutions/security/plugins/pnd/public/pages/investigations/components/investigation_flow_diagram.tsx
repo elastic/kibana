@@ -149,14 +149,14 @@ export const InvestigationFlowDiagram: React.FC<InvestigationFlowDiagramProps> =
 
       <EuiPanel paddingSize="s" hasBorder color="subdued">
         <EuiFlexGroup gutterSize="s" alignItems="center">
-          {watchTierIcon ? <EuiIcon type={watchTierIcon} size="m" /> : null}
+          {watchTierIcon ? <EuiIcon type={watchTierIcon} size="m" aria-hidden={true} /> : null}
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>{investigation.watch_id}</strong>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="sortRight" />
+            <EuiIcon type="sortRight" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{investigation.title}</EuiText>
@@ -178,7 +178,7 @@ export const InvestigationFlowDiagram: React.FC<InvestigationFlowDiagramProps> =
               <EuiTimelineItem
                 key={event.id}
                 verticalAlign="top"
-                icon={<EuiIcon type={style.icon} color={style.color} size="m" />}
+                icon={<EuiIcon type={style.icon} color={style.color} size="m" aria-hidden={true} />}
                 iconAriaLabel={event.type}
               >
                 <EuiPanel paddingSize="s" hasShadow={false} hasBorder>

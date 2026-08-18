@@ -8807,6 +8807,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-mitre-catalog@link:x-pack/solutions/security/packages/kbn-securitysolution-mitre-catalog":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-rules@link:src/platform/packages/shared/kbn-securitysolution-rules":
   version "0.0.0"
   uid ""

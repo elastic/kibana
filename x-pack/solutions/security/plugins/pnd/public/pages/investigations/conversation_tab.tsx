@@ -86,7 +86,12 @@ export const ConversationTab = ({ investigationId, isActive }: ConversationTabPr
 
   if (error) {
     return (
-      <EuiCallOut color="danger" title={i18n.CONVERSATION_ERROR_TITLE} iconType="alert">
+      <EuiCallOut
+        announceOnMount
+        color="danger"
+        title={i18n.CONVERSATION_ERROR_TITLE}
+        iconType="alert"
+      >
         {error}
       </EuiCallOut>
     );
