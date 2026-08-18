@@ -36,6 +36,9 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
 elif [[ "$(pwd)" == "/dev/shm"* && -f ~/.kibana/node_modules.tar.zst ]]; then
   echo "Extracting ~/.kibana/node_modules.tar.zst"
   tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
+  if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
+    ln -s ~/.kibana/.yarn-local-mirror ./.yarn-local-mirror
+  fi
 fi
 
 # TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
