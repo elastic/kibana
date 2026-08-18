@@ -7,7 +7,17 @@
 
 import { validateReadOnlyQuery } from './validate_read_only_query';
 
-const ALLOWED = new Set(['processes', 'process_open_sockets', 'users', 'scheduled_tasks']);
+const ALLOWED = new Set([
+  'processes',
+  'process_open_sockets',
+  'users',
+  'scheduled_tasks',
+  // These ship in the installed osquery_manager schema catalog, so they pass a
+  // catalog-only allowlist — the validator must reject them on its own.
+  'curl',
+  'carves',
+  'yara',
+]);
 
 describe('validateReadOnlyQuery', () => {
   it('accepts a simple SELECT against an allowlisted table', () => {
@@ -32,8 +42,10 @@ describe('validateReadOnlyQuery', () => {
   });
 
   it('rejects INSERT / UPDATE / ATTACH keywords even inside a SELECT-looking string', () => {
+    // Semicolons are rejected first (single-statement rule); keyword scanning
+    // still guards single-statement injections like ATTACH via CTE strings.
     expect(validateReadOnlyQuery('SELECT 1; DROP TABLE processes', ALLOWED)).toMatch(
-      /forbidden keyword/i
+      /single statement|forbidden keyword/i
     );
   });
 
@@ -104,7 +116,53 @@ describe('validateReadOnlyQuery', () => {
           "SELECT pid FROM processes WHERE name = 'x'; DROP TABLE users",
           ALLOWED
         )
-      ).toMatch(/forbidden keyword/i);
+      ).toMatch(/single statement/i);
+    });
+  });
+
+  describe('non-read-only catalog tables (review finding)', () => {
+    it.each([
+      ['curl', "SELECT * FROM curl WHERE url = 'http://169.254.169.254/latest/meta-data/'"],
+      ['carves', 'SELECT * FROM carves WHERE carve = 1'],
+      ['yara', "SELECT * FROM yara WHERE sigrule = 'rule r {}'"],
+    ])('rejects catalog table %s because it performs host-side effects', (table, query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/not read-only/i);
+      expect(validateReadOnlyQuery(query, ALLOWED)).toContain(table);
+    });
+
+    it('rejects a side-effect table even when joined from a passive table', () => {
+      expect(
+        validateReadOnlyQuery('SELECT * FROM processes JOIN curl USING (pid)', ALLOWED)
+      ).toMatch(/not read-only/i);
+    });
+  });
+
+  describe('multi-statement rejection (review finding)', () => {
+    it('rejects a second statement riding behind a valid first statement', () => {
+      expect(
+        validateReadOnlyQuery(
+          "SELECT * FROM processes; SELECT * FROM curl WHERE url = 'http://internal/'",
+          ALLOWED
+        )
+      ).toMatch(/single statement/i);
+    });
+
+    it('rejects a trailing empty statement', () => {
+      expect(validateReadOnlyQuery('SELECT pid FROM processes;', ALLOWED)).toMatch(
+        /single statement/i
+      );
+    });
+
+    it('does not reject a semicolon inside a string literal', () => {
+      expect(
+        validateReadOnlyQuery("SELECT pid FROM processes WHERE cmdline LIKE '%;%'", ALLOWED)
+      ).toBeNull();
+    });
+
+    it('does not reject a semicolon inside a comment', () => {
+      expect(
+        validateReadOnlyQuery('SELECT pid FROM processes /* allow; list */', ALLOWED)
+      ).toBeNull();
     });
   });
 });

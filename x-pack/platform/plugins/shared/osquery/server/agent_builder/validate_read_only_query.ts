@@ -16,6 +16,19 @@ const blankStringLiterals = (sql: string): string =>
   sql.replace(/'(?:[^']|'')*'/g, (match) => `'${' '.repeat(Math.max(match.length - 2, 0))}'`);
 
 /**
+ * Osquery tables that perform host-side effects even inside a syntactically
+ * valid SELECT. The schema catalog is an *availability* list, not a
+ * *read-only* list: these entries ship in the installed package and pass the
+ * catalog check, but must never be reachable through a tool that advertises
+ * read-only queries.
+ *
+ * - `curl`   — performs an outbound HTTP request for every row (SSRF)
+ * - `carves` — `carve=1` turns the SELECT into a new carve request (file exfil)
+ * - `yara`   — triggers a one-off YARA scan on the host
+ */
+const NON_READ_ONLY_TABLES = new Set(['curl', 'carves', 'yara']);
+
+/**
  * Table references in a FROM/JOIN clause, including comma-separated lists.
  *
  * `FROM processes, shell` is two table references. Matching only the first
@@ -68,6 +81,14 @@ export const validateReadOnlyQuery = (
 
   const scannable = blankStringLiterals(withoutComments);
 
+  // A semicolon anywhere outside a string literal means a second statement.
+  // extractTableRefs stops at the first statement's keywords, so
+  // `SELECT * FROM processes; SELECT * FROM curl …` would validate only
+  // `processes` and let the second statement reach osquery unchecked.
+  if (scannable.includes(';')) {
+    return 'Query must be a single statement. Multiple statements separated by semicolons are not allowed.';
+  }
+
   // Osquery live queries must be a single SELECT (optionally WITH … SELECT)
   if (!/^(WITH\b[\s\S]+?\bSELECT\b|SELECT\b)/i.test(scannable)) {
     return 'Only read-only SELECT queries are allowed. Mutating statements (INSERT, UPDATE, DELETE, ATTACH, etc.) are rejected.';
@@ -97,6 +118,13 @@ export const validateReadOnlyQuery = (
 
   if (tableRefs.length === 0) {
     return 'Query must reference at least one Osquery table via FROM / JOIN';
+  }
+
+  const nonReadOnly = [...new Set(tableRefs)].filter((t) => NON_READ_ONLY_TABLES.has(t));
+  if (nonReadOnly.length > 0) {
+    return `Table(s) are not read-only and cannot be used in a live query: ${nonReadOnly.join(
+      ', '
+    )}. These tables perform host-side actions (HTTP requests, file carving, YARA scans) even in a SELECT.`;
   }
 
   const unknown = [...new Set(tableRefs)].filter(

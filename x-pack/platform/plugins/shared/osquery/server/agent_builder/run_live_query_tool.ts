@@ -39,8 +39,9 @@ const runLiveQuerySchema = z.object({
   agent_ids: z
     .array(z.string())
     .min(1)
+    .max(100)
     .describe(
-      'Specific agent IDs to run the query on (from Elastic Agent / osquerybeat enrollment)'
+      'Specific agent IDs to run the query on (from Elastic Agent / osquerybeat enrollment). Max 100 — resolve subsets with osquery.resolve_agent_ids and batch further runs separately.'
     ),
   timeout: z
     .number()

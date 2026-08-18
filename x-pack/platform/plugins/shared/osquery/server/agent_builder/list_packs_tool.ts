@@ -108,17 +108,16 @@ export const listPacksTool = (
     } catch (e) {
       logger.warn(`Failed to list packs: ${e}`);
 
+      // Must be ToolResultType.error: an empty `packs: []` under `other`
+      // tells the model "there are no packs" when the truth is the lookup
+      // failed.
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
-            type: ToolResultType.other,
+            type: ToolResultType.error,
             data: {
-              total: 0,
-              page,
-              per_page: pageSize,
-              packs: [],
-              error: 'Failed to retrieve packs',
+              message: `Failed to retrieve packs: ${e instanceof Error ? e.message : String(e)}`,
             },
           },
         ],

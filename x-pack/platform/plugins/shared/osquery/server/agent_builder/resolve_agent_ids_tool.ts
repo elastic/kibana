@@ -26,7 +26,10 @@ const resolveAgentIdsSchema = z.object({
   hostnames: z
     .array(z.string())
     .min(1)
-    .describe('Host names to resolve to Elastic Agent IDs (e.g. ["SRV-DC01", "WKSTN-RECV01"])'),
+    .max(50)
+    .describe(
+      'Host names to resolve to Elastic Agent IDs (e.g. ["SRV-DC01", "WKSTN-RECV01"]). Max 50 — each hostname issues its own Fleet query.'
+    ),
 });
 
 interface ResolvedAgent {
@@ -45,10 +48,11 @@ interface FleetAgentLike {
 }
 
 /**
- * Fleet KQL is quoted-string based, so a hostname containing `"` or `\` breaks
- * out of its literal and produces a malformed query.
+ * Fleet KQL is quoted-string based, so a value containing `"` or `\` breaks
+ * out of its literal and produces a malformed query. Shared by every tool
+ * that interpolates caller-supplied hostnames or agent IDs into a KQL clause.
  */
-const escapeKueryValue = (value: string): string =>
+export const escapeKueryValue = (value: string): string =>
   value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 
 /**

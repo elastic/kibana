@@ -19,6 +19,7 @@ import {
   buildOsqueryPolicyKuery,
   getOsqueryAgentPolicyIds,
 } from '../lib/get_osquery_agent_policy_ids';
+import { escapeKueryValue } from './resolve_agent_ids_tool';
 import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 
 export const CHECK_INTEGRATION_TOOL_ID = osqueryTool('check_integration');
@@ -184,8 +185,11 @@ export const checkIntegrationTool = (
       // count: "can THIS host run Osquery", i.e. is it enrolled in a policy
       // that carries the integration.
       if (agentId) {
+        // The agent id is model-supplied text interpolated into a KQL quoted
+        // string — escape it the same way resolve_agent_ids escapes hostnames.
+        const escapedAgentId = escapeKueryValue(agentId);
         const { agents, total } = await scopedAgentClient.listAgents({
-          kuery: `agent.id:"${agentId}" and (${policyKuery})`,
+          kuery: `agent.id:"${escapedAgentId}" and (${policyKuery})`,
           perPage: 1,
           showInactive: true,
         });

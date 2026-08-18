@@ -7,11 +7,16 @@
 
 import { pollActionResponses } from './poll_action_responses';
 
+const responsesSearchResult = (distinctAgents: number) => ({
+  hits: { total: { value: distinctAgents }, hits: [] },
+  aggregations: { distinct_agents: { value: distinctAgents } },
+});
+
 describe('pollActionResponses', () => {
   it('polls action responses for completion metadata and result index for SQL rows', async () => {
     const search = jest
       .fn()
-      .mockResolvedValueOnce({ hits: { total: { value: 1 }, hits: [] } })
+      .mockResolvedValueOnce(responsesSearchResult(1))
       .mockResolvedValueOnce({
         hits: { hits: [{ _source: { osquery: { pid: 1, name: 'launchd' } } }] },
       });
@@ -29,6 +34,10 @@ describe('pollActionResponses', () => {
       expect.objectContaining({
         index: 'logs-osquery_manager.action.responses*',
         size: 0,
+        // Completion is measured by distinct responding agents, not document
+        // count: the action-responses transform can emit multiple docs per
+        // agent (keyed on @timestamp + action_id + agent_id).
+        aggs: { distinct_agents: { cardinality: { field: 'agent_id' } } },
         query: expect.objectContaining({
           bool: expect.objectContaining({
             filter: expect.arrayContaining([{ term: { action_id: 'query-action-1' } }]),
@@ -59,7 +68,7 @@ describe('pollActionResponses', () => {
   it('only reports completed after every expected agent responds', async () => {
     const search = jest
       .fn()
-      .mockResolvedValueOnce({ hits: { total: { value: 2 }, hits: [] } })
+      .mockResolvedValueOnce(responsesSearchResult(2))
       .mockResolvedValueOnce({ hits: { hits: [] } });
 
     const result = await pollActionResponses({ search } as any, 'query-action-1', {
@@ -69,6 +78,30 @@ describe('pollActionResponses', () => {
       expectedAgentCount: 2,
     });
 
+    expect(result.status).toBe('completed');
+  });
+
+  it('does not complete early when one agent produced multiple response docs', async () => {
+    // Regression: raw doc count would read this as 3 >= 3 (completed); the
+    // cardinality agg correctly reads 2 of 3 distinct agents.
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce({
+        hits: { total: { value: 3 }, hits: [] },
+        aggregations: { distinct_agents: { value: 2 } },
+      })
+      .mockResolvedValueOnce({ hits: { hits: [] } })
+      .mockResolvedValueOnce(responsesSearchResult(3))
+      .mockResolvedValueOnce({ hits: { hits: [] } });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 50,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 3,
+    });
+
+    expect(result.responded).toBe(3);
     expect(result.status).toBe('completed');
   });
 });

@@ -41,10 +41,11 @@ export const allowedExperimentalValues = Object.freeze({
   rruleScheduling: true,
   /**
    * Enables Agent Builder tool registration in the osquery plugin. When enabled,
-   * the plugin registers read-only Osquery inline tools (check_integration,
-   * list_saved_queries, get_table_schema, run_live_query, list_packs) that can
-   * be referenced by skills such as endpoint-forensic-analysis. Tools are
-   * fleet-wide-capable and gated behind the osquery integration being installed.
+   * the plugin registers Osquery inline tools (check_integration,
+   * list_saved_queries, get_table_schema, run_live_query, list_packs,
+   * resolve_agent_ids, get_live_query_results) that can be referenced by skills
+   * such as endpoint-forensic-analysis. Tool handlers enforce integration
+   * state at call time; availability reflects only this flag.
    */
   agentBuilderTools: false,
   /**
