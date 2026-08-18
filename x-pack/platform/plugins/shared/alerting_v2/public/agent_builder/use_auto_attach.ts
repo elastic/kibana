@@ -21,9 +21,7 @@ export const useAutoAttach = <FocusedItem>(
     | AgentBuilderPluginStart
     | undefined;
 
-  const focusedItem$ = useRef(
-    new BehaviorSubject<FocusedItem | undefined>(undefined)
-  ).current;
+  const focusedItem$ = useRef(new BehaviorSubject<FocusedItem | undefined>(undefined)).current;
 
   const converterRef = useRef(converter);
   converterRef.current = converter;

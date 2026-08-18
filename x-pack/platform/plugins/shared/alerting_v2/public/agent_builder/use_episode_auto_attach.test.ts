@@ -126,9 +126,7 @@ describe('useEpisodeAutoAttach', () => {
     });
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    expect(addAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({ origin: 'ep-1' })
-    );
+    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'ep-1' }));
   });
 
   it('does not double-stage the same episode', () => {
@@ -146,10 +144,9 @@ describe('useEpisodeAutoAttach', () => {
     activeConversation$.next({ id: undefined });
     const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
 
-    const { rerender } = renderHook(
-      ({ ep }) => useEpisodeAutoAttach(ep),
-      { initialProps: { ep: episode } }
-    );
+    const { rerender } = renderHook(({ ep }) => useEpisodeAutoAttach(ep), {
+      initialProps: { ep: episode },
+    });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);

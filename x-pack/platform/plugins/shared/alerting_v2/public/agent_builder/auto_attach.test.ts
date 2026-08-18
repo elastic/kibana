@@ -205,9 +205,7 @@ describe('registerAutoAttach', () => {
 
     expect(removeAttachment).toHaveBeenCalledTimes(1);
     expect(removeAttachment).toHaveBeenCalledWith('test:item-1');
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'test:item-2' })
-    );
+    expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'test:item-2' }));
   });
 
   it('does not call removeAttachment on the first staging', () => {
