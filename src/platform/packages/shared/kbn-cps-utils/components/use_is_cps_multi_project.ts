@@ -27,8 +27,6 @@ export const useIsCpsMultiProject = (cpsManager?: ICPSManager): boolean | undefi
 
   useEffect(() => {
     if (!cpsManager) {
-      // Must match the initial state, or every consumer gets an extra render on mount; this only
-      // does work when `cpsManager` goes from set to unset, which the initializer can't observe.
       setIsCpsMultiProject(false);
       return;
     }
