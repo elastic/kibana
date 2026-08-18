@@ -103,12 +103,13 @@ export class DispatchStep implements DispatcherStep {
       pushMapList(groupsByApiKey, apiKey, group);
     }
 
-    const remainingGroups = [...groupsByApiKey.values()].flat();
-    if (remainingGroups.length === 0) {
+    if (groupsByApiKey.size === 0) {
       return done();
     }
 
-    const { workflowsBySpace, failedSpaces } = await this.prefetchWorkflows(remainingGroups);
+    const { workflowsBySpace, failedSpaces } = await this.prefetchWorkflows(
+      [...groupsByApiKey.values()].flat()
+    );
 
     for (const [apiKey, groups] of groupsByApiKey) {
       const pending = this.buildPendingSchedules(
@@ -267,6 +268,7 @@ export class DispatchStep implements DispatcherStep {
         group_id: group.id,
         policy_id: group.policyId,
         workflow_id: workflowId,
+        space_id: group.spaceId,
       },
     });
     dispatchFailures.push(
