@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { getDiverseSampleDocuments } from './src/sampling/get_diverse_sample_documents';
 export { generateStreamDescription } from './src/description/generate_description';
 export { overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
@@ -28,6 +29,9 @@ export {
   identifyKIQueries,
   DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   type ExistingQuerySummary,
+  type QueryAttempt,
+  type QueryAttemptStatus,
+  type QueryAttemptFailureReason,
 } from './src/significant_events/identify_ki_queries';
 export {
   createDefaultSignificantEventsToolUsage,
