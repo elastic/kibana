@@ -11,6 +11,7 @@
     "schema/*.json",
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/telemetry-collection-manager-plugin",
     "@kbn/telemetry-plugin",

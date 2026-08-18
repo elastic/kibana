@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-//  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
-
-export async function plugin() {
-  const { TelemetryCollectionXpackPlugin } = await import('./plugin');
-  return new TelemetryCollectionXpackPlugin();
-}
+export { default as cordisPlugin } from './plugin';

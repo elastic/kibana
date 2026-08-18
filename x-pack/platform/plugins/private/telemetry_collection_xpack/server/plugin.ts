@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type { TelemetryCollectionManagerPluginSetup } from '@kbn/telemetry-collection-manager-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { getClusterUuids } from '@kbn/telemetry-plugin/server';
 import { getStatsWithXpack } from './telemetry_collection';
 
-interface TelemetryCollectionXpackDepsSetup {
-  telemetryCollectionManager: TelemetryCollectionManagerPluginSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class TelemetryCollectionXpackPlugin extends Service {
+  static readonly inject = ['telemetryCollectionManager.setup'];
+  static readonly provide = 'telemetryCollectionXpack';
 
-export class TelemetryCollectionXpackPlugin implements Plugin {
-  constructor() {}
-
-  public setup(core: CoreSetup, { telemetryCollectionManager }: TelemetryCollectionXpackDepsSetup) {
+  constructor(ctx: Context) {
+    super(ctx, 'telemetryCollectionXpack');
+    const telemetryCollectionManager = (ctx.get('telemetryCollectionManager.setup') as any).contract;
     telemetryCollectionManager.setCollectionStrategy({
       title: 'local_xpack',
       priority: 1,
@@ -25,6 +25,4 @@ export class TelemetryCollectionXpackPlugin implements Plugin {
       clusterDetailsGetter: getClusterUuids,
     });
   }
-
-  public start(core: CoreStart) {}
 }
