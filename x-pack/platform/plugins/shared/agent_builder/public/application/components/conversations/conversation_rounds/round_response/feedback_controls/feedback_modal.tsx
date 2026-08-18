@@ -43,6 +43,7 @@ interface FeedbackModalProps {
   vote: 'up' | 'down';
   chips: FeedbackChipId[];
   comment: string;
+  isSubmitting?: boolean;
   onToggleChip: (chip: FeedbackChipId) => void;
   onCommentChange: (value: string) => void;
   onSubmit: () => void;
@@ -53,6 +54,7 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
   vote,
   chips,
   comment,
+  isSubmitting,
   onToggleChip,
   onCommentChange,
   onSubmit,
@@ -88,6 +90,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
         <EuiButton
           fill
           onClick={onSubmit}
+          isLoading={isSubmitting}
+          isDisabled={isSubmitting}
           data-test-subj="roundFeedbackSubmitButton"
           {...getEbtProps({
             element: AGENT_BUILDER_UI_EBT.element.pageContent,

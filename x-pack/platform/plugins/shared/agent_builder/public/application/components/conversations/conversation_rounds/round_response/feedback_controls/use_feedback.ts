@@ -282,7 +282,8 @@ export const useFeedback = (
 
   const submit = useCallback(() => {
     const currentVote = voteRef.current;
-    if (!currentVote || !conversationId || isSubmitInFlightRef.current) return;
+    if (!currentVote || !conversationId || isSubmittingRef.current || isSubmitInFlightRef.current)
+      return;
 
     setModalOpen(false);
     isSubmitInFlightRef.current = true;

@@ -266,6 +266,7 @@ export const RoundResponseActions: React.FC<RoundResponseActionsProps> = ({
           vote={feedback.vote}
           chips={feedback.chips}
           comment={feedback.comment}
+          isSubmitting={feedback.isSubmitting}
           onToggleChip={feedback.toggleChip}
           onCommentChange={feedback.setComment}
           onSubmit={feedback.submit}
