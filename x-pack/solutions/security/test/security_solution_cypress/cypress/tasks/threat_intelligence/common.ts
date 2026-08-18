@@ -20,12 +20,17 @@ import {
   FLYOUT_TAKE_ACTION_BUTTON,
   INDICATORS_TABLE,
   INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON,
-  REFRESH_BUTTON,
   TOGGLE_FLYOUT_BUTTON,
 } from '../../screens/threat_intelligence/indicators';
 
 /**
- * Navigate to Blocklist screen via the Security Solution navbar and Manage menu item
+ * Navigate to Blocklist screen.
+ *
+ * This is a full page load rather than a navbar click: the Blocklist link is nested inside the
+ * collapsible Manage section of the Security side navigation and is not reliably reachable from
+ * a Threat Intelligence page. Because it is a full page load, any Security Solution global state
+ * held in the URL (most notably the time range) is dropped, so callers that navigate back to a
+ * data driven view must re-establish it themselves.
  */
 export const navigateToBlocklist = () => {
   cy.visit(BLOCKLIST_URL);
@@ -81,42 +86,9 @@ export const navigateToFlyoutJsonTab = () => {
 };
 
 /**
- * Wait for the view to be fully loaded.
- *
- * The indicators table only renders once the underlying search has resolved with at least one
- * hit (see `IndicatorsTable`'s `isLoading`/`indicatorCount` gating in the app code). On a fresh
- * page load, the initial indicators search can occasionally resolve before the page's data
- * view/index pattern has fully settled, leaving the table permanently absent even though the
- * underlying data exists (see https://github.com/elastic/kibana/issues/239150 and the identical
- * symptom tracked by #244231, #246885, #246405, #239929, #246404). Rather than passively polling
- * the DOM for the whole timeout budget, click the query bar's refresh button every so often to
- * re-trigger the search — this reliably recovers the view instead of a single, ever-growing wait.
+ * Wait for the view to be fully loaded
  */
 export const waitForViewToBeLoaded = () => {
-  let attempt = 0;
-  recurse(
-    () => {
-      if (attempt > 0) {
-        cy.get('body').then(($body) => {
-          if ($body.find(REFRESH_BUTTON).length > 0) {
-            cy.get(REFRESH_BUTTON).click();
-            cy.get(UPDATE_STATUS, { timeout: 30000 }).should('contain.text', 'Updated');
-          } else {
-            cy.intercept('POST', '**/internal/search/threatIntelligenceSearchStrategy').as(
-              'tiReloadSearch'
-            );
-            cy.reload();
-            cy.wait('@tiReloadSearch', { timeout: 90000 });
-          }
-        });
-      }
-      attempt++;
-      return cy.get('body').then(($body) => $body.find(INDICATORS_TABLE).length > 0);
-    },
-    (isTableVisible) => isTableVisible === true,
-    { delay: 2000, timeout: 150000 }
-  );
-
   cy.get(INDICATORS_TABLE).should('exist');
   cy.get(BARCHART_WRAPPER).should('exist');
   waitForViewToBeUpdated();
