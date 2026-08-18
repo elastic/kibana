@@ -75,11 +75,14 @@ async function runEsqlPopulationCount({
   end: number;
   kql?: string;
 }): Promise<number> {
-  const response = (await esClient.esql.query({
-    query: buildCountQuery({ index, kql }),
-    filter: { bool: { filter: dateRangeQuery(start, end) } },
-    drop_null_columns: true,
-  })) as unknown as ESQLSearchResponse;
+  const response = (await esClient.esql.query(
+    {
+      query: buildCountQuery({ index, kql }),
+      filter: { bool: { filter: dateRangeQuery(start, end) } },
+      drop_null_columns: true,
+    },
+    { signal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS) }
+  )) as unknown as ESQLSearchResponse;
   const total = response.values[0]?.[0];
 
   return typeof total === 'number' ? total : 0;
