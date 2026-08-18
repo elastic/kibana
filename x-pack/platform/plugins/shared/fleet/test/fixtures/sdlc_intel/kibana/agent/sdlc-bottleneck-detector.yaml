@@ -1,5 +1,3 @@
-# SDLC Bottleneck Detector Agent
-# Uses platform ES|QL tools only
 name: sdlc-bottleneck-detector
 description: >
   Detects SDLC bottlenecks by analyzing cycle time, review latency, and

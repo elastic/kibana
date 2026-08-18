@@ -1,8 +1,6 @@
-# SDLC Coverage Analysis Agent
-# Uses platform tools only (no product builtin tools)
 name: sdlc-coverage-analysis
 description: >
-  Analyzes SDLC coverage metrics from indexed pull request and commit data.
+  Analyzes SDLC coverage metrics from indexed pull request data.
   Identifies gaps in test coverage and suggests areas for improvement.
 instructions: |
   You are an SDLC coverage analysis agent. Your job is to:
