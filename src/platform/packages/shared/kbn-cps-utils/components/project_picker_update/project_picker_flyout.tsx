@@ -68,6 +68,7 @@ export function ProjectPickerFlyoutContent({
   applyButtonLabel = defaultApplyButtonLabel,
   availableProjects,
   backButtonLabel = defaultBackButtonLabel,
+  defaultProjectRouting,
   discardButtonLabel = defaultDiscardButtonLabel,
   isApplyDisabled,
   isReadOnly,
@@ -87,6 +88,7 @@ export function ProjectPickerFlyoutContent({
   return (
     <ProjectPickerStateProvider
       availableProjects={availableProjects}
+      defaultProjectRouting={defaultProjectRouting}
       initialProjectRouting={projectRouting}
       isReadOnly={isReadOnly}
       originProjectId={originProjectId}

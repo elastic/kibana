@@ -119,4 +119,22 @@ describe('EditTransformProjectScopeFlyout', () => {
     expect(screen.getByTestId('projectRoutingProbe')).toHaveTextContent(namedRouting);
     expect(screen.getByTestId('projectRoutingProbe')).not.toHaveTextContent(PROJECT_ROUTING.ALL);
   });
+
+  it('reverts to the default project routing verbatim', async () => {
+    const appDeps = appDependencies.useAppDependencies();
+    appDeps.cps!.cpsManager!.getDefaultProjectRouting = jest.fn(() => PROJECT_ROUTING.ORIGIN);
+    renderFlyout('_id:p2');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('projectPickerHeaderActionsButton'));
+    fireEvent.click(screen.getByText('Revert to space defaults'));
+    fireEvent.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
+
+    expect(screen.getByTestId('projectRoutingProbe')).toHaveTextContent(PROJECT_ROUTING.ORIGIN);
+    expect(screen.getByTestId('projectRoutingProbe')).not.toHaveTextContent(PROJECT_ROUTING.ALL);
+    expect(screen.getByTestId('projectRoutingProbe')).not.toHaveTextContent('_id:p1');
+  });
 });

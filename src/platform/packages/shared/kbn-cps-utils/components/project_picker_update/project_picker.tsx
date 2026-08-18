@@ -21,6 +21,7 @@ export interface ProjectPickerProps
 
 export function ProjectPicker({
   availableProjects,
+  defaultProjectRouting,
   isReadOnly,
   onProjectRoutingChange,
   originProjectId,
@@ -31,6 +32,7 @@ export function ProjectPicker({
   return (
     <ProjectPickerStateProvider
       availableProjects={availableProjects}
+      defaultProjectRouting={defaultProjectRouting}
       initialProjectRouting={projectRouting}
       isReadOnly={isReadOnly}
       originProjectId={originProjectId}

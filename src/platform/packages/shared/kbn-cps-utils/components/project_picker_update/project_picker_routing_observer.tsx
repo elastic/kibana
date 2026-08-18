@@ -11,6 +11,7 @@ import { useEffect } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { useProjectPickerState } from './state';
+import { isUsingProjectRouting } from './state/reducers';
 import { projectRoutingCodec } from './utils/project_routing_codec';
 
 export interface ProjectPickerRoutingObserverProps {
@@ -22,13 +23,15 @@ export const ProjectPickerRoutingObserver = ({
   onProjectRoutingChange,
   projectRouting,
 }: ProjectPickerRoutingObserverProps) => {
+  const state = useProjectPickerState();
   const {
     availableProjects,
+    defaultProjectRouting,
     excludedOverrides,
     filterExpressions,
     hasUserModifiedRouting,
     selectedProjects,
-  } = useProjectPickerState();
+  } = state;
 
   useEffect(() => {
     if (!onProjectRoutingChange || !hasUserModifiedRouting || availableProjects.size === 0) {
@@ -44,8 +47,9 @@ export const ProjectPickerRoutingObserver = ({
     const isAllProjectsSelected =
       selectedProjects.length === 0 || selectedProjects.length === allProjectIds.length;
 
-    const nextProjectRouting =
-      !hasActiveFilters && !hasExcludedOverrides && isAllProjectsSelected
+    const nextProjectRouting = isUsingProjectRouting(state, defaultProjectRouting)
+      ? defaultProjectRouting
+      : !hasActiveFilters && !hasExcludedOverrides && isAllProjectsSelected
         ? PROJECT_ROUTING.ALL
         : projectRoutingCodec.encode({
             excludedProjectIds: excludedOverrides,
@@ -65,6 +69,7 @@ export const ProjectPickerRoutingObserver = ({
     onProjectRoutingChange,
     projectRouting,
     selectedProjects,
+    state,
   ]);
 
   return null;

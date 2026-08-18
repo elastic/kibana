@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 
 import type { ProjectPickerState } from '../../../../state/reducers';
 import { ProjectPickerFrameHeader } from './header';
@@ -53,7 +54,9 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   visibleProjectIds: [],
   selectedProjects: [],
   ...overrides,
+  defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
   hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
+  originProjectId: overrides.originProjectId,
 });
 
 const defaultActions = {
@@ -104,5 +107,23 @@ describe('ProjectPickerFrameHeader', () => {
 
     expect(screen.getByText('Clear project tag filters').closest('button')).not.toBeDisabled();
     expect(screen.getByText('Revert to space defaults').closest('button')).not.toBeDisabled();
+  });
+
+  it('shows the space defaults badge when the state matches an origin default', async () => {
+    renderHeader({
+      availableProjects: new Map([
+        ['p1', { _id: 'p1', _alias: 'p1', _type: 'security', _organisation: 'org' }],
+        ['p2', { _id: 'p2', _alias: 'p2', _type: 'security', _organisation: 'org' }],
+      ]),
+      defaultProjectRouting: PROJECT_ROUTING.ORIGIN,
+      excludedOverrides: ['p2'],
+      originProjectId: 'p1',
+    });
+
+    expect(screen.getByText('Using space defaults')).toBeInTheDocument();
+
+    await openGlobalActionsMenu();
+
+    expect(screen.getByText('Revert to space defaults').closest('button')).toBeDisabled();
   });
 });

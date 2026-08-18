@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { CPSProject } from '../../types';
 import { ProjectPicker } from './project_picker';
 import { ProjectPickerFlyout } from './project_picker_flyout';
@@ -230,6 +231,36 @@ describe('ProjectPicker', () => {
 
     expect(screen.getByText('Clear project tag filters')).toBeInTheDocument();
     expect(screen.getByText('Revert to space defaults')).toBeInTheDocument();
+  });
+
+  it('reports the default project routing verbatim after reverting in the flyout variant', async () => {
+    const onProjectRoutingChange = jest.fn();
+
+    render(
+      <ProjectPickerFlyout
+        availableProjects={[createProject('p1'), createProject('p2')]}
+        defaultProjectRouting={PROJECT_ROUTING.ORIGIN}
+        onApplyChanges={jest.fn()}
+        onClose={jest.fn()}
+        onDiscardChanges={jest.fn()}
+        onProjectRoutingChange={onProjectRoutingChange}
+        originProjectId="p1"
+        projectRouting="_id:p2"
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('projectPickerHeaderActionsButton'));
+    fireEvent.click(screen.getByText('Revert to space defaults'));
+
+    await waitFor(() => {
+      expect(onProjectRoutingChange).toHaveBeenCalledWith(PROJECT_ROUTING.ORIGIN);
+    });
+    expect(onProjectRoutingChange).not.toHaveBeenCalledWith(PROJECT_ROUTING.ALL);
+    expect(onProjectRoutingChange).not.toHaveBeenCalledWith('_id:p1');
   });
 
   it('does not reset custom flyout routing while projects are loading', async () => {

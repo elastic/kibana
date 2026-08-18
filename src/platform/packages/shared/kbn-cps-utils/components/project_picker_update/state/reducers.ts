@@ -8,6 +8,8 @@
  */
 
 import { uniq } from 'lodash';
+import type { ProjectRouting } from '@kbn/es-query';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { CPSProject } from '../../../types';
 import {
   FilterOperator,
@@ -15,6 +17,10 @@ import {
   getFilterExpressionLookupKey,
   type FilterExpressionValue,
 } from '../utils/filter_input_codec';
+import {
+  type ProjectRoutingExpression,
+  projectRoutingCodec,
+} from '../utils/project_routing_codec';
 import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from './derivatives';
 import type { StoreReducer } from './store';
 
@@ -26,6 +32,8 @@ export interface FilterEntry {
 export interface ProjectPickerStoredState {
   isReadOnly?: boolean;
   hasUserModifiedRouting: boolean;
+  defaultProjectRouting: ProjectRouting;
+  originProjectId?: string;
   filteringDimensions: string[];
   filterExpressions: Map<string, FilterEntry>;
   availableProjects: Map<CPSProject['_id'], CPSProject>;
@@ -56,6 +64,99 @@ const removeOverrides = (overrides: string[], projectIds: string[]): string[] =>
   return overrides.filter((id) => !projectIds.includes(id));
 };
 
+export const createFilterExpressionsMap = (
+  filterExpressions: FilterExpressionValue[]
+): Map<string, FilterEntry> =>
+  new Map(
+    filterExpressions.map((expression) => [
+      getFilterExpressionLookupKey(expression),
+      { expression, enabled: true },
+    ])
+  );
+
+export const getProjectRoutingState = ({
+  availableProjects,
+  originProjectId,
+  projectRouting,
+}: {
+  availableProjects: CPSProject[];
+  originProjectId?: string;
+  projectRouting?: ProjectRouting;
+}): Pick<ProjectRoutingExpression, 'filterExpressions' | 'excludedProjectIds'> => {
+  const allProjectIds = availableProjects.map((project) => project._id);
+
+  if (projectRouting === undefined || projectRouting === PROJECT_ROUTING.ALL) {
+    return {
+      filterExpressions: [],
+      excludedProjectIds: [],
+    };
+  }
+
+  if (projectRouting === PROJECT_ROUTING.ORIGIN) {
+    return {
+      filterExpressions: [],
+      excludedProjectIds: originProjectId
+        ? allProjectIds.filter((projectId) => projectId !== originProjectId)
+        : [],
+    };
+  }
+
+  const { excludedProjectIds, filterExpressions, selectedProjectIds } =
+    projectRoutingCodec.decode(projectRouting);
+
+  if (selectedProjectIds.length > 0) {
+    const selectedProjectIdsSet = new Set(
+      selectedProjectIds.filter((projectId) =>
+        availableProjects.some((project) => project._id === projectId)
+      )
+    );
+
+    return {
+      filterExpressions,
+      excludedProjectIds: allProjectIds.filter(
+        (projectId) => !selectedProjectIdsSet.has(projectId)
+      ),
+    };
+  }
+
+  return {
+    filterExpressions,
+    excludedProjectIds: excludedProjectIds.filter((projectId) =>
+      availableProjects.some((project) => project._id === projectId)
+    ),
+  };
+};
+
+const haveSameItems = (left: string[], right: string[]): boolean => {
+  if (left.length !== right.length) {
+    return false;
+  }
+
+  const rightSet = new Set(right);
+  return left.every((item) => rightSet.has(item));
+};
+
+export const isUsingProjectRouting = (
+  state: ProjectPickerState,
+  projectRouting?: ProjectRouting
+): boolean => {
+  const { excludedProjectIds, filterExpressions } = getProjectRoutingState({
+    availableProjects: Array.from(state.availableProjects.values()),
+    originProjectId: state.originProjectId,
+    projectRouting,
+  });
+  const expectedFilterExpressions = createFilterExpressionsMap(filterExpressions);
+
+  return (
+    state.filterExpressions.size === expectedFilterExpressions.size &&
+    Array.from(expectedFilterExpressions.entries()).every(([key, value]) => {
+      const current = state.filterExpressions.get(key);
+      return current?.enabled === value.enabled;
+    }) &&
+    haveSameItems(state.excludedOverrides, excludedProjectIds)
+  );
+};
+
 const withUserInteractionMiddleware =
   <P = void>(reducer: StoreReducer<ProjectPickerState, P>): StoreReducer<ProjectPickerState, P> =>
   (state, payload) => {
@@ -71,20 +172,19 @@ export function createStoreReducers() {
     _setStoreState(
       _state: ProjectPickerState,
       payload: Pick<ProjectPickerState, 'availableProjects' | 'isReadOnly'> & {
+        defaultProjectRouting?: ProjectRouting;
         excludedOverrides?: string[];
         filterExpressions?: FilterExpressionValue[];
+        originProjectId?: string;
       }
     ) {
       return {
         ..._state,
         isReadOnly: payload.isReadOnly,
+        defaultProjectRouting: payload.defaultProjectRouting ?? _state.defaultProjectRouting,
+        originProjectId: payload.originProjectId ?? _state.originProjectId,
         availableProjects: payload.availableProjects,
-        filterExpressions: new Map(
-          payload.filterExpressions?.map((expression) => [
-            getFilterExpressionLookupKey(expression),
-            { expression, enabled: true },
-          ])
-        ),
+        filterExpressions: createFilterExpressionsMap(payload.filterExpressions ?? []),
         excludedOverrides: payload.excludedOverrides ?? [],
         // these states are derived values we reset them for completeness, their values will be recomputed based on the new state
         filteringDimensions: [],
@@ -275,11 +375,19 @@ export function createStoreReducers() {
         excludedOverrides: removeOverrides(state.excludedOverrides, payload.projects),
       })
     ),
-    revertToSpaceDefaults: withUserInteractionMiddleware((state: ProjectPickerState) => ({
-      ...state,
-      filterExpressions: new Map(),
-      excludedOverrides: [],
-    })),
+    revertToSpaceDefaults: withUserInteractionMiddleware((state: ProjectPickerState) => {
+      const { excludedProjectIds, filterExpressions } = getProjectRoutingState({
+        availableProjects: Array.from(state.availableProjects.values()),
+        originProjectId: state.originProjectId,
+        projectRouting: state.defaultProjectRouting,
+      });
+
+      return {
+        ...state,
+        filterExpressions: createFilterExpressionsMap(filterExpressions),
+        excludedOverrides: excludedProjectIds,
+      };
+    }),
     /**
      * Includes all visible projects.
      */

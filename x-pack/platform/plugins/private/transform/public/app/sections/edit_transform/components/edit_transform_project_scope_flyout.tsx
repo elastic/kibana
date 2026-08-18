@@ -10,6 +10,8 @@ import type { ProjectRouting } from '@kbn/es-query';
 import { PROJECT_ROUTING, ProjectScopePickerFlyoutContent } from '@kbn/cps-utils';
 import { i18n } from '@kbn/i18n';
 
+import { useAppDependencies } from '../../../app_dependencies';
+
 import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
 import { useFormField } from '../state_management/selectors/form_field';
 import type { LoadedTransformProjectScopeProjects } from './edit_transform_project_scope';
@@ -37,8 +39,10 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
   onClose,
   projects,
 }) => {
+  const { cps } = useAppDependencies();
   const { value } = useFormField('projectRouting');
   const { setFormField } = useEditTransformFlyoutActions();
+  const defaultProjectRouting = cps?.cpsManager?.getDefaultProjectRouting() ?? PROJECT_ROUTING.ALL;
   const persistedProjectRouting = (value || PROJECT_ROUTING.ORIGIN) as NonNullable<ProjectRouting>;
   const [stagedProjectRouting, setStagedProjectRouting] = useState<
     NonNullable<ProjectRouting> | undefined
@@ -73,6 +77,7 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
       )}
       availableProjects={availableProjects}
       backButtonLabel={backToEditTransformLabel}
+      defaultProjectRouting={defaultProjectRouting}
       discardButtonLabel={i18n.translate(
         'xpack.transform.transformList.editFlyoutProjectScopeDiscardButtonText',
         {

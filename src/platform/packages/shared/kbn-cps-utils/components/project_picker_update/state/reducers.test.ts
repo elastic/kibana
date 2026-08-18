@@ -8,6 +8,7 @@
  */
 
 import type { CPSProject } from '../../../types';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { createStoreReducers, type FilterEntry, type ProjectPickerState } from './reducers';
 import {
   FilterOperator,
@@ -58,7 +59,9 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     visibleProjectIds: [],
     selectedProjects: [],
     ...overrides,
+    defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
     hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
+    originProjectId: overrides.originProjectId,
   };
 };
 
@@ -98,6 +101,24 @@ describe('createStoreReducers', () => {
 
     expect(nextState.filterExpressions).toEqual(new Map());
     expect(nextState.excludedOverrides).toEqual([]);
+  });
+
+  it('resets filters and overrides from origin space defaults', () => {
+    const state = createState({
+      availableProjects: new Map([
+        ['p1', createProject({ _id: 'p1' })],
+        ['p2', createProject({ _id: 'p2' })],
+      ]),
+      defaultProjectRouting: PROJECT_ROUTING.ORIGIN,
+      filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
+      originProjectId: 'p1',
+      excludedOverrides: [],
+    });
+
+    const nextState = reducers.revertToSpaceDefaults(state);
+
+    expect(nextState.filterExpressions).toEqual(new Map());
+    expect(nextState.excludedOverrides).toEqual(['p2']);
   });
 
   it('adds filter expressions without touching overrides', () => {

@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState } from 'react';
-import type { ProjectPickerState } from '../../../../state/reducers';
+import { isUsingProjectRouting, type ProjectPickerState } from '../../../../state/reducers';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../state';
 
 interface HeaderContextMenuClickActionContext {
@@ -61,8 +61,7 @@ const getContextMenuItems = (
       },
       isDisabled: ({ state }) => {
         return (
-          (state.filterExpressions.size === 0 && state.excludedOverrides.length === 0) ||
-          Boolean(state.isReadOnly)
+          isUsingProjectRouting(state, state.defaultProjectRouting) || Boolean(state.isReadOnly)
         );
       },
     },
@@ -96,11 +95,9 @@ export function ProjectPickerFrameHeaderActions() {
   const state = useProjectPickerState();
   const contextMenuTooltipId = useGeneratedHtmlId();
 
-  // TODO: this definition of space defaults is not correct but suffices for now,
-  // it should be based on the space defaults set in the space picker
   const isUsingSpaceDefaults = useMemo(
-    () => state.filterExpressions.size === 0 && state.excludedOverrides.length === 0,
-    [state.filterExpressions, state.excludedOverrides]
+    () => isUsingProjectRouting(state, state.defaultProjectRouting),
+    [state]
   );
 
   const closePopover = useCallback(() => setIsOpen(false), []);
