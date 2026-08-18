@@ -30,7 +30,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
       log.warning(`Warmup failed: ${e}`);
     }
 
-    const clients = { esClient, internalEsClient };
+    const clients = { esClient, internalEsClient, kbnClient };
     // Seed endpoint data for response-action tests
     await seedScenario(clients, {
       agentId: 'eval-agent-ts-isolate-001',
@@ -233,7 +233,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
             output: {
               criteria: [
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
+                'Passed host name "eval-host-isolate" to the endpoint status tool (the tool resolves it to an endpoint/agent ID internally)',
                 'Called the endpoint-response-actions.get_endpoint_status inline tool',
                 'Reported the host status (online/offline) and isolation state',
               ],
@@ -264,7 +264,7 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
             output: {
               criteria: [
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
+                'Passed host name "eval-host-isolate" to the running processes tool (the tool resolves it to an endpoint/agent ID internally)',
                 'Called the endpoint-response-actions.running_processes inline tool',
                 'Reported the process list or a clear not-found message',
               ],
@@ -295,9 +295,9 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
             output: {
               criteria: [
                 `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
-                'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
+                'Passed host name "eval-host-isolate" to the scan tool (the tool resolves it to an endpoint/agent ID internally)',
                 'Called the endpoint-response-actions.scan inline tool',
-                'Presented a confirmation prompt before executing the scan',
+                'Surfaced the Agent Builder confirmation card for the scan write action (the skill instructs the agent to call write tools directly and let Agent Builder present the confirmation, not ask in chat)',
                 'Reported the scan result (success or pending) back to the user',
               ],
               tool_sequence: ['endpoint-response-actions.scan'],
