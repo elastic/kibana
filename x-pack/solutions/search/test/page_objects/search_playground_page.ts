@@ -467,11 +467,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.click('chatMode');
         await testSubjects.existOrFail(`contextField-${fieldToRemove}`);
         const wrapper = await testSubjects.find(`contextField-${fieldToRemove}`);
-        await (
-          await wrapper.findByCssSelector(
-            `[aria-label="Remove ${fieldToRemove} from selection in this group"]`
-          )
-        ).click();
+        const removeFieldButton = await wrapper.findByCssSelector(
+          `[aria-label="Remove ${fieldToRemove} from selection in this group"]`
+        );
+        // Scroll the badge away from the fixed embedded console bar at the bottom of the
+        // page, which otherwise intercepts the click.
+        await removeFieldButton.scrollIntoViewIfNecessary();
+        await removeFieldButton.click();
         expect(
           await comboBox.getComboBoxSelectedOptions(`contextFieldsSelectable-${indexName}`)
         ).to.eql(['bar', 'baz', 'baz.keyword', 'foo', 'nestedField']);
