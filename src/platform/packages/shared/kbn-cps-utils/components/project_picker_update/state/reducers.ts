@@ -17,10 +17,7 @@ import {
   getFilterExpressionLookupKey,
   type FilterExpressionValue,
 } from '../utils/filter_input_codec';
-import {
-  type ProjectRoutingExpression,
-  projectRoutingCodec,
-} from '../utils/project_routing_codec';
+import { type ProjectRoutingExpression, projectRoutingCodec } from '../utils/project_routing_codec';
 import { computeVisibleProjectIds, getIncludedVisibleProjectIds } from './derivatives';
 import type { StoreReducer } from './store';
 

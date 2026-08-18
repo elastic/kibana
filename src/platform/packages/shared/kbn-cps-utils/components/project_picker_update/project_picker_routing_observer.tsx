@@ -50,13 +50,13 @@ export const ProjectPickerRoutingObserver = ({
     const nextProjectRouting = isUsingProjectRouting(state, defaultProjectRouting)
       ? defaultProjectRouting
       : !hasActiveFilters && !hasExcludedOverrides && isAllProjectsSelected
-        ? PROJECT_ROUTING.ALL
-        : projectRoutingCodec.encode({
-            excludedProjectIds: excludedOverrides,
-            filterExpressions: activeFilterExpressions,
-            selectedProjectIds: selectedProjects,
-            projectRoutingStrategy: hasActiveFilters ? 'dynamic' : 'snapshot',
-          });
+      ? PROJECT_ROUTING.ALL
+      : projectRoutingCodec.encode({
+          excludedProjectIds: excludedOverrides,
+          filterExpressions: activeFilterExpressions,
+          selectedProjectIds: selectedProjects,
+          projectRoutingStrategy: hasActiveFilters ? 'dynamic' : 'snapshot',
+        });
 
     if (nextProjectRouting !== projectRouting) {
       onProjectRoutingChange(nextProjectRouting);
