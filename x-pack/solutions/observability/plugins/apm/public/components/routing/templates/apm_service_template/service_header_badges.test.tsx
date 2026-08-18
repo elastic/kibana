@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { ServiceHeaderBadges } from './service_header_badges';
@@ -27,13 +27,12 @@ const mockShare = {
   url: {
     locators: {
       get: jest.fn().mockReturnValue({
-        getRedirectUrl: jest
+        getUrl: jest
           .fn()
-          .mockImplementation(
-            ({ serviceName, query }: any) =>
-              `/services/${serviceName}/overview?comparisonEnabled=${
-                query?.comparisonEnabled ?? true
-              }`
+          .mockImplementation(async ({ serviceName, query }: any) =>
+            `/app/apm/services/${serviceName}/overview?comparisonEnabled=${
+              query?.comparisonEnabled ?? true
+            }`
           ),
       }),
     },
@@ -304,7 +303,7 @@ describe('ServiceHeaderBadges', () => {
     expect(badge).toHaveAttribute('data-slo-status', 'violated');
   });
 
-  it('shows anomalies badge when ML jobs can be read and a score is returned', () => {
+  it('shows anomalies badge when ML jobs can be read and a score is returned', async () => {
     setupMocks({
       canReadMlJobs: true,
       alertsCount: 0,
@@ -316,9 +315,12 @@ describe('ServiceHeaderBadges', () => {
 
     expect(screen.getByTestId('serviceHeaderAnomaliesBadge')).toBeInTheDocument();
     expect(screen.getByText(/Critical \(82\)/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+    });
   });
 
-  it('links the anomalies badge to the service overview tab', () => {
+  it('links the anomalies badge to the service overview tab', async () => {
     setupMocks({
       canReadMlJobs: true,
       alertsCount: 0,
@@ -328,7 +330,10 @@ describe('ServiceHeaderBadges', () => {
     });
     renderBadges();
 
-    const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+    await waitFor(() => {
+      expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+    });
+    const href = screen.getByTestId('apmAnomaliesBadge').getAttribute('href');
     expect(href).toContain('/services/test-service/overview');
   });
 
@@ -383,12 +388,15 @@ describe('ServiceHeaderBadges', () => {
       sloFetchStatus: FETCH_STATUS.NOT_INITIATED,
     };
 
-    function getAnomalyBadgeSearchParams(): Record<string, string> {
-      const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+    async function getAnomalyBadgeSearchParams(): Promise<Record<string, string>> {
+      await waitFor(() => {
+        expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+      });
+      const href = screen.getByTestId('apmAnomaliesBadge').getAttribute('href');
       return Object.fromEntries(new URLSearchParams(href!.split('?')[1]));
     }
 
-    it('always targets expected bounds ON when not on the overview tab', () => {
+    it('always targets expected bounds ON when not on the overview tab', async () => {
       setupMocks({
         ...anomalySetup,
         routePath: '/services/{serviceName}/transactions',
@@ -397,10 +405,10 @@ describe('ServiceHeaderBadges', () => {
       });
       renderBadges();
 
-      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
+      expect(await getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
     });
 
-    it('targets toggling expected bounds OFF when on overview tab and bounds are showing', () => {
+    it('targets toggling expected bounds OFF when on overview tab and bounds are showing', async () => {
       setupMocks({
         ...anomalySetup,
         routePath: '/services/{serviceName}/overview',
@@ -409,10 +417,10 @@ describe('ServiceHeaderBadges', () => {
       });
       renderBadges();
 
-      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'false' });
+      expect(await getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'false' });
     });
 
-    it('targets toggling expected bounds ON when on overview tab and bounds are not showing', () => {
+    it('targets toggling expected bounds ON when on overview tab and bounds are not showing', async () => {
       setupMocks({
         ...anomalySetup,
         routePath: '/services/{serviceName}/overview',
@@ -421,7 +429,7 @@ describe('ServiceHeaderBadges', () => {
       });
       renderBadges();
 
-      expect(getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
+      expect(await getAnomalyBadgeSearchParams()).toMatchObject({ comparisonEnabled: 'true' });
     });
   });
 });

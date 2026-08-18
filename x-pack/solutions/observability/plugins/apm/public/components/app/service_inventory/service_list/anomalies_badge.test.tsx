@@ -12,21 +12,19 @@ import { AnomalyDetectorType } from '@kbn/apm-types';
 import type { AnomaliesBadgeNavigationProps } from './anomalies_badge';
 import { AnomaliesBadge } from './anomalies_badge';
 
-const mockGetRedirectUrl = jest
-  .fn()
-  .mockImplementation(({ serviceName, isMobileAgentName, query }: any) => {
-    const base = isMobileAgentName
-      ? `/mobile-services/${serviceName}/overview`
-      : `/services/${serviceName}/overview`;
-    const params = new URLSearchParams();
-    Object.entries(query ?? {}).forEach(([k, v]) => {
-      if (v !== undefined) params.set(k, String(v));
-    });
-    return `${base}?${params.toString()}`;
+const mockGetUrl = jest.fn().mockImplementation(async ({ serviceName, isMobileAgentName, query }: any) => {
+  const base = isMobileAgentName
+    ? `/app/apm/mobile-services/${serviceName}/overview`
+    : `/app/apm/services/${serviceName}/overview`;
+  const params = new URLSearchParams();
+  Object.entries(query ?? {}).forEach(([k, v]) => {
+    if (v !== undefined) params.set(k, String(v));
   });
+  return `${base}?${params.toString()}`;
+});
 
 const mockLocators = {
-  get: jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl }),
+  get: jest.fn().mockReturnValue({ getUrl: mockGetUrl }),
 } as unknown as AnomaliesBadgeNavigationProps['locators'];
 
 const regularClickProps: AnomaliesBadgeNavigationProps = {
@@ -66,8 +64,11 @@ async function getTooltipText(): Promise<string | null | undefined> {
   return document.querySelector('.euiToolTipPopover')?.textContent;
 }
 
-function getBadgeHrefParts(): [string, string] {
-  const href = screen.getByTestId('apmAnomaliesBadge').closest('a')?.getAttribute('href');
+async function getBadgeHrefParts(): Promise<[string, string]> {
+  await waitFor(() => {
+    expect(screen.getByTestId('apmAnomaliesBadge')).toHaveAttribute('href');
+  });
+  const href = screen.getByTestId('apmAnomaliesBadge').getAttribute('href');
   const [pathname, search] = href!.split('?');
   return [pathname, search];
 }
@@ -140,7 +141,7 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const [pathname, search] = getBadgeHrefParts();
+    const [pathname, search] = await getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
@@ -162,7 +163,7 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const [pathname, search] = getBadgeHrefParts();
+    const [pathname, search] = await getBadgeHrefParts();
 
     expect(pathname).toContain('/mobile-services/opbeans-android/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
@@ -194,7 +195,7 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const [pathname, search] = getBadgeHrefParts();
+    const [pathname, search] = await getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
@@ -217,7 +218,7 @@ describe('AnomaliesBadge', () => {
       />
     );
 
-    const [pathname, search] = getBadgeHrefParts();
+    const [pathname, search] = await getBadgeHrefParts();
 
     expect(pathname).toContain('/services/opbeans-java/overview');
     expect(Object.fromEntries(new URLSearchParams(search))).toMatchObject({
