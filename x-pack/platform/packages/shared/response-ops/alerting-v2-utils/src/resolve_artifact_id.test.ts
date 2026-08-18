@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import { resolveArtifactId } from './artifact_mappers';
+import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { resolveArtifactId } from './resolve_artifact_id';
 
 describe('resolveArtifactId', () => {
   it('keeps an existing id', () => {
@@ -19,5 +19,6 @@ describe('resolveArtifactId', () => {
     ['blank', '   '],
   ])('generates a prefixed id when the existing id is %s', (_label, existingId) => {
     expect(resolveArtifactId(RUNBOOK_ARTIFACT_TYPE, existingId)).toMatch(/^runbook-.+/);
+    expect(resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingId)).toMatch(/^dashboard-.+/);
   });
 });

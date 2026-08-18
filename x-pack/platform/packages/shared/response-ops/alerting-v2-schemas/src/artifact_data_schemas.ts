@@ -24,6 +24,9 @@ const nonBlankString = (max: number) =>
     .max(max)
     .refine((value) => value.trim().length > 0);
 
+/** Bounded non-blank string used as `data.dashboardId` on dashboard artifacts. */
+export const dashboardIdSchema = nonBlankString(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT);
+
 /**
  * Per-type schemas for the fields an artifact type owns in `data`.
  *
@@ -40,6 +43,6 @@ export const ARTIFACT_DATA_SCHEMAS: Readonly<Record<string, z.ZodObject<z.ZodRaw
     content: nonBlankString(RUNBOOK_CONTENT_LIMIT),
   }),
   [DASHBOARD_ARTIFACT_TYPE]: z.object({
-    dashboardId: nonBlankString(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT),
+    dashboardId: dashboardIdSchema,
   }),
 };

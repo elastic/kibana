@@ -24,13 +24,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useController, useFormContext } from 'react-hook-form';
 import { useRuleFormServices } from '../contexts';
 import type { FormValues } from '../types';
 import { getDashboardId } from '../utils/artifact_data';
-import { resolveArtifactId } from '../utils/artifact_mappers';
 import {
   resolveDashboardsByIds,
   searchRelatedDashboard,

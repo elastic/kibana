@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import {
-  ARTIFACT_DATA_SCHEMAS,
   createRuleDataSchema,
+  dashboardIdSchema,
   metadataSchema,
   ruleKindSchema,
   scheduleSchema,
@@ -31,11 +30,20 @@ import {
   isNoDataQueryConsistentWithStrategy,
   isNoDataQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
+import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
 import { resolveTimeFieldForQuery } from './resolve_time_field';
 
 type RuleArtifact = NonNullable<RuleAttachmentData['artifacts']>[number];
+
+type DashboardArtifact = RuleArtifact & {
+  type: typeof DASHBOARD_ARTIFACT_TYPE;
+  data: { dashboardId: string };
+};
+
+const isDashboardArtifact = (artifact: RuleArtifact): artifact is DashboardArtifact =>
+  artifact.type === DASHBOARD_ARTIFACT_TYPE;
 
 // Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
 // local to avoid forcing an export purely for this guard.
@@ -43,8 +51,6 @@ const MAX_RULE_TAGS = 20;
 
 // Mirrors `artifactsSchema.max(100)` in @kbn/alerting-v2-schemas.
 const MAX_RULE_ARTIFACTS = 100;
-
-const dashboardIdSchema = ARTIFACT_DATA_SCHEMAS[DASHBOARD_ARTIFACT_TYPE].shape.dashboardId;
 
 /**
  * Ensures the agent-builder provenance tag is present without clobbering any
@@ -59,11 +65,6 @@ const withAgentBuilderTag = (tags: string[] | undefined): string[] => {
   return [...existing, AGENT_BUILDER_TAG];
 };
 
-const getDashboardId = (artifact: RuleArtifact): string | undefined =>
-  artifact.type === DASHBOARD_ARTIFACT_TYPE && typeof artifact.data.dashboardId === 'string'
-    ? artifact.data.dashboardId
-    : undefined;
-
 /**
  * Maps dashboard saved-object IDs onto `dashboard` artifacts in the create/update
  * API shape. Reuses an existing artifact `id` when the same dashboard is already
@@ -71,25 +72,22 @@ const getDashboardId = (artifact: RuleArtifact): string | undefined =>
  */
 const toDashboardArtifacts = (
   dashboardIds: string[],
-  existingArtifacts: RuleArtifact[]
-): RuleArtifact[] => {
+  existingArtifacts: DashboardArtifact[]
+): DashboardArtifact[] => {
   const existingIdByDashboardId = new Map<string, string>();
   for (const artifact of existingArtifacts) {
-    const dashboardId = getDashboardId(artifact);
-    if (dashboardId) {
-      existingIdByDashboardId.set(dashboardId, artifact.id);
-    }
+    existingIdByDashboardId.set(artifact.data.dashboardId, artifact.id);
   }
 
   const seen = new Set<string>();
-  const dashboards: RuleArtifact[] = [];
+  const dashboards: DashboardArtifact[] = [];
   for (const dashboardId of dashboardIds) {
     if (seen.has(dashboardId)) {
       continue;
     }
     seen.add(dashboardId);
     dashboards.push({
-      id: existingIdByDashboardId.get(dashboardId) ?? `${DASHBOARD_ARTIFACT_TYPE}-${uuidv4()}`,
+      id: resolveArtifactId(DASHBOARD_ARTIFACT_TYPE, existingIdByDashboardId.get(dashboardId)),
       type: DASHBOARD_ARTIFACT_TYPE,
       data: { dashboardId },
     });
@@ -384,10 +382,19 @@ export const executeRuleOperations = async (
 
       case 'set_dashboards': {
         const existingArtifacts = next.artifacts ?? [];
-        const otherArtifacts = existingArtifacts.filter(
-          (artifact) => artifact.type !== DASHBOARD_ARTIFACT_TYPE
+        const otherArtifacts: RuleArtifact[] = [];
+        const existingDashboardArtifacts: DashboardArtifact[] = [];
+        for (const artifact of existingArtifacts) {
+          if (isDashboardArtifact(artifact)) {
+            existingDashboardArtifacts.push(artifact);
+          } else {
+            otherArtifacts.push(artifact);
+          }
+        }
+        const dashboardArtifacts = toDashboardArtifacts(
+          op.dashboard_ids,
+          existingDashboardArtifacts
         );
-        const dashboardArtifacts = toDashboardArtifacts(op.dashboard_ids, existingArtifacts);
         const artifacts = [...otherArtifacts, ...dashboardArtifacts];
         if (artifacts.length > MAX_RULE_ARTIFACTS) {
           throw new RuleOperationValidationError(
