@@ -54,49 +54,16 @@ export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, Sto
 export type LegacySignal = Omit<SignalEntry, 'verdict'> & {
   verdict?: SignalVerdict;
   confirmed?: boolean;
-  verification?: {
-    assessment?: 'active' | 'recovered' | 'non_incident' | 'inconclusive' | 'not_checked';
-  };
-};
-
-const legacyAssessmentToVerdict: Record<
-  NonNullable<LegacySignal['verification']>['assessment'] & string,
-  SignalVerdict
-> = {
-  active: 'confirms',
-  recovered: 'refutes',
-  non_incident: 'refutes',
-  inconclusive: 'inconclusive',
-  not_checked: 'not_checked',
 };
 
 // TODO: Remove this function once old signals are replaced with the new signal schema
 export const normalizeLegacyVerdict = (signal: LegacySignal): SignalEntry => {
   if (signal.verdict !== undefined) return signal as SignalEntry;
 
-  const { confirmed: _confirmed, verification, ...normalizedSignal } = signal;
-  // Assessment-derived verdict is only valid when evidence supports it — confirms/refutes
-  // require result: 'found'; fall through to the evidence-based branch otherwise.
-  const rawVerdictFromAssessment =
-    verification?.assessment !== undefined
-      ? legacyAssessmentToVerdict[verification.assessment]
-      : undefined;
-  const evidenceResult = signal.evidence?.result;
-  let assessmentIsValid = true;
-  if (rawVerdictFromAssessment === 'confirms' || rawVerdictFromAssessment === 'refutes') {
-    assessmentIsValid = evidenceResult === 'found';
-  } else if (rawVerdictFromAssessment === 'not_checked') {
-    assessmentIsValid = signal.evidence == null;
-  } else if (rawVerdictFromAssessment === 'inconclusive') {
-    assessmentIsValid = evidenceResult !== 'found';
-  }
-  const verdictFromAssessment = assessmentIsValid ? rawVerdictFromAssessment : undefined;
-
+  const { confirmed, ...normalizedSignal } = signal;
   const verdict =
-    verdictFromAssessment ??
-    // retro-compat: `confirmed` was a boolean field that was replaced with `verification.assessment`
-    (signal.confirmed === true && signal.evidence?.result === 'found' ? 'confirms' : undefined) ??
-    (signal.confirmed === false && signal.evidence?.result === 'found' ? 'refutes' : undefined) ??
+    (confirmed === true && signal.evidence?.result === 'found' ? 'confirms' : undefined) ??
+    (confirmed === false && signal.evidence?.result === 'found' ? 'refutes' : undefined) ??
     (signal.evidence === undefined || signal.evidence === null
       ? 'not_checked'
       : signal.evidence.result === 'found'
