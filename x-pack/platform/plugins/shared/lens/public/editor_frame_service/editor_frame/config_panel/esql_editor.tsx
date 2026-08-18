@@ -278,6 +278,7 @@ export function ESQLEditor({
         queryStats={esqlQueryStats}
         closeFlyout={closeFlyout}
         panelId={panelId}
+        layerId={layerId}
         attributes={attributes}
         parentApi={parentApi}
       />
@@ -325,7 +326,7 @@ type InnerEditorProps = Simplify<
     adHocDataViews: DataViewSpec[];
     esqlVariables: ESQLControlVariable[] | undefined;
     queryStats?: ESQLQueryStats;
-  } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'closeFlyout'>
+  } & Pick<LayerPanelProps, 'attributes' | 'parentApi' | 'panelId' | 'layerId' | 'closeFlyout'>
 >;
 
 function InnerESQLEditor({
@@ -336,6 +337,7 @@ function InnerESQLEditor({
   attributes,
   parentApi,
   panelId,
+  layerId,
   closeFlyout,
   setQuery,
   isVisualizationLoading,
@@ -350,6 +352,7 @@ function InnerESQLEditor({
   const { onSaveControl, onCancelControl } = useESQLVariables({
     parentApi,
     panelId,
+    layerId,
     attributes,
     closeFlyout,
   });
