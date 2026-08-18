@@ -26,7 +26,8 @@ export function ApmTimeRangeMetadataContextProvider({ children }: { children?: R
   const { query } = useApmParams('/*');
 
   const kuery = 'kuery' in query && query.kuery ? query.kuery : '';
-  const serviceGroupId = 'serviceGroup' in query && query.serviceGroup ? query.serviceGroup : undefined;
+  const serviceGroupId =
+    'serviceGroup' in query && query.serviceGroup ? query.serviceGroup : undefined;
 
   const range =
     'rangeFrom' in query && 'rangeTo' in query

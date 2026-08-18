@@ -530,13 +530,29 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('returns metric sources with docs when the service group kuery matches existing data', async () => {
-          const response = await getTimeRangeMetadata({ start, end, serviceGroupId: matchingGroupId });
-          expect(response.sources.filter((s) => s.hasDocs && s.documentType !== ApmDocumentType.TransactionEvent).length).to.be.greaterThan(0);
+          const response = await getTimeRangeMetadata({
+            start,
+            end,
+            serviceGroupId: matchingGroupId,
+          });
+          expect(
+            response.sources.filter(
+              (s) => s.hasDocs && s.documentType !== ApmDocumentType.TransactionEvent
+            ).length
+          ).to.be.greaterThan(0);
         });
 
         it('returns no metric sources with docs when the service group kuery matches nothing', async () => {
-          const response = await getTimeRangeMetadata({ start, end, serviceGroupId: nonexistentGroupId });
-          expect(response.sources.filter((s) => s.hasDocs && s.documentType !== ApmDocumentType.TransactionEvent)).to.eql([]);
+          const response = await getTimeRangeMetadata({
+            start,
+            end,
+            serviceGroupId: nonexistentGroupId,
+          });
+          expect(
+            response.sources.filter(
+              (s) => s.hasDocs && s.documentType !== ApmDocumentType.TransactionEvent
+            )
+          ).to.eql([]);
         });
       });
 
