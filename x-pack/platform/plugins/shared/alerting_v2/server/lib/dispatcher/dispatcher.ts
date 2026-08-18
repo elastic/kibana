@@ -5,21 +5,10 @@
  * 2.0.
  */
 
-import { inject, injectable } from 'inversify';
-import { v4 as uuidV4 } from 'uuid';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
-import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
-import type { DispatcherExecutionParams, DispatcherExecutionResult } from './types';
-import { toAction } from './steps/store_actions_step';
-import {
-  OVERLAP_WINDOW_MINUTES,
-  MAX_WINDOW_MINUTES,
-  SETTLE_BUFFER_SECONDS,
-  TICK_DEADLINE_MS,
-  STUCK_TICK_LIMIT,
-  PRE_FETCH_STUCK_ADVANCE_LAG_MS,
-} from './constants';
+import { v4 as uuidV4 } from 'uuid';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -27,6 +16,21 @@ import {
 } from '../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../services/storage_service/tokens';
+import {
+  MAX_WINDOW_MINUTES,
+  OVERLAP_WINDOW_MINUTES,
+  PRE_FETCH_STUCK_ADVANCE_LAG_MS,
+  SETTLE_BUFFER_SECONDS,
+  STUCK_TICK_LIMIT,
+  TICK_DEADLINE_MS,
+} from './constants';
+import { DispatcherPipeline, type DispatcherPipelineContract } from './execution_pipeline';
+import { toAction } from './steps/store_actions_step';
+import type {
+  DispatcherExecutionParams,
+  DispatcherExecutionResult,
+  DispatcherPipelineInput,
+} from './types';
 import { computeNextWatermark } from './watermark';
 
 const NEVER_ABORTED = new AbortController().signal;
@@ -37,18 +41,24 @@ export interface DispatcherServiceContract {
 
 @injectable()
 export class DispatcherService implements DispatcherServiceContract {
+  private readonly parentLogger: LoggerServiceContract;
+
   constructor(
     @inject(DispatcherPipeline) private readonly pipeline: DispatcherPipelineContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
-  ) {}
+    @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract,
+    @inject(LoggerServiceToken) logger: LoggerServiceContract
+  ) {
+    this.parentLogger = logger.forSubsystem('dispatcher');
+  }
 
   public async run({
     eventWatermark,
     stuckTicks = 0,
     signal = NEVER_ABORTED,
+    taskId,
   }: DispatcherExecutionParams): Promise<DispatcherExecutionResult> {
     const startedAt = new Date();
+    const logger = this.parentLogger.withLabels({ task_id: taskId });
 
     const isValidDate = (d: Date | undefined): d is Date =>
       d instanceof Date && !Number.isNaN(d.getTime());
@@ -57,11 +67,11 @@ export class DispatcherService implements DispatcherServiceContract {
       const code = eventWatermark
         ? ALERTING_LOG_CODES.DISPATCHER_INVALID_WATERMARK
         : ALERTING_LOG_CODES.DISPATCHER_COLD_START;
-      this.logger.warn({
+      logger.warn({
         code,
         message: () =>
           eventWatermark
-            ? `Dispatcher: eventWatermark is Invalid Date; falling back to cold start ` +
+            ? `eventWatermark is Invalid Date; falling back to cold start ` +
               `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`
             : `Dispatcher: no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
               `Rule events older than that will not be dispatched.`,
@@ -78,9 +88,10 @@ export class DispatcherService implements DispatcherServiceContract {
     const windowEnd = maxEnd < settled ? maxEnd : settled;
 
     if (windowEnd <= windowStart) {
-      // Degenerate: watermark is ahead of now − settle (e.g. right after cold start with a fast
-      // clock). Skip the scan and hold the watermark to avoid a regress.
-      this.logger.debug({
+      // Degenerate: watermark is future-dated relative to now − settle. Only reachable via a
+      // persisted watermark that is ahead of the current clock — clock skew between Kibana nodes
+      // or corrupt task state. Skip the scan and hold the watermark to avoid a regress.
+      logger.debug({
         message: () =>
           `Dispatcher: windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
           `(${windowStart.toISOString()}); skipping scan.`,
@@ -127,7 +138,7 @@ export class DispatcherService implements DispatcherServiceContract {
     }
 
     try {
-      const input = {
+      const input: DispatcherPipelineInput = {
         startedAt,
         eventWatermark: resolvedWatermark,
         windowStart,
@@ -135,19 +146,19 @@ export class DispatcherService implements DispatcherServiceContract {
         executionUuid,
         signal: tickController.signal,
       };
-      const pipelineResult = await this.pipeline.execute(input);
+      const pipelineResult = await this.pipeline.execute(input, logger);
 
       if (pipelineResult.haltReason === 'aborted') {
         if (deadlineController.signal.aborted) {
-          this.logger.warn({
+          logger.warn({
             code: ALERTING_LOG_CODES.DISPATCHER_TICK_DEADLINE_EXCEEDED,
             message: () =>
-              `Dispatcher: tick deadline (${TICK_DEADLINE_MS}ms) exceeded; pipeline stopped early. ` +
+              `tick deadline (${TICK_DEADLINE_MS}ms) exceeded; pipeline stopped early. ` +
               `Watermark is safe.`,
           });
         } else {
-          this.logger.debug({
-            message: () => `Dispatcher: pipeline aborted by Task Manager signal.`,
+          logger.debug({
+            message: () => `pipeline aborted by Task Manager signal.`,
           });
         }
       }
@@ -158,12 +169,12 @@ export class DispatcherService implements DispatcherServiceContract {
 
       // Per-tick observability. All fields are lazy so the string is never built
       // at production log levels where debug is off.
-      this.logger.debug({
+      logger.debug({
         message: () => {
           const watermarkLagMs = startedAt.getTime() - nextWatermark.getTime();
           const windowSpanMs = windowEnd.getTime() - windowStart.getTime();
           return [
-            'Dispatcher tick:',
+            'tick:',
             `halt_reason=${pipelineResult.haltReason ?? 'completed'}`,
             `watermark_lag_ms=${watermarkLagMs}`,
             `window_span_ms=${windowSpanMs}`,
@@ -188,10 +199,10 @@ export class DispatcherService implements DispatcherServiceContract {
             const clampedEscapeTarget = new Date(
               Math.max(input.windowEnd.getTime(), resolvedWatermark.getTime())
             );
-            this.logger.error({
+            logger.error({
               code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE,
               message: () =>
-                `Dispatcher: escape hatch triggered but pipeline stopped before FetchEpisodesStep ` +
+                `escape hatch triggered but pipeline stopped before FetchEpisodesStep ` +
                 `(lag: ${lagMs}ms > ${MAX_WINDOW_MINUTES}m). Force-advancing to ` +
                 `${clampedEscapeTarget.toISOString()}; unread episodes in this window are skipped.`,
               error: new Error(`Pre-fetch watermark stuck at ${resolvedWatermark.toISOString()}`),
@@ -204,10 +215,10 @@ export class DispatcherService implements DispatcherServiceContract {
             };
           }
 
-          this.logger.warn({
+          logger.warn({
             code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK,
             message: () =>
-              `Dispatcher: escape hatch triggered but pipeline stopped before FetchEpisodesStep ` +
+              `escape hatch triggered but pipeline stopped before FetchEpisodesStep ` +
               `(lag: ${lagMs}ms). Holding watermark at ${resolvedWatermark.toISOString()} ` +
               `and resetting stuck counter.`,
           });
@@ -230,10 +241,10 @@ export class DispatcherService implements DispatcherServiceContract {
           Math.max(escapeTarget.getTime(), resolvedWatermark.getTime())
         );
 
-        this.logger.error({
+        logger.error({
           code: ALERTING_LOG_CODES.DISPATCHER_WATERMARK_STUCK,
           message: () =>
-            `Dispatcher: watermark stuck for ${STUCK_TICK_LIMIT} consecutive ticks ` +
+            `watermark stuck for ${STUCK_TICK_LIMIT} consecutive ticks ` +
             `(lag: ${lagMs}ms, blocking episodes: ${blockingEpisodes.length}, ` +
             `truncated: ${truncated}). ` +
             `Force-recording as unmatched and advancing to ${clampedEscapeTarget.toISOString()}.`,
@@ -256,11 +267,11 @@ export class DispatcherService implements DispatcherServiceContract {
           });
         } catch (writeErr) {
           const err = isError(writeErr) ? writeErr : new Error(String(writeErr));
-          this.logger.error({
+          logger.error({
             error: err,
             code: ALERTING_LOG_CODES.DISPATCHER_ESCAPE_HATCH_WRITE_FAILED,
             message: () =>
-              `Dispatcher: escape hatch bulkIndexDocs failed; holding watermark so ` +
+              `escape hatch bulkIndexDocs failed; holding watermark so ` +
               `episodes will be retried. ${err.message}`,
           });
           // Do not advance: the records were not written, so dedup marks are absent.

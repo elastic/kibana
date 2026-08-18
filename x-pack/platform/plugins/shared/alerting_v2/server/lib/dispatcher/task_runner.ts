@@ -42,6 +42,7 @@ export class DispatcherTaskRunner {
       eventWatermark: state.eventWatermark ? new Date(state.eventWatermark) : undefined,
       stuckTicks: state.stuckTicks ?? 0,
       signal,
+      taskId: taskInstance.id,
     };
   }
 

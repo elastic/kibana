@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Headers, FakeRawRequest } from '@kbn/core-http-server';
+import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
@@ -19,22 +19,18 @@ import type {
 } from '@kbn/workflows-management-plugin/server';
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../../errors/error_codes';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
+  ActionGroup,
+  ActionGroupId,
+  ActionPolicyWorkflowPayload,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  ActionGroup,
-  ActionGroupId,
-  ActionPolicyDestination,
-  ActionPolicyWorkflowPayload,
   DispatchFailure,
 } from '../types';
-import { DISPATCH_CHUNK_SIZE } from '../constants';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 
@@ -74,12 +70,14 @@ export class DispatchStep implements DispatcherStep {
   public readonly name = 'dispatch';
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(WorkflowsManagementApiToken)
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { dispatch = [], policies } = state;
     const { signal } = state.input;
 
@@ -98,7 +96,7 @@ export class DispatchStep implements DispatcherStep {
     for (const group of dispatch) {
       const apiKey = policies?.get(group.policyId)?.apiKey;
       if (!apiKey) {
-        this.recordMissingApiKey(group, dispatchFailures);
+        this.recordMissingApiKey(group, dispatchFailures, logger);
         continue;
       }
       pushMapList(groupsByApiKey, apiKey, group);
@@ -116,7 +114,8 @@ export class DispatchStep implements DispatcherStep {
         groups,
         workflowsBySpace,
         failedSpaces,
-        dispatchFailures
+        dispatchFailures,
+        logger
       );
       const request = this.craftFakeRequest(apiKey);
       for (let offset = 0; offset < pending.length; offset += DISPATCH_CHUNK_SIZE) {
@@ -127,7 +126,8 @@ export class DispatchStep implements DispatcherStep {
           pending.slice(offset, offset + DISPATCH_CHUNK_SIZE),
           request,
           dispatchedExecutions,
-          dispatchFailures
+          dispatchFailures,
+          logger
         );
       }
     }
@@ -135,9 +135,13 @@ export class DispatchStep implements DispatcherStep {
     return done();
   }
 
-  private recordMissingApiKey(group: ActionGroup, dispatchFailures: DispatchFailure[]): void {
+  private recordMissingApiKey(
+    group: ActionGroup,
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
+  ): void {
     const message = `No API key found for policy ${group.policyId}, skipping dispatch of group ${group.id}`;
-    this.logger.warn({
+    logger.warn({
       message: () => message,
       code: ALERTING_LOG_CODES.DISPATCH_POLICY_MISSING_API_KEY,
       labels: { group_id: group.id, policy_id: group.policyId },
@@ -179,7 +183,8 @@ export class DispatchStep implements DispatcherStep {
     groups: ActionGroup[],
     workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>,
     failedSpaces: Map<string, Error>,
-    dispatchFailures: DispatchFailure[]
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
   ): PendingSchedule[] {
     const pending: PendingSchedule[] = [];
 
@@ -187,7 +192,7 @@ export class DispatchStep implements DispatcherStep {
       const prefetchError = failedSpaces.get(group.spaceId);
       if (prefetchError) {
         for (const destination of workflowDestinations(group)) {
-          this.recordScheduleError(group, destination.id, prefetchError, dispatchFailures);
+          this.recordScheduleError(group, destination.id, prefetchError, dispatchFailures, logger);
         }
         continue;
       }
@@ -202,7 +207,8 @@ export class DispatchStep implements DispatcherStep {
             DISPATCH_FAILURE_REASONS.WORKFLOW_NOT_FOUND,
             ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
             `Workflow ${destination.id} not found, skipping dispatch for group ${group.id}`,
-            dispatchFailures
+            dispatchFailures,
+            logger
           );
           continue;
         }
@@ -213,7 +219,8 @@ export class DispatchStep implements DispatcherStep {
             DISPATCH_FAILURE_REASONS.WORKFLOW_DISABLED,
             ALERTING_LOG_CODES.DISPATCH_WORKFLOW_DISABLED,
             `Workflow ${destination.id} is disabled, enable it to dispatch for group ${group.id}`,
-            dispatchFailures
+            dispatchFailures,
+            logger
           );
           continue;
         }
@@ -234,9 +241,10 @@ export class DispatchStep implements DispatcherStep {
     reason: DispatchFailureReason,
     code: AlertingV2LogCode,
     message: string,
-    dispatchFailures: DispatchFailure[]
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
   ): void {
-    this.logger.warn({
+    logger.warn({
       message: () => message,
       code,
       labels: { group_id: group.id, workflow_id: workflowId },
@@ -248,9 +256,10 @@ export class DispatchStep implements DispatcherStep {
     group: ActionGroup,
     workflowId: string,
     error: Error,
-    dispatchFailures: DispatchFailure[]
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
   ): void {
-    this.logger.error({
+    logger.error({
       error,
       code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
       labels: {
@@ -296,7 +305,8 @@ export class DispatchStep implements DispatcherStep {
     chunk: PendingSchedule[],
     request: KibanaRequest,
     dispatchedExecutions: Map<ActionGroupId, string[]>,
-    dispatchFailures: DispatchFailure[]
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
   ): Promise<void> {
     try {
       const results: BulkScheduleWorkflowResult =
@@ -305,12 +315,24 @@ export class DispatchStep implements DispatcherStep {
           request
         );
       for (let i = 0; i < chunk.length; i++) {
-        this.applyScheduleResult(chunk[i], results[i], dispatchedExecutions, dispatchFailures);
+        this.applyScheduleResult(
+          chunk[i],
+          results[i],
+          dispatchedExecutions,
+          dispatchFailures,
+          logger
+        );
       }
     } catch (err) {
       const error = toError(err);
       for (const pending of chunk) {
-        this.recordScheduleError(pending.group, pending.workflowId, error, dispatchFailures);
+        this.recordScheduleError(
+          pending.group,
+          pending.workflowId,
+          error,
+          dispatchFailures,
+          logger
+        );
       }
     }
   }
@@ -319,7 +341,8 @@ export class DispatchStep implements DispatcherStep {
     pending: PendingSchedule,
     result: BulkScheduleWorkflowResult[number] | undefined,
     dispatchedExecutions: Map<ActionGroupId, string[]>,
-    dispatchFailures: DispatchFailure[]
+    dispatchFailures: DispatchFailure[],
+    logger: LoggerServiceContract
   ): void {
     if (result?.status === 'scheduled' && result.workflowExecutionId) {
       pushMapList(dispatchedExecutions, pending.group.id, result.workflowExecutionId);
@@ -331,7 +354,8 @@ export class DispatchStep implements DispatcherStep {
         pending.group,
         pending.workflowId,
         new Error(result.error.message),
-        dispatchFailures
+        dispatchFailures,
+        logger
       );
       return;
     }
@@ -342,7 +366,8 @@ export class DispatchStep implements DispatcherStep {
       DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
       `Workflow ${pending.workflowId} scheduling returned no execution id for group ${pending.group.id}`,
-      dispatchFailures
+      dispatchFailures,
+      logger
     );
   }
 

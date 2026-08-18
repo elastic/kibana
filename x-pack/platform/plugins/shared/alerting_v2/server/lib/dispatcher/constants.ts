@@ -29,7 +29,6 @@ export const SETTLE_BUFFER_SECONDS = 5;
  * Number of consecutive ticks in which the watermark must not advance before
  * the escape hatch fires. After this many stuck ticks the dispatcher writes
  * terminal `unmatched` records for the blocking episodes and force-advances.
- * Each tick is ~5 s, so 10 ticks ≈ 50 s of stall.
  */
 export const STUCK_TICK_LIMIT = 10;
 

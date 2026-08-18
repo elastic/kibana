@@ -7,8 +7,8 @@
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 import type { DispatcherServiceContract } from './dispatcher';
-import { DispatcherTaskRunner } from './task_runner';
 import { createDispatcherPipelineInput } from './fixtures/test_utils';
+import { DispatcherTaskRunner } from './task_runner';
 
 const createMockPipelineResult = () => ({
   completed: true,
@@ -75,6 +75,8 @@ describe('DispatcherTaskRunner', () => {
 
       const [params] = dispatcherService.run.mock.calls[0];
       expect(params.stuckTicks).toBe(0);
+      expect(params.signal).toBe(signal);
+      expect(params.taskId).toBe(taskInstance.id);
     });
 
     it('returns updated eventWatermark and stuckTicks in state', async () => {
