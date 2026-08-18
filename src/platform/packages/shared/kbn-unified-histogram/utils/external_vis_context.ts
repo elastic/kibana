@@ -181,6 +181,10 @@ export function deriveLensSuggestionFromLensAttributes({
   try {
     if (externalVisContext.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion) {
       // should be based on same query
+      // Note: for text-based (ES|QL) Lens attributes `state.query` is a copy of
+      // the layer query (`datasourceStates.textBased.layers[id].query`, which
+      // `injectESQLQueryIntoLensLayers` treats as authoritative); it is only
+      // used here as a staleness check for the customized vis context.
       if (queryParams && !isEqual(externalVisContext.attributes?.state?.query, queryParams.query)) {
         return undefined;
       }

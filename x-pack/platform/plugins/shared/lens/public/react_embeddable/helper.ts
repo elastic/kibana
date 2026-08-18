@@ -130,6 +130,12 @@ export async function deserializeState(
   return newState;
 }
 
+/**
+ * A document is text-based (ES|QL) when `state.query` holds an aggregate
+ * query. `state.query` is dual-role (see `LensDocument['state']['query']`):
+ * for text-based documents it is a copy of the authoritative layer query in
+ * `state.datasourceStates.textBased.layers[id].query`.
+ */
 export function isTextBasedLanguage(state: LensRuntimeState) {
   return isOfAggregateQueryType(state.attributes?.state.query);
 }

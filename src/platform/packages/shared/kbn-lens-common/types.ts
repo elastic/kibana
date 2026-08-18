@@ -414,6 +414,26 @@ export interface LensDocument {
   state: {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
+    /**
+     * Semantically overloaded field with two unrelated roles:
+     *
+     * 1. Form-based documents (`Query`, KQL/Lucene): a chart-scoped filter.
+     *    Authored via the query bar of the full-frame editor (not editable in
+     *    the inline flyout), persisted with the visualization, and AND-ed with
+     *    the dashboard query/filters at render time (see
+     *    `getMergedSearchContext`). It narrows every form-based layer of the
+     *    chart. Introduced by https://github.com/elastic/kibana/pull/43865.
+     *
+     * 2. Text-based documents (`AggregateQuery`, ES|QL): a copy of the data
+     *    definition. The authoritative query lives on the text-based
+     *    datasource layers (`datasourceStates.textBased.layers[id].query`);
+     *    this field duplicates it for consumers that expect a single query
+     *    (language badge, ES|QL gating, Discover vis-context comparison). It
+     *    is stripped from the execution search context before rendering (see
+     *    `getExecutionSearchContext`) and never filters anything. Retrofitted
+     *    by https://github.com/elastic/kibana/pull/140469 under the
+     *    assumption of exactly one query per document.
+     */
     query: Query | AggregateQuery;
     globalPalette?: {
       activePaletteId: string;

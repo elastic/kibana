@@ -72,6 +72,11 @@ export function initializeSearchContext(
     injectFilterReferences(attributes.state.filters, attributes.references)
   );
 
+  // `state.query` is dual-role (see `LensDocument['state']['query']`): the
+  // chart-scoped KQL/Lucene filter for form-based documents, or a copy of the
+  // ES|QL layer query for text-based documents. Consumers of `query$` (e.g.
+  // ES|QL controls variable detection, project routing below) rely on the
+  // text-based copy staying in sync with the layer query.
   const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(attributes.state.query);
 
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);

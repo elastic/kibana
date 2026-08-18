@@ -125,6 +125,10 @@ export function mergeToNewDoc(
     references,
     state: {
       visualization: persistibleVisualizationState,
+      // Dual-role field (see `LensDocument['state']['query']`): the editor's
+      // query bar state — a chart-scoped KQL/Lucene filter for form-based
+      // documents, or the ES|QL query for text-based documents (where the
+      // layers in `datasourceStates.textBased` hold the authoritative copy).
       query,
       filters: [...persistableFilters, ...adHocFilters],
       datasourceStates: persistibleDatasourceStates,
