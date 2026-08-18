@@ -102,9 +102,11 @@ export const createActionPolicySmlType = ({
   },
 
   /**
-   * Action policies are gated by the Alerting v2 action-policies read API
-   * privilege — the same gate the action policies API checks before
-   * surfacing policy data.
+   * Action policies are gated by the dedicated `ai_index:action_policy/read` action, not by the
+   * Alerting v2 action-policies read API action the action policies API itself checks. The
+   * Alerting v2 feature grants it by declaring `aiIndex: { read: [ACTION_POLICY_SML_TYPE] }`
+   * (see `common/feature_privileges.ts`), so the `kiType` here must stay in step with that
+   * declaration.
    */
   getPermissions: () => kibanaPermissions({ kiType: ACTION_POLICY_SML_TYPE }),
 

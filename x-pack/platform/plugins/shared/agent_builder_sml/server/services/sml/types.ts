@@ -162,24 +162,25 @@ export interface SmlTypeDefinition {
   ) => Promise<AttachmentInput<string, unknown> | undefined>;
 
   /**
-   * Compute the {@link SmlPermissions} that gate access to the entry for the
-   * given `originId`. Called by the indexer for every entry it stamps.
+   * Compute the raw Kibana actions ({@link SmlPermissionsInput}) that gate access to the entry
+   * for the given `originId`. Called by the indexer for every entry it stamps.
    *
-   * Authoritative when defined. `SmlEntry` does not carry a `permissions`
-   * field. Types that need permission shapes the built-in helpers do not
-   * cover should still implement this directly (returning a fully-shaped
-   * {@link SmlPermissions}).
+   * Returns actions only — the indexer owns the stored shape, grouping them per space into
+   * {@link SmlPermissions}. Implementations never construct that shape themselves.
+   *
+   * Authoritative when defined. `SmlEntry` does not carry a `permissions` field.
    *
    * Omit when the type wraps a resource that is intentionally public within
    * the space (e.g. taxonomy entries, public schema docs). The indexer then
-   * stamps an empty `SmlPermissions`, which the read-path security filter
-   * treats as "no privileges required". A type that wraps a sensitive
+   * stamps no privilege elements at all, which the read-path security filter
+   * treats as "no actions required". A type that wraps a sensitive
    * resource MUST implement this hook — there is no other way to attach an
    * access-control gate to its entry.
    *
-   * For Kibana saved-object-backed types, prefer the
-   * `kibanaSavedObjectPermissions` helper over hand-writing the privilege
-   * string.
+   * Prefer the `kibanaPermissions` helper over hand-writing the action string. Its `kiType` MUST
+   * match the KI type the owning feature declares in `aiIndex: { read: [...] }` — which is the
+   * SML type id, not the underlying saved object type. A mismatch produces an action no feature
+   * privilege ever grants, silently hiding every entry of the type from every user.
    */
   getPermissions?: (
     originId: string,

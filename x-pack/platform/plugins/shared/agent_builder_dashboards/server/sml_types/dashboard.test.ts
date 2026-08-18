@@ -210,9 +210,10 @@ describe('dashboardSmlType', () => {
         content: '...',
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
-        spaces: ['default'],
         permissions: {
-          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          kibana: {
+            privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
+          },
         },
         ingestion_method: 'crawled',
       },
@@ -271,9 +272,10 @@ describe('dashboardSmlType', () => {
         content: '...',
         created_at: '2025-01-01T00:00:00.000Z',
         updated_at: '2025-01-01T00:00:00.000Z',
-        spaces: ['default'],
         permissions: {
-          kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+          kibana: {
+            privileges: [{ space: 'default', name: ['ai_index:dashboard/read'], count: 1 }],
+          },
         },
         ingestion_method: 'crawled',
       },
@@ -306,7 +308,10 @@ describe('dashboardSmlType', () => {
     ]);
   });
 
-  it('getPermissions returns the saved_object:dashboard/get privilege', () => {
+  it('getPermissions returns the ai_index:dashboard/read action', () => {
+    // The kiType MUST be the SML type id. It happens to equal the `dashboard` saved object type
+    // here, but the Dashboard feature declares `aiIndex: { read: ['dashboard'] }`
+    // (oss_features.ts) and it is that declaration this must match — not the saved object type.
     const dashboardSmlType = createDashboardSmlType({
       getDashboardClient: async () => createDashboardClient(),
     });
@@ -318,7 +323,7 @@ describe('dashboardSmlType', () => {
     } as never);
 
     expect(permissions).toEqual({
-      kibana: { privileges: [{ name: 'saved_object:dashboard/get' }] },
+      kibana: { privileges: { name: 'ai_index:dashboard/read' } },
     });
   });
 

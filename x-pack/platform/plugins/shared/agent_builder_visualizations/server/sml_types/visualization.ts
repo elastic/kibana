@@ -17,7 +17,6 @@ import {
 } from '../lens_reference';
 
 const VISUALIZATION_SML_TYPE = 'visualization';
-const VISUALIZATION_SAVED_OBJECT_TYPE = 'lens';
 
 const getChartType = (attributes: LensAttributes): string => {
   return attributes.visualizationType ?? '';
@@ -72,8 +71,7 @@ export const visualizationSmlType: SmlTypeDefinition = {
     }
   },
 
-  getPermissions: () =>
-    kibanaPermissions({ kiType: VISUALIZATION_SAVED_OBJECT_TYPE }),
+  getPermissions: () => kibanaPermissions({ kiType: VISUALIZATION_SML_TYPE }),
 
   toAttachment: async (item, context) => {
     const resolveResult = await context.savedObjectsClient.resolve('lens', item.origin_id ?? '');

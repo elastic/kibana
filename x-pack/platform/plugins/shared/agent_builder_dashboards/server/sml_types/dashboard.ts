@@ -19,7 +19,6 @@ import type {
 } from '@kbn/dashboard-plugin/server';
 
 const DASHBOARD_SML_TYPE = 'dashboard';
-const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 interface CreateDashboardSmlTypeOptions {
   getDashboardClient: () => Promise<DashboardPluginStart['client']>;
@@ -109,8 +108,7 @@ export const createDashboardSmlType = ({
     }
   },
 
-  getPermissions: () =>
-    kibanaPermissions({ kiType: DASHBOARD_SAVED_OBJECT_TYPE }),
+  getPermissions: () => kibanaPermissions({ kiType: DASHBOARD_SML_TYPE }),
 
   toAttachment: async (item, context) => {
     try {

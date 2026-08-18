@@ -27,24 +27,27 @@ import type { SmlService } from './types';
  * The crawler indexes ALL content across ALL spaces into the SML system index.
  * Access control is enforced at **query time**, not index time:
  *
- *  1. `searchSml` enforces authorization via a `terms_set` Query DSL filter
- *     pushed into the ES|QL `_query` API's `filter` parameter. Composite
- *     `space|action` tokens encode both the space and action, so a single
- *     filter handles both dimensions.
- *  2. `autocompleteSml` applies the same `terms_set` filter in the
- *     Elasticsearch `_search` query. Both paths read as `asInternalUser`
- *     (ES DLS does not apply); authorization is application-side.
- *     ES-side DLS (elasticsearch#155197) protects direct ES access by
- *     third parties using the same token semantics.
- *  3. `checkItemsAccess` (used by `sml_attach`) performs explicit privilege
- *     checks against each item's composite permission tokens before allowing
- *     attachment resolution.
+ *  1. `searchSml` enforces authorization via a `nested` Query DSL filter pushed
+ *     into the ES|QL `_query` API's `filter` parameter. `permissions.kibana.privileges`
+ *     is a `nested` field holding one element per space (`{ space, name[], count }`),
+ *     so a single filter covers both dimensions: the element's `space` term scopes
+ *     it, and a `terms_set` against that element's own `count` requires ALL of its
+ *     actions. Nesting is what keeps the two bound together — matches cannot
+ *     accumulate across spaces.
+ *  2. `autocompleteSml` applies the same filter in the Elasticsearch `_search`
+ *     query. Both paths read as `asInternalUser` (ES DLS does not apply);
+ *     authorization is application-side. ES-side DLS (elasticsearch#156990)
+ *     protects direct ES access by third parties using the same semantics.
+ *  3. `checkItemsAccess` (used by `sml_attach`) applies the same rule in memory
+ *     — existential across a document's space elements, universal within one —
+ *     before allowing attachment resolution.
  *
  * When the security plugin is absent (development/testing), all results are
  * returned unfiltered, following the standard Kibana open-access convention.
  *
- * SML type implementers are responsible for setting correct `permissions`
- * arrays in their `getSmlEntry` hook (see `SmlTypeDefinition`).
+ * SML type implementers are responsible for returning the correct actions from
+ * their `getPermissions` hook (see `SmlTypeDefinition`); the indexer groups them
+ * by space into the stored shape.
  */
 export const SML_CRAWLER_TASK_TYPE = 'agent_builder_sml:sml_crawler';
 

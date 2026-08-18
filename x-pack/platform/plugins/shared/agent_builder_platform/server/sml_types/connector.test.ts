@@ -383,13 +383,14 @@ describe('connectorSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the saved_object:action/get Kibana privilege', () => {
-      // The actions plugin gates connector reads on saved-object read access for the `action`
-      // type — `saved_object:action/get` is the correct privilege string. Pinning it here
-      // so a regression to a non-existent privilege name fails loudly.
+    it('returns the ai_index:connector/read action', () => {
+      // The kiType MUST be the SML type id, not the `action` saved object type: the Actions
+      // feature declares `aiIndex: { read: ['connector'] }` (actions/server/feature.ts), and only
+      // the action that declaration produces is ever granted to a user. Stamping
+      // `ai_index:action/read` here would make every connector entry invisible to everyone.
       const permissions = connectorSmlType.getPermissions!('conn-1', createContext() as never);
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: 'saved_object:action/get' }] },
+        kibana: { privileges: { name: 'ai_index:connector/read' } },
       });
     });
   });

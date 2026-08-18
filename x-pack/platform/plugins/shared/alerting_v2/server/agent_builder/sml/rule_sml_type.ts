@@ -90,8 +90,10 @@ export const createRuleSmlType = ({
   },
 
   /**
-   * Rules are gated by the Alerting v2 rules read API privilege — the same
-   * gate the rules API checks before surfacing rule data.
+   * Rules are gated by the dedicated `ai_index:rule/read` action, not by the Alerting v2 rules
+   * read API action the rules API itself checks. The Alerting v2 feature grants it by declaring
+   * `aiIndex: { read: [RULE_SML_TYPE] }` (see `common/feature_privileges.ts`), so the `kiType`
+   * here must stay in step with that declaration.
    */
   getPermissions: () => kibanaPermissions({ kiType: RULE_SML_TYPE }),
 

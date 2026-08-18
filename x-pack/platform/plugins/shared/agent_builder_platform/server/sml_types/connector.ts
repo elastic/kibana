@@ -101,7 +101,7 @@ export const createConnectorSmlType = (deps: ConnectorSmlTypeDeps): SmlTypeDefin
 
     requiredHiddenTypes: ['action'],
 
-    getPermissions: () => kibanaPermissions({ kiType: 'action' }),
+    getPermissions: () => kibanaPermissions({ kiType: CONNECTOR_SML_TYPE }),
 
     toAttachment: async (item, context) => {
       try {
