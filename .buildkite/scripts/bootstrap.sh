@@ -19,10 +19,14 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.kibana/node_modules as a starting point"
     mv ~/.kibana/node_modules ./
   fi
-  if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
-    echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
-    mv ~/.kibana/.yarn-local-mirror ./
-  fi
+fi
+
+if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
+  echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
+  mv ~/.kibana/.yarn-local-mirror ./
+fi
+
+if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
   # Check if there's a cache artifact uploaded from a previous step
   if [[ -z "${KBN_BOOTSTRAP_NO_PREBUILT:-}" ]]; then
     if download_tmp_artifact moon-cache.tar.zst "$HOME" "$BUILDKITE_BUILD_ID" false; then
