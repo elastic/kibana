@@ -19,15 +19,29 @@ import {
   REVIEW_STEP,
   SCHEMA_MAPPINGS_STEP,
 } from './dataset_wizard_constants';
+import {
+  DATASET_WIZARD_FLOW_VARIANT_1,
+  isDatasetWizardFlow3,
+  type DatasetWizardFlowVariant,
+} from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
 import type { DatasetWizardStep } from './dataset_wizard_step_url';
 
-const LOGISTICS_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = [
+const LOGISTICS_STEP_FIELDS_WITHOUT_REGION: Array<FieldPath<DatasetWizardFormValues>> = [
   'data_source',
   'name',
   'resource',
+];
+
+const LOGISTICS_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = [
+  ...LOGISTICS_STEP_FIELDS_WITHOUT_REGION,
   'region',
 ];
+
+const getLogisticsStepFields = (
+  flowVariant: DatasetWizardFlowVariant
+): Array<FieldPath<DatasetWizardFormValues>> =>
+  isDatasetWizardFlow3(flowVariant) ? LOGISTICS_STEP_FIELDS_WITHOUT_REGION : LOGISTICS_STEP_FIELDS;
 
 const GLUE_STEP_FIELDS: Array<FieldPath<DatasetWizardFormValues>> = [
   'glue_database',
@@ -42,12 +56,16 @@ const isKnownFormat = (format: string): format is Exclude<DatasetFormatFormValue
   format === 'orc';
 
 export const getAdditionalSettingsStepFields = (
-  values: DatasetWizardFormValues
+  values: DatasetWizardFormValues,
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
 ): Array<FieldPath<DatasetWizardFormValues>> => {
   const { format, error_mode: errorMode } = values.settings;
+  const regionFields: Array<FieldPath<DatasetWizardFormValues>> = isDatasetWizardFlow3(flowVariant)
+    ? ['region']
+    : [];
 
   if (!isKnownFormat(format)) {
-    return [];
+    return regionFields;
   }
 
   const fields = DATASET_SETTINGS_FIELD_IDS.filter(
@@ -55,7 +73,7 @@ export const getAdditionalSettingsStepFields = (
       isFieldVisibleForFormat(fieldId, format) && isFieldVisibleForErrorMode(fieldId, errorMode)
   ).map((fieldId) => `settings.${fieldId}` as FieldPath<DatasetWizardFormValues>);
 
-  return fields;
+  return [...regionFields, ...fields];
 };
 
 export const getSchemaMappingsStepFields = (
@@ -70,19 +88,20 @@ export const getSchemaMappingsStepFields = (
 
 export const getWizardStepFields = (
   step: DatasetWizardStep,
-  values: DatasetWizardFormValues
+  values: DatasetWizardFormValues,
+  flowVariant: DatasetWizardFlowVariant = DATASET_WIZARD_FLOW_VARIANT_1
 ): Array<FieldPath<DatasetWizardFormValues>> => {
   switch (step) {
     case LOGISTICS_STEP:
-      return LOGISTICS_STEP_FIELDS;
+      return getLogisticsStepFields(flowVariant);
     case ADDITIONAL_SETTINGS_STEP:
-      return getAdditionalSettingsStepFields(values);
+      return getAdditionalSettingsStepFields(values, flowVariant);
     case SCHEMA_MAPPINGS_STEP:
       return getSchemaMappingsStepFields(values);
     case REVIEW_STEP:
       return [
-        ...LOGISTICS_STEP_FIELDS,
-        ...getAdditionalSettingsStepFields(values),
+        ...getLogisticsStepFields(flowVariant),
+        ...getAdditionalSettingsStepFields(values, flowVariant),
         ...getSchemaMappingsStepFields(values),
       ];
   }
@@ -99,27 +118,47 @@ export const getWizardStepsThrough = (targetStep: DatasetWizardStep): DatasetWiz
   return steps.filter((step) => step <= targetStep);
 };
 
+const getFieldsToValidateForStep = (
+  step: DatasetWizardStep,
+  targetStep: DatasetWizardStep,
+  values: DatasetWizardFormValues,
+  flowVariant: DatasetWizardFlowVariant
+): Array<FieldPath<DatasetWizardFormValues>> => {
+  const fields = getWizardStepFields(step, values, flowVariant);
+
+  // Flow 3 keeps region on additional settings. Validate it when leaving that
+  // step, not when first landing on it (URL sync / stepper).
+  if (
+    isDatasetWizardFlow3(flowVariant) &&
+    step === ADDITIONAL_SETTINGS_STEP &&
+    targetStep === ADDITIONAL_SETTINGS_STEP
+  ) {
+    return fields.filter((field) => field !== 'region');
+  }
+
+  return fields;
+};
+
 export const findFirstInvalidWizardStep = async ({
   targetStep,
   values,
   trigger,
+  flowVariant = DATASET_WIZARD_FLOW_VARIANT_1,
 }: {
   targetStep: DatasetWizardStep;
   values: DatasetWizardFormValues;
   trigger: (
     fields: Array<FieldPath<DatasetWizardFormValues>>
   ) => Promise<boolean>;
+  flowVariant?: DatasetWizardFlowVariant;
 }): Promise<DatasetWizardStep | undefined> => {
   for (const step of getWizardStepsThrough(targetStep)) {
-    if (step === LOGISTICS_STEP) {
-      const isValid = await trigger(getWizardStepFields(step, values));
-      if (!isValid) {
-        return LOGISTICS_STEP;
-      }
+    const fields = getFieldsToValidateForStep(step, targetStep, values, flowVariant);
+    if (fields.length === 0) {
       continue;
     }
 
-    const isValid = await trigger(getWizardStepFields(step, values));
+    const isValid = await trigger(fields);
     if (!isValid) {
       return step;
     }

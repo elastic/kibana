@@ -55,6 +55,7 @@ import { SchemaMappingsStep } from './steps/schema_mappings_step';
 import { ReviewStep } from './steps/review_step';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
+  isDatasetWizardFlow3,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import { TestConfigurationPreview } from './test_configuration_preview';
@@ -107,6 +108,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
   const additionalSettingsSyncedResourceRef = useRef<string | null>(null);
   const testConfigLoadingTimeoutRef = useRef<number | undefined>();
   const isFlow1 = flowVariant === DATASET_WIZARD_FLOW_VARIANT_1;
+  const isFlow3 = isDatasetWizardFlow3(flowVariant);
 
   const {
     control,
@@ -200,7 +202,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     const resource = watchedResource?.trim() ?? '';
     const region = watchedRegion?.trim() ?? '';
 
-    if (!dataSource || !name || !resource || !region) {
+    if (!dataSource || !name || !resource || (!isFlow3 && !region)) {
       return false;
     }
 
@@ -209,7 +211,15 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     }
 
     return validateResourceForDataSource(resource, dataSource, dataSources) === true;
-  }, [dataSources, validateName, watchedDataSource, watchedName, watchedRegion, watchedResource]);
+  }, [
+    dataSources,
+    isFlow3,
+    validateName,
+    watchedDataSource,
+    watchedName,
+    watchedRegion,
+    watchedResource,
+  ]);
 
   useEffect(() => {
     if (!isFlow1) {
@@ -274,6 +284,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         targetStep: stepFromUrl,
         values,
         trigger,
+        flowVariant,
       });
 
       if (isCancelled) {
@@ -296,7 +307,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     return () => {
       isCancelled = true;
     };
-  }, [getValues, history, location.pathname, location.search, trigger]);
+  }, [flowVariant, getValues, history, location.pathname, location.search, trigger]);
 
   const isStepDisabled = useCallback(
     (step: DatasetWizardStep) => !logisticsStepComplete && currentStep < step,
@@ -328,6 +339,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
         targetStep,
         values,
         trigger,
+        flowVariant,
       });
 
       if (firstInvalidStep !== undefined) {
@@ -337,7 +349,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
 
       goToStep(targetStep);
     },
-    [currentStep, getValues, goToStep, trigger]
+    [currentStep, flowVariant, getValues, goToStep, trigger]
   );
 
   const stepDefinitions = useMemo(
@@ -389,7 +401,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
     setSaveError(undefined);
 
     const values = getValues();
-    const fields = getWizardStepFields(currentStep, values);
+    const fields = getWizardStepFields(currentStep, values, flowVariant);
     const isValid = await trigger(fields, { shouldFocus: true });
 
     if (!isValid) {
@@ -433,6 +445,7 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
       targetStep: REVIEW_STEP,
       values,
       trigger,
+      flowVariant,
     });
 
     if (firstInvalidStep !== undefined) {
@@ -467,6 +480,8 @@ export const DatasetWizard: FunctionComponent<DatasetWizardProps> = ({
           dataSources={dataSources}
           onConnectNewDataSource={openCreateDataSourceFlyout}
           validateName={validateName}
+          setValue={setValue}
+          flowVariant={flowVariant}
         />
       </div>
       <div hidden={currentStep !== ADDITIONAL_SETTINGS_STEP}>

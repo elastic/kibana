@@ -217,6 +217,11 @@ export const datasetWizardStrings = {
       defaultMessage: 'Additional settings (optional)',
     }),
 
+  additionalSettingsTitleFlow3: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.additionalSettingsTitleFlow3', {
+      defaultMessage: 'Additional settings',
+    }),
+
   additionalSettingsDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.additionalSettingsDescription', {
       defaultMessage: 'You can further customize your setup of your dataset',
@@ -230,6 +235,11 @@ export const datasetWizardStrings = {
   commonSettingsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.commonSettingsTitle', {
       defaultMessage: 'Common settings',
+    }),
+
+  advancedSettingsTitleFlow3: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsTitleFlow3', {
+      defaultMessage: 'Advanced settings',
     }),
 
   delimiterOptionComma: () =>
@@ -290,6 +300,22 @@ export const datasetWizardStrings = {
   schemaMappingsDescription: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsDescription', {
       defaultMessage: 'Optional definition of how documents should be indexed',
+    }),
+
+  schemaMappingsDescriptionFlow3: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsDescriptionFlow3', {
+      defaultMessage:
+        'Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. If you want to preview the schema and customize it, you can click below to pull the inferred schema and edit it if needed.',
+    }),
+
+  pullInferredSchemaButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.pullInferredSchemaButton', {
+      defaultMessage: 'Pull inferred schema',
+    }),
+
+  resetInferredSchemaButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.resetInferredSchemaButton', {
+      defaultMessage: 'Reset to inferred schema',
     }),
 
   schemaMappingModeLegend: () =>

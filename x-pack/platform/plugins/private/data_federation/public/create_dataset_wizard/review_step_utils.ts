@@ -40,10 +40,13 @@ import { datasetWizardStrings } from './dataset_wizard_i18n';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
+  isDatasetWizardFlow3,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
+import { countModifiedAutomaticFieldTypesForFlow3 } from './automatic_field_types_utils';
 import { inferFormatFromResource } from './infer_format_from_resource';
+import { getTestConfigurationPreviewFields } from './test_configuration_preview_utils';
 
 export type ReviewSettingBadge = 'default' | 'modified';
 
@@ -355,8 +358,16 @@ export const getReviewSchemaMappingRows = (
     });
   }
 
-  if (values.schema_mapping_mode === 'automatic' && flowVariant === DATASET_WIZARD_FLOW_VARIANT_2) {
-    const modifiedFieldTypeCount = Object.keys(values.automatic_field_types ?? {}).length;
+  if (values.schema_mapping_mode === 'automatic' && flowVariant !== DATASET_WIZARD_FLOW_VARIANT_1) {
+    const modifiedFieldTypeCount = isDatasetWizardFlow3(flowVariant)
+      ? countModifiedAutomaticFieldTypesForFlow3(
+          getTestConfigurationPreviewFields({
+            ...values,
+            schema_mapping_mode: 'automatic',
+          }),
+          values.automatic_field_types ?? {}
+        )
+      : Object.keys(values.automatic_field_types ?? {}).length;
 
     if (modifiedFieldTypeCount > 0) {
       rows.push({

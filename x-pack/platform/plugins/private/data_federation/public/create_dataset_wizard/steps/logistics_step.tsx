@@ -15,16 +15,18 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { Control, Validate } from 'react-hook-form';
+import type { Control, UseFormSetValue, Validate } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
 import { DATA_SOURCE_TYPES_TO_HELP_TEXT } from '../../../common';
 import { DataSourceSuperSelect } from '../data_source_super_select';
-import { RegionSuperSelect } from '../region_super_select';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
+import { isDatasetWizardFlow3, type DatasetWizardFlowVariant } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { inferRegionFromResource } from '../infer_region_from_resource';
 import { validateResourceForDataSource } from '../validate_dataset_resource';
+import { WizardRegionField } from '../wizard_region_field';
 
 const trimRequired =
   (message: string) =>
@@ -36,6 +38,8 @@ export interface LogisticsStepProps {
   dataSources: DataSource[];
   onConnectNewDataSource: () => void;
   validateName: Validate<string, DatasetWizardFormValues>;
+  setValue: UseFormSetValue<DatasetWizardFormValues>;
+  flowVariant: DatasetWizardFlowVariant;
 }
 
 export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
@@ -43,6 +47,8 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
   dataSources,
   onConnectNewDataSource,
   validateName,
+  setValue,
+  flowVariant,
 }) => {
   const { field: dataSourceField, fieldState: dataSourceFieldState } = useController({
     name: 'data_source',
@@ -80,13 +86,7 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
     },
   });
 
-  const { field: regionField, fieldState: regionFieldState } = useController({
-    name: 'region',
-    control,
-    rules: {
-      validate: trimRequired(datasetWizardStrings.regionRequired()),
-    },
-  });
+  const showRegion = !isDatasetWizardFlow3(flowVariant);
 
   const onDataSourceChange = useCallback(
     (selectedValue: string) => {
@@ -94,6 +94,22 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
     },
     [dataSourceField]
   );
+
+  const onResourceBlur = useCallback(() => {
+    resourceField.onBlur();
+
+    const selectedDataSource = dataSources.find(
+      (dataSource) => dataSource.name === dataSourceField.value
+    );
+    if (selectedDataSource && selectedDataSource.type !== 's3') {
+      return;
+    }
+
+    const inferredRegion = inferRegionFromResource(resourceField.value);
+    if (inferredRegion) {
+      setValue('region', inferredRegion, { shouldDirty: true, shouldValidate: true });
+    }
+  }, [dataSourceField.value, dataSources, resourceField, setValue]);
 
   const resourceHelpText = useMemo(() => {
     const selected = dataSources.find((ds) => ds.name === dataSourceField.value);
@@ -184,31 +200,13 @@ export const LogisticsStep: FunctionComponent<LogisticsStepProps> = ({
             isInvalid={Boolean(resourceFieldState.error)}
             value={resourceField.value}
             onChange={(e) => resourceField.onChange(e.target.value)}
+            onBlur={onResourceBlur}
             name={resourceField.name}
             inputRef={resourceField.ref}
           />
         </EuiFormRow>
 
-        <EuiFormRow
-          label={datasetWizardStrings.regionLabel()}
-          fullWidth
-          isInvalid={Boolean(regionFieldState.error)}
-          error={regionFieldState.error?.message}
-        >
-          <RegionSuperSelect
-            data-test-subj="datasetWizardRegion"
-            fullWidth
-            aria-label={datasetWizardStrings.regionLabel()}
-            placeholder={datasetWizardStrings.regionPlaceholder()}
-            searchPlaceholder={datasetWizardStrings.regionSearchPlaceholder()}
-            isInvalid={Boolean(regionFieldState.error)}
-            value={regionField.value || undefined}
-            onChange={regionField.onChange}
-            onBlur={regionField.onBlur}
-            name={regionField.name}
-            buttonRef={regionField.ref}
-          />
-        </EuiFormRow>
+        {showRegion ? <WizardRegionField control={control} /> : null}
       </EuiForm>
     </>
   );

@@ -15,6 +15,7 @@ import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
+  DATASET_WIZARD_FLOW_VARIANT_3,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from '../../create_dataset_flyout/dataset_settings_options';
@@ -50,6 +51,29 @@ const TestHarness = ({
 };
 
 describe('AdditionalSettingsStep', () => {
+  it('shows region before format only in flow 3', () => {
+    const { getByTestId, queryByTestId, rerender } = render(
+      <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_2} />
+    );
+
+    expect(queryByTestId('datasetWizardRegion')).toBeNull();
+    expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
+
+    rerender(
+      <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+    );
+
+    const region = getByTestId('datasetWizardRegion');
+    const format = getByTestId('datasetWizardSettingsFormat');
+    expect(region.compareDocumentPosition(format) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
+      'Additional settings'
+    );
+    expect(getByTestId('datasetWizardAdditionalSettingsStep')).not.toHaveTextContent(
+      'Additional settings (optional)'
+    );
+  });
+
   it('renders format field and accordions when format is auto-detected', async () => {
     const { getByTestId, getByText } = render(
       <TestHarness resource="s3://bucket/data.csv" />
@@ -343,5 +367,75 @@ describe('AdditionalSettingsStep', () => {
 
     expect(queryByTestId('datasetWizardSettingsDelimiter')).toBeNull();
     expect(queryByTestId('datasetWizardAccordionColumnsAndValues')).toBeNull();
+  });
+
+  describe('flow 3 settings layout', () => {
+    it('uses common panel and single advanced accordion instead of grouped accordions', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3CommonSettingsPanel')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardFlow3AdvancedSettingsAccordion')).toBeInTheDocument();
+      });
+
+      expect(queryByTestId('datasetWizardCommonSettingsPanel')).toBeNull();
+      expect(queryByTestId('datasetWizardAccordionStructureAndSchema')).toBeNull();
+      expect(queryByTestId('datasetWizardAccordionTextParsing')).toBeNull();
+    });
+
+    it('shows expanded csv common fields in flow 3', async () => {
+      const { getByTestId } = render(
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+      );
+
+      await waitFor(() => {
+        const commonPanel = getByTestId('datasetWizardFlow3CommonSettingsPanel');
+        expect(commonPanel).toContainElement(getByTestId('datasetWizardSettingsDelimiter'));
+        expect(commonPanel).toContainElement(getByTestId('datasetWizardSettingsMode'));
+        expect(commonPanel).toContainElement(getByTestId('datasetWizardSettingsHeaderRow'));
+        expect(commonPanel).toContainElement(getByTestId('datasetWizardSettingsDatetimeFormat'));
+        expect(commonPanel).toContainElement(getByTestId('datasetWizardSettingsEncoding'));
+        expect(commonPanel).not.toContainElement(getByTestId('datasetWizardSettingsQuote'));
+      });
+    });
+
+    it('promotes max error fields into common settings for ndjson when error mode is not fail_fast', async () => {
+      const Harness = () => {
+        const syncedResourceRef = useRef<string | null>(null);
+        const { control, getValues, setValue } = useForm<DatasetWizardFormValues>({
+          defaultValues: {
+            ...emptyDatasetWizardFormValues(),
+            settings: {
+              ...emptyDatasetWizardFormValues().settings,
+              format: 'ndjson',
+              error_mode: 'skip_row',
+            },
+          },
+        });
+
+        return (
+          <EuiProvider>
+            <AdditionalSettingsStep
+              control={control}
+              getValues={getValues}
+              setValue={setValue}
+              resource="s3://bucket/data.ndjson"
+              syncedResourceRef={syncedResourceRef}
+              isEditMode={true}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+            />
+          </EuiProvider>
+        );
+      };
+
+      const { getByTestId } = render(<Harness />);
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsMaxErrors')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardSettingsMaxErrorRatio')).toBeInTheDocument();
+      });
+    });
   });
 });

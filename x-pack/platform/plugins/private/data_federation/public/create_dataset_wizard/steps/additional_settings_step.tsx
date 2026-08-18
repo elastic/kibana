@@ -13,6 +13,7 @@ import { useController } from 'react-hook-form';
 
 import { DatasetSettingsAccordions } from '../../create_dataset_flyout/dataset_settings_accordions';
 import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_settings_common_panel';
+import { DatasetSettingsFlow3SettingsPanel } from '../../create_dataset_flyout/dataset_settings_flow3_settings_panel';
 import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
 import { FORMAT_SUPER_SELECT_OPTIONS } from '../../create_dataset_flyout/dataset_settings_options';
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
@@ -22,10 +23,12 @@ import { AutoDetectedSuffix } from '../auto_detected_suffix';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
+  isDatasetWizardFlow3,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { inferFormatFromResource } from '../infer_format_from_resource';
+import { WizardRegionField } from '../wizard_region_field';
 
 const FORMAT_VALUES: DatasetFormatFormValue[] = ['csv', 'tsv', 'parquet', 'ndjson', 'orc'];
 
@@ -179,7 +182,11 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
   return (
     <div data-test-subj="datasetWizardAdditionalSettingsStep">
       <EuiTitle size="s">
-        <h3>{datasetWizardStrings.additionalSettingsTitle()}</h3>
+        <h3>
+          {isDatasetWizardFlow3(flowVariant)
+            ? datasetWizardStrings.additionalSettingsTitleFlow3()
+            : datasetWizardStrings.additionalSettingsTitle()}
+        </h3>
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText size="s" color="subdued">
@@ -188,6 +195,8 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       <EuiSpacer size="l" />
 
       <EuiForm component="div">
+        {isDatasetWizardFlow3(flowVariant) ? <WizardRegionField control={control} /> : null}
+
         <EuiFormRow label={createDatasetFlyoutStrings.settingsFormatLabel()} fullWidth>
           <EuiSuperSelect
             options={formatSuperSelectOptions}
@@ -205,20 +214,30 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
         </EuiFormRow>
 
         {hasFormatSelected ? (
-          <>
-            <DatasetSettingsCommonPanel
+          isDatasetWizardFlow3(flowVariant) ? (
+            <DatasetSettingsFlow3SettingsPanel
               control={control}
               format={format}
-              panelTitle={datasetWizardStrings.commonSettingsTitle()}
+              commonSettingsTitle={datasetWizardStrings.commonSettingsTitle()}
+              advancedSettingsTitle={datasetWizardStrings.advancedSettingsTitleFlow3()}
               testSubjPrefix="datasetWizard"
             />
-            <DatasetSettingsAccordions
-              control={control}
-              format={format}
-              accordionTitles={accordionTitles}
-              testSubjPrefix="datasetWizard"
-            />
-          </>
+          ) : (
+            <>
+              <DatasetSettingsCommonPanel
+                control={control}
+                format={format}
+                panelTitle={datasetWizardStrings.commonSettingsTitle()}
+                testSubjPrefix="datasetWizard"
+              />
+              <DatasetSettingsAccordions
+                control={control}
+                format={format}
+                accordionTitles={accordionTitles}
+                testSubjPrefix="datasetWizard"
+              />
+            </>
+          )
         ) : null}
       </EuiForm>
     </div>

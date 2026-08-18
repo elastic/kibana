@@ -11,17 +11,47 @@ import { fireEvent, render } from '@testing-library/react';
 import { useForm } from 'react-hook-form';
 
 import type { DataSource } from '../../../common';
+import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
+import { emptyCreateDatasetSettingsFormValues } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
+import {
+  countModifiedAutomaticFieldTypesForFlow3,
+  seedAutomaticFieldTypesFromInferred,
+} from '../automatic_field_types_utils';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
+import { getTestConfigurationPreviewFields } from '../test_configuration_preview_utils';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
+  DATASET_WIZARD_FLOW_VARIANT_3,
+  type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { SchemaMappingsStep } from './schema_mappings_step';
 
 jest.mock('./manual_schema_mappings_editor', () => ({
   ManualSchemaMappingsEditor: () => (
     <div data-test-subj="datasetWizardManualSchemaMappingsEditor">Manual mappings editor</div>
+  ),
+}));
+
+jest.mock('./inferred_schema_mappings_editor', () => ({
+  InferredSchemaMappingsEditor: ({
+    hasSchemaModifications,
+    onReset,
+  }: {
+    hasSchemaModifications: boolean;
+    onReset: () => void;
+  }) => (
+    <div data-test-subj="datasetWizardInferredSchemaMappingsEditor">
+      <button
+        type="button"
+        data-test-subj="datasetWizardResetInferredSchema"
+        disabled={!hasSchemaModifications}
+        onClick={onReset}
+      >
+        Reset to inferred schema
+      </button>
+    </div>
   ),
 }));
 
@@ -50,7 +80,7 @@ const TestHarness = ({
   dataSource?: string;
   dataSourceRegion?: string;
   defaultValues?: DatasetWizardFormValues;
-  flowVariant?: typeof DATASET_WIZARD_FLOW_VARIANT_1 | typeof DATASET_WIZARD_FLOW_VARIANT_2;
+  flowVariant?: DatasetWizardFlowVariant;
 }) => {
   const { control } = useForm<DatasetWizardFormValues>({
     defaultValues: {
@@ -235,5 +265,90 @@ describe('SchemaMappingsStep flow 2', () => {
       'true'
     );
     expect(getByTestId('datasetWizardAutomaticSchemaSampleTable')).toBeInTheDocument();
+  });
+});
+
+describe('SchemaMappingsStep flow 3', () => {
+  it('hides the schema mapping mode buttons and generates the inferred schema on CTA click', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestHarness
+        dataSources={[s3DataSource]}
+        dataSource="s3-source"
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+        defaultValues={{
+          ...emptyDatasetWizardFormValues(),
+          settings: {
+            ...emptyDatasetWizardFormValues().settings,
+            format: 'parquet',
+          },
+        }}
+      />
+    );
+
+    expect(queryByTestId('datasetWizardSchemaMappingModeButtonGroup')).toBeNull();
+    expect(queryByTestId('datasetWizardSchemaMappingModeAutomatic')).toBeNull();
+    expect(queryByTestId('datasetWizardSchemaMappingModeAwsGlueTable')).toBeNull();
+    expect(getByTestId('datasetWizardSchemaMappingModeDescription')).toHaveTextContent(
+      'Optional definition of how documents should be indexed. Elastic infers the schema at query time by default.'
+    );
+    expect(queryByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeNull();
+    expect(queryByTestId('datasetWizardAutomaticSchemaSampleTable')).toBeNull();
+
+    fireEvent.click(getByTestId('datasetWizardPullInferredSchema'));
+
+    expect(queryByTestId('datasetWizardPullInferredSchema')).toBeNull();
+    expect(getByTestId('datasetWizardInferredSchemaMappingsEditor')).toBeInTheDocument();
+  });
+
+  it('resets schema edits back to the inferred baseline', () => {
+    const parquetSettings = applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'parquet');
+    const inferredFields = getTestConfigurationPreviewFields({
+      ...emptyDatasetWizardFormValues(),
+      settings: parquetSettings,
+      schema_mapping_mode: 'automatic',
+    });
+    const inferredFieldTypes = seedAutomaticFieldTypesFromInferred(inferredFields);
+
+    const Flow3ResetHarness = () => {
+      const { control, watch } = useForm<DatasetWizardFormValues>({
+        defaultValues: {
+          ...emptyDatasetWizardFormValues(),
+          settings: parquetSettings,
+          automatic_field_types: {
+            ...inferredFieldTypes,
+            message: 'keyword',
+          },
+        },
+      });
+
+      return (
+        <EuiProvider>
+          <SchemaMappingsStep
+            control={control}
+            dataSources={[s3DataSource]}
+            dataSource="s3-source"
+            dataSourceRegion=""
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+          />
+          <span data-test-subj="automaticFieldTypesValue">
+            {JSON.stringify(watch('automatic_field_types'))}
+          </span>
+        </EuiProvider>
+      );
+    };
+
+    const { getByTestId } = render(<Flow3ResetHarness />);
+
+    expect(getByTestId('datasetWizardResetInferredSchema')).not.toBeDisabled();
+
+    fireEvent.click(getByTestId('datasetWizardResetInferredSchema'));
+
+    expect(getByTestId('automaticFieldTypesValue')).toHaveTextContent(
+      JSON.stringify(inferredFieldTypes)
+    );
+    expect(getByTestId('datasetWizardResetInferredSchema')).toBeDisabled();
+    expect(
+      countModifiedAutomaticFieldTypesForFlow3(inferredFields, inferredFieldTypes)
+    ).toBe(0);
   });
 });
