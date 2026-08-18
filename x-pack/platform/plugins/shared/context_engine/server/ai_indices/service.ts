@@ -32,6 +32,9 @@ import { createAiIndexStorageClient } from './storage';
 const toAiIndexItem = (id: string, document: AiIndexDocument): AiIndexHttpItem => ({
   id,
   ...(document.description !== undefined && { description: document.description }),
+  ...(document.feedback_agent_id !== undefined && {
+    feedback_agent_id: document.feedback_agent_id,
+  }),
   managed: document.managed ?? false,
   dest: document.dest,
   automations: document.automations,
