@@ -11,9 +11,9 @@ import { type Container, ContainerModule } from 'inversify';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import {
   CoreStart,
+  CurrentUserProfileId,
   Request,
   UserProfileAccessor,
-  UserProfileIdAccessor,
 } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
@@ -66,21 +66,17 @@ describe('loadUserProfile', () => {
     expect(fork.get(UserProfileAccessor)).toBe(fork.get(UserProfileAccessor));
   });
 
-  it('should not retrieve the profile identifier when resolving the accessor', () => {
-    container.get(UserProfileIdAccessor);
-
-    expect(userProfile.getCurrentProfileId).not.toHaveBeenCalled();
-  });
-
-  it('should retrieve the profile identifier for the current request', async () => {
-    const userProfileIdAccessor = container.get(UserProfileIdAccessor);
-    await expect(userProfileIdAccessor()).resolves.toBe('jesuswr123');
+  it('should resolve the profile identifier for the current request', async () => {
+    await expect(container.getAsync(CurrentUserProfileId)).resolves.toBe('jesuswr123');
     expect(userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
   });
 
-  it('should create the profile identifier accessor only once per scope', () => {
+  it('should retrieve the profile identifier only once per scope', async () => {
     const fork = injection.fork();
 
-    expect(fork.get(UserProfileIdAccessor)).toBe(fork.get(UserProfileIdAccessor));
+    await expect(fork.getAsync(CurrentUserProfileId)).resolves.toBe('jesuswr123');
+    await expect(fork.getAsync(CurrentUserProfileId)).resolves.toBe('jesuswr123');
+
+    expect(userProfile.getCurrentProfileId).toHaveBeenCalledTimes(1);
   });
 });

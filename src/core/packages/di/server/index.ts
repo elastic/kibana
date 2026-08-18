@@ -39,8 +39,7 @@ export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycl
 export { AuditLogger, CurrentUser, RedactedSessionId } from './src/services/security';
 export { GlobalUiSettingsClient, UiSettingsClient } from './src/services/ui_settings';
 export {
+  CurrentUserProfileId,
   type IUserProfileAccessor,
-  type IUserProfileIdAccessor,
   UserProfileAccessor,
-  UserProfileIdAccessor,
 } from './src/services/user_profile';

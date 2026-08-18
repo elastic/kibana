@@ -26,12 +26,6 @@ export type IUserProfileAccessor = <D extends UserProfileData, L extends UserPro
 ) => Promise<UserProfileWithSecurity<D, L> | null>;
 
 /**
- * Retrieves the user profile identifier of the user of the current HTTP request or `null` if the profile is not available.
- * @public
- */
-export type IUserProfileIdAccessor = () => Promise<string | null>;
-
-/**
  * The accessor retrieving the user profile in the current HTTP request context.
  * @public
  */
@@ -39,8 +33,8 @@ export const UserProfileAccessor: ServiceToken<IUserProfileAccessor> =
   createToken('UserProfileAccessor');
 
 /**
- * The accessor retrieving the user profile identifier in the current HTTP request context.
+ * The user profile identifier of the user of the current HTTP request or `null` if the profile is not available.
  * @public
  */
-export const UserProfileIdAccessor: ServiceToken<IUserProfileIdAccessor> =
-  createToken('UserProfileIdAccessor');
+export const CurrentUserProfileId: ServiceToken<string | null> =
+  createToken('CurrentUserProfileId');

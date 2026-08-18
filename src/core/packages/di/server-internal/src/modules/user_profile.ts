@@ -12,10 +12,10 @@ import type { UserProfileData, UserProfileLabels } from '@kbn/core-user-profile-
 import { cacheInScope } from '@kbn/core-di-internal';
 import {
   CoreStart,
+  CurrentUserProfileId,
   type IUserProfileAccessor,
   Request,
   UserProfileAccessor,
-  UserProfileIdAccessor,
 } from '@kbn/core-di-server';
 
 export function loadUserProfile({ bind }: ContainerModuleLoadOptions): void {
@@ -31,11 +31,11 @@ export function loadUserProfile({ bind }: ContainerModuleLoadOptions): void {
     .inRequestScope()
     .onActivation(cacheInScope(UserProfileAccessor));
 
-  bind(UserProfileIdAccessor)
+  bind(CurrentUserProfileId)
     .toResolvedValue(
-      (userProfile, request) => () => userProfile.getCurrentProfileId({ request }),
+      (userProfile, request) => userProfile.getCurrentProfileId({ request }),
       [CoreStart('userProfile'), Request]
     )
     .inRequestScope()
-    .onActivation(cacheInScope(UserProfileIdAccessor));
+    .onActivation(cacheInScope(CurrentUserProfileId));
 }
