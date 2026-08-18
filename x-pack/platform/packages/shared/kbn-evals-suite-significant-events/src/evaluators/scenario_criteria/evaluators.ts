@@ -15,6 +15,12 @@ export interface CreateScenarioCriteriaLlmEvaluatorOptions<
   criteria?: EvaluationCriterion[];
   transformOutput?: (output: TTaskOutput) => TTaskOutput;
   name?: string;
+  /**
+   * Optional guard for outputs there is nothing to judge in. Return a reason to abstain
+   * (`score: null`) instead of asking the judge to score an empty output, which produces a
+   * low score that reads as poor quality rather than as a missing result.
+   */
+  skipWhen?: (output: TTaskOutput) => string | undefined;
 }
 
 /**
@@ -42,6 +48,7 @@ export const createScenarioCriteriaLlmEvaluator = <
   criteria,
   criteriaFn,
   transformOutput,
+  skipWhen,
 }: CreateScenarioCriteriaLlmEvaluatorOptions<TExample, TTaskOutput>): Evaluator<
   TExample,
   TTaskOutput
@@ -50,6 +57,12 @@ export const createScenarioCriteriaLlmEvaluator = <
   kind: 'LLM' as const,
   evaluate: async (params) => {
     const { input, output, expected, metadata } = params;
+
+    const skipReason = skipWhen?.(output);
+    if (skipReason) {
+      return { score: null, label: 'unavailable', explanation: skipReason };
+    }
+
     const resolvedCriteria =
       criteria ?? (expected as Record<string, unknown> | null)?.criteria ?? [];
 

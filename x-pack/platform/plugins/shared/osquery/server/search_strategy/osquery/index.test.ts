@@ -6,12 +6,14 @@
  */
 
 import { of, lastValueFrom } from 'rxjs';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 import type { StrategyRequestType } from '../../../common/search_strategy/osquery';
 import { Direction } from '../../../common/search_strategy';
 import type { ActionResultsStrategyResponse } from '../../../common/search_strategy';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import {
+  ACTIONS_INDEX,
   ACTION_RESPONSES_DATA_STREAM_INDEX,
   OSQUERY_INTEGRATION_NAME,
 } from '../../../common/constants';
@@ -45,12 +47,14 @@ describe('osquerySearchStrategyProvider space scoping', () => {
     activeSpaceId = 'default',
     actionsIndexExists = false,
     newDataStreamIndexExists = false,
+    cpsEnabled = false,
   }: {
     authorizedPrivileges?: string[];
     useRbac?: boolean;
     activeSpaceId?: string | null;
     actionsIndexExists?: boolean;
     newDataStreamIndexExists?: boolean;
+    cpsEnabled?: boolean;
   } = {}) => {
     const searchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
     const authorizedActions = new Set(authorizedPrivileges.map((privilege) => `api:${privilege}`));
@@ -102,7 +106,8 @@ describe('osquerySearchStrategyProvider space scoping', () => {
         },
       },
       service: { getActiveSpace },
-    } as unknown as Pick<OsqueryAppContext, 'security' | 'service'>;
+      cpsEnabled,
+    } as unknown as Pick<OsqueryAppContext, 'security' | 'service' | 'cpsEnabled'>;
 
     const provider = osquerySearchStrategyProvider(data, esClient, osqueryContext);
 
@@ -268,6 +273,56 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       ]);
     });
 
+    it('routes osquery result reads to the enhanced strategy when CPS is enabled', async () => {
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const { provider, searchMock, getSearchStrategy } = setup({ cpsEnabled: true });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await search(provider);
+
+      expect(getSearchStrategy).toHaveBeenCalled();
+      expect(searchMock).not.toHaveBeenCalled();
+      expect(enhancedSearchMock.mock.calls[0][0].params.index).toEqual([
+        `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
+      ]);
+    });
+
+    const actionsRequest = {
+      factoryQueryType: OsqueryQueries.actions,
+      kuery: '',
+      pagination: { activePage: 0, cursorStart: 0, querySize: 20 },
+      sort: { field: 'created_at', direction: Direction.desc },
+      spaceId: 'default',
+    } as StrategyRequestType<OsqueryQueries.actions>;
+
+    it('routes actions metadata reads to the enhanced strategy when CPS is enabled', async () => {
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const { provider, searchMock, getSearchStrategy } = setup({
+        cpsEnabled: true,
+        actionsIndexExists: true,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await lastValueFrom(provider.search(actionsRequest, {} as never, { request: {} } as never));
+
+      expect(getSearchStrategy).toHaveBeenCalled();
+      expect(searchMock).not.toHaveBeenCalled();
+      expect(enhancedSearchMock.mock.calls[0][0].params.index).toEqual(`${ACTIONS_INDEX}*`);
+    });
+
+    it('keeps the Fleet actions fallback on the internal-user search client when CPS is enabled', async () => {
+      const { provider, searchMock, getSearchStrategy } = setup({
+        cpsEnabled: true,
+        actionsIndexExists: false,
+      });
+
+      await lastValueFrom(provider.search(actionsRequest, {} as never, { request: {} } as never));
+
+      expect(searchMock).toHaveBeenCalled();
+      expect(getSearchStrategy).not.toHaveBeenCalled();
+      expect(searchMock.mock.calls[0][0].params.index).toEqual(AGENT_ACTIONS_INDEX);
+    });
+
     it('adds CCS-prefixed index targets when remote clusters are connected', async () => {
       (hasConnectedRemoteClusters as jest.Mock).mockResolvedValueOnce(true);
       const { provider, searchMock } = setup();
@@ -320,6 +375,23 @@ describe('osquerySearchStrategyProvider space scoping', () => {
 
     const legacyResponse = { rawResponse: { hits: { total: 3, hits: [{ _id: 'legacy' }] } } };
 
+    it('routes actionResults reads to the enhanced strategy when CPS is enabled', async () => {
+      const enhancedSearchMock = jest.fn().mockReturnValue(of(emptyRawResponse));
+      const { provider, searchMock, getSearchStrategy } = setup({
+        cpsEnabled: true,
+        actionsIndexExists: true,
+        newDataStreamIndexExists: true,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+
+      await lastValueFrom(
+        provider.search(actionResultsRequest, {} as never, { request: {} } as never)
+      );
+
+      expect(getSearchStrategy).toHaveBeenCalled();
+      expect(searchMock).not.toHaveBeenCalled();
+    });
+
     it('prefers the new data-stream response when it returns hits', async () => {
       const { provider, searchMock } = setup({ newDataStreamIndexExists: true });
       searchMock
@@ -347,6 +419,53 @@ describe('osquerySearchStrategyProvider space scoping', () => {
       )) as ActionResultsStrategyResponse;
 
       expect(searchMock).toHaveBeenCalledTimes(2);
+      expect(response.edges).toEqual([{ _id: 'legacy' }]);
+    });
+
+    it('queries the new data stream as the request user when CPS is enabled even if the origin index is absent', async () => {
+      const enhancedSearchMock = jest
+        .fn()
+        .mockReturnValue(
+          of({ rawResponse: { hits: { total: 5, hits: [{ _id: 'data-stream' }] } } })
+        );
+      const { provider, searchMock, getSearchStrategy } = setup({
+        cpsEnabled: true,
+        newDataStreamIndexExists: false,
+      });
+      getSearchStrategy.mockReturnValue({ search: enhancedSearchMock, cancel: jest.fn() });
+      searchMock.mockReturnValue(of({ rawResponse: { hits: { total: 0, hits: [] } } }));
+
+      const response = (await lastValueFrom(
+        provider.search(actionResultsRequest, {} as never, { request: {} } as never)
+      )) as ActionResultsStrategyResponse;
+
+      // With no osquery actions index on the origin, the legacy read resolves to the Fleet
+      // results index and is therefore pinned to the internal client. The data-stream read
+      // must still be selected independently, or reusing the legacy client would cancel
+      // fan-out for every result on a managing project.
+      expect(searchMock).toHaveBeenCalledTimes(1);
+      expect(String(searchMock.mock.calls[0][0].params.index)).toContain(
+        AGENT_ACTIONS_RESULTS_INDEX
+      );
+      expect(enhancedSearchMock).toHaveBeenCalledTimes(1);
+      expect(String(enhancedSearchMock.mock.calls[0][0].params.index)).toContain(
+        ACTION_RESPONSES_DATA_STREAM_INDEX
+      );
+      expect(response.edges).toEqual([{ _id: 'data-stream' }]);
+    });
+
+    it('skips the new data stream when CPS is disabled and the origin index is absent', async () => {
+      const { provider, searchMock } = setup({
+        cpsEnabled: false,
+        newDataStreamIndexExists: false,
+      });
+      searchMock.mockReturnValueOnce(of(legacyResponse));
+
+      const response = (await lastValueFrom(
+        provider.search(actionResultsRequest, {} as never, { request: {} } as never)
+      )) as ActionResultsStrategyResponse;
+
+      expect(searchMock).toHaveBeenCalledTimes(1);
       expect(response.edges).toEqual([{ _id: 'legacy' }]);
     });
   });

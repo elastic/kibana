@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Good integration test for a complex integrtaion. But the ui-based fixture creation should be replaced with an API-based fixture creation in Scout.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -82,6 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    // NOTE: Great candidate for an API-based fixture creation in Scout.
     const addUnlinkedSavedSearch = async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();

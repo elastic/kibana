@@ -39,6 +39,9 @@ const executionStatusSchema = schema.oneOf(
 const executionTypeSchema = schema.oneOf(
   ExecutionTypeValues.map((type) => schema.literal(type)) as [Type<ExecutionType>]
 );
+
+const EXECUTION_QUERY_PARAM_AVAILABILITY = { stability: 'stable', since: '9.5.0' } as const;
+
 export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: RouteDependencies) {
   router.versioned
     .get({
@@ -97,7 +100,10 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               ),
               concurrencyGroupKey: schema.maybe(
                 schema.string({
-                  meta: { description: 'Filter by evaluated concurrency group key.' },
+                  meta: {
+                    description: 'Filter by evaluated concurrency group key.',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                  },
                 })
               ),
               omitStepRuns: schema.maybe(
@@ -110,6 +116,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: {
                     description:
                       'Datemath lower bound for filtering executions by finishedAt (inclusive when parsed).',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                   },
                 })
               ),
@@ -118,6 +125,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: {
                     description:
                       'Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                   },
                 })
               ),
@@ -127,7 +135,10 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                     Type<WorkflowExecutionCollapseField>
                   ],
                   {
-                    meta: { description: 'Field to collapse execution results by.' },
+                    meta: {
+                      description: 'Field to collapse execution results by.',
+                      availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                    },
                   }
                 )
               ),
@@ -137,13 +148,19 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                     Type<WorkflowExecutionSortField>
                   ],
                   {
-                    meta: { description: 'Field to sort executions by.' },
+                    meta: {
+                      description: 'Field to sort executions by.',
+                      availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                    },
                   }
                 )
               ),
               sortOrder: schema.maybe(
                 schema.oneOf([schema.literal('asc'), schema.literal('desc')], {
-                  meta: { description: 'Sort order.' },
+                  meta: {
+                    description: 'Sort order.',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
+                  },
                 })
               ),
               page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number.' } })),
@@ -159,6 +176,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: {
                     description:
                       'Datemath lower bound for filtering executions by startedAt (inclusive when parsed).',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                   },
                 })
               ),
@@ -167,6 +185,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: {
                     description:
                       'Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).',
+                    availability: EXECUTION_QUERY_PARAM_AVAILABILITY,
                   },
                 })
               ),

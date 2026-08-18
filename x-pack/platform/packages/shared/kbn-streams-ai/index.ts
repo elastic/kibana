@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+export { getDiverseSampleDocuments } from './src/sampling/get_diverse_sample_documents';
 export { generateStreamDescription } from './src/description/generate_description';
-export { descriptionPrompt, overviewDescriptionPrompt } from './src/description/prompt';
+export { overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,
@@ -28,11 +29,15 @@ export {
   identifyKIQueries,
   DEFAULT_MAX_EXISTING_QUERIES_FOR_CONTEXT,
   type ExistingQuerySummary,
+  type QueryAttempt,
+  type QueryAttemptStatus,
+  type QueryAttemptFailureReason,
 } from './src/significant_events/identify_ki_queries';
 export {
   createDefaultSignificantEventsToolUsage,
   type SignificantEventsToolUsage,
 } from './src/significant_events/tools/tool_usage';
+export { QUERY_GENERATION_EXCLUDED_FEATURE_TYPES } from './src/significant_events/tools/features_tool';
 export { EMPTY_TOKENS, sumTokens } from './src/helpers/sum_tokens';
 export {
   identifyFeatures,
@@ -56,7 +61,7 @@ export type {
 
 export {
   searchKnowledgeIndicators,
-  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_LIMIT,
+  DEFAULT_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE,
 } from './src/knowledge_indicators/search';
 export {
   featureToKnowledgeIndicatorFeature,

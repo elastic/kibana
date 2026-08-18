@@ -3,6 +3,9 @@
 **If you're looking for available extension point definitions, they're located in the `Profile` interface
 in [`types.ts`](types.ts).**
 
+**If you're designing a new profile, see [`PRINCIPLES.md`](PRINCIPLES.md) for the principles that keep
+Discover feeling like Discover across profiles.**
+
 ## Summary
 
 The Discover context awareness framework allows Discover's UI and functionality to adapt to the surrounding context of

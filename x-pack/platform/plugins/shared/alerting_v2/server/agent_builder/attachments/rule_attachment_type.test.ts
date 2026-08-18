@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
+import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
+import Boom from '@hapi/boom';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type {
@@ -34,10 +36,10 @@ const baseRuleData: RuleAttachmentData = {
     breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
   },
   state_transition: null,
-  createdBy: 'elastic',
-  createdAt: '2026-04-01T00:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-04-10T00:00:00.000Z',
+  created_by: 'elastic',
+  created_at: '2026-04-01T00:00:00.000Z',
+  updated_by: 'elastic',
+  updated_at: '2026-04-10T00:00:00.000Z',
 };
 
 type RuleVersionedAttachment = VersionedAttachmentWithOrigin<
@@ -63,17 +65,25 @@ const buildVersionedAttachment = (
   ...overrides,
 });
 
+const SPACE_ID = 'default';
+
+const createResolveContext = (spaceId: string = SPACE_ID) => ({
+  ...agentBuilderMocks.attachments.createResolveContextMock(),
+  spaceId,
+});
+
 describe('createRuleAttachmentType', () => {
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
   let getRule: jest.Mock;
   let definition: AttachmentTypeDefinition<typeof RULE_ATTACHMENT_TYPE, RuleAttachmentData>;
 
   beforeEach(() => {
-    logger = loggingSystemMock.createLogger();
+    ({ loggerService, mockLogger } = createLoggerService());
     getRule = jest.fn();
     const rulesClient = { getRule } as unknown as RulesClient;
     definition = createRuleAttachmentType({
-      logger,
+      logger: loggerService,
       getRulesClient: () => rulesClient,
     });
   });
@@ -115,26 +125,40 @@ describe('createRuleAttachmentType', () => {
     it('returns rule data parsed against the schema', async () => {
       getRule.mockResolvedValueOnce(baseRuleData);
 
-      const result = await definition.resolve!(
-        'rule-1',
-        agentBuilderMocks.attachments.createResolveContextMock()
-      );
+      const result = await definition.resolve!('rule-1', createResolveContext());
 
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
       expect(result).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
     });
 
-    it('returns undefined and logs a warning when getRule throws', async () => {
-      getRule.mockRejectedValueOnce(new Error('not found'));
+    it('returns undefined without logging when getRule returns 404', async () => {
+      getRule.mockRejectedValueOnce(Boom.notFound('not found'));
 
-      const result = await definition.resolve!(
-        'rule-missing',
-        agentBuilderMocks.attachments.createResolveContextMock()
-      );
+      const result = await definition.resolve!('rule-missing', createResolveContext());
 
       expect(result).toBeUndefined();
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to resolve rule attachment for origin "rule-missing"')
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('returns undefined and logs a warning when getRule throws unexpectedly', async () => {
+      getRule.mockRejectedValueOnce(new Error('boom'));
+
+      const result = await definition.resolve!('rule-missing', createResolveContext());
+
+      expect(result).toBeUndefined();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to resolve rule attachment',
+        expect.objectContaining({
+          labels: {
+            rule_id: 'rule-missing',
+            space_id: SPACE_ID,
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_RESOLVE_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
       );
     });
   });
@@ -143,80 +167,82 @@ describe('createRuleAttachmentType', () => {
     it('returns false when origin_snapshot_at is missing', async () => {
       const attachment = buildVersionedAttachment({ origin_snapshot_at: undefined });
 
-      const result = await definition.isStale!(
-        attachment,
-        agentBuilderMocks.attachments.createResolveContextMock()
-      );
+      const result = await definition.isStale!(attachment, createResolveContext());
 
       expect(result).toBe(false);
       expect(getRule).not.toHaveBeenCalled();
     });
 
-    it('returns false when rule.updatedAt equals snapshot time', async () => {
-      getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-10T00:00:00.000Z' });
+    it('returns false when rule.updated_at equals snapshot time', async () => {
+      getRule.mockResolvedValueOnce({ ...baseRuleData, updated_at: '2026-04-10T00:00:00.000Z' });
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        agentBuilderMocks.attachments.createResolveContextMock()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
     });
 
-    it('returns false when rule.updatedAt is before snapshot time', async () => {
-      getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-09T00:00:00.000Z' });
+    it('returns false when rule.updated_at is before snapshot time', async () => {
+      getRule.mockResolvedValueOnce({ ...baseRuleData, updated_at: '2026-04-09T00:00:00.000Z' });
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        agentBuilderMocks.attachments.createResolveContextMock()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
     });
 
-    it('returns true when rule.updatedAt is after snapshot AND differs from latest version', async () => {
-      getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-20T00:00:00.000Z' });
+    it('returns true when rule.updated_at is after snapshot AND differs from latest version', async () => {
+      getRule.mockResolvedValueOnce({ ...baseRuleData, updated_at: '2026-04-20T00:00:00.000Z' });
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        agentBuilderMocks.attachments.createResolveContextMock()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(true);
     });
 
-    it('returns false when rule.updatedAt is after snapshot but matches latest version', async () => {
+    it('returns false when rule.updated_at is after snapshot but matches latest version', async () => {
       const sameUpdatedAt = '2026-04-15T00:00:00.000Z';
-      getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: sameUpdatedAt });
+      getRule.mockResolvedValueOnce({ ...baseRuleData, updated_at: sameUpdatedAt });
       const attachment = buildVersionedAttachment({
         versions: [
           {
             version: 1,
-            data: { ...baseRuleData, updatedAt: sameUpdatedAt },
+            data: { ...baseRuleData, updated_at: sameUpdatedAt },
             created_at: '2026-04-15T00:00:00.000Z',
           } as never,
         ],
       });
 
-      const result = await definition.isStale!(
-        attachment,
-        agentBuilderMocks.attachments.createResolveContextMock()
-      );
+      const result = await definition.isStale!(attachment, createResolveContext());
 
       expect(result).toBe(false);
+    });
+
+    it('returns false without logging when getRule returns 404', async () => {
+      getRule.mockRejectedValueOnce(Boom.notFound('not found'));
+
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
+
+      expect(result).toBe(false);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('returns false and logs a warning when getRule throws', async () => {
       getRule.mockRejectedValueOnce(new Error('boom'));
 
-      const result = await definition.isStale!(
-        buildVersionedAttachment(),
-        agentBuilderMocks.attachments.createResolveContextMock()
-      );
+      const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to check staleness for rule attachment "rule-1"')
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to check rule attachment staleness',
+        expect.objectContaining({
+          labels: {
+            rule_id: 'rule-1',
+            space_id: SPACE_ID,
+            code: ALERTING_LOG_CODES.AGENT_BUILDER_RULE_STALENESS_CHECK_FAILED,
+          },
+          error: expect.objectContaining({
+            message: 'boom',
+            type: 'Error',
+          }),
+        })
       );
     });
   });

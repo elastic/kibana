@@ -66,7 +66,7 @@ Scout now runs on MKI via the [Appex QA Serverless Scout pipeline](https://build
 | Screens (selector files) | Page objects (class with locators + methods) |
 | Tasks (action files) | Page object methods |
 | Direct `cy.get()` in tests | `page.testSubj.locator()` via page objects |
-| No EUI abstraction | EUI wrappers (`EuiComboBoxWrapper`, `EuiDataGridWrapper`, etc.) |
+| No EUI abstraction | EUI test helpers via `page.components.*` (`comboBox`, `dataGrid`, `superSelect`, `globalToastList`) |
 
 ## Serverless Tiers & Feature Flags
 
