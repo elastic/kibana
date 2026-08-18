@@ -26,6 +26,7 @@ import { lookupServices } from './lookup_services';
 import { validateServiceGroupKuery } from '../../../common/service_groups';
 import { getServicesCounts } from './get_services_counts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getApmDataAccessServices } from '../../lib/helpers/get_apm_data_access_services';
 import { getServiceGroupAlerts } from './get_service_group_alerts';
 import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
@@ -143,6 +144,9 @@ const serviceGroupCountsRoute = createApmServerRoute({
 
     const spacesPluginStart = await plugins.spaces?.start();
 
+    const start = datemath.parse('now-24h')!.toDate().getTime();
+    const end = datemath.parse('now')!.toDate().getTime();
+
     const [serviceGroups, apmAlertsClient, apmEventClient, activeSpace] = await Promise.all([
       getServiceGroups({ savedObjectsClient }),
       getApmAlertsClient(resources),
@@ -150,13 +154,10 @@ const serviceGroupCountsRoute = createApmServerRoute({
       await spacesPluginStart?.spacesService.getActiveSpace(request),
     ]);
 
-    const [servicesCounts, serviceGroupAlertsCount] = await Promise.all([
-      getServicesCounts({
-        apmEventClient,
-        serviceGroups,
-        start: datemath.parse('now-24h')!.toDate().getTime(),
-        end: datemath.parse('now')!.toDate().getTime(),
-      }),
+    const apmDataAccessServices = await getApmDataAccessServices({ apmEventClient, plugins });
+
+    const [sources, serviceGroupAlertsCount] = await Promise.all([
+      apmDataAccessServices.getDocumentSources({ start, end, kuery: '' }),
       getServiceGroupAlerts({
         serviceGroups,
         apmAlertsClient,
@@ -165,6 +166,14 @@ const serviceGroupCountsRoute = createApmServerRoute({
         spaceId: activeSpace?.id ?? DEFAULT_SPACE_ID,
       }),
     ]);
+
+    const servicesCounts = await getServicesCounts({
+      apmEventClient,
+      serviceGroups,
+      start,
+      end,
+      sources,
+    });
     const serviceGroupCounts = serviceGroups.reduce<ServiceGroupCounts>(
       (acc, { id }): ServiceGroupCounts => {
         acc[id] = {
