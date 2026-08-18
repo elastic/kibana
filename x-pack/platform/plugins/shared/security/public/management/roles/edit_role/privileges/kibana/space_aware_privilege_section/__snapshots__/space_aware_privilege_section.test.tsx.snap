@@ -21,8 +21,7 @@ exports[`<SpaceAwarePrivilegeSection> with user profile disabling "manageSpaces"
   </p>
   <p>
     <MemoizedFormattedMessage
-      defaultMessage="Please ensure your account has all privileges granted by the
-              {kibanaAdmin} role, and try again."
+      defaultMessage="Please ensure your account has all privileges granted by the {kibanaAdmin} role, and try again."
       id="xpack.security.management.editRole.spaceAwarePrivilegeForm.ensureAccountHasAllPrivilegesGrantedDescription"
       values={
         Object {

@@ -3934,7 +3934,7 @@
     "@jridgewell/sourcemap-codec" "^1.5.0"
     "@jridgewell/trace-mapping" "^0.3.24"
 
-"@jridgewell/remapping@^2.3.5":
+"@jridgewell/remapping@2.3.5", "@jridgewell/remapping@^2.3.5":
   version "2.3.5"
   resolved "https://registry.yarnpkg.com/@jridgewell/remapping/-/remapping-2.3.5.tgz#375c476d1972947851ba1e15ae8f123047445aa1"
   integrity sha512-LI9u/+laYG4Ds1TDKSJW2YPrIlcVYOwi2fUC6xB43lueCjgxV4lffOCZCtYFiH6TNOX+tQKXx97T4IKHbhyHEQ==
@@ -13389,10 +13389,17 @@
     "@swc/counter" "^0.1.3"
     jsonc-parser "^3.2.0"
 
-"@swc/plugin-emotion@14.15.0":
+"@swc/plugin-emotion-jest@npm:@swc/plugin-emotion@14.15.0":
   version "14.15.0"
   resolved "https://registry.yarnpkg.com/@swc/plugin-emotion/-/plugin-emotion-14.15.0.tgz#ab92e40f6c9713acabcc4fca7dea6f81a18ddd54"
   integrity sha512-nCsTO7mOOPz2UnT3N6YWb014uI0CVxeKg53A/KM/CvuSIE6H3KPkhaziJQ3q2jI3u3LfFuDKEnU5ZmB1330Dqg==
+  dependencies:
+    "@swc/counter" "^0.1.3"
+
+"@swc/plugin-emotion@14.7.0":
+  version "14.7.0"
+  resolved "https://registry.yarnpkg.com/@swc/plugin-emotion/-/plugin-emotion-14.7.0.tgz#f74096282e8746bdda66e7fb1049764a4a752f01"
+  integrity sha512-RwYrsxia8GKh2qLHWwymcfCeP6C5gAkssB2YtBRhP/qlKCxXYfv808buEXkCYvyGIY+bN3XziKXCuAi+waA5pQ==
   dependencies:
     "@swc/counter" "^0.1.3"
 
@@ -25651,7 +25658,7 @@ magic-bytes.js@1.12.1:
   resolved "https://registry.yarnpkg.com/magic-bytes.js/-/magic-bytes.js-1.12.1.tgz#031fedceb1fc652c1ccd917c6b45a6e8d6554245"
   integrity sha512-ThQLOhN86ZkJ7qemtVRGYM+gRgR8GEXNli9H/PMvpnZsE44Xfh3wx9kGJaldg314v85m+bFW6WBMaVHJc/c3zA==
 
-magic-string@^0.30.0, magic-string@^0.30.21, magic-string@^0.30.5:
+magic-string@0.30.21, magic-string@^0.30.0, magic-string@^0.30.21, magic-string@^0.30.5:
   version "0.30.21"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.30.21.tgz#56763ec09a0fa8091df27879fd94d19078c00d91"
   integrity sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==

@@ -25,8 +25,7 @@ exports[`ML Confirm Job Delete shallow renders without errors 1`] = `
   </p>
   <p>
     <MemoizedFormattedMessage
-      defaultMessage="Deleting a job can be time consuming.
-              It will be deleted in the background and data may not disappear instantly."
+      defaultMessage="Deleting a job can be time consuming. It will be deleted in the background and data may not disappear instantly."
       id="xpack.uptime.monitorDetails.ml.deleteJobWarning"
     />
   </p>

@@ -26,7 +26,7 @@ describe('RootPrivilegesCallout', () => {
 
     await waitFor(() => {
       expect(renderResult.getByText('Root privileges required')).toBeInTheDocument();
-      expect(renderResult.getByTestId('rootPrivilegesCallout')).toHaveTextContent(
+      expect(renderResult.getByTestId('rootPrivilegesCallout').textContent).toContain(
         'This agent policy contains the following integrations that require Elastic Agents to have root privileges. To ensure that all data required by the integrations can be collected, enroll the agents using an account with root privileges.'
       );
       expect(renderResult.getByText('Auditd Manager')).toBeInTheDocument();

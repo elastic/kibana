@@ -359,10 +359,7 @@ export const createDataRetentionFormActions = () => {
   };
 
   const getReducedRetentionCalloutText = () => {
-    return screen
-      .queryByTestId('reducedDataRetentionCallout')
-      ?.textContent?.replace(/\s+/g, ' ')
-      .trim();
+    return screen.queryByTestId('reducedDataRetentionCallout')?.textContent;
   };
 
   return {

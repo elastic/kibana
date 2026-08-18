@@ -147,7 +147,8 @@ function getSwcOptions(dist: boolean, hmr: boolean = false) {
       // built against `swc_core` 58.0.1 (the closest release at/below the host —
       // there is no release targeting 59/60, it jumps to 61.0.1 in 14.8.0). The
       // pinned version must be re-checked whenever `@rspack/core` is bumped, or
-      // the build will panic on a plugin ABI mismatch.
+      // the build will panic on a plugin ABI mismatch. Jest uses the separately
+      // pinned `@swc/plugin-emotion-jest` alias and must not drive this version.
       experimental: {
         plugins: [
           [

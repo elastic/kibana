@@ -303,8 +303,7 @@
         "@emotion/css",
         "@emotion/react",
         "@emotion/serialize",
-        "@emotion/styled",
-        "@swc/plugin-emotion"
+        "@emotion/styled"
       ],
       "reviewers": ["team:appex-sharedux"],
       "matchBaseBranches": ["main"],
@@ -1971,6 +1970,7 @@
         "@jest/transform",
         "@jest/types",
         "@swc/jest",
+        "@swc/plugin-emotion-jest",
         "@types/jest",
         "babel-jest",
         "expect",

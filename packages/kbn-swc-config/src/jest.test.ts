@@ -26,7 +26,7 @@ describe('getJestSwcConfig', () => {
 
     expect(config.jsc?.experimental?.plugins).toEqual([
       [
-        require.resolve('@swc/plugin-emotion'),
+        require.resolve('@swc/plugin-emotion-jest'),
         {
           sourceMap: false,
           autoLabel: 'always',

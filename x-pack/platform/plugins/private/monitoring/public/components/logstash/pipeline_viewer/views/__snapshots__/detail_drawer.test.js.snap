@@ -90,8 +90,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
       <div>
         <p>
           <MemoizedFormattedMessage
-            defaultMessage="This {vertexType} does not have an ID explicitly specified. Specifying an ID allows you to track differences
-          across pipeline changes. You can explicitly specify an ID for this plugin like so:"
+            defaultMessage="This {vertexType} does not have an ID explicitly specified. Specifying an ID allows you to track differences across pipeline changes. You can explicitly specify an ID for this plugin like so:"
             id="xpack.monitoring.logstash.pipeline.detailDrawer.specifyVertexIdDescription"
             values={
               Object {
@@ -588,8 +587,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
     <EuiText>
       <p>
         <MemoizedFormattedMessage
-          defaultMessage="This is an internal structure used by Logstash to buffer events between
-        inputs and the rest of the pipeline."
+          defaultMessage="This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline."
           id="xpack.monitoring.logstash.pipeline.detailDrawer.structureDescription"
         />
       </p>

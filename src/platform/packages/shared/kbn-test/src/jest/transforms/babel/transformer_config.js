@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = () => ({
+module.exports = ({ modules = 'cjs' } = {}) => ({
   presets: [
     [
       require.resolve('@kbn/babel-preset/node_preset'),
@@ -16,6 +16,7 @@ module.exports = () => ({
           // disable built-in filtering, which is more performant but strips the import of `regenerator-runtime` required by EUI
           useBuiltIns: false,
           corejs: false,
+          modules,
         },
       },
     ],

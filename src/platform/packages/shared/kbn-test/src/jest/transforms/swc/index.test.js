@@ -8,9 +8,10 @@
  */
 
 import Path from 'path';
+import { SourceMap } from 'node:module';
 import transformer from '.';
 
-const makeTransformOptions = (rootDir = process.cwd()) => ({
+const makeTransformOptions = (rootDir = process.cwd(), overrides = {}) => ({
   config: {
     rootDir,
     transform: {},
@@ -18,6 +19,7 @@ const makeTransformOptions = (rootDir = process.cwd()) => ({
   },
   instrument: false,
   supportsStaticESM: false,
+  ...overrides,
 });
 
 const getCode = (source, filename = '/repo/example.ts') => {
@@ -49,6 +51,39 @@ describe('SWC Jest transformer', () => {
     expect(code.indexOf('const moduleName')).toBeLessThan(mockIndex);
   });
 
+  it('resolves dynamic mock names from the binding visible at the call site', () => {
+    const code = getCode(`
+      const modulePath = './real_module';
+      jest.mock(modulePath, () => ({}));
+      describe('x', () => { const modulePath = './wrong'; });
+    `);
+
+    expect(code).toMatch(/\.mock\(['"]\.\/real_module['"]/);
+    expect(code).not.toMatch(/\.mock\(['"]\.\/wrong['"]/);
+  });
+
+  it('does not inline a dynamic mock name declared only in an inner scope', () => {
+    const code = getCode(`
+      jest.mock(modulePath, () => ({}));
+      describe('x', () => { const modulePath = './wrong'; });
+    `);
+
+    expect(code).toContain('.mock(modulePath');
+  });
+
+  it('resolves dynamic mock names through enclosing scopes', () => {
+    const code = getCode(`
+      describe('x', () => {
+        const modulePath = './value';
+        jest.isolateModules(() => {
+          jest.mock(modulePath, () => ({}));
+        });
+      });
+    `);
+
+    expect(code).toMatch(/\.mock\(['"]\.\/value['"]/);
+  });
+
   it('hoists safe constants used by a mock factory with the mock', () => {
     const code = getCode(`
       const Component = () => null;
@@ -68,6 +103,53 @@ describe('SWC Jest transformer', () => {
     expect(code).toContain('require("./value")');
   });
 
+  it('normalizes whitespace in multiline JSX string attributes before SWC', () => {
+    const result = transformer.process(
+      `export const message = (
+  <FormattedMessage
+    id="example.message"
+    defaultMessage="First sentence.
+      Second sentence."
+  />
+);
+throw new Error('after');`,
+      '/repo/message.tsx',
+      makeTransformOptions()
+    );
+    const generatedLines = result.code.split('\n');
+    const generatedLine = generatedLines.findIndex((line) => line.includes("new Error('after')"));
+    const generatedColumn = generatedLines[generatedLine].indexOf('throw');
+    const originalPosition = new SourceMap(JSON.parse(result.map)).findEntry(
+      generatedLine,
+      generatedColumn
+    );
+
+    expect(result.code).toContain('defaultMessage: "First sentence. Second sentence."');
+    expect(result.code).not.toContain('First sentence.\\n');
+    expect(result.code).toContain('jsxDEV');
+    expect(originalPosition).toMatchObject({
+      originalSource: '/repo/message.tsx',
+      originalLine: 7,
+      originalColumn: 0,
+    });
+  });
+
+  it('delimits Emotion labels when CSS templates omit a trailing semicolon', () => {
+    const code = getCode(
+      `
+        import { css } from '@emotion/react';
+        export const noSemi = (width: number) => css\`width: ${'${width}'}px\`;
+        export const plainNoSemi = css\`color: red\`;
+        export const withSemi = (width: number) => css\`width: ${'${width}'}px;\`;
+      `,
+      '/repo/emotion.ts'
+    );
+
+    expect(code).toMatch(/"px",\s*";label:noSemi"/);
+    expect(code).toMatch(/"color:red",\s*";label:plainNoSemi"/);
+    expect(code).toMatch(/"px;",\s*"label:withSemi"/);
+  });
+
   it('keeps source locations without SWC name mappings', () => {
     const result = transformer.process(
       'export const Component = () => null;',
@@ -79,6 +161,32 @@ describe('SWC Jest transformer', () => {
     expect(sourceMap.sources).toContain('/repo/example.tsx');
     expect(sourceMap.names).toEqual([]);
     expect(sourceMap.mappings).not.toBe('');
+  });
+
+  it('keeps source map positions aligned after CommonJS compatibility rewrites', () => {
+    const result = transformer.process(
+      `export const value = 1;
+export function boom() {
+  const message = 'failure';
+  throw new Error(message);
+}
+boom();`,
+      '/repo/subject.ts',
+      makeTransformOptions()
+    );
+    const generatedLines = result.code.split('\n');
+    const generatedLine = generatedLines.findIndex((line) => line.includes('throw new Error')) + 1;
+    const generatedColumn = generatedLines[generatedLine - 1].indexOf('throw');
+    const originalPosition = new SourceMap(JSON.parse(result.map)).findEntry(
+      generatedLine - 1,
+      generatedColumn
+    );
+
+    expect(originalPosition).toMatchObject({
+      originalSource: '/repo/subject.ts',
+      originalLine: 3,
+      originalColumn: 2,
+    });
   });
 
   it('uses Babel for the lazyObject compile-time macro', () => {
@@ -100,6 +208,31 @@ describe('SWC Jest transformer', () => {
 
     expect(code).not.toContain('RuleType[RuleType[');
     expect(code).toContain('RuleType["Metric"] = "metric"');
+  });
+
+  it('uses Babel for enum members initialized from deep member access', () => {
+    const code = getCode(`
+      const CFG = { ID: { X: 'x' } } as const;
+      export enum RuleType { Metric = CFG.ID.X }
+      export const values = Object.values(RuleType);
+    `);
+
+    expect(code).not.toContain('RuleType[RuleType[');
+    expect(code).toContain('RuleType["Metric"] = "x"');
+  });
+
+  it('uses Babel for enum members initialized from template literals', () => {
+    const code = getCode(`
+      const FEATURE_ID = 'workflowsManagement';
+      export enum ApiActions {
+        create = \`${'${FEATURE_ID}'}:create\`,
+        read = \`${'${FEATURE_ID}'}:read\`,
+      }
+    `);
+
+    expect(code).not.toContain('ApiActions[ApiActions[');
+    expect(code).toContain('ApiActions["create"] = "workflowsManagement:create"');
+    expect(code).toContain('ApiActions["read"] = "workflowsManagement:read"');
   });
 
   it('preserves add-module-exports behavior for a sole default export', () => {
@@ -137,7 +270,47 @@ describe('SWC Jest transformer', () => {
 
     expect(code).toContain('enumerable: true, configurable: true');
     expect(code).toContain('function(value)');
-    expect(code).toContain('value: exports["useFetcher"], writable: true');
+  });
+
+  it('makes exports with dollar-sign names replaceable', () => {
+    const code = getCode('export const theme$ = () => "real";');
+
+    expect(code).toContain('Object.defineProperty(exports, "theme$"');
+    expect(code).toContain('value: exports["theme$"], writable: true');
+  });
+
+  it('does not create exports from unrelated object getters', () => {
+    const code = getCode(`
+      const serverConfig = 1;
+      const object = { get helper() { return serverConfig; } };
+      export const value = object.helper;
+    `);
+
+    expect(code).not.toContain('Object.defineProperty(exports, "helper"');
+    expect(code).toContain('Object.defineProperty(exports, "value"');
+  });
+
+  it('does not modify user defineProperty calls with export-helper parameter names', () => {
+    const code = getCode(`
+      const target = {};
+      const to = {};
+      Object.defineProperty(target, 'first', {
+        enumerable: true,
+        get() { return 1; },
+      });
+      Object.defineProperty(to, 'second', {
+        enumerable: true,
+        get() { return 2; },
+      });
+      export const value = target.first + to.second;
+    `);
+
+    expect(code).toMatch(
+      /Object\.defineProperty\(target, ['"]first['"], \{\n\s+enumerable: true,\n\s+get \(\)/
+    );
+    expect(code).toMatch(
+      /Object\.defineProperty\(to, ['"]second['"], \{\n\s+enumerable: true,\n\s+get \(\)/
+    );
   });
 
   it('allows Jest to replace a named export with an attached comment', () => {
@@ -147,7 +320,7 @@ describe('SWC Jest transformer', () => {
     `);
 
     expect(code).toContain('enumerable: true, configurable: true');
-    expect(code).toContain('value: exports["useFetcher"], writable: true');
+    expect(code).toContain('function(value)');
   });
 
   it('keeps mutable and re-exported bindings as live getters', () => {
@@ -174,6 +347,24 @@ describe('SWC Jest transformer', () => {
     `);
 
     expect(code).toContain('if (error instanceof ReferenceError) return undefined;');
+  });
+
+  it('keeps processAsync output in the requested module format', async () => {
+    const commonJsResult = await transformer.processAsync(
+      'export const value = 1;',
+      '/repo/commonjs.ts',
+      makeTransformOptions()
+    );
+    const esmResult = await transformer.processAsync(
+      `const CFG = { ID: { X: 'x' } } as const;
+       export enum RuleType { Metric = CFG.ID.X }`,
+      '/repo/esm.ts',
+      makeTransformOptions(process.cwd(), { supportsStaticESM: true })
+    );
+
+    expect(commonJsResult.code).toContain('Object.defineProperty(exports');
+    expect(esmResult.code).toContain('export let RuleType');
+    expect(esmResult.code).not.toContain('Object.defineProperty(exports');
   });
 
   it('returns stable cache keys and varies them with relevant inputs', () => {
