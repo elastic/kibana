@@ -164,6 +164,8 @@ export {
   type AssistantResponse,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAccessControlEntryInput,
+  type ConversationAccessControlInput,
   type ConversationAccessControlPrincipalType,
   type ToolCallWithResult,
   type ConversationRound,

@@ -7,7 +7,7 @@
 
 import type {
   Conversation,
-  ConversationAccessControl,
+  ConversationAccessControlInput,
   ConversationListOptions,
   ConversationWithoutRounds,
 } from '@kbn/agent-builder-common';
@@ -22,8 +22,8 @@ export interface ConversationCreatePublicRequest {
   id?: string;
   /** Defaults to "New conversation". */
   title?: string;
-  /** Defaults to private. */
-  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
+  /** Defaults to `{ access_mode: 'private', entries: [] }`. */
+  accessControl?: ConversationAccessControlInput;
 }
 
 /**

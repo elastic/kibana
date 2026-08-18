@@ -3,11 +3,18 @@ requestBody:
     application/json:
       examples:
         createConversationRequestExample:
-          description: "Example request for creating an empty conversation with a custom title"
+          description: "Example request for creating a private shared conversation with a custom title and two members"
           value:
             title: My new conversation
             access_control:
               access_mode: private
+              entries:
+                - type: user
+                  id: u_abc123_uid
+                  role: member
+                - type: user
+                  id: u_def456_uid
+                  role: member
 responses:
   200:
     description: "Indicates a successful response"
@@ -27,6 +34,15 @@ responses:
                 delete: true
               access_control:
                 access_mode: private
+                entries:
+                  - type: user
+                    id: u_abc123_uid
+                    role: member
+                    added_at: "2026-08-14T10:00:00.000Z"
+                  - type: user
+                    id: u_def456_uid
+                    role: member
+                    added_at: "2026-08-14T10:00:00.000Z"
               created_at: "2026-08-14T10:00:00.000Z"
               updated_at: "2026-08-14T10:00:00.000Z"
               rounds: []
@@ -40,12 +56,18 @@ x-codeSamples:
       -H "Content-Type: application/json" \
       -d '{
         "title": "My new conversation",
-        "access_control": { "access_mode": "private" }
+        "access_control": {
+          "access_mode": "private",
+          "entries": [{ "type": "user", "id": "u_abc123_uid", "role": "member" }]
+        }
       }'
 - lang: Console
   source: |
     POST kbn://api/agent_builder/conversations
     {
       "title": "My new conversation",
-      "access_control": { "access_mode": "private" }
+      "access_control": {
+        "access_mode": "private",
+        "entries": [{ "type": "user", "id": "u_abc123_uid", "role": "member" }]
+      }
     }

@@ -70,6 +70,16 @@ const ACCESS_CONTROL_ENTRIES_SCHEMA = schema.arrayOf(
   }
 );
 
+const validateAccessControlEntries = (val: { access_mode: string; entries?: unknown[] }) => {
+  if (
+    val.access_mode === ConversationAccessControlMode.Public &&
+    val.entries &&
+    val.entries.length > 0
+  ) {
+    return 'ACL entries are not supported when access_mode is "public"';
+  }
+};
+
 export function registerConversationRoutes({
   router,
   getInternalServices,
@@ -279,19 +289,11 @@ export function registerConversationRoutes({
               access_control: schema.maybe(
                 schema.object(
                   {
-                    access_mode: schema.oneOf(
-                      [
-                        schema.literal(ConversationAccessControlMode.Private),
-                        schema.literal(ConversationAccessControlMode.Public),
-                      ],
-                      {
-                        meta: {
-                          description: 'Access mode for the conversation. Defaults to private.',
-                        },
-                      }
-                    ),
+                    access_mode: ACCESS_CONTROL_MODE_SCHEMA,
+                    entries: schema.maybe(ACCESS_CONTROL_ENTRIES_SCHEMA),
                   },
                   {
+                    validate: validateAccessControlEntries,
                     meta: {
                       description: 'Optional access control settings. Defaults to private.',
                     },
@@ -390,10 +392,13 @@ export function registerConversationRoutes({
                 },
               }),
             }),
-            body: schema.object({
-              access_mode: ACCESS_CONTROL_MODE_SCHEMA,
-              entries: ACCESS_CONTROL_ENTRIES_SCHEMA,
-            }),
+            body: schema.object(
+              {
+                access_mode: ACCESS_CONTROL_MODE_SCHEMA,
+                entries: ACCESS_CONTROL_ENTRIES_SCHEMA,
+              },
+              { validate: validateAccessControlEntries }
+            ),
           },
         },
         options: {

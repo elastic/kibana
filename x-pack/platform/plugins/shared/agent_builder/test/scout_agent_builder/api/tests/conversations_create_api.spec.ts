@@ -136,6 +136,42 @@ apiTest.describe(
       }
     );
 
+    apiTest('stores access_control entries when provided', async ({ asAdmin }) => {
+      const res = await asAdmin.post(CONVERSATIONS_PATH, {
+        body: {
+          access_control: {
+            access_mode: ConversationAccessControlMode.Private,
+            entries: [{ type: 'user', id: 'u_test_uid', role: 'member' }],
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(res).toHaveStatusCode(200);
+      const conversation = res.body as CreateConversationResponse;
+      expect(conversation.access_control?.access_mode).toBe(ConversationAccessControlMode.Private);
+      expect(Array.isArray(conversation.access_control?.entries)).toBe(true);
+      expect(conversation.access_control?.entries).toHaveLength(1);
+      expect(conversation.access_control?.entries?.[0].id).toBe('u_test_uid');
+    });
+
+    apiTest(
+      'returns 400 when entries are supplied with access_mode public',
+      async ({ asAdmin }) => {
+        const res = await asAdmin.post(CONVERSATIONS_PATH, {
+          body: {
+            access_control: {
+              access_mode: ConversationAccessControlMode.Public,
+              entries: [{ type: 'user', id: 'u_test_uid', role: 'member' }],
+            },
+          },
+          responseType: 'json',
+        });
+
+        expect(res).toHaveStatusCode(400);
+      }
+    );
+
     apiTest('returns 404 when agent_id does not exist', async ({ asAdmin }) => {
       const res = await asAdmin.post(CONVERSATIONS_PATH, {
         body: { agent_id: 'non-existent-agent-id' },

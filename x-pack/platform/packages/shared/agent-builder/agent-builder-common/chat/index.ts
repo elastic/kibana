@@ -15,6 +15,8 @@ export {
   normalizeConversationAccessControl,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
+  type ConversationAccessControlEntryInput,
+  type ConversationAccessControlInput,
   type ConversationAccessControlPrincipalType,
 } from './access_control';
 export {
