@@ -13,6 +13,10 @@ steps:
   - name: load_pending_reports
     type: elasticsearch.search
     with:
+      # Bare index name. `{index}/_search` is skipped if `index` is omitted, and the
+      # engine falls through to cluster-wide `_search`.
+      index: .kibana-threat-reports
+      size: 200
       # Fingerprints only. Fetch bodies per item after the dedup skip (10 MB step cap).
       _source:
         - content_fingerprint
