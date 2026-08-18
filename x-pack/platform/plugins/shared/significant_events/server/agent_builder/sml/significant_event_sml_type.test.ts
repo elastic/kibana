@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
 import { EventService } from '../../lib/significant_events/events/event_service';
@@ -67,7 +67,7 @@ describe('createSignificantEventSmlType', () => {
       getScopedClients: createGetScopedClients([]),
     });
 
-    expect(smlType.id).toBe(SIGNIFICANT_EVENT_SML_TYPE);
+    expect(smlType.id).toBe(SIGNIFICANT_EVENT_KI_TYPE);
   });
 
   it('lists significant events for SML indexing', async () => {
@@ -109,7 +109,7 @@ describe('createSignificantEventSmlType', () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        type: SIGNIFICANT_EVENT_SML_TYPE,
+        type: SIGNIFICANT_EVENT_KI_TYPE,
         title: 'Payment outage',
       })
     );
@@ -141,10 +141,10 @@ describe('createSignificantEventSmlType', () => {
       smlType.toAttachment(
         {
           id: 'chunk-1',
-          type: SIGNIFICANT_EVENT_SML_TYPE,
+          type: SIGNIFICANT_EVENT_KI_TYPE,
           title: 'Payment outage',
           origin_id: 'payment-outage',
-          origin: { uri: `${SIGNIFICANT_EVENT_SML_TYPE}://payment-outage` },
+          origin: { uri: `${SIGNIFICANT_EVENT_KI_TYPE}://payment-outage` },
           content: 'Payment outage',
           created_at: '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',
