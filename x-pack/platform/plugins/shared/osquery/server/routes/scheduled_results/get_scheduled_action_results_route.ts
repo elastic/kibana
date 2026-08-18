@@ -24,6 +24,7 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import type { PackSavedObject } from '../../common/types';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 
 interface ScheduledActionResultsAggregations {
   aggs: {
@@ -116,7 +117,12 @@ export const getScheduledActionResultsRoute = (
           const namespacesOrUndefined =
             osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
-          const search = await context.search;
+          const search = await getScopedSearch(
+            context,
+            request,
+            osqueryContext.cpsEnabled,
+            osqueryContext.getStartServices
+          );
           const res = await lastValueFrom(
             search.search<
               ScheduledActionResultsRequestOptions,
@@ -133,6 +139,7 @@ export const getScheduledActionResultsRoute = (
                   field: request.query.sort ?? '@timestamp',
                 },
                 integrationNamespaces: namespacesOrUndefined,
+                ...(osqueryContext.cpsEnabled ? { matchMissingSpaceId: false } : {}),
               },
               { abortSignal, strategy: OSQUERY_SEARCH_STRATEGY }
             )

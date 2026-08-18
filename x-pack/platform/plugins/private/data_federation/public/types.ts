@@ -8,6 +8,7 @@
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { FederatedIdentityClusterInfo } from './create_data_source_flyout/federated_identity_cluster_info';
 import type { DataSourcesClient } from './data_sources_client';
 import type { DatasetsClient } from './datasets_client';
@@ -33,6 +34,7 @@ export interface DataFederationKibanaServices {
   dataSourcesClient: DataSourcesClient;
   datasetsClient: DatasetsClient;
   toasts: ToastsStart;
+  docLinks: DocLinksStart;
   cloudInfo?: FederatedIdentityClusterInfo;
   featureFlags?: FederatedDataFeatureFlags;
 }

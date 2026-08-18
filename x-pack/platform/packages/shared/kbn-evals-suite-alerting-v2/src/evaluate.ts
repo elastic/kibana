@@ -9,7 +9,6 @@ import { v4 as uuidv4 } from 'uuid';
 import type { HttpHandler } from '@kbn/core/public';
 import type { KbnClient } from '@kbn/kbn-client';
 import { evaluate as evalsBase, createAgentBuilderClient } from '@kbn/evals';
-import { withPhoenixExecutor } from '@kbn/evals-phoenix-executor';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { createEvaluateDataset } from './evaluate_dataset';
 import type { EvaluateDataset } from './types';
@@ -19,8 +18,6 @@ import {
   installFullStackDataForge,
   removeFullStackDataForge,
 } from './full_stack_data';
-
-const base = withPhoenixExecutor(evalsBase);
 
 /**
  * Kibana feature config granting Alerting V2 read-only (no write) plus
@@ -69,7 +66,7 @@ const httpHandlerWithApiKey = (kbnClient: KbnClient, encodedApiKey: string): Htt
   return fetch;
 };
 
-export const evaluate = base.extend<{
+export const evaluate = evalsBase.extend<{
   evaluateDataset: EvaluateDataset;
   /**
    * An {@link EvaluateDataset} function backed by a read-only user that has

@@ -99,6 +99,8 @@
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-security-server",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/cps-utils",
+    "@kbn/cps"
   ]
 }

@@ -11,7 +11,13 @@ import {
   type RuleTemplateData,
 } from '@kbn/alerting-v2-schemas';
 
+/**
+ * Convert a v2 rule template into create-rule data.
+ *
+ * Re-parses `template.rule` even though {@link RuleTemplateData} already types it:
+ * Fleet/SO storage only keeps an opaque bag, so runtime Zod validation here is the
+ * safety boundary before rule creation.
+ */
 export const createRuleDataFromTemplate = (template: RuleTemplateData): CreateRuleData => {
-  const { engine: _engine, ...ruleFields } = template;
-  return createRuleDataSchema.parse(ruleFields);
+  return createRuleDataSchema.parse(template.rule);
 };

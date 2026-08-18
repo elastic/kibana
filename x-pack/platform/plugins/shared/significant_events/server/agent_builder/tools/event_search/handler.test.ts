@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { searchEventsToolHandler } from './handler';
+import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import {
+  searchEventsToolHandler,
+  DESCRIPTION_TRUNCATION_SUFFIX,
+  DESCRIPTION_CONTENT_LENGTH,
+} from './handler';
 
 describe('searchEventsToolHandler', () => {
   const event = {
@@ -21,17 +26,32 @@ describe('searchEventsToolHandler', () => {
     stream_names: ['logs.checkout'],
     signals: [
       {
+        type: 'detection',
         stream_name: 'logs.checkout',
-        confirmed: true,
+        verdict: 'confirms',
         description: 'Payment call failed',
         collected_at: '2026-07-20T08:00:00.000Z',
-        metadata: { rule_uuid: 'rule-uuid-1', rule_name: 'Payment failures' },
-        evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
+        metadata: { rule_uuid: 'rule-active', rule_name: 'Payment failures' },
+      },
+      {
+        type: 'detection',
+        stream_name: 'logs.checkout',
+        verdict: 'refutes',
+        description: 'Recovered payment call',
+        collected_at: '2026-07-19T08:00:00.000Z',
+        metadata: { rule_uuid: 'rule-clear', rule_name: 'Payment recovery' },
+      },
+      {
+        type: 'detection',
+        stream_name: 'logs.checkout',
+        verdict: 'inconclusive',
+        description: 'Pending verification',
+        collected_at: '2026-07-18T08:00:00.000Z',
+        metadata: { rule_uuid: 'rule-unknown', rule_name: 'Payment latency' },
       },
     ],
     causal_features: [{ feature_id: 'checkout-payment', name: 'Checkout to payment' }],
     blast_radius: [{ feature_id: 'checkout-payment', type: 'dependency' }],
-    assessment_note: 'Verbose judge assessment',
   };
 
   const makeClient = (hits: object[] = [event], total = hits.length) => ({
@@ -41,425 +61,187 @@ describe('searchEventsToolHandler', () => {
     findLatestPaginated: jest.fn().mockResolvedValue({ hits, page: 1, perPage: 20, total }),
   });
 
-  it('maps params and returns events for state-scoped search', async () => {
-    const eventClient = makeClient();
-
+  it('returns a bounded compact routing projection with complete signal state', async () => {
     const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: {
-        query: 'timeout',
-        stream_names: ['logs.checkout'],
-        rule_uuids: ['rule-uuid-1'],
-        status: 'open',
-        page: 2,
-      },
+      eventClient: makeClient() as never,
+      params: { rule_uuids: ['rule-active'] },
     });
 
-    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
-      page: 2,
-      perPage: 20,
-      eventIds: undefined,
-      ruleUuids: ['rule-uuid-1'],
-      topologyFeatureIds: undefined,
-      search: 'timeout',
-      stream: ['logs.checkout'],
-      status: ['open'],
-      from: 'now-7d',
-      to: 'now',
-    });
-    expect(eventClient.findLatestPaginated).not.toHaveBeenCalled();
-    expect(result).toEqual({
-      events: [
-        {
-          '@timestamp': '2026-07-20T08:00:00.000Z',
-          event_id: 'checkout-failure',
-          event_uuid: 'e1',
-          title: 'Checkout — payment failure',
-          symptom_hypothesis: 'Payment calls are failing',
-          summary: 'Checkout payment calls fail.',
-          status: 'open',
-          severity: '60-high',
-          confidence: 0.8,
-          stream_names: ['logs.checkout'],
-          signals: [
-            {
-              stream_name: 'logs.checkout',
-              rule_uuid: 'rule-uuid-1',
-              rule_name: 'Payment failures',
-              confirmed: true,
-              description: 'Payment call failed',
-              collected_at: '2026-07-20T08:00:00.000Z',
-              esql_query: 'FROM logs.checkout',
-            },
-          ],
-          total_signals: 1,
-          signals_truncated: false,
-          causal_features: [{ feature_id: 'checkout-payment', name: 'Checkout to payment' }],
-          blast_radius: [{ feature_id: 'checkout-payment', type: 'dependency' }],
-        },
-      ],
-      view: 'compact',
-      page: 1,
-      per_page: 20,
-      returned: 1,
-      total: 1,
-      has_more: false,
-      next_page: null,
-    });
-  });
-
-  it('excludes confirmed false signals when requested', async () => {
-    const eventClient = makeClient([
-      {
-        ...event,
-        signals: [
-          ...event.signals,
-          {
-            ...event.signals[0],
-            confirmed: false,
-            metadata: { rule_uuid: 'rule-uuid-rejected', rule_name: 'Rejected rule' },
-          },
-        ],
-      },
-    ]);
-
-    const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: {
-        rule_uuids: ['rule-uuid-1', 'rule-uuid-rejected'],
-        exclude_unconfirmed_signals: true,
-        view: 'compact',
-      },
-    });
-
-    expect(result.events[0].signals).toEqual([
+    expect(result.events).toEqual([
       expect.objectContaining({
-        rule_uuid: 'rule-uuid-1',
-        confirmed: true,
+        event_id: 'checkout-failure',
+        symptom_hypothesis: 'Payment calls are failing',
+        summary: 'Checkout payment calls fail.',
+        signal_rule_uuids: ['rule-active', 'rule-clear', 'rule-unknown'],
+        unresolved_rule_uuids: ['rule-active', 'rule-unknown'],
+        signal_counts: {
+          total: 3,
+          confirms: 1,
+          refutes: 1,
+          off_topic: 0,
+          inconclusive: 1,
+          not_checked: 0,
+        },
       }),
     ]);
+    expect(result.events[0]).not.toHaveProperty('signals');
+    expect(result.events[0].symptom_hypothesis).toBe('Payment calls are failing');
   });
 
-  it('drops an event when its only rule-matching signal is unconfirmed', async () => {
-    // The data query matched this event via 'unconfirmed-rule-uuid', but that signal
-    // is confirmed: false. After stripping unconfirmed signals the event has no
-    // visible signal for the requested rule, so hasRequestedRule returns false and
-    // the event must be dropped entirely.
-    const eventWithOnlyUnconfirmedMatch = {
-      ...event,
-      signals: [
-        {
-          stream_name: 'logs.checkout',
-          confirmed: false,
-          description: 'Unconfirmed signal',
-          collected_at: '2026-07-20T08:00:00.000Z',
-          metadata: { rule_uuid: 'unconfirmed-rule-uuid', rule_name: 'Unconfirmed rule' },
-          evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
-        },
-      ],
-    };
-    const eventClient = makeClient([eventWithOnlyUnconfirmedMatch]);
-
+  it('does not hide inconclusive signals from closure routing', async () => {
     const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: {
-        rule_uuids: ['unconfirmed-rule-uuid'],
-        exclude_unconfirmed_signals: true,
-      },
-    });
-
-    expect(result.events).toHaveLength(0);
-    expect(result.returned).toBe(0);
-  });
-
-  it('caps compact signals to the most recent entries', async () => {
-    const manySignals = Array.from({ length: 16 }, (_, i) => ({
-      stream_name: 'logs.checkout',
-      confirmed: true,
-      description: `Testing rule ${i}. Verdict: confirms.`,
-      collected_at: `2026-07-20T0${i % 10}:00:00.000Z`,
-      metadata: { rule_uuid: `rule-uuid-${i}`, rule_name: `Rule ${i}` },
-      evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
-    }));
-    const eventClient = makeClient([{ ...event, signals: manySignals }]);
-
-    const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { view: 'compact' },
-    });
-
-    expect(result.events[0].signals).toHaveLength(10);
-    expect(result.events[0].signals.map((signal) => signal.rule_uuid)).toEqual([
-      'rule-uuid-9',
-      'rule-uuid-8',
-      'rule-uuid-7',
-      'rule-uuid-6',
-      'rule-uuid-5',
-      'rule-uuid-15',
-      'rule-uuid-4',
-      'rule-uuid-14',
-      'rule-uuid-3',
-      'rule-uuid-13',
-    ]);
-    expect(result.events[0].total_signals).toBe(16);
-    expect(result.events[0].signals_truncated).toBe(true);
-  });
-
-  it('never truncates away a fresh unconfirmed signal in favor of old confirmed ones', async () => {
-    const oldConfirmedSignals = Array.from({ length: 15 }, (_, i) => ({
-      stream_name: 'logs.checkout',
-      confirmed: true,
-      description: `Old confirmed rule ${i}`,
-      collected_at: `2026-07-0${(i % 9) + 1}T08:00:00.000Z`,
-      metadata: { rule_uuid: `old-rule-uuid-${i}`, rule_name: `Old rule ${i}` },
-      evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
-    }));
-    const freshUnconfirmedSignal = {
-      stream_name: 'logs.checkout',
-      confirmed: false,
-      description: 'Fresh rule needing this-cycle verification',
-      collected_at: '2026-07-20T08:00:00.000Z',
-      metadata: { rule_uuid: 'fresh-rule-uuid', rule_name: 'Fresh rule' },
-      evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
-    };
-    const eventClient = makeClient([
-      { ...event, signals: [...oldConfirmedSignals, freshUnconfirmedSignal] },
-    ]);
-
-    const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { view: 'compact' },
-    });
-
-    expect(result.events[0].signals).toHaveLength(10);
-    expect(result.events[0].signals[0]).toEqual(
-      expect.objectContaining({ rule_uuid: 'fresh-rule-uuid', confirmed: false })
-    );
-  });
-
-  it('never truncates away a signal matching the search rule_uuids filter', async () => {
-    const recentSignals = Array.from({ length: 10 }, (_, i) => ({
-      stream_name: 'logs.checkout',
-      confirmed: true,
-      description: `Recent rule ${i}`,
-      collected_at: `2026-07-2${i}T08:00:00.000Z`,
-      metadata: { rule_uuid: `recent-rule-uuid-${i}`, rule_name: `Recent rule ${i}` },
-      evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
-    }));
-    const requestedOldSignal = {
-      stream_name: 'logs.checkout',
-      confirmed: true,
-      description: 'Requested old rule',
-      collected_at: '2026-01-01T08:00:00.000Z',
-      metadata: { rule_uuid: 'requested-rule-uuid', rule_name: 'Requested rule' },
-      evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
-    };
-    const eventClient = makeClient([{ ...event, signals: [...recentSignals, requestedOldSignal] }]);
-
-    const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { view: 'compact', rule_uuids: ['requested-rule-uuid'] },
-    });
-
-    expect(result.events[0].signals).toHaveLength(10);
-    expect(result.events[0].signals[0]).toEqual(
-      expect.objectContaining({ rule_uuid: 'requested-rule-uuid' })
-    );
-  });
-
-  it('never truncates away a signal matching the search stream_names filter', async () => {
-    const recentSignals = Array.from({ length: 10 }, (_, i) => ({
-      stream_name: 'logs.checkout',
-      confirmed: true,
-      description: `Recent rule ${i}`,
-      collected_at: `2026-07-2${i}T08:00:00.000Z`,
-      metadata: { rule_uuid: `recent-rule-uuid-${i}`, rule_name: `Recent rule ${i}` },
-      evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
-    }));
-    const requestedOldSignal = {
-      stream_name: 'logs.requested-stream',
-      confirmed: true,
-      description: 'Requested old rule',
-      collected_at: '2026-01-01T08:00:00.000Z',
-      metadata: { rule_uuid: 'other-rule-uuid', rule_name: 'Other rule' },
-      evidence: { result: 'found', esql_query: 'FROM logs.checkout' },
-    };
-    const eventClient = makeClient([{ ...event, signals: [...recentSignals, requestedOldSignal] }]);
-
-    const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { view: 'compact', stream_names: ['logs.requested-stream'] },
-    });
-
-    expect(result.events[0].signals).toHaveLength(10);
-    expect(result.events[0].signals[0]).toEqual(
-      expect.objectContaining({ stream_name: 'logs.requested-stream' })
-    );
-  });
-
-  it('omits a whitespace-only query', async () => {
-    const eventClient = makeClient();
-
-    await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { query: '   ' },
-    });
-
-    expect(eventClient.findLatestPaginated).toHaveBeenCalledWith(
-      expect.objectContaining({ search: undefined })
-    );
-  });
-
-  it('supports cross-stream state search when stream_names is omitted', async () => {
-    const eventClient = makeClient();
-
-    await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { status: 'closed' },
-    });
-
-    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
-      page: 1,
-      perPage: 20,
-      eventIds: undefined,
-      ruleUuids: undefined,
-      topologyFeatureIds: undefined,
-      search: undefined,
-      stream: undefined,
-      status: ['closed'],
-      from: 'now-7d',
-      to: 'now',
-    });
-  });
-
-  it('falls back to findLatestPaginated when state is omitted', async () => {
-    const eventClient = makeClient();
-
-    await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: {
-        stream_names: ['logs.checkout', 'logs.payment', 'logs.otel'],
-      },
-    });
-
-    expect(eventClient.findLatestPaginated).toHaveBeenCalledWith(
-      expect.objectContaining({
-        stream: ['logs.checkout', 'logs.payment', 'logs.otel'],
-        from: 'now-7d',
-        to: 'now',
-      })
-    );
-    expect(eventClient.findLatestByCurrentStatePaginated).not.toHaveBeenCalled();
-  });
-
-  it('applies rule and event ID filters even when status is omitted', async () => {
-    const eventClient = makeClient();
-
-    await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: {
-        rule_uuids: ['rule-uuid-1'],
-        event_ids: ['checkout-failure'],
-      },
-    });
-
-    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith(
-      expect.objectContaining({
-        eventIds: ['checkout-failure'],
-        ruleUuids: ['rule-uuid-1'],
-        status: undefined,
-      })
-    );
-    expect(eventClient.findLatestPaginated).not.toHaveBeenCalled();
-  });
-
-  it('applies topology feature filters even when status is omitted', async () => {
-    const eventClient = makeClient();
-
-    await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: {
-        topology_feature_ids: ['checkout-payment', 'payments-database'],
-      },
-    });
-
-    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith(
-      expect.objectContaining({
-        topologyFeatureIds: ['checkout-payment', 'payments-database'],
-      })
-    );
-    expect(eventClient.findLatestPaginated).not.toHaveBeenCalled();
-  });
-
-  it('preserves null topology fields in compact results', async () => {
-    const eventClient = makeClient([{ ...event, causal_features: null, blast_radius: null }]);
-
-    const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { view: 'compact' },
+      eventClient: makeClient([{ ...event, signals: [event.signals[2]] }]) as never,
+      params: { event_ids: ['checkout-failure'] },
     });
 
     expect(result.events[0]).toEqual(
       expect.objectContaining({
-        causal_features: null,
-        blast_radius: null,
+        unresolved_rule_uuids: ['rule-unknown'],
+        signal_counts: {
+          total: 1,
+          confirms: 0,
+          refutes: 0,
+          off_topic: 0,
+          inconclusive: 1,
+          not_checked: 0,
+        },
       })
     );
   });
 
-  it('returns full events with a 10-event page cap and pagination metadata', async () => {
-    const eventClient = makeClient([event], 25);
-    eventClient.findLatestPaginated.mockResolvedValue({
-      hits: [event],
-      page: 2,
-      perPage: 10,
-      total: 25,
-    });
-
+  it('reports off-topic rules without making their authored rule unresolved', async () => {
     const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { view: 'full', per_page: 20, page: 2 },
+      eventClient: makeClient([
+        {
+          ...event,
+          signals: [
+            {
+              ...event.signals[0],
+              verdict: 'off_topic',
+              metadata: { rule_uuid: 'rule-off-topic', rule_name: 'Unrelated error' },
+            },
+          ],
+        },
+      ]) as never,
+      params: { event_ids: ['checkout-failure'] },
     });
 
-    expect(eventClient.findLatestPaginated).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 2, perPage: 10 })
-    );
-    expect(result).toEqual({
-      events: [event],
-      view: 'full',
-      page: 2,
-      per_page: 10,
-      returned: 1,
-      total: 25,
-      has_more: true,
-      next_page: 3,
-    });
-  });
-
-  it('returns compact pagination metadata for later pages', async () => {
-    const eventClient = makeClient([event], 25);
-    eventClient.findLatestPaginated.mockResolvedValue({
-      hits: [event],
-      page: 2,
-      perPage: 20,
-      total: 25,
-    });
-
-    const result = await searchEventsToolHandler({
-      eventClient: eventClient as never,
-      params: { view: 'compact', per_page: 20, page: 2 },
-    });
-
-    expect(result).toEqual(
+    expect(result.events[0]).toEqual(
       expect.objectContaining({
-        view: 'compact',
-        page: 2,
-        per_page: 20,
-        returned: 1,
-        total: 25,
-        has_more: false,
-        next_page: null,
+        signal_rule_uuids: ['rule-off-topic'],
+        unresolved_rule_uuids: [],
+        signal_counts: {
+          total: 1,
+          confirms: 0,
+          refutes: 0,
+          off_topic: 1,
+          inconclusive: 0,
+          not_checked: 0,
+        },
       })
+    );
+  });
+
+  it('returns bounded, deterministically ordered pages for one known event', async () => {
+    const signals = Array.from({ length: 12 }, (_, index) => ({
+      ...event.signals[1],
+      verdict: index === 11 ? 'confirms' : 'refutes',
+      collected_at: `2026-07-${String(index + 1).padStart(2, '0')}T08:00:00.000Z`,
+      metadata: { rule_uuid: `rule-${index}`, rule_name: `Rule ${index}` },
+    }));
+    const eventClient = makeClient([{ ...event, signals }]);
+
+    const result = await searchEventsToolHandler({
+      eventClient: eventClient as never,
+      params: {
+        view: 'full',
+        event_ids: ['checkout-failure'],
+        page: 2,
+        signals_page: 1,
+        signals_per_page: 10,
+      },
+    });
+
+    expect(eventClient.findLatestByCurrentStatePaginated).toHaveBeenCalledWith(
+      expect.objectContaining({ eventIds: ['checkout-failure'], page: 1, perPage: 1 })
+    );
+    expect(result.events[0]).toEqual(
+      expect.objectContaining({
+        signals_total: 12,
+        signals_page: 1,
+        signals_per_page: 10,
+        signals_has_more: true,
+      })
+    );
+    expect(result.events[0].signals).toHaveLength(10);
+    expect(result.events[0].signals[0]).toEqual(
+      expect.objectContaining({ rule_uuid: 'rule-11', verdict: 'confirms' })
+    );
+  });
+
+  it('returns the final signal page without unrelated events', async () => {
+    const eventClient = makeClient([
+      {
+        ...event,
+        signals: Array.from({ length: 12 }, (_, index) => ({
+          ...event.signals[1],
+          metadata: { rule_uuid: `rule-${index}`, rule_name: `Rule ${index}` },
+        })),
+      },
+    ]);
+
+    const result = await searchEventsToolHandler({
+      eventClient: eventClient as never,
+      params: {
+        view: 'full',
+        event_ids: ['checkout-failure'],
+        signals_page: 2,
+        signals_per_page: 10,
+      },
+    });
+
+    expect(result.events).toHaveLength(1);
+    expect(result.events[0]).toEqual(
+      expect.objectContaining({ signals_page: 2, signals_has_more: false })
+    );
+    expect(result.events[0].signals).toHaveLength(2);
+  });
+
+  it('rejects full search without exactly one event ID', async () => {
+    await expect(
+      searchEventsToolHandler({ eventClient: makeClient() as never, params: { view: 'full' } })
+    ).rejects.toThrow('Full event search requires exactly one event ID');
+  });
+
+  it('leaves max-length full-view signal descriptions unchanged', async () => {
+    const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH);
+    const result = await searchEventsToolHandler({
+      eventClient: makeClient([
+        {
+          ...event,
+          signals: [{ ...event.signals[0], description }],
+        },
+      ]) as never,
+      params: { view: 'full', event_ids: ['checkout-failure'] },
+    });
+
+    expect(result.events[0].signals[0].description).toBe(description);
+  });
+
+  it('truncates oversized full-view signal descriptions', async () => {
+    const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1);
+    const result = await searchEventsToolHandler({
+      eventClient: makeClient([
+        {
+          ...event,
+          signals: [{ ...event.signals[0], description }],
+        },
+      ]) as never,
+      params: { view: 'full', event_ids: ['checkout-failure'] },
+    });
+
+    expect(result.events[0].signals[0].description).toBe(
+      `${description.slice(0, DESCRIPTION_CONTENT_LENGTH)}${DESCRIPTION_TRUNCATION_SUFFIX}`
     );
   });
 });
