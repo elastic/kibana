@@ -63,7 +63,7 @@ export const VerifyKiStepCommonDefinition: CommonStepDefinition<
   documentation: {
     details: i18n.translate('xpack.contextEngine.verifyKiStep.documentation.details', {
       defaultMessage:
-        'The {stepTypeId} step runs all applicable Context Engine verifiers against the given knowledge indicator and returns a per-verifier pass/fail summary. Requires the Context Engine advanced setting to be enabled.',
+        'The {stepTypeId} step runs all applicable Context Engine verifiers against the given knowledge indicator and returns a per-verifier pass/fail summary. A knowledge indicator no verifier applies to (for example, one without ES|QL in `attributes.esql`) passes with an empty results list. Requires the Context Engine advanced setting to be enabled.',
       values: { stepTypeId: VERIFY_KI_STEP_TYPE_ID },
     }),
     examples: [
