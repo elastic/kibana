@@ -4,7 +4,7 @@ navigation_title: Logging
 
 # Logging in Scout tests [scout-logging]
 
-This page explains how logging works in Scout: the `log` [fixture](./fixtures.md) used inside tests, and how to inspect logs from the systems under test (Kibana, Elasticsearch, the browser, and UIAM) when running against a serverless project in MKI.
+This page explains how logging works in Scout: the `log` [fixture](./fixtures.md) used inside tests, and how to inspect logs from the systems under test (Kibana, Elasticsearch, and the browser).
 
 ::::{note}
 **Inspecting serverless MKI project logs**: see the Elasticians-only internal [Troubleshoot Cloud test failures](https://codex.elastic.dev/r/kibana-team/testing/elastic-cloud-testing/troubleshoot-cloud-test-failures) guide.
