@@ -8,7 +8,8 @@
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { INBOX_API_VERSION, RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
+import { API_VERSIONS } from '@kbn/inbox-common';
+import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 
 export const ensureConnectorAccessible = async ({
   fetch,
@@ -48,7 +49,7 @@ export const respondToWorkflowApproval = async ({
   log.info(`Sending approval=${approved} for inbox source ${sourceId}`);
   await fetch(`/internal/inbox/actions/workflows/${encodeURIComponent(sourceId)}/respond`, {
     method: 'POST',
-    headers: { 'elastic-api-version': INBOX_API_VERSION, 'kbn-xsrf': 'true' },
+    headers: { 'elastic-api-version': API_VERSIONS.internal.v1, 'kbn-xsrf': 'true' },
     body: JSON.stringify({ input: { approved } }),
   });
 };

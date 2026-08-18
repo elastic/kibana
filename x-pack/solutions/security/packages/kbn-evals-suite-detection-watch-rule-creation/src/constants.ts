@@ -22,9 +22,6 @@ export const RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
 /** Public workflows_management API version (`Elastic-Api-Version` header). */
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
-/** Internal inbox API version (`elastic-api-version` header), from @kbn/inbox-common API_VERSIONS. */
-export const INBOX_API_VERSION = '1';
-
 /**
  * Agent Builder tool the workflow's `ai.agent` step is instructed to call. Reserved for the
  * Tool Routing evaluator, blocked on trace access (PR #284701).
