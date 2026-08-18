@@ -12,13 +12,20 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
 export const VERIFY_KI_STEP_TYPE_ID = 'context_engine.verify_ki';
 
+export const MAX_KI_ATTRIBUTES = 100;
+
 const KnowledgeIndicatorSchema = z.object({
   type: z.string().max(256).optional(),
   title: z.string().max(1024).optional(),
   description: z.string().max(10_000).optional(),
   content: z.string().max(100_000).optional(),
   tags: z.array(z.string().max(256)).max(100).optional(),
-  attributes: z.record(z.string(), z.unknown()).optional(),
+  attributes: z
+    .record(z.string().max(256), z.unknown())
+    .refine((attributes) => Object.keys(attributes).length <= MAX_KI_ATTRIBUTES, {
+      message: `attributes must have at most ${MAX_KI_ATTRIBUTES} entries`,
+    })
+    .optional(),
 });
 
 export const VerifyKiInputSchema = z.object({

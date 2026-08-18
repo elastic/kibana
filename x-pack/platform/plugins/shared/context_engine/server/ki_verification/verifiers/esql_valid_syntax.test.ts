@@ -147,6 +147,30 @@ describe('esql-valid-syntax verifier', () => {
       }
     });
 
+    it('fails when the KI carries more than the maximum number of queries', async () => {
+      const queries = Array.from({ length: 101 }, () => VALID_QUERY);
+
+      const outcome = await verifier.verify(makeKi(queries), context);
+
+      expect(outcome.passed).toBe(false);
+      if (!outcome.passed) {
+        expect(outcome.reason).toContain('the maximum is 100');
+      }
+    });
+
+    it('fails an oversized query without validating it, truncating it in the reason', async () => {
+      const query = `FROM logs-* | WHERE event.action == "${'x'.repeat(10_001)}"`;
+
+      const outcome = await verifier.verify(makeKi(query), context);
+
+      expect(outcome.passed).toBe(false);
+      if (!outcome.passed) {
+        expect(outcome.reason).toContain('exceeds the maximum length of 10000 characters');
+        expect(outcome.reason).toContain('…');
+        expect(outcome.reason.length).toBeLessThan(500);
+      }
+    });
+
     it('never calls the cluster', async () => {
       await verifier.verify(makeKi(VALID_QUERY), context);
       await verifier.verify(makeKi('FROM logs-* | WHERE | LIMIT'), context);
