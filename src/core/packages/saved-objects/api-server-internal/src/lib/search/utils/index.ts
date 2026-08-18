@@ -10,7 +10,7 @@
 export {
   fieldDefined,
   hasFilterKeyError,
-  isSavedObjectAttr,
+  isRootField,
   validateConvertFilterToKueryNode,
   validateFilterKueryNode,
 } from './filter_utils';
