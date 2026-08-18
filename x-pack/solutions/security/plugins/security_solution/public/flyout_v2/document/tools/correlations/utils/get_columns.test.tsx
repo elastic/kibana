@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { formatDate } from '@elastic/eui';
 import { EntityStoreEuidApiProvider } from '@kbn/entity-store/public';
 import { ALERT_REASON, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
@@ -86,7 +85,7 @@ describe('getColumns', () => {
       expect(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`)).toBeInTheDocument();
     });
 
-    it('calls onShowAlert with row id and index when clicked', async () => {
+    it('calls onShowAlert with row id and index when clicked', () => {
       const [previewColumn] = getColumns({
         scopeId,
         dataTestSubj,
@@ -98,12 +97,12 @@ describe('getColumns', () => {
 
       renderColumn(renderCell(row));
 
-      await userEvent.click(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`));
+      fireEvent.click(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`));
 
       expect(mockOnShowAlert).toHaveBeenCalledWith('alert-id-1', 'test-index', 'Alert');
     });
 
-    it('includes the rule name in the title when the row has ALERT_RULE_NAME', async () => {
+    it('includes the rule name in the title when the row has ALERT_RULE_NAME', () => {
       const rowWithRule = {
         id: 'alert-id-1',
         index: 'test-index',
@@ -120,7 +119,7 @@ describe('getColumns', () => {
 
       renderColumn(renderCell(rowWithRule));
 
-      await userEvent.click(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`));
+      fireEvent.click(screen.getByTestId(`${dataTestSubj}AlertPreviewButton`));
 
       expect(mockOnShowAlert).toHaveBeenCalledWith(
         'alert-id-1',
