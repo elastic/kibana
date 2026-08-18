@@ -59,6 +59,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
   internalStateActions,
   useCurrentDataView,
@@ -118,6 +119,7 @@ export function DiscoverLayout() {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
+  useRegisterDiscoverEsqlFeedback();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;

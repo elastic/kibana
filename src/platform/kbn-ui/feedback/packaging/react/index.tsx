@@ -14,7 +14,9 @@ export { FeedbackTriggerButton, FeedbackContainer } from '../../src';
 export type { FeedbackTriggerButtonProps, FeedbackContainerProps } from '../../src';
 export type {
   FeedbackRegistryEntry,
+  FeedbackContext,
   FeedbackSubmittedData,
   FeedbackQuestion,
   FeedbackFormData,
+  AppDetails,
 } from '../../src/types';
