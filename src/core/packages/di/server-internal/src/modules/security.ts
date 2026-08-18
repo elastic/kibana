@@ -9,7 +9,13 @@
 
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { cacheInScope } from '@kbn/core-di-internal';
-import { ApiKeys, AuditLogger, CoreStart, CurrentUser, Request } from '@kbn/core-di-server';
+import {
+  AuditLogger,
+  CoreStart,
+  CurrentUser,
+  RedactedSessionId,
+  Request,
+} from '@kbn/core-di-server';
 
 export function loadSecurity({ bind }: ContainerModuleLoadOptions): void {
   bind(AuditLogger)
@@ -28,7 +34,11 @@ export function loadSecurity({ bind }: ContainerModuleLoadOptions): void {
     .inRequestScope()
     .onActivation(cacheInScope(CurrentUser));
 
-  bind(ApiKeys)
-    .toResolvedValue((securityStart) => securityStart.authc.apiKeys, [CoreStart('security')])
-    .inSingletonScope();
+  bind(RedactedSessionId)
+    .toResolvedValue(
+      (securityStart, request) => securityStart.authc.getRedactedSessionId(request),
+      [CoreStart('security'), Request]
+    )
+    .inRequestScope()
+    .onActivation(cacheInScope(RedactedSessionId));
 }

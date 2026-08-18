@@ -9,7 +9,13 @@
 
 import { type Container, ContainerModule } from 'inversify';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import { ApiKeys, AuditLogger, CoreStart, CurrentUser, Request } from '@kbn/core-di-server';
+import {
+  AuditLogger,
+  CoreStart,
+  CurrentUser,
+  RedactedSessionId,
+  Request,
+} from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
@@ -71,9 +77,20 @@ describe('loadSecurity', () => {
     expect(security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
   });
 
-  it('should resolve the api keys service', () => {
-    expect(container.get(ApiKeys)).toBe(security.authc.apiKeys);
-    expect(security.authc.getCurrentUser).not.toHaveBeenCalled();
-    expect(security.audit.asScoped).not.toHaveBeenCalled();
+  it('should resolve the redacted session id', async () => {
+    security.authc.getRedactedSessionId.mockResolvedValue('redacted-id');
+
+    await expect(container.getAsync(RedactedSessionId)).resolves.toBe('redacted-id');
+    expect(security.authc.getRedactedSessionId).toHaveBeenCalledWith(request);
+  });
+
+  it('should retrieve the redacted session id only once per scope', async () => {
+    const fork = injection.fork();
+    security.authc.getRedactedSessionId.mockResolvedValue('redacted-id');
+
+    await expect(fork.getAsync(RedactedSessionId)).resolves.toBe('redacted-id');
+    await expect(fork.getAsync(RedactedSessionId)).resolves.toBe('redacted-id');
+
+    expect(security.authc.getRedactedSessionId).toHaveBeenCalledTimes(1);
   });
 });

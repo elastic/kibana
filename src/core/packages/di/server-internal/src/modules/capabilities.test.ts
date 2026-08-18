@@ -14,6 +14,7 @@ import { injectionServiceMock } from '@kbn/core-di-mocks';
 import {
   CapabilitiesProvider,
   CapabilitiesResolver,
+  CapabilitiesSwitcher,
   CoreSetup,
   CoreStart,
   Request,
@@ -52,6 +53,20 @@ describe('loadCapabilities', () => {
     setup();
 
     expect(capabilitiesSetup.registerProvider).toHaveBeenCalledWith(capabilitiesProvider);
+  });
+
+  it('should register a capabilities switcher', () => {
+    const switcher = {
+      capabilityPath: 'myPlugin.*',
+      switch: () => ({}),
+    };
+    container.bind(CapabilitiesSwitcher).toConstantValue(switcher);
+    setup();
+
+    expect(capabilitiesSetup.registerSwitcher).toHaveBeenCalledWith(
+      switcher.switch,
+      expect.objectContaining({ capabilityPath: 'myPlugin.*' })
+    );
   });
 
   it('should not resolve the capabilities when resolving the resolver', () => {

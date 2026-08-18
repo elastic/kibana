@@ -9,7 +9,7 @@
 
 import { createToken } from '@kbn/core-di';
 import type { ServiceToken } from '@kbn/core-di';
-import type { APIKeysType, AuditLogger as IAuditLogger } from '@kbn/core-security-server';
+import type { AuditLogger as IAuditLogger } from '@kbn/core-security-server';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 /**
@@ -27,8 +27,7 @@ export const AuditLogger: ServiceToken<IAuditLogger> = createToken('AuditLogger'
 export const CurrentUser: ServiceToken<AuthenticatedUser | null> = createToken('CurrentUser');
 
 /**
- * The service for managing API keys.
- * @see {@link APIKeysType}
+ * The redacted session ID for the current HTTP request or `undefined` if the request has no session.
  * @public
  */
-export const ApiKeys: ServiceToken<APIKeysType> = createToken('ApiKeys');
+export const RedactedSessionId: ServiceToken<string | undefined> = createToken('RedactedSessionId');

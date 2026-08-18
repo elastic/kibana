@@ -10,6 +10,8 @@
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type {
   CapabilitiesProvider as ICapabilitiesProvider,
+  CapabilitiesSwitcher as CapabilitiesSwitcherFunction,
+  CapabilitiesSwitcherOptions,
   ResolveCapabilitiesOptions,
 } from '@kbn/core-capabilities-server';
 import { createToken } from '@kbn/core-di';
@@ -28,6 +30,35 @@ import type { ServiceToken } from '@kbn/core-di';
  */
 export const CapabilitiesProvider: ServiceToken<ICapabilitiesProvider> =
   createToken('CapabilitiesProvider');
+
+/**
+ * A capabilities switcher together with its registration options.
+ * @see {@link CapabilitiesSetup.registerSwitcher}
+ * @public
+ */
+export interface ICapabilitiesSwitcher extends CapabilitiesSwitcherOptions {
+  /**
+   * The switcher function changing the default state of the capabilities entries.
+   */
+  switch: CapabilitiesSwitcherFunction;
+}
+
+/**
+ * Service identifier to register a capabilities switcher.
+ * @see {@link ICapabilitiesSwitcher}
+ * @example
+ * ```ts
+ * bind(CapabilitiesSwitcher).toConstantValue({
+ *   capabilityPath: 'myPlugin.*',
+ *   switch: (request, capabilities) => ({
+ *     myPlugin: { read: false },
+ *   }),
+ * });
+ * ```
+ * @public
+ */
+export const CapabilitiesSwitcher: ServiceToken<ICapabilitiesSwitcher> =
+  createToken('CapabilitiesSwitcher');
 
 /**
  * Resolves the {@link Capabilities} for the current HTTP request.

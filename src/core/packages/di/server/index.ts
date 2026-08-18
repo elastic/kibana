@@ -10,7 +10,9 @@
 export {
   CapabilitiesProvider,
   CapabilitiesResolver,
+  CapabilitiesSwitcher,
   type ICapabilitiesResolver,
+  type ICapabilitiesSwitcher,
 } from './src/services/capabilities';
 export {
   ElasticsearchClient,
@@ -34,7 +36,7 @@ export {
   SavedObjectsTypeRegistry,
 } from './src/services/saved_objects';
 export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
-export { ApiKeys, AuditLogger, CurrentUser } from './src/services/security';
+export { AuditLogger, CurrentUser, RedactedSessionId } from './src/services/security';
 export { GlobalUiSettingsClient, UiSettingsClient } from './src/services/ui_settings';
 export {
   type IUserProfileAccessor,
