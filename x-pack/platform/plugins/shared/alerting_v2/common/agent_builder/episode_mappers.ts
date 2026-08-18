@@ -27,16 +27,32 @@ const mapNullFieldsToUndefined = <T extends Record<string, unknown>>(
 
 /**
  * Maps an {@link AlertEpisode} row to attachment `data`, converting any `null` field to `undefined`.
+ * Copies only attachment-schema fields so extra ES|QL columns cannot fail a `.strict()` parse.
  */
 export const alertEpisodeToEpisodeAttachment = (
   episode: AlertEpisode,
   options: AlertEpisodeToAttachmentOptions = {}
 ): EpisodeAttachmentData =>
   mapNullFieldsToUndefined({
-    ...episode,
+    '@timestamp': episode['@timestamp'],
+    'episode.id': episode['episode.id'],
     'episode.label': resolveEpisodeLabel({
       episode,
       ruleName: options.ruleName,
       groupingFields: options.groupingFields,
     }),
+    'episode.status': episode['episode.status'],
+    'rule.id': episode['rule.id'],
+    group_hash: episode.group_hash,
+    first_timestamp: episode.first_timestamp,
+    last_timestamp: episode.last_timestamp,
+    duration: episode.duration,
+    triggered_at: episode.triggered_at,
+    last_ack_action: episode.last_ack_action,
+    last_assignee_uid: episode.last_assignee_uid,
+    last_snooze_action: episode.last_snooze_action,
+    snooze_expiry: episode.snooze_expiry,
+    last_tags: episode.last_tags,
+    episode_data: episode.episode_data,
+    severity: episode.severity,
   });

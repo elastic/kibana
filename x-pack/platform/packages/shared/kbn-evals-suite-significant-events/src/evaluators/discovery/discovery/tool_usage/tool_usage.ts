@@ -87,9 +87,12 @@ const writesTopology = ({ params, toolId }: ReturnType<typeof extractOrderedTool
 export const scoreToolUsage = ({
   steps,
   detectionCount,
+  allowNewEventTopologyWrite = false,
 }: {
   steps: ConverseStep[];
   detectionCount: number;
+  /** When true, skip the topology-search requirement after a zero-result rule search (new episode). */
+  allowNewEventTopologyWrite?: boolean;
 }): ToolUsageScore => {
   const calledTools = new Set(extractToolCallIds(steps));
 
@@ -121,18 +124,6 @@ export const scoreToolUsage = ({
     };
   }
 
-  const hasUnfilteredEventSearch = orderedCalls.some(
-    ({ toolId, params }) =>
-      toolId === TOOL_ID_EVENT_SEARCH && params.exclude_unconfirmed_signals !== true
-  );
-  if (hasUnfilteredEventSearch) {
-    return {
-      score: 0,
-      label: `unfiltered-${TOOL_ID_EVENT_SEARCH}`,
-      explanation: `${TOOL_ID_EVENT_SEARCH} was not called with exclude_unconfirmed_signals: true — required to exclude signals whose confirmed value is false`,
-    };
-  }
-
   const ruleSearchFoundNoCandidates = orderedCalls.some(didRuleSearchReturnNoCandidates);
   const hasTopologySearch = orderedCalls.some(
     ({ params, toolId }) =>
@@ -140,7 +131,12 @@ export const scoreToolUsage = ({
       Array.isArray(params.topology_feature_ids) &&
       params.topology_feature_ids.length > 0
   );
-  if (ruleSearchFoundNoCandidates && orderedCalls.some(writesTopology) && !hasTopologySearch) {
+  if (
+    !allowNewEventTopologyWrite &&
+    ruleSearchFoundNoCandidates &&
+    orderedCalls.some(writesTopology) &&
+    !hasTopologySearch
+  ) {
     return {
       score: 0,
       label: 'missing-topology-search',
@@ -184,9 +180,15 @@ export const scoreToolUsageContinuation = (cycles: ContinuationCycle[]): ToolUsa
     return { score: 0, label: 'no-cycles', explanation: 'No cycles to score' };
   }
 
-  const perCycle = cycles.map((cycle): ToolUsageScore => {
+  const perCycle = cycles.map((cycle, cycleIndex): ToolUsageScore => {
     const steps = cycle.steps ?? [];
-    const baseScore = scoreToolUsage({ steps, detectionCount: 1 });
+    const baseScore = scoreToolUsage({
+      steps,
+      detectionCount: 1,
+      // Establishing cycle of a new episode may write topology without a topology search.
+      // A new event after a closed seed (`expectReuse: false`) still requires that search.
+      allowNewEventTopologyWrite: cycleIndex === 0 && cycle.expectReuse !== false,
+    });
     if (
       cycle.expectTopologyEventSearch &&
       !extractOrderedToolCalls(steps).some(

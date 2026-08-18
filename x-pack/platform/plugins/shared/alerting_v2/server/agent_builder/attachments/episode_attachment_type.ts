@@ -105,123 +105,128 @@ export const createEpisodeAttachmentType = ({
 }: CreateEpisodeAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof EPISODE_ATTACHMENT_TYPE,
   EpisodeAttachmentData
-> => ({
-  id: EPISODE_ATTACHMENT_TYPE,
+> => {
+  const attachmentLogger = logger.withLabels({ attachment_type: EPISODE_ATTACHMENT_TYPE });
 
-  validate: (input) => {
-    const result = episodeAttachmentDataSchema.safeParse(input);
-    if (result.success) {
-      return { valid: true, data: result.data };
-    }
-    return { valid: false, error: result.error.message };
-  },
+  return {
+    id: EPISODE_ATTACHMENT_TYPE,
 
-  resolve: async (
-    episodeId: string,
-    context: AttachmentResolveContext
-  ): Promise<EpisodeAttachmentData | undefined> => {
-    try {
-      const privilegeChecker = getPrivilegeChecker({ request: context.request });
-      const canRead = await privilegeChecker.canRead('alerts');
-      if (!canRead) {
-        logger.debug({
-          message: 'Unauthorized to resolve episode attachment',
+    validate: (input) => {
+      const result = episodeAttachmentDataSchema.safeParse(input);
+      if (result.success) {
+        return { valid: true, data: result.data };
+      }
+      return { valid: false, error: result.error.message };
+    },
+
+    resolve: async (
+      episodeId: string,
+      context: AttachmentResolveContext
+    ): Promise<EpisodeAttachmentData | undefined> => {
+      try {
+        const privilegeChecker = getPrivilegeChecker({ request: context.request });
+        const canRead = await privilegeChecker.canRead('alerts');
+        if (!canRead) {
+          attachmentLogger.debug({
+            message: 'Unauthorized to resolve episode attachment',
+            labels: { episode_id: episodeId, space_id: context.spaceId },
+          });
+          return undefined;
+        }
+
+        const episode = await getEpisodesClient(context).get(episodeId);
+        if (!episode) {
+          return undefined;
+        }
+
+        const { ruleName, groupingFields } = await loadRuleMetadata(
+          getRulesClient(context),
+          episode['rule.id'],
+          attachmentLogger
+        );
+
+        return episodeAttachmentDataSchema.parse(
+          alertEpisodeToEpisodeAttachment(episode, { ruleName, groupingFields })
+        );
+      } catch (error) {
+        attachmentLogger.warn({
+          message: 'Failed to resolve episode attachment',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
           labels: { episode_id: episodeId, space_id: context.spaceId },
+          error,
         });
         return undefined;
       }
+    },
 
-      const episode = await getEpisodesClient(context).get(episodeId);
-      if (!episode) {
-        return undefined;
-      }
-
-      const { ruleName, groupingFields } = await loadRuleMetadata(
-        getRulesClient(context),
-        episode['rule.id']
-      );
-
-      return episodeAttachmentDataSchema.parse(
-        alertEpisodeToEpisodeAttachment(episode, { ruleName, groupingFields })
-      );
-    } catch (error) {
-      logger.warn({
-        message: 'Failed to resolve episode attachment',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
-        labels: { episode_id: episodeId, space_id: context.spaceId },
-        error,
-      });
-      return undefined;
-    }
-  },
-
-  isStale: async (
-    attachment: VersionedAttachment<typeof EPISODE_ATTACHMENT_TYPE, EpisodeAttachmentData>,
-    context: AttachmentResolveContext
-  ): Promise<boolean> => {
-    if (!attachment.origin) {
-      return false;
-    }
-    const latestVersion = getLatestVersion(attachment);
-    if (!latestVersion) return true;
-    try {
-      const episode = await getEpisodesClient(context).get(attachment.origin);
-      if (!episode) {
+    isStale: async (
+      attachment: VersionedAttachment<typeof EPISODE_ATTACHMENT_TYPE, EpisodeAttachmentData>,
+      context: AttachmentResolveContext
+    ): Promise<boolean> => {
+      if (!attachment.origin) {
         return false;
       }
-      return episode['episode.status'] !== latestVersion.data['episode.status'];
-    } catch (error) {
-      logger.warn({
-        message: 'Failed to check episode attachment staleness',
-        code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
-        labels: { episode_id: attachment.origin, space_id: context.spaceId },
-        error,
-      });
-      return false;
-    }
-  },
+      const latestVersion = getLatestVersion(attachment);
+      if (!latestVersion) return true;
+      try {
+        const episode = await getEpisodesClient(context).get(attachment.origin);
+        if (!episode) {
+          return false;
+        }
+        return episode['episode.status'] !== latestVersion.data['episode.status'];
+      } catch (error) {
+        attachmentLogger.warn({
+          message: 'Failed to check episode attachment staleness',
+          code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,
+          labels: { episode_id: attachment.origin, space_id: context.spaceId },
+          error,
+        });
+        return false;
+      }
+    },
 
-  format: (attachment) => {
-    const episodeId = attachment.origin ?? attachment.data['episode.id'];
-    const ruleId = attachment.data['rule.id'];
-    const refreshToolId = refreshEpisodeToolId(attachment.id);
-    const ruleToolId = getRuleToolId(attachment.id);
+    format: (attachment) => {
+      const episodeId = attachment.origin ?? attachment.data['episode.id'];
+      const ruleId = attachment.data['rule.id'];
+      const refreshToolId = refreshEpisodeToolId(attachment.id);
+      const ruleToolId = getRuleToolId(attachment.id);
 
-    return {
-      getRepresentation: () => ({
-        type: 'text',
-        value: formatEpisodeDescription({
-          attachmentId: attachment.id,
-          data: attachment.data,
-          refreshToolId,
-          getRuleToolId: ruleToolId,
+      return {
+        getRepresentation: () => ({
+          type: 'text',
+          value: formatEpisodeDescription({
+            attachmentId: attachment.id,
+            data: attachment.data,
+            refreshToolId,
+            getRuleToolId: ruleToolId,
+          }),
         }),
-      }),
-      getBoundedTools: () => [
-        refreshEpisodeTool({
-          attachmentId: attachment.id,
-          episodeId,
-          logger,
-          getEpisodesClient,
-          getRulesClient,
-          getPrivilegeChecker,
-        }),
-        getRuleTool({
-          attachmentId: attachment.id,
-          episodeId,
-          ruleId,
-          logger,
-          getRulesClient,
-          getPrivilegeChecker,
-        }),
-      ],
-    };
-  },
+        getBoundedTools: () => [
+          refreshEpisodeTool({
+            attachmentId: attachment.id,
+            episodeId,
+            logger: attachmentLogger,
+            getEpisodesClient,
+            getRulesClient,
+            getPrivilegeChecker,
+          }),
+          getRuleTool({
+            attachmentId: attachment.id,
+            episodeId,
+            ruleId,
+            logger: attachmentLogger,
+            getRulesClient,
+            getPrivilegeChecker,
+          }),
+        ],
+      };
+    },
 
-  getAgentDescription: () =>
-    `A platform alert episode attachment — a stateful lifecycle of related alert events for a platform alert rule and group. This is not a Security/SIEM detection alert: do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices. It is read-only snapshot context. Use the attachment-scoped refresh_episode tool when you need the latest episode state, and get_rule to fetch the associated platform alert rule and its source indices. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
+    getAgentDescription: () =>
+      `A platform alert episode attachment — a stateful lifecycle of related alert events for a platform alert rule and group. This is not a Security/SIEM detection alert: do not use the security alert-analysis skill, detection-rule tools, or .alerts-security.alerts-* indices. It is read-only snapshot context. Use the attachment-scoped refresh_episode tool when you need the latest episode state, and get_rule to fetch the associated platform alert rule and its source indices. To create, explain, or modify that rule, load the ${RULE_MANAGEMENT_SKILL_ID} skill.`,
 
-  isReadonly: true,
+    isReadonly: true,
 
-  getTools: () => [],
-});
+    getTools: () => [],
+  };
+};

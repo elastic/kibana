@@ -10,11 +10,15 @@ import { ALERT_EPISODE_STATUS } from './alert_action_schema';
 import { tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_FINGERPRINT_LENGTH } from './constants';
 
-export const alertEpisodeStatusSchema = z.enum([
-  ALERT_EPISODE_STATUS.ACTIVE,
-  ALERT_EPISODE_STATUS.INACTIVE,
-  ALERT_EPISODE_STATUS.PENDING,
-  ALERT_EPISODE_STATUS.RECOVERING,
+export const alertEpisodeStatusSchema = z.union([
+  z.literal(ALERT_EPISODE_STATUS.INACTIVE).describe('The alert episode is fully recovered'),
+  z
+    .literal(ALERT_EPISODE_STATUS.PENDING)
+    .describe('Breached but below the consecutive-breaches threshold'),
+  z.literal(ALERT_EPISODE_STATUS.ACTIVE).describe('Met the threshold — alert is firing'),
+  z
+    .literal(ALERT_EPISODE_STATUS.RECOVERING)
+    .describe('Breach stopped but recovery condition is not yet met'),
 ]);
 
 /**

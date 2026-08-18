@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
+import { MAX_EPISODE_LABEL_LENGTH, type AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { parseEpisodeDataJson, getValueByFieldPath } from '@kbn/alerting-v2-utils';
 
 const GROUP_NAME_SEPARATOR = ' · ';
@@ -46,23 +46,27 @@ export const resolveEpisodeLabel = ({
   const resolvedRuleName = ruleName?.trim() || undefined;
   const groupName = resolveGroupName(episode, groupingFields);
 
-  if (resolvedRuleName && groupName) {
-    return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabelFromRuleAndGroup', {
-      defaultMessage: '{ruleName} alert for {groupName}',
-      values: { ruleName: resolvedRuleName, groupName },
-    });
-  }
+  const buildLabel = (): string => {
+    if (resolvedRuleName && groupName) {
+      return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabelFromRuleAndGroup', {
+        defaultMessage: '{ruleName} alert for {groupName}',
+        values: { ruleName: resolvedRuleName, groupName },
+      });
+    }
 
-  const label = resolvedRuleName ?? groupName;
-  if (label) {
-    return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabel', {
-      defaultMessage: '{label} alert',
-      values: { label: resolvedRuleName ?? groupName },
-    });
-  }
+    const resolvedLabel = resolvedRuleName ?? groupName;
+    if (resolvedLabel) {
+      return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabel', {
+        defaultMessage: '{label} alert',
+        values: { label: resolvedLabel },
+      });
+    }
 
-  return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabelFromRuleId', {
-    defaultMessage: 'Alert for rule {ruleId}',
-    values: { ruleId: episode['rule.id'] },
-  });
+    return i18n.translate('xpack.alertingV2.episodeAttachment.episodeLabelFromRuleId', {
+      defaultMessage: 'Alert for rule {ruleId}',
+      values: { ruleId: episode['rule.id'] },
+    });
+  };
+
+  return buildLabel().slice(0, MAX_EPISODE_LABEL_LENGTH);
 };

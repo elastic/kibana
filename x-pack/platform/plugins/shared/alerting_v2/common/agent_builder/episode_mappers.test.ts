@@ -97,4 +97,15 @@ describe('alertEpisodeToEpisodeAttachment', () => {
     expect(result.duration).toBeUndefined();
     expect(result).not.toEqual(expect.objectContaining({ group_hash: null, duration: null }));
   });
+
+  it('drops extra episode-row keys that are not on the attachment schema', () => {
+    const episodeWithExtraColumn = {
+      ...baseEpisode,
+      extra_column: 'should-not-copy',
+    } as unknown as AlertEpisode;
+
+    expect(alertEpisodeToEpisodeAttachment(episodeWithExtraColumn)).not.toHaveProperty(
+      'extra_column'
+    );
+  });
 });

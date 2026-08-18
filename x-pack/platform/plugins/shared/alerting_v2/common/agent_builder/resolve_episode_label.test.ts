@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { ALERT_EPISODE_STATUS, type AlertEpisode } from '@kbn/alerting-v2-schemas';
+import {
+  ALERT_EPISODE_STATUS,
+  MAX_EPISODE_LABEL_LENGTH,
+  type AlertEpisode,
+} from '@kbn/alerting-v2-schemas';
 import { resolveEpisodeLabel } from './resolve_episode_label';
 
 const baseEpisode: AlertEpisode = {
@@ -104,5 +108,21 @@ describe('resolveEpisodeLabel', () => {
     expect(resolveEpisodeLabel({ episode, groupingFields: ['host.name'] })).toBe(
       'Alert for rule rule-1'
     );
+  });
+
+  it('truncates labels that exceed the episode attachment schema max', () => {
+    const longGroup = 'g'.repeat(MAX_EPISODE_LABEL_LENGTH);
+    const episode = {
+      ...baseEpisode,
+      episode_data: JSON.stringify({ 'host.name': longGroup }),
+    };
+    const label = resolveEpisodeLabel({
+      episode,
+      ruleName: 'Host CPU high',
+      groupingFields: ['host.name'],
+    });
+
+    expect(label.startsWith('Host CPU high alert for ')).toBe(true);
+    expect(label).toHaveLength(MAX_EPISODE_LABEL_LENGTH);
   });
 });

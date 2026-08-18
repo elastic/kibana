@@ -10,7 +10,7 @@
 import type { ReactElement, ReactNode, MouseEventHandler } from 'react';
 import type { IconType } from '@elastic/eui';
 import type { Observable } from 'rxjs';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { GlobalHeaderAiButton } from './ai_button';
 import type { GlobalSearchConfig } from './global_search';
 
@@ -95,7 +95,7 @@ export interface AppHeaderTabAction {
  * @remarks
  * Actions are intentionally flat (a single level of items). Nested submenus, modals/flyouts and
  * focus return are not supported yet; when a use case arises, mirror the AppMenu approach
- * (`AppMenuRunActionParams` in `@kbn/core-chrome-app-menu-components`) by adding a nested `items`
+ * (`AppMenuRunActionParams` in `@kbn/app-menu`) by adding a nested `items`
  * prop and passing an anchor/`returnFocus` handler down to `onClick`.
  *
  * @public

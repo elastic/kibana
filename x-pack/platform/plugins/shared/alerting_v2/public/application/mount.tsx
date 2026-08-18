@@ -32,6 +32,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import { RulesApp } from './rules_app';
+import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
@@ -66,6 +67,39 @@ export const mountAlertingV2App = async ({
             <I18nProvider>
               <Router history={history}>
                 <RulesApp />
+              </Router>
+            </I18nProvider>
+          </BreadcrumbProvider>
+        </QueryClientProvider>
+      </Context.Provider>
+    ),
+    element
+  );
+
+  return () => ReactDOM.unmountComponentAtNode(element);
+};
+
+export const mountRuleLibraryApp = async ({
+  params,
+  container,
+  coreStart,
+}: {
+  params: AlertingV2MountParams;
+  container: Container;
+  coreStart: CoreStart;
+}): Promise<AppUnmount> => {
+  const { element, history, setBreadcrumbs } = params;
+
+  const queryClient = new QueryClient();
+
+  ReactDOM.render(
+    coreStart.rendering.addContext(
+      <Context.Provider value={container}>
+        <QueryClientProvider client={queryClient}>
+          <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
+            <I18nProvider>
+              <Router history={history}>
+                <RuleLibraryApp />
               </Router>
             </I18nProvider>
           </BreadcrumbProvider>
