@@ -21,6 +21,7 @@ import { createRuleExceptionStepDefinition } from './create_rule_exception_step/
 import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
 import { createNoteStepDefinition } from './create_note_step/create_note_step';
 import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
+import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 
 const createWorkflowsExtensionsMock = workflowsExtensionsMock.createSetup;
 
@@ -30,7 +31,7 @@ describe('registerWorkflowSteps (server)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(14);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(15);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       renderAlertNarrativeStepDefinition
     );
@@ -73,5 +74,6 @@ describe('registerWorkflowSteps (server)', () => {
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(
       deleteNoteStepDefinition
     );
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(getNotesStepDefinition);
   });
 });
