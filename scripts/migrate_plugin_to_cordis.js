@@ -163,6 +163,18 @@ function run(pluginDir) {
     coreAccessedSetup
   );
 
+  // If the plugins param is a plain identifier (not destructured) and is used in the body
+  // but all its deps were filtered out (browser-only), the variable would be undefined.
+  // Bail out in that case — the whole plugins object is being passed to an external function.
+  const isDestructuredPluginsParam = pluginsSetupParam.startsWith('{');
+  if (!isDestructuredPluginsParam && requiredPlugins.length === 0 && allRequiredPlugins.length > 0) {
+    const pluginsParamUsed = new RegExp(`\\b${escapeRegex(pluginsSetupParam)}\\b`).test(setupBody);
+    if (pluginsParamUsed) {
+      console.error(`  ✗ Cannot auto-migrate: plugins param '${pluginsSetupParam}' is used as a whole object but all deps were filtered as browser-only. Migrate manually.`);
+      process.exit(1);
+    }
+  }
+
   // Inject required-plugin compat keys: rebuild `plugins` (or destructured param) from ctx.
   // For destructured patterns like `{ dep1, dep2 }`, emit individual const declarations.
   if (requiredPlugins.length > 0) {
