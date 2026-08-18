@@ -17,7 +17,7 @@ import { VIS_EVENT_TO_TRIGGER, VisGroups } from '@kbn/visualizations-plugin/publ
 import { getDefaultSpec } from './default_spec';
 import { extractIndexPatternsFromSpec } from './lib/extract_index_pattern';
 import { extractProjectRoutingOverrides } from './lib/extract_project_routing_overrides';
-import { specUsesEsql } from './lib/spec_uses_esql';
+import { getPublishedEsqlQuery, specUsesEsql } from './lib/spec_uses_esql';
 import { createInspectorAdapters } from './vega_inspector';
 import { toExpressionAst } from './to_ast';
 import { getInfoMessage } from './components/vega_info_message';
@@ -83,6 +83,16 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
       // spec is invalid
     }
     return false;
+  },
+  getEsqlQuery: (visParams) => {
+    try {
+      const spec = parse(visParams.spec, { legacyRoot: false, keepWsc: true });
+
+      return getPublishedEsqlQuery(spec);
+    } catch (e) {
+      // spec is invalid
+    }
+    return undefined;
   },
   inspectorAdapters: createInspectorAdapters,
   /**
