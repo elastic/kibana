@@ -509,18 +509,26 @@ export function buildAwsServiceMatrix(
     }
 
     // Build the merged deploymentMethods array.
-    // managed_integration always goes first so it is the preferred method when present.
+    // managed_integration is always preferred when present; static methods are demoted.
     const methods: DeploymentMethodEntry[] = [];
     if (managedIntegrations) {
-      methods.push({ method: 'managed_integration' });
+      methods.push({ method: 'managed_integration', preferred: true });
     }
     if (staticMethods?.length) {
-      methods.push(...staticMethods);
+      methods.push(
+        ...(managedIntegrations
+          ? staticMethods.map((m) => ({ ...m, preferred: false }))
+          : staticMethods)
+      );
     }
-    const deploymentMethods: DeploymentMethodEntry[] = methods.length > 0 ? methods : [];
+    const deploymentMethods: DeploymentMethodEntry[] = methods;
 
-    // Ensure exactly one preferred entry — set it on the first if none is marked.
-    if (deploymentMethods.length > 0 && !deploymentMethods.some((dm) => dm.preferred)) {
+    // When managed_integration is absent, ensure exactly one static method is preferred.
+    if (
+      !managedIntegrations &&
+      deploymentMethods.length > 0 &&
+      !deploymentMethods.some((dm) => dm.preferred)
+    ) {
       deploymentMethods[0] = { ...deploymentMethods[0], preferred: true };
     }
 

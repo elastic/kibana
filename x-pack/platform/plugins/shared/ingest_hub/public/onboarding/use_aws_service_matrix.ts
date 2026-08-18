@@ -54,24 +54,6 @@ export function useAwsServiceMatrix(): AwsServiceMatrixEntry[] | undefined {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const { data: cloudtrailOtelData } = useGetPackageInfoByKeyQuery(
-    'aws_cloudtrail_otel',
-    undefined,
-    PACKAGE_QUERY_OPTIONS,
-    CACHE_OPTS
-  );
-  const { data: vpcflowOtelData } = useGetPackageInfoByKeyQuery(
-    'aws_vpcflow_otel',
-    undefined,
-    PACKAGE_QUERY_OPTIONS,
-    CACHE_OPTS
-  );
-  const { data: wafOtelData } = useGetPackageInfoByKeyQuery(
-    'aws_waf_otel',
-    undefined,
-    PACKAGE_QUERY_OPTIONS,
-    CACHE_OPTS
-  );
   const { data: logsData } = useGetPackageInfoByKeyQuery(
     'aws_logs',
     undefined,
@@ -89,23 +71,10 @@ export function useAwsServiceMatrix(): AwsServiceMatrixEntry[] | undefined {
       ...(bedrockAgentcoreData?.item && { aws_bedrock_agentcore: bedrockAgentcoreData.item }),
       ...(fargateData?.item && { awsfargate: fargateData.item }),
       ...(mqData?.item && { aws_mq: mqData.item }),
-      ...(cloudtrailOtelData?.item && { aws_cloudtrail_otel: cloudtrailOtelData.item }),
-      ...(vpcflowOtelData?.item && { aws_vpcflow_otel: vpcflowOtelData.item }),
-      ...(wafOtelData?.item && { aws_waf_otel: wafOtelData.item }),
       ...(logsData?.item && { aws_logs: logsData.item }),
     };
     return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC);
-  }, [
-    awsData,
-    bedrockData,
-    bedrockAgentcoreData,
-    fargateData,
-    mqData,
-    cloudtrailOtelData,
-    vpcflowOtelData,
-    wafOtelData,
-    logsData,
-  ]);
+  }, [awsData, bedrockData, bedrockAgentcoreData, fargateData, mqData, logsData]);
 }
 
 export function useAwsServicesMap(): Map<string, AwsServiceMatrixEntry> | undefined {
