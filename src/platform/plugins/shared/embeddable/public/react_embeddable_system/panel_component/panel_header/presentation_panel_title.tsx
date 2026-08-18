@@ -40,7 +40,7 @@ export const PresentationPanelTitle = ({
   panelTitle?: string;
   panelDescription?: string;
   viewMode?: ViewMode;
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
 }) => {
   const { euiTheme } = useEuiTheme();
   const isEditableTitle = viewMode === 'edit' && isApiCompatibleWithCustomizePanelAction(api);
