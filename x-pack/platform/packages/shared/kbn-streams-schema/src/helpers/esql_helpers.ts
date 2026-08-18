@@ -590,8 +590,9 @@ function getColumnName(node: ESQLAstItem | undefined): string {
 }
 
 /**
- * Finds `:` / `MATCH` predicates whose multi-word value the operator ORs term-by-term
- * (a static over-match); `MATCH_PHRASE` and `MATCH(..., {"operator":"AND"})` are exempt.
+ * Finds multi-word `:` / `MATCH` predicates - ORed term-by-term on text, an over-match.
+ * Mapping-blind on purpose: a field's type is ambiguous across backing indices, and the fix
+ * `MATCH_PHRASE` is safe either way.
  */
 export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredicate[] {
   const { root, parsed } = tryParseEsql(esql);

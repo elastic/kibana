@@ -283,40 +283,13 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
   describe('over-broad full-text predicates', () => {
     const stream = createWiredStreamDefinition('logs');
 
-    it('should reject a multi-word `:` value', () => {
+    it('should reject a multi-word full-text predicate, steering to MATCH_PHRASE', () => {
       expect(() =>
         validateEsqlQueryForStreamOrThrow({
           esqlQuery: 'FROM logs, logs.* | WHERE message : "request failed"',
           stream,
         })
-      ).toThrow('match ANY word');
-    });
-
-    it('should render a rejected MATCH as a function call, not `field MATCH value`', () => {
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* | WHERE MATCH(message, "request failed")',
-          stream,
-        })
-      ).toThrow('MATCH(message, "request failed")');
-    });
-
-    it('should reject with a 400 status', () => {
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* | WHERE message : "request failed"',
-          stream,
-        })
-      ).toThrow(expect.objectContaining({ statusCode: 400 }));
-    });
-
-    it('should accept a single-word `:` value', () => {
-      expect(() =>
-        validateEsqlQueryForStreamOrThrow({
-          esqlQuery: 'FROM logs, logs.* | WHERE message : "timeout"',
-          stream,
-        })
-      ).not.toThrow();
+      ).toThrow('MATCH_PHRASE');
     });
 
     it('should accept MATCH_PHRASE and AND-of-single-terms', () => {

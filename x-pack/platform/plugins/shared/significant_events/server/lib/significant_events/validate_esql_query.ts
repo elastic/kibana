@@ -70,8 +70,7 @@ export function validateEsqlQueryForStreamOrThrow({
     throw new EsqlQueryValidationError(`ES|QL query must use FROM ${wiredPattern}`);
   }
 
-  // Second enforcement point: the generation agent rejects these too, but direct writes
-  // (REST route, Agent Builder tool) bypass it.
+  // Enforced here too for direct writes (REST route, Agent Builder tool) that bypass generation.
   const overBroad = findOverBroadMatchPredicates(esqlQuery);
   if (overBroad.length > 0) {
     const rendered = overBroad
@@ -82,8 +81,9 @@ export function validateEsqlQueryForStreamOrThrow({
     throw new EsqlQueryValidationError(
       `Full-text predicate(s) match ANY word rather than the whole value - a multi-word ` +
         `":" or MATCH value is ORed term-by-term, which is far too broad: ${rendered}. ` +
-        `Use all-terms-required (field:"a" AND field:"b") or, when word order is semantic, ` +
-        `MATCH_PHRASE(field, "a b").`
+        `Replace each with MATCH_PHRASE(field, "a b") for an exact phrase, or ` +
+        `MATCH(field, "a b", {"operator": "AND"}) to require all terms in any order; ` +
+        `both match exactly on keyword fields.`
     );
   }
 }

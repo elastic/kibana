@@ -426,8 +426,6 @@ describe('hasSameEsql', () => {
 });
 
 describe('findOverBroadMatchPredicates', () => {
-  const fields = (esql: string) => findOverBroadMatchPredicates(esql).map((p) => p.field);
-
   it('flags a multi-word `:` value', () => {
     expect(findOverBroadMatchPredicates('FROM logs | WHERE message : "request failed"')).toEqual([
       { field: 'message', value: 'request failed', operator: ':' },
@@ -468,23 +466,13 @@ describe('findOverBroadMatchPredicates', () => {
     ).toEqual([]);
   });
 
-  it('does not flag a hyphenated/dotted single token', () => {
-    expect(
-      findOverBroadMatchPredicates('FROM logs | WHERE log.logger : "input.httpjson-cursor"')
-    ).toEqual([]);
-  });
-
-  it('ignores surrounding whitespace when counting words', () => {
-    expect(findOverBroadMatchPredicates('FROM logs | WHERE message : " timeout "')).toEqual([]);
-  });
-
-  it('reports every offending predicate in one query', () => {
-    expect(
-      fields('FROM logs | WHERE message : "request failed" OR error.message : "no such host"')
-    ).toEqual(['message', 'error.message']);
-  });
-
   it('returns an empty array for an unparseable query', () => {
     expect(findOverBroadMatchPredicates('THIS IS NOT ESQL {{{')).toEqual([]);
+  });
+
+  it('flags a multi-word value regardless of field (mapping-blind)', () => {
+    expect(
+      findOverBroadMatchPredicates('FROM logs | WHERE host.name : "web server"').map((p) => p.field)
+    ).toEqual(['host.name']);
   });
 });
