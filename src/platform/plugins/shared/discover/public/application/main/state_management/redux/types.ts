@@ -146,7 +146,6 @@ export enum TabInitializationStatus {
   NotStarted = 'NotStarted',
   InProgress = 'InProgress',
   Complete = 'Complete',
-  NoData = 'NoData',
   Disconnected = 'Disconnected',
   Error = 'Error',
 }
@@ -249,7 +248,11 @@ export enum TabsBarVisibility {
 }
 
 export interface DiscoverInternalState {
-  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  /**
+   * Whether the cluster contains any data, undefined as long as it wasn't checked yet.
+   * Only checked on demand, and no longer once data was found.
+   */
+  hasESData: boolean | undefined;
   userId: string | undefined;
   spaceId: string | undefined;
   persistedDiscoverSession: DiscoverSession | undefined;

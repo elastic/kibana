@@ -71,7 +71,7 @@ const getQueryText = (query: AggregateQuery | Query | undefined): string => {
 };
 
 export const buildScreenContext = (
-  dataViewTitle: string,
+  dataViewTitle: string | undefined,
   query: AggregateQuery | Query | undefined,
   columns: string[] | undefined,
   dataSourceType: string | undefined,
@@ -82,16 +82,21 @@ export const buildScreenContext = (
   data: {
     app: SESSION_TAG,
     url: window.location.href,
-    description: i18n.translate('discover.agentBuilder.screenContextDescription', {
-      defaultMessage:
-        'The user is viewing a Discover tab for data view {dataViewTitle} in {queryLanguage} mode.',
-      values: { dataViewTitle, queryLanguage: getQueryLanguage(query) },
-    }),
+    description: dataViewTitle
+      ? i18n.translate('discover.agentBuilder.screenContextDescription', {
+          defaultMessage:
+            'The user is viewing a Discover tab for data view {dataViewTitle} in {queryLanguage} mode.',
+          values: { dataViewTitle, queryLanguage: getQueryLanguage(query) },
+        })
+      : i18n.translate('discover.agentBuilder.screenContextDescriptionWithoutDataView', {
+          defaultMessage: 'The user is viewing a Discover tab in {queryLanguage} mode.',
+          values: { queryLanguage: getQueryLanguage(query) },
+        }),
     time_range: timeRange,
     additional_data: {
       columns: JSON.stringify(columns ?? []),
       data_source_type: dataSourceType ?? 'unknown',
-      data_view: dataViewTitle,
+      data_view: dataViewTitle ?? 'unknown',
       query: getQueryText(query),
       query_language: getQueryLanguage(query),
     },
@@ -209,7 +214,7 @@ export const DiscoverAgentBuilderConfig = () => {
 
     const attachments: AttachmentInput[] = [
       buildScreenContext(
-        dataView.getIndexPattern(),
+        dataView?.getIndexPattern(),
         query,
         columns,
         dataSource?.type,

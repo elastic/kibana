@@ -16,3 +16,4 @@ export type {
 
 export { NoDataCard } from './src/no_data_card';
 export { NoDataCardKibanaProvider, NoDataCardProvider } from './src/services';
+export { ElasticAgentCardIllustration } from './src/elastic_agent_card_illustration';

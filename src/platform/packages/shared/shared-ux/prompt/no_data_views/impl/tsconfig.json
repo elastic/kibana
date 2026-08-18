@@ -15,6 +15,7 @@
     "**/*.tsx"
   ],
   "kbn_references": [
+    "@kbn/shared-ux-card-no-data",
     "@kbn/shared-ux-prompt-no-data-views-types",
     "@kbn/shared-ux-prompt-no-data-views-mocks",
     "@kbn/deeplinks-analytics",

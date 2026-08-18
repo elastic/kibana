@@ -67,8 +67,8 @@ export const DiscoverToolkitTestProvider = ({
   const customizationService = useRuntimeState(currentTabRuntimeState.customizationService$);
   const adHocDataViews = useRuntimeState(toolkit.runtimeStateManager.adHocDataViews$);
   const currentDataView = useRuntimeState(currentTabRuntimeState.currentDataView$);
-  const runtimeState = useMemo<CombinedRuntimeState | undefined>(
-    () => (currentDataView ? { adHocDataViews, currentDataView } : undefined),
+  const runtimeState = useMemo<CombinedRuntimeState>(
+    () => ({ adHocDataViews, currentDataView }),
     [adHocDataViews, currentDataView]
   );
   const scopedProfilesManager = useRuntimeState(currentTabRuntimeState.scopedProfilesManager$);

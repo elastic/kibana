@@ -21,7 +21,7 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
  * data view, returns a new state object
  */
 export function getDataViewAppState(
-  currentDataView: DataView,
+  currentDataView: DataView | undefined,
   nextDataView: DataView,
   defaultColumns: string[],
   currentColumns: string[],
@@ -34,7 +34,7 @@ export function getDataViewAppState(
 
   if (modifyColumns) {
     const currentUnknownColumns = columns.filter(
-      (column) => !currentDataView.fields.getByName(column) && !defaultColumns.includes(column)
+      (column) => !currentDataView?.fields.getByName(column) && !defaultColumns.includes(column)
     );
     const currentColumnsRefreshed = uniq([...columns, ...defaultColumns]);
     columns = currentColumnsRefreshed.filter(
@@ -53,7 +53,7 @@ export function getDataViewAppState(
   // prepend this field in the table, so in legacy grid you would need to add this column to
   // remove sorting
   let nextSort = getSortArray(currentSort, nextDataView, isEsqlQuery).filter((value) => {
-    return nextDataView.timeFieldName || value[0] !== currentDataView.timeFieldName;
+    return nextDataView.timeFieldName || value[0] !== currentDataView?.timeFieldName;
   });
 
   if (nextDataView.isTimeBased() && !nextSort.length) {
@@ -61,7 +61,7 @@ export function getDataViewAppState(
     nextSort = [[nextDataView.timeFieldName, sortDirection]];
   } else if (
     nextDataView.isTimeBased() &&
-    currentDataView.isTimeBased() &&
+    currentDataView?.isTimeBased() &&
     nextDataView.timeFieldName !== currentDataView.timeFieldName
   ) {
     // switch time fields

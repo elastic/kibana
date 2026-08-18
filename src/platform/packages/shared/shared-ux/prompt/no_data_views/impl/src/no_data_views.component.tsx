@@ -22,12 +22,58 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { ElasticAgentCardIllustration } from '@kbn/shared-ux-card-no-data';
 import { DataViewIllustration } from './data_view_illustration';
 import { EsqlIllustration } from './esql_illustration';
 import { DocumentationLink } from './documentation_link';
 
 // max width value to use in pixels
 const MAX_WIDTH = 1200;
+
+const PromptAddData = ({
+  addDataHref,
+  addDataDocLink,
+}: Pick<NoDataViewsPromptComponentProps, 'addDataHref' | 'addDataDocLink'>) => {
+  if (!addDataHref) {
+    return null;
+  }
+
+  const cardTitle = i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataText', {
+    defaultMessage: 'Add integrations',
+  });
+
+  const cardDescription = i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataExplanation', {
+    defaultMessage:
+      'There is no data in Elasticsearch yet. Use Elastic Agent to collect data from your systems and services, so you can start exploring it here.',
+  });
+
+  return (
+    <EuiPageTemplate.EmptyPrompt
+      data-test-subj="noDataViewsPromptAddData"
+      className="NoDataViewsPromptAddData"
+      style={{ maxWidth: 400 }}
+      title={
+        <EuiTitle size="m">
+          <h2>{cardTitle}</h2>
+        </EuiTitle>
+      }
+      icon={<ElasticAgentCardIllustration />}
+      body={<p>{cardDescription}</p>}
+      actions={
+        <EuiButton color="primary" fill data-test-subj="browseIntegrationsLink" href={addDataHref}>
+          {i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataButtonLabel', {
+            defaultMessage: 'Browse integrations',
+          })}
+        </EuiButton>
+      }
+      footer={
+        addDataDocLink ? (
+          <DocumentationLink href={addDataDocLink} data-test-subj="docLinkAddData" />
+        ) : undefined
+      }
+    />
+  );
+};
 
 const PromptAddDataViews = ({
   onClickCreate,
@@ -155,6 +201,9 @@ export const NoDataViewsPrompt = ({
   dataViewsDocLink,
   onTryESQL,
   esqlDocLink,
+  addDataHref,
+  addDataDocLink,
+  showCreateDataView = true,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
   const cssStyles = [
@@ -209,6 +258,7 @@ export const NoDataViewsPrompt = ({
             }
 
             /* Final EmptyPrompt components */
+            .NoDataViewsPromptAddData,
             .NoDataViewsPromptCreateDataView,
             .NoDataViewsPromptTryESQL {
               flex: 1 !important;
@@ -218,16 +268,23 @@ export const NoDataViewsPrompt = ({
             }
           `}
         >
-          <EuiFlexItem>
-            <PromptAddDataViews
-              {...{
-                onClickCreate,
-                canCreateNewDataView,
-                dataViewsDocLink,
-                emptyPromptColor,
-              }}
-            />
-          </EuiFlexItem>
+          {addDataHref && (
+            <EuiFlexItem>
+              <PromptAddData {...{ addDataHref, addDataDocLink }} />
+            </EuiFlexItem>
+          )}
+          {showCreateDataView && (
+            <EuiFlexItem>
+              <PromptAddDataViews
+                {...{
+                  onClickCreate,
+                  canCreateNewDataView,
+                  dataViewsDocLink,
+                  emptyPromptColor,
+                }}
+              />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <PromptTryEsql
               {...{

@@ -23,6 +23,7 @@ import { hasActiveFilter } from '../../layout/utils';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 import { useFetchOccurrencesRange, TimeRangeExtendingStatus } from './use_fetch_occurances_range';
 import { NoResultsIllustration } from './assets/no_results_illustration';
+import { NoEsDataMessage } from '../no_es_data_message';
 import { useIsEsqlMode } from '../../../hooks/use_is_esql_mode';
 
 interface NoResultsSuggestionProps {
@@ -30,6 +31,8 @@ interface NoResultsSuggestionProps {
   isTimeBased?: boolean;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
+  /** Whether the cluster contains any data, undefined while it's being checked */
+  hasESData?: boolean;
   onDisableFilters: NoResultsSuggestionWhenFiltersProps['onDisableFilters'];
 }
 
@@ -38,6 +41,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
   isTimeBased,
   query,
   filters,
+  hasESData,
   onDisableFilters,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -90,7 +94,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
 
   const canAdjustSearchCriteria = isTimeBased || hasFilters || hasQuery;
 
-  const body = canAdjustSearchCriteria ? (
+  const suggestions = canAdjustSearchCriteria ? (
     <>
       <FormattedMessage
         id="discover.noResults.suggestion.tryText"
@@ -124,6 +128,10 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
   ) : (
     <NoResultsSuggestionDefault dataView={dataView} />
   );
+
+  // Suggesting to adjust the search criteria doesn't help as long as there is no data to
+  // search, so point to adding data instead in that case
+  const body = hasESData === false ? <NoEsDataMessage /> : suggestions;
 
   return (
     <EuiEmptyPrompt

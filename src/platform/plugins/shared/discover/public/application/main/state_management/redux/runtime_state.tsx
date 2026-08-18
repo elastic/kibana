@@ -307,7 +307,13 @@ export const useCurrentTabDataStateContainer = () => {
   return dataStateContainer;
 };
 
-export type CombinedRuntimeState = DiscoverRuntimeState & Pick<TabRuntimeState, 'currentDataView'>;
+export type CombinedRuntimeState = DiscoverRuntimeState & {
+  /**
+   * The tab's data view, which is undefined when none is available,
+   * e.g. when no data view exists in the current space
+   */
+  currentDataView: DataView | undefined;
+};
 
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 
@@ -337,6 +343,20 @@ const useRuntimeStateContext = () => {
 };
 
 export const useCurrentDataView = () => useRuntimeStateContext().currentDataView;
+
+/**
+ * Returns the current data view for subtrees that are only rendered when one exists
+ */
+export const useRequiredCurrentDataView = () => {
+  const currentDataView = useCurrentDataView();
+
+  if (!currentDataView) {
+    throw new Error('useRequiredCurrentDataView requires a data view to be available');
+  }
+
+  return currentDataView;
+};
+
 export const useAdHocDataViews = () => useRuntimeStateContext().adHocDataViews;
 
 const runtimeStateManagerContext = createContext<RuntimeStateManager | undefined>(undefined);

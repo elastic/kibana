@@ -151,35 +151,11 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       ? urlAppState?.dataSource.dataViewId
       : persistedTabDataView?.id;
 
-    const tabHasInitialAdHocDataViewSpec =
-      dataViewId && initialAdHocDataViewSpec?.id === dataViewId;
-    const peristedTabHasAdHocDataView = Boolean(
-      persistedTabDataView && !persistedTabDataView.isPersisted()
-    );
-
-    const { initializationState, defaultProfileAdHocDataViewIds } = getState();
-    const profileDataViews = runtimeStateManager.adHocDataViews$
-      .getValue()
-      .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
-
-    const profileDataViewsExist = profileDataViews.length > 0;
-    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
-    const canAccessWithoutPersistedDataView =
-      isEsqlMode ||
-      tabHasInitialAdHocDataViewSpec ||
-      peristedTabHasAdHocDataView ||
-      profileDataViewsExist ||
-      locationStateHasDataViewSpec;
-
-    if (!initializationState.hasUserDataView && !canAccessWithoutPersistedDataView) {
-      return { showNoDataPage: true };
-    }
-
     /**
      * Tab initialization
      */
 
-    let dataView: DataView;
+    let dataView: DataView | undefined;
 
     if (isOfAggregateQueryType(initialQuery)) {
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
@@ -206,12 +182,12 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
 
     dispatch(setDataView({ tabId, dataView }));
 
-    if (!dataView.isPersisted()) {
+    if (dataView && !dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));
     }
 
     const initialGlobalState: TabStateGlobalState = {
-      ...(persistedTab?.timeRestore && dataView.isTimeBased()
+      ...(persistedTab?.timeRestore && dataView?.isTimeBased()
         ? pick(persistedTab, 'timeRange', 'refreshInterval')
         : undefined),
       ...tabInitialGlobalState,
@@ -344,7 +320,5 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
     }
 
     discoverTabLoadTracker.reportEvent();
-
-    return { showNoDataPage: false };
   }
 );

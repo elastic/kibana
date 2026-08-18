@@ -30,6 +30,11 @@ export function createDiscoverDataViewsMock() {
         return Promise.reject(`DataView ${id} not found`);
       }
     },
+    hasData: {
+      hasESData: jest.fn(() => Promise.resolve(true)),
+      hasUserDataView: jest.fn(() => Promise.resolve(true)),
+      hasDataView: jest.fn(() => Promise.resolve(true)),
+    },
     defaultDataViewExists: jest.fn(() => Promise.resolve(true)),
     getDefaultDataView: jest.fn(() => dataViewMock),
     updateSavedObject: jest.fn(),

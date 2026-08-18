@@ -69,6 +69,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import { NoDataState } from './no_data_state';
 import type { DiscoverLayoutRestorableState } from './discover_layout_restorable_state';
 import { useScopedServices } from '../../../../components/scoped_services_provider';
 import { useIsChromeNextProjectHeader } from '../chrome_app_header';
@@ -144,7 +145,7 @@ export function DiscoverLayout() {
   // representation of those documents does not have the time field that _field_caps
   // reports us.
   const isTimeBased = useMemo(() => {
-    return dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased();
+    return Boolean(dataView && dataView.type !== DataViewType.ROLLUP && dataView.isTimeBased());
   }, [dataView]);
 
   const resultState = useMemo(
@@ -193,10 +194,14 @@ export function DiscoverLayout() {
   // The assistant is getting the state from the url correctly
   // expect from the index pattern where we have only the dataview id
   useEffect(() => {
+    const indexPatternDescription = dataView
+      ? ` The index pattern is the ${dataView.getIndexPattern()}`
+      : ' No data view is currently selected.';
+
     return observabilityAIAssistant?.service.setScreenContext({
       screenDescription: `The user is looking at the Discover view on the ${
         isEsqlMode ? 'ES|QL' : 'dataView'
-      } mode. The index pattern is the ${dataView.getIndexPattern()}`,
+      } mode.${indexPatternDescription}`,
     });
   }, [dataView, isEsqlMode, observabilityAIAssistant?.service]);
 
@@ -294,7 +299,27 @@ export function DiscoverLayout() {
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
   );
 
+  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
+  const onChangeDataView = useCallback(
+    (dataViewOrDataViewId: string | DataView) => {
+      dispatch(changeDataView({ dataViewOrDataViewId }));
+    },
+    [dispatch, changeDataView]
+  );
+
+  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
+  const onDataViewCreated = useCallback(
+    (nextDataView: DataView) => {
+      dispatch(onDataViewCreatedAction({ nextDataView }));
+    },
+    [dispatch, onDataViewCreatedAction]
+  );
+
   const mainDisplay = useMemo(() => {
+    if (!dataView) {
+      return <NoDataState onDataViewCreated={onDataViewCreated} />;
+    }
+
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
       return <DiscoverUninitialized onRefresh={() => dataStateContainer.fetch()} />;
@@ -320,6 +345,7 @@ export function DiscoverLayout() {
     viewMode,
     onAddFilter,
     onFieldEdited,
+    onDataViewCreated,
     onDropFieldToTable,
     dataStateContainer,
   ]);
@@ -343,22 +369,6 @@ export function DiscoverLayout() {
       );
     },
     [dispatch, setLayoutUiState]
-  );
-
-  const changeDataView = useCurrentTabAction(internalStateActions.changeDataView);
-  const onChangeDataView = useCallback(
-    (dataViewOrDataViewId: string | DataView) => {
-      dispatch(changeDataView({ dataViewOrDataViewId }));
-    },
-    [dispatch, changeDataView]
-  );
-
-  const onDataViewCreatedAction = useCurrentTabAction(internalStateActions.onDataViewCreated);
-  const onDataViewCreated = useCallback(
-    (nextDataView: DataView) => {
-      dispatch(onDataViewCreatedAction({ nextDataView }));
-    },
-    [dispatch, onDataViewCreatedAction]
   );
 
   const fullBodyHeightOffset = useMemo(() => {
@@ -405,74 +415,91 @@ export function DiscoverLayout() {
             spaces={spaces}
             history={history}
           />
-          <DiscoverResizableLayout
-            sidebarToggleState$={sidebarToggleState$}
-            sidebarPanel={
-              <SidebarMemoized
-                columns={currentColumns}
-                documents$={dataStateContainer.data$.documents$}
-                onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
-                onAddField={onAddColumnWithTracking}
-                onAddFilter={onAddFilter}
-                onChangeDataView={onChangeDataView}
-                onDataViewCreated={onDataViewCreated}
-                onFieldEdited={onFieldEdited}
-                onRemoveField={onRemoveColumnWithTracking}
-                selectedDataView={dataView}
-                sidebarToggleState$={sidebarToggleState$}
-                trackUiMetric={trackUiMetric}
-              />
-            }
-            mainPanel={
-              <div css={styles.dscPageContentWrapper}>
-                {resultState === 'none' ? (
-                  <>
-                    <div css={styles.mainPanel}>
-                      <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
-                    </div>
-                    {dataState.error ? (
-                      <ErrorCallout
-                        title={i18n.translate(
-                          'discover.noResults.searchExamples.noResultsErrorTitle',
-                          {
-                            defaultMessage: 'Unable to retrieve search results',
+          {!dataView ? (
+            <EuiPanel
+              role="main"
+              paddingSize="none"
+              borderRadius="none"
+              hasShadow={false}
+              hasBorder={false}
+              color="transparent"
+              css={styles.noDataStateContent}
+            >
+              {mainDisplay}
+            </EuiPanel>
+          ) : (
+            <DiscoverResizableLayout
+              sidebarToggleState$={sidebarToggleState$}
+              sidebarPanel={
+                <SidebarMemoized
+                  columns={currentColumns}
+                  documents$={dataStateContainer.data$.documents$}
+                  onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
+                  onAddField={onAddColumnWithTracking}
+                  onAddFilter={onAddFilter}
+                  onChangeDataView={onChangeDataView}
+                  onDataViewCreated={onDataViewCreated}
+                  onFieldEdited={onFieldEdited}
+                  onRemoveField={onRemoveColumnWithTracking}
+                  selectedDataView={dataView}
+                  sidebarToggleState$={sidebarToggleState$}
+                  trackUiMetric={trackUiMetric}
+                />
+              }
+              mainPanel={
+                <div css={styles.dscPageContentWrapper}>
+                  {resultState === 'none' ? (
+                    <>
+                      <div css={styles.mainPanel}>
+                        <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
+                      </div>
+                      {dataState.error ? (
+                        <ErrorCallout
+                          title={i18n.translate(
+                            'discover.noResults.searchExamples.noResultsErrorTitle',
+                            {
+                              defaultMessage: 'Unable to retrieve search results',
+                            }
+                          )}
+                          error={dataState.error}
+                          isEsqlMode={isEsqlMode}
+                          showErrorDialog={({ title, error }) =>
+                            core.notifications.showErrorDialog({ title, error })
                           }
-                        )}
-                        error={dataState.error}
-                        isEsqlMode={isEsqlMode}
-                        showErrorDialog={({ title, error }) =>
-                          core.notifications.showErrorDialog({ title, error })
-                        }
-                        esqlReferenceHref={docLinks.links.query.queryESQL}
-                      />
-                    ) : (
-                      <DiscoverNoResults
-                        isTimeBased={isTimeBased}
-                        query={globalQueryState.query}
-                        filters={globalQueryState.filters}
-                        dataView={dataView}
-                        onDisableFilters={onDisableFilters}
-                      />
-                    )}
-                  </>
-                ) : (
-                  <EuiPanel
-                    role="main"
-                    paddingSize="none"
-                    borderRadius="none"
-                    hasShadow={false}
-                    hasBorder={false}
-                    color="transparent"
-                    css={[styles.dscPageContent, contentCentered && styles.dscPageContentCentered]}
-                  >
-                    {mainDisplay}
-                  </EuiPanel>
-                )}
-              </div>
-            }
-            initialState={layoutUiState}
-            onInitialStateChange={onInitialStateChange}
-          />
+                          esqlReferenceHref={docLinks.links.query.queryESQL}
+                        />
+                      ) : (
+                        <DiscoverNoResults
+                          isTimeBased={isTimeBased}
+                          query={globalQueryState.query}
+                          filters={globalQueryState.filters}
+                          dataView={dataView}
+                          onDisableFilters={onDisableFilters}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <EuiPanel
+                      role="main"
+                      paddingSize="none"
+                      borderRadius="none"
+                      hasShadow={false}
+                      hasBorder={false}
+                      color="transparent"
+                      css={[
+                        styles.dscPageContent,
+                        contentCentered && styles.dscPageContentCentered,
+                      ]}
+                    >
+                      {mainDisplay}
+                    </EuiPanel>
+                  )}
+                </div>
+              }
+              initialState={layoutUiState}
+              onInitialStateChange={onInitialStateChange}
+            />
+          )}
         </div>
       </EuiPageBody>
     </EuiPage>
@@ -509,6 +536,14 @@ const componentStyles = {
     position: 'relative',
     overflow: 'hidden',
     height: '100%',
+  }),
+  // Fills the space usually taken by the sidebar and the document table,
+  // so that the no data state can center itself within the page
+  noDataStateContent: css({
+    display: 'flex',
+    flexDirection: 'column',
+    flex: '1 1 auto',
+    overflow: 'auto',
   }),
   dscPageContentCentered: css({
     width: 'auto',

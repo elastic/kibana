@@ -14,6 +14,7 @@ import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SearchResponseWarningsEmptyPrompt } from '@kbn/search-response-warnings';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import { useDataState } from '../../hooks/use_data_state';
+import { useHasESData } from '../../hooks/use_has_es_data';
 import { useCurrentTabDataStateContainer } from '../../state_management/redux';
 
 export interface DiscoverNoResultsProps {
@@ -34,6 +35,7 @@ export function DiscoverNoResults({
   const dataStateContainer = useCurrentTabDataStateContainer();
   const { documents$ } = dataStateContainer.data$;
   const interceptedWarnings = useDataState(documents$).interceptedWarnings;
+  const hasESData = useHasESData();
 
   if (interceptedWarnings?.length) {
     return <SearchResponseWarningsEmptyPrompt warnings={interceptedWarnings} />;
@@ -47,6 +49,7 @@ export function DiscoverNoResults({
           query={query}
           filters={filters}
           dataView={dataView}
+          hasESData={hasESData}
           onDisableFilters={onDisableFilters}
         />
       </EuiFlexItem>

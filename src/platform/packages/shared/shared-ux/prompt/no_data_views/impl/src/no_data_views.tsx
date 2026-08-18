@@ -30,6 +30,9 @@ export const NoDataViewsPrompt = ({
   allowAdHocDataView = false,
   onTryESQL: onTryESQLProp,
   onESQLNavigationComplete,
+  addDataHref,
+  addDataDocLink,
+  showCreateDataView,
 }: NoDataViewsPromptProps) => {
   const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, esqlDocLink, ...services } =
     useServices();
@@ -85,6 +88,9 @@ export const NoDataViewsPrompt = ({
         canCreateNewDataView,
         dataViewsDocLink,
         esqlDocLink,
+        addDataHref,
+        addDataDocLink,
+        showCreateDataView,
         onTryESQL: onTryESQL
           ? () => {
               onTryESQL();

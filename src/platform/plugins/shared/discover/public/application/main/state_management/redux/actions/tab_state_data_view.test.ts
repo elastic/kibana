@@ -40,7 +40,7 @@ const setup = async ({ dataView = dataViewMockWithTimeField }: { dataView?: Data
   });
 
   const persistedTab = getPersistedTabMock({
-    dataView: dataView.isPersisted() ? dataView : dataViewMockWithTimeField,
+    dataView: dataView?.isPersisted() ? dataView : dataViewMockWithTimeField,
     services,
   });
 

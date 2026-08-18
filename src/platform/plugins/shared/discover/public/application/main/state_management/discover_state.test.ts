@@ -118,9 +118,6 @@ async function getState(
     history: nextHistory,
     services,
   });
-  nextState.internalState.dispatch(
-    internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
-  );
   const getCurrentUrl = () => nextHistory.createHref(nextHistory.location);
   return {
     services,

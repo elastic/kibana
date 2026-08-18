@@ -25,7 +25,7 @@ export function getStateColumnActions({
   settings,
 }: {
   capabilities: Capabilities;
-  dataView: DataView;
+  dataView: DataView | undefined;
   dataViews: DataViewsContract;
   setAppState: (state: {
     columns: string[];
@@ -38,14 +38,19 @@ export function getStateColumnActions({
   settings?: UnifiedDataTableSettings;
 }) {
   function onAddColumn(columnName: string) {
-    popularizeField(dataView, columnName, dataViews, capabilities);
+    if (dataView) {
+      popularizeField(dataView, columnName, dataViews, capabilities);
+    }
+
     const nextColumns = addColumn(columns || [], columnName);
     const nextSort = columnName === '_score' && !sort?.length ? [['_score', defaultOrder]] : sort;
     setAppState({ columns: nextColumns, sort: nextSort, settings });
   }
 
   function onRemoveColumn(columnName: string) {
-    popularizeField(dataView, columnName, dataViews, capabilities);
+    if (dataView) {
+      popularizeField(dataView, columnName, dataViews, capabilities);
+    }
 
     const nextColumns = removeColumn(columns || [], columnName);
     // The state's sort property is an array of [sortByColumn,sortDirection]
@@ -70,7 +75,7 @@ export function getStateColumnActions({
   function onSetColumns(nextColumns: string[], hideTimeColumn: boolean) {
     // The next line should be gone when classic table will be removed
     const actualColumns =
-      !hideTimeColumn && dataView.timeFieldName && dataView.timeFieldName === nextColumns[0]
+      !hideTimeColumn && dataView?.timeFieldName && dataView.timeFieldName === nextColumns[0]
         ? (nextColumns || []).slice(1)
         : nextColumns;
 

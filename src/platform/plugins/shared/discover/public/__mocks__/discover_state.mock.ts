@@ -236,10 +236,6 @@ export function getDiscoverInternalStateMock({
           .mockResolvedValueOnce(persistedDiscoverSession);
       }
 
-      internalState.dispatch(
-        internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
-      );
-
       // Populate savedDataViews before initializing tabs,
       // needed for computing default app state values (like default sort)
       await internalState.dispatch(internalStateActions.loadDataViewList());

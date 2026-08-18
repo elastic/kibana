@@ -10,14 +10,14 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 
-export const getValidFilters = (dataView: DataView, filters: Filter[]): Filter[] => {
+export const getValidFilters = (dataView: DataView | undefined, filters: Filter[]): Filter[] => {
   return filters.map((filter) => {
     const meta = { ...filter.meta };
 
     // We need to disable scripted filters that don't match this data view
     // since we can't guarantee they'll succeed for the current data view
     // and can lead to runtime errors
-    if (filter.query?.script && meta.index !== dataView.id) {
+    if (filter.query?.script && meta.index !== dataView?.id) {
       meta.disabled = true;
     }
 

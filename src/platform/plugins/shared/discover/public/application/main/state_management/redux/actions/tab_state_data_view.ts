@@ -40,13 +40,13 @@ import { fetchData } from './tab_state';
  * Set the data view in the tab's runtime state
  */
 export const setDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
+  [TabActionPayload<{ dataView: DataView | undefined }>]
 > =
   ({ tabId, dataView }) =>
   (dispatch, _, { runtimeStateManager }) => {
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
 
-    if (dataView.id !== currentDataView$.getValue()?.id) {
+    if (dataView?.id !== currentDataView$.getValue()?.id) {
       dispatch(internalStateSlice.actions.setExpandedDoc({ tabId, expandedDoc: undefined }));
     }
 
@@ -57,7 +57,7 @@ export const setDataView: InternalStateThunkActionCreator<
  * Assign the next data view to the tab's runtime state and pause the refresh interval
  */
 export const assignNextDataView: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
+  [TabActionPayload<{ dataView: DataView | undefined }>]
 > = ({ tabId, dataView }) =>
   function assignNextDataViewThunkFn(dispatch) {
     dispatch(setDataView({ tabId, dataView }));
@@ -98,7 +98,7 @@ export const changeDataView: InternalStateThunkActionCreator<
       // Swallow the error and keep the current data view
     }
 
-    if (nextDataView && currentDataView) {
+    if (nextDataView) {
       // Mark all profile app state default fields to reset if we are switching to a different data view
       dispatch(
         internalStateActions.setProfileAppStateDefaultFieldsToReset({

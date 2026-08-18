@@ -102,6 +102,7 @@ export {
   RuntimeStateManagerProvider,
   useRuntimeStateManager,
   useCurrentDataView,
+  useRequiredCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
 

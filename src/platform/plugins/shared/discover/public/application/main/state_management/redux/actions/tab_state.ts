@@ -572,7 +572,7 @@ export const fetchData: InternalStateThunkActionCreator<
  * Pause auto refresh interval if the data view is not time-based or is a rollup
  */
 export const pauseAutoRefreshInterval: InternalStateThunkActionCreator<
-  [TabActionPayload<{ dataView: DataView }>]
+  [TabActionPayload<{ dataView: DataView | undefined }>]
 > = ({ tabId, dataView }) =>
   function pauseAutoRefreshIntervalThunkFn(dispatch, getState) {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {

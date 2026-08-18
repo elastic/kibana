@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EuiButton, EuiFlexItem } from '@elastic/eui';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/control-group-renderer';
 import { DataViewType, type DataView, type DataViewSpec } from '@kbn/data-views-plugin/public';
 import {
@@ -95,11 +96,15 @@ export const DiscoverTopNav = ({
   const showDatePicker = useMemo(() => {
     // always show the timepicker for ES|QL mode
     return (
-      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+      isEsqlMode ||
+      (!isEsqlMode && Boolean(dataView?.isTimeBased()) && dataView?.type !== DataViewType.ROLLUP)
     );
   }, [dataView, isEsqlMode]);
 
+  const indexPatterns = useMemo(() => (dataView ? [dataView] : []), [dataView]);
+
   const closeFieldEditor = useRef<() => void | undefined>();
+  const closeDataViewEditor = useRef<() => void | undefined>();
 
   const onQuerySubmitAction = useCurrentTabAction(internalStateActions.onQuerySubmit);
   const onQuerySubmit = useCallback(
@@ -139,14 +144,13 @@ export const DiscoverTopNav = ({
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
-      if (closeFieldEditor.current) {
-        closeFieldEditor.current();
-      }
+      closeFieldEditor.current?.();
+      closeDataViewEditor.current?.();
     };
   }, []);
 
   const canEditDataView =
-    Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || dataView?.isPersisted() === false;
 
   const editField = useMemo(
     () =>
@@ -259,7 +263,11 @@ export const DiscoverTopNav = ({
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
       trigger: {
-        label: dataView?.getName() || '',
+        label:
+          dataView?.getName() ||
+          i18n.translate('discover.dataViewPicker.noDataViewSelectedLabel', {
+            defaultMessage: 'Select a data view',
+          }),
         'data-test-subj': 'discover-dataView-switch-link',
         title: dataView?.getIndexPattern() || '',
       },
@@ -282,6 +290,13 @@ export const DiscoverTopNav = ({
     onDataViewEdited,
     onCreateDefaultAdHocDataView,
   ]);
+
+  const createDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: onDataViewCreated,
+      allowAdHocDataView: true,
+    });
+  }, [dataViewEditor, onDataViewCreated]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
     if (isOpen) {
@@ -336,6 +351,34 @@ export const DiscoverTopNav = ({
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
+  // As long as there is nothing to pick from, offer creating a data view instead of the picker
+  const hasNoDataViewToPick =
+    !dataView && !savedDataViews.length && !adHocDataViews.length && !isEsqlMode;
+  const dataViewPickerOverride = useMemo(() => {
+    if (searchBarCustomization?.CustomDataViewPicker) {
+      return <searchBarCustomization.CustomDataViewPicker />;
+    }
+
+    if (!hasNoDataViewToPick || !dataViewEditor.userPermissions.editDataView()) {
+      return undefined;
+    }
+
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiButton
+          size="s"
+          iconType="plusInCircle"
+          onClick={createDataView}
+          data-test-subj="discoverCreateDataViewButton"
+        >
+          {i18n.translate('discover.dataViewPicker.createDataViewButtonLabel', {
+            defaultMessage: 'Create a data view',
+          })}
+        </EuiButton>
+      </EuiFlexItem>
+    );
+  }, [createDataView, dataViewEditor, hasNoDataViewToPick, searchBarCustomization]);
+
   return (
     <span>
       <DiscoverTopNavMenu
@@ -350,7 +393,10 @@ export const DiscoverTopNav = ({
           !!services.capabilities.discover_v2.storeSearchSession
         }
         appName="discover"
-        indexPatterns={[dataView]}
+        // Without a data view there is nothing to query, the data view picker stays
+        // enabled since it's rendered as an override
+        isDisabled={hasNoDataViewToPick}
+        indexPatterns={indexPatterns}
         onQuerySubmit={onQuerySubmit}
         onCancel={onCancelClick}
         isLoading={isLoading}
@@ -369,11 +415,7 @@ export const DiscoverTopNav = ({
         allowSavingQueries
         showSearchBar={true}
         useDefaultBehaviors={true}
-        dataViewPickerOverride={
-          searchBarCustomization?.CustomDataViewPicker ? (
-            <searchBarCustomization.CustomDataViewPicker />
-          ) : undefined
-        }
+        dataViewPickerOverride={dataViewPickerOverride}
         dataViewPickerComponentProps={
           shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
         }

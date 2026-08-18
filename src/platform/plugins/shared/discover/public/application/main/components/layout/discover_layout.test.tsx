@@ -23,29 +23,51 @@ import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import { render, screen, waitFor } from '@testing-library/react';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 
 const setup = async ({
   dataView,
   hideSidebar,
   hideTable = false,
+  hasESData = true,
   dataMainMsg = {
     fetchStatus: FetchStatus.COMPLETE,
     foundDocuments: true,
   },
 }: {
-  dataView: DataView;
+  dataView: DataView | undefined;
   hideSidebar?: boolean;
   hideTable?: boolean;
+  hasESData?: boolean;
   dataMainMsg?: DataMainMsg;
 }) => {
   const { profilesManagerMock } = createContextAwarenessMocks({ shouldRegisterProviders: false });
   const services = createDiscoverServicesMock();
 
   services.profilesManager = profilesManagerMock;
+  services.dataViews.hasData = {
+    hasESData: jest.fn(() => Promise.resolve(hasESData)),
+    hasUserDataView: jest.fn(() => Promise.resolve(true)),
+    hasDataView: jest.fn(() => Promise.resolve(true)),
+  };
+  services.core.application.capabilities = {
+    ...services.core.application.capabilities,
+    navLinks: { ...services.core.application.capabilities.navLinks, integrations: true },
+  };
+
+  const uiSettingsGetMock = services.uiSettings.get;
+  services.uiSettings.get = <T,>(key: string) => {
+    return key === ENABLE_ESQL ? (true as T) : uiSettingsGetMock<T>(key);
+  };
+
+  if (!dataView) {
+    // Simulate a space without any data view
+    services.dataViews.getDefaultDataView = jest.fn(() => Promise.resolve(null));
+  }
 
   const toolkit = getDiscoverInternalStateMock({
     services,
-    persistedDataViews: [dataView],
+    persistedDataViews: dataView ? [dataView] : [],
   });
 
   await toolkit.initializeTabs();
@@ -54,7 +76,9 @@ const setup = async ({
     internalStateActions.updateAppState({
       tabId: toolkit.getCurrentTab().id,
       appState: {
-        dataSource: createDataViewDataSource({ dataViewId: dataView.id! }),
+        dataSource: dataView?.id
+          ? createDataViewDataSource({ dataViewId: dataView.id })
+          : undefined,
         hideTable,
         hideSidebar,
         query: { query: '', language: 'kuery' },
@@ -83,15 +107,17 @@ const setup = async ({
     })
   );
 
-  dataStateContainer.data$.documents$.next({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
-  });
-  dataStateContainer.data$.totalHits$.next({
-    fetchStatus: FetchStatus.COMPLETE,
-    result: Number(esHitsMock.length),
-  });
-  dataStateContainer.data$.main$.next(dataMainMsg);
+  if (dataView) {
+    dataStateContainer.data$.documents$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: esHitsMock.map((esHit) => buildDataTableRecord(esHit, dataView)),
+    });
+    dataStateContainer.data$.totalHits$.next({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: Number(esHitsMock.length),
+    });
+    dataStateContainer.data$.main$.next(dataMainMsg);
+  }
 
   render(
     <DiscoverToolkitTestProvider toolkit={toolkit} usePortalsRenderer>
@@ -153,6 +179,28 @@ describe('Discover component', () => {
       });
     }, 10000);
   });
+
+  it('shows the ES|QL prompt when no data view is available', async () => {
+    await setup({ dataView: undefined });
+    await waitFor(() => {
+      expect(screen.queryByTestId('noDataViewsTryESQL')).toBeInTheDocument();
+    });
+    // Creating a data view is offered by the data view picker instead
+    expect(screen.queryByTestId('noDataViewsPromptCreateDataView')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('noDataViewsPromptAddData')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('fieldList')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('discoverDocumentsTable')).not.toBeInTheDocument();
+  }, 10000);
+
+  it('shows the add data card additionally when the cluster has no data', async () => {
+    await setup({ dataView: undefined, hasESData: false });
+    await waitFor(() => {
+      expect(screen.queryByTestId('noDataViewsPromptAddData')).toBeInTheDocument();
+    });
+    expect(screen.queryByTestId('browseIntegrationsLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('noDataViewsTryESQL')).toBeInTheDocument();
+    expect(screen.queryByTestId('noDataViewsPromptCreateDataView')).not.toBeInTheDocument();
+  }, 10000);
 
   it('shows the no results error display', async () => {
     await setup({
