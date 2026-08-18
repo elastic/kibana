@@ -437,7 +437,6 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // Must run inside apply_verdicts so it is constrained to pending alerts.
     const loops = enclosingLoops(workflow.steps, 'push_auto_close_id');
     expect(loops.some((l) => l.name === 'apply_verdicts')).toBe(true);
-
   });
 
   it('auto-closes every qualifying alert of the execution in one bulk call', () => {
