@@ -214,4 +214,98 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
       },
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 5: Get endpoint status by hostname
+  // ---------------------------------------------------------------------------
+  evaluate('get endpoint status by hostname', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: endpoint status by hostname',
+        description:
+          'Validates that the agent resolves a hostname and calls get_endpoint_status ' +
+          'to report isolation state and online/offline status.',
+        examples: [
+          {
+            input: {
+              question: 'What is the current status of eval-host-isolate? Is it isolated?',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
+                'Called the endpoint-response-actions.get_endpoint_status inline tool',
+                'Reported the host status (online/offline) and isolation state',
+              ],
+              tool_sequence: ['endpoint-response-actions.get_endpoint_status'],
+            },
+            metadata: { golden_id: 'era-006-endpoint-status', row_type: 'happy' },
+          },
+        ],
+      },
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 6: List running processes on a host
+  // ---------------------------------------------------------------------------
+  evaluate('list running processes on a host', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: running processes',
+        description:
+          'Validates that the agent resolves a hostname and calls running_processes ' +
+          'to enumerate active processes on the endpoint.',
+        examples: [
+          {
+            input: {
+              question: 'Show me the running processes on eval-host-isolate',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
+                'Called the endpoint-response-actions.running_processes inline tool',
+                'Reported the process list or a clear not-found message',
+              ],
+              tool_sequence: ['endpoint-response-actions.running_processes'],
+            },
+            metadata: { golden_id: 'era-007-running-processes', row_type: 'happy' },
+          },
+        ],
+      },
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // Scenario 7: Scan a path on a host
+  // ---------------------------------------------------------------------------
+  evaluate('scan a path on a host', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'endpoint-response-actions: scan path',
+        description:
+          'Validates that the agent resolves a hostname and calls scan to trigger ' +
+          'a malware scan on a specific path, with confirmation.',
+        examples: [
+          {
+            input: {
+              question: 'Scan /tmp/suspicious on eval-host-isolate for malware',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Resolved host name "eval-host-isolate" to an endpoint/agent ID',
+                'Called the endpoint-response-actions.scan inline tool',
+                'Presented a confirmation prompt before executing the scan',
+                'Reported the scan result (success or pending) back to the user',
+              ],
+              tool_sequence: ['endpoint-response-actions.scan'],
+            },
+            metadata: { golden_id: 'era-008-scan-path', row_type: 'happy' },
+          },
+        ],
+      },
+    });
+  });
 });
