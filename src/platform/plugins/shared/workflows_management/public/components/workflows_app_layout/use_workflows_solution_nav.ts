@@ -17,7 +17,7 @@ import { PLUGIN_ID, PLUGIN_NAME } from '../../../common';
 
 type SolutionNavItems = NonNullable<SolutionNavProps['items']>;
 
-const NAV_PAGES = [WorkflowsPageName.list, WorkflowsPageName.library, WorkflowsPageName.executions];
+const NAV_PAGES = [WorkflowsPageName.list, WorkflowsPageName.executions, WorkflowsPageName.library];
 
 /**
  * The app-relative path of a nav link, for react-router. `path` is not exposed on `ChromeNavLink`
