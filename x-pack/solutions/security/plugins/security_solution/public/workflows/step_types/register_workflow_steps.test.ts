@@ -78,6 +78,6 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader13()).resolves.toBe(createNoteStepDefinition);
     await expect(loader14()).resolves.toBe(deleteNoteStepDefinition);
     await expect(loader15()).resolves.toBe(getNotesStepDefinition);
-    await expect(loader11()).resolves.toBe(updateNoteStepDefinition);
+    await expect(loader16()).resolves.toBe(updateNoteStepDefinition);
   });
 });
