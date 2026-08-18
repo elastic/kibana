@@ -151,6 +151,9 @@ export const prepareRule = async <Params extends RuleParams>({
       schedule: data.schedule,
       consumer: data.consumer,
       ruleTypeId: data.alertTypeId,
+      producer: ruleType.producer,
+      createdAt: createTime,
+      templateId: rule.templateId,
     };
     return { prepared };
   } catch (err) {
