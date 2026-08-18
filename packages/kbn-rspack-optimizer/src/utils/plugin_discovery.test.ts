@@ -8,6 +8,7 @@
  */
 
 import Fs from 'fs';
+import Path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { discoverPlugins } from './plugin_discovery';
 
@@ -111,5 +112,33 @@ describe('plugin_discovery', () => {
     it('should discover more plugins when testPlugins=true', () => {
       expect(pluginsWithTest.length).toBeGreaterThanOrEqual(pluginsWithoutTest.length);
     });
+  });
+
+  describe('discoverPlugins with pluginPaths', () => {
+    const analyticsFtrHelpersDir = Path.resolve(
+      REPO_ROOT,
+      'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+    );
+
+    it('includes a test plugin listed in pluginPaths without enabling all test plugins', async () => {
+      const withoutPaths = await discoverPlugins({
+        repoRoot: REPO_ROOT,
+        examples: false,
+        testPlugins: false,
+      });
+      const withPath = await discoverPlugins({
+        repoRoot: REPO_ROOT,
+        examples: false,
+        testPlugins: false,
+        pluginPaths: [analyticsFtrHelpersDir],
+      });
+
+      expect(withoutPaths.find((p) => p.id === 'analyticsFtrHelpers')).toBeUndefined();
+      expect(withPath.find((p) => p.id === 'analyticsFtrHelpers')).toMatchObject({
+        id: 'analyticsFtrHelpers',
+        contextDir: analyticsFtrHelpersDir,
+      });
+      expect(withPath.find((p) => p.id === 'analyticsPluginA')).toBeUndefined();
+    }, 30000);
   });
 });

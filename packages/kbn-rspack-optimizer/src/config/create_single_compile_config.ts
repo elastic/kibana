@@ -80,6 +80,8 @@ export interface SingleCompileConfigOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  pluginPaths?: string[];
+  pluginScanDirs?: string[];
   themeTags?: ThemeTag[];
   /** ToolingLog instance for consistent logging with Kibana's dev mode */
   log?: ToolingLog;
@@ -117,6 +119,8 @@ export async function createSingleCompileConfig(
     cache = true,
     examples = false,
     testPlugins = false,
+    pluginPaths,
+    pluginScanDirs,
     themeTags = [...DEFAULT_THEME_TAGS],
     log,
     profile = false,
@@ -139,6 +143,8 @@ export async function createSingleCompileConfig(
     repoRoot,
     examples,
     testPlugins,
+    pluginPaths,
+    pluginScanDirs,
   });
 
   // Create a SINGLE unified entry that imports ALL plugins

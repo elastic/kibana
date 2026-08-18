@@ -22,6 +22,8 @@ export interface RspackOptimizerOptions {
   cache?: boolean;
   dist?: boolean;
   examples?: boolean;
+  pluginPaths?: string[];
+  pluginScanDirs?: string[];
   themeTags?: ThemeTag[];
   /** Enable HMR in watch mode (undefined = auto-detect) */
   hmr?: boolean;
@@ -127,6 +129,8 @@ export class RspackOptimizer {
                 cache: this.options.cache,
                 dist: this.options.dist,
                 examples: this.options.examples,
+                pluginPaths: this.options.pluginPaths,
+                pluginScanDirs: this.options.pluginScanDirs,
                 themeTags: this.options.themeTags ?? [...DEFAULT_THEME_TAGS],
                 hmr: this.options.hmr,
                 basePath: this.options.basePath,

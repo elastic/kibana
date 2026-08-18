@@ -69,7 +69,12 @@ describe('RspackOptimizer', () => {
     const child = createMockChildProcess();
     mockFork.mockReturnValue(child);
 
-    const optimizer = createOptimizer({ dist: true, basePath: '/bp' });
+    const optimizer = createOptimizer({
+      dist: true,
+      basePath: '/bp',
+      pluginPaths: ['/repo/test-plugin'],
+      pluginScanDirs: ['/repo/plugins'],
+    });
     const runPromise = optimizer.run();
 
     child.emit('message', { type: 'ready' });
@@ -83,6 +88,8 @@ describe('RspackOptimizer', () => {
         cache: undefined,
         dist: true,
         examples: undefined,
+        pluginPaths: ['/repo/test-plugin'],
+        pluginScanDirs: ['/repo/plugins'],
         themeTags: ['borealislight', 'borealisdark'],
         hmr: undefined,
         basePath: '/bp',
