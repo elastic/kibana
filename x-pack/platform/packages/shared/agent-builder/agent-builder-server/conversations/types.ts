@@ -39,14 +39,7 @@ export interface ConversationPublicClient {
    */
   list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
   /**
-   * Create an empty conversation (no rounds, no execution).
-   *
-   * Validates that the agent is accessible before writing — prevents orphaned
-   * documents if the agent is invalid. Throws a 404-shaped error if the agent
-   * does not exist or is inaccessible.
-   *
-   * Throws a 409-shaped error (AgentBuilderConversationAlreadyExistsError) if
-   * a conversation with the given ID already exists.
+   * Create a new empty conversation (without triggering an execution).
    */
   create(request: ConversationCreatePublicRequest): Promise<Conversation>;
 }
