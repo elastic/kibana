@@ -11,6 +11,7 @@ import dedent from 'dedent';
 import getopts from 'getopts';
 import { Cluster } from '../cluster';
 import { createCliError } from '../errors';
+import { defaultToSingleNodeDiscovery } from '../settings';
 import { parseTimeoutToMs } from '../utils';
 
 export const archive = {
@@ -61,6 +62,8 @@ export const archive = {
     if (!path || !path.endsWith('tar.gz')) {
       throw createCliError('you must provide a path to an ES tar file');
     }
+
+    options.esArgs = defaultToSingleNodeDiscovery(options.esArgs);
 
     const { installPath } = await cluster.installArchive(path, {
       basePath: options.basePath,

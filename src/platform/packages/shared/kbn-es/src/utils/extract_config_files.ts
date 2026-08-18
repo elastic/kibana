@@ -12,13 +12,13 @@ import fs from 'fs';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
- * Copies config references to an absolute path to
- * the provided destination. This is necessary as ES security
- * requires files to be within the installation directory
+ * Copies config references to an absolute path into the given config directory,
+ * rewriting each setting to the bare filename. This is necessary as ES security
+ * requires files to be within the config directory.
  */
 export function extractConfigFiles(
   config: string | string[],
-  dest: string,
+  configDir: string,
   options?: { log: ToolingLog }
 ) {
   const originalConfig = typeof config === 'string' ? [config] : config;
@@ -29,7 +29,7 @@ export function extractConfigFiles(
 
     if (isFile(value)) {
       const filename = path.basename(value);
-      const destPath = path.resolve(dest, 'config', filename);
+      const destPath = path.resolve(configDir, filename);
 
       copyFileSync(value, destPath);
 

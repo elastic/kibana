@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseSettings, SettingsFilter } from './settings';
+import { defaultToSingleNodeDiscovery, parseSettings, SettingsFilter } from './settings';
 
 const mockSettings = [
   'abc.def=1',
@@ -62,4 +62,30 @@ test('`parseSettings` parses and returns only non-secure settings with `Settings
     ['xpack.security.authc.realms.oidc.oidc1.rp.client_id', 'client id'],
     ['discovery.type', 'single-node'],
   ]);
+});
+
+describe('defaultToSingleNodeDiscovery', () => {
+  test('prepends single-node discovery when no discovery settings are given', () => {
+    expect(defaultToSingleNodeDiscovery(['abc.def=1'])).toEqual([
+      'discovery.type=single-node',
+      'abc.def=1',
+    ]);
+    expect(defaultToSingleNodeDiscovery()).toEqual(['discovery.type=single-node']);
+    expect(defaultToSingleNodeDiscovery('abc.def=1')).toEqual([
+      'discovery.type=single-node',
+      'abc.def=1',
+    ]);
+  });
+
+  test('leaves esArgs unchanged when discovery is already configured', () => {
+    expect(defaultToSingleNodeDiscovery(['discovery.type=multi-node'])).toEqual([
+      'discovery.type=multi-node',
+    ]);
+    expect(defaultToSingleNodeDiscovery(['discovery.seed_hosts=127.0.0.1:9301'])).toEqual([
+      'discovery.seed_hosts=127.0.0.1:9301',
+    ]);
+    expect(defaultToSingleNodeDiscovery(['cluster.initial_master_nodes=node-01'])).toEqual([
+      'cluster.initial_master_nodes=node-01',
+    ]);
+  });
 });

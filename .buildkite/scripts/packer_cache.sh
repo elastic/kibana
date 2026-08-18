@@ -13,7 +13,7 @@ yarn kbn bootstrap
 cd .buildkite && npm ci && cd ..
 
 for version in $(cat versions.json | jq -r '.versions[].version'); do
-  node scripts/es snapshot --download-only --base-path "$ES_CACHE_DIR" --version "$version"
+  node scripts/es snapshot --install-only --base-path "$ES_CACHE_DIR" --version "$version"
 done
 
 for version in $(cat versions.json | jq -r '.versions[].version'); do

@@ -71,7 +71,12 @@ const createArtifactDest = () => {
   return path.join(dir, MOCK_FILENAME);
 };
 
-const createCachedArtifact = ({ contents, etag = 'etag' }) => {
+const statVerifiedState = (dest) => {
+  const { size, mtimeMs } = fs.statSync(dest);
+  return { size, mtimeMs };
+};
+
+const createCachedArtifact = ({ contents, etag = 'etag', markVerified = false }) => {
   const dest = createArtifactDest();
   fs.writeFileSync(dest, contents);
   fs.writeFileSync(
@@ -80,6 +85,7 @@ const createCachedArtifact = ({ contents, etag = 'etag' }) => {
       {
         ts: new Date().toISOString(),
         etag,
+        ...(markVerified ? { verified: statVerifiedState(dest) } : {}),
       },
       null,
       2
@@ -192,8 +198,56 @@ describe('Artifact', () => {
       await artifact.download(dest);
 
       expect(fs.readFileSync(dest)).toEqual(validContents);
-      expect(JSON.parse(fs.readFileSync(`${dest}.meta`, 'utf8')).etag).toBe('fresh-etag');
+      const meta = JSON.parse(fs.readFileSync(`${dest}.meta`, 'utf8'));
+      expect(meta.etag).toBe('fresh-etag');
+      expect(meta.verified).toEqual(statVerifiedState(dest));
       expect(fetch).toHaveBeenCalledTimes(4);
+    });
+
+    it('skips checksum verification on a 304 when the file is unchanged since a previous verification', async () => {
+      const artifact = new Artifact(log, {
+        url: MOCK_URL,
+        filename: MOCK_FILENAME,
+        checksumUrl: `${MOCK_URL}.sha512`,
+        checksumType: 'sha512',
+      });
+      const cachedContents = Buffer.from('cached artifact');
+      const dest = createCachedArtifact({ contents: cachedContents, markVerified: true });
+
+      fetch.mockReturnValueOnce(Promise.resolve(new Response('', { status: 304 })));
+
+      await artifact.download(dest);
+
+      expect(fs.readFileSync(dest)).toEqual(cachedContents);
+      // only the conditional GET; no checksum fetch
+      expect(fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-verifies on a 304 when the file changed since the last verification', async () => {
+      const artifact = new Artifact(log, {
+        url: MOCK_URL,
+        filename: MOCK_FILENAME,
+        checksumUrl: `${MOCK_URL}.sha512`,
+        checksumType: 'sha512',
+      });
+      const cachedContents = Buffer.from('cached artifact');
+      const dest = createCachedArtifact({ contents: cachedContents, markVerified: true });
+      // invalidate the recorded state by touching the file
+      const stat = fs.statSync(dest);
+      fs.utimesSync(dest, new Date(stat.atimeMs), new Date(stat.mtimeMs + 1000));
+
+      fetch
+        .mockReturnValueOnce(Promise.resolve(new Response('', { status: 304 })))
+        .mockReturnValueOnce(
+          Promise.resolve(new Response(`${getChecksum(cachedContents)}  ${MOCK_FILENAME}`))
+        );
+
+      await artifact.download(dest);
+
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(JSON.parse(fs.readFileSync(`${dest}.meta`, 'utf8')).verified).toEqual(
+        statVerifiedState(dest)
+      );
     });
 
     it('reuses a cached artifact when the checksum endpoint is unavailable', async () => {
@@ -269,7 +323,9 @@ describe('Artifact', () => {
       await artifact.download(dest);
 
       expect(fs.readFileSync(dest)).toEqual(validContents);
-      expect(JSON.parse(fs.readFileSync(`${dest}.meta`, 'utf8')).etag).toBe('fresh-etag');
+      const meta = JSON.parse(fs.readFileSync(`${dest}.meta`, 'utf8'));
+      expect(meta.etag).toBe('fresh-etag');
+      expect(meta.verified).toEqual(statVerifiedState(dest));
       expect(fetch).toHaveBeenCalledTimes(2);
     });
   });

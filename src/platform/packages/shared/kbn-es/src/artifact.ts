@@ -257,9 +257,16 @@ export class Artifact {
         // A 304 means the remote etag matches, but the file on disk may still be
         // corrupt, e.g. if an ES snapshot was promoted while a CI VM image was
         // being built, the cached file could have been overwritten mid-download.
-        // Verify the checksum before trusting the cache.
+        // Verify the checksum before trusting the cache, unless the file is
+        // unchanged since a previous successful verification.
+        if (this.wasVerifiedSinceLastChange(dest, cacheMeta.verified)) {
+          this.log.info('cached artifact previously verified, skipping checksum');
+          return;
+        }
+
         try {
           await this.verifyExistingFileChecksum(dest);
+          cache.writeMeta(dest, { etag: cacheMeta.etag, ...this.getVerifiedState(dest) });
           return;
         } catch (error) {
           if (
@@ -283,11 +290,8 @@ export class Artifact {
 
         const redownloadedArtifact = await this.downloadAndVerify(tmpPath, cacheMeta.ts);
 
-        // cache the etag for future downloads
-        cache.writeMeta(dest, { etag: redownloadedArtifact.etag });
-
-        // rename temp download to the destination location
         fs.renameSync(tmpPath, dest);
+        cache.writeMeta(dest, { etag: redownloadedArtifact.etag, ...this.getVerifiedState(dest) });
         return;
       }
 
@@ -299,11 +303,8 @@ export class Artifact {
         throw error;
       }
 
-      // cache the etag for future downloads
-      cache.writeMeta(dest, { etag: artifactResp.etag });
-
-      // rename temp download to the destination location
       fs.renameSync(tmpPath, dest);
+      cache.writeMeta(dest, { etag: artifactResp.etag, ...this.getVerifiedState(dest) });
     });
   }
 
@@ -494,14 +495,38 @@ export class Artifact {
     return expectedChecksum;
   }
 
-  private async verifyExistingFileChecksum(dest: string) {
-    const hash = createHash(this.spec.checksumType);
-    for await (const chunk of fs.createReadStream(dest)) {
-      hash.update(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  private getVerifiedState(dest: string) {
+    const { size, mtimeMs } = fs.statSync(dest);
+    return { verified: { size, mtimeMs } };
+  }
+
+  private wasVerifiedSinceLastChange(dest: string, verified?: { size: number; mtimeMs: number }) {
+    if (!verified) {
+      return false;
     }
 
-    const expectedChecksum = await this.fetchExpectedChecksum();
-    const actualChecksum = hash.digest('hex');
+    try {
+      const { size, mtimeMs } = fs.statSync(dest);
+      return size === verified.size && mtimeMs === verified.mtimeMs;
+    } catch {
+      return false;
+    }
+  }
+
+  private async verifyExistingFileChecksum(dest: string) {
+    const hashFile = async () => {
+      const hash = createHash(this.spec.checksumType);
+      for await (const chunk of fs.createReadStream(dest)) {
+        hash.update(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+      }
+      return hash.digest('hex');
+    };
+
+    const [expectedChecksum, actualChecksum] = await Promise.all([
+      this.fetchExpectedChecksum(),
+      hashFile(),
+    ]);
+
     if (actualChecksum !== expectedChecksum) {
       throw createTaggedError(
         `cached artifact at ${dest} checksum mismatch: expected ${expectedChecksum}, got ${actualChecksum}`,

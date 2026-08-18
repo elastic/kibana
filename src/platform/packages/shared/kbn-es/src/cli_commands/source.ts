@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import path from 'path';
+
 import dedent from 'dedent';
 import getopts from 'getopts';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Cluster } from '../cluster';
+import { defaultToSingleNodeDiscovery } from '../settings';
 import { parseTimeoutToMs } from '../utils';
 import { configureMockIdpSamlRealm } from '../utils/configure_mock_idp_saml_realm';
 import type { Command } from './types';
@@ -81,7 +84,7 @@ export const source: Command = {
       license: options.license,
       log,
     });
-    options.esArgs = samlEsArgs;
+    options.esArgs = defaultToSingleNodeDiscovery(samlEsArgs);
 
     const cluster = new Cluster({ ssl: options.ssl });
     const { installPath } = await cluster.installSource({
@@ -95,7 +98,7 @@ export const source: Command = {
     });
 
     if (options.dataArchive) {
-      await cluster.extractDataDirectory(installPath, options.dataArchive);
+      await cluster.extractDataDirectory(path.resolve(installPath, 'data'), options.dataArchive);
     }
     if (options.plugins) {
       await cluster.installPlugins(installPath, options.plugins, options.esJavaOpts);

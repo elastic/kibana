@@ -10,7 +10,12 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ArtifactLicense } from '../artifact';
 
-export interface InstallSourceOptions {
+interface ConfigPathOption {
+  /** Where to write `config/`, passed to ES as `ES_PATH_CONF`. Defaults to the install dir */
+  configPath?: string;
+}
+
+export interface InstallSourceOptions extends ConfigPathOption {
   sourcePath: string;
   license?: ArtifactLicense;
   password?: string;
@@ -31,12 +36,12 @@ export interface DownloadSnapshotOptions {
   resources?: string[];
 }
 
-export interface InstallSnapshotOptions extends DownloadSnapshotOptions {
+export interface InstallSnapshotOptions extends DownloadSnapshotOptions, ConfigPathOption {
   password?: string;
   esArgs?: string[];
 }
 
-export interface InstallArchiveOptions {
+export interface InstallArchiveOptions extends ConfigPathOption {
   license?: ArtifactLicense;
   password?: string;
   basePath?: string;

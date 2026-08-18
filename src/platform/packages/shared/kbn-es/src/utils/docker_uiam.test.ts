@@ -9,6 +9,9 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
+import { createStripAnsiSerializer } from '@kbn/jest-serializers';
+
+expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn(() => Promise.resolve()),
@@ -365,10 +368,8 @@ describe(`#runUiamContainer()`, () => {
       .mockResolvedValueOnce({ stdout: `name-${cosmosDbContainer.name}` })
       .mockResolvedValue({ stdout: ` running ` });
 
-    await expect(
-      runUiamContainer(new ToolingLog(), cosmosDbContainer)
-    ).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam-cosmosdb[22m]`
+    await expect(runUiamContainer(new ToolingLog(), cosmosDbContainer)).rejects.toThrow(
+      'The "uiam-cosmosdb" container failed to start within the expected time. Last known status: running.'
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.
@@ -381,8 +382,8 @@ describe(`#runUiamContainer()`, () => {
       .mockResolvedValueOnce({ stdout: `name-${uiamContainer.name}` })
       .mockResolvedValue({ stdout: ` running ` });
 
-    await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toMatchInlineSnapshot(
-      `[Error: The "uiam" container failed to start within the expected time. Last known status: running. Check the logs with [1mdocker logs -f uiam[22m]`
+    await expect(runUiamContainer(new ToolingLog(), uiamContainer)).rejects.toThrow(
+      'The "uiam" container failed to start within the expected time. Last known status: running.'
     );
 
     // Skip the first call to `docker run` as we checked it in the previous test.

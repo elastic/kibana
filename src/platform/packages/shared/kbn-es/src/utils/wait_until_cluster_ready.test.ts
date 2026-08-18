@@ -10,6 +10,9 @@
 import { Client } from '@elastic/elasticsearch';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { waitUntilClusterReady } from './wait_until_cluster_ready';
+import { createStripAnsiSerializer } from '@kbn/jest-serializers';
+
+expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 jest.mock('@elastic/elasticsearch', () => {
   return {
@@ -49,9 +52,9 @@ describe('waitUntilClusterReady', () => {
     expect(health).toHaveBeenCalledTimes(4);
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m waiting for ES cluster to report a green status",
-        " [33mwarn[39m waiting for ES cluster to come online, attempt 1 failed with: foo",
-        " [32msucc[39m ES cluster is ready",
+        " info waiting for ES cluster to report a green status",
+        " warn waiting for ES cluster to come online, attempt 1 failed with: foo",
+        " succ ES cluster is ready",
       ]
     `);
   }, 10000);
@@ -69,9 +72,9 @@ describe('waitUntilClusterReady', () => {
     expect(health).toHaveBeenCalledTimes(3);
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
-        " [34minfo[39m waiting for ES cluster to report a yellow status",
-        " [33mwarn[39m waiting for ES cluster to come online, attempt 1 failed with: foo",
-        " [32msucc[39m ES cluster is ready",
+        " info waiting for ES cluster to report a yellow status",
+        " warn waiting for ES cluster to come online, attempt 1 failed with: foo",
+        " succ ES cluster is ready",
       ]
     `);
   }, 10000);
