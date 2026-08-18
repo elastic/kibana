@@ -15,7 +15,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AWS_SERVICES_MAP } from '../aws_service_matrix';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import {
   DeploymentMethodCard,
@@ -30,7 +29,7 @@ interface AuthenticateAndDeployStepProps {
 }
 
 export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAndDeployStepProps) {
-  const { servicesStep } = useOnboardingFlow();
+  const { servicesStep, awsServicesMap } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   const [deploymentMethod, setDeploymentMethod] =
@@ -39,27 +38,25 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const miServiceIds = useMemo(
     () =>
       selectedServiceIds.filter((id) =>
-        AWS_SERVICES_MAP.get(id)?.deploymentMethods.some(
-          (dm) => dm.method === 'managed_integration'
-        )
+        awsServicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'managed_integration')
       ),
-    [selectedServiceIds]
+    [selectedServiceIds, awsServicesMap]
   );
 
   const ecfServiceIds = useMemo(
     () =>
       selectedServiceIds.filter((id) =>
-        AWS_SERVICES_MAP.get(id)?.deploymentMethods.some((dm) => dm.method === 'ecf')
+        awsServicesMap?.get(id)?.deploymentMethods.some((dm) => dm.method === 'ecf')
       ),
-    [selectedServiceIds]
+    [selectedServiceIds, awsServicesMap]
   );
 
   const showIdentityFederation = useMemo(() => {
     if (miServiceIds.length === 0) return true;
     return miServiceIds.every(
-      (id) => AWS_SERVICES_MAP.get(id)?.identityFederationSupported !== false
+      (id) => awsServicesMap?.get(id)?.identityFederationSupported !== false
     );
-  }, [miServiceIds]);
+  }, [miServiceIds, awsServicesMap]);
 
   return (
     <div data-test-subj="onboardingStep-authenticate-and-deploy">
