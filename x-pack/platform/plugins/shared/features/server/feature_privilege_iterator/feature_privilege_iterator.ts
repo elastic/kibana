@@ -207,6 +207,16 @@ function mergeWithSubFeatures(
         : {}),
     };
 
+    // `aiIndex.read` is a list of KI types, so a sub-feature privilege included in the primary
+    // privilege widens the set of readable types without ever revoking a type the primary privilege
+    // already grants.
+    if (subFeaturePrivilege.aiIndex?.read) {
+      mergedConfig.aiIndex = {
+        ...mergedConfig.aiIndex,
+        read: mergeArrays(mergedConfig.aiIndex?.read, subFeaturePrivilege.aiIndex.read),
+      };
+    }
+
     // `alerts.read` is a boolean flag, so a sub-feature privilege included in the primary
     // privilege grants alerts read access to it without ever revoking access the primary
     // privilege already grants on its own.

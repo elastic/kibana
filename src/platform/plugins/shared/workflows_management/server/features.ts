@@ -11,6 +11,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
+  WORKFLOW_SML_TYPE,
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
   WorkflowsManagementApiActions,
   WorkflowsManagementUiActions,
@@ -94,6 +95,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
               ),
               includeIn: 'read',
               savedObject: { all: [], read: [] },
+              aiIndex: { read: [WORKFLOW_SML_TYPE] },
               api: [WorkflowsManagementApiActions.read],
               ui: [WorkflowsManagementUiActions.read],
             },

@@ -41,6 +41,12 @@ describe('visualizationSmlType', () => {
   });
 
   describe('id', () => {
+    // IF THIS TEST FAILS you have renamed the KI type id. Also update the literal in
+    // x-pack/platform/plugins/shared/features/server/oss_features.ts `aiIndex: { read: ['visualization'] }`
+    // Otherwise visualizations' visibility will silently be dropped from the AI Index, i.e. a user
+    // won't be able to see them in the SML even though they're still in the backing index.
+    // The `features` plugin cannot depend on this one, so it hardcodes the string instead of importing
+    // VISUALIZATION_SML_TYPE.
     it('equals visualization', () => {
       expect(visualizationSmlType.id).toBe('visualization');
     });

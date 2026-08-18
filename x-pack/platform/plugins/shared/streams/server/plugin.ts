@@ -248,6 +248,11 @@ export class StreamsPlugin
       privileges: {
         all: {
           app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
+          // Must match SIGNIFICANT_EVENT_SML_TYPE in
+          // x-pack/platform/plugins/shared/significant_events/common/significant_event_attachment.ts.
+          // Declared as a literal rather than imported: `significant_events` already requires
+          // `streams`, so importing it here would create a circular plugin dependency.
+          aiIndex: { read: ['significant_event'] },
           savedObject: {
             all: [],
             read: [],
@@ -257,6 +262,11 @@ export class StreamsPlugin
         },
         read: {
           app: [STREAMS_FEATURE_ID, SIGNIFICANT_EVENTS_APP_ID],
+          // Must match SIGNIFICANT_EVENT_SML_TYPE in
+          // x-pack/platform/plugins/shared/significant_events/common/significant_event_attachment.ts.
+          // Declared as a literal rather than imported: `significant_events` already requires
+          // `streams`, so importing it here would create a circular plugin dependency.
+          aiIndex: { read: ['significant_event'] },
           savedObject: {
             all: [],
             read: [],

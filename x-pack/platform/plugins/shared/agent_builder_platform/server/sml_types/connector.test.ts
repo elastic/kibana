@@ -59,6 +59,14 @@ describe('connectorSmlType', () => {
     logger: mockLogger,
   });
 
+  it('uses the KI type id the actions feature privilege grants (see actions/server/feature.ts)', () => {
+    // `aiIndex: { read: ['connector'] }` on ACTIONS_FEATURE is a literal, because the actions plugin
+    // cannot depend on this one. Renaming CONNECTOR_SML_TYPE without updating it would silently drop
+    // AI Index visibility rather than fail to compile. Note the KI type id is `connector`, not the
+    // saved-object type `action`.
+    expect(connectorSmlType.id).toBe('connector');
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

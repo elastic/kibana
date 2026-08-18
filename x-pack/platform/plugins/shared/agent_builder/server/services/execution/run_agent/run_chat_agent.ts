@@ -436,6 +436,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       pendingRound,
       startTime,
       modelProvider,
+      mainConnectorId: model.connector.connectorId,
       stateManager,
       attachmentStateManager: context.attachmentStateManager,
       configurationOverrides: effectiveOverrides,
