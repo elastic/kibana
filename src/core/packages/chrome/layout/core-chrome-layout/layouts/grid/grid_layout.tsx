@@ -35,10 +35,10 @@ import {
 } from '@kbn/core-chrome-browser-hooks';
 import { isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
-import { GridLayoutGlobalStyles } from '@kbn/ui-chrome-layout';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
 import { APP_FIXED_VIEWPORT_ID } from '../../app_fixed_viewport';
+import { KibanaGridLayoutGlobalStyles } from './kibana_grid_global_styles';
 
 const layoutConfigs: {
   classic: ChromeLayoutConfig;
@@ -46,7 +46,7 @@ const layoutConfigs: {
   projectNext: ChromeLayoutConfig;
 } = {
   classic: {
-    chromeStyle: 'classic',
+    appearance: 'plain',
     headerHeight: 96,
     bannerHeight: 32,
     sidebarWidth: 0,
@@ -54,7 +54,7 @@ const layoutConfigs: {
     navigationWidth: 0,
   },
   project: {
-    chromeStyle: 'project',
+    appearance: 'framed',
     headerHeight: 48,
     bannerHeight: 32,
 
@@ -67,7 +67,7 @@ const layoutConfigs: {
     navigationWidth: 0,
   },
   projectNext: {
-    chromeStyle: 'project',
+    appearance: 'framed',
     headerHeight: 48,
     bannerHeight: 32,
     /** Chrome Next folds app-level header controls into the new header surface. */
@@ -152,7 +152,7 @@ export class GridLayout implements LayoutService {
 
       return (
         <>
-          <GridLayoutGlobalStyles chromeStyle={chromeStyle} />
+          <KibanaGridLayoutGlobalStyles appearance={layoutConfig.appearance ?? 'plain'} />
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}
