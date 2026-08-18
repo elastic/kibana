@@ -1956,7 +1956,7 @@
   "type": "doc",
   "value": {
     "id": "multi-actor-1",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1977,7 +1977,7 @@
   "type": "doc",
   "value": {
     "id": "multi-actor-2",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1998,7 +1998,7 @@
   "type": "doc",
   "value": {
     "id": "multi-target-service-1",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -2019,7 +2019,7 @@
   "type": "doc",
   "value": {
     "id": "multi-target-bucket-1",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -2039,7 +2039,7 @@
   "type": "doc",
   "value": {
     "id": "multi-target-bucket-2",
-    "index": ".entities.v2.latest.security_entities-space-00001",
+    "index": ".entities.v2.latest.entities-space-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
