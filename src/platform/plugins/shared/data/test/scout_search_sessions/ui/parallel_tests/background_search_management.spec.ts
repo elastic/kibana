@@ -16,46 +16,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { expect } from '@kbn/scout/ui';
-import type { KbnClient } from '@kbn/scout';
-import { spaceTest, SESSION_API_PATH, DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE } from '../fixtures';
-
-// Version header required by the background search internal API.
-const SESSION_VERSION = '1';
-const SESSION_HEADERS = {
-  [ELASTIC_HTTP_VERSION_HEADER]: SESSION_VERSION,
-  'kbn-xsrf': 'anything',
-  'kbn-system-request': 'true',
-};
-
-/**
- * Delete every background search in the given Kibana space.
- * Path prefix `/s/{spaceId}` scopes the query to that space only.
- */
-async function deleteAllBackgroundSearches(kbnClient: KbnClient, spaceId: string) {
-  const spacePath = spaceId === 'default' ? '' : `/s/${spaceId}`;
-  const { data } = await kbnClient.request<{ saved_objects: Array<{ id: string }> }>({
-    method: 'POST',
-    path: `${spacePath}${SESSION_API_PATH}/_find`,
-    headers: SESSION_HEADERS,
-    body: { page: 1, perPage: 10_000, sortField: 'created', sortOrder: 'asc' },
-  });
-
-  if (data.saved_objects.length === 0) return;
-
-  const spacedDeletePath = (id: string) => `${spacePath}${SESSION_API_PATH}/${id}`;
-  await Promise.all(
-    data.saved_objects.map(({ id }) =>
-      kbnClient.request({
-        method: 'DELETE',
-        path: spacedDeletePath(id),
-        headers: SESSION_HEADERS,
-        ignoreErrors: [404],
-      })
-    )
-  );
-}
+import {
+  spaceTest,
+  deleteAllBackgroundSearches,
+  DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
+} from '../fixtures';
 
 spaceTest.describe('Background Search management UI', { tag: '@local-stateful-classic' }, () => {
   // Dashboard ID varies per space (createNewCopies:true assigns a new ID on each load).
@@ -107,8 +73,6 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
   spaceTest(
     'saves a background search from a dashboard, verifies it in management',
     async ({ page, pageObjects }) => {
-      spaceTest.setTimeout(180_000);
-
       await spaceTest.step('open the Delayed 5s dashboard', async () => {
         await pageObjects.dashboard.openDashboardWithId(dashboardId);
       });

@@ -44,3 +44,4 @@ export const spaceTest = spaceBaseTest.extend<
 });
 
 export { SESSION_API_PATH, DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE } from './constants';
+export { deleteAllBackgroundSearches } from './helpers';
