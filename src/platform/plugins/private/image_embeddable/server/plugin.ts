@@ -7,20 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { IMAGE_EMBEDDABLE_TYPE } from '../common/constants';
 import { getTransforms } from '../common/transforms';
-import type { SetupDeps, StartDeps } from './types';
 import { getImageEmbeddableSchema } from './schemas';
 
-export class ImageEmbeddablePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
-    plugins.embeddable.registerEmbeddableServerDefinition(IMAGE_EMBEDDABLE_TYPE, {
-      title: 'Image',
-      getTransforms,
-      getSchema: (getDrilldownsSchemas) => getImageEmbeddableSchema(getDrilldownsSchemas),
-    });
-  }
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ImageEmbeddablePlugin extends Service {
+  static readonly inject = ['embeddable.setup'];
+  static readonly provide = 'imageEmbeddable';
 
-  start(core: CoreStart, plugins: StartDeps) {}
+  constructor(ctx: Context) {
+    super(ctx, 'imageEmbeddable');
+    const plugins = {
+      embeddable: (ctx.get('embeddable.setup') as any).contract,
+    };
+    plugins.embeddable.registerEmbeddableServerDefinition(IMAGE_EMBEDDABLE_TYPE, {
+          title: 'Image',
+          getTransforms,
+          getSchema: (getDrilldownsSchemas: Parameters<typeof getImageEmbeddableSchema>[0]) => getImageEmbeddableSchema(getDrilldownsSchemas),
+        });
+  }
 }

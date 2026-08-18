@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { getUiSettings } from './ui_settings';
 
-export class VisTypeVislibServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
-    core.uiSettings.register(getUiSettings());
-    return {};
-  }
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class VisTypeVislibServerPlugin extends Service {
+  static readonly inject = ['core.uiSettings'];
+  static readonly provide = 'visTypeVislib';
 
-  public start(core: CoreStart) {
-    return {};
+  constructor(ctx: Context) {
+    super(ctx, 'visTypeVislib');
+    (ctx.get('core.uiSettings') as any).register(getUiSettings());
   }
-
-  public stop() {}
 }

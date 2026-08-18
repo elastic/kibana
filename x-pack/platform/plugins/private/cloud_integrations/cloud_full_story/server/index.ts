@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export { config } from './config';
-
-export async function plugin() {
-  const { CloudFullStoryPlugin } = await import('./plugin');
-  return new CloudFullStoryPlugin();
-}
+export { default as cordisPlugin } from './plugin';

@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { IndexPatternManagementPlugin } = await import('./plugin');
-  return new IndexPatternManagementPlugin(initializerContext);
-}
+export { default as cordisPlugin } from './plugin';

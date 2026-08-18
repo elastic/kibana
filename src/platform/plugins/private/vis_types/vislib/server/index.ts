@@ -7,18 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginConfigDescriptor } from '@kbn/core/server';
-import type { VislibConfig } from './config';
-import { configSchema } from './config';
-
-export const config: PluginConfigDescriptor<VislibConfig> = {
-  exposeToBrowser: {
-    readOnly: true,
-  },
-  schema: configSchema,
-};
-
-export const plugin = async () => {
-  const { VisTypeVislibServerPlugin } = await import('./plugin');
-  return new VisTypeVislibServerPlugin();
-};
+export { default as cordisPlugin } from './plugin';

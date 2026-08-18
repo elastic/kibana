@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export async function plugin() {
-  const { FeedbackPlugin } = await import('./plugin');
-  return new FeedbackPlugin();
-}
+export { default as cordisPlugin } from './plugin';

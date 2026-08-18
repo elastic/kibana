@@ -14,6 +14,7 @@
     "../../../../../../typings/**/*",
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",

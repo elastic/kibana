@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import type { SloSharedPluginSetup, SloSharedPluginStart } from './types';
-
-const plugin = async (initContext: PluginInitializerContext) => {
-  const { SloSharedPlugin } = await import('./plugin');
-  return new SloSharedPlugin(initContext);
-};
-
-export type { SloSharedPluginSetup, SloSharedPluginStart };
-export { plugin };
+export { default as cordisPlugin } from './plugin';

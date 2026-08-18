@@ -56,7 +56,7 @@ function extractLicenseHeader(srcPath) {
 
 // Known core.* service keys provided by the Cordis driver (Stage 4)
 const CORE_SETUP_KEYS = new Set([
-  'capabilities', 'deprecations', 'elasticsearch', 'http', 'logger',
+  'analytics', 'capabilities', 'deprecations', 'elasticsearch', 'http', 'logger',
   'logging', 'savedObjects', 'status', 'uiSettings',
 ]);
 const CORE_START_KEYS = new Set([
@@ -254,11 +254,32 @@ ${indentedCtorBody}${indentedStop}${startTodo}
   fs.writeFileSync(pluginFile, finalContent, 'utf8');
   console.log(`  ✓ Rewrote ${pluginFile}`);
 
-  // Rewrite server/index.ts — preserve its existing license header if present
+  // Rewrite server/index.ts — preserve its existing license header and any non-plugin re-exports.
+  // Drop the `export const plugin = ...` / `export async function plugin() {...}` initializer;
+  // keep `export type { ... } from '...'` and similar module re-exports.
   const indexLicenseHeader = extractLicenseHeader(indexFile);
+  let existingIndexReexports = '';
+  if (fs.existsSync(indexFile)) {
+    const indexText = fs.readFileSync(indexFile, 'utf8');
+    // Strip the entire plugin() initializer block (may be multi-line).
+    // Handles: `export const plugin = async () => { ... };`
+    //          `export async function plugin() { ... }`
+    const stripped = indexText
+      .replace(/export\s+(?:async\s+function\s+plugin\s*\([^)]*\)|const\s+plugin\s*[=:][^;{]*)\s*\{[^}]*\}(?:\s*;)?/gs, '');
+    // Collect only `export type { ... } from '...'` and `export { ... } from '...'` re-exports.
+    const reexports = [];
+    for (const line of stripped.split('\n')) {
+      const t = line.trim();
+      // Keep re-exports from other modules (not from './plugin')
+      if (/^export\s+(?:type\s+)?\{/.test(t) && /from\s+['"](?!\.\/plugin)/.test(t)) {
+        reexports.push(t);
+      }
+    }
+    if (reexports.length > 0) existingIndexReexports = '\n' + reexports.join('\n');
+  }
   const newIndex = `${indexLicenseHeader}
 
-export { default as cordisPlugin } from './plugin';
+export { default as cordisPlugin } from './plugin';${existingIndexReexports}
 `;
   fs.writeFileSync(indexFile, newIndex, 'utf8');
   console.log(`  ✓ Rewrote ${indexFile}`);
@@ -276,34 +297,36 @@ export { default as cordisPlugin } from './plugin';
   console.log(`  node scripts/type_check --project ${serverDir}/../tsconfig.json`);
 }
 
+/** Parse a JSONC string (handles // comments and trailing commas). */
+function parseJsonc(text) {
+  const stripped = text
+    .replace(/\/\/[^\n]*/g, '')           // strip // comments
+    .replace(/\/\*[\s\S]*?\*\//g, '')     // strip /* */ block comments
+    .replace(/,(\s*[}\]])/g, '$1');       // strip trailing commas before } or ]
+  return JSON.parse(stripped);
+}
+
+function readKibanajsonc(pluginDir) {
+  try {
+    const text = fs.readFileSync(path.join(pluginDir, 'kibana.jsonc'), 'utf8');
+    return parseJsonc(text);
+  } catch (_) { return {}; }
+}
+
 /** Read requiredPlugins array from kibana.jsonc. */
 function readRequiredPlugins(pluginDir) {
-  try {
-    const jsonc = fs.readFileSync(path.join(pluginDir, 'kibana.jsonc'), 'utf8');
-    const stripped = jsonc.replace(/\/\/[^\n]*/g, '');
-    const parsed = JSON.parse(stripped);
-    return parsed.plugin?.requiredPlugins ?? [];
-  } catch (_) { return []; }
+  return readKibanajsonc(pluginDir).plugin?.requiredPlugins ?? [];
 }
 
 /** Read optionalPlugins array from kibana.jsonc. */
 function readOptionalPlugins(pluginDir) {
-  try {
-    const jsonc = fs.readFileSync(path.join(pluginDir, 'kibana.jsonc'), 'utf8');
-    const stripped = jsonc.replace(/\/\/[^\n]*/g, '');
-    const parsed = JSON.parse(stripped);
-    return parsed.plugin?.optionalPlugins ?? [];
-  } catch (_) { return []; }
+  return readKibanajsonc(pluginDir).plugin?.optionalPlugins ?? [];
 }
 
 /** Read the plugin ID from kibana.jsonc (plugin.id field). Falls back to camelCase of dir name. */
 function deriveCordisId(pluginDir) {
-  try {
-    const jsonc = fs.readFileSync(path.join(pluginDir, 'kibana.jsonc'), 'utf8');
-    const stripped = jsonc.replace(/\/\/[^\n]*/g, '');
-    const parsed = JSON.parse(stripped);
-    if (parsed.plugin?.id) return parsed.plugin.id;
-  } catch (_) { /* fall through */ }
+  const id = readKibanajsonc(pluginDir).plugin?.id;
+  if (id) return id;
   const base = path.basename(pluginDir);
   return base.replace(/[-_](\w)/g, (_, c) => c.toUpperCase());
 }

@@ -5,10 +5,17 @@
  * 2.0.
  */
 
-import type { Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-export class ObservabilityLogsExplorerServerPlugin implements Plugin {
-  setup() {}
 
-  start() {}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ObservabilityLogsExplorerServerPlugin extends Service {
+  static readonly inject = [];
+  static readonly provide = 'observabilityLogsExplorer';
+
+  constructor(ctx: Context) {
+    super(ctx, 'observabilityLogsExplorer');
+
+  }
 }

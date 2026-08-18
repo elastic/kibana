@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export { config } from './config';
-
-export const plugin = async () => {
-  const { ObservabilityLogsExplorerServerPlugin } = await import('./plugin');
-  return new ObservabilityLogsExplorerServerPlugin();
-};
+export { default as cordisPlugin } from './plugin';

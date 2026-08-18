@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { feedbackSubmittedEventType } from './src';
 import { registerSendFeedbackRoute } from './routes';
 
-export class FeedbackPlugin implements Plugin {
-  public setup(core: CoreSetup) {
-    core.analytics.registerEventType(feedbackSubmittedEventType);
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class FeedbackPlugin extends Service {
+  static readonly inject = ['core.analytics', 'core.http'];
+  static readonly provide = 'feedback';
 
-    const router = core.http.createRouter();
-    registerSendFeedbackRoute(router, core.analytics);
+  constructor(ctx: Context) {
+    super(ctx, 'feedback');
+    (ctx.get('core.analytics') as any).registerEventType(feedbackSubmittedEventType);
 
-    return {};
+        const router = (ctx.get('core.http') as any).createRouter();
+        registerSendFeedbackRoute(router, (ctx.get('core.analytics') as any));
   }
-
-  public start() {
-    return {};
-  }
-
-  public stop() {}
 }

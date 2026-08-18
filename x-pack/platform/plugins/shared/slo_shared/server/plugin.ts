@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { sloTemplate } from './saved_objects';
-import type { SloSharedPluginSetup, SloSharedPluginStart } from './types';
 
-export class SloSharedPlugin implements Plugin<SloSharedPluginSetup, SloSharedPluginStart> {
-  constructor(initContext: PluginInitializerContext) {}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class SloSharedPlugin extends Service {
+  static readonly inject = ['core.savedObjects'];
+  static readonly provide = 'sloShared';
 
-  public setup(core: CoreSetup): SloSharedPluginSetup {
-    core.savedObjects.registerType(sloTemplate);
-
-    return {};
+  constructor(ctx: Context) {
+    super(ctx, 'sloShared');
+    (ctx.get('core.savedObjects') as any).registerType(sloTemplate);
   }
-
-  public start(core: CoreStart): SloSharedPluginStart {
-    return {};
-  }
-
-  public stop() {}
 }

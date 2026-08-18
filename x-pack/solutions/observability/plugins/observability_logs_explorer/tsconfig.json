@@ -11,6 +11,7 @@
     ".storybook/**/*.tsx"
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/deeplinks-observability",

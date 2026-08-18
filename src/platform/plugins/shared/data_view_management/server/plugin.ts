@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/server';
-
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { registerPreviewScriptedFieldRoute, registerResolveIndexRoute } from './routes';
 
-export class IndexPatternManagementPlugin implements Plugin<void, void> {
-  constructor(initializerContext: PluginInitializerContext) {}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class IndexPatternManagementPlugin extends Service {
+  static readonly inject = ['core.http'];
+  static readonly provide = 'dataViewManagement';
 
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
+  constructor(ctx: Context) {
+    super(ctx, 'dataViewManagement');
+    const router = (ctx.get('core.http') as any).createRouter();
 
-    registerPreviewScriptedFieldRoute(router);
-    registerResolveIndexRoute(router);
+        registerPreviewScriptedFieldRoute(router);
+        registerResolveIndexRoute(router);
   }
-
-  public start() {}
-
-  public stop() {}
 }

@@ -9,6 +9,7 @@
     "test/**/*",
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/management-plugin",

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type { Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-export class CloudFullStoryPlugin implements Plugin {
-  public setup() {}
 
-  public start() {}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class CloudFullStoryPlugin extends Service {
+  static readonly inject = [];
+  static readonly provide = 'cloudFullStory';
 
-  public stop() {}
+  constructor(ctx: Context) {
+    super(ctx, 'cloudFullStory');
+
+  }
 }

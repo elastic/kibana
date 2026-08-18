@@ -9,6 +9,7 @@
     "common/**/*"
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/cloud-plugin",
     "@kbn/spaces-plugin",

@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-export const plugin = async () => {
-  const { GlobalSearchBarPlugin } = await import('./plugin');
-  return new GlobalSearchBarPlugin();
-};
-
-export { config } from './config';
+export { default as cordisPlugin } from './plugin';

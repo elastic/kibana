@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import { FeedbackPlugin } from './plugin';
+import { Context } from '@kbn/cordis';
+import FeedbackPlugin from './plugin';
 import { feedbackSubmittedEventType } from './src';
 import { registerSendFeedbackRoute } from './routes';
 
@@ -14,37 +14,39 @@ jest.mock('./routes', () => ({
   registerSendFeedbackRoute: jest.fn(),
 }));
 
-const coreSetup = coreMock.createSetup();
-const plugin = new FeedbackPlugin();
-
 const registerSendFeedbackRouteMock = registerSendFeedbackRoute as jest.MockedFunction<
   typeof registerSendFeedbackRoute
 >;
 
 describe('FeedbackPlugin', () => {
+  let ctx: Context;
+  let mockAnalytics: jest.Mocked<{ registerEventType: jest.Mock }>;
+  let mockHttp: jest.Mocked<{ createRouter: jest.Mock }>;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    ctx = new Context();
+    mockAnalytics = { registerEventType: jest.fn() };
+    mockHttp = { createRouter: jest.fn().mockReturnValue({}) };
+    ctx.provide('core.analytics', mockAnalytics);
+    ctx.provide('core.http', mockHttp);
   });
 
-  describe('setup', () => {
-    it('should register the feedback submitted event type', () => {
-      plugin.setup(coreSetup);
+  it('should register the feedback submitted event type', async () => {
+    await ctx.plugin(FeedbackPlugin);
 
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledTimes(1);
-      expect(coreSetup.analytics.registerEventType).toHaveBeenCalledWith(
-        feedbackSubmittedEventType
-      );
-    });
+    expect(mockAnalytics.registerEventType).toHaveBeenCalledTimes(1);
+    expect(mockAnalytics.registerEventType).toHaveBeenCalledWith(feedbackSubmittedEventType);
+  });
 
-    it('should create a router and register the send feedback route', () => {
-      plugin.setup(coreSetup);
+  it('should create a router and register the send feedback route', async () => {
+    await ctx.plugin(FeedbackPlugin);
 
-      expect(coreSetup.http.createRouter).toHaveBeenCalledTimes(1);
-      expect(registerSendFeedbackRouteMock).toHaveBeenCalledTimes(1);
-      expect(registerSendFeedbackRouteMock).toHaveBeenCalledWith(
-        expect.any(Object),
-        coreSetup.analytics
-      );
-    });
+    expect(mockHttp.createRouter).toHaveBeenCalledTimes(1);
+    expect(registerSendFeedbackRouteMock).toHaveBeenCalledTimes(1);
+    expect(registerSendFeedbackRouteMock).toHaveBeenCalledWith(
+      expect.any(Object),
+      mockAnalytics
+    );
   });
 });
