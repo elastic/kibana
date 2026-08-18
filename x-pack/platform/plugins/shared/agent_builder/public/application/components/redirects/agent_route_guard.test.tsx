@@ -24,6 +24,11 @@ jest.mock('react-router-dom-v5-compat', () => ({
   Navigate: ({ to }: { to: string }) => <div>{`navigate:${to}`}</div>,
 }));
 
+// Render the loading spinner as a marker so we can assert the isReady gate.
+jest.mock('./redirect_loading', () => ({
+  RedirectLoading: () => <div>loading-spinner</div>,
+}));
+
 const Child = () => <div>child-content</div>;
 
 describe('AgentRouteGuard', () => {
@@ -104,5 +109,42 @@ describe('AgentRouteGuard', () => {
     );
 
     expect(screen.getByText('child-content')).toBeInTheDocument();
+  });
+
+  it('renders a spinner (not the agent page) on an agent route while not ready', () => {
+    mockPathname = '/agents/other-agent/conversations/xyz';
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: false,
+    });
+
+    render(
+      <AgentRouteGuard>
+        <Child />
+      </AgentRouteGuard>
+    );
+
+    expect(screen.getByText('loading-spinner')).toBeInTheDocument();
+    expect(screen.queryByText('child-content')).not.toBeInTheDocument();
+    expect(screen.queryByText(/^navigate:/)).not.toBeInTheDocument();
+  });
+
+  it('does not gate non-agent routes while not ready', () => {
+    mockPathname = '/manage/agents';
+    mockUseEffectiveSpaceDefaultAgent.mockReturnValue({
+      effectiveDefaultAgentId: null,
+      isRestricted: false,
+      isReady: false,
+    });
+
+    render(
+      <AgentRouteGuard>
+        <Child />
+      </AgentRouteGuard>
+    );
+
+    expect(screen.getByText('child-content')).toBeInTheDocument();
+    expect(screen.queryByText('loading-spinner')).not.toBeInTheDocument();
   });
 });
