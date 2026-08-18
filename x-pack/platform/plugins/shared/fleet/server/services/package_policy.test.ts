@@ -2182,6 +2182,301 @@ describe('Package policy service', () => {
     });
   });
 
+  describe('condition metadata updates', () => {
+    const conditionMetadataSavedObject = ({
+      id = 'test-package-policy',
+      version = 'version-1',
+      condition,
+      revision = 1,
+      policyIds = ['agent-policy-1'],
+      isManaged = false,
+      supportsAgentless = false,
+      inputTypes = ['synthetics/http'],
+    }: {
+      id?: string;
+      version?: string;
+      condition?: string | null;
+      revision?: number;
+      policyIds?: string[];
+      isManaged?: boolean;
+      supportsAgentless?: boolean;
+      inputTypes?: string[];
+    } = {}) => ({
+      id,
+      type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      version,
+      references: [],
+      attributes: {
+        name: `Policy ${id}`,
+        condition,
+        policy_ids: policyIds,
+        revision,
+        package: { name: 'synthetics' },
+        is_managed: isManaged,
+        supports_agentless: supportsAgentless,
+        inputs: inputTypes.map((type) => ({ type })),
+      },
+    });
+
+    beforeEach(() => {
+      mockAgentPolicyService.bumpRevision.mockReset();
+      mockAgentPolicyService.bumpRevision.mockResolvedValue(undefined);
+    });
+
+    it('fetches and returns only the condition metadata projection', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [conditionMetadataSavedObject()],
+      });
+
+      const result = await packagePolicyService.getConditionMetadata(soClient, [
+        'test-package-policy',
+      ]);
+
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        {
+          id: 'test-package-policy',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          fields: [
+            'name',
+            'condition',
+            'policy_id',
+            'policy_ids',
+            'revision',
+            'package.name',
+            'is_managed',
+            'supports_agentless',
+            'inputs.type',
+          ],
+          namespaces: undefined,
+        },
+      ]);
+      expect(result).toEqual([
+        {
+          id: 'test-package-policy',
+          name: 'Policy test-package-policy',
+          version: 'version-1',
+          revision: 1,
+          condition: undefined,
+          policyIds: ['agent-policy-1'],
+          packageName: 'synthetics',
+          isManaged: false,
+          supportsAgentless: false,
+          inputTypes: ['synthetics/http'],
+        },
+      ]);
+    });
+
+    it('writes only condition and revision metadata, then bumps each agent policy once', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          conditionMetadataSavedObject({ id: 'policy-1' }),
+          conditionMetadataSavedObject({ id: 'policy-2' }),
+        ],
+      });
+      soClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'policy-1',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            version: 'version-2',
+            attributes: {},
+            references: [],
+          },
+          {
+            id: 'policy-2',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            version: 'version-3',
+            attributes: {},
+            references: [],
+          },
+        ],
+      });
+
+      const result = await packagePolicyService.bulkUpdateConditions(
+        soClient,
+        esClient,
+        [
+          { id: 'policy-1', condition: "${agent.id} == 'agent-1'" },
+          { id: 'policy-2', condition: "${agent.id} == 'agent-2'" },
+        ],
+        { asyncDeploy: true }
+      );
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(1);
+      const updates = soClient.bulkUpdate.mock.calls[0][0];
+      expect(updates).toHaveLength(2);
+      expect(updates[0]).toEqual({
+        type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        id: 'policy-1',
+        attributes: {
+          condition: "${agent.id} == 'agent-1'",
+          revision: 2,
+          updated_at: expect.any(String),
+          updated_by: 'system',
+        },
+        version: 'version-1',
+      });
+      expect(Object.keys(updates[0].attributes)).toEqual([
+        'condition',
+        'revision',
+        'updated_at',
+        'updated_by',
+      ]);
+      expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledTimes(1);
+      expect(mockAgentPolicyService.bumpRevision).toHaveBeenCalledWith(
+        soClient,
+        esClient,
+        'agent-policy-1',
+        expect.objectContaining({ asyncDeploy: true })
+      );
+      expect(result.agentPolicyIds).toEqual(['agent-policy-1']);
+      expect(result.updatedPolicies).toEqual([
+        expect.objectContaining({
+          id: 'policy-1',
+          version: 'version-2',
+          revision: 2,
+          condition: "${agent.id} == 'agent-1'",
+        }),
+        expect.objectContaining({
+          id: 'policy-2',
+          version: 'version-3',
+          revision: 2,
+          condition: "${agent.id} == 'agent-2'",
+        }),
+      ]);
+    });
+
+    it('skips unchanged conditions and does not bump the agent policy', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [conditionMetadataSavedObject({ condition: "${agent.id} == 'agent-1'" })],
+      });
+
+      const result = await packagePolicyService.bulkUpdateConditions(soClient, esClient, [
+        { id: 'test-package-policy', condition: "${agent.id} == 'agent-1'" },
+      ]);
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
+      expect(result.unchangedPolicies).toHaveLength(1);
+      expect(result.agentPolicyIds).toEqual([]);
+    });
+
+    it.each([
+      {
+        name: 'managed package policy',
+        savedObject: conditionMetadataSavedObject({ isManaged: true }),
+        condition: "${agent.id} == 'agent-1'",
+      },
+      {
+        name: 'agentless package policy',
+        savedObject: conditionMetadataSavedObject({ supportsAgentless: true }),
+        condition: "${agent.id} == 'agent-1'",
+      },
+      {
+        name: 'OTel package policy',
+        savedObject: conditionMetadataSavedObject({ inputTypes: ['otelcol'] }),
+        condition: "${agent.id} == 'agent-1'",
+      },
+      {
+        name: 'invalid condition',
+        savedObject: conditionMetadataSavedObject(),
+        condition: "${agent.id} == 'agent-1",
+      },
+    ])('rejects a $name without writing', async ({ savedObject, condition }) => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      soClient.bulkGet.mockResolvedValueOnce({ saved_objects: [savedObject] });
+
+      const result = await packagePolicyService.bulkUpdateConditions(soClient, esClient, [
+        { id: 'test-package-policy', condition },
+      ]);
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(result.failedPolicies).toEqual([
+        { id: 'test-package-policy', error: expect.any(Error) },
+      ]);
+    });
+
+    it('reports a missing package policy without attempting an update', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'missing-policy',
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            error: { statusCode: 404, error: 'Not Found', message: 'missing' },
+          },
+        ],
+      });
+
+      const result = await packagePolicyService.bulkUpdateConditions(soClient, esClient, [
+        { id: 'missing-policy', condition: "${agent.id} == 'agent-1'" },
+      ]);
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(result.failedPolicies).toEqual([{ id: 'missing-policy', error: expect.any(Error) }]);
+    });
+
+    it('refetches minimal metadata and retries a version conflict', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      soClient.bulkGet
+        .mockResolvedValueOnce({
+          saved_objects: [conditionMetadataSavedObject()],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [conditionMetadataSavedObject({ version: 'version-2', revision: 2 })],
+        });
+      soClient.bulkUpdate
+        .mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'test-package-policy',
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              error: { statusCode: 409, error: 'Conflict', message: 'conflict' },
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [
+            {
+              id: 'test-package-policy',
+              type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              version: 'version-3',
+              attributes: {},
+              references: [],
+            },
+          ],
+        });
+
+      const result = await packagePolicyService.bulkUpdateConditions(
+        soClient,
+        esClient,
+        [{ id: 'test-package-policy', condition: "${agent.id} == 'agent-1'" }],
+        { bumpRevision: false }
+      );
+
+      expect(soClient.bulkGet).toHaveBeenCalledTimes(2);
+      expect(soClient.bulkUpdate).toHaveBeenCalledTimes(2);
+      expect(soClient.bulkUpdate.mock.calls[1][0][0]).toEqual(
+        expect.objectContaining({
+          version: 'version-2',
+          attributes: expect.objectContaining({ revision: 3 }),
+        })
+      );
+      expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
+      expect(result.updatedPolicies).toEqual([
+        expect.objectContaining({ version: 'version-3', revision: 3 }),
+      ]);
+    });
+  });
+
   describe('list', () => {
     it('should use NOT latest_revision:false filter to include 8.x policies without the field', async () => {
       const soClient = createSavedObjectClientMock();

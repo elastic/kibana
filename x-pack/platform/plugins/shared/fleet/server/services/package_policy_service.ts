@@ -27,7 +27,7 @@ import type {
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
 } from '../../common';
-import type { PackagePolicyAssetsMap } from '../../common/types';
+import type { AgentConditionExpression, PackagePolicyAssetsMap } from '../../common/types';
 import type { DeletePackagePoliciesResponse } from '../../common/types';
 import type {
   NewPackagePolicy,
@@ -164,6 +164,24 @@ export interface PackagePolicyClient {
     ids: string[],
     options?: PackagePolicyClientGetByIdsOptions
   ): Promise<PackagePolicy[]>;
+
+  /** Returns the small package-policy projection needed to inspect integration conditions. */
+  getConditionMetadata(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options?: PackagePolicyClientGetConditionMetadataOptions
+  ): Promise<PackagePolicyConditionMetadata[]>;
+
+  /**
+   * Validates and partially updates integration conditions without running the full Fleet update
+   * pipeline. Saved Objects still reads the full source internally to migrate and safely merge it.
+   */
+  bulkUpdateConditions(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    updates: PackagePolicyConditionUpdate[],
+    options?: PackagePolicyClientBulkUpdateConditionsOptions
+  ): Promise<PackagePolicyConditionUpdateResult>;
 
   list(
     soClient: SavedObjectsClientContract,
@@ -337,6 +355,45 @@ export type PackagePolicyClientFetchAllItemsOptions = Pick<
 
 export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
   ignoreMissing?: boolean;
+}
+
+export interface PackagePolicyConditionMetadata {
+  id: string;
+  name: string;
+  version: string;
+  revision: number;
+  condition?: AgentConditionExpression | null;
+  policyIds: string[];
+  packageName?: string;
+  isManaged: boolean;
+  supportsAgentless: boolean;
+  inputTypes: string[];
+  spaceIds?: string[];
+}
+
+export interface PackagePolicyConditionUpdate {
+  id: string;
+  condition: AgentConditionExpression | null;
+}
+
+export interface PackagePolicyConditionUpdateResult {
+  updatedPolicies: PackagePolicyConditionMetadata[];
+  unchangedPolicies: PackagePolicyConditionMetadata[];
+  failedPolicies: Array<{ id: string; error: Error | SavedObjectError }>;
+  agentPolicyIds: string[];
+}
+
+export interface PackagePolicyClientGetConditionMetadataOptions extends WithSpaceIdsOption {
+  ignoreMissing?: boolean;
+}
+
+export interface PackagePolicyClientBulkUpdateConditionsOptions {
+  user?: AuthenticatedUser;
+  /** Target one space when using an unscoped Saved Objects client. */
+  spaceId?: string;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
+  asyncDeploy?: boolean;
 }
 
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
