@@ -633,7 +633,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isFilterActive, setIsFilterActive] = useRestorableState('isFilterActive', false);
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
-    const displayedColumns = getDisplayedColumns(columns, dataView);
+    const displayedColumns = getDisplayedColumns(columns, dataView, sourceDisplayMode);
     const defaultColumns = displayedColumns.includes('_source');
     const docMap = useMemo<DocMap>(
       () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
@@ -736,6 +736,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           options,
           sourceDisplayMode,
           shouldShowFieldHandler,
+          selectedColumns: columns,
         });
       },
       [
@@ -745,6 +746,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         columnsMeta,
         sourceDisplayMode,
         shouldShowFieldHandler,
+        columns,
       ]
     );
 
@@ -897,6 +899,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
           columnsMeta,
           sourceDisplayMode,
+          selectedColumns: columns,
         }),
       [
         dataView,
@@ -909,6 +912,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         dataGridDensity,
         columnsMeta,
         sourceDisplayMode,
+        columns,
       ]
     );
 

@@ -31,9 +31,11 @@ const renderCell = (
   {
     shouldShowFieldHandler = () => true,
     inTableSearch,
+    selectedColumns,
   }: {
     shouldShowFieldHandler?: (fieldName: string) => boolean;
     inTableSearch?: { term: string; isCounting: boolean };
+    selectedColumns?: string[];
   } = {}
 ) => {
   const cell = (
@@ -43,6 +45,7 @@ const renderCell = (
       columnsMeta={undefined}
       shouldShowFieldHandler={shouldShowFieldHandler}
       fieldFormats={fieldFormats}
+      selectedColumns={selectedColumns}
     />
   );
 
@@ -70,6 +73,24 @@ describe('SourceDocumentJsonMode', () => {
 
     expect(screen.getByTestId('sourceDocumentTruncatedWarning')).toBeVisible();
     expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+  });
+
+  describe('selectedColumns filter', () => {
+    it('renders only the selected fields when columns are selected', () => {
+      const { container } = renderCell(hitWithFields, { selectedColumns: ['bytes'] });
+
+      expect(screen.getByTestId('jsonTreeViewer')).toBeVisible();
+      expect(container.textContent).toContain('bytes');
+      expect(container.textContent).toContain('100');
+      expect(container.textContent).not.toContain('extension');
+    });
+
+    it('renders the whole document when no columns are selected', () => {
+      const { container } = renderCell(hitWithFields);
+
+      expect(container.textContent).toContain('bytes');
+      expect(container.textContent).toContain('extension');
+    });
   });
 
   it('does not warn for a document within the limit', () => {

@@ -38,6 +38,7 @@ export const convertValueToString = ({
   options,
   sourceDisplayMode,
   shouldShowFieldHandler,
+  selectedColumns,
 }: {
   rowIndex: number;
   rows: DataTableRecord[];
@@ -51,6 +52,7 @@ export const convertValueToString = ({
   };
   sourceDisplayMode?: SourceDisplayMode;
   shouldShowFieldHandler?: ShouldShowFieldInTableHandler;
+  selectedColumns?: string[];
 }): ConvertedResult => {
   const row = rows[rowIndex];
   if (!row) {
@@ -64,7 +66,7 @@ export const convertValueToString = ({
     const multiline = !(options?.compatibleWithCSV || options?.compatibleWithMarkdown);
     return {
       formattedString: sourceDocumentToJsonString(
-        { row, dataView, columnsMeta, shouldShowFieldHandler },
+        { row, dataView, columnsMeta, shouldShowFieldHandler, selectedColumns },
         { multiline }
       ),
       withFormula: false,

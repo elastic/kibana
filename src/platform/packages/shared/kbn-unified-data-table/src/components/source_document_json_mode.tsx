@@ -37,6 +37,8 @@ export interface SourceDocumentJsonModeProps {
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   fieldFormats: FieldFormatsStart;
+  /** When set, the JSON tree is filtered to these fields; empty = whole document. */
+  selectedColumns?: string[];
 }
 
 export const SourceDocumentJsonMode = ({
@@ -45,6 +47,7 @@ export const SourceDocumentJsonMode = ({
   columnsMeta,
   shouldShowFieldHandler,
   fieldFormats,
+  selectedColumns,
 }: SourceDocumentJsonModeProps) => {
   const { inTableSearchTerm, isCounting: isInTableSearchCounting } =
     useContext(InTableSearchCellContext);
@@ -61,6 +64,7 @@ export const SourceDocumentJsonMode = ({
     dataView,
     columnsMeta,
     shouldShowFieldHandler,
+    selectedColumns,
   });
 
   // We just add the highlight formatter, the values are shown raw.

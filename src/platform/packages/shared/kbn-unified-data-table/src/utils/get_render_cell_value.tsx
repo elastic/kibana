@@ -45,6 +45,7 @@ export const getRenderCellValueFn = ({
   isCompressed = true,
   columnsMeta,
   sourceDisplayMode,
+  selectedColumns,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -57,6 +58,7 @@ export const getRenderCellValueFn = ({
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
   sourceDisplayMode: SourceDisplayMode;
+  selectedColumns?: string[];
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -142,6 +144,7 @@ export const getRenderCellValueFn = ({
           columnsMeta={columnsMeta}
           shouldShowFieldHandler={shouldShowFieldHandler}
           fieldFormats={fieldFormats}
+          selectedColumns={selectedColumns}
         />
       );
     }

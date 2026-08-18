@@ -40,7 +40,7 @@ export interface NestedDocument {
   truncated: boolean;
 }
 
-const documentTreeCache = new WeakMap<EsHitRecord, NestedDocument>();
+const documentTreeCache = new WeakMap<EsHitRecord, Map<string, NestedDocument>>();
 
 /**
  * Receives flattened fields (in ES|QL or DSL format) and builds a raw nested JSON document.
@@ -49,13 +49,18 @@ export const flattenedToNestedDocument = ({
   row,
   dataView,
   shouldShowFieldHandler,
+  selectedColumns,
 }: {
   row: DataTableRecord;
   dataView: DataView;
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  selectedColumns?: string[];
 }): NestedDocument => {
-  const cached = documentTreeCache.get(row.raw);
+  // The tree depends on the active field filter, so cache per row and filter signature.
+  const filterSignature = selectedColumns?.length ? [...selectedColumns].sort().join('\n') : '';
+  let rowCache = documentTreeCache.get(row.raw);
+  const cached = rowCache?.get(filterSignature);
   if (cached) return cached;
 
   const ctx: FormatContext = {
@@ -72,8 +77,13 @@ export const flattenedToNestedDocument = ({
     // Discard meta fields (_id, _index, etc.)
     if (metaFields.has(fieldName)) continue;
 
-    // Discard multifields (i.e: field.keyword)
-    if (!shouldShowFieldHandler(fieldName)) continue;
+    const isExplicitlySelected = selectedColumns?.includes(fieldName) ?? false;
+
+    // Discard multifields (i.e: field.keyword) unless the user explicitly selected them.
+    if (!isExplicitlySelected && !shouldShowFieldHandler(fieldName)) continue;
+
+    // When the user selects columns, the JSON is filtered to those fields.
+    if (selectedColumns?.length && !isFieldSelected(fieldName, selectedColumns)) continue;
 
     // Stop once the budget is spent, leaving the remaining fields out of the document.
     if (budget.remaining <= 0) {
@@ -88,7 +98,11 @@ export const flattenedToNestedDocument = ({
   const documentTree = unflattenKeys(documentFlat);
 
   const result: NestedDocument = { tree: documentTree, truncated: budget.truncated };
-  documentTreeCache.set(row.raw, result);
+  if (!rowCache) {
+    rowCache = new Map<string, NestedDocument>();
+    documentTreeCache.set(row.raw, rowCache);
+  }
+  rowCache.set(filterSignature, result);
   return result;
 };
 
@@ -101,6 +115,7 @@ export const sourceDocumentToJsonString = (
     dataView: DataView;
     columnsMeta: DataTableColumnsMeta | undefined;
     shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+    selectedColumns?: string[];
   },
   { multiline }: { multiline: boolean }
 ): string => {
@@ -205,6 +220,11 @@ const unflattenKeys = (source: Record<string, unknown>): Record<string, unknown>
   }
   return target;
 };
+
+// A flattened field is kept when it is a selected column, or a descendant of a selected object
+// parent (which keeps its `.*` children).
+const isFieldSelected = (fieldName: string, selectedColumns: string[]): boolean =>
+  selectedColumns.some((column) => fieldName === column || fieldName.startsWith(`${column}.`));
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
