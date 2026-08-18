@@ -124,6 +124,15 @@ describe('ConnectorsTab', () => {
     expect(screen.queryByTestId('contextCreateConnectorButton')).not.toBeInTheDocument();
   });
 
+  it('hides the create button footer when the user cannot save connectors', () => {
+    renderConnectorsTab({ canCreateConnector: false });
+
+    const connectorsTab = screen.getByTestId('contextConnectorsTab');
+    expect(connectorsTab).toBeInTheDocument();
+    expect(screen.queryByTestId('contextCreateConnectorButton')).not.toBeInTheDocument();
+    expect(connectorsTab.querySelector('hr')).not.toBeInTheDocument();
+  });
+
   it('renders one option per connector showing each connector name', () => {
     renderConnectorsTab();
 

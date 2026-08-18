@@ -136,10 +136,14 @@ const ConnectorsTabContent = ({
           </>
         )}
       </EuiSelectable>
-      <EuiHorizontalRule margin="m" />
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-        <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
-      </EuiFlexGroup>
+      {createConnectorButton && (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+            <EuiFlexItem grow={false}>{createConnectorButton}</EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
     </div>
   );
 };
