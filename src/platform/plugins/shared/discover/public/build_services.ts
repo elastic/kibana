@@ -67,6 +67,7 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { EsqlViewsPublicStart } from '@kbn/esql-views-plugin/public';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -105,6 +106,7 @@ export interface DiscoverServices {
   agentBuilder?: AgentBuilderPluginStart;
   aiops?: AiopsPluginStart;
   alertingVTwo?: AlertingV2PublicStart;
+  esqlViews?: EsqlViewsPublicStart;
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   analytics: AnalyticsServiceStart;
@@ -206,6 +208,7 @@ export const buildServices = ({
     agentBuilder: plugins.agentBuilder,
     aiops: plugins.aiops,
     alertingVTwo: plugins.alertingVTwo,
+    esqlViews: plugins.esqlViews,
     application: core.application,
     addBasePath: core.http.basePath.prepend,
     analytics: core.analytics,

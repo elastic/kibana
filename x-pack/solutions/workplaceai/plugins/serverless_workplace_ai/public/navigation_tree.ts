@@ -107,6 +107,7 @@ export const createNavigationTree = (core: CoreStart): NavigationTreeDefinition 
             children: [
               { link: 'management:spaces', breadcrumbStatus: 'hidden' },
               { link: 'management:objects', breadcrumbStatus: 'hidden' },
+              { link: 'management:esqlViews', breadcrumbStatus: 'hidden' },
               { link: 'management:filesManagement', breadcrumbStatus: 'hidden' },
               { link: 'management:reporting', breadcrumbStatus: 'hidden' },
               { link: 'management:tags', breadcrumbStatus: 'hidden' },

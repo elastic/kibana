@@ -26,6 +26,7 @@ export enum AppMenuActionId {
   createRule = 'createRule',
   backgroundsearch = 'backgroundSearch',
   manageRulesAndConnectors = 'manageRulesAndConnectors',
+  createEsqlView = 'createEsqlView',
 }
 
 /**

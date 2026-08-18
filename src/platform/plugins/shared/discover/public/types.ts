@@ -49,6 +49,7 @@ import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { EsqlViewsPublicStart } from '@kbn/esql-views-plugin/public';
 import type { DiscoverAppLocator } from '../common';
 import type { DiscoverContainerProps } from './components/discover_container';
 
@@ -153,6 +154,7 @@ export interface DiscoverStartPlugins {
   agentBuilder?: AgentBuilderPluginStart;
   aiops?: AiopsPluginStart;
   alertingVTwo?: AlertingV2PublicStart;
+  esqlViews?: EsqlViewsPublicStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   data: DataPublicPluginStart;

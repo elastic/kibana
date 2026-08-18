@@ -34,6 +34,7 @@ import type { AppMenuDiscoverParams } from './app_menu_actions';
 import {
   getAlertsAppMenuItem,
   getCreateRuleOptionsAppMenuItem,
+  getCreateEsqlViewAppMenuItem,
   getNewSearchAppMenuItem,
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
@@ -443,6 +444,19 @@ export const useTopNavLinks = ({
       );
     }
 
+    const CreateEsqlViewFlyout = services.esqlViews?.CreateEsqlViewFlyout;
+
+    if (isEsqlMode && CreateEsqlViewFlyout) {
+      registry.registerItem(
+        getCreateEsqlViewAppMenuItem({
+          CreateEsqlViewFlyout,
+          services,
+          tabId: currentTab.id,
+          getState,
+        })
+      );
+    }
+
     return registry;
   }, [
     getAppMenuAccessor,
@@ -454,6 +468,7 @@ export const useTopNavLinks = ({
     getState,
     subscribe,
     showCreateRuleV2,
+    isEsqlMode,
     hasUnsavedChanges,
     transferBackToEditor,
     persistedDiscoverSession,

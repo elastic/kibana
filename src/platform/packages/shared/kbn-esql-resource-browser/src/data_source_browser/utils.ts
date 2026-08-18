@@ -14,6 +14,7 @@ const SOURCE_TYPE_PATTERNS = [
   { patterns: ['stream', 'data stream'], label: 'Stream', key: 'stream' },
   { patterns: ['alias'], label: 'Alias', key: 'alias' },
   { patterns: ['external'], label: 'External data', key: 'external' },
+  { patterns: ['view'], label: 'ES|QL View', key: 'view' },
   { patterns: ['index'], label: 'Index', key: 'index' },
 ] as const;
 
