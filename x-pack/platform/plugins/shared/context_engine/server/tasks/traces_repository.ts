@@ -9,13 +9,13 @@ import type { EsqlESQLParams } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
-import { MANAGEMENT_AGENT_ID } from '../../common/constants';
+import { AGENT_BUILDER_TRACES_INDEX_PREFIX, MANAGEMENT_AGENT_ID } from '../../common/constants';
 import type { AgentInfo, ExecuteToolSpan } from './transform';
 
 /** Max rows read per ES|QL query in a single run (the per-run cap). */
 export const MAX_ROWS_PER_QUERY = 1000;
 
-const TRACES_INDEX_PREFIX = 'traces-agent_builder.otel-';
+const TRACES_INDEX_PREFIX = AGENT_BUILDER_TRACES_INDEX_PREFIX;
 const TRACES_INDEX_PATTERN = `${TRACES_INDEX_PREFIX}*`;
 
 /**
