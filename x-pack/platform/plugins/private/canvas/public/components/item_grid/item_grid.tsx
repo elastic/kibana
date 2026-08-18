@@ -7,7 +7,7 @@
 
 import { last } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { Fragment, ReactElement, ValidationMap } from 'react';
+import React, { Fragment, ReactElement } from 'react';
 
 const PER_ROW_DEFAULT = 6;
 
@@ -27,7 +27,7 @@ export interface Props<T> {
 // but TS needs to know that ItemGrid can have propTypes defined on it.
 interface ItemGridType {
   <T>(props: Props<T>): ReactElement;
-  propTypes?: ValidationMap<Props<any>>;
+  propTypes?: object;
 }
 
 export const ItemGrid: ItemGridType = function ItemGridFunc<T>({
@@ -66,9 +66,7 @@ export const ItemGrid: ItemGridType = function ItemGridFunc<T>({
 };
 
 ItemGrid.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   items: PropTypes.array,
-  // @ts-expect-error upgrade typescript v5.9.3
   itemsPerRow: PropTypes.number,
   children: PropTypes.func.isRequired,
 };
