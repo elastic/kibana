@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationAccessControl,
+  ConversationAccessControlEntry,
+  ConversationAccessControlMode,
+  ConversationWithoutRounds,
+} from '@kbn/agent-builder-common';
 
 export interface ConversationPermissions {
   rename: boolean;
@@ -47,3 +53,10 @@ export interface MarkPinnedConversationResponse {
   id: string;
   pinned: boolean;
 }
+
+export interface UpdateConversationAccessControlRequestBody {
+  access_mode: ConversationAccessControlMode;
+  entries: Array<Omit<ConversationAccessControlEntry, 'added_at'>>;
+}
+
+export type UpdateConversationAccessControlResponse = ConversationAccessControl;
