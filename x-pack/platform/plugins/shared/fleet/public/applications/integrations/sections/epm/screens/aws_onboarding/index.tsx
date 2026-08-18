@@ -76,7 +76,13 @@ const ServiceCard: React.FunctionComponent<{
       checked={checked}
       onChange={() => onToggle(service.id)}
       color="plain"
-      css={{ borderColor: euiTheme.colors.borderBasePlain }}
+      css={{
+        borderColor: euiTheme.colors.borderBaseProminent,
+        // Override EuiCheckableCard's built-in "subdued" tint on the
+        // checkbox cell so it reads as part of the same white card,
+        // not a separate grey patch.
+        '.euiPanel--subdued': { backgroundColor: euiTheme.colors.emptyShade },
+      }}
       label={
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
