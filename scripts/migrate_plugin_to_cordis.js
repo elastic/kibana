@@ -179,14 +179,6 @@ function run(pluginDir) {
     );
   }
 
-  // Rewrite logger references: this.logger, this.log, this.#logger, this.#log
-  const loggerReplacement = `(ctx.get('core.logger') as any).get('plugins', '${pluginId}')`;
-  ctorBody = ctorBody
-    .replace(/this\.#logger\b/g, loggerReplacement)
-    .replace(/this\.#log\b/g, loggerReplacement)
-    .replace(/this\.logger\b/g, loggerReplacement)
-    .replace(/this\.log\b/g, loggerReplacement);
-
   // Build stop wiring
   const stopSection = hasRealStop
     ? `\n    // Migrated from stop():\n    ctx.effect(() => () => {\n      ${stripBraces(stopBody)}\n    });`
@@ -196,6 +188,19 @@ function run(pluginDir) {
     ? '\n    // TODO: start() had a non-empty body — migrate manually:\n' +
       startBody.split('\n').map((l) => `    // ${l}`).join('\n')
     : '';
+
+  // Rewrite logger references: this.logger, this.log, this.#logger, this.#log
+  const loggerReplacement = `(ctx.get('core.logger') as any).get('plugins', '${pluginId}')`;
+  const hasThisLogger = /this\.(?:#logger|#log|logger|log)\b/.test(ctorBody + stopSection);
+  ctorBody = ctorBody
+    .replace(/this\.#logger\b/g, loggerReplacement)
+    .replace(/this\.#log\b/g, loggerReplacement)
+    .replace(/this\.logger\b/g, loggerReplacement)
+    .replace(/this\.log\b/g, loggerReplacement);
+  // If logger was rewritten, inject core.logger unless already injected via core.logger access
+  if (hasThisLogger && !coreAccessedSetup.has('logger')) {
+    injectKeys.unshift("'core.logger'");
+  }
 
   // Keep non-core imports (drop PluginInitializerContext, CoreSetup, CoreStart, Plugin etc.)
   const CORE_LIFECYCLE_PATTERN =
@@ -295,6 +300,18 @@ ${indentedCtorBody}${indentedStop}${startTodo}
     //          `export async function plugin() { ... }`
     const stripped = indexText
       .replace(/export\s+(?:async\s+function\s+plugin\s*\([^)]*\)|const\s+plugin\s*[=:][^;{]*)\s*\{[^}]*\}(?:\s*;)?/gs, '');
+    // Build a map: name → source module from `import type { ... } from '...'` statements.
+    const importedFrom = {};
+    for (const line of indexText.split('\n')) {
+      const importMatch = line.match(/^import\s+type\s+\{([^}]+)\}\s+from\s+(['"][^'"]+['"])/);
+      if (importMatch) {
+        const src = importMatch[2];
+        for (const name of importMatch[1].split(',').map((s) => s.trim()).filter(Boolean)) {
+          importedFrom[name] = src;
+        }
+      }
+    }
+
     // Collect only `export type { ... } from '...'` and `export { ... } from '...'` re-exports.
     const reexports = [];
     for (const line of stripped.split('\n')) {
@@ -303,9 +320,31 @@ ${indentedCtorBody}${indentedStop}${startTodo}
       if (/^export\s+(?:type\s+)?\{/.test(t) && /from\s+['"](?!\.\/plugin)/.test(t)) {
         reexports.push(t);
       }
-      // Keep bare re-exports: `export type { ... }` without a `from` clause (re-exports of imports)
+      // Resolve bare re-exports: `export type { X, Y }` → find their source via import map.
       if (/^export\s+type\s+\{/.test(t) && !/from\s+/.test(t)) {
-        reexports.push(t);
+        const namesMatch = t.match(/export\s+type\s+\{([^}]+)\}/);
+        if (namesMatch) {
+          const names = namesMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
+          // Group names by their source module.
+          const bySource = {};
+          const unresolved = [];
+          for (const name of names) {
+            if (importedFrom[name]) {
+              (bySource[importedFrom[name]] = bySource[importedFrom[name]] || []).push(name);
+            } else {
+              unresolved.push(name);
+            }
+          }
+          for (const [src, srcNames] of Object.entries(bySource)) {
+            reexports.push(`export type { ${srcNames.join(', ')} } from ${src};`);
+          }
+          if (unresolved.length > 0) {
+            // Can't resolve — keep bare, will need manual fix.
+            reexports.push(`export type { ${unresolved.join(', ')} };`);
+          }
+        } else {
+          reexports.push(t);
+        }
       }
     }
     if (reexports.length > 0) existingIndexReexports = '\n' + reexports.join('\n');

@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { ConnectorEventsBridgePlugin } = await import('./plugin');
-  return new ConnectorEventsBridgePlugin(initializerContext);
-}
+export { default as cordisPlugin } from './plugin';

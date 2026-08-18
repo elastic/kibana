@@ -24,6 +24,7 @@
     "@kbn/code-editor",
     "@kbn/config-schema",
     "@kbn/console-plugin",
+    "@kbn/cordis",
     "@kbn/content-packs-schema",
     "@kbn/core",
     "@kbn/core-analytics-browser",

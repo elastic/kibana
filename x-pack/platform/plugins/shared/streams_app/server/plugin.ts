@@ -5,38 +5,17 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
-import type {
-  ConfigSchema,
-  StreamsAppServerSetup,
-  StreamsAppServerStart,
-  StreamsAppSetupDependencies,
-  StreamsAppStartDependencies,
-} from './types';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-export class StreamsAppPlugin
-  implements
-    Plugin<
-      StreamsAppServerSetup,
-      StreamsAppServerStart,
-      StreamsAppSetupDependencies,
-      StreamsAppStartDependencies
-    >
-{
-  logger: Logger;
 
-  constructor(context: PluginInitializerContext<ConfigSchema>) {
-    this.logger = context.logger.get();
-  }
-  setup(
-    coreSetup: CoreSetup<StreamsAppStartDependencies, StreamsAppServerStart>,
-    pluginsSetup: StreamsAppSetupDependencies
-  ): StreamsAppServerSetup {
-    return {};
-  }
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class StreamsAppPlugin extends Service {
+  static readonly inject: string[] = [];
+  static readonly provide = 'streamsApp';
 
-  start(core: CoreStart, pluginsStart: StreamsAppStartDependencies): StreamsAppServerStart {
-    return {};
+  constructor(ctx: Context) {
+    super(ctx, 'streamsApp');
+
   }
 }

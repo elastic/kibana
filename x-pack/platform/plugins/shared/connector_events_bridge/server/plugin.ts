@@ -5,30 +5,17 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-export type ConnectorEventsBridgeSetupDeps = Record<string, never>;
 
-export interface ConnectorEventsBridgeStartDeps {
-  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ConnectorEventsBridgePlugin extends Service {
+  static readonly inject = ['core.logger'];
+  static readonly provide = 'connectorEventsBridge';
 
-export class ConnectorEventsBridgePlugin
-  implements Plugin<{}, {}, ConnectorEventsBridgeSetupDeps, ConnectorEventsBridgeStartDeps>
-{
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
-  setup(_core: CoreSetup<ConnectorEventsBridgeStartDeps>, _deps: ConnectorEventsBridgeSetupDeps) {
-    this.logger.debug('connectorEventsBridge loaded');
-    return {};
-  }
-
-  start() {
-    return {};
+  constructor(ctx: Context) {
+    super(ctx, 'connectorEventsBridge');
+    (ctx.get('core.logger') as any).get('plugins', 'connectorEventsBridge').debug('connectorEventsBridge loaded');
   }
 }
