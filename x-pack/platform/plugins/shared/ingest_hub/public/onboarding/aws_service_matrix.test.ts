@@ -36,13 +36,11 @@ const VALID_CATEGORIES: ServiceCategory[] = [
 // All aws policy templates are marked agentless-enabled to exercise managed_integration derivation.
 const MOCK_PACKAGES: Record<string, any> = {
   aws: {
-    policy_templates: [
-      ...new Set(
-        AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws' && e.policyTemplate).map(
-          (e) => e.policyTemplate!
-        )
-      ),
-    ].map((name) => ({ name, deployment_modes: { agentless: { enabled: true } } })),
+    policy_templates: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
+      name: e.id,
+      data_streams: [e.id],
+      deployment_modes: { agentless: { enabled: true } },
+    })),
     data_streams: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
       path: e.id,
       type: e.id.includes('_metrics') || e.id === 'billing' ? 'metrics' : 'logs',
@@ -160,10 +158,12 @@ describe('AWS service matrix', () => {
       policy_templates: [
         {
           name: 'guardduty',
+          data_streams: ['guardduty'],
           inputs: [{ type: 'aws-s3', title: 'GuardDuty S3' }],
         },
         {
           name: 'cloudtrail',
+          data_streams: ['cloudtrail'],
           inputs: [
             {
               type: 'aws-s3',
@@ -179,6 +179,7 @@ describe('AWS service matrix', () => {
         },
         {
           name: 'elb',
+          data_streams: ['elb_logs'],
           inputs: [
             { type: 'aws-s3', title: 'ELB S3' },
             {

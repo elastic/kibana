@@ -21,10 +21,11 @@ const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
 // AWS_SERVICES_MAP would have signalType:undefined (no manifest data), breaking signal-filter tests.
 const MOCK_PACKAGES: Record<string, any> = {
   aws: {
-    policy_templates: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws' && e.policyTemplate)
-      .map((e) => e.policyTemplate!)
-      .filter((name, i, arr) => arr.indexOf(name) === i)
-      .map((name) => ({ name, deployment_modes: { agentless: { enabled: true } } })),
+    policy_templates: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
+      name: e.id,
+      data_streams: [e.id],
+      deployment_modes: { agentless: { enabled: true } },
+    })),
     data_streams: AWS_SERVICES_STATIC.filter((e) => e.packageName === 'aws').map((e) => ({
       path: e.id,
       type: e.id.includes('_metrics') || e.id === 'billing' ? 'metrics' : 'logs',

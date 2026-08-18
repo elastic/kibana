@@ -20,13 +20,13 @@ jest.mock('../../use_aws_service_matrix', () => {
   const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = jest.requireActual(
     '../../aws_service_matrix'
   ) as any;
-  const policyTemplates = [
-    ...new Set(
-      (AWS_SERVICES_STATIC as any[])
-        .filter((e: any) => e.packageName === 'aws' && e.policyTemplate)
-        .map((e: any) => e.policyTemplate as string)
-    ),
-  ].map((name: string) => ({ name, deployment_modes: { agentless: { enabled: true } } }));
+  const policyTemplates = (AWS_SERVICES_STATIC as any[])
+    .filter((e: any) => e.packageName === 'aws')
+    .map((e: any) => ({
+      name: e.id,
+      data_streams: [e.id],
+      deployment_modes: { agentless: { enabled: true } },
+    }));
   // Provide data streams for aws entries with correct input types so deployment input keys
   // (e.g. 'ec2-aws/metrics') are generated correctly in useDeploy tests.
   const AWS_INPUT_MAP: Record<string, string[]> = {
@@ -81,7 +81,7 @@ jest.mock('../../use_aws_service_matrix', () => {
     .map((e: any) => {
       const inputList: string[] = AWS_INPUT_MAP[e.id] ?? ['aws-s3'];
       return {
-        path: e.dataStream ?? e.id,
+        path: e.id,
         type: inputList[0].includes('metrics') ? 'metrics' : 'logs',
         streams: inputList.map((input: string) => ({ input, vars: [], enabled: true })),
       };
@@ -791,7 +791,7 @@ describe('useDeploy', () => {
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
     // ec2_metrics must appear in the call — it must not be silently dropped.
-    expect(submittedInputs['ec2-aws/metrics'].enabled).toBe(true);
+    expect(submittedInputs['ec2_metrics-aws/metrics'].enabled).toBe(true);
   });
 
   it('does not deploy a deselected service even when it is still in persisted instances', async () => {
@@ -818,7 +818,7 @@ describe('useDeploy', () => {
     // One call — only ec2_metrics; cloudtrail must not appear.
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
-    expect(submittedInputs['ec2-aws/metrics'].enabled).toBe(true);
+    expect(submittedInputs['ec2_metrics-aws/metrics'].enabled).toBe(true);
     // cloudtrail input must not be included (if it were, it would appear as 'cloudtrail-aws-s3'
     // or similar and would fire a separate call or appear enabled in the single call).
     const hasCloudtrailInput = Object.keys(submittedInputs).some((k) => k.startsWith('cloudtrail'));

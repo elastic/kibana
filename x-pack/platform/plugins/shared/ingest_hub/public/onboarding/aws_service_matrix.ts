@@ -65,7 +65,7 @@ export interface AwsServiceMatrixEntry {
   /** Manifest var type by name — 'bool', 'text', 'integer', etc. Derived from the package manifest. */
   varTypes?: Record<string, string>;
   packageName: string;
-  /** Fleet policy template name (policy_templates[].name in the package manifest) */
+  /** Fleet policy template name derived from policy_templates[].data_streams lookup in the manifest. */
   policyTemplate?: string;
   /** Whether the data stream is enabled by default when the integration is installed. Derived from the package manifest. */
   defaultEnabled: boolean;
@@ -97,25 +97,21 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'apigateway_logs',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'apigateway',
   },
   {
     id: 'apigateway_metrics',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'apigateway',
   },
   {
     id: 'lambda',
     category: 'Compute',
     packageName: 'aws',
-    policyTemplate: 'lambda',
   },
   {
     id: 'lambda_logs',
     category: 'Compute',
     packageName: 'aws',
-    policyTemplate: 'lambda',
   },
 
   // ── aws package — Compute ───────────────────────────────────────────────
@@ -123,31 +119,26 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'ec2_logs',
     category: 'Compute',
     packageName: 'aws',
-    policyTemplate: 'ec2',
   },
   {
     id: 'ec2_metrics',
     category: 'Compute',
     packageName: 'aws',
-    policyTemplate: 'ec2',
   },
   {
     id: 'ecs_metrics',
     category: 'Compute',
     packageName: 'aws',
-    policyTemplate: 'ecs',
   },
   {
     id: 'emr_logs',
     category: 'Compute',
     packageName: 'aws',
-    policyTemplate: 'emr',
   },
   {
     id: 'emr_metrics',
     category: 'Compute',
     packageName: 'aws',
-    policyTemplate: 'emr',
   },
 
   // ── aws package — Management and Governance ──────────────────────────────
@@ -155,19 +146,16 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'awshealth',
     category: 'Management and Governance',
     packageName: 'aws',
-    policyTemplate: 'awshealth',
   },
   {
     id: 'cloudwatch_logs',
     category: 'Management and Governance',
     packageName: 'aws',
-    policyTemplate: 'cloudwatch',
   },
   {
     id: 'cloudwatch_metrics',
     category: 'Management and Governance',
     packageName: 'aws',
-    policyTemplate: 'cloudwatch',
   },
 
   // ── aws package — Cloud Financial Management ────────────────────────────
@@ -175,13 +163,11 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'billing',
     category: 'Cloud Financial Management',
     packageName: 'aws',
-    policyTemplate: 'billing',
   },
   {
     id: 'usage',
     category: 'Cloud Financial Management',
     packageName: 'aws',
-    policyTemplate: 'usage',
   },
 
   // ── aws package — Management and Governance / Security, Identity and Compliance ──
@@ -190,41 +176,35 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Management and Governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    policyTemplate: 'cloudtrail',
   },
   {
     id: 'config',
     name: 'AWS Config',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
-    policyTemplate: 'config',
   },
   {
     id: 'guardduty',
     name: 'AWS GuardDuty',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
-    policyTemplate: 'guardduty',
   },
   {
     id: 'inspector',
     name: 'AWS Inspector',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
-    policyTemplate: 'inspector',
   },
   {
     id: 'firewall_logs',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
-    policyTemplate: 'firewall',
   },
   {
     id: 'firewall_metrics',
     category: 'Security, Identity and Compliance',
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
     packageName: 'aws',
-    policyTemplate: 'firewall',
     showInUI: false, // TODO confirm if only agent_based and if should be included in onboarding flow
   },
   {
@@ -232,28 +212,24 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Security Hub',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
-    policyTemplate: 'securityhub',
   },
   {
     id: 'securityhub_findings_full_posture',
     name: 'AWS Security Hub (Full Posture / CSPM)',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
-    policyTemplate: 'securityhub',
   },
   {
     id: 'securityhub_insights',
     name: 'AWS Security Hub (Insights)',
     category: 'Security, Identity and Compliance',
     packageName: 'aws',
-    policyTemplate: 'securityhub',
   },
   {
     id: 'waf',
     category: 'Security, Identity and Compliance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    policyTemplate: 'waf',
   },
 
   // ── aws package — Networking and Content Delivery ─────────────────────────
@@ -264,56 +240,47 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     showInUI: false,
     packageName: 'aws',
-    policyTemplate: 'cloudfront',
   },
   {
     id: 'elb_logs',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'elb',
   },
   {
     id: 'elb_metrics',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'elb',
   },
   {
     id: 'natgateway',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'natgateway',
   },
   {
     id: 'route53_public_logs',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'route53',
   },
   {
     id: 'route53_resolver_logs',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'route53',
   },
   {
     id: 'transitgateway',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'transitgateway',
   },
   {
     id: 'vpcflow',
     category: 'Networking and Content Delivery',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
-    policyTemplate: 'vpcflow',
   },
   {
     id: 'vpn',
     category: 'Networking and Content Delivery',
     packageName: 'aws',
-    policyTemplate: 'vpn',
   },
 
   // ── aws package — Storage ───────────────────────────────────────────────
@@ -321,31 +288,26 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'ebs',
     category: 'Storage',
     packageName: 'aws',
-    policyTemplate: 'ebs',
   },
   {
     id: 's3_daily_storage',
     category: 'Storage',
     packageName: 'aws',
-    policyTemplate: 's3',
   },
   {
     id: 's3_request',
     category: 'Storage',
     packageName: 'aws',
-    policyTemplate: 's3',
   },
   {
     id: 's3access',
     category: 'Storage',
     packageName: 'aws',
-    policyTemplate: 's3',
   },
   {
     id: 's3_storage_lens',
     category: 'Storage',
     packageName: 'aws',
-    policyTemplate: 's3_storage_lens',
   },
 
   // ── aws package — Databases ──────────────────────────────────────────────
@@ -353,19 +315,16 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'dynamodb',
     category: 'Databases',
     packageName: 'aws',
-    policyTemplate: 'dynamodb',
   },
   {
     id: 'rds',
     category: 'Databases',
     packageName: 'aws',
-    policyTemplate: 'rds',
   },
   {
     id: 'redshift',
     category: 'Databases',
     packageName: 'aws',
-    policyTemplate: 'redshift',
   },
 
   // ── aws package — Analytics / Application Integration ───────────────────
@@ -373,25 +332,21 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     id: 'kafka_metrics',
     category: 'Management and Governance',
     packageName: 'aws',
-    policyTemplate: 'kafka',
   },
   {
     id: 'kinesis',
     category: 'Management and Governance',
     packageName: 'aws',
-    policyTemplate: 'kinesis',
   },
   {
     id: 'sns',
     category: 'Management and Governance',
     packageName: 'aws',
-    policyTemplate: 'sns',
   },
   {
     id: 'sqs',
     category: 'Management and Governance',
     packageName: 'aws',
-    policyTemplate: 'sqs',
   },
 
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
@@ -400,21 +355,18 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Bedrock (Guardrails)',
     category: 'Machine Learning',
     packageName: 'aws_bedrock',
-    policyTemplate: 'aws_bedrock',
   },
   {
     id: 'invocation',
     name: 'AWS Bedrock (Invocation)',
     category: 'Machine Learning',
     packageName: 'aws_bedrock',
-    policyTemplate: 'aws_bedrock',
   },
   {
     id: 'runtime',
     name: 'AWS Bedrock (Runtime)',
     category: 'Machine Learning',
     packageName: 'aws_bedrock',
-    policyTemplate: 'aws_bedrock',
   },
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
@@ -423,7 +375,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Machine Learning',
     packageName: 'aws_bedrock_agentcore',
     showInUI: false,
-    policyTemplate: 'aws_bedrock_agentcore',
   },
 
   // ── awsfargate package — Containers ─────────────────────────────────────
@@ -432,7 +383,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Fargate',
     category: 'Containers',
     packageName: 'awsfargate',
-    policyTemplate: 'awsfargate',
   },
 
   // ── aws_mq package — Application Integration ────────────────────────────
@@ -443,7 +393,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     category: 'Application Integration',
     packageName: 'aws_mq',
     showInUI: false,
-    policyTemplate: 'amazon_mq',
   },
 
   // ── aws_logs package — Management and Governance ──────────────────────────
@@ -452,7 +401,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     name: 'AWS Logs (Generic)',
     category: 'Management and Governance',
     packageName: 'aws_logs',
-    policyTemplate: 'aws_logs',
   },
 ];
 
@@ -478,14 +426,16 @@ export function buildAwsServiceMatrix(
     let defaultEnabled = true;
     let identityFederationSupported: boolean | undefined;
     let managedIntegrations = false;
+    let pt: any;
     const varTypes: Record<string, string> = {};
 
     const packageInfo = packages[entry.packageName];
     const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
     if (packageInfo) {
-      const pt = (packageInfo.policy_templates ?? []).find(
-        (p: any) => 'name' in p && p.name === entry.policyTemplate
-      );
+      pt =
+        (packageInfo.policy_templates ?? []).find((p: any) =>
+          (p.data_streams ?? []).includes(entry.id)
+        ) ?? packageInfo.policy_templates?.[0];
       const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === entry.id);
 
       managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
@@ -581,6 +531,7 @@ export function buildAwsServiceMatrix(
     const merged = {
       ...rest,
       name: (name ?? entry.id) as string,
+      policyTemplate: (pt as any)?.name as string | undefined,
       deploymentMethods,
       signalType: (signalType ?? entry.signalType) as SignalType,
       inputs,
