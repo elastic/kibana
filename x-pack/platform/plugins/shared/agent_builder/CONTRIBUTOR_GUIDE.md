@@ -1248,7 +1248,7 @@ export const myAssetSmlType: SmlTypeDefinition = {
 
   // Yield pages of items to consider for indexing.
   // Called by the crawler with internal credentials.
-  async* list(context) {
+  async *list(context) {
     // Use createPointInTimeFinder for efficient pagination
     const finder = context.savedObjectsClient.createPointInTimeFinder({
       type: 'my-saved-object-type',
