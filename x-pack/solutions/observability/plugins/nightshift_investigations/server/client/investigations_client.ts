@@ -19,12 +19,8 @@ import type {
   StartInvestigationResponse,
 } from '../../common';
 
-export class InvestigationNotFoundError extends Error {
-  constructor(investigationId: string) {
-    super(`Investigation "${investigationId}" not found`);
-    this.name = 'InvestigationNotFoundError';
-  }
-}
+import { InvestigationNotFoundError } from './errors';
+export { InvestigationNotFoundError };
 
 function toInvestigationStatus(status: ExecutionStatus): InvestigationStatus {
   switch (status) {

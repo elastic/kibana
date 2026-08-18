@@ -11,8 +11,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { NightshiftInvestigationsClient } from './client/investigations_client';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface NightshiftInvestigationsServerSetup {}
+export type NightshiftInvestigationsServerSetup = void;
 
 export interface NightshiftInvestigationsServerStart {
   getInvestigationsClient: (request: KibanaRequest) => NightshiftInvestigationsClient;

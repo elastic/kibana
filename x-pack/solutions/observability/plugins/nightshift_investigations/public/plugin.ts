@@ -11,8 +11,7 @@ import {
   type NightshiftInvestigationsRepositoryClient,
 } from './api';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface NightshiftInvestigationsPublicSetup {}
+export type NightshiftInvestigationsPublicSetup = void;
 
 export interface NightshiftInvestigationsPublicStart {
   investigationsClient: NightshiftInvestigationsRepositoryClient;
@@ -21,9 +20,7 @@ export interface NightshiftInvestigationsPublicStart {
 export class NightshiftInvestigationsPublicPlugin
   implements Plugin<NightshiftInvestigationsPublicSetup, NightshiftInvestigationsPublicStart>
 {
-  setup(_core: CoreSetup): NightshiftInvestigationsPublicSetup {
-    return {};
-  }
+  setup(_core: CoreSetup): NightshiftInvestigationsPublicSetup {}
 
   start(core: CoreStart): NightshiftInvestigationsPublicStart {
     return {

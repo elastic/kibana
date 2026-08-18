@@ -77,8 +77,6 @@ export class NightshiftInvestigationsPlugin
         'workflowsManagement is not available — nightshift investigations routes will not be registered'
       );
     }
-
-    return {};
   }
 
   start(

@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { GetInvestigationsClient } from '../routes/types';
 
@@ -33,6 +34,8 @@ export const triggerInvestigationStepDefinition = (
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
+    label: 'Trigger Nightshift Investigation',
+    category: StepCategory.Ai,
     description:
       'Start an investigation for a given subject (significant event, alert, or other entity). Returns investigation_id for tracking.',
     inputSchema,
