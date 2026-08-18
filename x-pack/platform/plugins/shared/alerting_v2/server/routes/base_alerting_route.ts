@@ -15,9 +15,11 @@ import type {
 import type { RouteHandler } from '@kbn/core-di-server';
 import { errorResponseSchema, type ErrorResponse } from '@kbn/alerting-v2-schemas';
 import { injectable } from 'inversify';
+import merge from 'lodash/merge';
 import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import { ALERTING_ERROR_CODES } from '../lib/errors/error_codes';
 import type { AlertingRouteContext } from './alerting_route_context';
+import { getCommonErrorOasOperationObject } from './common_error_oas_examples';
 import { deepMergeRouteOptions } from './deep_merge_route_options';
 import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { computeRouteValidate, type AlertingRouteSchemas } from './compute_route_validate';
@@ -46,29 +48,37 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   protected static readonly defaultOptions: RouteConfigOptions<RouteMethod> = {
     access: 'public',
     tags: ['oas-tag:alerting-v2'],
-    availability: { stability: 'experimental' },
+    availability: { stability: 'experimental', since: '9.5.0' },
   };
 
   protected static readonly routeOptions: RouteConfigOptions<RouteMethod> = {};
 
   public static get options(): RouteConfigOptions<RouteMethod> {
-    return deepMergeRouteOptions(BaseAlertingRoute.defaultOptions, this.routeOptions);
+    const merged = deepMergeRouteOptions(BaseAlertingRoute.defaultOptions, this.routeOptions);
+    const subclassOas = this.routeOptions.oasOperationObject;
+
+    // Keep shared error examples when subclasses add their own OAS fragment.
+    return {
+      ...merged,
+      oasOperationObject: async () => {
+        const common = getCommonErrorOasOperationObject();
+        if (!subclassOas) {
+          return common;
+        }
+        const extra = await subclassOas();
+        if (typeof extra === 'string') {
+          throw new Error(
+            'Alerting v2 route oasOperationObject must return an object so it can be composed with shared common-error examples'
+          );
+        }
+        return merge({}, common, extra);
+      },
+    };
   }
 
   /**
-   * Error responses every route can emit, merged into each
-   * subclass's declared `schemas.response` by the `validate` getter so the
-   * generated OAS captures them consistently. Subclass-declared status
-   * codes take precedence. A route can specialize, say, `500` with a more
-   * specific description and the merge keeps the override.
-   *
-   * Intentionally limited to truly universal codes:
-   *   401 — request was not authenticated (Kibana core enforces auth).
-   *   403 — request lacks the route's `requiredPrivileges`.
-   *   500 — any uncaught throw boomifies to 500.
-   *   503 — alerting is administratively disabled (kill switch).
-   *
-   * Route-specific codes (400 / 404 / 409 / …) belong on each subclass.
+   * Universal error responses merged into every route's OAS.
+   * Subclass status codes win. Route-specific codes (400/404/409/…) stay on subclasses.
    */
   protected static readonly commonResponses: NonNullable<AlertingRouteSchemas['response']> = {
     401: {

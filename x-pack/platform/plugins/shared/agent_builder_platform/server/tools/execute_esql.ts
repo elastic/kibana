@@ -93,6 +93,13 @@ Prefer a filter that every targeted index can match: against a wildcard pattern 
 ## API documentation
 - ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
 - Query DSL reference (for the filter parameter): https://www.elastic.co/docs/reference/query-languages/querydsl`,
+    annotations: {
+      title: 'Execute ES|QL',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: executeEsqlToolSchema,
     handler: async (
       {
