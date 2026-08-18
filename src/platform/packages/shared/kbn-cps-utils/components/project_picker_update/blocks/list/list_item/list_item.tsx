@@ -55,7 +55,11 @@ export function ProjectPickerListItem({
       checked={isSelected}
       disabled={isToggleDisabled || isReadOnly}
       onChange={(evt) => onToggle(project, evt.target.checked)}
-      label={null}
+      label={i18n.translate('cpsUtils.projectPicker.listItem.toggleLabel', {
+        defaultMessage: 'Include project {projectName}',
+        values: { projectName: project._alias },
+      })}
+      showLabel={false}
       data-test-subj={`projectPickerListItemSwitch-${project._id}`}
       compressed
     />
