@@ -322,8 +322,11 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
 
   return (
     // Full-bleed white page canvas per design reference, overriding
-    // Kibana's default page background for this flow only.
-    <div style={{ background: '#FFFFFF', minHeight: '100%', width: '100%' }}>
+    // Kibana's default page background for this flow only. emptyShade
+    // (not a literal hex) so this still adapts correctly in dark mode.
+    <div
+      style={{ background: euiTheme.colors.emptyShade, minHeight: '100%', width: '100%' }}
+    >
     <div
       style={{
         maxWidth: 1240,
