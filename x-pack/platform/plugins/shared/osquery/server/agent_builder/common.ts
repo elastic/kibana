@@ -88,13 +88,11 @@ export const isOsqueryLiveCapable = async (
   }
 
   try {
-    const agents = await agentService
-      .asInternalScopedUser(spaceId)
-      .listAgents({
-        kuery: buildOsqueryPolicyKuery(agentPolicyIds),
-        perPage: 1,
-        showInactive: false,
-      });
+    const agents = await agentService.asInternalScopedUser(spaceId).listAgents({
+      kuery: buildOsqueryPolicyKuery(agentPolicyIds),
+      perPage: 1,
+      showInactive: false,
+    });
 
     return (agents?.total ?? 0) > 0;
   } catch {
