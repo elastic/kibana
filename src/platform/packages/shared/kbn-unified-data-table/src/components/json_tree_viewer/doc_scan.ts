@@ -53,15 +53,18 @@ export const collectSearchMatches = (nodes: JsonNode[], termLower: string): Sear
   };
 
   const visit = (node: JsonNode, listId: string, index: number): boolean => {
+    const keyMatches = !node.isArrayItem && node.key.toLowerCase().includes(termLower);
+
     let hasMatch: boolean;
     if (node.kind === 'leaf') {
-      hasMatch = String(node.value).toLowerCase().includes(termLower);
+      hasMatch = keyMatches || String(node.value).toLowerCase().includes(termLower);
     } else {
-      hasMatch = false;
+      let descendantMatch = false;
       node.children.forEach((child, childIndex) => {
-        if (visit(child, node.id, childIndex)) hasMatch = true;
+        if (visit(child, node.id, childIndex)) descendantMatch = true;
       });
-      if (hasMatch) containers.add(node.id);
+      if (descendantMatch) containers.add(node.id);
+      hasMatch = descendantMatch || keyMatches;
     }
 
     // Check if the node needs to be revealed.
