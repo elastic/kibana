@@ -6,7 +6,7 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
-import type { DeploySettingsStepState } from '../../onboarding_flow_context';
+import type { AuthenticateAndDeployStepState } from '../../onboarding_flow_context';
 import { FIELD_CONFIG } from '../service_settings_step/field_config';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 
@@ -94,7 +94,7 @@ export function buildPackageInputs(
 
 export function buildPackageVars(
   globalRegion: string,
-  staticKeys: DeploySettingsStepState['staticKeys'],
+  staticKeys: AuthenticateAndDeployStepState['staticKeys'],
   pkgVarNames: Set<string>
 ): Record<string, string> | undefined {
   const vars: Record<string, string> = {};
