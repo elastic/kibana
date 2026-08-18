@@ -67,8 +67,6 @@ export interface AwsServiceMatrixEntry {
   packageName: string;
   /** Fleet policy template name (policy_templates[].name in the package manifest) */
   policyTemplate?: string;
-  /** Override for the data stream name used in Fleet input stream keys when it differs from `id` */
-  dataStream?: string;
   /** Whether the data stream is enabled by default when the integration is installed. Derived from the package manifest. */
   defaultEnabled: boolean;
   /** Whether this service should be shown in the AWS onboarding UI. Defaults to true. */
@@ -430,12 +428,11 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
 
   // ── awsfargate package — Containers ─────────────────────────────────────
   {
-    id: 'fargate',
+    id: 'task_stats',
     name: 'AWS Fargate',
     category: 'Containers',
     packageName: 'awsfargate',
     policyTemplate: 'awsfargate',
-    dataStream: 'task_stats',
   },
 
   // ── aws_mq package — Application Integration ────────────────────────────
@@ -489,9 +486,7 @@ export function buildAwsServiceMatrix(
       const pt = (packageInfo.policy_templates ?? []).find(
         (p: any) => 'name' in p && p.name === entry.policyTemplate
       );
-      const ds = (packageInfo.data_streams ?? []).find(
-        (d: any) => d.path === (entry.dataStream ?? entry.id)
-      );
+      const ds = (packageInfo.data_streams ?? []).find((d: any) => d.path === entry.id);
 
       managedIntegrations = (pt as any)?.deployment_modes?.agentless?.enabled === true;
 
