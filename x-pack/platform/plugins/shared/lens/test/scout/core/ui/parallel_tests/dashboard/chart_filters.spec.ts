@@ -61,41 +61,42 @@ spaceTest.describe('Lens dashboard chart filters', { tag: '@local-stateful-class
     }
   );
 
-  spaceTest(
-    'adds a filter by right-clicking a bar in an XY chart',
-    async ({ page, pageObjects }) => {
-      const { dashboard, filterBar } = pageObjects;
+  spaceTest('adds an ip filter by right-clicking a bar in an XY chart', async ({ pageObjects }) => {
+    const { dashboard, filterBar } = pageObjects;
 
+    await dashboard.openNewDashboard();
+    await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.XY_VIS);
+    await dashboard.waitForRenderComplete();
+
+    const ipFilterAction = dashboard.getChartTooltipAction(/Filter \d+ selected series/);
+    // Same offset as the left-click case — that hit is already proven on this chart.
+    await dashboard.clickInPanelChart({ x: 30, y: 5 }, { button: 'right' });
+    await expect(ipFilterAction).toBeVisible();
+    // echTooltipActions portal repositions while Playwright waits for stability
+    await ipFilterAction.dispatchEvent('click');
+    await expect(filterBar.getFilterLocator({ field: 'ip', value: '97.220.3.248' })).toBeVisible();
+  });
+
+  spaceTest(
+    'adds a time range by right-clicking a bar in an XY chart',
+    async ({ page, pageObjects }) => {
+      const { dashboard } = pageObjects;
+
+      // Fresh dashboard: applying the ip filter first re-lays out the bars, so a
+      // second hardcoded click on the same panel misses the hit-target.
       await dashboard.openNewDashboard();
       await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.XY_VIS);
       await dashboard.waitForRenderComplete();
 
-      await spaceTest.step('right-click reveals the tooltip actions for a bar', async () => {
-        const ipFilterAction = dashboard.getChartTooltipAction(/Filter \d+ selected series/);
-        await dashboard.clickInPanelChart({ x: 30, y: 5 }, { button: 'right' });
-        await expect(ipFilterAction).toBeVisible();
-        // echTooltipActions portal repositions while Playwright waits for stability
-        await ipFilterAction.dispatchEvent('click');
-        await expect(
-          filterBar.getFilterLocator({ field: 'ip', value: '97.220.3.248' })
-        ).toBeVisible();
-        // The ip filter re-renders the chart; clicking again while the portal or old
-        // geometry is still up misses the next bar (CI: "Filter by time" never appears).
-        await expect(page.locator('.echTooltipActions')).toBeHidden();
-        await dashboard.waitForRenderComplete();
-      });
-
-      await spaceTest.step('right-click a different bar applies the time range', async () => {
-        const timeFilterAction = dashboard.getChartTooltipAction('Filter by time');
-        await dashboard.clickInPanelChart({ x: 35, y: 5 }, { button: 'right' });
-        await expect(timeFilterAction).toBeVisible();
-        // echTooltipActions portal repositions while Playwright waits for stability
-        await timeFilterAction.dispatchEvent('click');
-        await expect(page.testSubj.locator('dateRangePickerControlButton')).toHaveAttribute(
-          'data-date-range',
-          `${XY_BAR_TIME_RANGE.start} to ${XY_BAR_TIME_RANGE.end}`
-        );
-      });
+      const timeFilterAction = dashboard.getChartTooltipAction('Filter by time');
+      await dashboard.clickInPanelChart({ x: 30, y: 5 }, { button: 'right' });
+      await expect(timeFilterAction).toBeVisible();
+      // echTooltipActions portal repositions while Playwright waits for stability
+      await timeFilterAction.dispatchEvent('click');
+      await expect(page.testSubj.locator('dateRangePickerControlButton')).toHaveAttribute(
+        'data-date-range',
+        `${XY_BAR_TIME_RANGE.start} to ${XY_BAR_TIME_RANGE.end}`
+      );
     }
   );
 
