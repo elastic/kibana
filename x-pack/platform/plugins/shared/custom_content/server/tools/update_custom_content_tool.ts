@@ -15,6 +15,10 @@ import {
   CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
+  CUSTOM_CONTENT_CSS_VARS_GUIDANCE,
+  CUSTOM_CONTENT_SANDBOX_GUIDANCE,
+  CUSTOM_CONTENT_LIQUID_DATA_MODEL_GUIDANCE,
+  stripMarkdownFences,
 } from '@kbn/custom-content-common';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
@@ -42,9 +46,23 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 > => ({
   id: 'custom_content_update_panel',
   type: ToolType.builtin,
+  annotations: {
+    title: 'Update Custom Content Panel',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   tags: ['custom_content'],
-  description:
-    'Update the custom content panel. Set `template` to modify the HTML/CSS (LiquidJS, no JavaScript allowed). Set `esqlQuery` to change the data source. Set both to change both at once. Returns an error if the template contains script tags.',
+  description: `Update the custom content panel's template and/or ES|QL query. Write the full HTML template yourself using LiquidJS — no server-side generation happens here.
+
+${CUSTOM_CONTENT_SANDBOX_GUIDANCE}
+
+${CUSTOM_CONTENT_CSS_VARS_GUIDANCE}
+
+${CUSTOM_CONTENT_LIQUID_DATA_MODEL_GUIDANCE}
+
+Set \`template\` to replace the HTML, \`esqlQuery\` to change the data source (pass null to remove it), or both at once.`,
   schema: updateCustomContentSchema,
   handler: async ({ template, esqlQuery }, { attachments, logger }) => {
     if (template !== undefined && CUSTOM_CONTENT_SCRIPT_PATTERN.test(template)) {
@@ -85,7 +103,8 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
       | undefined;
 
     const newData: CustomContentContextAttachmentData = {
-      panel_template: template ?? currentData?.panel_template ?? '',
+      panel_template:
+        template !== undefined ? stripMarkdownFences(template) : currentData?.panel_template ?? '',
       esql_query: esqlQuery === null ? undefined : esqlQuery ?? currentData?.esql_query,
       panel_title: currentData?.panel_title,
       embeddable_id: currentData?.embeddable_id ?? '',
