@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { evaluate } from './evaluate_setup';
-import { seedRuleMigration } from './automatic_migration_fixtures';
+import { seedRuleMigration, seedMissingResources } from './automatic_migration_fixtures';
 
 evaluate.describe(
   'Automatic Rule Migration - start skill',
@@ -78,6 +79,8 @@ name or create one from LaunchPad → Manage Automatic Migrations.`,
 
     evaluate.describe('grounded output (seeded migration data)', () => {
       let teardown: (() => Promise<void>) | undefined;
+      let cleanupResources: (() => Promise<void>) | undefined;
+      let seededMigrationId: string;
 
       evaluate.beforeAll(async ({ esClient, log }) => {
         const seeded = await seedRuleMigration({
@@ -87,10 +90,24 @@ name or create one from LaunchPad → Manage Automatic Migrations.`,
           completed: 0,
           failed: 0,
         });
+        seededMigrationId = seeded.fixtures.migrationId;
         teardown = seeded.cleanup;
+
+        // Seed missing resources so the pre-flight check has something to report.
+        // Omitting the 'content' field makes the server treat these as missing (hasContent: false).
+        cleanupResources = await seedMissingResources({
+          esClient,
+          log,
+          migrationId: seededMigrationId,
+          resources: [
+            { type: 'lookup', name: 'Sample Lookup 1' },
+            { type: 'macro', name: 'sample_macro' },
+          ],
+        });
       });
 
       evaluate.afterAll(async () => {
+        await cleanupResources?.();
         await teardown?.();
       });
 
@@ -153,6 +170,191 @@ the translation? If so, please choose an AI connector.`,
                     expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
                     shouldNotCallToolId: 'security.siem_migration.start_rule_migration',
                     requiredTerms: ['Splunk Q1'],
+                  },
+                },
+              ],
+            },
+          });
+        }
+      );
+
+      evaluate(
+        'pre-flight: get_missing_rule_migration_resources is called before start on a fresh START',
+        async ({ evaluateDataset }) => {
+          await evaluateDataset({
+            dataset: {
+              name: 'agent builder: automatic-migration-start-preflight',
+              description: `Validates that the start skill calls get_missing_rule_migration_resources
+as a pre-flight check on a fresh START (ready migration) before calling start_rule_migration.
+The seeded migration has no uploaded resources, so the missing-resources response is empty
+and the agent proceeds to the connector step without a blocking warning.`,
+              examples: [
+                {
+                  input: {
+                    question: 'Start my rule migration named Splunk Q1.',
+                  },
+                  output: {
+                    expected: `I found your "Splunk Q1" migration. No resources are missing.
+I need to ask which AI connector to use before starting.`,
+                  },
+                  metadata: {
+                    query_intent: 'Start Rule Migration - Pre-flight check',
+                    expectedSkill: 'automatic-migration-rules-start-migration',
+                    expectedToolId: 'security.siem_migration.get_missing_rule_migration_resources',
+                    shouldNotCallToolId: 'security.siem_migration.start_rule_migration',
+                    requiredTerms: ['Splunk Q1'],
+                  },
+                },
+              ],
+            },
+          });
+        }
+      );
+
+      evaluate(
+        'multi-turn regression: missing-resources question is NOT re-asked after the user has already answered it',
+        async ({ chatClient }) => {
+          const MISSING_RESOURCES_TOOL =
+            'security.siem_migration.get_missing_rule_migration_resources';
+          const getToolIds = (steps: any[] | undefined): string[] =>
+            (steps ?? [])
+              .filter((s: any) => s?.type === 'tool_call')
+              .map((s: any) => s.tool_id as string);
+
+          // Turn 1: ask to start — autoConfirm answers the missing-resources
+          // ask_user_question (choice 0 = "Start now anyway") automatically.
+          const turn1 = await chatClient.converse({
+            messages: [{ message: 'Start my rule migration named Splunk Q1.' }],
+            options: { autoConfirm: true },
+          });
+          expect(turn1.errors).toEqual([]);
+          expect(turn1.conversationId).toBeDefined();
+          expect(getToolIds(turn1.steps)).toContain(MISSING_RESOURCES_TOOL);
+
+          // Turn 2: continue — autoConfirm handles any connector/skip-prebuilt prompts.
+          // Agent must NOT re-call get_missing_rule_migration_resources in this turn.
+          const turn2 = await chatClient.converse({
+            messages: [{ message: 'Use that connector.' }],
+            conversationId: turn1.conversationId,
+            options: { autoConfirm: true },
+          });
+          expect(turn2.errors).toEqual([]);
+          expect(getToolIds(turn2.steps)).not.toContain(MISSING_RESOURCES_TOOL);
+        }
+      );
+    });
+
+    evaluate.describe('resume skips pre-flight (stopped migration)', () => {
+      let teardown: (() => Promise<void>) | undefined;
+
+      evaluate.beforeAll(async ({ esClient, log }) => {
+        const seeded = await seedRuleMigration({
+          esClient,
+          log,
+          name: 'Splunk Q1 Stopped',
+          pending: 2,
+          completed: 1,
+          failed: 0,
+          migrationStatus: 'stopped',
+        });
+        teardown = seeded.cleanup;
+      });
+
+      evaluate.afterAll(async () => {
+        await teardown?.();
+      });
+
+      evaluate(
+        'pre-flight: get_missing_rule_migration_resources is NOT called on RESUME',
+        async ({ evaluateDataset }) => {
+          await evaluateDataset({
+            dataset: {
+              name: 'agent builder: automatic-migration-resume-skips-preflight',
+              description: `Validates that the start skill does NOT call get_missing_rule_migration_resources
+when the user asks to resume a stopped migration. Pre-flight is start-only; resume
+picks up from where the migration left off without re-checking resources.`,
+              examples: [
+                {
+                  input: {
+                    question: 'Resume my stopped rule migration named Splunk Q1 Stopped.',
+                  },
+                  output: {
+                    expected: `I found your stopped rule migration "Splunk Q1 Stopped".
+I will resume it using the same settings as the last run.
+Please confirm you want to resume.`,
+                  },
+                  metadata: {
+                    query_intent: 'Resume Rule Migration - Pre-flight should be skipped',
+                    expectedSkill: 'automatic-migration-rules-start-migration',
+                    expectedToolId: 'security.siem_migration.get_all_rule_migration_stats',
+                    shouldNotCallToolId:
+                      'security.siem_migration.get_missing_rule_migration_resources',
+                    requiredTerms: ['Splunk Q1 Stopped'],
+                  },
+                },
+              ],
+            },
+          });
+        }
+      );
+    });
+
+    evaluate.describe('complete flow: starts migration when all params supplied upfront', () => {
+      let teardownMigration: (() => Promise<void>) | undefined;
+      let teardownResources: (() => Promise<void>) | undefined;
+
+      evaluate.beforeAll(async ({ esClient, log }) => {
+        const seeded = await seedRuleMigration({
+          esClient,
+          log,
+          name: 'QRadar Migration',
+          vendor: 'qradar',
+          pending: 2,
+          completed: 0,
+          failed: 0,
+        });
+        teardownMigration = seeded.cleanup;
+
+        teardownResources = await seedMissingResources({
+          esClient,
+          log,
+          migrationId: seeded.fixtures.migrationId,
+          resources: [
+            { type: 'lookup', name: 'Sample IP Servers' },
+            { type: 'lookup', name: 'Sample Host servers' },
+          ],
+        });
+      });
+
+      evaluate.afterAll(async () => {
+        await teardownResources?.();
+        await teardownMigration?.();
+      });
+
+      evaluate(
+        'starts migration end-to-end when connector, skip-prebuilt, and proceed-with-resources are all specified in the first message',
+        async ({ evaluateDataset }) => {
+          await evaluateDataset({
+            dataset: {
+              name: 'agent builder: automatic-migration-start-end-to-end',
+              description: `Validates that when the user supplies connector + skip-prebuilt +
+proceed-with-resources upfront, the start skill invokes start_rule_migration in a
+single turn (via autoConfirm) with the settings the user asked for.`,
+              examples: [
+                {
+                  input: {
+                    question: `Run my QRadar Migration with following parameters even if there are missing resources. Don't ask any questions.\n\n1. Connector: Opus 4.6\n2. Skip pre built rule matching. Let's me know once the migration is running.`,
+                  },
+                  output: {
+                    expected: `Your migration had below missing resources <agent gives the list of missing resources>.
+                                Missing resources were acknowledged and translation is now running.`,
+                  },
+                  metadata: {
+                    query_intent: 'Start Rule Migration - End-to-end with autoConfirm',
+                    expectedSkill: 'automatic-migration-rules-start-migration',
+                    autoConfirm: true,
+                    expectedToolId: 'security.siem_migration.start_rule_migration',
+                    requiredTerms: ['running'],
                   },
                 },
               ],

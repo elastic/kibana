@@ -14,12 +14,30 @@ type Messages = { message: string }[];
 
 interface Options {
   agentId?: string;
+  /**
+   * When true, the client automatically answers any pending structured prompts
+   * that the agent emits after each API call:
+   *   - `ask_user_question` → selects the first option (`choice: [0]`)
+   *   - `confirmation`      → allows (`allow: true`)
+   *
+   * The client loops until no unanswered prompts remain, merging all steps
+   * from continuation calls into the final `steps[]` response. Callers see a
+   * clean "send message → get response" interface with no prompt-ID handling.
+   */
+  autoConfirm?: boolean;
 }
 
 interface ConverseFunctionParams {
   messages: Messages;
   conversationId?: string;
   options?: Options;
+}
+
+interface AgentBuilderConverseApiResponse {
+  conversation_id: string;
+  trace_id?: string;
+  steps: any[];
+  response: { message: string; prompts?: any[] };
 }
 
 type ConverseFunction = (params: ConverseFunctionParams) => Promise<{
@@ -77,7 +95,7 @@ export class AgentBuilderEvaluationChatClient {
   converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
     this.log.info('Calling converse');
 
-    const { agentId = agentBuilderDefaultAgentId } = options;
+    const { agentId = agentBuilderDefaultAgentId, autoConfirm = false } = options;
 
     const callConverseApi = async (): Promise<{
       conversationId?: string;
@@ -86,8 +104,7 @@ export class AgentBuilderEvaluationChatClient {
       steps?: any[];
       traceId?: string;
     }> => {
-      // Use the non-async AgentBuilder API endpoint
-      const response = await this.fetch('/api/agent_builder/converse', {
+      const chatResponse = (await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
         body: JSON.stringify({
@@ -96,15 +113,8 @@ export class AgentBuilderEvaluationChatClient {
           conversation_id: conversationId,
           input: messages[messages.length - 1].message,
         }),
-      });
+      })) as AgentBuilderConverseApiResponse;
 
-      // Extract conversation ID and response from the API response
-      const chatResponse = response as {
-        conversation_id: string;
-        trace_id?: string;
-        steps: any[];
-        response: { message: string };
-      };
       const {
         conversation_id: conversationIdFromResponse,
         response: latestResponse,
@@ -112,10 +122,62 @@ export class AgentBuilderEvaluationChatClient {
         trace_id: traceId,
       } = chatResponse;
 
+      let allSteps: any[] = steps ?? [];
+      let lastResponse = latestResponse;
+      let currentConversationId = conversationIdFromResponse;
+
+      // Auto-answer pending structured prompts until none remain.
+      // Pending prompts come from two places:
+      //   - steps[]           → ask_user_question (unanswered)
+      //   - response.prompts  → confirmation / authorization (tool pre-call gates)
+      if (autoConfirm) {
+        const collectPending = (
+          responseSteps: any[],
+          responseMsg: { prompts?: any[] }
+        ): Record<string, unknown> => {
+          const autoPrompts: Record<string, unknown> = {};
+          for (const step of responseSteps) {
+            if (step?.type === 'ask_user_question' && !step.answers && step.prompt_id) {
+              autoPrompts[step.prompt_id] = { answers: [{ choice: [0] }] };
+            }
+          }
+          for (const prompt of responseMsg?.prompts ?? []) {
+            if (!prompt?.id) continue;
+            if (prompt.type === 'confirmation') {
+              autoPrompts[prompt.id] = { allow: true };
+            } else if (prompt.type === 'authorization') {
+              autoPrompts[prompt.id] = { authorized: true };
+            }
+          }
+          return autoPrompts;
+        };
+
+        let autoPrompts = collectPending(allSteps, lastResponse);
+
+        while (Object.keys(autoPrompts).length > 0) {
+          const continuation = (await this.fetch('/api/agent_builder/converse', {
+            method: 'POST',
+            version: '2023-10-31',
+            body: JSON.stringify({
+              agent_id: agentId,
+              connector_id: this.connectorId,
+              conversation_id: currentConversationId,
+              prompts: autoPrompts,
+            }),
+          })) as AgentBuilderConverseApiResponse;
+
+          allSteps = [...allSteps, ...(continuation.steps ?? [])];
+          lastResponse = continuation.response ?? lastResponse;
+          currentConversationId = continuation.conversation_id ?? currentConversationId;
+
+          autoPrompts = collectPending(continuation.steps ?? [], continuation.response);
+        }
+      }
+
       return {
-        conversationId: conversationIdFromResponse,
-        messages: [...messages, latestResponse],
-        steps,
+        conversationId: currentConversationId,
+        messages: [...messages, lastResponse],
+        steps: allSteps,
         traceId,
         errors: [],
       };
