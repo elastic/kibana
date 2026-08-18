@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { EventTypeOpts } from '@kbn/core/server';
+import type { AnalyticsServiceStart, EventTypeOpts, Logger } from '@kbn/core/server';
+
+interface ReportEventContext {
+  analytics?: Pick<AnalyticsServiceStart, 'reportEvent'>;
+  logger: Logger;
+}
 
 export interface RuleCreatedEventData {
   rule_id: string;
@@ -76,3 +81,38 @@ export const RULE_CREATED_EVENT: EventTypeOpts<RuleCreatedEventData> = {
 export const ruleCreateTelemetryEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   RULE_CREATED_EVENT,
 ];
+
+export function reportRuleCreatedEvent(
+  context: ReportEventContext,
+  {
+    id,
+    templateId,
+    createTime,
+    alertTypeId,
+    enabled,
+    consumer,
+    producer,
+  }: {
+    id: string;
+    templateId?: string;
+    createTime: number;
+    alertTypeId: string;
+    enabled: boolean;
+    consumer: string;
+    producer: string;
+  }
+): void {
+  try {
+    context.analytics?.reportEvent(RULE_CREATED_EVENT.eventType, {
+      rule_id: id,
+      ...(templateId ? { template_id: templateId } : {}),
+      created_at: new Date(createTime).toISOString(),
+      rule_type_id: alertTypeId,
+      enabled,
+      consumer,
+      producer,
+    });
+  } catch (e) {
+    context.logger.debug(`Failed to report rule create telemetry event: ${e}`);
+  }
+}
