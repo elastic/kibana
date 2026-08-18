@@ -33,13 +33,22 @@ const renderHeader = (services: ReturnType<typeof coreMock.createStart>) =>
   );
 
 describe('ContextEngineSubPageHeader', () => {
+  let services: ReturnType<typeof coreMock.createStart>;
+  let isChromeNextEnabledSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    services = coreMock.createStart();
+    isChromeNextEnabledSpy = jest
+      .spyOn(services.chrome.next, 'isEnabled', 'get')
+      .mockReturnValue(false);
+  });
+
   afterEach(() => {
-    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('hides the in-page back button when Chrome Next is enabled in the project layout', () => {
-    const services = coreMock.createStart();
-    services.chrome.next.isEnabled = true;
+    isChromeNextEnabledSpy.mockReturnValue(true);
     services.chrome.getChromeStyle.mockReturnValue('project');
 
     renderHeader(services);
@@ -49,8 +58,7 @@ describe('ContextEngineSubPageHeader', () => {
   });
 
   it('shows the in-page back button in classic layout when Chrome Next is enabled', () => {
-    const services = coreMock.createStart();
-    services.chrome.next.isEnabled = true;
+    isChromeNextEnabledSpy.mockReturnValue(true);
     services.chrome.getChromeStyle.mockReturnValue('classic');
 
     renderHeader(services);
@@ -59,8 +67,6 @@ describe('ContextEngineSubPageHeader', () => {
   });
 
   it('shows the in-page back button in the project layout when Chrome Next is disabled', () => {
-    const services = coreMock.createStart();
-    services.chrome.next.isEnabled = false;
     services.chrome.getChromeStyle.mockReturnValue('project');
 
     renderHeader(services);
