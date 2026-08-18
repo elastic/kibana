@@ -25,6 +25,7 @@ import {
   AutomationsPanel,
   DescriptionPanel,
   KnowledgeIndicatorsPanel,
+  SignalsPanel,
   SourcesPanel,
 } from '../components/ai_index_detail';
 import { EditSourcesFlyout } from '../components/edit_sources_flyout';
@@ -66,7 +67,7 @@ export const AiIndexDetailPage = () => {
             actions={[
               <EuiButton
                 key="back-to-list"
-                iconType="arrowLeft"
+                iconType="chevronSingleLeft"
                 href={landingUrl}
                 data-test-subj="contextAiIndexBackToListButton"
               >
@@ -110,7 +111,7 @@ export const AiIndexDetailPage = () => {
         rightSideItems={[
           <EuiButtonEmpty
             key="back-to-list"
-            iconType="arrowLeft"
+            iconType="chevronSingleLeft"
             href={landingUrl}
             data-test-subj="contextAiIndexBackToListButton"
           >
@@ -142,6 +143,8 @@ export const AiIndexDetailPage = () => {
           onSaved={refetch}
           isManaged={isManaged}
         />
+        <EuiSpacer size="m" />
+        <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
       </KibanaPageTemplate.Section>
       {isEditingSources && aiIndex && (
         <EditSourcesFlyout

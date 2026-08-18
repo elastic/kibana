@@ -19,7 +19,7 @@ import type {
   AppHeaderMetadataItems,
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { AppHeaderSpacing } from '../types';
 import { AppHeaderView } from './app_header';
 
@@ -69,7 +69,7 @@ const tabs: AppHeaderTab[] = [
   {
     id: 'insights',
     label: 'Insights',
-    badge: { iconType: 'beaker', tooltip: 'Beta feature' },
+    badge: { iconType: 'flask', tooltip: 'Beta feature' },
     onClick: action('tab-insights'),
   },
   { id: 'settings', label: 'Settings', onClick: action('tab-settings') },
