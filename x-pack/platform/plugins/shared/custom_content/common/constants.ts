@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export const CUSTOM_CONTENT_GENERATE_ROUTE = '/internal/custom_content/generate';
 export const CUSTOM_CONTENT_APP_NAME = 'Custom content';
-
-export const CUSTOM_CONTENT_SAMPLE_ROW_COUNT = 3;
 
 // injectCsp() in prepare_html.ts de-dupes on an exact string match of this value.
 export const CUSTOM_CONTENT_CSP_META =
