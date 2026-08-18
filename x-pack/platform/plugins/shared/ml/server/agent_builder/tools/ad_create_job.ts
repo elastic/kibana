@@ -41,6 +41,13 @@ export const createAdCreateJobTool = (
   tags: ['ml', 'anomaly-detection'],
   description:
     'Create an ML anomaly detection job and its datafeed. Also validates a job spec or estimates memory requirement before creation.',
+  annotations: {
+    title: 'Create Anomaly Detection Job',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   experimental: true,
   schema,
   handler: async (

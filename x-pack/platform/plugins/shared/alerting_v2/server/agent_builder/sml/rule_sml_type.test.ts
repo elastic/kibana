@@ -38,6 +38,17 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   updatedAt: '2026-04-10T00:00:00.000Z',
 } as RuleSavedObjectAttributes;
 
+// `getRule` returns the snake_case API response, not the saved object attributes.
+const { createdBy, createdAt, updatedBy, updatedAt, ...restRuleAttrs } = baseRuleAttrs;
+const baseRuleResponse = {
+  ...restRuleAttrs,
+  created_by: createdBy,
+  created_at: createdAt,
+  updated_by: updatedBy,
+  updated_at: updatedAt,
+  metadata: { ...baseRuleAttrs.metadata, version: baseRuleAttrs.metadata?.version ?? 1 },
+};
+
 const buildSmlContext = (logger = loggingSystemMock.createLogger()) => ({
   esClient: {} as ElasticsearchClient,
   savedObjectsClient: {} as SavedObjectsClientContract,
@@ -267,7 +278,7 @@ describe('createRuleSmlType', () => {
 
     it('returns an attachment input wrapping the parsed rule', async () => {
       getRule.mockResolvedValueOnce({
-        ...baseRuleAttrs,
+        ...baseRuleResponse,
         id: 'rule-1',
       });
 

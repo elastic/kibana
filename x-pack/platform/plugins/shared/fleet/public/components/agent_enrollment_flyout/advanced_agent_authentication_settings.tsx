@@ -28,6 +28,7 @@ import {
   useStartServices,
   sendCreateEnrollmentAPIKey,
 } from '../../applications/fleet/hooks';
+import { isEnrollmentTokenExpired } from '../../services';
 import { Loading } from '../loading';
 
 const NoEnrollmentKeysCallout: React.FunctionComponent<{
@@ -156,7 +157,10 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
           }
 
           const enrollmentAPIKeysResponse = res.data.items.filter(
-            (key) => key.policy_id === agentPolicyId && key.active === true
+            (key) =>
+              key.policy_id === agentPolicyId &&
+              key.active === true &&
+              !isEnrollmentTokenExpired(key)
           );
 
           setEnrollmentAPIKeys(enrollmentAPIKeysResponse);
