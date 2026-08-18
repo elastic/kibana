@@ -44,6 +44,13 @@ export const dismissLeadTool = (
       'Use when the user decides a lead is not worth investigating.',
     schema,
     tags: ['security', 'entity-analytics', 'leads'],
+    annotations: {
+      title: 'Dismiss Lead',
+      readOnlyHint: false,
+      destructiveHint: true,
+      idempotentHint: false,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: ({ request }) =>
