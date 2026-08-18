@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT.
+ * Aim to group tests into a "New Discover session / Persisted Discover session" Histogram behavior part
+ * Merge test suites by using Scout steps, rather than navigating to Discover too often
+ */
+
 // Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group1/_discover_histogram.ts
 
 import expect from '@kbn/expect';
@@ -166,54 +172,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(chartCanvasExist).to.be(true);
       const chartIntervalIconTip = await discover.getChartIntervalWarningIcon();
       expect(chartIntervalIconTip).to.be(true);
-    });
-
-    it('should allow hide/show histogram, persisted in url state', async () => {
-      const from = 'Jan 1, 2010 @ 00:00:00.000';
-      const to = 'Mar 21, 2019 @ 00:00:00.000';
-      await prepareTest({ from, to });
-      let canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(true);
-      await discover.toggleChartVisibility();
-      await retry.try(async () => {
-        canvasExists = await elasticChart.canvasExists();
-        expect(canvasExists).to.be(false);
-      });
-      // histogram is hidden, when reloading the page it should remain hidden
-      await browser.refresh();
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
-      await discover.toggleChartVisibility();
-      await header.waitUntilLoadingHasFinished();
-      await retry.try(async () => {
-        canvasExists = await elasticChart.canvasExists();
-        expect(canvasExists).to.be(true);
-      });
-    });
-
-    it('should allow hide/show histogram, persisted after navigating away and back', async () => {
-      const from = 'Jan 1, 2010 @ 00:00:00.000';
-      const to = 'Mar 21, 2019 @ 00:00:00.000';
-      await prepareTest({ from, to });
-      let canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(true);
-      await discover.toggleChartVisibility();
-      await retry.try(async () => {
-        canvasExists = await elasticChart.canvasExists();
-        expect(canvasExists).to.be(false);
-      });
-      await dashboard.navigateToApp();
-      await header.waitUntilLoadingHasFinished();
-      await common.navigateToApp('discover');
-      await header.waitUntilLoadingHasFinished();
-      canvasExists = await elasticChart.canvasExists();
-      expect(canvasExists).to.be(false);
-      await discover.toggleChartVisibility();
-      await header.waitUntilLoadingHasFinished();
-      await retry.try(async () => {
-        canvasExists = await elasticChart.canvasExists();
-        expect(canvasExists).to.be(true);
-      });
     });
 
     it('should allow hiding the histogram, persisted in saved search', async () => {
