@@ -385,9 +385,10 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
         })
       );
     } else {
-      const openingBrackets = getAllIndices(val.value, '{[');
+      const topic = val.value;
+      const openingBrackets = getAllIndices(topic, '{[');
       const closingBracketCount =
-        getAllIndices(val.value, ']}').length + getAllIndices(val.value, ']:').length;
+        getAllIndices(topic, ']}').length + getAllIndices(topic, ']:').length;
       if (openingBrackets.length !== closingBracketCount) {
         res.push(
           i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
@@ -397,7 +398,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
         );
       }
       // check for preceding percent sign
-      if (!openingBrackets.every((item) => val.value[item - 1] === '%')) {
+      if (!openingBrackets.every((item) => topic[item - 1] === '%')) {
         res.push(
           i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicPercentError', {
             defaultMessage: 'Opening brackets should be preceded by a percent sign',
