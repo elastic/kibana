@@ -33,6 +33,10 @@ apiTest.describe(
   { tag: tags.serverless.security.complete },
   () => {
     const transformId = 'test_transform_id_create_with_project_routing';
+    const bulkTransformIds = [
+      'test_transform_id_bulk_project_scope_1',
+      'test_transform_id_bulk_project_scope_2',
+    ];
     const projectRouting = LINKED_PROJECT_ROUTING;
     let transformManagerCookieHeader: CookieHeader;
 
@@ -44,7 +48,7 @@ apiTest.describe(
     apiTest.afterEach(async ({ apiServices }) => {
       await apiServices.transform.cleanTransformIndices();
       await apiServices.transform.deleteIndices({
-        index: generateDestIndex(transformId),
+        index: [transformId, ...bulkTransformIds].map(generateDestIndex),
       });
     });
 
@@ -111,6 +115,72 @@ apiTest.describe(
             transform_id: transformId,
           });
           expect(updatedTransform.source.project_routing).toBe(updatedProjectRouting);
+        });
+      }
+    );
+
+    apiTest(
+      'should update project routing for multiple selected transforms',
+      async ({ apiClient, apiServices }) => {
+        await apiTest.step('creates transforms with project routing', async () => {
+          for (const bulkTransformId of bulkTransformIds) {
+            const transformConfig = generateTransformConfig(bulkTransformId);
+            const { statusCode, body } = await apiClient.put(
+              `internal/transform/transforms/${bulkTransformId}?deferValidation=true`,
+              {
+                headers: {
+                  ...COMMON_HEADERS,
+                  ...transformManagerCookieHeader,
+                },
+                body: {
+                  ...transformConfig,
+                  source: {
+                    ...transformConfig.source,
+                    project_routing: projectRouting,
+                  },
+                },
+                responseType: 'json',
+              }
+            );
+            const createResponse = body as PutTransformsResponseSchema;
+
+            expect(statusCode).toBe(200);
+            expect(createResponse.errors).toHaveLength(0);
+            expect(createResponse.transformsCreated).toMatchObject([
+              {
+                transform: bulkTransformId,
+              },
+            ]);
+          }
+        });
+
+        await apiTest.step('updates project routing for selected transforms', async () => {
+          const { statusCode, body } = await apiClient.post(
+            'internal/transform/update_transforms_project_scope',
+            {
+              headers: {
+                ...COMMON_HEADERS,
+                ...transformManagerCookieHeader,
+              },
+              body: {
+                projectRouting: PROJECT_ROUTING.ALL,
+                transformsInfo: bulkTransformIds.map((id) => ({ id })),
+              },
+              responseType: 'json',
+            }
+          );
+
+          expect(statusCode).toBe(200);
+          expect(body).toMatchObject(
+            Object.fromEntries(bulkTransformIds.map((id) => [id, { success: true }]))
+          );
+
+          for (const bulkTransformId of bulkTransformIds) {
+            const updatedTransform = await apiServices.transform.getTransform({
+              transform_id: bulkTransformId,
+            });
+            expect(updatedTransform.source.project_routing).toBe(PROJECT_ROUTING.ALL);
+          }
         });
       }
     );
