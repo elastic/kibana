@@ -90,8 +90,7 @@ async function extractAwsCloudConnectorSecrets(
   const roleArnVar = findFirstVarEntry(vars, roleArnKeys);
   const roleArn = roleArnVar?.value as string | undefined;
 
-  // Look for external_id using schema-defined keys. It is optional: the aws
-  // package's Identity Federation path does not use one (ingest-dev#9116).
+  // Look for external_id using schema-defined keys. It is optional.
   const externalIdVar = findFirstVarEntry(vars, externalIdKeys);
 
   if (roleArn) {
