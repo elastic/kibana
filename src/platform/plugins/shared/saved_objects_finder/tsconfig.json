@@ -6,6 +6,7 @@
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/cordis",
     "@kbn/saved-objects-management-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/saved-objects-tagging-oss-plugin",

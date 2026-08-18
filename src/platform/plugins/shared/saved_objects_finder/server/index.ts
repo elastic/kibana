@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const plugin = async () => {
-  const { SavedObjectsServerPlugin } = await import('./plugin');
-  return new SavedObjectsServerPlugin();
-};
+export { default as cordisPlugin } from './plugin';

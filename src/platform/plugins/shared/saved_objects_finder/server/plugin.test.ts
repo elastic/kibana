@@ -7,24 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import { SavedObjectsServerPlugin } from './plugin';
+import { Context } from '@kbn/cordis';
+import SavedObjectsServerPlugin from './plugin';
 import { uiSettings } from './ui_settings';
 
 describe('SavedObjectsPlugin', () => {
-  let plugin: SavedObjectsServerPlugin;
-  let coreSetup: ReturnType<typeof coreMock.createSetup>;
+  it('calls `registerSettings` with the correct parameters', async () => {
+    const ctx = new Context();
+    const mockUiSettings = { register: jest.fn() };
+    ctx.provide('core.uiSettings', mockUiSettings);
 
-  beforeEach(() => {
-    coreSetup = coreMock.createSetup();
-    plugin = new SavedObjectsServerPlugin();
-  });
+    await ctx.plugin(SavedObjectsServerPlugin);
 
-  describe('#setup', () => {
-    it('calls `registerSettings` with the correct parameters', () => {
-      plugin.setup(coreSetup);
-
-      expect(coreSetup.uiSettings.register).toHaveBeenCalledWith(uiSettings);
-    });
+    expect(mockUiSettings.register).toHaveBeenCalledWith(uiSettings);
   });
 });

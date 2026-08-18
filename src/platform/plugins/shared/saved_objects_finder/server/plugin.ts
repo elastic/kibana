@@ -7,18 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { uiSettings } from './ui_settings';
 
-export class SavedObjectsServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup) {
-    core.uiSettings.register(uiSettings);
-    return {};
-  }
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class SavedObjectsServerPlugin extends Service {
+  static readonly inject = ['core.uiSettings'];
+  static readonly provide = 'savedObjectsFinder';
 
-  public start() {
-    return {};
+  constructor(ctx: Context, _config: never) {
+    super(ctx, 'savedObjectsFinder');
+    (ctx.get('core.uiSettings') as any).register(uiSettings);
   }
-
-  public stop() {}
 }
