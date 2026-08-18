@@ -9,7 +9,7 @@
 // Source of truth for deployment mechanism, signal types, auth, and required config per AWS service.
 // Drives the Services UI badges and Deployment UI stack composition in the AWS onboarding flow.
 
-import type { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 export type SignalType = 'logs' | 'metrics';
 
@@ -43,6 +43,13 @@ export interface DeploymentMethodEntry {
   preferred?: boolean;
 }
 
+/** A manifest var definition plus the input types it appears under. */
+export interface ServiceVarDef {
+  def: RegistryVarsEntry;
+  /** streams[].input values this var appears under, e.g. ['aws-s3'] */
+  inputs: string[];
+}
+
 export interface AwsServiceMatrixEntry {
   /** Data stream identifier, matching packages/<packageName>/data_stream/<id> */
   id: string;
@@ -64,6 +71,8 @@ export interface AwsServiceMatrixEntry {
   mandatoryFields?: string[];
   /** Manifest var type by name — 'bool', 'text', 'integer', etc. Derived from the package manifest. */
   varTypes?: Record<string, string>;
+  /** Full manifest var definitions keyed by name, with the inputs each var appears under. Derived from the package manifest. */
+  varDefs?: Record<string, ServiceVarDef>;
   packageName: string;
   /** Fleet policy template name derived from policy_templates[].data_streams lookup in the manifest. */
   policyTemplate?: string;
@@ -80,7 +89,13 @@ export interface AwsServiceMatrixEntry {
  */
 type AwsServiceStaticEntry = Omit<
   AwsServiceMatrixEntry,
-  'deploymentMethods' | 'signalType' | 'defaultEnabled' | 'showInUI' | 'optionalConfig' | 'name'
+  | 'deploymentMethods'
+  | 'signalType'
+  | 'defaultEnabled'
+  | 'showInUI'
+  | 'optionalConfig'
+  | 'name'
+  | 'varDefs'
 > & {
   deploymentMethods?: DeploymentMethodEntry[];
   signalType?: SignalType;
@@ -428,6 +443,7 @@ export function buildAwsServiceMatrix(
     let managedIntegrations = false;
     let pt: any;
     const varTypes: Record<string, string> = {};
+    const varDefs: Record<string, ServiceVarDef> = {};
 
     const packageInfo = packages[entry.packageName];
     const badge = entry.badge ?? releaseToBadge((packageInfo as any)?.release);
@@ -455,10 +471,28 @@ export function buildAwsServiceMatrix(
         inputs = dsInputs;
       }
 
-      const allVars: any[] = ((ds as any)?.streams ?? []).flatMap((s: any) => s.vars ?? []);
+      // Walk streams preserving input attribution and full var definitions.
+      // First-wins on name collision: when a var appears under multiple inputs,
+      // the definition from the first stream wins and the additional input is appended.
+      for (const s of ((ds as any)?.streams ?? []) as Array<{
+        input?: string;
+        vars?: RegistryVarsEntry[];
+      }>) {
+        for (const v of s.vars ?? []) {
+          if (!v.name) continue;
+          const existing = varDefs[v.name];
+          if (existing) {
+            if (s.input && !existing.inputs.includes(s.input)) existing.inputs.push(s.input);
+            continue;
+          }
+          varDefs[v.name] = { def: v, inputs: s.input ? [s.input] : [] };
+        }
+      }
+
+      const allVars: RegistryVarsEntry[] = Object.values(varDefs).map((d) => d.def);
 
       for (const v of allVars) {
-        if (v.name && v.type) varTypes[v.name as string] = v.type as string;
+        if (v.name && v.type) varTypes[v.name] = v.type;
       }
 
       const reqVars: string[] = [
@@ -548,6 +582,7 @@ export function buildAwsServiceMatrix(
       optionalConfig,
       mandatoryFields,
       varTypes: Object.keys(varTypes).length > 0 ? varTypes : undefined,
+      varDefs: Object.keys(varDefs).length > 0 ? varDefs : undefined,
       defaultEnabled,
       showInUI,
       badge,

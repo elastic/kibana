@@ -11,7 +11,12 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { getDefaultTransport, getRequiredTextFields } from './field_config';
+import {
+  getDefaultTransport,
+  getRequiredTextFields,
+  resolveFieldMeta,
+  toTyped,
+} from './field_config';
 import type { TransportType } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
 
@@ -234,7 +239,11 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         if (!service) return false;
         const config = getServiceVars(inst.instanceId);
         const required = getRequiredTextFields(service, config.trigger);
-        return required.some((f) => (config.vars[f] ?? '').trim() === '');
+        return required.some((f) => {
+          const meta = resolveFieldMeta(service, f);
+          const effective = meta ? toTyped(config.vars[f], meta) : config.vars[f] ?? '';
+          return typeof effective === 'string' && effective.trim() === '';
+        });
       }),
     [instances, getServiceVars, awsServicesMap]
   );

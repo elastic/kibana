@@ -144,7 +144,6 @@ export function DuplicateServiceModal({
           draftTransport={draftTransport}
           onFieldChange={handleFieldChange}
           onTransportChange={setDraftTransport}
-          showTransportPrefix
         />
       </EuiModalBody>
 

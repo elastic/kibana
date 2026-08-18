@@ -9,7 +9,17 @@ import { renderHook, act } from '@testing-library/react';
 
 import { getRegionFieldName, buildStreamVars, buildPackageInputs, useDeploy } from './use_deploy';
 import { collectDeployResults, buildInstanceStatuses } from './deploy_groups';
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, ServiceVarDef } from '../../aws_service_matrix';
+import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
+
+function makeVarDef(
+  name: string,
+  type: RegistryVarsEntry['type'],
+  opts: Partial<RegistryVarsEntry & { inputs: string[] }> = {}
+): ServiceVarDef {
+  const { inputs = [], ...rest } = opts;
+  return { def: { name, type, title: name, ...rest } as RegistryVarsEntry, inputs };
+}
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   sendCreateAgentlessPolicy: jest.fn(),
@@ -179,7 +189,15 @@ describe('buildStreamVars', () => {
   });
 
   it('coerces boolean var names to boolean type', () => {
-    const service = makeService({ requiredConfig: ['region'] });
+    const service = makeService({
+      requiredConfig: ['region'],
+      varDefs: {
+        preserve_original_event: makeVarDef('preserve_original_event', 'bool', {
+          inputs: ['aws-s3', 'aws-cloudwatch'],
+        }),
+        collect_s3_logs: makeVarDef('collect_s3_logs', 'bool', { inputs: ['aws-s3'] }),
+      },
+    });
     const vars = buildStreamVars(
       service,
       { trigger: 'aws-s3', vars: { preserve_original_event: 'true', collect_s3_logs: 'false' } },
@@ -212,7 +230,13 @@ describe('buildStreamVars', () => {
   });
 
   it('emits explicitly set regions as a string array (split on comma)', () => {
-    const service = makeService({ requiredConfig: [], optionalConfig: ['regions'] });
+    const service = makeService({
+      requiredConfig: [],
+      optionalConfig: ['regions'],
+      varDefs: {
+        regions: makeVarDef('regions', 'text', { multi: true, inputs: [] }),
+      },
+    });
     const vars = buildStreamVars(
       service,
       { trigger: null, vars: { regions: 'us-east-1,eu-west-1' } },

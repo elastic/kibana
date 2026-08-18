@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { FleetStatusProvider } from '@kbn/fleet-plugin/public';
 import type { IngestHubStartDependencies } from '../types';
 
 import { OnboardingShell } from './onboarding_shell';
@@ -55,7 +56,7 @@ export function shouldClearSession(location: {
 export function renderOnboardingApp(
   coreStart: CoreStart,
   params: AppMountParameters,
-  deps: IngestHubStartDependencies = {}
+  deps: IngestHubStartDependencies
 ) {
   // Clear session storage before any hooks initialize.
   // useSessionStorage (react-use) writes its default on first mount and re-serializes
@@ -76,18 +77,20 @@ export function renderOnboardingApp(
   const root = createRoot(params.element);
   root.render(
     coreStart.rendering.addContext(
-      <KibanaContextProvider services={{ ...coreStart, cloud: deps.cloud }}>
+      <KibanaContextProvider services={{ ...coreStart, cloud: deps.cloud, fleet: deps.fleet }}>
         <QueryClientProvider client={queryClient}>
-          <OnboardingFlowProvider>
-            <Router history={params.history}>
-              <Route exact path="/">
-                <RootRedirect />
-              </Route>
-              <Route path="/:integrationId">
-                <OnboardingShell />
-              </Route>
-            </Router>
-          </OnboardingFlowProvider>
+          <FleetStatusProvider>
+            <OnboardingFlowProvider>
+              <Router history={params.history}>
+                <Route exact path="/">
+                  <RootRedirect />
+                </Route>
+                <Route path="/:integrationId">
+                  <OnboardingShell />
+                </Route>
+              </Router>
+            </OnboardingFlowProvider>
+          </FleetStatusProvider>
         </QueryClientProvider>
       </KibanaContextProvider>
     )
