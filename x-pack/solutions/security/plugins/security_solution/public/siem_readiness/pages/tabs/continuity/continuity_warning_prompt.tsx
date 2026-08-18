@@ -20,6 +20,7 @@ export const ContinuityWarningPrompt: React.FC = () => {
         defaultMessage: 'Ingest pipeline failures were detected in your environment.',
       })}
       color="warning"
+      data-test-subj="continuityWarningPrompt"
       iconType="warning"
       size="s"
     >

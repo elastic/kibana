@@ -14,6 +14,7 @@ import {
   EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useParams } from 'react-router-dom';
@@ -29,6 +30,8 @@ import {
   CategoryConfigurationPanel,
   ACTIVE_CATEGORIES_STORAGE_KEY,
 } from './components/configuration_panel';
+import { SiemReadinessExporter } from './components/siem_readiness_exporter';
+import { ExportModeView } from './components/export_mode_view';
 
 const VALID_TABS: VisibilityTabId[] = ['coverage', 'quality', 'continuity', 'retention'];
 const DEFAULT_TAB: VisibilityTabId = 'coverage';
@@ -64,66 +67,91 @@ const SiemReadinessDashboard = () => {
   );
 
   return (
-    <div>
-      <EuiPageHeader
-        pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              {i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
-                defaultMessage: 'SIEM Readiness',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel',
-                  {
-                    defaultMessage: 'Technical Preview',
-                  }
-                )}
-                data-test-subj="siemReadinessPreviewBadge"
+    <SiemReadinessExporter>
+      {(exportPDF, isExporting) => (
+        <div>
+          {/* Normal view - show when not exporting */}
+          {!isExporting && (
+            <>
+              <EuiPageHeader
+                pageTitle={
+                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate('xpack.securitySolution.siemReadiness.pageTitle', {
+                        defaultMessage: 'SIEM Readiness',
+                      })}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBetaBadge
+                        label={i18n.translate(
+                          'xpack.securitySolution.siemReadiness.technicalPreviewBadgeLabel',
+                          {
+                            defaultMessage: 'Technical Preview',
+                          }
+                        )}
+                        data-test-subj="siemReadinessPreviewBadge"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                }
+                bottomBorder={true}
+                rightSideItems={[
+                  <EuiButton
+                    iconType="exportAction"
+                    size="s"
+                    onClick={exportPDF}
+                    isLoading={isExporting}
+                    disabled={isExporting}
+                    data-test-subj="exportReportButton"
+                  >
+                    {i18n.translate('xpack.securitySolution.siemReadiness.exportReport', {
+                      defaultMessage: 'Export Report',
+                    })}
+                  </EuiButton>,
+                  <EuiButtonEmpty
+                    iconSide="right"
+                    size="s"
+                    iconType="gear"
+                    onClick={() => setIsConfigModalVisible(true)}
+                    data-test-subj="configurationsButton"
+                  >
+                    {i18n.translate('xpack.securitySolution.siemReadiness.configurations', {
+                      defaultMessage: 'Configurations',
+                    })}
+                  </EuiButtonEmpty>,
+                ]}
               />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        bottomBorder={true}
-        rightSideItems={[
-          <EuiButtonEmpty
-            iconSide="right"
-            size="s"
-            iconType="gear"
-            onClick={() => setIsConfigModalVisible(true)}
-            data-test-subj="configurationsButton"
-          >
-            {i18n.translate('xpack.securitySolution.siemReadiness.configurations', {
-              defaultMessage: 'Configurations',
-            })}
-          </EuiButtonEmpty>,
-        ]}
-      />
-      <EuiSpacer />
-      <EuiPageSection paddingSize="none">
-        <VisibilitySectionBoxes
-          selectedTabId={selectedTabId}
-          onTabSelect={handleTabSelect}
-          activeCategories={activeCategories ?? ALL_CATEGORIES}
-        />
-      </EuiPageSection>
-      <EuiSpacer />
-      <EuiPageSection paddingSize="none">
-        <VisibilitySectionTabs
-          selectedTabId={selectedTabId}
-          onTabSelect={handleTabSelect}
-          activeCategories={activeCategories ?? ALL_CATEGORIES}
-        />
-      </EuiPageSection>
-      {isConfigModalVisible && (
-        <CategoryConfigurationPanel
-          onClose={() => setIsConfigModalVisible(false)}
-          onSave={setActiveCategories}
-        />
+              <EuiSpacer />
+              <EuiPageSection paddingSize="none">
+                <VisibilitySectionBoxes
+                  selectedTabId={selectedTabId}
+                  onTabSelect={handleTabSelect}
+                  activeCategories={activeCategories ?? ALL_CATEGORIES}
+                />
+              </EuiPageSection>
+              <EuiSpacer />
+              <EuiPageSection paddingSize="none">
+                <VisibilitySectionTabs
+                  selectedTabId={selectedTabId}
+                  onTabSelect={handleTabSelect}
+                  activeCategories={activeCategories ?? ALL_CATEGORIES}
+                />
+              </EuiPageSection>
+            </>
+          )}
+
+          {/* Export mode view - show when exporting (renders all tabs) */}
+          {isExporting && <ExportModeView activeCategories={activeCategories ?? ALL_CATEGORIES} />}
+
+          {isConfigModalVisible && (
+            <CategoryConfigurationPanel
+              onClose={() => setIsConfigModalVisible(false)}
+              onSave={setActiveCategories}
+            />
+          )}
+        </div>
       )}
-    </div>
+    </SiemReadinessExporter>
   );
 };
 

@@ -242,7 +242,7 @@ export const DataCoveragePanel: React.FC = () => {
   ];
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder data-test-subj="dataCoveragePanel">
       <EuiFlexGroup direction="column" gutterSize="m">
         {/* Header Section */}
         <EuiFlexItem>
