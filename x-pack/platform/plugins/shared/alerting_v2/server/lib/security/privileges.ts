@@ -13,6 +13,7 @@ import { APP_ID } from '../constants';
 import {
   ALERTING_V2_API_PRIVILEGES,
   ALERTING_V2_FEATURES,
+  getFeatureManagementApps,
   type AlertingV2FeatureDefinition,
 } from '../../../common/feature_privileges';
 
@@ -26,7 +27,7 @@ const category: AppCategory = {
 };
 
 const buildKibanaFeature = (feature: AlertingV2FeatureDefinition): KibanaFeatureConfig => {
-  const managementApps = [feature.managementApp];
+  const managementApps = [...getFeatureManagementApps(feature)];
   const app = [APP_ID];
 
   return {
