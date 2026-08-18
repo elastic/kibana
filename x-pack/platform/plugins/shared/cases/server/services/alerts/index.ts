@@ -132,6 +132,19 @@ export class AlertService {
     }
   }
 
+  private static parseWorkflowStatus(source: unknown): STATUS_VALUES {
+    const rawStatus =
+      typeof source === 'object' && source !== null
+        ? (source as Record<string, unknown>)[ALERT_WORKFLOW_STATUS]
+        : undefined;
+    return rawStatus === 'open' ||
+      rawStatus === 'acknowledged' ||
+      rawStatus === 'in-progress' ||
+      rawStatus === 'closed'
+      ? rawStatus
+      : 'open';
+  }
+
   private async prefetchPreviousStatuses(
     alerts: UpdateAlertStatusRequest[]
   ): Promise<Map<string, STATUS_VALUES>> {
@@ -146,13 +159,7 @@ export class AlertService {
     const result = new Map<string, STATUS_VALUES>();
     for (const doc of response.docs) {
       if ('found' in doc && doc.found && doc._id != null) {
-        const source = doc._source as Record<string, unknown> | undefined;
-        const v = source?.[ALERT_WORKFLOW_STATUS];
-        const status: STATUS_VALUES =
-          v === 'open' || v === 'acknowledged' || v === 'in-progress' || v === 'closed'
-            ? v
-            : 'open';
-        result.set(doc._id, status);
+        result.set(doc._id, AlertService.parseWorkflowStatus(doc._source));
       }
     }
     return result;
@@ -167,21 +174,23 @@ export class AlertService {
     const byStatus = new Map<STATUS_VALUES, string[]>();
     for (const alert of alerts) {
       if (!AlertService.isEmptyAlert(alert)) {
-        const translated = this.translateStatus(alert);
-        if (!byStatus.has(translated)) byStatus.set(translated, []);
-        const ids = byStatus.get(translated);
-        if (ids) ids.push(alert.id);
+        const status = this.translateStatus(alert);
+        const bucket = byStatus.get(status);
+        if (bucket !== undefined) {
+          bucket.push(alert.id);
+        } else {
+          byStatus.set(status, [alert.id]);
+        }
       }
     }
-    for (const [status, alertIds] of byStatus.entries()) {
-      const previousStatuses = alertIds.map((id) => ({
-        id,
-        previousStatus: (previousStatusMap.get(id) ?? 'open') as STATUS_VALUES,
-      }));
+    for (const [status, alertIds] of byStatus) {
       casesEventBus.emitAlertStatusChanged(request, {
         alertIds,
         status,
-        previousStatuses,
+        previousStatuses: alertIds.map((id) => ({
+          id,
+          previousStatus: previousStatusMap.get(id) ?? 'open',
+        })),
       });
     }
   }
