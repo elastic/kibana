@@ -91,6 +91,7 @@ export const EditCustomContentFlyout = ({
     query,
     filters,
     colorMode,
+    euiTheme,
     onRunPreview,
   });
 

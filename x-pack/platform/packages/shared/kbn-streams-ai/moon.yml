@@ -32,6 +32,8 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/traced-es-client'
   - '@kbn/es-types'
+  - '@kbn/es-query'
+  - '@kbn/logging'
 tags:
   - shared-server
   - package
