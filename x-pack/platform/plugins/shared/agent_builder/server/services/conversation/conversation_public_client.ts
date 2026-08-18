@@ -8,6 +8,7 @@
 import {
   agentBuilderDefaultAgentId,
   createConversationAlreadyExistsError,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { ConversationClient } from './client/client';
@@ -39,7 +40,7 @@ export const createConversationPublicClient = ({
       return client.create({
         agent_id: effectiveAgentId,
         id,
-        title: title ?? 'New conversation',
+        title: title ?? DEFAULT_CONVERSATION_TITLE,
         access_control: accessControl,
         rounds: [],
       });

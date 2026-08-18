@@ -10,6 +10,7 @@ import {
   ConversationRoundStatus,
   ConversationOriginType,
   createAgentNotFoundError,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import { publicApiPath } from '../../common/constants';
 import { registerConversationRoutes } from './conversations';
@@ -352,7 +353,7 @@ describe('POST /conversations', () => {
   const createdConversation = {
     id: '550e8400-e29b-41d4-a716-446655440000',
     agent_id: 'elastic-default-agent',
-    title: 'New conversation',
+    title: DEFAULT_CONVERSATION_TITLE,
     rounds: [],
     access_control: { access_mode: 'private' },
     created_at: '2026-08-14T00:00:00.000Z',
@@ -397,7 +398,7 @@ describe('POST /conversations', () => {
     const result = await createHandler!(defaultCtx, { body: {} }, defaultResponse);
 
     expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'New conversation', rounds: [] })
+      expect.objectContaining({ title: DEFAULT_CONVERSATION_TITLE, rounds: [] })
     );
     expect(mockGet).toHaveBeenCalledWith(createdConversation.id);
     expect(result.status).toBe(200);

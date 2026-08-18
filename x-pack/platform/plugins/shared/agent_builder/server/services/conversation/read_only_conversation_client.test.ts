@@ -10,6 +10,7 @@ import {
   createAgentNotFoundError,
   isConversationAlreadyExistsError,
   ConversationAccessControlMode,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { AgentRegistry } from '../agents/agent_registry';
@@ -72,7 +73,7 @@ describe('createConversationPublicClient', () => {
       expect(internalClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           agent_id: agentBuilderDefaultAgentId,
-          title: 'New conversation',
+          title: DEFAULT_CONVERSATION_TITLE,
           rounds: [],
         })
       );

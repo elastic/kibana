@@ -168,6 +168,7 @@ export {
   type ConversationAccessControlInput,
   type ConversationAccessControlPrincipalType,
   type ToolCallWithResult,
+  DEFAULT_CONVERSATION_TITLE,
   type ConversationRound,
   type Conversation,
   type ConversationOrigin,

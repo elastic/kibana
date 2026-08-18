@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
+import { ConversationAccessControlMode, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { CreateConversationResponse } from '../../../../common/http_api/conversations';
@@ -41,7 +41,7 @@ apiTest.describe(
         expect(res).toHaveStatusCode(200);
         const conversation = res.body as CreateConversationResponse;
         expect(typeof conversation.id).toBe('string');
-        expect(conversation.title).toBe('New conversation');
+        expect(conversation.title).toBe(DEFAULT_CONVERSATION_TITLE);
         expect(conversation.agent_id).toBeDefined();
         expect(Array.isArray(conversation.rounds)).toBe(true);
         expect(conversation.rounds).toHaveLength(0);

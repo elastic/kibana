@@ -20,6 +20,7 @@ export {
   type ConversationAccessControlPrincipalType,
 } from './access_control';
 export {
+  DEFAULT_CONVERSATION_TITLE,
   ConversationRoundStatus,
   ConversationDisplayStatus,
   ConversationOriginType,
