@@ -33,6 +33,20 @@ describe('useIsCpsMultiProject', () => {
     expect(result.current).toBe(false);
   });
 
+  // Guards against a regression where `false` was set from an effect instead of derived from
+  // the argument, causing an extra render (and re-invoking every other hook in the caller) even
+  // though the reported value never actually changes.
+  it('does not trigger an extra render when the cps manager is unavailable', () => {
+    let renderCount = 0;
+    const { result } = renderHook(() => {
+      renderCount += 1;
+      return useIsCpsMultiProject(undefined);
+    });
+
+    expect(result.current).toBe(false);
+    expect(renderCount).toBe(1);
+  });
+
   it('is false when there is no linked project', async () => {
     const cpsManager = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(false) });
 
