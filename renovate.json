@@ -2420,6 +2420,15 @@
       "enabled": true
     },
     {
+      "groupName": "patch-package",
+      "matchDepNames": ["patch-package"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "addLabels": ["Team:Operations"],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
       "groupName": "@xyflow/react",
       "matchPackageNames": ["@xyflow/react"],
       "reviewers": ["team:contextual-security-apps"],
