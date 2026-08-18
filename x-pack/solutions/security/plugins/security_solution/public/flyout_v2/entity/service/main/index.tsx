@@ -178,7 +178,6 @@ export const Service: FC<ServiceProps> = memo(function Service({
         entityId: params.entityId,
         entityName: params.entityName,
         scopeId,
-        title: params.entityName ?? params.entityId,
         origin,
       }),
     [openEntityDetailsAsChild, scopeId]
@@ -316,6 +315,7 @@ export const Service: FC<ServiceProps> = memo(function Service({
             entityStoreEntityId={entityStoreEntityId}
             onShowEntity={onShowRelatedEntityFromResolution}
             riskScoreQueryId={SERVICE_PANEL_RISK_SCORE_QUERY_ID}
+            hideHeaderIcons
           />
         )}
       </FlyoutBody>

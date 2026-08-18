@@ -21,10 +21,25 @@ export const MonochromeIcons = new Set([
   'workflow.executeAsync',
   'workflow.output',
   'workflow.fail',
+  'while',
+  // base-type step glyphs: dedicated SVGs with no fill (default black) — must use mask+currentColor
+  'data.set',
+  'switch',
+  'waitForInput',
+  'waitForApproval',
+  // base-type steps that fall back to the generic plugs.svg (also no fill)
+  'http',
+  // loop control steps use controls.svg (no fill → black): must use mask+currentColor
+  'loop.break',
+  'loop.continue',
   // connector icons, which are monochrome and should be colored with currentColor
   '.http',
   '.inference',
   '.email',
   '.gen-ai',
   '.bedrock',
+  // Marks drawn with `fill="currentColor"`, which resolves in the DOM but not inside a
+  // data URL — as a background-image they fall back to black in both modes.
+  '.greynoise',
+  '.tavily_mcp',
 ]);

@@ -16,6 +16,61 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
+/**
+ * Free-form labels used to organize datasets. Tags are lowercased and deduplicated on write, so `Golden` and `golden` are the same tag. Commas are not allowed because tag filters are comma-separated. Tags describe what a dataset is about; they never affect who can see it.
+ */
+export const DatasetTags = lazySchema(() =>
+  z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(64)
+        .regex(/^[a-zA-Z0-9][a-zA-Z0-9:._-]*$/)
+    )
+    .max(20)
+);
+export type DatasetTags = z.infer<typeof DatasetTags>;
+
+/**
+ * How curated the dataset is, from raw captures through cleaned data to "golden" reference datasets. Absent when a dataset has no maturity set.
+ */
+export const DatasetMaturity = lazySchema(() => z.enum(['raw', 'cleaned', 'golden']));
+export type DatasetMaturity = z.infer<typeof DatasetMaturity>;
+export type DatasetMaturityEnum = typeof DatasetMaturity.enum;
+export const DatasetMaturityEnum = DatasetMaturity.enum;
+
+/**
+ * Spaces the dataset is assigned to. Each id must name an existing space the caller can manage evaluations in; wildcards are not accepted, so every space is listed. Defaults to the space the request was made in, taken from the URL's `/s/` prefix and the default space without one. Absent in a response means the default space.
+ */
+export const SpaceIds = lazySchema(() => z.array(z.string().min(1).max(256)).min(1).max(100));
+export type SpaceIds = z.infer<typeof SpaceIds>;
+
+/**
+ * Spaces the dataset is assigned to, with each id the caller cannot access replaced by `?`, so the entries still count the spaces.
+ */
+export const RedactedSpaceIds = lazySchema(() => z.array(z.string().max(256)).max(100));
+export type RedactedSpaceIds = z.infer<typeof RedactedSpaceIds>;
+
+export const DatasetFacetBucket = lazySchema(() =>
+  z.object({
+    value: z.string().max(64),
+    count: z.number().int(),
+  })
+);
+export type DatasetFacetBucket = z.infer<typeof DatasetFacetBucket>;
+
+/**
+ * Values available to filter on, with the number of datasets carrying each. Counts reflect the current search term but ignore the tag and maturity filters, so they stay stable while filters are toggled.
+ */
+export const DatasetFacets = lazySchema(() =>
+  z.object({
+    tags: z.array(DatasetFacetBucket),
+    maturity: z.array(DatasetFacetBucket),
+  })
+);
+export type DatasetFacets = z.infer<typeof DatasetFacets>;
+
 export const Model = lazySchema(() =>
   z.object({
     id: z.string().max(256),
@@ -30,6 +85,7 @@ export const ExampleInfo = lazySchema(() =>
     id: z.string().max(1024),
     index: z.number().int(),
     input: z.object({}).catchall(z.unknown()).nullable().optional(),
+    metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     dataset: z.object({
       id: z.string().max(1024),
       name: z.string().max(256),
@@ -96,6 +152,10 @@ export const EvaluationScoreDocument = lazySchema(() =>
     '@timestamp': z.string().max(64),
     experiment_id: z.string().max(1024),
     experiment_name: z.string().max(256).optional(),
+    /**
+     * Spaces this score belongs to. Absent on documents created before space-awareness was introduced (those are treated as the default space).
+     */
+    space_ids: z.array(z.string().max(256)).max(100).nullable().optional(),
     example: ExampleInfo,
     task: TaskInfo,
     evaluator: EvaluatorInfo,

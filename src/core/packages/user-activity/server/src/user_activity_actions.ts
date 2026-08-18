@@ -72,6 +72,24 @@ export const userActivityActions = {
     groupName: 'Dashboard',
     versionAddedAt: '9.5',
   },
+  discover_session_create: {
+    description: 'User created a Discover session.',
+    ownerTeam: '@elastic/kibana-data-discovery',
+    groupName: 'Discover',
+    versionAddedAt: '9.6',
+  },
+  discover_session_update: {
+    description: 'User updated an existing Discover session.',
+    ownerTeam: '@elastic/kibana-data-discovery',
+    groupName: 'Discover',
+    versionAddedAt: '9.6',
+  },
+  discover_session_delete: {
+    description: 'User deleted a Discover session.',
+    ownerTeam: '@elastic/kibana-data-discovery',
+    groupName: 'Discover',
+    versionAddedAt: '9.6',
+  },
 } as const satisfies Record<string, UserActivityActionDefinition>;
 
 /** Closed union derived from the keys of {@link userActivityActions}. @public */

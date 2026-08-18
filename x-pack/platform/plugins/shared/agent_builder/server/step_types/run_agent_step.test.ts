@@ -11,6 +11,7 @@ import { ChatEventType, createRequestAbortedError } from '@kbn/agent-builder-com
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
   ConfigSchema,
+  InputSchema,
 } from '../../common/step_types/run_agent_step';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
@@ -117,8 +118,57 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     const res = await step.handler(context);
 
     expect(execution.executeAgent).toHaveBeenCalledTimes(1);
+    expect(execution.executeAgent.mock.calls[0][0].params.accessControl).toBeUndefined();
     expect(res).toHaveProperty('output.conversation_id');
     expect(res.output?.conversation_id).toBe('c-1');
+  });
+
+  it('passes public access control when public-conversation is true', async () => {
+    const events$ = of(
+      {
+        type: ChatEventType.conversationCreated,
+        data: { conversation_id: 'c-public', title: 't' },
+      },
+      {
+        type: ChatEventType.roundComplete,
+        data: {
+          round: {
+            id: 'r-1',
+            response: { message: 'ok' },
+          },
+        },
+      }
+    );
+
+    const execution = createExecutionMock(events$);
+
+    const serviceManager = {
+      internalStart: { execution },
+    } as any;
+
+    const step = getRunAgentStepDefinition(serviceManager);
+    const res = await step.handler(
+      createContext({
+        input: {
+          message: 'hello',
+        },
+        config: {
+          'create-conversation': true,
+          'public-conversation': true,
+        },
+      })
+    );
+
+    expect(execution.executeAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          accessControl: { access_mode: 'public' },
+          storeConversation: true,
+          autoCreateConversationWithId: true,
+        }),
+      })
+    );
+    expect(res.output?.conversation_id).toBe('c-public');
   });
 
   it('uses conversation_id from input (with:) and create-conversation from config (static)', async () => {
@@ -356,6 +406,67 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       })
     );
     expect(res.output?.message).toBe('ok');
+  });
+
+  describe('configuration_overrides (InputSchema)', () => {
+    it('accepts configuration_overrides with all optional fields', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: {
+          instructions: 'Custom instructions.',
+          tools: [{ tool_ids: ['tool-a', 'tool-b'] }],
+          skill_ids: ['skill-a'],
+        },
+      });
+      expect(parsed.success).toBe(true);
+    });
+
+    it('accepts configuration_overrides with a subset of fields', () => {
+      expect(
+        InputSchema.safeParse({ message: 'hi', configuration_overrides: { skill_ids: ['s1'] } })
+          .success
+      ).toBe(true);
+      expect(
+        InputSchema.safeParse({
+          message: 'hi',
+          configuration_overrides: { instructions: 'override' },
+        }).success
+      ).toBe(true);
+    });
+
+    it('accepts an omitted configuration_overrides field', () => {
+      const parsed = InputSchema.safeParse({ message: 'hello' });
+      expect(parsed.success).toBe(true);
+      if (parsed.success) {
+        expect(parsed.data.configuration_overrides).toBeUndefined();
+      }
+    });
+
+    it('rejects instructions exceeding 2048 characters', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: { instructions: 'a'.repeat(2049) },
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('rejects skill_ids list exceeding 50 entries', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: { skill_ids: Array.from({ length: 51 }, (_, i) => `s-${i}`) },
+      });
+      expect(parsed.success).toBe(false);
+    });
+
+    it('rejects tools list exceeding 50 entries', () => {
+      const parsed = InputSchema.safeParse({
+        message: 'hello',
+        configuration_overrides: {
+          tools: Array.from({ length: 51 }, (_, i) => ({ tool_ids: [`t-${i}`] })),
+        },
+      });
+      expect(parsed.success).toBe(false);
+    });
   });
 
   describe('connector-id / inference-id', () => {

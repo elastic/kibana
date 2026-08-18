@@ -38,10 +38,10 @@ actions:
   - target: '$.tags[?(@.name=="agent builder")]'
     description: Change tag description and displayName
     update:
-      description: >
+      description: |
         Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
-        
-        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+
+        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs. Follow the [Agent Builder API tutorial](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/agent-builder-api-tutorial) for a guided example.
       externalDocs:
         description: Agent Builder docs
         url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access

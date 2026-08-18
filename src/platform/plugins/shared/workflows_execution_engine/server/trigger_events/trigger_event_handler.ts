@@ -172,7 +172,7 @@ export class TriggerEventHandler {
     this.telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, deps.logger);
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient, this.logger);
     this.triggerEventsClientPromise =
       deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
   }

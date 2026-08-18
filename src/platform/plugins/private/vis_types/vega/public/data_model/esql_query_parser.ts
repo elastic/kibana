@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { getTime } from '@kbn/data-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
-import { getESQLTimeFieldFromQuery, hasStartEndParams, getStartEndParams } from '@kbn/esql-utils';
+import { getESQLTimeField, hasStartEndParams, getStartEndParams } from '@kbn/esql-utils';
 import { getHttp } from '../services';
 import type { TimeCache } from './time_cache';
 import type { SearchAPI } from './search_api';
@@ -200,7 +200,7 @@ export class EsqlQueryParser {
     }
 
     try {
-      return await getESQLTimeFieldFromQuery({
+      return await getESQLTimeField({
         query: url.query,
         http: getHttp(),
       });

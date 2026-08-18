@@ -59,6 +59,7 @@ export const MetricsExperienceGrid = ({
     profileId,
     gridSettings,
     onGridSettingsChange,
+    recentlyExploredMetrics,
   } = useMetricsExperienceState();
   const [isGridSettingsFlyoutOpen, toggleGridSettingsFlyout] = useToggle(false);
   const {
@@ -80,11 +81,12 @@ export const MetricsExperienceGrid = ({
     searchTerm,
   });
 
-  const [sortBy, direction] = metricsSort;
+  const { sortField: sortBy, sortDirection: direction } = metricsSort;
   const { sortedMetricItems } = useMetricsSort({
     metricItems: filteredMetricItems,
     sortBy,
     direction,
+    recentlyExploredMetrics,
   });
 
   useDiscoverFieldForBreakdown(

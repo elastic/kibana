@@ -195,7 +195,12 @@ export interface ChromeProjectNavigationNode extends ChromeNavigationNodeCommon 
   isExternalLink?: boolean;
 }
 
-/** @public */
+/**
+ * @deprecated Project breadcrumb overrides remain only for compatibility fallback back navigation.
+ * Declare hierarchy in the project navigation tree and pass explicit `back` configuration to
+ * `AppHeader` from `@kbn/app-header`.
+ * @public
+ */
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }

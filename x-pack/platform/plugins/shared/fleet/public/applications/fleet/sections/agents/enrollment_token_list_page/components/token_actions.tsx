@@ -47,6 +47,11 @@ export const TokenActions: React.FunctionComponent<{
     try {
       const res = await sendDeleteOneEnrollmentAPIKey(apiKey.id);
       if (res.error) throw res.error;
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenSuccess', {
+          defaultMessage: 'Enrollment token successfully revoked',
+        })
+      );
     } catch (err) {
       notifications.toasts.addError(err as Error, { title: 'Error' });
     }
@@ -61,6 +66,11 @@ export const TokenActions: React.FunctionComponent<{
     try {
       const res = await sendDeleteOneEnrollmentAPIKey(apiKey.id, { forceDelete: true });
       if (res.error) throw res.error;
+      notifications.toasts.addSuccess(
+        i18n.translate('xpack.fleet.enrollmentTokensList.deleteTokenSuccess', {
+          defaultMessage: 'Enrollment token successfully deleted',
+        })
+      );
     } catch (err) {
       notifications.toasts.addError(err as Error, { title: 'Error' });
     }
@@ -119,7 +129,7 @@ export const getTokenActionItems = ({
       : i18n.translate('xpack.fleet.enrollmentTokensList.revokeTokenAction', {
           defaultMessage: 'Revoke token',
         }),
-    icon: 'minusInCircle',
+    icon: 'minusCircle',
     disabled: revokeDisabled,
     'data-test-subj': plural
       ? 'enrollmentTokensList.bulkRevokeButton'

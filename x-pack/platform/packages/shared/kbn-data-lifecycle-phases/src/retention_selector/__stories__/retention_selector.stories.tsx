@@ -92,6 +92,39 @@ const STREAM_OPTIONS: RetentionOption[] = [
   { name: 'logs.otel.windows', descriptionParts: ['90d'] },
 ];
 
+// Edit Data Lifecycle flyout with managed/system policies mixed in. Managed policies are hidden
+// behind the "Managed" filter toggle and carry a "Managed" badge when shown.
+const ILM_OPTIONS_WITH_MANAGED: RetentionOption[] = [
+  {
+    name: 'my-custom-policy',
+    descriptionParts: ['60d', '3 data phases'],
+    inspectable: true,
+  },
+  {
+    name: 'another-custom-policy',
+    descriptionParts: ['90d', '2 data phases'],
+    inspectable: true,
+  },
+  {
+    name: '.alerts-ilm-policy',
+    descriptionParts: ['60d', '4 data phases', '2 downsample steps'],
+    inspectable: true,
+    isManaged: true,
+  },
+  {
+    name: '.fleet-actions-results-ilm-policy',
+    descriptionParts: ['∞', '1 data phase'],
+    inspectable: true,
+    isManaged: true,
+  },
+  {
+    name: '.deprecation-indexing-ilm-policy',
+    descriptionParts: ['365d', '2 data phases'],
+    inspectable: true,
+    isManaged: true,
+  },
+];
+
 const Panel = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <EuiPanel hasBorder hasShadow={false} paddingSize="m">
     <EuiText size="s">
@@ -148,25 +181,69 @@ export const IlmPolicies: Story = {
   render: () => <IlmPoliciesExample />,
 };
 
-const IlmPoliciesInheritedExample = () => {
-  const inheritedPolicyName = ILM_OPTIONS[0].name;
-  const inheritedOptions = ILM_OPTIONS.filter((o) => o.name === inheritedPolicyName);
+const IlmPoliciesWithManagedExample = () => {
+  const [selected, setSelected] = useState(ILM_OPTIONS_WITH_MANAGED[0].name);
 
   return (
-    <Panel title="Inherited (read-only single policy)">
+    <Panel title="With managed policies (toggle 'Managed' to reveal them)">
       <RetentionSelector
-        options={inheritedOptions}
-        selectedOptionName={inheritedPolicyName}
-        onSelectOption={action('onSelectOption')}
+        options={ILM_OPTIONS_WITH_MANAGED}
+        selectedOptionName={selected}
+        onSelectOption={setSelected}
         onInspect={action('onInspect')}
-        isDisabled
-        showSearch={false}
-        listStyle="panel"
-        showRowActions={false}
         searchPlaceholder="Search by policy name"
         inspectButtonLabel={(name) => `Inspect '${name}'`}
       />
     </Panel>
+  );
+};
+
+export const IlmPoliciesWithManaged: Story = {
+  name: 'ILM policies — with managed/system policies',
+  render: () => <IlmPoliciesWithManagedExample />,
+};
+
+const IlmPoliciesInheritedExample = () => {
+  const inheritedPolicyName = ILM_OPTIONS[0].name;
+  const inheritedOptions = ILM_OPTIONS.filter((o) => o.name === inheritedPolicyName);
+
+  const inheritedManagedPolicy =
+    ILM_OPTIONS_WITH_MANAGED.find((o) => o.isManaged) ?? ILM_OPTIONS_WITH_MANAGED[0];
+
+  return (
+    <>
+      <Panel title="Inherited (read-only single policy)">
+        <RetentionSelector
+          options={inheritedOptions}
+          selectedOptionName={inheritedPolicyName}
+          onSelectOption={action('onSelectOption')}
+          onInspect={action('onInspect')}
+          isDisabled
+          showSearch={false}
+          listStyle="panel"
+          showRowActions={false}
+          searchPlaceholder="Search by policy name"
+          inspectButtonLabel={(name) => `Inspect '${name}'`}
+        />
+      </Panel>
+
+      <EuiSpacer size="m" />
+
+      <Panel title="Inherited (read-only, managed policy)">
+        <RetentionSelector
+          options={[inheritedManagedPolicy]}
+          selectedOptionName={inheritedManagedPolicy.name}
+          onSelectOption={action('onSelectOption')}
+          onInspect={action('onInspect')}
+          isDisabled
+          showSearch={false}
+          listStyle="panel"
+          showRowActions={false}
+          searchPlaceholder="Search by policy name"
+          inspectButtonLabel={(name) => `Inspect '${name}'`}
+        />
+      </Panel>
+    </>
   );
 };
 

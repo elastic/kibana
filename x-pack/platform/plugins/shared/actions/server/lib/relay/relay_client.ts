@@ -12,11 +12,14 @@ import type { ActionsConfigurationUtilities } from '../../actions_config';
 import { request } from '../axios_utils';
 import { RelayRequestError } from './relay_error';
 import type {
+  RelayBinding,
+  RelayBindingsPage,
   RelayCallbackResponse,
   RelayClaimResponse,
   RelayClientContract,
   RelayInstallRequest,
   RelayInstallResponse,
+  RelayListBindingsOptions,
 } from './types';
 
 export interface RelayClientOptions {
@@ -25,8 +28,17 @@ export interface RelayClientOptions {
   logger: Logger;
 }
 
+/** Largest page size the Relay accepts on its cursor-paginated list endpoints. */
+const RELAY_MAX_PAGE_LIMIT = 200;
+
 interface RelayErrorResponse {
   message?: string;
+}
+
+/** Raw shape of the cursor-paginated bindings list response body. */
+interface RelayBindingsListResponse {
+  bindings?: RelayBinding[];
+  next_cursor?: string;
 }
 
 export class RelayClient implements RelayClientContract {
@@ -53,12 +65,79 @@ export class RelayClient implements RelayClientContract {
       return { status: 'pending' };
     }
 
-    const claim = response.data as { tenant_key: string };
+    const claim = response.data as { tenant_key?: string };
     return { status: 'complete', tenant_key: claim.tenant_key };
   }
 
-  async unbind(): Promise<void> {
-    await this.post('/v1/slack/uninstall', {});
+  /** Unbind a single workspace binding identified by its tenant key. */
+  async unbind(tenantKey: string): Promise<void> {
+    await this.post('/v1/slack/uninstall', { tenant_key: tenantKey });
+  }
+
+  /**
+   * Fetch a single page of the calling deployment's own SUB (channel-scoped) bindings for a
+   * given Slack workspace tenant — the "connected channels" inventory. Each entry carries its
+   * persisted display snapshot (`display_name`, `visibility`). Returns the page's items plus
+   * the Relay's opaque `next_cursor` (as `nextCursor`); pass it back via `options.cursor` to
+   * read the next page.
+   */
+  async listBindings(
+    tenantKey: string,
+    options: RelayListBindingsOptions = {}
+  ): Promise<RelayBindingsPage> {
+    const query = new URLSearchParams({
+      limit: String(options.limit ?? RELAY_MAX_PAGE_LIMIT),
+    });
+    if (options.cursor) {
+      query.set('cursor', options.cursor);
+    }
+
+    const response = await this.get(
+      `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings?${query.toString()}`
+    );
+    const body = response.data as RelayBindingsListResponse | undefined;
+
+    if (body?.bindings === undefined) {
+      return { bindings: [], nextCursor: body?.next_cursor };
+    }
+
+    if (!Array.isArray(body.bindings)) {
+      throw new RelayRequestError(
+        `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings`,
+        response.status,
+        'Relay invalid response format missing expected `bindings` array'
+      );
+    }
+
+    const bindings: RelayBinding[] = body.bindings.map(
+      ({ scope_type, scope_id, display_name, visibility }) => ({
+        scope_type,
+        scope_id,
+        display_name,
+        visibility,
+      })
+    );
+
+    return { bindings, nextCursor: body?.next_cursor };
+  }
+
+  /** Claim an unclaimed channel (put-if-absent). The caller must hold a registration for the tenant. */
+  async bind(tenantKey: string, channelId: string): Promise<void> {
+    await this.put(
+      `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings/${encodeURIComponent(
+        channelId
+      )}/bind`,
+      {}
+    );
+  }
+
+  /** Release a channel binding owned by this deployment. */
+  async unbindChannel(tenantKey: string, channelId: string): Promise<void> {
+    await this.del(
+      `/v1/slack/tenants/${encodeURIComponent(tenantKey)}/bindings/${encodeURIComponent(
+        channelId
+      )}/unbind`
+    );
   }
 
   isRelayOrigin(url: string): boolean {
@@ -78,12 +157,32 @@ export class RelayClient implements RelayClientContract {
       throw new Error('Callback URL does not match the configured Relay origin');
     }
 
-    const response = await this.sendRequest(url, body, signal);
+    const response = await this.sendRequest(url, body, 'post', signal);
     return { status: response.status };
   }
 
   private async post(path: string, body: unknown): Promise<AxiosResponse> {
-    const response = await this.sendRequest(new URL(path, this.baseUrl).toString(), body);
+    return this.send(path, 'post', body);
+  }
+
+  private async put(path: string, body: unknown): Promise<AxiosResponse> {
+    return this.send(path, 'put', body);
+  }
+
+  private async del(path: string): Promise<AxiosResponse> {
+    return this.send(path, 'delete');
+  }
+
+  private async get(path: string): Promise<AxiosResponse> {
+    return this.send(path, 'get');
+  }
+
+  private async send(
+    path: string,
+    method: 'get' | 'post' | 'put' | 'delete',
+    data?: unknown
+  ): Promise<AxiosResponse> {
+    const response = await this.sendRequest(new URL(path, this.baseUrl).toString(), data, method);
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
@@ -92,11 +191,16 @@ export class RelayClient implements RelayClientContract {
     throw new RelayRequestError(path, response.status, relayMessage);
   }
 
-  private sendRequest(url: string, data: unknown, signal?: AbortSignal): Promise<AxiosResponse> {
+  private sendRequest(
+    url: string,
+    data: unknown,
+    method: 'get' | 'post' | 'put' | 'delete' = 'post',
+    signal?: AbortSignal
+  ): Promise<AxiosResponse> {
     return request({
       axios: this.axios,
       url,
-      method: 'post',
+      method,
       data,
       headers: { 'Content-Type': 'application/json' },
       configurationUtilities: this.configurationUtilities,

@@ -8,10 +8,12 @@
 import _ from 'lodash';
 import moment from 'moment-timezone';
 import { RRule } from '@kbn/rrule';
+import {
+  transformCustomScheduleToRRule,
+  getDurationInMilliseconds,
+} from '@kbn/response-ops-schedule-schema';
 import type { DateRange } from '../../../common';
 import type { MaintenanceWindow, Schedule } from '../types';
-import { transformCustomScheduleToRRule } from '../../lib/transforms/custom_to_rrule/latest';
-import { getDurationInMilliseconds } from '../../lib/transforms/custom_to_rrule/util';
 
 export interface GenerateMaintenanceWindowEventsParams {
   schedule: Schedule;

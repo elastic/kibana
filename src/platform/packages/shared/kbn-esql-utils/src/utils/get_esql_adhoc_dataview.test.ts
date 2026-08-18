@@ -112,6 +112,22 @@ describe('getESQLAdHocDataview', () => {
       );
     });
 
+    it('should ignore coordinator lookup join targets when extracting the index pattern', async () => {
+      await getESQLAdHocDataview({
+        dataViewsService,
+        query:
+          'FROM "my_remote_cluster:customer_orders" | LOOKUP JOIN _coordinator:customer_profiles_lookup ON customer_id',
+      });
+
+      expect(dataViewsService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'my_remote_cluster:customer_orders',
+          type: ESQL_TYPE,
+        }),
+        false
+      );
+    });
+
     it('should pass allowNoIndex when set', async () => {
       await getESQLAdHocDataview({
         dataViewsService,

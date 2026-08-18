@@ -13,6 +13,7 @@ import {
   RULE_UPDATED_EVENT_TYPE,
   type RuleEvent,
 } from '../../rule_event_publisher/events';
+import { createRuleResponse } from '../../../test_utils';
 import type { RuleWorkflowTriggerBinding } from './types';
 import { ruleCreatedTrigger } from './rule_created';
 import { ruleUpdatedTrigger } from './rule_updated';
@@ -20,7 +21,19 @@ import { ruleDeletedTrigger } from './rule_deleted';
 import { ruleEnabledTrigger } from './rule_enabled';
 import { ruleDisabledTrigger } from './rule_disabled';
 
-const payload = { rule: { ruleId: 'rule-1', spaceId: 'default' } } as const;
+const ruleRef = { ruleId: 'rule-1', spaceId: 'default' } as const;
+
+/**
+ * Internal event payload carries the full domain rule plus envelope fields. The
+ * bindings must project this down to just the rule ref so the rule state never
+ * leaks into the workflow trigger payload.
+ */
+const enrichedPayload: RuleEvent['payload'] = {
+  ruleId: ruleRef.ruleId,
+  spaceId: ruleRef.spaceId,
+  rule: createRuleResponse({ id: ruleRef.ruleId, metadata: { name: 'secret rule' } }),
+  correlationId: 'bulk-1',
+};
 
 interface Case {
   name: string;
@@ -32,27 +45,27 @@ const cases: Case[] = [
   {
     name: 'ruleCreatedTrigger',
     trigger: ruleCreatedTrigger,
-    event: { type: RULE_CREATED_EVENT_TYPE, payload },
+    event: { type: RULE_CREATED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleUpdatedTrigger',
     trigger: ruleUpdatedTrigger,
-    event: { type: RULE_UPDATED_EVENT_TYPE, payload },
+    event: { type: RULE_UPDATED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleDeletedTrigger',
     trigger: ruleDeletedTrigger,
-    event: { type: RULE_DELETED_EVENT_TYPE, payload },
+    event: { type: RULE_DELETED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleEnabledTrigger',
     trigger: ruleEnabledTrigger,
-    event: { type: RULE_ENABLED_EVENT_TYPE, payload },
+    event: { type: RULE_ENABLED_EVENT_TYPE, payload: enrichedPayload },
   },
   {
     name: 'ruleDisabledTrigger',
     trigger: ruleDisabledTrigger,
-    event: { type: RULE_DISABLED_EVENT_TYPE, payload },
+    event: { type: RULE_DISABLED_EVENT_TYPE, payload: enrichedPayload },
   },
 ];
 
@@ -63,8 +76,8 @@ describe('rule lifecycle workflow trigger bindings', () => {
       expect(trigger.definition.id).toBe(trigger.triggerId);
     });
 
-    it('forwards the publisher-shaped payload unchanged', () => {
-      expect(trigger.toPayload(event)).toEqual(event.payload);
+    it('projects only the rule ref, dropping change-history fields (no snapshot/author/sequence leak)', () => {
+      expect(trigger.toPayload(event)).toEqual({ rule: ruleRef });
     });
 
     it('produces a payload that parses cleanly against the registered Zod schema', () => {

@@ -64,21 +64,21 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     });
 
     const loadSmokescreenTestFiles = () => {
-      loadTestFile(require.resolve('./chart_creation'));
-      loadTestFile(require.resolve('./chart_switching'));
-      loadTestFile(require.resolve('./layers'));
       loadTestFile(require.resolve('./dimension_editor'));
       loadTestFile(require.resolve('./chart_style_settings'));
     };
 
     if (config.get('esTestCluster.ccs')) {
       loadSmokescreenTestFiles();
+      // Layers and chart switching moved to Scout for the non-CCS run (see
+      // x-pack/platform/plugins/shared/lens/test/scout/smokescreen). They stay here for CCS
+      // because Scout cannot target a real remote cluster yet.
+      // Ticket: https://github.com/elastic/apps-dx/issues/44
+      loadTestFile(require.resolve('./layers'));
+      loadTestFile(require.resolve('./chart_switching'));
     } else {
       // total run time ~16 min
       loadSmokescreenTestFiles(); // smokescreen split, previously ~12m 12s
-      loadTestFile(require.resolve('./ad_hoc_data_view')); // 3m 40s
-      loadTestFile(require.resolve('./multiple_data_views'));
-      loadTestFile(require.resolve('./inspector_pagination'));
     }
   });
 };

@@ -22,13 +22,6 @@ interface StreamsStateErrorProps {
   status_code: number;
 }
 
-interface StreamsDescriptionGeneratedProps {
-  input_tokens_used: number;
-  output_tokens_used: number;
-  stream_name: string;
-  stream_type: StreamType;
-}
-
 interface StreamsProcessingPipelineSuggestedProps {
   duration_ms: number;
   steps_used: number;
@@ -46,7 +39,6 @@ interface StreamsAgentToolEventCreateProps {
 export {
   type StreamEndpointLatencyProps,
   type StreamsStateErrorProps,
-  type StreamsDescriptionGeneratedProps,
   type StreamsProcessingPipelineSuggestedProps,
   type StreamsAgentToolEventCreateProps,
 };

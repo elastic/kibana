@@ -10,7 +10,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
@@ -23,6 +22,7 @@ import {
   EuiToolTip,
   type EuiSearchBarProps,
 } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { i18n } from '@kbn/i18n';
@@ -77,6 +77,7 @@ import { JobSpacesSyncFlyout } from '../components/job_spaces_sync';
 import { HelpMenu } from '../components/help_menu';
 import { MlAppHeader } from '../components/ml_app_header';
 import { useTrainedModelsMenu } from './hooks/use_trained_models_menu';
+import { DatePicker } from '../components/ml_page/date_picker';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -615,7 +616,6 @@ export const ModelsList: FC<Props> = ({
         })}
         menu={menu}
         docLink={helpLink}
-        showDatePicker
       />
       <div data-test-subj="mlTrainedModelsList">
         <SpaceManagementContextWrapper>
@@ -637,6 +637,10 @@ export const ModelsList: FC<Props> = ({
                   onChange={(e) => updatePageState({ showAll: e.target.checked })}
                   data-test-subj="mlModelsShowAllSwitch"
                 />
+              </EuiFlexItem>
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <DatePicker />
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
@@ -672,8 +676,7 @@ export const ModelsList: FC<Props> = ({
               childrenBetween={
                 isElserCalloutVisible ? (
                   <>
-                    <EuiCallOut
-                      announceOnMount={false}
+                    <KbnInfoCallout
                       size="s"
                       title={
                         <FormattedMessage
@@ -681,23 +684,26 @@ export const ModelsList: FC<Props> = ({
                           defaultMessage="New ELSER model now available"
                         />
                       }
+                      text={
+                        <p>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
+                            defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
+                            values={{
+                              docLink: (
+                                <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
+                                  <FormattedMessage
+                                    id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
+                                    defaultMessage="View documentation"
+                                  />
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </p>
+                      }
                       onDismiss={setIsElserCalloutDismissed.bind(null, true)}
-                    >
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
-                        defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
-                        values={{
-                          docLink: (
-                            <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
-                              <FormattedMessage
-                                id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
-                                defaultMessage="View documentation"
-                              />
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </EuiCallOut>
+                    />
                     <EuiSpacer size="m" />
                   </>
                 ) : null

@@ -6,6 +6,11 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "add_items": [],
+      "description": "",
+      "remove_items": []
+    },
     "methods": [
       "POST"
     ],

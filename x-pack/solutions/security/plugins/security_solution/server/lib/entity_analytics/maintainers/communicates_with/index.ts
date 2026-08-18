@@ -43,6 +43,7 @@ export const communicatesWithMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS,
+      maintainerName: 'communicates_with',
       signal,
       telemetryCollector: collector,
     });
