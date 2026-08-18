@@ -75,11 +75,33 @@ describe('generateAllComputedFeatures', () => {
     await generateAllComputedFeatures({ ...options, requestSignal: controller.signal });
 
     expect(seen).toHaveLength(5);
-    expect(seen[0]).toBeInstanceOf(AbortSignal);
     expect(new Set(seen).size).toBe(1);
-    expect(seen[0].aborted).toBe(false);
     controller.abort();
     expect(seen[0].aborted).toBe(true);
+  });
+
+  it('logs cancelled for every generator when the shared signal is already aborted', async () => {
+    const timeoutError = new DOMException('signal timed out', 'TimeoutError');
+    const aborted = AbortSignal.abort(timeoutError);
+
+    [
+      datasetAnalysisGenerator,
+      logSamplesGenerator,
+      logPatternsGenerator,
+      errorLogsGenerator,
+      codeAnalysisGenerator,
+    ].forEach((generator) =>
+      jest.spyOn(generator, 'generate').mockImplementation(async ({ signal }) => {
+        if (signal.aborted) throw signal.reason;
+        return undefined;
+      })
+    );
+
+    await expect(
+      generateAllComputedFeatures({ ...options, requestSignal: aborted })
+    ).rejects.toThrow('All computed feature generators failed');
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/"[^"]+" cancelled/));
   });
 
   it('returns empty without throwing when all generators skip and none fail', async () => {

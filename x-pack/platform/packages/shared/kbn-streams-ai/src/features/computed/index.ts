@@ -130,7 +130,13 @@ export async function generateAllComputedFeatures({
     if (result.status === 'rejected') {
       const message =
         result.reason instanceof Error ? result.reason.message : String(result.reason);
-      options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
+      if (signal.aborted) {
+        const cause =
+          signal.reason instanceof Error ? signal.reason.message : 'timeout or request cancelled';
+        options.logger.warn(`Computed feature generator "${generator.type}" cancelled (${cause})`);
+      } else {
+        options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
+      }
       errors.push({ feature: generator.type, error: message });
     } else if (result.value !== undefined) {
       features.push(toComputedFeature(generator, result.value, options.stream.name));
