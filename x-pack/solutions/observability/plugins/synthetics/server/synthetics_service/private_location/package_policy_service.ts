@@ -110,7 +110,9 @@ export class PackagePolicyService {
 
     const newSuffix = `-${locationId}`;
     const legacyInfix = `-${locationId}-`;
-    return items.filter((pkgPolicy) => pkgPolicy.id.endsWith(newSuffix) || pkgPolicy.id.includes(legacyInfix));
+    return items.filter(
+      (pkgPolicy) => pkgPolicy.id.endsWith(newSuffix) || pkgPolicy.id.includes(legacyInfix)
+    );
   }
 
   async bulkCreate({

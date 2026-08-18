@@ -11,7 +11,10 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
-import { getAgentInfo, type AgentInfo } from '../synthetics_service/private_location/get_agent_info';
+import {
+  getAgentInfo,
+  type AgentInfo,
+} from '../synthetics_service/private_location/get_agent_info';
 import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
 import {
   isCheckinStale,
@@ -107,7 +110,12 @@ export class RebalancePrivateLocationShardsTask {
         // we skip it, so a healthy location adds no extra ES load.
         const hasStaleAgent = [...agents.values()].some((info) => isCheckinStale(info, now));
         const activeAgentIds = hasStaleAgent
-          ? await getRecentlyActiveAgentIds(this.serverSetup, [...agents.keys()], STALE_DATA_MS, now)
+          ? await getRecentlyActiveAgentIds(
+              this.serverSetup,
+              [...agents.keys()],
+              STALE_DATA_MS,
+              now
+            )
           : undefined;
 
         const {
@@ -140,12 +148,13 @@ export class RebalancePrivateLocationShardsTask {
 
         // Idempotent placement + diff-based writes: only monitors whose assigned
         // agent changed are rewritten; steady state performs zero writes.
-        const { total, moved } = await this.syntheticsMonitorClient.privateLocationAPI.rebalanceShards({
-          location: { id: location.id, label: location.label },
-          healthyAgentIds,
-          recoveryAgentIds,
-          capacities,
-        });
+        const { total, moved } =
+          await this.syntheticsMonitorClient.privateLocationAPI.rebalanceShards({
+            location: { id: location.id, label: location.label },
+            healthyAgentIds,
+            recoveryAgentIds,
+            capacities,
+          });
         this.debugLog(`location ${location.id}: moved ${moved}/${total} monitor(s)`);
       }
 

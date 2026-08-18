@@ -130,7 +130,12 @@ describe('getAgentInfo', () => {
     expect(info.size).toBe(1500);
     expect(listAgents).toHaveBeenCalledTimes(2);
     expect(listAgents).toHaveBeenLastCalledWith(
-      expect.objectContaining({ showInactive: false, perPage: 1000, page: 2, kuery: 'policy_id:"policy-1"' })
+      expect.objectContaining({
+        showInactive: false,
+        perPage: 1000,
+        page: 2,
+        kuery: 'policy_id:"policy-1"',
+      })
     );
   });
 
