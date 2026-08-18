@@ -186,6 +186,24 @@ describe('AiIndexService', () => {
       expect(indexArgs.document?.date_modified).not.toBe(aiIndexDocument.date_modified);
     });
 
+    it('persists feedback_agent_id when updating an existing AI index', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 7,
+        _primary_term: 2,
+        _source: aiIndexDocument,
+      });
+
+      await expect(
+        service.put('customer_support', { ...properties, feedback_agent_id: 'my-analysis-agent' })
+      ).resolves.toBe('updated');
+
+      const [indexArgs] = storageClient.index.mock.calls[0];
+      expect(indexArgs.document?.feedback_agent_id).toBe('my-analysis-agent');
+    });
+
     it('throws AiIndexConflictError when a concurrent create wins (409)', async () => {
       storageClient.get.mockRejectedValue(createNotFoundError());
       storageClient.index.mockRejectedValue(createConflictError());
@@ -522,6 +540,45 @@ describe('AiIndexService', () => {
 
       await expect(service.get('customer_support')).resolves.toEqual(
         expect.objectContaining({ id: 'customer_support', managed: false })
+      );
+    });
+
+    it('round-trips feedback_agent_id from the stored document to the item', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: { ...aiIndexDocument, feedback_agent_id: 'my-analysis-agent' },
+      });
+
+      await expect(service.get('customer_support')).resolves.toEqual(
+        expect.objectContaining({ feedback_agent_id: 'my-analysis-agent' })
+      );
+    });
+
+    it('omits feedback_agent_id when the stored document has none', async () => {
+      storageClient.get.mockResolvedValue({
+        _id: 'customer_support',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _source: aiIndexDocument,
+      });
+
+      await expect(service.get('customer_support')).resolves.not.toHaveProperty(
+        'feedback_agent_id'
+      );
+    });
+
+    it('persists feedback_agent_id when creating an AI index', async () => {
+      await service.create('customer_support', {
+        ...properties,
+        feedback_agent_id: 'my-analysis-agent',
+      });
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          document: expect.objectContaining({ feedback_agent_id: 'my-analysis-agent' }),
+        })
       );
     });
 
