@@ -16,7 +16,8 @@ import { getFlattenedObject } from '@kbn/std';
 import { difference } from 'lodash';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { isCustomProjectRouting, PROJECT_ROUTING } from '@kbn/cps-common';
+import { isCustomProjectRouting } from '@kbn/cps-common';
+import { PROJECT_ROUTING, projectRoutingCodec } from '@kbn/cps-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
 import {
@@ -59,12 +60,38 @@ export const isSourceIndexUnavailableError = (error: unknown): boolean =>
 export const isProjectScopedSourceIndexUnavailableError = (
   error: unknown,
   projectRouting?: StepDefineExposedState['projectRouting']
+): boolean => isCustomProjectRouting(projectRouting) && isSourceIndexUnavailableError(error);
+
+const isOriginOnlyProjectRouting = (
+  projectRouting?: StepDefineExposedState['projectRouting'],
+  originProjectId?: string
+): boolean => {
+  if (projectRouting === PROJECT_ROUTING.ORIGIN) {
+    return true;
+  }
+
+  if (!projectRouting || !originProjectId) {
+    return false;
+  }
+
+  const { excludedProjectIds, filterExpressions, selectedProjectIds } =
+    projectRoutingCodec.decode(projectRouting);
+
+  return (
+    filterExpressions.length === 0 &&
+    excludedProjectIds.length === 0 &&
+    selectedProjectIds.length === 1 &&
+    selectedProjectIds[0] === originProjectId
+  );
+};
+
+export const isLinkedProjectScopedSourceIndexUnavailableError = (
+  error: unknown,
+  projectRouting?: StepDefineExposedState['projectRouting'],
+  originProjectId?: string
 ): boolean =>
-  // ORIGIN routes to the current project, so unavailable source indices there are real errors.
-  // Only suppress this known preview failure for custom linked-project scopes.
-  projectRouting !== PROJECT_ROUTING.ORIGIN &&
-  isCustomProjectRouting(projectRouting) &&
-  isSourceIndexUnavailableError(error);
+  isProjectScopedSourceIndexUnavailableError(error, projectRouting) &&
+  !isOriginOnlyProjectRouting(projectRouting, originProjectId);
 
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {
