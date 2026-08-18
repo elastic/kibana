@@ -1421,7 +1421,7 @@
     "constate": "3.3.3",
     "copy-to-clipboard": "3.3.3",
     "core-js": "3.45.1",
-    "cronstrue": "3.13.0",
+    "cronstrue": "3.24.0",
     "css-box-model": "1.2.1",
     "cypress-data-session": "2.8.7",
     "d3": "3.5.17",
@@ -1475,7 +1475,6 @@
     "joi-to-json": "5.0.0",
     "jquery": "3.7.1",
     "js-search": "1.4.3",
-    "js-yaml": "4.3.0",
     "jsdom": "20.0.1",
     "json-schema-to-ts": "3.1.1",
     "jsonwebtoken": "9.0.2",
@@ -1533,7 +1532,7 @@
     "rbush": "4.0.1",
     "re2js": "2.8.5",
     "react": "18.2.0",
-    "react-day-picker": "9.13.2",
+    "react-day-picker": "9.14.0",
     "react-diff-view": "3.3.1",
     "react-dom": "18.2.0",
     "react-dropzone": "15.0.0",
@@ -2005,7 +2004,6 @@
     "@types/jest": "29.5.3",
     "@types/jquery": "3.5.33",
     "@types/js-search": "1.4.0",
-    "@types/js-yaml": "4.0.9",
     "@types/jsdom": "20.0.1",
     "@types/json-schema": "7.0.15",
     "@types/jsonwebtoken": "9.0.10",
@@ -2252,5 +2250,5 @@
     "yaml-language-server": "1.23.0",
     "yarn-deduplicate": "6.0.2"
   },
-  "packageManager": "yarn@1.22.21"
+  "packageManager": "yarn@1.22.22"
 }
