@@ -19,8 +19,9 @@ const CACHE_OPTS = { staleTime: 10 * 60 * 1000 };
 /**
  * Returns the merged AWS service matrix, deriving managed_integration, signalType,
  * inputs, requiredConfig, mandatoryFields, defaultEnabled, and identityFederationSupported
- * from the Fleet package manifests for all packages. Returns undefined while any manifest
- * is still loading.
+ * from Fleet package manifests. Gated only on the core `aws` package — secondary packages
+ * (aws_bedrock, awsfargate, etc.) are optional: if unavailable (technical-preview, air-gapped,
+ * fetch error) those entries fall back to their static definitions.
  */
 export function useAwsServiceMatrix(): AwsServiceMatrixEntry[] | undefined {
   const { data: awsData } = useGetPackageInfoByKeyQuery(
@@ -79,29 +80,19 @@ export function useAwsServiceMatrix(): AwsServiceMatrixEntry[] | undefined {
   );
 
   return useMemo(() => {
-    if (
-      !awsData?.item ||
-      !bedrockData?.item ||
-      !bedrockAgentcoreData?.item ||
-      !fargateData?.item ||
-      !mqData?.item ||
-      !cloudtrailOtelData?.item ||
-      !vpcflowOtelData?.item ||
-      !wafOtelData?.item ||
-      !logsData?.item
-    ) {
+    if (!awsData?.item) {
       return undefined;
     }
     const packages: Record<string, PackageInfo> = {
       aws: awsData.item,
-      aws_bedrock: bedrockData.item,
-      aws_bedrock_agentcore: bedrockAgentcoreData.item,
-      awsfargate: fargateData.item,
-      aws_mq: mqData.item,
-      aws_cloudtrail_otel: cloudtrailOtelData.item,
-      aws_vpcflow_otel: vpcflowOtelData.item,
-      aws_waf_otel: wafOtelData.item,
-      aws_logs: logsData.item,
+      ...(bedrockData?.item && { aws_bedrock: bedrockData.item }),
+      ...(bedrockAgentcoreData?.item && { aws_bedrock_agentcore: bedrockAgentcoreData.item }),
+      ...(fargateData?.item && { awsfargate: fargateData.item }),
+      ...(mqData?.item && { aws_mq: mqData.item }),
+      ...(cloudtrailOtelData?.item && { aws_cloudtrail_otel: cloudtrailOtelData.item }),
+      ...(vpcflowOtelData?.item && { aws_vpcflow_otel: vpcflowOtelData.item }),
+      ...(wafOtelData?.item && { aws_waf_otel: wafOtelData.item }),
+      ...(logsData?.item && { aws_logs: logsData.item }),
     };
     return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC);
   }, [
