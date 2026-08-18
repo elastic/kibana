@@ -10,6 +10,9 @@
 import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { registerRoutes } from './routes';
 
+// TODO(cordis-stage5): Cannot auto-migrate. registerRoutes() calls core.getStartServices() to
+// access coreStart.userActivity, which is not yet a Cordis service key. Migrate this plugin
+// once core.userActivity.start is added to the Cordis service registry (Stage 4 extension).
 export class UserActivityExamplePlugin implements Plugin<{}, {}> {
   public setup(core: CoreSetup) {
     const router = core.http.createRouter();

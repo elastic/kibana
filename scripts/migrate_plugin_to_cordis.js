@@ -93,8 +93,8 @@ function run(pluginDir) {
   const stopBody = stopMethod ? stopMethod.getBody()?.getText() ?? '{}' : '{}';
   const startBody = startMethod ? startMethod.getBody()?.getText() ?? '{}' : '{}';
 
-  const hasRealStart = startBody.trim() !== '{}' && startBody.trim() !== '{ }';
-  const hasRealStop = stopBody.trim() !== '{}' && stopBody.trim() !== '{ }';
+  const hasRealStart = !isTriviallyEmpty(startBody);
+  const hasRealStop = !isTriviallyEmpty(stopBody);
 
   // Find which core services are accessed in setup body
   const coreSetupParam = setupMethod?.getParameters()[0]?.getName() ?? 'core';
@@ -106,7 +106,12 @@ function run(pluginDir) {
   const injectKeys = [...coreAccessedSetup].map((prop) => `'core.${prop}'`);
 
   // Rewrite setup body: replace core.X with ctx.get('core.X') as any
-  let ctorBody = rewriteCoreAccesses(stripBraces(setupBody), coreSetupParam, coreAccessedSetup);
+  // Strip trailing `return ...;` since contracts are provided via `static provide`, not returned.
+  let ctorBody = rewriteCoreAccesses(
+    stripReturnStatements(stripBraces(setupBody)),
+    coreSetupParam,
+    coreAccessedSetup
+  );
 
   // Rewrite logger references from initializerContext.logger.get() pattern
   ctorBody = ctorBody
@@ -237,6 +242,22 @@ function rewriteCoreAccesses(bodyText, coreParam, coreProps) {
 /** Strip leading `{` and trailing `}` from a method body string. */
 function stripBraces(body) {
   return body.trim().replace(/^\{/, '').replace(/\}$/, '').trim();
+}
+
+/** Return true if a method body is effectively empty (no real statements). */
+function isTriviallyEmpty(body) {
+  const inner = stripBraces(body);
+  // Allow empty, whitespace-only, and sole `return {};` / `return undefined;` / `return;`
+  return inner.trim() === '' || /^return\s*({}|undefined|void 0)?;?\s*$/.test(inner.trim());
+}
+
+/**
+ * Strip trailing `return ...;` statements from a method body (already stripped of outer braces).
+ * setup() returns a contract object; in native Cordis that role is filled by `static provide`.
+ */
+function stripReturnStatements(body) {
+  // Remove lines that are purely `return ...;` at the end of the body.
+  return body.replace(/\n?\s*return\s+[^;]*;\s*$/s, '').trimEnd();
 }
 
 function escapeRegex(s) {

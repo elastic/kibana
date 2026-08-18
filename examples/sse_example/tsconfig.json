@@ -14,6 +14,7 @@
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/cordis",
     "@kbn/core-plugins-server",
     "@kbn/developer-examples-plugin",
     "@kbn/react-kibana-context-render",

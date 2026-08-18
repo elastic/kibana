@@ -7,25 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, CoreSetup, Plugin, Logger } from '@kbn/core/server';
-
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { defineRoutes } from './routes';
 
-export class SseExamplePlugin implements Plugin {
-  private readonly logger: Logger;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class SseExamplePlugin extends Service {
+  static readonly inject = ['core.http'];
+  static readonly provide = 'sseExample';
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
+  constructor(ctx: Context, _config: never) {
+    super(ctx, 'sseExample');
+    const router = (ctx.get('core.http') as any).createRouter();
 
     // Register server side APIs
-    defineRoutes(router, this.logger);
+    defineRoutes(router, (ctx.get('core.logger') as any).get('plugins', 'sseExample'));
   }
-
-  public start() {}
-
-  public stop() {}
 }

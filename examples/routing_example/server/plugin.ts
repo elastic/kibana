@@ -7,22 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { registerRoutes, registerDeprecatedRoutes } from './routes';
 
-export class RoutingExamplePlugin implements Plugin<{}, {}> {
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class RoutingExamplePlugin extends Service {
+  static readonly inject = ['core.http'];
+  static readonly provide = 'routingExample';
 
+  constructor(ctx: Context, _config: never) {
+    super(ctx, 'routingExample');
+    const router = (ctx.get('core.http') as any).createRouter();
     registerRoutes(router);
     registerDeprecatedRoutes(router);
-
-    return {};
   }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-
-  public stop() {}
 }
