@@ -40,6 +40,6 @@ export { AuditLogger, CurrentUser, RedactedSessionId } from './src/services/secu
 export { GlobalUiSettingsClient, UiSettingsClient } from './src/services/ui_settings';
 export {
   CurrentUserProfileId,
-  type IUserProfileAccessor,
-  UserProfileAccessor,
+  type IUserProfileFactory,
+  UserProfileFactory,
 } from './src/services/user_profile';

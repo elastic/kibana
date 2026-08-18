@@ -9,12 +9,7 @@
 
 import { type Container, ContainerModule } from 'inversify';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import {
-  CoreStart,
-  CurrentUserProfileId,
-  Request,
-  UserProfileAccessor,
-} from '@kbn/core-di-server';
+import { CoreStart, CurrentUserProfileId, Request, UserProfileFactory } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { UserProfileWithSecurity } from '@kbn/core-user-profile-common';
@@ -42,28 +37,28 @@ describe('loadUserProfile', () => {
     container.bind(Request).toConstantValue(request);
   });
 
-  it('should not retrieve the user profile when resolving the accessor', () => {
-    container.get(UserProfileAccessor);
+  it('should not retrieve the user profile when resolving the factory', () => {
+    container.get(UserProfileFactory);
 
     expect(userProfile.getCurrent).not.toHaveBeenCalled();
   });
 
   it('should retrieve the user profile for the current request', async () => {
-    const userProfileAccessor = container.get(UserProfileAccessor);
-    await expect(userProfileAccessor()).resolves.toBe(profile);
+    const userProfileFactory = container.get(UserProfileFactory);
+    await expect(userProfileFactory()).resolves.toBe(profile);
     expect(userProfile.getCurrent).toHaveBeenCalledWith({ request });
   });
 
   it('should pass the options through to the user profile service', async () => {
-    await container.get(UserProfileAccessor)({ dataPath: 'something' });
+    await container.get(UserProfileFactory)({ dataPath: 'something' });
 
     expect(userProfile.getCurrent).toHaveBeenCalledWith({ request, dataPath: 'something' });
   });
 
-  it('should create the user profile accessor only once per scope', () => {
+  it('should create the user profile factory only once per scope', () => {
     const fork = injection.fork();
 
-    expect(fork.get(UserProfileAccessor)).toBe(fork.get(UserProfileAccessor));
+    expect(fork.get(UserProfileFactory)).toBe(fork.get(UserProfileFactory));
   });
 
   it('should resolve the profile identifier for the current request', async () => {

@@ -13,23 +13,23 @@ import { cacheInScope } from '@kbn/core-di-internal';
 import {
   CoreStart,
   CurrentUserProfileId,
-  type IUserProfileAccessor,
+  type IUserProfileFactory,
   Request,
-  UserProfileAccessor,
+  UserProfileFactory,
 } from '@kbn/core-di-server';
 
 export function loadUserProfile({ bind }: ContainerModuleLoadOptions): void {
-  bind(UserProfileAccessor)
+  bind(UserProfileFactory)
     .toResolvedValue(
-      (userProfile, request): IUserProfileAccessor =>
+      (userProfile, request): IUserProfileFactory =>
         <D extends UserProfileData, L extends UserProfileLabels>(
-          options?: Parameters<IUserProfileAccessor>[0]
+          options?: Parameters<IUserProfileFactory>[0]
         ) =>
           userProfile.getCurrent<D, L>({ ...options, request }),
       [CoreStart('userProfile'), Request]
     )
     .inRequestScope()
-    .onActivation(cacheInScope(UserProfileAccessor));
+    .onActivation(cacheInScope(UserProfileFactory));
 
   bind(CurrentUserProfileId)
     .toResolvedValue(

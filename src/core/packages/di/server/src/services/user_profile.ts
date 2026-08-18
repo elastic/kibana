@@ -21,16 +21,16 @@ import type {
  * @see {@link UserProfileWithSecurity}
  * @public
  */
-export type IUserProfileAccessor = <D extends UserProfileData, L extends UserProfileLabels>(
+export type IUserProfileFactory = <D extends UserProfileData, L extends UserProfileLabels>(
   options?: Pick<UserProfileGetCurrentParams, 'dataPath'>
 ) => Promise<UserProfileWithSecurity<D, L> | null>;
 
 /**
- * The accessor retrieving the user profile in the current HTTP request context.
+ * The factory retrieving the user profile in the current HTTP request context.
  * @public
  */
-export const UserProfileAccessor: ServiceToken<IUserProfileAccessor> =
-  createToken('UserProfileAccessor');
+export const UserProfileFactory: ServiceToken<IUserProfileFactory> =
+  createToken('UserProfileFactory');
 
 /**
  * The user profile identifier of the user of the current HTTP request or `null` if the profile is not available.
