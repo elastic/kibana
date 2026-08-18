@@ -3018,9 +3018,9 @@ module.exports = {
     {
       // Platform & Solutions API Tests
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
@@ -3194,7 +3194,6 @@ module.exports.overrides.push({
     'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
     'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
-    'src/platform/plugins/shared/discover/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
     'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
     'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
