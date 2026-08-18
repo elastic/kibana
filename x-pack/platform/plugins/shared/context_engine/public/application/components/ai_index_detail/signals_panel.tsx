@@ -129,13 +129,10 @@ export const SignalsPanel = ({ isLoading, aiIndex }: SignalsPanelProps) => {
           <EuiSpacer size="m" />
           <EuiText size="xs" color="subdued" data-test-subj="contextSignalsManagedNoAgentPrompt">
             <p>
-              {i18n.translate(
-                'xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt',
-                {
-                  defaultMessage:
-                    'A feedback agent must be configured for this managed index to enable "Analyze & improve".',
-                }
-              )}
+              {i18n.translate('xpack.contextEngine.aiIndexDetail.signals.managedNoAgent.prompt', {
+                defaultMessage:
+                  'A feedback agent must be configured for this managed index to enable "Analyze & improve".',
+              })}
             </p>
           </EuiText>
         </>
