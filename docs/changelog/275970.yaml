@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: Batch large terms queries for lead generation
+title: Fix Threat Hunting Leads generation failing at large entity counts

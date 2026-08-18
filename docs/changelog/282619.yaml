@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: 'Fix logsdb smoke flake: re-sync data view picker list when data views load'
+title: Fix empty data view picker when data views load after it opens
