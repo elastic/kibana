@@ -499,19 +499,9 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
         const renderCount = useStateFromPublishingSubject(renderCount$);
-        const [hideTitle, title, defaultTitle] = useBatchedPublishingSubjects(
-          api.hideTitle$,
-          api.title$,
-          api.defaultTitle$
-        );
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
         const errorTextStyle = useErrorTextStyle();
-
-        const dataTitle = useMemo(() => {
-          if (hideTitle) return '';
-          return title ?? defaultTitle ?? '';
-        }, [hideTitle, title, defaultTitle]);
 
         useEffect(() => {
           return () => {

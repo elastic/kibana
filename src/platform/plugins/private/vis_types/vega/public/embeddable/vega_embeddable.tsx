@@ -334,11 +334,8 @@ export const vegaEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const [renderInput, hideTitle, title, description, rendered] = useBatchedPublishingSubjects(
+        const [renderInput, rendered] = useBatchedPublishingSubjects(
           renderInput$,
-          api.hideTitle$,
-          api.title$,
-          api.description$,
           rendered$
         );
         const domNode = useRef<HTMLDivElement>(null);

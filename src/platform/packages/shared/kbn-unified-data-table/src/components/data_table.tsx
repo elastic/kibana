@@ -1382,8 +1382,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       };
     }, [defaultColumns, paginationMode, throttledHandleOnScroll]);
 
-    const isRenderComplete = loadingState !== DataLoadingState.loading;
-
     if (!rowCount && loadingState === DataLoadingState.loading) {
       return (
         <div
