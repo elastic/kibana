@@ -46,7 +46,6 @@ import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/tim
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { extractTimelineIdsAndVersions, refreshTimelines } from './helpers';
-import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from '../../components/timeline/tabs/esql/translations';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
   return action.type === saveTimeline.type;
@@ -91,14 +90,6 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
 
     store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
-    const savedSearch =
-      timeline.title && timeline.savedSearch
-        ? {
-            ...timeline.savedSearch,
-            title: GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE(timeline.title),
-          }
-        : timeline.savedSearch;
-
     try {
       const response = await (action.payload.saveAsNew && timeline.id
         ? copyTimeline({
@@ -110,7 +101,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
               templateTimelineId,
               templateTimelineVersion,
             },
-            savedSearch,
+            savedSearch: timeline.savedSearch,
           })
         : persistTimeline({
             timelineId,
@@ -122,7 +113,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
               templateTimelineId,
               templateTimelineVersion,
             },
-            savedSearch,
+            savedSearch: timeline.savedSearch,
           }));
 
       if (isTimelineErrorResponse(response)) {

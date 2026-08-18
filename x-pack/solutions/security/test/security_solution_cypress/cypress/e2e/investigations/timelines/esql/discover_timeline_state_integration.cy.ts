@@ -22,10 +22,6 @@ import {
   assertFieldsAreLoaded,
   verifyDiscoverEsqlQuery,
 } from '../../../../tasks/discover';
-import {
-  GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
-  GET_LOCAL_SHOW_DATES_BUTTON,
-} from '../../../../screens/date_picker';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import {
   DISCOVER_CONTAINER,
@@ -33,7 +29,11 @@ import {
   GET_DISCOVER_DATA_GRID_CELL_HEADER,
   TIMELINE_DISCOVER_TAB,
 } from '../../../../screens/discover';
-import { updateDateRangeInLocalDatePickers } from '../../../../tasks/date_picker';
+import {
+  expectDatePickerToBeDisabled,
+  expectDateRangeToBe,
+  updateDateRangeInLocalDatePickers,
+} from '../../../../tasks/date_picker';
 import { login } from '../../../../tasks/login';
 import {
   addNameToTimelineAndSave,
@@ -46,11 +46,22 @@ import {
 import { LOADING_INDICATOR } from '../../../../screens/security_header';
 import { STACK_MANAGEMENT_PAGE } from '../../../../screens/kibana_navigation';
 import { SAVED_OBJECTS_ROW_TITLES } from '../../../../screens/common/stack_management';
+import {
+  deleteTimelineDiscoverSessions,
+  deleteTimelines,
+} from '../../../../tasks/api_calls/timelines';
 
 const INITIAL_START_DATE = 'Jan 18, 2021 @ 20:33:29.186';
 const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const TIMELINE_REQ_WITH_SAVED_SEARCH = 'TIMELINE_REQ_WITH_SAVED_SEARCH';
 const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
+const ESQL_QUERY_REQ = 'ESQL_QUERY_REQ';
+
+/**
+ * The CI config only raises `defaultCommandTimeout`, `requestTimeout` stays at Cypress'
+ * 5s default which is not enough for the ES|QL search of a freshly restored timeline.
+ */
+const ESQL_QUERY_REQ_TIMEOUT = 120000;
 
 const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH = 'response.body.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
@@ -75,6 +86,10 @@ describe(
   },
   () => {
     beforeEach(() => {
+      // Timelines and their Discover sessions are not cleaned up by the framework, so
+      // without this they accumulate across tests and retries within the same stack.
+      deleteTimelines();
+      deleteTimelineDiscoverSessions();
       login();
       visitWithTimeRange(ALERTS_URL);
       createTimelineFromBottomBar();
@@ -89,7 +104,7 @@ describe(
         addNameToTimelineAndSave('Timerange timeline');
         createNewTimeline();
         goToEsqlTab();
-        cy.get(GET_LOCAL_SHOW_DATES_BUTTON(DISCOVER_CONTAINER)).should('be.disabled'); // default state
+        expectDatePickerToBeDisabled(DISCOVER_CONTAINER); // default state
       });
 
       it('should save/restore esql tab dataview/timerange/filter/query/columns when saving/restoring timeline', () => {
@@ -112,17 +127,17 @@ describe(
             // switch to old timeline
             openTimelineFromSettings();
             openTimelineById(timelineId);
-            cy.intercept('POST', '**/_query').as('esqlQuery');
+            cy.intercept('POST', '**/internal/search/esql_async').as(ESQL_QUERY_REQ);
             goToEsqlTab();
             cy.get(LOADING_INDICATOR).should('not.exist');
-            cy.wait('@esqlQuery');
+            cy.wait(`@${ESQL_QUERY_REQ}`, { timeout: ESQL_QUERY_REQ_TIMEOUT });
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
-            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-              'have.text',
-              INITIAL_START_DATE
-            );
+            expectDateRangeToBe(DISCOVER_CONTAINER, {
+              start: INITIAL_START_DATE,
+              end: INITIAL_END_DATE,
+            });
           });
       });
 
@@ -142,19 +157,19 @@ describe(
           .its(TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH)
           .then(() => {
             cy.wait(`@${TIMELINE_REQ_WITH_SAVED_SEARCH}`);
-            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-              'have.text',
-              INITIAL_START_DATE
-            );
+            expectDateRangeToBe(DISCOVER_CONTAINER, {
+              start: INITIAL_START_DATE,
+              end: INITIAL_END_DATE,
+            });
             // reload the page with the exact url
             cy.reload();
             verifyDiscoverEsqlQuery(esqlQuery);
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
             cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
-            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-              'have.text',
-              INITIAL_START_DATE
-            );
+            expectDateRangeToBe(DISCOVER_CONTAINER, {
+              start: INITIAL_START_DATE,
+              end: INITIAL_END_DATE,
+            });
           });
       });
 

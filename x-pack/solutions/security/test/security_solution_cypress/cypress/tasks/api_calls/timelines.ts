@@ -15,6 +15,20 @@ import { rootRequest } from './common';
 
 const mockTimeline = getTimeline();
 
+/** Saved object type of a Discover session (saved search). */
+const SAVED_SEARCH_TYPE = 'search';
+
+/**
+ * Prefix of the titles the ES|QL timeline tab gives to its Discover sessions, see
+ * `GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE` in the security solution plugin.
+ */
+const TIMELINE_DISCOVER_SESSION_TITLE_PREFIX = 'Saved Discover session for Timeline';
+
+/** Partial shape of `GET api/saved_objects/_find`, everything is optional to stay tolerant of error bodies. */
+interface FindSavedObjectsResponse {
+  saved_objects?: Array<{ id: string; attributes?: { title?: string } }>;
+}
+
 /**
  * Creates a timeline saved object
  * @param {CompleteTimeline} [timeline] - configuration needed for creating a timeline. Defaults to getTimeline in security_solution_cypress/cypress/objects/timeline.ts
@@ -180,6 +194,31 @@ export const deleteTimelines = () => {
         savedObjectIds,
       },
     });
+  });
+};
+
+/**
+ * Deletes the Discover sessions the ES|QL timeline tab creates. They are plain `search`
+ * saved objects which are not removed together with their timeline, so without this they
+ * pile up across specs and retries and pollute the Saved Objects management table.
+ */
+export const deleteTimelineDiscoverSessions = () => {
+  rootRequest<FindSavedObjectsResponse>({
+    method: 'GET',
+    url: `api/saved_objects/_find?type=${SAVED_SEARCH_TYPE}&per_page=100&fields=title`,
+    failOnStatusCode: false,
+  }).then(({ body }) => {
+    (body?.saved_objects ?? [])
+      .filter(({ attributes }) =>
+        attributes?.title?.startsWith(TIMELINE_DISCOVER_SESSION_TITLE_PREFIX)
+      )
+      .forEach(({ id }) => {
+        rootRequest({
+          method: 'DELETE',
+          url: `api/saved_objects/${SAVED_SEARCH_TYPE}/${id}`,
+          failOnStatusCode: false,
+        });
+      });
   });
 };
 
