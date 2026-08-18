@@ -18,6 +18,7 @@ import type {
 import { ConversationContext } from './conversation_context';
 import { upsertAttachmentsIntoList } from './upsert_attachments_into_list';
 import { removeAttachmentFromList } from './remove_attachment_from_list';
+import { removeAttachmentById } from './remove_attachment_by_id';
 import { AgentBuilderServicesContext } from '../agent_builder_services_context';
 import { StreamingProvider } from '../streaming/streaming_context';
 import { useConversationActions } from './use_conversation_actions';
@@ -51,6 +52,13 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
           setCurrentProps((prevProps) => ({
             ...prevProps,
             attachments: upsertAttachmentsIntoList(prevProps.attachments, [attachment]),
+          })),
+        removeAttachmentById: (attachmentId) =>
+          setCurrentProps((prevProps) => ({
+            ...prevProps,
+            attachments: prevProps.attachments
+              ? removeAttachmentById(prevProps.attachments, attachmentId)
+              : prevProps.attachments,
           })),
       });
     }

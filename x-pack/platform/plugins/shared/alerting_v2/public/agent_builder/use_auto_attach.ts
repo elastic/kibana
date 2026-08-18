@@ -10,9 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
-import { createIdGenerator, registerAutoAttach, type AttachmentConverter } from './auto_attach';
-
-const sharedDraftAttachmentId = createIdGenerator();
+import { registerAutoAttach, type AttachmentConverter } from './auto_attach';
 
 export const useAutoAttach = <FocusedItem>(
   item: FocusedItem | undefined,
@@ -23,7 +21,9 @@ export const useAutoAttach = <FocusedItem>(
     | AgentBuilderPluginStart
     | undefined;
 
-  const focusedItem$ = useRef(new BehaviorSubject<FocusedItem | undefined>(undefined)).current;
+  const focusedItem$ = useRef(
+    new BehaviorSubject<FocusedItem | undefined>(undefined)
+  ).current;
 
   const converterRef = useRef(converter);
   converterRef.current = converter;
@@ -42,7 +42,6 @@ export const useAutoAttach = <FocusedItem>(
       chrome,
       focusedItem$,
       converter: converterRef.current,
-      draftAttachmentId: sharedDraftAttachmentId,
     });
 
     return teardown;

@@ -9,19 +9,14 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import type { ChromeStart } from '@kbn/core/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
-import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type { ChatEvent } from '@kbn/agent-builder-common';
 import {
   ALERT_EPISODE_STATUS,
   EPISODE_ATTACHMENT_TYPE,
   type AlertEpisode,
 } from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-import {
-  registerEpisodeAutoAttach,
-  type FocusedEpisode,
-  type IdGenerator,
-} from './episode_auto_attach';
+import { registerEpisodeAutoAttach, type FocusedEpisode } from './episode_auto_attach';
 
 const createEpisode = (overrides?: Partial<AlertEpisode>): AlertEpisode => ({
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -35,48 +30,12 @@ const createEpisode = (overrides?: Partial<AlertEpisode>): AlertEpisode => ({
   ...overrides,
 });
 
-const createVersionedAttachment = (id: string): VersionedAttachment => ({
-  id,
-  type: EPISODE_ATTACHMENT_TYPE,
-  versions: [
-    {
-      version: 1,
-      data: createEpisode(),
-      created_at: '2026-01-01T00:00:00.000Z',
-      content_hash: 'hash',
-    },
-  ],
-  current_version: 1,
-});
-
-const createRoundCompleteEvent = (attachmentId: string): ChatEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {} as never,
-    attachments: [createVersionedAttachment(attachmentId)],
-  },
-});
-
-const createIdGenerator = (): IdGenerator => {
-  let current = 'draft-id-1';
-
-  return {
-    get current() {
-      return current;
-    },
-    next: jest.fn(() => {
-      current = current === 'draft-id-1' ? 'draft-id-2' : 'draft-id-3';
-      return current;
-    }),
-  };
-};
-
 describe('registerEpisodeAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
   let focusedEpisode$: BehaviorSubject<FocusedEpisode | undefined>;
   let addAttachment: jest.Mock;
-  let draftAttachmentId: IdGenerator;
+  let removeAttachment: jest.Mock;
   let cleanup: () => void;
   let chatEventsByConversationId: Map<string, Subject<ChatEvent>>;
 
@@ -86,7 +45,7 @@ describe('registerEpisodeAutoAttach', () => {
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
     focusedEpisode$ = new BehaviorSubject<FocusedEpisode | undefined>(undefined);
     addAttachment = jest.fn();
-    draftAttachmentId = createIdGenerator();
+    removeAttachment = jest.fn();
     chatEventsByConversationId = new Map();
 
     const chrome = {
@@ -97,6 +56,7 @@ describe('registerEpisodeAutoAttach', () => {
 
     const agentBuilder = {
       addAttachment,
+      removeAttachment,
       events: {
         ui: { activeConversation$: activeConversation$.asObservable() },
         getChatEvents$: jest.fn((conversationId: string) => {
@@ -116,7 +76,6 @@ describe('registerEpisodeAutoAttach', () => {
       agentBuilder,
       chrome,
       focusedEpisode$,
-      draftAttachmentId,
     });
   });
 
@@ -133,7 +92,7 @@ describe('registerEpisodeAutoAttach', () => {
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('attaches the focused episode to a new conversation draft when chat is open', () => {
+  it('attaches the focused episode with a deterministic id', () => {
     const episode = createEpisode({
       last_assignee_uid: null,
       episode_data: null,
@@ -146,7 +105,7 @@ describe('registerEpisodeAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
-      id: 'draft-id-1',
+      id: 'episode:ep-1',
       type: EPISODE_ATTACHMENT_TYPE,
       origin: 'ep-1',
       data: expect.objectContaining({
@@ -187,9 +146,6 @@ describe('registerEpisodeAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-1' })
-    );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
@@ -218,7 +174,7 @@ describe('registerEpisodeAutoAttach', () => {
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-1' })
+      expect.objectContaining({ id: 'episode:ep-1', origin: 'ep-1' })
     );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
@@ -231,11 +187,11 @@ describe('registerEpisodeAutoAttach', () => {
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-2', origin: 'ep-2' })
+      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
     );
   });
 
-  it('updates the same draft attachment when the focused episode changes before send', () => {
+  it('uses deterministic ids based on episode id', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
@@ -247,29 +203,12 @@ describe('registerEpisodeAutoAttach', () => {
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-1' })
+      expect.objectContaining({ id: 'episode:ep-1', origin: 'ep-1' })
     );
     expect(addAttachment).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-2' })
+      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
     );
-  });
-
-  it('rotates the draft id after it is created in a completed round', () => {
-    focusedEpisode$.next({ episode: createEpisode() });
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
-
-    activeConversation$.next({ id: 'conversation-1', conversation: undefined });
-    chatEventsByConversationId.get('conversation-1')?.next(createRoundCompleteEvent('draft-id-1'));
-
-    currentAppId$.next(null);
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
-
-    expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'draft-id-3' }));
   });
 
   it('unsubscribes on cleanup', () => {

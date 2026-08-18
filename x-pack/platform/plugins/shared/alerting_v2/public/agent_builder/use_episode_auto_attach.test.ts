@@ -16,8 +16,6 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import type { ChatEvent } from '@kbn/agent-builder-common';
-import { ChatEventType } from '@kbn/agent-builder-common';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
 import { useEpisodeAutoAttach } from './use_episode_auto_attach';
 
@@ -43,28 +41,6 @@ const episode: AlertEpisode = {
   duration: 3600000,
 };
 
-const createRoundCompleteEvent = (attachmentId: string): ChatEvent => ({
-  type: ChatEventType.roundComplete,
-  data: {
-    round: {} as never,
-    attachments: [
-      {
-        id: attachmentId,
-        type: EPISODE_ATTACHMENT_TYPE,
-        versions: [
-          {
-            version: 1,
-            data: episode,
-            created_at: '2026-01-01T00:00:00.000Z',
-            content_hash: 'hash',
-          },
-        ],
-        current_version: 1,
-      } as VersionedAttachment,
-    ],
-  },
-});
-
 describe('useEpisodeAutoAttach', () => {
   let addAttachment: jest.Mock;
   let currentAppId$: BehaviorSubject<string | null>;
@@ -85,6 +61,7 @@ describe('useEpisodeAutoAttach', () => {
       if (token === PluginStart('agentBuilder')) {
         return {
           addAttachment,
+          removeAttachment: jest.fn(),
           events: {
             ui: { activeConversation$: activeConversation$.asObservable() },
             getChatEvents$: () => chatEvents$.asObservable(),
@@ -119,6 +96,7 @@ describe('useEpisodeAutoAttach', () => {
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenCalledWith(
       expect.objectContaining({
+        id: 'episode:ep-1',
         type: EPISODE_ATTACHMENT_TYPE,
         origin: 'ep-1',
       })
@@ -163,7 +141,7 @@ describe('useEpisodeAutoAttach', () => {
     expect(addAttachment).toHaveBeenCalledTimes(1);
   });
 
-  it('replaces the draft attachment when episode changes (same hook instance)', () => {
+  it('stages the new episode when it changes (same hook instance)', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
@@ -175,21 +153,20 @@ describe('useEpisodeAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
+    expect(addAttachment).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: 'episode:ep-1', origin: 'ep-1' })
+    );
 
     rerender({ ep: episode2 });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
-
-    const firstId = addAttachment.mock.calls[0][0].id;
-    const secondId = addAttachment.mock.calls[1][0].id;
-    expect(firstId).toBe(secondId);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ origin: 'ep-2' })
+      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
     );
   });
 
-  it('replaces the draft attachment when hook remounts with a different episode', () => {
+  it('stages the new episode when hook remounts with a different episode', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     const episode2 = { ...episode, 'episode.id': 'ep-2' } as AlertEpisode;
@@ -198,7 +175,6 @@ describe('useEpisodeAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    const firstId = addAttachment.mock.calls[0][0].id;
 
     unmount();
 
@@ -206,37 +182,9 @@ describe('useEpisodeAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
-    const secondId = addAttachment.mock.calls[1][0].id;
-
-    expect(firstId).toBe(secondId);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ origin: 'ep-2' })
+      expect.objectContaining({ id: 'episode:ep-2', origin: 'ep-2' })
     );
-  });
-
-  it('rotates the draft id after the attachment is consumed by a round', () => {
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-
-    renderHook(() => useEpisodeAutoAttach(episode));
-    jest.runOnlyPendingTimers();
-
-    expect(addAttachment).toHaveBeenCalledTimes(1);
-    const draftId = addAttachment.mock.calls[0][0].id;
-
-    activeConversation$.next({ id: 'conv-1', conversation: undefined });
-    chatEvents$.next(createRoundCompleteEvent(draftId));
-
-    // Simulate re-navigation to a new episode after send
-    currentAppId$.next(null);
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
-
-    expect(addAttachment).toHaveBeenCalledTimes(2);
-    const newDraftId = addAttachment.mock.calls[1][0].id;
-
-    expect(newDraftId).not.toBe(draftId);
   });
 
   it('does not stage when episode is undefined', () => {

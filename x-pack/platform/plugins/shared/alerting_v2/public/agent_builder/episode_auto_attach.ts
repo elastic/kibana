@@ -15,14 +15,7 @@ import {
   type EpisodeAttachmentData,
 } from '@kbn/alerting-v2-schemas';
 import { alertEpisodeToEpisodeAttachment } from '../../common/agent_builder/episode_mappers';
-import {
-  registerAutoAttach,
-  type AttachmentConverter,
-  type IdGenerator,
-  createIdGenerator,
-} from './auto_attach';
-
-export { createIdGenerator, type IdGenerator } from './auto_attach';
+import { registerAutoAttach, type AttachmentConverter } from './auto_attach';
 
 export interface FocusedEpisode {
   episode: AlertEpisode;
@@ -36,8 +29,8 @@ export type PendingEpisodeAttachment = AttachmentInput<
 >;
 
 export const episodeAttachmentConverter: AttachmentConverter<FocusedEpisode> = {
-  toAttachment: (focused, draftId): PendingEpisodeAttachment => ({
-    id: draftId,
+  toAttachment: (focused): PendingEpisodeAttachment => ({
+    id: `episode:${focused.episode['episode.id']}`,
     type: EPISODE_ATTACHMENT_TYPE,
     origin: focused.episode['episode.id'],
     data: alertEpisodeToEpisodeAttachment(focused.episode, {
@@ -52,17 +45,14 @@ export const registerEpisodeAutoAttach = ({
   agentBuilder,
   chrome,
   focusedEpisode$,
-  draftAttachmentId = createIdGenerator(),
 }: {
   agentBuilder: AgentBuilderPluginStart;
   chrome: ChromeStart;
   focusedEpisode$: Observable<FocusedEpisode | undefined>;
-  draftAttachmentId?: IdGenerator;
 }): (() => void) =>
   registerAutoAttach({
     agentBuilder,
     chrome,
     focusedItem$: focusedEpisode$,
     converter: episodeAttachmentConverter,
-    draftAttachmentId,
   });
