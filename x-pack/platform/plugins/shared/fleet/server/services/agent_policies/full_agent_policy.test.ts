@@ -124,7 +124,6 @@ jest.mock('../output', () => {
       hosts: ['http://127.0.0.1:9201'],
       write_to_logs_streams: true,
     },
-    // ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID — literal required inside jest.mock factory
     'es-managed-bulk-agentless-output': {
       id: 'es-managed-bulk-agentless-output',
       is_default: false,
@@ -136,7 +135,6 @@ jest.mock('../output', () => {
       is_internal: true,
       is_preconfigured: true,
     },
-    // SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID — literal required inside jest.mock factory
     'es-managed-bulk-agentless-output-internal': {
       id: 'es-managed-bulk-agentless-output-internal',
       is_default: false,
@@ -1697,9 +1695,6 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should emit only the apm applications block for the ECH managed bulk output', async () => {
-    // Stub cloud so isManagedBulkEnabled() + getManagedBulkEndpoint() resolve the ECH endpoint.
-    // The persisted host has an explicit port (normalizeHostsForAgents adds :443); the matcher
-    // compares on hostname only, so 'managed-otlp.example.invalid/_es' matches ':443/_es'. ✓
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({
       managedOtlp: { url: 'https://managed-otlp.example.invalid' },
     } as any);
@@ -1757,9 +1752,6 @@ describe('getFullAgentPolicy', () => {
   });
 
   it('should emit only the apm applications block for the serverless managed bulk output, matched via the config-injected endpoint', async () => {
-    // Stub config so the serverless bulk output (injected via xpack.fleet.outputs by
-    // project-controller) appears in getPreconfiguredOutputFromConfig and its hostname is
-    // added to the matcher's set. No cloud stub needed — the serverless path is config-only.
     jest.spyOn(appContextService, 'getConfig').mockReturnValue({
       agents: { enabled: true, elasticsearch: {} },
       enabled: true,
