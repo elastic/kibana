@@ -173,7 +173,7 @@ class VisEditorVisualizationUI extends Component {
   }
 
   render() {
-    const { dirty, autoApply, title, description, onToggleAutoApply, onCommit } = this.props;
+    const { dirty, autoApply, onToggleAutoApply, onCommit } = this.props;
     const style = { height: this.state.height };
 
     if (this.state.dragging) {
