@@ -22,6 +22,7 @@ import { createRuleExceptionStepDefinition } from './create_rule_exception_step/
 import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
 import { createNoteStepDefinition } from './create_note_step/create_note_step';
 import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
+import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
 
 type StepLoader = () => Promise<PublicStepDefinition | undefined>;
 
@@ -33,7 +34,7 @@ describe('registerWorkflowSteps (public)', () => {
 
     registerWorkflowSteps(workflowsExtensions);
 
-    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(14);
+    expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledTimes(15);
     expect(workflowsExtensions.registerStepDefinition).toHaveBeenCalledWith(expect.any(Function));
   });
 
@@ -57,6 +58,7 @@ describe('registerWorkflowSteps (public)', () => {
       loader12,
       loader13,
       loader14,
+      loader15,
     ] = workflowsExtensions.registerStepDefinition.mock.calls.map(([arg]) => arg as StepLoader);
 
     await expect(loader1()).resolves.toBe(renderAlertNarrativeStepDefinition);
@@ -73,5 +75,6 @@ describe('registerWorkflowSteps (public)', () => {
     await expect(loader12()).resolves.toBe(createExceptionListItemStepDefinition);
     await expect(loader13()).resolves.toBe(createNoteStepDefinition);
     await expect(loader14()).resolves.toBe(deleteNoteStepDefinition);
+    await expect(loader15()).resolves.toBe(getNotesStepDefinition);
   });
 });
