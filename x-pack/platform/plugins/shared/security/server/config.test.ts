@@ -2337,7 +2337,7 @@ describe('createConfig()', () => {
               outcomes: ['unknown'],
               spaces: ['default'],
               types: ['index'],
-              users: ['elastic'],
+              users: ['elastic', '/^svc-.*/', '!/^[0-9]+$/'],
             },
           ],
         },
@@ -2363,10 +2363,36 @@ describe('createConfig()', () => {
           ],
           "users": Array [
             "elastic",
+            "/^svc-.*/",
+            "!/^[0-9]+$/",
           ],
         },
       ]
     `);
+  });
+
+  it('rejects an audit ignore filter with an invalid users regex', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: {
+          ignore_filters: [{ users: ['elastic', '/(/'] }],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[audit.ignore_filters.0.users]: \\"error parsing regexp: missing closing ): \`(\`\\" at array position 1"`
+    );
+  });
+
+  it('rejects an audit ignore filter with an unsupported users regex such as lookahead', () => {
+    expect(() =>
+      ConfigSchema.validate({
+        audit: {
+          ignore_filters: [{ users: ['/foo(?=bar)/'] }],
+        },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[audit.ignore_filters.0.users]: \\"error parsing regexp: invalid or unsupported Perl syntax: \`(?=\`\\" at array position 0"`
+    );
   });
 
   describe('#getExpirationTimeouts', () => {

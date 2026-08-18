@@ -820,8 +820,27 @@ groups:
       - setting: xpack.security.audit.ignore_filters[].users[]
         description: |
           List of values matched against the `user.name` field of an audit event. This represents the `username` associated with the audit event.
+
+          Each value can take one of three forms:
+
+          * A plain string, which must equal the username exactly.
+          * {applies_to}`stack: ga 9.6+` A regular expression wrapped in slashes (`/pattern/`), which matches if the pattern is found anywhere in the username. Patterns use [RE2 syntax](https://github.com/google/re2/wiki/Syntax) and are unanchored; use `^` and `$` to match the entire username.
+          * {applies_to}`stack: ga 9.6+` A negated regular expression (`!/pattern/`), which matches if the pattern is not found in the username. Use this form to exclude all events except those from usernames matching the pattern.
+
+          {applies_to}`stack: ga 9.6+` To match a literal username that itself begins and ends with a slash, write it as an escaped regular expression (for example, `/^\/name\/$/`).
         datatype: string
         applies_to:
           stack: ga
           ech: ga
           self: ga
+        example: |
+          For example:
+
+          ```yaml
+          xpack.security.audit.ignore_filters:
+          - users: [kibana_system, '/^svc-.*/'] <1>
+          - users: ['!/^dept-a-.*/'] <2>
+          ```
+
+          1. Filters out events from the `kibana_system` user and from usernames starting with `svc-`
+          2. Filters out events from all usernames except those starting with `dept-a-`

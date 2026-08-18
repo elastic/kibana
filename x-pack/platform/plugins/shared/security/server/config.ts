@@ -16,6 +16,7 @@ import { config as coreConfig } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { getLogsPath } from '@kbn/utils';
 
+import { validateUsersFilter } from './audit/audit_ignore_filters';
 import type { AuthenticationProvider } from '../common';
 
 export type ConfigType = ReturnType<typeof createConfig>;
@@ -312,7 +313,9 @@ export const ConfigSchema = schema.object({
           outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          users: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          users: schema.maybe(
+            schema.arrayOf(schema.string(), { minSize: 1, validate: validateUsersFilter })
+          ),
         })
       )
     ),

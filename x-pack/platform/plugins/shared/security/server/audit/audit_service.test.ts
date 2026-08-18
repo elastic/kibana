@@ -17,6 +17,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
+import type { AuditIgnoreFilter } from './audit_ignore_filters';
+import { compileAuditIgnoreFilters } from './audit_ignore_filters';
 import {
   applyAuditOtelFieldMap,
   AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
@@ -829,6 +831,9 @@ describe('#getForwardedFor', () => {
 describe('#filterEvent', () => {
   let event: AuditEvent;
 
+  const filterEventWithRules = (auditEvent: AuditEvent, rules?: AuditIgnoreFilter[]) =>
+    filterEvent(auditEvent, compileAuditIgnoreFilters(rules));
+
   beforeEach(() => {
     event = {
       message: 'this is my audit message',
@@ -848,23 +853,23 @@ describe('#filterEvent', () => {
   });
 
   test('keeps event when ignore filters are undefined or empty', () => {
-    expect(filterEvent(event, undefined)).toBeTruthy();
-    expect(filterEvent(event, [])).toBeTruthy();
+    expect(filterEventWithRules(event, undefined)).toBeTruthy();
+    expect(filterEventWithRules(event, [])).toBeTruthy();
   });
 
   test('filters event correctly when a single match is found per criteria', () => {
-    expect(filterEvent(event, [{ actions: ['NO_MATCH'] }])).toBeTruthy();
-    expect(filterEvent(event, [{ actions: ['NO_MATCH', 'http_request'] }])).toBeFalsy();
-    expect(filterEvent(event, [{ categories: ['NO_MATCH', 'web'] }])).toBeFalsy();
-    expect(filterEvent(event, [{ types: ['NO_MATCH', 'access'] }])).toBeFalsy();
-    expect(filterEvent(event, [{ outcomes: ['NO_MATCH', 'success'] }])).toBeFalsy();
-    expect(filterEvent(event, [{ spaces: ['NO_MATCH', 'default'] }])).toBeFalsy();
-    expect(filterEvent(event, [{ users: ['NO_MATCH', 'jdoe'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ actions: ['NO_MATCH'] }])).toBeTruthy();
+    expect(filterEventWithRules(event, [{ actions: ['NO_MATCH', 'http_request'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ categories: ['NO_MATCH', 'web'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ types: ['NO_MATCH', 'access'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ outcomes: ['NO_MATCH', 'success'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ spaces: ['NO_MATCH', 'default'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ users: ['NO_MATCH', 'jdoe'] }])).toBeFalsy();
   });
 
   test('keeps event when one criteria per rule does not match', () => {
     expect(
-      filterEvent(event, [
+      filterEventWithRules(event, [
         {
           actions: ['NO_MATCH'],
           categories: ['web'],
@@ -935,7 +940,7 @@ describe('#filterEvent', () => {
     };
 
     expect(
-      filterEvent(event, [
+      filterEventWithRules(event, [
         {
           actions: ['http_request'],
           categories: ['web', 'NO_MATCH'],
@@ -966,7 +971,7 @@ describe('#filterEvent', () => {
     };
 
     expect(
-      filterEvent(event, [
+      filterEventWithRules(event, [
         {
           actions: ['http_request'],
           categories: ['web'],
@@ -981,7 +986,7 @@ describe('#filterEvent', () => {
 
   test('filters out event when all criteria in a single rule match', () => {
     expect(
-      filterEvent(event, [
+      filterEventWithRules(event, [
         {
           actions: ['NO_MATCH'],
           categories: ['NO_MATCH'],
@@ -1020,7 +1025,7 @@ describe('#filterEvent', () => {
     };
 
     expect(
-      filterEvent(event, [
+      filterEventWithRules(event, [
         {
           actions: ['http_request'],
           categories: ['authentication', 'web'],
@@ -1051,7 +1056,7 @@ describe('#filterEvent', () => {
     };
 
     expect(
-      filterEvent(event, [
+      filterEventWithRules(event, [
         {
           actions: ['http_request'],
           categories: ['web'],
@@ -1061,5 +1066,35 @@ describe('#filterEvent', () => {
         },
       ])
     ).toBeFalsy();
+  });
+
+  test('filters out event when a regex users entry matches the username', () => {
+    expect(filterEventWithRules(event, [{ users: ['/^jd/'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ users: ['/oe$/'] }])).toBeFalsy();
+  });
+
+  test('keeps event when a regex users entry does not match the username', () => {
+    expect(filterEventWithRules(event, [{ users: ['/^svc-/'] }])).toBeTruthy();
+  });
+
+  test('filters out event when a negated regex users entry does not match the username', () => {
+    expect(filterEventWithRules(event, [{ users: ['!/^svc-/'] }])).toBeFalsy();
+  });
+
+  test('keeps event when a negated regex users entry matches the username', () => {
+    expect(filterEventWithRules(event, [{ users: ['!/^jd/'] }])).toBeTruthy();
+  });
+
+  test('matches users criteria when any literal or regex entry matches', () => {
+    expect(filterEventWithRules(event, [{ users: ['jdoe', '/^svc-/'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ users: ['NO_MATCH', '/^jd/'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ users: ['NO_MATCH', '/^svc-/'] }])).toBeTruthy();
+  });
+
+  test('matches users criteria regardless of entry type when event has no username', () => {
+    delete event.user;
+    expect(filterEventWithRules(event, [{ users: ['NO_MATCH'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ users: ['/^svc-/'] }])).toBeFalsy();
+    expect(filterEventWithRules(event, [{ users: ['!/^svc-/'] }])).toBeFalsy();
   });
 });

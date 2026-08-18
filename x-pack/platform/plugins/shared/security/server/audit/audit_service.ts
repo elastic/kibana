@@ -18,6 +18,8 @@ import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-p
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { httpRequestEvent } from './audit_events';
+import type { CompiledAuditIgnoreFilter } from './audit_ignore_filters';
+import { compileAuditIgnoreFilters } from './audit_ignore_filters';
 import {
   applyAuditOtelFieldMap,
   AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
@@ -99,11 +101,13 @@ export class AuditService {
       });
     }
 
+    const ignoreFilters = compileAuditIgnoreFilters(config.ignore_filters);
+
     const log = (event: AuditEvent | undefined) => {
       if (!event) {
         return;
       }
-      if (filterEvent(event, config.ignore_filters)) {
+      if (filterEvent(event, ignoreFilters)) {
         const { message, ...eventMeta } = event;
         this.logger.info(message, eventMeta);
       }
@@ -231,7 +235,7 @@ export const createLoggingConfig = (config: ConfigType['audit'], isServerless = 
  */
 export function filterEvent(
   event: AuditEvent,
-  ignoreFilters: ConfigType['audit']['ignore_filters']
+  ignoreFilters: CompiledAuditIgnoreFilter[] | undefined
 ) {
   if (ignoreFilters) {
     return !ignoreFilters.some(
@@ -243,7 +247,7 @@ export function filterEvent(
           normalize(event.event?.type)?.every((t) => rule.types?.includes(t || ''))) &&
         (!rule.outcomes || rule.outcomes.includes(event.event?.outcome!)) &&
         (!rule.spaces || rule.spaces.includes(event.kibana?.space_id!)) &&
-        (!rule.users || !event.user?.name || rule.users.includes(event.user.name))
+        (!rule.users || !event.user?.name || rule.users(event.user.name))
     );
   }
   return true;
