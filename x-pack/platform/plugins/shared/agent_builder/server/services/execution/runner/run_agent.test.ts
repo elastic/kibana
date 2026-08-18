@@ -199,7 +199,7 @@ describe('runAgent', () => {
     });
   });
 
-  it('leaves the ES client origin-only (no routing options) when no project routing is provided', async () => {
+  it('defaults the ES client to space routing when no project routing is provided', async () => {
     const params: ScopedRunnerRunAgentParams = {
       agentId: 'test-agent',
       agentParams: { nextInput: { message: 'hi' } },
@@ -210,9 +210,8 @@ describe('runAgent', () => {
       parentManager: runnerManager,
     });
 
-    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(
-      runnerDeps.request,
-      undefined
-    );
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'space',
+    });
   });
 });
