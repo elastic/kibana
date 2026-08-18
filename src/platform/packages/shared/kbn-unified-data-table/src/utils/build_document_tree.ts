@@ -14,20 +14,17 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
-
-// ES types that ES|QL delivers as a JSON string instead of a structured value.
-const ESQL_JSON_STRUCTURED_ES_TYPES = new Set([
-  ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE,
-  ES_FIELD_TYPES.HISTOGRAM,
-]);
 
 // Max number of values the document will show. The rest will be truncated.
 // Applies before search, so truncated values do not participate in it.
 // Prevents blocking the main thread on massive documents.
 export const MAX_TREE_VALUES = 10_000;
+
+// Skip JSON.parse on field values this long or longer. The raw string is shown instead.
+export const MAX_JSON_PARSE_LENGTH = 5_000;
+
 interface ValueBudget {
   remaining: number;
   truncated: boolean;
@@ -35,7 +32,6 @@ interface ValueBudget {
 
 interface FormatContext {
   dataView: DataView;
-  columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
 }
 
@@ -52,7 +48,6 @@ const documentTreeCache = new WeakMap<EsHitRecord, NestedDocument>();
 export const flattenedToNestedDocument = ({
   row,
   dataView,
-  columnsMeta,
   shouldShowFieldHandler,
 }: {
   row: DataTableRecord;
@@ -65,14 +60,13 @@ export const flattenedToNestedDocument = ({
 
   const ctx: FormatContext = {
     dataView,
-    columnsMeta,
     shouldShowFieldHandler,
   };
   const budget: ValueBudget = { remaining: MAX_TREE_VALUES, truncated: false };
   const metaFields = new Set(dataView.metaFields);
   const documentFlat: Record<string, unknown> = {};
 
-  // Step 1. Process field values. Histograms / Nested fields / unwrapp scalar values.
+  // Step 1. Process field values. Nested fields / unwrap scalar values / expand JSON strings.
   // The result is still a flat object.
   for (const fieldName of Object.keys(row.flattened)) {
     // Discard meta fields (_id, _index, etc.)
@@ -120,18 +114,10 @@ const processFieldValue = (
   ctx: FormatContext,
   budget: ValueBudget
 ): unknown => {
-  // CASE 1: a ES|QL complex column (histogram, aggregate_metric_double) arrives as a JSON string.
-  // We parse it back into an object so it can be explored. Consumes only 1 value from the budget.
-  const structured = parseEsqlStructuredValue(rawValue, ctx.columnsMeta?.[fieldName]?.esType);
-  if (structured !== undefined) {
-    budget.remaining -= 1;
-    return structured;
-  }
-
   // Normalise the value, in Classic we get every value wrapped in an array, in ES|QL we get the value directly.
   const values: unknown[] = Array.isArray(rawValue) ? rawValue : [rawValue];
 
-  // CASE 2: a `nested` field. We need to recurse into the sub-objects.
+  // CASE 1: a `nested` field. We need to recurse into the sub-objects.
   // The container may be absent from the data view (`!field`). ES|QL do not support them.
   const field = ctx.dataView.fields.getByName(fieldName);
   const isNestedContainer = !field || field.type === 'nested';
@@ -160,30 +146,55 @@ const processFieldValue = (
     return nested;
   }
 
-  // CASE 3: a scalar value (or a genuine multi-value array). Each element is one value, so a single
+  // CASE 2: a scalar value (or a genuine multi-value array). Each element is one value, so a single
   // huge field is sliced down to the remaining budget rather than materialised in full.
-  const take = Math.min(values.length, budget.remaining);
-  if (take < values.length) budget.truncated = true;
-  budget.remaining -= take;
-  const leaves = values.slice(0, take).map((value) => value ?? null);
+  // String values that are perfect JSON (an object or array) are expanded; inner nodes count
+  // against the same budget.
+  const leaves: unknown[] = [];
+  for (const value of values) {
+    if (budget.remaining <= 0) {
+      budget.truncated = true;
+      break;
+    }
+
+    const parsedJson = tryParsePerfectJson(value, budget);
+    if (parsedJson !== undefined) {
+      leaves.push(parsedJson);
+      continue;
+    }
+
+    budget.remaining -= 1;
+    leaves.push(value ?? null);
+  }
   return leaves.length === 1 ? leaves[0] : leaves;
 };
 
-// Decode a complex ES|QL column that arrived as a JSON string back into its object/array value.
-const parseEsqlStructuredValue = (value: unknown, esType: string | undefined): unknown => {
-  if (
-    typeof value !== 'string' ||
-    !esType ||
-    !ESQL_JSON_STRUCTURED_ES_TYPES.has(esType as ES_FIELD_TYPES)
-  ) {
+// Parse a string that is entirely a JSON object or array. Length / delimiter checks
+// run first so JSON.parse is not attempted on large or obviously non-JSON values.
+// The reviver counts inner nodes against the document budget (not a precise trim).
+const tryParsePerfectJson = (value: unknown, budget: ValueBudget): unknown => {
+  if (typeof value !== 'string' || value.length >= MAX_JSON_PARSE_LENGTH) {
     return undefined;
   }
+  const first = value.trimStart()[0];
+  if (first !== '{' && first !== '[') {
+    return undefined;
+  }
+
+  const remainingBefore = budget.remaining;
+  const truncatedBefore = budget.truncated;
   try {
-    const parsed = JSON.parse(value);
-    return isPlainObject(parsed) || Array.isArray(parsed) ? parsed : undefined;
+    return JSON.parse(value, (_key, nested) => {
+      budget.remaining -= 1;
+      if (budget.remaining < 0) budget.truncated = true;
+      return nested;
+    });
   } catch {
-    return undefined;
+    // A failed parse must not spend budget.
   }
+  budget.remaining = remainingBefore;
+  budget.truncated = truncatedBefore;
+  return undefined;
 };
 
 // Build the nested document from the flat, dotted-key map.

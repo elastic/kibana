@@ -164,10 +164,10 @@ describe('flattenedToNestedDocument', () => {
     expect(tree).toEqual({ message: 'hello world', count: 5 });
   });
 
-  it('decodes ES|QL complex columns delivered as JSON strings into structure (via esType)', () => {
+  it('decodes ES|QL complex columns delivered as JSON strings into structure', () => {
     // In ES|QL mode `flattened` is the raw columnar row (no array wrapping), and `histogram` /
     // `aggregate_metric_double` arrive as JSON strings rather than the objects the fields API
-    // returns. `columnsMeta` carries the ES type that marks them for decoding.
+    // returns. Any string that is perfect JSON is expanded the same way.
     const row: DataTableRecord = {
       id: '1',
       raw: { _id: '1', _index: 'test' },
@@ -193,13 +193,11 @@ describe('flattenedToNestedDocument', () => {
     });
   });
 
-  it('leaves a JSON-looking ES|QL keyword string untouched (only known complex types decode)', () => {
-    // The decode is gated on the ES type: a genuine keyword whose value merely looks like JSON
-    // must stay a raw string.
+  it('expands a string field whose entire value is perfect JSON', () => {
     const row: DataTableRecord = {
       id: '1',
       raw: { _id: '1', _index: 'test' },
-      flattened: { note: '{"looks":"like json"}' },
+      flattened: { note: '{"looks":"like json","n":2}' },
     };
 
     const { tree } = flattenedToNestedDocument({
@@ -209,7 +207,7 @@ describe('flattenedToNestedDocument', () => {
       shouldShowFieldHandler: () => true,
     });
 
-    expect(tree).toEqual({ note: '{"looks":"like json"}' });
+    expect(tree).toEqual({ note: { looks: 'like json', n: 2 } });
   });
 
   it('drops multi-fields (agent.keyword), keeping the parent scalar', () => {
