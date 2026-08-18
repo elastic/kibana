@@ -7,6 +7,10 @@
 
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import {
+  isSavedObjectErrorResult,
+  type SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { DASHBOARD_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
@@ -51,6 +55,10 @@ const MAX_RULE_TAGS = 20;
 
 // Mirrors `artifactsSchema.max(100)` in @kbn/alerting-v2-schemas.
 const MAX_RULE_ARTIFACTS = 100;
+
+// Saved-object type for Kibana dashboards. Same string as DASHBOARD_ARTIFACT_TYPE
+// but a different concept (SO type vs rule artifact type).
+const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 /**
  * Ensures the agent-builder provenance tag is present without clobbering any
@@ -159,7 +167,7 @@ export const setDashboardsOperationSchema = z
       .array(dashboardIdSchema.describe('Dashboard saved-object ID.'))
       .max(MAX_RULE_ARTIFACTS)
       .describe(
-        'Dashboard saved-object IDs to link as investigation artifacts on the rule. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards.'
+        'Dashboard saved-object IDs to link as investigation artifacts on the rule. Each ID must be an existing dashboard the current user can read. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards.'
       ),
   })
   .describe(
@@ -203,6 +211,41 @@ export class RuleOperationValidationError extends Error {
   }
 }
 
+/**
+ * Confirms each ID is a dashboard saved object the current user can read.
+ * Empty `dashboard_ids` (unlink all) skips the lookup.
+ */
+const assertDashboardsExist = async (
+  savedObjectsClient: SavedObjectsClientContract,
+  dashboardIds: string[]
+): Promise<void> => {
+  const uniqueIds = [...new Set(dashboardIds)];
+  if (uniqueIds.length === 0) {
+    return;
+  }
+
+  try {
+    const { saved_objects: savedObjects } = await savedObjectsClient.bulkGet(
+      uniqueIds.map((id) => ({ type: DASHBOARD_SAVED_OBJECT_TYPE, id }))
+    );
+    const missing = savedObjects
+      .filter(isSavedObjectErrorResult)
+      .map((savedObject) => savedObject.id);
+    if (missing.length > 0) {
+      throw new RuleOperationValidationError(
+        `Dashboard saved object(s) not found: ${missing.join(', ')}. ` +
+          `Resolve dashboard titles to saved-object IDs before calling set_dashboards.`
+      );
+    }
+  } catch (err) {
+    if (err instanceof RuleOperationValidationError) {
+      throw err;
+    }
+    const message = err instanceof Error ? err.message : String(err);
+    throw new RuleOperationValidationError(`Could not verify dashboards: ${message}`);
+  }
+};
+
 // ─── ES|QL query validation ───────────────────────────────────────────────────
 
 export interface EsqlColumn {
@@ -242,7 +285,8 @@ async function validateEsqlQuery(
 export const executeRuleOperations = async (
   data: Partial<RuleAttachmentData>,
   operations: RuleOperation[],
-  esClient?: IScopedClusterClient,
+  esClient: IScopedClusterClient | undefined,
+  savedObjectsClient: SavedObjectsClientContract,
   { isNew = false }: { isNew?: boolean } = {}
 ): Promise<RuleOperationsResult> => {
   let next = { ...data };
@@ -381,6 +425,7 @@ export const executeRuleOperations = async (
         break;
 
       case 'set_dashboards': {
+        await assertDashboardsExist(savedObjectsClient, op.dashboard_ids);
         const existingArtifacts = next.artifacts ?? [];
         const otherArtifacts: RuleArtifact[] = [];
         const existingDashboardArtifacts: DashboardArtifact[] = [];

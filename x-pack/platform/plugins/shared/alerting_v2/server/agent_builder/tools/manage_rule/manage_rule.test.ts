@@ -23,6 +23,9 @@ const getEsqlQueryMock = (ctx: ToolHandlerContextMock) =>
 const getFieldCapsMock = (ctx: ToolHandlerContextMock) =>
   ctx.esClient.asCurrentUser.fieldCaps as unknown as jest.Mock;
 
+const getBulkGetMock = (ctx: ToolHandlerContextMock) =>
+  ctx.savedObjectsClient.bulkGet as unknown as jest.Mock;
+
 // set_query resolves the rule's time field from the source index via fieldCaps.
 // Default to an index that exposes @timestamp so query-based operations don't
 // fail time-field resolution.
@@ -39,6 +42,14 @@ const createContext = (): ToolHandlerContextMock => {
     id: 'mock-attachment-id',
     current_version: 2,
   } as never);
+  getBulkGetMock(ctx).mockImplementation(async (objects: Array<{ id: string; type: string }>) => ({
+    saved_objects: objects.map((obj) => ({
+      id: obj.id,
+      type: obj.type,
+      attributes: {},
+      references: [],
+    })),
+  }));
   return ctx;
 };
 
@@ -284,6 +295,40 @@ describe('manageRuleTool', () => {
       };
       expect(results[0].type).toBe(ToolResultType.other);
       expect(results[0].data?.ruleAttachment?.dashboards).toEqual(['dash-abc']);
+    });
+
+    it('returns an error result when a dashboard ID does not exist', async () => {
+      const ctx = createContext();
+      getBulkGetMock(ctx).mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'missing-dash',
+            type: 'dashboard',
+            error: {
+              statusCode: 404,
+              error: 'Not Found',
+              message: 'Saved object [dashboard/missing-dash] not found',
+            },
+            attributes: {},
+            references: [],
+          },
+        ],
+      } as never);
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Dashboard Rule' },
+            { operation: 'set_dashboards', dashboard_ids: ['missing-dash'] },
+          ],
+        },
+        ctx
+      );
+
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+      const { results } = result as { results: Array<{ type: string; data?: { message?: string } }> };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data?.message).toMatch(/Dashboard saved object\(s\) not found: missing-dash/);
     });
 
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {

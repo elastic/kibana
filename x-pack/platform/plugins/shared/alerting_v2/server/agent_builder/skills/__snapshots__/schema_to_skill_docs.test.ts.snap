@@ -258,7 +258,7 @@ Use \`set_dashboards\` to link investigation dashboards to the rule by saved-obj
 | Field | Type | Required | Description |
 |---|---|---|---|
 | \`operation\` | \\"set_dashboards\\" | required |  |
-| \`dashboard_ids\` | string[] | required | Dashboard saved-object IDs to link as investigation artifacts on the rule. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards. (max items: 100) |
+| \`dashboard_ids\` | string[] | required | Dashboard saved-object IDs to link as investigation artifacts on the rule. Each ID must be an existing dashboard the current user can read. Replaces previously linked dashboards. Pass an empty array to unlink all dashboards. (max items: 100) |
 
 #### \`operation: \\"validate\\"\`
 

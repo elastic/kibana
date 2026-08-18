@@ -54,7 +54,7 @@ ${generateRuleOperationsUsageList()}`,
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
-    { attachments, esClient, spaceId }
+    { attachments, esClient, spaceId, savedObjectsClient }
   ) => {
     let ruleId: string | undefined;
     try {
@@ -73,6 +73,7 @@ ${generateRuleOperationsUsageList()}`,
         currentData,
         operations,
         esClient,
+        savedObjectsClient,
         { isNew }
       );
 
