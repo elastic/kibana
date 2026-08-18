@@ -70,6 +70,7 @@ export const ProjectPickerRoutingObserver = ({
     projectRouting,
     selectedProjects,
     state,
+    defaultProjectRouting,
   ]);
 
   return null;
