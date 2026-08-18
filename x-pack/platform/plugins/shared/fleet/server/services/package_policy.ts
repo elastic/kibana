@@ -78,6 +78,7 @@ import type {
   PackagePolicyConfigRecordEntry,
   PackagePolicyInputStream,
   PackageInfo,
+  AgentConditionExpression,
   ListWithKuery,
   ListResult,
   UpgradePackagePolicyDryRunResponseItem,
@@ -194,11 +195,16 @@ import type {
   PackagePolicyClientDeleteOptions,
   PackagePolicyClientFetchAllItemsOptions,
   PackagePolicyClientFindAllForAgentPolicyOptions,
+  PackagePolicyClientBulkUpdateConditionsOptions,
+  PackagePolicyClientGetConditionMetadataOptions,
   PackagePolicyClientGetByIdsOptions,
   PackagePolicyClientGetOptions,
   PackagePolicyClientListIdsOptions,
   PackagePolicyClientRollbackOptions,
   PackagePolicyService,
+  PackagePolicyConditionMetadata,
+  PackagePolicyConditionUpdate,
+  PackagePolicyConditionUpdateResult,
   RollbackResult,
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
@@ -503,6 +509,117 @@ function validateAgentlessForPackagePolicy(
     pkgInfo
   );
 }
+
+interface PackagePolicyConditionSOAttributes {
+  name?: string;
+  condition?: AgentConditionExpression | null;
+  policy_id?: string | null;
+  policy_ids?: string[];
+  revision?: number;
+  package?: { name?: string };
+  is_managed?: boolean;
+  supports_agentless?: boolean | null;
+  inputs?: Array<{ type?: string }>;
+}
+
+const PACKAGE_POLICY_CONDITION_METADATA_FIELDS = [
+  'name',
+  'condition',
+  'policy_id',
+  'policy_ids',
+  'revision',
+  'package.name',
+  'is_managed',
+  'supports_agentless',
+  'inputs.type',
+] as const;
+
+const MAX_PACKAGE_POLICY_CONDITION_UPDATE_ATTEMPTS = 3;
+
+const throwAgentlessConditionNotAllowed = (): never => {
+  throw new PackagePolicyValidationError(
+    i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedAgentless', {
+      defaultMessage: '`condition` is not supported on managed integrations.',
+    })
+  );
+};
+
+const throwOtelConditionNotAllowed = (): never => {
+  throw new PackagePolicyValidationError(
+    i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedOtel', {
+      defaultMessage: '`condition` is not supported on `{otelcol}` inputs or their streams.',
+      values: { otelcol: OTEL_COLLECTOR_INPUT_TYPE },
+    })
+  );
+};
+
+const mapPackagePolicyConditionMetadata = (
+  savedObject: SavedObject<PackagePolicyConditionSOAttributes>
+): PackagePolicyConditionMetadata => {
+  const { id, version, attributes, namespaces } = savedObject;
+  const { name, revision } = attributes;
+
+  if (!version || typeof name !== 'string' || typeof revision !== 'number') {
+    throw new FleetError(`Package policy [${id}] is missing condition update metadata`);
+  }
+
+  const policyIds = attributes.policy_ids ?? (attributes.policy_id ? [attributes.policy_id] : []);
+  const inputTypes = (attributes.inputs ?? [])
+    .map(({ type }) => type)
+    .filter((type): type is string => typeof type === 'string');
+
+  return {
+    id,
+    name,
+    version,
+    revision,
+    condition: attributes.condition,
+    policyIds,
+    packageName: attributes.package?.name,
+    isManaged: attributes.is_managed === true,
+    supportsAgentless: attributes.supports_agentless === true,
+    inputTypes,
+    ...(namespaces ? { spaceIds: namespaces } : {}),
+  };
+};
+
+const validatePackagePolicyConditionUpdate = (
+  packagePolicy: PackagePolicyConditionMetadata,
+  condition: AgentConditionExpression | null
+): void => {
+  if (packagePolicy.isManaged) {
+    throw new PackagePolicyRestrictionRelatedError(
+      `Cannot update managed package policy [${packagePolicy.id}]`
+    );
+  }
+
+  if (condition && packagePolicy.supportsAgentless) {
+    throwAgentlessConditionNotAllowed();
+  }
+
+  if (condition && packagePolicy.inputTypes.includes(OTEL_COLLECTOR_INPUT_TYPE)) {
+    throwOtelConditionNotAllowed();
+  }
+
+  const syntaxErrors = validateAgentConditionExpression(condition ?? undefined);
+  if (syntaxErrors.length > 0) {
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.packagePolicyConditionInvalidError', {
+        defaultMessage: 'Package policy condition is invalid: {errors}',
+        values: {
+          errors: syntaxErrors
+            .map(({ line, column, message }) => `Line ${line}, column ${column + 1}: ${message}`)
+            .join('\n'),
+        },
+      })
+    );
+  }
+};
+
+const conditionsAreEqual = (
+  currentCondition: AgentConditionExpression | null | undefined,
+  nextCondition: AgentConditionExpression | null
+): boolean => (currentCondition ?? null) === (nextCondition ?? null);
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
   protected getLogger(...childContextPaths: string[]): Logger {
@@ -1423,6 +1540,227 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     logger.debug(`returning [${packagePolicies.length}] package policies`);
 
     return packagePolicies;
+  }
+
+  public async getConditionMetadata(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: PackagePolicyClientGetConditionMetadataOptions = {}
+  ): Promise<PackagePolicyConditionMetadata[]> {
+    const logger = this.getLogger('getConditionMetadata');
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const isSpacesEnabled = await isSpaceAwarenessEnabled();
+
+    logger.debug(
+      () =>
+        `Retrieving condition metadata for package policies [${ids.join(
+          ', '
+        )}] using soClient scoped to [${soClient.getCurrentNamespace()}]`
+    );
+
+    const { saved_objects: savedObjects } = await soClient
+      .bulkGet<PackagePolicyConditionSOAttributes>(
+        ids.map((id) => ({
+          id,
+          type: savedObjectType,
+          fields: [...PACKAGE_POLICY_CONDITION_METADATA_FIELDS],
+          namespaces: isSpacesEnabled ? options.spaceIds : undefined,
+        }))
+      )
+      .catch(
+        catchAndSetErrorStackTrace.withMessage(
+          'bulkGet of package policy condition metadata failed'
+        )
+      );
+
+    const metadata = savedObjects
+      .map((savedObject): PackagePolicyConditionMetadata | null => {
+        if (isSavedObjectErrorResult(savedObject)) {
+          if (options.ignoreMissing && savedObject.error.statusCode === 404) {
+            return null;
+          }
+          if (savedObject.error.statusCode === 404) {
+            throw new PackagePolicyNotFoundError(`Package policy ${savedObject.id} not found`, {
+              packagePolicyId: savedObject.id,
+            });
+          }
+          throw new FleetError(savedObject.error.message);
+        }
+
+        return mapPackagePolicyConditionMetadata(savedObject);
+      })
+      .filter((item): item is PackagePolicyConditionMetadata => item !== null);
+
+    for (const packagePolicy of metadata) {
+      auditLoggingService.writeCustomSoAuditLog({
+        action: 'get',
+        id: packagePolicy.id,
+        name: packagePolicy.name,
+        savedObjectType,
+      });
+    }
+
+    logger.debug(`returning condition metadata for [${metadata.length}] package policies`);
+
+    return metadata;
+  }
+
+  public async bulkUpdateConditions(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    updates: PackagePolicyConditionUpdate[],
+    options: PackagePolicyClientBulkUpdateConditionsOptions = {}
+  ): Promise<PackagePolicyConditionUpdateResult> {
+    if (updates.length === 0) {
+      return {
+        updatedPolicies: [],
+        unchangedPolicies: [],
+        failedPolicies: [],
+        agentPolicyIds: [],
+      };
+    }
+
+    if (options.spaceId === ALL_SPACES_ID) {
+      throw new FleetError('Package policy conditions must be updated from a specific space');
+    }
+
+    const pendingUpdates = new Map<string, PackagePolicyConditionUpdate>();
+    for (const update of updates) {
+      if (pendingUpdates.has(update.id)) {
+        throw new FleetError(`Duplicate package policy condition update [${update.id}]`);
+      }
+      pendingUpdates.set(update.id, update);
+    }
+
+    const logger = this.getLogger('bulkUpdateConditions');
+    const savedObjectType = await getPackagePolicySavedObjectType();
+    const updatedPolicies: PackagePolicyConditionMetadata[] = [];
+    const unchangedPolicies: PackagePolicyConditionMetadata[] = [];
+    const failedPolicies: Array<{ id: string; error: Error | SavedObjectError }> = [];
+
+    for (
+      let attempt = 1;
+      attempt <= MAX_PACKAGE_POLICY_CONDITION_UPDATE_ATTEMPTS && pendingUpdates.size > 0;
+      attempt++
+    ) {
+      const currentPolicies = await this.getConditionMetadata(
+        soClient,
+        [...pendingUpdates.keys()],
+        {
+          ignoreMissing: true,
+          spaceIds: options.spaceId ? [options.spaceId] : undefined,
+        }
+      );
+      const currentPoliciesById = new Map(currentPolicies.map((policy) => [policy.id, policy]));
+
+      for (const id of pendingUpdates.keys()) {
+        if (!currentPoliciesById.has(id)) {
+          failedPolicies.push({
+            id,
+            error: new PackagePolicyNotFoundError(`Package policy [${id}] not found`, {
+              packagePolicyId: id,
+            }),
+          });
+          pendingUpdates.delete(id);
+        }
+      }
+
+      const policiesToUpdate: Array<{
+        update: PackagePolicyConditionUpdate;
+        currentPolicy: PackagePolicyConditionMetadata;
+      }> = [];
+
+      for (const currentPolicy of currentPolicies) {
+        const update = pendingUpdates.get(currentPolicy.id);
+        if (!update) {
+          continue;
+        }
+
+        try {
+          validatePackagePolicyConditionUpdate(currentPolicy, update.condition);
+        } catch (error) {
+          failedPolicies.push({ id: update.id, error });
+          pendingUpdates.delete(update.id);
+          continue;
+        }
+
+        if (conditionsAreEqual(currentPolicy.condition, update.condition)) {
+          unchangedPolicies.push(currentPolicy);
+          pendingUpdates.delete(update.id);
+          continue;
+        }
+
+        policiesToUpdate.push({ update, currentPolicy });
+      }
+
+      if (policiesToUpdate.length === 0) {
+        continue;
+      }
+
+      const updatedAt = new Date().toISOString();
+      const { saved_objects: updateResults } = await soClient
+        .bulkUpdate<PackagePolicySOAttributes>(
+          policiesToUpdate.map(({ update, currentPolicy }) => ({
+            type: savedObjectType,
+            id: update.id,
+            attributes: {
+              condition: update.condition,
+              revision: currentPolicy.revision + 1,
+              updated_at: updatedAt,
+              updated_by: options.user?.username ?? 'system',
+            },
+            version: currentPolicy.version,
+            ...(options.spaceId ? { namespace: options.spaceId } : {}),
+          }))
+        )
+        .catch(
+          catchAndSetErrorStackTrace.withMessage('bulkUpdate of package policy conditions failed')
+        );
+
+      updateResults.forEach((result, index) => {
+        const { update, currentPolicy } = policiesToUpdate[index];
+        if (isSavedObjectErrorResult(result)) {
+          if (
+            result.error.statusCode === 409 &&
+            attempt < MAX_PACKAGE_POLICY_CONDITION_UPDATE_ATTEMPTS
+          ) {
+            logger.debug(
+              `Retrying condition update for package policy [${update.id}] after a version conflict`
+            );
+            return;
+          }
+
+          failedPolicies.push({ id: update.id, error: result.error });
+          pendingUpdates.delete(update.id);
+          return;
+        }
+
+        const updatedPolicy = {
+          ...currentPolicy,
+          version: result.version ?? currentPolicy.version,
+          revision: currentPolicy.revision + 1,
+          condition: update.condition,
+        };
+        updatedPolicies.push(updatedPolicy);
+        pendingUpdates.delete(update.id);
+        auditLoggingService.writeCustomSoAuditLog({
+          action: 'update',
+          id: update.id,
+          name: currentPolicy.name,
+          savedObjectType,
+        });
+      });
+    }
+
+    const agentPolicyIds = [...new Set(updatedPolicies.flatMap(({ policyIds }) => policyIds))];
+    if ((options.bumpRevision ?? true) && agentPolicyIds.length > 0) {
+      await this.bumpAgentPoliciesRevision({ soClient, esClient }, agentPolicyIds, {
+        user: options.user,
+        asyncDeploy: options.asyncDeploy,
+      });
+    }
+
+    return { updatedPolicies, unchangedPolicies, failedPolicies, agentPolicyIds };
   }
 
   public async list(
@@ -3549,6 +3887,21 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
     return super.bulkCreate(soClient, esClient, packagePolicies, options);
   }
 
+  async bulkUpdateConditions(
+    soClient: SavedObjectsClientContract,
+    esClient: ElasticsearchClient,
+    updates: PackagePolicyConditionUpdate[],
+    options?: PackagePolicyClientBulkUpdateConditionsOptions
+  ): Promise<PackagePolicyConditionUpdateResult> {
+    await this.#runPreflight({
+      fleetAuthz: {
+        integrations: { writeIntegrationPolicies: true },
+      },
+    });
+
+    return super.bulkUpdateConditions(soClient, esClient, updates, options);
+  }
+
   async update(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
@@ -3609,36 +3962,21 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 
 function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
   const isAgentless = packagePolicy.supports_agentless === true;
-  const throwAgentless = () => {
-    throw new PackagePolicyValidationError(
-      i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedAgentless', {
-        defaultMessage: '`condition` is not supported on managed integrations.',
-      })
-    );
-  };
-  const throwOtel = () => {
-    throw new PackagePolicyValidationError(
-      i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedOtel', {
-        defaultMessage: '`condition` is not supported on `{otelcol}` inputs or their streams.',
-        values: { otelcol: OTEL_COLLECTOR_INPUT_TYPE },
-      })
-    );
-  };
 
   if (packagePolicy.condition) {
-    if (isAgentless) throwAgentless();
+    if (isAgentless) throwAgentlessConditionNotAllowed();
   }
 
   for (const input of packagePolicy.inputs) {
     const isOtel = input.type === OTEL_COLLECTOR_INPUT_TYPE;
     if (input.condition) {
-      if (isAgentless) throwAgentless();
-      if (isOtel) throwOtel();
+      if (isAgentless) throwAgentlessConditionNotAllowed();
+      if (isOtel) throwOtelConditionNotAllowed();
     }
     for (const stream of input.streams) {
       if (!stream.condition) continue;
-      if (isAgentless) throwAgentless();
-      if (isOtel) throwOtel();
+      if (isAgentless) throwAgentlessConditionNotAllowed();
+      if (isOtel) throwOtelConditionNotAllowed();
     }
   }
 }
