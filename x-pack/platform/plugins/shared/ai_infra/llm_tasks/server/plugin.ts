@@ -5,69 +5,50 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { ResourceTypes, type ResourceType } from '@kbn/product-doc-common';
-import type { LlmTasksConfig } from './config';
-import type {
-  LlmTasksPluginSetup,
-  LlmTasksPluginStart,
-  PluginSetupDependencies,
-  PluginStartDependencies,
-} from './types';
-import { retrieveDocumentation } from './tasks';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-export class LlmTasksPlugin
-  implements
-    Plugin<
-      LlmTasksPluginSetup,
-      LlmTasksPluginStart,
-      PluginSetupDependencies,
-      PluginStartDependencies
-    >
-{
-  private logger: Logger;
 
-  constructor(context: PluginInitializerContext<LlmTasksConfig>) {
-    this.logger = context.logger.get();
-  }
-  setup(
-    coreSetup: CoreSetup<PluginStartDependencies, LlmTasksPluginStart>,
-    setupDependencies: PluginSetupDependencies
-  ): LlmTasksPluginSetup {
-    return {};
-  }
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class LlmTasksPlugin extends Service {
+  static readonly inject: string[] = [];
+  static readonly provide = 'llmTasks';
 
-  start(core: CoreStart, startDependencies: PluginStartDependencies): LlmTasksPluginStart {
-    const { inference, productDocBase } = startDependencies;
-    return {
-      retrieveDocumentationAvailable: async (options: {
-        inferenceId: string;
-        resourceType?: ResourceType;
-      }) => {
-        try {
-          const resourceType = options.resourceType ?? ResourceTypes.productDoc;
-          if (resourceType === ResourceTypes.securityLabs) {
-            const status = await startDependencies.productDocBase.management.getSecurityLabsStatus({
-              inferenceId: options.inferenceId,
-            });
-            return status.status === 'installed';
-          }
-          const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
-            inferenceId: options.inferenceId,
-          });
-          return docBaseStatus.status === 'installed';
-        } catch {
-          return false;
-        }
-      },
-      retrieveDocumentation: (options) => {
-        return retrieveDocumentation({
-          outputAPI: inference.getClient({ request: options.request }).output,
-          searchDocAPI: productDocBase.search,
-          logger: this.logger.get('tasks.retrieve-documentation'),
-        })(options);
-      },
-    };
+  constructor(ctx: Context) {
+    super(ctx, 'llmTasks');
+
+    // TODO: start() had a non-empty body — migrate manually:
+    // {
+    //     const { inference, productDocBase } = startDependencies;
+    //     return {
+    //       retrieveDocumentationAvailable: async (options: {
+    //         inferenceId: string;
+    //         resourceType?: ResourceType;
+    //       }) => {
+    //         try {
+    //           const resourceType = options.resourceType ?? ResourceTypes.productDoc;
+    //           if (resourceType === ResourceTypes.securityLabs) {
+    //             const status = await startDependencies.productDocBase.management.getSecurityLabsStatus({
+    //               inferenceId: options.inferenceId,
+    //             });
+    //             return status.status === 'installed';
+    //           }
+    //           const docBaseStatus = await startDependencies.productDocBase.management.getStatus({
+    //             inferenceId: options.inferenceId,
+    //           });
+    //           return docBaseStatus.status === 'installed';
+    //         } catch {
+    //           return false;
+    //         }
+    //       },
+    //       retrieveDocumentation: (options) => {
+    //         return retrieveDocumentation({
+    //           outputAPI: inference.getClient({ request: options.request }).output,
+    //           searchDocAPI: productDocBase.search,
+    //           logger: this.logger.get('tasks.retrieve-documentation'),
+    //         })(options);
+    //       },
+    //     };
+    //   }
   }
 }

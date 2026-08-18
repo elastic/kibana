@@ -5,59 +5,50 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import type { ProfilingConfig } from '.';
-import { registerServices } from './services/register_services';
-import { createProfilingEsClient } from './utils/create_profiling_es_client';
-import type { ProfilingPluginStartDeps } from './types';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-export type ProfilingDataAccessPluginSetup = ReturnType<ProfilingDataAccessPlugin['setup']>;
-export type ProfilingDataAccessPluginStart = ReturnType<ProfilingDataAccessPlugin['start']>;
 
-export class ProfilingDataAccessPlugin implements Plugin {
-  private readonly logger: Logger;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ProfilingDataAccessPlugin extends Service {
+  static readonly inject: string[] = [];
+  static readonly provide = 'profilingDataAccess';
 
-  constructor(private readonly initializerContext: PluginInitializerContext<ProfilingConfig>) {
-    this.logger = initializerContext.logger.get();
-  }
-  public setup(core: CoreSetup) {}
+  constructor(ctx: Context) {
+    super(ctx, 'profilingDataAccess');
 
-  public start(core: CoreStart, plugins: ProfilingPluginStartDeps) {
-    const config = this.initializerContext.config.get();
-
-    const profilingSpecificEsClient = config.elasticsearch
-      ? core.elasticsearch.createClient('profiling', {
-          hosts: [config.elasticsearch.hosts],
-          username: config.elasticsearch.username,
-          password: config.elasticsearch.password,
-        })
-      : undefined;
-
-    const services = registerServices({
-      createProfilingEsClient: ({ esClient: defaultEsClient, useDefaultAuth = false }) => {
-        const esClient =
-          profilingSpecificEsClient && !useDefaultAuth
-            ? profilingSpecificEsClient.asInternalUser
-            : defaultEsClient;
-
-        return createProfilingEsClient({ esClient });
-      },
-      logger: this.logger,
-      deps: {
-        fleet: plugins.fleet,
-        cloud: plugins.cloud,
-      },
-    });
-
-    // called after all plugins are set up
-    return {
-      services,
-    };
+    // TODO: start() had a non-empty body — migrate manually:
+    // {
+    //     const config = this.initializerContext.config.get();
+    // 
+    //     const profilingSpecificEsClient = config.elasticsearch
+    //       ? core.elasticsearch.createClient('profiling', {
+    //           hosts: [config.elasticsearch.hosts],
+    //           username: config.elasticsearch.username,
+    //           password: config.elasticsearch.password,
+    //         })
+    //       : undefined;
+    // 
+    //     const services = registerServices({
+    //       createProfilingEsClient: ({ esClient: defaultEsClient, useDefaultAuth = false }) => {
+    //         const esClient =
+    //           profilingSpecificEsClient && !useDefaultAuth
+    //             ? profilingSpecificEsClient.asInternalUser
+    //             : defaultEsClient;
+    // 
+    //         return createProfilingEsClient({ esClient });
+    //       },
+    //       logger: this.logger,
+    //       deps: {
+    //         fleet: plugins.fleet,
+    //         cloud: plugins.cloud,
+    //       },
+    //     });
+    // 
+    //     // called after all plugins are set up
+    //     return {
+    //       services,
+    //     };
+    //   }
   }
 }

@@ -15,6 +15,7 @@
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/logging",
     "@kbn/config-schema",

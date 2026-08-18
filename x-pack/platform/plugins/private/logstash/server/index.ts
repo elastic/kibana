@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
-export const plugin = async (context: PluginInitializerContext) => {
-  const { LogstashPlugin } = await import('./plugin');
-  return new LogstashPlugin(context);
-};
+export { default as cordisPlugin } from './plugin';

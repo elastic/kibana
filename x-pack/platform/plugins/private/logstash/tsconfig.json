@@ -11,6 +11,7 @@
     "test/scout/**/*",
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/home-plugin",
     "@kbn/management-plugin",

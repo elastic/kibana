@@ -56,8 +56,8 @@ function extractLicenseHeader(srcPath) {
 
 // Known core.* service keys provided by the Cordis driver (Stage 4)
 const CORE_SETUP_KEYS = new Set([
-  'analytics', 'capabilities', 'deprecations', 'elasticsearch', 'http', 'logger',
-  'logging', 'savedObjects', 'status', 'uiSettings',
+  'analytics', 'capabilities', 'deprecations', 'elasticsearch', 'featureFlags', 'http', 'logger',
+  'logging', 'notifications', 'pricing', 'savedObjects', 'security', 'status', 'uiSettings',
 ]);
 const CORE_START_KEYS = new Set([
   'capabilities', 'elasticsearch', 'http', 'savedObjects', 'uiSettings',
@@ -146,6 +146,12 @@ function run(pluginDir) {
     process.exit(1);
   }
 
+  // Bail if getStartServices is used in the setup body (lazy start dep — needs Cordis start-time design).
+  if (/\bgetStartServices\b/.test(setupBody + ctorText)) {
+    console.error(`  ✗ Cannot auto-migrate: setup() uses getStartServices(). Migrate manually.`);
+    process.exit(1);
+  }
+
   // Detect which plugin deps are actually used in the setup body.
   // Supports both destructured `{ dep1, dep2 }` and plain `plugins.dep1` patterns.
   const usedPluginDeps = detectUsedPluginDeps(
@@ -171,6 +177,15 @@ function run(pluginDir) {
     coreSetupParam,
     coreAccessedSetup
   );
+
+  // After rewriting core accesses, bail if the original core param is still accessed as
+  // `core.something` — this means there are core service accesses the codemod doesn't handle.
+  // Strip string literals before checking so 'core.capabilities' inside ctx.get(...) doesn't false-positive.
+  const ctorBodyNoStrings = ctorBody.replace(/(['"`])(?:\\.|(?!\1).)*\1/g, '""');
+  if (new RegExp(`\\b${escapeRegex(coreSetupParam)}\\.`).test(ctorBodyNoStrings)) {
+    console.error(`  ✗ Cannot auto-migrate: core param '${coreSetupParam}' has unrecognized service accesses in setup body. Migrate manually.`);
+    process.exit(1);
+  }
 
   // If the plugins param is a plain identifier (not destructured) and is used in the body
   // but all its deps were filtered out (browser-only), the variable would be undefined.
@@ -204,6 +219,15 @@ function run(pluginDir) {
     ctorBody = pluginsDecl + '\n' + ctorBody;
   }
   if (optionalPlugins.length > 0) {
+    // Check if any optional plugin names are actually accessed in the setup body.
+    // If so, the generated code would reference them but they won't be in the deps object.
+    const accessedOptionalInBody = optionalPlugins.filter((id) =>
+      new RegExp(`\\b${escapeRegex(id)}\\b`).test(ctorBody)
+    );
+    if (accessedOptionalInBody.length > 0) {
+      console.error(`  ✗ Cannot auto-migrate: optional plugins [${accessedOptionalInBody.join(', ')}] are accessed in setup body. Migrate manually.`);
+      process.exit(1);
+    }
     console.log(
       `  ⚠  optionalPlugins [${optionalPlugins.join(', ')}] are not auto-migrated. Add them manually.`
     );
@@ -395,6 +419,9 @@ ${indentedCtorBody}${indentedStop}${startTodo}
             }
           }
           for (const [src, srcNames] of Object.entries(bySource)) {
+            // Skip re-exports of types from './plugin' — those were contract types
+            // (return types of setup/start) which no longer exist after migration.
+            if (/^['"]\.\/plugin['"]$/.test(src)) continue;
             reexports.push(`export type { ${srcNames.join(', ')} } from ${src};`);
           }
           if (unresolved.length > 0) {
@@ -551,8 +578,33 @@ function isTriviallyEmpty(body) {
  * setup() returns a contract object; in native Cordis that role is filled by `static provide`.
  */
 function stripReturnStatements(body) {
-  // Remove lines that are purely `return ...;` at the end of the body.
-  return body.replace(/\n?\s*return\s+[^;]*;\s*$/s, '').trimEnd();
+  // Find all `return { X, Y, Z }` or `return { a: X, b: Y }` at end of body.
+  // Track which simple identifiers appear only in the return (and nowhere else).
+  const returnMatch = body.match(/\breturn\s+(\{[^}]*\})\s*;?\s*$/s);
+  let stripped = body.replace(/\n?\s*return\s+[^;]*;\s*$/s, '').trimEnd();
+
+  if (returnMatch) {
+    // Extract identifiers from the return object: both `{ X }` and `{ key: X }` forms.
+    const returnObj = returnMatch[1];
+    const identifiers = [...returnObj.matchAll(/\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g)]
+      .map(([, id]) => id)
+      .filter((id) => id !== 'undefined' && id !== 'null' && id !== 'true' && id !== 'false');
+
+    for (const id of new Set(identifiers)) {
+      // Remove `const id = ` prefix, leaving just `expr;` — the call may have side effects.
+      // Then check if `id` is now used elsewhere in the body (i.e., still has references).
+      const withoutDecl = stripped.replace(
+        new RegExp(`\\bconst\\s+${escapeRegex(id)}\\s*=\\s*`, 'g'),
+        ''
+      );
+      // If `id` no longer appears after removing its declaration, it was only used in the return.
+      if (!new RegExp(`\\b${escapeRegex(id)}\\b`).test(withoutDecl)) {
+        stripped = withoutDecl;
+      }
+    }
+  }
+
+  return stripped;
 }
 
 function escapeRegex(s) {

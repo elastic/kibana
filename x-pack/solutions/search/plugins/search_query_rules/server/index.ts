@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
+export { default as cordisPlugin } from './plugin';
 export { config } from './config';
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { SearchQueryRulesPlugin } = await import('./plugin');
-  return new SearchQueryRulesPlugin(initializerContext);
-}
-
 export type { SearchQueryRulesPluginSetup, SearchQueryRulesPluginStart } from './types';

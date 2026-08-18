@@ -7,85 +7,78 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import type {
-  FeaturesPluginSetup,
-  // PluginStartContract as FeaturesPluginStart,
-} from '@kbn/features-plugin/server';
 import { FEATURE_PRIVILEGES_PLUGIN_ID } from '../common';
 
-export interface FeatureControlExampleDeps {
-  features: FeaturesPluginSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class FeatureControlsPluginExample extends Service {
+  static readonly inject = ['core.http', 'features.setup'];
+  static readonly provide = 'featureControlsExamples';
 
-export class FeatureControlsPluginExample
-  implements Plugin<void, void, any, FeatureControlExampleDeps>
-{
-  public setup(core: CoreSetup, { features }: FeatureControlExampleDeps) {
+  constructor(ctx: Context) {
+    super(ctx, 'featureControlsExamples');
+    const features = (ctx.get('features.setup') as any).contract;
     features.registerKibanaFeature({
-      id: FEATURE_PRIVILEGES_PLUGIN_ID,
-      name: 'Feature Plugin Examples',
-      category: DEFAULT_APP_CATEGORIES.management,
-      app: ['FeaturePluginExample'],
-      privileges: {
-        all: {
+          id: FEATURE_PRIVILEGES_PLUGIN_ID,
+          name: 'Feature Plugin Examples',
+          category: DEFAULT_APP_CATEGORIES.management,
           app: ['FeaturePluginExample'],
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          api: ['my_closed_example_api'],
-          ui: ['view', 'create', 'edit', 'delete', 'assign'],
-        },
-        read: {
-          app: ['FeaturePluginExample'],
-          savedObject: {
-            all: [],
-            read: ['tag'],
-          },
-          api: [],
-          ui: ['view'],
-        },
-      },
-    });
-
-    const router = core.http.createRouter();
-    router.get(
-      {
-        path: '/internal/my_plugin/read',
-        validate: false,
-        security: { authz: { requiredPrivileges: ['my_closed_example_api'] } },
-      },
-      async (context, request, response) => {
-        return response.ok({
-          body: {
-            time: new Date().toISOString(),
+          privileges: {
+            all: {
+              app: ['FeaturePluginExample'],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              api: ['my_closed_example_api'],
+              ui: ['view', 'create', 'edit', 'delete', 'assign'],
+            },
+            read: {
+              app: ['FeaturePluginExample'],
+              savedObject: {
+                all: [],
+                read: ['tag'],
+              },
+              api: [],
+              ui: ['view'],
+            },
           },
         });
-      }
-    );
-    router.get(
-      {
-        path: '/internal/my_plugin/sensitive_action',
-        validate: false,
-        security: {
-          authz: {
-            requiredPrivileges: ['my_closed_example_api'],
-          },
-        },
-      },
-      async (context, request, response) => {
-        return response.ok({
-          body: {
-            time: new Date().toISOString(),
-          },
-        });
-      }
-    );
-  }
 
-  start() {
-    return {};
+        const router = (ctx.get('core.http') as any).createRouter();
+        router.get(
+          {
+            path: '/internal/my_plugin/read',
+            validate: false,
+            security: { authz: { requiredPrivileges: ['my_closed_example_api'] } },
+          },
+          async (context: unknown, request: unknown, response: any) => {
+            return response.ok({
+              body: {
+                time: new Date().toISOString(),
+              },
+            });
+          }
+        );
+        router.get(
+          {
+            path: '/internal/my_plugin/sensitive_action',
+            validate: false,
+            security: {
+              authz: {
+                requiredPrivileges: ['my_closed_example_api'],
+              },
+            },
+          },
+          async (context: unknown, request: unknown, response: any) => {
+            return response.ok({
+              body: {
+                time: new Date().toISOString(),
+              },
+            });
+          }
+        );
   }
 }

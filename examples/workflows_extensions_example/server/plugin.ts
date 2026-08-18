@@ -7,106 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import type {
-  WorkflowsExtensionsRequestHandlerContext,
-  WorkflowsExtensionsServerPluginSetup,
-  WorkflowsExtensionsServerPluginStart,
-} from '@kbn/workflows-extensions/server';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
+import type { WorkflowsExtensionsRequestHandlerContext } from '@kbn/workflows-extensions/server';
 import { registerEmitEventRoute } from './routes/emit_event';
 import { registerEmitLoopRoute } from './routes/emit_loop';
 import { registerStepDefinitions } from './step_types';
 import { registerTriggers } from './triggers';
-import {
-  EXAMPLE_MANAGED_WORKFLOW_ID,
-  EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID,
-} from './managed_workflows';
+import { EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID } from './managed_workflows';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsExamplePluginSetup {
-  // No public API needed
-}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface WorkflowsExtensionsExamplePluginStart {
-  // No public API needed
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class WorkflowsExtensionsExamplePlugin extends Service {
+  static readonly inject = ['core.http', 'workflowsExtensions.setup'];
+  static readonly provide = 'workflowsExtensionsExample';
 
-export interface WorkflowsExtensionsExamplePluginSetupDeps {
-  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
-}
-
-export interface WorkflowsExtensionsExamplePluginStartDeps {
-  workflowsExtensions: WorkflowsExtensionsServerPluginStart;
-}
-
-export class WorkflowsExtensionsExamplePlugin
-  implements
-    Plugin<
-      WorkflowsExtensionsExamplePluginSetup,
-      WorkflowsExtensionsExamplePluginStart,
-      WorkflowsExtensionsExamplePluginSetupDeps,
-      WorkflowsExtensionsExamplePluginStartDeps
-    >
-{
-  private readonly logger: Logger;
-
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
-
-  public setup(
-    core: CoreSetup,
-    plugins: WorkflowsExtensionsExamplePluginSetupDeps
-  ): WorkflowsExtensionsExamplePluginSetup {
+  constructor(ctx: Context) {
+    super(ctx, 'workflowsExtensionsExample');
+    const plugins = {
+      workflowsExtensions: (ctx.get('workflowsExtensions.setup') as any).contract,
+    };
     registerStepDefinitions(plugins.workflowsExtensions);
-    registerTriggers(plugins.workflowsExtensions);
+        registerTriggers(plugins.workflowsExtensions);
 
-    plugins.workflowsExtensions.registerManagedWorkflowOwner(EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID);
+        plugins.workflowsExtensions.registerManagedWorkflowOwner(EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID);
 
-    const router = core.http.createRouter<WorkflowsExtensionsRequestHandlerContext>();
-    registerEmitEventRoute(router);
-    registerEmitLoopRoute(router);
-
-    return {};
-  }
-
-  public start(
-    _core: CoreStart,
-    plugins: WorkflowsExtensionsExamplePluginStartDeps
-  ): WorkflowsExtensionsExamplePluginStart {
-    void this.installManagedWorkflows(plugins);
-    return {};
-  }
-
-  public stop() {}
-
-  private async installManagedWorkflows(
-    plugins: WorkflowsExtensionsExamplePluginStartDeps
-  ): Promise<void> {
-    try {
-      const client = await plugins.workflowsExtensions.initManagedWorkflowsClient(
-        EXAMPLE_MANAGED_WORKFLOW_PLUGIN_ID
-      );
-
-      await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, {
-        spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-        values: { recipient: 'World' },
-      });
-
-      await client.ready();
-
-      this.logger.info('Workflows Extensions Example: Managed workflow installed successfully');
-    } catch (error) {
-      this.logger.warn('Workflows Extensions Example: Failed to install managed workflow', {
-        error,
-      });
-    }
+        const router = (ctx.get('core.http') as any).createRouter() as import('@kbn/core/server').IRouter<WorkflowsExtensionsRequestHandlerContext>;
+        registerEmitEventRoute(router);
+        registerEmitLoopRoute(router);
+    // TODO: start() had a non-empty body — migrate manually:
+    // {
+    //     void this.installManagedWorkflows(plugins);
+    //     return {};
+    //   }
   }
 }

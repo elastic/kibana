@@ -5,72 +5,53 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import type {
-  SearchQueryRulesPluginSetup,
-  SearchQueryRulesPluginSetupDependencies,
-  SearchQueryRulesPluginStart,
-} from './types';
-
 import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_TITLE } from '../common';
 
-export class SearchQueryRulesPlugin
-  implements Plugin<SearchQueryRulesPluginSetup, SearchQueryRulesPluginStart, {}, {}>
-{
-  private readonly logger: Logger;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class SearchQueryRulesPlugin extends Service {
+  static readonly inject = ['core.logger', 'core.http', 'features.setup'];
+  static readonly provide = 'searchQueryRules';
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
-  }
+  constructor(ctx: Context) {
+    super(ctx, 'searchQueryRules');
+    const plugins = {
+      features: (ctx.get('features.setup') as any).contract,
+    };
+    const router = (ctx.get('core.http') as any).createRouter();
 
-  public setup(core: CoreSetup, plugins: SearchQueryRulesPluginSetupDependencies) {
-    const router = core.http.createRouter();
+        defineRoutes({ router, logger: (ctx.get('core.logger') as any).get('plugins', 'searchQueryRules') });
 
-    defineRoutes({ router, logger: this.logger });
-
-    plugins.features.registerKibanaFeature({
-      id: PLUGIN_ID,
-      name: PLUGIN_TITLE,
-      order: 0,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      app: ['kibana', PLUGIN_ID],
-      catalogue: [PLUGIN_ID],
-      privileges: {
-        all: {
+        plugins.features.registerKibanaFeature({
+          id: PLUGIN_ID,
+          name: PLUGIN_TITLE,
+          order: 0,
+          category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
           app: ['kibana', PLUGIN_ID],
-          api: ['manage_search_query_rules'],
           catalogue: [PLUGIN_ID],
-          savedObject: {
-            all: [],
-            read: [],
+          privileges: {
+            all: {
+              app: ['kibana', PLUGIN_ID],
+              api: ['manage_search_query_rules'],
+              catalogue: [PLUGIN_ID],
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: ['manage'],
+            },
+            read: {
+              disabled: true,
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              ui: [],
+            },
           },
-          ui: ['manage'],
-        },
-        read: {
-          disabled: true,
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          ui: [],
-        },
-      },
-    });
-
-    return {};
+        });
   }
-
-  public start(_: CoreStart) {
-    return {};
-  }
-
-  public stop() {}
 }

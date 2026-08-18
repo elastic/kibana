@@ -5,48 +5,36 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/server';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { registerRoutes } from './routes';
 
-interface SetupDeps {
-  licensing: LicensingPluginSetup;
-  features: FeaturesPluginSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class LogstashPlugin extends Service {
+  static readonly inject = ['core.logger', 'core.http', 'features.setup'];
+  static readonly provide = 'logstash';
 
-export class LogstashPlugin implements Plugin {
-  private readonly logger: Logger;
+  constructor(ctx: Context) {
+    super(ctx, 'logstash');
+    const deps = {
+      features: (ctx.get('features.setup') as any).contract,
+    };
+    (ctx.get('core.logger') as any).get('plugins', 'logstash').debug('Setting up Logstash plugin');
 
-  constructor(context: PluginInitializerContext) {
-    this.logger = context.logger.get();
+        registerRoutes((ctx.get('core.http') as any).createRouter());
+
+        deps.features.registerElasticsearchFeature({
+          id: 'pipelines',
+          management: {
+            ingest: ['pipelines'],
+          },
+          privileges: [
+            {
+              requiredClusterPrivileges: ['manage_logstash_pipelines'],
+              requiredIndexPrivileges: {},
+              ui: [],
+            },
+          ],
+        });
   }
-
-  setup(core: CoreSetup, deps: SetupDeps) {
-    this.logger.debug('Setting up Logstash plugin');
-
-    registerRoutes(core.http.createRouter());
-
-    deps.features.registerElasticsearchFeature({
-      id: 'pipelines',
-      management: {
-        ingest: ['pipelines'],
-      },
-      privileges: [
-        {
-          requiredClusterPrivileges: ['manage_logstash_pipelines'],
-          requiredIndexPrivileges: {},
-          ui: [],
-        },
-      ],
-    });
-  }
-
-  start(core: CoreStart) {}
 }

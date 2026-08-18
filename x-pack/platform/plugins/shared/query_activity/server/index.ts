@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { QueryActivityPlugin } = await import('./plugin');
-  return new QueryActivityPlugin(initializerContext);
-}
-
+export { default as cordisPlugin } from './plugin';
 export type { QueryActivityServerSetup, QueryActivityServerStart } from './types';

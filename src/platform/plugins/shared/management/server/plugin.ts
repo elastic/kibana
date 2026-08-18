@@ -7,52 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
-import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import type { ManagementAppLocatorParams } from '../common/locator';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { ManagementAppLocatorDefinition } from '../common/locator';
 import { capabilitiesProvider } from './capabilities_provider';
 
-interface ManagementSetupDependencies {
-  share: SharePluginSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ManagementServerPlugin extends Service {
+  static readonly inject = ['core.logger', 'core.capabilities', 'share.setup'];
+  static readonly provide = 'management';
 
-export interface ManagementSetup {
-  locator: LocatorPublic<ManagementAppLocatorParams>;
-}
+  constructor(ctx: Context) {
+    super(ctx, 'management');
+    const share = (ctx.get('share.setup') as any).contract;
+    (ctx.get('core.logger') as any).get('plugins', 'management').debug('management: Setup');
 
-export class ManagementServerPlugin
-  implements Plugin<ManagementSetup, object, ManagementSetupDependencies>
-{
-  private readonly logger: Logger;
+        share.url.locators.create(new ManagementAppLocatorDefinition());
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+        (ctx.get('core.capabilities') as any).registerProvider(capabilitiesProvider);
+    // TODO: start() had a non-empty body — migrate manually:
+    // {
+    //     this.logger.debug('management: Started');
+    //     return {};
+    //   }
   }
-
-  public setup(core: CoreSetup, { share }: ManagementSetupDependencies) {
-    this.logger.debug('management: Setup');
-
-    const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
-
-    core.capabilities.registerProvider(capabilitiesProvider);
-
-    return {
-      locator,
-    };
-  }
-
-  public start(core: CoreStart) {
-    this.logger.debug('management: Started');
-    return {};
-  }
-
-  public stop() {}
 }
