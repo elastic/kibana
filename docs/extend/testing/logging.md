@@ -66,36 +66,9 @@ This only applies to servers Scout manages directly (local runs). It doesn't app
 ## Inspecting serverless project logs in MKI [scout-logging-mki]
 
 ::::{note}
-This section is for Elasticians only, and applies when your Scout tests run against a serverless project in MKI rather than a local stack.
+Elasticians only: for how to inspect Kibana, Elasticsearch, and UIAM logs for a serverless project in MKI via the Overview cluster, see the internal [Troubleshoot Cloud test failures](https://codex.elastic.dev/r/kibana-team/testing/elastic-cloud-testing/troubleshoot-cloud-test-failures) guide.
 ::::
-
-When a Scout test runs against a serverless project in MKI, the project's own server-side logs aren't printed to your local console and Scout doesn't manage the servers directly — they're shipped to Elastic's internal **Overview cluster**.
-
-**Access**: the Overview cluster is a separate organization from your personal QA cloud account, so you likely won't see the relevant data by default. Request readonly access to it (for example, via an internal access-request tool) before you can query it.
-
-**Where to look**: in the Overview cluster's Kibana, open **Discover** and select the `discover-observability-solution-all-logs` data view (broader than the default data view — it's backed by a remote logging cluster via cross-cluster search). Filter to your test project with:
-
-```
-serverless.project.id : "<your-project-id>"
-```
-
-You can cross-check with the equivalent Kubernetes-level fields on the same documents if needed:
-
-```
-kubernetes.labels.k8s_elastic_co/project-id : "<your-project-id>"
-kubernetes.namespace : "project-<your-project-id>"
-```
-
-Retention on this data view is roughly on the order of weeks for Kibana/Elasticsearch logs and longer for UIAM logs, but treat this as approximate — it's governed by ILM policies that can change, so check the actual index list if you need a precise cutoff.
-
-### Which log types to expect [scout-logging-mki-types]
-
-- **Kibana logs** — server-side logs from the Kibana instance backing the serverless project. Filterable by `serverless.project.id`. Useful fields: `log.level`, `log.logger`, `message`.
-- **Elasticsearch logs** — server-side logs from the project's Elasticsearch cluster, same pipeline/schema as Kibana logs and filterable by `serverless.project.id`.
-- **UIAM logs** — logs from the Unified Identity and Access Management service, useful when investigating auth-related test failures in serverless (where UIAM handles API keys and identity, unlike the local environment). UIAM is a shared regional service, so these logs are **not** tagged with `serverless.project.id` — correlate them to your project via a known user identity or token visible in the log `message` instead.
 
 ## Browser logs [scout-logging-browser]
 
 Scout's UI test fixtures capture browser console errors during a test run and attach them to the failure report and test artifacts when a test fails. You can find them in the Scout HTML report, alongside the rest of the test's artifacts — there's no separate console output to watch for these locally.
-
-The Overview cluster's `discover-observability-solution-all-logs` data view (see above) does not currently include raw browser/RUM application logs for MKI runs — only synthetic monitor results, which are a different thing.
