@@ -61,7 +61,9 @@ exports[`TelemetryManagementSectionComponent renders as expected 1`] = `
                 "description": <React.Fragment>
                   <p>
                     <Memo(MemoizedFormattedMessage)
-                      defaultMessage="Enabling usage collection allows us to learn what our users are most interested in, so we can improve our products and services. Refer to our {privacyStatementLink}."
+                      defaultMessage="Enabling usage collection allows us to learn
+            what our users are most interested in, so we can improve our products and services.
+            Refer to our {privacyStatementLink}."
                       id="telemetry.telemetryConfigAndLinkDescription"
                       values={
                         Object {

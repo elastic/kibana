@@ -30,7 +30,8 @@ exports[`StartTrial component when trial is allowed display for basic license 1`
           >
             <p>
               <span>
-                Experience what machine learning, advanced security, and all our other 
+                Experience what machine learning, advanced security,
+          and all our other 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co/subscriptions"
@@ -105,7 +106,8 @@ exports[`StartTrial component when trial is allowed should display for expired e
           >
             <p>
               <span>
-                Experience what machine learning, advanced security, and all our other 
+                Experience what machine learning, advanced security,
+          and all our other 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co/subscriptions"
@@ -180,7 +182,8 @@ exports[`StartTrial component when trial is allowed should display for expired p
           >
             <p>
               <span>
-                Experience what machine learning, advanced security, and all our other 
+                Experience what machine learning, advanced security,
+          and all our other 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co/subscriptions"
@@ -255,7 +258,8 @@ exports[`StartTrial component when trial is allowed should display for gold lice
           >
             <p>
               <span>
-                Experience what machine learning, advanced security, and all our other 
+                Experience what machine learning, advanced security,
+          and all our other 
                 <a
                   class="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co/subscriptions"

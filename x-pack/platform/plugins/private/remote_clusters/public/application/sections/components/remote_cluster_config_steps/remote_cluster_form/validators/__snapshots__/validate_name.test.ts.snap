@@ -30,7 +30,8 @@ exports[`validateName rejects invalid characters ' ' 1`] = `
 
 exports[`validateName rejects invalid characters '!' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -45,7 +46,8 @@ exports[`validateName rejects invalid characters '!' 1`] = `
 
 exports[`validateName rejects invalid characters '#' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -60,7 +62,8 @@ exports[`validateName rejects invalid characters '#' 1`] = `
 
 exports[`validateName rejects invalid characters '$' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -75,7 +78,8 @@ exports[`validateName rejects invalid characters '$' 1`] = `
 
 exports[`validateName rejects invalid characters '%' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -90,7 +94,8 @@ exports[`validateName rejects invalid characters '%' 1`] = `
 
 exports[`validateName rejects invalid characters '&' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -105,7 +110,8 @@ exports[`validateName rejects invalid characters '&' 1`] = `
 
 exports[`validateName rejects invalid characters '(' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -120,7 +126,8 @@ exports[`validateName rejects invalid characters '(' 1`] = `
 
 exports[`validateName rejects invalid characters ')' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -135,7 +142,8 @@ exports[`validateName rejects invalid characters ')' 1`] = `
 
 exports[`validateName rejects invalid characters '*' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -150,7 +158,8 @@ exports[`validateName rejects invalid characters '*' 1`] = `
 
 exports[`validateName rejects invalid characters '+' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -165,7 +174,8 @@ exports[`validateName rejects invalid characters '+' 1`] = `
 
 exports[`validateName rejects invalid characters ',' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -180,7 +190,8 @@ exports[`validateName rejects invalid characters ',' 1`] = `
 
 exports[`validateName rejects invalid characters '.' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -195,7 +206,8 @@ exports[`validateName rejects invalid characters '.' 1`] = `
 
 exports[`validateName rejects invalid characters '<' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -210,7 +222,8 @@ exports[`validateName rejects invalid characters '<' 1`] = `
 
 exports[`validateName rejects invalid characters '>' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -225,7 +238,8 @@ exports[`validateName rejects invalid characters '>' 1`] = `
 
 exports[`validateName rejects invalid characters '?' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -240,7 +254,8 @@ exports[`validateName rejects invalid characters '?' 1`] = `
 
 exports[`validateName rejects invalid characters '@' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
@@ -255,7 +270,8 @@ exports[`validateName rejects invalid characters '@' 1`] = `
 
 exports[`validateName rejects invalid characters '^' 1`] = `
 <Memo(MemoizedFormattedMessage)
-  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
   id="xpack.remoteClusters.form.errors.illegalCharacters"
   values={
     Object {
