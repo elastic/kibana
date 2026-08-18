@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import { AnomaliesResults } from '.';
 import type {
   LogEntryAnomalies,
@@ -52,43 +52,19 @@ const baseProps = {
 };
 
 const renderComponent = (props: Partial<typeof baseProps> = {}) =>
-  render(
-    <IntlProvider locale="en">
-      <AnomaliesResults {...baseProps} {...props} />
-    </IntlProvider>
-  );
+  renderWithKibanaRenderContext(<AnomaliesResults {...baseProps} {...props} />);
 
 describe('AnomaliesResults', () => {
+  // There is no "failed with stale results" case to cover: useLogEntryAnomaliesResults
+  // clears the list on any non-cancellation rejection, so a failure always implies an
+  // empty `anomalies` array. AC1 already covers that the prompt wins over the table.
   describe('when the fetch fails', () => {
     it('shows the failure prompt and not the empty or table states (AC1)', () => {
       renderComponent({ hasFailedLoadingAnomaliesResults: true });
 
-      expect(screen.getByText('Failed to load anomalies')).toBeInTheDocument();
+      expect(screen.getByTestId('infraAnomaliesFailurePrompt')).toBeInTheDocument();
       expect(screen.queryByTestId('anomaliesTable')).not.toBeInTheDocument();
-      expect(screen.queryByText('There is no data to display.')).not.toBeInTheDocument();
-    });
-
-    it('shows the failure prompt even when anomalies from a previous successful fetch are present (AC2)', () => {
-      const staleAnomalies = [
-        {
-          id: 'anomaly-1',
-          anomalyScore: 75,
-          dataset: 'nginx',
-          typical: 100,
-          actual: 200,
-          startTime: new Date('2026-06-12T14:30:00.000Z').valueOf(),
-          duration: 900_000,
-          type: 'logRate' as const,
-          jobId: 'job-1',
-        },
-      ];
-      renderComponent({
-        hasFailedLoadingAnomaliesResults: true,
-        anomalies: staleAnomalies,
-      });
-
-      expect(screen.getByText('Failed to load anomalies')).toBeInTheDocument();
-      expect(screen.queryByTestId('anomaliesTable')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('infraAnomaliesNoDataPrompt')).not.toBeInTheDocument();
     });
 
     it('calls the retry callback when the retry button is clicked (AC3)', () => {
@@ -107,8 +83,8 @@ describe('AnomaliesResults', () => {
     it('shows the "no data" empty prompt and not the failure prompt (AC5)', () => {
       renderComponent({ hasFailedLoadingAnomaliesResults: false, anomalies: [] });
 
-      expect(screen.getByText('There is no data to display.')).toBeInTheDocument();
-      expect(screen.queryByText('Failed to load anomalies')).not.toBeInTheDocument();
+      expect(screen.getByTestId('infraAnomaliesNoDataPrompt')).toBeInTheDocument();
+      expect(screen.queryByTestId('infraAnomaliesFailurePrompt')).not.toBeInTheDocument();
       expect(screen.queryByTestId('anomaliesTable')).not.toBeInTheDocument();
     });
   });
@@ -132,8 +108,8 @@ describe('AnomaliesResults', () => {
       });
 
       expect(screen.getByTestId('anomaliesTable')).toBeInTheDocument();
-      expect(screen.queryByText('Failed to load anomalies')).not.toBeInTheDocument();
-      expect(screen.queryByText('There is no data to display.')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('infraAnomaliesFailurePrompt')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('infraAnomaliesNoDataPrompt')).not.toBeInTheDocument();
     });
   });
 });

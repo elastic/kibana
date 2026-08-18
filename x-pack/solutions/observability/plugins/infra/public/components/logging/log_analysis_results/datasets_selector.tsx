@@ -9,6 +9,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiLink } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 
 import { getFriendlyNameForPartitionId } from '../../../../common/log_analysis';
@@ -56,19 +57,28 @@ export const DatasetsSelector: React.FunctionComponent<{
         isInvalid
         error={
           onRetry ? (
-            <EuiLink
-              color="danger"
-              onClick={onRetry}
-              data-test-subj="infraDatasetsSelectorRetryLink"
-              {...getEbtProps({
-                action: INFRA_EBT_ACTIONS.RETRY_LOAD,
-                element: INFRA_EBT_ELEMENTS.LOG_ANALYSIS_DATASETS_SELECTOR,
-              })}
-            >
-              {i18n.translate('xpack.infra.logs.analysis.datasetFilterLoadingFailureRetry', {
-                defaultMessage: 'Failed to load datasets. Retry.',
-              })}
-            </EuiLink>
+            <FormattedMessage
+              id="xpack.infra.logs.analysis.datasetFilterLoadingFailureDetail"
+              defaultMessage="Failed to load datasets. {retryLink}"
+              values={{
+                retryLink: (
+                  <EuiLink
+                    color="danger"
+                    onClick={onRetry}
+                    data-test-subj="infraDatasetsSelectorRetryLink"
+                    {...getEbtProps({
+                      action: INFRA_EBT_ACTIONS.RETRY_LOAD,
+                      element: INFRA_EBT_ELEMENTS.LOG_ANALYSIS_DATASETS_SELECTOR,
+                    })}
+                  >
+                    {i18n.translate(
+                      'xpack.infra.logs.analysis.datasetFilterLoadingFailureRetryLinkLabel',
+                      { defaultMessage: 'Retry' }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
           ) : (
             i18n.translate('xpack.infra.logs.analysis.datasetFilterLoadingFailure', {
               defaultMessage: 'Failed to load datasets.',

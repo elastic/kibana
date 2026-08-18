@@ -88,6 +88,7 @@ export const AnomaliesResults: React.FunctionComponent<{
             loadingChildren={<LoadingOverlayContent />}
           >
             <EuiEmptyPrompt
+              data-test-subj="infraAnomaliesNoDataPrompt"
               title={
                 <h2>
                   {i18n.translate('xpack.infra.logs.analysis.anomalySectionNoDataTitle', {
@@ -128,6 +129,7 @@ const AnomaliesResultsFailurePrompt: React.FunctionComponent<{ onRetry: () => vo
   onRetry,
 }) => (
   <EuiEmptyPrompt
+    data-test-subj="infraAnomaliesFailurePrompt"
     color="danger"
     iconType="warning"
     title={
