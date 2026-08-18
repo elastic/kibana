@@ -9,7 +9,7 @@
 
 import { type Container, ContainerModule } from 'inversify';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import { CoreStart, CurrentUserAccessor } from '@kbn/core-di-browser';
+import { CoreStart, CurrentUser } from '@kbn/core-di-browser';
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { loadSecurity } from './security';
 
@@ -24,16 +24,20 @@ describe('loadSecurity', () => {
     container.bind(CoreStart('security')).toConstantValue(security);
   });
 
-  it('should not retrieve the current user when resolving the accessor', () => {
-    container.get(CurrentUserAccessor);
-
-    expect(security.authc.getCurrentUser).not.toHaveBeenCalled();
-  });
-
-  it('should resolve the current user accessor', async () => {
+  it('should resolve the current user', async () => {
     const user = securityServiceMock.createMockAuthenticatedUser();
     security.authc.getCurrentUser.mockResolvedValue(user);
 
-    await expect(container.get(CurrentUserAccessor)()).resolves.toBe(user);
+    await expect(container.getAsync(CurrentUser)).resolves.toBe(user);
+  });
+
+  it('should cache the current user in the scope', async () => {
+    const user = securityServiceMock.createMockAuthenticatedUser();
+    security.authc.getCurrentUser.mockResolvedValue(user);
+
+    await expect(container.getAsync(CurrentUser)).resolves.toBe(user);
+    await expect(container.getAsync(CurrentUser)).resolves.toBe(user);
+
+    expect(security.authc.getCurrentUser).toHaveBeenCalledTimes(1);
   });
 });

@@ -18,5 +18,5 @@ export { Capabilities } from './src/services/capabilities';
 export { DocTitle, RecentlyAccessed } from './src/services/chrome';
 export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
 export { Toasts } from './src/services/notifications';
-export { CurrentUserAccessor, type ICurrentUserAccessor } from './src/services/security';
+export { CurrentUser } from './src/services/security';
 export { GlobalUiSettingsClient, UiSettingsClient } from './src/services/settings';

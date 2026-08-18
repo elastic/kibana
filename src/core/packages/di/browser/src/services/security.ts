@@ -7,21 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreAuthenticationService } from '@kbn/core-security-browser';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import { createToken } from '@kbn/core-di';
 import type { ServiceToken } from '@kbn/core-di';
 
 /**
- * Retrieves the currently authenticated user and throws if the current user is not authenticated.
- * @see {@link CoreAuthenticationService.getCurrentUser}
+ * The currently authenticated user.
+ *
+ * This binding resolves asynchronously (via `CoreAuthenticationService.getCurrentUser`)
+ * and should be consumed with `container.getAsync` or within an asynchronous resolution chain.
  * @public
  */
-export type ICurrentUserAccessor = CoreAuthenticationService['getCurrentUser'];
-
-/**
- * The accessor retrieving the currently authenticated user.
- * @see {@link ICurrentUserAccessor}
- * @public
- */
-export const CurrentUserAccessor: ServiceToken<ICurrentUserAccessor> =
-  createToken('CurrentUserAccessor');
+export const CurrentUser: ServiceToken<AuthenticatedUser> = createToken('CurrentUser');

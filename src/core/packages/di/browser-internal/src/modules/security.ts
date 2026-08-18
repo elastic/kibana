@@ -8,15 +8,12 @@
  */
 
 import type { ContainerModuleLoadOptions } from 'inversify';
-import { CoreStart, CurrentUserAccessor } from '@kbn/core-di-browser';
+import { cacheInScope } from '@kbn/core-di-internal';
+import { CoreStart, CurrentUser } from '@kbn/core-di-browser';
 
 export function loadSecurity({ bind }: ContainerModuleLoadOptions): void {
-  bind(CurrentUserAccessor)
-    .toResolvedValue(
-      ({ authc }) =>
-        () =>
-          authc.getCurrentUser(),
-      [CoreStart('security')]
-    )
-    .inSingletonScope();
+  bind(CurrentUser)
+    .toResolvedValue(({ authc }) => authc.getCurrentUser(), [CoreStart('security')])
+    .inRequestScope()
+    .onActivation(cacheInScope(CurrentUser));
 }
