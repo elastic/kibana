@@ -272,6 +272,16 @@ const pluginModule = new ContainerModule(({ bind }) => {
             );
           }
         );
+        import(
+          /* webpackChunkName: "alerting_v2_episode_auto_attach" */
+          './agent_builder/episode_auto_attach'
+        ).then(({ registerEpisodeAutoAttach }) => {
+          registerEpisodeAutoAttach({
+            agentBuilder,
+            chrome: coreStart.chrome,
+            focusedEpisodeService: diContainer.get(FocusedEpisodeService),
+          });
+        });
       }
     });
   });
