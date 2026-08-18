@@ -50,6 +50,9 @@ const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
     reviewIntervalMinutes: 10,
     discoveryBatchSize: 3,
     maxReviewPasses: 3,
+    flakyRuleDetectionThreshold: 10,
+    flakyRuleProbeAfterMinutes: 360,
+    flakyRuleExemptSeverityScore: 80,
   },
 };
 

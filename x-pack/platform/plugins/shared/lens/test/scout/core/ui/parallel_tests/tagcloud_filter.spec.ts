@@ -30,7 +30,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: '@local-stateful-classic' }, 
         field: 'ip',
         keepOpen: true,
       });
-      await lens.setTermsNumberOfValues(5);
+      await lens.dimensions.setTermsNumberOfValues(5);
       await lens.closeDimensionEditor();
 
       await lens.configureDimension({
@@ -40,7 +40,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: '@local-stateful-classic' }, 
       });
       await lens.waitForVisualization('tagCloudVisualization');
       // Avoid picking up tags in the suggestion panel.
-      await lens.closeSuggestionPanel();
+      await lens.workspace.closeSuggestionPanel();
 
       const { violations: workspaceViolations } = await page.checkA11y({
         include: ['[data-test-subj="lnsApp"]'],
@@ -50,7 +50,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: '@local-stateful-classic' }, 
       let renderedTagToFilter = '';
 
       await spaceTest.step('render tag cloud', async () => {
-        const tagLabels = await lens.getTagCloudTexts();
+        const tagLabels = await lens.workspace.getTagCloudTexts();
         expect(tagLabels.length).toBeGreaterThan(3);
 
         const filterableTags = tagLabels.filter((tag) => tag !== 'Other');
@@ -62,7 +62,7 @@ spaceTest.describe('Lens tag cloud filter', { tag: '@local-stateful-classic' }, 
       });
 
       await spaceTest.step('add filter from clicking on tag', async () => {
-        await lens.selectTagCloudTag(renderedTagToFilter);
+        await lens.workspace.selectTagCloudTag(renderedTagToFilter);
         // Filter bar state is not a locator — poll until the click-to-filter lands.
         await expect
           .poll(async () => filterBar.hasFilter({ field: 'ip', value: renderedTagToFilter }))
@@ -73,11 +73,11 @@ spaceTest.describe('Lens tag cloud filter', { tag: '@local-stateful-classic' }, 
         await lens.waitForVisualization('tagCloudVisualization');
         await expect
           .poll(async () => {
-            const filteredTags = await lens.getTagCloudTexts();
+            const filteredTags = await lens.workspace.getTagCloudTexts();
             return filteredTags.length;
           })
           .toBeLessThan(2);
-        const filteredTags = await lens.getTagCloudTexts();
+        const filteredTags = await lens.workspace.getTagCloudTexts();
         expect(filteredTags.every((tag) => tag === renderedTagToFilter)).toBe(true);
       });
     }

@@ -83,7 +83,7 @@ export interface QuerySandboxFlyoutProps {
    */
   helpText?: React.ReactNode;
   /**
-   * Optional actions rendered right-aligned in the ES|QL query header row — passed through
+   * Optional actions rendered at the end of the in-editor toolbar — passed through
    * to `QuerySandbox`. Use for header-level controls such as Split / Merge buttons.
    */
   headerActions?: React.ReactNode;

@@ -8,17 +8,39 @@
  */
 
 import React, { useRef } from 'react';
+import type { ProjectRouting } from '@kbn/es-query';
 import { ProjectPickerFrame, ProjectPickerList } from './blocks';
 import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from './state';
+import { ProjectPickerRoutingObserver } from './project_picker_routing_observer';
+
+export interface ProjectPickerProps
+  extends Omit<ProjectPickerStateProviderProps, 'children' | 'initialProjectRouting'> {
+  onProjectRoutingChange?: (projectRouting: ProjectRouting) => void;
+  projectRouting?: ProjectRouting;
+}
 
 export function ProjectPicker({
   availableProjects,
+  defaultProjectRouting,
   isReadOnly,
-}: Omit<ProjectPickerStateProviderProps, 'children'>) {
+  onProjectRoutingChange,
+  originProjectId,
+  projectRouting,
+}: ProjectPickerProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <ProjectPickerStateProvider availableProjects={availableProjects} isReadOnly={isReadOnly}>
+    <ProjectPickerStateProvider
+      availableProjects={availableProjects}
+      defaultProjectRouting={defaultProjectRouting}
+      initialProjectRouting={projectRouting}
+      isReadOnly={isReadOnly}
+      originProjectId={originProjectId}
+    >
+      <ProjectPickerRoutingObserver
+        onProjectRoutingChange={onProjectRoutingChange}
+        projectRouting={projectRouting}
+      />
       <ProjectPickerFrame maxBodyHeight={500} scrollContainerRef={scrollContainerRef}>
         <ProjectPickerList scrollContainerRef={scrollContainerRef} />
       </ProjectPickerFrame>
