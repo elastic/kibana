@@ -25,11 +25,9 @@ export const config: PluginConfigDescriptor<PluginConfig> = {
   exposeToBrowser: {
     rules: { minimumScheduleInterval: true },
   },
-  // `esql.responseFormat` is only read when a `QueryService` is instantiated
-  // (see `bind_services.ts`), so it can be flipped at runtime via the
-  // `PUT /internal/core/_settings` API instead of requiring a dedicated boot.
-  // Tests toggle it to exercise the Arrow response path; the new value is
-  // re-validated against `configSchema`, so only 'json' | 'arrow' can ever land.
+  // Exposed as dynamic config solely for testing: it lets Scout tests
+  // flip the ES|QL response format at runtime via the `PUT /internal/core/_settings`
+  // API to exercise the Arrow path, instead of booting a dedicated Kibana instance.
   dynamicConfig: {
     esql: { responseFormat: true },
   },
