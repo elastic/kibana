@@ -7,15 +7,12 @@
 
 import React from 'react';
 import { act, renderHook } from '@testing-library/react';
-import type { DataTableRecord } from '@kbn/discover-utils';
 import { useFlyoutPagination } from './use_flyout_pagination';
 import { PaginationStoreProvider } from './context';
 import { createPaginationStore } from './store';
 
-const sampleDocument = {
-  id: 'index-1::alert-1',
-  raw: { _id: 'alert-1', _index: 'index-1' },
-} as unknown as DataTableRecord;
+const sampleDocumentId = 'alert-1';
+const sampleDocumentIndexName = 'index-1';
 
 describe('useFlyoutPagination', () => {
   describe('without a PaginationStoreProvider', () => {
@@ -26,7 +23,8 @@ describe('useFlyoutPagination', () => {
       expect(result.current.pageSize).toBe(0);
       expect(result.current.totalDocumentCount).toBe(0);
       expect(result.current.isFlyoutDocumentLoading).toBe(false);
-      expect(result.current.flyoutDocument).toBeNull();
+      expect(result.current.flyoutDocumentId).toBeNull();
+      expect(result.current.flyoutDocumentIndexName).toBeNull();
     });
 
     it('does not throw when openDocumentFlyout is called with no provider', () => {
@@ -50,14 +48,16 @@ describe('useFlyoutPagination', () => {
           flyoutDocumentIndex: 42,
           totalDocumentCount: 500,
           pageSize: 50,
-          flyoutDocument: sampleDocument,
+          flyoutDocumentId: sampleDocumentId,
+          flyoutDocumentIndexName: sampleDocumentIndexName,
         });
       });
 
       expect(result.current.flyoutDocumentIndex).toBe(42);
       expect(result.current.totalDocumentCount).toBe(500);
       expect(result.current.pageSize).toBe(50);
-      expect(result.current.flyoutDocument).toBe(sampleDocument);
+      expect(result.current.flyoutDocumentId).toBe(sampleDocumentId);
+      expect(result.current.flyoutDocumentIndexName).toBe(sampleDocumentIndexName);
     });
 
     it('forwards openDocumentFlyout to the registered openDocumentFlyoutImpl', () => {
@@ -121,13 +121,13 @@ describe('useFlyoutPagination', () => {
       const { result: hookB } = renderHook(() => useFlyoutPagination(), { wrapper });
 
       act(() => {
-        store.setState({ flyoutDocumentIndex: 42, flyoutDocument: sampleDocument });
+        store.setState({ flyoutDocumentIndex: 42, flyoutDocumentId: sampleDocumentId });
       });
 
       expect(hookA.current.flyoutDocumentIndex).toBe(42);
-      expect(hookA.current.flyoutDocument).toBe(sampleDocument);
+      expect(hookA.current.flyoutDocumentId).toBe(sampleDocumentId);
       expect(hookB.current.flyoutDocumentIndex).toBe(42);
-      expect(hookB.current.flyoutDocument).toBe(sampleDocument);
+      expect(hookB.current.flyoutDocumentId).toBe(sampleDocumentId);
     });
   });
 });

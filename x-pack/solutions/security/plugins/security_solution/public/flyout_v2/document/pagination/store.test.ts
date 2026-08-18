@@ -20,7 +20,7 @@ describe('createPaginationStore', () => {
     expect(store.getSnapshot().flyoutDocumentIndex).toBe(3);
     expect(store.getSnapshot().totalDocumentCount).toBe(20);
     // Other fields survive
-    expect(store.getSnapshot().flyoutDocument).toBeNull();
+    expect(store.getSnapshot().flyoutDocumentId).toBeNull();
   });
 
   it('notifies subscribers on setState', () => {
