@@ -18,9 +18,7 @@ project:
   sourceRoot: src/core/packages/di/browser
 dependsOn:
   - '@kbn/core-application-browser'
-  - '@kbn/core-chrome-browser'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/core-notifications-browser'
   - '@kbn/core-plugins-browser'
   - '@kbn/core-security-common'
   - '@kbn/core-ui-settings-browser'

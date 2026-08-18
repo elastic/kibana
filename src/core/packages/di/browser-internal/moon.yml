@@ -19,15 +19,12 @@ project:
 dependsOn:
   - '@kbn/std'
   - '@kbn/core-application-browser'
-  - '@kbn/core-application-browser-mocks'
-  - '@kbn/core-chrome-browser-mocks'
   - '@kbn/core-security-browser-mocks'
   - '@kbn/core-di'
   - '@kbn/core-di-browser'
   - '@kbn/core-di-internal'
   - '@kbn/core-di-mocks'
   - '@kbn/core-lifecycle-browser'
-  - '@kbn/core-notifications-browser-mocks'
   - '@kbn/core-ui-settings-browser-mocks'
 tags:
   - shared-browser

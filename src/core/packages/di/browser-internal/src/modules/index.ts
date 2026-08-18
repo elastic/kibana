@@ -9,17 +9,11 @@
 
 import { ContainerModule } from 'inversify';
 import { loadApplication } from './application';
-import { loadCapabilities } from './capabilities';
-import { loadChrome } from './chrome';
-import { loadNotifications } from './notifications';
 import { loadSecurity } from './security';
 import { loadSettings } from './settings';
 
 export const core = new ContainerModule((options) => {
   loadApplication(options);
-  loadCapabilities(options);
-  loadChrome(options);
-  loadNotifications(options);
   loadSecurity(options);
   loadSettings(options);
 });
