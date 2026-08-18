@@ -3316,6 +3316,10 @@ paths:
                 input:
                   description: The user input message to send to the agent.
                   type: string
+                project_routing:
+                  description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
+                  maxLength: 2048
+                  type: string
                 prompts:
                   additionalProperties:
                     anyOf:
@@ -3788,6 +3792,10 @@ paths:
                   type: string
                 input:
                   description: The user input message to send to the agent.
+                  type: string
+                project_routing:
+                  description: Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.
+                  maxLength: 2048
                   type: string
                 prompts:
                   additionalProperties:
@@ -96459,7 +96467,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Forces recovery when no data is present.
+            - description: Resolves the alert episode to inactive on the first no-data run.
               enum:
                 - recover
               type: string
@@ -96956,7 +96964,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Forces recovery when no data is present.
+            - description: Resolves the alert episode to inactive on the first no-data run.
               enum:
                 - recover
               type: string
@@ -97346,7 +97354,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Forces recovery when no data is present.
+            - description: Resolves the alert episode to inactive on the first no-data run.
               enum:
                 - recover
               type: string
