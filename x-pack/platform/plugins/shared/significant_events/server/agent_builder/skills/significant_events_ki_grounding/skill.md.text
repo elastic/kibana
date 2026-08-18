@@ -135,7 +135,7 @@ After:  FROM logs.* | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp 
 
 2. **Set `verdict` from the row content and result**:
    - `confirms` only for a found row that directly supports the rule's failure, degradation, exposure, or evidenced cascade.
-   - `refutes` for successful healthy, positive, or no-failure evidence under the applicable failure or recovery lens.
+   - `refutes` for successful healthy, positive, or no-failure found rows.
    - `off_topic` for a found row that does not address the authored rule hypothesis.
    - `inconclusive` for empty or errored evidence when a query ran. It cannot establish a mechanism, impact, or severity tier.
    - `not_checked` only when no backed query KI exists.

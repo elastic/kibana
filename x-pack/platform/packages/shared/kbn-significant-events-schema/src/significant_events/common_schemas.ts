@@ -206,11 +206,11 @@ const detectionSignalSchema = signalBaseSchema
         message: 'An off-topic verdict requires found query evidence.',
       });
     }
-    if (signal.verdict === 'refutes' && result !== 'found') {
+    if (signal.verdict === 'refutes' && result !== 'found' && result !== 'empty') {
       context.addIssue({
         code: 'custom',
         path: ['verdict'],
-        message: 'A refuting verdict requires found query evidence.',
+        message: 'A refuting verdict requires found or empty query evidence.',
       });
     }
     if (signal.verdict === 'inconclusive' && result !== 'empty' && result !== 'error') {

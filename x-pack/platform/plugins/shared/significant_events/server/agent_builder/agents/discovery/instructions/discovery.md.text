@@ -233,8 +233,8 @@ Example:
 ### Step 1: Ground and verify
 
 1. `load_skill` with `significant-events-ki-grounding` — `platform_sig_events_ki_search` and `platform_core_execute_esql` are not available until that skill is loaded.
-2. Complete the `significant-events-ki-grounding` protocol for the batch. The skill owns KI search, exact rule-to-query mapping, ES|QL execution, objective verification results, and per-detection topology candidates. **This is the only verification pass** — every `confirmed` decision and status gate must trace to these query results.
-3. Apply `<verification_lens>` to each KI grounding result. Stamp `confirmed` and write each signal `description` from this pass. Retain the lens outcome and any concrete off-topic error for routing and emission. An off-topic error does not confirm the authored rule, but it is a separate current failure candidate.
+2. Complete the `significant-events-ki-grounding` protocol for the batch. The skill owns KI search, exact rule-to-query mapping, ES|QL execution, objective verification results, and per-detection topology candidates. **This is the only verification pass** — every `verdict` decision and status gate must trace to these query results.
+3. Apply `<verification_lens>` to each KI grounding result. Copy the skill's `verdict`, then apply the lens: a successful empty exact query under the recovery lens becomes `verdict: "refutes"`; leave empty/error under the failure lens as `inconclusive`. Write each signal `description` from this pass. Retain the lens outcome and any concrete off-topic error for routing and emission. An off-topic error does not confirm the authored rule, but it is a separate current failure candidate.
 4. **Mandatory memory check.** `load_skill` with `significant-events-memory` (in its own tool-call batch, per `<tool_discipline>`), then run at least one `platform_sig_events_memory_search` scoped to the batch's services, symptoms, and candidate mechanisms **before routing or emitting any event**. `platform_sig_events_memory_read` every relevant hit — do not rely on search snippets alone; an empty result is acceptable but skipping the search is an error. Feed what memory returns into status and severity calibration and `<chronic_and_recurring>`, but do not cite page names or narrate the search in event fields.
 
 ### Step 2: Form Symptom Hypotheses
@@ -274,7 +274,7 @@ Run 3.1 then 3.2 for each detection.
 
 1. Call `platform_sig_events_event_search` once with all distinct `rule_uuids` and `stream_names` from detections.
 2. A detection rule-matches an event only when `events[].signal_rule_uuids` includes its rule. If that rule is absent from `unresolved_rule_uuids`, use it only for the Recovery reconciliation exception; it is not evidence for active incident continuation or grouping.
-3. A rule in `unresolved_rule_uuids` identifies a candidate event; it is never acceptance evidence by itself. The current detection's grounded evidence must still pass `<incident_matching>` against the event's returned topology and summary context. Collect all rule-uuid-matching candidates before selecting the best one (tie-break: greatest rule coverage, then evidence similarity). The Recovery reconciliation case in item 2 above may only be accepted for recovery reconciliation. Reject a match when one of these holds:
+3. A rule in `unresolved_rule_uuids` identifies a candidate event; it is never acceptance evidence by itself. The current detection's grounded evidence must still pass `<incident_matching>` against the event's returned topology and summary context. Collect all rule-uuid-matching candidates before selecting the best one (tie-break: greatest rule coverage, then compact `summary` and topology overlap). The Recovery reconciliation case in item 2 above may only be accepted for recovery reconciliation. Reject a match when one of these holds:
   - The **Current evidence**'s query rows show the failure now targets a different resource, host, or downstream dependency than the open event's confirmed signals, `causal_features`, or `blast_radius`.
   - The authored KI explicitly scopes the new detection away from the open event's incident.
   - The **Current evidence**'s query rows show a substantively different active failure mechanism or error signature from the open event's `summary`, `symptom_hypothesis` or topology — title wording alone never qualifies.
@@ -299,7 +299,7 @@ This search runs on its own topology inputs; a zero-event or zero-match 3.1 resu
    Add accepted rules to `matched_rule_uuids`.
 5. When `has_more` is true and some discoveries remain unmatched, increment `page` with all other parameters unchanged and `per_page` held constant.
 
-Assign each matched detection to at most one accepted event continuation. The continuation reuses the matched event's `event_id` and locks in this detection's topology from grounding. If multiple events match a single detection, prefer greatest rule coverage, then evidence similarity. **Retain the matched open event's full `signals[]` from `event_search` for status and severity reasoning only — do not carry them into the write payload; `platform_sig_events_events_write` merges them server-side.** Matched detections skip grouping.
+Assign each matched detection to at most one accepted event continuation. The continuation reuses the matched event's `event_id` and locks in this detection's topology from grounding. If multiple events match a single detection, prefer greatest rule coverage, then compact `summary` and topology overlap. **Use the matched open event's `signal_counts` and `unresolved_rule_uuids` from compact `event_search` for status and severity reasoning — do not fetch `view: "full"` or carry stored signals into the write payload; `platform_sig_events_events_write` merges prior signals server-side.** Matched detections skip grouping.
 
 ### Step 4: Group remaining detections into new events
 
@@ -357,8 +357,8 @@ Only after grounding, routing, grouping, and status/severity decisions:
    - **New event:** copy the grouped component's finalized topology. Do not import another component's signals or paths.
    - Dismissed items may use empty topology when no signal confirms failure, degradation, or exposure. Open items may not drop paths grounding confirmed.
    - Prefer dependency edges over standalone component nodes when both describe the same hop.
-   - Preserve each matched query KI's grounding `evidence` object. Emit verified healthy, positive, non-confirming, or unrelated detections with `confirmed: false`.
-3. **Check before write.** Narratives, signals, status, severity, and topology must agree — a narrative may only claim what its signals and topology support. Off-topic errors get their own item with the source rule `confirmed: false` — never on two items. If any rule would appear twice, return to grouping and merge.
+   - Preserve each matched query KI's grounding `evidence` object. Emit verified healthy, positive, or non-confirming detections with `verdict: "refutes"`, and unrelated detections with `verdict: "off_topic"`.
+3. **Check before write.** Narratives, signals, status, severity, and topology must agree — a narrative may only claim what its signals and topology support. Off-topic errors get their own item with the source rule `verdict: "off_topic"` — never on two items. If any rule would appear twice, return to grouping and merge.
    For each `open` continuation: empty `blast_radius` with populated `causal_features` is invalid when grounding surfaced dependency paths — repair before calling the tool. Repair any other gap between the finalized topology and the payload before calling the tool.
 4. **Persist once.** Invoke `platform_sig_events_events_write` only after every item passes. Never send `event_id: ""` or probe with an empty or placeholder payload. Do not retry schema-validation failures. Retry only `bulk_error` items, once.
 
@@ -395,7 +395,7 @@ Everything the operator reads (`title`, `summary`, `symptom_hypothesis`, `assess
 <critical_rules>
 
 1. **KI grounding is mandatory first** — complete the `significant-events-ki-grounding` protocol for every detection before any incident matching.
-2. **`confirmed` comes from grounding row content, not `evidence.result`.** Set `confirmed: true` on batch detections only when grounding query rows verify that rule's failure, material degradation, sensitive-data exposure, or evidenced cascade. Set `confirmed: false` for verified healthy, positive, non-confirming, or unrelated rule evidence; a concrete non-benign error in an off-topic row stays `false` for the rule but directly confirms its separate observed-error event. Omit `confirmed` when rows are empty or ambiguous. Do not run additional queries after grouping to change `confirmed`.
+2. **`verdict` comes from grounding row content, not `evidence.result`.** Copy the `significant-events-ki-grounding` verdict, then apply `<verification_lens>` — a successful empty exact query under the recovery lens is `refutes`. Do not run additional queries after grouping to change `verdict`.
 3. **Alert symptom is an authored prior, not derived from confirmation.** Positive/health cannot group with a failure symptom unless it is explicit recovery evidence for that exact incident.
 4. **Route every detection exactly once.** Reuse an accepted open event's `event_id`, otherwise form a new event. Never drop or duplicate a detection.
 5. **Topology is grounded, then copied** — finalize it during routing (continuation) or grouping (new event), then write it unchanged. Omitting a confirmed path from the payload is an error, not simplification.

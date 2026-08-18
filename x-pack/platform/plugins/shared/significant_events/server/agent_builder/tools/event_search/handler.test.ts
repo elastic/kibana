@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { searchEventsToolHandler } from './handler';
+import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
+import {
+  searchEventsToolHandler,
+  DESCRIPTION_TRUNCATION_SUFFIX,
+  DESCRIPTION_CONTENT_LENGTH,
+} from './handler';
 
 describe('searchEventsToolHandler', () => {
   const event = {
@@ -206,5 +211,37 @@ describe('searchEventsToolHandler', () => {
     await expect(
       searchEventsToolHandler({ eventClient: makeClient() as never, params: { view: 'full' } })
     ).rejects.toThrow('Full event search requires exactly one event ID');
+  });
+
+  it('leaves max-length full-view signal descriptions unchanged', async () => {
+    const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH);
+    const result = await searchEventsToolHandler({
+      eventClient: makeClient([
+        {
+          ...event,
+          signals: [{ ...event.signals[0], description }],
+        },
+      ]) as never,
+      params: { view: 'full', event_ids: ['checkout-failure'] },
+    });
+
+    expect(result.events[0].signals[0].description).toBe(description);
+  });
+
+  it('truncates oversized full-view signal descriptions', async () => {
+    const description = 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1);
+    const result = await searchEventsToolHandler({
+      eventClient: makeClient([
+        {
+          ...event,
+          signals: [{ ...event.signals[0], description }],
+        },
+      ]) as never,
+      params: { view: 'full', event_ids: ['checkout-failure'] },
+    });
+
+    expect(result.events[0].signals[0].description).toBe(
+      `${description.slice(0, DESCRIPTION_CONTENT_LENGTH)}${DESCRIPTION_TRUNCATION_SUFFIX}`
+    );
   });
 });

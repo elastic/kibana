@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SignificantEvent, SignificantEventStatus } from '@kbn/significant-events-schema';
+import {
+  MAX_SIGNAL_DESCRIPTION_LENGTH,
+  type SignificantEvent,
+  type SignificantEventStatus,
+} from '@kbn/significant-events-schema';
 import {
   DEFAULT_EVENTS_SEARCH_FROM,
   DEFAULT_EVENTS_SEARCH_TO,
@@ -15,6 +19,10 @@ import {
 export const EVENT_SEARCH_DEFAULT_PER_PAGE = 20;
 export const EVENT_SEARCH_MAX_PER_PAGE = 50;
 export const EVENT_SEARCH_SIGNAL_PAGE_SIZE = 10;
+
+export const DESCRIPTION_TRUNCATION_SUFFIX = '… [truncated]';
+export const DESCRIPTION_CONTENT_LENGTH =
+  MAX_SIGNAL_DESCRIPTION_LENGTH - DESCRIPTION_TRUNCATION_SUFFIX.length;
 
 export type EventSearchView = 'compact' | 'full';
 
@@ -196,6 +204,11 @@ const toCompactEvent = (event: SignificantEvent): CompactEventSearchItem => {
   };
 };
 
+const truncateSignalDescription = (description: string | undefined): string | undefined =>
+  description !== undefined && description.length > MAX_SIGNAL_DESCRIPTION_LENGTH
+    ? `${description.slice(0, DESCRIPTION_CONTENT_LENGTH)}${DESCRIPTION_TRUNCATION_SUFFIX}`
+    : description;
+
 const toDetailedEvent = (
   event: SignificantEvent,
   signalsPage: number,
@@ -210,7 +223,7 @@ const toDetailedEvent = (
       stream_name: signal.stream_name,
       rule_uuid: getRuleUuid(signal),
       verdict: signal.verdict,
-      description: signal.description,
+      description: truncateSignalDescription(signal.description),
       collected_at: signal.collected_at,
     })),
     signals_page: signalsPage,
