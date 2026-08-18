@@ -7,32 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type {
-  ExpressionsServerStart,
-  ExpressionsServerSetup,
-} from '@kbn/expressions-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { gaugeFunction } from '../common';
 
-interface SetupDeps {
-  expressions: ExpressionsServerSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ExpressionGaugePlugin extends Service {
+  static readonly inject = ['expressions.setup'];
+  static readonly provide = 'expressionGauge';
 
-interface StartDeps {
-  expression: ExpressionsServerStart;
-}
-
-export type ExpressionGaugePluginSetup = void;
-export type ExpressionGaugePluginStart = void;
-
-export class ExpressionGaugePlugin
-  implements Plugin<ExpressionGaugePluginSetup, ExpressionGaugePluginStart, SetupDeps, StartDeps>
-{
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionGaugePluginSetup {
+  constructor(ctx: Context) {
+    super(ctx, 'expressionGauge');
+    const expressions = (ctx.get('expressions.setup') as any).contract;
     expressions.registerFunction(gaugeFunction);
   }
-
-  public start(core: CoreStart): ExpressionGaugePluginStart {}
-
-  public stop() {}
 }

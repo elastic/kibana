@@ -10,6 +10,7 @@
     "server/**/*",
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/presentation-util-plugin",
     "@kbn/expressions-plugin",

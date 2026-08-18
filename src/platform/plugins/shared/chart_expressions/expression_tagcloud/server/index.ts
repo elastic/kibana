@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export async function plugin() {
-  const { ExpressionTagcloudPlugin } = await import('./plugin');
-  return new ExpressionTagcloudPlugin();
-}
+export { default as cordisPlugin } from './plugin';

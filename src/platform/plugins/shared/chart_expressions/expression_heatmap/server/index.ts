@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export async function plugin() {
-  const { ExpressionHeatmapPlugin } = await import('./plugin');
-  return new ExpressionHeatmapPlugin();
-}
+export { default as cordisPlugin } from './plugin';

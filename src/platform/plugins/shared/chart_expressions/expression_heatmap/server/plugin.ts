@@ -7,35 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type {
-  ExpressionsServerStart,
-  ExpressionsServerSetup,
-} from '@kbn/expressions-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { heatmapFunction, heatmapLegendConfig, heatmapGridConfig } from '../common';
 
-interface SetupDeps {
-  expressions: ExpressionsServerSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ExpressionHeatmapPlugin extends Service {
+  static readonly inject = ['expressions.setup'];
+  static readonly provide = 'expressionHeatmap';
 
-interface StartDeps {
-  expression: ExpressionsServerStart;
-}
-
-export type ExpressionHeatmapPluginSetup = void;
-export type ExpressionHeatmapPluginStart = void;
-
-export class ExpressionHeatmapPlugin
-  implements
-    Plugin<ExpressionHeatmapPluginSetup, ExpressionHeatmapPluginStart, SetupDeps, StartDeps>
-{
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionHeatmapPluginSetup {
+  constructor(ctx: Context) {
+    super(ctx, 'expressionHeatmap');
+    const expressions = (ctx.get('expressions.setup') as any).contract;
     expressions.registerFunction(heatmapFunction);
-    expressions.registerFunction(heatmapLegendConfig);
-    expressions.registerFunction(heatmapGridConfig);
+        expressions.registerFunction(heatmapLegendConfig);
+        expressions.registerFunction(heatmapGridConfig);
   }
-
-  public start(core: CoreStart): ExpressionHeatmapPluginStart {}
-
-  public stop() {}
 }

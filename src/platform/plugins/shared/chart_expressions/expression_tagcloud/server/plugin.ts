@@ -7,33 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type {
-  ExpressionsServerStart,
-  ExpressionsServerSetup,
-} from '@kbn/expressions-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { tagcloudFunction } from '../common/expression_functions';
 
-interface SetupDeps {
-  expressions: ExpressionsServerSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ExpressionTagcloudPlugin extends Service {
+  static readonly inject = ['expressions.setup'];
+  static readonly provide = 'expressionTagcloud';
 
-interface StartDeps {
-  expression: ExpressionsServerStart;
-}
-
-export type ExpressionTagcloudPluginSetup = void;
-export type ExpressionTagcloudPluginStart = void;
-
-export class ExpressionTagcloudPlugin
-  implements
-    Plugin<ExpressionTagcloudPluginSetup, ExpressionTagcloudPluginStart, SetupDeps, StartDeps>
-{
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionTagcloudPluginSetup {
+  constructor(ctx: Context) {
+    super(ctx, 'expressionTagcloud');
+    const expressions = (ctx.get('expressions.setup') as any).contract;
     expressions.registerFunction(tagcloudFunction);
   }
-
-  public start(core: CoreStart): ExpressionTagcloudPluginStart {}
-
-  public stop() {}
 }

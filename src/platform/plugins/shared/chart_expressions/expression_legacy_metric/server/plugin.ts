@@ -7,38 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type {
-  ExpressionsServerStart,
-  ExpressionsServerSetup,
-} from '@kbn/expressions-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { metricVisFunction } from '../common';
 
-interface SetupDeps {
-  expressions: ExpressionsServerSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ExpressionLegacyMetricPlugin extends Service {
+  static readonly inject = ['expressions.setup'];
+  static readonly provide = 'expressionLegacyMetricVis';
 
-interface StartDeps {
-  expression: ExpressionsServerStart;
-}
-
-export type ExpressionLegacyMetricPluginSetup = void;
-export type ExpressionLegacyMetricPluginStart = void;
-
-export class ExpressionLegacyMetricPlugin
-  implements
-    Plugin<
-      ExpressionLegacyMetricPluginSetup,
-      ExpressionLegacyMetricPluginStart,
-      SetupDeps,
-      StartDeps
-    >
-{
-  public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionLegacyMetricPluginSetup {
+  constructor(ctx: Context) {
+    super(ctx, 'expressionLegacyMetricVis');
+    const expressions = (ctx.get('expressions.setup') as any).contract;
     expressions.registerFunction(metricVisFunction);
   }
-
-  public start(core: CoreStart): ExpressionLegacyMetricPluginStart {}
-
-  public stop() {}
 }
