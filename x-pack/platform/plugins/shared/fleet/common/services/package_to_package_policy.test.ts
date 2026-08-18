@@ -66,6 +66,7 @@ describe('Fleet - packageToPackagePolicy', () => {
     assets: {
       kibana: {
         workflow: [],
+        agent: [],
         csp_rule_template: [],
         dashboard: [],
         visualization: [],

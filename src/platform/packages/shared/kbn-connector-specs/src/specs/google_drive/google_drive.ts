@@ -541,7 +541,7 @@ export const GoogleDriveConnector: ConnectorSpec = {
             .string()
             .optional()
             .describe(
-              "ISO-8601 modifiedTime lower bound for incremental ingest (for example 2024-01-01T00:00:00Z)."
+              'ISO-8601 modifiedTime lower bound for incremental ingest (for example 2024-01-01T00:00:00Z).'
             ),
           pageSize: z
             .number()

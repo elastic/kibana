@@ -209,21 +209,11 @@ export class AgentBuilderPlugin
       plugins: {
         register: serviceSetups.plugins.register.bind(serviceSetups.plugins),
       },
-      management: {
-        createOrUpdateAgent: async ({ spaceId, agent, availability }) => {
-          const services = getInternalServices();
-          await services.agents.ensure({ spaceId, agent, availability });
-        },
-        deleteAgent: async ({ agentId, spaceId }) => {
-          const services = getInternalServices();
-          const registry = await services.agents.getRegistry({
-            request: { headers: {}, path: '/', route: { path: '/', method: 'get' } } as any,
-          });
-          return registry.delete({ id: agentId });
-        },
-      },
       topSnippets: this.config.topSnippets,
-      management: new AgentBuilderManagementApi(coreSetup.getStartServices, this.logger.get('management')),
+      management: new AgentBuilderManagementApi(
+        coreSetup.getStartServices,
+        this.logger.get('management')
+      ),
     };
   }
 

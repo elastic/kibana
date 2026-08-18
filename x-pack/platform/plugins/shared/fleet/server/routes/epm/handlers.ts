@@ -336,7 +336,10 @@ export const getBulkAssetsHandler: FleetRequestHandler<
                   };
                 }
               } else if (type === KibanaSavedObjectType.agent && agentBuilderApi) {
-                const agent = await agentBuilderApi.getAgent(id, request);
+                const agent = (await agentBuilderApi.getAgent(id, request)) as {
+                  name?: string;
+                  description?: string;
+                } | null;
                 if (agent) {
                   metadata[id] = {
                     title: agent.name,

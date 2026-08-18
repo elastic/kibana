@@ -17,7 +17,7 @@ describe('AgentBuilderManagementApi', () => {
   const createRequest = (): KibanaRequest =>
     ({
       headers: {},
-    }) as KibanaRequest;
+    } as KibanaRequest);
 
   it('uses the agentBuilder start contract from getStartServices', async () => {
     const createOrUpdate = jest.fn().mockResolvedValue({ id: 'agent-1' });

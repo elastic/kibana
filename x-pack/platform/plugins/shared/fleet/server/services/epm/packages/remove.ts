@@ -59,6 +59,7 @@ import type { PackageSpecConditions } from '../../../../common';
 import { getInstallation, getPackageInfo, kibanaSavedObjectTypes } from '.';
 import { updateUninstallFailedAttempts } from './uninstall_errors_helpers';
 import { deletePackageKnowledgeBase } from './knowledge_base_index';
+import { createFleetInternalRequest } from '../../security';
 
 const MAX_ASSETS_TO_DELETE = 1000;
 
@@ -267,7 +268,9 @@ export async function deleteKibanaAssets({
     const workflowIds = workflowAssets.map((asset) => asset.id);
     logger.debug(`Deleting ${workflowIds.length} workflow assets via workflowsManagement`);
     try {
-      await workflowsApi.deleteWorkflows(workflowIds, spaceId, { force: true });
+      await workflowsApi.deleteWorkflows(workflowIds, spaceId, createFleetInternalRequest(), {
+        force: true,
+      });
     } catch (err) {
       logger.warn(`Failed to delete workflow assets: ${err}`);
     }

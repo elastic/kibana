@@ -688,20 +688,14 @@ export interface SlackConversationsRepliesResponse extends SlackErrorFields {
 
 export const SlackGetChannelHistoryInputSchema = lazySchema(() =>
   z.object({
-    channel: z
-      .string()
-      .min(1)
-      .describe('Channel ID (C.../G...) to fetch message history from.'),
+    channel: z.string().min(1).describe('Channel ID (C.../G...) to fetch message history from.'),
     oldest: z
       .string()
       .optional()
       .describe(
         'Only messages after this Unix timestamp (exclusive). Use for incremental ingest checkpoints.'
       ),
-    latest: z
-      .string()
-      .optional()
-      .describe('Only messages before this Unix timestamp (exclusive).'),
+    latest: z.string().optional().describe('Only messages before this Unix timestamp (exclusive).'),
     cursor: z
       .string()
       .optional()
@@ -760,4 +754,6 @@ export const SlackGetConversationRepliesInputSchema = lazySchema(() =>
       .describe('Return the full raw Slack API response instead of a compact ingest result.'),
   })
 );
-export type SlackGetConversationRepliesInput = z.infer<typeof SlackGetConversationRepliesInputSchema>;
+export type SlackGetConversationRepliesInput = z.infer<
+  typeof SlackGetConversationRepliesInputSchema
+>;

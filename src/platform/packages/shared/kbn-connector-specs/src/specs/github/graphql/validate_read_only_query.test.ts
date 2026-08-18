@@ -18,7 +18,9 @@ describe('validateReadOnlyGraphQLQuery', () => {
 
   it('rejects mutation operations', () => {
     expect(() =>
-      validateReadOnlyGraphQLQuery('mutation CreateIssue { createIssue(input: {}) { issue { id } } }')
+      validateReadOnlyGraphQLQuery(
+        'mutation CreateIssue { createIssue(input: {}) { issue { id } } }'
+      )
     ).toThrow('GraphQL mutations are not allowed');
   });
 

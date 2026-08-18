@@ -114,6 +114,7 @@ export enum ElasticsearchAssetType {
   mlModel = 'ml_model',
   knowledgeBase = 'knowledge_base',
   esqlView = 'esql_view',
+  indexAlias = 'index_alias',
 }
 
 export type FleetElasticsearchAssetType = Exclude<
@@ -440,6 +441,7 @@ export type RegistrySearchResult = Pick<
   | 'categories'
   | 'discovery'
   | 'deprecated'
+  | 'group'
 >;
 
 // from /categories
@@ -785,6 +787,7 @@ export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
   INSTALL_PRECHECK = 'install_precheck',
   INSTALL_ESQL_VIEWS = 'install_esql_views',
+  INSTALL_INDEX_ALIASES = 'install_index_aliases',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
   CREATE_ALERTING_ASSETS = 'create_alerting_assets',

@@ -507,8 +507,7 @@ export const GITHUB_QUERY_TEMPLATES: GitHubQueryTemplate[] = [
   },
   {
     id: 'graph.pullRequestGraph',
-    description:
-      'Fetch a pull request with reviews, review threads, and linked closing issues.',
+    description: 'Fetch a pull request with reviews, review threads, and linked closing issues.',
     query: `
       query GraphPullRequest($owner: String!, $repo: String!, $number: Int!) {
         repository(owner: $owner, name: $repo) {

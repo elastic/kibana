@@ -360,7 +360,7 @@ export async function stepInstallWorkflowAssets(
     // FLEET-012: Reconcile removed workflows — delete managed workflows that
     // belong to this package but are no longer in the new archive.
     const newAssetIds = new Set(assetRefs.map((r) => r.id));
-    const managedWorkflowPrefix = `${spaceId ?? "default"}-${pkgName}-`;
+    const managedWorkflowPrefix = `${spaceId ?? 'default'}-${pkgName}-`;
     try {
       const finder = savedObjectsClient.createPointInTimeFinder({
         type: KibanaSavedObjectType.workflow,

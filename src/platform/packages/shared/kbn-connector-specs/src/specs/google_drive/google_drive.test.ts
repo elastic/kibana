@@ -99,7 +99,11 @@ describe('GoogleDriveConnector', () => {
   });
 
   it('should define agent-facing actions as tools and ingest actions as workflow-only', () => {
-    const ingestActions = new Set(['listFilesIngest', 'parseDriveUrlsFromText', 'parseCommaSeparatedIds']);
+    const ingestActions = new Set([
+      'listFilesIngest',
+      'parseDriveUrlsFromText',
+      'parseCommaSeparatedIds',
+    ]);
 
     for (const actionName of Object.keys(GoogleDriveConnector.actions)) {
       if (ingestActions.has(actionName)) {
@@ -127,9 +131,12 @@ describe('GoogleDriveConnector', () => {
 
   describe('parseDriveUrlsFromText action', () => {
     it('returns parsed links from connector action', async () => {
-      const result = await GoogleDriveConnector.actions.parseDriveUrlsFromText.handler(mockContext, {
-        text: 'See https://docs.google.com/document/d/doc1/edit',
-      });
+      const result = await GoogleDriveConnector.actions.parseDriveUrlsFromText.handler(
+        mockContext,
+        {
+          text: 'See https://docs.google.com/document/d/doc1/edit',
+        }
+      );
 
       expect(result).toEqual({
         ok: true,
@@ -150,9 +157,12 @@ describe('GoogleDriveConnector', () => {
 
   describe('parseCommaSeparatedIds action', () => {
     it('returns items for foreach workflows', async () => {
-      const result = await GoogleDriveConnector.actions.parseCommaSeparatedIds.handler(mockContext, {
-        value: '1abc, 2def',
-      });
+      const result = await GoogleDriveConnector.actions.parseCommaSeparatedIds.handler(
+        mockContext,
+        {
+          value: '1abc, 2def',
+        }
+      );
 
       expect(result).toEqual({
         ok: true,
@@ -165,7 +175,9 @@ describe('GoogleDriveConnector', () => {
     it('lists shared-drive folder files with pagination metadata', async () => {
       mockClient.get.mockResolvedValue({
         data: {
-          files: [{ id: 'file-1', name: 'Roadmap', mimeType: 'application/vnd.google-apps.document' }],
+          files: [
+            { id: 'file-1', name: 'Roadmap', mimeType: 'application/vnd.google-apps.document' },
+          ],
           nextPageToken: 'token-2',
         },
       });
@@ -178,7 +190,9 @@ describe('GoogleDriveConnector', () => {
 
       expect(result).toEqual({
         ok: true,
-        files: [{ id: 'file-1', name: 'Roadmap', mimeType: 'application/vnd.google-apps.document' }],
+        files: [
+          { id: 'file-1', name: 'Roadmap', mimeType: 'application/vnd.google-apps.document' },
+        ],
         nextPageToken: 'token-2',
         hasMore: true,
       });

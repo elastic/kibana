@@ -7,7 +7,6 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { AgentCreateRequest } from '@kbn/agent-builder-common';
 import type {
   AgentCreateRequest,
   Conversation,
@@ -232,10 +231,7 @@ export interface TopSnippetsConfig {
  * Internal management API for package-owned persisted agents (e.g. Fleet install step).
  */
 export interface AgentBuilderManagementSetup {
-  createOrUpdateAgent(
-    params: AgentCreateRequest,
-    request: KibanaRequest
-  ): Promise<unknown>;
+  createOrUpdateAgent(params: AgentCreateRequest, request: KibanaRequest): Promise<unknown>;
   deleteAgent(agentId: string, request: KibanaRequest): Promise<boolean>;
   deletePackageManagedAgent(agentId: string, spaceId: string): Promise<boolean>;
   getAgent(agentId: string, request: KibanaRequest): Promise<unknown | null>;
@@ -283,30 +279,6 @@ export interface AgentBuilderPluginSetup {
    * Exposed so that dependent plugins can pass these values to search utilities.
    */
   topSnippets: TopSnippetsConfig;
-  /**
-   * Internal management API for programmatic agent CRUD (Fleet package install).
-   */
-  management: AgentBuilderManagementSetup;
-}
-
-/**
- * Setup-time management contract for persisted agents.
- * Lets plugins like Fleet create/update/delete agents during package install.
- */
-export interface AgentBuilderManagementSetup {
-  /**
-   * Create or update a persisted agent. If the agent already exists, it is updated;
-   * otherwise it is created. Uses the `ensure` pattern from AgentsServiceStart.
-   */
-  createOrUpdateAgent: (opts: {
-    spaceId: string;
-    agent: AgentCreateRequest;
-    availability?: AgentAvailabilityConfig;
-  }) => Promise<void>;
-  /**
-   * Delete a persisted agent by ID.
-   */
-  deleteAgent: (opts: { agentId: string; spaceId: string }) => Promise<boolean>;
 }
 
 /**

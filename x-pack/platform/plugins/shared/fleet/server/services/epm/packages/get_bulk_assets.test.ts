@@ -13,12 +13,18 @@ import { getBulkAssets, getKibanaLinkForExternalAsset } from './get_bulk_assets'
 
 describe('getKibanaLinkForExternalAsset', () => {
   it('returns workflow and agent builder links', () => {
-    expect(getKibanaLinkForExternalAsset(KibanaSavedObjectType.workflow, 'fleet-default-sdlc-intel-github-catalog-repos')).toBe(
-      '/app/workflows/fleet-default-sdlc-intel-github-catalog-repos'
-    );
-    expect(getKibanaLinkForExternalAsset(KibanaSavedObjectType.agent, 'fleet-default-sdlc-intel-sdlc-coverage-analysis')).toBe(
-      '/app/agent_builder/agents/fleet-default-sdlc-intel-sdlc-coverage-analysis/overview'
-    );
+    expect(
+      getKibanaLinkForExternalAsset(
+        KibanaSavedObjectType.workflow,
+        'fleet-default-sdlc-intel-github-catalog-repos'
+      )
+    ).toBe('/app/workflows/fleet-default-sdlc-intel-github-catalog-repos');
+    expect(
+      getKibanaLinkForExternalAsset(
+        KibanaSavedObjectType.agent,
+        'fleet-default-sdlc-intel-sdlc-coverage-analysis'
+      )
+    ).toBe('/app/agent_builder/agents/fleet-default-sdlc-intel-sdlc-coverage-analysis/overview');
   });
 });
 
@@ -77,7 +83,8 @@ describe('getBulkAssets', () => {
           title: 'SDLC Coverage Analysis',
           description: 'Coverage analyst',
         },
-        appLink: '/app/agent_builder/agents/fleet-default-sdlc-intel-sdlc-coverage-analysis/overview',
+        appLink:
+          '/app/agent_builder/agents/fleet-default-sdlc-intel-sdlc-coverage-analysis/overview',
       },
     ]);
   });

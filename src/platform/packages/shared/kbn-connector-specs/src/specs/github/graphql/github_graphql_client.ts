@@ -51,10 +51,7 @@ const getHeader = (headers: unknown, headerName: string): string | undefined => 
   return undefined;
 };
 
-const getGitHubRetryDelayMs = (params: {
-  responseHeaders?: unknown;
-  attempt: number;
-}): number => {
+const getGitHubRetryDelayMs = (params: { responseHeaders?: unknown; attempt: number }): number => {
   const { responseHeaders, attempt } = params;
   const retryAfter = getHeader(responseHeaders, 'retry-after');
   const retryAfterSeconds = typeof retryAfter === 'string' ? Number(retryAfter) : NaN;

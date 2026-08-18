@@ -24,16 +24,16 @@ type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
 };
 
-export type ExternalAssetMetadata = {
+export interface ExternalAssetMetadata {
   title?: string;
   description?: string;
-};
+}
 
-export type GetBulkAssetsOptions = {
+export interface GetBulkAssetsOptions {
   externalAssetEnricher?: (
     assets: AssetSOObject[]
   ) => Promise<Record<string, ExternalAssetMetadata>>;
-};
+}
 
 const EXTERNAL_KIBANA_ASSET_TYPES = new Set<string>([
   KibanaSavedObjectType.workflow,

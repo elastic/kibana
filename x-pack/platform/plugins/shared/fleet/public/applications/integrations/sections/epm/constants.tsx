@@ -136,9 +136,6 @@ export const AssetTitleMap: Record<
   knowledge_base: i18n.translate('xpack.fleet.epm.assetTitles.knowledgeBase', {
     defaultMessage: 'Integration knowledge',
   }),
-  workflow: i18n.translate('xpack.fleet.epm.assetTitles.workflows', {
-    defaultMessage: 'Workflows',
-  }),
   alert: i18n.translate('xpack.fleet.epm.assetTitles.rules', {
     defaultMessage: 'Rules',
   }),

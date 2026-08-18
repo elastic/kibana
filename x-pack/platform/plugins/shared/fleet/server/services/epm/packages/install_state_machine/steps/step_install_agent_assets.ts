@@ -41,10 +41,7 @@ interface FleetPackageAgentYaml {
   configuration: AgentCreateRequest['configuration'];
 }
 
-export const parseFleetAgentYaml = (
-  yamlContent: string,
-  agentId: string
-): AgentCreateRequest => {
+export const parseFleetAgentYaml = (yamlContent: string, agentId: string): AgentCreateRequest => {
   const parsed = parseYaml(yamlContent) as FleetPackageAgentYaml;
 
   if (!parsed.name || !parsed.description || !parsed.configuration?.tools?.length) {
@@ -82,7 +79,9 @@ export async function stepInstallAgentAssets(
   }
 
   if (!context.request) {
-    logger.debug(`Skipping agent asset installation for ${pkgName}: missing install request context`);
+    logger.debug(
+      `Skipping agent asset installation for ${pkgName}: missing install request context`
+    );
     return;
   }
 

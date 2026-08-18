@@ -1,15 +1,24 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import fs from 'fs';
-import path from 'path';
+import fs from 'fs'; // eslint-disable-line import/no-nodejs-modules
+import path from 'path'; // eslint-disable-line import/no-nodejs-modules
 
-import { WORKFLOW_EXAMPLES, getWorkflowExamplesDir } from './index';
+import { getWorkflowExamplesDir, WORKFLOW_EXAMPLES } from '.';
 
 const FLEET_PACKAGE_ROOT = path.resolve(
   __dirname,
@@ -58,22 +67,30 @@ describe('SDLC intel golden-path assets', () => {
   });
 
   it('includes Phase B fleet package assets', () => {
-    expect(fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/ilm_policy/sdlc_intel_retention.json'))).toBe(
-      true
-    );
-    expect(fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/esql_view/sdlc_ingest_health.yml'))).toBe(
-      true
-    );
-    expect(fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/dashboard/sdlc-intel-ingest-health.json'))).toBe(
-      true
-    );
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/github-catalog-project-views.yaml'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/ilm_policy/sdlc_intel_retention.json')
+      )
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/github-build-release-calendar.yaml'))
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/esql_view/sdlc_ingest_health.yml'))
     ).toBe(true);
-    expect(fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/slack-thread-replies.yaml'))).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/dashboard/sdlc-intel-ingest-health.json'))
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/github-catalog-project-views.yaml')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/github-build-release-calendar.yaml')
+      )
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/slack-thread-replies.yaml'))
+    ).toBe(true);
 
     const manifest = fs.readFileSync(path.join(FLEET_PACKAGE_ROOT, 'manifest.yml'), 'utf8');
     expect(manifest).toContain('github_connector_id');
@@ -85,10 +102,14 @@ describe('SDLC intel golden-path assets', () => {
 
   it('includes Phase C1 feedback-loop assets', () => {
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/salesforce-intel-cases.json'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/salesforce-intel-cases.json')
+      )
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/github-intel-sdh-issues.json'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/github-intel-sdh-issues.json')
+      )
     ).toBe(true);
     expect(
       fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/salesforce-catalog-cases.yaml'))
@@ -100,10 +121,14 @@ describe('SDLC intel golden-path assets', () => {
       fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/cross-link-feedback-loop.yaml'))
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/esql_view/sdlc_salesforce_feedback.yml'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/esql_view/sdlc_salesforce_feedback.yml')
+      )
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/dashboard/sdlc-intel-salesforce-feedback.json'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/dashboard/sdlc-intel-salesforce-feedback.json')
+      )
     ).toBe(true);
   });
 
@@ -134,16 +159,24 @@ describe('SDLC intel golden-path assets', () => {
 
   it('includes Phase D Google Drive design-doc assets', () => {
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/gdrive-intel-documents.json'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/gdrive-intel-documents.json')
+      )
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/gdrive-catalog-roadmap-docs.yaml'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/gdrive-catalog-roadmap-docs.yaml')
+      )
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/github-extract-drive-links.yaml'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/github-extract-drive-links.yaml')
+      )
     ).toBe(true);
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/esql_view/sdlc_design_doc_coverage.yml'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/esql_view/sdlc_design_doc_coverage.yml')
+      )
     ).toBe(true);
 
     const manifest = fs.readFileSync(path.join(FLEET_PACKAGE_ROOT, 'manifest.yml'), 'utf8');
@@ -153,7 +186,9 @@ describe('SDLC intel golden-path assets', () => {
 
   it('includes Phase E agentic workflow assets', () => {
     expect(
-      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/sdlc-agent-insights.json'))
+      fs.existsSync(
+        path.join(FLEET_PACKAGE_ROOT, 'elasticsearch/index_template/sdlc-agent-insights.json')
+      )
     ).toBe(true);
     expect(
       fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'kibana/workflow/agent-coverage-analysis.yaml'))
@@ -180,14 +215,10 @@ describe('SDLC intel golden-path assets', () => {
 
   it('includes Phase F knowledge base and alerting template assets', () => {
     expect(
-      fs.existsSync(
-        path.join(FLEET_PACKAGE_ROOT, 'docs/knowledge_base/sdlc-github-data-model.md')
-      )
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'docs/knowledge_base/sdlc-github-data-model.md'))
     ).toBe(true);
     expect(
-      fs.existsSync(
-        path.join(FLEET_PACKAGE_ROOT, 'docs/knowledge_base/sdlc-epic-phases-schema.md')
-      )
+      fs.existsSync(path.join(FLEET_PACKAGE_ROOT, 'docs/knowledge_base/sdlc-epic-phases-schema.md'))
     ).toBe(true);
     expect(
       fs.existsSync(

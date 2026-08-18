@@ -185,7 +185,17 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     description:
       'Pages members per team from github-intel-teams, upserts people and team membership relationships',
     category: 'security',
-    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'people', 'teams', 'foreach', 'while'],
+    tags: [
+      'scheduled',
+      'github',
+      'graphql',
+      'ingest',
+      'sdlc',
+      'people',
+      'teams',
+      'foreach',
+      'while',
+    ],
     filename: 'sdlc_github_catalog_team_members.yml',
   },
   {
@@ -212,7 +222,16 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     description:
       'Enriches github-intel-pull-requests with reviews and closing issues via graph.pullRequestGraph',
     category: 'security',
-    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'pull-requests', 'enrich', 'foreach'],
+    tags: [
+      'scheduled',
+      'github',
+      'graphql',
+      'ingest',
+      'sdlc',
+      'pull-requests',
+      'enrich',
+      'foreach',
+    ],
     filename: 'sdlc_github_enrich_pull_requests_graph.yml',
   },
   {
@@ -290,7 +309,17 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     description:
       'Pages GitHub Project v2 saved views via orgCatalog.projectViews into github-intel-project-views',
     category: 'security',
-    tags: ['scheduled', 'github', 'graphql', 'ingest', 'sdlc', 'projects', 'views', 'foreach', 'while'],
+    tags: [
+      'scheduled',
+      'github',
+      'graphql',
+      'ingest',
+      'sdlc',
+      'projects',
+      'views',
+      'foreach',
+      'while',
+    ],
     filename: 'sdlc_github_catalog_project_views.yml',
   },
   {
@@ -325,7 +354,17 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     description:
       'Per-repo SDH issue catalog via activity.searchIssues into github-intel-sdh-issues',
     category: 'security',
-    tags: ['scheduled', 'github', 'ingest', 'sdlc', 'issues', 'sdh', 'feedback', 'foreach', 'while'],
+    tags: [
+      'scheduled',
+      'github',
+      'ingest',
+      'sdlc',
+      'issues',
+      'sdh',
+      'feedback',
+      'foreach',
+      'while',
+    ],
     filename: 'sdlc_github_catalog_sdh_issues.yml',
   },
   {
@@ -349,8 +388,7 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
   {
     id: 'sdlc_github_catalog_sdh_labeled_issues',
     name: 'SDLC GitHub catalog SDH labeled issues',
-    description:
-      'Ingests label:sdh issues from product repos into github-intel-sdh-issues',
+    description: 'Ingests label:sdh issues from product repos into github-intel-sdh-issues',
     category: 'security',
     tags: ['scheduled', 'github', 'ingest', 'sdlc', 'issues', 'sdh', 'feedback', 'label'],
     filename: 'sdlc_github_catalog_sdh_labeled_issues.yml',
@@ -361,7 +399,17 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     description:
       'Catalogs configured shared roadmap folder IDs via listFilesIngest into gdrive-intel-documents',
     category: 'security',
-    tags: ['scheduled', 'google_drive', 'ingest', 'sdlc', 'documents', 'design', 'roadmap', 'foreach', 'while'],
+    tags: [
+      'scheduled',
+      'google_drive',
+      'ingest',
+      'sdlc',
+      'documents',
+      'design',
+      'roadmap',
+      'foreach',
+      'while',
+    ],
     filename: 'sdlc_gdrive_catalog_roadmap_docs.yml',
   },
   {
@@ -370,7 +418,16 @@ export const WORKFLOW_EXAMPLES: WorkflowExampleEntry[] = [
     description:
       'Extracts Drive URLs from GitHub/SDH issue bodies, fetches metadata, writes issue_references_design_doc edges',
     category: 'security',
-    tags: ['scheduled', 'github', 'google_drive', 'ingest', 'sdlc', 'documents', 'design', 'enrich'],
+    tags: [
+      'scheduled',
+      'github',
+      'google_drive',
+      'ingest',
+      'sdlc',
+      'documents',
+      'design',
+      'enrich',
+    ],
     filename: 'sdlc_github_extract_drive_links.yml',
   },
   {

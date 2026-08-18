@@ -66,6 +66,10 @@ import { stepCreateAlertingAssets } from './steps/step_create_alerting_assets';
 import { stepInstallWorkflowAssets } from './steps/step_install_workflow_assets';
 import { stepInstallAgentAssets } from './steps/step_install_agent_assets';
 import { cleanupEsqlViewsStep, stepInstallEsqlViews } from './steps/step_install_esql_views';
+import {
+  cleanupIndexAliasesStep,
+  stepInstallIndexAliases,
+} from './steps/step_install_index_aliases';
 import { stepResolveDependencies } from './steps/step_resolve_dependencies';
 
 export interface InstallContext extends StateContext<StateNames> {
@@ -115,6 +119,12 @@ export const regularStatesDefinition: StateMachineStates<StateNames> = {
   install_esql_views: {
     onPreTransition: cleanupEsqlViewsStep,
     onTransition: stepInstallEsqlViews,
+    nextState: INSTALL_STATES.INSTALL_INDEX_ALIASES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_index_aliases: {
+    onPreTransition: cleanupIndexAliasesStep,
+    onTransition: stepInstallIndexAliases,
     nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },

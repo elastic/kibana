@@ -165,7 +165,9 @@ export const SalesforceConnector: ConnectorSpec = {
           raw: z
             .boolean()
             .optional()
-            .describe('Return the full raw Salesforce API response instead of a compact ingest result.'),
+            .describe(
+              'Return the full raw Salesforce API response instead of a compact ingest result.'
+            ),
         })
       ),
       handler: async (ctx, input) => {
@@ -175,8 +177,13 @@ export const SalesforceConnector: ConnectorSpec = {
           raw?: boolean;
         };
 
-        if (!typedInput.nextRecordsUrl && (!typedInput.soql || typedInput.soql.trim().length === 0)) {
-          throw new Error('soqlIngest requires soql on the first page or nextRecordsUrl for pagination.');
+        if (
+          !typedInput.nextRecordsUrl &&
+          (!typedInput.soql || typedInput.soql.trim().length === 0)
+        ) {
+          throw new Error(
+            'soqlIngest requires soql on the first page or nextRecordsUrl for pagination.'
+          );
         }
 
         const data = await executeSalesforceSoql(ctx, {

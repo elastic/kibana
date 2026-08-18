@@ -53,6 +53,8 @@ describe('github graphql templates', () => {
   });
 
   it('throws for unknown template ids', () => {
-    expect(() => getGitHubQueryTemplate('unknown.template')).toThrow('Unknown GitHub GraphQL template');
+    expect(() => getGitHubQueryTemplate('unknown.template')).toThrow(
+      'Unknown GitHub GraphQL template'
+    );
   });
 });

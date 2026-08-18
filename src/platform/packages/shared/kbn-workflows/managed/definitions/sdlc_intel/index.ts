@@ -25,6 +25,7 @@ const SDLC_WORKFLOW_MANAGEMENT = {
 export const SDLC_SETUP_INDICES_WORKFLOW = {
   id: SDLC_SETUP_INDICES_WORKFLOW_ID,
   pluginId: 'sdlcIntel',
+  billable: false,
   version: 2,
   yaml: SETUP_INDICES_YAML,
   management: SDLC_WORKFLOW_MANAGEMENT,
@@ -33,6 +34,7 @@ export const SDLC_SETUP_INDICES_WORKFLOW = {
 export const SDLC_GITHUB_SYNC_ORCHESTRATOR_WORKFLOW = {
   id: SDLC_GITHUB_SYNC_ORCHESTRATOR_WORKFLOW_ID,
   pluginId: 'sdlcIntel',
+  billable: false,
   version: 9,
   yaml: GITHUB_SYNC_ORCHESTRATOR_YAML,
   management: SDLC_WORKFLOW_MANAGEMENT,
@@ -41,6 +43,7 @@ export const SDLC_GITHUB_SYNC_ORCHESTRATOR_WORKFLOW = {
 export const SDLC_RELEASE_CALENDAR_SYNC_WORKFLOW = {
   id: SDLC_RELEASE_CALENDAR_SYNC_WORKFLOW_ID,
   pluginId: 'sdlcIntel',
+  billable: false,
   version: 1,
   yaml: RELEASE_CALENDAR_SYNC_YAML,
   management: SDLC_WORKFLOW_MANAGEMENT,

@@ -1,42 +1,52 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { runPreflight, type PreflightInput } from './preflight';
-import type { ConnectorSpec, ActionContext } from '../connector_spec';
+import { runPreflight } from './preflight';
+import type { ConnectorSpec, ActionContext } from './connector_spec';
+import type { Logger } from '@kbn/logging';
+import { z } from '@kbn/zod/v4';
 
 const mockCtx: ActionContext = {
-  client: {} as any,
+  client: {} as ActionContext['client'],
   getClient: jest.fn(),
-  log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() } as any,
+  log: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn(),
+  } as unknown as Logger,
 };
 
 const mockConnector: ConnectorSpec = {
   metadata: {
     id: 'github',
-    name: 'GitHub',
+    displayName: 'GitHub',
     description: 'GitHub connector',
-    iconPath: '',
-    categories: [],
-  } as any,
+    minimumLicense: 'enterprise',
+    supportedFeatureIds: ['workflows'],
+  },
   actions: {
     listIssues: {
       isTool: false,
-      input: {} as any,
-      handler: jest.fn(),
+      input: z.object({}),
+      handler: jest.fn().mockResolvedValue({}),
     },
     createIssue: {
       isTool: true,
-      input: {} as any,
-      handler: jest.fn(),
+      input: z.object({}),
+      handler: jest.fn().mockResolvedValue({}),
     },
   },
   test: {
-    handler: jest.fn().mockResolvedValue(undefined),
-  } as any,
+    enabled: true,
+    handler: jest.fn().mockResolvedValue({}),
+  },
 };
 
 describe('CONN-007: Connector preflight health API', () => {
@@ -64,8 +74,9 @@ describe('CONN-007: Connector preflight health API', () => {
     const failingConnector: ConnectorSpec = {
       ...mockConnector,
       test: {
+        enabled: true,
         handler: jest.fn().mockRejectedValue(new Error('missing scope: repo')),
-      } as any,
+      },
     };
 
     const results = await runPreflight(failingConnector, mockCtx, {
