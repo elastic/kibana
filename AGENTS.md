@@ -79,8 +79,10 @@ Follow existing patterns in the target area first; below are common defaults.
 - Keep async logic linear; avoid nested `try` blocks when possible.
 
 ### UI Component Selection and Styling
-- Reuse components from the target module and shared packages it can depend on. Prefer components from `@kbn/ui-*` under `src/platform/kbn-ui` over equivalent `@elastic/eui` components when available.
-- If a reusable component's public API cannot meet the requirement, call out the limitation and recommend consulting its owning team before duplicating its implementation or overriding its internals with CSS. Treat CSS overrides as a last resort.
+- Reuse existing components from the target module and shared packages it can depend on. Prefer `@kbn/ui-*` packages under `src/platform/kbn-ui` over equivalent `@elastic/eui` components — they encode Kibana-specific behavior and conventions.
+- Treat every component you consume as encapsulated; customize it through its public props and supported composition points.
+- Do not target a component's internal DOM, internal or generated class names, or use `!important` to override its appearance. Existing instances of these patterns are not precedent.
+- When the public API cannot meet the requirement: if changing the component is in scope, extend its public API; otherwise implement the closest supported result and recommend consulting its owning team (`owner` in `kibana.jsonc`; `@elastic/eui-team` for EUI). Treat duplicating a component as a last resort.
 - Style with Emotion (`@emotion/react`) and EUI design tokens; reserve inline styles for runtime-computed values.
 
 ### Schema validation
