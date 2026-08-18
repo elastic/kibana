@@ -3564,6 +3564,96 @@ describe('Output Service', () => {
         );
       });
 
+      it('Should null gRPC-only compression when switching from gRPC with snappy/zstd to HTTP', async () => {
+        const soClient = getMockedSoClient({});
+        // Override the stored output to have a gRPC-only compression value
+        esoClientMock.getDecryptedAsInternalUser.mockResolvedValueOnce(
+          mockOutputSO('existing-otlp-output', {
+            type: 'otlp',
+            is_default: false,
+            otlp_exporter: {
+              endpoint: 'https://otel.example.com:4317',
+              protocol: 'grpc',
+              compression: 'zstd',
+            },
+          })
+        );
+
+        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4318',
+            protocol: 'http/protobuf',
+          },
+        });
+
+        expect(soClient.update).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            otlp_exporter: expect.objectContaining({
+              protocol: 'http/protobuf',
+              compression: null,
+            }),
+          })
+        );
+      });
+
+      it('Should extract tls secrets as ESO secret refs on OTLP update when secret storage is enabled', async () => {
+        const soClient = getMockedSoClient({});
+        mockedIsOutputSecretStorageEnabled.mockResolvedValueOnce(true);
+        mockedExtractAndUpdateOutputSecrets.mockResolvedValueOnce({
+          secretsToDelete: [],
+          outputUpdate: {
+            type: 'otlp',
+            otlp_exporter: { endpoint: 'https://new.example.com:4317', protocol: 'grpc' },
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: { id: 'updated-key-pem-secret-id' },
+                  tpm: {
+                    owner_auth: { id: 'updated-owner-auth-secret-id' },
+                    auth: { id: 'updated-auth-secret-id' },
+                  },
+                },
+              },
+            },
+          },
+        } as any);
+
+        await outputService.update(soClient, esClientMock, 'existing-otlp-output', {
+          otlp_exporter: {
+            endpoint: 'https://new.example.com:4317',
+            protocol: 'grpc',
+          },
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                key_pem: 'updated-key-pem',
+                tpm: { owner_auth: 'updated-owner-auth', auth: 'updated-auth' },
+              },
+            },
+          },
+        });
+
+        expect(soClient.update).toBeCalledWith(
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({
+            type: 'otlp',
+            secrets: {
+              otlp_exporter: {
+                tls: {
+                  key_pem: { id: 'updated-key-pem-secret-id' },
+                  tpm: {
+                    owner_auth: { id: 'updated-owner-auth-secret-id' },
+                    auth: { id: 'updated-auth-secret-id' },
+                  },
+                },
+              },
+            },
+          })
+        );
+      });
     });
   });
 
