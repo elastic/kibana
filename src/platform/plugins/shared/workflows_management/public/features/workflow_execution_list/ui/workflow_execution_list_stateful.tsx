@@ -87,9 +87,12 @@ export function WorkflowExecutionList({ workflowId }: WorkflowExecutionListProps
 
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
-  const handleViewWorkflowExecution = (executionId: string) => {
-    setSelectedExecution(executionId);
-  };
+  const handleViewWorkflowExecution = useCallback(
+    (executionId: string) => {
+      setSelectedExecution(executionId);
+    },
+    [setSelectedExecution]
+  );
 
   const onConfirmCancel = useCallback(async () => {
     if (!workflowId) {

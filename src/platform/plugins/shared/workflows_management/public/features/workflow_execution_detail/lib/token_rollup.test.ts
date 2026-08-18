@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { rollupStepAiList, rollupTokenUsage } from './token_rollup';
+import { rollupStepAiList, rollupTokenUsage, tokenRollupToUsage } from './token_rollup';
 
 describe('rollupTokenUsage', () => {
   it('returns empty for a node with no AI data', () => {
@@ -82,6 +82,23 @@ describe('rollupTokenUsage', () => {
       hasTokens: true,
       callCount: 1,
     });
+  });
+
+  it('treats zero-total AI leaves as empty so control-flow parents get no badge value', () => {
+    const result = rollupTokenUsage({
+      children: [
+        { ai: { inputTokens: 0, outputTokens: 0, totalTokens: 0 } },
+        {},
+      ],
+    });
+    expect(result).toEqual({
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      callCount: 0,
+      hasTokens: false,
+    });
+    expect(tokenRollupToUsage(result)).toBeUndefined();
   });
 });
 

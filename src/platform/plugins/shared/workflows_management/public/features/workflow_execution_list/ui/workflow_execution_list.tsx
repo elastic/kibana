@@ -124,13 +124,34 @@ export const WorkflowExecutionList = ({
     });
 
   const availableExecutedByOptions = useMemo<ExecutedByFilterOption[]>(() => {
-    return executedByValuesToResolve.flatMap((executedBy) => {
+    const options = executedByValuesToResolve.flatMap((executedBy) => {
       const label = getExecutedByLabel(
         executedByUserProfiles.get(executedBy),
         showUnresolvedExecutors ? executedBy : undefined
       );
 
       return label ? [{ label, value: executedBy }] : [];
+    });
+
+    const labelCounts = new Map<string, number>();
+    for (const { label } of options) {
+      labelCounts.set(label, (labelCounts.get(label) ?? 0) + 1);
+    }
+
+    return options.map((option) => {
+      if ((labelCounts.get(option.label) ?? 0) < 2) {
+        return option;
+      }
+
+      const profile = executedByUserProfiles.get(option.value);
+      const disambiguator =
+        profile?.user?.username ?? profile?.user?.email ?? option.value;
+
+      if (disambiguator === option.label) {
+        return { ...option, label: `${option.label} (${option.value})` };
+      }
+
+      return { ...option, label: `${option.label} (${disambiguator})` };
     });
   }, [executedByUserProfiles, executedByValuesToResolve, showUnresolvedExecutors]);
 
@@ -211,7 +232,8 @@ export const WorkflowExecutionList = ({
                 <WorkflowExecutionListItem
                   status={execution.status}
                   isTestRun={execution.isTestRun}
-                  startedAt={toValidDate(execution.startedAt)}
+                  stepId={execution.stepId}
+                  startedAt={execution.startedAt}
                   duration={execution.duration}
                   executedByProfile={
                     execution.executedBy
@@ -222,7 +244,8 @@ export const WorkflowExecutionList = ({
                   triggeredBy={execution.triggeredBy}
                   showExecutor={showExecutor}
                   selected={execution.id === selectedId}
-                  onClick={() => onExecutionClick(execution.id)}
+                  executionId={execution.id}
+                  onExecutionClick={onExecutionClick}
                 />
               </EuiFlexItem>
               {execution.id === lastExecutionId && (
@@ -309,9 +332,4 @@ const componentStyles = {
     height: '100%',
     overflowY: 'auto',
   }),
-};
-
-const toValidDate = (value: string): Date | null => {
-  const date = new Date(value);
-  return isNaN(date.getTime()) ? null : date;
 };

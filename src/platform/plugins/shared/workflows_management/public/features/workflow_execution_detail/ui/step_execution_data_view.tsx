@@ -58,7 +58,7 @@ interface StepExecutionDataViewProps {
 }
 
 export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
-  ({ stepExecution, mode, allStepExecutions }) => {
+  ({ stepExecution, mode }) => {
     const { data, title } = useMemo<{ data: JsonValue | undefined; title: string }>(() => {
       if (mode === 'input') {
         return { data: stepExecution.input, title: Titles.input };
@@ -69,17 +69,9 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
             title: Titles.error,
           };
         }
-        const isForeachOrWhile =
-          stepExecution.stepType === 'foreach' || stepExecution.stepType === 'while';
-        if (isForeachOrWhile && stepExecution.output == null && allStepExecutions?.length) {
-          return {
-            data: buildForeachOutput(stepExecution, allStepExecutions),
-            title: Titles.output,
-          };
-        }
         return { data: stepExecution.output, title: Titles.output };
       }
-    }, [mode, stepExecution, allStepExecutions]);
+    }, [mode, stepExecution]);
 
     const fieldPathActionsPrefix: string | undefined = useMemo(() => {
       const isOverviewStep = stepExecution.stepType === '__overview';

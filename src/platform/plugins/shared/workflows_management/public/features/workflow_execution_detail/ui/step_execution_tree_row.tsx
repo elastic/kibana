@@ -8,12 +8,14 @@
  */
 
 import {
+  EuiBadge,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -22,13 +24,37 @@ import { i18n } from '@kbn/i18n';
 import type { SerializedError, WorkflowTokenUsage } from '@kbn/workflows';
 import { ExecutionStatus, isDangerousStatus } from '@kbn/workflows';
 import { FailedStepErrorPanel } from './failed_step_error_panel';
+import { TreeStateTag, type TreeStateTagKind } from './tree_state_tag';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
+import type { IterationPinKind } from '../lib/iteration_pins';
 
-/** Chevron / icon gutter width — leaves reserve the same space so names align. */
+/** Chevron / gap-glyph gutter width — reserved per sibling group when needed. */
 export const TREE_ROW_CHEVRON_SLOT_PX = 16;
+/** Step / attempt icon column width (EuiIcon size="m"). */
+export const TREE_ROW_ICON_SLOT_PX = 16;
+
+/**
+ * Shared open-tree row spacing. Tune here — consumers read these constants
+ * (row flex gap, vertical padding, indent-guide geometry).
+ */
+export const TREE_ROW_GAP_SIZE = 's' as const; // euiTheme.size.s → 8px
+export const TREE_ROW_PADDING_X_SIZE = 's' as const; // euiTheme.size.s → 8px
+/** Previous vertical padding was size.xs (4px); +2px breathing room. */
+export const TREE_ROW_PADDING_Y_PX = 6;
+export const TREE_INDENT_GUIDE_WIDTH_PX = 1.5;
+/** Space between the parent row bottom and the start of the guide. */
+export const TREE_INDENT_GUIDE_STANDOFF_PX = 2;
+
+/**
+ * Horizontal offset from the node wrapper's left edge to the indent guide,
+ * so the guide sits under the parent row's chevron-slot center:
+ * row left padding + half the chevron slot.
+ */
+export const getTreeIndentGuideOffset = (rowPaddingX: string): string =>
+  `calc(${rowPaddingX} + ${TREE_ROW_CHEVRON_SLOT_PX / 2}px)`;
 
 export type StatusPlacement = 'inline' | 'right';
 
@@ -39,6 +65,20 @@ export interface StepExecutionTreeRowProps {
   executionTimeMs?: number | null;
   usage?: WorkflowTokenUsage;
   usageCallCount?: number;
+  /** Leaf AI model name for the token badge popover footer. */
+  usageModel?: string;
+  /**
+   * When set, inline metadata shows "{n} iterations · {duration}" (legacy range rows).
+   * Prefer gap rows for collapsed ranges.
+   */
+  iterationCount?: number;
+  /** Pin tags for foreach/while iteration exemplar rows (failed / latest / running). */
+  iterationPinKinds?: IterationPinKind[];
+  /**
+   * Extra qualitative tags (e.g. retry `final`). Merged with `iterationPinKinds`
+   * after the name; metric pills stay in the metadata cluster.
+   */
+  stateTags?: TreeStateTagKind[];
   selected: boolean;
   onSelect: () => void;
   /** Parent rows with children. */
@@ -46,18 +86,41 @@ export interface StepExecutionTreeRowProps {
   isExpanded?: boolean;
   onToggleExpand?: () => void;
   isTrigger?: boolean;
-  /** Structural labels (branch / iteration range) — no metadata cluster. */
+  /** Structural labels (branch / case) — no metadata cluster; uses → glyph. */
   isBranchLabel?: boolean;
   isSkeleton?: boolean;
   /**
    * Override interactivity. Branch labels default non-interactive; set true for
-   * clickable structural controls (e.g. collapsed iteration range `#0-1`).
+   * clickable structural controls.
    */
   forceInteractive?: boolean;
+  /** Legacy #N prefix; prefer `isRetryAttempt` + Attempt label. */
   attemptNumber?: number;
+  /** This row is a retry attempt of its parent step. */
+  isRetryAttempt?: boolean;
+  /** On the retry parent: attempts that actually ran (used). */
+  retryAttemptCount?: number;
+  /** On the retry parent: total allowed attempts denominator (config max-attempts + 1). */
+  retryMaxAttempts?: number;
+  /**
+   * When false, omit the chevron gutter so leaf-only sibling groups (e.g. attempts)
+   * shift left. Computed per sibling group by the parent list renderer.
+   */
+  reserveChevronSlot?: boolean;
   error?: SerializedError | string | null;
   onViewFailedStepInput?: () => void;
   errorPanelExpanded?: boolean;
+  /** Accessible name for the inline error region. */
+  errorPanelAriaLabel?: string;
+  /** Optional full message body (retry exhaustion lead-in + last error). */
+  errorPanelMessageOverride?: string;
+  /**
+   * Danger border around this error region because the owning step is selected
+   * (may be a sibling retry attempt, not this row).
+   */
+  showDangerSelectionBorder?: boolean;
+  /** One-shot arrival pulse when navigating to this failure (header link / flyout open). */
+  arrivalPulse?: boolean;
   /**
    * Where the non-success status icon anchors. Default `inline` (after metadata).
    * `right` keeps everything else inline-left and only pushes the status icon.
@@ -85,8 +148,7 @@ const shouldShowStatusIcon = (
     status === ExecutionStatus.RUNNING ||
     status === ExecutionStatus.WAITING ||
     status === ExecutionStatus.WAITING_FOR_INPUT ||
-    status === ExecutionStatus.WAITING_FOR_CHILD ||
-    status === ExecutionStatus.CANCELLED
+    status === ExecutionStatus.WAITING_FOR_CHILD
   );
 };
 
@@ -134,6 +196,10 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     executionTimeMs = null,
     usage,
     usageCallCount,
+    usageModel,
+    iterationCount,
+    iterationPinKinds = [],
+    stateTags = [],
     selected,
     onSelect,
     isExpandable = false,
@@ -144,32 +210,64 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     isSkeleton = false,
     forceInteractive,
     attemptNumber,
+    isRetryAttempt = false,
+    retryAttemptCount,
+    retryMaxAttempts,
+    reserveChevronSlot = true,
     error,
     onViewFailedStepInput,
-    errorPanelExpanded,
+    errorPanelExpanded: _errorPanelExpanded,
+    errorPanelAriaLabel,
+    errorPanelMessageOverride,
+    showDangerSelectionBorder = false,
+    arrivalPulse = false,
     statusPlacement = 'inline',
     showAggregateDanger = false,
     'data-test-subj': dataTestSubj = 'workflowStepExecutionTreeRow',
   }) => {
-    const { euiTheme } = useEuiTheme();
-    const isDangerous = status != null && isDangerousStatus(status);
+    const { euiTheme, colorMode } = useEuiTheme();
+    const isIterationParent = stepType === 'foreach-iteration' || stepType === 'while-iteration';
+    const hasFailedPin = iterationPinKinds.includes('failed');
+    const isRetryParent = retryAttemptCount != null && retryAttemptCount > 0 && !isRetryAttempt;
+    const statusIsDangerous = status != null && isDangerousStatus(status);
+    /** Danger fill only on the failure's location — never on retry parents or earlier attempts. */
+    const showDangerFill =
+      hasFailedPin ||
+      (statusIsDangerous && !isRetryParent && (!isRetryAttempt || stateTags.includes('final')));
+    const isDangerous = showDangerFill;
     const isInactive = status === ExecutionStatus.SKIPPED || status === ExecutionStatus.PENDING;
     const showNotRun = isInactive && !isTrigger && !isBranchLabel;
-    const isInteractive = forceInteractive ?? (!isSkeleton && !isBranchLabel);
+    const isInteractive = forceInteractive ?? (!isSkeleton && !isBranchLabel && !isRetryParent);
     const allowHover = isInteractive && !showNotRun;
-    const showStatus = !isBranchLabel && shouldShowStatusIcon(status, showAggregateDanger);
+    const showStatus =
+      !isBranchLabel && (hasFailedPin || shouldShowStatusIcon(status, showAggregateDanger));
 
     const hoverBg = euiTheme.colors.backgroundBaseInteractiveHover;
     const selectBg = euiTheme.colors.backgroundBaseInteractiveSelect;
     const radius = euiTheme.border.radius.medium;
+    // Light theme: stronger danger border for contrast against the danger fill.
+    const dangerSelectionBorder =
+      colorMode === 'LIGHT'
+        ? euiTheme.colors.borderStrongDanger
+        : euiTheme.colors.borderBaseDanger;
 
     const expandLabel = i18n.translate('workflowsManagement.stepExecutionTreeRow.expandAriaLabel', {
       defaultMessage: '{expanded, select, true{Collapse} other{Expand}} {stepName}',
       values: { expanded: isExpanded, stepName: stepId },
     });
 
+    // Dedupe while preserving order: pin kinds first, then extra state tags (e.g. final).
+    const resolvedStateTags = [...iterationPinKinds, ...stateTags].filter(
+      (kind, index, all): kind is TreeStateTagKind => all.indexOf(kind) === index
+    );
+
+    const showErrorPanel = showDangerFill && Boolean(error) && Boolean(onViewFailedStepInput);
+
     const statusNode = showStatus ? (
-      <StatusIcon status={status} showAggregateDanger={showAggregateDanger && !isDangerous} />
+      <StatusIcon
+        status={hasFailedPin && !status ? ExecutionStatus.FAILED : status}
+        showAggregateDanger={showAggregateDanger && !isDangerous}
+      />
     ) : null;
 
     const durationNode = (() => {
@@ -178,6 +276,25 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
         return (
           <EuiText size="xs" color="subdued" data-test-subj="workflowStepTreeDuration">
             {notRunLabel}
+          </EuiText>
+        );
+      }
+      if (iterationCount != null && iterationCount > 0) {
+        const durationLabel =
+          executionTimeMs != null && Number.isFinite(executionTimeMs) && executionTimeMs >= 0
+            ? formatDuration(executionTimeMs)
+            : undefined;
+        return (
+          <EuiText size="xs" color="subdued" data-test-subj="workflowStepTreeDuration">
+            {durationLabel != null
+              ? i18n.translate('workflowsManagement.stepExecutionTreeRow.iterationRangeMeta', {
+                  defaultMessage: '{count} iterations · {duration}',
+                  values: { count: iterationCount, duration: durationLabel },
+                })
+              : i18n.translate('workflowsManagement.stepExecutionTreeRow.iterationRangeCountOnly', {
+                  defaultMessage: '{count} iterations',
+                  values: { count: iterationCount },
+                })}
           </EuiText>
         );
       }
@@ -197,28 +314,46 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     })();
 
     const tokenNode =
-      !isBranchLabel && usage ? (
+      !isBranchLabel && usage && usage.totalTokens > 0 ? (
         <TokenUsageBadge
           usage={usage}
           compact
           callCount={usageCallCount}
+          model={usageModel}
           data-test-subj="workflowStepTreeTokenUsage"
         />
+      ) : null;
+
+    const attemptsBadge =
+      isRetryParent && retryAttemptCount != null ? (
+        <EuiBadge color="hollow" iconType="refresh" data-test-subj="workflowStepTreeAttemptsBadge">
+          {retryMaxAttempts != null
+            ? i18n.translate('workflowsManagement.stepExecutionTreeRow.attemptsOfMaxBadge', {
+                defaultMessage: '{used} of {max} attempts',
+                values: { used: retryAttemptCount, max: retryMaxAttempts },
+              })
+            : i18n.translate('workflowsManagement.stepExecutionTreeRow.attemptsBadge', {
+                defaultMessage: '{n} attempts',
+                values: { n: retryAttemptCount },
+              })}
+        </EuiBadge>
       ) : null;
 
     const metaInline = (
       <EuiFlexGroup
         alignItems="center"
-        gutterSize="s"
+        gutterSize="none"
         responsive={false}
         wrap={false}
         css={css`
           flex-shrink: 0;
           min-width: 0;
+          gap: ${euiTheme.size[TREE_ROW_GAP_SIZE]};
         `}
         data-test-subj="workflowStepTreeMeta"
       >
         {durationNode && <EuiFlexItem grow={false}>{durationNode}</EuiFlexItem>}
+        {attemptsBadge && <EuiFlexItem grow={false}>{attemptsBadge}</EuiFlexItem>}
         {tokenNode && <EuiFlexItem grow={false}>{tokenNode}</EuiFlexItem>}
         {statusPlacement === 'inline' && statusNode && (
           <EuiFlexItem grow={false}>{statusNode}</EuiFlexItem>
@@ -227,7 +362,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     );
 
     const rowBg = (() => {
-      if (isDangerous) return euiTheme.colors.backgroundBaseDanger;
+      if (showDangerFill) return euiTheme.colors.backgroundBaseDanger;
       if (isTrigger) return euiTheme.colors.backgroundBaseSubdued;
       if (selected) return selectBg;
       return 'transparent';
@@ -238,6 +373,9 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
         data-test-subj={dataTestSubj}
         data-selected={selected ? 'true' : 'false'}
         data-status-placement={statusPlacement}
+        data-danger-fill={showDangerFill ? 'true' : 'false'}
+        data-danger-selected={showDangerSelectionBorder ? 'true' : 'false'}
+        data-arrival-pulse={arrivalPulse ? 'true' : 'false'}
         css={css`
           width: 100%;
           min-width: 0;
@@ -249,7 +387,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             cursor: pointer;
             &:hover {
               background-color: ${
-                isDangerous
+                showDangerFill
                   ? euiTheme.colors.backgroundBaseDanger
                   : selected
                   ? selectBg
@@ -260,20 +398,41 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             : isInteractive
             ? `cursor: pointer;`
             : ''}
-          ${selected && isDangerous
-            ? `outline: 1px solid ${euiTheme.colors.borderBasePrimary};`
+          ${showDangerSelectionBorder
+            ? `outline: 1px solid ${dangerSelectionBorder};`
+            : ''}
+          ${arrivalPulse
+            ? `
+            @keyframes workflowDangerArrivalPulse {
+              0%,
+              100% {
+                box-shadow: 0 0 0 0 ${transparentize(euiTheme.colors.danger, 0)};
+              }
+              50% {
+                box-shadow: 0 0 0 ${euiTheme.size.xs} ${transparentize(
+                  euiTheme.colors.danger,
+                  0.35
+                )};
+              }
+            }
+            @media (prefers-reduced-motion: no-preference) {
+              animation: workflowDangerArrivalPulse 0.6s ease-out 2;
+            }
+          `
             : ''}
         `}
       >
         <EuiFlexGroup
           alignItems="center"
-          gutterSize="xs"
+          gutterSize="none"
           responsive={false}
           wrap={false}
           css={css`
-            padding: ${euiTheme.size.xs} ${euiTheme.size.s};
+            gap: ${euiTheme.size[TREE_ROW_GAP_SIZE]};
+            padding: ${TREE_ROW_PADDING_Y_PX}px ${euiTheme.size[TREE_ROW_PADDING_X_SIZE]};
             min-height: 28px;
           `}
+          data-test-subj="workflowStepTreeRowInner"
           onClick={
             isInteractive
               ? (e) => {
@@ -297,35 +456,37 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
           aria-selected={isInteractive ? selected : undefined}
           aria-expanded={isExpandable ? isExpanded : undefined}
         >
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              width: ${TREE_ROW_CHEVRON_SLOT_PX}px;
-              flex-shrink: 0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            `}
-            data-test-subj="workflowStepTreeChevronSlot"
-          >
-            {isExpandable ? (
-              <EuiButtonIcon
-                iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-                size="xs"
-                color="text"
-                aria-label={expandLabel}
-                aria-expanded={isExpanded}
-                data-test-subj="workflowStepTreeChevron"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onToggleExpand?.();
-                }}
-              />
-            ) : (
-              <span aria-hidden="true" />
-            )}
-          </EuiFlexItem>
+          {reserveChevronSlot ? (
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                width: ${TREE_ROW_CHEVRON_SLOT_PX}px;
+                flex-shrink: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              `}
+              data-test-subj="workflowStepTreeChevronSlot"
+            >
+              {isExpandable ? (
+                <EuiButtonIcon
+                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                  size="xs"
+                  color="text"
+                  aria-label={expandLabel}
+                  aria-expanded={isExpanded}
+                  data-test-subj="workflowStepTreeChevron"
+                  onClick={(e: React.MouseEvent) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onToggleExpand?.();
+                  }}
+                />
+              ) : (
+                <span aria-hidden="true" />
+              )}
+            </EuiFlexItem>
+          ) : null}
 
           <EuiFlexItem
             grow={false}
@@ -344,6 +505,21 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
                 aria-hidden={true}
                 data-test-subj="workflowStepTreeBranchGlyph"
               />
+            ) : isRetryAttempt ? (
+              <EuiIcon
+                type="refresh"
+                size="m"
+                color="subdued"
+                aria-hidden={true}
+                data-test-subj="workflowStepTreeRetryAttemptIcon"
+              />
+            ) : isIterationParent ? (
+              <span data-test-subj="workflowStepTreeIterationIcon">
+                <StepIcon
+                  stepType={stepType}
+                  executionStatus={isDangerous ? ExecutionStatus.FAILED : status ?? null}
+                />
+              </span>
             ) : (
               <StepIcon
                 stepType={stepType || stepId}
@@ -359,36 +535,79 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
               max-width: 100%;
             `}
           >
-            <EuiText
-              size="s"
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="none"
+              responsive={false}
+              wrap={false}
               css={css`
-                font-weight: ${isExpandable ? 500 : 400};
-                color: ${selected
-                  ? euiTheme.colors.textPrimary
-                  : isDangerous
-                  ? euiTheme.colors.danger
-                  : isInactive
-                  ? euiTheme.colors.textDisabled
-                  : 'inherit'};
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                /* Annotations use a leading " · "; failed chip adds its own margin. */
+                gap: 0;
+                min-width: 0;
               `}
             >
-              <span data-test-subj="workflowStepName">
-                {attemptNumber !== undefined && (
-                  <span
-                    css={css`
-                      color: ${euiTheme.colors.textSubdued};
-                      font-variant-numeric: tabular-nums;
-                    `}
-                  >
-                    #{attemptNumber}{' '}
+              <EuiFlexItem grow={false} css={{ minWidth: 0, maxWidth: '100%' }}>
+                <EuiText
+                  size="s"
+                  css={css`
+                    font-weight: ${isExpandable || hasFailedPin ? 500 : 400};
+                    color: ${selected
+                      ? euiTheme.colors.textPrimary
+                      : isDangerous
+                      ? euiTheme.colors.danger
+                      : isInactive
+                      ? euiTheme.colors.textDisabled
+                      : 'inherit'};
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                  `}
+                >
+                  <span data-test-subj="workflowStepName">
+                    {!isRetryAttempt && attemptNumber !== undefined && (
+                      <span
+                        css={css`
+                          color: ${euiTheme.colors.textSubdued};
+                          font-variant-numeric: tabular-nums;
+                        `}
+                      >
+                        {`#${attemptNumber} `}
+                      </span>
+                    )}
+                    {stepId}
                   </span>
-                )}
-                {stepId}
-              </span>
-            </EuiText>
+                </EuiText>
+              </EuiFlexItem>
+              {resolvedStateTags.length > 0 && (
+                <EuiFlexItem grow={false} data-test-subj="workflowStepTreeStateTags">
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="none"
+                    responsive={false}
+                    wrap={false}
+                  >
+                    {resolvedStateTags.map((kind) => (
+                      <EuiFlexItem
+                        grow={false}
+                        key={kind}
+                        css={
+                          kind === 'failed'
+                            ? css`
+                                margin-inline-start: ${euiTheme.size.xs};
+                              `
+                            : undefined
+                        }
+                      >
+                        <TreeStateTag
+                          kind={kind}
+                          data-test-subj={`workflowStepTreeIterationTag-${kind}`}
+                        />
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
 
           {!isBranchLabel && (
@@ -412,12 +631,19 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
           )}
         </EuiFlexGroup>
 
-        {isDangerous && error && onViewFailedStepInput && (
+        {showErrorPanel && error && onViewFailedStepInput && (
           <FailedStepErrorPanel
             error={error}
             stepType={stepType}
             onViewInput={onViewFailedStepInput}
-            defaultExpanded={errorPanelExpanded ?? true}
+            ariaLabel={
+              errorPanelAriaLabel ??
+              i18n.translate('workflows.executionFlyout.failedStep.regionLabel', {
+                defaultMessage: 'Error details for {stepName}',
+                values: { stepName: stepId },
+              })
+            }
+            messageOverride={errorPanelMessageOverride}
           />
         )}
       </div>

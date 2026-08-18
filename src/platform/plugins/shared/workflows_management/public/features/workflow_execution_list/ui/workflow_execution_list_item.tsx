@@ -13,14 +13,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiIconTip,
   EuiPanel,
   EuiText,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,6 +31,7 @@ import { getStatusLabel } from '../../../shared/translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
 import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
+import { getRunMode } from '../../workflow_execution_detail/lib/get_run_mode';
 
 export const getExecutionTitleColor = (
   euiTheme: EuiThemeComputed,
@@ -42,34 +42,49 @@ export const getExecutionTitleColor = (
   }
 };
 
+const toValidDate = (value: Date | string | null | undefined): Date | null => {
+  if (value == null) {
+    return null;
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
   isTestRun: boolean;
-  startedAt: Date | null;
+  /** Targeted step id for step-test runs; omitted for full-workflow test runs. */
+  stepId?: string | null;
+  /** ISO string preferred so poll refetches keep a stable prop for React.memo. */
+  startedAt: Date | string | null;
   duration: number | null;
   executedByProfile?: UserProfileWithAvatar;
   executedByLabel?: string;
   triggeredBy?: string;
   showExecutor?: boolean;
   selected?: boolean;
-  onClick?: () => void;
+  executionId?: string;
+  onExecutionClick?: (executionId: string) => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
   ({
     status,
     isTestRun,
-    startedAt,
+    stepId,
+    startedAt: startedAtInput,
     duration,
     executedByProfile,
     executedByLabel,
     triggeredBy,
     showExecutor = false,
     selected,
-    onClick,
+    executionId,
+    onExecutionClick,
   }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
+    const startedAt = useMemo(() => toValidDate(startedAtInput), [startedAtInput]);
     const formattedDate = startedAt ? getFormattedDate(startedAt) : null;
     const executedByDisplayName = executedByProfile?.user
       ? getUserDisplayName(executedByProfile.user)
@@ -81,18 +96,44 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
       return null;
     }, [duration]);
 
+    const runModeInfo = useMemo(
+      () => getRunMode({ isTestRun, stepId }),
+      [isTestRun, stepId]
+    );
+    const runModeTooltip = useMemo(() => {
+      if (runModeInfo.runMode === 'stepTest') {
+        return i18n.translate('workflows.workflowExecutionListItem.stepTestIconTitle', {
+          defaultMessage: 'Step test: {stepName}',
+          values: { stepName: runModeInfo.stepTestTargetName ?? '' },
+        });
+      }
+      if (runModeInfo.runMode === 'test') {
+        return i18n.translate('workflows.workflowExecutionListItem.testRunIconTitle', {
+          defaultMessage: 'Test run',
+        });
+      }
+      return null;
+    }, [runModeInfo]);
+
+    const isSelectable = Boolean(onExecutionClick && executionId);
+    const handleClick = useCallback(() => {
+      if (onExecutionClick && executionId) {
+        onExecutionClick(executionId);
+      }
+    }, [executionId, onExecutionClick]);
+
     const panelCss = useMemo(() => {
       if (selected) {
         return styles.selectedContainer;
       }
-      if (onClick) {
+      if (isSelectable) {
         return styles.selectableContainer;
       }
-    }, [selected, onClick, styles]);
+    }, [selected, isSelectable, styles]);
 
     return (
       <EuiPanel
-        onClick={onClick}
+        onClick={isSelectable ? handleClick : undefined}
         hasShadow={false}
         paddingSize="m"
         hasBorder
@@ -111,7 +152,10 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               <EuiFlexItem>
                 <EuiText
                   size="s"
-                  css={{ fontWeight: 'bold', color: getExecutionTitleColor(euiTheme, status) }}
+                  css={{
+                    fontWeight: euiTheme.font.weight.medium,
+                    color: getExecutionTitleColor(euiTheme, status),
+                  }}
                 >
                   {getStatusLabel(status)}
                 </EuiText>
@@ -145,15 +189,18 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
                   </EuiBadge>
                 </EuiFlexItem>
               )}
-              {isTestRun && (
+              {runModeTooltip && (
                 <EuiFlexItem grow={false}>
-                  <EuiIconTip
-                    type="flask"
-                    color={euiTheme.colors.backgroundFilledText}
-                    title={i18n.translate('workflows.workflowExecutionListItem.testRunIconTitle', {
-                      defaultMessage: 'Test Run',
-                    })}
-                  />
+                  <EuiToolTip content={runModeTooltip} position="top">
+                    <span
+                      tabIndex={0}
+                      aria-label={runModeTooltip}
+                      css={{ display: 'inline-flex', lineHeight: 0 }}
+                      data-test-subj="workflowExecutionListItemRunModeIcon"
+                    >
+                      <EuiIcon type="flask" color="warning" aria-hidden={true} />
+                    </span>
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
               {showExecutor && executedByDisplayName && (

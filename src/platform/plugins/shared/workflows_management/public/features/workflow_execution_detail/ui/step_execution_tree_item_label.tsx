@@ -113,7 +113,7 @@ export function StepExecutionTreeItemLabel({
             </EuiBadge>
           </EuiFlexItem>
         )}
-        {usage && (
+        {usage && usage.totalTokens > 0 && (
           <EuiFlexItem grow={false}>
             <TokenUsageBadge
               usage={usage}
@@ -151,7 +151,10 @@ export function StepExecutionTreeItemLabel({
           error={error}
           stepType={stepType}
           onViewInput={onViewFailedStepInput}
-          defaultExpanded={errorPanelExpanded ?? true}
+          ariaLabel={i18n.translate('workflows.executionFlyout.failedStep.regionLabel', {
+            defaultMessage: 'Error details for {stepName}',
+            values: { stepName: stepId },
+          })}
         />
       )}
     </div>

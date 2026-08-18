@@ -77,6 +77,59 @@ describe('normalizeStepAi', () => {
       callCount: undefined,
     });
   });
+
+  it('reads LangChain model_name from output.metadata', () => {
+    expect(
+      normalizeStepAi({
+        output: {
+          content: 'ok',
+          metadata: {
+            model_name: 'gpt-4o',
+            tokenUsage: { promptTokens: 10, completionTokens: 5, totalTokens: 15 },
+          },
+        },
+      })
+    ).toMatchObject({
+      model: 'gpt-4o',
+      inputTokens: 10,
+      outputTokens: 5,
+    });
+  });
+
+  it('reads LangChain tokenUsage.promptTokens from output.metadata', () => {
+    expect(
+      normalizeStepAi({
+        output: {
+          content: 'ok',
+          metadata: {
+            tokenUsage: { promptTokens: 124, completionTokens: 86, totalTokens: 210 },
+          },
+        },
+      })
+    ).toMatchObject({
+      inputTokens: 124,
+      outputTokens: 86,
+      totalTokens: 210,
+    });
+  });
+
+  it('prefers result connectorId over the definition fallback', () => {
+    expect(
+      normalizeStepAi({
+        output: { metadata: { connectorId: 'from-result' } },
+        connectorId: 'from-definition',
+      })
+    ).toMatchObject({ connectorId: 'from-result' });
+  });
+
+  it('falls back to definition connectorId when the result has none', () => {
+    expect(
+      normalizeStepAi({
+        output: { model: 'gpt-4o' },
+        connectorId: 'from-definition',
+      })
+    ).toMatchObject({ model: 'gpt-4o', connectorId: 'from-definition' });
+  });
 });
 
 describe('stepAiToTokenUsage', () => {
@@ -90,5 +143,11 @@ describe('stepAiToTokenUsage', () => {
       outputTokens: 3,
       totalTokens: 5,
     });
+  });
+
+  it('returns undefined for zero-total usage so badges stay hidden', () => {
+    expect(
+      stepAiToTokenUsage({ inputTokens: 0, outputTokens: 0, totalTokens: 0 })
+    ).toBeUndefined();
   });
 });

@@ -256,4 +256,28 @@ describe('useWorkflowExecutions', () => {
 
     expect(result.current.hasNextPage).toBe(true);
   });
+
+  it('should not set isLoadingMore during background refetch', async () => {
+    const { result } = renderExecutionsHook({ workflowId: 'wf-1' });
+
+    await waitFor(() => expect(result.current.data).not.toBeNull());
+    expect(result.current.isLoadingMore).toBe(false);
+
+    let resolveRefetch: (value: WorkflowExecutionListDto) => void = () => {};
+    mockGetWorkflowExecutions.mockImplementation(
+      () =>
+        new Promise<WorkflowExecutionListDto>((resolve) => {
+          resolveRefetch = resolve;
+        })
+    );
+
+    const refetchPromise = result.current.refetch();
+    await waitFor(() => expect(mockGetWorkflowExecutions).toHaveBeenCalledTimes(2));
+
+    expect(result.current.isLoadingMore).toBe(false);
+
+    resolveRefetch(executionsPage1);
+    await refetchPromise;
+    await waitFor(() => expect(result.current.isLoadingMore).toBe(false));
+  });
 });

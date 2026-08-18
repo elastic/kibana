@@ -86,4 +86,32 @@ describe('WorkflowExecutionListItem', () => {
       expect(screen.queryByText('Tal Borenstein')).not.toBeInTheDocument();
     });
   });
+
+  describe('run mode indicator', () => {
+    it('does not render a flask for production runs', () => {
+      render(<WorkflowExecutionListItem {...defaultProps} isTestRun={false} />);
+
+      expect(
+        screen.queryByTestId('workflowExecutionListItemRunModeIcon')
+      ).not.toBeInTheDocument();
+    });
+
+    it('renders a warning flask with Test run tooltip for full test runs', () => {
+      const { container } = render(
+        <WorkflowExecutionListItem {...defaultProps} isTestRun={true} />
+      );
+
+      expect(screen.getByLabelText('Test run')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="flask"]')).toBeInTheDocument();
+    });
+
+    it('renders a warning flask with Step test tooltip when stepId is set', () => {
+      const { container } = render(
+        <WorkflowExecutionListItem {...defaultProps} isTestRun={true} stepId="analyze_alerts" />
+      );
+
+      expect(screen.getByLabelText('Step test: analyze_alerts')).toBeInTheDocument();
+      expect(container.querySelector('[data-euiicon-type="flask"]')).toBeInTheDocument();
+    });
+  });
 });

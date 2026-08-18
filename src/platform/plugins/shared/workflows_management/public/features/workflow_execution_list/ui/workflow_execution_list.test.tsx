@@ -19,21 +19,33 @@ jest.mock('./workflow_execution_list_item', () => ({
     status,
     startedAt,
     executedByLabel,
-    onClick,
+    onExecutionClick,
+    executionId,
     selected,
   }: {
     status: string;
-    startedAt: Date | null;
+    startedAt: Date | string | null;
     executedByLabel?: string;
-    onClick: () => void;
+    onExecutionClick?: (id: string) => void;
+    executionId?: string;
     selected: boolean;
   }) => (
     <div
       data-test-subj="workflowExecutionListItem"
       data-selected={selected}
-      data-started-at={startedAt ? startedAt.toISOString() : 'null'}
+      data-started-at={
+        !startedAt
+          ? 'null'
+          : typeof startedAt === 'string'
+            ? startedAt
+            : startedAt.toISOString()
+      }
       data-executed-by-label={executedByLabel}
-      onClick={onClick}
+      onClick={() => {
+        if (onExecutionClick && executionId) {
+          onExecutionClick(executionId);
+        }
+      }}
       role="button"
       onKeyDown={() => {}}
       tabIndex={0}
@@ -244,10 +256,10 @@ describe('WorkflowExecutionList', () => {
   });
 
   describe('startedAt date handling', () => {
-    it('passes a valid Date when startedAt is a valid ISO string', () => {
+    it('passes through a valid ISO startedAt string', () => {
       renderComponent();
       const items = screen.getAllByTestId('workflowExecutionListItem');
-      expect(items[0]).toHaveAttribute('data-started-at', '2024-01-01T10:00:00.000Z');
+      expect(items[0]).toHaveAttribute('data-started-at', '2024-01-01T10:00:00Z');
     });
 
     it('passes null when startedAt is an empty string', () => {

@@ -129,6 +129,7 @@ export function useWorkflowExecutions(
     hasNextPage,
     isFetched,
     isFetching,
+    isFetchingNextPage,
     isLoading: isInitialLoading,
     refetch,
     error,
@@ -158,8 +159,8 @@ export function useWorkflowExecutions(
     retryDelay: options.retryDelay ?? ((attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000)),
   });
 
-  // Computed loading states for better semantics
-  const isLoadingMore = isFetching && !isInitialLoading;
+  // Only true while paginating — not during background poll refetches
+  const isLoadingMore = isFetchingNextPage;
 
   // Flatten all pages into a single list
   const allExecutions = useMemo<WorkflowExecutionListDto | null>(() => {

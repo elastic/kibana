@@ -7,25 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiComboBoxOptionOption, EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
+import type { EuiSelectableOption, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
-  EuiComboBox,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
   EuiPopoverTitle,
   EuiSelectable,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
@@ -51,11 +50,99 @@ export interface ExecutionListFiltersProps {
   showExecutor?: boolean;
 }
 
-interface ExecutionListFiltersItem {
-  group: 'status' | 'executionType';
-}
+type StatusFilterOption = EuiSelectableOption<{ statuses: ExecutionStatus[] }>;
 
 const EQUAL_HEIGHT_OFFSET = 2; // to avoid changes in the header's height after "Clear all" button appears
+
+const buildStatusFilterOptions = (selected: ExecutionStatus[]): StatusFilterOption[] => {
+  const statusesByLabel = new Map<string, ExecutionStatus[]>();
+
+  for (const status of Object.values(ExecutionStatus)) {
+    const label = getStatusLabel(status);
+    const group = statusesByLabel.get(label);
+    if (group) {
+      group.push(status);
+    } else {
+      statusesByLabel.set(label, [status]);
+    }
+  }
+
+  return Array.from(statusesByLabel.entries()).map(([label, statuses]) => ({
+    label,
+    key: statuses[0],
+    statuses,
+    checked: statuses.some((status) => selected.includes(status)) ? ('on' as const) : undefined,
+  }));
+};
+
+const buildRunTypeFilterOptions = (
+  selected: ExecutionType[]
+): Array<EuiSelectableOption<{ executionType: ExecutionType }>> => [
+  {
+    key: ExecutionType.PRODUCTION,
+    label: i18n.translate('workflows.workflowExecutionList.filterIconButton.productionLabel', {
+      defaultMessage: 'Production',
+    }),
+    executionType: ExecutionType.PRODUCTION,
+    checked: selected.includes(ExecutionType.PRODUCTION) ? ('on' as const) : undefined,
+  },
+  {
+    key: ExecutionType.TEST,
+    label: i18n.translate('workflows.workflowExecutionList.filterIconButton.testLabel', {
+      defaultMessage: 'Test run',
+    }),
+    executionType: ExecutionType.TEST,
+    checked: selected.includes(ExecutionType.TEST) ? ('on' as const) : undefined,
+  },
+];
+
+const buildExecutedByFilterOptions = ({
+  availableExecutedByOptions,
+  selected,
+  searchValue,
+}: {
+  availableExecutedByOptions: ExecutedByFilterOption[];
+  selected: string[];
+  searchValue: string;
+}): EuiSelectableOption[] => {
+  const optionsByValue = new Map<string, EuiSelectableOption>();
+
+  for (const { label, value } of availableExecutedByOptions) {
+    optionsByValue.set(value, {
+      label,
+      key: value,
+      checked: selected.includes(value) ? ('on' as const) : undefined,
+    });
+  }
+
+  for (const value of selected) {
+    if (!optionsByValue.has(value)) {
+      optionsByValue.set(value, {
+        label: value,
+        key: value,
+        checked: 'on',
+      });
+    }
+  }
+
+  const trimmedSearch = searchValue.trim();
+  if (
+    trimmedSearch &&
+    !Array.from(optionsByValue.values()).some(
+      (option) =>
+        option.key === trimmedSearch ||
+        option.label.localeCompare(trimmedSearch, undefined, { sensitivity: 'accent' }) === 0
+    )
+  ) {
+    optionsByValue.set(trimmedSearch, {
+      label: trimmedSearch,
+      key: trimmedSearch,
+      checked: undefined,
+    });
+  }
+
+  return Array.from(optionsByValue.values());
+};
 
 export function ExecutionListFilters({
   filters,
@@ -69,83 +156,70 @@ export function ExecutionListFilters({
     prefix: 'filterGroupPopover',
   });
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [items, setItems] = useState<EuiSelectableOption<ExecutionListFiltersItem>[]>([
-    {
-      label: i18n.translate('workflows.workflowExecutionList.filterIconButton.statusLabel', {
-        defaultMessage: 'Status',
-      }),
-      isGroupLabel: true,
-      group: 'status' as const,
-    },
-    ...Object.values(ExecutionStatus).map((status) => ({
-      label: getStatusLabel(status),
-      key: status,
-      checked: filters.statuses.includes(status) ? ('on' as const) : undefined,
-      group: 'status' as const,
-    })),
-    {
-      label: i18n.translate('workflows.workflowExecutionList.filterIconButton.executionTypeLabel', {
-        defaultMessage: 'Execution type',
-      }),
-      isGroupLabel: true,
-      group: 'executionType' as const,
-    },
-    {
-      key: ExecutionType.TEST,
-      label: i18n.translate('workflows.workflowExecutionList.filterIconButton.testLabel', {
-        defaultMessage: 'test',
-      }),
-      checked: filters.executionTypes.includes(ExecutionType.TEST) ? ('on' as const) : undefined,
-      group: 'executionType' as const,
-    },
-    {
-      key: ExecutionType.PRODUCTION,
-      label: i18n.translate('workflows.workflowExecutionList.filterIconButton.productionLabel', {
-        defaultMessage: 'production',
-      }),
-      checked: filters.executionTypes.includes(ExecutionType.PRODUCTION)
-        ? ('on' as const)
-        : undefined,
-      group: 'executionType' as const,
-    },
-  ]);
-
-  const availableExecutedByOptionsByValue = useMemo(
-    () => new Map(availableExecutedByOptions.map(({ label, value }) => [value, label])),
-    [availableExecutedByOptions]
+  const [executedBySearchValue, setExecutedBySearchValue] = useState('');
+  const [statusOptions, setStatusOptions] = useState(() =>
+    buildStatusFilterOptions(filters.statuses)
+  );
+  const [runTypeOptions, setRunTypeOptions] = useState(() =>
+    buildRunTypeFilterOptions(filters.executionTypes)
   );
 
-  const getExecutedByOption = (value: string): EuiComboBoxOptionOption<string> => ({
-    label: availableExecutedByOptionsByValue.get(value) ?? value,
-    value,
-  });
+  useEffect(() => {
+    setStatusOptions(buildStatusFilterOptions(filters.statuses));
+  }, [filters.statuses]);
 
-  const handleSelectableOptionsChange = (
-    newOptions: EuiSelectableOption<ExecutionListFiltersItem>[]
-  ) => {
-    setItems(newOptions);
+  useEffect(() => {
+    setRunTypeOptions(buildRunTypeFilterOptions(filters.executionTypes));
+  }, [filters.executionTypes]);
+
+  const executedByOptions = useMemo(
+    () =>
+      buildExecutedByFilterOptions({
+        availableExecutedByOptions,
+        selected: filters.executedBy,
+        searchValue: executedBySearchValue,
+      }),
+    [availableExecutedByOptions, filters.executedBy, executedBySearchValue]
+  );
+
+  const handleStatusChange = (newOptions: StatusFilterOption[]) => {
+    setStatusOptions(newOptions);
     onFiltersChange({
       statuses: newOptions
-        .filter((item) => item.checked === 'on' && item.key && item.group === 'status')
-        .map((item) => item.key as ExecutionStatus),
+        .filter((item) => item.checked === 'on')
+        .flatMap((item) => item.statuses ?? []),
+      executionTypes: filters.executionTypes,
+      executedBy: filters.executedBy,
+    });
+  };
+
+  const handleRunTypeChange = (
+    newOptions: Array<EuiSelectableOption<{ executionType: ExecutionType }>>
+  ) => {
+    setRunTypeOptions(newOptions);
+    onFiltersChange({
+      statuses: filters.statuses,
       executionTypes: newOptions
-        .filter((item) => item.checked === 'on' && item.key && item.group === 'executionType')
+        .filter((item) => item.checked === 'on' && item.key)
         .map((item) => item.key as ExecutionType),
       executedBy: filters.executedBy,
     });
   };
 
-  const handleExecutedByChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
-    const executedByValues = selectedOptions.map((option) => option.value ?? option.label);
+  const handleExecutedByChange = (newOptions: EuiSelectableOption[]) => {
     onFiltersChange({
       statuses: filters.statuses,
       executionTypes: filters.executionTypes,
-      executedBy: executedByValues,
+      executedBy: newOptions
+        .filter((item) => item.checked === 'on' && item.key)
+        .map((item) => item.key as string),
     });
   };
 
   const clearAll = () => {
-    setItems(items.map((item) => ({ ...item, checked: undefined })));
+    setStatusOptions(statusOptions.map((item) => ({ ...item, checked: undefined })));
+    setRunTypeOptions(runTypeOptions.map((item) => ({ ...item, checked: undefined })));
+    setExecutedBySearchValue('');
     onFiltersChange({
       statuses: [],
       executionTypes: [],
@@ -154,8 +228,11 @@ export function ExecutionListFilters({
   };
 
   const numActiveFilters =
-    items.filter((item) => item.checked === 'on').length +
+    statusOptions.filter((item) => item.checked === 'on').length +
+    runTypeOptions.filter((item) => item.checked === 'on').length +
     (showExecutor ? filters.executedBy.length : 0);
+
+  const hasActiveFilters = numActiveFilters > 0;
 
   return (
     <EuiFilterGroup compressed css={styles.filterGroup}>
@@ -165,25 +242,31 @@ export function ExecutionListFilters({
           defaultMessage: 'Filter executions',
         })}
         isOpen={isPopoverOpen}
-        closePopover={() => setIsPopoverOpen(false)}
+        closePopover={() => {
+          setIsPopoverOpen(false);
+          setExecutedBySearchValue('');
+        }}
         button={
           <EuiFilterButton
+            grow={false}
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
             }}
             color="text"
-            badgeColor={numActiveFilters > 0 ? 'accent' : 'subdued'}
+            badgeColor="accent"
             isSelected={isPopoverOpen}
+            hasActiveFilters={hasActiveFilters}
+            // Always pass numFilters so the inline badge stays mounted (gray "0" /
+            // accent "N") and the control width does not shift.
             numFilters={numActiveFilters}
-            hasActiveFilters={!!numActiveFilters}
-            numActiveFilters={numActiveFilters}
+            numActiveFilters={hasActiveFilters ? numActiveFilters : undefined}
             aria-label={i18n.translate(
               'workflows.workflowExecutionList.filterIconButtonAriaLabel',
               {
                 defaultMessage: 'Filter executions',
               }
             )}
-            css={styles.filterButtonStyle}
+            css={styles.filterButton}
           >
             <EuiIcon type="filter" aria-hidden={true} />
           </EuiFilterButton>
@@ -204,7 +287,7 @@ export function ExecutionListFilters({
                 </h5>
               </EuiTitle>
             </EuiFlexItem>
-            {numActiveFilters > 0 && (
+            {hasActiveFilters && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   size="xs"
@@ -219,57 +302,105 @@ export function ExecutionListFilters({
             )}
           </EuiFlexGroup>
         </EuiPopoverTitle>
-        <EuiSelectable
-          aria-label={i18n.translate('workflows.workflowExecutionList.filterIconButton.ariaLabel', {
-            defaultMessage: 'Filter executions',
-          })}
-          options={items}
-          onChange={handleSelectableOptionsChange}
-        >
-          {(list) => list}
-        </EuiSelectable>
+
+        <div css={styles.section}>
+          <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
+            <strong>
+              {i18n.translate('workflows.workflowExecutionList.filterIconButton.statusLabel', {
+                defaultMessage: 'Status',
+              })}
+            </strong>
+          </EuiText>
+          <EuiSelectable
+            aria-label={i18n.translate(
+              'workflows.workflowExecutionList.filterIconButton.statusAriaLabel',
+              {
+                defaultMessage: 'Filter by status',
+              }
+            )}
+            options={statusOptions}
+            onChange={handleStatusChange}
+            listProps={{ isVirtualized: false, bordered: false }}
+          >
+            {(list) => list}
+          </EuiSelectable>
+        </div>
+
+        <EuiHorizontalRule margin="none" />
+
+        <div css={styles.section}>
+          <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
+            <strong>
+              {i18n.translate(
+                'workflows.workflowExecutionList.filterIconButton.executionTypeLabel',
+                {
+                  defaultMessage: 'Run type',
+                }
+              )}
+            </strong>
+          </EuiText>
+          <EuiSelectable
+            aria-label={i18n.translate(
+              'workflows.workflowExecutionList.filterIconButton.runTypeAriaLabel',
+              {
+                defaultMessage: 'Filter by run type',
+              }
+            )}
+            options={runTypeOptions}
+            onChange={handleRunTypeChange}
+            listProps={{ isVirtualized: false, bordered: false }}
+          >
+            {(list) => list}
+          </EuiSelectable>
+        </div>
+
         {showExecutor && (
-          <div css={styles.comboBoxContainer}>
-            <EuiSpacer size="s" />
-            <EuiText size="xs" color="subdued">
-              <strong>
-                {i18n.translate(
-                  'workflows.workflowExecutionList.filterIconButton.executedByLabel',
+          <>
+            <EuiHorizontalRule margin="none" />
+            <div css={styles.section}>
+              <EuiText size="xs" color="subdued" css={styles.sectionTitle}>
+                <strong>
+                  {i18n.translate(
+                    'workflows.workflowExecutionList.filterIconButton.executedByLabel',
+                    {
+                      defaultMessage: 'Executed by',
+                    }
+                  )}
+                </strong>
+              </EuiText>
+              <EuiSelectable
+                aria-label={i18n.translate(
+                  'workflows.workflowExecutionList.filterIconButton.executedByAriaLabel',
                   {
-                    defaultMessage: 'Executed by',
+                    defaultMessage: 'Filter by executor',
                   }
                 )}
-              </strong>
-            </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiComboBox
-              aria-label={i18n.translate(
-                'workflows.workflowExecutionList.filterIconButton.executedByAriaLabel',
-                {
-                  defaultMessage: 'Filter by executor',
-                }
-              )}
-              placeholder={i18n.translate(
-                'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
-                {
-                  defaultMessage: 'Filter by user',
-                }
-              )}
-              options={availableExecutedByOptions.map(({ label, value }) => ({ label, value }))}
-              selectedOptions={filters.executedBy.map(getExecutedByOption)}
-              onChange={handleExecutedByChange}
-              onCreateOption={(searchValue) => {
-                handleExecutedByChange([
-                  ...filters.executedBy.map(getExecutedByOption),
-                  { label: searchValue, value: searchValue },
-                ]);
-              }}
-              isClearable={true}
-              compressed
-              fullWidth
-            />
-            <EuiSpacer size="s" />
-          </div>
+                options={executedByOptions}
+                onChange={handleExecutedByChange}
+                searchable
+                searchProps={{
+                  compressed: true,
+                  placeholder: i18n.translate(
+                    'workflows.workflowExecutionList.filterIconButton.executedByPlaceholder',
+                    {
+                      defaultMessage: 'Filter by user',
+                    }
+                  ),
+                  value: executedBySearchValue,
+                  onChange: (value) => setExecutedBySearchValue(value),
+                  'data-test-subj': 'workflowExecutionListExecutedBySearch',
+                }}
+                listProps={{ isVirtualized: false, bordered: false }}
+              >
+                {(list, search) => (
+                  <>
+                    <div css={styles.executedBySearch}>{search}</div>
+                    {list}
+                  </>
+                )}
+              </EuiSelectable>
+            </div>
+          </>
         )}
       </EuiPopover>
     </EuiFilterGroup>
@@ -279,18 +410,23 @@ export function ExecutionListFilters({
 const componentStyles = {
   popover: css`
     & .euiFilterButton__wrapper {
-      min-inline-size: 64px;
+      min-inline-size: 0;
 
       &::before,
       &::after {
         display: none !important;
       }
     }
+
+    & .euiPopover__anchor {
+      display: inline-flex;
+    }
   `,
   popoverTitle: ({ euiTheme }: UseEuiTheme) => css`
     padding: ${EQUAL_HEIGHT_OFFSET}px ${euiTheme.size.s};
   `,
   filterGroup: css({
+    overflow: 'visible',
     backgroundColor: 'transparent',
     '&::after': {
       border: 'none',
@@ -299,17 +435,34 @@ const componentStyles = {
       border: 'none',
     },
   }),
-  filterButtonStyle: css`
-    padding: 0;
+  filterButton: ({ euiTheme }: UseEuiTheme) => css`
+    width: auto;
+    min-width: 64px;
+    padding-inline: ${euiTheme.size.xs};
+    border: none;
+    box-shadow: none;
+    background-color: transparent;
 
-    &,
-    & .euiFilterButton__text {
+    &.euiFilterButton-hasNotification {
+      min-width: 64px;
+    }
+
+    & .euiFilterButton__text,
+    & .euiFilterButton__text-hasNotification {
       min-width: 0;
+      padding-inline: 0;
       line-height: 1;
     }
   `,
-  comboBoxContainer: ({ euiTheme }: UseEuiTheme) => css`
-    padding: ${euiTheme.size.s};
-    border-top: ${euiTheme.border.thin};
+  section: ({ euiTheme }: UseEuiTheme) => css`
+    padding-block: ${euiTheme.size.s};
+  `,
+  sectionTitle: ({ euiTheme }: UseEuiTheme) => css`
+    padding-inline: ${euiTheme.size.m};
+    padding-bottom: ${euiTheme.size.xs};
+  `,
+  executedBySearch: ({ euiTheme }: UseEuiTheme) => css`
+    padding-inline: ${euiTheme.size.s};
+    padding-bottom: ${euiTheme.size.xs};
   `,
 };

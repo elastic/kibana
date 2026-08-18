@@ -30,7 +30,7 @@ import type {
 } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
-import { ForeachIterationStepList } from './foreach_iteration_step_list';
+import { ForeachIterationsSection } from './foreach_iterations_section';
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { StepExecutionDataView } from './step_execution_data_view';
 import { WorkflowExecutionOverview } from './workflow_execution_overview';
@@ -142,32 +142,24 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     const isForeachOrWhile =
       stepExecution?.stepType === 'foreach' || stepExecution?.stepType === 'while';
 
-    // Detect foreach/while steps by finding child steps in allStepExecutions whose scopeStack
-    // references this step. This works even when stepType is absent from the lightweight poll.
-    const foreachRows = useMemo(() => {
+    // Detect foreach/while children even when stepType is absent from the lightweight poll.
+    const hasForeachIterations = useMemo(() => {
       const stepId = stepExecution?.stepId;
       if (!stepId || !allStepExecutions?.length || !onSelectStepExecution) {
-        return [];
+        return false;
       }
-      const result: Array<{ iterNum: number; step: WorkflowStepExecutionDto }> = [];
-      for (const s of allStepExecutions) {
+      return allStepExecutions.some((s) => {
         const frame = s.scopeStack.find((f) => f.stepId === stepId);
-        const iterScope = frame?.nestedScopes.find((sc) => sc.scopeId !== undefined);
-        if (!iterScope?.scopeId) continue;
-        const iterNum = parseInt(iterScope.scopeId, 10);
-        if (isNaN(iterNum)) continue;
-        result.push({ iterNum, step: s });
-      }
-      result.sort(
-        (a, b) =>
-          a.iterNum - b.iterNum ||
-          (a.step.globalExecutionIndex ?? 0) - (b.step.globalExecutionIndex ?? 0)
-      );
-      return result;
+        return frame?.nestedScopes.some((sc) => sc.scopeId !== undefined) ?? false;
+      });
     }, [stepExecution?.stepId, allStepExecutions, onSelectStepExecution]);
 
     const showInput = hasInput;
-    const showOutput = hasOutput || hasError || isForeachOrWhile || foreachRows.length > 0;
+    const showIterations =
+      (isForeachOrWhile || hasForeachIterations) &&
+      Boolean(onSelectStepExecution) &&
+      Boolean(allStepExecutions?.length);
+    const showOutput = hasOutput || hasError;
 
     if (!stepExecution) {
       return (
@@ -307,21 +299,24 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                       <StepExecutionDataView stepExecution={stepExecution} mode="input" />
                     </EuiFlexItem>
                   )}
+                  {showIterations && stepExecution && allStepExecutions && onSelectStepExecution && (
+                    <EuiFlexItem grow={false}>
+                      <ForeachIterationsSection
+                        foreachStep={stepExecution}
+                        allStepExecutions={allStepExecutions}
+                        selectedId={stepExecution.id}
+                        onSelectStep={onSelectStepExecution}
+                        executionStatus={workflowExecutionStatus}
+                      />
+                    </EuiFlexItem>
+                  )}
                   {showOutput && (
                     <EuiFlexItem grow={false}>
-                      {foreachRows.length > 0 && onSelectStepExecution ? (
-                        <ForeachIterationStepList
-                          executionId={stepExecution.id}
-                          rows={foreachRows}
-                          onSelectStep={onSelectStepExecution}
-                        />
-                      ) : (
-                        <StepExecutionDataView
-                          stepExecution={stepExecution}
-                          mode="output"
-                          allStepExecutions={allStepExecutions}
-                        />
-                      )}
+                      <StepExecutionDataView
+                        stepExecution={stepExecution}
+                        mode="output"
+                        allStepExecutions={allStepExecutions}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>

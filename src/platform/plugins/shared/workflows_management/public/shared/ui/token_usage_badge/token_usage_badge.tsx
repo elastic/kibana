@@ -7,17 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiBadge, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowTokenUsage } from '@kbn/workflows';
+import { TokenUsageBreakdown } from './token_usage_breakdown';
 
 interface TokenUsageBadgeProps {
   usage?: WorkflowTokenUsage;
@@ -26,7 +20,7 @@ interface TokenUsageBadgeProps {
    * " tokens" suffix. Use in tight layouts like the step execution tree.
    */
   compact?: boolean;
-  /** When > 1, popover shows "{n} model calls" instead of model footer. */
+  /** When > 1, breakdown footer shows "{n} model calls" instead of model line. */
   callCount?: number;
   model?: string;
   connectorName?: string;
@@ -40,15 +34,9 @@ const compactNumberFormatter = new Intl.NumberFormat(undefined, {
 
 const fullNumberFormatter = new Intl.NumberFormat();
 
-const percentOf = (part: number, total: number): string => {
-  if (total <= 0) return '0%';
-  return `${Math.round((part / total) * 100)}%`;
-};
-
 /**
  * Compact badge showing total LLM token usage. Hover/focus opens a popover
- * with input/output breakdown and an optional model · connector footer.
- * Renders `null` when no usage is reported.
+ * with the shared TokenUsageBreakdown. Renders `null` when no usage is reported.
  */
 export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
   ({
@@ -59,10 +47,9 @@ export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
     connectorName,
     'data-test-subj': dataTestSubj = 'workflowTokenUsageBadge',
   }) => {
-    const { euiTheme } = useEuiTheme();
     const [isOpen, setIsOpen] = useState(false);
 
-    if (!usage) {
+    if (!usage || usage.totalTokens <= 0) {
       return null;
     }
 
@@ -74,16 +61,10 @@ export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
           values: { total },
         });
 
-    const hasSplit = usage.inputTokens > 0 || usage.outputTokens > 0;
     const ariaLabel = i18n.translate('workflowsManagement.tokenUsage.ariaLabel', {
       defaultMessage: 'AI token usage: {total} total',
       values: { total: fullNumberFormatter.format(usage.totalTokens) },
     });
-
-    const inputPct = percentOf(usage.inputTokens, usage.totalTokens);
-    const outputPct = percentOf(usage.outputTokens, usage.totalTokens);
-    const footerParts = [model, connectorName].filter(Boolean);
-    const showCalls = callCount != null && callCount > 1;
 
     return (
       <EuiPopover
@@ -112,102 +93,14 @@ export const TokenUsageBadge = React.memo<TokenUsageBadgeProps>(
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
-        <div css={{ minWidth: 180 }} data-test-subj={`${dataTestSubj}-popover`}>
-          {hasSplit && (
-            <>
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    {i18n.translate('workflowsManagement.tokenUsage.inputRow', {
-                      defaultMessage: 'Input tokens',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    {fullNumberFormatter.format(usage.inputTokens)} ({inputPct})
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    {i18n.translate('workflowsManagement.tokenUsage.outputRow', {
-                      defaultMessage: 'Output tokens',
-                    })}
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="xs">
-                    {fullNumberFormatter.format(usage.outputTokens)} ({outputPct})
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          )}
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>
-                  {i18n.translate('workflowsManagement.tokenUsage.totalRow', {
-                    defaultMessage: 'Total',
-                  })}
-                </strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <strong>{fullNumberFormatter.format(usage.totalTokens)}</strong>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          {hasSplit && usage.totalTokens > 0 && (
-            <div
-              aria-hidden="true"
-              css={{
-                display: 'flex',
-                height: 4,
-                borderRadius: 2,
-                overflow: 'hidden',
-                marginTop: euiTheme.size.xs,
-                background: euiTheme.colors.backgroundBaseSubdued,
-              }}
-            >
-              <div
-                css={{
-                  width: inputPct,
-                  background: euiTheme.colors.backgroundFilledText,
-                }}
-              />
-              <div
-                css={{
-                  width: outputPct,
-                  background: euiTheme.colors.borderBaseSubdued,
-                }}
-              />
-            </div>
-          )}
-          {showCalls ? (
-            <EuiText size="xs" color="subdued" css={{ marginTop: euiTheme.size.xs }}>
-              {i18n.translate('workflowsManagement.tokenUsage.modelCalls', {
-                defaultMessage: '{count} model calls',
-                values: { count: callCount },
-              })}
-            </EuiText>
-          ) : (
-            footerParts.length > 0 && (
-              <EuiText
-                size="xs"
-                color="subdued"
-                css={{
-                  marginTop: euiTheme.size.xs,
-                  fontFamily: euiTheme.font.familyCode,
-                }}
-              >
-                {footerParts.join(' · ')}
-              </EuiText>
-            )
-          )}
+        <div data-test-subj={`${dataTestSubj}-popover`}>
+          <TokenUsageBreakdown
+            usage={usage}
+            callCount={callCount}
+            model={model}
+            connectorName={connectorName}
+            data-test-subj="workflowTokenUsageBreakdown"
+          />
         </div>
       </EuiPopover>
     );

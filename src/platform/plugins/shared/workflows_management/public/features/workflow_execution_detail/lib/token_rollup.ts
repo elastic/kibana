@@ -48,11 +48,7 @@ export const rollupTokenUsage = (node: TokenRollupNode): TokenRollupResult => {
     const inputTokens = ai.inputTokens ?? 0;
     const outputTokens = ai.outputTokens ?? 0;
     const totalTokens = ai.totalTokens ?? inputTokens + outputTokens;
-    const hasTokens =
-      ai.totalTokens !== undefined ||
-      ai.inputTokens !== undefined ||
-      ai.outputTokens !== undefined;
-    if (!hasTokens) {
+    if (totalTokens <= 0) {
       return emptyRollup();
     }
     return {
@@ -80,7 +76,7 @@ export const rollupTokenUsage = (node: TokenRollupNode): TokenRollupResult => {
 };
 
 export const tokenRollupToUsage = (rollup: TokenRollupResult): WorkflowTokenUsage | undefined => {
-  if (!rollup.hasTokens) {
+  if (!rollup.hasTokens || rollup.totalTokens <= 0) {
     return undefined;
   }
   return {

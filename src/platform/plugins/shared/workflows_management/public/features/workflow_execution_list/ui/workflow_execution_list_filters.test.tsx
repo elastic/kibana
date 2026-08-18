@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import type { ExecutionListFiltersProps } from './workflow_execution_list_filters';
 import { ExecutionListFilters } from './workflow_execution_list_filters';
 import { TestWrapper } from '../../../shared/test_utils';
@@ -35,44 +36,88 @@ describe('ExecutionListFilters', () => {
     );
   };
 
+  const openPopover = async () => {
+    fireEvent.click(screen.getByLabelText('Filter executions'));
+    await waitFor(() => {
+      expect(screen.getByText('Status')).toBeInTheDocument();
+    });
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the filter button', () => {
+  it('renders the icon-only filter button', () => {
     renderComponent();
-    const filterButton = screen.getByLabelText('Filter executions');
-    expect(filterButton).toBeInTheDocument();
+    expect(screen.getByLabelText('Filter executions')).toBeInTheDocument();
+    expect(screen.queryByText('Filters')).not.toBeInTheDocument();
   });
 
   it('opens the popover when the filter button is clicked', async () => {
     renderComponent();
-    const filterButton = screen.getByLabelText('Filter executions');
-    fireEvent.click(filterButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Filter executions')).toBeInTheDocument();
-    });
+    await openPopover();
+    expect(screen.getByText('Filter executions')).toBeInTheDocument();
   });
 
   it('shows status filter options in the popover', async () => {
     renderComponent();
-    const filterButton = screen.getByLabelText('Filter executions');
-    fireEvent.click(filterButton);
+    await openPopover();
+    expect(screen.getByText('Status')).toBeInTheDocument();
+  });
 
-    await waitFor(() => {
-      expect(screen.getByText('Status')).toBeInTheDocument();
+  it('dedupes status options that share a display label', async () => {
+    renderComponent();
+    await openPopover();
+
+    expect(screen.getAllByText('Waiting')).toHaveLength(1);
+  });
+
+  it('selecting Waiting applies all waiting statuses', async () => {
+    const onFiltersChange = jest.fn();
+    renderComponent({ onFiltersChange });
+    await openPopover();
+
+    fireEvent.click(screen.getByText('Waiting'));
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      statuses: [
+        ExecutionStatus.WAITING,
+        ExecutionStatus.WAITING_FOR_INPUT,
+        ExecutionStatus.WAITING_FOR_CHILD,
+      ],
+      executionTypes: [],
+      executedBy: [],
+    });
+  });
+
+  it('shows Run type options with Production and Test run labels', async () => {
+    renderComponent();
+    await openPopover();
+
+    expect(screen.getByText('Run type')).toBeInTheDocument();
+    expect(screen.getByText('Production')).toBeInTheDocument();
+    expect(screen.getByText('Test run')).toBeInTheDocument();
+    expect(screen.queryByText('Execution type')).not.toBeInTheDocument();
+  });
+
+  it('filters by production run type', async () => {
+    const onFiltersChange = jest.fn();
+    renderComponent({ onFiltersChange });
+    await openPopover();
+
+    fireEvent.click(screen.getByText('Production'));
+
+    expect(onFiltersChange).toHaveBeenCalledWith({
+      statuses: [],
+      executionTypes: [ExecutionType.PRODUCTION],
+      executedBy: [],
     });
   });
 
   it('does not show "Executed by" section when showExecutor is false', async () => {
     renderComponent({ showExecutor: false });
-    const filterButton = screen.getByLabelText('Filter executions');
-    fireEvent.click(filterButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText('Executed by')).not.toBeInTheDocument();
-    });
+    await openPopover();
+    expect(screen.queryByText('Executed by')).not.toBeInTheDocument();
   });
 
   it('shows "Executed by" section when showExecutor is true', async () => {
@@ -83,12 +128,8 @@ describe('ExecutionListFilters', () => {
         { label: 'user2', value: 'user2' },
       ],
     });
-    const filterButton = screen.getByLabelText('Filter executions');
-    fireEvent.click(filterButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('Executed by')).toBeInTheDocument();
-    });
+    await openPopover();
+    expect(screen.getByText('Executed by')).toBeInTheDocument();
   });
 
   it('filters by the profile UID behind a display label', async () => {
@@ -98,9 +139,8 @@ describe('ExecutionListFilters', () => {
       onFiltersChange,
       availableExecutedByOptions: [{ label: 'Tal Borenstein', value: 'u_tal' }],
     });
-    fireEvent.click(screen.getByLabelText('Filter executions'));
-    fireEvent.click(screen.getByPlaceholderText('Filter by user'));
-    fireEvent.click(await screen.findByText('Tal Borenstein'));
+    await openPopover();
+    fireEvent.click(screen.getByText('Tal Borenstein'));
 
     expect(onFiltersChange).toHaveBeenCalledWith({
       statuses: [],
@@ -112,10 +152,11 @@ describe('ExecutionListFilters', () => {
   it('allows filtering by an executor outside the loaded options', async () => {
     const onFiltersChange = jest.fn();
     renderComponent({ showExecutor: true, onFiltersChange });
-    fireEvent.click(screen.getByLabelText('Filter executions'));
+    await openPopover();
+
     const input = screen.getByPlaceholderText('Filter by user');
     fireEvent.change(input, { target: { value: 'legacy-user' } });
-    fireEvent.keyDown(input, { key: 'Enter' });
+    fireEvent.click(await screen.findByText('legacy-user'));
 
     await waitFor(() => {
       expect(onFiltersChange).toHaveBeenCalledWith({
@@ -128,32 +169,41 @@ describe('ExecutionListFilters', () => {
 
   it('does not show "Clear all" button when no filters are active', async () => {
     renderComponent();
-    const filterButton = screen.getByLabelText('Filter executions');
-    fireEvent.click(filterButton);
-
-    await waitFor(() => {
-      expect(screen.queryByText('Clear all')).not.toBeInTheDocument();
-    });
+    await openPopover();
+    expect(screen.queryByText('Clear all')).not.toBeInTheDocument();
   });
 
-  it('shows the active filters count badge on the filter button', () => {
+  it('shows a subdued 0 badge when no filters are active', () => {
     renderComponent();
-    // With no active filters, the badge should show 0 or not display prominently
     const filterButton = screen.getByLabelText('Filter executions');
-    expect(filterButton).toBeInTheDocument();
+    const badge = within(filterButton).getByText('0');
+    expect(badge).toBeInTheDocument();
+    expect(badge.className).toContain('subdued');
+  });
+
+  it('shows an accent count badge when filters are active', () => {
+    renderComponent({
+      filters: {
+        statuses: [ExecutionStatus.FAILED],
+        executionTypes: [],
+        executedBy: [],
+      },
+    });
+    const filterButton = screen.getByLabelText('Filter executions');
+    const badge = within(filterButton).getByLabelText('1 active filters');
+    expect(badge).toHaveTextContent('1');
+    expect(badge.className).toContain('accent');
   });
 
   it('closes the popover when clicking the filter button again', async () => {
     renderComponent();
     const filterButton = screen.getByLabelText('Filter executions');
 
-    // Open popover
     fireEvent.click(filterButton);
     await waitFor(() => {
       expect(screen.getByText('Status')).toBeInTheDocument();
     });
 
-    // Close popover
     fireEvent.click(filterButton);
     await waitFor(() => {
       expect(screen.queryByText('Status')).not.toBeInTheDocument();

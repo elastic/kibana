@@ -8,15 +8,15 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SerializedError } from '@kbn/workflows';
 
@@ -24,17 +24,24 @@ interface FailedStepErrorPanelProps {
   error: SerializedError | string;
   stepType?: string;
   onViewInput: () => void;
-  defaultExpanded?: boolean;
+  /** Accessible name for the error region (visually hidden). */
+  ariaLabel: string;
+  /**
+   * When set, replaces the raw error body (e.g. retry exhaustion lead-in that
+   * already includes the last error message).
+   */
+  messageOverride?: string;
 }
 
+/**
+ * Inline error details under a failed row. Message-first; no visible heading.
+ */
 export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
-  ({ error, stepType, onViewInput, defaultExpanded = true }) => {
+  ({ error, stepType, onViewInput, ariaLabel, messageOverride }) => {
     const { euiTheme } = useEuiTheme();
-    const [isOpen, setIsOpen] = useState(defaultExpanded);
 
-    const message = typeof error === 'string' ? error : error.message;
-    const copyText =
-      typeof error === 'string' ? error : JSON.stringify(error, null, 2);
+    const message = messageOverride ?? (typeof error === 'string' ? error : error.message);
+    const copyText = typeof error === 'string' ? error : JSON.stringify(error, null, 2);
 
     const isHttpStep = stepType?.startsWith('http') ?? false;
     const viewInputLabel = isHttpStep
@@ -47,61 +54,59 @@ export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
 
     return (
       <div
+        role="region"
+        aria-label={ariaLabel}
+        data-test-subj="workflowFailedStepErrorPanel"
         css={{
           marginTop: euiTheme.size.xs,
           padding: euiTheme.size.s,
           borderTop: `1px solid ${euiTheme.colors.borderBaseDanger}`,
         }}
-        data-test-subj="workflowFailedStepErrorPanel"
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
       >
-        <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType={isOpen ? 'arrowDown' : 'arrowRight'}
-              size="xs"
-              color="danger"
-              aria-label={i18n.translate('workflows.executionFlyout.failedStep.toggle', {
-                defaultMessage: 'Why this step failed',
-              })}
-              onClick={() => setIsOpen((v) => !v)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="xs" color="danger" css={{ fontWeight: 600 }}>
-              {i18n.translate('workflows.executionFlyout.failedStep.heading', {
-                defaultMessage: 'Why this step failed',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {isOpen && (
-          <>
-            <EuiText size="xs" color="danger" css={{ marginTop: euiTheme.size.xs }}>
-              <p>{message}</p>
-            </EuiText>
-            <EuiFlexGroup gutterSize="s" responsive={false} css={{ marginTop: euiTheme.size.s }}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty size="xs" color="danger" onClick={onViewInput}>
-                  {viewInputLabel}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiCopy textToCopy={copyText}>
-                  {(copy) => (
-                    <EuiButtonEmpty size="xs" color="danger" onClick={copy}>
-                      {i18n.translate('workflows.executionFlyout.failedStep.copyError', {
-                        defaultMessage: 'Copy error',
-                      })}
-                    </EuiButtonEmpty>
-                  )}
-                </EuiCopy>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        )}
+        {/* Capture bubbling row clicks without making the region itself a click target. */}
+        <div
+          onMouseDown={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          <EuiText size="xs" color="danger" data-test-subj="workflowFailedStepErrorMessage">
+            <p>{message}</p>
+          </EuiText>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            css={{ marginTop: euiTheme.size.s }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                color="danger"
+                fill={false}
+                onClick={onViewInput}
+                data-test-subj="workflowFailedStepViewInput"
+              >
+                {viewInputLabel}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiCopy textToCopy={copyText}>
+                {(copy) => (
+                  <EuiButtonEmpty
+                    size="s"
+                    color="danger"
+                    onClick={copy}
+                    data-test-subj="workflowFailedStepCopyError"
+                  >
+                    {i18n.translate('workflows.executionFlyout.failedStep.copyError', {
+                      defaultMessage: 'Copy error',
+                    })}
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
       </div>
     );
   }

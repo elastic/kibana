@@ -84,14 +84,26 @@ export const normalizeStepAi = (params: {
         ? (o.metadata as Record<string, unknown>)
         : undefined;
 
-    const usageRaw = metadata?.usage ?? o.usage;
+    // Prefer explicit usage blobs; LangChain ChatOpenAI reports tokenUsage.
+    const usageRaw = metadata?.usage ?? metadata?.tokenUsage ?? o.usage ?? o.tokenUsage;
     fromOutput = usageFromUnknown(usageRaw);
-    model = asNonEmptyString(o.model ?? metadata?.model);
+    // LangChain / GenAI connectors variously use `model`, `model_name`, or `ls_model_name`.
+    model = asNonEmptyString(
+      o.model ??
+        metadata?.model ??
+        metadata?.model_name ??
+        metadata?.modelName ??
+        metadata?.ls_model_name ??
+        metadata?.lsModelName
+    );
     ttft = asFiniteNumber(
       o.timeToFirstTokenMs ??
         o.time_to_first_token_ms ??
+        o.timeToFirstToken ??
         metadata?.timeToFirstTokenMs ??
-        metadata?.time_to_first_token_ms
+        metadata?.time_to_first_token_ms ??
+        metadata?.timeToFirstToken ??
+        metadata?.time_to_first_token
     );
     const usageObj =
       usageRaw && typeof usageRaw === 'object' && !Array.isArray(usageRaw)
@@ -112,7 +124,7 @@ export const normalizeStepAi = (params: {
     outputTokens: fromUsage.outputTokens ?? fromOutput.outputTokens,
     totalTokens: fromUsage.totalTokens ?? fromOutput.totalTokens,
     model,
-    connectorId: asNonEmptyString(connectorId) ?? outputConnectorId,
+    connectorId: outputConnectorId ?? asNonEmptyString(connectorId),
     timeToFirstTokenMs: ttft,
     callCount,
   };
@@ -134,9 +146,14 @@ export const stepAiToTokenUsage = (ai: StepAiMetadata): WorkflowTokenUsage | und
   }
   const inputTokens = ai.inputTokens ?? 0;
   const outputTokens = ai.outputTokens ?? 0;
+  const totalTokens = ai.totalTokens ?? inputTokens + outputTokens;
+  // Zero-total usage must not produce a badge (avoids "✨ 0" on empty subtrees).
+  if (totalTokens <= 0) {
+    return undefined;
+  }
   return {
     inputTokens,
     outputTokens,
-    totalTokens: ai.totalTokens ?? inputTokens + outputTokens,
+    totalTokens,
   };
 };

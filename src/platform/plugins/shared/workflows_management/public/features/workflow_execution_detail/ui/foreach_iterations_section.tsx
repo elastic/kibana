@@ -1,0 +1,126 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { EuiButtonIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows';
+import { isTerminalStatus } from '@kbn/workflows';
+import { buildStepExecutionsTree } from './build_step_executions_tree';
+import { StepExecutionOpenTree } from './workflow_step_execution_tree';
+
+interface ForeachIterationsSectionProps {
+  foreachStep: WorkflowStepExecutionDto;
+  allStepExecutions: WorkflowStepExecutionDto[];
+  selectedId: string | null;
+  onSelectStep: (stepExecutionId: string) => void;
+  executionStatus?: WorkflowStepExecutionDto['status'];
+}
+
+/**
+ * Navigable Iterations section for foreach/while (and similar repetitive control)
+ * step subflyouts. High-level iteration rows only — selecting one opens that
+ * iteration in the step panel. Pin/gap collapse is shared with the Table tab.
+ */
+export const ForeachIterationsSection: React.FC<ForeachIterationsSectionProps> = ({
+  foreachStep,
+  allStepExecutions,
+  selectedId,
+  onSelectStep,
+  executionStatus,
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const [isOpen, setIsOpen] = useState(true);
+
+    const foreachRoot = useMemo(() => {
+      const tree = buildStepExecutionsTree(allStepExecutions);
+      const find = (
+        items: ReturnType<typeof buildStepExecutionsTree>
+      ): ReturnType<typeof buildStepExecutionsTree>[number] | undefined => {
+        for (const item of items) {
+          const isForeachType = item.stepType === 'foreach' || item.stepType === 'while';
+          const hasIterationChildren = item.children.some(
+            (c) => c.stepType === 'foreach-iteration' || c.stepType === 'while-iteration'
+          );
+          if (
+            item.stepId === foreachStep.stepId &&
+            (item.stepExecutionId === foreachStep.id || isForeachType || hasIterationChildren)
+          ) {
+            return item;
+          }
+          const nested = find(item.children);
+          if (nested) return nested;
+        }
+        return undefined;
+      };
+      return find(tree);
+    }, [allStepExecutions, foreachStep.id, foreachStep.stepId]);
+
+  const iterationCount = foreachRoot?.children.length ?? 0;
+
+  const headerLabel =
+    iterationCount > 0
+      ? i18n.translate('workflows.executionFlyout.iterationsSection.titleWithCount', {
+          defaultMessage: 'Iterations · {count}',
+          values: { count: iterationCount },
+        })
+      : i18n.translate('workflows.executionFlyout.iterationsSection.title', {
+          defaultMessage: 'Iterations',
+        });
+
+  if (!foreachRoot || iterationCount === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      css={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}
+      data-test-subj="workflowExecutionIterationsSection"
+    >
+      <div css={{ display: 'flex', alignItems: 'center', height: '32px', gap: '4px' }}>
+        <EuiButtonIcon
+          iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+          size="xs"
+          color="text"
+          aria-label={i18n.translate('workflows.executionFlyout.iterationsSection.toggle', {
+            defaultMessage: 'Iterations section',
+          })}
+          onClick={() => setIsOpen((v) => !v)}
+        />
+        <EuiText size="s" css={{ fontWeight: 600, color: euiTheme.colors.title }}>
+          <span>{headerLabel}</span>
+        </EuiText>
+      </div>
+      {isOpen && (
+        <div
+          role="group"
+          aria-label={headerLabel}
+          css={{
+            border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+            borderRadius: euiTheme.border.radius.medium,
+            overflow: 'hidden',
+            padding: euiTheme.size.s,
+          }}
+        >
+          <StepExecutionOpenTree
+            roots={[foreachRoot]}
+            stepExecutions={allStepExecutions}
+            selectedId={selectedId}
+            onStepExecutionClick={onSelectStep}
+            isExecutionComplete={
+              executionStatus != null ? isTerminalStatus(executionStatus) : true
+            }
+            childrenOnly
+            data-test-subj="workflowExecutionIterationsTree"
+          />
+        </div>
+      )}
+    </div>
+  );
+};
