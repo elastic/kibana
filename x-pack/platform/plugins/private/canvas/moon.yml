@@ -76,6 +76,8 @@ dependsOn:
   - '@kbn/core-http-browser'
   - '@kbn/scout'
   - '@kbn/rison'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

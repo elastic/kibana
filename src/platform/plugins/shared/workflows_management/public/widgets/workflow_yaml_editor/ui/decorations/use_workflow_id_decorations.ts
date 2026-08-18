@@ -8,11 +8,11 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import type { Document, Pair, Scalar, YAMLMap } from 'yaml';
 import { isMap, isPair, isScalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
-import { getStepNodesWithType } from '../../../../../common/lib/yaml/get_step_nodes_with_type';
+import { getStepNodesWithType } from '@kbn/workflows-yaml';
 import { selectWorkflows } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { getMonacoRangeFromYamlNode } from '../../lib/utils';
 

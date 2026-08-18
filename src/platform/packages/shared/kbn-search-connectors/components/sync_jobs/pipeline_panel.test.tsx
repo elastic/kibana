@@ -9,20 +9,27 @@
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { screen } from '@testing-library/react';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { PipelinePanel } from './pipeline_panel';
 
 describe('PipelinePanel', () => {
   const pipeline = {
     extract_binary_content: true,
-    name: 'name',
+    name: 'my-pipeline',
     reduce_whitespace: true,
     run_ml_inference: true,
   };
-  it('renders', () => {
-    const wrapper = shallow(<PipelinePanel pipeline={pipeline} />);
 
-    expect(wrapper).toMatchSnapshot();
+  it('renders the pipeline heading and all settings', () => {
+    renderWithKibanaRenderContext(<PipelinePanel pipeline={pipeline} />);
+
+    expect(screen.getByRole('heading', { name: 'Pipeline' })).toBeInTheDocument();
+    expect(screen.getByText('Pipeline name')).toBeInTheDocument();
+    expect(screen.getByText('my-pipeline')).toBeInTheDocument();
+    expect(screen.getByText('Extract binary content')).toBeInTheDocument();
+    expect(screen.getByText('Reduce whitespace')).toBeInTheDocument();
+    expect(screen.getByText('Machine learning inference')).toBeInTheDocument();
   });
 });

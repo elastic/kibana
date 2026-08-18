@@ -10,7 +10,7 @@
 import type { Table as TableType } from 'cli-table3';
 import Table from 'cli-table3';
 
-import colors from 'colors/safe';
+import chalk from 'chalk';
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
@@ -67,7 +67,7 @@ export const createTable = (
     Object.entries(statuses).some(
       ([_name, statusObj]) => statusObj[layer][lifecycle].source === 'none'
     )
-      ? colors.red(lifecycle.toUpperCase())
+      ? chalk.red(lifecycle.toUpperCase())
       : lifecycle.toUpperCase();
 
   /**
@@ -156,7 +156,7 @@ export const createTable = (
         if (state === 'no class' || (manifestState === 'bundle' && state === 'missing')) {
           return '';
         } else if (manifestState === 'bundle' || (manifestState !== state && state !== 'missing')) {
-          return colors.red(state === 'missing' ? '' : state);
+          return chalk.red(state === 'missing' ? '' : state);
         }
 
         return state === 'missing' ? '' : state;
@@ -203,7 +203,7 @@ export const createTable = (
           { content: name, chars },
           {
             content:
-              manifestState === 'missing' ? colors.red(manifestState.toUpperCase()) : manifestState,
+              manifestState === 'missing' ? chalk.red(manifestState.toUpperCase()) : manifestState,
             chars,
           },
           ...getLifecycleColumns(),

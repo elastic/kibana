@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/268847
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Alerting and reporting
+title: Add JWT assertion-based client credentials authentication for connectors
+description: Connectors V2 can now authenticate using client credentials flow with a JWT assertion instead of client secret.

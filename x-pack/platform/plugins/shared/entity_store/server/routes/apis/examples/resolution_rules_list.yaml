@@ -1,0 +1,19 @@
+responses:
+  '200':
+    description: Entity resolution rules.
+    content:
+      application/json:
+        examples:
+          rulesListExample:
+            summary: Managed resolution rules
+            description: Lists the managed resolution rules and their enabled state in the current space.
+            value:
+              rules:
+                - id: related_user_alias_resolution
+                  kind: related_user_alias_resolution
+                  managed: true
+                  enabled: false
+                - id: email_exact_match
+                  kind: email_exact_match
+                  managed: true
+                  enabled: true

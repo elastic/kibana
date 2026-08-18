@@ -1,5 +1,5 @@
 {
-  "sha1": "5468f66aa8dfbca4630df7e832a08a85e6a4c4a8",
+  "sha1": "7c03c27e0fc11b74207827e15b270043140b4fd7",
   "tests": [
     {
       "id": "567909ceb07724b-3b647c7c5404028",
@@ -478,7 +478,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/uptime_integration_deprecation.spec.ts",
-        "line": 92,
+        "line": 63,
         "column": 10
       }
     },
@@ -491,7 +491,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/api/tests/uptime/uptime_integration_deprecation.spec.ts",
-        "line": 105,
+        "line": 76,
         "column": 10
       }
     }

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BreakingChange } from '../diff/breaking_rules';
-import type { TerraformImpactResult, TerraformImpact } from '../terraform/check_terraform_impact';
+import type { StabilityTier } from '../stability';
+import type { ImpactReportEntry } from './write_impact_report';
 import { ESCALATION_LINK } from './links';
 
 const HEADER = `
@@ -18,76 +18,71 @@ const HEADER = `
 
 `.split('\n');
 
-const TERRAFORM_HEADER = `
-╔════════════════════════════════════════════════════════════════════════════╗
-║                        TERRAFORM PROVIDER IMPACT                           ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
-⚠️  The following breaking changes affect Terraform Provider APIs:
-
-`.split('\n');
-
 const FOOTER = `
 ────────────────────────────────────────────────────────────────────────────
 
 What to do next:
 
 1. Review the breaking changes above
-2. If intentional, add an allowlist entry with approval
-3. If unintentional, revert the changes
+2. If unintentional, revert the change
+3. If intentional, add an approved allowlist entry and coordinate with the owning team
 
 Need help? ${ESCALATION_LINK}
 
 `.split('\n');
-const formatBreakingChange = (change: BreakingChange, idx: number): string[] => {
-  const lines = [`${idx + 1}. ${change.reason}`, `   Path: ${change.path}`];
 
-  if (change.method) {
-    lines.push(`   Method: ${change.method.toUpperCase()}`);
-  }
+const TIER_LABEL: Record<StabilityTier, string> = {
+  stable: 'Stable (GA)',
+  tech_preview: 'Technical Preview',
+  experimental: 'Experimental',
+};
 
-  if (change.details) {
-    lines.push(`   Details: ${JSON.stringify(change.details, null, 2).split('\n').join('\n   ')}`);
+const formatEntry = (entry: ImpactReportEntry, idx: number): string[] => {
+  const lines = [
+    `${idx + 1}. ${entry.reason}`,
+    `   Path: ${entry.path}`,
+    `   Tier: ${TIER_LABEL[entry.tier]}`,
+  ];
+
+  if (entry.method) {
+    lines.push(`   Method: ${entry.method.toUpperCase()}`);
   }
 
   return [...lines, ''];
 };
 
-const formatTerraformImpact = (impact: TerraformImpact): string[] => {
-  const method = impact.change.method ? ` ${impact.change.method.toUpperCase()}` : '';
-  const lines = [
-    `• ${impact.change.path}${method}`,
-    `  Terraform Resource: ${impact.terraformResource}`,
-    `  Reason: ${impact.change.reason}`,
-  ];
-  if (impact.owners.length > 0) {
-    lines.push(`  Owners: ${impact.owners.join(', ')}`);
-  }
-  lines.push('');
-  return lines;
-};
+const EXPERIMENTAL_HEADING = `
+────────────────────────────────────────────────────────────────────────────
 
-export function formatFailure(
-  breakingChanges: BreakingChange[],
-  terraformImpact?: TerraformImpactResult
-): string {
-  const breakingSection = breakingChanges.flatMap(formatBreakingChange);
+Informational — not blocking merge:
 
-  const terraformSection = terraformImpact?.hasImpact
-    ? [
-        ...TERRAFORM_HEADER,
-        ...terraformImpact.impactedChanges.flatMap(formatTerraformImpact),
-        'Coordinate with @elastic/terraform-provider before merging.',
-        '',
-      ]
-    : [];
+The following breaking change(s) are in experimental APIs, which are allowed to
+break. They are listed for visibility only and do not fail this check.
+
+`.split('\n');
+
+/**
+ * Format the CI-log summary for detected breaking changes. Gating tiers (stable
+ * first, then tech_preview) lead the report and drive the summary count;
+ * experimental changes, if any, follow in a clearly non-blocking section. Entries
+ * are already tier-classified by check_contracts, so this is presentation only.
+ */
+export function formatFailure(entries: ImpactReportEntry[]): string {
+  const stable = entries.filter((e) => e.tier === 'stable');
+  const techPreview = entries.filter((e) => e.tier === 'tech_preview');
+  const experimental = entries.filter((e) => e.tier === 'experimental');
+  const gating = [...stable, ...techPreview];
+
+  const experimentalSection =
+    experimental.length > 0 ? [...EXPERIMENTAL_HEADING, ...experimental.flatMap(formatEntry)] : [];
 
   return [
     ...HEADER,
-    `Found ${breakingChanges.length} breaking change(s):`,
+    `Detected ${gating.length} breaking change(s) in stable/tech_preview APIs ` +
+      `(${stable.length} stable, ${techPreview.length} tech_preview):`,
     '',
-    ...breakingSection,
-    ...terraformSection,
+    ...gating.flatMap(formatEntry),
+    ...experimentalSection,
     ...FOOTER,
   ].join('\n');
 }

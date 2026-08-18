@@ -40,6 +40,7 @@ import type {
 import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeProjectRoutingManager } from './project_routing_manager';
+import { initializeApproximationManager } from './approximation_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import type { DashboardReadResponseBody } from '../../server';
@@ -89,9 +90,13 @@ export function getDashboardApi({
   const childrenSubject$: BehaviorSubject<Observable<DashboardChildren>> = new BehaviorSubject(
     of({})
   );
-  const trackPanel = initializeTrackPanel(async (id: string) => {
-    await layoutManager.api.getChildApi(id);
-  }, childrenSubject$.pipe(concatMap((children) => children)));
+  const trackPanel = initializeTrackPanel(
+    async (id: string) => {
+      await layoutManager.api.getChildApi(id);
+    },
+    childrenSubject$.pipe(concatMap((children) => children)),
+    viewModeManager.api.viewMode$
+  );
 
   const layoutManager = initializeLayoutManager(
     viewModeManager,
@@ -138,10 +143,13 @@ export function getDashboardApi({
     settingsManager.api.projectRoutingRestore$
   );
 
+  const approximationManager = initializeApproximationManager(initialState);
+
   function setState(state: DashboardState) {
     layoutManager.internalApi.reset(state);
     unifiedSearchManager.internalApi.reset(state);
     projectRoutingManager?.internalApi.reset(state);
+    approximationManager.internalApi.reset(state);
     settingsManager.internalApi.reset(state);
 
     // when auto-apply is `false`, wait for children to update their filters + time slice + variables, then publish
@@ -159,6 +167,7 @@ export function getDashboardApi({
     settingsManager,
     unifiedSearchManager,
     projectRoutingManager,
+    approximationManager,
     setState,
     onSave$: onSave$.asObservable(),
   });
@@ -167,18 +176,20 @@ export function getDashboardApi({
     const { panels, pinned_panels } = layoutManager.internalApi.serializeLayout();
     const unifiedSearchState = unifiedSearchManager.internalApi.getState();
     const projectRoutingState = projectRoutingManager?.internalApi.getState();
+    const approximationState = approximationManager.internalApi.getState();
     const accessControlState = accessControlManager.internalApi.getState();
     return {
       ...settingsManager.internalApi.serializeSettings(),
       ...unifiedSearchState,
       ...projectRoutingState,
+      ...approximationState,
       ...accessControlState,
       panels,
       pinned_panels,
     } satisfies DashboardState;
   }
 
-  const trackOverlayApi = initializeTrackOverlay(trackPanel.api.setFocusedPanelId);
+  const trackOverlayApi = initializeTrackOverlay(trackPanel.api);
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);
 
@@ -193,6 +204,7 @@ export function getDashboardApi({
     ...unifiedSearchManager.api,
     ...unsavedChangesManager.api,
     ...projectRoutingManager?.api,
+    ...approximationManager.api,
     ...trackOverlayApi,
     panelFlyoutType,
     esqlVariables$: esqlVariablesManager.api.publishedEsqlVariables$,
@@ -203,7 +215,8 @@ export function getDashboardApi({
       settingsManager.internalApi.anyStateChange$,
       unifiedSearchManager.internalApi.anyStateChange$,
       layoutManager.internalApi.anyStateChange$,
-      ...(projectRoutingManager ? [projectRoutingManager.internalApi.anyStateChange$] : [])
+      ...(projectRoutingManager ? [projectRoutingManager.internalApi.anyStateChange$] : []),
+      approximationManager.internalApi.anyStateChange$
     ),
     executionContext: {
       type: 'dashboard',
@@ -312,6 +325,7 @@ export function getDashboardApi({
   const internalApi: DashboardInternalApi = {
     ...layoutManager.internalApi,
     ...unifiedSearchManager.internalApi,
+    ...unsavedChangesManager.internalApi,
     ...esqlVariablesManager.api,
     dashboardContainerRef$,
     setDashboardContainerRef: (ref: HTMLElement | null) => dashboardContainerRef$.next(ref),

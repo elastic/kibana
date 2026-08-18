@@ -5,31 +5,69 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, IRouter, KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { InferenceServerSetup, InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { DatasetService } from './storage/dataset_service';
 import type { EvaluationScoreService } from './storage/evaluation_score_service';
+import type { EvaluatorRegistry } from './evaluators/types';
+import type { EvalsTaskProvider } from './task_providers/types';
 
-export type EvalsPluginSetup = Record<string, never>;
+export interface EvalsPluginSetup {
+  enabled: boolean;
+  registerTaskProvider: (provider: EvalsTaskProvider) => void;
+}
+
+export interface EvaluatorSummary {
+  name: string;
+  version: string;
+  kind: 'llm' | 'code';
+  description: string;
+  needsJudgeConnector: boolean;
+}
+
+export interface ModelConnectorSummary {
+  id: string;
+  name: string;
+  type: string;
+}
+
 export interface EvalsPluginStart {
   datasetService?: DatasetService;
   evaluationScoreService?: EvaluationScoreService;
+  listEvaluators?: () => EvaluatorSummary[];
+
+  listModelConnectors?: (request: KibanaRequest) => Promise<ModelConnectorSummary[]>;
 }
+
+export type EvalsWorkflowsManagementSetup = Pick<WorkflowsServerPluginSetup, 'management'>;
 
 export interface EvalsSetupDependencies {
   features: FeaturesPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  inference: InferenceServerSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
+  workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
 
 export interface EvalsStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  inference: InferenceServerStart;
+  spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
+  workflowsManagement?: EvalsWorkflowsManagementSetup;
 }
 
 export interface EvalsRouteHandlerContext {
   datasetService: DatasetService;
   evaluationScoreService: EvaluationScoreService;
+  evaluatorRegistry: EvaluatorRegistry;
 }
 
 export type EvalsRequestHandlerContext = CustomRequestHandlerContext<{

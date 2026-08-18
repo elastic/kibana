@@ -35,7 +35,6 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
-import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/errors';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
@@ -142,9 +141,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -272,9 +268,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -388,7 +381,7 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security);
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security, {});
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -422,9 +415,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
@@ -547,9 +537,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -674,9 +661,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -845,7 +829,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -950,7 +933,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -1049,7 +1031,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: { update_by_query: 1000 },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -1166,9 +1147,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -1295,9 +1273,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -1526,9 +1501,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: mockSavedObjectsService as unknown as SavedObjectsServiceStart,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -1865,7 +1837,8 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [{ ...bulkUpdateTask, apiKey: mockApiKey, userScope: mockUserScope }],
         mockRequest,
-        coreStart.security
+        coreStart.security,
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -1965,7 +1938,8 @@ describe('TaskStore', () => {
           },
         ],
         mockRequest,
-        coreStart.security
+        coreStart.security,
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2072,7 +2046,8 @@ describe('TaskStore', () => {
           },
         ],
         mockRequest,
-        coreStart.security
+        coreStart.security,
+        {}
       );
 
       expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith(
@@ -2357,9 +2332,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: {
           getScopedClient: mockGetScopedClient,
         } as unknown as SavedObjectsServiceStart,
@@ -2434,9 +2406,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3043,9 +3012,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3172,9 +3138,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3262,9 +3225,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3346,9 +3306,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3414,9 +3371,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3517,9 +3471,6 @@ describe('TaskStore', () => {
             savedObjectsRepository: savedObjectsClient,
             adHocTaskCounter,
             allowReadingInvalidState: false,
-            requestTimeouts: {
-              update_by_query: 1000,
-            },
             savedObjectsService: coreStart.savedObjects,
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
@@ -3547,9 +3498,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3575,9 +3523,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -3604,9 +3549,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -3821,7 +3763,8 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [task1, task2],
         request,
-        coreStart.security
+        coreStart.security,
+        {}
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -3877,9 +3820,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: false,
@@ -3913,9 +3853,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         canEncryptSavedObjects: true,
@@ -4173,9 +4110,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4226,9 +4160,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: true,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4259,44 +4190,6 @@ describe('TaskStore', () => {
     });
   });
 
-  describe('updateByQuery', () => {
-    let store: TaskStore;
-    let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-
-    beforeAll(() => {
-      esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      store = new TaskStore({
-        logger: mockLogger(),
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
-        savedObjectsService: coreStart.savedObjects,
-        security: coreStart.security,
-        getIsSecurityEnabled: () => true,
-        executionContext: mockExecutionContextStart,
-        apiKeyStrategy: new EsApiKeyStrategy(),
-      });
-    });
-    test('should pass requestTimeout and retryOnTimeout', async () => {
-      esClient.updateByQuery.mockResponse({
-        hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
-      } as UpdateByQueryResponse);
-      await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
-      expect(esClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
-        requestTimeout: 1000,
-        retryOnTimeout: false,
-      });
-    });
-  });
-
   describe('bulkGetVersions', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
@@ -4313,9 +4206,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
@@ -4431,9 +4321,6 @@ describe('TaskStore', () => {
         savedObjectsRepository: savedObjectsClient,
         adHocTaskCounter,
         allowReadingInvalidState: false,
-        requestTimeouts: {
-          update_by_query: 1000,
-        },
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,

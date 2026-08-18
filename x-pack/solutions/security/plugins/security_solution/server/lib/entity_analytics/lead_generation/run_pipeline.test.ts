@@ -28,6 +28,12 @@ jest.mock('./observation_modules/temporal_state_module', () => ({
 jest.mock('./observation_modules/behavioral_analysis_module', () => ({
   createBehavioralAnalysisModule: jest.fn(() => ({ config: { id: 'alert' } })),
 }));
+jest.mock('./observation_modules/entity_profile_module', () => ({
+  createEntityProfileModule: jest.fn(() => ({ config: { id: 'entity_profile' } })),
+}));
+jest.mock('./observation_modules/anomaly_detection_module', () => ({
+  createAnomalyDetectionModule: jest.fn(() => ({ config: { id: 'anomaly_detection' } })),
+}));
 
 const mockCreateLeads = jest.fn();
 jest.mock('./lead_data_client', () => ({
@@ -107,7 +113,7 @@ describe('runLeadGenerationPipeline', () => {
     });
 
     expect(result).toEqual({ total: 1 });
-    expect(mockRegisterModule).toHaveBeenCalledTimes(3);
+    expect(mockRegisterModule).toHaveBeenCalledTimes(5);
     expect(mockCreateLeads).toHaveBeenCalledWith(
       expect.objectContaining({
         sourceType: 'adhoc',

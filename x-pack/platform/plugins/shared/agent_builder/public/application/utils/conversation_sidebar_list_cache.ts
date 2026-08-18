@@ -6,8 +6,9 @@
  */
 
 import type { QueryClient } from '@kbn/react-query';
-import type { ConversationWithoutRounds } from '@kbn/agent-builder-common';
 
+import type { ListConversationsResponseItem } from '../../../common/http_api/conversations';
+import type { ConversationsService } from '../../services/conversations/conversations_service';
 import { queryKeys } from '../query_keys';
 
 const agentConversationListKey = (agentId: string) => queryKeys.conversations.byAgent(agentId);
@@ -16,7 +17,7 @@ const buildSidebarConversationListRow = (p: {
   id: string;
   agent_id: string;
   title: string;
-}): ConversationWithoutRounds => {
+}): ListConversationsResponseItem => {
   const t = new Date().toISOString();
   return {
     id: p.id,
@@ -25,16 +26,19 @@ const buildSidebarConversationListRow = (p: {
     title: p.title,
     created_at: t,
     updated_at: t,
+    permissions: { rename: true, delete: true, update_access_control: true },
   };
 };
 
 export const insertSidebarConversationListRow = async ({
   queryClient,
+  conversationsService,
   agentId,
   conversationId,
   title,
 }: {
   queryClient: QueryClient;
+  conversationsService: ConversationsService;
   agentId: string;
   conversationId: string;
   title: string;
@@ -45,10 +49,25 @@ export const insertSidebarConversationListRow = async ({
     title,
   });
   const key = agentConversationListKey(agentId);
+
+  // Ensure the server list is in cache before we prepend — otherwise `cancelQueries`
+  // below kills the in-flight GET and the sidebar ends up showing only the new row.
+  if (queryClient.getQueryData<ListConversationsResponseItem[]>(key) === undefined) {
+    try {
+      await queryClient.fetchQuery({
+        queryKey: key,
+        queryFn: () => conversationsService.list({ agentId }),
+      });
+    } catch {
+      // Proceed with the optimistic insert even if the prefetch fails — the next
+      // explicit refresh of the sidebar will pick up the server state.
+    }
+  }
+
   await queryClient.cancelQueries({ queryKey: key });
 
   let inserted = false;
-  queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
     if (prev?.some((c) => c.id === row.id)) {
       return prev;
     }
@@ -69,7 +88,7 @@ export const removeSidebarConversationListRow = ({
   conversationId: string;
 }) => {
   const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
     if (!prev?.length) {
       return prev;
     }
@@ -86,15 +105,15 @@ export const patchConversationList = ({
   queryClient: QueryClient;
   agentId: string;
   conversationId: string;
-  values: Partial<ConversationWithoutRounds>;
+  values: Partial<ListConversationsResponseItem>;
 }) => {
   const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ListConversationsResponseItem[] | undefined>(key, (prev) => {
     if (!prev?.length) return prev;
     let changed = false;
     const next = prev.map((c) => {
       if (c.id !== conversationId) return c;
-      const hasChanges = (Object.keys(values) as Array<keyof ConversationWithoutRounds>).some(
+      const hasChanges = (Object.keys(values) as Array<keyof ListConversationsResponseItem>).some(
         (k) => values[k] !== c[k]
       );
       if (!hasChanges) return c;

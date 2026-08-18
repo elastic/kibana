@@ -42,14 +42,8 @@ export const getSchema = ({
   },
   connectorId: {
     label: i18n.translate('xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdLabel', {
-      defaultMessage: 'Connector',
+      defaultMessage: 'Connector for generating attack discoveries',
     }),
-    helpText: i18n.translate(
-      'xpack.securitySolution.attackDiscovery.schedule.fieldConnectorIdHelpText',
-      {
-        defaultMessage: 'This connector will apply to this schedule, only.',
-      }
-    ),
     validations: [
       {
         validator: emptyField(
@@ -66,7 +60,7 @@ export const getSchema = ({
   alertsSelectionSettings: {},
   interval: {
     label: i18n.translate('xpack.securitySolution.attackDiscovery.schedule.fieldIntervalLabel', {
-      defaultMessage: 'Runs every',
+      defaultMessage: 'Run every',
     }),
   },
   actions: {

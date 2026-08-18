@@ -24,6 +24,7 @@ interface EndpointUrlProps {
   elasticsearchUrl: string | null;
   isLoading: boolean;
   isCompact?: boolean;
+  telemetryPage: string;
 }
 
 const urlStyle = ({ euiTheme }: UseEuiTheme) => css`
@@ -43,6 +44,7 @@ export const EndpointUrl = ({
   elasticsearchUrl,
   isLoading,
   isCompact = false,
+  telemetryPage,
 }: EndpointUrlProps) => {
   if (isLoading) {
     return <EuiLoadingSpinner size="m" />;
@@ -72,7 +74,7 @@ export const EndpointUrl = ({
                     defaultMessage: 'Copy Elasticsearch URL',
                   })}
                   data-test-subj="vectordbConnectToProjectCopyUrl"
-                  data-telemetry-id="vectordbOnboarding-connectToProject-copyUrl"
+                  data-telemetry-id={`vectordbOnboarding-${telemetryPage}-copyEndpointUrl`}
                 />
               </EuiToolTip>
             )}

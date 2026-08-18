@@ -70,7 +70,8 @@ export const READ_ROLE: KibanaRole = {
 /**
  * Role with no alerting_v2 privileges. Used to assert that endpoints reject
  * users that lack the required `alerting_v2_*` feature privileges (typically
- * with a `403`).
+ * with a `403`) and, in UI tests, that unprivileged users are redirected away
+ * from the alerting_v2 management pages.
  */
 export const NO_ACCESS_ROLE: KibanaRole = {
   elasticsearch: NO_ACCESS_ES_PRIVILEGES,
@@ -78,7 +79,7 @@ export const NO_ACCESS_ROLE: KibanaRole = {
     {
       base: [],
       feature: {
-        discover: ['read'],
+        advancedSettings: ['read'],
       },
       spaces: ['*'],
     },
@@ -179,9 +180,8 @@ export const ALERTING_V2_ACTION_POLICIES_READ_ROLE: KibanaRole = {
 
 /**
  * Composite role granting full access to action policies plus read access to
- * rules. Required by the create/upsert action policy routes, which also need
- * `alerting_v2_rules: ['read']` to validate the referenced rule when callers
- * create a policy with `type: 'single_rule'`.
+ * rules. Used by routes that also need `alerting_v2_rules: ['read']`, such as
+ * matching action policies for a rule.
  */
 export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
   elasticsearch: WRITER_ES_PRIVILEGES,
@@ -191,6 +191,35 @@ export const ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE: KibanaRole = {
       feature: {
         alerting_v2_action_policies: ['all'],
         alerting_v2_rules: ['read'],
+        discover: ['all'],
+      },
+      spaces: ['*'],
+    },
+  ],
+};
+
+/**
+ * Everything the action policy form page needs to complete a create/edit
+ * round-trip in the browser. Each extra privilege is one the form actually
+ * exercises:
+ *
+ * - `alerting_v2_rules: ['read']` — the create and upsert routes require
+ *   `rules.read` on top of `actionPolicies.write`.
+ * - `alerting_v2_alerts: ['read']` — the matcher input fetches data-field
+ *   suggestions from `GET /suggestions/rule_event_fields`.
+ * - `workflowsManagement: ['read']` — destinations are workflow references, so
+ *   the `destinationsInput` combo box lists workflows via the workflows plugin.
+ */
+export const ALERTING_V2_ACTION_POLICY_FORM_ROLE: KibanaRole = {
+  elasticsearch: WRITER_ES_PRIVILEGES,
+  kibana: [
+    {
+      base: [],
+      feature: {
+        alerting_v2_action_policies: ['all'],
+        alerting_v2_rules: ['read'],
+        alerting_v2_alerts: ['read'],
+        workflowsManagement: ['read'],
         discover: ['all'],
       },
       spaces: ['*'],

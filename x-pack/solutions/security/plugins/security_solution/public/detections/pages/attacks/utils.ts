@@ -10,6 +10,7 @@ import {
   expandableFlyoutStateRightPanelOnly,
   resolveFlyoutUrlParam,
 } from '../../../flyout/shared/utils/expandable_flyout_url_state';
+import { encodeFlyoutV2UrlParam } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
 
 export interface ResolveAttackFlyoutParamsConfig {
   index: string;
@@ -34,3 +35,18 @@ export const resolveAttackFlyoutParams = (
       },
     })
   );
+
+/**
+ * Resolves the flyoutV2 URL parameter for the new flyout system.
+ * If the URL already carries a flyoutV2 param (e.g. from a prior share link), preserves it.
+ * Otherwise encodes an attack descriptor for the given attack.
+ */
+export const resolveAttackFlyoutV2Params = (
+  { index, attackId }: ResolveAttackFlyoutParamsConfig,
+  currentParamsString: string | null
+): string => {
+  if (currentParamsString) {
+    return currentParamsString;
+  }
+  return encodeFlyoutV2UrlParam([{ kind: 'attack', attackId, indexName: index }]);
+};

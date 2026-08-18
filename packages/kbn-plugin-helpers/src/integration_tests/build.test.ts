@@ -123,11 +123,9 @@ describe('scripts/generate_plugin', () => {
       "optionalPlugins": Array [],
       "owner": Object {
         "githubTeam": "",
-        "name": "",
+        "name": "Plugin Author",
       },
-      "requiredPlugins": Array [
-        "navigation",
-      ],
+      "requiredPlugins": Array [],
       "server": true,
       "ui": true,
       "version": "1.0.0",

@@ -22,6 +22,46 @@ export const hashIds = (ids: string[]): string =>
     .digest('hex');
 
 /**
+ * Unions an ES|QL multi-value column (scalar | array | null | undefined) into a target Set.
+ * Used by the regroup* functions to merge the VALUES(...) aggregates of pre-aggregated rows.
+ * `dropEmpty` additionally excludes the empty-string sentinel ES|QL emits for missing values —
+ * set it for doc id / doc-data columns to match the original `if (record.x)` falsy guards.
+ */
+export const addValuesToSet = (
+  set: Set<string>,
+  value: string | string[] | null | undefined,
+  { dropEmpty }: { dropEmpty: boolean }
+): void => {
+  for (const v of castArray(value ?? [])) {
+    if (v == null) continue;
+    if (dropEmpty && v === '') continue;
+    set.add(v);
+  }
+};
+
+/**
+ * Filters a multi-value doc-data column (JSON strings built by the ES|QL CONCAT expression)
+ * to only the entries whose embedded "id" field is in the allowed set. Used to attribute a
+ * shared STATS row's doc-data to a specific entity-type group without leaking across groups.
+ * Each entry has the shape: {"id":"<entityId>","type":"entity",...}
+ */
+export const filterDocDataToIds = (
+  docData: string | string[],
+  allowedIds: Set<string>
+): string[] => {
+  const entries = castArray(docData ?? []);
+  return entries.filter((entry) => {
+    if (!entry) return false;
+    try {
+      const parsed = JSON.parse(entry) as { id?: string };
+      return parsed.id != null && allowedIds.has(parsed.id);
+    } catch {
+      return false;
+    }
+  });
+};
+
+/**
  * Checks if the entities latest index exists.
  * Previously checked for lookup mode (required for LOOKUP JOIN), but since
  * enrichment now uses follow-up queries, only existence matters.

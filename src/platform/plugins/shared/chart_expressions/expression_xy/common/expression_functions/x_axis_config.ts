@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Position } from '@elastic/charts';
+import { ChartPosition } from '@kbn/chart-expressions-common';
 import { strings } from '../i18n';
 import type { XAxisConfigFn } from '../types';
 import { X_AXIS_CONFIG } from '../constants';
@@ -23,7 +23,7 @@ export const xAxisConfigFunction: XAxisConfigFn = {
     ...commonAxisConfigArgs,
     position: {
       types: ['string'],
-      options: [Position.Top, Position.Bottom],
+      options: [ChartPosition.Top, ChartPosition.Bottom],
       help: strings.getAxisPositionHelp(),
       strict: true,
     },
@@ -32,7 +32,7 @@ export const xAxisConfigFunction: XAxisConfigFn = {
     return {
       type: X_AXIS_CONFIG,
       ...args,
-      position: args.position ?? Position.Bottom,
+      position: args.position ?? ChartPosition.Bottom,
     };
   },
 };

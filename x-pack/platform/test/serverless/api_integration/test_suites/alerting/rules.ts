@@ -22,7 +22,8 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAdmin: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  describe('Alerting rules', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/251764
+  describe.skip('Alerting rules', function () {
     // Timeout of 360000ms exceeded
     this.tags(['failsOnMKI']);
     const RULE_TYPE_ID = '.es-query';

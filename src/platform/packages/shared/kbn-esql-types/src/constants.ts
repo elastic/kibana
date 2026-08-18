@@ -33,4 +33,5 @@ export enum SOURCES_TYPES {
   WIRED_STREAM = 'Wired Stream',
   CLASSIC_STREAM = 'Classic Stream',
   QUERY_STREAM = 'Query Stream',
+  EXTERNAL = 'External data',
 }

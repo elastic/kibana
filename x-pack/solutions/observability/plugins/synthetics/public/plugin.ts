@@ -57,7 +57,6 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { SLOPublicStart } from '@kbn/slo-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -124,7 +123,6 @@ export interface ClientPluginsStart {
   licenseManagement?: LicenseManagementUIPluginSetup;
   licensing: LicensingPluginStart;
   slo?: SLOPublicStart;
-  presentationUtil: PresentationUtilPluginStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
@@ -163,16 +161,13 @@ export class SyntheticsPlugin
     registerSyntheticsRoutesWithNavigation(coreSetup, plugins);
 
     coreSetup.getStartServices().then(([coreStart, clientPluginsStart]) => {
-      const browserConfig = this.initContext.config.get<{
-        experimental?: { ccs?: { enabled?: boolean } };
-      }>();
       kibanaService.init({
         coreSetup,
         coreStart,
         startPlugins: clientPluginsStart,
         isDev: this.initContext.env.mode.dev,
         isServerless: this._isServerless,
-        isCCSEnabled: !this._isServerless && (browserConfig.experimental?.ccs?.enabled ?? false),
+        isCCSEnabled: !this._isServerless,
       });
     });
 

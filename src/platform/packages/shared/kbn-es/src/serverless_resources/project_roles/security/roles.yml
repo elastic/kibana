@@ -42,7 +42,8 @@ viewer:
         - '.entities.v1.latest.security_*'
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - '.entity_analytics.entity-leads*'
@@ -129,7 +130,8 @@ editor:
         - '.entities.v1.updates.security_*'
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
       privileges:
         - 'read'
@@ -229,7 +231,8 @@ t1_analyst:
         - .entities.v1.updates.security_*
         - '.entities.v1.latest.security_*'
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
         - '.ml-anomalies-*'
         - security_solution-*.misconfiguration_latest*
@@ -311,7 +314,8 @@ t2_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata
@@ -360,7 +364,8 @@ t3_analyst:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -463,7 +468,8 @@ threat_intelligence_analyst:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata
@@ -547,7 +553,8 @@ rule_author:
         - winlogbeat-*
         - logstash-*
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - security_solution-*.misconfiguration_latest*
       privileges:
         - read
@@ -641,7 +648,8 @@ soc_manager:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
         - security_solution-*.misconfiguration_latest*
       privileges:
@@ -765,7 +773,8 @@ detections_admin:
         - .entities.v1.latest.security_*
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
       privileges:
         - read
@@ -815,6 +824,7 @@ platform_engineer:
         - .lists*
         - .items*
         - .alerts-security*
+        - .internal.alerts-security.alerts-*
         - .siem-signals-*
         - .preview.alerts-security*
         - .internal.preview.alerts-security*
@@ -831,7 +841,8 @@ platform_engineer:
         - .entities.v1.updates.security_*
         - '.entities.v1.history.*.security_*'
         - '.entities.v1.reset*'
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
         - 'entities-latest-*'
       privileges:
         - read
@@ -934,7 +945,8 @@ endpoint_operations_analyst:
         - view_index_metadata
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata
@@ -1017,7 +1029,8 @@ endpoint_policy_manager:
         - read
     - names:
         - .asset-criticality.asset-criticality-*
-        - '.entities.v2.latest.security_*'
+        - '.entities.v2.latest.*'
+        - '.entities.v2.metadata.*'
       privileges:
         - read
         - view_index_metadata

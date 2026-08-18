@@ -1,0 +1,33 @@
+{
+  "sha1": "006a2bd7266137910a4231b7ad8752f7b1ce01f3",
+  "tests": [
+    {
+      "id": "465ebd73794deaf-1f4354557566991",
+      "title": "Preconfigured connector functionality should not be able to delete a preconfigured connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_triggers_actions_ui/ui/tests/connector_preconfigured.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "465ebd73794deaf-2832e38b50e2544",
+      "title": "Preconfigured connector functionality should not be able to edit a preconfigured connector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout_triggers_actions_ui/ui/tests/connector_preconfigured.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    }
+  ]
+}

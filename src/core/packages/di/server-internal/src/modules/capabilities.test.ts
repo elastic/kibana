@@ -28,7 +28,7 @@ describe('loadCapabilities', () => {
     injection = injectionServiceMock.createStartContract();
     capabilities = { registerProvider: jest.fn() } as unknown as typeof capabilities;
     container = injection.getContainer();
-    container.loadSync(new ContainerModule(loadCapabilites));
+    container.load(new ContainerModule(loadCapabilites));
     container.bind(CoreSetup('capabilities')).toConstantValue(capabilities);
   });
 

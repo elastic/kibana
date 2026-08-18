@@ -200,6 +200,7 @@ export const useSendMessageMutation = ({
         setPendingMessage(vars.conversationId, vars.message);
         hasInsertedOptimisticListRow = await insertSidebarConversationListRow({
           queryClient,
+          conversationsService,
           agentId: vars.agentId,
           conversationId: vars.conversationId,
           title: optimisticConversationListTitle,
@@ -314,7 +315,7 @@ export const useSendMessageMutation = ({
           if (succeeded && !endedInAwaitingPrompt) {
             streamActions.invalidateConversation();
           }
-          if (!succeeded && hasInsertedOptimisticListRow) {
+          if (!succeeded && hasInsertedOptimisticListRow && !conversationPersisted) {
             removeSidebarConversationListRow({
               queryClient,
               agentId: vars.agentId,

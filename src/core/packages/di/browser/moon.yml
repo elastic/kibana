@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/core-lifecycle-browser'
   - '@kbn/core-plugins-browser'
   - '@kbn/core-di-internal'
+  - '@kbn/core-di'
 tags:
   - shared-browser
   - package

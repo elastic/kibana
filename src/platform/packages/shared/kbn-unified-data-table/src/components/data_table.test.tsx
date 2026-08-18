@@ -572,9 +572,7 @@ describe('UnifiedDataTable', () => {
     const sortByColumn = async (name: string) => {
       await userEvent.click(getColumnActions(name));
       await waitForEuiPopoverOpen();
-      // Column sort button incorrectly renders as "Sort " instead
-      // of "Sort Z-A" in Jest tests, so we need to find it by index
-      await userEvent.click(screen.getAllByRole('button', { name: /Sort/ })[2]);
+      await userEvent.click(screen.getByTitle(/Sort\s+Z-A/im).closest('button')!);
     };
 
     const copySelectedDocsAsText = async () => {
@@ -637,6 +635,47 @@ describe('UnifiedDataTable', () => {
             'message_1',
             'message_0',
           ]);
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should not apply client side sorting in ES|QL mode when isInMemorySortEnabled is false',
+      async () => {
+        await renderDataTable({
+          columns: ['message'],
+          isPlainRecord: true,
+          isInMemorySortEnabled: false,
+          rows: generateEsHits(dataViewMock, 10).map((hit) =>
+            buildDataTableRecord(hit, dataViewMock)
+          ),
+        });
+
+        let values = getCellValuesByColumn();
+
+        const initialOrder = [
+          'message_0',
+          'message_1',
+          'message_2',
+          'message_3',
+          'message_4',
+          'message_5',
+          'message_6',
+          'message_7',
+          'message_8',
+          'message_9',
+        ];
+
+        expect(values.message).toEqual(initialOrder);
+
+        await sortByColumn('message');
+
+        // Rows keep their original (server) order; the table does not re-sort them in memory.
+        await waitFor(() => {
+          values = getCellValuesByColumn();
+
+          expect(values.message).toEqual(initialOrder);
         });
       },
       EXTENDED_JEST_TIMEOUT

@@ -302,6 +302,7 @@ describe('EditDlmPhasesFlyout', () => {
 
     const frozenPanel = withinPhase('frozen');
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`)).toBeVisible();
+    expect(frozenPanel.getByText('Must occur before the delete phase (60d).')).toBeInTheDocument();
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}DlmSearchableSnapshotInfo`)).toBeVisible();
     expect(
       frozenPanel.queryByTestId(`${DATA_TEST_SUBJ}FrozenEnterpriseRequiredCallout`)
@@ -309,11 +310,22 @@ describe('EditDlmPhasesFlyout', () => {
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}RemoveFrozenPhaseButton`)).toBeVisible();
   });
 
-  it('shows a default repository required callout in frozen searchable snapshot section when default repo is missing', async () => {
+  it('does not show frozen help text when the delete phase is not enabled', async () => {
+    renderDlmFlyout({ initialDsl: { frozen_after: '30d' } }, { initialSelectedPhase: 'frozen' });
+    await tick();
+
+    const frozenPanel = withinPhase('frozen');
+    expect(frozenPanel.queryByText(/Must occur before the .* phase/i)).not.toBeInTheDocument();
+  });
+
+  it('shows a direct create-repository link in frozen searchable snapshot section when default repo is missing', async () => {
+    const onMissingDefaultRepository = jest.fn();
+    const createDefaultRepositoryHref = '/app/management/data/snapshot_restore/add_repository';
     renderDlmFlyout(
       {
         defaultRepositoryName: undefined,
-        onMissingDefaultRepository: jest.fn(),
+        createDefaultRepositoryHref,
+        onMissingDefaultRepository,
         onRefreshDefaultRepository: jest.fn(),
         isRefreshingDefaultRepository: true,
       },
@@ -328,13 +340,48 @@ describe('EditDlmPhasesFlyout', () => {
     expect(
       frozenPanel.getByTestId(`${DATA_TEST_SUBJ}FrozenDefaultRepositoryRequiredCallout`)
     ).toBeVisible();
-    expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}CreateDefaultRepositoryButton`)).toBeVisible();
+    const createRepositoryButton = frozenPanel.getByTestId(
+      `${DATA_TEST_SUBJ}CreateDefaultRepositoryButton`
+    );
+    expect(createRepositoryButton).toBeVisible();
+    expect(createRepositoryButton).toHaveAttribute('href', createDefaultRepositoryHref);
+
+    fireEvent.click(createRepositoryButton);
+    expect(onMissingDefaultRepository).not.toHaveBeenCalled();
+
     expect(
       frozenPanel.getByTestId(`${DATA_TEST_SUBJ}RefreshDefaultRepositoryButton`)
     ).toBeVisible();
 
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`)).toBeDisabled();
     expect(frozenPanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterUnit`)).toBeDisabled();
+  });
+
+  it('shows a manage-repositories link in frozen searchable snapshot section when other repositories already exist', async () => {
+    renderDlmFlyout(
+      {
+        defaultRepositoryName: undefined,
+        createDefaultRepositoryHref: '/app/management/data/snapshot_restore/add_repository',
+        manageRepositoriesHref: '/app/management/data/snapshot_restore/repositories',
+        hasExistingRepositories: true,
+        onRefreshDefaultRepository: jest.fn(),
+      },
+      { initialSelectedPhase: 'frozen' }
+    );
+    await tick();
+
+    const frozenPanel = withinPhase('frozen');
+    const manageRepositoriesButton = frozenPanel.getByTestId(
+      `${DATA_TEST_SUBJ}ManageRepositoriesButton`
+    );
+    expect(manageRepositoriesButton).toBeVisible();
+    expect(manageRepositoriesButton).toHaveAttribute(
+      'href',
+      '/app/management/data/snapshot_restore/repositories'
+    );
+    expect(
+      frozenPanel.queryByTestId(`${DATA_TEST_SUBJ}CreateDefaultRepositoryButton`)
+    ).not.toBeInTheDocument();
   });
 
   it('shows only the delete-after field for delete and a remove button', async () => {
@@ -389,6 +436,43 @@ describe('EditDlmPhasesFlyout', () => {
     expect(next).toEqual({
       data_retention: '90d',
       frozen_after: '30d',
+    });
+  });
+
+  it('hides boundary help text when delete falls below frozen, but keeps it for non-boundary errors', async () => {
+    renderDlmFlyout({}, { initialSelectedPhase: 'delete' });
+    await tick();
+
+    const deletePanel = withinPhase('delete');
+    const helpText = 'Must occur after the frozen phase (30d).';
+
+    // Initially: valid state — help text is visible.
+    expect(deletePanel.getByText(helpText)).toBeInTheDocument();
+
+    // Enter a value below frozen (boundary error) — message should appear exactly once.
+    const valueInput = deletePanel.getByTestId(`${DATA_TEST_SUBJ}MoveAfterValue`);
+    fireEvent.change(valueInput, { target: { value: '20' } });
+    fireEvent.blur(valueInput);
+
+    await waitFor(() => {
+      // Error is shown (via EuiFormRow error prop), help text is suppressed — only one instance.
+      expect(deletePanel.getAllByText(helpText)).toHaveLength(1);
+    });
+
+    // Restore to a valid value above frozen, then enter a non-integer value: help text stays.
+    fireEvent.change(valueInput, { target: { value: '90' } });
+    fireEvent.blur(valueInput);
+    await waitFor(() =>
+      expect(deletePanel.queryByText(/An integer is required/)).not.toBeInTheDocument()
+    );
+
+    fireEvent.change(valueInput, { target: { value: '90.5' } });
+    fireEvent.blur(valueInput);
+
+    await waitFor(() => {
+      expect(deletePanel.getByText(/An integer is required/)).toBeInTheDocument();
+      // Help text remains visible — boundary error isn't active.
+      expect(deletePanel.getByText(helpText)).toBeInTheDocument();
     });
   });
 

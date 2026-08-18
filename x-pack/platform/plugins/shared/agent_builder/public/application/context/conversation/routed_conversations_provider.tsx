@@ -76,7 +76,21 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
     [navigateToAgentBuilderUrl]
   );
 
-  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(undefined);
+  const [attachments, setAttachments] = useState<ConversationAttachment[] | undefined>(
+    location.state?.attachments
+  );
+
+  // Clear attachments when navigating to a different conversation, but not on initial mount.
+  // Skipping initial mount prevents the parent effect from racing with child effects (e.g.
+  // stale-attachments checks in conversation.tsx) that set attachments during the same render.
+  const hasMountedRef = useRef(false);
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true;
+      return;
+    }
+    setAttachments(undefined);
+  }, [conversationId]);
 
   const conversationActions = useConversationActions({
     conversationId,

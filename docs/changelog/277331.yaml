@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/277331
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+areas:
+- Search and data
+title: Add Geo tab to Manage Region Preferences modal
+description: Adds a Geo tab to the Manage Region Preferences modal so admins can restrict EIS inference routing by geo zone instead of individual CSP regions.

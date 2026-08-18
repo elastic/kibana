@@ -107,6 +107,22 @@ export const mockFinalAnswer = (llmProxy: LlmProxy, answer: string | LLmError) =
     .completeAfterIntercept();
 };
 
+/**
+ * Intercepts the final assistant response but never completes it, leaving the LLM request
+ * hanging so the execution can be aborted while it is in flight. Resolves once the request
+ * has been intercepted, signalling that the agent execution is running.
+ */
+export const mockHangingFinalAnswer = (llmProxy: LlmProxy): Promise<void> =>
+  llmProxy
+    .intercept({
+      name: 'final-assistant-response',
+      when: (_body) => {
+        return true;
+      },
+    })
+    .waitForIntercept()
+    .then(() => undefined);
+
 export const mockSearchToolCallWithNaturalLanguageGen = ({
   resource,
   esqlQuery = "FROM my_index WHERE name = 'John'",

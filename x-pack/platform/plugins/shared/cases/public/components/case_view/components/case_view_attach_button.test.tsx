@@ -10,6 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
 
 import { CaseViewAttachButton } from './case_view_attach_button';
+import { basicCase } from '../../../containers/mock';
 import { buildCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
@@ -22,6 +23,13 @@ import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '../../../../common/constants/
 
 jest.mock('../../attachments/file/upload_file_modal', () => ({
   UploadFileModal: () => <div data-test-subj="upload-file-modal-mock" />,
+}));
+
+const mockTrackAttachButtonClicked = jest.fn();
+const mockTrackAttachMenuItemClicked = jest.fn();
+jest.mock('../../../analytics/use_attach_button_ebt', () => ({
+  useAttachButtonClickedEBT: () => mockTrackAttachButtonClicked,
+  useAttachMenuItemClickedEBT: () => mockTrackAttachMenuItemClicked,
 }));
 
 jest.mock('../../../containers/use_create_attachments');
@@ -81,58 +89,120 @@ describe('CaseViewAttachButton', () => {
   });
 
   it('renders the attach button', async () => {
-    renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />);
+    renderWithTestingProviders(
+      <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+    );
     expect(await screen.findByTestId('case-view-attach-button')).toBeInTheDocument();
   });
 
   it('opens the popover with the upload-file menu item', async () => {
-    renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />);
+    renderWithTestingProviders(
+      <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+    );
     await user.click(await screen.findByTestId('case-view-attach-button'));
     expect(await screen.findByTestId('case-view-attach-menu-file')).toBeInTheDocument();
   });
 
   it('opens the upload file modal when File is selected', async () => {
-    renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />);
+    renderWithTestingProviders(
+      <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+    );
     await user.click(await screen.findByTestId('case-view-attach-button'));
     await user.click(await screen.findByTestId('case-view-attach-menu-file'));
     await screen.findByTestId('upload-file-modal-mock');
   });
 
+  it('tracks the attach button click with the attach location', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachButton caseData={basicCase} attachLocation="attachments" />
+    );
+    await user.click(await screen.findByTestId('case-view-attach-button'));
+    expect(mockTrackAttachButtonClicked).toHaveBeenCalledWith('attachments');
+  });
+
+  it('tracks the file menu item click', async () => {
+    renderWithTestingProviders(
+      <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+    );
+    await user.click(await screen.findByTestId('case-view-attach-button'));
+    await user.click(await screen.findByTestId('case-view-attach-menu-file'));
+    expect(mockTrackAttachMenuItemClicked).toHaveBeenCalledWith('file');
+  });
+
+  it('tracks the saved object menu item click', async () => {
+    getConfigMock.mockReturnValue(getCasesConfig(true));
+    renderWithTestingProviders(
+      <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+    );
+    await user.click(await screen.findByTestId('case-view-attach-button'));
+    await user.click(await screen.findByTestId('case-view-attach-menu-saved-object'));
+    expect(mockTrackAttachMenuItemClicked).toHaveBeenCalledWith('saved_object');
+  });
+
   it('does not render without `createComment` permission', () => {
-    renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />, {
-      wrapperProps: {
-        permissions: buildCasesPermissions({ createComment: false }),
-      },
-    });
+    renderWithTestingProviders(
+      <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />,
+      {
+        wrapperProps: {
+          permissions: buildCasesPermissions({ createComment: false }),
+        },
+      }
+    );
     expect(screen.queryByTestId('case-view-attach-button')).not.toBeInTheDocument();
   });
 
   describe('Timeline option', () => {
     it('is hidden when the timeline integration is absent (e.g. observability)', async () => {
       getConfigMock.mockReturnValue(getCasesConfig(true));
-      renderWithTestingProviders(<CaseViewAttachButton caseId="case-1" />);
+      renderWithTestingProviders(
+        <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+      );
       await user.click(await screen.findByTestId('case-view-attach-button'));
       expect(screen.queryByTestId('case-view-attach-menu-timeline')).not.toBeInTheDocument();
     });
 
     it('is hidden when the attachments feature flag is off', async () => {
       getConfigMock.mockReturnValue(getCasesConfig(false));
-      renderWithTestingProviders(withTimelineIntegration(<CaseViewAttachButton caseId="case-1" />));
+      renderWithTestingProviders(
+        withTimelineIntegration(
+          <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+        )
+      );
       await user.click(await screen.findByTestId('case-view-attach-button'));
       expect(screen.queryByTestId('case-view-attach-menu-timeline')).not.toBeInTheDocument();
     });
 
     it('shows the Timeline option and opens the modal when flag is on and integration is present', async () => {
       getConfigMock.mockReturnValue(getCasesConfig(true));
-      renderWithTestingProviders(withTimelineIntegration(<CaseViewAttachButton caseId="case-1" />));
+      renderWithTestingProviders(
+        withTimelineIntegration(
+          <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+        )
+      );
       await user.click(await screen.findByTestId('case-view-attach-button'));
       await user.click(await screen.findByTestId('case-view-attach-menu-timeline'));
       await screen.findByTestId('select-timeline-modal-mock');
     });
 
+    it('tracks the timeline menu item click', async () => {
+      getConfigMock.mockReturnValue(getCasesConfig(true));
+      renderWithTestingProviders(
+        withTimelineIntegration(
+          <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+        )
+      );
+      await user.click(await screen.findByTestId('case-view-attach-button'));
+      await user.click(await screen.findByTestId('case-view-attach-menu-timeline'));
+      expect(mockTrackAttachMenuItemClicked).toHaveBeenCalledWith('timeline');
+    });
+
     it('creates a security.timeline attachment when a timeline is selected', async () => {
       getConfigMock.mockReturnValue(getCasesConfig(true));
-      renderWithTestingProviders(withTimelineIntegration(<CaseViewAttachButton caseId="case-1" />));
+      renderWithTestingProviders(
+        withTimelineIntegration(
+          <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+        )
+      );
       await user.click(await screen.findByTestId('case-view-attach-button'));
       await user.click(await screen.findByTestId('case-view-attach-menu-timeline'));
       await user.click(await screen.findByTestId('select-timeline-modal-mock-select'));
@@ -140,7 +210,7 @@ describe('CaseViewAttachButton', () => {
       await waitFor(() => {
         expect(createAttachmentsMutate).toHaveBeenCalledWith(
           {
-            caseId: 'case-1',
+            caseId: basicCase.id,
             caseOwner: expect.any(String),
             attachments: [
               {
@@ -159,7 +229,11 @@ describe('CaseViewAttachButton', () => {
 
     it('refreshes the case view page after a successful timeline attachment', async () => {
       getConfigMock.mockReturnValue(getCasesConfig(true));
-      renderWithTestingProviders(withTimelineIntegration(<CaseViewAttachButton caseId="case-1" />));
+      renderWithTestingProviders(
+        withTimelineIntegration(
+          <CaseViewAttachButton caseData={basicCase} attachLocation="activity" />
+        )
+      );
       await user.click(await screen.findByTestId('case-view-attach-button'));
       await user.click(await screen.findByTestId('case-view-attach-menu-timeline'));
       await user.click(await screen.findByTestId('select-timeline-modal-mock-select'));

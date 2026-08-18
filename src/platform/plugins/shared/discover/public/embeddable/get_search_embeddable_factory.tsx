@@ -49,7 +49,7 @@ import { initializeInlineEditingApi } from './initialize_inline_editing_api';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import type { SearchEmbeddableApi, SearchEmbeddablePanelApiState } from './types';
 import { deserializeState, serializeState } from './utils/serialization_utils';
-import { type ContextAwarenessToolkit } from '../context_awareness';
+import { createInMemoryContextAwarenessToolkit } from '../context_awareness';
 import { ScopedServicesProvider } from '../components/scoped_services_provider';
 import { isFieldStatsMode } from './utils/is_field_stats_mode';
 import { isTabDeleted } from './utils/is_tab_deleted';
@@ -215,6 +215,8 @@ export const getSearchEmbeddableFactory = ({
         getTitle: () => titleManager.api.title$.getValue(),
       });
 
+      let cancelRequests: () => void = () => {};
+
       const api: SearchEmbeddableApi = finalizeApi({
         ...stateApi,
         ...titleManager.api,
@@ -274,6 +276,7 @@ export const getSearchEmbeddableFactory = ({
         supportedTriggers: () => {
           return [ON_OPEN_PANEL_MENU];
         },
+        cancelRequests: () => cancelRequests(),
       });
 
       const addFilter: DocViewFilterFn = async (mapping, values, operation) => {
@@ -315,13 +318,14 @@ export const getSearchEmbeddableFactory = ({
         initialDocViewerTabId$.next(options?.initialTabId);
       };
 
-      const toolkit: ContextAwarenessToolkit = {
+      const toolkit = createInMemoryContextAwarenessToolkit({
+        profileStateRegistry: discoverServices.profileStateRegistry,
         actions: {
           addFilter: enableFilters ? addFilter : undefined,
           refreshData: () => refreshTrigger$.next(undefined),
           setExpandedDoc: enableDocumentViewer ? setExpandedDoc : undefined,
         },
-      };
+      });
 
       const scopedEbtManager = discoverServices.ebtManager.createScopedEBTManager();
       const scopedProfilesManager = discoverServices.profilesManager.createScopedProfilesManager({
@@ -329,7 +333,7 @@ export const getSearchEmbeddableFactory = ({
         toolkit,
       });
 
-      const unsubscribeFromFetch = initializeFetch({
+      const { cleanup: cleanupFetch, cancelRequests: _cancelRequests } = initializeFetch({
         api: {
           ...api,
           parentApi,
@@ -351,6 +355,7 @@ export const getSearchEmbeddableFactory = ({
         setDataLoading: (dataLoading: boolean | undefined) => dataLoading$.next(dataLoading),
         setBlockingError: (error: Error | undefined) => blockingError$.next(error),
       });
+      cancelRequests = _cancelRequests;
 
       return {
         api,
@@ -388,7 +393,7 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               drilldownsManager.cleanup();
               searchEmbeddable.cleanup();
-              unsubscribeFromFetch();
+              cleanupFetch();
             };
           }, []);
 

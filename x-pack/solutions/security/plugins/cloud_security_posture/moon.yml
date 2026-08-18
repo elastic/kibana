@@ -80,7 +80,9 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/kql'
   - '@kbn/entity-store'
+  - '@kbn/logging-mocks'
   - '@kbn/core-spaces-common'
+  - '@kbn/app-header'
 tags:
   - plugin
   - prod

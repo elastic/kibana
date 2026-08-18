@@ -35,9 +35,13 @@ const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const setupMocks = () => {
   mockUseKibana.mockReturnValue({
     services: {
+      featureFlags: {
+        getBooleanValue: jest.fn().mockResolvedValue(false),
+      },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,
       },
+      telemetry: { reportEvent: jest.fn() },
       uiSettings: {
         get: jest.fn(),
       },

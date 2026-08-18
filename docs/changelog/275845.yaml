@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/275845
+issues:
+- https://github.com/elastic/security-team/issues/16943
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Improve lookup join translation for Sentinel
+description: "Improves SIEM migration translations by giving lookup resources field metadata so generated ES|QL can use more accurate `LOOKUP JOIN` clauses."

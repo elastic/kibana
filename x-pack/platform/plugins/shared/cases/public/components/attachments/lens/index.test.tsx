@@ -10,7 +10,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common';
 import {
   AttachmentActionType,
-  type UnifiedValueAttachmentViewProps,
+  type UnifiedHybridAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 
 import { basicCase } from '../../../containers/mock';
@@ -23,7 +23,7 @@ describe('getVisualizationAttachmentType', () => {
     .fn()
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
 
-  const attachmentViewProps: UnifiedValueAttachmentViewProps = {
+  const attachmentViewProps: UnifiedHybridAttachmentViewProps = {
     data: {
       state: {
         attributes: { state: { query: {} } },
@@ -56,7 +56,46 @@ describe('getVisualizationAttachmentType', () => {
       displayName: 'Visualizations',
       getAttachmentViewObject: expect.any(Function),
       getAttachmentRemovalObject: expect.any(Function),
+      getAttachmentTabViewObject: expect.any(Function),
       schema: expect.any(Object),
+      workflowSchema: expect.any(Object),
+    });
+  });
+
+  describe('workflowSchema', () => {
+    const getWorkflowSchema = () => {
+      const { workflowSchema } = getVisualizationAttachmentType();
+      if (!workflowSchema) {
+        throw new Error('expected lens to expose a workflow schema');
+      }
+      return workflowSchema;
+    };
+
+    const referencePayload = {
+      type: LENS_ATTACHMENT_TYPE,
+      owner: 'securitySolution',
+      attachmentId: 'lens-so-id',
+      metadata: { title: 'My visualization', soType: 'lens' },
+    };
+
+    it('accepts a by-reference payload', () => {
+      expect(getWorkflowSchema().safeParse(referencePayload).success).toBe(true);
+    });
+
+    it('rejects a by-reference payload carrying an inline data snapshot', () => {
+      expect(
+        getWorkflowSchema().safeParse({ ...referencePayload, data: { attributes: {} } }).success
+      ).toBe(false);
+    });
+
+    it('rejects the by-value persistable-state arm', () => {
+      expect(
+        getWorkflowSchema().safeParse({
+          type: LENS_ATTACHMENT_TYPE,
+          owner: 'securitySolution',
+          data: { state: {} },
+        }).success
+      ).toBe(false);
     });
   });
 
@@ -66,6 +105,20 @@ describe('getVisualizationAttachmentType', () => {
       const event = lensType.getAttachmentViewObject(attachmentViewProps).event;
 
       expect(event).toBe('added visualization');
+    });
+
+    it('renders the saved-object event correctly', () => {
+      const lensType = getVisualizationAttachmentType();
+      const event = lensType.getAttachmentViewObject({
+        ...attachmentViewProps,
+        attachmentId: 'lens-1',
+        metadata: { title: 'My lens', soType: 'lens' },
+      }).event;
+
+      const services = createStartServicesMock();
+      renderWithTestingProviders(<>{event}</>, { wrapperProps: { services } });
+
+      expect(screen.getByText('added visualization My lens')).toBeInTheDocument();
     });
 
     it('renders the timelineAvatar correctly', () => {
@@ -96,6 +149,19 @@ describe('getVisualizationAttachmentType', () => {
         isPrimary: false,
         render: expect.any(Function),
       });
+    });
+
+    it('does not set custom actions for a saved-object attachment without inline data', () => {
+      const lensType = getVisualizationAttachmentType();
+      const attachmentViewObject = lensType.getAttachmentViewObject({
+        ...attachmentViewProps,
+        data: undefined,
+        attachmentId: 'lens-1',
+        metadata: { title: 'My lens', soType: 'lens' },
+      });
+
+      expect(attachmentViewObject.getActions).toBeUndefined();
+      expect('children' in attachmentViewObject).toBe(false);
     });
 
     it('renders the open visualization button correctly', () => {
@@ -132,6 +198,75 @@ describe('getVisualizationAttachmentType', () => {
 
       await waitFor(() => {
         expect(screen.getByTestId('embeddableComponent'));
+      });
+    });
+
+    it('renders saved-object snapshot children correctly', async () => {
+      const lensType = getVisualizationAttachmentType();
+      const viewProps = {
+        ...attachmentViewProps,
+        attachmentId: 'lens-1',
+        metadata: { title: 'My lens', soType: 'lens' },
+        data: {
+          attributes: { state: { query: {} } },
+        },
+      };
+      // eslint-disable-next-line testing-library/no-node-access
+      const Component = lensType.getAttachmentViewObject(viewProps).children!;
+
+      const services = createStartServicesMock();
+      services.lens.EmbeddableComponent = mockEmbeddableComponent;
+
+      renderWithTestingProviders(
+        <Suspense fallback={'Loading...'}>
+          <Component {...viewProps} />
+        </Suspense>,
+        { wrapperProps: { services } }
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('embeddableComponent'));
+      });
+
+      expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          timeRange: undefined,
+        }),
+        {}
+      );
+    });
+
+    it('renders saved-object snapshot children with their stored time range', async () => {
+      const lensType = getVisualizationAttachmentType();
+      const viewProps = {
+        ...attachmentViewProps,
+        attachmentId: 'lens-1',
+        metadata: { title: 'My lens', soType: 'lens' },
+        data: {
+          attributes: { state: { query: {} } },
+          timeRange: { from: 'now-15m', to: 'now' },
+        },
+      };
+      // eslint-disable-next-line testing-library/no-node-access
+      const Component = lensType.getAttachmentViewObject(viewProps).children!;
+
+      const services = createStartServicesMock();
+      services.lens.EmbeddableComponent = mockEmbeddableComponent;
+
+      renderWithTestingProviders(
+        <Suspense fallback={'Loading...'}>
+          <Component {...viewProps} />
+        </Suspense>,
+        { wrapperProps: { services } }
+      );
+
+      await waitFor(() => {
+        expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+          expect.objectContaining({
+            timeRange: { from: 'now-15m', to: 'now' },
+          }),
+          {}
+        );
       });
     });
   });

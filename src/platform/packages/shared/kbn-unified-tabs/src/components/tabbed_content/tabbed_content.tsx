@@ -56,6 +56,12 @@ export interface TabbedContentProps
   services: TabsServices;
   hideTabsBar?: boolean;
   renderContent?: (selectedItem: TabItem) => React.ReactNode;
+  /**
+   * Optional wrapper for the tabs bar. Receives the tabs bar node
+   * and returns a node to render in its place.
+   * When omitted, the default tabs bar is rendered as-is.
+   */
+  wrapTabsBar?: (tabsBar: React.ReactNode) => React.ReactNode;
   createItem: () => TabItem;
   customNewTabButton?: React.ReactElement;
   onChanged: (state: TabbedContentState) => void;
@@ -99,6 +105,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   services,
   hideTabsBar = false,
   renderContent,
+  wrapTabsBar,
   createItem,
   onChanged,
   tabContentIdOverride,
@@ -423,7 +430,9 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   ]);
 
   const tabsBarContainerCss = css`
-    background-color: ${euiTheme.colors.lightestShade};
+    width: 100%;
+    min-width: 0;
+    background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
   const tabsBarComponentCss = css`
@@ -491,8 +500,16 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     </EuiFlexGroup>
   );
 
+  const tabsBarNode = hideTabsBar ? null : tabsBar;
+  const renderedTabsBar = wrapTabsBar ? wrapTabsBar(tabsBarNode) : tabsBarNode;
+
+  // The separating line between tabs and content
+  const tabsBarSeparatorCss = css`
+    border-bottom: ${euiTheme.border.thin};
+  `;
+
   if (!renderContent) {
-    return tabsBar;
+    return <div css={tabsBarSeparatorCss}>{renderedTabsBar}</div>;
   }
 
   return (
@@ -502,7 +519,11 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       gutterSize="none"
       className="eui-fullHeight"
     >
-      {!hideTabsBar && <EuiFlexItem grow={false}>{tabsBar}</EuiFlexItem>}
+      {renderedTabsBar && (
+        <EuiFlexItem grow={false} css={tabsBarSeparatorCss}>
+          {renderedTabsBar}
+        </EuiFlexItem>
+      )}
       {selectedItem ? (
         <EuiFlexItem
           data-test-subj="unifiedTabs_selectedTabContent"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from 'redux-toolkit-v1';
 import { mockDataViewManagerState } from '../mock';
 import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
@@ -74,27 +74,24 @@ describe('createInitListener', () => {
       kibanaDataViews: [],
     } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
 
-    listener = createInitListener(
-      {
-        dataViews: mockDataViewsService,
-        http,
-        application,
-        uiSettings,
-        notifications: {
-          toasts: {
-            addDanger: mockToastsDanger,
-          },
-        } as unknown as CoreStart['notifications'],
-        spaces,
-        storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-          remove: jest.fn(),
-          clear: jest.fn(),
-        } as unknown as Storage,
-      },
-      false
-    );
+    listener = createInitListener({
+      dataViews: mockDataViewsService,
+      http,
+      application,
+      uiSettings,
+      notifications: {
+        toasts: {
+          addDanger: mockToastsDanger,
+        },
+      } as unknown as CoreStart['notifications'],
+      spaces,
+      storage: {
+        get: jest.fn(),
+        set: jest.fn(),
+        remove: jest.fn(),
+        clear: jest.fn(),
+      } as unknown as Storage,
+    });
   });
 
   it('should load the data views from getIdsWithTitle and dispatch further actions', async () => {

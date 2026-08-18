@@ -41,6 +41,8 @@
     "@kbn/agent-builder-browser",
     "@kbn/zod",
     "@kbn/core-http-browser",
+    "@kbn/agent-builder-platform-plugin",
+    "@kbn/dashboard-plugin",
   ],
   "exclude": ["target/**/*"]
 }
