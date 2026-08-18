@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('AlertingDefaults', { tag: tags.stateful.classic }, () => {
+test.describe('AlertingDefaults', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     // Enable synthetics so the Settings page renders — otherwise it redirects to the
     // "enable monitor management" onboarding and createConnectorButton never appears.

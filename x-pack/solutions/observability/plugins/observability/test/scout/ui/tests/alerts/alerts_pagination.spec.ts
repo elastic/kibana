@@ -16,7 +16,7 @@ const PAGE_SIZE = 10;
 // Ported from the FTR `Observability alerts pagination` suite
 // (x-pack/solutions/observability/test/observability_functional/apps/observability/pages/alerts/pagination.ts).
 // The skipped `When less than 10 alerts are found` block (#119946) is dropped.
-test.describe('Observability alerts - pagination', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Observability alerts - pagination', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeAll(async ({ esClient }) => {
     await generateObservabilityAlerts(esClient);
   });

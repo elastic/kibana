@@ -13,7 +13,7 @@ const FIRST_TAG = 'a';
 const SECOND_TAG = 'b';
 
 // Failing: See https://github.com/elastic/kibana/issues/257334
-test.describe.skip('FilterMonitors', { tag: [...tags.stateful.classic] }, () => {
+test.describe.skip('FilterMonitors', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
   });

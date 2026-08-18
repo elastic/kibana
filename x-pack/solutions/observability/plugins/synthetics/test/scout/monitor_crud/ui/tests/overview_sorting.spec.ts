@@ -11,7 +11,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('OverviewSorting', { tag: tags.stateful.classic }, () => {
+test.describe('OverviewSorting', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   const testMonitor1 = 'acb';
   const testMonitor2 = 'aCd';
   const testMonitor3 = 'Abc';

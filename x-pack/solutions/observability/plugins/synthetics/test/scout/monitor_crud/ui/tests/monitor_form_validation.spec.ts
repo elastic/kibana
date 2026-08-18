@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('MonitorFormValidation', { tag: tags.stateful.classic }, () => {
+test.describe('MonitorFormValidation', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   const existingMonitorName = 'https://amazon.com';
 
   test.beforeAll(async ({ syntheticsServices }) => {

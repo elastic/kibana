@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('OverviewCompactView', { tag: tags.stateful.classic }, () => {
+test.describe('OverviewCompactView', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeAll(async ({ syntheticsServices }) => {
     await syntheticsServices.cleanUp();
   });

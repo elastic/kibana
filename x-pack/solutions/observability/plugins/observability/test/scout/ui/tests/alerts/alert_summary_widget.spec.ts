@@ -15,7 +15,7 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // (x-pack/solutions/observability/test/observability_functional/apps/observability/pages/alerts/alert_summary_widget.ts).
 // The two FTR `it` blocks shared one browser session (the second cleared the
 // status control), so they are combined into a single journey with `test.step`s.
-test.describe('Observability alerts - summary widget', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Observability alerts - summary widget', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeAll(async ({ esClient }) => {
     await generateObservabilityAlerts(esClient);
   });

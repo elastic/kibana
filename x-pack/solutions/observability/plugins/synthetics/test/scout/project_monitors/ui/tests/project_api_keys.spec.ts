@@ -10,7 +10,7 @@ import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('ProjectAPIKeys', { tag: tags.stateful.classic }, () => {
+test.describe('ProjectAPIKeys', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test('generates API key and verifies viewer restrictions', async ({
     pageObjects,
     page,

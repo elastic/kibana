@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
-test.describe('ManagementList', { tag: tags.stateful.classic }, () => {
+test.describe('ManagementList', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   const testMonitor1 = 'Test monitor 1';
   const testMonitor2 = 'Test monitor 2';
   const testMonitor3 = 'Test monitor 3';

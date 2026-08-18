@@ -13,7 +13,7 @@ import { generateObservabilityAlerts, OBSERVABILITY_ALERT_RULE } from '../../fix
 
 // Ported from the `Actions Button` describe of the FTR `Observability alerts`
 // suite (x-pack/solutions/observability/test/observability_functional/apps/observability/pages/alerts/index.ts).
-test.describe('Observability alerts - row actions', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Observability alerts - row actions', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeAll(async ({ esClient }) => {
     await generateObservabilityAlerts(esClient);
   });

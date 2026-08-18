@@ -75,7 +75,7 @@ const createMetricThresholdRule = async (
   return res.body as RuleResponse;
 };
 
-apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic] }, () => {
+apiTest.describe('Metric threshold rule', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   let headers: Record<string, string>;
   let ruleId: string;
   let actionId: string;

@@ -16,7 +16,7 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // The three FTR `it` blocks shared a single browser journey (each step mutated the
 // status control and re-checked the row count), so they are combined into one test
 // with `test.step` boundaries.
-test.describe('Observability alerts - status controls', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Observability alerts - status controls', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeAll(async ({ esClient }) => {
     await generateObservabilityAlerts(esClient);
   });

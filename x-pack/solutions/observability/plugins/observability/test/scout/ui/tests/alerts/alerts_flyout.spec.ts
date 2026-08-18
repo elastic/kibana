@@ -15,7 +15,7 @@ import { generateObservabilityAlerts } from '../../fixtures/alerts_data';
 // The flyout has since been redesigned from a static description list into an
 // Overview/Metadata tabbed layout, so instead of the FTR's exact field-value
 // assertions we verify the current flyout structure and navigation affordances.
-test.describe('Observability alerts - flyout', { tag: [...tags.stateful.classic] }, () => {
+test.describe('Observability alerts - flyout', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   test.beforeAll(async ({ esClient }) => {
     await generateObservabilityAlerts(esClient);
   });

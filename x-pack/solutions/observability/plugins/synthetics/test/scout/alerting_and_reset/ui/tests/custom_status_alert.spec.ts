@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../common/ui/fixtures';
 
 // Failing: See https://github.com/elastic/kibana/issues/268088
-test.describe.skip('CustomStatusAlert', { tag: tags.stateful.classic }, () => {
+test.describe.skip('CustomStatusAlert', { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] }, () => {
   let configId: string;
 
   test.beforeAll(async ({ syntheticsServices }) => {
