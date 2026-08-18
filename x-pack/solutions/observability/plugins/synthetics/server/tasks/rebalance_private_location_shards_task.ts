@@ -141,7 +141,7 @@ export class RebalancePrivateLocationShardsTask {
         // Idempotent placement + diff-based writes: only monitors whose assigned
         // agent changed are rewritten; steady state performs zero writes.
         const { total, moved } = await this.syntheticsMonitorClient.privateLocationAPI.rebalanceShards({
-          location: { id: location.id, label: location.label },
+          location: { id: location.id, label: location.label, agentPolicyId: location.agentPolicyId },
           healthyAgentIds,
           recoveryAgentIds,
           capacities,

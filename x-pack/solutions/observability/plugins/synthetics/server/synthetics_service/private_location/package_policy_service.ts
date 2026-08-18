@@ -84,12 +84,15 @@ export class PackagePolicyService {
   }
 
   /**
-   * All synthetics package policies belonging to a private location, across
-   * every space. Matches both the new (`${configId}-${locationId}`) and legacy
-   * space-suffixed (`${configId}-${locationId}-${spaceId}`) id formats. Paginated
-   * so a location with more than one page of monitors isn't truncated.
+   * All synthetics package policies bound to a location's Fleet agent policy,
+   * across every space. A scalable private location is backed by a single agent
+   * policy, so a targeted `policy_ids` query returns exactly its monitors —
+   * far cheaper than scanning the whole synthetics package-policy index and
+   * filtering by id suffix in memory (this runs once per location per rebalance
+   * cycle, ~1m). Paginated so a location with more than one page of monitors
+   * isn't truncated.
    */
-  async listByLocation({ locationId }: { locationId: string }): Promise<PackagePolicy[]> {
+  async listByAgentPolicy({ agentPolicyId }: { agentPolicyId: string }): Promise<PackagePolicy[]> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const items: PackagePolicy[] = [];
     const perPage = 1000;
@@ -98,7 +101,7 @@ export class PackagePolicyService {
 
     while (hasMore) {
       const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
-        kuery: 'ingest-package-policies.package.name:synthetics',
+        kuery: `ingest-package-policies.package.name:synthetics AND ingest-package-policies.policy_ids:"${agentPolicyId}"`,
         spaceId: ALL_SPACES_ID,
         page,
         perPage,
@@ -108,9 +111,7 @@ export class PackagePolicyService {
       page += 1;
     }
 
-    const newSuffix = `-${locationId}`;
-    const legacyInfix = `-${locationId}-`;
-    return items.filter((pkgPolicy) => pkgPolicy.id.endsWith(newSuffix) || pkgPolicy.id.includes(legacyInfix));
+    return items;
   }
 
   async bulkCreate({

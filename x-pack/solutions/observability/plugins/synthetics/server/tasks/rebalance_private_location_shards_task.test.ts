@@ -154,7 +154,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       });
 
       expect(mockRebalanceShards).toHaveBeenCalledWith({
-        location: { id: 'loc-1', label: 'Location 1' },
+        location: { id: 'loc-1', label: 'Location 1', agentPolicyId: 'ap-1' },
         healthyAgentIds: ['agent-1', 'agent-2'],
         recoveryAgentIds: ['agent-1'],
         capacities: new Map([['agent-1', 2048]]),
@@ -228,7 +228,9 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
       expect(mockRebalanceShards).toHaveBeenCalledTimes(1);
       expect(mockRebalanceShards).toHaveBeenCalledWith(
-        expect.objectContaining({ location: { id: 'loc-b', label: 'Location 1' } })
+        expect.objectContaining({
+          location: { id: 'loc-b', label: 'Location 1', agentPolicyId: 'ap-b' },
+        })
       );
     });
 

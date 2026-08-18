@@ -106,3 +106,47 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
     expect(clientPassedToFleet(fleetBulkCreate)).toEqual({ __space: DEFAULT_SPACE_ID });
   });
 });
+
+describe('PackagePolicyService.listByAgentPolicy', () => {
+  const makeListServer = (pages: Array<Array<{ id: string }>>) => {
+    const list = jest.fn(async (_soClient: unknown, { page }: { page: number }) => ({
+      items: pages[page - 1] ?? [],
+    }));
+    const server = {
+      logger: loggerMock.create(),
+      fleet: { packagePolicyService: { list } },
+      coreStart: { savedObjects: { createInternalRepository: () => ({}) } },
+    } as unknown as SyntheticsServerSetup;
+    return { server, list };
+  };
+
+  it('queries synthetics policies bound to the agent policy across all spaces', async () => {
+    const { server, list } = makeListServer([[{ id: 'm1-loc' }]]);
+
+    const result = await new PackagePolicyService(server).listByAgentPolicy({
+      agentPolicyId: 'ap-1',
+    });
+
+    expect(result).toEqual([{ id: 'm1-loc' }]);
+    expect(list).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        spaceId: ALL_SPACES_ID,
+        kuery:
+          'ingest-package-policies.package.name:synthetics AND ingest-package-policies.policy_ids:"ap-1"',
+      })
+    );
+  });
+
+  it('paginates until a short page and concatenates the results', async () => {
+    const fullPage = Array.from({ length: 1000 }, (_, i) => ({ id: `m${i}-loc` }));
+    const { server, list } = makeListServer([fullPage, [{ id: 'last-loc' }]]);
+
+    const result = await new PackagePolicyService(server).listByAgentPolicy({
+      agentPolicyId: 'ap-1',
+    });
+
+    expect(result).toHaveLength(1001);
+    expect(list).toHaveBeenCalledTimes(2);
+  });
+});

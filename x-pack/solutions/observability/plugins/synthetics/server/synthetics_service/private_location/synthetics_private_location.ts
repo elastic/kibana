@@ -777,7 +777,7 @@ export class SyntheticsPrivateLocation {
     recoveryAgentIds,
     capacities,
   }: {
-    location: { id: string; label?: string };
+    location: { id: string; label?: string; agentPolicyId: string };
     healthyAgentIds: string[];
     recoveryAgentIds?: string[];
     capacities?: ReadonlyMap<string, number>;
@@ -785,7 +785,9 @@ export class SyntheticsPrivateLocation {
     if (healthyAgentIds.length === 0) {
       return { total: 0, moved: 0 };
     }
-    const pkgPolicies = await this.packagePolicyService.listByLocation({ locationId: location.id });
+    const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
+      agentPolicyId: location.agentPolicyId,
+    });
     if (pkgPolicies.length === 0) {
       return { total: 0, moved: 0 };
     }
