@@ -6,7 +6,10 @@
  */
 
 import { randomUUID } from 'crypto';
-import { ConversationAccessControlMode, DEFAULT_CONVERSATION_TITLE } from '@kbn/agent-builder-common';
+import {
+  ConversationAccessControlMode,
+  DEFAULT_CONVERSATION_TITLE,
+} from '@kbn/agent-builder-common';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { CreateConversationResponse } from '../../../../common/http_api/conversations';
