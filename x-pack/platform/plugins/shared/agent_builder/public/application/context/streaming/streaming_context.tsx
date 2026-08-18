@@ -13,15 +13,15 @@
  * state lives here so the sidebar can observe it.
  *
  * State:
- *   - `activeStreams`: `Map<conversationId, { type, agentReasoning }>`. Each in-flight
- *     stream owns one entry. Set synchronously when each mutation kicks off; deleted in
- *     the mutation's `finally`. Multiple entries can coexist — concurrent streams.
+ *   - `activeStreams`: `Map<conversationId, { type }>`. Each in-flight stream owns one
+ *     entry. Set synchronously when each mutation kicks off; deleted in the mutation's
+ *     `finally`. Multiple entries can coexist — concurrent streams.
  *   - `byConversationId`: per-conversation pending message, error, and errorSteps.
  *     Persists across stream end so a user can hit Retry after a failure.
  */
 
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import produce from 'immer';
+import produce from 'immer-v9';
 import type { ConversationRoundStep } from '@kbn/agent-builder-common';
 import { useSendMessageMutation } from './use_send_message_mutation';
 import type { SendMessageVars } from './use_send_message_mutation';
@@ -58,14 +58,6 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
       const next = new Map(prev);
       next.delete(conversationId);
       return next;
-    });
-  }, []);
-
-  const updateActiveReasoning = useCallback((conversationId: string, reasoning: string) => {
-    setActiveStreams((prev) => {
-      const existing = prev.get(conversationId);
-      if (!existing) return prev;
-      return new Map(prev).set(conversationId, { ...existing, agentReasoning: reasoning });
     });
   }, []);
 
@@ -125,7 +117,6 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
   }, []);
 
   const sendMutation = useSendMessageMutation({
-    updateActiveReasoning,
     setPendingMessage,
     clearPendingMessage,
     setError,
@@ -134,7 +125,6 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
   });
 
   const resumeMutation = useResumeRoundMutation({
-    updateActiveReasoning,
     setError,
     clearActiveStream,
   });
@@ -174,7 +164,6 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
     (vars: SendMessageVars) => {
       setActiveStream(vars.conversationId, {
         type: vars.action === 'regenerate' ? 'regenerate' : 'send',
-        agentReasoning: null,
       });
       sendMutate(vars);
     },
@@ -184,7 +173,6 @@ export const StreamingProvider = ({ children }: { children: React.ReactNode }) =
     (vars: ResumeRoundVars) => {
       setActiveStream(vars.conversationId, {
         type: 'resume',
-        agentReasoning: null,
       });
       resumeMutate(vars);
     },

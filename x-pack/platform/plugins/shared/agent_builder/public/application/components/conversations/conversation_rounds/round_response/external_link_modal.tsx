@@ -6,9 +6,11 @@
  */
 
 import { EuiConfirmModal, euiTextBreakWord, useGeneratedHtmlId } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_EVENT_TYPES, AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 const linkStyles = css`
   ${euiTextBreakWord()}
@@ -21,6 +23,29 @@ interface ExternalLinkModalProps {
 
 export const ExternalLinkModal: React.FC<ExternalLinkModalProps> = ({ url, onClose }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'externalLinkModal' });
+  const {
+    services: { analytics },
+  } = useKibana();
+
+  const handleConfirm = useCallback(() => {
+    if (url === null) return;
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+      ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_CONFIRM,
+      element_kind: 'button',
+    });
+    window.open(url, '_blank', 'noreferrer');
+    onClose();
+  }, [analytics, url, onClose]);
+
+  const handleCancel = useCallback(() => {
+    analytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+      ebt_element: AGENT_BUILDER_UI_EBT.element.pageContent,
+      ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_CANCEL,
+      element_kind: 'button',
+    });
+    onClose();
+  }, [analytics, onClose]);
 
   if (url === null) return null;
 
@@ -35,11 +60,8 @@ export const ExternalLinkModal: React.FC<ExternalLinkModalProps> = ({ url, onClo
         />
       }
       titleProps={{ id: titleId }}
-      onCancel={onClose}
-      onConfirm={() => {
-        window.open(url, '_blank', 'noreferrer');
-        onClose();
-      }}
+      onCancel={handleCancel}
+      onConfirm={handleConfirm}
       cancelButtonText={
         <FormattedMessage
           id="xpack.agentBuilder.chatMessage.externalLinkModal.cancelButton"

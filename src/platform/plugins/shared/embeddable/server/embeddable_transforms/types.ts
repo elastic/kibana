@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
+import type { ZodObjectType } from '@kbn/zod';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DrilldownTransforms } from '../../common';
 import type { GetDrilldownsSchemaFnType } from '../drilldowns/types';
@@ -32,12 +32,16 @@ export type EmbeddableTransforms<
      * @deprecated ID is passed as an argument for legacy reference names that require it
      * to fetch their old references. It should not be used for new reference names.
      */
-    id?: string
+    id?: string,
+    useGASchemas?: boolean
   ) => EmbeddableState;
   /**
    * Converts EmbeddableState into StoredEmbeddableState and extracts references
    */
-  transformIn?: (state: EmbeddableState) => {
+  transformIn?: (
+    state: EmbeddableState,
+    useGASchemas?: boolean
+  ) => {
     state: StoredEmbeddableState;
     references?: Reference[];
   };
@@ -73,7 +77,7 @@ export type EmbeddableServerDefinition<
    * EmbeddableState is expected to be TypeOf<typeof schema>
    */
   // TODO - make required once all embeddables have schemas
-  getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => Type<object> | undefined;
+  getSchema?: (getDrilldownsSchema: GetDrilldownsSchemaFnType) => ZodObjectType | undefined;
 
   /**
    * Throws error when panel config is not supported.

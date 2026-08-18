@@ -6,7 +6,7 @@ steps:
       machineType: n2-standard-2
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
-      diskSizeGb: 115
+      diskSizeGb: 130
     timeout_in_minutes: 10
     retry:
       automatic:

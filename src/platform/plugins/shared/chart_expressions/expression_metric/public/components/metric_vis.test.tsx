@@ -35,7 +35,7 @@ import * as secondaryMetricInfoModule from './secondary_metric_info';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
-  return { getConverterFor: () => convertFn };
+  return { convertToText: convertFn };
 });
 
 const mockGetColorForValue = jest.fn<undefined | string, any>(() => undefined);
@@ -87,6 +87,7 @@ const defaultMetricParams: MetricVisParam = {
   secondaryAlign: 'right',
   iconAlign: 'left',
   valueFontSize: 'default',
+  density: 'compact',
   secondaryTrend: {
     visuals: undefined,
     baseline: undefined,
@@ -640,7 +641,7 @@ describe('MetricVisComponent', function () {
       // 5 columns x 2 rows by default
       expect(screen.getByRole('list')).toHaveStyle({
         'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
       });
 
       // now configure maxCols: 2
@@ -657,7 +658,7 @@ describe('MetricVisComponent', function () {
       // changed to 2 columns x 3 rows now
       expect(screen.getByRole('list')).toHaveStyle({
         'grid-template-columns': 'repeat(2, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(3, minmax(64px, 1fr)',
+        'grid-template-rows': 'repeat(3, minmax(80px, 1fr)',
       });
 
       // now configure maxCols: 5 and minTiles: 10
@@ -675,7 +676,7 @@ describe('MetricVisComponent', function () {
       // changed to 5 columns x 2 rows now
       expect(screen.getByRole('list')).toHaveStyle({
         'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
       });
     });
 
@@ -772,7 +773,7 @@ describe('MetricVisComponent', function () {
       expect(screen.getAllByRole('presentation')).toHaveLength(10);
       expect(screen.getByRole('list')).toHaveStyle({
         'grid-template-columns': 'repeat(5, minmax(0, 1fr)',
-        'grid-template-rows': 'repeat(2, minmax(64px, 1fr)',
+        'grid-template-rows': 'repeat(2, minmax(80px, 1fr)',
       });
     });
   });
@@ -797,11 +798,11 @@ describe('MetricVisComponent', function () {
         maxDimensions: {
           x: {
             unit: 'pixels',
-            value: 310,
+            value: 300,
           },
           y: {
             unit: 'pixels',
-            value: 310,
+            value: 160,
           },
         },
       },
@@ -950,6 +951,44 @@ describe('MetricVisComponent', function () {
         });
 
         expect(screen.getByRole('figure')).toHaveStyle({ backgroundColor: colorFromPalette });
+      });
+
+      it('applies no value color when applyColorTo is "value" and the value is outside the palette range', async () => {
+        // a value outside the palette range yields no color, so the palette color falls back to the default
+        mockGetColorForValue.mockReturnValue(undefined);
+
+        const { container } = await renderMetricChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...defaultMetricParams,
+              applyColorTo: 'value',
+              color: undefined,
+              palette: {
+                type: 'palette',
+                name: 'default',
+                params: {
+                  colors: [],
+                  gradient: true,
+                  stops: [],
+                  range: 'number',
+                  rangeMin: 2,
+                  rangeMax: 10,
+                },
+              },
+            },
+          },
+        });
+
+        // background stays the default and the value text has no explicit (custom) color
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+        const valueEl = container.querySelector<HTMLElement>('.echMetricText__value');
+        expect(valueEl).not.toBeNull();
+        expect(valueEl?.style.color).toBe('');
       });
 
       describe('percent-based', () => {
@@ -1266,6 +1305,7 @@ describe('MetricVisComponent', function () {
             maxCols: 3,
             titlesTextAlign: 'left',
             valueFontSize: 'default',
+            density: 'compact',
             primaryAlign: 'right',
             secondaryAlign: 'right',
             primaryPosition: 'bottom',

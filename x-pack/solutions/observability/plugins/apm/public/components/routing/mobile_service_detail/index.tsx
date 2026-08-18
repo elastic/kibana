@@ -6,29 +6,33 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
-import * as t from 'io-ts';
+import { z } from '@kbn/zod/v4';
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { offsetRt } from '../../../../common/comparison_rt';
+import { toBooleanFromString } from '../../../../common/utils/to_boolean_from_string';
+import { offsetSchema } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { environmentRt } from '../../../../common/environment_rt';
+import { environmentSchema } from '../../../../common/environment_rt';
 import {
   LatencyAggregationType,
-  latencyAggregationTypeRt,
+  latencyAggregationTypeSchema,
 } from '../../../../common/latency_aggregation_types';
+import {
+  DEFAULT_ANOMALY_THRESHOLD,
+  anomalyThresholdSchema,
+} from '../../../../common/anomaly_detection/anomaly_threshold';
 import {
   AlertsOverview,
   AlertsSearchBarContextProvider,
   AlertsHeaderSearchBar,
 } from '../../app/alerts_overview';
-import { ServiceMapServiceDetail } from '../../app/service_map';
 import { MobileServiceTemplate } from '../templates/mobile_service_template';
 import { MobileServiceOverview } from '../../app/mobile/service_overview';
 import { MobileTransactionOverview } from '../../app/mobile/transaction_overview';
 import { TransactionDetails } from '../../app/transaction_details';
 import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to_default_service_route_view';
+import { RedirectFocusedServiceMapToGlobal } from '../service_detail/redirect_focused_service_map_to_global';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ErrorGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/error_group_details';
 import { CrashGroupDetails } from '../../app/mobile/errors_and_crashes_group_details/crash_group_details';
@@ -46,30 +50,36 @@ export function page({
   tabKey,
   element,
   searchBarOptions,
+  customSearchBar,
   bottomHeaderContent,
   contentWrapper,
+  contextWrapper: ContextWrapper,
 }: {
   title: string;
   tabKey: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: React.ComponentProps<typeof MobileSearchBar>;
+  customSearchBar?: React.ReactNode;
   bottomHeaderContent?: React.ComponentType;
   contentWrapper?: React.ComponentType<{ children: React.ReactNode }>;
+  contextWrapper?: React.ComponentType<{ children: React.ReactNode }>;
 }): {
   element: React.ReactElement<any, any>;
 } {
+  const template = (
+    <MobileServiceTemplate
+      title={title}
+      selectedTabKey={tabKey}
+      searchBarOptions={searchBarOptions}
+      customSearchBar={customSearchBar}
+      bottomHeaderContent={bottomHeaderContent}
+      contentWrapper={contentWrapper}
+    >
+      {element}
+    </MobileServiceTemplate>
+  );
   return {
-    element: (
-      <MobileServiceTemplate
-        title={title}
-        selectedTabKey={tabKey}
-        searchBarOptions={searchBarOptions}
-        bottomHeaderContent={bottomHeaderContent}
-        contentWrapper={contentWrapper}
-      >
-        {element}
-      </MobileServiceTemplate>
-    ),
+    element: ContextWrapper ? <ContextWrapper>{template}</ContextWrapper> : template,
   };
 }
 
@@ -80,38 +90,43 @@ export const mobileServiceDetailRoute = {
         <Outlet />
       </ApmTimeRangeMetadataContextProvider>
     ),
-    params: t.intersection([
-      t.type({
-        path: t.type({
-          serviceName: t.string,
+    params: z
+      .object({
+        path: z.object({
+          serviceName: z.string(),
         }),
-      }),
-      t.type({
-        query: t.intersection([
-          environmentRt,
-          t.type({
-            rangeFrom: t.string,
-            rangeTo: t.string,
-            kuery: t.string,
-            serviceGroup: t.string,
-            comparisonEnabled: toBooleanRt,
-          }),
-          t.partial({
-            latencyAggregationType: latencyAggregationTypeRt,
-            transactionType: t.string,
-            refreshPaused: t.union([t.literal('true'), t.literal('false')]),
-            refreshInterval: t.string,
-          }),
-          offsetRt,
-        ]),
-      }),
-    ]),
+      })
+      .merge(
+        z.object({
+          query: environmentSchema
+            .merge(
+              z.object({
+                rangeFrom: z.string(),
+                rangeTo: z.string(),
+                kuery: z.string(),
+                serviceGroup: z.string(),
+                comparisonEnabled: toBooleanFromString,
+              })
+            )
+            .merge(
+              z.object({
+                latencyAggregationType: latencyAggregationTypeSchema.optional(),
+                anomalyThreshold: anomalyThresholdSchema.optional(),
+                transactionType: z.string().optional(),
+                refreshPaused: z.union([z.literal('true'), z.literal('false')]).optional(),
+                refreshInterval: z.string().optional(),
+              })
+            )
+            .merge(offsetSchema),
+        })
+      ),
     defaults: {
       query: {
         kuery: '',
         environment: ENVIRONMENT_ALL.value,
         serviceGroup: '',
         latencyAggregationType: LatencyAggregationType.avg,
+        anomalyThreshold: DEFAULT_ANOMALY_THRESHOLD,
       },
     },
     children: {
@@ -123,23 +138,26 @@ export const mobileServiceDetailRoute = {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
-            showTransactionTypeSelector: true,
             showTimeComparison: true,
             showMobileFilters: true,
           },
         }),
-        params: t.partial({
-          query: t.partial({
-            page: toNumberRt,
-            pageSize: toNumberRt,
-            sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-            device: t.string,
-            osVersion: t.string,
-            appVersion: t.string,
-            netConnectionType: t.string,
-          }),
-        }),
+        params: z
+          .object({
+            query: z
+              .object({
+                page: z.coerce.number().optional(),
+                pageSize: z.coerce.number().optional(),
+                sortField: z.string().optional(),
+                sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                device: z.string().optional(),
+                osVersion: z.string().optional(),
+                appVersion: z.string().optional(),
+                netConnectionType: z.string().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
       },
       '/mobile-services/{serviceName}/transactions': {
         ...page({
@@ -149,45 +167,47 @@ export const mobileServiceDetailRoute = {
           }),
           element: <Outlet />,
           searchBarOptions: {
-            showTransactionTypeSelector: true,
             showTimeComparison: true,
             showMobileFilters: true,
           },
         }),
-        params: t.partial({
-          query: t.partial({
-            page: toNumberRt,
-            pageSize: toNumberRt,
-            sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-            device: t.string,
-            osVersion: t.string,
-            appVersion: t.string,
-            netConnectionType: t.string,
-            mobileSelectedTab: t.string,
-          }),
-        }),
+        params: z
+          .object({
+            query: z
+              .object({
+                page: z.coerce.number().optional(),
+                pageSize: z.coerce.number().optional(),
+                sortField: z.string().optional(),
+                sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                device: z.string().optional(),
+                osVersion: z.string().optional(),
+                appVersion: z.string().optional(),
+                netConnectionType: z.string().optional(),
+                mobileSelectedTab: z.string().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
         children: {
           '/mobile-services/{serviceName}/transactions/view': {
             element: <TransactionDetails />,
-            params: t.type({
-              query: t.intersection([
-                t.intersection([
-                  t.type({
-                    comparisonEnabled: toBooleanRt,
-                    showCriticalPath: toBooleanRt,
-                  }),
-                  t.partial({ transactionName: t.string }),
-                ]),
-                t.partial({
-                  traceId: t.string,
-                  transactionId: t.string,
-                  flyoutDetailTab: t.string,
-                  sampleRangeTo: toNumberRt,
-                  sampleRangeFrom: toNumberRt,
-                }),
-                offsetRt,
-              ]),
+            params: z.object({
+              query: z
+                .object({
+                  comparisonEnabled: toBooleanFromString,
+                  showCriticalPath: toBooleanFromString,
+                })
+                .merge(z.object({ transactionName: z.string().optional() }))
+                .merge(
+                  z.object({
+                    traceId: z.string().optional(),
+                    transactionId: z.string().optional(),
+                    flyoutDetailTab: z.string().optional(),
+                    sampleRangeTo: z.coerce.number().optional(),
+                    sampleRangeFrom: z.coerce.number().optional(),
+                  })
+                )
+                .merge(offsetSchema),
             }),
             defaults: {
               query: {
@@ -212,27 +232,31 @@ export const mobileServiceDetailRoute = {
             showMobileFilters: true,
           },
         }),
-        params: t.partial({
-          query: t.partial({
-            page: toNumberRt,
-            pageSize: toNumberRt,
-            sortField: t.string,
-            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-            mobileErrorTabId: t.string,
-            device: t.string,
-            osVersion: t.string,
-            appVersion: t.string,
-            netConnectionType: t.string,
-          }),
-        }),
+        params: z
+          .object({
+            query: z
+              .object({
+                page: z.coerce.number().optional(),
+                pageSize: z.coerce.number().optional(),
+                sortField: z.string().optional(),
+                sortDirection: z.union([z.literal('asc'), z.literal('desc')]).optional(),
+                mobileErrorTabId: z.string().optional(),
+                device: z.string().optional(),
+                osVersion: z.string().optional(),
+                appVersion: z.string().optional(),
+                netConnectionType: z.string().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
         children: {
           '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}': {
             element: <ErrorGroupDetails />,
-            params: t.type({
-              path: t.type({
-                groupId: t.string,
+            params: z.object({
+              path: z.object({
+                groupId: z.string(),
               }),
-              query: t.partial({ errorId: t.string }),
+              query: z.object({ errorId: z.string().optional() }),
             }),
           },
           '/mobile-services/{serviceName}/errors-and-crashes/': {
@@ -240,11 +264,11 @@ export const mobileServiceDetailRoute = {
           },
           '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}': {
             element: <CrashGroupDetails />,
-            params: t.type({
-              path: t.type({
-                groupId: t.string,
+            params: z.object({
+              path: z.object({
+                groupId: z.string(),
               }),
-              query: t.partial({ errorId: t.string }),
+              query: z.object({ errorId: z.string().optional() }),
             }),
           },
         },
@@ -259,16 +283,9 @@ export const mobileServiceDetailRoute = {
           showTimeComparison: true,
         },
       }),
-      '/mobile-services/{serviceName}/service-map': page({
-        tabKey: 'service-map',
-        title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service map',
-        }),
-        element: <ServiceMapServiceDetail />,
-        searchBarOptions: {
-          showTimeComparison: true,
-        },
-      }),
+      '/mobile-services/{serviceName}/service-map': {
+        element: <RedirectFocusedServiceMapToGlobal />,
+      },
       '/mobile-services/{serviceName}/logs': page({
         tabKey: 'logs',
         title: i18n.translate('xpack.apm.views.logs.title', {
@@ -291,16 +308,22 @@ export const mobileServiceDetailRoute = {
           }),
           element: <AlertsOverview />,
           searchBarOptions: {
-            hidden: true,
+            showUnifiedSearchBar: false,
+            showTimeComparison: false,
+            showMobileFilters: false,
           },
           bottomHeaderContent: AlertsHeaderSearchBar,
           contentWrapper: AlertsSearchBarContextProvider,
         }),
-        params: t.partial({
-          query: t.partial({
-            alertStatus: t.string,
-          }),
-        }),
+        params: z
+          .object({
+            query: z
+              .object({
+                alertStatus: z.string().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
       },
       '/mobile-services/{serviceName}/dashboards': {
         ...page({
@@ -310,11 +333,15 @@ export const mobileServiceDetailRoute = {
           }),
           element: <ServiceDashboards />,
         }),
-        params: t.partial({
-          query: t.partial({
-            dashboardId: t.string,
-          }),
-        }),
+        params: z
+          .object({
+            query: z
+              .object({
+                dashboardId: z.string().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
       },
       '/mobile-services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,

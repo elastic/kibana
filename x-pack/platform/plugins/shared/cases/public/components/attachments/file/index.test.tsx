@@ -9,17 +9,16 @@ import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 
-import {
-  AttachmentActionType,
-  type UnifiedReferenceAttachmentViewProps,
-} from '../../../client/attachment_framework/types';
-import type { FileAttachmentMetadata } from '../../../../common/types/domain_zod/attachment/file/v2';
+import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { basicCase, basicFileMock } from '../../../containers/mock';
 import { getFileAttachmentType } from '.';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
-import { renderWithTestingProviders } from '../../../common/mock';
-
-type FileViewProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
+import {
+  allCasesPermissions,
+  buildCasesPermissions,
+  renderWithTestingProviders,
+} from '../../../common/mock';
+import type { FileViewProps } from '.';
 
 describe('getFileType', () => {
   const fileType = getFileAttachmentType();
@@ -31,11 +30,12 @@ describe('getFileType', () => {
     expect(fileType).toStrictEqual({
       id: FILE_ATTACHMENT_TYPE,
       icon: 'document',
-      displayName: 'File',
+      displayName: 'Files',
       getAttachmentViewObject: expect.any(Function),
       getAttachmentRemovalObject: expect.any(Function),
       getAttachmentTabViewObject: expect.any(Function),
       schema: expect.any(Object),
+      workflowSchema: false,
     });
   });
 
@@ -54,6 +54,7 @@ describe('getFileType', () => {
       createdBy: { username: 'elastic', fullName: null, email: null, profileUid: undefined },
       version: '1',
       caseData: { title: basicCase.title, id: basicCase.id },
+      permissions: allCasesPermissions(),
       rowContext: {
         appId: 'cases',
         manageMarkdownEditIds: [],
@@ -137,6 +138,35 @@ describe('getFileType', () => {
       await userEvent.click(deleteButton);
 
       expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+    });
+
+    it('getActions delete control is hidden without delete permission', async () => {
+      const attachmentViewObject = fileType.getAttachmentViewObject(attachmentViewProps);
+      const actions = attachmentViewObject.getActions?.(attachmentViewProps) ?? [];
+
+      // @ts-expect-error: render exists on CustomAttachmentAction
+      renderWithTestingProviders(actions[1].render(), {
+        wrapperProps: { permissions: buildCasesPermissions({ delete: false }) },
+      });
+
+      expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
+    });
+
+    it('getActions omits the delete action entirely without delete permission', () => {
+      const noDeletePermissions = buildCasesPermissions({ delete: false });
+      const attachmentViewObject = fileType.getAttachmentViewObject({
+        ...attachmentViewProps,
+        permissions: noDeletePermissions,
+      });
+
+      const actions =
+        attachmentViewObject.getActions?.({
+          ...attachmentViewProps,
+          permissions: noDeletePermissions,
+        }) ?? [];
+
+      expect(actions.length).toBe(1);
+      expect(screen.queryByTestId('cases-files-delete-button')).not.toBeInTheDocument();
     });
 
     it('empty metadata returns blank FileAttachmentViewObject', () => {

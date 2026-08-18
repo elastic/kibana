@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/269560
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- Alerting and reporting
+title: Add file attachment option to Cases

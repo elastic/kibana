@@ -4,6 +4,7 @@
 viewer:
   cluster:
     - 'read_project_routing'
+    - 'monitor_inference'
   indices:
     - names:
         - '/~(([.]|ilm-history-).*)/'
@@ -42,6 +43,7 @@ viewer:
 editor:
   cluster:
     - 'read_project_routing'
+    - 'monitor_inference'
   indices:
     - names:
         - '/~(([.]|ilm-history-).*)/'

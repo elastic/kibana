@@ -1,5 +1,5 @@
 {
-  "sha1": "e6ed860b0525fd1fa532a47bd54797e417822532",
+  "sha1": "aa22bdd03f2f5f2b7fe230d95a6d21603487142f",
   "tests": [
     {
       "id": "d2014f4df575e52-44c5e30280778f9",
@@ -27,6 +27,34 @@
         "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/builtin_roles_kibana_access.spec.ts",
         "line": 152,
         "column": 10
+      }
+    },
+    {
+      "id": "2604f49abedc2cb-5e01b18261d4a81",
+      "title": "xsrf protection Authorization-scheme bypass (server.xsrf.allowedSchemes) accepts a self-invalidation request authenticated with a real ApiKey Authorization header and no kbn-xsrf header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
+        "line": 85,
+        "column": 12
+      }
+    },
+    {
+      "id": "2604f49abedc2cb-ba096edd116d8f3",
+      "title": "xsrf protection Authorization-scheme bypass (server.xsrf.allowedSchemes) rejects the same request when authenticated with a cookie session (no Authorization-header scheme), even with the bypass enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout/api/tests/xsrf_authorization_scheme_bypass.spec.ts",
+        "line": 109,
+        "column": 12
       }
     }
   ]

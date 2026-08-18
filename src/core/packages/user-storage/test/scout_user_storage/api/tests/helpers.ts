@@ -9,6 +9,9 @@
 
 import { INTERNAL_HEADERS } from '../fixtures';
 
+// Mirrors the `register()` call in
+// `src/platform/test/user_storage/plugins/user_storage_test/server/plugin.ts`.
+// Keep both in sync when changing the test fixture.
 export const ALL_KEYS = [
   'test:string_key',
   'test:number_key',
@@ -51,17 +54,68 @@ interface ApiClient {
 export const createHelpers = (headersGetter: () => Record<string, string>) => {
   const headers = () => ({ ...INTERNAL_HEADERS, ...headersGetter() });
 
+  const getKey = (apiClient: ApiClient, key: string) =>
+    apiClient.get(`internal/user_storage/${key}`, {
+      headers: headers(),
+      responseType: 'json',
+    });
+
+  const getKeyInSpace = (apiClient: ApiClient, spaceId: string, key: string) =>
+    apiClient.get(`s/${spaceId}/internal/user_storage/${key}`, {
+      headers: headers(),
+      responseType: 'json',
+    });
+
+  /**
+   * Fetches every key in ALL_KEYS individually and assembles the results into
+   * a response-like object: `{ statusCode, body: Record<key, value> }`.
+   * The `statusCode` reflects the last non-200 response seen, or 200 if all
+   * succeeded. Use this when a test needs to assert across multiple keys at
+   * once while staying compatible with the per-key route.
+   */
+  const getAllKeys = async (
+    apiClient: ApiClient
+  ): Promise<{ statusCode: number; body: Record<string, unknown> }> => {
+    const body: Record<string, unknown> = {};
+    let lastFailCode = 200;
+    for (const key of ALL_KEYS) {
+      const res = await getKey(apiClient, key);
+      if (res.statusCode !== 200) {
+        lastFailCode = res.statusCode;
+        continue;
+      }
+      body[key] = res.body.value;
+    }
+    return { statusCode: lastFailCode, body };
+  };
+
+  const getAllKeysInSpace = async (
+    apiClient: ApiClient,
+    spaceId: string
+  ): Promise<{ statusCode: number; body: Record<string, unknown> }> => {
+    const body: Record<string, unknown> = {};
+    let lastFailCode = 200;
+    for (const key of ALL_KEYS) {
+      const res = await getKeyInSpace(apiClient, spaceId, key);
+      if (res.statusCode !== 200) {
+        lastFailCode = res.statusCode;
+        continue;
+      }
+      body[key] = res.body.value;
+    }
+    return { statusCode: lastFailCode, body };
+  };
+
   return {
+    getKey,
+    getKeyInSpace,
+    getAllKeys,
+    getAllKeysInSpace,
+
     put: (apiClient: ApiClient, key: string, value: unknown) =>
       apiClient.put(`internal/user_storage/${key}`, {
         headers: headers(),
         body: { value },
-        responseType: 'json',
-      }),
-
-    get: (apiClient: ApiClient) =>
-      apiClient.get('internal/user_storage', {
-        headers: headers(),
         responseType: 'json',
       }),
 
@@ -75,12 +129,6 @@ export const createHelpers = (headersGetter: () => Record<string, string>) => {
       apiClient.put(`s/${spaceId}/internal/user_storage/${key}`, {
         headers: headers(),
         body: { value },
-        responseType: 'json',
-      }),
-
-    getInSpace: (apiClient: ApiClient, spaceId: string) =>
-      apiClient.get(`s/${spaceId}/internal/user_storage`, {
-        headers: headers(),
         responseType: 'json',
       }),
 

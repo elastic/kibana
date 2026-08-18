@@ -7,42 +7,40 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamClient, type DataStreamDefinition } from '@kbn/data-streams';
-import { Logger as LoggerToken } from '@kbn/core-di';
 import type { Logger } from '@kbn/logging';
-import { inject, injectable } from 'inversify';
 import { isResponseError } from '@kbn/es-errors';
 import type { ResourceDefinition } from '../../../resources/datastreams/types';
 import type { IResourceInitializer } from './resource_manager';
-import { EsServiceInternalToken } from '../es_service/tokens';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 
-@injectable()
+// Max Java long. Installing at the highest priority keeps our managed template
+// from being rejected for tying with a user template whose patterns overlap
+// `.rule-events*` / `.alert-actions*` (ES only rejects overlapping templates at
+// equal priority). Stringified to avoid JS number precision loss.
+const INDEX_TEMPLATE_PRIORITY = `${9223372036854775807n}` as unknown as number;
+
 export class DatastreamInitializer implements IResourceInitializer {
   constructor(
-    @inject(LoggerToken) private readonly logger: Logger,
-    @inject(EsServiceInternalToken) private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly esClient: ElasticsearchClient,
     private readonly resourceDefinition: ResourceDefinition
   ) {}
 
   public async initialize(): Promise<void> {
-    await this.esClient.ilm.putLifecycle({
-      name: this.resourceDefinition.ilmPolicy.name,
-      policy: this.resourceDefinition.ilmPolicy.policy,
-    });
-
     const dataStreamDefinition: DataStreamDefinition<typeof this.resourceDefinition.mappings> = {
       name: this.resourceDefinition.dataStreamName,
       hidden: true,
       version: this.resourceDefinition.version,
       template: {
         aliases: {},
-        priority: 500,
+        priority: INDEX_TEMPLATE_PRIORITY,
         mappings: this.resourceDefinition.mappings,
+        lifecycle: this.resourceDefinition.lifecycle,
         settings: {
-          'index.lifecycle.name': this.resourceDefinition.ilmPolicy.name,
           'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
           'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+          'index.lifecycle.prefer_ilm': false,
         },
         _meta: {
           managed: true,

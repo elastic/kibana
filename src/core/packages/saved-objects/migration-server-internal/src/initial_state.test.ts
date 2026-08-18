@@ -8,7 +8,6 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import * as Option from 'fp-ts/Option';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import {
@@ -32,18 +31,10 @@ const migrationsConfig = {
   maxReadBatchSizeBytes: ByteSizeValue.parse('500mb'),
 } as unknown as SavedObjectsMigrationConfigType;
 
-const indexTypesMap = {
-  '.kibana': ['typeA', 'typeB', 'typeC'],
-  '.kibana_task_manager': ['task'],
-  '.kibana_cases': ['typeD', 'typeE'],
-};
-
 const createInitialStateCommonParams = {
   kibanaVersion: '8.1.0',
   waitForMigrationCompletion: false,
-  mustRelocateDocuments: true,
   indexTypes: ['typeA', 'typeB', 'typeC'],
-  indexTypesMap,
   hashToVersionMap: {
     'typeA|someHash': '10.1.0',
     'typeB|someHash': '10.1.0',
@@ -52,9 +43,6 @@ const createInitialStateCommonParams = {
   targetIndexMappings: {
     dynamic: 'strict',
     properties: { my_type: { properties: { title: { type: 'text' } } } },
-    _meta: {
-      indexTypesMap,
-    },
   } as IndexMapping,
   coreMigrationVersionPerType: {},
   migrationVersionPerType: {},
@@ -163,20 +151,6 @@ describe('createInitialState', () => {
           "typeB",
           "typeC",
         ],
-        "indexTypesMap": Object {
-          ".kibana": Array [
-            "typeA",
-            "typeB",
-            "typeC",
-          ],
-          ".kibana_cases": Array [
-            "typeD",
-            "typeE",
-          ],
-          ".kibana_task_manager": Array [
-            "task",
-          ],
-        },
         "kibanaVersion": "8.1.0",
         "knownTypes": Array [
           "foo",
@@ -186,7 +160,6 @@ describe('createInitialState', () => {
           "bar": "10.2.0",
           "foo": "10.0.0",
         },
-        "legacyIndex": ".kibana_task_manager",
         "logs": Array [],
         "maxBatchSize": 1000,
         "maxBatchSizeBytes": 104857600,
@@ -197,36 +170,16 @@ describe('createInitialState', () => {
           "resolveMigrationFailures": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures",
           "routingAllocationDisabled": "https://www.elastic.co/docs/troubleshoot/kibana/migration-failures#routing-allocation-disabled",
         },
-        "mustRelocateDocuments": true,
         "outdatedDocumentsQuery": Object {
           "bool": Object {
             "should": Array [],
           },
-        },
-        "preMigrationScript": Object {
-          "_tag": "None",
         },
         "retryAttempts": 15,
         "retryCount": 0,
         "retryDelay": 0,
         "skipRetryReset": false,
         "targetIndexMappings": Object {
-          "_meta": Object {
-            "indexTypesMap": Object {
-              ".kibana": Array [
-                "typeA",
-                "typeB",
-                "typeC",
-              ],
-              ".kibana_cases": Array [
-                "typeD",
-                "typeE",
-              ],
-              ".kibana_task_manager": Array [
-                "task",
-              ],
-            },
-          },
           "dynamic": "strict",
           "properties": Object {
             "my_type": Object {
@@ -235,19 +188,6 @@ describe('createInitialState', () => {
                   "type": "text",
                 },
               },
-            },
-          },
-        },
-        "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
-        "tempIndexAlias": ".kibana_task_manager_8.1.0_reindex_temp_alias",
-        "tempIndexMappings": Object {
-          "dynamic": false,
-          "properties": Object {
-            "type": Object {
-              "type": "keyword",
-            },
-            "typeMigrationVersion": Object {
-              "type": "version",
             },
           },
         },
@@ -289,35 +229,12 @@ describe('createInitialState', () => {
     expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ baz: fooExcludeOnUpgradeHook });
   });
 
-  it('returns state with a preMigration script', () => {
-    const preMigrationScript = "ctx._id = ctx._source.type + ':' + ctx._id";
-    const initialState = createInitialState({
-      ...createInitialStateParams,
-      preMigrationScript,
-    });
-
-    expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
-    expect((initialState.preMigrationScript as Option.Some<string>).value).toEqual(
-      preMigrationScript
-    );
-  });
-  it('returns state without a preMigration script', () => {
-    expect(
-      Option.isNone(
-        createInitialState({
-          ...createInitialStateParams,
-          preMigrationScript: undefined,
-        }).preMigrationScript
-      )
-    ).toEqual(true);
-  });
   it('returns state with an outdatedDocumentsQuery', () => {
     jest.spyOn(getOutdatedDocumentsQueryModule, 'getOutdatedDocumentsQuery');
 
     expect(
       createInitialState({
         ...createInitialStateParams,
-        preMigrationScript: "ctx._id = ctx._source.type + ':' + ctx._id",
         coreMigrationVersionPerType: {},
         migrationVersionPerType: { my_dashboard: '7.10.1', my_viz: '8.0.0' },
       }).outdatedDocumentsQuery

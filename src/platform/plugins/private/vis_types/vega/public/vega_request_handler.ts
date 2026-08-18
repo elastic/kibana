@@ -24,11 +24,13 @@ import type { VegaInspectorAdapters } from './vega_inspector';
 interface VegaRequestHandlerParams {
   query: Query;
   filters: Filter[];
-  timeRange: TimeRange;
+  timeRange: TimeRange | undefined;
   visParams: VisParams;
   searchSessionId?: string;
   executionContext?: KibanaExecutionContext;
   projectRouting?: ProjectRouting;
+  /** Only applies to ES|QL-backed vega data sources */
+  isApproximate: boolean;
 }
 
 interface VegaRequestHandlerContext {
@@ -56,6 +58,7 @@ export function createVegaRequestHandler(
     searchSessionId,
     executionContext,
     projectRouting,
+    isApproximate,
   }: VegaRequestHandlerParams) {
     const { search } = getData();
     const dataViews = getDataViews();
@@ -71,7 +74,8 @@ export function createVegaRequestHandler(
         context.inspectorAdapters,
         searchSessionId,
         executionContext,
-        projectRouting
+        projectRouting,
+        isApproximate
       );
     }
 

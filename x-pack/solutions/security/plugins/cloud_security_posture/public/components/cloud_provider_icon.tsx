@@ -40,5 +40,14 @@ export const CloudProviderIcon = ({ cloudProvider, size, style }: Props) => {
 
   const name = getCloudProviderNameFromAbbreviation(cloudProvider);
 
-  return <EuiIconTip content={name} type={iconType} size={size || 'xl'} css={style} />;
+  return (
+    <EuiIconTip
+      content={name}
+      type={iconType}
+      size={size || 'xl'}
+      css={style}
+      aria-label={name}
+      iconProps={{ title: name }}
+    />
+  );
 };

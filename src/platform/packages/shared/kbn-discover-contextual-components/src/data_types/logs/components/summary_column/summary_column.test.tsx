@@ -61,7 +61,7 @@ const getSummaryProps = (
       .fn()
       .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
         ...fieldFormatsMock.getDefaultInstance(...params),
-        convert: jest.fn().mockImplementation((t: string) => String(t)),
+        convertToText: jest.fn().mockImplementation((t: string) => String(t)),
       })),
   },
   setCellProps: () => {},

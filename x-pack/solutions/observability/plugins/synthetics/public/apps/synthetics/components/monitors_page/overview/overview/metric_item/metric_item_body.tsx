@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { LocationsBadge } from './locations_badge';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
 import { SyntheticsRemoteBadge } from '../../../../common/components/synthetics_remote_badge';
-import * as labels from '../../../management/monitor_list_table/labels';
+import { SyntheticsHeartbeatBadge } from '../../../../common/components/synthetics_heartbeat_badge';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const MetricItemBody = ({
@@ -28,7 +28,6 @@ export const MetricItemBody = ({
   const typeBadge = (
     <MonitorTypeBadge
       monitorType={monitor.type}
-      ariaLabel={labels.getFilterForTypeMessage(monitor.type)}
       onClick={() => {
         history.push({
           search: `monitorTypes=${encodeURIComponent(JSON.stringify([monitor.type]))}`,
@@ -36,13 +35,22 @@ export const MetricItemBody = ({
       }}
     />
   );
-  const remoteBadge = <SyntheticsRemoteBadge remote={monitor.remote} />;
-
+  // Each badge is its own flex item — EuiFlexItem is a flex column, so placing
+  // multiple badges in one item would stack them vertically.
   const badges = (
-    <>
-      {typeBadge}
-      {remoteBadge}
-    </>
+    <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
+      <EuiFlexItem grow={false}>{typeBadge}</EuiFlexItem>
+      {monitor.remote && (
+        <EuiFlexItem grow={false}>
+          <SyntheticsRemoteBadge remote={monitor.remote} />
+        </EuiFlexItem>
+      )}
+      {monitor.origin === 'heartbeat' && (
+        <EuiFlexItem grow={false}>
+          <SyntheticsHeartbeatBadge origin={monitor.origin} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   );
   if (tags.length === 0 && (monitor?.locations?.length ?? 0) <= 1) {
     return (
@@ -56,7 +64,7 @@ export const MetricItemBody = ({
   return (
     <>
       <EuiSpacer size="xs" />
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" alignItems="center" wrap>
         <EuiFlexItem grow={false}>{badges}</EuiFlexItem>
         {monitor?.locations?.length > 1 && (
           <EuiFlexItem grow={false}>

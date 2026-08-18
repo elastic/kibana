@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EvaluationIndices } from './constants';
+
 /**
  * Shared privilege descriptors for the golden cluster API key.
  *
@@ -19,7 +21,7 @@ export const goldenClusterPrivileges = {
         cluster: ['manage_index_templates'],
         indices: [
           {
-            names: ['kibana-evaluations*'],
+            names: [`${EvaluationIndices.SCORES}*`],
             privileges: [
               'auto_configure',
               'create_index',
@@ -39,7 +41,7 @@ export const goldenClusterPrivileges = {
             ],
           },
           {
-            names: ['kibana-evaluation-dataset*'],
+            names: [`${EvaluationIndices.DATASETS}*`, `${EvaluationIndices.DATASET_EXAMPLES}*`],
             privileges: [
               'auto_configure',
               'create_index',

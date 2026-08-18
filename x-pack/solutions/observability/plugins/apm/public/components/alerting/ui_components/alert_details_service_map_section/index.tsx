@@ -15,11 +15,23 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
-import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import useObservable from 'react-use/lib/useObservable';
+import { EMPTY } from 'rxjs';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
+import { isActivePlatinumLicense } from '../../../../../common/license_check';
 import { ApmEmbeddableContext } from '../../../../embeddable/embeddable_context';
 import { ServiceMapEmbeddable } from '../../../../embeddable/service_map/service_map_embeddable';
 import { getServiceMapUrl } from '../../../../embeddable/service_map/get_service_map_url';
+import { APM_EBT_ACTIONS } from '../../../app/ebt_constants';
+import { SERVICE_MAP_EBT_ELEMENTS } from '../../../app/service_map/ebt_constants';
 import { useApmEmbeddableDeps } from '../../context/apm_embeddable_deps_context';
 import type { AlertDetailsAppSectionProps } from '../alert_details_app_section/types';
 import { getServiceMapTimeRange } from './get_service_map_time_range';
@@ -38,6 +50,9 @@ const EMBEDDABLE_HEIGHT = 400;
 
 export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionProps) {
   const embeddableDeps = useApmEmbeddableDeps();
+  const license = useObservable(
+    embeddableDeps ? embeddableDeps.pluginsStart.licensing.license$ : EMPTY
+  );
 
   const serviceName =
     alert.fields[SERVICE_NAME] != null ? String(alert.fields[SERVICE_NAME]) : undefined;
@@ -61,9 +76,45 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
   const kuery = useMemo(() => buildKueryFromAlert(alert), [alert]);
   const filters = useMemo(() => buildFiltersFromAlert(alert), [alert]);
 
+  const filterPills = useMemo(() => {
+    const pills: Array<{ field: string; value: string }> = [];
+    const transactionType = alert.fields[TRANSACTION_TYPE];
+    const transactionName = alert.fields[TRANSACTION_NAME];
+    if (transactionType != null) {
+      pills.push({ field: 'transaction.type', value: String(transactionType) });
+    }
+    if (transactionName != null) {
+      pills.push({ field: 'transaction.name', value: String(transactionName) });
+    }
+    return pills;
+  }, [alert]);
+
+  const flyoutOptions = useMemo(() => {
+    const transactionTypeField = alert.fields[TRANSACTION_TYPE];
+
+    const rawTransactionType = Array.isArray(transactionTypeField)
+      ? transactionTypeField[0]
+      : transactionTypeField;
+
+    const paddedRange = alertStart
+      ? getPaddedAlertTimeRange(String(alertStart), alertEnd != null ? String(alertEnd) : undefined)
+      : undefined;
+
+    return {
+      transactionType: rawTransactionType != null ? String(rawTransactionType) : undefined,
+      rangeFrom: paddedRange?.from,
+      rangeTo: paddedRange?.to,
+    };
+  }, [alert, alertStart, alertEnd]);
+
   const [hasNoServices, setHasNoServices] = useState(false);
 
   if (!embeddableDeps || !serviceName || !timeRanges || hasNoServices) {
+    return null;
+  }
+
+  // hide service map section without Platinum license or service map enabled.
+  if (!license || !isActivePlatinumLicense(license) || !embeddableDeps.config.serviceMapEnabled) {
     return null;
   }
 
@@ -74,8 +125,8 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
     rangeFrom,
     rangeTo,
     environment,
-    kuery,
     serviceName,
+    filterPills,
   });
 
   return (
@@ -93,6 +144,10 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 color="primary"
                 href={fullMapUrl}
                 data-test-subj="apmAlertDetailsExploreInServiceMap"
+                {...getEbtProps({
+                  action: APM_EBT_ACTIONS.EXPLORE_SERVICE_MAP,
+                  element: SERVICE_MAP_EBT_ELEMENTS.SECTION_HEADER_LINK,
+                })}
               >
                 {EXPLORE_IN_SERVICE_MAP_LABEL}
               </EuiButtonEmpty>
@@ -146,6 +201,8 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
                 onEmptyStateChange={setHasNoServices}
+                filterPills={filterPills}
+                flyoutOptions={flyoutOptions}
               />
             </ApmEmbeddableContext>
           </EuiPanel>

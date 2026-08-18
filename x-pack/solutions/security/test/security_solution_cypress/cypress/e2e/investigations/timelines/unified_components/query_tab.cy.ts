@@ -40,7 +40,8 @@ import { getDataTestSubjectSelector } from '../../../../helpers/common';
 
 const TIMELINE_TAB_QUERY_TEST_SUBJ = 'timeline-tab-content-query';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/274543
+describe.skip(
   'Unsaved Timeline query tab',
   {
     tags: ['@ess', '@serverless', '@skipInServerlessMKI'],

@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, type RenderHookResult } from '@testing-library/react';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
-import { PollingIntervalMs, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
+import { type PollingState, useWorkflowExecutionPolling } from './use_workflow_execution_polling';
+import { WORKFLOW_EXECUTION_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
 import { useAsyncThunkState } from '../../../hooks/use_async_thunk';
 
-// Mock the useAsyncThunkState hook
 jest.mock('../../../hooks/use_async_thunk');
 const mockUseAsyncThunkState = useAsyncThunkState as jest.MockedFunction<typeof useAsyncThunkState>;
 
 describe('useWorkflowExecutionPolling', () => {
   const mockWorkflowExecutionId = 'test-execution-id';
   let mockLoadExecution: jest.Mock;
-  let hookResult: any;
+  let hookResult: RenderHookResult<PollingState, { id: string }> | null;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -30,8 +30,7 @@ describe('useWorkflowExecutionPolling', () => {
   });
 
   afterEach(() => {
-    // Clean up any rendered hooks
-    if (hookResult && hookResult.unmount) {
+    if (hookResult?.unmount) {
       hookResult.unmount();
     }
     jest.runOnlyPendingTimers();
@@ -69,7 +68,7 @@ describe('useWorkflowExecutionPolling', () => {
     workflowDefinition: createMockWorkflowDefinition(),
     stepId: undefined,
     stepExecutions: [],
-    duration: PollingIntervalMs * 2,
+    duration: WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 2,
     triggeredBy: 'manual',
     yaml: 'version: "1"\\nname: test-workflow\\nenabled: true\\ntriggers:\\n  - type: manual\\nsteps:\\n  - name: test-step\\n    type: console.log\\n    with:\\n      message: Hello World',
   });
@@ -80,8 +79,6 @@ describe('useWorkflowExecutionPolling', () => {
     error: Error | null = null,
     createNewFunction: boolean = false
   ) => {
-    // Create a new function reference only when explicitly requested
-    // This allows us to control when the effect re-runs
     if (createNewFunction) {
       const loadExecutionFn = jest.fn().mockResolvedValue(undefined);
       mockLoadExecution = loadExecutionFn;
@@ -94,7 +91,6 @@ describe('useWorkflowExecutionPolling', () => {
         },
       ]);
     } else {
-      // Reuse the existing function reference to preserve call history
       mockUseAsyncThunkState.mockReturnValue([
         mockLoadExecution,
         {
@@ -106,6 +102,19 @@ describe('useWorkflowExecutionPolling', () => {
     }
   };
 
+  const flushPoll = async () => {
+    await act(async () => {
+      await Promise.resolve();
+    });
+  };
+
+  const advancePollInterval = async () => {
+    await act(async () => {
+      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS);
+      await Promise.resolve();
+    });
+  };
+
   it('should return workflow execution data, loading state, and error from useAsyncThunkState', () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     const mockError = new Error('Test error');
@@ -115,38 +124,34 @@ describe('useWorkflowExecutionPolling', () => {
     const { result } = hookResult;
 
     expect(result.current.workflowExecution).toBe(mockWorkflowExecution);
-    expect(result.current.isLoading).toBe(true); // Initially true due to useEffect
+    expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBe(mockError);
   });
 
-  it('should start polling immediately when workflow execution data is available', () => {
+  it('should start polling immediately', async () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     setupMock(mockWorkflowExecution);
 
     hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    await flushPoll();
 
-    // timer(0, PollingIntervalMs) emits immediately (0ms) then every PollingIntervalMs
-    // So we need to advance timers to let the immediate emission happen
-    act(() => {
-      jest.advanceTimersByTime(0);
-    });
     expect(mockLoadExecution).toHaveBeenCalledTimes(1);
     expect(mockLoadExecution).toHaveBeenCalledWith({ id: mockWorkflowExecutionId });
   });
 
-  it('should not start polling when workflow execution data is not available', () => {
-    setupMock(undefined, true);
+  it('should poll again after the previous poll finishes and the interval elapses', async () => {
+    const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
+    setupMock(mockWorkflowExecution);
 
     hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+    await flushPoll();
+    expect(mockLoadExecution).toHaveBeenCalledTimes(1);
 
-    // Fast forward time to check if polling would occur
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs * 2);
-    });
+    await advancePollInterval();
+    expect(mockLoadExecution).toHaveBeenCalledTimes(2);
 
-    // Polling still starts because the hook doesn't check for data availability
-    // It just starts polling regardless. But let's verify it was called
-    expect(mockLoadExecution).toHaveBeenCalled();
+    await advancePollInterval();
+    expect(mockLoadExecution).toHaveBeenCalledTimes(3);
   });
 
   describe('polling behavior for non-terminal statuses', () => {
@@ -158,249 +163,171 @@ describe('useWorkflowExecutionPolling', () => {
     ];
 
     nonTerminalStatuses.forEach((status) => {
-      it(`should poll every ${PollingIntervalMs}ms when status is ${status}`, () => {
+      it(`should continue polling when status is ${status}`, async () => {
         const mockWorkflowExecution = createMockWorkflowExecution(status);
         setupMock(mockWorkflowExecution);
 
         hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
-
-        // timer(0, PollingIntervalMs) emits immediately (0ms) then every PollingIntervalMs
-        act(() => {
-          jest.advanceTimersByTime(0);
-        });
+        await flushPoll();
         expect(mockLoadExecution).toHaveBeenCalledTimes(1);
 
-        // After PollingIntervalMs, should call loadExecution again
-        act(() => {
-          jest.advanceTimersByTime(PollingIntervalMs);
-        });
+        await advancePollInterval();
         expect(mockLoadExecution).toHaveBeenCalledTimes(2);
-
-        // After another PollingIntervalMs, should call loadExecution again
-        act(() => {
-          jest.advanceTimersByTime(PollingIntervalMs);
-        });
-        expect(mockLoadExecution).toHaveBeenCalledTimes(3);
-
-        // After another PollingIntervalMs, should call loadExecution again
-        act(() => {
-          jest.advanceTimersByTime(PollingIntervalMs);
-        });
-        expect(mockLoadExecution).toHaveBeenCalledTimes(4);
       });
     });
   });
 
   describe('polling stops for terminal statuses', () => {
     TerminalExecutionStatuses.forEach((status: ExecutionStatus) => {
-      it(`should stop polling when status changes to ${status}`, () => {
-        // Start with a non-terminal status
+      it(`should stop polling when status changes to ${status}`, async () => {
         const initialWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
         setupMock(initialWorkflowExecution);
 
         hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
         const { rerender } = hookResult;
 
-        // Verify polling starts
-        act(() => {
-          jest.advanceTimersByTime(0);
-        });
+        await flushPoll();
         expect(mockLoadExecution).toHaveBeenCalledTimes(1);
 
-        // Advance time to get another call
-        act(() => {
-          jest.advanceTimersByTime(PollingIntervalMs);
-        });
+        await advancePollInterval();
         expect(mockLoadExecution).toHaveBeenCalledTimes(2);
 
-        // Update to terminal status
         const terminalWorkflowExecution = createMockWorkflowExecution(status);
         setupMock(terminalWorkflowExecution);
 
-        act(() => {
+        await act(async () => {
           rerender();
+          await Promise.resolve();
         });
 
-        // Clear previous calls
         mockLoadExecution.mockClear();
 
-        // Fast forward time - should not call loadExecution anymore after terminal status
-        act(() => {
-          jest.advanceTimersByTime(PollingIntervalMs * 4);
+        await act(async () => {
+          jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
+          await Promise.resolve();
         });
         expect(mockLoadExecution).not.toHaveBeenCalled();
       });
 
-      it(`should not start polling when initial status is terminal (${status})`, () => {
+      it(`should stop after the first poll when initial status is terminal (${status})`, async () => {
         const mockWorkflowExecution = createMockWorkflowExecution(status);
         setupMock(mockWorkflowExecution);
 
         hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
+        await flushPoll();
+        expect(mockLoadExecution).toHaveBeenCalledTimes(1);
 
-        // When status is terminal from the start, the stop signal is sent immediately
-        // which stops polling before the timer can emit. So we don't expect it to be called.
-        act(() => {
-          jest.advanceTimersByTime(0);
-        });
-
-        // The timer might emit once before being stopped, or it might not emit at all
-        // depending on the timing. Let's verify it doesn't continue polling.
         mockLoadExecution.mockClear();
 
-        // Fast forward time - should not call loadExecution anymore
-        act(() => {
-          jest.advanceTimersByTime(PollingIntervalMs * 4);
+        await act(async () => {
+          jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
+          await Promise.resolve();
         });
         expect(mockLoadExecution).not.toHaveBeenCalled();
       });
     });
   });
 
-  it('should clean up interval on unmount', () => {
+  it('should clean up polling on unmount', async () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     setupMock(mockWorkflowExecution);
 
     hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
     const { unmount } = hookResult;
 
-    // Verify polling starts
-    act(() => {
-      jest.advanceTimersByTime(0);
-    });
+    await flushPoll();
     expect(mockLoadExecution).toHaveBeenCalledTimes(1);
 
-    // Advance time to get another call
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs);
-    });
+    await advancePollInterval();
     expect(mockLoadExecution).toHaveBeenCalledTimes(2);
 
-    // Unmount the component
-    act(() => {
+    await act(async () => {
       unmount();
     });
 
-    // Clear previous calls
     mockLoadExecution.mockClear();
 
-    // Fast forward time - should not call loadExecution anymore after unmount
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs * 4);
+    await act(async () => {
+      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
+      await Promise.resolve();
     });
     expect(mockLoadExecution).not.toHaveBeenCalled();
   });
 
-  it('should start polling when workflow execution data changes from null to available', () => {
-    // Start with no data
-    setupMock(undefined, true, null, true);
-
-    hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
-    const { rerender } = hookResult;
-
-    // Polling still starts immediately
-    act(() => {
-      jest.advanceTimersByTime(0);
-    });
-    expect(mockLoadExecution).toHaveBeenCalled();
-
-    // Clear calls
-    mockLoadExecution.mockClear();
-
-    // Update with workflow execution data
-    // The effect depends on workflowExecutionId and loadExecution, not on workflowExecution
-    // So changing the data doesn't cause the effect to re-run
-    // The polling continues with the same subscription
-    const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
-    setupMock(mockWorkflowExecution);
-
-    act(() => {
-      rerender();
-    });
-
-    // Should continue polling with the same subscription
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs);
-    });
-    expect(mockLoadExecution).toHaveBeenCalledTimes(1);
-
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs);
-    });
-    expect(mockLoadExecution).toHaveBeenCalledTimes(2);
-  });
-
-  it('should handle status transitions during polling', () => {
-    // Start with running status
+  it('should handle status transitions during polling', async () => {
     const runningExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
     setupMock(runningExecution, false, null, true);
 
     hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
     const { rerender } = hookResult;
 
-    // Verify initial polling starts
-    act(() => {
-      jest.advanceTimersByTime(0);
-    });
+    await flushPoll();
     expect(mockLoadExecution).toHaveBeenCalledTimes(1);
 
-    // Advance time to get another call
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs);
-    });
+    await advancePollInterval();
     expect(mockLoadExecution).toHaveBeenCalledTimes(2);
 
-    // Change to another non-terminal status
-    // The effect depends on workflowExecutionId and loadExecution, not on workflowExecution
-    // So changing the status doesn't cause the effect to re-run
-    // The polling continues with the same subscription
     const waitingExecution = createMockWorkflowExecution(ExecutionStatus.WAITING);
     setupMock(waitingExecution);
-    act(() => {
+    await act(async () => {
       rerender();
+      await Promise.resolve();
     });
 
-    // Should continue polling with the same subscription
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs);
-    });
+    await advancePollInterval();
     expect(mockLoadExecution).toHaveBeenCalledTimes(3);
 
-    // Advance time to get another call
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs);
-    });
-    expect(mockLoadExecution).toHaveBeenCalledTimes(4);
-
-    // Change to terminal status - create a new execution object
     const completedExecution = createMockWorkflowExecution(ExecutionStatus.COMPLETED);
     setupMock(completedExecution);
-    act(() => {
+    await act(async () => {
       rerender();
+      await Promise.resolve();
     });
 
-    // Clear previous calls to isolate the terminal status behavior
     mockLoadExecution.mockClear();
 
-    // Should stop polling after status change to terminal
-    act(() => {
-      jest.advanceTimersByTime(PollingIntervalMs * 4);
+    await act(async () => {
+      jest.advanceTimersByTime(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4);
+      await Promise.resolve();
     });
     expect(mockLoadExecution).not.toHaveBeenCalled();
   });
 
-  it('should set isLoading to false when execution reaches terminal state', () => {
+  it('should restart polling when workflowExecutionId changes after a terminal execution', async () => {
+    const completedExecution = createMockWorkflowExecution(ExecutionStatus.COMPLETED);
+    setupMock(completedExecution);
+
+    hookResult = renderHook(({ id }: { id: string }) => useWorkflowExecutionPolling(id), {
+      initialProps: { id: mockWorkflowExecutionId },
+    });
+    await flushPoll();
+    expect(mockLoadExecution).toHaveBeenCalledTimes(1);
+
+    mockLoadExecution.mockClear();
+
+    const runningExecution = createMockWorkflowExecution(ExecutionStatus.RUNNING);
+    runningExecution.id = 'new-execution-id';
+    setupMock(runningExecution);
+
+    await act(async () => {
+      hookResult?.rerender({ id: 'new-execution-id' });
+      await Promise.resolve();
+    });
+    expect(mockLoadExecution).toHaveBeenCalledWith({ id: 'new-execution-id' });
+
+    await advancePollInterval();
+    expect(mockLoadExecution).toHaveBeenCalledTimes(2);
+  });
+
+  it('should set isLoading to false when execution reaches terminal state', async () => {
     const mockWorkflowExecution = createMockWorkflowExecution(ExecutionStatus.COMPLETED);
     setupMock(mockWorkflowExecution);
 
     hookResult = renderHook(() => useWorkflowExecutionPolling(mockWorkflowExecutionId));
     const { result } = hookResult;
 
-    // Wait for effects to run
-    act(() => {
-      jest.advanceTimersByTime(0);
-    });
+    await flushPoll();
 
-    // After terminal status is detected, isLoading should be false
     expect(result.current.isLoading).toBe(false);
   });
 });

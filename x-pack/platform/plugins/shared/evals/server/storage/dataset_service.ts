@@ -19,34 +19,39 @@ import {
 } from './examples_storage';
 
 export class DatasetService {
-  constructor(private readonly logger: Logger, private readonly isServerless: boolean) {}
+  constructor(
+    private readonly logger: Logger,
+    private readonly esClient: ElasticsearchClient,
+    private readonly isServerless: boolean
+  ) {}
 
-  getClient(esClient: ElasticsearchClient): DatasetClient {
-    const datasetsStorageAdapter = this.createDatasetsStorageAdapter(esClient);
-    const examplesStorageAdapter = this.createExamplesStorageAdapter(esClient);
-
+  /**
+   * A client scoped to `spaceId`. Required rather than defaulted so a new call
+   * site has to state which space it is acting in.
+   */
+  getClient({ spaceId }: { spaceId: string }): DatasetClient {
     return new DatasetClient({
-      datasetsStorageAdapter,
-      examplesStorageAdapter,
+      datasetsStorageAdapter: this.createDatasetsStorageAdapter(),
+      examplesStorageAdapter: this.createExamplesStorageAdapter(),
+      logger: this.logger,
+      spaceId,
     });
   }
 
-  private createDatasetsStorageAdapter(esClient: ElasticsearchClient): DatasetsStorageAdapter {
+  private createDatasetsStorageAdapter(): DatasetsStorageAdapter {
     return new StorageIndexAdapter<typeof datasetsStorageSettings, DatasetStorageProperties>(
-      esClient,
+      this.esClient,
       this.logger,
       datasetsStorageSettings,
       { isServerless: this.isServerless }
     );
   }
 
-  private createExamplesStorageAdapter(
-    esClient: ElasticsearchClient
-  ): DatasetExamplesStorageAdapter {
+  private createExamplesStorageAdapter(): DatasetExamplesStorageAdapter {
     return new StorageIndexAdapter<
       typeof datasetExamplesStorageSettings,
       DatasetExampleStorageProperties
-    >(esClient, this.logger, datasetExamplesStorageSettings, {
+    >(this.esClient, this.logger, datasetExamplesStorageSettings, {
       isServerless: this.isServerless,
     });
   }

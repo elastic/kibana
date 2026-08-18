@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/268963
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+title: Add subtype filter to Knowledge Indicators table

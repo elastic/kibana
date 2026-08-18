@@ -9,6 +9,7 @@ import { END as _END_, START as _START_, StateGraph } from '@langchain/langgraph
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { BaseMessage } from '@langchain/core/messages';
 import type { Logger } from '@kbn/core/server';
+import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { ResolvedAgentCapabilities } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode as ErrCodes } from '@kbn/agent-builder-common/agents';
@@ -22,23 +23,18 @@ import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ResolvedConfiguration } from './types';
 import { convertError, isRecoverableError } from './utils/errors';
 import type { PromptFactory } from './prompts';
-import { getRandomAnsweringMessage, getRandomThinkingMessage } from './i18n';
+import { getRandomThinkingMessage } from './i18n';
 import { steps, tags, BACKGROUND_CHECK_CYCLE_INTERVAL } from './constants';
 import type { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
 import { StateAnnotation } from './state';
-import {
-  processAnswerResponse,
-  processResearchResponse,
-  processToolNodeResponse,
-} from './action_utils';
+import { processResearchResponse, processToolNodeResponse } from './action_utils';
 import { createAnswerAgentStructured } from './answer_agent_structured';
 import {
   errorAction,
   handoverAction,
   backgroundExecutionCompleteAction,
   isAgentErrorAction,
-  isAnswerAction,
   isHandoverAction,
   isStructuredAnswerAction,
   isToolCallAction,
@@ -62,6 +58,8 @@ export const createAgentGraph = ({
   promptFactory,
   backgroundExecutionService,
   roundId,
+  sessionId,
+  cacheControl,
 }: {
   chatModel: InferenceChatModel;
   toolManager: ToolManager;
@@ -75,6 +73,9 @@ export const createAgentGraph = ({
   promptFactory: PromptFactory;
   backgroundExecutionService?: BackgroundExecutionService;
   roundId: string;
+  /** Optional session ID forwarded to EIS for prompt-cache scoping. Non-EIS endpoints ignore it. */
+  sessionId?: string;
+  cacheControl?: ChatCompleteCacheControl;
 }) => {
   const init = async () => {
     return {};
@@ -113,6 +114,8 @@ export const createAgentGraph = ({
   const researchAgent = async (state: StateType) => {
     const researcherModel = chatModel.bindTools(toolManager.list()).withConfig({
       tags: [tags.agent, tags.researchAgent],
+      sessionId,
+      cacheControl,
     });
 
     if (state.mainActions.length === 0 && state.errorCount === 0) {
@@ -132,7 +135,9 @@ export const createAgentGraph = ({
       return {
         mainActions: [action],
         currentCycle,
-        errorCount: 0,
+        // Successful inference calls can still produce recoverable error actions,
+        // which must count toward the retry limit.
+        errorCount: isAgentErrorAction(action) ? state.errorCount + 1 : 0,
       };
     } catch (error) {
       const executionError = convertError(error);
@@ -160,12 +165,19 @@ export const createAgentGraph = ({
     } else if (isToolCallAction(lastAction)) {
       const maxCycleReached = state.currentCycle > state.cycleLimit;
       if (maxCycleReached) {
-        return steps.prepareToAnswer;
+        if (structuredOutput) {
+          return steps.prepareToAnswer;
+        }
+        throw createAgentExecutionError(
+          `Agent exceeded its cycle budget of ${state.cycleLimit} without producing a final answer.`,
+          ErrCodes.cycleLimitExceeded,
+          {}
+        );
       } else {
         return steps.executeTool;
       }
     } else if (isHandoverAction(lastAction)) {
-      return steps.prepareToAnswer;
+      return structuredOutput ? steps.prepareToAnswer : steps.finalize;
     }
 
     throw invalidState(`[researchAgentEdge] last action type was ${lastAction.type}}`);
@@ -224,42 +236,6 @@ export const createAgentGraph = ({
     }
   };
 
-  const answerAgent = async (state: StateType) => {
-    const answeringModel = chatModel.bindTools(toolManager.list()).withConfig({
-      tags: [tags.agent, tags.answerAgent],
-    });
-
-    if (state.answerActions.length === 0 && state.errorCount === 0) {
-      events.emit(createReasoningEvent(getRandomAnsweringMessage(), { transient: true }));
-    }
-    try {
-      const response = await answeringModel.invoke(
-        await promptFactory.getAnswerPrompt({
-          actions: state.mainActions,
-          answerActions: state.answerActions,
-          cycleLimit: state.cycleLimit,
-        })
-      );
-
-      const action = processAnswerResponse(response);
-
-      return {
-        answerActions: [action],
-        errorCount: 0,
-      };
-    } catch (error) {
-      const executionError = convertError(error);
-      if (isRecoverableError(executionError)) {
-        return {
-          answerActions: [errorAction(executionError)],
-          errorCount: state.errorCount + 1,
-        };
-      } else {
-        throw executionError;
-      }
-    }
-  };
-
   const answerAgentStructured = createAnswerAgentStructured({
     chatModel,
     promptFactory,
@@ -278,7 +254,7 @@ export const createAgentGraph = ({
         // max error count reached, stop execution by throwing
         throw lastAction.error;
       }
-    } else if (isAnswerAction(lastAction) || isStructuredAnswerAction(lastAction)) {
+    } else if (isStructuredAnswerAction(lastAction)) {
       return steps.finalize;
     }
 
@@ -287,56 +263,66 @@ export const createAgentGraph = ({
   };
 
   const finalize = async (state: StateType) => {
-    const answerAction = state.answerActions[state.answerActions.length - 1];
-    if (isStructuredAnswerAction(answerAction)) {
-      return {
-        finalAnswer: answerAction.data,
-      };
-    } else if (isAnswerAction(answerAction)) {
-      return {
-        finalAnswer: answerAction.message,
-      };
-    } else {
-      throw invalidState(`[finalize] expect answer action, got ${answerAction.type} instead.`);
+    if (structuredOutput) {
+      const answerAction = state.answerActions[state.answerActions.length - 1];
+      if (isStructuredAnswerAction(answerAction)) {
+        return { finalAnswer: answerAction.data };
+      }
+      throw invalidState(
+        `[finalize] expected structured answer action, got ${answerAction.type} instead.`
+      );
     }
+
+    // Non-structured: the research agent's terminal HandoverAction carries the
+    // user-facing answer.
+    const lastMainAction = state.mainActions[state.mainActions.length - 1];
+    if (isHandoverAction(lastMainAction)) {
+      return { finalAnswer: lastMainAction.message };
+    }
+    throw invalidState(`[finalize] expected handover action, got ${lastMainAction.type} instead.`);
   };
 
-  const selectedAnswerAgent = structuredOutput ? answerAgentStructured : answerAgent;
-
   // note: the node names are used in the event convertion logic, they should *not* be changed
-  const graph = new StateGraph(StateAnnotation)
-    // nodes
+  const graphBuilder = new StateGraph(StateAnnotation)
     .addNode(steps.init, init)
     .addNode(steps.checkBackgroundWork, checkBackgroundWork)
     .addNode(steps.researchAgent, researchAgent)
     .addNode(steps.executeTool, executeTool)
     .addNode(steps.handleToolInterrupt, handleToolInterrupt)
-    .addNode(steps.prepareToAnswer, prepareToAnswer)
-    .addNode(steps.answerAgent, selectedAnswerAgent)
     .addNode(steps.finalize, finalize)
-    // edges
     .addEdge(_START_, steps.init)
     .addEdge(steps.init, steps.checkBackgroundWork)
     .addEdge(steps.checkBackgroundWork, steps.researchAgent)
-    .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
-      [steps.researchAgent]: steps.researchAgent,
-      [steps.executeTool]: steps.executeTool,
-      [steps.prepareToAnswer]: steps.prepareToAnswer,
-    })
     .addConditionalEdges(steps.executeTool, executeToolEdge, {
       [steps.checkBackgroundWork]: steps.checkBackgroundWork,
       [steps.handleToolInterrupt]: steps.handleToolInterrupt,
     })
     .addEdge(steps.handleToolInterrupt, _END_)
-    .addEdge(steps.prepareToAnswer, steps.answerAgent)
-    .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
-      [steps.answerAgent]: steps.answerAgent,
-      [steps.finalize]: steps.finalize,
-    })
-    .addEdge(steps.finalize, _END_)
-    .compile();
+    .addEdge(steps.finalize, _END_);
 
-  return graph;
+  if (structuredOutput) {
+    graphBuilder
+      .addNode(steps.prepareToAnswer, prepareToAnswer)
+      .addNode(steps.answerAgent, answerAgentStructured)
+      .addConditionalEdges(steps.researchAgent, researchAgentEdge, {
+        [steps.researchAgent]: steps.researchAgent,
+        [steps.executeTool]: steps.executeTool,
+        [steps.prepareToAnswer]: steps.prepareToAnswer,
+      })
+      .addEdge(steps.prepareToAnswer, steps.answerAgent)
+      .addConditionalEdges(steps.answerAgent, answerAgentEdge, {
+        [steps.answerAgent]: steps.answerAgent,
+        [steps.finalize]: steps.finalize,
+      });
+  } else {
+    graphBuilder.addConditionalEdges(steps.researchAgent, researchAgentEdge, {
+      [steps.researchAgent]: steps.researchAgent,
+      [steps.executeTool]: steps.executeTool,
+      [steps.finalize]: steps.finalize,
+    });
+  }
+
+  return graphBuilder.compile();
 };
 
 const invalidState = (message: string) => {

@@ -33,6 +33,7 @@ Table of Contents
     - [actionsClient.execute(options)](#actionsclientexecuteoptions)
       - [Example](#example-2)
 - [Command Line Utility](#command-line-utility)
+- [Logging](#Logging)
 
 ## Terminology
 
@@ -61,6 +62,14 @@ Built-In-Actions are configured using the _xpack.actions_ namespace under _kiban
 
 
 - The **allowedHosts** configuration applies to built-in action types (such as Slack and PagerDuty). While the _PagerDuty Action Type_ has been configured to support the service's Events API (at _https://events.pagerduty.com/v2/enqueue_, which you can read about in [Pagerduty's documentation](https://v2.developer.pagerduty.com/docs/events-api-v2)), the PagerDuty domain must still be included in the allowedHosts configuration before the action can be used.
+
+#### **relay** configuration
+
+The server-only `xpack.actions.relay` configuration defines the shared Relay service URL and
+optional SSL settings, including a client certificate and key for mTLS. Actions exposes one
+configured Relay client to server plugins so all Relay consumers use the same outbound HTTP,
+proxy, and TLS policy. The Relay host must also be added to `xpack.actions.allowedHosts`, since
+Relay requests go through the same `ensureUriAllowed` check as any other connector call.
 
 ### Configuration Utilities
 
@@ -296,3 +305,7 @@ $ kbn-action create .slack "post to slack" '{"webhookUrl": "https://hooks.slack.
     "version": "WzMsMV0="
 }
 ```
+
+# Logging
+
+For logging and editorial guidance see the [logging guidelines](../../../../../docs/extend/contributing/codebase/logging.md).

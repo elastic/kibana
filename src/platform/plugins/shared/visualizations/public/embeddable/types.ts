@@ -12,15 +12,18 @@ import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesEsqlUsage,
   PublishesProjectRoutingOverrides,
   PublishesRendered,
   PublishesTimeRange,
   PublishesTitle,
+  PublishesWritableTitle,
   SerializedTimeRange,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -57,10 +60,13 @@ export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
 };
 
 export type VisualizeApi = Partial<HasEditCapabilities> &
+  CanCancelRequests &
+  PublishesWritableTitle &
   PublishesDataViews &
   PublishesDataLoading &
   PublishesRendered &
   PublishesProjectRoutingOverrides &
+  PublishesEsqlUsage &
   Required<PublishesTitle> &
   HasVisualizeConfig &
   HasInspectorAdapters &

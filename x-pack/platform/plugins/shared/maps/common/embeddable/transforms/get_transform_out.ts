@@ -39,7 +39,7 @@ export function getTransformOut(transformDrilldownsOut: DrilldownTransforms['tra
     }
 
     // by value
-    if ('attributes' in state) {
+    if ('attributes' in state && state.attributes) {
       return {
         ...state,
         attributes: transformMapAttributesOut(state.attributes, (targetName: string) => {

@@ -20,7 +20,7 @@ import type {
 } from '@kbn/as-code-filters-schema';
 import type { Logger } from '@kbn/logging';
 import { ASCODE_FILTER_OPERATOR } from '@kbn/as-code-filters-constants';
-import { FILTERS, getFilterField, type Filter } from '@kbn/es-query';
+import { FILTERS, type Filter } from '@kbn/es-query';
 import { FilterConversionError } from './errors';
 import {
   isConditionFilter,
@@ -231,10 +231,10 @@ function convertFromFilterGroup(group: AsCodeGroupFilter['group'], baseStored: F
       | AsCodeConditionFilter['condition']
       | AsCodeGroupFilter['group'];
 
-    // Create a clean base for sub-filters
-    // Sub-filters inherit index and $state when present
+    // Create a clean base for sub-filters: they inherit only the parent's index.
+    // $state is UI/session state and is intentionally not persisted (globalState filters are dropped
+    // entirely in from_stored_filter.ts; appState is re-derived at runtime).
     const cleanBase = {
-      ...(baseStored.$state ? { $state: baseStored.$state } : {}),
       meta: {
         ...(baseStored.meta.index ? { index: baseStored.meta.index } : {}),
       },
@@ -245,8 +245,8 @@ function convertFromFilterGroup(group: AsCodeGroupFilter['group'], baseStored: F
       ? convertFromFilterGroup(typedCondition, cleanBase)
       : convertFromSimpleCondition(typedCondition, cleanBase);
 
-    // Clean up filter: remove $state, alias, and disabled from all sub-filters
-    const { $state, meta: filterMeta, ...cleanedUpFilter } = filter;
+    // Clean up filter: remove alias and disabled from all sub-filters
+    const { meta: filterMeta, ...cleanedUpFilter } = filter;
     const { alias, disabled, ...cleanedUpMeta } = filterMeta;
     return { ...cleanedUpFilter, meta: cleanedUpMeta };
   });
@@ -283,16 +283,9 @@ function convertFromSpatialFilter(asCodeFilter: AsCodeSpatialFilter, baseStored:
 function convertFromDSLFilter(asCodeFilter: AsCodeDSLFilter, baseStored: Filter): Filter {
   const query = asCodeFilter.dsl.query;
 
-  // Build a filter to test with type guard functions
-  const dslFilter: Filter = {
-    ...baseStored,
-    query,
-  };
-
-  // Extract field name using utility function (returns undefined for filters without a field)
-  const detectedField = getFilterField(dslFilter);
-  // Use detected field or fall back to asCodeFilter.field
-  const field = detectedField ?? asCodeFilter.field;
+  // Custom/DSL filters carry a `field` only when is set explicitly (e.g. scripted
+  // filters, whose genuine `meta.field` is preserved by `from_stored_filter`).
+  const field = asCodeFilter.field;
 
   return {
     ...baseStored,

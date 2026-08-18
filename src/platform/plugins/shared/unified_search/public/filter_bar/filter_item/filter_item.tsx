@@ -71,22 +71,30 @@ export type FilterLabelStatus =
 
 export const FILTER_EDITOR_WIDTH = 1200;
 
-function FilterItemComponent(props: FilterItemProps) {
+const FILTER_ITEM_MENU = 'menu';
+const FILTER_ITEM_EDITOR = 'editFilter';
+
+// exported for testing only
+export function FilterItemComponent(props: FilterItemProps) {
   const { onCloseFilterPopover, onLocalFilterCreate, onLocalFilterUpdate } = props;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
-  const [renderedComponent, setRenderedComponent] = useState('menu');
+  const [renderedComponent, setRenderedComponent] = useState(FILTER_ITEM_MENU);
   const { id, filter, indexPatterns, hiddenPanelOptions, readOnly = false, docLinks } = props;
 
   const styles = useMemoCss(filterItemStyles);
 
   const closePopover = useCallback(() => {
-    onCloseFilterPopover([() => setIsPopoverOpen(false)]);
-  }, [onCloseFilterPopover]);
+    if (renderedComponent === FILTER_ITEM_EDITOR) {
+      onCloseFilterPopover([() => setIsPopoverOpen(false)]);
+    } else {
+      setIsPopoverOpen(false);
+    }
+  }, [onCloseFilterPopover, renderedComponent]);
 
   useEffect(() => {
     if (isPopoverOpen) {
-      setRenderedComponent('menu');
+      setRenderedComponent(FILTER_ITEM_MENU);
     }
   }, [isPopoverOpen]);
 
@@ -193,7 +201,7 @@ function FilterItemComponent(props: FilterItemProps) {
         icon: 'pencil',
         'data-test-subj': 'editFilter',
         onClick: () => {
-          setRenderedComponent('editFilter');
+          setRenderedComponent(FILTER_ITEM_EDITOR);
         },
       },
       {
@@ -342,7 +350,7 @@ function FilterItemComponent(props: FilterItemProps) {
     <FilterView {...filterViewProps} />
   ) : (
     <EuiPopover anchorPosition="downLeft" {...popoverProps}>
-      {renderedComponent === 'menu' ? (
+      {renderedComponent === FILTER_ITEM_MENU ? (
         <EuiContextMenu initialPanelId={0} panels={getPanels()} />
       ) : (
         <EuiContextMenuPanel

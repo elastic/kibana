@@ -14,12 +14,14 @@ async function navigate({
   spaceId,
   timeRange,
   tabId,
+  remoteName,
 }: {
   configId: string;
   locationId?: string;
   spaceId?: string;
   timeRange?: TimeRange;
   tabId?: string;
+  remoteName?: string;
 }) {
   let queryParam = locationId ? `?locationId=${locationId}` : '';
   const tab = `${tabId ? `/${tabId}` : ''}`;
@@ -32,6 +34,10 @@ async function navigate({
     queryParam += queryParam
       ? `&dateRangeStart=${timeRange.from}&dateRangeEnd=${timeRange.to}`
       : `?dateRangeStart=${timeRange.from}&dateRangeEnd=${timeRange.to}`;
+  }
+
+  if (remoteName) {
+    queryParam += queryParam ? `&remoteName=${remoteName}` : `?remoteName=${remoteName}`;
   }
 
   return {

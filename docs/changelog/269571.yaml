@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/269571
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+title: Fix content connector redirects to be basePath and space-aware
+description: Fixes client-side navigation within the content connectors UI to honor `server.basePath` and Kibana space prefixes.

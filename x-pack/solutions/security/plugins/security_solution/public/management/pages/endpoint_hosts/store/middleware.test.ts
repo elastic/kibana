@@ -6,8 +6,8 @@
  */
 
 import type { CoreStart, HttpSetup } from '@kbn/core/public';
-import type { Store } from 'redux';
-import { applyMiddleware, createStore } from 'redux';
+import type { Store } from 'redux-v4';
+import { applyMiddleware, createStore } from 'redux-v4';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { History } from 'history';
 import { createBrowserHistory } from 'history';

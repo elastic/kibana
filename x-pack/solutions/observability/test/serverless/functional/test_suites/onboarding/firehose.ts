@@ -81,7 +81,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
 
       // Checking that an AWS service item is visible after data is detected
-      await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);
+      await testSubjects.existOrFail(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`, {
+        timeout: 30_000,
+      });
     });
 
     it('shows the existing data callout and detected AWS services when data was ingested previously', async () => {
@@ -112,10 +114,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await browser.refresh();
 
       // Checking that the existing data callout is visible after data is detected
-      await testSubjects.isDisplayed('observabilityOnboardingFirehosePanelExistingDataCallout');
+      await testSubjects.existOrFail('observabilityOnboardingFirehosePanelExistingDataCallout', {
+        timeout: 30_000,
+      });
 
       // Checking that an AWS service item is visible after data is detected
-      await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);
+      await testSubjects.existOrFail(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`, {
+        timeout: 30_000,
+      });
     });
   });
 }

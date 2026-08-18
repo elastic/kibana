@@ -14,6 +14,7 @@ import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SUGGEST_FIX_ROUTE, FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
+import { AiReviewAction, type ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { ReviewActionsWidget } from '../comment_to_esql/review_actions_widget';
 import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
@@ -73,6 +74,8 @@ interface UseSuggestFixParams {
   http: HttpStart;
   notifications: NotificationsStart;
   isEnabled: boolean;
+  telemetryService?: ESQLEditorTelemetryService;
+  onAfterInsert?: () => void;
 }
 
 export const useSuggestFix = ({
@@ -81,6 +84,8 @@ export const useSuggestFix = ({
   http,
   notifications,
   isEnabled,
+  telemetryService,
+  onAfterInsert,
 }: UseSuggestFixParams) => {
   const { euiTheme } = useEuiTheme();
 
@@ -124,6 +129,30 @@ export const useSuggestFix = ({
     abortInFlight();
   }, [clearGeneratingDecoration, abortInFlight]);
 
+  const trackFixResult = useCallback(
+    (
+      queryLength: number,
+      startTime: number,
+      success: boolean,
+      errorCode?: string | null,
+      changedLineCount?: number
+    ) =>
+      telemetryService?.trackFixWithAiSubmitted({
+        queryLength,
+        success,
+        durationMs: Date.now() - startTime,
+        errorCode: errorCode ?? undefined,
+        ...(changedLineCount !== undefined ? { changedLineCount } : {}),
+      }),
+    [telemetryService]
+  );
+
+  const trackFixReview = useCallback(
+    (action: AiReviewAction, linesChanged: number) =>
+      telemetryService?.trackFixWithAiReviewed({ action, linesChanged }),
+    [telemetryService]
+  );
+
   const acceptFix = useCallback(() => {
     const editor = editorRef.current;
     const model = editorModel.current;
@@ -134,6 +163,8 @@ export const useSuggestFix = ({
     if (!editor || !model || !state) {
       return;
     }
+
+    trackFixReview(AiReviewAction.ACCEPT, state.generatedLineEnd - state.generatedLineStart + 1);
 
     // Remove only the original changed lines — the fix lines shift up to replace them
     editor.executeEdits('esql-suggest-fix-accept', [
@@ -147,7 +178,7 @@ export const useSuggestFix = ({
         text: null,
       },
     ]);
-  }, [editorRef, editorModel, cleanup]);
+  }, [editorRef, editorModel, cleanup, trackFixReview]);
 
   const rejectFix = useCallback(() => {
     const editor = editorRef.current;
@@ -159,6 +190,8 @@ export const useSuggestFix = ({
     if (!editor || !model || !state) {
       return;
     }
+
+    trackFixReview(AiReviewAction.REJECT, state.generatedLineEnd - state.generatedLineStart + 1);
 
     // Remove the "\n" connector + fix lines by selecting from the end of the last
     // original changed line through the end of the last fix line.
@@ -173,7 +206,7 @@ export const useSuggestFix = ({
         text: null,
       },
     ]);
-  }, [editorRef, editorModel, cleanup]);
+  }, [editorRef, editorModel, cleanup, trackFixReview]);
 
   const showReview = useCallback(
     (state: ReviewState) => {
@@ -269,6 +302,7 @@ export const useSuggestFix = ({
 
       const controller = new AbortController();
       abortControllerRef.current = controller;
+      const startTime = Date.now();
 
       try {
         const result = await http.post<{ content: string }>(SUGGEST_FIX_ROUTE, {
@@ -276,13 +310,19 @@ export const useSuggestFix = ({
           signal: controller.signal,
         });
 
-        if (controller.signal.aborted || !result?.content) {
+        // Was aborted (retrigger / cleanup) — swallow and let the new run own the UX.
+        if (controller.signal.aborted) {
           if (abortControllerRef.current === controller) {
             abortControllerRef.current = undefined;
           }
           return;
         }
         abortControllerRef.current = undefined;
+
+        if (!result?.content) {
+          trackFixResult(queryString.length, startTime, false, errorCode);
+          return;
+        }
 
         const fixedQuery = result.content.replace(/\n+$/, '');
         const originalLines = model.getValue().split('\n');
@@ -313,9 +353,18 @@ export const useSuggestFix = ({
             forceMoveMarkers: true,
           },
         ]);
+        onAfterInsert?.();
 
         const generatedLineStart = lastChangedOriginalLine + 1;
         const generatedLineEnd = lastChangedOriginalLine + changedFixedLines.length;
+
+        trackFixResult(
+          queryString.length,
+          startTime,
+          true,
+          errorCode,
+          generatedLineEnd - generatedLineStart + 1
+        );
 
         showReview({
           firstChangedOriginalLine,
@@ -325,6 +374,7 @@ export const useSuggestFix = ({
         });
       } catch (error) {
         if (controller.signal.aborted) return;
+        trackFixResult(queryString.length, startTime, false, errorCode);
         const message =
           (error as { body?: { message?: string } })?.body?.message ??
           i18n.translate('esqlEditor.suggestFix.error', {
@@ -339,10 +389,12 @@ export const useSuggestFix = ({
       isEnabled,
       editorRef,
       editorModel,
-      http,
-      notifications.toasts,
       rejectFix,
+      http,
+      onAfterInsert,
+      trackFixResult,
       showReview,
+      notifications.toasts,
       clearGeneratingDecoration,
     ]
   );

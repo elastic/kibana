@@ -12,22 +12,35 @@ import {
   AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
   AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
-import { casesSchemaValidator } from '../common/utils';
+import {
+  ChangePointChartAttachmentPayloadSchema,
+  LogRateAnalysisAttachmentPayloadSchema,
+  PatternAnalysisAttachmentPayloadSchema,
+} from '../common/utils';
 
 export function registerCaseAttachments(cases: CasesServerSetup | undefined, logger: Logger) {
   if (cases) {
     try {
       cases.attachmentFramework.registerUnified({
         id: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
-        schemaValidator: casesSchemaValidator,
+        schema: ChangePointChartAttachmentPayloadSchema,
+        // `data.state` is the AIOps embeddable input bag produced by the
+        // change point detection "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
       cases.attachmentFramework.registerUnified({
         id: AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
-        schemaValidator: casesSchemaValidator,
+        schema: PatternAnalysisAttachmentPayloadSchema,
+        // `data.state` is the AIOps embeddable input bag produced by the
+        // log pattern analysis "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
       cases.attachmentFramework.registerUnified({
         id: AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
-        schemaValidator: casesSchemaValidator,
+        schema: LogRateAnalysisAttachmentPayloadSchema,
+        // `data.state` is the AIOps embeddable input bag produced by the
+        // log rate analysis "Add to case" flow — not authorable in YAML.
+        workflowSchema: false,
       });
     } catch (error) {
       logger.warn(`AIOPs failed to register cases persistable state`);

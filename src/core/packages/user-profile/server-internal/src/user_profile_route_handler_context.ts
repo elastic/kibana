@@ -29,4 +29,8 @@ export class CoreUserProfileRouteHandlerContext implements UserProfileRequestHan
   } = {}): Promise<UserProfileWithSecurity<D, L> | null> {
     return this.userProfileStart.getCurrent({ request: this.request, dataPath });
   }
+
+  getCurrentProfileId(): Promise<string | null> {
+    return this.userProfileStart.getCurrentProfileId({ request: this.request });
+  }
 }

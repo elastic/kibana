@@ -136,7 +136,7 @@ export function ScanResultsPanel({ scanId }: Props) {
   const handleNextPage = () => {
     if (data?.searchAfter) {
       setSearchAfterHistory((prev) => [...prev, searchAfter]);
-      setSearchAfter(JSON.stringify(data.searchAfter));
+      setSearchAfter(data.searchAfter);
     }
   };
   const handlePreviousPage = () => {
@@ -308,7 +308,7 @@ export function ScanResultsPanel({ scanId }: Props) {
               defaultMessage: 'Some SLOs have issues',
             })}
             color="danger"
-            iconType="alert"
+            iconType="warning"
           >
             <p>
               {i18n.translate('xpack.slo.healthScanFlyout.scanResults.issuesBody', {

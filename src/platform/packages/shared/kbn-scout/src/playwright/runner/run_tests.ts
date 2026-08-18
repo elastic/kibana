@@ -24,7 +24,7 @@ import {
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import type { ScoutPlaywrightProjects } from '../types';
-import { execPromise, getPlaywrightGrepTag, withKibanaBabelRegister } from '../utils';
+import { execPromise, getPlaywrightGrepTag, withKibanaSwcRegister } from '../utils';
 import type { RunTestsOptions } from './flags';
 
 export const getPlaywrightProject = (
@@ -66,7 +66,7 @@ async function runPlaywrightTest(
     cmd,
     args,
     cwd: resolve(REPO_ROOT),
-    env: withKibanaBabelRegister({
+    env: withKibanaSwcRegister({
       ...process.env,
       ...env,
     }),
@@ -85,7 +85,7 @@ export async function hasTestsInPlaywrightConfig(
     const validationCmd = [cmd, ...cmdArgs, '--list'].join(' ');
 
     const result = await execPromise(validationCmd, {
-      env: withKibanaBabelRegister({
+      env: withKibanaSwcRegister({
         ...process.env,
         SCOUT_REPORTER_ENABLED: 'false',
       }) as NodeJS.ProcessEnv,
@@ -100,7 +100,7 @@ export async function hasTestsInPlaywrightConfig(
     if (errorMessage.includes('No tests found')) {
       log.error(
         `scout: No tests found in [${configPath}]. ` +
-          `Run 'npx playwright test --list --config ${configPath}' to see Playwright errors.`
+          `Run 'node scripts/playwright test --list --config ${configPath}' to see Playwright errors.`
       );
       return 2; // "no tests" code, no hard failure on CI
     }

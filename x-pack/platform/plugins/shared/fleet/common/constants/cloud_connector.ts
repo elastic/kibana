@@ -6,6 +6,7 @@
  */
 
 import type { CloudProvider } from '../types/models/cloud_connector';
+import { AWS_CLOUD_PROVIDER } from '../types/models/cloud_connector';
 
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from './package_policy';
 
@@ -38,6 +39,8 @@ export const GCP_CREDENTIALS_CLOUD_CONNECTOR_ID = 'gcp_credentials_cloud_connect
 
 // Cloud connector support flag
 export const SUPPORTS_CLOUD_CONNECTORS_VAR_NAME = 'supports_cloud_connectors';
+// Renamed from supports_cloud_connectors in newer integrations (e.g. elastic/integrations#19828)
+export const SUPPORTS_IDENTITY_FEDERATION_VAR_NAME = 'supports_identity_federation';
 
 // OTel Verifier package constants
 export const VERIFIER_PKG_NAME = 'verifier_otel';
@@ -101,6 +104,7 @@ export const SUPPORTED_CLOUD_CONNECTOR_VARS = [
   AUDIENCE_VAR_NAME,
   GCP_CREDENTIALS_CLOUD_CONNECTOR_ID,
   SUPPORTS_CLOUD_CONNECTORS_VAR_NAME,
+  SUPPORTS_IDENTITY_FEDERATION_VAR_NAME,
 ];
 
 // Cloud connector permission allowlist
@@ -120,12 +124,16 @@ export const CLOUD_CONNECTOR_PERMISSION_ALLOWLIST: Record<
   ReadonlyArray<CloudConnectorAllowlistEntry>
 > = {
   security_audit_policy_group: [
-    { provider: 'aws', package: 'cloud_security_posture', policyTemplate: 'cspm' },
-    { provider: 'aws', package: 'cloud_asset_inventory', policyTemplate: 'asset_inventory' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'cloud_security_posture', policyTemplate: 'cspm' },
+    {
+      provider: AWS_CLOUD_PROVIDER,
+      package: 'cloud_asset_inventory',
+      policyTemplate: 'asset_inventory',
+    },
   ],
   aws_global_policy_group: [
-    { provider: 'aws', package: 'aws', policyTemplate: 'guardduty' },
-    { provider: 'aws', package: 'aws', policyTemplate: 's3' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 'guardduty' },
+    { provider: AWS_CLOUD_PROVIDER, package: 'aws', policyTemplate: 's3' },
   ],
 };
 

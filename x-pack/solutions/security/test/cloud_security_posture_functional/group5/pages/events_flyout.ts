@@ -62,10 +62,13 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await waitForPluginInitialized({ retry, supertest, logger });
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
 
-      // Enable asset inventory and entity store v2 settings
+      // Enable asset inventory and entity store v2 settings.
+      // Disable the new flyout so the graph preview panel uses its legacy expandable-flyout
+      // selectors (e.g. `previewSection`), which don't exist in the new flyout system.
       await kibanaServer.uiSettings.update({
         'securitySolution:enableAssetInventory': true,
         'securitySolution:entityStoreEnableV2': true,
+        'securitySolution:enableNewFlyout': false,
       });
 
       // Initialize security-solution-default data-view (required by entity store)
@@ -89,6 +92,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await esArchiver.unload(
         'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/logs_gcp_audit'
       );
+      await kibanaServer.uiSettings.unset('securitySolution:enableNewFlyout');
     });
 
     it('expanded flyout - filter by node', async () => {
@@ -140,7 +144,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show events with the same action
       await expandedFlyoutGraph.showEventsOfSameAction(
-        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(0)'
       );
 
       await expandedFlyoutGraph.expectFilterTextEquals(
@@ -156,7 +160,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Hide events with the same action
       await expandedFlyoutGraph.hideEventsOfSameAction(
-        'label(google.iam.admin.v1.CreateRole)ln(d417ea74f69263353ca1f98e8269b8a6)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(b0f4971b57721f2778832a4f81523af433a4f974671ce49770e1846d12e20760)oe(1)oa(0)'
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
@@ -267,7 +271,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show event details from group node
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'label(google.iam.admin.v1.CreateRole)ln(c6579aaf5457eee679bb88bc31162a3d)oe(0)oa(0)'
+        'label(google.iam.admin.v1.CreateRole)ln(5cc3ec012284b76c9ebb137c692826dcba12e4cc6792de419b51667b02df4b58)oe(0)oa(0)'
       );
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
       await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
@@ -324,7 +328,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
 
       await expandedFlyoutGraph.showEventOrAlertDetails(
-        'label(google.iam.admin.v1.CreateRole2)ln(528a070f7bdd4fdac70ee28fbe835f04)oe(1)oa(0)'
+        'label(google.iam.admin.v1.CreateRole2)ln(fe63b16ddd48d7792e4391e9067cdf4f273045a23d5596074c89afe7c03b3083)oe(1)oa(0)'
       );
       // An alert is always coupled with an event, so we open the group preview panel instead of the alert panel
       await networkEventsPage.flyout.assertPreviewPanelIsOpen('group');
@@ -361,16 +365,36 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.waitGraphIsLoaded();
           await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
 
-          const actorNodeId = 'dd46938f412437c539cbff915873c550';
+          const actorNodeId = '0dd7df1e4e0a04a8dcde50181928557ceff5b21dfa0a46b1e173feef4bb3ddbc';
           await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
           await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
 
-          const storageBucketNodeId = '8a748ce026512856f76bdc6304573f1c';
+          // The event's user.email / user.id / user.name are all multi-value, so MV_EXPAND
+          // produces a Cartesian product of rows for only 2 real actors. The node counter and the
+          // grouped-entities flyout must both report 2 — the flyout previously listed one item per
+          // Cartesian row (8) instead of one per entity id.
+          await expandedFlyoutGraph.assertNodeEntityTagCount(actorNodeId, 2);
+          await expandedFlyoutGraph.showEntityDetails(actorNodeId);
+          await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+          // Both actors are enriched, so their titles render as links to the entity flyout.
+          await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
+          await expandedFlyoutGraph.closePreviewSection();
+
+          const storageBucketNodeId =
+            '1abcf2b7cb329695e152ab9f1838188e0f61f5796fd20518c73488748e05b935';
           await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
           await expandedFlyoutGraph.assertNodeEntityDetails(
             storageBucketNodeId,
             'GCP Storage Bucket'
           );
+
+          // The two buckets come from a single multi-value field (entity.target.id), so there is no
+          // cross-product to collapse — but the counter and flyout must still agree.
+          await expandedFlyoutGraph.assertNodeEntityTagCount(storageBucketNodeId, 2);
+          await expandedFlyoutGraph.showEntityDetails(storageBucketNodeId);
+          await networkEventsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
+          await expandedFlyoutGraph.assertPreviewPanelGroupedItemTitleLinkNumber(2);
+          await expandedFlyoutGraph.closePreviewSection();
 
           const serviceNodeId = 'service:TargetMultiService1';
           await expandedFlyoutGraph.assertNodeEntityTag(serviceNodeId, 'Service');
@@ -460,8 +484,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             es,
             logger,
             retry,
-            entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 36,
+            entitiesIndex: '.entities.v2.latest.*',
+            expectedCount: 46,
           });
         });
 
@@ -542,7 +566,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               'rel(user:data-pipeline@my-gcp-project.iam.gserviceaccount.com@gcp-owns)';
             await expandedFlyoutGraph.assertNodeExists(ownsRelationshipNodeId);
 
-            const communicatesWithIdRelationshipTargetNodeId = '06530c8b5bd27028c4f78cb987f08cc0';
+            const communicatesWithIdRelationshipTargetNodeId =
+              'c7d2fb4084505889f751c7a8ffcee9eb7d836a60c2e34f751b64faf34ac0b932';
             await expandedFlyoutGraph.assertNodeEntityTag(
               communicatesWithIdRelationshipTargetNodeId,
               'Host'
@@ -556,7 +581,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               2
             );
 
-            const ownsIdRelationshipTargetNodeId = '2aab291bca8891f6ba943173ab574130';
+            const ownsIdRelationshipTargetNodeId =
+              'f30eb27265a364641d6b15acdf5cffc78f581d08acfa6af82b26587f6b3c353b';
             await expandedFlyoutGraph.assertNodeEntityTag(ownsIdRelationshipTargetNodeId, 'Host');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               ownsIdRelationshipTargetNodeId,
@@ -711,7 +737,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               'Hierarchy Delegate Agent'
             );
 
-            const communicatesWithIdRelationshipTargetNodeId = '3ed488a2068243098af41d666693f341';
+            const communicatesWithIdRelationshipTargetNodeId =
+              '28ddbf3f780ac0c16071a33d0ae9d8d92ed7bf0c28ed9ad9b606f9ddacdb589b';
             await expandedFlyoutGraph.assertNodeEntityTag(
               communicatesWithIdRelationshipTargetNodeId,
               'Networking'

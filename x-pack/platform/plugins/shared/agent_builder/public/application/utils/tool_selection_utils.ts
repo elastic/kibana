@@ -116,11 +116,24 @@ export const getActiveTools = <T extends ToolSelectionRelevantFields>(
 };
 
 /**
+ * Returns whether a skill is automatically included when Elastic capabilities are enabled.
+ */
+export const isSkillAutoIncluded = <
+  T extends { readonly: boolean; exclude_from_elastic_capabilities?: boolean }
+>(
+  skill: T,
+  enableElasticCapabilities: boolean
+): boolean =>
+  enableElasticCapabilities && skill.readonly && !skill.exclude_from_elastic_capabilities;
+
+/**
  * Returns the list of active skills for an agent, combining explicitly selected skills
  * with built-in (readonly) skills when elastic capabilities are enabled. Built-in skills
  * that are already explicitly selected are not duplicated.
  */
-export const getActiveSkills = <T extends { id: string; readonly: boolean }>(
+export const getActiveSkills = <
+  T extends { id: string; readonly: boolean; exclude_from_elastic_capabilities?: boolean }
+>(
   allSkills: T[],
   agentSkillIds: string[] | undefined,
   enableElasticCapabilities: boolean
@@ -128,7 +141,9 @@ export const getActiveSkills = <T extends { id: string; readonly: boolean }>(
   const explicitIds = new Set(agentSkillIds ?? []);
   const explicitSkills = allSkills.filter((s) => explicitIds.has(s.id));
   if (!enableElasticCapabilities) return explicitSkills;
-  const builtinNotExplicit = allSkills.filter((s) => s.readonly && !explicitIds.has(s.id));
+  const builtinNotExplicit = allSkills.filter(
+    (skill) => isSkillAutoIncluded(skill, enableElasticCapabilities) && !explicitIds.has(skill.id)
+  );
   return [...explicitSkills, ...builtinNotExplicit];
 };
 

@@ -9,7 +9,8 @@ import {
   getFieldNamespace,
   generateFieldHintCases,
   concatJsonObjectPropertyEsqlExprSafe,
-  buildLookupJoinEsql,
+  concatJsonObjectPropertyEsqlExprAsString,
+  escapeJsonStringValueEsql,
 } from './esql_utils';
 
 describe('ESQL utils', () => {
@@ -83,11 +84,45 @@ describe('ESQL utils', () => {
     });
   });
 
+  describe('escapeJsonStringValueEsql', () => {
+    it('should wrap the expression in REPLACE calls that escape backslashes then double quotes', () => {
+      const result = escapeJsonStringValueEsql('entityName');
+
+      // Backslash is escaped first (\ -> \\), then double quote (" -> \").
+      // Backslash counts reflect ES|QL string-literal + Java regex/replacement semantics.
+      expect(result).toBe(
+        String.raw`REPLACE(REPLACE(entityName, "\\\\", "\\\\\\\\"), "\"", "\\\\\"")`
+      );
+    });
+
+    it('should escape backslashes before quotes (regression for DOMAIN\\user EUIDs)', () => {
+      const result = escapeJsonStringValueEsql('value');
+      const backslashIndex = result.indexOf(String.raw`"\\\\"`);
+      const quoteIndex = result.indexOf(String.raw`"\""`);
+
+      expect(backslashIndex).toBeGreaterThanOrEqual(0);
+      expect(quoteIndex).toBeGreaterThanOrEqual(0);
+      // The inner REPLACE (backslash) must run before the outer REPLACE (quote),
+      // so the backslash pattern must appear earlier in the generated expression.
+      expect(backslashIndex).toBeLessThan(quoteIndex);
+    });
+  });
+
   describe('formatJsonProperty', () => {
-    it('should generate ESQL that outputs JSON property, or empty string if null', () => {
+    it('should generate ESQL that outputs JSON property (with escaped value), or empty string if null', () => {
       const result = concatJsonObjectPropertyEsqlExprSafe('name', 'entityName');
 
-      expect(result).toBe('COALESCE(CONCAT("\\"name\\":\\"", entityName, "\\""), "")');
+      expect(result).toBe(
+        `COALESCE(CONCAT("\\"name\\":\\"", ${escapeJsonStringValueEsql('entityName')}, "\\""), "")`
+      );
+    });
+
+    it('should escape the value embedded by concatJsonObjectPropertyEsqlExprAsString', () => {
+      const result = concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId');
+
+      expect(result).toBe(
+        `CONCAT("\\"id\\":\\"", ${escapeJsonStringValueEsql('actorEntityId')}, "\\"")`
+      );
     });
 
     it('should include the property name and variable in the output', () => {
@@ -95,47 +130,6 @@ describe('ESQL utils', () => {
 
       expect(result).toContain('customProp');
       expect(result).toContain('customVar');
-    });
-  });
-
-  describe('buildLookupJoinEsql', () => {
-    it('should generate LOOKUP JOIN statements with provided index name', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_default-00001');
-
-      expect(result).toContain('| DROP entity.id');
-      expect(result).toContain('| DROP entity.target.id');
-      expect(result).toContain(
-        '| LOOKUP JOIN .entities.v2.latest.security_default-00001 ON entity.id'
-      );
-      expect(result).toContain('| RENAME actorEntityName    = entity.name');
-      expect(result).toContain('| RENAME actorEntityType    = entity.type');
-      expect(result).toContain('| RENAME actorEntitySubType = entity.sub_type');
-      expect(result).toContain('| INLINE STATS actorHostIp = VALUES(TO_STRING(host.ip))');
-      expect(result).toContain('| RENAME targetEntityName    = entity.name');
-      expect(result).toContain('| RENAME targetEntityType    = entity.type');
-      expect(result).toContain('| RENAME targetEntitySubType = entity.sub_type');
-      expect(result).toContain('| INLINE STATS targetHostIp = VALUES(TO_STRING(host.ip))');
-    });
-
-    it('should include two LOOKUP JOIN statements for actor and target', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_test-00001');
-
-      const lookupJoinMatches = result.match(/LOOKUP JOIN/g);
-      expect(lookupJoinMatches).toHaveLength(2);
-    });
-
-    it('should use the provided index name in both LOOKUP JOIN statements', () => {
-      const indexName = '.entities.v2.latest.security_custom-00001';
-      const result = buildLookupJoinEsql(indexName);
-
-      const indexMatches = result.match(new RegExp(indexName.replace(/\./g, '\\.'), 'g'));
-      expect(indexMatches).toHaveLength(2);
-    });
-    it('should preserve the lookup entity id aliases for both joins', () => {
-      const result = buildLookupJoinEsql('.entities.v2.latest.security_test-00001');
-
-      expect(result).toContain('| RENAME actorLookupEntityId = entity.id');
-      expect(result).toContain('| RENAME targetLookupEntityId = entity.id');
     });
   });
 });

@@ -6,10 +6,12 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { fromKueryExpression } from '@kbn/es-query';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
+import { packagePolicyService } from '../package_policy';
 import type {
   NewPackagePolicy,
   PackageInfo,
@@ -22,7 +24,12 @@ import {
   diffSecretPaths,
   extractAndWriteSecrets,
   extractAndUpdateSecrets,
+  findPackagePoliciesUsingSecrets,
 } from './package_policies';
+
+jest.mock('../package_policy');
+
+const mockedPackagePolicyService = packagePolicyService as jest.Mocked<typeof packagePolicyService>;
 
 describe('Package policy secrets', () => {
   let mockContract: ReturnType<typeof createAppContextStartContractMock>;
@@ -1974,6 +1981,89 @@ describe('Package policy secrets', () => {
 
         expect(result.secretsToDelete).toHaveLength(0);
       });
+    });
+
+    describe('when a secret var is removed entirely from a newer package version', () => {
+      // Mirrors the `secrets` test fixture package used by the policy_secrets FTR suite:
+      // `package_var_multi_secret` exists in 1.0.0 but is dropped from 1.1.0's manifest.
+      const newPackageInfoWithoutMultiSecret = {
+        name: 'mock-package',
+        title: 'Mock package',
+        version: '1.1.0',
+        description: 'description',
+        type: 'integration',
+        status: 'not_installed',
+        vars: [{ name: 'pkg-secret-1', type: 'text', secret: true, required: true }],
+        data_streams: [],
+        policy_templates: [],
+      } as unknown as PackageInfo;
+
+      it('still marks the orphaned secret for deletion even though the new package no longer declares it', async () => {
+        const oldPackagePolicy = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'pkg-secret-1-id', isSecretRef: true },
+            },
+            'pkg-multi-secret': {
+              value: { ids: ['orphan-id-1', 'orphan-id-2'], isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as PackagePolicy;
+
+        const packagePolicyUpdate = {
+          vars: {
+            'pkg-secret-1': {
+              value: { id: 'pkg-secret-1-id', isSecretRef: true },
+            },
+          },
+          inputs: [],
+        } as unknown as UpdatePackagePolicy;
+
+        const result = await extractAndUpdateSecrets({
+          oldPackagePolicy,
+          packagePolicyUpdate,
+          packageInfo: newPackageInfoWithoutMultiSecret,
+          esClient: esClientMock,
+        });
+
+        expect(result.secretsToDelete).toEqual([{ id: 'orphan-id-1' }, { id: 'orphan-id-2' }]);
+      });
+    });
+  });
+
+  describe('findPackagePoliciesUsingSecrets', () => {
+    const soClient = savedObjectsClientMock.create();
+
+    beforeEach(() => {
+      mockedPackagePolicyService.list.mockReset();
+      mockedPackagePolicyService.list.mockResolvedValue({ total: 0, items: [] } as any);
+    });
+
+    it('quotes each id so the generated kuery is valid even when an id contains a KQL keyword', async () => {
+      // Real-world ids from https://github.com/elastic/kibana/issues/273040 that end in "Not",
+      // which an unquoted kuery would parse as the NOT operator.
+      const ids = ['_3bpqZ4BbB0ae8-cYNot', '_nbpqZ4BbB0ae8-cYNot'];
+
+      await findPackagePoliciesUsingSecrets({ soClient, ids });
+
+      const { kuery } = mockedPackagePolicyService.list.mock.calls[0][1];
+
+      expect(kuery).toBe(
+        'ingest-package-policies.secret_references.id: ("_3bpqZ4BbB0ae8-cYNot" or "_nbpqZ4BbB0ae8-cYNot")'
+      );
+      // This is the actual bug: before quoting, this expression throws KQLSyntaxError.
+      expect(() => fromKueryExpression(kuery as string)).not.toThrow();
+    });
+
+    it('produces a parseable kuery for ids containing other KQL keywords and quote characters', async () => {
+      const ids = ['idAndSuffix', 'idOrSuffix', 'id"with"quotes'];
+
+      await findPackagePoliciesUsingSecrets({ soClient, ids });
+
+      const { kuery } = mockedPackagePolicyService.list.mock.calls[0][1];
+
+      expect(() => fromKueryExpression(kuery as string)).not.toThrow();
     });
   });
 });

@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/275693
+issues:
+- https://github.com/elastic/kibana/issues/275147
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Search and data
+title: Fix TLS certificate secret repopulating in Fleet Server host settings

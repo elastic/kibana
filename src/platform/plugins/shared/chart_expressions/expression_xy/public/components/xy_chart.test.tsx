@@ -155,9 +155,9 @@ describe('XYChart component', () => {
 
     formatFactorySpy = jest.fn((mapping?: SerializedFieldFormat) => {
       const fieldFormat = fieldFormatsRegistry.deserialize(mapping);
-      const originalConvert = fieldFormat.convert?.bind(fieldFormat) ?? ((v: unknown) => v);
+      const originalConvert = fieldFormat.convertToText?.bind(fieldFormat) ?? ((v: unknown) => v);
       convertSpy = jest.fn((value) => originalConvert(value));
-      fieldFormat.convert = convertSpy as typeof fieldFormat.convert;
+      fieldFormat.convertToText = convertSpy as typeof fieldFormat.convertToText;
       return fieldFormat;
     });
 
@@ -238,7 +238,7 @@ describe('XYChart component', () => {
                   source: 'esaggs',
                   sourceParams: {
                     type: 'date_histogram',
-                    params: {},
+                    params: { used_interval: '1d' },
                     appliedTimeRange: {
                       from: '2019-01-02T05:00:00.000Z',
                       to: '2019-01-03T05:00:00.000Z',
@@ -452,7 +452,7 @@ describe('XYChart component', () => {
                   source: 'esaggs',
                   sourceParams: {
                     type: 'date_histogram',
-                    params: {},
+                    params: { used_interval: '1d' },
                     appliedTimeRange: {
                       from: '2021-04-22T12:00:00.000Z',
                       to: '2021-04-24T12:00:00.000Z',
@@ -937,6 +937,63 @@ describe('XYChart component', () => {
 
       expect(areaPointStyle.visible).toBe('never');
       expect(linePointStyle.visible).toBe('never');
+    });
+  });
+
+  describe('area fill in area chart', () => {
+    const getAreaStyle = ({
+      areaFill,
+      fillOpacity,
+      isStacked = false,
+    }: {
+      areaFill?: 'solid' | 'gradient';
+      fillOpacity?: number;
+      isStacked?: boolean;
+    }) => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            areaFill,
+            fillOpacity,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'area', isStacked }],
+          }}
+        />
+      );
+      const areaSeries = component.find(DataLayers).dive().find(AreaSeries).at(0);
+      return (areaSeries.prop('areaSeriesStyle') as AreaSeriesStyle).area;
+    };
+
+    test('applies gradient fill when areaFill is gradient', () => {
+      const areaStyle = getAreaStyle({ areaFill: 'gradient', fillOpacity: 0.5 });
+
+      expect(areaStyle?.gradient).toEqual(
+        expect.objectContaining({
+          type: 'linear',
+          stops: expect.any(Array),
+        })
+      );
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('does not apply gradient when areaFill is solid', () => {
+      const areaStyle = getAreaStyle({ areaFill: 'solid', fillOpacity: 0.5 });
+
+      expect(areaStyle?.gradient).toBeUndefined();
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('applies fill opacity', () => {
+      const areaStyle = getAreaStyle({ fillOpacity: 0.5 });
+      expect(areaStyle?.gradient).toBeUndefined();
+      expect(areaStyle?.opacity).toBe(0.5);
+    });
+
+    test('does not apply area styling when both areaFill and fillOpacity are omitted', () => {
+      const areaStyle = getAreaStyle({});
+      expect(areaStyle).toBeUndefined();
     });
   });
 
@@ -2263,7 +2320,7 @@ describe('XYChart component', () => {
     const localConvertSpy = jest.fn((x) => x);
     const getFormatSpy = jest.fn();
     getFormatSpy.mockReturnValue({
-      convert: localConvertSpy,
+      convertToText: localConvertSpy,
       params: jest.fn(() => ({})),
     });
 
@@ -3062,7 +3119,7 @@ describe('XYChart component', () => {
 
     const getCustomFormatSpy = jest.fn();
     getCustomFormatSpy.mockReturnValue({
-      convert: jest.fn((x) => Boolean(x)),
+      convertToText: jest.fn((x) => Boolean(x)),
       params: jest.fn(() => ({})),
     });
 

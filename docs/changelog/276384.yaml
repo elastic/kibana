@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/276384
+issues:
+- https://github.com/elastic/kibana/issues/275298
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Add approximation results in Discover and Dashboards

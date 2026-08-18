@@ -17,23 +17,10 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(async () => {
       await ml.securityCommon.createMlRoles();
       await ml.securityCommon.createMlUsers();
-    });
-
-    after(async () => {
-      await ml.securityCommon.cleanMlUsers();
-      await ml.securityCommon.cleanMlRoles();
-
-      await ml.testResources.deleteSavedSearches();
-
-      await ml.testResources.deleteDataViewByTitle('ft_farequote');
-      await ml.testResources.deleteDataViewByTitle('ft_module_sample_ecommerce');
-
-      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/ml/farequote');
-      await esArchiver.unload(
-        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_ecommerce'
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/ml/module_sample_logs'
       );
-
-      await ml.testResources.resetKibanaTimeZone();
     });
 
     // The data visualizer should work the same as with a trial license, except the missing create actions

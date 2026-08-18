@@ -11,14 +11,15 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiLink,
-  EuiFlexItem,
-  useEuiTheme,
   EuiBadge,
-  EuiText,
-  EuiLoadingSpinner,
   EuiButtonIcon,
   EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { encode } from '@kbn/rison';
@@ -81,18 +82,28 @@ const getActionsColumn = (openUserFlyout: (userName: string) => void) => ({
   ),
   render: (record: { 'user.name': string }) => {
     return (
-      <EuiButtonIcon
-        iconType="maximize"
-        onClick={() => {
-          openUserFlyout(record['user.name']);
-        }}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.expand.ariaLabel',
           {
             defaultMessage: 'Open user flyout',
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="maximize"
+          onClick={() => {
+            openUserFlyout(record['user.name']);
+          }}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.privilegedUsersTable.columns.expand.ariaLabel',
+            {
+              defaultMessage: 'Open user flyout',
+            }
+          )}
+        />
+      </EuiToolTip>
     );
   },
   width: COLUMN_WIDTHS.actions,

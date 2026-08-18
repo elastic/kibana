@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import {
   DATASET_VAR_NAME,
+  DATA_STREAM_TYPE_VAR_NAME,
   dataTypes,
   OTEL_COLLECTOR_INPUT_TYPE,
   USE_APM_VAR_NAME,
@@ -41,6 +42,21 @@ const DATA_STREAM_DATASET_VAR: RegistryVarsEntry = {
   multi: false,
   required: true,
   show_user: true,
+};
+
+export const DATA_STREAM_TYPE_VAR: RegistryVarsEntry = {
+  name: DATA_STREAM_TYPE_VAR_NAME,
+  type: 'text',
+  title: i18n.translate('xpack.fleet.policyTemplate.dataStreamTypeVar.title', {
+    defaultMessage: 'Data stream type',
+  }),
+  description: i18n.translate('xpack.fleet.policyTemplate.dataStreamTypeVar.description', {
+    defaultMessage:
+      'Set the type for your data stream. Valid values are logs, metrics, traces, and synthetics.',
+  }),
+  multi: false,
+  required: false,
+  show_user: false,
 };
 
 export const DATA_STREAM_USE_APM_VAR: RegistryVarsEntry = {
@@ -202,6 +218,9 @@ export function getNormalizedDataStreams(
     const dataset = datasetName || createDefaultDatasetName(packageInfo, policyTemplate);
 
     let vars = addDatasetVarIfNotPresent(policyTemplate.vars, policyTemplate.name);
+    if (shouldIncludeDataStreamTypeVar(policyTemplate.dynamic_signal_types === true)) {
+      vars = addDataStreamTypeVarIfNotPresent(vars, policyTemplate.type);
+    }
     if (
       shouldIncludeUseAPMVar(
         policyTemplate.input,
@@ -288,10 +307,49 @@ export const addUseAPMVarIfNotPresent = (vars?: RegistryVarsEntry[]): RegistryVa
   }
 };
 
+export const shouldIncludeDataStreamTypeVar = (isDynamicSignalTypes: boolean): boolean =>
+  !isDynamicSignalTypes;
+
+export const addDataStreamTypeVarIfNotPresent = (
+  vars?: RegistryVarsEntry[],
+  defaultType?: string
+): RegistryVarsEntry[] => {
+  const newVars = vars ?? [];
+
+  const isDataStreamTypeVarAlreadyAdded = newVars.find(
+    (varEntry) => varEntry.name === DATA_STREAM_TYPE_VAR_NAME
+  );
+
+  if (isDataStreamTypeVarAlreadyAdded) {
+    return newVars;
+  } else {
+    return [...newVars, { ...DATA_STREAM_TYPE_VAR, ...(defaultType && { default: defaultType }) }];
+  }
+};
+
 const createDefaultDatasetName = (
   packageInfo: { name: string },
   policyTemplate: { name: string }
 ): string => packageInfo.name + '.' + policyTemplate.name;
+
+/**
+ * Returns the data stream paths that scope stream resolution to a single policy template.
+ *
+ * - Integration templates: the explicit `data_streams` declared on the template (an empty
+ *   list means "all data streams" to the stream resolvers).
+ * - Input-only templates: each template synthesizes exactly one data stream whose `path`
+ *   equals the template's default dataset name (see `getNormalizedDataStreams`). Returning that
+ *   single path prevents templates that share the same input type (e.g. several `otelcol`
+ *   templates in one input package) from each picking up every template's stream, which would
+ *   otherwise duplicate stream-level vars such as `data_stream.dataset`.
+ */
+export const getPolicyTemplateDataStreamPaths = (
+  packageInfo: Pick<PackageInfo | InstallablePackage, 'name'>,
+  policyTemplate: RegistryPolicyTemplate
+): string[] =>
+  isIntegrationPolicyTemplate(policyTemplate)
+    ? policyTemplate.data_streams ?? []
+    : [createDefaultDatasetName(packageInfo, policyTemplate)];
 
 export const hasMultipleEnabledPolicyTemplates = (packagePolicy: NewPackagePolicy): boolean => {
   const enabledPolicyTemplates = new Set(

@@ -8,6 +8,7 @@
 import type { DefaultEmbeddableApi, HasDrilldowns } from '@kbn/embeddable-plugin/public';
 import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import type {
+  CanCancelRequests,
   HasEditCapabilities,
   HasLibraryTransforms,
   HasSupportedTriggers,
@@ -16,6 +17,7 @@ import type {
   PublishesDataViews,
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
+  PublishesWritableTitle,
 } from '@kbn/presentation-publishing';
 import type { Observable } from 'rxjs';
 import type { LayerDescriptor } from '../../common/descriptor_types';
@@ -28,6 +30,7 @@ import type {
 } from '../../common/embeddable/types';
 
 export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
+  CanCancelRequests &
   HasDrilldowns &
   Partial<HasEditCapabilities> &
   HasInspectorAdapters &
@@ -35,6 +38,7 @@ export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesProjectRoutingOverrides &
+  PublishesWritableTitle &
   PublishesUnifiedSearch &
   HasLibraryTransforms<MapByReferenceState, MapByValueState> & {
     getLayerList: () => ILayer[];

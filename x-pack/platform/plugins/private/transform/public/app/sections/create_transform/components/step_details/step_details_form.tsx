@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
@@ -42,7 +41,7 @@ import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { ToastNotificationText } from '../../../../components';
+import { useToastNotificationText } from '../../../../components';
 import {
   useDocumentationLinks,
   useGetDataViewTitles,
@@ -57,6 +56,7 @@ import {
   getPreviewTransformRequestBody,
   isTransformIdValid,
 } from '../../../../common';
+import { isProjectScopedSourceIndexUnavailableError } from '../../../../hooks/use_transform_config_data';
 import type { EsIndexName } from './common';
 import {
   isContinuousModeDelay,
@@ -80,9 +80,10 @@ interface StepDetailsFormProps {
 
 export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
   ({ overrides = {}, onChange, searchItems, stepDefineState }) => {
-    const { application, ...startServices } = useAppDependencies();
+    const { application } = useAppDependencies();
     const { capabilities } = application;
     const toastNotifications = useToastNotifications();
+    const getToastNotificationText = useToastNotificationText();
     const { esIndicesCreateIndex } = useDocumentationLinks();
 
     const defaults = {
@@ -124,7 +125,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
         searchItems.dataView,
         transformConfigQuery,
         partialPreviewRequest,
-        stepDefineState.runtimeMappings
+        stepDefineState.runtimeMappings,
+        undefined,
+        stepDefineState.projectRouting
       );
     }, [searchItems.dataView, stepDefineState]);
 
@@ -174,10 +177,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformList', {
             defaultMessage: 'An error occurred getting the existing transform IDs:',
           }),
-          text: toMountPoint(
-            <ToastNotificationText text={getErrorMessage(transformsError)} />,
-            startServices
-          ),
+          ...getToastNotificationText(getErrorMessage(transformsError)),
         });
       }
       // custom comparison
@@ -185,15 +185,18 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     }, [transformsError]);
 
     useEffect(() => {
-      if (transformsPreviewError !== null) {
+      if (
+        transformsPreviewError !== null &&
+        !isProjectScopedSourceIndexUnavailableError(
+          transformsPreviewError,
+          stepDefineState.projectRouting
+        )
+      ) {
         toastNotifications.addDanger({
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingTransformPreview', {
             defaultMessage: 'An error occurred fetching the transform preview',
           }),
-          text: toMountPoint(
-            <ToastNotificationText text={getErrorMessage(transformsPreviewError)} />,
-            startServices
-          ),
+          ...getToastNotificationText(getErrorMessage(transformsPreviewError)),
         });
       }
       // custom comparison
@@ -209,10 +212,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIndexNames', {
             defaultMessage: 'An error occurred getting the existing index names:',
           }),
-          text: toMountPoint(
-            <ToastNotificationText text={getErrorMessage(esIndicesError)} />,
-            startServices
-          ),
+          ...getToastNotificationText(getErrorMessage(esIndicesError)),
         });
       }
       // custom comparison
@@ -229,10 +229,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIngestPipelines', {
             defaultMessage: 'An error occurred getting the existing ingest pipeline names:',
           }),
-          text: toMountPoint(
-            <ToastNotificationText text={getErrorMessage(esIngestPipelinesError)} />,
-            startServices
-          ),
+          ...getToastNotificationText(getErrorMessage(esIngestPipelinesError)),
         });
       }
       // custom comparison
@@ -247,10 +244,7 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
           title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingDataViewTitles', {
             defaultMessage: 'An error occurred getting the existing data view titles:',
           }),
-          text: toMountPoint(
-            <ToastNotificationText text={getErrorMessage(dataViewTitlesError)} />,
-            startServices
-          ),
+          ...getToastNotificationText(getErrorMessage(dataViewTitlesError)),
         });
       }
     }, [dataViewTitlesError]);

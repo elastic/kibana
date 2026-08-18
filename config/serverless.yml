@@ -1,4 +1,6 @@
-# Common serverless config
+# Common serverless config: settings here apply to every serverless project type.
+# Do not add project-specific settings; those belong in the corresponding
+# serverless.<project>.yml file (e.g. serverless.es.yml, serverless.oblt.yml).
 
 interactiveSetup.enabled: false
 newsfeed.enabled: false
@@ -118,6 +120,12 @@ migrations.batchSize: 250
 migrations.zdt:
   metaPickupSyncDelaySec: 5
 
+# Buffer migration progress logs and only emit them on failure to keep startup logs quiet.
+# Serverless can apply temporary overrides if a migration needs detailed logs, and its frequent
+# releases would otherwise pile up these logs. ECH/on-premise keep the default (continuous logging)
+# for better visibility into stuck or failing migrations.
+migrations.useCumulativeLogger: true
+
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
 xpack.rollup.enabled: false
@@ -128,6 +136,7 @@ xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
 xpack.license_management.enabled: false
 xpack.cloud_connect.enabled: false
+
 xpack.reindex_service.rollupsEnabled: false
 
 # Management team UI configurations
@@ -164,7 +173,8 @@ xpack.cloud_integrations.data_migration.enabled: false
 
 # Other disabled plugins
 xpack.canvas.enabled: false
-advanced_settings.globalSettingsEnabled: false
+# Significant Events is re-enabled only for Observability Complete
+xpack.significantEvents.enabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false
@@ -193,6 +203,8 @@ xpack.ml.nlp:
 
 # Enforce restring access to internal APIs see https://github.com/elastic/kibana/issues/151940
 server.restrictInternalApis: true
+# Allow API key and Bearer token authenticated requests to bypass the XSRF check
+server.xsrf.allowedSchemes: ['apikey', 'bearer']
 # Telemetry enabled by default and not disableable via UI
 telemetry.optIn: true
 telemetry.allowChangingOptInStatus: false
@@ -258,7 +270,6 @@ uiSettings:
 
 # Task Manager
 xpack.task_manager.allow_reading_invalid_state: false
-xpack.task_manager.request_timeouts.update_by_query: 60000
 xpack.task_manager.metrics_reset_interval: 120000
 
 # Reporting feature

@@ -7,18 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import type { BuiltInStepType, ConnectorTypeInfo, WorkflowOutput } from '@kbn/workflows';
 import {
   DataSetStepSchema,
   ForEachStepSchema,
-  getBuiltInStepStability,
   IfStepSchema,
   LoopBreakStepSchema,
   LoopContinueStepSchema,
   MergeStepSchema,
   ParallelStepSchema,
   SwitchStepSchema,
+  WaitForApprovalStepSchema,
   WaitForInputStepSchema,
   WaitStepSchema,
   WhileStepSchema,
@@ -139,12 +139,6 @@ export function getConnectorTypeSuggestions(
         endColumn: Math.max(range.endColumn, 1000),
       };
 
-      const stability = getBuiltInStepStability(stepType.type);
-      const detail =
-        stability === 'tech_preview'
-          ? 'Built-in workflow step (Tech Preview)'
-          : 'Built-in workflow step';
-
       suggestions.push({
         label: stepType.type,
         kind: stepType.icon,
@@ -154,7 +148,7 @@ export function getConnectorTypeSuggestions(
         documentation: stepType.description,
         filterText: stepType.type,
         sortText: `!${stepType.type}`,
-        detail,
+        detail: 'Built-in workflow step',
         preselect: false,
       });
     });
@@ -266,7 +260,7 @@ function getBuiltInStepTypesFromSchema(): Array<{
     },
     {
       schema: ParallelStepSchema,
-      description: 'Execute multiple branches in parallel',
+      description: 'Run a branch body once per item in a list, concurrently',
       icon: monaco.languages.CompletionItemKind.Class,
     },
     {
@@ -287,6 +281,11 @@ function getBuiltInStepTypesFromSchema(): Array<{
     {
       schema: WaitForInputStepSchema,
       description: 'Pause execution until external input is provided (human-in-the-loop)',
+      icon: monaco.languages.CompletionItemKind.Event,
+    },
+    {
+      schema: WaitForApprovalStepSchema,
+      description: 'Pause execution until approval or rejection is received (human-in-the-loop)',
       icon: monaco.languages.CompletionItemKind.Event,
     },
     {

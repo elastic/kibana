@@ -41,19 +41,14 @@ function parseLayerListJSON(layerListJSON?: string) {
 
 function parseMapStateJSON(mapStateJSON?: string) {
   const parsedMapState = parseJSON<{ [key: string]: unknown }>({}, mapStateJSON);
-  const { refreshConfig, timeFilters, adHocDataViews, ...rest } = dropUnknownKeys(
+  const { refreshConfig, timeFilters, adHocDataViews, filters, ...rest } = dropUnknownKeys(
     parsedMapState,
     mapStateKeys
-  ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval };
-
-  const convertedFilters =
-    'filters' in rest && Array.isArray((rest as Record<string, unknown>).filters)
-      ? fromStoredFilters((rest as Record<string, unknown>).filters as unknown[]) ?? []
-      : undefined;
+  ) as Partial<MapAttributes> & { refreshConfig: StoredRefreshInterval; filters?: unknown };
 
   return {
     ...rest,
-    ...(convertedFilters !== undefined ? { filters: convertedFilters } : {}),
+    ...(Array.isArray(filters) ? { filters: fromStoredFilters(filters) ?? [] } : {}),
     ...(refreshConfig
       ? { refreshInterval: { pause: refreshConfig.isPaused, value: refreshConfig.interval } }
       : {}),

@@ -84,9 +84,10 @@ test.describe(
       });
 
       await test.step('remove the filter and verify all hosts return', async () => {
-        const deleteFilterButton = page.locator(
-          `[title="Delete host.name: ${HOST1_NAME} OR host.name: ${HOST2_NAME}"]`
-        );
+        // The selected-hosts filter is now a single `phrases` ("is one of") filter
+        // on `host.name`, so match the delete pill by prefix rather than the old
+        // `host.name: a OR host.name: b` label.
+        const deleteFilterButton = page.locator('[title^="Delete host.name"]');
         await deleteFilterButton.click();
         await expect(hostsPage.tableRows).toHaveCount(EXPECTED_HOST_COUNT);
       });

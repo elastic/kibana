@@ -208,6 +208,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   warning: null,
                 },
                 next_run: response.body.next_run,
+                is_snoozed_until: response.body.is_snoozed_until,
               });
               expect(typeof response.body.scheduled_task_id).to.be('string');
               expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);

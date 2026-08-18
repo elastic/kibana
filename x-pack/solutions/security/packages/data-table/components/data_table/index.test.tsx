@@ -23,8 +23,8 @@ import { mockBrowserFields } from '../../mock/mock_source';
 import { getMappedNonEcsValue } from './utils';
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => ({
-  ...jest.requireActual('react-redux'),
+jest.mock('react-redux-v7', () => ({
+  ...jest.requireActual('react-redux-v7'),
   useDispatch: () => mockDispatch,
 }));
 
@@ -256,7 +256,7 @@ describe('DataTable', () => {
     fireEvent.click(screen.getByTestId('dataGridColumnSelectorButton'));
 
     // `EuiDataGrid` renders switches for hiding in the `Columns` popover when `showColumnSelector.allowHide` is `true`
-    const switches = await screen.queryAllByRole('switch');
+    const switches = await screen.queryAllByTestId(/dataGridColumnSelectorToggleColumnVisibility-/);
 
     expect(switches.length).toBe(0); // no switches are rendered, because `allowHide` is `false`
   });

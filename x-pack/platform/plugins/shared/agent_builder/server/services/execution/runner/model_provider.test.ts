@@ -13,9 +13,9 @@ import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { InferenceCompleteCallbackHandler } from '@kbn/inference-common/src/chat_complete';
 import { AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID } from '@kbn/agent-builder-common/constants';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { resolveSelectedConnectorId } from '../../../utils/resolve_selected_connector_id';
 import type { TrackingService } from '../../../telemetry';
+import { MODEL_TELEMETRY_METADATA } from '../../../telemetry';
 import { createModelProvider, createModelProviderFactory } from './model_provider';
 
 jest.mock('../../../utils/resolve_selected_connector_id');
@@ -49,11 +49,9 @@ const createTrackingServiceMock = (): jest.Mocked<Pick<TrackingService, 'trackLL
 });
 
 const setupDeps = ({
-  fastModelEnabled = false,
   fastEndpoints = [] as FastEndpointMock[],
   defaultConnectorId,
 }: {
-  fastModelEnabled?: boolean;
   fastEndpoints?: FastEndpointMock[];
   defaultConnectorId?: string;
 } = {}) => {
@@ -66,12 +64,7 @@ const setupDeps = ({
   const trackingService = createTrackingServiceMock() as unknown as TrackingService;
 
   savedObjects.getScopedClient.mockReturnValue({} as any);
-  const get = jest.fn(async (key: string) => {
-    if (key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) {
-      return fastModelEnabled;
-    }
-    return undefined;
-  });
+  const get = jest.fn(async () => undefined);
   uiSettings.asScopedToClient.mockReturnValue({ get } as any);
 
   return {
@@ -155,6 +148,22 @@ describe('createModelProvider', () => {
       expect(model.connector).toEqual(createConnectorMock());
     });
 
+    it('passes maxContentLength to the chat model options', async () => {
+      const deps = setupDeps();
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, maxContentLength: 10 * 1024 * 1024 });
+      await provider.getDefaultModel();
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: expect.objectContaining({
+            maxContentLength: 10 * 1024 * 1024,
+          }),
+        })
+      );
+    });
+
     it('throws when no connector can be resolved', async () => {
       resolveSelectedConnectorIdMock.mockResolvedValue(undefined);
       const deps = setupDeps();
@@ -218,7 +227,6 @@ describe('createModelProvider', () => {
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'default-connector' })
       );
-      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
     });
 
     it('uses the default connector when effortLevel is omitted', async () => {
@@ -233,9 +241,8 @@ describe('createModelProvider', () => {
       );
     });
 
-    it('uses the recommended fast model endpoint when effortLevel is low and feature is enabled', async () => {
+    it('uses the recommended fast model endpoint when effortLevel is low', async () => {
       const deps = setupDeps({
-        fastModelEnabled: true,
         fastEndpoints: [{ connectorId: 'fast-connector', isRecommended: true }],
       });
       setupChatAndClient(deps.inference);
@@ -254,7 +261,6 @@ describe('createModelProvider', () => {
 
     it('picks the first recommended endpoint when several are returned', async () => {
       const deps = setupDeps({
-        fastModelEnabled: true,
         fastEndpoints: [
           { connectorId: 'non-recommended', isRecommended: false },
           { connectorId: 'first-recommended', isRecommended: true },
@@ -273,7 +279,6 @@ describe('createModelProvider', () => {
 
     it('falls back to the default connector when no fast endpoint is recommended', async () => {
       const deps = setupDeps({
-        fastModelEnabled: true,
         fastEndpoints: [
           { connectorId: 'fast-connector', isRecommended: false },
           { connectorId: 'other-connector' },
@@ -289,29 +294,13 @@ describe('createModelProvider', () => {
       );
     });
 
-    it('falls back to the default connector when fast feature is enabled but no endpoint exists', async () => {
-      const deps = setupDeps({ fastModelEnabled: true, fastEndpoints: [] });
+    it('falls back to the default connector when no fast endpoint exists', async () => {
+      const deps = setupDeps({ fastEndpoints: [] });
       setupChatAndClient(deps.inference);
 
       const provider = createModelProvider(deps);
       await provider.selectModel({ effortLevel: 'low' });
 
-      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'default-connector' })
-      );
-    });
-
-    it('falls back to the default connector when fast feature is disabled', async () => {
-      const deps = setupDeps({
-        fastModelEnabled: false,
-        fastEndpoints: [{ connectorId: 'fast-connector', isRecommended: true }],
-      });
-      setupChatAndClient(deps.inference);
-
-      const provider = createModelProvider(deps);
-      await provider.selectModel({ effortLevel: 'low' });
-
-      expect(deps.searchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalled();
       expect(deps.inference.getChatModel).toHaveBeenCalledWith(
         expect.objectContaining({ connectorId: 'default-connector' })
       );
@@ -319,7 +308,6 @@ describe('createModelProvider', () => {
 
     it('memoizes the fast connector resolution across calls', async () => {
       const deps = setupDeps({
-        fastModelEnabled: true,
         fastEndpoints: [{ connectorId: 'fast-connector', isRecommended: true }],
       });
       setupChatAndClient(deps.inference);
@@ -329,6 +317,53 @@ describe('createModelProvider', () => {
       await provider.selectModel({ effortLevel: 'low' });
 
       expect(deps.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('telemetryMetadata', () => {
+    it('defaults to the Agent Builder telemetry and binds no metadata when none is provided', async () => {
+      const deps = setupDeps();
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider(deps);
+      await provider.getDefaultModel();
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: { telemetryMetadata: MODEL_TELEMETRY_METADATA },
+        })
+      );
+      expect(deps.inference.getClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bindTo: { connectorId: 'default-connector' },
+        })
+      );
+    });
+
+    it('uses the provided telemetryMetadata for the chat model and binds it on the inference client', async () => {
+      const telemetryMetadata = {
+        pluginId: 'streams_significant_events_discovery',
+        aggregateBy: 'streams_significant_events',
+      };
+      const deps = setupDeps();
+      setupChatAndClient(deps.inference);
+
+      const provider = createModelProvider({ ...deps, telemetryMetadata });
+      await provider.getDefaultModel();
+
+      expect(deps.inference.getChatModel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          chatModelOptions: { telemetryMetadata },
+        })
+      );
+      expect(deps.inference.getClient).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bindTo: {
+            connectorId: 'default-connector',
+            metadata: { connectorTelemetry: telemetryMetadata },
+          },
+        })
+      );
     });
   });
 

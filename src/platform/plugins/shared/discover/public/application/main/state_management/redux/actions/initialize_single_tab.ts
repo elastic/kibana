@@ -28,9 +28,10 @@ import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
+import { ProfileStateType, type ProfileStateMap } from '../../../../../../common/context_awareness';
 import { selectTab } from '../selectors';
 import type { TabState, TabStateGlobalState } from '../types';
-import { GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
+import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import { fromSavedObjectTabToSearchSource } from '../tab_mapping_utils';
 import { createInternalStateAsyncThunk, extractEsqlVariables } from '../utils';
 import { fetchData, updateAttributes } from './tab_state';
@@ -42,6 +43,7 @@ export interface InitializeSingleTabsParams {
   dataViewSpec: DataViewSpec | undefined;
   esqlControls: ControlPanelsState<OptionsListESQLControlState> | undefined;
   defaultUrlState: DiscoverAppState | undefined;
+  profileState?: ProfileStateMap;
 }
 
 export const initializeSingleTab = createInternalStateAsyncThunk(
@@ -55,6 +57,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         dataViewSpec,
         esqlControls,
         defaultUrlState,
+        profileState,
       },
     }: TabActionPayload<{ initializeSingleTabParams: InitializeSingleTabsParams }>,
     {
@@ -116,6 +119,14 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       ...(defaultUrlState ??
         cleanupUrlState(urlStateStorage.get<AppStateUrl>(APP_STATE_URL_KEY), services.uiSettings)),
     };
+    const urlProfileState = services.profileStateRegistry.pickStateByType({
+      profileStateMap: urlStateStorage.get<ProfileStateMap>(PROFILE_STATE_URL_KEY) ?? undefined,
+      stateTypes: [ProfileStateType.Url],
+    });
+    const defaultPersistentProfileState = services.profileStateRegistry.pickStateByType({
+      profileStateMap: profileState,
+      stateTypes: [ProfileStateType.Persistent],
+    });
 
     const discoverTabLoadTracker = scopedEbtManager$
       .getValue()
@@ -296,8 +307,25 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
      * Update state containers
      */
 
-    // Make sure app state state is completely reset
-    dispatch(internalStateSlice.actions.resetAppState({ tabId, appState: initialAppState }));
+    // Initialize app and profile state together
+    const mergedProfileState = services.profileStateRegistry.mergeState(
+      tabState.profileState,
+      defaultPersistentProfileState,
+      urlProfileState
+    );
+    const initialProfileState = services.profileStateRegistry.pickStateByType({
+      profileStateMap: mergedProfileState,
+      stateTypes: [ProfileStateType.Ui, ProfileStateType.Persistent, ProfileStateType.Url],
+      defaultsHandling: 'strip',
+    });
+
+    dispatch(
+      internalStateSlice.actions.initializeTabState({
+        tabId,
+        initialAppState,
+        initialProfileState,
+      })
+    );
 
     // Set runtime state
     customizationService$.next(customizationService);

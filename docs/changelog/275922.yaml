@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/275922
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+areas:
+- Alerting and reporting
+title: Add Kubernetes connector for alerting and automation workflows
+description: Introduces a Technical Preview Kubernetes connector for reading and modifying cluster resources through the Kubernetes REST API, with authentication for generic clusters (service account token) and managed clusters (GKE, Amazon EKS, and AKS).

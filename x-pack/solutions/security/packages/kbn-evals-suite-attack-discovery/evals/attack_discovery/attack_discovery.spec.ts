@@ -90,16 +90,18 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
 
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'attack discovery: searchAlerts smoke',
-              description: 'Smoke test for the searchAlerts mode',
-              examples: [
-                {
-                  input: { mode: 'searchAlerts', size: 1 } as const,
-                  output: { attackDiscoveries: [] },
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'attack discovery: searchAlerts smoke',
+                description: 'Smoke test for the searchAlerts mode',
+                examples: [
+                  {
+                    input: { mode: 'searchAlerts', size: 1 } as const,
+                    output: { attackDiscoveries: [] },
+                  },
+                ],
+              },
+            ],
             task: async ({ input }) =>
               runAttackDiscovery({
                 inferenceClient,
@@ -124,16 +126,18 @@ evaluate.describe('Attack Discovery', { tag: tags.stateful.classic }, () => {
       async ({ executorClient, inferenceClient, log, attackDiscoveryClient }) => {
         await executorClient.runExperiment(
           {
-            dataset: {
-              name: 'attack discovery: graphState smoke',
-              description: 'Smoke test for the graphState mode',
-              examples: [
-                {
-                  input: { mode: 'graphState', anonymizedAlerts: [] } as const,
-                  output: { attackDiscoveries: [] },
-                },
-              ],
-            },
+            datasets: [
+              {
+                name: 'attack discovery: graphState smoke',
+                description: 'Smoke test for the graphState mode',
+                examples: [
+                  {
+                    input: { mode: 'graphState', anonymizedAlerts: [] } as const,
+                    output: { attackDiscoveries: [] },
+                  },
+                ],
+              },
+            ],
             task: async ({ input }) =>
               runAttackDiscovery({
                 inferenceClient,

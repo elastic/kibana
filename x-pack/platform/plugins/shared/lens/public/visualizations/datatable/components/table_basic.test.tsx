@@ -33,6 +33,27 @@ jest.mock('../../../shared_components/coloring/get_cell_color_fn', () => {
   };
 });
 
+// EuiDataGrid's react-window virtualized body produces NaN height values in JSDOM
+// because elements have no real dimensions. This is harmless and internal to EUI.
+beforeAll(() => {
+  // eslint-disable-next-line no-console
+  const originalError = console.error;
+  jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+    if (
+      typeof args[0] === 'string' &&
+      args[0].includes('NaN') &&
+      args[0].includes('css style property')
+    ) {
+      return;
+    }
+    originalError(...args);
+  });
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
+
 const { theme: setUpMockTheme } = coreMock.createSetup();
 
 function sampleArgs() {
@@ -128,7 +149,7 @@ describe('DatatableComponent', () => {
     const props: DatatableRenderProps = {
       data,
       args,
-      formatFactory: () => ({ convert: (x) => x, reactConvert: (x) => x } as IFieldFormat),
+      formatFactory: () => ({ convertToText: (x) => x, convertToReact: (x) => x } as IFieldFormat),
       dispatchEvent: onDispatchEvent,
       getType: jest.fn().mockReturnValue({
         type: 'buckets',
@@ -445,6 +466,33 @@ describe('DatatableComponent', () => {
       'lnsTableCell--center', // set via args
       'lnsTableCell--center', // set via args
     ]);
+  });
+
+  test('it normalizes unsupported center alignment for progress columns at render time', () => {
+    renderDatatableComponent({
+      args: {
+        ...args,
+        columns: [
+          { columnId: 'a', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          { columnId: 'b', alignment: 'center', type: 'lens_datatable_column', colorMode: 'none' },
+          {
+            columnId: 'c',
+            alignment: 'center',
+            type: 'lens_datatable_column',
+            colorMode: 'progress',
+            fillStyle: JSON.stringify({ fillMode: 'single' }),
+          },
+        ],
+      },
+    });
+
+    const alignmentsClassNames = screen
+      .getAllByTestId('lnsTableCellContent')
+      .map((cell) => cell.className);
+
+    expect(alignmentsClassNames[0]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[1]).toBe('lnsTableCell--center');
+    expect(alignmentsClassNames[2]).toContain('lnsTableCell--right');
   });
 
   test('it adds default alignment data to context', () => {

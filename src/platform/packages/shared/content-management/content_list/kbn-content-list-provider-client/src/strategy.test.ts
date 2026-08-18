@@ -12,6 +12,7 @@ import type { FindItemsParams } from '@kbn/content-list-provider';
 import { createClientStrategy } from './strategy';
 import type { ItemDecorator } from './strategy';
 import type { TableListViewFindItemsFn } from './types';
+import { defineContentListFilter, type ContentListFilterMap } from './filters';
 
 const createParams = (overrides?: Partial<FindItemsParams>): FindItemsParams => ({
   searchQuery: '',
@@ -38,6 +39,19 @@ describe('createClientStrategy', () => {
   ): jest.Mock<ReturnType<TableListViewFindItemsFn>> => {
     return jest.fn().mockResolvedValue({ hits: items, total: items.length });
   };
+
+  const createdByFilter = defineContentListFilter({
+    id: 'createdBy',
+    title: 'Created by',
+    getItemValue: (item: UserContentCommonSchema) => item.createdBy,
+  });
+
+  const tagFilter = defineContentListFilter({
+    id: 'tag',
+    title: 'Tags',
+    getItemValue: (item: UserContentCommonSchema) =>
+      item.references?.filter((ref) => ref.type === 'tag').map((ref) => ref.id) ?? [],
+  });
 
   describe('findItems', () => {
     it('calls the consumer with searchQuery and signal', async () => {
@@ -167,7 +181,9 @@ describe('createClientStrategy', () => {
       const item1: UserContentCommonSchema = { ...createMockItem('1'), createdBy: 'u_jane' };
       const item2: UserContentCommonSchema = { ...createMockItem('2'), createdBy: 'u_diego' };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        createdBy: createdByFilter,
+      });
 
       await findItems(createParams({ searchQuery: 'test' }));
       const result = await findItems(
@@ -180,6 +196,38 @@ describe('createClientStrategy', () => {
       expect(mockFindItems).toHaveBeenCalledTimes(1);
       expect(result.items).toHaveLength(1);
       expect(result.items[0].id).toBe('1');
+    });
+
+    it('keeps cached items when custom filter definitions change', async () => {
+      let customFilters: ContentListFilterMap = {};
+      const mockFindItems = createMockFindItems([
+        createMockItem('1'),
+        { ...createMockItem('2'), type: 'visualization' },
+      ]);
+      const { findItems } = createClientStrategy(
+        mockFindItems,
+        undefined,
+        undefined,
+        () => customFilters
+      );
+
+      await findItems(createParams({ searchQuery: 'ecommer' }));
+      customFilters = {
+        contentType: defineContentListFilter({
+          id: 'contentType',
+          title: 'Content type',
+          getItemValue: (item: UserContentCommonSchema) => item.type,
+        }),
+      };
+      const result = await findItems(
+        createParams({
+          searchQuery: 'ecommer',
+          filters: { contentType: { include: ['visualization'] } },
+        })
+      );
+
+      expect(mockFindItems).toHaveBeenCalledTimes(1);
+      expect(result.items.map(({ id }) => id)).toEqual(['2']);
     });
   });
 
@@ -225,7 +273,9 @@ describe('createClientStrategy', () => {
       const item1: UserContentCommonSchema = { ...createMockItem('1'), createdBy: 'u_jane' };
       const item2: UserContentCommonSchema = { ...createMockItem('2'), createdBy: 'u_diego' };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        createdBy: createdByFilter,
+      });
 
       const result = await findItems(
         createParams({ filters: { createdBy: { include: ['u_jane'] } } })
@@ -245,7 +295,9 @@ describe('createClientStrategy', () => {
         references: [{ type: 'tag', id: 'tag-2', name: 'tag-2' }],
       };
       const mockFindItems = createMockFindItems([item1, item2]);
-      const { findItems } = createClientStrategy(mockFindItems);
+      const { findItems } = createClientStrategy(mockFindItems, undefined, undefined, {
+        tag: tagFilter,
+      });
 
       const result = await findItems(createParams({ filters: { tag: { include: ['tag-1'] } } }));
 

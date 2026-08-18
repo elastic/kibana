@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/269227
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- Search and data
+title: Add `ignoreGlobalDefault` flag to inference feature config
+description: AI features can opt out of the global default inference connector by setting `ignoreGlobalDefault` on their inference feature configuration.

@@ -60,7 +60,8 @@ export function createConfigRoute({
     // Check that user has access to at least one rule type
     const rulesClient = await getRulesClientWithRequest(req);
     const ruleTypes = Array.from(await rulesClient.listRuleTypes());
-    const { minimumScheduleInterval, maxScheduledPerMinute, isUsingSecurity } = alertingConfig(); // Only returns exposed config values
+    const { minimumScheduleInterval, maxScheduledPerMinute, isUsingSecurity, apiKeyType } =
+      alertingConfig(); // Only returns exposed config values
 
     if (ruleTypes.length > 0) {
       return res.ok({
@@ -68,6 +69,7 @@ export function createConfigRoute({
           minimumScheduleInterval,
           maxScheduledPerMinute,
           isUsingSecurity,
+          apiKeyType,
         },
       });
     } else {

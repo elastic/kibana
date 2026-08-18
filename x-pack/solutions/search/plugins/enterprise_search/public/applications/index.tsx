@@ -8,10 +8,10 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 
 import { getContext, resetContext } from 'kea';
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 
 import { of } from 'rxjs';
 
