@@ -13,7 +13,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiCallOut,
   EuiCodeBlock,
   EuiComboBox,
   EuiFieldPassword,
@@ -46,6 +45,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import {
   AWS_SCHEMA_META,
@@ -53,10 +53,6 @@ import {
   type AwsSchema,
   type AwsServiceEntry,
 } from './aws_services_data';
-
-// Light lavender-white tint used for card header bands, matched to the
-// design reference (Step 14.svg / Deploy & Detect mockups).
-const HEADER_TINT = '#F6F9FC';
 
 // EUI's own accordion open/close transition has no prop to slow down — it's
 // baked into the .euiAccordion__childWrapper class — so this overrides its
@@ -152,7 +148,7 @@ const AccordionCard: React.FunctionComponent<{
             margin: `-${euiTheme.size.l} -${euiTheme.size.l} 0`,
             width: `calc(100% + ${euiTheme.size.l} * 2)`,
             padding: euiTheme.size.l,
-            background: HEADER_TINT,
+            background: euiTheme.colors.lightestShade,
             borderBottom: euiTheme.border.thin,
           },
         }}
@@ -256,28 +252,33 @@ const REGION_OPTIONS = [
 
 const STATUS_BADGE_SIZE = 32;
 
-// Colored circle behind the spinner/checkmark (light blue while detecting,
-// light green once data is received).
-const ServiceStatusBadge: React.FunctionComponent<{ receiving: boolean }> = ({ receiving }) => (
-  <div
-    style={{
-      width: STATUS_BADGE_SIZE,
-      height: STATUS_BADGE_SIZE,
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: receiving ? '#EAF3DE' : '#E6F1FA',
-      flexShrink: 0,
-    }}
-  >
-    {receiving ? (
-      <EuiIcon type="check" color="success" size="m" />
-    ) : (
-      <EuiLoadingSpinner size="m" />
-    )}
-  </div>
-);
+// Colored circle behind the spinner/checkmark (light primary while
+// detecting, light success once data is received).
+const ServiceStatusBadge: React.FunctionComponent<{ receiving: boolean }> = ({ receiving }) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      style={{
+        width: STATUS_BADGE_SIZE,
+        height: STATUS_BADGE_SIZE,
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: receiving
+          ? euiTheme.colors.backgroundLightSuccess
+          : euiTheme.colors.backgroundLightPrimary,
+        flexShrink: 0,
+      }}
+    >
+      {receiving ? (
+        <EuiIcon type="check" color="success" size="m" />
+      ) : (
+        <EuiLoadingSpinner size="m" />
+      )}
+    </div>
+  );
+};
 
 const ServiceDetectionCard: React.FunctionComponent<{
   service: { name: string };
@@ -447,9 +448,8 @@ const CloudFormationWidget: React.FunctionComponent<{
 
       {!isLaunched ? (
         previewLaunchError ? (
-          <EuiCallOut
-            color="danger"
-            iconType="warning"
+          <KbnDangerCallout
+            announceOnMount
             title="CloudFormation stack failed to deploy"
             data-test-subj="awsOnboardingCloudFormationLaunchError"
           >
@@ -483,11 +483,12 @@ const CloudFormationWidget: React.FunctionComponent<{
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiCallOut>
+          </KbnDangerCallout>
         ) : (
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
+                fill
                 iconType="popout"
                 iconSide="right"
                 onClick={onLaunch}
@@ -560,9 +561,8 @@ const CloudFormationWidget: React.FunctionComponent<{
           {previewStuck && !allReceived && (
             <>
               <EuiSpacer size="m" />
-              <EuiCallOut
-                color="warning"
-                iconType="warning"
+              <KbnWarningCallout
+                announceOnMount
                 title="Still waiting on data from some services"
                 data-test-subj="awsOnboardingCloudFormationStuckWarning"
               >
@@ -581,7 +581,7 @@ const CloudFormationWidget: React.FunctionComponent<{
                 >
                   Open AWS Lambda console
                 </EuiButtonEmpty>
-              </EuiCallOut>
+              </KbnWarningCallout>
             </>
           )}
         </>
@@ -646,7 +646,7 @@ type ManagedAccessMethod = 'access_keys' | 'identity_federation';
 
 // Managed Integrations widget — the single credentials card for the managed
 // path (the separate "Setup access" card was removed as a duplicate).
-// Defaults to Identity Federation; the Federated Identity Name is lifted to
+// Defaults to Federated Identity; the Federated Identity Name is lifted to
 // the parent flow so Detect & Review's summary can read it. Like the Cloud
 // Forwarder card, it owns its own deploy CTA + arrival animation so the
 // Detect & Review summary arrives already settled. Open/closed state is
@@ -729,7 +729,7 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
       <EuiSpacer size="m" />
       <EuiRadioGroup
         options={[
-          { id: 'identity_federation', label: 'Identity Federation' },
+          { id: 'identity_federation', label: 'Federated Identity' },
           { id: 'access_keys', label: 'Access Keys' },
         ]}
         idSelected={method}
@@ -849,9 +849,8 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
       <EuiSpacer size="m" />
       {!isDeployed ? (
         previewDeployError ? (
-          <EuiCallOut
-            color="danger"
-            iconType="warning"
+          <KbnDangerCallout
+            announceOnMount
             title="Couldn't verify AWS permissions for this role"
             data-test-subj="awsOnboardingManagedIntegrationsDeployError"
           >
@@ -877,11 +876,12 @@ const ManagedIntegrationsWidget: React.FunctionComponent<{
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </EuiCallOut>
+          </KbnDangerCallout>
         ) : (
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
+                fill
                 isDisabled={!isValid}
                 onClick={onDeploy}
                 data-test-subj="awsOnboardingDeployManagedIntegrations"
@@ -1025,6 +1025,8 @@ const WhereToAddCard: React.FunctionComponent<{
 
           {!isEnrolled ? (
             <EuiButton
+              fill
+              iconType="plus"
               onClick={() => setIsAddAgentFlyoutOpen(true)}
               data-test-subj="awsOnboardingOpenAddAgentFlyout"
             >
@@ -1105,18 +1107,25 @@ const WhereToAddCard: React.FunctionComponent<{
           <EuiText size="xs" color="subdued">
             <p>
               {availablePolicies.length === 0
-                ? "There aren't any options available. "
-                : "Don't see the policy you need? "}
-              <EuiLink
-                onClick={() => setIsCreatePolicyFlyoutOpen(true)}
-                data-test-subj="awsOnboardingAddNewPolicy"
-              >
-                Add a new policy
-              </EuiLink>
+                ? "There aren't any options available."
+                : "Don't see the policy you need?"}
             </p>
           </EuiText>
+          <EuiSpacer size="xs" />
+          {/* A standalone button, not a link embedded in the sentence above
+              — same "add/create something" action category as Add agent /
+              Add another agent, styled the same way for consistency. */}
+          <EuiButtonEmpty
+            size="xs"
+            iconType="plus"
+            onClick={() => setIsCreatePolicyFlyoutOpen(true)}
+            data-test-subj="awsOnboardingAddNewPolicy"
+          >
+            Add a new policy
+          </EuiButtonEmpty>
           <EuiSpacer size="m" />
           <EuiButton
+            fill
             isDisabled={existingPolicyIds.length === 0}
             data-test-subj="awsOnboardingDeployExistingHosts"
           >
@@ -1130,6 +1139,7 @@ const WhereToAddCard: React.FunctionComponent<{
       <EuiFlyout
         onClose={() => setIsAddAgentFlyoutOpen(false)}
         size="m"
+        aria-label="Add agent"
         data-test-subj="awsOnboardingAddAgentFlyout"
       >
         <EuiFlyoutHeader hasBorder>
@@ -1154,7 +1164,7 @@ const WhereToAddCard: React.FunctionComponent<{
             </p>
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiCallOut title="Root privileges required" color="warning" iconType="alert">
+          <KbnWarningCallout announceOnMount title="Root privileges required">
             <p>
               This agent policy contains the following integrations that require Elastic Agents
               to have root privileges. To ensure that all data required by the integrations can
@@ -1167,7 +1177,7 @@ const WhereToAddCard: React.FunctionComponent<{
             <ul>
               <li>System</li>
             </ul>
-          </EuiCallOut>
+          </KbnWarningCallout>
           <EuiSpacer size="m" />
           <EuiText size="s">
             <p>
@@ -1250,6 +1260,7 @@ const WhereToAddCard: React.FunctionComponent<{
       <EuiFlyout
         onClose={() => setIsCreatePolicyFlyoutOpen(false)}
         size="s"
+        aria-label="Create agent policy"
         data-test-subj="awsOnboardingCreatePolicyFlyout"
       >
         <EuiFlyoutHeader hasBorder>
@@ -1432,7 +1443,7 @@ export const StepAuthentication: React.FunctionComponent<{
           style={{
             margin: `-${euiTheme.size.l} -${euiTheme.size.l}`,
             padding: euiTheme.size.l,
-            background: HEADER_TINT,
+            background: euiTheme.colors.lightestShade,
           }}
         >
           <EuiFlexGroup alignItems="flexStart" responsive={false}>
@@ -1566,6 +1577,7 @@ export const StepAuthentication: React.FunctionComponent<{
       {isEditModalOpen && (
         <EuiModal
           onClose={() => setIsEditModalOpen(false)}
+          aria-label="Edit deployment method"
           data-test-subj="awsOnboardingDeploymentMethodModal"
           style={{ width: 400 }}
         >
