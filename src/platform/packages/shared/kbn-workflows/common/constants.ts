@@ -57,7 +57,7 @@ export const SystemConnectorsMap = new Map<string, string>([['.http', '.http-sys
 
 /**
  * Workflow attachment types used by the agent builder integration.
- * The matching SML type id is `WORKFLOW_SML_TYPE` in `@kbn/agent-builder-elastic-ai-index-ki-types`.
+ * The matching SML type id is `WORKFLOW_KI_TYPE` in `@kbn/agent-builder-elastic-ai-index-ki-types`.
  */
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 export const WORKFLOW_YAML_DIFF_ATTACHMENT_TYPE = 'workflow.yaml.diff';
