@@ -40,6 +40,8 @@ export interface RuleCreationResult {
   rule: DraftRule | undefined;
   pendingApproval: boolean;
   traceId: string | undefined;
+  workflowExecutionId: string;
+  stepExecutions: WorkflowStepExecutionDto[];
 }
 
 export class RuleCreationClient {
@@ -114,8 +116,66 @@ export class RuleCreationClient {
       rule,
       pendingApproval: execution.status === ExecutionStatus.WAITING_FOR_INPUT,
       traceId: execution.traceId,
+      workflowExecutionId,
+      stepExecutions: execution.stepExecutions ?? [],
     };
     return result;
+  }
+
+  /**
+   * Responds to the review_creation approval gate for a paused workflow execution, then polls
+   * until the execution reaches a terminal state. Call this after run() returns pendingApproval:true.
+   */
+  async respond({
+    workflowExecutionId,
+    stepExecutions,
+    approved,
+    maxWaitMs = 5 * 60_000,
+    pollIntervalMs = 5_000,
+  }: {
+    workflowExecutionId: string;
+    stepExecutions: WorkflowStepExecutionDto[];
+    approved: boolean;
+    maxWaitMs?: number;
+    pollIntervalMs?: number;
+  }): Promise<WorkflowExecutionDto> {
+    const reviewStep = stepExecutions.find(
+      (s) => s.stepId === 'review_creation' && s.output == null
+    );
+    if (!reviewStep) {
+      throw new Error(
+        `review_creation step not found in waiting state for execution ${workflowExecutionId}`
+      );
+    }
+
+    const sourceId = `${RULE_CREATION_WORKFLOW_ID}:${workflowExecutionId}:${reviewStep.id}`;
+    await this.fetch(`/internal/inbox/actions/workflows/${encodeURIComponent(sourceId)}/respond`, {
+      method: 'POST',
+      headers: { 'elastic-api-version': '1', 'kbn-xsrf': 'true' },
+      body: JSON.stringify({ input: { approved } }),
+    });
+    this.log.info(`Sent approval=${approved} for execution ${workflowExecutionId}`);
+
+    const deadline = Date.now() + maxWaitMs;
+    let execution: WorkflowExecutionDto | undefined;
+
+    while (Date.now() < deadline) {
+      execution = await this.fetch<WorkflowExecutionDto>(
+        `/api/workflows/executions/${workflowExecutionId}`,
+        {
+          method: 'GET',
+          version: WORKFLOWS_API_VERSION,
+          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+          query: { includeOutput: true },
+        }
+      );
+      if (TerminalExecutionStatuses.includes(execution.status)) break;
+      await sleep(pollIntervalMs);
+    }
+
+    if (!execution)
+      throw new Error(`No execution returned after respond for ${workflowExecutionId}`);
+    return execution;
   }
 
   async cancelPending(): Promise<void> {
