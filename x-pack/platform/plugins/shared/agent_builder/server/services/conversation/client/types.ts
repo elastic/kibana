@@ -41,14 +41,39 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
     Pick<
       Conversation,
-      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'pinned' | 'workspace_id'
+      | 'title'
+      | 'rounds'
+      | 'attachments'
+      | 'state'
+      | 'status'
+      | 'read'
+      | 'pinned'
+      | 'workspace_id'
+      | 'access_control'
+      | 'metadata'
+      | 'template_id'
+      | 'template_version'
     >
   >;
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  'id' | 'title' | 'attachments' | 'read' | 'pinned'
+  | 'id'
+  | 'title'
+  | 'attachments'
+  | 'read'
+  | 'pinned'
+  | 'metadata'
+  | 'template_id'
+  | 'template_version'
 >;
+
+export interface GetEventsOptions {
+  /** Return only events after the one with this id (exclusive). */
+  afterEventId?: string;
+  /** Cap the number of events returned (applied after `afterEventId`). */
+  limit?: number;
+}
 
 /**
  * Persists a single completed round as intent, not end state, so it can be merged into

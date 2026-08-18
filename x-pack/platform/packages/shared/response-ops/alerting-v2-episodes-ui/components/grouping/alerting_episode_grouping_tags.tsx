@@ -9,11 +9,8 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import {
-  formatGroupingValue,
-  getNonEmptyGroupingFields,
-  getValueByFieldPath,
-} from '../../utils/episode_grouping_data';
+import { getValueByFieldPath } from '@kbn/alerting-v2-utils';
+import { formatGroupingValue, getNonEmptyGroupingFields } from '../../utils/episode_grouping_data';
 
 export interface AlertingEpisodeGroupingTagsProps {
   fields: readonly string[];
