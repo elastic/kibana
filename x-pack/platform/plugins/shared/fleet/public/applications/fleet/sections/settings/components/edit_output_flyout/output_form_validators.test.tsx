@@ -418,6 +418,7 @@ describe('Output form validation', () => {
       { label: 'field1', value: '%{[field]}' },
       { label: 'field2', value: 'field2' },
       { label: 'field3', value: '%{[field2]}-%{[field3]}' },
+      { label: 'field4', value: '%{[data_stream.type]}-%{[service.common_name]:agent-monitoring}' },
     ];
     const invalidBracketTopic = [{ label: '%{[field}', value: '%{[field}' }];
     const invalidPercentTopic = [{ label: '{[field]}', value: '{[field]}' }];

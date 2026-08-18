@@ -386,8 +386,9 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
       );
     } else {
       const openingBrackets = getAllIndices(val.value, '{[');
-      const closingBrackets = getAllIndices(val.value, ']}');
-      if (openingBrackets.length !== closingBrackets.length) {
+      const closingBracketCount =
+        getAllIndices(val.value, ']}').length + getAllIndices(val.value, ']:').length;
+      if (openingBrackets.length !== closingBracketCount) {
         res.push(
           i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicBracketsError', {
             defaultMessage:
