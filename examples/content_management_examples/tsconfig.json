@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/cordis",
     "@kbn/developer-examples-plugin",
     "@kbn/content-management-plugin",
     "@kbn/content-management-table-list-view",

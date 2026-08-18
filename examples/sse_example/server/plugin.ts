@@ -16,7 +16,7 @@ export default class SseExamplePlugin extends Service {
   static readonly inject = ['core.http'];
   static readonly provide = 'sseExample';
 
-  constructor(ctx: Context, _config: never) {
+  constructor(ctx: Context) {
     super(ctx, 'sseExample');
     const router = (ctx.get('core.http') as any).createRouter();
 

@@ -108,14 +108,34 @@ function run(pluginDir) {
   const hasRealStart = !isTriviallyEmpty(startBody);
   const hasRealStop = !isTriviallyEmpty(stopBody);
 
+  // Read plugin deps from kibana.jsonc
+  const allRequiredPlugins = readRequiredPlugins(pluginDir);
+  const optionalPlugins = readOptionalPlugins(pluginDir);
+
   // Find which core services are accessed in setup body
   const coreSetupParam = setupMethod?.getParameters()[0]?.getName() ?? 'core';
-  const pluginsSetupParam = setupMethod?.getParameters()[1]?.getName() ?? 'plugins';
+  const pluginsParam = setupMethod?.getParameters()[1] ?? null;
+  const pluginsSetupParam = pluginsParam?.getName() ?? 'plugins';
 
   const coreAccessedSetup = findCoreAccesses(setupBody, coreSetupParam, CORE_SETUP_KEYS);
 
-  // Build inject array
-  const injectKeys = [...coreAccessedSetup].map((prop) => `'core.${prop}'`);
+  // Detect which plugin deps are actually used in the setup body.
+  // Supports both destructured `{ dep1, dep2 }` and plain `plugins.dep1` patterns.
+  const usedPluginDeps = detectUsedPluginDeps(
+    setupBody, pluginsSetupParam, allRequiredPlugins
+  );
+  // Only inject deps that are actually used in setup (others may be browser-only)
+  const requiredPlugins = allRequiredPlugins.filter((id) => usedPluginDeps.has(id));
+  if (allRequiredPlugins.length > requiredPlugins.length) {
+    const skipped = allRequiredPlugins.filter((id) => !usedPluginDeps.has(id));
+    console.log(`  ℹ  Skipping unused server-setup deps: [${skipped.join(', ')}] (browser-only or start-only)`);
+  }
+
+  // Build inject array: core keys first, then required-plugin compat keys (.setup)
+  const injectKeys = [
+    ...[...coreAccessedSetup].map((prop) => `'core.${prop}'`),
+    ...requiredPlugins.map((id) => `'${id}.setup'`),
+  ];
 
   // Rewrite setup body: replace core.X with ctx.get('core.X') as any
   // Strip trailing `return ...;` since contracts are provided via `static provide`, not returned.
@@ -124,6 +144,31 @@ function run(pluginDir) {
     coreSetupParam,
     coreAccessedSetup
   );
+
+  // Inject required-plugin compat keys: rebuild `plugins` (or destructured param) from ctx.
+  // For destructured patterns like `{ dep1, dep2 }`, emit individual const declarations.
+  if (requiredPlugins.length > 0) {
+    const destructuredMatch = pluginsSetupParam.match(/^\{([^}]+)\}/);
+    let pluginsDecl;
+    if (destructuredMatch) {
+      // Destructured: emit `const dep1 = (ctx.get('dep1.setup') as any).contract;` per dep
+      pluginsDecl = requiredPlugins
+        .map((id) => `const ${id} = (ctx.get('${id}.setup') as any).contract;`)
+        .join('\n');
+    } else {
+      // Plain: emit `const plugins = { dep1: ..., dep2: ... };`
+      const pluginEntries = requiredPlugins
+        .map((id) => `  ${id}: (ctx.get('${id}.setup') as any).contract,`)
+        .join('\n');
+      pluginsDecl = `const ${pluginsSetupParam} = {\n${pluginEntries}\n};`;
+    }
+    ctorBody = pluginsDecl + '\n' + ctorBody;
+  }
+  if (optionalPlugins.length > 0) {
+    console.log(
+      `  ⚠  optionalPlugins [${optionalPlugins.join(', ')}] are not auto-migrated. Add them manually.`
+    );
+  }
 
   // Rewrite logger references from initializerContext.logger.get() pattern
   ctorBody = ctorBody
@@ -142,16 +187,21 @@ function run(pluginDir) {
   // Keep non-core imports (drop PluginInitializerContext, CoreSetup, CoreStart, Plugin etc.)
   const CORE_LIFECYCLE_PATTERN =
     /PluginInitializerContext|CoreSetup|CoreStart|Plugin\b|PrebootPlugin|Logger\b/;
+  // Types from SetupDeps / StartDeps interfaces are no longer used in the migrated code
+  const UNUSED_TYPE_PATTERN = /SetupDeps|StartDeps/;
   const originalImports = sourceFile
     .getImportDeclarations()
     .filter((imp) => {
       const mod = imp.getModuleSpecifierValue();
-      const text = imp.getText();
       // Drop meta-package core imports that only carry lifecycle types
       if (mod === '@kbn/core/server' || mod === '@kbn/core-lifecycle-server' || mod === '@kbn/core-plugins-server') {
-        // Check if ALL named imports are lifecycle-only; keep if not
         const namedImports = imp.getNamedImports().map((ni) => ni.getName());
         return namedImports.some((n) => !CORE_LIFECYCLE_PATTERN.test(n));
+      }
+      // Drop type-only imports where ALL named imports are now unused (SetupDeps, StartDeps, etc.)
+      if (imp.isTypeOnly()) {
+        const namedImports = imp.getNamedImports().map((ni) => ni.getName());
+        if (namedImports.every((n) => UNUSED_TYPE_PATTERN.test(n))) return false;
       }
       return true;
     })
@@ -175,7 +225,7 @@ export default class ${className} extends Service {
   static readonly inject = [${injectKeys.join(', ')}];
   static readonly provide = '${pluginId}';
 
-  constructor(ctx: Context, _config: never) {
+  constructor(ctx: Context) {
     super(ctx, '${pluginId}');
 ${indentedCtorBody}${indentedStop}${startTodo}
   }
@@ -217,6 +267,26 @@ export { default as cordisPlugin } from './plugin';
   console.log(`  node scripts/type_check --project ${serverDir}/../tsconfig.json`);
 }
 
+/** Read requiredPlugins array from kibana.jsonc. */
+function readRequiredPlugins(pluginDir) {
+  try {
+    const jsonc = fs.readFileSync(path.join(pluginDir, 'kibana.jsonc'), 'utf8');
+    const stripped = jsonc.replace(/\/\/[^\n]*/g, '');
+    const parsed = JSON.parse(stripped);
+    return parsed.plugin?.requiredPlugins ?? [];
+  } catch (_) { return []; }
+}
+
+/** Read optionalPlugins array from kibana.jsonc. */
+function readOptionalPlugins(pluginDir) {
+  try {
+    const jsonc = fs.readFileSync(path.join(pluginDir, 'kibana.jsonc'), 'utf8');
+    const stripped = jsonc.replace(/\/\/[^\n]*/g, '');
+    const parsed = JSON.parse(stripped);
+    return parsed.plugin?.optionalPlugins ?? [];
+  } catch (_) { return []; }
+}
+
 /** Read the plugin ID from kibana.jsonc (plugin.id field). Falls back to camelCase of dir name. */
 function deriveCordisId(pluginDir) {
   try {
@@ -227,6 +297,35 @@ function deriveCordisId(pluginDir) {
   } catch (_) { /* fall through */ }
   const base = path.basename(pluginDir);
   return base.replace(/[-_](\w)/g, (_, c) => c.toUpperCase());
+}
+
+/**
+ * Detect which plugin IDs from `allPlugins` are actually used in the setup body.
+ * Handles both:
+ *   - Plain param: `plugins.contentManagement.registerType(...)`
+ *   - Destructured param: `{ contentManagement }: SetupDeps`  (binding names in param)
+ */
+function detectUsedPluginDeps(bodyText, pluginsParamName, allPlugins) {
+  const used = new Set();
+  // Destructured pattern: pluginsParamName is like `{ dep1, dep2 }` or `{ dep1: alias, dep2 }`
+  const destructuredMatch = pluginsParamName.match(/^\{([^}]+)\}/);
+  if (destructuredMatch) {
+    // Parse the binding names from the destructuring pattern
+    const bindings = destructuredMatch[1].split(',').map((b) => {
+      // Each binding is like `dep1` or `dep1: localName`
+      return b.trim().split(':')[0].trim().replace(/\s*=\s*.*$/, '');
+    });
+    for (const id of allPlugins) {
+      if (bindings.includes(id)) used.add(id);
+    }
+  } else {
+    // Plain identifier: look for `pluginsParamName.X` accesses
+    for (const id of allPlugins) {
+      const re = new RegExp(`\\b${escapeRegex(pluginsParamName)}\\.${escapeRegex(id)}\\b`);
+      if (re.test(bodyText)) used.add(id);
+    }
+  }
+  return used;
 }
 
 /** Return set of core property names accessed as `${param}.X` in the body text. */

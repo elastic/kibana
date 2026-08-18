@@ -16,7 +16,7 @@ export default class V8ProfilerExamplesPlugin extends Service {
   static readonly inject = ['core.http'];
   static readonly provide = 'v8ProfilerExamples';
 
-  constructor(ctx: Context, _config: never) {
+  constructor(ctx: Context) {
     super(ctx, 'v8ProfilerExamples');
     const router = (ctx.get('core.http') as any).createRouter();
     registerRoutes((ctx.get('core.logger') as any).get('plugins', 'v8ProfilerExamples'), router);

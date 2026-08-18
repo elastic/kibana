@@ -16,7 +16,7 @@ export default class RoutingExamplePlugin extends Service {
   static readonly inject = ['core.http'];
   static readonly provide = 'routingExample';
 
-  constructor(ctx: Context, _config: never) {
+  constructor(ctx: Context) {
     super(ctx, 'routingExample');
     const router = (ctx.get('core.http') as any).createRouter();
     registerRoutes(router);

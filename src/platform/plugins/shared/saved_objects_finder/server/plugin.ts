@@ -16,7 +16,7 @@ export default class SavedObjectsServerPlugin extends Service {
   static readonly inject = ['core.uiSettings'];
   static readonly provide = 'savedObjectsFinder';
 
-  constructor(ctx: Context, _config: never) {
+  constructor(ctx: Context) {
     super(ctx, 'savedObjectsFinder');
     (ctx.get('core.uiSettings') as any).register(uiSettings);
   }

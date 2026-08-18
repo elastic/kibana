@@ -7,21 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type { SetupDeps, StartDeps } from './types';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { registerTodoContentType } from './examples/todos';
 
-export class ContentManagementExamplesPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  constructor(initializerContext: PluginInitializerContext) {}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ContentManagementExamplesPlugin extends Service {
+  static readonly inject = ['contentManagement.setup'];
+  static readonly provide = 'contentManagementExamples';
 
-  public setup(core: CoreSetup, { contentManagement }: SetupDeps) {
+  constructor(ctx: Context) {
+    super(ctx, 'contentManagementExamples');
+    const contentManagement = (ctx.get('contentManagement.setup') as any).contract;
     registerTodoContentType({ contentManagement });
-    return {};
   }
-
-  public start(core: CoreStart, { contentManagement }: StartDeps) {
-    return {};
-  }
-
-  public stop() {}
 }

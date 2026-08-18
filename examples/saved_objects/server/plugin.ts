@@ -18,7 +18,7 @@ export default class SavedObjectsExamplePlugin extends Service {
   static readonly inject = ['core.savedObjects', 'core.http'];
   static readonly provide = 'savedObjectsExample';
 
-  constructor(ctx: Context, _config: never) {
+  constructor(ctx: Context) {
     super(ctx, 'savedObjectsExample');
     const savedObjects = ctx.get('core.savedObjects') as any;
     const http = ctx.get('core.http') as any;

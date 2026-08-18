@@ -14,7 +14,7 @@ export default class ClientAppsPlugin extends Service {
   static readonly inject = ['core.http'];
   static readonly provide = 'clientApps';
 
-  constructor(ctx: Context, _config: never) {
+  constructor(ctx: Context) {
     super(ctx, 'clientApps');
     const router = (ctx.get('core.http') as any).createRouter();
     const params = { router, logger: (ctx.get('core.logger') as any).get('plugins', 'clientApps') };
