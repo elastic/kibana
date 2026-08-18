@@ -1041,9 +1041,9 @@ const WhereToAddCard: React.FunctionComponent<{
                 {/* EuiButton, not EuiButtonEmpty — empty renders no visible
                     chrome at this size, so it read as a plain link rather
                     than a button. color="text" for a secondary (not
-                    primary-blue) treatment. */}
+                    primary-blue) treatment. Standard (default) size, not
+                    "xs" — matches "Add a new policy" below. */}
                 <EuiButton
-                  size="xs"
                   color="text"
                   iconType="plus"
                   onClick={() => setIsAddAgentFlyoutOpen(true)}
@@ -1111,15 +1111,16 @@ const WhereToAddCard: React.FunctionComponent<{
           <EuiSpacer size="xs" />
           {/* A standalone button, not a link embedded in the sentence above
               — same "add/create something" action category as Add agent /
-              Add another agent, styled the same way for consistency. */}
-          <EuiButtonEmpty
-            size="xs"
+              Add another agent, styled the same way (bordered, text color,
+              standard size) for consistency. */}
+          <EuiButton
+            color="text"
             iconType="plus"
             onClick={() => setIsCreatePolicyFlyoutOpen(true)}
             data-test-subj="awsOnboardingAddNewPolicy"
           >
             Add a new policy
-          </EuiButtonEmpty>
+          </EuiButton>
           <EuiSpacer size="m" />
           <EuiButton
             fill
@@ -1476,7 +1477,7 @@ export const StepAuthentication: React.FunctionComponent<{
             separate Setup access card was redundant. */}
         {deploymentMethod === 'agent' && (
           <>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="xl" />
             <EuiFormRow
               label={
                 <span>
