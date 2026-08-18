@@ -11,9 +11,8 @@
  * `common/cases/attachments/endpoint.ts` so the server-side registry
  * (`registerUnified({ schema })`) and the client-side renderers can never drift.
  *
- * The cases unified-reference dispatcher types `metadata` as
- * `Record<string, JsonValue>`; renderers cast to `EndpointMetadata` because
- * the registered zod payload schema guarantees this shape on the write path.
+ * Renderers type view props as `UnifiedReferenceAttachmentViewProps<EndpointMetadata>`
+ * so `metadata` is already the zod-inferred shape from the registered payload schema.
  */
 export type {
   EndpointAttachmentMetadata as EndpointMetadata,
