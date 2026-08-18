@@ -36,7 +36,6 @@ import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RuleChangeHistoryApi } from './services/rule_change_history_api';
 import { RulesApi } from './services/rules_api';
 import { UserCapabilities } from './services/user_capabilities';
-import { FocusedEpisodeService } from './services/focused_episode_service';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
@@ -65,7 +64,6 @@ const pluginModule = new ContainerModule(({ bind }) => {
   bind(ExecutionHistoryApi).toSelf().inSingletonScope();
   bind(RuleChangeHistoryApi).toSelf().inSingletonScope();
   bind(UserCapabilities).toSelf().inSingletonScope();
-  bind(FocusedEpisodeService).toSelf().inSingletonScope();
   bind(WorkflowApi)
     .toDynamicValue(({ get }) => new WorkflowApi(get(CoreStart('http'))))
     .inSingletonScope();
@@ -272,16 +270,6 @@ const pluginModule = new ContainerModule(({ bind }) => {
             );
           }
         );
-        import(
-          /* webpackChunkName: "alerting_v2_episode_auto_attach" */
-          './agent_builder/episode_auto_attach'
-        ).then(({ registerEpisodeAutoAttach }) => {
-          registerEpisodeAutoAttach({
-            agentBuilder,
-            chrome: coreStart.chrome,
-            focusedEpisodeService: diContainer.get(FocusedEpisodeService),
-          });
-        });
       }
     });
   });

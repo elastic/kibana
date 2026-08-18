@@ -21,6 +21,7 @@ import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule'
 import { RuleStateStatus } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { createEpisodeActions } from '@kbn/alerting-v2-episodes-ui/actions';
 import { TestProviders } from '../../test_utils/test_providers';
+import { useEpisodeAutoAttach } from '../../agent_builder/use_episode_auto_attach';
 import { EpisodeDetailsPage } from './episode_details_page';
 
 const OPEN_IN_DISCOVER_EPISODE_ACTION_ID = 'ALERTING_V2_OPEN_EPISODE_IN_DISCOVER';
@@ -29,19 +30,14 @@ const WRITE_CAPABILITIES = { alerting_v2_alerts: { read: true, all: true } };
 const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } };
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 let mockCanReadExecutionHistory = true;
-const mockFocusedEpisodeService = {
-  setFocusedEpisode: jest.fn(),
-  clearFocusedEpisode: jest.fn(),
-  getFocusedEpisode: jest.fn(),
-  focusedEpisode$: { subscribe: jest.fn() },
-};
+
+jest.mock('../../agent_builder/use_episode_auto_attach', () => ({
+  useEpisodeAutoAttach: jest.fn(),
+}));
 
 jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../services/user_capabilities'
-  );
-  const { FocusedEpisodeService: ActualFocusedEpisodeService } = jest.requireActual(
-    '../../services/focused_episode_service'
   );
   return {
     useService: (token: unknown) => {
@@ -55,9 +51,6 @@ jest.mock('@kbn/core-di-browser', () => {
               ? mockCanReadExecutionHistory
               : capabilities.canRead(feature),
         };
-      }
-      if (token === ActualFocusedEpisodeService) {
-        return mockFocusedEpisodeService;
       }
       return {};
     },
@@ -140,6 +133,7 @@ const mockUseFetchEpisodeActions = jest.mocked(useFetchEpisodeActions);
 const mockUseFetchGroupActions = jest.mocked(useFetchGroupActions);
 const mockUseFetchRule = jest.mocked(useFetchRule);
 const mockCreateEpisodeActions = jest.mocked(createEpisodeActions);
+const mockUseEpisodeAutoAttach = jest.mocked(useEpisodeAutoAttach);
 
 type EpisodeQueryResult = ReturnType<typeof useFetchEpisodeQuery>;
 type FetchRuleResult = ReturnType<typeof useFetchRule>;
@@ -454,11 +448,11 @@ describe('EpisodeDetailsPage', () => {
     expect(screen.getByTestId('episodeDetailsErrorPrompt')).toBeInTheDocument();
   });
 
-  describe('Agent Builder focus', () => {
-    it('sets the focused episode when the episode loads', () => {
+  describe('Agent Builder auto-attach', () => {
+    it('passes the loaded episode to useEpisodeAutoAttach', () => {
       renderPage();
 
-      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenCalledWith(mockEpisode, {
+      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
         ruleName: 'Rule A',
         groupingFields: ['host.name'],
       });
@@ -476,21 +470,13 @@ describe('EpisodeDetailsPage', () => {
 
       renderPage();
 
-      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenCalledWith(mockEpisode, {
+      expect(mockUseEpisodeAutoAttach).toHaveBeenCalledWith(mockEpisode, {
         ruleName: undefined,
         groupingFields: undefined,
       });
     });
 
-    it('clears the focused episode on unmount with the episode id', () => {
-      const { unmount } = renderPage();
-
-      unmount();
-
-      expect(mockFocusedEpisodeService.clearFocusedEpisode).toHaveBeenCalledWith('ep-1');
-    });
-
-    it('re-sets focus when the episode id changes', () => {
+    it('passes the next episode when the episode id changes', () => {
       const { rerender } = render(
         <MockChromeContextProvider>
           <TestProviders>
@@ -518,8 +504,7 @@ describe('EpisodeDetailsPage', () => {
         </MockChromeContextProvider>
       );
 
-      expect(mockFocusedEpisodeService.clearFocusedEpisode).toHaveBeenCalledWith('ep-1');
-      expect(mockFocusedEpisodeService.setFocusedEpisode).toHaveBeenLastCalledWith(nextEpisode, {
+      expect(mockUseEpisodeAutoAttach).toHaveBeenLastCalledWith(nextEpisode, {
         ruleName: 'Rule A',
         groupingFields: ['host.name'],
       });

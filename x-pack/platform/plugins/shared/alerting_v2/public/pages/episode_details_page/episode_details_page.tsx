@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonGroup,
@@ -51,7 +51,7 @@ import { paths } from '../../constants';
 import type { AlertEpisodesKibanaServices } from '../../episodes_kibana_services';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { UserCapabilities } from '../../services/user_capabilities';
-import { FocusedEpisodeService } from '../../services/focused_episode_service';
+import { useEpisodeAutoAttach } from '../../agent_builder/use_episode_auto_attach';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import {
   filterEpisodeActionsByPrivilege,
@@ -103,8 +103,6 @@ export function EpisodeDetailsPage() {
     services: { data, spaces },
   });
 
-  const focusedEpisodeService = useService(FocusedEpisodeService);
-
   const ruleId = episode?.['rule.id'];
   const groupHash = episode?.group_hash;
 
@@ -138,20 +136,10 @@ export function EpisodeDetailsPage() {
   const episodeBreadcrumbTitle = episodeRuleName ?? i18n.EPISODE_DETAILS_BREADCRUMB_FALLBACK;
   const groupingFields = showRuleDependentUi ? ruleState.rule.grouping?.fields : undefined;
 
-  useEffect(() => {
-    if (!episode) {
-      return;
-    }
-
-    focusedEpisodeService.setFocusedEpisode(episode, {
-      ruleName: episodeRuleName,
-      groupingFields,
-    });
-
-    return () => {
-      focusedEpisodeService.clearFocusedEpisode(episode['episode.id']);
-    };
-  }, [episode, episodeRuleName, focusedEpisodeService, groupingFields]);
+  useEpisodeAutoAttach(episode, {
+    ruleName: episodeRuleName,
+    groupingFields,
+  });
 
   useBreadcrumbs('episode_details', { ruleName: episodeBreadcrumbTitle });
 

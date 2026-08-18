@@ -11,37 +11,39 @@ import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { ChatEventType, type ChatEvent } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import {
-  ALERT_EPISODE_STATUS,
-  EPISODE_ATTACHMENT_TYPE,
-  type AlertEpisode,
-} from '@kbn/alerting-v2-schemas';
 import { AGENTBUILDER_FEATURE_ID } from '@kbn/agent-builder-plugin/public';
-import {
-  registerEpisodeAutoAttach,
-  type FocusedEpisode,
-  type IdGenerator,
-} from './episode_auto_attach';
+import { registerAutoAttach, type AttachmentConverter, type IdGenerator } from './auto_attach';
 
-const createEpisode = (overrides?: Partial<AlertEpisode>): AlertEpisode => ({
-  '@timestamp': '2026-01-01T00:00:00.000Z',
-  'episode.id': 'ep-1',
-  'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
-  'rule.id': 'rule-1',
-  group_hash: 'gh-1',
-  first_timestamp: '2026-01-01T00:00:00.000Z',
-  last_timestamp: '2026-01-01T01:00:00.000Z',
-  duration: 3600000,
+interface TestItem {
+  id: string;
+  label: string;
+}
+
+const TEST_ATTACHMENT_TYPE = 'test-attachment';
+
+const createItem = (overrides?: Partial<TestItem>): TestItem => ({
+  id: 'item-1',
+  label: 'Test item',
   ...overrides,
 });
 
+const testConverter: AttachmentConverter<TestItem> = {
+  toAttachment: (item, draftId) => ({
+    id: draftId,
+    type: TEST_ATTACHMENT_TYPE,
+    origin: item.id,
+    data: { id: item.id, label: item.label },
+  }),
+  getOrigin: (item) => item.id,
+};
+
 const createVersionedAttachment = (id: string): VersionedAttachment => ({
   id,
-  type: EPISODE_ATTACHMENT_TYPE,
+  type: TEST_ATTACHMENT_TYPE,
   versions: [
     {
       version: 1,
-      data: createEpisode(),
+      data: createItem(),
       created_at: '2026-01-01T00:00:00.000Z',
       content_hash: 'hash',
     },
@@ -71,10 +73,10 @@ const createIdGenerator = (): IdGenerator => {
   };
 };
 
-describe('registerEpisodeAutoAttach', () => {
+describe('registerAutoAttach', () => {
   let currentAppId$: BehaviorSubject<string | null>;
   let activeConversation$: BehaviorSubject<ActiveConversation | null>;
-  let focusedEpisode$: BehaviorSubject<FocusedEpisode | undefined>;
+  let focusedItem$: BehaviorSubject<TestItem | undefined>;
   let addAttachment: jest.Mock;
   let draftAttachmentId: IdGenerator;
   let cleanup: () => void;
@@ -84,7 +86,7 @@ describe('registerEpisodeAutoAttach', () => {
     jest.useFakeTimers();
     currentAppId$ = new BehaviorSubject<string | null>(null);
     activeConversation$ = new BehaviorSubject<ActiveConversation | null>(null);
-    focusedEpisode$ = new BehaviorSubject<FocusedEpisode | undefined>(undefined);
+    focusedItem$ = new BehaviorSubject<TestItem | undefined>(undefined);
     addAttachment = jest.fn();
     draftAttachmentId = createIdGenerator();
     chatEventsByConversationId = new Map();
@@ -112,10 +114,11 @@ describe('registerEpisodeAutoAttach', () => {
       },
     } as unknown as AgentBuilderPluginStart;
 
-    cleanup = registerEpisodeAutoAttach({
+    cleanup = registerAutoAttach({
       agentBuilder,
       chrome,
-      focusedEpisode$,
+      focusedItem$,
+      converter: testConverter,
       draftAttachmentId,
     });
   });
@@ -126,70 +129,43 @@ describe('registerEpisodeAutoAttach', () => {
   });
 
   it('does not attach when the Agent Builder sidebar is closed', () => {
-    focusedEpisode$.next({ episode: createEpisode() });
+    focusedItem$.next(createItem());
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
   });
 
-  it('attaches the focused episode to a new conversation draft when chat is open', () => {
-    const episode = createEpisode({
-      last_assignee_uid: null,
-      episode_data: null,
-      severity: null,
-    });
-
-    focusedEpisode$.next({ episode });
+  it('attaches the focused item to a new conversation draft when chat is open', () => {
+    focusedItem$.next(createItem({ id: 'item-1', label: 'My item' }));
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledWith({
       id: 'draft-id-1',
-      type: EPISODE_ATTACHMENT_TYPE,
-      origin: 'ep-1',
-      data: expect.objectContaining({
-        'episode.id': 'ep-1',
-        last_assignee_uid: undefined,
-        episode_data: undefined,
-        severity: undefined,
-      }),
+      type: TEST_ATTACHMENT_TYPE,
+      origin: 'item-1',
+      data: expect.objectContaining({ id: 'item-1', label: 'My item' }),
     });
   });
 
-  it('includes the focused episode label on the attachment', () => {
-    focusedEpisode$.next({ episode: createEpisode(), ruleName: 'Host CPU high' });
-    currentAppId$.next(AGENTBUILDER_FEATURE_ID);
-    activeConversation$.next({ id: undefined });
-    jest.runOnlyPendingTimers();
-
-    expect(addAttachment).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({ 'episode.label': 'Host CPU high alert' }),
-      })
-    );
-  });
-
-  it('attaches the focused episode when an existing conversation becomes active', () => {
-    focusedEpisode$.next({ episode: createEpisode() });
+  it('attaches when an existing conversation becomes active', () => {
+    focusedItem$.next(createItem());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
 
-    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'ep-1' }));
+    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'item-1' }));
   });
 
   it('does not restage after the conversation is persisted', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-1' }) });
+    focusedItem$.next(createItem({ id: 'item-1' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-1' })
-    );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
@@ -197,28 +173,28 @@ describe('registerEpisodeAutoAttach', () => {
     expect(addAttachment).toHaveBeenCalledTimes(1);
   });
 
-  it('attaches when navigating to an episode while an existing conversation is open', () => {
+  it('attaches when navigating to an item while an existing conversation is open', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).not.toHaveBeenCalled();
 
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-1' }) });
+    focusedItem$.next(createItem({ id: 'item-1' }));
     jest.runOnlyPendingTimers();
 
-    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'ep-1' }));
+    expect(addAttachment).toHaveBeenCalledWith(expect.objectContaining({ origin: 'item-1' }));
   });
 
-  it('attaches a different focused episode after the conversation has started', () => {
+  it('attaches a different focused item after the conversation has started', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-1' }) });
+    focusedItem$.next(createItem({ id: 'item-1' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-1' })
+      expect.objectContaining({ id: 'draft-id-1', origin: 'item-1' })
     );
 
     activeConversation$.next({ id: 'conversation-1', conversation: undefined });
@@ -226,37 +202,37 @@ describe('registerEpisodeAutoAttach', () => {
 
     expect(addAttachment).toHaveBeenCalledTimes(1);
 
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-2' }) });
+    focusedItem$.next(createItem({ id: 'item-2' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'draft-id-2', origin: 'ep-2' })
+      expect.objectContaining({ id: 'draft-id-2', origin: 'item-2' })
     );
   });
 
-  it('updates the same draft attachment when the focused episode changes before send', () => {
+  it('updates the same draft attachment when the focused item changes before send', () => {
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
 
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-1' }) });
+    focusedItem$.next(createItem({ id: 'item-1' }));
     jest.runOnlyPendingTimers();
-    focusedEpisode$.next({ episode: createEpisode({ 'episode.id': 'ep-2' }) });
+    focusedItem$.next(createItem({ id: 'item-2' }));
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
     expect(addAttachment).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-1' })
+      expect.objectContaining({ id: 'draft-id-1', origin: 'item-1' })
     );
     expect(addAttachment).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ id: 'draft-id-1', origin: 'ep-2' })
+      expect.objectContaining({ id: 'draft-id-1', origin: 'item-2' })
     );
   });
 
   it('rotates the draft id after it is created in a completed round', () => {
-    focusedEpisode$.next({ episode: createEpisode() });
+    focusedItem$.next(createItem());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
@@ -275,7 +251,7 @@ describe('registerEpisodeAutoAttach', () => {
   it('unsubscribes on cleanup', () => {
     cleanup();
 
-    focusedEpisode$.next({ episode: createEpisode() });
+    focusedItem$.next(createItem());
     currentAppId$.next(AGENTBUILDER_FEATURE_ID);
     activeConversation$.next({ id: undefined });
     jest.runOnlyPendingTimers();
