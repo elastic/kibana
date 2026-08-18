@@ -39,6 +39,7 @@ import {
   getValueOrName,
   groupArgsByType,
   isMathNode,
+  unescapeBackslashes,
 } from './util';
 
 import type { OperationDefinition, GenericOperationDefinition } from '..';
@@ -191,10 +192,12 @@ export const getQueryValidationError = (
     return result;
   }
   try {
+    // validate the same string the column will receive (see getOperationParams)
+    const unescapedQuery = typeof query === 'string' ? unescapeBackslashes(query) : query;
     if (language === 'kql') {
-      toElasticsearchQuery(fromKueryExpression(query), indexPattern);
+      toElasticsearchQuery(fromKueryExpression(unescapedQuery), indexPattern);
     } else {
-      luceneStringToDsl(query);
+      luceneStringToDsl(unescapedQuery);
     }
     return;
   } catch (e) {
