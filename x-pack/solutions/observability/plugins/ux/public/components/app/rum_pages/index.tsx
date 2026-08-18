@@ -176,7 +176,7 @@ const PagesKpiStrip = ({ kpis }: { kpis: RumPagesKpis }) => {
   );
 };
 
-const truncateDetail = (value: string, max = 72): React.ReactNode => {
+const truncateDetail = (value: string, max = 72): NonNullable<React.ReactNode> => {
   const compact = value.replace(/\s+/g, ' ').trim();
   if (compact.length <= max) {
     return compact;
@@ -184,6 +184,7 @@ const truncateDetail = (value: string, max = 72): React.ReactNode => {
   return (
     <EuiToolTip content={compact}>
       <span
+        tabIndex={0}
         css={css`
           display: inline-block;
           max-width: 100%;
@@ -230,7 +231,7 @@ const WhySlow = ({ attribution }: { attribution: RumVitalAttribution }) => {
     return null;
   }
 
-  const items: Array<{ title: string; description: React.ReactNode }> = [];
+  const items: Array<{ title: string; description: NonNullable<React.ReactNode> }> = [];
   if (attribution.lcpElement) {
     items.push({
       title: i18n.translate('xpack.ux.pages.why.lcpElement', { defaultMessage: 'LCP element' }),
@@ -242,7 +243,7 @@ const WhySlow = ({ attribution }: { attribution: RumVitalAttribution }) => {
       title: i18n.translate('xpack.ux.pages.why.lcpUrl', { defaultMessage: 'LCP resource' }),
       description: (
         <EuiToolTip content={attribution.lcpUrl}>
-          <span>{resourceFileName(attribution.lcpUrl)}</span>
+          <span tabIndex={0}>{resourceFileName(attribution.lcpUrl)}</span>
         </EuiToolTip>
       ),
     });
@@ -403,6 +404,7 @@ const ResourcePanel = ({ resources }: { resources: RumResourceRow[] }) => {
                 <EuiToolTip content={resource.url}>
                   <EuiText
                     size="s"
+                    tabIndex={0}
                     css={css`
                       overflow: hidden;
                       text-overflow: ellipsis;
