@@ -25,7 +25,7 @@ export function registerSingleMetricViewerCasesAttachment(
   pluginStart: MlStartDependencies,
   usageCollection?: UsageCollectionSetup
 ) {
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE,
       getIcon: () => PLUGIN_ICON,

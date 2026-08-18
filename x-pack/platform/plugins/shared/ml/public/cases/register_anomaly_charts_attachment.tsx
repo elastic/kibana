@@ -23,7 +23,7 @@ export function registerAnomalyChartsCasesAttachment(
   pluginStart: MlStartDependencies,
   usageCollection?: UsageCollectionSetup
 ) {
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: ML_ANOMALY_CHARTS_ATTACHMENT_TYPE,
       getIcon: () => PLUGIN_ICON,

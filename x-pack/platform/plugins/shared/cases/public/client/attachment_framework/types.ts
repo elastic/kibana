@@ -163,5 +163,5 @@ export type RegisteredUnifiedAttachmentType =
   | UnifiedHybridAttachmentType;
 
 export interface AttachmentFramework {
-  registerUnified: (unifiedAttachmentType: RegisteredUnifiedAttachmentType) => void;
+  registerAttachment: (attachmentType: RegisteredUnifiedAttachmentType) => void;
 }

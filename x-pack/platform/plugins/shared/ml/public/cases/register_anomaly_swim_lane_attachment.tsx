@@ -18,7 +18,7 @@ export function registerAnomalySwimLaneCasesAttachment(
   cases: CasesPublicSetup,
   pluginStart: MlStartDependencies
 ) {
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
       getIcon: () => PLUGIN_ICON,

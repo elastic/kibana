@@ -34,7 +34,7 @@ export function registerCases(
 ) {
   const ChangePointDetectionComponent = getChangePointDetectionComponent(coreStart, pluginStart);
 
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE,
       getIcon: () => 'machineLearningApp',
@@ -74,7 +74,7 @@ export function registerCases(
 
   const LogPatternAttachmentComponent = getPatternAnalysisComponent(coreStart, pluginStart);
 
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE,
       getIcon: () => 'machineLearningApp',
@@ -117,7 +117,7 @@ export function registerCases(
     pluginStart
   );
 
-  cases.attachmentFramework.registerUnified(
+  cases.attachmentFramework.registerAttachment(
     defineAttachment({
       id: AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE,
       getIcon: () => 'machineLearningApp',
