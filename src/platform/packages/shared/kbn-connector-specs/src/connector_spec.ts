@@ -218,29 +218,20 @@ export interface ConnectorPolicies {
 // ============================================================================
 
 /**
- * Permission hints for a connector action, aligned with MCP ToolAnnotations.
- * These are advisory signals for the LLM and any orchestration layer — they do
- * not enforce access control at runtime.
+ * Scope of a connector action's side effects. Advisory signal for the LLM and
+ * any orchestration layer — does not enforce access control at runtime.
  *
- * Semantics follow the MCP spec:
- *   https://modelcontextprotocol.io/docs/concepts/tools#tool-annotations
+ * - `read`    The action only reads data; no external state is modified. Default
+ *             when no annotations are provided.
+ * - `write`   The action creates or appends data but does not overwrite or delete
+ *             existing state (e.g. send a message, create a resource).
+ * - `destroy` The action may overwrite, update, or delete existing data
+ *             (e.g. resolve an issue, delete a resource, patch a record).
  */
+export type ActionScope = 'read' | 'write' | 'destroy';
+
 export interface ActionAnnotations {
-  /**
-   * The action only reads data and does not modify any state.
-   * Default assumption when no annotations are provided.
-   */
-  readOnlyHint?: boolean;
-  /**
-   * The action may create, update, or delete data (CUD operations).
-   * Mutually advisory with readOnlyHint — set one or the other, not both.
-   */
-  destructiveHint?: boolean;
-  /**
-   * Calling the action multiple times with the same input produces the same
-   * result as calling it once (e.g., a PUT that overwrites vs. an append).
-   */
-  idempotentHint?: boolean;
+  scope?: ActionScope;
 }
 
 export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {

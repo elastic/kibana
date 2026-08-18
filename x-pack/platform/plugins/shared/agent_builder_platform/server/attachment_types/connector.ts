@@ -17,12 +17,8 @@ import { getConnectorSpec } from '@kbn/connector-specs';
 import type { ActionAnnotations } from '@kbn/connector-specs';
 
 function formatAnnotationHint(annotations: ActionAnnotations | undefined): string {
-  if (!annotations) return '';
-  const tags: string[] = [];
-  if (annotations.destructiveHint) tags.push('DESTRUCTIVE');
-  else if (annotations.readOnlyHint) tags.push('READ-ONLY');
-  if (annotations.idempotentHint) tags.push('IDEMPOTENT');
-  return tags.length > 0 ? `[${tags.join(', ')}]` : '';
+  if (!annotations?.scope || annotations.scope === 'read') return '';
+  return annotations.scope === 'destroy' ? '[DESTROY]' : '[WRITE]';
 }
 
 /**

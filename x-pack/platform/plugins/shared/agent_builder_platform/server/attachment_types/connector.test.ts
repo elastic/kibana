@@ -244,7 +244,7 @@ describe('connector attachment type', () => {
           formatSchemaForLlmMock.mockReturnValue('channel (string, required): Channel name');
         });
 
-        it('shows [DESTRUCTIVE] for a destructive action', () => {
+        it('shows [WRITE] for a write-scoped action', () => {
           getConnectorSpecMock.mockReturnValue({
             metadata: {
               id: '.slack2',
@@ -256,7 +256,7 @@ describe('connector attachment type', () => {
             actions: {
               sendMessage: {
                 isTool: true,
-                annotations: { destructiveHint: true },
+                annotations: { scope: 'write' },
                 description: 'Send a message to a channel',
                 input: inputSchema,
                 handler: jest.fn(),
@@ -279,13 +279,13 @@ describe('connector attachment type', () => {
           const representation = formatted.getRepresentation!() as { value: string };
 
           expect(representation.value).toContain(
-            'sendMessage [DESTRUCTIVE]: Send a message to a channel'
+            'sendMessage [WRITE]: Send a message to a channel'
           );
           expect(representation.value).toMatch(/- searchMessages: Search messages/);
           expect(representation.value).not.toContain('searchMessages [');
         });
 
-        it('shows [DESTRUCTIVE, IDEMPOTENT] for a destructive idempotent action', () => {
+        it('shows [DESTROY] for a destroy-scoped action', () => {
           getConnectorSpecMock.mockReturnValue({
             metadata: {
               id: '.slack2',
@@ -295,10 +295,10 @@ describe('connector attachment type', () => {
               supportedFeatureIds: [],
             },
             actions: {
-              inviteToConversation: {
+              deleteMessage: {
                 isTool: true,
-                annotations: { destructiveHint: true, idempotentHint: true },
-                description: 'Invite a user to a conversation',
+                annotations: { scope: 'destroy' },
+                description: 'Delete a message',
                 input: inputSchema,
                 handler: jest.fn(),
               },
@@ -313,9 +313,7 @@ describe('connector attachment type', () => {
           ) as AgentFormattedAttachment;
           const representation = formatted.getRepresentation!() as { value: string };
 
-          expect(representation.value).toContain(
-            'inviteToConversation [DESTRUCTIVE, IDEMPOTENT]: Invite a user to a conversation'
-          );
+          expect(representation.value).toContain('deleteMessage [DESTROY]: Delete a message');
         });
 
         it('shows no hint tag for a read-only action with no annotations', () => {

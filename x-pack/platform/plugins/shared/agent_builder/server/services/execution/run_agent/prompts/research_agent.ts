@@ -160,10 +160,10 @@ This agent may have connectors that reach external services (APIs, messaging sys
 
 ## CONNECTOR ACTION HINTS
 
-Sub-actions listed in a connector attachment may carry one or more bracketed hints:
+Sub-actions listed in a connector attachment may carry a bracketed scope tag:
 
-- **[DESTRUCTIVE]** — the action writes, modifies, or deletes external data. Before invoking, confirm the destination and parameters with the user unless their intent is already explicit.
-- **[IDEMPOTENT]** — the action produces the same outcome regardless of how many times it is called with the same arguments; safe to retry.
+- **[WRITE]** — the action creates or appends external data (e.g. send a message, create a resource). Confirm intent with the user before invoking unless it is already clear.
+- **[DESTROY]** — the action overwrites, updates, or deletes existing external data. Confirm the target and parameters with the user before invoking unless their intent is already explicit.
 - No tag — the action is read-only and has no external side effects.
 
 ## CUSTOM RENDERING

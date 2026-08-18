@@ -145,7 +145,7 @@ export const AwsLambdaConnector: ConnectorSpec = {
   actions: {
     invoke: {
       isTool: true,
-      annotations: { destructiveHint: true },
+      annotations: { scope: 'destroy' },
       input: lazySchema(() =>
         z.object({
           functionName: z.string().min(1).describe('Lambda function name or ARN'),
