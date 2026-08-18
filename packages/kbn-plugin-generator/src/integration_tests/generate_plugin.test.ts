@@ -70,7 +70,7 @@ it('generates a DI plugin by default', async () => {
     'utf8'
   );
   expect(serverIndex).toContain('export { pluginModule as module }');
-  expect(publicIndex).toContain('export { pluginModule as module }');
+  expect(publicIndex).toContain('export const module');
   expect(exampleService).toContain('SavedObjectsClient');
 
   expect(Fs.existsSync(Path.resolve(GENERATED_DIR, 'foo/classic'))).toBe(false);
