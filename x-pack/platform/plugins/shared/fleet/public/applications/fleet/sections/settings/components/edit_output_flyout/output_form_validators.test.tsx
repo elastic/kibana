@@ -436,5 +436,4 @@ describe('Output form validation', () => {
       expect(res).toEqual(['Opening brackets should be preceded by a percent sign']);
     });
   });
-
 });
