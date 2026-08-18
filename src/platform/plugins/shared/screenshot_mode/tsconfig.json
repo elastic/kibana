@@ -9,6 +9,7 @@
     "server/**/*"
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/utility-types-jest",
   ],

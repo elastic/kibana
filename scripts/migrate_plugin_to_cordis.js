@@ -128,6 +128,15 @@ function run(pluginDir) {
 
   const coreAccessedSetup = findCoreAccesses(setupBody, coreSetupParam, CORE_SETUP_KEYS);
 
+  // If `core` (the CoreSetup param) is passed as an argument to an external function, bail out.
+  // Pattern: identifier followed by `core` in a call argument position, e.g. `fn(core, ...)`.
+  // This is distinct from `core.http.createRouter()` (method access on core).
+  const corePassedToFn = new RegExp(`[,(]\\s*${escapeRegex(coreSetupParam)}\\s*[,)]`).test(setupBody);
+  if (corePassedToFn) {
+    console.error(`  ✗ Cannot auto-migrate: '${coreSetupParam}' is passed as an argument to an external function. Migrate manually.`);
+    process.exit(1);
+  }
+
   // Detect which plugin deps are actually used in the setup body.
   // Supports both destructured `{ dep1, dep2 }` and plain `plugins.dep1` patterns.
   const usedPluginDeps = detectUsedPluginDeps(
@@ -300,37 +309,43 @@ ${indentedCtorBody}${indentedStop}${startTodo}
     //          `export async function plugin() { ... }`
     const stripped = indexText
       .replace(/export\s+(?:async\s+function\s+plugin\s*\([^)]*\)|const\s+plugin\s*[=:][^;{]*)\s*\{[^}]*\}(?:\s*;)?/gs, '');
-    // Build a map: name → source module from `import type { ... } from '...'` statements.
+    // Build a map: name → source module from `import type { ... } from '...'` statements (multiline-safe).
     const importedFrom = {};
-    for (const line of indexText.split('\n')) {
-      const importMatch = line.match(/^import\s+type\s+\{([^}]+)\}\s+from\s+(['"][^'"]+['"])/);
-      if (importMatch) {
-        const src = importMatch[2];
-        for (const name of importMatch[1].split(',').map((s) => s.trim()).filter(Boolean)) {
-          importedFrom[name] = src;
-        }
+    const importTypeRegex = /import\s+type\s+\{([^}]+)\}\s+from\s+(['"][^'"]+['"])/gs;
+    for (const m of indexText.matchAll(importTypeRegex)) {
+      const src = m[2];
+      for (const rawName of m[1].split(',').map((s) => s.trim()).filter(Boolean)) {
+        // Handle aliased: "Foo as Bar" — key is the original name Foo
+        const baseName = rawName.split(/\s+as\s+/)[0].trim();
+        importedFrom[baseName] = src;
       }
     }
 
-    // Collect only `export type { ... } from '...'` and `export { ... } from '...'` re-exports.
+    // Extract all complete export { ... } and export type { ... } statements (including multiline).
+    // This regex captures: export [type] { ... } [from '...'];
     const reexports = [];
-    for (const line of stripped.split('\n')) {
-      const t = line.trim();
-      // Keep re-exports: `export type { ... } from '...'` (not from './plugin')
-      if (/^export\s+(?:type\s+)?\{/.test(t) && /from\s+['"](?!\.\/plugin)/.test(t)) {
-        reexports.push(t);
-      }
-      // Resolve bare re-exports: `export type { X, Y }` → find their source via import map.
-      if (/^export\s+type\s+\{/.test(t) && !/from\s+/.test(t)) {
-        const namesMatch = t.match(/export\s+type\s+\{([^}]+)\}/);
+    const exportRegex = /export\s+(?:type\s+)?\{[^}]*\}(?:\s+from\s+['"][^'"]+['"])?\s*;/gs;
+    for (const match of stripped.matchAll(exportRegex)) {
+      const stmt = match[0].replace(/\s+/g, ' ').trim();
+      const hasFrom = /from\s+['"]/.test(stmt);
+      const isFromPlugin = /from\s+['"]\.\/plugin['"]/.test(stmt);
+      if (isFromPlugin) continue;
+
+      if (hasFrom) {
+        // Keep as-is (already has from clause, not ./plugin).
+        reexports.push(stmt);
+      } else if (/^export\s+type\s+\{/.test(stmt)) {
+        // Bare re-export: resolve each name to its source module.
+        const namesMatch = stmt.match(/export\s+type\s+\{([^}]+)\}/);
         if (namesMatch) {
           const names = namesMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
-          // Group names by their source module.
           const bySource = {};
           const unresolved = [];
           for (const name of names) {
-            if (importedFrom[name]) {
-              (bySource[importedFrom[name]] = bySource[importedFrom[name]] || []).push(name);
+            // Handle aliased names like "Foo as Bar"
+            const baseName = name.split(/\s+as\s+/)[0].trim();
+            if (importedFrom[baseName]) {
+              (bySource[importedFrom[baseName]] = bySource[importedFrom[baseName]] || []).push(name);
             } else {
               unresolved.push(name);
             }
@@ -339,13 +354,11 @@ ${indentedCtorBody}${indentedStop}${startTodo}
             reexports.push(`export type { ${srcNames.join(', ')} } from ${src};`);
           }
           if (unresolved.length > 0) {
-            // Can't resolve — keep bare, will need manual fix.
             reexports.push(`export type { ${unresolved.join(', ')} };`);
           }
-        } else {
-          reexports.push(t);
         }
       }
+      // Non-type bare export { ... } without from — skip (likely re-exports of imports that won't work)
     }
     if (reexports.length > 0) existingIndexReexports = '\n' + reexports.join('\n');
   }

@@ -7,19 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { default as cordisPlugin } from './plugin';
 export {
   setScreenshotModeEnabled,
   KBN_SCREENSHOT_MODE_HEADER,
   KBN_SCREENSHOT_MODE_ENABLED_KEY,
 } from '../common';
-
 export type {
   ScreenshotModeRequestHandlerContext,
   ScreenshotModeServerSetup as ScreenshotModePluginSetup,
   ScreenshotModeServerStart as ScreenshotModePluginStart,
 } from './types';
-
-export async function plugin() {
-  const { ScreenshotModePlugin } = await import('./plugin');
-  return new ScreenshotModePlugin();
-}

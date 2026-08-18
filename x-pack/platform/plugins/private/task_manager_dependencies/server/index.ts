@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export async function plugin() {
-  const { TaskManagerDependenciesPlugin } = await import('./plugin');
-  return new TaskManagerDependenciesPlugin();
-}
+export { default as cordisPlugin } from './plugin';

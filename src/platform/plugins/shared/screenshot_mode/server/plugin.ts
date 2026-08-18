@@ -7,52 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreSetup } from '@kbn/core/server';
-import type {
-  ScreenshotModeRequestHandlerContext,
-  ScreenshotModeServerSetup,
-  ScreenshotModeServerStart,
-  ScreenshotModeServerSetupDependencies,
-  ScreenshotModeServerStartDependencies,
-} from './types';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { isScreenshotMode } from './is_screenshot_mode';
 
-export class ScreenshotModePlugin
-  implements
-    Plugin<
-      ScreenshotModeServerSetup,
-      ScreenshotModeServerStart,
-      ScreenshotModeServerSetupDependencies,
-      ScreenshotModeServerStartDependencies
-    >
-{
-  public setup(core: CoreSetup): ScreenshotModeServerSetup {
-    core.http.registerRouteHandlerContext<ScreenshotModeRequestHandlerContext, 'screenshotMode'>(
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ScreenshotModePlugin extends Service {
+  static readonly inject = ['core.http'];
+  static readonly provide = 'screenshotMode';
+
+  constructor(ctx: Context) {
+    super(ctx, 'screenshotMode');
+    (ctx.get('core.http') as any).registerRouteHandlerContext(
       'screenshotMode',
-      (ctx, req) => {
+      (_reqCtx: unknown, req: unknown) => {
         return {
-          isScreenshot: isScreenshotMode(req),
+          isScreenshot: isScreenshotMode(req as any),
         };
       }
     );
-
-    // We use "require" here to ensure the import does not have external references due to code bundling that
-    // commonly happens during transpiling. External references would be missing in the environment puppeteer creates.
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { setScreenshotContext, setScreenshotModeEnabled } = require('../common');
-
-    return {
-      setScreenshotContext,
-      setScreenshotModeEnabled,
-      isScreenshotMode,
-    };
   }
-
-  public start(): ScreenshotModeServerStart {
-    return {
-      isScreenshotMode,
-    };
-  }
-
-  public stop() {}
 }
