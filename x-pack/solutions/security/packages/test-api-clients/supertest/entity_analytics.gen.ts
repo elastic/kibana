@@ -225,12 +225,6 @@ If a record already exists for the specified entity, that record is overwritten 
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
-  /**
-      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Create a new entity source configuration.
-
-      */
   createEntitySource(props: CreateEntitySourceProps, kibanaSpace: string = 'default') {
     return supertest
       .post(getRouteUrlForSpace('/api/entity_analytics/monitoring/entity_source', kibanaSpace))
@@ -239,12 +233,6 @@ Create a new entity source configuration.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
-  /**
-      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Create an index for Privileges Monitoring import.
-
-      */
   createPrivilegesImportIndex(
     props: CreatePrivilegesImportIndexProps,
     kibanaSpace: string = 'default'
@@ -363,7 +351,7 @@ Delete the asset criticality record for a specific entity.
   },
   /**
       * Delete a single entity in Entity Store.
-The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future.
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
 
       */
   deleteSingleEntity(props: DeleteSingleEntityProps, kibanaSpace: string = 'default') {
@@ -736,11 +724,8 @@ Each row will match up to 10,000 entities.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
   /**
-      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Check if the current user has all required permissions for Privilege Monitoring.
-
-      */
+   * Check if the current user has all required permissions for Privilege Monitoring
+   */
   privMonPrivileges(kibanaSpace: string = 'default') {
     return supertest
       .get(
@@ -790,12 +775,6 @@ Check if the current user has all required permissions for Privilege Monitoring.
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
   },
-  /**
-      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Search Indices for Privileges Monitoring import.
-
-      */
   searchPrivilegesIndices(props: SearchPrivilegesIndicesProps, kibanaSpace: string = 'default') {
     return supertest
       .get(getRouteUrlForSpace('/api/entity_analytics/monitoring/privileges/indices', kibanaSpace))
@@ -886,12 +865,6 @@ remain on the watchlist.
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(props.body as object);
   },
-  /**
-      * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Update an entity source configuration.
-
-      */
   updateEntitySource(props: UpdateEntitySourceProps, kibanaSpace: string = 'default') {
     return supertest
       .put(

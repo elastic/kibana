@@ -10,7 +10,8 @@ paths:
       x-codegen-enabled: true
       operationId: InitMonitoringEngine
       deprecated: true
-      summary: '**Deprecated in 9.4.0.** Initialize the Privilege Monitoring Engine'
+      summary: Initialize the Privilege Monitoring Engine
+      description: '**Deprecated in 9.4.0.**'
       responses:
         "200":
           description: Successful response

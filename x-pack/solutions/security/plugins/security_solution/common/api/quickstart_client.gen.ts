@@ -855,12 +855,6 @@ If a record already exists for the specified entity, that record is overwritten 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  /**
-    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Create a new entity source configuration.
-
-    */
   async createEntitySource(props: CreateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreateEntitySource`);
     return this.kbnClient
@@ -874,12 +868,6 @@ Create a new entity source configuration.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  /**
-    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Create an index for Privileges Monitoring import.
-
-    */
   async createPrivilegesImportIndex(props: CreatePrivilegesImportIndexProps) {
     this.log.info(`${new Date().toISOString()} Calling API CreatePrivilegesImportIndex`);
     return this.kbnClient
@@ -1277,7 +1265,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   }
   /**
     * Delete a single entity in Entity Store.
-The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future.
+The entity will be immediately deleted from the latest index.  It will remain available in historical snapshots if it has been snapshotted.  The delete operation does not prevent the entity from being recreated if it is observed again in the future. 
 
     */
   async deleteSingleEntity(props: DeleteSingleEntityProps) {
@@ -2428,14 +2416,6 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  /**
-    * Run one or more Security Solution initialization flows for the current space.
-Each flow provisions a specific set of assets, for example list indices,
-security data views, prebuilt detection rules, endpoint protection, AI prompts,
-or detection rule monitoring assets. Only the requested flows are run, and the
-response reports a result for each one.
-
-    */
   async initializeSecuritySolution(props: InitializeSecuritySolutionProps) {
     this.log.info(`${new Date().toISOString()} Calling API InitializeSecuritySolution`);
     return this.kbnClient
@@ -2514,14 +2494,14 @@ response reports a result for each one.
   /**
     * Install and update all Elastic prebuilt detection rules and Timelines.
 
-This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic.
+This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
 When you call this endpoint, it will:
 - Install any new prebuilt detection rules that are not currently installed in your system.
 - Update any existing prebuilt detection rules that have been modified or improved by Elastic.
 - Install any new prebuilt Timelines that are not currently installed in your system.
 - Update any existing prebuilt Timelines that have been modified or improved by Elastic.
 
-This ensures that your detection engine is always up-to-date with the latest rules and Timelines,
+This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
 providing you with the most current and effective threat detection capabilities.
 
     */
@@ -2733,7 +2713,7 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
   /**
     * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
+The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
 The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
 > warn
 > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -2852,11 +2832,8 @@ Requires the **Timeline and Notes** write privilege (`notes_write`).
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Check if the current user has all required permissions for Privilege Monitoring.
-
-    */
+   * Check if the current user has all required permissions for Privilege Monitoring
+   */
   async privMonPrivileges() {
     this.log.info(`${new Date().toISOString()} Calling API PrivMonPrivileges`);
     return this.kbnClient
@@ -2899,7 +2876,7 @@ Check if the current user has all required permissions for Privilege Monitoring.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-    * Retrieve the status of all Elastic prebuilt detection rules and Timelines.
+    * Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
 
 This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
 
@@ -3453,12 +3430,6 @@ remain on the watchlist.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  /**
-    * **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-Update an entity source configuration.
-
-    */
   async updateEntitySource(props: UpdateEntitySourceProps) {
     this.log.info(`${new Date().toISOString()} Calling API UpdateEntitySource`);
     return this.kbnClient

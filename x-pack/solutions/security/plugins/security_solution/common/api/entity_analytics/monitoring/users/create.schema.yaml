@@ -10,10 +10,9 @@ paths:
       x-codegen-enabled: true
       operationId: CreatePrivMonUser
       deprecated: true
-      summary: |
+      summary: Create a new monitored user
+      description: |
         **Deprecated in 9.4.0.** Use the Watchlists API instead.
-
-        Create a new monitored user
       requestBody:
         required: true
         content:

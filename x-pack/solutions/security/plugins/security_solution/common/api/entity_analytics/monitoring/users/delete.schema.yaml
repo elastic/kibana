@@ -10,10 +10,9 @@ paths:
       x-codegen-enabled: true
       operationId: DeletePrivMonUser
       deprecated: true
-      summary: |
+      summary: Delete a monitored user
+      description: |
         **Deprecated in 9.4.0.** Use the Watchlists API instead.
-
-        Delete a monitored user
       parameters:
         - name: id
           in: path

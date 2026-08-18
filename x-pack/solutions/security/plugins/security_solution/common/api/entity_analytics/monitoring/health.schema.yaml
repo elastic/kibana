@@ -10,7 +10,8 @@ paths:
       x-codegen-enabled: true
       operationId: PrivMonHealth
       deprecated: true
-      summary: '**Deprecated in 9.4.0.** Health check on Privilege Monitoring'
+      summary: Health check on Privilege Monitoring
+      description: '**Deprecated in 9.4.0.**'
       responses:
         "200":
           description: Successful response

@@ -10,7 +10,8 @@ paths:
       x-codegen-enabled: true
       operationId: DeleteMonitoringEngine
       deprecated: true
-      summary: '**Deprecated in 9.4.0.** Delete the Privilege Monitoring Engine'
+      summary: Delete the Privilege Monitoring Engine
+      description: '**Deprecated in 9.4.0.**'
       parameters:
         - in: query
           name: data

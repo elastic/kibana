@@ -447,13 +447,8 @@ paths:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      deprecated: true
-      description: >
-        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-
-        Check if the current user has all required permissions for Privilege
-        Monitoring.
+      description: Check if the current user has all required permissions for
+        Privilege Monitoring
       operationId: PrivMonPrivileges
       responses:
         '200':

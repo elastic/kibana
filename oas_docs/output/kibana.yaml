@@ -331,12 +331,6 @@ tags:
   - description: Run live queries, manage packs and saved queries.
     name: Security Osquery API
     x-displayName: Security Osquery
-  - description: |
-      Use the initialization API to set up the assets Elastic Security needs to operate in a Kibana space.
-
-      A single request can run one or more initialization flows. Each flow provisions a specific set of assets (for example, list indices, security data views, prebuilt detection rules, endpoint protection, AI prompts, or detection rule monitoring assets). The response reports a per-flow result so you can tell which flows completed and which returned an error.
-    name: Security Solution Initialization API
-    x-displayName: Security solution initialization
   - description: You can create Timelines and Timeline templates via the API, as well as import new Timelines from an ndjson file.
     name: Security Timeline API
     x-displayName: Security timeline
@@ -437,7 +431,6 @@ paths:
           name: feature_id
           required: false
           schema:
-            maxLength: 100
             type: string
       responses:
         '200':
@@ -11892,7 +11885,7 @@ paths:
             -F 'service_name="foo"' \
             -F 'service_version="1.0.0"' \
             -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
-            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"'
+            -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -17354,7 +17347,7 @@ paths:
                   query: |
                     FROM logs-abc*
                     | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
-                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW())
+                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) 
                     | KEEP event_rate
               example6:
                 summary: Patch indicator match rule
@@ -18312,7 +18305,7 @@ paths:
 
         Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
-        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once.
+        The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
         The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
         > warn
         > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -19957,14 +19950,14 @@ paths:
 
         Install and update all Elastic prebuilt detection rules and Timelines.
 
-        This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic.
+        This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
         When you call this endpoint, it will:
         - Install any new prebuilt detection rules that are not currently installed in your system.
         - Update any existing prebuilt detection rules that have been modified or improved by Elastic.
         - Install any new prebuilt Timelines that are not currently installed in your system.
         - Update any existing prebuilt Timelines that have been modified or improved by Elastic.
 
-        This ensures that your detection engine is always up-to-date with the latest rules and Timelines,
+        This ensures that your detection engine is always up-to-date with the latest rules and Timelines, 
         providing you with the most current and effective threat detection capabilities.
       operationId: InstallPrebuiltRulesAndTimelines
       responses:
@@ -20019,7 +20012,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Retrieve the status of all Elastic prebuilt detection rules and Timelines.
+        Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
 
         This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
       operationId: ReadPrebuiltRulesAndTimelinesStatus
@@ -22989,17 +22982,14 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      deprecated: true
-      description: |
+      description: |-
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/privileges</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
-
-        Check if the current user has all required permissions for Privilege Monitoring.
+        Check if the current user has all required permissions for Privilege Monitoring
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -30166,8 +30156,6 @@ paths:
                             type: string
                           maxItems: 10000
                           type: array
-                        policy_base_id:
-                          type: string
                         policy_id:
                           type: string
                         policy_revision:
@@ -30815,8 +30803,6 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
-                      policy_base_id:
-                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -31282,8 +31268,6 @@ paths:
                           type: string
                         maxItems: 10000
                         type: array
-                      policy_base_id:
-                        type: string
                       policy_id:
                         type: string
                       policy_revision:
@@ -43712,8 +43696,7 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags:
-        - Fleet internals
+      tags: []
       x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -43788,8 +43771,7 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags:
-        - Fleet internals
+      tags: []
       x-state: Generally available; added in 9.1.0
       x-metaTags:
         - content: Kibana
@@ -46503,7 +46485,7 @@ paths:
                           "id": "hello-world",
                           "description": "Just a simple pipeline",
                           "last_modified": "2018-04-14T12:23:29.772Z",
-                          "username": "elastic"
+                          "username": "elastic" 
                         },
                         {
                           "id": "sleepy-pipeline",
@@ -49120,7 +49102,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded.  Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json:
@@ -49164,7 +49146,7 @@ paths:
               schema:
                 type: object
           description: |
-            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body.
+            Indicates a successful call. NOTE: This HTTP response code indicates that the bulk operation succeeded. Errors pertaining to individual objects will be returned in the response body. 
         '400':
           content:
             application/json:
@@ -51716,83 +51698,6 @@ paths:
       summary: Get prompts
       tags:
         - Security AI Assistant API
-      x-metaTags:
-        - content: Kibana
-          name: product_name
-  /api/security_solution/initialize:
-    post:
-      description: |
-        **Spaces method and path for this operation:**
-
-        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_solution/initialize</span></div>
-
-        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
-
-        Run one or more Security Solution initialization flows for the current space.
-        Each flow provisions a specific set of assets, for example list indices,
-        security data views, prebuilt detection rules, endpoint protection, AI prompts,
-        or detection rule monitoring assets. Only the requested flows are run, and the
-        response reports a result for each one.
-      operationId: InitializeSecuritySolution
-      requestBody:
-        content:
-          application/json:
-            examples:
-              default:
-                value:
-                  flows:
-                    - init-prebuilt-rules
-                    - init-endpoint-protection
-                    - init-ai-prompts
-            schema:
-              type: object
-              properties:
-                flows:
-                  items:
-                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowId'
-                  minItems: 1
-                  type: array
-              required:
-                - flows
-        description: The initialization flows to run.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                default:
-                  value:
-                    flows:
-                      init-ai-prompts:
-                        payload:
-                          install_status: installed
-                          name: security_ai_prompts
-                          version: 8.17.1
-                        status: ready
-                      init-endpoint-protection:
-                        payload:
-                          install_status: already_installed
-                          name: endpoint
-                          version: 8.17.1
-                        status: ready
-                      init-prebuilt-rules:
-                        payload:
-                          install_status: installed
-                          name: security_detection_engine
-                          version: 8.17.1
-                        status: ready
-              schema:
-                type: object
-                properties:
-                  flows:
-                    $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowsResult'
-                required:
-                  - flows
-          description: Indicates a successful call. Returns a result for each requested flow.
-      summary: Initialize security solution flows
-      tags:
-        - Security Solution Initialization API
       x-metaTags:
         - content: Kibana
           name: product_name
@@ -65934,7 +65839,7 @@ paths:
                 heartbeatIndices:
                   default: heartbeat-*
                   description: |
-                    An index pattern string to be used within the Uptime app and alerts to query Heartbeat data.
+                    An index pattern string to be used within the Uptime app and alerts to query Heartbeat data. 
                   type: string
       responses:
         '200':
@@ -75055,7 +74960,7 @@ components:
           type: boolean
         scaling_factor:
           description: |
-            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value.
+            The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. 
           type: integer
         type:
           description: Specifies the data type for the field.
@@ -80031,9 +79936,8 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePercentage'
-        - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
         - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValue'
-      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges and for named palettes.
+      description: Dynamic color mapping by numeric range, with support for absolute and percentage-based ranges.
       title: Color By Value
     Kibana_HTTP_APIs_colorByValueAbsolute:
       additionalProperties: false
@@ -80078,31 +79982,6 @@ components:
         - range
         - steps
       title: Color By Value (Absolute)
-      type: object
-    Kibana_HTTP_APIs_colorByValuePalette:
-      additionalProperties: false
-      description: Color by value using a palette, with colors distributed across the range of values.
-      properties:
-        palette:
-          description: The name of the palette to apply across the value range.
-          enum:
-            - status
-            - temperature
-            - complementary
-            - negative
-            - positive
-            - cool
-            - warm
-            - gray
-          type: string
-        type:
-          enum:
-            - distributed_palette
-          type: string
-      required:
-        - type
-        - palette
-      title: Color By Value (Palette)
       type: object
     Kibana_HTTP_APIs_colorByValuePercentage:
       additionalProperties: false
@@ -83823,9 +83702,6 @@ components:
           description: The ID of the API key in the Security API.
           type: string
         created_at:
-          type: string
-        expire_at:
-          description: The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.
           type: string
         hidden:
           type: boolean
@@ -91648,22 +91524,12 @@ components:
     Kibana_HTTP_APIs_kbn-data-view-spec-schema:
       additionalProperties: false
       properties:
-        allow_hidden_indices:
-          description: When `true`, allows the data view to match hidden indices.
-          title: Allow hidden and system indices
-          type: boolean
         field_settings:
           additionalProperties:
             $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-field-settings-entry'
           type: object
         index_pattern:
           description: 'The index pattern (Elasticsearch index expression) to use as the data source. Example: "my-index-*".'
-          type: string
-        name:
-          description: 'The name of the data view. Example: "Sample data view".'
-          maxLength: 256
-          minLength: 1
-          title: Data view name
           type: string
         time_field:
           description: 'The name of the time field in the index. Used for time-based filtering. Example: "@timestamp".'
@@ -91952,7 +91818,6 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -92038,7 +91903,6 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -92122,7 +91986,6 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -92364,7 +92227,6 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -92451,7 +92313,6 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -92538,7 +92399,6 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -92625,7 +92485,6 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -92712,7 +92571,6 @@ components:
         color:
           anyOf:
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValueAbsolute'
-            - $ref: '#/components/schemas/Kibana_HTTP_APIs_colorByValuePalette'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_legacyColorByValueAbsolute'
             - $ref: '#/components/schemas/Kibana_HTTP_APIs_autoColor'
           description: Color configuration based on the metric value.
@@ -101584,8 +101442,6 @@ components:
       additionalProperties: false
       properties:
         expiration:
-          description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
-          maxLength: 20
           type: string
         name:
           type: string
@@ -101616,7 +101472,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -101837,7 +101693,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -101891,8 +101747,6 @@ components:
                 - type: string
                 - not: {}
         proxy_id:
-          deprecated: true
-          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -102078,7 +101932,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -102222,7 +102076,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -103142,7 +102996,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -103363,7 +103217,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -103417,8 +103271,6 @@ components:
                 - type: string
                 - not: {}
         proxy_id:
-          deprecated: true
-          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -103604,7 +103456,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -103748,7 +103600,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -111766,7 +111618,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -111981,7 +111833,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -112035,8 +111887,6 @@ components:
                 - type: string
                 - not: {}
         proxy_id:
-          deprecated: true
-          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -112219,7 +112069,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -112357,7 +112207,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 100
+          maxItems: 10
           minItems: 1
           type: array
         id:
@@ -122545,7 +122395,7 @@ components:
         - value
     Security_Detections_API_BulkActionEditPayloadSchedule:
       description: |
-        Overwrites schedule of rules.
+        Overwrites schedule of rules. 
 
         - `set_schedule` sets a schedule for rules. If the same schedule already exists for a rule, no changes are made.
 
@@ -126699,8 +126549,8 @@ components:
       description: |
         The rule's version number.
 
-        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules).
-        - For custom rules it is set to `1` when the rule is created.
+        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules). 
+        - For custom rules it is set to `1` when the rule is created. 
         > info
         > It is not incremented on each update. Compare this to the `revision` field.
       minimum: 1
@@ -127427,7 +127277,7 @@ components:
         - field: field from the event indices on which the rule runs
         - type: must be mapping
         - value: field from the Elasticsearch threat index
-
+          
         You can use Boolean and and or logic to define the conditions for when matching fields and values generate alerts. Sibling entries objects are evaluated using or logic, whereas multiple entries in a single entries object use and logic. See Example of Threat Match rule which uses both `and` and `or` logic.
       items:
         type: object
@@ -134597,144 +134447,6 @@ components:
     Security_Osquery_API_VersionOrUndefined:
       $ref: '#/components/schemas/Security_Osquery_API_Version'
       nullable: true
-    Security_Solution_Initialization_API_CreateListIndicesReadyResult:
-      type: object
-      properties:
-        status:
-          enum:
-            - ready
-          type: string
-      required:
-        - status
-    Security_Solution_Initialization_API_DataViewPayload:
-      type: object
-      properties:
-        id:
-          type: string
-        patternList:
-          items:
-            type: string
-          type: array
-        title:
-          type: string
-      required:
-        - id
-        - title
-        - patternList
-    Security_Solution_Initialization_API_InitializationFlowErrorResult:
-      type: object
-      properties:
-        error:
-          nullable: true
-          type: string
-        status:
-          enum:
-            - error
-          type: string
-      required:
-        - status
-        - error
-    Security_Solution_Initialization_API_InitializationFlowId:
-      description: Identifier for an initialization flow.
-      enum:
-        - create-list-indices
-        - security-data-views
-        - init-prebuilt-rules
-        - init-endpoint-protection
-        - init-ai-prompts
-        - init-detection-rule-monitoring
-      type: string
-    Security_Solution_Initialization_API_InitializationFlowsResult:
-      description: Per-flow results. Only requested flows appear in the response, so all properties are optional. Each flow is either a typed ready result or an error result.
-      type: object
-      properties:
-        create-list-indices:
-          oneOf:
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_CreateListIndicesReadyResult'
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
-        init-ai-prompts:
-          oneOf:
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
-        init-detection-rule-monitoring:
-          oneOf:
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult'
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
-        init-endpoint-protection:
-          oneOf:
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
-        init-prebuilt-rules:
-          oneOf:
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_PackageInstallReadyResult'
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
-        security-data-views:
-          oneOf:
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_SecurityDataViewsReadyResult'
-            - $ref: '#/components/schemas/Security_Solution_Initialization_API_InitializationFlowErrorResult'
-    Security_Solution_Initialization_API_InstallDetectionEngineRuleMonitoringAssetsReadyResult:
-      type: object
-      properties:
-        status:
-          enum:
-            - ready
-          type: string
-      required:
-        - status
-    Security_Solution_Initialization_API_PackageInstallReadyResult:
-      type: object
-      properties:
-        payload:
-          type: object
-          properties:
-            install_status:
-              description: Fleet package installation status (e.g., installed, already_installed).
-              type: string
-            name:
-              type: string
-            version:
-              type: string
-          required:
-            - name
-            - version
-            - install_status
-        status:
-          enum:
-            - ready
-          type: string
-      required:
-        - status
-        - payload
-    Security_Solution_Initialization_API_SecurityDataViewsReadyResult:
-      type: object
-      properties:
-        payload:
-          type: object
-          properties:
-            alertDataView:
-              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
-            attackDataView:
-              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
-            defaultDataView:
-              $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
-            kibanaDataViews:
-              items:
-                $ref: '#/components/schemas/Security_Solution_Initialization_API_DataViewPayload'
-              type: array
-            signalIndexName:
-              type: string
-          required:
-            - defaultDataView
-            - alertDataView
-            - kibanaDataViews
-            - signalIndexName
-        status:
-          enum:
-            - ready
-          type: string
-      required:
-        - status
-        - payload
     Security_Timeline_API_AssociatedFilterType:
       description: |
         How the note is associated with a Timeline saved object and/or an event (`eventId`). `all`: no association-based restriction from this parameter. `document_only`: document-linked notes (non-empty `eventId`) without timeline association in the API's internal sense; post-filtering drops notes without a usable `eventId`. `saved_object_only`: timeline notes with no linked event (`eventId` empty or absent); post-filtering keeps timeline-only notes. `document_and_saved_object`: notes on a timeline and linked to an event; post-filtering enforces a real `eventId`. `orphan`: not on a timeline and `eventId` is empty (stricter than missing `eventId` in some cases).
@@ -137160,7 +136872,7 @@ components:
           type: array
         value:
           description: |
-            The value associated with the parameter. It will be included in the response if the user has write permissions.
+            The value associated with the parameter. It will be included in the response if the user has write permissions.  
           type: string
     Synthetics_getPrivateLocation:
       additionalProperties: true
@@ -138583,7 +138295,7 @@ components:
           items:
             type: string
           description: |
-            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
         message:
           type: string
           description: The email message text. Markdown format is supported.
