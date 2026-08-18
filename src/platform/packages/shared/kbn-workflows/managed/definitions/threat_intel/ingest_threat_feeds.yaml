@@ -14,7 +14,7 @@ version: "1"
 #           duplicates short-circuit).
 #
 # Per-adapter logic lives in TypeScript under
-# `server/threat_intelligence/adapters/{rss,stix,taxii,vendor_api}/`:
+# `server/threat_intel/adapters/{rss,stix,taxii,vendor_api}/`:
 #   - Each adapter parses the upstream payload (xml2js for RSS, JSON +
 #     bundle splitter for STIX/TAXII, vendor-specific dispatch for
 #     vendor_api) and emits one normalized `.kibana-threat-reports`
@@ -36,7 +36,7 @@ version: "1"
 # horizon — stale duplicates can re-enter the pipeline only after the
 # upstream advisory has had time to rotate).
 #
-# Index names mirror the constants in `common/threat_intelligence/hub/`. They
+# Index names mirror the constants in `common/threat_intel/`. They
 # live under `.kibana-*` so the `kibana_system` reserved role can create /
 # read / write them without a custom Elasticsearch role descriptor — see
 # `dev_docs/key_concepts/kibana_system_user.mdx`.
@@ -70,7 +70,7 @@ steps:
     steps:
       # Fetch one source. The step is registered by the security_solution
       # plugin via `workflowsExtensions.registerStepDefinition` (see
-      # `server/threat_intelligence/workflows/step_types/fetch_source/`),
+      # `server/threat_intel/workflows/step_types/fetch_source/`),
       # dispatches to the right adapter from the source's `adapter_type`,
       # and returns one normalized `.kibana-threat-reports` document per
       # upstream item with a precomputed per-item `content_fingerprint`.
@@ -164,7 +164,7 @@ steps:
               # to ES verbatim. Re-mapping fields here would just
               # introduce drift between the strict mapping and the
               # adapter's TS shape — the common Zod schema in
-              # `common/threat_intelligence/workflows/step_types/fetch_source/`
+              # `common/threat_intel/workflows/step_types/fetch_source/`
               # is the single source of truth for both.
               #
               # `${{ foreach.item }}` (with the `$` prefix), NOT

@@ -6,7 +6,7 @@ version: "1"
 # documents are available). Matches Workflow 1's 4h cadence so the extraction
 # pass doesn't lag the ingestion pass.
 # Purpose:  For each freshly-ingested report (where extraction_method == 'pending'),
-#           extract IOCs via internal threat-intelligence routes (deterministic
+#           extract IOCs via internal threat-intel routes (deterministic
 #           regex + precision pass), closed-set taxonomy, severity, and Diamond
 #           vertices when gated. Behavior extraction (hunt_behavior) is out of
 #           this supply slice. Skip documents whose content_fingerprint has
@@ -26,7 +26,7 @@ steps:
     type: elasticsearch.search
     with:
       # Source-ingestion writes to the bare data stream name
-      # (`THREAT_REPORTS_DATA_STREAM` in `common/threat_intelligence/hub/constants.ts`).
+      # (`THREAT_REPORTS_DATA_STREAM` in `common/threat_intel/constants.ts`).
       # The `.kibana-threat-reports-*` pattern requires at least one
       # character after the dash and therefore matches neither the data
       # stream alias nor its backing `.ds-.kibana-threat-reports-…` indices
@@ -106,7 +106,7 @@ steps:
               values:
                 - "{{ foreach.item._id }}"
 
-      # Gate: assess whether this report is genuine threat-intelligence.
+      # Gate: assess whether this report is genuine threat-intel.
       # Runs FIRST so we persist the verdict alongside all other extraction fields.
       # OBSERVE-FIRST: verdict is persisted to extracted.gate.* but gates NOTHING.
 # All downstream extraction stages (extract_iocs, enrich_taxonomy,
@@ -122,7 +122,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intelligence/assess_relevance
+          path: /internal/threat_intel/assess_relevance
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -152,7 +152,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intelligence/extract_iocs
+          path: /internal/threat_intel/extract_iocs
           headers:
             # Versioned Kibana route — `registerExtractIocsRoute` registers
             # `version: '2023-10-31'` on a `router.versioned.post` handler,
@@ -192,7 +192,7 @@ steps:
       #
       # Backed by `services/enrich_taxonomy.ts` via `kibana.request` (NOT
       # `ai.agent`) so the per-stage connector is operator-configurable via
-      # the `securitySolution:threatIntelligence:diamondGateConnector` advanced
+      # the `securitySolution:threatIntel:diamondGateConnector` advanced
       # setting — pin it to a cheap model (Haiku/Sonnet) to reduce per-report
       # cost. The route falls through to `genAi:defaultAIConnector` when the
       # setting is blank.
@@ -202,7 +202,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intelligence/enrich_taxonomy
+          path: /internal/threat_intel/enrich_taxonomy
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -227,7 +227,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intelligence/classify_severity
+          path: /internal/threat_intel/classify_severity
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -288,7 +288,7 @@ steps:
         if: "variables.diamond_suitable: true"
         with:
           method: POST
-          path: /internal/threat_intelligence/extract_diamond
+          path: /internal/threat_intel/extract_diamond
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
