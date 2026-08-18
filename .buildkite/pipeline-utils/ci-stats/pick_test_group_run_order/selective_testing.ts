@@ -8,7 +8,6 @@
  */
 
 import {
-  ALWAYS_RUN_JEST_INTEGRATION_CONFIGS,
   CRITICAL_FILES_JEST_INTEGRATION_TESTS,
   CRITICAL_FILES_JEST_UNIT_TESTS,
   filterFilesByPackages,
@@ -18,7 +17,6 @@ import {
 } from '../../affected-packages';
 
 import { expandJestImplicitConsumers } from './jest_implicit_consumers';
-import { SHARD_ANNOTATION_SEP } from './jest_configs';
 
 /**
  * The shared inputs both per-variant filters need: which packages the PR
@@ -105,33 +103,5 @@ function filterByAffected(args: {
   }
 
   const filtered = filterFilesByPackages(configs, context.affectedPackages);
-  const withAlwaysRun = addAlwaysRunConfigs(filtered, configs, alwaysRun);
-  console.log(`Filtering Jest ${label} tests: ${configs.length} -> ${withAlwaysRun.length}`);
-  return withAlwaysRun;
-}
-
-// Matches on the base path so every shard of an always-run config is restored.
-function addAlwaysRunConfigs(
-  filtered: string[],
-  allConfigs: string[],
-  alwaysRun: readonly string[]
-): string[] {
-  if (alwaysRun.length === 0) {
-    return filtered;
-  }
-
-  const alwaysRunSet = new Set(alwaysRun);
-  const result = new Set(filtered);
-  for (const config of allConfigs) {
-    if (alwaysRunSet.has(baseConfigPath(config)) && !result.has(config)) {
-      result.add(config);
-      console.log(`Always-run Jest integration config re-added: ${config}`);
-    }
-  }
-  return [...result];
-}
-
-function baseConfigPath(config: string): string {
-  const idx = config.indexOf(SHARD_ANNOTATION_SEP);
-  return idx === -1 ? config : config.slice(0, idx);
+  return filtered;
 }
