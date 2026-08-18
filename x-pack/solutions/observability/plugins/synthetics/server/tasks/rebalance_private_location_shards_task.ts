@@ -11,11 +11,23 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
+import { getAgentInfo, type AgentInfo } from '../synthetics_service/private_location/get_agent_info';
+import { planLocationRebalance } from '../synthetics_service/private_location/plan_rebalance';
 import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
 export const REBALANCE_SHARDS_TASK_ID = `${TASK_TYPE}-single-instance`;
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
+
+interface RebalanceTaskState extends Record<string, unknown> {
+  /**
+   * `${agentPolicyId}:${agentId}` → epoch ms when the agent's current healthy
+   * streak began. Persisted across runs to drive the recovery hysteresis (see
+   * {@link planLocationRebalance}); agents not healthy on a run drop out so their
+   * streak restarts next time they recover.
+   */
+  healthySince?: Record<string, number>;
+}
 
 /**
  * Keeps monitor→agent assignment aligned with the set of healthy agents for
@@ -62,9 +74,55 @@ export class RebalancePrivateLocationShardsTask {
         return { state: taskInstance.state, schedule };
       }
 
-      // Health detection, placement and diff-based writes are wired up in the
-      // following steps.
-      this.debugLog(`Found ${scalableLocations.length} scalable private location(s) to rebalance`);
+      const now = Date.now();
+      // Carry each agent's healthy streak across runs so a recovered agent only
+      // becomes recovery-eligible after RECOVERY_STABILITY_MS. Rebuilt each run
+      // from the currently-healthy agents; a dropped agent is forgotten so its
+      // streak restarts on the next recovery.
+      const priorHealthySince = (taskInstance.state as RebalanceTaskState).healthySince ?? {};
+      const nextHealthySince: Record<string, number> = {};
+
+      for (const location of scalableLocations) {
+        let agents: Map<string, AgentInfo>;
+        try {
+          agents = await getAgentInfo(this.serverSetup, location.agentPolicyId);
+        } catch (e) {
+          this.debugLog(
+            `Agent read failed for location ${location.id}; skipping this cycle: ${e.message}`
+          );
+          continue;
+        }
+
+        const { healthyAgentIds, recoveryAgentIds, nextHealthySince: locationHealthySince } =
+          planLocationRebalance({
+            agents,
+            now,
+            priorHealthySince,
+            agentPolicyId: location.agentPolicyId,
+          });
+        // Keys are policy-scoped, so merging every location into one map is safe.
+        Object.assign(nextHealthySince, locationHealthySince);
+
+        if (healthyAgentIds.length === 0) {
+          // Leave monitors pinned where they are rather than break at-most-once:
+          // with no healthy target there is nowhere safe to move them to.
+          logger.warn(
+            `[RebalancePrivateLocationShardsTask] No healthy agents for private location ${location.id} (${location.label}); skipping rebalance.`
+          );
+          continue;
+        }
+
+        this.debugLog(
+          `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, recovery-eligible=${recoveryAgentIds.length}`
+        );
+
+        // Placement and diff-based writes are wired up in the following step.
+      }
+
+      return {
+        state: { ...taskInstance.state, healthySince: nextHealthySince },
+        schedule,
+      };
     } catch (error) {
       logger.error(
         `[RebalancePrivateLocationShardsTask] Rebalance of private location shards failed: ${error.message}`
