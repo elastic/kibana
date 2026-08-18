@@ -17,7 +17,7 @@ import type {
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import { useLayoutUpdate } from '@kbn/ui-chrome-layout';
 import { useHasLegacyActionMenu } from '../shared/chrome_hooks';
 
@@ -141,6 +141,7 @@ function hasExplicitAppHeaderContent(config: ChromeAppHeaderConfig | undefined):
     !!config.badges?.length ||
     !!config.menu?.items?.length ||
     !!config.favorite ||
+    !!config.share ||
     !!config.description ||
     !!config.metadata?.length
   );
@@ -202,7 +203,8 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
     !config?.description &&
     !config?.metadata?.length &&
     !config?.badges?.length &&
-    !config?.favorite;
+    !config?.favorite &&
+    !config?.share;
   const reservedMinHeight =
     config?.spacing === 'compact' || isSparse
       ? RESERVED_COMPACT_MIN_HEIGHT_PX
@@ -226,6 +228,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
           badges={config?.badges}
           menu={menu}
           favorite={config?.favorite}
+          share={config?.share}
           {...secondaryContent}
           sticky={false}
           spacing={config?.spacing}

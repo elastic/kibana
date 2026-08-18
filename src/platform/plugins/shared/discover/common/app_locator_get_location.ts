@@ -110,7 +110,7 @@ export const parseAppLocatorParams = (
     sampleSize,
     isAlertResults,
     esqlControls,
-    isApproximate,
+    esqlApproximation,
     profileState,
   } = params;
 
@@ -138,7 +138,7 @@ export const parseAppLocatorParams = (
   if (typeof hideTable === 'boolean') appState.hideTable = hideTable;
   if (typeof hideSidebar === 'boolean') appState.hideSidebar = hideSidebar;
   if (typeof sampleSize === 'number' && sampleSize > 0) appState.sampleSize = sampleSize;
-  if (typeof isApproximate === 'boolean') appState.isApproximate = isApproximate;
+  if (typeof esqlApproximation === 'boolean') appState.esqlApproximation = esqlApproximation;
 
   const state: MainHistoryLocationState = {};
 

@@ -137,6 +137,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'var_groups',
   'deprecated',
   'provider_permissions',
+  'group',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
