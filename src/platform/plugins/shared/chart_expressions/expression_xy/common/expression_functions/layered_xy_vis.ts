@@ -59,6 +59,11 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
       help: strings.getPointVisibilityHelp(),
       options: Object.values(PointVisibilityOptions),
     },
+    showExemplars: {
+      types: ['boolean'],
+      help: strings.getShowExemplarsHelp(),
+      default: false,
+    },
   },
   async fn(data, args, handlers) {
     const { layeredXyVisFn } = await import('./expression_module');

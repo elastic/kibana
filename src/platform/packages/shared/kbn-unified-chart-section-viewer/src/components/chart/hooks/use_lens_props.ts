@@ -70,6 +70,7 @@ export const useLensProps = ({
   chartLayers,
   yBounds,
   legend,
+  showExemplars,
   error,
   userMessages,
   profileId,
@@ -83,6 +84,7 @@ export const useLensProps = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
+  showExemplars?: boolean;
   error?: Error;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
@@ -110,6 +112,7 @@ export const useLensProps = ({
     chartLayers,
     yBounds,
     legend,
+    showExemplars,
     effectiveError,
     userMessages,
     profileId,
@@ -128,6 +131,7 @@ export const useLensProps = ({
       chartLayers,
       yBounds,
       legend,
+      showExemplars,
     });
     const builder = new LensConfigBuilder(services.dataViews);
 
@@ -271,6 +275,7 @@ const buildLensParams = ({
   chartLayers,
   yBounds,
   legend,
+  showExemplars,
 }: {
   query: string;
   title: string;
@@ -278,6 +283,7 @@ const buildLensParams = ({
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
   legend?: LensLegendConfig;
+  showExemplars?: boolean;
 }): LensConfig => {
   return {
     chartType: 'xy',
@@ -295,6 +301,7 @@ const buildLensParams = ({
     layers: chartLayers,
     fittingFunction: 'Linear',
     yBounds,
+    showExemplars,
   };
 };
 

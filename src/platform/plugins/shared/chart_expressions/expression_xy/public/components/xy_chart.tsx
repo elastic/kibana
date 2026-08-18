@@ -36,9 +36,12 @@ import {
   Direction,
   Tooltip,
   LEGACY_LIGHT_THEME,
+  BubbleSeries,
+  ScaleType,
+  PointShape,
 } from '@elastic/charts';
 import { partition } from 'lodash';
-import { type IconType } from '@elastic/eui';
+import { type IconType, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { PaletteRegistry } from '@kbn/coloring';
@@ -97,6 +100,9 @@ import {
   validateExtent,
   getOriginalAxisPosition,
   getMaximumFractionDigits,
+  generateMockExemplars,
+  EXEMPLARS_SERIES_ID,
+  type ExemplarPoint,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
@@ -118,6 +124,7 @@ import {
 } from './annotations';
 import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
+import { ExemplarFlyout } from './exemplar_flyout';
 import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
 import { TooltipHeader } from './tooltip';
@@ -241,11 +248,21 @@ export function XYChart({
     singleTable,
     annotations,
     pointVisibility,
+    showExemplars,
   } = args;
 
   const chartRef = useRef<Chart>(null);
+  const { euiTheme } = useEuiTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = useKibanaIsDarkMode();
+  // `useEuiTheme()` doesn't reliably reflect Kibana dark mode in this chart's
+  // render path, so drive the exemplar marker colors from the trusted `darkMode`
+  // flag using the colorMode-independent constants `plainLight`/`plainDark`.
+  // Fill and outline are inverse neutrals (black diamond + white outline in dark
+  // mode, and the reverse in light mode) so markers stay legible in both themes
+  // and never collide with the vis palette used by the metric series.
+  const exemplarFill = darkMode ? euiTheme.colors.plainDark : euiTheme.colors.plainLight;
+  const exemplarStroke = darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
   const filteredLayers = getFilteredLayers(layers);
@@ -267,6 +284,8 @@ export function XYChart({
   }, [chartHasMoreThanOneSeries, legend.isVisible, legend.showSingleSeries, uiState]);
 
   const [showLegend, setShowLegend] = useState<boolean>(() => getShowLegendDefault());
+
+  const [selectedExemplar, setSelectedExemplar] = useState<ExemplarPoint | null>(null);
 
   useEffect(() => {
     const legendShow = getShowLegendDefault();
@@ -315,6 +334,17 @@ export function XYChart({
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
 
   const isTimeVis = isTimeChart(dataLayers);
+
+  // POC: exemplars are mocked from the chart's own data and only shown when the
+  // Metrics Experience turns the prop on. Keyed on `layers` (not the per-render
+  // `dataLayers` array) so the random ids stay stable across re-renders.
+  const exemplars = useMemo<ExemplarPoint[]>(
+    () =>
+      showExemplars && isTimeVis
+        ? generateMockExemplars(getFilteredLayers(layers).filter(isDataLayer))
+        : [],
+    [showExemplars, isTimeVis, layers]
+  );
 
   useEffect(() => {
     const chartSizeSpec: ChartSizeSpec =
@@ -604,6 +634,12 @@ export function XYChart({
   const clickHandler: ElementClickListener = ([elementEvent]) => {
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
+
+    // Exemplar markers open a flyout instead of triggering the normal filter path.
+    if (xySeries.specId === EXEMPLARS_SERIES_ID) {
+      setSelectedExemplar(xyGeometry.datum as ExemplarPoint);
+      return;
+    }
 
     const layer = dataLayers.find((l) =>
       xySeries.seriesKeys.some((key: string | number) =>
@@ -1088,6 +1124,27 @@ export function XYChart({
                 pointVisibility={pointVisibility}
               />
             )}
+            {exemplars.length ? (
+              <BubbleSeries
+                id={EXEMPLARS_SERIES_ID}
+                groupId={(yAxesMap.left ?? yAxesMap.right)?.groupId}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={exemplars}
+                color={exemplarFill}
+                bubbleSeriesStyle={{
+                  point: {
+                    shape: PointShape.Diamond,
+                    radius: 4,
+                    strokeWidth: 1,
+                    stroke: exemplarStroke,
+                  },
+                }}
+                hideInLegend
+              />
+            ) : null}
             {referenceLineLayers.length ? (
               <ReferenceLines
                 layers={referenceLineLayers}
@@ -1122,6 +1179,9 @@ export function XYChart({
           </Chart>
         </LegendColorPickerWrapperContext.Provider>
       </div>
+      {selectedExemplar ? (
+        <ExemplarFlyout exemplar={selectedExemplar} onClose={() => setSelectedExemplar(null)} />
+      ) : null}
     </>
   );
 }

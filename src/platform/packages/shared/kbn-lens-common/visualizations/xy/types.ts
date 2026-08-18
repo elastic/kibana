@@ -153,4 +153,5 @@ export interface XYVisualizationState {
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
   pointVisibility?: PointVisibility;
+  showExemplars?: boolean;
 }
