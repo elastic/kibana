@@ -23,7 +23,7 @@ import type {
 import { formatFieldValueReact, tryPrettyPrintJsonBlocks } from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { UnifiedDataTableContext } from '../table_context';
-import type { CustomCellRenderer, SourceDisplayMode } from '../types';
+import type { CustomCellRenderer, JsonModeSettings, SourceDisplayMode } from '../types';
 import { SourceDocument } from '../components/source_document';
 import { SourceDocumentJsonMode } from '../components/source_document_json_mode';
 import SourcePopoverContent from '../components/source_popover_content';
@@ -45,6 +45,7 @@ export const getRenderCellValueFn = ({
   isCompressed = true,
   columnsMeta,
   sourceDisplayMode,
+  jsonModeSettings,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -57,6 +58,7 @@ export const getRenderCellValueFn = ({
   isCompressed?: boolean;
   columnsMeta: DataTableColumnsMeta | undefined;
   sourceDisplayMode: SourceDisplayMode;
+  jsonModeSettings?: JsonModeSettings;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -142,6 +144,7 @@ export const getRenderCellValueFn = ({
           columnsMeta={columnsMeta}
           shouldShowFieldHandler={shouldShowFieldHandler}
           fieldFormats={fieldFormats}
+          jsonModeSettings={jsonModeSettings}
         />
       );
     }

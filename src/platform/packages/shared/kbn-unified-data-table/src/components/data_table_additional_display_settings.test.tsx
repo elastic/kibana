@@ -313,11 +313,10 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       expect(screen.queryByTestId('unifiedDataTableViewModeSettings')).not.toBeInTheDocument();
     });
 
-    it('should render the view mode toggle with a "New" badge and "Default" selected initially', () => {
+    it('should render the view mode toggle with "Default" selected initially', () => {
       renderWithAllControls();
 
       expect(screen.getByTestId('unifiedDataTableViewModeSettings')).toBeVisible();
-      expect(screen.getByTestId('unifiedDataTableViewModeSettings_newBadge')).toBeVisible();
       expect(
         screen.getByTestId('unifiedDataTableViewModeSettings_viewMode_summary')
       ).toHaveAttribute('aria-pressed', 'true');

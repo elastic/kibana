@@ -45,6 +45,8 @@ export interface JsonTreeViewerProps {
   formatValue?: FormatValue;
   /** Optional extra content rendered in the tree's header row, next to the expand/collapse control. */
   extraHeaderContent?: ReactNode;
+  /** When false, leaf values render on a single truncated line instead of wrapping. Defaults to true. */
+  wrapLines?: boolean;
 }
 
 export const JsonTreeViewer = memo(function JsonTreeViewer({
@@ -54,6 +56,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
   expandNodesContainingTerm,
   formatValue,
   extraHeaderContent,
+  wrapLines = true,
 }: JsonTreeViewerProps) {
   const styles = useEuiMemoizedStyles(treeStyles);
 
@@ -124,7 +127,7 @@ export const JsonTreeViewer = memo(function JsonTreeViewer({
         </EuiFlexGroup>
       )}
 
-      <div css={styles.wrapper}>
+      <div css={[styles.wrapper, !wrapLines && styles.noWrap]}>
         <div
           role="tree"
           aria-label={i18n.translate('unifiedDataTable.jsonTreeViewer.treeAriaLabel', {

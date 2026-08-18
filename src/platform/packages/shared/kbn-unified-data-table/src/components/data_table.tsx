@@ -915,6 +915,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           isCompressed: dataGridDensity === DataGridDensity.COMPACT,
           columnsMeta,
           sourceDisplayMode,
+          jsonModeSettings,
         }),
       [
         dataView,
@@ -927,6 +928,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         dataGridDensity,
         columnsMeta,
         sourceDisplayMode,
+        jsonModeSettings,
       ]
     );
 

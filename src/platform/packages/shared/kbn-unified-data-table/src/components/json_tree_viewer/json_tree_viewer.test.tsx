@@ -304,4 +304,16 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByTestId('custom-header')).toBeVisible();
     });
   });
+
+  describe('wrapLines', () => {
+    it('applies distinct container styling when wrapping is disabled', () => {
+      const { rerender } = render(<JsonTreeViewer json={{ message: 'hello' }} wrapLines />);
+      const wrappingClassName = screen.getByRole('tree').parentElement?.className;
+
+      rerender(<JsonTreeViewer json={{ message: 'hello' }} wrapLines={false} />);
+      const noWrapClassName = screen.getByRole('tree').parentElement?.className;
+
+      expect(noWrapClassName).not.toEqual(wrappingClassName);
+    });
+  });
 });

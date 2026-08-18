@@ -37,14 +37,20 @@ interface FormatContext {
   dataView: DataView;
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  hideNulls: boolean;
 }
+
+// Returned by processFieldValue when, with `hideNulls` on, a field has no non-null value left and
+// should be dropped entirely rather than added to the document.
+const OMIT_FIELD = Symbol('omitField');
 
 export interface NestedDocument {
   tree: JsonValue;
   truncated: boolean;
 }
 
-const documentTreeCache = new WeakMap<EsHitRecord, NestedDocument>();
+// Cached per raw hit and per `hideNulls` mode, since the two modes produce different documents.
+const documentTreeCache = new WeakMap<EsHitRecord, Map<boolean, NestedDocument>>();
 
 /**
  * Receives flattened fields (in ES|QL or DSL format) and builds a raw nested JSON document.
@@ -54,19 +60,23 @@ export const flattenedToNestedDocument = ({
   dataView,
   columnsMeta,
   shouldShowFieldHandler,
+  hideNulls = false,
 }: {
   row: DataTableRecord;
   dataView: DataView;
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+  hideNulls?: boolean;
 }): NestedDocument => {
-  const cached = documentTreeCache.get(row.raw);
+  const cachedByMode = documentTreeCache.get(row.raw);
+  const cached = cachedByMode?.get(hideNulls);
   if (cached) return cached;
 
   const ctx: FormatContext = {
     dataView,
     columnsMeta,
     shouldShowFieldHandler,
+    hideNulls,
   };
   const budget: ValueBudget = { remaining: MAX_TREE_VALUES, truncated: false };
   const metaFields = new Set(dataView.metaFields);
@@ -87,14 +97,21 @@ export const flattenedToNestedDocument = ({
       break;
     }
 
-    documentFlat[fieldName] = processFieldValue(row.flattened[fieldName], fieldName, ctx, budget);
+    const value = processFieldValue(row.flattened[fieldName], fieldName, ctx, budget);
+    if (value !== OMIT_FIELD) {
+      documentFlat[fieldName] = value;
+    }
   }
 
   // Step 2. Unflatten the object based on the dotted-key map.
   const documentTree = unflattenKeys(documentFlat);
 
   const result: NestedDocument = { tree: documentTree, truncated: budget.truncated };
-  documentTreeCache.set(row.raw, result);
+  if (cachedByMode) {
+    cachedByMode.set(hideNulls, result);
+  } else {
+    documentTreeCache.set(row.raw, new Map([[hideNulls, result]]));
+  }
   return result;
 };
 
@@ -153,7 +170,10 @@ const processFieldValue = (
           budget.truncated = true;
           break;
         }
-        inner[key] = processFieldValue(object[key], qualifiedName, ctx, budget);
+        const value = processFieldValue(object[key], qualifiedName, ctx, budget);
+        if (value !== OMIT_FIELD) {
+          inner[key] = value;
+        }
       }
       nested.push(unflattenKeys(inner));
     }
@@ -162,10 +182,16 @@ const processFieldValue = (
 
   // CASE 3: a scalar value (or a genuine multi-value array). Each element is one value, so a single
   // huge field is sliced down to the remaining budget rather than materialised in full.
-  const take = Math.min(values.length, budget.remaining);
-  if (take < values.length) budget.truncated = true;
+  // With `hideNulls`, null entries are dropped up front so they never reach the budget;
+  // a field left without any value is omitted entirely.
+  const visibleValues = ctx.hideNulls ? values.filter((value) => value != null) : values;
+  if (ctx.hideNulls && visibleValues.length === 0) {
+    return OMIT_FIELD;
+  }
+  const take = Math.min(visibleValues.length, budget.remaining);
+  if (take < visibleValues.length) budget.truncated = true;
   budget.remaining -= take;
-  const leaves = values.slice(0, take).map((value) => value ?? null);
+  const leaves = visibleValues.slice(0, take).map((value) => value ?? null);
   return leaves.length === 1 ? leaves[0] : leaves;
 };
 

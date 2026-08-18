@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiBetaBadge, EuiButtonGroup, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import type { SourceDisplayMode } from '../types';
 const dataTestSubj = 'unifiedDataTableViewModeSettings';
 
@@ -45,19 +45,7 @@ export function ViewModeSettings({
 
   return (
     <EuiFormRow
-      label={
-        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
-          {label}
-          <EuiBetaBadge
-            size="s"
-            color="subdued"
-            label={i18n.translate('unifiedDataTable.viewMode.newBadge', {
-              defaultMessage: 'New',
-            })}
-            data-test-subj={`${dataTestSubj}_newBadge`}
-          />
-        </EuiFlexGroup>
-      }
+      label={label}
       aria-label={label}
       display="columnCompressed"
       data-test-subj={dataTestSubj}

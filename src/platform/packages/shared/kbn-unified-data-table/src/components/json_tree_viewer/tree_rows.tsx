@@ -39,6 +39,9 @@ import {
   type PrimitiveType,
 } from './tree_model';
 
+const LABEL_TEXT_CLASS = 'jsonTreeViewerLabelText';
+const VALUE_CLASS = 'jsonTreeViewerValue';
+
 // ---- Row view components (one per render-row kind) ----
 
 // Focus and roving-tabindex wiring shared by the focusable row kinds.
@@ -230,7 +233,7 @@ const PrimitiveValue = memo(function PrimitiveValue({
   const styles = useEuiMemoizedStyles(treeStyles);
   if (primitiveType === 'string') {
     return (
-      <span css={[styles.value, styles.valueString]}>
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueString]}>
         {'"'}
         {formatted ?? String(value)}
         {'"'}
@@ -238,9 +241,17 @@ const PrimitiveValue = memo(function PrimitiveValue({
     );
   }
   if (primitiveType === 'number' || primitiveType === 'boolean') {
-    return <span css={[styles.value, styles.valueScalar]}>{formatted ?? String(value)}</span>;
+    return (
+      <span className={VALUE_CLASS} css={[styles.value, styles.valueScalar]}>
+        {formatted ?? String(value)}
+      </span>
+    );
   }
-  return <span css={[styles.value, styles.valueNull]}>null</span>;
+  return (
+    <span className={VALUE_CLASS} css={[styles.value, styles.valueNull]}>
+      null
+    </span>
+  );
 });
 
 const Comma = memo(function Comma() {
@@ -340,7 +351,7 @@ const NodeLabel = memo(function NodeLabel({
   if (node.kind === 'leaf') {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <PrimitiveValue
             primitiveType={node.primitiveType}
@@ -361,7 +372,7 @@ const NodeLabel = memo(function NodeLabel({
   if (!hasChildren) {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{`${open}${close}`}</span>
           {trailingComma && <Comma />}
@@ -375,7 +386,7 @@ const NodeLabel = memo(function NodeLabel({
   if (isExpanded) {
     return (
       <span css={styles.label}>
-        <span css={styles.labelText}>
+        <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
           <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
           <span css={styles.bracket}>{open}</span>
         </span>
@@ -387,7 +398,7 @@ const NodeLabel = memo(function NodeLabel({
   // Collapsed: a one-line preview, e.g. `"user": { 2 fields }`.
   return (
     <span css={styles.label}>
-      <span css={styles.labelText}>
+      <span className={LABEL_TEXT_CLASS} css={styles.labelText}>
         <KeyPrefix name={node.key} isArrayItem={node.isArrayItem} />
         <span css={styles.bracket}>{open}</span>
         <span css={styles.count}>{collectionCountLabel(node)}</span>
@@ -523,6 +534,17 @@ const treeStyles = ({ euiTheme }: UseEuiTheme) => ({
     '&:focus-visible': { opacity: 1 },
   }),
   value: css({ minWidth: 0, overflowWrap: 'anywhere', whiteSpace: 'pre-wrap' }),
+  noWrap: css({
+    [`& .${LABEL_TEXT_CLASS}`]: {
+      display: 'block',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+    },
+    [`& .${VALUE_CLASS}`]: {
+      whiteSpace: 'nowrap',
+    },
+  }),
   valueString: css({ color: euiTheme.colors.textDanger }),
   valueScalar: css({ color: euiTheme.colors.textAccent }),
   valueNull: css({ color: euiTheme.colors.textSubdued, fontStyle: 'italic' }),
