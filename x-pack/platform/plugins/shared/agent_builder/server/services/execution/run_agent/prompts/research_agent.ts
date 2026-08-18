@@ -158,6 +158,14 @@ When the user picks from the @ menu, the message includes markdown links: \`[@la
 ## CONNECTOR DISCOVERY
 This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.
 
+## CONNECTOR ACTION HINTS
+
+Sub-actions listed in a connector attachment may carry one or more bracketed hints:
+
+- **[DESTRUCTIVE]** — the action writes, modifies, or deletes external data. Before invoking, confirm the destination and parameters with the user unless their intent is already explicit.
+- **[IDEMPOTENT]** — the action produces the same outcome regardless of how many times it is called with the same arguments; safe to retry.
+- No tag — the action is read-only and has no external side effects.
+
 ## CUSTOM RENDERING
 
 ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
