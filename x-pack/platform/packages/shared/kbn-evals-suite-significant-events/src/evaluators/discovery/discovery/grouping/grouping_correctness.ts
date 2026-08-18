@@ -6,6 +6,7 @@
  */
 
 import type { DiscoveryEvaluator } from '../../types';
+import { f1 } from '../common/metrics';
 
 function detectionKey(d: { rule_uuid?: string; metadata?: { rule_uuid?: string } }): string {
   return d.rule_uuid ?? d.metadata?.rule_uuid ?? '';
@@ -141,7 +142,7 @@ export const groupingCorrectnessEvaluator: DiscoveryEvaluator = {
     const truePositives = intersectionSize(actualPairs, expectedPairs);
     const precision = actualPairs.size === 0 ? 0 : truePositives / actualPairs.size;
     const recall = expectedPairs.size === 0 ? 0 : truePositives / expectedPairs.size;
-    const score = precision + recall === 0 ? 0 : (2 * precision * recall) / (precision + recall);
+    const score = f1(precision, recall);
 
     return Promise.resolve({
       score,
