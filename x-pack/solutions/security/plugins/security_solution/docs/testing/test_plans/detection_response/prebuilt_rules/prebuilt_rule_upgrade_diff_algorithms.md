@@ -28,12 +28,14 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Scenarios](#scenarios)
   - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa)
     - [**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
+    - [**Scenario: `AAA` - Rule field is `machine_learning_job_id` with only cosmetic differences**](#scenario-aaa---rule-field-is-machine_learning_job_id-with-only-cosmetic-differences)
   - [Rule field doesn't have an update but has a custom value - `ABA`](#rule-field-doesnt-have-an-update-but-has-a-custom-value---aba)
     - [**Scenario: `ABA` - Rule field is any type except rule `type`**](#scenario-aba---rule-field-is-any-type-except-rule-type)
     - [**Scenario: `ABA` - Rule field is rule `type`**](#scenario-aba---rule-field-is-rule-type)
   - [Rule field has an update and doesn't have a custom value - `AAB`](#rule-field-has-an-update-and-doesnt-have-a-custom-value---aab)
     - [**Scenario: `AAB` - Rule field is any type except rule `type`**](#scenario-aab---rule-field-is-any-type-except-rule-type)
     - [**Scenario: `AAB` - Rule field is rule `type`**](#scenario-aab---rule-field-is-rule-type)
+    - [**Scenario: `AAB` - Rule field is `machine_learning_job_id` dropping an affected ML job**](#scenario-aab---rule-field-is-machine_learning_job_id-dropping-an-affected-ml-job)
   - [Rule field has an update and a custom value that are the same - `ABB`](#rule-field-has-an-update-and-a-custom-value-that-are-the-same---abb)
     - [**Scenario: `ABB` - Rule field is any type except rule `type`**](#scenario-abb---rule-field-is-any-type-except-rule-type)
     - [**Scenario: `ABB` - Rule field is rule `type`**](#scenario-abb---rule-field-is-rule-type)
@@ -133,6 +135,24 @@ Examples:
 | esql_query         | esql_query  | {query: "FROM query WHERE true", language: "esql"}                                   | {query: "FROM query WHERE true", language: "esql"}                                   | {query: "FROM query WHERE true", language: "esql"}                                   | {query: "FROM query WHERE true", language: "esql"}                                   |
 ```
 
+#### **Scenario: `AAA` - Rule field is `machine_learning_job_id` with only cosmetic differences**
+
+**Automation**: unit tests for the `machine_learning_job_id` diff algorithm.
+
+```Gherkin
+Given machine_learning_job_id field differs between versions only by job id ordering, duplicates, or a single job id represented as a string vs a one-element array
+Then machine_learning_job_id field is treated as an unordered set of job ids, so these differences are not an update or a customization
+And for machine_learning_job_id field the diff algorithm should output the current version as the merged one without a conflict
+And machine_learning_job_id field should not be returned from the `upgrade/_review` API endpoint
+And machine_learning_job_id field should not be shown in the upgrade preview UI
+
+Examples:
+| algorithm               | field_name              | base_version       | current_version    | target_version     | merged_version     |
+| machine_learning_job_id | machine_learning_job_id | ["job_a", "job_b"] | ["job_b", "job_a"] | ["job_a", "job_b"] | ["job_b", "job_a"] |
+| machine_learning_job_id | machine_learning_job_id | ["job_a"]          | ["job_a", "job_a"] | ["job_a"]          | ["job_a", "job_a"] |
+| machine_learning_job_id | machine_learning_job_id | ["job_a"]          | "job_a"            | ["job_a"]          | "job_a"            |
+```
+
 ### Rule field doesn't have an update but has a custom value - `ABA`
 
 #### **Scenario: `ABA` - Rule field is any type except rule `type`**
@@ -222,6 +242,25 @@ Examples:
 ```
 
 Notes: `type` field can only be changed between `query` and `saved_query` rule types in the UI and API via normal conventions, but the logic for others is still covered
+
+#### **Scenario: `AAB` - Rule field is `machine_learning_job_id` dropping an affected ML job**
+
+**Automation**: unit tests for the `machine_learning_job_id` diff algorithm + FE integration tests.
+
+```Gherkin
+Given machine_learning_job_id field is not customized by the user (current version == base version)
+And machine_learning_job_id field is updated by Elastic in this upgrade (target version != base version)
+And the current version references an affected ML job (id in common/machine_learning/affected_job_ids.ts) that the target version drops
+Then for machine_learning_job_id field the diff algorithm should output the current version as the merged one with a non-solvable conflict
+And machine_learning_job_id field should be returned from the `upgrade/_review` API endpoint
+And machine_learning_job_id field should be shown in the upgrade preview UI
+
+Examples:
+| algorithm              | field_name              | base_version                      | current_version                   | target_version                          | merged_version                    |
+| machine_learning_job_id | machine_learning_job_id | ["v2_windows_rare_metadata_user"] | ["v2_windows_rare_metadata_user"] | ["v3_windows_rare_metadata_user_ea"]    | ["v2_windows_rare_metadata_user"] |
+```
+
+Notes: this is the ML coverage-loss conflict - the detection is purely content-based (the rule's version triad and the affected-jobs allowlist), independent of which jobs are installed. When the target keeps the affected job, or the referenced job is not in the allowlist, the field behaves like the normal `AAB` case above (target merged, no conflict). See the [ML job coverage-loss conflict](./prebuilt_rules_common_info.md#common-terminology) terminology and the end-to-end scenarios in [the legacy ML jobs upgrade test plan](./prebuilt_rule_upgrade_with_legacy_ml_jobs.md).
 
 ### Rule field has an update and a custom value that are the same - `ABB`
 

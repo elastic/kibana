@@ -77,6 +77,31 @@ export async function renderRuleUpgradeFlyout(): Promise<ReturnType<typeof rende
   return renderResult;
 }
 
+/**
+ * Renders an arbitrary component (e.g. the single-rule upgrade callout used on the
+ * Rule Details / Rule Editing pages) wired to the same mocked Kibana fetch responses
+ * as `renderRuleUpgradeFlyout`. Unlike `renderRuleUpgradeFlyout`, it neither renders the
+ * Rule Management page nor opens any flyout — the caller drives the UI. Combine with
+ * `mockRuleUpgradeReviewData()` / `mockKibanaFetchResponse()` to stub responses.
+ */
+export function renderRuleUpgradeContainer(ui: React.ReactElement): ReturnType<typeof render> {
+  // KibanaServices.get().http.fetch persists globally
+  // it's important to clear the state for the later assertions
+  (KibanaServices.get().http.fetch as jest.Mock).mockClear();
+  (KibanaServices.get().http.fetch as jest.Mock).mockImplementation((requestedPath) =>
+    mockedResponses.get(requestedPath)
+  );
+  (useUserPrivileges as jest.Mock).mockReturnValue({
+    ...initialUserPrivilegesState(),
+    rulesPrivileges: {
+      ...initialUserPrivilegesState().rulesPrivileges,
+      rules: { read: true, edit: true },
+    },
+  });
+
+  return render(ui, { wrapper: RuleUpgradeTestProviders });
+}
+
 interface MockRuleUpgradeReviewDataParams {
   ruleType: string;
   fieldName: string;
@@ -98,6 +123,7 @@ export function mockRuleUpgradeReviewData({
   conflict,
 }: MockRuleUpgradeReviewDataParams): void {
   mockKibanaFetchResponse(REVIEW_RULE_UPGRADE_URL, {
+    total: 1,
     stats: {
       num_rules_to_upgrade_total: 1,
       num_rules_with_conflicts:

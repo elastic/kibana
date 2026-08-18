@@ -110,6 +110,8 @@ Terminology related to prebuilt rule customization:
 Terminology related to prebuilt rule upgrade workflow:
 
 - **upgrade conflict**, **conflicting upgrade**: mostly it means the incoming rule upgrade has changes to the customized fields. Depending on the field type it may be possible to **solve** the conflict (a.k.a. **solvable conflict**, **auto-solving conflict**) otherwise the conflict is **non-solvable** (a.k.a. **unresolved conflict**). In any case the conflict means the prebuilt rule upgrade is unsafe and should be reviewed.
+- **affected ML job**: a legacy anomaly detection job whose id is in the affected jobs allowlist (`common/machine_learning/affected_job_ids.ts`). It is a superseded ML job generation that the latest prebuilt rules no longer reference.
+- **ML job coverage-loss conflict**: a conflict raised on a prebuilt ML rule's `machine_learning_job_id` field when the current version references an affected ML job that the target version drops. Upgrading would repoint the rule to a newer job, so it would stop using the installed legacy job (a potential detection-coverage gap). It is detected purely from the rule's current and target `machine_learning_job_id` values and the allowlist, independently of which jobs are installed, and it replaces the former blocking "ML rule updates may override your existing rules" modal (removed). With rule customization enabled (Enterprise) it is a non-solvable conflict resolved in the three-way-diff resolver, where the user can keep the current job; with rule customization disabled (Platinum) it surfaces as an informational warning only, and the rule upgrades to the target version.
 
 Terminology related to the "rule source" object:
 

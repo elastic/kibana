@@ -13,6 +13,16 @@ Options:
 
 `scratchpad.ts` already contains code to set up clients for Elasticsearch and Kibana. In addition it provides clients for Security Solution, Lists, and Exceptions APIs, built on top of the Kibana client. However, it does not create any rules/exceptions/lists/data - it's a blank slate for you to immediately begin creating the resources you want for testing. Please don't commit data-generating code to `scratchpad.ts`! Instead, when you have built a data-generating script that might be useful to others, please extract the useful components to the `quickstart/modules` folder and leave `scratchpad.ts` empty for the next developer.
 
+## Auth
+
+Most modules talk to Kibana through its public APIs, so the default `elastic` superuser works fine. Some modules, however, may need to write saved objects directly to the Kibana system indices (`.kibana*`) via the ES client - for example, to setup prebuilt `security-rule` assets in `.kibana_security_solution`. The `elastic` superuser cannot access Kibana system indices, so those modules fail with an authorization error.
+
+To run them, use a user that also has the `system_indices_superuser` role. For a local stack, create a `test` user with roles `superuser` + `system_indices_superuser` and run:
+
+```bash
+node x-pack/solutions/security/plugins/security_solution/scripts/quickstart/run.js --username test --password changeme
+```
+
 ### Environments
 
 The API clients are designed to work with any delivery method - local, cloud, or serverless deployments. For deployments that do not allow username/password auth, use an API key.
@@ -48,6 +58,10 @@ Functions to help setup mappings. Provides the ECS mapping as well as helpers to
 ### Rules
 
 Functions to help create rules along with data specific to each rule (WIP). Each sample rule defined in this folder should have an associated function to generate data that triggers alerts for the rule.
+
+### ML Coverage Loss
+
+Seeds the state needed to reproduce the ML coverage-loss upgrade behavior (#239884 / #279791): a legacy ML job plus prebuilt ML rules whose upgrade would drop that job, surfacing a `machine_learning_job_id` NON_SOLVABLE conflict. Also seeds control fixtures (a clean ML upgrade and a non-ML rule) so you can confirm the conflict fires only when it should. Exposes `seedMlCoverageLossState`, `teardownMlCoverageLossState`, and `verifySeededUpgrades`. See the example below.
 
 ## Speed
 
@@ -132,6 +146,48 @@ const results = (await concurrentlyExec(previewPromises, 50)).map(
   (result) => result.data.logs
 );
 ```
+
+### Seed ML coverage-loss upgrade conflict
+
+Reproduces the legacy-ML-job coverage-loss upgrade state (#239884 / #279791).
+
+```
+import { seedMlCoverageLossState } from './modules/ml_coverage_loss';
+
+await seedMlCoverageLossState({ esClient, kbnClient, detectionsClient, log });
+```
+
+Notes:
+
+- This seeds rule assets by writing directly to the `.kibana_security_solution` system index, so it
+  must run as a user with the `system_indices_superuser` role — the default `elastic` superuser
+  cannot access system indices. See [Auth for modules that write to system indices](#auth-for-modules-that-write-to-system-indices).
+- Creating the ML job needs a trial/platinum license. On a basic-license stack pass
+  `{ createMlJob: false }` — the upgrade conflict still reproduces (the diff is content-based and
+  does not depend on the job being installed).
+- To install *every* job in the affected list instead of just the one the rule fixtures need, pass `{ installAllAffectedJobs: true }`.
+- To reset, import and call `teardownMlCoverageLossState({ esClient, kbnClient, log })`.
+- Then open Rule Management → Rule Updates: fixtures A & B show **Review** (coverage-loss warning on
+  `machine_learning_job_id`); the non-affected ML rule and the query rule update cleanly.
+
+It also seeds four **name-field upgrade** fixtures (non-ML `query` rules where only the `name` field
+differs between versions), crossing customized × base-version-missing so you can exercise the upgrade
+actions — with and without preview — under Enterprise, Platinum, and Basic licenses:
+
+| ruleId | customized name? | base present? | `name` conflict |
+| --- | --- | --- | --- |
+| `test-name-upgrade-stock-with-base` | no | yes | none (clean update) |
+| `test-name-upgrade-customized-with-base` | yes | yes | non-solvable |
+| `test-name-upgrade-stock-no-base` | no | no | none (updates to target) |
+| `test-name-upgrade-customized-no-base` | yes | no | solvable |
+
+- On Enterprise (customization enabled) the flyout shows the three-way-diff resolver; below Enterprise
+  (Platinum/Basic) it shows the read-only diff and the upgrade takes Elastic's target version.
+- The customized fixtures should be seeded on a customization-enabled (Enterprise/trial) license so
+  `is_customized` is recorded — same caveat as the customized ML fixture. Query rules themselves
+  install and upgrade on every tier.
+- `verifySeededUpgrades` prints a PASS/FAIL row per checked field (the `name` conflicts above are
+  asserted alongside the `machine_learning_job_id` ones).
 
 ## Future Work
 

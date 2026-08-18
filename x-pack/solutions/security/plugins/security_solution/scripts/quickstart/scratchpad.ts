@@ -6,15 +6,12 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { Client as ListsClient } from '@kbn/securitysolution-lists-common/api/quickstart_client.gen';
-import { Client as ExceptionsClient } from '@kbn/securitysolution-exceptions-common/api/quickstart_client.gen';
-import { concurrentlyExec } from '@kbn/securitysolution-utils/src/client_concurrency';
 import { HORIZONTAL_LINE } from '../endpoint/common/constants';
 import { createEsClient, createKbnClient } from '../endpoint/common/stack_services';
 import { createToolingLogger } from '../../common/endpoint/data_loaders/utils';
 import { Client as DetectionsClient } from '../../common/api/quickstart_client.gen';
-import { duplicateRuleParams } from './modules/rules';
-import { basicRule } from './modules/rules/new_terms/basic_rule';
+// TEMPORARY (revert before committing): wiring for the ML coverage-loss seeder.
+import { seedMlCoverageLossState } from './modules/ml_coverage_loss';
 
 export const cli = () => {
   run(
@@ -43,8 +40,6 @@ export const cli = () => {
       });
 
       const detectionsClient = new DetectionsClient({ kbnClient, log });
-      const listsClient = new ListsClient({ kbnClient, log });
-      const exceptionsClient = new ExceptionsClient({ kbnClient, log });
 
       log.info(`${HORIZONTAL_LINE}
  Environment Data Loader
@@ -58,15 +53,14 @@ ${HORIZONTAL_LINE}
        * START Custom data loader logic
        */
 
-      // Replace this code with whatever you want!
-      const ruleCopies = duplicateRuleParams(basicRule, 200);
-      const functions = ruleCopies.map((rule) => () => detectionsClient.createRule({ body: rule }));
-      await concurrentlyExec(functions);
-
-      listsClient.findLists({ query: {} });
-      exceptionsClient.findExceptionLists({ query: {} });
-
-      esClient.indices.exists({ index: 'test' });
+      // TEMPORARY (revert before committing): seed the ML coverage-loss upgrade repro state.
+      await seedMlCoverageLossState({
+        esClient,
+        kbnClient,
+        detectionsClient,
+        log,
+        installAllAffectedJobs: true,
+      });
 
       /**
        * END Custom data loader logic

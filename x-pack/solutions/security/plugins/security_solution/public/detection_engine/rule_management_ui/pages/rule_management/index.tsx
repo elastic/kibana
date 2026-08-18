@@ -100,7 +100,6 @@ const RulesPageContent = () => {
       <NeedAdminForUpdateRulesCallOut />
       <MissingDetectionsPrivilegesCallOut />
       <CpsMlRuleCallout />
-      <MlJobCompatibilityCallout />
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <RuleImportModal
         isImportModalVisible={isImportModalVisible}
@@ -168,6 +167,7 @@ const RulesPageContent = () => {
           )}
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={canEditRules} />
           <EuiSpacer size="s" />
+          <MlJobCompatibilityCallout />
           {deprecatedRulesCallout}
           <MaintenanceWindowCallout
             kibanaServices={kibanaServices}

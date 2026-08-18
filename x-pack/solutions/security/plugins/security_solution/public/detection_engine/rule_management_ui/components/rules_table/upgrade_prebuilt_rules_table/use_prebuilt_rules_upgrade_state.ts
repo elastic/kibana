@@ -17,12 +17,14 @@ import { FieldUpgradeStateEnum } from '../../../../rule_management/model/prebuil
 import {
   type ThreeWayFieldsDiff,
   type DiffableAllFields,
+  type MachineLearningThreeWayFieldsDiff,
   type RuleUpgradeInfoForReview,
   ThreeWayDiffConflict,
   type RuleSignatureId,
   NON_UPGRADEABLE_DIFFABLE_FIELDS,
   ThreeWayDiffOutcome,
 } from '../../../../../../common/api/detection_engine';
+import { isMlJobCoverageLossUpgrade } from '../../../../../../common/detection_engine/prebuilt_rules/diff/is_ml_job_coverage_loss_upgrade';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 import * as i18n from './translations';
 
@@ -138,6 +140,20 @@ export function usePrebuiltRulesUpgradeState(
         ({ state: fieldState }) => fieldState === FieldUpgradeStateEnum.NonSolvableConflict
       );
 
+      // Derived solely from the `machine_learning_job_id` field diff and the hardcoded
+      // affected-jobs allowlist, independent of `isRulesCustomizationEnabled`. This narrowly
+      // scoped signal drives the informational ML coverage-loss callout shown in the upgrade
+      // flyout on every license tier (it does not block the upgrade).
+      const machineLearningJobIdDiff = (
+        ruleUpgradeInfo.diff.fields as Partial<MachineLearningThreeWayFieldsDiff>
+      ).machine_learning_job_id;
+      const hasMlCoverageLossConflict = machineLearningJobIdDiff
+        ? isMlJobCoverageLossUpgrade(
+            machineLearningJobIdDiff.current_version,
+            machineLearningJobIdDiff.target_version
+          )
+        : false;
+
       state[ruleUpgradeInfo.rule_id] = {
         ...ruleUpgradeInfo,
         conflict: getWorstConflictLevelAmongFields(ruleUpgradeInfo.diff.fields),
@@ -148,6 +164,7 @@ export function usePrebuiltRulesUpgradeState(
         hasNonSolvableUnresolvedConflicts: isRulesCustomizationEnabled
           ? hasRuleTypeChange || hasNonSolvableFieldConflicts
           : false,
+        hasMlCoverageLossConflict,
       };
     }
 
