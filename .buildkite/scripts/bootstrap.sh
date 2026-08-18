@@ -33,9 +33,14 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     fi
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
-elif [[ "$(pwd)" == "/dev/shm"* && -f ~/.kibana/node_modules.tar.zst ]]; then
-  echo "Extracting ~/.kibana/node_modules.tar.zst"
-  tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
+elif [[ "$(pwd)" == "/dev/shm"* ]]; then
+  # The image bake runs `yarn cache clean`, so installs repopulate the cache from
+  # the offline mirror. Keep the cache in memory instead of on the boot disk.
+  yarn config set cache-folder /dev/shm/yarn-cache > /dev/null
+  if [[ -f ~/.kibana/node_modules.tar.zst ]]; then
+    echo "Extracting ~/.kibana/node_modules.tar.zst"
+    tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
+  fi
   if [[ -d ~/.kibana/.yarn-local-mirror ]]; then
     ln -s ~/.kibana/.yarn-local-mirror ./.yarn-local-mirror
   fi
