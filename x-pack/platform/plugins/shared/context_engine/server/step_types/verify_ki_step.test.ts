@@ -21,7 +21,7 @@ const makeHandlerContext = (ki: VerifyKiHandlerContext['input']['ki']): VerifyKi
     logger: loggingSystemMock.createLogger(),
     abortSignal: new AbortController().signal,
     stepId: 'verify_ki',
-    stepType: 'context_engine.verify_ki',
+    stepType: 'context-engine.verifyKi',
   } as unknown as VerifyKiHandlerContext);
 
 describe('verify_ki workflow step', () => {

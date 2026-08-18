@@ -10,7 +10,7 @@ import { StepCategory } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 
-export const VERIFY_KI_STEP_TYPE_ID = 'context_engine.verify_ki';
+export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 
 export const MAX_KI_ATTRIBUTES = 100;
 

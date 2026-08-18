@@ -61,7 +61,7 @@ export class ContextEnginePlugin
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
     setupDeps.workflowsExtensions?.registerStepDefinition(() =>
-      import('./steps/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
+      import('./step_types/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
     );
 
     const startServices = core.getStartServices();

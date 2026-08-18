@@ -8,7 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { VerifyKiStepCommonDefinition } from '../../common/steps/verify_ki_step';
+import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
 import { createKiVerifierRegistry, KiVerificationService } from '../ki_verification';
 
 export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logger) =>

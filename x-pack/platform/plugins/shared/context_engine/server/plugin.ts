@@ -31,7 +31,7 @@ import { AiIndexRegistry } from './ai_indices/registry';
 import { SignalsService } from './signals/service';
 import type { SignalsServiceApi } from './signals/service';
 import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
-import { createVerifyKiStepDefinition } from './steps/verify_ki_step';
+import { createVerifyKiStepDefinition } from './step_types/verify_ki_step';
 
 export class ContextEnginePlugin
   implements

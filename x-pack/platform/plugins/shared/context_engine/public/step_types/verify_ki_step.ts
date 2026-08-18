@@ -6,7 +6,7 @@
  */
 
 import { createPublicStepDefinition } from '@kbn/workflows-extensions/public';
-import { VerifyKiStepCommonDefinition } from '../../common/steps/verify_ki_step';
+import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
 
 export const VerifyKiStepDefinition = createPublicStepDefinition({
   ...VerifyKiStepCommonDefinition,
