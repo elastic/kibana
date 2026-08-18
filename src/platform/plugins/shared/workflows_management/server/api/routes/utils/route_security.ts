@@ -34,12 +34,16 @@ interface ManagedResource {
  *
  * Privilege model:
  * - Routes that return workflow data to the caller require `read`.
- * - Routes that return execution data require `readExecution`.
+ * - Routes that return execution data require `readExecution`, which is an extension of `read`:
+ *   both `read` and `readExecution` are required (the execution document includes the YAML
+ *   snapshot of the workflow definition).
  * - Routes that mutate or execute perform internal reads as part of the operation
  *   (merge, space-scoping, loading the definition to run it). These reads are
  *   implementation details and do NOT require the `read` privilege.
  * - `get_workflows` and `get_stats` use `extendedPrivileges` for optional
  *   execution/managed privileges checked via `authzResult` without gating access.
+ * - Execution routes use `extendedPrivileges` for `readManagedExecution` so handlers can
+ *   branch on managed access via `authzResult` without it becoming a hard gate.
  */
 export const WORKFLOW_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.read] },
@@ -93,15 +97,15 @@ export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
   authz: { requiredPrivileges: [...WorkflowsManagementOperationPrivileges.readExecution] },
 };
 /**
- * Allows either base execution read or managed execution read through platform
- * authz so handlers can inspect `authzResult` for both. Handlers must still
- * require base `readExecution`.
+ * Requires `read` and `readExecution` (the `readExecution` operation privilege set already
+ * includes `read`), and surfaces the optional `readManagedExecution` privilege in `authzResult`
+ * without enforcing it. Handlers use `authzResult.readManagedExecution` to decide whether
+ * managed executions should be included or accessible.
  */
 export const WORKFLOW_EXECUTION_READ_WITH_MANAGED_SECURITY: RouteSecurity = {
   authz: {
-    requiredPrivileges: [
-      { anyRequired: [...WorkflowsManagementOperationPrivileges.readManagedExecution] },
-    ],
+    requiredPrivileges: [...WorkflowsManagementOperationPrivileges.readExecution],
+    extendedPrivileges: [WorkflowsManagementApiActions.readManagedExecution],
   },
 };
 export const WORKFLOW_EXECUTION_CANCEL_SECURITY: RouteSecurity = {
