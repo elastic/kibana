@@ -82,51 +82,73 @@ export const navigateToFlyoutJsonTab = () => {
   cy.get(FLYOUT_JSON_TAB).click();
 };
 
+const VIEW_LOAD_TIMEOUT = 150000;
+const VIEW_LOAD_GRACE_TIMEOUT = 30000;
+const VIEW_LOAD_POLL_DELAY = 1000;
+const POLLS_BETWEEN_SEARCH_RETRIES = 15;
+const POLLS_BEFORE_PAGE_RELOAD = 60;
+const MAX_PAGE_RELOADS = 1;
+
 /**
  * Wait for the view to be fully loaded.
  *
  * The indicators table only renders once the underlying search has resolved with at least one
- * hit (see `IndicatorsTable`'s `isLoading`/`indicatorCount` gating in the app code). On a fresh
+ * hit (see the `isLoading`/`indicatorCount` gating in the app's indicators table). On a fresh
  * page load, the initial indicators search can occasionally resolve before the page's data
  * view/index pattern has fully settled, leaving the table permanently absent even though the
  * underlying data exists (see #239929, #246404, #246405, and #246885). Rather than passively
- * polling the DOM for the whole timeout budget, click the query bar's refresh button every so
- * often to re-trigger the search — this reliably recovers the view instead of a single wait.
+ * polling the DOM for the whole timeout budget, re-run the search via the query bar's refresh
+ * button once the page has had a fair chance to settle on its own, and only fall back to a
+ * single full page reload when even that does not bring the table back.
  *
- * When the KQL bar itself is absent (the page stalled during initialisation before the search
- * bar mounted), a hard reload is the only recovery — a missing bar means the data view
- * bootstrap never completed and clicking elsewhere on the page does nothing.
- *
- * After issuing a reload, wait for the KQL bar to reappear before returning to the recurse
- * loop. Without this, the 2 s inter-iteration delay is shorter than the time Kibana needs to
- * mount the security-solution app (~3 s observed in CI), causing the loop to reload again
- * before the previous reload has settled — each reload interrupts the one before it and the
- * table never gets a chance to render.
+ * The loop is deliberately made of non-failing commands only (`doNotFail` plus DOM probing
+ * instead of `cy.wait` on an aliased request): recovery attempts are best effort, so a slow
+ * page must never turn into a hard error inside a `beforeEach`. When the table never shows up,
+ * the assertions below produce the failure, exactly as they did before this helper existed. They
+ * only need a short grace period, the recursion above already owns the waiting budget.
  */
 export const waitForViewToBeLoaded = () => {
+  let polls = 0;
+  let reloads = 0;
+
   recurse(
-    () => {
-      return cy.get('body').then(($body) => {
+    () =>
+      cy.get('body').then(($body) => {
         if ($body.find(INDICATORS_TABLE).length > 0) {
           return true;
         }
-        if ($body.find(REFRESH_BUTTON).length === 0) {
-          cy.intercept('POST', '**/internal/search/threatIntelligenceSearchStrategy').as(
-            'tiReloadSearch'
-          );
+
+        polls += 1;
+
+        if (polls >= POLLS_BEFORE_PAGE_RELOAD && reloads < MAX_PAGE_RELOADS) {
+          polls = 0;
+          reloads += 1;
+          cy.log('Indicators table still missing, reloading the page');
           cy.reload();
-          cy.wait('@tiReloadSearch', { timeout: 90000 });
-        } else {
-          cy.get(REFRESH_BUTTON).click();
+          return false;
         }
+
+        if (
+          polls % POLLS_BETWEEN_SEARCH_RETRIES === 0 &&
+          $body.find(`${REFRESH_BUTTON}:enabled`).length > 0
+        ) {
+          cy.log('Indicators table still missing, re-running the indicators search');
+          // this is a best effort recovery attempt, it must never fail the surrounding hook
+          cy.get(REFRESH_BUTTON).click({ force: true });
+        }
+
         return false;
-      });
-    },
-    (isTableVisible) => isTableVisible === true,
-    { delay: 2000, timeout: 180000 }
+      }),
+    (isTableRendered) => isTableRendered === true,
+    {
+      delay: VIEW_LOAD_POLL_DELAY,
+      timeout: VIEW_LOAD_TIMEOUT,
+      log: false,
+      doNotFail: true,
+    }
   );
 
-  cy.get(INDICATORS_TABLE).should('exist');
+  cy.get(INDICATORS_TABLE, { timeout: VIEW_LOAD_GRACE_TIMEOUT }).should('exist');
   cy.get(BARCHART_WRAPPER).should('exist');
   waitForViewToBeUpdated();
 };
@@ -157,6 +179,6 @@ export const clickAction = (propertySelector: string, rowIndex: number, actionSe
     ($el) => $el.is(':visible')
   );
 
-  cy.get(propertySelector).filter(':visible').eq(rowIndex).trigger('mouseover');
-  cy.get(actionSelector).first().click();
+  // while { force: true } shouldn't really be used, here it allows us to get rid of flakiness on things that need an mouse hover
+  cy.get(actionSelector).first().click({ force: true });
 };

@@ -181,7 +181,15 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       navigateToFlyoutJsonTab();
 
-      cy.get(FLYOUT_JSON).should('contain.text', '2022-06-02T13:29:47.677Z');
+      // The JSON tab renders the raw Elasticsearch hit inside a virtualised code editor, which
+      // only keeps the lines currently in view in the DOM. Assert on the document metadata that
+      // the editor always renders first (the `_index`/`_id`/`fields` preamble of the hit) rather
+      // than on a field that sits further down the document and may never be rendered.
+      cy.get(FLYOUT_JSON)
+        .should('contain.text', '_index')
+        .and('contain.text', 'ti_abusech')
+        .and('contain.text', '_id')
+        .and('contain.text', 'fields');
     });
   });
 
