@@ -15,9 +15,11 @@ import type {
 } from '@kbn/scout';
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { BackgroundSearchManagementPage } from './page_objects/background_search_management_page';
+import { BackgroundSearchPage } from './page_objects/background_search_page';
 
 export interface BackgroundSearchTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
+    backgroundSearch: BackgroundSearchPage;
     backgroundSearchManagement: BackgroundSearchManagementPage;
   };
 }
@@ -38,10 +40,18 @@ export const spaceTest = spaceBaseTest.extend<
   ) => {
     await use({
       ...pageObjects,
+      backgroundSearch: createLazyPageObject(BackgroundSearchPage, page),
       backgroundSearchManagement: createLazyPageObject(BackgroundSearchManagementPage, page),
     });
   },
 });
 
-export { SESSION_API_PATH, DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE } from './constants';
+export {
+  SESSION_API_PATH,
+  DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
+  DISCOVER_DEFAULT_KBN_ARCHIVE,
+  LOGSTASH_TIME_RANGE,
+  STALLING_DSL_FILTER,
+} from './constants';
+export { BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT } from './page_objects/background_search_page';
 export { deleteAllBackgroundSearches } from './helpers';
