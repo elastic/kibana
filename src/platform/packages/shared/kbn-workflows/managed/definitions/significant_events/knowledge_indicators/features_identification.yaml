@@ -195,6 +195,10 @@ steps:
   - name: identify_computed
     type: kibana.request
     on-failure:
+      retry:
+        max-attempts: 3
+        delay: "5s"
+        strategy: exponential
       continue: true
     with:
       method: POST
