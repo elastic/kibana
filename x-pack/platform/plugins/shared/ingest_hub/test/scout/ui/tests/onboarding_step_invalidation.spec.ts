@@ -86,7 +86,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
       stepState: {
         services: 'complete',
         'service-settings': 'complete',
-        'deploy-settings': 'incomplete',
+        'authenticate-and-deploy': 'incomplete',
         'deploy-and-detect': 'incomplete',
       },
     });
@@ -111,10 +111,10 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
   });
 
   // Path 2: with only non-agentless services selected, the services step auto-marks
-  // deploy-settings complete and skips it. Adding an agentless service (which requires
+  // authenticate-and-deploy complete and skips it. Adding an agentless service (which requires
   // credentials) must immediately invalidate that stale flag so the credentials step
   // can no longer be bypassed, preventing a deploy with no auth configured.
-  test('path 2 — deploy-settings indicator loses checkmark when agentless service is added', async ({
+  test('path 2 — authenticate-and-deploy indicator loses checkmark when agentless service is added', async ({
     browserAuth,
     page,
   }) => {
@@ -125,7 +125,7 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
       stepState: {
         services: 'complete',
         'service-settings': 'complete',
-        'deploy-settings': 'complete',
+        'authenticate-and-deploy': 'complete',
         'deploy-and-detect': 'incomplete',
       },
     });
@@ -133,19 +133,17 @@ test.describe('Onboarding — downstream step invalidation', { tag: tags.statefu
 
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
-    // Confirm deploy-settings starts as complete (stale from the auto-skip).
-    await expect(page.testSubj.locator('onboardingStepIndicator-deploy-settings')).toHaveAttribute(
-      'data-step-status',
-      'complete'
-    );
+    // Confirm authenticate-and-deploy starts as complete (stale from the auto-skip).
+    await expect(
+      page.testSubj.locator('onboardingStepIndicator-authenticate-and-deploy')
+    ).toHaveAttribute('data-step-status', 'complete');
 
     // Add an agentless service — flips needsDeploySettingsStep to true.
     await page.testSubj.locator(`servicesStep-toggle-${AGENTLESS_ID}`).click();
 
-    // deploy-settings indicator must immediately become incomplete.
-    await expect(page.testSubj.locator('onboardingStepIndicator-deploy-settings')).toHaveAttribute(
-      'data-step-status',
-      'incomplete'
-    );
+    // authenticate-and-deploy indicator must immediately become incomplete.
+    await expect(
+      page.testSubj.locator('onboardingStepIndicator-authenticate-and-deploy')
+    ).toHaveAttribute('data-step-status', 'incomplete');
   });
 });
