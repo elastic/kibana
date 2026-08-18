@@ -450,7 +450,7 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 Object {
                   "const": "recover",
-                  "description": "Forces recovery when no data is present.",
+                  "description": "Resolves the alert episode to inactive on the first no-data run.",
                   "type": "string",
                 },
                 Object {
