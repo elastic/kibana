@@ -28,7 +28,7 @@ const getTableSchemaSchema = z.object({
     .enum(['linux', 'windows', 'darwin'])
     .optional()
     .describe(
-      'Platform to get the schema for. Different platforms may have different columns. If omitted, returns the universal schema.'
+      'Platform to get the schema for. Tables not available on this platform are rejected; columns return the table catalog entry, which covers all supported platforms.'
     ),
 });
 

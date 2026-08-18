@@ -108,17 +108,19 @@ export const listSavedQueriesTool = (
     } catch (e) {
       logger.warn(`Failed to list saved queries: ${e}`);
 
+      // Must be ToolResultType.error: an empty `queries: []` under `other`
+      // tells the model "there are no saved queries" when the truth is the
+      // lookup failed — it then proceeds to author a custom query on a false
+      // premise.
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
-            type: ToolResultType.other,
+            type: ToolResultType.error,
             data: {
-              total: 0,
-              page,
-              per_page: pageSize,
-              queries: [],
-              error: 'Failed to retrieve saved queries',
+              message: `Failed to retrieve saved queries: ${
+                e instanceof Error ? e.message : String(e)
+              }`,
             },
           },
         ],
