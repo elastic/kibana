@@ -67,6 +67,8 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'yarn.lock',
   '.node-version',
   '.nvmrc',
+  'config/**/*.yml',
+  'config/node.options',
 ];
 
 /** Skip FTR when every changed file matches, regardless of owning module. */
