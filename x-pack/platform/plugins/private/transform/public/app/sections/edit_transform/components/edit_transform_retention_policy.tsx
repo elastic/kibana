@@ -168,9 +168,7 @@ export const EditTransformRetentionPolicy: FC = () => {
 
   return (
     <>
-      <EuiFormRow
-        helpText={retentionPolicyHelpText}
-      >
+      <EuiFormRow helpText={retentionPolicyHelpText}>
         <EuiSwitch
           name="transformEditRetentionPolicySwitch"
           label={i18n.translate(
