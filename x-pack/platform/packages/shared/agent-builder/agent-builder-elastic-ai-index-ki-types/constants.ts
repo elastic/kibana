@@ -22,7 +22,7 @@
  */
 
 export const VISUALIZATION_KI_TYPE = 'visualization' as const;
-export const DASHBOARD_SML_TYPE = 'dashboard' as const;
+export const DASHBOARD_KI_TYPE = 'dashboard' as const;
 export const CONNECTOR_SML_TYPE = 'connector' as const;
 export const SIGNIFICANT_EVENT_SML_TYPE = 'significant_event' as const;
 export const WORKFLOW_SML_TYPE = 'workflow' as const;

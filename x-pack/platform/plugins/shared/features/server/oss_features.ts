@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
-  DASHBOARD_SML_TYPE,
+  DASHBOARD_KI_TYPE,
   VISUALIZATION_KI_TYPE,
 } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
@@ -654,7 +654,7 @@ const getBaseDashboardFeature = ({
       all: {
         app: ['dashboards', 'kibana'],
         catalogue: ['dashboard'],
-        aiIndex: { read: [DASHBOARD_SML_TYPE] },
+        aiIndex: { read: [DASHBOARD_KI_TYPE] },
         savedObject: {
           all: savedObjectAllPrivileges,
           read: [
@@ -686,7 +686,7 @@ const getBaseDashboardFeature = ({
       read: {
         app: ['dashboards', 'kibana'],
         catalogue: ['dashboard'],
-        aiIndex: { read: [DASHBOARD_SML_TYPE] },
+        aiIndex: { read: [DASHBOARD_KI_TYPE] },
         savedObject: {
           all: [],
           read: savedObjectReadPrivileges,

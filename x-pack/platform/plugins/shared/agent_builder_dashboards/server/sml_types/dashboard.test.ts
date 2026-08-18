@@ -12,7 +12,7 @@ import {
   DASHBOARD_ATTACHMENT_TYPE,
   attachmentDataToDashboardState,
 } from '@kbn/agent-builder-dashboards-common';
-import { DASHBOARD_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { DASHBOARD_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createDashboardSmlType } from './dashboard';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
@@ -109,7 +109,7 @@ describe('dashboardSmlType', () => {
       getDashboardClient: async () => createDashboardClient(),
     });
 
-    expect(dashboardSmlType.id).toBe(DASHBOARD_SML_TYPE);
+    expect(dashboardSmlType.id).toBe(DASHBOARD_KI_TYPE);
   });
 
   it('lists dashboards across all spaces', async () => {
