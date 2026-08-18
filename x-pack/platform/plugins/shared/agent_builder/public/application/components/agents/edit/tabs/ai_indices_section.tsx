@@ -21,6 +21,7 @@ import {
   EuiIcon,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { Controller } from 'react-hook-form';
@@ -114,19 +115,70 @@ const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({
   );
 };
 
-/** Keeps the pills clear of the form control's dropdown arrow and clear button. */
-const selectedIdsFieldStyles = css`
-  min-height: 100%;
-  padding: 4px 0;
-`;
+/**
+ * Makes the pill container read as a form control, the way `EuiComboBox` does for its own input:
+ * `EuiFormControlLayout` supplies the icons and the layout, but the border and background belong to
+ * the control it wraps, and there is no exported style helper to borrow.
+ *
+ * Uses an inset shadow rather than a border, again as EUI does, so the border cannot alter the
+ * control's height.
+ */
+const useFieldStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const { forms } = euiTheme.components;
 
-/** Fills the rest of the control so the whole empty area opens the list, like a combo box does. */
-const openButtonStyles = css`
-  width: 100%;
-  height: 100%;
-  text-align: start;
-  cursor: pointer;
-`;
+  return useMemo(() => {
+    const insetBorder = (color: string, width: string | number | undefined) =>
+      `box-shadow: inset 0 0 0 ${width} ${color};`;
+
+    return {
+      field: css`
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: ${euiTheme.size.xs} ${euiTheme.size.s};
+        min-block-size: ${euiTheme.size.xxl};
+        border: none;
+        border-radius: ${euiTheme.border.radius.small};
+        background-color: ${forms.background};
+        ${insetBorder(forms.border, euiTheme.border.width.thin)}
+        padding-block: ${euiTheme.size.s};
+        padding-inline-start: ${euiTheme.size.m};
+        /* The layout counts its own icons in this variable, so the pills never run under them. */
+        padding-inline-end: calc(
+          ${euiTheme.size.m} +
+            (${euiTheme.size.base} * 1.5 * var(--euiFormControlRightIconsCount, 0))
+        );
+
+        &:hover {
+          ${insetBorder(forms.borderHovered, euiTheme.border.width.thin)}
+        }
+
+        &:focus-within {
+          ${insetBorder(forms.borderFocused, euiTheme.border.width.thick)}
+        }
+      `,
+      disabled: css`
+        background-color: ${forms.backgroundDisabled};
+        ${insetBorder(forms.border, euiTheme.border.width.thin)}
+        &:hover {
+          ${insetBorder(forms.border, euiTheme.border.width.thin)}
+        }
+      `,
+      /** Fills the rest of the control, so clicking its empty space opens the list. */
+      openButton: css`
+        flex-grow: 1;
+        align-self: stretch;
+        text-align: start;
+        cursor: pointer;
+
+        &:disabled {
+          cursor: not-allowed;
+        }
+      `,
+    };
+  }, [euiTheme, forms]);
+};
 
 interface AiIndicesFieldsProps {
   aiIndices: Array<{ id: string; description?: string; managed: boolean }>;
@@ -148,6 +200,7 @@ const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
   onChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const fieldStyles = useFieldStyles();
 
   const inheritedIdSet = useMemo(() => new Set(inheritedIds), [inheritedIds]);
 
@@ -255,51 +308,43 @@ const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
                 fullWidth
                 isLoading={isLoading}
                 isDisabled={isFormDisabled}
+                wrapperProps={{
+                  css: [fieldStyles.field, isFormDisabled && fieldStyles.disabled],
+                }}
                 clear={
                   selectedIds.length > 0 && !isFormDisabled
                     ? { onClick: () => onChange([]) }
                     : undefined
                 }
               >
-                <EuiFlexGroup
-                  responsive={false}
-                  alignItems="center"
-                  gutterSize="xs"
-                  wrap
-                  css={selectedIdsFieldStyles}
-                >
+                <>
                   {selectedIds.map((id) => (
-                    <EuiFlexItem key={id} grow={false}>
-                      <EuiBadge
-                        color="hollow"
-                        iconType="cross"
-                        iconSide="right"
-                        iconOnClick={() => handleRemove(id)}
-                        iconOnClickAriaLabel={labels.aiIndices.removeAiIndex(id)}
-                        data-test-subj={`agentBuilderSelectedAiIndex-${id}`}
-                      >
-                        {id}
-                      </EuiBadge>
-                    </EuiFlexItem>
+                    <EuiBadge
+                      key={id}
+                      color="hollow"
+                      iconType="cross"
+                      iconSide="right"
+                      iconOnClick={() => handleRemove(id)}
+                      iconOnClickAriaLabel={labels.aiIndices.removeAiIndex(id)}
+                      data-test-subj={`agentBuilderSelectedAiIndex-${id}`}
+                    >
+                      {id}
+                    </EuiBadge>
                   ))}
                   {/* Sibling of the badges rather than their parent, so the remove buttons are
                       never nested inside another button. */}
-                  <EuiFlexItem>
-                    <button
-                      type="button"
-                      onClick={() => setIsOpen((open) => !open)}
-                      disabled={isFormDisabled}
-                      aria-expanded={isOpen}
-                      aria-label={labels.aiIndices.additionalIndicesLabel}
-                      css={openButtonStyles}
-                      data-test-subj="agentBuilderAdditionalAiIndicesButton"
-                    >
-                      {selectedIds.length === 0
-                        ? labels.aiIndices.additionalIndicesPlaceholder
-                        : ''}
-                    </button>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen((open) => !open)}
+                    disabled={isFormDisabled}
+                    aria-expanded={isOpen}
+                    aria-label={labels.aiIndices.additionalIndicesLabel}
+                    css={fieldStyles.openButton}
+                    data-test-subj="agentBuilderAdditionalAiIndicesButton"
+                  >
+                    {selectedIds.length === 0 ? labels.aiIndices.additionalIndicesPlaceholder : ''}
+                  </button>
+                </>
               </EuiFormControlLayout>
             }
           >
