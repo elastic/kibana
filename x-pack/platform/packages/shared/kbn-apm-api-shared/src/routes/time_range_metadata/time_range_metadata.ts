@@ -17,7 +17,10 @@ export const timeRangeMetadataRoute = defineRoute<TimeRangeMetadataResponse>()({
   params: lazySchema(() =>
     z.object({
       query: z
-        .object({ useSpanName: BooleanFromString.default(false) })
+        .object({
+          useSpanName: BooleanFromString.default(false),
+          serviceGroupId: z.string().optional(),
+        })
         .merge(kuerySchema)
         .merge(rangeSchema),
     })

@@ -31,4 +31,29 @@ describe('timeRangeMetadataRoute params', () => {
 
     expectParseError(result);
   });
+
+  it('accepts an optional serviceGroupId', () => {
+    const result = timeRangeMetadataRoute.params!.shape.query.safeParse({
+      useSpanName: 'false',
+      kuery: '',
+      start: '2023-01-01T00:00:00.000Z',
+      end: '2023-01-02T00:00:00.000Z',
+      serviceGroupId: 'my-group',
+    });
+
+    expectParseSuccess(result);
+    expect(result.data.serviceGroupId).toBe('my-group');
+  });
+
+  it('accepts a missing serviceGroupId', () => {
+    const result = timeRangeMetadataRoute.params!.shape.query.safeParse({
+      useSpanName: 'false',
+      kuery: '',
+      start: '2023-01-01T00:00:00.000Z',
+      end: '2023-01-02T00:00:00.000Z',
+    });
+
+    expectParseSuccess(result);
+    expect(result.data.serviceGroupId).toBeUndefined();
+  });
 });

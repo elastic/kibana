@@ -19,6 +19,7 @@ import {
 } from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getServiceGroups } from './get_service_groups';
+import { combineServiceGroupKueries } from '../../lib/helpers/merge_service_group_kuery';
 import { getServiceGroup } from './get_service_group';
 import { saveServiceGroup } from './save_service_group';
 import { deleteServiceGroup } from './delete_service_group';
@@ -150,12 +151,20 @@ const serviceGroupCountsRoute = createApmServerRoute({
       await spacesPluginStart?.spacesService.getActiveSpace(request),
     ]);
 
+    const start = datemath.parse('now-24h')!.toDate().getTime();
+    const end = datemath.parse('now')!.toDate().getTime();
+
+    // Combine all group kueries so document source selection can account for
+    // fields that only exist in non-metric documents (e.g. labels.* on traces).
+    const kuery = combineServiceGroupKueries(serviceGroups);
+
     const [servicesCounts, serviceGroupAlertsCount] = await Promise.all([
       getServicesCounts({
         apmEventClient,
         serviceGroups,
-        start: datemath.parse('now-24h')!.toDate().getTime(),
-        end: datemath.parse('now')!.toDate().getTime(),
+        start,
+        end,
+        kuery,
       }),
       getServiceGroupAlerts({
         serviceGroups,

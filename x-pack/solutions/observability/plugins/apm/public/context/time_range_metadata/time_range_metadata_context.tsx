@@ -26,6 +26,7 @@ export function ApmTimeRangeMetadataContextProvider({ children }: { children?: R
   const { query } = useApmParams('/*');
 
   const kuery = 'kuery' in query && query.kuery ? query.kuery : '';
+  const serviceGroupId = 'serviceGroup' in query && query.serviceGroup ? query.serviceGroup : undefined;
 
   const range =
     'rangeFrom' in query && 'rangeTo' in query
@@ -51,6 +52,7 @@ export function ApmTimeRangeMetadataContextProvider({ children }: { children?: R
       start={start}
       end={end}
       kuery={kuery}
+      serviceGroupId={serviceGroupId}
     >
       {children}
     </TimeRangeMetadataContextProvider>
@@ -64,6 +66,7 @@ export function TimeRangeMetadataContextProvider({
   start,
   end,
   kuery,
+  serviceGroupId,
 }: {
   children?: React.ReactNode;
   uiSettings: IUiSettingsClient;
@@ -71,6 +74,7 @@ export function TimeRangeMetadataContextProvider({
   start: string;
   end: string;
   kuery: string;
+  serviceGroupId?: string;
 }) {
   const fetcherResult = useFetcher(
     (callApmApi) => {
@@ -81,11 +85,12 @@ export function TimeRangeMetadataContextProvider({
             end,
             kuery,
             useSpanName,
+            serviceGroupId,
           },
         },
       });
     },
-    [start, end, kuery, useSpanName]
+    [start, end, kuery, useSpanName, serviceGroupId]
   );
 
   return (
