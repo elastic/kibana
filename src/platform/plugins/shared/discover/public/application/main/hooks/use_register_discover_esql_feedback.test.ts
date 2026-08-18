@@ -46,7 +46,11 @@ describe('useRegisterDiscoverEsqlFeedback', () => {
 
     const { unmount } = renderHook(() => useRegisterDiscoverEsqlFeedback());
 
-    expect(setContext).toHaveBeenCalledWith(DISCOVER_APP_ID, { isEsql: true });
+    expect(setContext).toHaveBeenCalledWith(
+      DISCOVER_APP_ID,
+      { isEsql: true },
+      { title: 'Analytics - Discover ES|QL' }
+    );
 
     unmount();
 

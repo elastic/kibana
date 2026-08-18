@@ -8,6 +8,8 @@
 export type {
   FeedbackQuestion,
   FeedbackContext,
+  FeedbackContextOptions,
+  SetFeedbackContext,
   FeedbackSubmittedData,
   FeedbackFormData,
 } from './types';

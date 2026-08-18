@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerSendFeedbackRoute } from './send_feedback';
+import { feedbackBodySchema, registerSendFeedbackRoute } from './send_feedback';
 import { httpServerMock, analyticsServiceMock, coreMock } from '@kbn/core/server/mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { FEEDBACK_SUBMITTED_EVENT_TYPE } from '../src';
@@ -85,6 +85,40 @@ describe('registerSendFeedbackRoute', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledWith({
       body: { success: true },
+    });
+  });
+
+  it('should reject context with too many entries', () => {
+    const oversizedContext = Object.fromEntries(
+      Array.from({ length: 17 }, (_, i) => [`key${i}`, true])
+    );
+
+    expect(() =>
+      feedbackBodySchema.validate({
+        app_id: 'discover',
+        solution: 'classic',
+        allow_email_contact: false,
+        url: '/app/discover',
+        context: oversizedContext,
+      })
+    ).toThrow(/context cannot have more than 16 entries/);
+  });
+
+  it('should accept context within the entry limit', () => {
+    expect(
+      feedbackBodySchema.validate({
+        app_id: 'discover',
+        solution: 'classic',
+        allow_email_contact: false,
+        url: '/app/discover',
+        context: { isEsql: true },
+      })
+    ).toEqual({
+      app_id: 'discover',
+      solution: 'classic',
+      allow_email_contact: false,
+      url: '/app/discover',
+      context: { isEsql: true },
     });
   });
 

@@ -186,6 +186,10 @@ export interface DiscoverStartPlugins {
   fileUpload?: FileUploadPluginStart;
   cps?: CPSPluginStart;
   feedback?: {
-    setContext: (appId: string, context: Record<string, string | boolean | number>) => () => void;
+    setContext: (
+      appId: string,
+      context: Record<string, string | boolean | number>,
+      options?: { title?: string }
+    ) => () => void;
   };
 }

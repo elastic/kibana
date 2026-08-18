@@ -230,11 +230,11 @@ describe('getAppDetails', () => {
     });
   });
 
-  it('should derive a Discover ES|QL title from context', () => {
+  it('should use titleOverride as a full title replacement', () => {
     setWindowLocation('/app/discover');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
 
-    const result = getAppDetails(coreStartMock, { isEsql: true });
+    const result = getAppDetails(coreStartMock, { isEsql: true }, 'Analytics - Discover ES|QL');
 
     expect(result).toEqual({
       title: 'Analytics - Discover ES|QL',
@@ -255,7 +255,7 @@ describe('getAppDetails', () => {
     });
   });
 
-  it('should not suffix non-Discover titles when context.isEsql is true', () => {
+  it('should keep the derived title when no title override is provided', () => {
     setWindowLocation('/app/dashboard');
     coreStartMock.chrome.navLinks.getAll.mockReturnValue([
       createMockNavLink({
@@ -276,6 +276,18 @@ describe('getAppDetails', () => {
       title: 'Analytics - Dashboard',
       id: 'dashboard',
       url: '/app/dashboard',
+      context: { isEsql: true },
+    });
+  });
+
+  it('should ignore an empty title override', () => {
+    setWindowLocation('/app/discover');
+    coreStartMock.chrome.navLinks.getAll.mockReturnValue([discoverNavLink()]);
+
+    expect(getAppDetails(coreStartMock, { isEsql: true }, '')).toEqual({
+      title: 'Analytics - Discover',
+      id: 'discover',
+      url: '/app/discover',
       context: { isEsql: true },
     });
   });

@@ -155,5 +155,20 @@ describe('Feedback Plugin', () => {
 
       expect(getAppDetailsFromTrigger()().context).toBeUndefined();
     });
+
+    it('uses options.title as a full app title override', () => {
+      enableFeedback();
+      const { setContext } = startPlugin();
+      currentAppId$.next('discover');
+
+      setContext('discover', { isEsql: true }, { title: 'Analytics - Discover ES|QL' });
+
+      expect(getAppDetailsFromTrigger()()).toEqual(
+        expect.objectContaining({
+          title: 'Analytics - Discover ES|QL',
+          context: { isEsql: true },
+        })
+      );
+    });
   });
 });

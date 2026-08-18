@@ -6,7 +6,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import { DISCOVER_APP_ID } from '@kbn/deeplinks-analytics';
 import type { FeedbackContext } from '../../../common';
 
 /**
@@ -42,7 +41,11 @@ const hasContextKeys = (context?: FeedbackContext): context is FeedbackContext =
  * Get current app details from browser URL and nav links.
  * Uses the actual browser URL for accurate deep link detection.
  */
-export const getAppDetails = (core: CoreStart, context?: FeedbackContext) => {
+export const getAppDetails = (
+  core: CoreStart,
+  context?: FeedbackContext,
+  titleOverride?: string
+) => {
   const currentPath = window.location.pathname;
   const navLinks = core.chrome.navLinks.getAll();
 
@@ -81,8 +84,8 @@ export const getAppDetails = (core: CoreStart, context?: FeedbackContext) => {
     title = `${category.label} - ${match?.title}`;
   }
 
-  if (id === DISCOVER_APP_ID && context?.isEsql === true && title) {
-    title = `${title} ES|QL`;
+  if (titleOverride) {
+    title = titleOverride;
   }
 
   return {
