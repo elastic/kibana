@@ -466,8 +466,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
                 data-test-subj="serviceSettingsStep-continueButton"
               >
                 <FormattedMessage
-                  id="xpack.ingestHub.serviceSettingsStep.continueButton"
-                  defaultMessage="Continue"
+                  id="xpack.ingestHub.serviceSettingsStep.nextButton"
+                  defaultMessage="Next"
                 />
               </EuiButton>
             </span>

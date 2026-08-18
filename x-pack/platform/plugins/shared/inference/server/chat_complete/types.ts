@@ -15,6 +15,7 @@ import type {
   ToolOptions,
   ChatCompleteMetadata,
   AnonymizationRule,
+  ChatCompleteCacheControl,
 } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
@@ -52,6 +53,8 @@ export type InferenceAdapterChatCompleteOptions = {
   stream?: boolean;
   timeout?: number;
   maxContentLength?: number;
+  cacheControl?: ChatCompleteCacheControl;
+  sessionId?: string;
 } & ToolOptions;
 
 /**
