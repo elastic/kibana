@@ -24,6 +24,7 @@ import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import { DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '../../utils/default_esql_query_timeout';
 import { pValueToLabel } from '../../utils/p_value_to_label';
 import { categorizeWithNoiseExclusion } from '../../utils/esql_categorize';
 
@@ -284,7 +285,6 @@ interface SigEventsLogPatternEsqlOptions {
   samplingSource: string;
   fields: string[];
   kql?: string;
-  signal?: AbortSignal;
 }
 
 export async function getLogPatterns<TChanges extends boolean | undefined = undefined>(
@@ -420,6 +420,7 @@ export async function getSigEventsLogPatternsEsql({
   kql,
   fields,
 }: SigEventsLogPatternEsqlOptions): Promise<LogPatternEsqlEntry[]> {
+  const signal = AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS);
   const columns = await getEsqlColumnSchema({
     esClient: esClient.client,
     index: samplingSource,
