@@ -67,7 +67,7 @@ describe('SearchNavigationPlugin', () => {
     const contextEngineSetup = createContextEngineSetup();
     const plugin = createPlugin();
 
-    coreStart.chrome.getChromeStyle.mockReturnValue('classic');
+    coreStart.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('classic'));
 
     plugin.setup(coreSetup, {
       share: sharePluginMock.createSetupContract(),
