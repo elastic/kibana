@@ -13,6 +13,7 @@ import { getPrivateLocations } from '../synthetics_service/get_private_locations
 import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
 import { getAgentInfo, type AgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import { planLocationRebalance } from '../synthetics_service/private_location/plan_rebalance';
+import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 
 const TASK_TYPE = 'Synthetics:Rebalance-Private-Location-Shards';
@@ -37,7 +38,10 @@ interface RebalanceTaskState extends Record<string, unknown> {
  * own tighter interval and only ever touches condition-sharded locations.
  */
 export class RebalancePrivateLocationShardsTask {
-  constructor(private readonly serverSetup: SyntheticsServerSetup) {}
+  constructor(
+    private readonly serverSetup: SyntheticsServerSetup,
+    private readonly syntheticsMonitorClient: SyntheticsMonitorClient
+  ) {}
 
   registerTaskDefinition(taskManager: TaskManagerSetupContract) {
     taskManager.registerTaskDefinitions({
@@ -93,13 +97,17 @@ export class RebalancePrivateLocationShardsTask {
           continue;
         }
 
-        const { healthyAgentIds, recoveryAgentIds, nextHealthySince: locationHealthySince } =
-          planLocationRebalance({
-            agents,
-            now,
-            priorHealthySince,
-            agentPolicyId: location.agentPolicyId,
-          });
+        const {
+          healthyAgentIds,
+          recoveryAgentIds,
+          capacities,
+          nextHealthySince: locationHealthySince,
+        } = planLocationRebalance({
+          agents,
+          now,
+          priorHealthySince,
+          agentPolicyId: location.agentPolicyId,
+        });
         // Keys are policy-scoped, so merging every location into one map is safe.
         Object.assign(nextHealthySince, locationHealthySince);
 
@@ -116,7 +124,15 @@ export class RebalancePrivateLocationShardsTask {
           `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, recovery-eligible=${recoveryAgentIds.length}`
         );
 
-        // Placement and diff-based writes are wired up in the following step.
+        // Idempotent placement + diff-based writes: only monitors whose assigned
+        // agent changed are rewritten; steady state performs zero writes.
+        const { total, moved } = await this.syntheticsMonitorClient.privateLocationAPI.rebalanceShards({
+          location: { id: location.id, label: location.label },
+          healthyAgentIds,
+          recoveryAgentIds,
+          capacities,
+        });
+        this.debugLog(`location ${location.id}: moved ${moved}/${total} monitor(s)`);
       }
 
       return {
