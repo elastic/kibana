@@ -80,6 +80,31 @@ describe('buildFanoutMatrix - per-spec mode', () => {
   });
 });
 
+describe('buildFanoutMatrix - specs that resolve to no connector', () => {
+  it('warns and drops a spec whose models match no connector, keeping the rest', () => {
+    const warn = jest.fn();
+    const rows = buildFanoutMatrix({
+      connectors: CONNECTORS,
+      suiteInfo: {
+        shards: [{ id: 's1', specFiles: [DISCOVERY, QUERY_GEN] }],
+        specModelGroups: {
+          discovery: ['eis/a'],
+          ki_query_generation: ['eis/not-provisioned'],
+        },
+        weeklyEisModelGroups: ['eis/a', 'eis/b', 'eis/c'],
+      },
+      requestedModelGroups: ['eis/a', 'eis/b', 'eis/c'],
+      perSpec: true,
+      grepOverride: false,
+      warn,
+    });
+
+    expect(rows).toEqual([{ connectorId: 'eis-a', shardId: 's1', specFiles: [DISCOVERY] }]);
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining(QUERY_GEN));
+  });
+});
+
 describe('buildFanoutMatrix - override / no-config parity', () => {
   it('runs every requested connector against every spec when perSpec is off', () => {
     expect(run({ perSpec: false })).toEqual([

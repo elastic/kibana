@@ -35,6 +35,7 @@ const isTruthy = (value) => /^(1|true)$/i.test(String(value || '').trim());
  * @param {string[]} params.requestedModelGroups  EVAL_MODEL_GROUPS (the provisioned universe)
  * @param {boolean} params.perSpec            EVAL_PER_SPEC_MODELS
  * @param {boolean} params.grepOverride       whether EVAL_GREP / EVAL_GREP_INVERT is set
+ * @param {(message: string) => void} [params.warn]  diagnostic sink (defaults to console.error)
  * @returns {Array<{connectorId: string, shardId: string, specFiles: string[]}>}
  */
 function buildFanoutMatrix({
@@ -43,6 +44,7 @@ function buildFanoutMatrix({
   requestedModelGroups,
   perSpec: perSpecFlag,
   grepOverride,
+  warn = (message) => console.error(message),
 }) {
   const specModelGroups =
     suiteInfo.specModelGroups && typeof suiteInfo.specModelGroups === 'object'
@@ -91,7 +93,15 @@ function buildFanoutMatrix({
     const connectorToSpecFiles = new Map();
     for (const specFile of specFiles) {
       const groups = resolveSpecModelGroups(pathToSpecId(specFile));
-      for (const connectorId of selectConnectorIds(connectors, groups)) {
+      const connectorIds = selectConnectorIds(connectors, groups);
+      if (connectorIds.length === 0) {
+        warn(
+          `No connector in KIBANA_TESTING_AI_CONNECTORS matched models [${groups.join(', ')}] ` +
+            `for spec "${specFile}"; it will not run in this fanout.`
+        );
+        continue;
+      }
+      for (const connectorId of connectorIds) {
         if (!connectorToSpecFiles.has(connectorId)) {
           connectorToSpecFiles.set(connectorId, []);
         }
