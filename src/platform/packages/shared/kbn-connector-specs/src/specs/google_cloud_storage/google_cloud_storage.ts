@@ -244,33 +244,13 @@ export const GoogleCloudStorageConnector: ConnectorSpec = {
       defaultMessage: 'Verifies Google Cloud Storage connection by calling the GCS API',
     }),
     handler: async (ctx) => {
-      try {
-        // Use the service discovery endpoint — it's accessible with any valid GCS token
-        // and doesn't require a project ID
-        const response = await ctx.client.get('https://storage.googleapis.com/storage/v1/b', {
-          params: { project: 'test', maxResults: 1 },
-        });
-        // A 200 or 400 (missing project) both prove the token is valid
-        if (response.status === 200 || response.status === 400) {
-          return { ok: true, message: 'Successfully connected to Google Cloud Storage API' };
-        }
-        return { ok: false, message: 'Failed to connect to Google Cloud Storage API' };
-      } catch (error) {
-        // A 400 error from GCS (e.g. "required" project param) still proves the token works
-        const axiosError = error as {
-          response?: { status?: number; data?: { error?: { code?: number } } };
-        };
-        const status = axiosError.response?.status ?? axiosError.response?.data?.error?.code;
-        if (status === 400) {
-          return { ok: true, message: 'Successfully connected to Google Cloud Storage API' };
-        }
-        return {
-          ok: false,
-          message: `Failed to connect to Google Cloud Storage API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      // A 200 or 400 (missing project id) both prove the token is valid
+      await ctx.client.get('https://storage.googleapis.com/storage/v1/b', {
+        params: { project: 'test', maxResults: 1 },
+        validateStatus: (status) => status === 200 || status === 400,
+      });
+      return {};
     },
+    enabled: true,
   },
 };

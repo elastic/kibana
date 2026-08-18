@@ -49,7 +49,6 @@ export const updateSignificantEventStatus = async ({
   const updatedEvent = {
     ...latest,
     '@timestamp': now,
-    created_at: now,
     event_uuid: nextEventUuid,
     previous_event_uuid: latest.event_uuid,
     status,

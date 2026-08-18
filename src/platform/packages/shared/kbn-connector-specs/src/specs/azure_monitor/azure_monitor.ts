@@ -768,7 +768,6 @@ export const AzureMonitor: ConnectorSpec = {
         );
         const count = Array.isArray(response.data?.value) ? response.data.value.length : 0;
         return {
-          ok: true,
           message: `Successfully connected to Azure Monitor: found ${count} action group(s)`,
         };
       } catch (error) {
