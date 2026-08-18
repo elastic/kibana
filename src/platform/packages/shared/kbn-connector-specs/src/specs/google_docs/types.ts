@@ -13,9 +13,6 @@ import { z, lazySchema } from '@kbn/zod/v4';
 // Action input schemas & inferred types
 // =============================================================================
 
-export const ListToolsInputSchema = lazySchema(() => z.object({}));
-export type ListToolsInput = z.infer<typeof ListToolsInputSchema>;
-
 export const ReadDocInputSchema = lazySchema(() =>
   z.object({
     document_id: z
@@ -25,6 +22,27 @@ export const ReadDocInputSchema = lazySchema(() =>
       .describe(
         'The ID of the Google Doc to read. Found in the document URL: ' +
           'docs.google.com/document/d/{document_id}/edit. Example: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"'
+      ),
+    max_characters: z
+      .number()
+      .int()
+      .min(1_000)
+      .max(200_000)
+      .default(100_000)
+      .describe(
+        'Maximum number of characters to return (default 100,000, range 1,000–200,000). ' +
+          'If the document is longer, the response includes truncated: true and next_offset ' +
+          'for fetching the next page.'
+      ),
+    offset: z
+      .number()
+      .int()
+      .min(0)
+      .max(10_000_000)
+      .default(0)
+      .describe(
+        'Character offset to start reading from (default 0). ' +
+          'Pass the next_offset value from a previous response to read the next page.'
       ),
   })
 );
@@ -48,31 +66,15 @@ export const UpdateDocInputSchema = lazySchema(() =>
         'Array of batch update request objects for the Google Docs batchUpdate API. Each object must contain exactly ' +
           'one key identifying the operation type, plus its parameters. ' +
           'Examples: ' +
-          '{"insertText": {"location": {"index": 1}, "text": "Hello"}} — insert text at a specific position; ' +
-          '{"replaceAllText": {"containsText": {"text": "old"}, "replaceText": "new"}} — find and replace text; ' +
+          '{"replaceAllText": {"containsText": {"text": "old"}, "replaceText": "new"}} — find and replace; ' +
+          '{"insertText": {"location": {"index": 1}, "text": "Hello"}} — insert at index (requires exact index from documents.get); ' +
           '{"updateTextStyle": {"range": {"startIndex": 1, "endIndex": 10}, "textStyle": {"bold": true}, ' +
-          '"fields": "bold"}} — apply bold formatting. ' +
-          'Supported operations include insertText, replaceAllText, updateTextStyle, updateParagraphStyle, ' +
-          'createParagraphBullets, deleteParagraphBullets, insertTable, insertTableRow, deleteTableRow, ' +
-          'insertInlineImage, deleteContentRange, and 30+ more. ' +
+          '"fields": "bold"}} — apply formatting. ' +
+          'Supported operations include replaceAllText, insertText, deleteContentRange, updateTextStyle, ' +
+          'updateParagraphStyle, createParagraphBullets, deleteParagraphBullets, insertTable, insertTableRow, ' +
+          'deleteTableRow, insertInlineImage, and 30+ more. ' +
           'See the Google Docs batchUpdate reference for the full list.'
       ),
   })
 );
 export type UpdateDocInput = z.infer<typeof UpdateDocInputSchema>;
-
-export const CallToolInputSchema = lazySchema(() =>
-  z.object({
-    name: z
-      .string()
-      .min(1)
-      .max(200)
-      .describe('The MCP tool name to call. Use listTools to discover available tools.'),
-    arguments: z
-      .record(z.string().max(200), z.unknown())
-      .refine((obj) => Object.keys(obj).length <= 50, { message: 'Too many arguments (max 50)' })
-      .optional()
-      .describe('Tool arguments as a key/value map (max 50 entries)'),
-  })
-);
-export type CallToolInput = z.infer<typeof CallToolInputSchema>;

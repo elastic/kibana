@@ -7,7 +7,7 @@ secrets:
   tokenUrl:
     value: "https://oauth2.googleapis.com/token"
   scope:
-    value: "https://www.googleapis.com/auth/documents"
+    value: "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents"
   clientId:
     vault: secret/ent-search-team/workplace-ai-oauth/dev/google
     field: client_id

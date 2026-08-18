@@ -10,37 +10,23 @@
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
 import { GoogleDocsConnector } from './google_docs';
 
-// Mock withMcpClient so action handlers don't need a real MCP transport.
-const mockCallTool = jest.fn();
-const mockListTools = jest.fn();
-
-jest.mock('../../lib/mcp/with_mcp_client', () => ({
-  withMcpClient: jest.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-    return fn({ callTool: mockCallTool, listTools: mockListTools });
-  }),
-}));
-
-// Helper: parse raw input through the action schema the way the framework does,
-// so Zod defaults are applied before the handler receives the input.
 const parse = <K extends keyof typeof GoogleDocsConnector.actions>(
   action: K,
   raw: Record<string, unknown>
 ) => GoogleDocsConnector.actions[action].input.parse(raw);
 
 describe('GoogleDocsConnector', () => {
-  const mockContext = {
-    client: {},
-    log: {},
-    config: { serverUrl: 'https://docsmcp.googleapis.com/mcp/v1' },
-  } as unknown as ActionContext;
+  const mockGet = jest.fn();
+  const mockPost = jest.fn();
 
-  const mockJson = { documentId: 'doc-1', title: 'My Document', body: { content: [] } };
-  const mockContent = [{ type: 'text', text: JSON.stringify(mockJson) }];
+  const mockContext = {
+    client: { get: mockGet, post: mockPost },
+    log: { debug: jest.fn() },
+    config: {},
+  } as unknown as ActionContext;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCallTool.mockResolvedValue({ content: mockContent });
-    mockListTools.mockResolvedValue({ tools: [{ name: 'read_doc' }, { name: 'update_doc' }] });
   });
 
   // =========================================================================
@@ -68,27 +54,18 @@ describe('GoogleDocsConnector', () => {
   // auth
   // =========================================================================
   describe('auth', () => {
-    it('supports ears auth type as first visible option', () => {
-      const visibleTypes = GoogleDocsConnector.auth?.types.filter(
-        (t) => typeof t === 'string' || !(t as AuthTypeDef).isLegacy
-      );
-      expect(visibleTypes?.[0]).toEqual(expect.objectContaining({ type: 'ears' }));
+    it('supports ears auth type as first option', () => {
+      expect(GoogleDocsConnector.auth?.types[0]).toEqual(expect.objectContaining({ type: 'ears' }));
     });
 
-    it('ears auth uses Google provider and documents scope', () => {
+    it('ears auth uses Google provider and required scopes', () => {
       const earsType = GoogleDocsConnector.auth?.types.find(
         (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'ears'
       );
-      expect(earsType).toMatchObject({
-        type: 'ears',
-        defaults: {
-          provider: 'google',
-          scope: 'https://www.googleapis.com/auth/documents',
-        },
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-      });
+      const scope = earsType?.defaults?.scope as string;
+      expect(scope).toContain('https://www.googleapis.com/auth/drive.readonly');
+      expect(scope).toContain('https://www.googleapis.com/auth/documents');
+      expect(earsType?.overrides?.meta).toEqual({ scope: { disabled: true } });
     });
 
     it('supports oauth_authorization_code with correct Google defaults and hidden fields', () => {
@@ -100,7 +77,6 @@ describe('GoogleDocsConnector', () => {
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
-          scope: 'https://www.googleapis.com/auth/documents',
         },
         overrides: {
           meta: {
@@ -110,23 +86,16 @@ describe('GoogleDocsConnector', () => {
           },
         },
       });
-    });
-  });
-
-  // =========================================================================
-  // schema (config)
-  // =========================================================================
-  describe('schema', () => {
-    it('defaults serverUrl to the Google Docs MCP server', () => {
-      const parsed = GoogleDocsConnector.schema.parse({});
-      expect(parsed.serverUrl).toBe('https://docsmcp.googleapis.com/mcp/v1');
+      const scope = oauthType?.defaults?.scope as string;
+      expect(scope).toContain('https://www.googleapis.com/auth/documents');
+      expect(scope).toContain('https://www.googleapis.com/auth/drive.readonly');
     });
 
-    it('accepts a custom serverUrl', () => {
-      const parsed = GoogleDocsConnector.schema.parse({
-        serverUrl: 'https://custom.example.com/mcp/v1',
-      });
-      expect(parsed.serverUrl).toBe('https://custom.example.com/mcp/v1');
+    it('does not include bearer auth', () => {
+      const bearerType = GoogleDocsConnector.auth?.types.find(
+        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
+      );
+      expect(bearerType).toBeUndefined();
     });
   });
 
@@ -134,18 +103,133 @@ describe('GoogleDocsConnector', () => {
   // readDoc action
   // =========================================================================
   describe('readDoc action', () => {
+    const DOC_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms';
+    const META_RESPONSE = {
+      data: {
+        name: 'My Test Doc',
+        mimeType: 'application/vnd.google-apps.document',
+        webViewLink: `https://docs.google.com/document/d/${DOC_ID}/edit`,
+      },
+    };
+
     it('is exposed as a tool', () => {
       expect(GoogleDocsConnector.actions.readDoc.isTool).toBe(true);
     });
 
-    it('passes document_id to the read_doc MCP tool', async () => {
-      const input = parse('readDoc', { document_id: 'doc-abc123' });
+    it('fetches metadata then exports as Markdown', async () => {
+      const markdownContent = '# My Test Doc\n\nHello world';
+      mockGet.mockResolvedValueOnce(META_RESPONSE).mockResolvedValueOnce({ data: markdownContent });
+
+      const input = parse('readDoc', { document_id: DOC_ID });
+      const result = await GoogleDocsConnector.actions.readDoc.handler(mockContext, input);
+
+      expect(mockGet).toHaveBeenNthCalledWith(
+        1,
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(DOC_ID)}`,
+        expect.objectContaining({
+          params: expect.objectContaining({ fields: 'id,name,mimeType,webViewLink' }),
+        })
+      );
+      expect(mockGet).toHaveBeenNthCalledWith(
+        2,
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(DOC_ID)}/export`,
+        expect.objectContaining({
+          params: { mimeType: 'text/markdown' },
+          responseType: 'text',
+        })
+      );
+      expect(result).toMatchObject({
+        document_id: DOC_ID,
+        title: 'My Test Doc',
+        content: markdownContent,
+        offset: 0,
+        total_characters: markdownContent.length,
+        truncated: false,
+      });
+      expect((result as { next_offset?: number }).next_offset).toBeUndefined();
+    });
+
+    it('applies default offset of 0 and max_characters of 100,000', async () => {
+      const content = 'a'.repeat(50_000);
+      mockGet.mockResolvedValueOnce(META_RESPONSE).mockResolvedValueOnce({ data: content });
+
+      const input = parse('readDoc', { document_id: DOC_ID });
+      const result = (await GoogleDocsConnector.actions.readDoc.handler(mockContext, input)) as {
+        offset: number;
+        truncated: boolean;
+        total_characters: number;
+      };
+
+      expect(result.offset).toBe(0);
+      expect(result.truncated).toBe(false);
+      expect(result.total_characters).toBe(50_000);
+    });
+
+    it('truncates and returns next_offset when content exceeds max_characters', async () => {
+      const content = 'a'.repeat(200_000);
+      mockGet.mockResolvedValueOnce(META_RESPONSE).mockResolvedValueOnce({ data: content });
+
+      const input = parse('readDoc', { document_id: DOC_ID, max_characters: 50_000 });
+      const result = (await GoogleDocsConnector.actions.readDoc.handler(mockContext, input)) as {
+        content: string;
+        truncated: boolean;
+        next_offset: number;
+        total_characters: number;
+      };
+
+      expect(result.content).toHaveLength(50_000);
+      expect(result.truncated).toBe(true);
+      expect(result.next_offset).toBe(50_000);
+      expect(result.total_characters).toBe(200_000);
+    });
+
+    it('applies offset when paging through a long document', async () => {
+      const content = 'abcdefghij'.repeat(10_000); // 100,000 chars
+      mockGet.mockResolvedValueOnce(META_RESPONSE).mockResolvedValueOnce({ data: content });
+
+      const input = parse('readDoc', {
+        document_id: DOC_ID,
+        offset: 50_000,
+        max_characters: 50_000,
+      });
+      const result = (await GoogleDocsConnector.actions.readDoc.handler(mockContext, input)) as {
+        content: string;
+        offset: number;
+        truncated: boolean;
+      };
+
+      expect(result.offset).toBe(50_000);
+      expect(result.content).toBe(content.slice(50_000, 100_000));
+      expect(result.truncated).toBe(false);
+    });
+
+    it('encodes document_id in the URL', async () => {
+      const specialId = 'doc/with spaces&chars';
+      mockGet.mockResolvedValueOnce(META_RESPONSE).mockResolvedValueOnce({ data: 'content' });
+
+      const input = parse('readDoc', { document_id: specialId });
       await GoogleDocsConnector.actions.readDoc.handler(mockContext, input);
 
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'read_doc',
-        arguments: { documentId: 'doc-abc123' },
+      expect(mockGet).toHaveBeenNthCalledWith(
+        1,
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(specialId)}`,
+        expect.anything()
+      );
+    });
+
+    it('throws when the file is not a Google Doc', async () => {
+      mockGet.mockResolvedValueOnce({
+        data: {
+          name: 'spreadsheet.xlsx',
+          mimeType: 'application/vnd.google-apps.spreadsheet',
+          webViewLink: 'https://docs.google.com/spreadsheets/d/123',
+        },
       });
+
+      const input = parse('readDoc', { document_id: DOC_ID });
+      await expect(GoogleDocsConnector.actions.readDoc.handler(mockContext, input)).rejects.toThrow(
+        'not a Google Doc'
+      );
     });
 
     it('rejects missing document_id', () => {
@@ -159,108 +243,94 @@ describe('GoogleDocsConnector', () => {
     it('rejects document_id longer than 200 characters', () => {
       expect(() => parse('readDoc', { document_id: 'a'.repeat(201) })).toThrow();
     });
+
+    it('rejects max_characters below 1,000', () => {
+      expect(() => parse('readDoc', { document_id: DOC_ID, max_characters: 999 })).toThrow();
+    });
+
+    it('rejects max_characters above 200,000', () => {
+      expect(() => parse('readDoc', { document_id: DOC_ID, max_characters: 200_001 })).toThrow();
+    });
   });
 
   // =========================================================================
   // updateDoc action
   // =========================================================================
   describe('updateDoc action', () => {
+    const DOC_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms';
+
     it('is exposed as a tool', () => {
       expect(GoogleDocsConnector.actions.updateDoc.isTool).toBe(true);
     });
 
-    it('passes document_id and requests to the update_doc MCP tool', async () => {
-      const requests = [{ insertText: { location: { index: 1 }, text: 'Hello' } }];
-      const input = parse('updateDoc', { document_id: 'doc-abc123', requests });
+    it('calls batchUpdate with document_id and requests', async () => {
+      const requests = [{ replaceAllText: { containsText: { text: 'old' }, replaceText: 'new' } }];
+      mockPost.mockResolvedValueOnce({ data: { documentId: DOC_ID, replies: [{}] } });
 
+      const input = parse('updateDoc', { document_id: DOC_ID, requests });
       await GoogleDocsConnector.actions.updateDoc.handler(mockContext, input);
 
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'update_doc',
-        arguments: { documentId: 'doc-abc123', requests },
+      expect(mockPost).toHaveBeenCalledWith(
+        `https://docs.googleapis.com/v1/documents/${encodeURIComponent(DOC_ID)}:batchUpdate`,
+        { requests }
+      );
+    });
+
+    it('encodes document_id in the URL', async () => {
+      const specialId = 'doc/with spaces';
+      mockPost.mockResolvedValueOnce({ data: {} });
+
+      const input = parse('updateDoc', {
+        document_id: specialId,
+        requests: [{ replaceAllText: { containsText: { text: 'a' }, replaceText: 'b' } }],
       });
+      await GoogleDocsConnector.actions.updateDoc.handler(mockContext, input);
+
+      expect(mockPost).toHaveBeenCalledWith(
+        `https://docs.googleapis.com/v1/documents/${encodeURIComponent(specialId)}:batchUpdate`,
+        expect.anything()
+      );
     });
 
     it('accepts multiple requests in one call', async () => {
       const requests = [
-        { insertText: { location: { index: 1 }, text: 'First' } },
-        { replaceAllText: { containsText: { text: 'old' }, replaceText: 'new' } },
+        { replaceAllText: { containsText: { text: 'foo' }, replaceText: 'bar' } },
+        {
+          updateTextStyle: {
+            range: { startIndex: 1, endIndex: 5 },
+            textStyle: { bold: true },
+            fields: 'bold',
+          },
+        },
       ];
-      const input = parse('updateDoc', { document_id: 'doc-1', requests });
+      mockPost.mockResolvedValueOnce({ data: { documentId: DOC_ID, replies: [{}, {}] } });
+
+      const input = parse('updateDoc', { document_id: DOC_ID, requests });
       await GoogleDocsConnector.actions.updateDoc.handler(mockContext, input);
 
-      expect(mockCallTool).toHaveBeenCalledWith(
-        expect.objectContaining({
-          arguments: expect.objectContaining({ documentId: 'doc-1', requests }),
-        })
+      expect(mockPost).toHaveBeenCalledWith(
+        expect.stringContaining(':batchUpdate'),
+        expect.objectContaining({ requests })
       );
     });
 
-    it('rejects missing document_id', () => {
-      expect(() =>
-        parse('updateDoc', { requests: [{ insertText: { location: { index: 1 }, text: 'x' } }] })
-      ).toThrow();
-    });
-
     it('rejects empty requests array', () => {
-      expect(() => parse('updateDoc', { document_id: 'doc-1', requests: [] })).toThrow();
+      expect(() => parse('updateDoc', { document_id: DOC_ID, requests: [] })).toThrow();
     });
 
     it('rejects more than 100 requests', () => {
       const requests = Array.from({ length: 101 }, () => ({
-        insertText: { location: { index: 1 }, text: 'x' },
+        replaceAllText: { containsText: { text: 'a' }, replaceText: 'b' },
       }));
-      expect(() => parse('updateDoc', { document_id: 'doc-1', requests })).toThrow();
-    });
-  });
-
-  // =========================================================================
-  // listTools action
-  // =========================================================================
-  describe('listTools action', () => {
-    it('is exposed as a tool', () => {
-      expect(GoogleDocsConnector.actions.listTools.isTool).toBe(true);
+      expect(() => parse('updateDoc', { document_id: DOC_ID, requests })).toThrow();
     });
 
-    it('calls mcp.listTools and returns the tool list', async () => {
-      const input = parse('listTools', {});
-      const result = await GoogleDocsConnector.actions.listTools.handler(mockContext, input);
-
-      expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual([{ name: 'read_doc' }, { name: 'update_doc' }]);
-    });
-  });
-
-  // =========================================================================
-  // callTool action
-  // =========================================================================
-  describe('callTool action', () => {
-    it('is exposed as a tool', () => {
-      expect(GoogleDocsConnector.actions.callTool.isTool).toBe(true);
-    });
-
-    it('forwards name and arguments to the MCP server', async () => {
-      const input = parse('callTool', {
-        name: 'read_doc',
-        arguments: { document_id: 'doc-xyz' },
-      });
-      await GoogleDocsConnector.actions.callTool.handler(mockContext, input);
-
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'read_doc',
-        arguments: { document_id: 'doc-xyz' },
-      });
-    });
-
-    it('accepts a call with no arguments', async () => {
-      const input = parse('callTool', { name: 'list_tools' });
-      await GoogleDocsConnector.actions.callTool.handler(mockContext, input);
-
-      // callToolContent substitutes undefined arguments with {} before forwarding to mcp.callTool
-      expect(mockCallTool).toHaveBeenCalledWith({
-        name: 'list_tools',
-        arguments: {},
-      });
+    it('rejects missing document_id', () => {
+      expect(() =>
+        parse('updateDoc', {
+          requests: [{ replaceAllText: { containsText: { text: 'a' }, replaceText: 'b' } }],
+        })
+      ).toThrow();
     });
   });
 
@@ -272,15 +342,20 @@ describe('GoogleDocsConnector', () => {
       expect(GoogleDocsConnector.test?.enabled).toBe(true);
     });
 
-    it('calls listTools and returns an empty object on success', async () => {
+    it('calls the Drive about endpoint and returns an empty object', async () => {
+      mockGet.mockResolvedValueOnce({ data: { user: { displayName: 'Test User' } } });
+
       const result = await GoogleDocsConnector.test.handler(mockContext);
 
-      expect(mockListTools).toHaveBeenCalled();
+      expect(mockGet).toHaveBeenCalledWith(
+        'https://www.googleapis.com/drive/v3/about',
+        expect.objectContaining({ params: { fields: 'user' } })
+      );
       expect(result).toEqual({});
     });
 
-    it('propagates errors from listTools', async () => {
-      mockListTools.mockRejectedValueOnce(new Error('Unauthorized'));
+    it('propagates errors from the about endpoint', async () => {
+      mockGet.mockRejectedValueOnce(new Error('Unauthorized'));
 
       await expect(GoogleDocsConnector.test.handler(mockContext)).rejects.toThrow('Unauthorized');
     });

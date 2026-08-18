@@ -11,8 +11,6 @@ applies_to:
 
 The Google Docs connector enables reading and updating documents in Google Docs.
 
-This connector is backed by the official [Google Docs MCP server](https://docsmcp.googleapis.com/mcp/v1) (currently in Developer Preview).
-
 ## Create connectors in {{kib}} [define-google-docs-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
@@ -27,31 +25,27 @@ OAuth 2.0 authorization code
     - **Client ID** and **Client Secret**: from that OAuth client
     - **Redirect URI**: register {{kib}}'s OAuth callback in Google Cloud (see **Get API credentials**)
 
-    The connector automatically uses the correct Google OAuth endpoints and the `https://www.googleapis.com/auth/documents` scope.
+    The connector automatically uses the correct Google OAuth endpoints and the required scopes.
 
 ## Test connectors [google-docs-action-configuration]
 
-You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by listing available tools from the Google Docs MCP server.
+You can test connectors when you create or edit the connector in {{kib}}. The test verifies connectivity by fetching user information from the Google Drive API.
 
 The Google Docs connector has the following actions:
 
 Read document
-:   Read the full content and structure of a Google Doc.
-    Returns a JSON representation of the document including body paragraphs, tables, lists, inline images, and document metadata.
+:   Read the full content of a Google Doc as Markdown.
+    Returns the document title, Markdown content, total character count, and a web link.
     - `document_id` (required): The ID of the Google Doc. Found in the document URL: `docs.google.com/document/d/{document_id}/edit`.
+    - `max_characters` (optional): Maximum number of characters to return (default 100,000, range 1,000–200,000). If the document is longer, the response includes `truncated: true` and `next_offset`.
+    - `offset` (optional): Character offset to start reading from (default 0). Pass `next_offset` from a previous response to page through a long document.
 
 Update document
-:   Apply one or more batch updates to a Google Doc. Supports inserting or replacing text, formatting runs, managing bullet lists, inserting tables and rows, inserting images, adding comments, accepting or rejecting suggestions, and more.
+:   Apply one or more batch updates to a Google Doc. Supports replacing text, formatting runs, managing bullet lists, inserting tables, images, comments, accepting suggestions, and more.
     - `document_id` (required): The ID of the Google Doc to update.
     - `requests` (required): Array of batch update request objects (1 to 100). Each object must contain exactly one operation key. Multiple requests are applied atomically in order. See the [Google Docs batchUpdate reference](https://developers.google.com/workspace/docs/api/reference/rest/v1/documents/batchUpdate) for the full list of supported operations.
 
-List tools
-:   List all MCP tools exposed by the Google Docs MCP server. Useful for discovering available capabilities.
-
-Call tool
-:   Call any MCP tool on the Google Docs MCP server directly by name. Use this as an escape hatch when a specific tool is not yet exposed as a named action.
-    - `name` (required): The MCP tool name. Use the **List tools** action to discover available tool names.
-    - `arguments` (optional): Tool arguments as a key/value map.
+    Use `replaceAllText` for most text replacement tasks — it requires no index arithmetic. Index-based operations such as `insertText` require exact character positions from the document's internal JSON structure, which differs from the Markdown text returned by the **Read document** action.
 
 ## Connector networking configuration [google-docs-connector-networking-configuration]
 
@@ -59,15 +53,11 @@ Use the [Action configuration settings](/reference/configuration-reference/alert
 
 ## Get API credentials [google-docs-api-credentials]
 
-### OAuth 2.0 authorization code (recommended for ongoing use)
-
-This matches the **OAuth 2.0 authorization code** authentication type in {{kib}}. Configure a **Web application** OAuth
-client in Google Cloud.
+Configure a **Web application** OAuth client in Google Cloud.
 
 Start in **[Google Cloud Console](https://console.cloud.google.com/)**.
 
-1. In Google Cloud Console, select or create a project. Enable the **Google Docs API** for that project (**APIs &
-   Services** > **Library**).
+1. In Google Cloud Console, select or create a project. Enable the **Google Docs API** and **Google Drive API** for that project (**APIs & Services** > **Library**).
 2. Open **APIs & Services** > **OAuth consent screen**.
    - Create OAuth Client
    - Select **Web Application**
@@ -79,7 +69,8 @@ Start in **[Google Cloud Console](https://console.cloud.google.com/)**.
      ```text
      https://<your-kibana-host>/api/actions/connector/_oauth_callback
      ```
-3. Open **APIs & Services** > **Data Access** and add the `https://www.googleapis.com/auth/documents` scope.
+3. Open **APIs & Services** > **Data Access** and add the following scopes:
+   - `https://www.googleapis.com/auth/documents`
+   - `https://www.googleapis.com/auth/drive.readonly`
 4. Create the client, then copy **Client ID** and **Client secret** into the connector in {{kib}} when you select **OAuth
-   2.0 authorization code**. The connector automatically configures the correct Google OAuth endpoints and scope.
-
+   2.0 authorization code**. The connector automatically configures the correct Google OAuth endpoints and scopes.

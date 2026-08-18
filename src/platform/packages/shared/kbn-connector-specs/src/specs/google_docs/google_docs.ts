@@ -7,27 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Google Docs MCP Connector
- *
- * An MCP-native connector backed by the official Google Docs MCP server
- * (docsmcp.googleapis.com). Exposes read and update operations on Google Docs
- * documents as tools consumable by AI agents.
- */
-
 import { i18n } from '@kbn/i18n';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { UISchemas, type ConnectorSpec } from '../../connector_spec';
-import { withMcpClient, callToolContent, callToolJson } from '../../lib/mcp';
-import type { CallToolInput, ReadDocInput, UpdateDocInput } from './types';
-import {
-  CallToolInputSchema,
-  ListToolsInputSchema,
-  ReadDocInputSchema,
-  UpdateDocInputSchema,
-} from './types';
+import { setConnectorActionErrorMeta, getConnectorActionErrorMeta } from '../../connector_utils';
+import type { ConnectorSpec } from '../../connector_spec';
+import type { ReadDocInput, UpdateDocInput } from './types';
+import { ReadDocInputSchema, UpdateDocInputSchema } from './types';
 
-const GOOGLE_DOCS_MCP_SERVER_URL = 'https://docsmcp.googleapis.com/mcp/v1';
+const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';
+const DOCS_API_BASE = 'https://docs.googleapis.com/v1';
+const GOOGLE_DOCS_MIME_TYPE = 'application/vnd.google-apps.document';
+const SCOPES =
+  'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents';
+
+function throwGoogleDocsError(error: unknown): void {
+  const axiosError = error as {
+    response?: { data?: { error?: { message?: string; code?: number } } };
+  };
+  const googleError = axiosError.response?.data?.error;
+  if (googleError) {
+    const message = googleError.message
+      ? `Google Docs API error (${googleError.code}): ${googleError.message}`
+      : `Google Docs API error (${googleError.code})`;
+    const newError = new Error(message);
+    const meta = getConnectorActionErrorMeta(error);
+    if (meta) {
+      setConnectorActionErrorMeta(newError, meta);
+    }
+    throw newError;
+  }
+}
 
 export const GoogleDocsConnector: ConnectorSpec = {
   metadata: {
@@ -55,7 +64,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
         },
         defaults: {
           provider: 'google',
-          scope: 'https://www.googleapis.com/auth/documents',
+          scope: SCOPES,
         },
       },
       {
@@ -70,106 +79,129 @@ export const GoogleDocsConnector: ConnectorSpec = {
         defaults: {
           authorizationUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
           tokenUrl: 'https://oauth2.googleapis.com/token',
-          scope: 'https://www.googleapis.com/auth/documents',
+          scope: SCOPES,
         },
       },
     ],
   },
 
-  schema: lazySchema(() =>
-    z.object({
-      serverUrl: UISchemas.url()
-        .default(GOOGLE_DOCS_MCP_SERVER_URL)
-        .describe('Google Docs MCP Server URL')
-        .meta({
-          widget: 'text',
-          placeholder: 'https://docsmcp.googleapis.com/mcp/v1',
-          hidden: true,
-          label: i18n.translate('connectorSpecs.googleDocs.config.serverUrl.label', {
-            defaultMessage: 'MCP Server URL',
-          }),
-          helpText: i18n.translate('connectorSpecs.googleDocs.config.serverUrl.helpText', {
-            defaultMessage: 'The URL of the Google Docs MCP server.',
-          }),
-        }),
-    })
-  ),
-
-  validateUrls: {
-    fields: ['serverUrl'],
-  },
+  schema: lazySchema(() => z.object({})),
 
   actions: {
     readDoc: {
       isTool: true,
       description:
-        'Read the full content and structure of a Google Doc by its document ID. ' +
-        'Returns a JSON representation of the document including body paragraphs, ' +
-        'tables, lists, inline images, named styles, and document metadata. ' +
+        'Read the full content of a Google Doc as Markdown. ' +
+        'Returns the document title, Markdown content, total character count, and a web link. ' +
+        'For documents longer than max_characters, the response includes truncated: true and next_offset — ' +
+        'call readDoc again with offset: next_offset to fetch the next page. ' +
         'Use document IDs from search results, shared links, or URLs in the form ' +
         'docs.google.com/document/d/{document_id}/edit.',
       input: ReadDocInputSchema,
       handler: async (ctx, input: ReadDocInput) => {
-        return callToolJson(ctx, 'read_doc', { documentId: input.document_id });
+        const { document_id, max_characters, offset } = input;
+        const encodedId = encodeURIComponent(document_id);
+
+        let title: string;
+        let webViewLink: string;
+        try {
+          const metaResponse = await ctx.client.get(`${DRIVE_API_BASE}/files/${encodedId}`, {
+            params: { fields: 'id,name,mimeType,webViewLink', supportsAllDrives: true },
+          });
+          const meta = metaResponse.data as {
+            name: string;
+            mimeType: string;
+            webViewLink: string;
+          };
+          if (meta.mimeType !== GOOGLE_DOCS_MIME_TYPE) {
+            throw new Error(
+              `File is not a Google Doc (mimeType: ${meta.mimeType}). ` +
+                'Use the Google Drive connector to access other file types.'
+            );
+          }
+          title = meta.name;
+          webViewLink = meta.webViewLink;
+        } catch (error: unknown) {
+          throwGoogleDocsError(error);
+          throw error;
+        }
+
+        let content: string;
+        try {
+          const exportResponse = await ctx.client.get(
+            `${DRIVE_API_BASE}/files/${encodedId}/export`,
+            {
+              params: { mimeType: 'text/markdown' },
+              responseType: 'text',
+            }
+          );
+          content = exportResponse.data as string;
+        } catch (error: unknown) {
+          throwGoogleDocsError(error);
+          throw error;
+        }
+
+        const totalCharacters = content.length;
+        const slice = content.slice(offset, offset + max_characters);
+        const truncated = offset + max_characters < totalCharacters;
+
+        return {
+          document_id,
+          title,
+          content: slice,
+          offset,
+          next_offset: truncated ? offset + max_characters : undefined,
+          total_characters: totalCharacters,
+          truncated,
+          web_view_link: webViewLink,
+        };
       },
     },
 
     updateDoc: {
       isTool: true,
       description:
-        'Apply one or more batch updates to a Google Doc. Supports inserting or replacing text, ' +
-        'formatting runs, managing bullet lists, inserting tables and rows, inserting images, ' +
-        'adding comments, accepting or rejecting suggestions, and more. ' +
+        'Apply one or more batch updates to a Google Doc using the Google Docs batchUpdate API. ' +
+        'Supports replacing text, formatting runs, managing bullet lists, inserting tables, images, ' +
+        'comments, accepting suggestions, and 30+ other operations. ' +
         'Each request in the array must contain exactly one operation key. ' +
         'Multiple requests are applied atomically in order. ' +
-        'Read the document first with readDoc to obtain accurate character indices before ' +
-        'constructing location-based requests such as insertText or deleteContentRange.',
+        'For text replacement, use replaceAllText — it requires no index arithmetic and is safe against stale indices. ' +
+        "Index-based operations (insertText, deleteContentRange) require exact character positions from the document's " +
+        'internal JSON structure (from documents.get), not from the Markdown text returned by readDoc.',
       input: UpdateDocInputSchema,
       handler: async (ctx, input: UpdateDocInput) => {
-        return callToolJson(ctx, 'update_doc', {
-          documentId: input.document_id,
-          requests: input.requests,
-        });
-      },
-    },
+        const { document_id, requests } = input;
+        const encodedId = encodeURIComponent(document_id);
 
-    listTools: {
-      isTool: true,
-      description:
-        'List all MCP tools exposed by the Google Docs MCP server. ' +
-        'Use this to discover available capabilities or to refresh tool context for the agent.',
-      input: ListToolsInputSchema,
-      handler: async (ctx) => {
-        return withMcpClient(ctx, async (mcp) => {
-          const { tools } = await mcp.listTools();
-          return tools;
-        });
-      },
-    },
-
-    callTool: {
-      isTool: true,
-      description:
-        'Call any tool on the Google Docs MCP server directly by name. ' +
-        'Use this as an escape hatch when a specific tool is not yet exposed as a named action. ' +
-        'Use listTools first to discover available tool names.',
-      input: CallToolInputSchema,
-      handler: async (ctx, input: CallToolInput) => {
-        return callToolContent(ctx, input.name, input.arguments);
+        try {
+          const response = await ctx.client.post(
+            `${DOCS_API_BASE}/documents/${encodedId}:batchUpdate`,
+            { requests }
+          );
+          return response.data;
+        } catch (error: unknown) {
+          throwGoogleDocsError(error);
+          throw error;
+        }
       },
     },
   },
 
   test: {
     description: i18n.translate('connectorSpecs.googleDocs.test.description', {
-      defaultMessage:
-        'Verifies connection to the Google Docs MCP server by listing available tools.',
+      defaultMessage: 'Verifies connection to the Google Docs API by fetching user information.',
     }),
     handler: async (ctx) => {
-      return withMcpClient(ctx, async (mcp) => {
-        await mcp.listTools();
+      try {
+        await ctx.client.get(`${DRIVE_API_BASE}/about`, {
+          params: { fields: 'user' },
+        });
         return {};
-      });
+      } catch (error: unknown) {
+        throwGoogleDocsError(error);
+        throw error;
+      }
     },
     enabled: true,
   },
@@ -186,23 +218,26 @@ export const GoogleDocsConnector: ConnectorSpec = {
     'The document_id is the long alphanumeric string in the URL:',
     '  docs.google.com/document/d/{document_id}/edit',
     '',
-    '## Read before writing',
-    'Always call readDoc before constructing location-based update requests such as insertText or',
-    'deleteContentRange. Document structure indices (character positions) are derived from the',
-    'returned body content, and an incorrect index silently corrupts the wrong range.',
+    '## Reading long documents',
+    'readDoc returns content as Markdown. For documents longer than max_characters (default 100,000),',
+    'the response includes truncated: true and next_offset. Call readDoc again with offset: next_offset',
+    'to fetch the next page. Continue until truncated is false.',
+    '',
+    '## Updating documents: replaceAllText is safest',
+    'When the goal is to replace a known phrase throughout the document, use replaceAllText.',
+    'It requires no index arithmetic and is immune to stale-index bugs from concurrent edits.',
+    '',
+    '## Index-based operations require raw document structure',
+    "Operations like insertText and deleteContentRange use character indices from the document's",
+    'internal JSON structure (from the Google Docs API documents.get endpoint). These indices do',
+    'NOT correspond to positions in the Markdown text returned by readDoc. Only use index-based',
+    'operations when you have obtained the exact indices from a prior documents.get call.',
     '',
     '## Anatomy of a batchUpdate request',
     'Each entry in the requests array is a single-key object. The key names the operation; its',
-    'value is the operation parameters. Example to append text after index 1:',
-    '  {"insertText": {"location": {"index": 1}, "text": "New content"}}',
-    'Example to bold a range of characters:',
+    'value is the operation parameters. Example to replace text:',
+    '  {"replaceAllText": {"containsText": {"text": "old phrase"}, "replaceText": "new phrase"}}',
+    'Example to bold a range (requires exact indices from documents.get):',
     '  {"updateTextStyle": {"range": {"startIndex": 5, "endIndex": 15}, "textStyle": {"bold": true}, "fields": "bold"}}',
-    '',
-    '## replaceAllText is safest for content updates',
-    'When the goal is to replace a known phrase throughout the document, prefer replaceAllText.',
-    'It requires no index arithmetic and is immune to stale-index bugs from concurrent edits.',
-    '',
-    '## For tools not yet exposed as named actions',
-    'Call listTools to discover available MCP tools, then use callTool to invoke them.',
   ].join('\n'),
 };
