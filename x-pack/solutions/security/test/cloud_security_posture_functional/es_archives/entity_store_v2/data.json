@@ -2,7 +2,7 @@
   "type": "doc",
   "value": {
     "id": "1",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -46,7 +46,7 @@
   "type": "doc",
   "value": {
     "id": "2",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -90,7 +90,7 @@
   "type": "doc",
   "value": {
     "id": "3",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -134,7 +134,7 @@
   "type": "doc",
   "value": {
     "id": "4",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -178,7 +178,7 @@
   "type": "doc",
   "value": {
     "id": "5",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -222,7 +222,7 @@
   "type": "doc",
   "value": {
     "id": "6",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -266,7 +266,7 @@
   "type": "doc",
   "value": {
     "id": "7",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -306,7 +306,7 @@
   "type": "doc",
   "value": {
     "id": "8",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -346,7 +346,7 @@
   "type": "doc",
   "value": {
     "id": "9",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -390,7 +390,7 @@
   "type": "doc",
   "value": {
     "id": "10",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -434,7 +434,7 @@
   "type": "doc",
   "value": {
     "id": "11",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -478,7 +478,7 @@
   "type": "doc",
   "value": {
     "id": "12",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -522,7 +522,7 @@
   "type": "doc",
   "value": {
     "id": "13",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -574,7 +574,7 @@
   "type": "doc",
   "value": {
     "id": "14",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -618,7 +618,7 @@
   "type": "doc",
   "value": {
     "id": "15",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -662,7 +662,7 @@
   "type": "doc",
   "value": {
     "id": "16",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -706,7 +706,7 @@
   "type": "doc",
   "value": {
     "id": "17",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -754,7 +754,7 @@
   "type": "doc",
   "value": {
     "id": "18",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -817,7 +817,7 @@
   "type": "doc",
   "value": {
     "id": "19",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -865,7 +865,7 @@
   "type": "doc",
   "value": {
     "id": "20",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -913,7 +913,7 @@
   "type": "doc",
   "value": {
     "id": "21",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -961,7 +961,7 @@
   "type": "doc",
   "value": {
     "id": "22",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1005,7 +1005,7 @@
   "type": "doc",
   "value": {
     "id": "23",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1049,7 +1049,7 @@
   "type": "doc",
   "value": {
     "id": "24",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1094,7 +1094,7 @@
   "type": "doc",
   "value": {
     "id": "25",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1147,7 +1147,7 @@
   "type": "doc",
   "value": {
     "id": "26",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1199,7 +1199,7 @@
   "type": "doc",
   "value": {
     "id": "27",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1251,7 +1251,7 @@
   "type": "doc",
   "value": {
     "id": "28",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1313,7 +1313,7 @@
   "type": "doc",
   "value": {
     "id": "29",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1353,7 +1353,7 @@
   "type": "doc",
   "value": {
     "id": "30",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1393,7 +1393,7 @@
   "type": "doc",
   "value": {
     "id": "31",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1433,7 +1433,7 @@
   "type": "doc",
   "value": {
     "id": "32",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1473,7 +1473,7 @@
   "type": "doc",
   "value": {
     "id": "33",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1513,7 +1513,7 @@
   "type": "doc",
   "value": {
     "id": "34",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1553,7 +1553,7 @@
   "type": "doc",
   "value": {
     "id": "35",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1597,7 +1597,7 @@
   "type": "doc",
   "value": {
     "id": "rel-hierarchy-external-caller",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2025-07-20T17:26:09.361Z",
       "cloud": {
@@ -1648,7 +1648,7 @@
   "type": "doc",
   "value": {
     "id": "origin-pinned-server",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1691,7 +1691,7 @@
   "type": "doc",
   "value": {
     "id": "grouped-actor-server-1",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1734,7 +1734,7 @@
   "type": "doc",
   "value": {
     "id": "grouped-actor-server-2",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1777,7 +1777,7 @@
   "type": "doc",
   "value": {
     "id": "relationship-target-server",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1813,7 +1813,7 @@
   "type": "doc",
   "value": {
     "id": "different-subtype-actor-server",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1856,7 +1856,7 @@
   "type": "doc",
   "value": {
     "id": "48",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1897,7 +1897,7 @@
   "type": "doc",
   "value": {
     "id": "49",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1938,7 +1938,7 @@
   "type": "doc",
   "value": {
     "id": "50",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -1971,7 +1971,7 @@
   "type": "doc",
   "value": {
     "id": "51",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
@@ -2004,7 +2004,7 @@
   "type": "doc",
   "value": {
     "id": "administers-target-server-admin",
-    "index": ".entities.v2.latest.security_default-00001",
+    "index": ".entities.v2.latest.default-00001",
     "source": {
       "@timestamp": "2024-09-01T12:00:00.000Z",
       "entity": {
