@@ -18,6 +18,8 @@ import type { RendererDefinition } from '@kbn/agent-builder-common/renderers';
 export interface RendererRenderContext {
   /** Whether the renderer is being mounted in canvas mode (expanded view). */
   isCanvas?: boolean;
+  /** Id of the conversation the render belongs to, for follow-up workspace reads. */
+  conversationId?: string;
 }
 
 /**

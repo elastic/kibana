@@ -35,6 +35,7 @@ import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
+import { registerBuiltinRenderers } from './services/renderers/builtin';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 
@@ -97,6 +98,8 @@ export class AgentBuilderPlugin
       usageApi: setupDeps.usageApi,
       actions: setupDeps.actions,
     });
+
+    registerBuiltinRenderers({ renderers: serviceSetups.renderers });
 
     registerTaskDefinitions({
       taskManager: setupDeps.taskManager,

@@ -65,7 +65,10 @@ const RenderError: React.FC<{ title: string; children?: React.ReactNode }> = ({
 const RendererOutput: React.FC<{
   definition: RendererUIDefinition;
   payload: Record<string, unknown>;
-}> = ({ definition, payload }) => <>{definition.render(payload, { isCanvas: false })}</>;
+  conversationId: string;
+}> = ({ definition, payload, conversationId }) => (
+  <>{definition.render(payload, { isCanvas: false, conversationId })}</>
+);
 
 /**
  * Resolves a `<render>` directive once its workspace file is available.
@@ -146,7 +149,11 @@ const ResolvedRender: React.FC<{
   // throwing renderer can't take down the whole chat.
   return (
     <EuiErrorBoundary>
-      <RendererOutput definition={definition} payload={payloadResult.data} />
+      <RendererOutput
+        definition={definition}
+        payload={payloadResult.data}
+        conversationId={conversationId}
+      />
     </EuiErrorBoundary>
   );
 };

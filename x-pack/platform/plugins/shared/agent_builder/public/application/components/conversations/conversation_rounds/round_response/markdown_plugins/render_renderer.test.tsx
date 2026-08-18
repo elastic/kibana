@@ -83,7 +83,10 @@ describe('createRenderRenderer', () => {
     renderDirective(services);
 
     expect(await screen.findByText('RENDERED')).toBeInTheDocument();
-    expect(renderImpl).toHaveBeenCalledWith({ ok: true }, { isCanvas: false });
+    expect(renderImpl).toHaveBeenCalledWith(
+      { ok: true },
+      { isCanvas: false, conversationId: 'conv-1' }
+    );
     expect(services.renderersService.getRendererUiDefinition).toHaveBeenCalledWith('table');
   });
 

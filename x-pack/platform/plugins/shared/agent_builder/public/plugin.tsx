@@ -42,6 +42,7 @@ import {
 } from './services';
 import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
+import { registerBuiltinRenderers } from './services/renderers/builtin';
 import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
@@ -156,6 +157,7 @@ export class AgentBuilderPlugin
     const agentService = new AgentService({ http });
     const attachmentsService = new AttachmentsService({ http });
     const renderersService = new RenderersService();
+    registerBuiltinRenderers({ renderersService });
 
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });

@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import { renderRenderersPrompt } from './renderers';
+import { fileContentRendererDefinition } from '../../../../renderers/builtin/file_content';
 
 const tableRenderer: RendererTypeDefinition = {
   type: 'table',
@@ -57,6 +58,18 @@ describe('renderRenderersPrompt', () => {
       expect(prompt).toContain('Renders a dataset as an interactive table.');
       expect(prompt).toContain('columns');
       expect(prompt).toContain('rows');
+    });
+  });
+
+  describe('with the built-in file_content renderer', () => {
+    const prompt = renderRenderersPrompt([fileContentRendererDefinition], {
+      bashEnabled: true,
+    });
+
+    it('advertises the file_content type and its agent-facing description', () => {
+      expect(prompt).toContain('#### type: "file_content"');
+      expect(prompt).toContain('file_path');
+      expect(prompt).toContain('/workspace/');
     });
   });
 });
