@@ -9,6 +9,8 @@ import React from 'react';
 import { render, renderHook, waitFor } from '@testing-library/react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import {
   useRunDocumentWorkflowPanel,
   RUN_DOCUMENT_WORKFLOW_PANEL_ID,
@@ -31,6 +33,7 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
   canCancelWorkflowExecution: true,
 }));
 const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
+const mockRunWorkflowPanelProps: RunWorkflowPanelProps[] = [];
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -57,15 +60,18 @@ jest.mock('@kbn/workflows-ui', () => ({
   ),
   // RunWorkflowPanel now lives in @kbn/workflows-ui.
   // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
-  // This stub covers panel-level rendering assertions only.
-  RunWorkflowPanel: () => (
-    <div>
-      <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
-      <button data-test-subj="run-workflow-execute-button" type="button">
-        {'Run workflow'}
-      </button>
-    </div>
-  ),
+  // This stub captures caller-owned inputs and sorting.
+  RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
+    mockRunWorkflowPanelProps.push(props);
+    return (
+      <div>
+        <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
+        <button data-test-subj="run-workflow-execute-button" type="button">
+          {'Run workflow'}
+        </button>
+      </div>
+    );
+  },
 }));
 
 const useKibanaMock = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
@@ -80,6 +86,18 @@ const defaultProps: UseRunDocumentWorkflowPanelProps = {
     },
   ],
 };
+
+const createMockWorkflow = (id: string, triggerType: 'alert' | 'manual'): WorkflowListItemDto => ({
+  id,
+  name: id,
+  description: '',
+  enabled: true,
+  valid: true,
+  createdAt: '',
+  definition: {
+    triggers: [{ type: triggerType }],
+  } as WorkflowListItemDto['definition'],
+});
 
 const createMockKibana = (
   overrides: {
@@ -122,6 +140,7 @@ const renderContextMenu = (
 
 describe('useRunDocumentWorkflowPanel', () => {
   beforeEach(() => {
+    mockRunWorkflowPanelProps.length = 0;
     mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
@@ -196,7 +215,7 @@ describe('useRunDocumentWorkflowPanel', () => {
   });
 
   describe('panel content', () => {
-    it('renders the workflow panel with selector and execute button', async () => {
+    it('renders the workflow panel with the document caller configuration', async () => {
       const { result } = renderHook(() => useRunDocumentWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
       });
@@ -208,6 +227,32 @@ describe('useRunDocumentWorkflowPanel', () => {
         expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
       });
       expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.inputs).toEqual({
+        event: {
+          triggerType: 'document',
+          documents: defaultProps.documents,
+        },
+      });
+      expect(panelProps.visibility).toBeUndefined();
+      expect(panelProps.filterWorkflow).toBeUndefined();
+      expect(panelProps.onClose).toBe(defaultProps.closePopover);
+
+      const { sortWorkflow } = panelProps;
+      if (!sortWorkflow) {
+        throw new Error('Expected document workflow sorting');
+      }
+
+      const alertWorkflow = createMockWorkflow('alert-workflow', 'alert');
+      const manualWorkflow = createMockWorkflow('manual-workflow', 'manual');
+      expect([alertWorkflow, manualWorkflow].sort(sortWorkflow)).toEqual([
+        manualWorkflow,
+        alertWorkflow,
+      ]);
     });
   });
 });

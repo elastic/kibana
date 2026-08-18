@@ -269,9 +269,32 @@ describe('RunWorkflowPanel', () => {
     const { onError } = mockMutate.mock.calls[0][1];
     onError(error);
 
-    expect(mockAddError).toHaveBeenCalledWith(error, {
-      title: i18n.WORKFLOW_START_FAILED_TOAST,
+    expect(mockAddError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'something went wrong' }),
+      {
+        title: i18n.WORKFLOW_START_FAILED_TOAST,
+      }
+    );
+  });
+
+  it('should prefer the API error message in the error toast', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('select-workflow-option'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+    const error = Object.assign(new Error('Forbidden'), {
+      body: { message: 'You do not have permission to run this workflow', statusCode: 403 },
     });
+    const { onError } = mockMutate.mock.calls[0][1];
+    onError(error);
+
+    expect(mockAddError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'You do not have permission to run this workflow' }),
+      {
+        title: i18n.WORKFLOW_START_FAILED_TOAST,
+      }
+    );
   });
 
   describe('managed workflow fetching', () => {

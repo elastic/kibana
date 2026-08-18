@@ -16,10 +16,6 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
 import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows';
-import {
-  getManagedWorkflowSelectorVisibilityContext,
-  getManagedWorkflowSolutionVisibilityContext,
-} from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 import { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
@@ -29,7 +25,10 @@ import { useRunWorkflow } from '../../hooks/use_run_workflow';
 import { useWorkflows } from '../../hooks/use_workflows';
 import { useWorkflowsCapabilities } from '../../hooks/use_workflows_capabilities';
 import { WorkflowSelector } from '../workflow_selector/workflow_selector';
-import type { WorkflowSelectorVisibility } from '../workflow_selector/workflow_utils';
+import {
+  getVisibilityContext,
+  type WorkflowSelectorVisibility,
+} from '../workflow_selector/workflow_utils';
 
 /**
  * The inputs payload forwarded verbatim to the workflow execution API.
@@ -91,14 +90,7 @@ export const RunWorkflowPanel = ({
 
   // Mirror WorkflowSelector's visibilityContext derivation exactly so both components hit the
   // same react-query cache entry — no second fetch.
-  const visibilityContext = useMemo(() => {
-    if (!visibility) return undefined;
-    const contexts = [
-      ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
-      ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
-    ];
-    return contexts.length === 0 ? undefined : contexts;
-  }, [visibility]);
+  const visibilityContext = useMemo(() => getVisibilityContext(visibility), [visibility]);
 
   // Share the query key with WorkflowSelector so this is a cache hit — no extra fetch.
   const { data: workflowsData } = useWorkflows({
@@ -158,7 +150,7 @@ export const RunWorkflowPanel = ({
             });
           },
           onError: (err) => {
-            notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+            notifications.toasts.addError(new Error(err.body?.message ?? err.message), {
               title: i18n.WORKFLOW_START_FAILED_TOAST,
             });
           },

@@ -14,6 +14,10 @@ import type {
   ManagedWorkflowSolution,
   WorkflowListDto,
 } from '@kbn/workflows';
+import {
+  getManagedWorkflowSelectorVisibilityContext,
+  getManagedWorkflowSolutionVisibilityContext,
+} from '@kbn/workflows';
 import { TagsBadge } from './tags_badge';
 import * as i18n from './translations';
 
@@ -21,6 +25,19 @@ export interface WorkflowSelectorVisibility {
   selectors?: ManagedWorkflowSelector[];
   solutions?: ManagedWorkflowSolution[];
 }
+
+export const getVisibilityContext = (
+  visibility: WorkflowSelectorVisibility | undefined
+): string[] | undefined => {
+  if (!visibility) return undefined;
+
+  const contexts = [
+    ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+    ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
+  ];
+
+  return contexts.length > 0 ? contexts : undefined;
+};
 
 export interface WorkflowValidationResult {
   severity: 'error' | 'warning';

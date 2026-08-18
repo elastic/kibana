@@ -27,31 +27,16 @@ import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  getManagedWorkflowSelectorVisibilityContext,
-  getManagedWorkflowSolutionVisibilityContext,
-} from '@kbn/workflows';
 import * as i18n from './translations';
 import { WorkflowSelectorEmptyState } from './workflow_selector_empty_state';
-import { getSelectedWorkflowDisabledError, processWorkflowsToOptions } from './workflow_utils';
-import type {
-  WorkflowOption,
-  WorkflowSelectorConfig,
-  WorkflowSelectorVisibility,
+import {
+  getSelectedWorkflowDisabledError,
+  getVisibilityContext,
+  processWorkflowsToOptions,
 } from './workflow_utils';
+import type { WorkflowOption, WorkflowSelectorConfig } from './workflow_utils';
 import { IconDisabledWorkflow } from '../../assets/icons';
 import { useWorkflows, useWorkflowsCapabilities } from '../../hooks';
-
-const getVisibilityContext = (
-  visibility: WorkflowSelectorVisibility | undefined
-): string[] | undefined => {
-  if (!visibility) return undefined;
-  const contexts = [
-    ...(visibility.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
-    ...(visibility.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
-  ];
-  return contexts.length === 0 ? undefined : contexts;
-};
 
 interface WorkflowSelectorProps {
   selectedWorkflowId?: string;

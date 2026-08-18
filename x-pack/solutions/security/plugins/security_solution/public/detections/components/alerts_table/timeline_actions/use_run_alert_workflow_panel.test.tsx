@@ -9,6 +9,8 @@ import React from 'react';
 import { render, renderHook, waitFor } from '@testing-library/react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { RunWorkflowPanelProps } from '@kbn/workflows-ui';
 import {
   useRunAlertWorkflowPanel,
   RUN_WORKFLOW_PANEL_ID,
@@ -34,6 +36,7 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
 }));
 const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
 const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: [] } }));
+const mockRunWorkflowPanelProps: RunWorkflowPanelProps[] = [];
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -61,15 +64,18 @@ jest.mock('@kbn/workflows-ui', () => ({
   ),
   // RunWorkflowPanel now lives in @kbn/workflows-ui.
   // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
-  // This stub covers panel-level rendering assertions only.
-  RunWorkflowPanel: () => (
-    <div>
-      <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
-      <button data-test-subj="run-workflow-execute-button" type="button">
-        {'Run workflow'}
-      </button>
-    </div>
-  ),
+  // This stub captures caller-owned inputs, visibility, filtering, and sorting.
+  RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
+    mockRunWorkflowPanelProps.push(props);
+    return (
+      <div>
+        <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
+        <button data-test-subj="run-workflow-execute-button" type="button">
+          {'Run workflow'}
+        </button>
+      </div>
+    );
+  },
 }));
 jest.mock('../../../../common/components/loader', () => ({
   Loader: ({ children }: { children: React.ReactNode }) => (
@@ -91,6 +97,23 @@ const defaultProps: UseRunAlertWorkflowPanelProps = {
     },
   },
 };
+
+const createMockWorkflow = (
+  id: string,
+  triggerType: 'alert' | 'manual',
+  managed: boolean
+): WorkflowListItemDto => ({
+  id,
+  name: id,
+  description: '',
+  enabled: true,
+  valid: true,
+  createdAt: '',
+  managed,
+  definition: {
+    triggers: [{ type: triggerType }],
+  } as WorkflowListItemDto['definition'],
+});
 
 const createMockKibana = (
   overrides: {
@@ -133,6 +156,7 @@ const renderContextMenu = (
 
 describe('useRunAlertWorkflowPanel', () => {
   beforeEach(() => {
+    mockRunWorkflowPanelProps.length = 0;
     mockUseRunWorkflow.mockReturnValue({ mutate: mockMutate });
     mockUseWorkflowsCapabilities.mockReturnValue({
       canCreateWorkflow: true,
@@ -228,7 +252,7 @@ describe('useRunAlertWorkflowPanel', () => {
   });
 
   describe('panel content', () => {
-    it('renders the workflow panel with selector and execute button', async () => {
+    it('renders the workflow panel with the alert caller configuration', async () => {
       const { result } = renderHook(() => useRunAlertWorkflowPanel(defaultProps), {
         wrapper: TestProviders,
       });
@@ -240,6 +264,36 @@ describe('useRunAlertWorkflowPanel', () => {
         expect(getByTestId('workflow-selector-mock')).toBeInTheDocument();
       });
       expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
+
+      const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+      if (!panelProps) {
+        throw new Error('Expected RunWorkflowPanel to render');
+      }
+      expect(panelProps.inputs).toEqual({
+        event: {
+          triggerType: 'alert',
+          alertIds: [{ _id: 'alert-123', _index: 'alerts-index' }],
+        },
+      });
+      expect(panelProps.visibility).toEqual({ selectors: ['rule_action'] });
+      expect(panelProps.onClose).toBe(defaultProps.closePopover);
+
+      const { filterWorkflow, sortWorkflow } = panelProps;
+      if (!filterWorkflow || !sortWorkflow) {
+        throw new Error('Expected alert workflow filtering and sorting');
+      }
+
+      const unmanagedManualWorkflow = createMockWorkflow('unmanaged-manual', 'manual', false);
+      const managedManualWorkflow = createMockWorkflow('managed-manual', 'manual', true);
+      const managedAlertWorkflow = createMockWorkflow('managed-alert', 'alert', true);
+
+      expect(filterWorkflow(unmanagedManualWorkflow)).toBe(true);
+      expect(filterWorkflow(managedManualWorkflow)).toBe(false);
+      expect(filterWorkflow(managedAlertWorkflow)).toBe(true);
+      expect([unmanagedManualWorkflow, managedAlertWorkflow].sort(sortWorkflow)).toEqual([
+        managedAlertWorkflow,
+        unmanagedManualWorkflow,
+      ]);
     });
   });
 });

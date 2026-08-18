@@ -10,33 +10,33 @@
 import { i18n } from '@kbn/i18n';
 
 export const WORKFLOW_START_SUCCESS_TOAST = i18n.translate(
-  'xpack.workflowsUi.runWorkflowPanel.start.success.toast',
+  'workflowsUi.runWorkflowPanel.start.success.toast',
   {
     defaultMessage: 'Workflow successfully started',
   }
 );
 
 export const WORKFLOW_START_SUCCESS_BUTTON = i18n.translate(
-  'xpack.workflowsUi.runWorkflowPanel.start.success.button',
+  'workflowsUi.runWorkflowPanel.start.success.button',
   {
     defaultMessage: 'View workflow execution',
   }
 );
 
 export const WORKFLOW_START_FAILED_TOAST = i18n.translate(
-  'xpack.workflowsUi.runWorkflowPanel.start.failed.toast',
+  'workflowsUi.runWorkflowPanel.start.failed.toast',
   {
     defaultMessage: 'Workflow failed to start',
   }
 );
 
-export const RUN_WORKFLOW_BUTTON = i18n.translate('xpack.workflowsUi.runWorkflowPanel.run.button', {
+export const RUN_WORKFLOW_BUTTON = i18n.translate('workflowsUi.runWorkflowPanel.run.button', {
   defaultMessage: 'Run workflow',
 });
 
 /** Returns the localised message shown at the top of the inputs modal. */
 export const getProvideInputsResumeMessage = (workflowName: string) =>
-  i18n.translate('xpack.workflowsUi.runWorkflowPanel.inputs.resumeMessage', {
+  i18n.translate('workflowsUi.runWorkflowPanel.inputs.resumeMessage', {
     defaultMessage: 'Provide inputs to run {workflowName}',
     values: { workflowName },
   });
