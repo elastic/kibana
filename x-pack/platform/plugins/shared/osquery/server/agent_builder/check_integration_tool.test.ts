@@ -16,8 +16,6 @@ describe('checkIntegrationTool agent_id handling', () => {
     });
     const tool = checkIntegrationTool(context, loggerMock.create());
 
-    // `"` and `\` would break out of the KQL quoted string and turn the
-    // enrollment check into a malformed or widened query.
     await tool.handler({ agent_id: 'agent-"1" or agent.id:"*\\' }, {
       request: toolRequest,
       spaceId: 'default',

@@ -34,9 +34,6 @@ describe('pollActionResponses', () => {
       expect.objectContaining({
         index: 'logs-osquery_manager.action.responses*',
         size: 0,
-        // Completion is measured by distinct responding agents, not document
-        // count: the action-responses transform can emit multiple docs per
-        // agent (keyed on @timestamp + action_id + agent_id).
         aggs: { distinct_agents: { cardinality: { field: 'agent_id' } } },
         query: expect.objectContaining({
           bool: expect.objectContaining({
@@ -82,8 +79,7 @@ describe('pollActionResponses', () => {
   });
 
   it('does not complete early when one agent produced multiple response docs', async () => {
-    // Regression: raw doc count would read this as 3 >= 3 (completed); the
-    // cardinality agg correctly reads 2 of 3 distinct agents.
+    // Raw doc count reads 3 >= 3 here; cardinality correctly reads 2 of 3.
     const search = jest
       .fn()
       .mockResolvedValueOnce({

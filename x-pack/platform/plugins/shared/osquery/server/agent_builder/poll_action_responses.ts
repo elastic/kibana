@@ -95,11 +95,8 @@ export const pollActionResponses = async (
         size: 0,
         ignore_unavailable: true,
         track_total_hits: true,
-        // Raw hit count is wrong: the action-responses transform keys docs by
-        // (@timestamp, action_id, agent_id), so one agent that reports twice
-        // (e.g. a retried row flush) contributes two docs and can push the
-        // count to `expectedAgentCount` while other agents are still running.
-        // Count distinct agents instead.
+        // The transform keys docs by (@timestamp, action_id, agent_id), so a
+        // retried flush double-counts one agent. Count distinct agents.
         aggs: {
           distinct_agents: {
             cardinality: { field: 'agent_id' },

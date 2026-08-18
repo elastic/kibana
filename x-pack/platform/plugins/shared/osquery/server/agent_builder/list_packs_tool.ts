@@ -108,9 +108,7 @@ export const listPacksTool = (
     } catch (e) {
       logger.warn(`Failed to list packs: ${e}`);
 
-      // Must be ToolResultType.error: an empty `packs: []` under `other`
-      // tells the model "there are no packs" when the truth is the lookup
-      // failed.
+      // An empty array under `other` reads as "nothing exists", not "lookup failed".
       return {
         results: [
           {

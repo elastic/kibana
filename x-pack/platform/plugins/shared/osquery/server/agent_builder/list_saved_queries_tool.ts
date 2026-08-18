@@ -108,10 +108,7 @@ export const listSavedQueriesTool = (
     } catch (e) {
       logger.warn(`Failed to list saved queries: ${e}`);
 
-      // Must be ToolResultType.error: an empty `queries: []` under `other`
-      // tells the model "there are no saved queries" when the truth is the
-      // lookup failed — it then proceeds to author a custom query on a false
-      // premise.
+      // An empty array under `other` reads as "nothing exists", not "lookup failed".
       return {
         results: [
           {
