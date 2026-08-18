@@ -100,7 +100,7 @@ jest.mock('../../use_aws_service_matrix', () => {
   const matrix = buildAwsServiceMatrix(mockPackages, AWS_SERVICES_STATIC);
   const servicesMap = new Map(matrix.map((s: any) => [s.id, s]));
   return {
-    useAwsServiceMatrix: jest.fn().mockReturnValue(matrix),
+    useAwsServiceMatrix: jest.fn().mockReturnValue({ matrix, isError: false, refetch: jest.fn() }),
     useAwsServicesMap: jest.fn().mockReturnValue(servicesMap),
   };
 });

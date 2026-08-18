@@ -9,7 +9,9 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
 jest.mock('./use_aws_service_matrix', () => ({
-  useAwsServiceMatrix: jest.fn().mockReturnValue([]),
+  useAwsServiceMatrix: jest
+    .fn()
+    .mockReturnValue({ matrix: [], isError: false, refetch: jest.fn() }),
 }));
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';

@@ -19,7 +19,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
@@ -74,7 +76,8 @@ export function OnboardingShell() {
   const { completedSteps, markStepComplete, markStepsIncomplete, firstIncompleteStepId } =
     useStepState(integrationId);
 
-  const { servicesStep, awsServiceMatrix } = useOnboardingFlow();
+  const { servicesStep, awsServiceMatrix, awsServiceMatrixError, refetchAwsServiceMatrix } =
+    useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
   useInvalidateDownstreamSteps({
@@ -202,7 +205,28 @@ export function OnboardingShell() {
         <EuiSpacer size="xs" />
         <EuiStepsHorizontal steps={horizontalStepsConfig} />
         <EuiSpacer size="xl" />
-        {!awsServiceMatrix ? (
+        {awsServiceMatrixError ? (
+          <KbnDangerCallout
+            announceOnMount
+            title={
+              <FormattedMessage
+                id="xpack.ingestHub.onboardingShell.matrixError.title"
+                defaultMessage="Failed to load AWS integration catalog"
+              />
+            }
+            actionProps={{
+              primary: {
+                children: (
+                  <FormattedMessage
+                    id="xpack.ingestHub.onboardingShell.matrixError.retry"
+                    defaultMessage="Retry"
+                  />
+                ),
+                onClick: refetchAwsServiceMatrix,
+              },
+            }}
+          />
+        ) : !awsServiceMatrix ? (
           <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '300px' }}>
             <EuiLoadingSpinner size="xl" />
           </EuiFlexGroup>

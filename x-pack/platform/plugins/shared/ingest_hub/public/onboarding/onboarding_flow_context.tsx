@@ -66,6 +66,8 @@ interface OnboardingFlowState {
   retryDeploy: (instanceIds?: string[]) => void;
   awsServiceMatrix: AwsServiceMatrixEntry[] | undefined;
   awsServicesMap: Map<string, AwsServiceMatrixEntry> | undefined;
+  awsServiceMatrixError: boolean;
+  refetchAwsServiceMatrix: () => void;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -196,7 +198,11 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
     deployHandlerRef.current?.(instanceIds);
   }, []);
 
-  const awsServiceMatrix = useAwsServiceMatrix();
+  const {
+    matrix: awsServiceMatrix,
+    isError: awsServiceMatrixError,
+    refetch: refetchAwsServiceMatrix,
+  } = useAwsServiceMatrix();
   const awsServicesMap = useMemo(
     () => (awsServiceMatrix ? new Map(awsServiceMatrix.map((s) => [s.id, s])) : undefined),
     [awsServiceMatrix]
@@ -242,6 +248,8 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         retryDeploy,
         awsServiceMatrix,
         awsServicesMap,
+        awsServiceMatrixError,
+        refetchAwsServiceMatrix,
       }}
     >
       {children}

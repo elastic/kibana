@@ -43,7 +43,7 @@ jest.mock('./use_aws_service_matrix', () => {
     },
   ];
   return {
-    useAwsServiceMatrix: jest.fn().mockReturnValue(matrix),
+    useAwsServiceMatrix: jest.fn().mockReturnValue({ matrix, isError: false, refetch: jest.fn() }),
     useAwsServicesMap: jest.fn().mockReturnValue(new Map(matrix.map((s) => [s.id, s]))),
   };
 });

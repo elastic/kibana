@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 
@@ -16,6 +16,15 @@ const PACKAGE_QUERY_OPTIONS = { full: true };
 // Package manifests change only on new releases; 10 min cache avoids repeated EPR requests.
 const CACHE_OPTS = { staleTime: 10 * 60 * 1000 };
 
+export interface UseAwsServiceMatrixResult {
+  /** Merged matrix, or undefined while the core aws package is still loading. */
+  matrix: AwsServiceMatrixEntry[] | undefined;
+  /** True when the core aws package fetch failed and will not auto-retry. */
+  isError: boolean;
+  /** Re-trigger the core aws package fetch (and all secondary fetches). */
+  refetch: () => void;
+}
+
 /**
  * Returns the merged AWS service matrix, deriving managed_integration, signalType,
  * inputs, requiredConfig, mandatoryFields, defaultEnabled, and identityFederationSupported
@@ -23,45 +32,45 @@ const CACHE_OPTS = { staleTime: 10 * 60 * 1000 };
  * (aws_bedrock, awsfargate, etc.) are optional: if unavailable (technical-preview, air-gapped,
  * fetch error) those entries fall back to their static definitions.
  */
-export function useAwsServiceMatrix(): AwsServiceMatrixEntry[] | undefined {
-  const { data: awsData } = useGetPackageInfoByKeyQuery(
-    'aws',
-    undefined,
-    PACKAGE_QUERY_OPTIONS,
-    CACHE_OPTS
-  );
-  const { data: bedrockData } = useGetPackageInfoByKeyQuery(
+export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
+  const {
+    data: awsData,
+    isError: awsIsError,
+    refetch: awsRefetch,
+  } = useGetPackageInfoByKeyQuery('aws', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const { data: bedrockData, refetch: bedrockRefetch } = useGetPackageInfoByKeyQuery(
     'aws_bedrock',
     undefined,
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const { data: bedrockAgentcoreData } = useGetPackageInfoByKeyQuery(
-    'aws_bedrock_agentcore',
-    undefined,
-    PACKAGE_QUERY_OPTIONS,
-    CACHE_OPTS
-  );
-  const { data: fargateData } = useGetPackageInfoByKeyQuery(
+  const { data: bedrockAgentcoreData, refetch: bedrockAgentcoreRefetch } =
+    useGetPackageInfoByKeyQuery(
+      'aws_bedrock_agentcore',
+      undefined,
+      PACKAGE_QUERY_OPTIONS,
+      CACHE_OPTS
+    );
+  const { data: fargateData, refetch: fargateRefetch } = useGetPackageInfoByKeyQuery(
     'awsfargate',
     undefined,
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const { data: mqData } = useGetPackageInfoByKeyQuery(
+  const { data: mqData, refetch: mqRefetch } = useGetPackageInfoByKeyQuery(
     'aws_mq',
     undefined,
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const { data: logsData } = useGetPackageInfoByKeyQuery(
+  const { data: logsData, refetch: logsRefetch } = useGetPackageInfoByKeyQuery(
     'aws_logs',
     undefined,
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
 
-  return useMemo(() => {
+  const matrix = useMemo(() => {
     if (!awsData?.item) {
       return undefined;
     }
@@ -75,9 +84,23 @@ export function useAwsServiceMatrix(): AwsServiceMatrixEntry[] | undefined {
     };
     return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC);
   }, [awsData, bedrockData, bedrockAgentcoreData, fargateData, mqData, logsData]);
+
+  const refetch = useCallback(() => {
+    awsRefetch();
+    bedrockRefetch();
+    bedrockAgentcoreRefetch();
+    fargateRefetch();
+    mqRefetch();
+    logsRefetch();
+  }, [awsRefetch, bedrockRefetch, bedrockAgentcoreRefetch, fargateRefetch, mqRefetch, logsRefetch]);
+
+  return { matrix, isError: awsIsError, refetch };
 }
 
-export function useAwsServicesMap(): Map<string, AwsServiceMatrixEntry> | undefined {
-  const matrix = useAwsServiceMatrix();
-  return useMemo(() => (matrix ? new Map(matrix.map((s) => [s.id, s])) : undefined), [matrix]);
+export function useAwsServicesMap():
+  | { map: Map<string, AwsServiceMatrixEntry>; isError: false; refetch: () => void }
+  | { map: undefined; isError: boolean; refetch: () => void } {
+  const { matrix, isError, refetch } = useAwsServiceMatrix();
+  const map = useMemo(() => (matrix ? new Map(matrix.map((s) => [s.id, s])) : undefined), [matrix]);
+  return { map, isError, refetch } as ReturnType<typeof useAwsServicesMap>;
 }
