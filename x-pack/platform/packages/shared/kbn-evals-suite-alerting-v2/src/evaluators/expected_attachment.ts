@@ -19,6 +19,14 @@ export interface RenderAttachmentRef {
   tag: string;
 }
 
+const getLatestAttachmentOfType = (
+  attachments: VersionedAttachment[],
+  type: string
+): VersionedAttachment | undefined => {
+  const ofType = attachments.filter((attachment) => attachment.type === type);
+  return ofType[ofType.length - 1];
+};
+
 /**
  * Latest current-version data among attachments of the given type
  * (filters by type, then takes the last match).
@@ -27,12 +35,29 @@ export const getLatestAttachmentData = <T>(
   attachments: VersionedAttachment[],
   type: string
 ): T | undefined => {
-  const ofType = attachments.filter((attachment) => attachment.type === type);
-  const latest = ofType[ofType.length - 1];
+  const latest = getLatestAttachmentOfType(attachments, type);
   if (!latest) {
     return undefined;
   }
   return getLatestVersion<T>(latest as VersionedAttachment<string, T>)?.data;
+};
+
+/**
+ * All version payloads for the latest attachment of the given type, ordered
+ * by version number. Used to assert multi-turn updates (each manage_rule call
+ * appends a version).
+ */
+export const getAttachmentVersionData = <T>(
+  attachments: VersionedAttachment[],
+  type: string
+): T[] => {
+  const latest = getLatestAttachmentOfType(attachments, type);
+  if (!latest) {
+    return [];
+  }
+  return [...latest.versions]
+    .sort((left, right) => left.version - right.version)
+    .map((version) => version.data as T);
 };
 
 export const parseRenderAttachmentRef = (message: string): RenderAttachmentRef | null => {
