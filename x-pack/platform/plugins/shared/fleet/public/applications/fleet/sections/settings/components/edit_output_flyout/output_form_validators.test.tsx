@@ -19,6 +19,7 @@ import {
   validateSSLCertificate,
   validateSSLKey,
   validateSslPathInput,
+  validateDynamicKafkaTopics,
 } from './output_form_validators';
 
 const validateYamlConfig = createValidateYamlConfig(parse);
@@ -411,4 +412,29 @@ describe('Output form validation', () => {
       });
     });
   });
+
+  describe('validateDynamicKafkaTopics', () => {
+    const validTopics = [
+      { label: 'field1', value: '%{[field]}' },
+      { label: 'field2', value: 'field2' },
+      { label: 'field3', value: '%{[field2]}-%{[field3]}' },
+    ];
+    const invalidBracketTopic = [{ label: '%{[field}', value: '%{[field}' }];
+    const invalidPercentTopic = [{ label: '{[field]}', value: '{[field]}' }];
+    it('should work with valid topics', () => {
+      const res = validateDynamicKafkaTopics(validTopics);
+      expect(res).toBeUndefined();
+    });
+    it("should return error with missing brackets in topic's name", () => {
+      const res = validateDynamicKafkaTopics(invalidBracketTopic);
+      expect(res).toEqual([
+        'The topic should have a matching number of opening and closing brackets',
+      ]);
+    });
+    it("should return error with missing percent sign before opening brackets in topic's name", () => {
+      const res = validateDynamicKafkaTopics(invalidPercentTopic);
+      expect(res).toEqual(['Opening brackets should be preceded by a percent sign']);
+    });
+  });
+
 });
