@@ -32,7 +32,6 @@ import useUnmount from 'react-use/lib/useUnmount';
 import { BehaviorSubject, distinctUntilChanged, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { initializeStateApi } from '@kbn/presentation-publishing';
-import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { SWIM_LANE_SELECTION_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { ANOMALY_SWIMLANE_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/anomaly_swimlane';
 import type { AnomalySwimlaneEmbeddableServices } from '..';
@@ -255,31 +254,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
             );
           const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
-          const [hasRendered, setHasRendered] = useState<boolean>(false);
-          const wrapperRef = useRef<HTMLDivElement>(null);
-          useEffect(() => {
-            if (isLoading) setHasRendered(false);
-          }, [isLoading]);
-
-          useEffect(
-            function dispatchRenderMessages() {
-              const el = wrapperRef.current;
-              if (!el) return;
-              if (error) {
-                dispatchRenderComplete(el);
-                return;
-              }
-              if (isLoading) {
-                dispatchRenderStart(el);
-                return;
-              }
-              if (hasRendered) {
-                dispatchRenderComplete(el);
-              }
-            },
-            [isLoading, hasRendered, error]
-          );
-
           const onCellsSelection = useCallback(
             (update?: AppStateSelectedCells) => {
               setSelectedCells(update);
@@ -305,7 +279,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                     padding: 8px;
                   `}
                   data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
-                  ref={wrapperRef}
                 >
                   {error ? (
                     <KbnDangerCallout
@@ -359,11 +332,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
                         />
                       }
                       chartsService={pluginsStartServices.charts}
-                      onRenderComplete={() => {
-                        if (!isLoading) {
-                          setHasRendered(true);
-                        }
-                      }}
                     />
                   )}
                 </div>

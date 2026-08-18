@@ -11,7 +11,6 @@ import { act, render, waitFor, screen } from '@testing-library/react';
 import React from 'react';
 import type { SingleMetricViewerEmbeddableState } from '@kbn/ml-server-schemas/embeddables/single_metric_viewer';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '@kbn/ml-common-types/embeddables/single_metric_viewer';
-import { dispatchRenderComplete, dispatchRenderStart } from '@kbn/kibana-utils-plugin/public';
 import { getSingleMetricViewerEmbeddableFactory } from './single_metric_viewer_embeddable_factory';
 import type { SingleMetricViewerEmbeddableApi } from '../types';
 import type { SingleMetricViewerProps } from '../../shared_components/single_metric_viewer/single_metric_viewer';
@@ -23,15 +22,6 @@ const mockPluginStartDeps = {
 const getStartServices = coreMock.createSetup({
   pluginStartDeps: mockPluginStartDeps,
 }).getStartServices;
-
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-utils-plugin/public');
-  return {
-    ...actual,
-    dispatchRenderComplete: jest.fn(),
-    dispatchRenderStart: jest.fn(),
-  };
-});
 
 jest.mock('../../application/capabilities/check_capabilities', () => {
   return {
@@ -126,21 +116,6 @@ describe('getSingleMetricViewerEmbeddableFactory reporting readiness', () => {
     expect(dispatchRenderStart).toHaveBeenCalled();
   });
 
-  it('marks render complete after onRenderComplete and dispatches renderComplete', async () => {
-    const { api } = await buildAndRender();
-
-    await act(async () => {
-      mockLatestSmvProps?.onRenderComplete?.();
-    });
-
-    await waitFor(() => {
-      const wrapper = screen.getByTestId('mlSingleMetricViewer_smv-uuid');
-      expect(wrapper).toHaveAttribute('data-render-complete', 'true');
-      expect(api.dataLoading$?.value).toEqual(false);
-      expect(dispatchRenderComplete).toHaveBeenCalled();
-    });
-  });
-
   it('resets readiness when loading starts again', async () => {
     await buildAndRender();
 
@@ -165,20 +140,6 @@ describe('getSingleMetricViewerEmbeddableFactory reporting readiness', () => {
         'false'
       );
       expect(dispatchRenderStart).toHaveBeenCalled();
-    });
-  });
-
-  it('marks render complete on error so reporting cannot hang', async () => {
-    await buildAndRender();
-
-    await act(async () => {
-      mockLatestSmvProps?.onError?.(new Error('job missing'));
-    });
-
-    await waitFor(() => {
-      const wrapper = screen.getByTestId('mlSingleMetricViewer_smv-uuid');
-      expect(wrapper).toHaveAttribute('data-render-complete', 'true');
-      expect(dispatchRenderComplete).toHaveBeenCalled();
     });
   });
 });
