@@ -263,4 +263,92 @@ describe('LoggerService', () => {
       expect(mockedLogger.debug).toHaveBeenCalledWith('Test debug message');
     });
   });
+
+  describe('withLabels', () => {
+    it('should attach bound labels on every log call', () => {
+      const bound = loggerService.withLabels({ rule_id: 'rule-1', space_id: 'default' });
+
+      bound.debug({ message: 'Test debug message' });
+
+      expect(mockLogger.debug).toHaveBeenCalledWith('Test debug message', {
+        labels: { rule_id: 'rule-1', space_id: 'default' },
+      });
+    });
+
+    it('should merge per-call labels over bound labels', () => {
+      const bound = loggerService.withLabels({ rule_id: 'rule-1', step: 'fetch_rule' });
+
+      bound.debug({ message: 'Test debug message', labels: { step: 'validate_rule' } });
+
+      expect(mockLogger.debug).toHaveBeenCalledWith('Test debug message', {
+        labels: { rule_id: 'rule-1', step: 'validate_rule' },
+      });
+    });
+
+    it('should merge bound labels with warn/error code', () => {
+      const bound = loggerService.withLabels({ rule_id: 'rule-1' });
+
+      bound.warn({
+        message: 'Test warn message',
+        code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+      });
+      bound.error({
+        error: new Error('boom'),
+        code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith('Test warn message', {
+        labels: {
+          rule_id: 'rule-1',
+          code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_NOT_FOUND,
+        },
+      });
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'boom',
+        expect.objectContaining({
+          labels: {
+            rule_id: 'rule-1',
+            code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
+          },
+        })
+      );
+    });
+
+    it('should not mutate the parent logger', () => {
+      const bound = loggerService.withLabels({ rule_id: 'rule-1' });
+
+      bound.debug({ message: 'bound' });
+      loggerService.debug({ message: 'unbound' });
+
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(1, 'bound', {
+        labels: { rule_id: 'rule-1' },
+      });
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(2, 'unbound');
+    });
+
+    it('should compose with forSubsystem', () => {
+      const bound = loggerService.forSubsystem('ruleExecutor').withLabels({
+        rule_id: 'rule-1',
+        task_id: 'task-1',
+      });
+
+      bound.debug({ message: 'Test debug message', labels: { step: 'fetch_rule' } });
+
+      expect(mockLogger.get).toHaveBeenCalledWith('ruleExecutor');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Test debug message', {
+        labels: { rule_id: 'rule-1', task_id: 'task-1', step: 'fetch_rule' },
+      });
+    });
+
+    it('should preserve bound labels when scoping a subsystem', () => {
+      const bound = loggerService.withLabels({ rule_id: 'rule-1' }).forSubsystem('director');
+
+      bound.debug({ message: 'Test debug message' });
+
+      expect(mockLogger.get).toHaveBeenCalledWith('director');
+      expect(mockLogger.debug).toHaveBeenCalledWith('Test debug message', {
+        labels: { rule_id: 'rule-1' },
+      });
+    });
+  });
 });
