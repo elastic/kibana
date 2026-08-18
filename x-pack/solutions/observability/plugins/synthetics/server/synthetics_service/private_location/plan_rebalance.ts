@@ -24,12 +24,29 @@ export const STALE_CHECKIN_MS = 90_000;
 // monitors) ignores this and stays immediate.
 export const RECOVERY_STABILITY_MS = 3 * 60_000;
 
+// Data-plane liveness window. A Fleet check-in travels the control plane, which
+// can lag while the agent still runs monitors and indexes results; evicting such
+// an agent would double-run its monitors. So an agent whose check-in is stale
+// but which has written a `synthetics-*` doc within this window is kept anyway
+// (see `getRecentlyActiveAgentIds`). Only ever *keeps* an agent, never evicts —
+// absence of data is ambiguous (idle/slow-schedule) and falls back to check-in.
+// Wider than STALE_CHECKIN_MS to tolerate a missed run plus scheduling jitter.
+export const STALE_DATA_MS = 3 * 60_000;
+
 /**
  * Stable key for an agent's healthy streak in the task state. Scoped by agent
  * policy so streaks never collide across locations when merged into one map.
  */
 export const healthySinceKey = (agentPolicyId: string, agentId: string): string =>
   `${agentPolicyId}:${agentId}`;
+
+/**
+ * Whether an agent's last check-in is old enough to treat it as stale (a failover
+ * candidate). The single definition of the check-in staleness rule, shared by the
+ * planner and the task's liveness-veto gate so the two can't drift apart.
+ */
+export const isCheckinStale = (info: AgentInfo, now: number): boolean =>
+  now - info.lastCheckin > STALE_CHECKIN_MS;
 
 export interface LocationRebalancePlan {
   /** Agents whose check-in is fresh enough to run monitors (placement targets). */
@@ -65,19 +82,26 @@ export const planLocationRebalance = ({
   now,
   priorHealthySince,
   agentPolicyId,
+  activeAgentIds,
 }: {
   agents: ReadonlyMap<string, AgentInfo>;
   now: number;
   priorHealthySince: Readonly<Record<string, number>>;
   agentPolicyId: string;
+  /**
+   * Agents proven alive by a recent `synthetics-*` write (data-plane liveness
+   * veto). An agent in this set is kept even when its check-in is stale, so we
+   * don't move monitors it is still running. Only keeps agents, never evicts.
+   */
+  activeAgentIds?: ReadonlySet<string>;
 }): LocationRebalancePlan => {
   const healthyAgentIds: string[] = [];
   const capacities = new Map<string, number>();
   const nextHealthySince: Record<string, number> = {};
 
   for (const [agentId, info] of agents) {
-    if (now - info.lastCheckin > STALE_CHECKIN_MS) {
-      continue; // stale check-in — not a valid target; its monitors fail over
+    if (isCheckinStale(info, now) && !activeAgentIds?.has(agentId)) {
+      continue; // stale check-in and no recent data — its monitors fail over
     }
     healthyAgentIds.push(agentId);
     if (info.memoryMib != null) {

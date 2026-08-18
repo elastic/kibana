@@ -9,6 +9,7 @@ import type { AgentInfo } from './get_agent_info';
 import {
   planLocationRebalance,
   healthySinceKey,
+  isCheckinStale,
   STALE_CHECKIN_MS,
   RECOVERY_STABILITY_MS,
 } from './plan_rebalance';
@@ -24,8 +25,17 @@ const info = (lastCheckin: number, memoryMib: number | null = null): AgentInfo =
 const plan = (
   agents: Map<string, AgentInfo>,
   priorHealthySince: Record<string, number> = {},
-  now: number = NOW
-) => planLocationRebalance({ agents, now, priorHealthySince, agentPolicyId: POLICY });
+  now: number = NOW,
+  activeAgentIds?: ReadonlySet<string>
+) => planLocationRebalance({ agents, now, priorHealthySince, agentPolicyId: POLICY, activeAgentIds });
+
+describe('isCheckinStale', () => {
+  it('is false within the window (including the exact boundary) and true past it', () => {
+    expect(isCheckinStale(info(NOW), NOW)).toBe(false);
+    expect(isCheckinStale(info(NOW - STALE_CHECKIN_MS), NOW)).toBe(false);
+    expect(isCheckinStale(info(NOW - STALE_CHECKIN_MS - 1), NOW)).toBe(true);
+  });
+});
 
 describe('planLocationRebalance', () => {
   describe('health detection (check-in recency)', () => {
@@ -104,6 +114,32 @@ describe('planLocationRebalance', () => {
       expect(healthyAgentIds).toEqual([]);
       expect(recoveryAgentIds).toEqual([]);
       expect(nextHealthySince).toEqual({});
+    });
+  });
+
+  describe('data-plane liveness veto', () => {
+    it('keeps a stale-check-in agent that is proven active by recent data', () => {
+      const agents = new Map<string, AgentInfo>([['a', info(NOW - STALE_CHECKIN_MS - 1)]]);
+
+      const { healthyAgentIds } = plan(agents, {}, NOW, new Set(['a']));
+
+      expect(healthyAgentIds).toEqual(['a']);
+    });
+
+    it('still drops a stale agent that is not in the active set', () => {
+      const agents = new Map<string, AgentInfo>([['a', info(NOW - STALE_CHECKIN_MS - 1)]]);
+
+      const { healthyAgentIds } = plan(agents, {}, NOW, new Set(['other']));
+
+      expect(healthyAgentIds).toEqual([]);
+    });
+
+    it('never evicts a fresh-check-in agent regardless of the active set', () => {
+      const agents = new Map<string, AgentInfo>([['a', info(NOW)]]);
+
+      const { healthyAgentIds } = plan(agents, {}, NOW, new Set());
+
+      expect(healthyAgentIds).toEqual(['a']);
     });
   });
 

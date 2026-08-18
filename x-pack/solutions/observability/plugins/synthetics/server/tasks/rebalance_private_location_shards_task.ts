@@ -12,7 +12,12 @@ import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
 import { getAgentInfo, type AgentInfo } from '../synthetics_service/private_location/get_agent_info';
-import { planLocationRebalance } from '../synthetics_service/private_location/plan_rebalance';
+import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
+import {
+  isCheckinStale,
+  planLocationRebalance,
+  STALE_DATA_MS,
+} from '../synthetics_service/private_location/plan_rebalance';
 import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 
@@ -97,6 +102,14 @@ export class RebalancePrivateLocationShardsTask {
           continue;
         }
 
+        // Data-plane liveness veto: only worth a `synthetics-*` query when at
+        // least one agent looks stale by check-in. In steady state (all fresh)
+        // we skip it, so a healthy location adds no extra ES load.
+        const hasStaleAgent = [...agents.values()].some((info) => isCheckinStale(info, now));
+        const activeAgentIds = hasStaleAgent
+          ? await getRecentlyActiveAgentIds(this.serverSetup, [...agents.keys()], STALE_DATA_MS, now)
+          : undefined;
+
         const {
           healthyAgentIds,
           recoveryAgentIds,
@@ -107,6 +120,7 @@ export class RebalancePrivateLocationShardsTask {
           now,
           priorHealthySince,
           agentPolicyId: location.agentPolicyId,
+          activeAgentIds,
         });
         // Keys are policy-scoped, so merging every location into one map is safe.
         Object.assign(nextHealthySince, locationHealthySince);

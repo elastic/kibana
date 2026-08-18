@@ -21,6 +21,7 @@ import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_m
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
 import * as getAgentInfoModule from '../synthetics_service/private_location/get_agent_info';
 import type { AgentInfo } from '../synthetics_service/private_location/get_agent_info';
+import * as getActiveAgentIdsModule from '../synthetics_service/private_location/get_active_agent_ids';
 import {
   RECOVERY_STABILITY_MS,
   STALE_CHECKIN_MS,
@@ -165,11 +166,45 @@ describe('RebalancePrivateLocationShardsTask', () => {
       });
     });
 
+    it('skips the data-plane liveness query when every agent is fresh', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
+      const getActive = jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds');
+
+      await makeTask().runTask({ taskInstance: taskInstance() });
+
+      expect(getActive).not.toHaveBeenCalled();
+      expect(mockRebalanceShards).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps a stale-check-in agent that the liveness query proves active', async () => {
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
+      const getActive = jest
+        .spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds')
+        .mockResolvedValue(new Set(['agent-1']));
+
+      await makeTask().runTask({ taskInstance: taskInstance() });
+
+      expect(getActive).toHaveBeenCalledTimes(1);
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+      expect(mockRebalanceShards).toHaveBeenCalledWith(
+        expect.objectContaining({ healthyAgentIds: ['agent-1'] })
+      );
+    });
+
     it('warns and skips the rebalance when a location has no healthy agents', async () => {
       jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
       jest
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
+      jest
+        .spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds')
+        .mockResolvedValue(new Set());
 
       await makeTask().runTask({ taskInstance: taskInstance() });
 
