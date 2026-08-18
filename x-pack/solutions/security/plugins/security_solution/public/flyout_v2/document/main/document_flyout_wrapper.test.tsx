@@ -221,6 +221,46 @@ describe('DocumentFlyoutWrapper', () => {
     expect(queryByTestId('document-overview-wrapper-not-found')).not.toBeInTheDocument();
   });
 
+  it('keeps the previously resolved document mounted while a new one is loading', () => {
+    const firstHit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, firstHit, jest.fn()]);
+
+    const { rerender, getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+
+    // Paginating to another document sends the search back to `Loading` with no hit. The
+    // flyout must stay mounted (so the header keeps its pagination controls) and only be
+    // told that it is loading.
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
+
+    rerender(
+      <TestProviders>
+        <DocumentFlyoutWrapper
+          documentId="doc-id-2"
+          indexName="my-index"
+          renderCellActions={jest.fn()}
+          onAlertUpdated={jest.fn()}
+        />
+      </TestProviders>
+    );
+
+    expect(queryByTestId('document-overview-wrapper-loading')).not.toBeInTheDocument();
+    expect(getByTestId('documentFlyoutStub')).toBeInTheDocument();
+    expect(mockDocumentFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ hit: firstHit, isPaginationLoading: true })
+    );
+  });
+
+  it('renders the cold loading state when no document has been resolved yet', () => {
+    (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Loading, null, jest.fn()]);
+
+    const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
+
+    expect(getByTestId('document-overview-wrapper-loading')).toBeInTheDocument();
+    expect(queryByTestId('documentFlyoutStub')).not.toBeInTheDocument();
+  });
+
   it('renders FlyoutMissingAlertsPrivilege when document is an alert and user lacks alerts read privilege', () => {
     const alertHit = createAlertHit();
     (useEsDocSearch as jest.Mock).mockReturnValue([ElasticRequestState.Found, alertHit, jest.fn()]);
