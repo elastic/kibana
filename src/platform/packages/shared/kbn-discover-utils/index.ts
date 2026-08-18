@@ -98,6 +98,7 @@ export {
   HISTOGRAM_HEIGHT_KEY,
   HISTOGRAM_BREAKDOWN_FIELD_KEY,
   METRICS_GRID_SETTINGS_DEFAULTS,
+  METRICS_GRID_SORT_DEFAULTS,
 } from './src';
 
 export type {
@@ -110,6 +111,9 @@ export type {
   DiscoverSessionFinderAttributes,
   HistogramPercentile,
   MetricsGridSettings,
+  MetricsGridSort,
+  MetricsGridSortDirection,
+  MetricsGridSortField,
   SimpleAggregation,
 } from './src';
 
