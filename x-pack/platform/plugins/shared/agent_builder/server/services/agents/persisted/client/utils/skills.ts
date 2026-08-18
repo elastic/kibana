@@ -5,31 +5,15 @@
  * 2.0.
  */
 
-import type { SkillRegistry } from '@kbn/agent-builder-server/skills';
+import type { SkillRegistry } from '../../../../skills/skill_registry';
 
-export interface ValidateSkillSelectionParams {
-  skillRegistry: SkillRegistry;
-  skillIds: string[];
-}
-
-/**
- * Validates that every skill id in a `configuration_overrides.skill_ids` selection actually
- * exists (and is visible to the caller) in the skill registry. Mirrors `validateToolSelection`
- * so skill overrides get the same 400-on-unknown-id guarantee tools already have (PR #280617
- * review — "we should have the same validation as tools").
- */
-export async function validateSkillSelection({
-  skillRegistry,
-  skillIds,
-}: ValidateSkillSelectionParams): Promise<string[]> {
-  const errors: string[] = [];
-
-  for (const skillId of skillIds) {
-    const exists = await skillRegistry.has(skillId);
-    if (!exists) {
-      errors.push(`Skill id '${skillId}' does not exist.`);
-    }
+export async function validateSkillIds(
+  skillRegistry: SkillRegistry,
+  skillIds: string[]
+): Promise<string[]> {
+  if (skillIds.length === 0) {
+    return [];
   }
-
-  return errors;
+  const found = await skillRegistry.bulkGet(skillIds);
+  return skillIds.filter((id) => !found.has(id)).map((id) => `Skill id '${id}' does not exist.`);
 }

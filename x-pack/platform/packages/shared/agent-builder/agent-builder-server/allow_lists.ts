@@ -46,6 +46,13 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.observability}.get_logs`,
   `${internalNamespaces.observability}.get_apm_correlations`,
 
+  // ML anomaly detection (Agent Builder skill tools)
+  `${internalNamespaces.ml}.ad_get_job_info`,
+  `${internalNamespaces.ml}.ad_create_job`,
+  `${internalNamespaces.ml}.ad_manage_job_state`,
+  `${internalNamespaces.ml}.ad_update_job_config`,
+  `${internalNamespaces.ml}.query_anomalies`,
+
   // Security Solution
   `${internalNamespaces.security}.entity_risk_score`,
   `${internalNamespaces.security}.create_detection_rule`,
@@ -53,11 +60,16 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.attack_discovery_search`,
   `${internalNamespaces.security}.security_labs_search`,
   `${internalNamespaces.security}.alerts`,
+  `${internalNamespaces.security}.build_redirect_url`,
   `${internalNamespaces.security}.add_entities_to_watchlist`,
   `${internalNamespaces.security}.create_watchlist`,
   `${internalNamespaces.security}.delete_watchlist`,
   `${internalNamespaces.security}.get_entity`,
+  `${internalNamespaces.security}.get_entity_graph`,
+  `${internalNamespaces.security}.get_entity_risk_score_history`,
+  `${internalNamespaces.security}.entity_relationship_history`,
   `${internalNamespaces.security}.list_watchlists`,
+  `${internalNamespaces.security}.get_watchlist_id`,
   `${internalNamespaces.security}.remove_entities_from_watchlist`,
   `${internalNamespaces.security}.search_entities`,
   `${internalNamespaces.security}.update_watchlist`,
@@ -84,6 +96,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
 
+  // Custom content panels
+  'custom_content_update_panel',
+
   // Workflows
   `${internalNamespaces.workflows}.validate_workflow`,
   `${internalNamespaces.workflows}.get_step_definitions`,
@@ -93,31 +108,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.workflows}.get_workflow`,
   `${internalNamespaces.workflows}.get_examples`,
   `${internalNamespaces.workflows}.workflow_execute_step`,
-  // Threat Intelligence tools are owned by Security Solution but registered under
-  // the `threat_intel.` namespace to match the `threat-intelligence` skill ID
-  // (see `security_solution/common/threat_intelligence/hub/constants.ts`).
-  'threat_intel.extract_iocs',
-  'threat_intel.analyse_environment',
-  'threat_intel.correlate_threat',
-  'threat_intel.correlate_start',
-  'threat_intel.correlate_poll',
-  'threat_intel.search_by_anchors',
-  'threat_intel.search_by_diamond',
-  'threat_intel.extract_diamond',
-  'threat_intel.get_report',
-  'threat_intel.correlate_synthesis_pack',
-  'threat_intel.hunt_behavior',
-  'threat_intel.hunt_orchestrator',
-  'threat_intel.synthesize_advisory',
-
-  // Osquery
-  `${internalNamespaces.osquery}.check_integration`,
-  `${internalNamespaces.osquery}.list_saved_queries`,
-  `${internalNamespaces.osquery}.get_table_schema`,
-  `${internalNamespaces.osquery}.run_live_query`,
-  `${internalNamespaces.osquery}.get_live_query_results`,
-  `${internalNamespaces.osquery}.list_packs`,
-  `${internalNamespaces.osquery}.resolve_agent_ids`,
 ] as const;
 
 export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[number];
@@ -129,11 +119,6 @@ export type AgentBuilderBuiltinTool = (typeof AGENT_BUILDER_BUILTIN_TOOLS)[numbe
 export const AGENT_BUILDER_BUILTIN_AGENTS = [
   `${internalNamespaces.search}.agent`,
   `${internalNamespaces.security}.agent`,
-  // Backing agent for PND (Proactive Network Defense) Watch-created Conversations
-  // (investigations, proposals, incidents) — see
-  // x-pack/solutions/security/plugins/pnd/server/services/investigations/template_mapping.ts.
-  // Not directly conversable by end users.
-  `${internalNamespaces.security}.pnd_watch_orchestrator`,
 ] as const;
 
 export type AgentBuilderBuiltinAgent = (typeof AGENT_BUILDER_BUILTIN_AGENTS)[number];
@@ -154,7 +139,6 @@ export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformSignificantEvents}.investigation-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
-  `${internalNamespaces.platformSignificantEvents}.discovery-judge-type`,
 ] as const;
 
 export type AgentBuilderAgentType = (typeof AGENT_BUILDER_AGENT_TYPES)[number];
@@ -180,6 +164,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Alerting
   'rule-management',
+  'action-policy-management',
 
   // Platform – Dashboard
   'dashboard-management',
@@ -205,6 +190,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
 
   // Platform – Context Engine
   'ki-automation-generation',
+  'ki-retrieval',
 
   // Platform – Workflows
   'workflow-authoring',
@@ -223,14 +209,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'detection-rule-edit',
   'recommend-prebuilt-rules',
   'threat-hunting',
-  'threat-intelligence',
   'find-security-rules',
   'pci-compliance',
   'endpoint-forensic-analysis',
-  'deep-watch-forensics',
   'investigate-rule',
   'siem-readiness',
-  'endpoint-response-actions',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
@@ -239,6 +222,9 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+
+  // ML
+  `${internalNamespaces.ml}.anomaly-detection`,
 
   // Search
   `${internalNamespaces.search}.keyword-search`,
@@ -307,25 +293,21 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'cases',
 
   // Platform – Alerting v2
-  'rule',
-  'action_policy',
+  'platform.alerting.rule',
+  'platform.alerting.action_policy',
+  'platform.alerting.episode',
 
   // Security Solution
   'security.alert',
   'security.alerts',
   'security.entity',
   'security.entity_analytics_dashboard',
+  'security.entity_graph',
+  'security.entity_risk_score_history',
   'security.rule',
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
   'security.rule.preview',
-
-  // Security Solution – Threat Intelligence
-  'threat-intel-mitre-heatmap',
-  'threat-intel-report-table',
-  'threat-intel-severity-timeline',
-  'threat-intel-subscription-confirmation',
-  'threat-intel-finding-card',
 
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
@@ -344,6 +326,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Observability – APM
   'observability.service-map',
+
+  // Platform – Custom Content
+  'platform.custom_content.panel_context',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];

@@ -9,12 +9,13 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { DiscoverDataSource } from '../../../common/data_sources';
+import type { ProfileStateDefinition } from '../../../common/context_awareness';
 import type { AsyncProfileProvider, ContextWithProfileId } from '../profile_service';
 import { AsyncProfileService } from '../profile_service';
 import type { Profile } from '../types';
 import type { RootContext } from './root_profile';
-import type { ProfileStateDefinition } from '../profile_state';
 
 /**
  * Indicates the category of the data source (e.g. logs, alerts, etc.)
@@ -64,7 +65,7 @@ export interface DataSourceContext {
   /**
    * Optional profile state definition whose URL fields should sync with Discover's URL.
    */
-  profileState?: ProfileStateDefinition<object>;
+  profileState?: ProfileStateDefinition<SerializableRecord>;
 }
 
 export type DataSourceProfileProvider<TProviderContext = {}> = AsyncProfileProvider<

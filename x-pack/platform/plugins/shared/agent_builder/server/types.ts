@@ -48,8 +48,7 @@ export type {
   PluginsSetup,
   PluginsStart,
   RuntimeStart,
-  ReadOnlyConversationClient,
-  ConversationWriterClient,
+  ConversationPublicClient,
   ConversationsStart,
 } from '@kbn/agent-builder-server';
 

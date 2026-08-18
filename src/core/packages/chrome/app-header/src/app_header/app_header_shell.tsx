@@ -26,7 +26,8 @@ export interface AppHeaderShellProps {
   titleActions?: ReactNode;
   titleAppend?: ReactNode;
   trailing?: ReactNode;
-  metadata?: ReactNode;
+  secondaryContent?: ReactNode;
+  secondaryContentTestSubj?: string;
   tabs?: ReactNode;
   sticky?: boolean;
   spacing?: AppHeaderSpacing;
@@ -76,7 +77,7 @@ const useHeaderStyles = (
   spacing: AppHeaderSpacing | undefined,
   hasTabs: boolean,
   hasTitleAppend: boolean,
-  hasMetadata: boolean,
+  hasSecondaryContent: boolean,
   borderless: boolean
 ) => {
   const { euiTheme } = useEuiTheme();
@@ -91,10 +92,8 @@ const useHeaderStyles = (
     // flush with the header's bottom border); otherwise it uses the symmetric vertical padding.
     const bottomPad = (followed: boolean) => (followed ? euiTheme.size.xs : paddingBlock);
 
-    // The min-height floor keeps a short single-row header from getting too thin. Multi-row headers
-    // already gain height from their extra rows and shrink the primary row's bottom padding, so the
-    // floor there would only add dead space.
-    const isMultiRow = hasTabs || hasMetadata;
+    const isMultiRow = hasTabs || hasSecondaryContent;
+    const primaryRowBottomPadding = bottomPad(hasTabs || hasSecondaryContent);
 
     const root = css`
       ${sticky &&
@@ -131,6 +130,8 @@ const useHeaderStyles = (
       }
     `;
 
+    // Preserve the single-row content floor in multi-row headers while replacing its symmetric
+    // bottom padding with the smaller gap to the following row.
     const primaryRow = css`
       display: flex;
       align-items: center;
@@ -141,10 +142,15 @@ const useHeaderStyles = (
       css`
         min-height: ${minHeight}px;
       `}
+      ${isMultiRow &&
+      !hasTitleAppend &&
+      css`
+        min-height: calc(${minHeight}px - ${paddingBlock} + ${primaryRowBottomPadding});
+      `}
       ${!hasTitleAppend &&
       css`
         padding-block-start: ${paddingBlock};
-        padding-block-end: ${bottomPad(hasTabs || hasMetadata)};
+        padding-block-end: ${primaryRowBottomPadding};
       `}
     `;
 
@@ -189,7 +195,7 @@ const useHeaderStyles = (
       align-items: stretch;
     `;
 
-    const metadataRow = css`
+    const secondaryContentRow = css`
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -218,10 +224,10 @@ const useHeaderStyles = (
       titleAppend,
       trailingSlot,
       titleActionsReveal,
-      metadataRow,
+      secondaryContentRow,
       tabsRow,
     };
-  }, [sticky, spacing, euiTheme, hasTabs, hasTitleAppend, hasMetadata, borderless]);
+  }, [sticky, spacing, euiTheme, hasTabs, hasTitleAppend, hasSecondaryContent, borderless]);
 };
 
 export const AppHeaderShell = React.memo<AppHeaderShellProps>(
@@ -230,7 +236,8 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     badges,
     titleActions,
     titleAppend,
-    metadata,
+    secondaryContent,
+    secondaryContentTestSubj,
     trailing,
     tabs,
     sticky = true,
@@ -238,7 +245,14 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
     borderless = false,
   }) => {
     const hasTitleAppend = titleAppend != null;
-    const styles = useHeaderStyles(sticky, spacing, !!tabs, hasTitleAppend, !!metadata, borderless);
+    const styles = useHeaderStyles(
+      sticky,
+      spacing,
+      !!tabs,
+      hasTitleAppend,
+      !!secondaryContent,
+      borderless
+    );
 
     return (
       <div css={styles.root} data-test-subj={APP_HEADER_TEST_SUBJECTS.root}>
@@ -258,9 +272,9 @@ export const AppHeaderShell = React.memo<AppHeaderShellProps>(
           </div>
           {trailing && <div css={styles.trailingSlot}>{trailing}</div>}
         </div>
-        {metadata && (
-          <div css={styles.metadataRow} data-test-subj={APP_HEADER_TEST_SUBJECTS.metadata}>
-            {metadata}
+        {secondaryContent && (
+          <div css={styles.secondaryContentRow} data-test-subj={secondaryContentTestSubj}>
+            {secondaryContent}
           </div>
         )}
         {tabs && (

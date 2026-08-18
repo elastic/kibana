@@ -7,18 +7,19 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  AgentCreateRequest,
-  Conversation,
-  ConversationWithoutRounds,
-  ConversationListOptions,
-} from '@kbn/agent-builder-common';
+import type { AgentCreateRequest } from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
-import type { BuiltInAgentDefinition, AgentTypeDefinition, AgentRegistry } from './agents';
+import type {
+  BuiltInAgentDefinition,
+  AgentTypeDefinition,
+  AgentRegistry,
+  AgentAvailabilityConfig,
+} from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
 import type { HooksServiceSetup } from './hooks/types';
@@ -123,8 +124,16 @@ export interface AgentsStart {
   /**
    * Ensure a system-owned persisted agent exists in a space without overwriting later edits.
    * Intended for code-owned startup installation; does not require a user request.
+   *
+   * Optional `availability` is kept in memory and keyed by `agent.id` (never persisted). Use the
+   * same {@link AgentAvailabilityConfig} shape as built-in agents. Prefer passing it on every
+   * `ensure` call for that id.
    */
-  ensure: (opts: { spaceId: string; agent: AgentCreateRequest }) => Promise<void>;
+  ensure: (opts: {
+    spaceId: string;
+    agent: AgentCreateRequest;
+    availability?: AgentAvailabilityConfig;
+  }) => Promise<void>;
 }
 
 /**
@@ -183,90 +192,13 @@ export interface RuntimeStart {
 }
 
 /**
- * A read-only conversation client exposing only get and list operations.
- */
-export interface ReadOnlyConversationClient {
-  /**
-   * Retrieve a single conversation by its ID, including all rounds.
-   */
-  get(conversationId: string): Promise<Conversation>;
-  /**
-   * List conversations for the current user, optionally filtered by agent ID.
-   */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
-}
-
-/**
- * A write-capable conversation client. Extends the read-only client with
- * create, update, and delete operations. Exposed via
- * {@link ConversationsStart.getScopedWriterClient} — opt-in, separate from
- * the read-only path so plugins that never call it cannot write.
- */
-export interface ConversationWriterClient extends ReadOnlyConversationClient {
-  /**
-   * Create a new conversation. The caller is stamped as the owner.
-   */
-  create(conversation: ConversationWriterCreateRequest): Promise<Conversation>;
-  /**
-   * Update an existing conversation. Requires owner or converse access.
-   */
-  update(conversationUpdate: ConversationWriterUpdateRequest): Promise<Conversation>;
-  /**
-   * Delete a conversation. Requires owner access.
-   */
-  delete(conversationId: string): Promise<boolean>;
-}
-
-/**
- * Request shape for creating a conversation via the writer client.
- * Omits system-managed fields (id, created_at, updated_at, user).
- */
-export type ConversationWriterCreateRequest = Omit<
-  Conversation,
-  'id' | 'created_at' | 'updated_at' | 'user'
-> & {
-  id?: string;
-};
-
-/**
- * Request shape for updating a conversation via the writer client.
- */
-export type ConversationWriterUpdateRequest = Pick<Conversation, 'id'> &
-  Partial<
-    Pick<
-      Conversation,
-      | 'title'
-      | 'rounds'
-      | 'attachments'
-      | 'state'
-      | 'status'
-      | 'read'
-      | 'workspace_id'
-      | 'template'
-      | 'extended_fields'
-    >
-  >;
-
-/**
  * AgentBuilder conversations service's start contract.
- *
- * Read access is the default. Write access is opt-in via
- * {@link getScopedWriterClient}.
  */
 export interface ConversationsStart {
   /**
-   * Returns a read-only conversation client scoped to the given request's user and space.
+   * Returns a conversation client scoped to the given request's user and space.
    */
-  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
-  /**
-   * Returns a write-capable conversation client scoped to the given request's user and space.
-   *
-   * Write access is opt-in: plugins that never call this method cannot write.
-   * Authorization is enforced per-operation by the underlying client (create
-   * stamps the caller as owner; update requires owner/converse access; delete
-   * requires owner access; all denials are masked as not-found).
-   */
-  getScopedWriterClient(opts: { request: KibanaRequest }): Promise<ConversationWriterClient>;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
 }
 
 /**

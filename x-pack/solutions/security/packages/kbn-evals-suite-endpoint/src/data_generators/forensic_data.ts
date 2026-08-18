@@ -9,22 +9,10 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
- * Forensic timeline seed for the endpoint-forensic-analysis smoke suite.
- *
- * The troubleshooting SCENARIOS in ./endpoint_data.ts stamp every document with a
- * single `now`, so they cannot exercise a chronological reconstruction. The forensic
- * skill's happy-path examples (patient zero, lateral movement, host timeline) require
- * an ORDERED kill-chain: `execute_esql` must return rows the model can sort by
- * `@timestamp` into a timeline. Without seeded events the "produces a chronological
- * narrative or ordered event list for the named host" criterion is unsatisfiable and
- * pins the timeline example at partial credit.
- *
- * One coherent narrative covers all three happy-path examples:
- *   WKSTN-RECV01 (patient zero, phishing) → lateral SMB/WMI hop → SRV-DC01 (domain
- *   controller ransomware + shadow-copy deletion). Every event carries a distinct
- *   `@timestamp` so an ascending sort is a real timeline.
- *
- * Agent ids use the shared `eval-agent-` prefix so cleanupSeededData() reclaims them.
+ * Ordered kill chain: WKSTN-RECV01 (patient zero, phishing) → lateral SMB/WMI hop →
+ * SRV-DC01 (ransomware + shadow-copy deletion). Every event carries a distinct
+ * `@timestamp`, unlike the troubleshooting SCENARIOS which stamp a single `now`,
+ * so the timeline/patient-zero/lateral-movement examples have something to sort.
  */
 
 const FORENSIC_AGENT_PREFIX = 'eval-agent-forensic-';
@@ -264,24 +252,16 @@ const KILL_CHAIN: ForensicEvent[] = [
 
 /**
  * Bulk-index the ordered kill chain into `logs-endpoint.events.*`. Idempotent when
- * paired with cleanupSeededData() in beforeAll (which reclaims by `eval-agent-` prefix).
+ * paired with cleanupForensicData() in beforeAll (which reclaims by the
+ * `eval-agent-forensic-` prefix only, leaving troubleshooting seeds intact).
  */
 export async function seedForensicTimeline(
   { esClient }: { esClient: Client },
   log: ToolingLog,
-  baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000),
-  /**
-   * Maps a seeded host to a REAL Fleet-enrolled agent UUID. Required for any
-   * environment where Osquery live queries must resolve `agent.id` from
-   * telemetry to an actually-enrolled agent (e.g. the BlackHat live demo) —
-   * without this, the synthetic `eval-agent-forensic-*` id is written instead
-   * and any live query dispatched against it hangs forever (no such agent).
-   * Omit for eval-suite runs, where no live Osquery dispatch happens.
-   */
-  agentIdOverrides: Partial<Record<keyof typeof AGENT_IDS, string>> = {}
+  baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000)
 ): Promise<void> {
   const operations = KILL_CHAIN.flatMap((event) => {
-    const agentId = agentIdOverrides[event.host] ?? AGENT_IDS[event.host];
+    const agentId = AGENT_IDS[event.host];
     const timestamp = new Date(baseTime.getTime() + event.offsetMinutes * 60 * 1000).toISOString();
     const [, dataset] = event.index.match(/^logs-(endpoint\.events\.[a-z]+)-default$/) ?? [];
 

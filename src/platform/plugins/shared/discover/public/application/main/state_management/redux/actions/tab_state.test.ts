@@ -18,18 +18,25 @@ import {
 } from '..';
 import { DataSourceType } from '../../../../../../common/data_sources';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
-import { GLOBAL_STATE_URL_KEY, PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
+import {
+  GLOBAL_STATE_URL_KEY,
+  PROFILE_STATE_URL_KEY,
+  DISCOVER_QUERY_MODE_KEY,
+} from '../../../../../../common/constants';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { mockControlState } from '../../../../../__mocks__/esql_controls';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 import { selectDataSourceProfileId, selectTabRuntimeState } from '../runtime_state';
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
-import type { ProfileStateDefinition } from '../../../../../context_awareness';
-import { ProfileStateType } from '../../../../../context_awareness';
+import {
+  ProfileStateType,
+  type ProfileStateDefinition,
+} from '../../../../../../common/context_awareness';
 
-interface SecondaryProfileState {
+interface SecondaryProfileState extends SerializableRecord {
   secondaryUrlValue: string;
 }
 
@@ -118,8 +125,8 @@ describe('tab_state actions', () => {
         })
       );
 
-      const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
-        .snapshotsByProfileId;
+      const snapshotsByProfileId = selectTab(internalState.getState(), tabId)
+        .profileAppStateDefaults.snapshotsByProfileId;
 
       expect(snapshotsByProfileId[profileId]).toEqual({
         columns: ['message'],
@@ -130,12 +137,12 @@ describe('tab_state actions', () => {
     });
   });
 
-  describe('syncProfileStateSnapshot', () => {
+  describe('syncProfileAppStateSnapshot', () => {
     it('should sync snapshotsByProfileId for the current profile when triggered separately', async () => {
       const { internalState, runtimeStateManager, tabId } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
-      const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
-        .snapshotsByProfileId;
+      const snapshotsByProfileId = selectTab(internalState.getState(), tabId)
+        .profileAppStateDefaults.snapshotsByProfileId;
 
       internalState.dispatch(
         internalStateActions.setAppState({
@@ -149,13 +156,13 @@ describe('tab_state actions', () => {
       );
 
       expect(
-        selectTab(internalState.getState(), tabId).defaultProfileState.snapshotsByProfileId
+        selectTab(internalState.getState(), tabId).profileAppStateDefaults.snapshotsByProfileId
       ).toBe(snapshotsByProfileId);
 
-      internalState.dispatch(internalStateActions.syncProfileStateSnapshot({ tabId }));
+      internalState.dispatch(internalStateActions.syncProfileAppStateSnapshot({ tabId }));
 
       const currentSnapshotsByProfileId = selectTab(internalState.getState(), tabId)
-        .defaultProfileState.snapshotsByProfileId;
+        .profileAppStateDefaults.snapshotsByProfileId;
 
       expect(currentSnapshotsByProfileId[profileId]).not.toBeUndefined();
       expect(currentSnapshotsByProfileId[profileId]?.columns).toEqual(['message']);
@@ -466,7 +473,7 @@ describe('tab_state actions', () => {
       expect(persistedAppState).toEqual(currentTab.appState);
       expect(currentTab.appState.columns).toEqual(['message']);
       expect(currentTab.appState.rowHeight).toBe(8);
-      expect(currentTab.defaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+      expect(currentTab.profileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
         columns: ['message'],
         rowHeight: 3,
       });
@@ -495,8 +502,8 @@ describe('tab_state actions', () => {
         })
       );
 
-      const snapshotsByProfileId = selectTab(internalState.getState(), tabId).defaultProfileState
-        .snapshotsByProfileId;
+      const snapshotsByProfileId = selectTab(internalState.getState(), tabId)
+        .profileAppStateDefaults.snapshotsByProfileId;
 
       expect(snapshotsByProfileId[profileId]).toEqual({
         breakdownField: undefined,
@@ -625,12 +632,13 @@ describe('tab_state actions', () => {
 
   describe('transitionFromESQLToDataView', () => {
     it('should transition from ES|QL mode to Data View mode', async () => {
-      const { internalState, runtimeStateManager, tabId } = await setup();
+      const { internalState, runtimeStateManager, tabId, services } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
+      const storageSetSpy = jest.spyOn(services.storage, 'set');
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
-      const prevDefaultProfileState = tab.defaultProfileState;
+      const prevProfileAppStateDefaults = tab.profileAppStateDefaults;
 
       expect(tab.appState.query).toStrictEqual({ esql: 'FROM test-index' });
       expect(tab.appState.columns).toHaveLength(2);
@@ -639,10 +647,10 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(prevDefaultProfileState.fieldsToReset).toBe('none');
-      expect(typeof prevDefaultProfileState.resetId).toBe('string');
-      expect(prevDefaultProfileState.resetId).not.toEqual('');
-      expect(prevDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+      expect(prevProfileAppStateDefaults.fieldsToReset).toBe('none');
+      expect(typeof prevProfileAppStateDefaults.resetId).toBe('string');
+      expect(prevProfileAppStateDefaults.resetId).not.toEqual('');
+      expect(prevProfileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
         breakdownField: '',
         columns: ['field1', 'field2'],
         hideChart: false,
@@ -675,9 +683,9 @@ describe('tab_state actions', () => {
         dataViewId: dataView.id,
       });
 
-      expect(tab.defaultProfileState.fieldsToReset).toBe('all');
-      expect(typeof tab.defaultProfileState.resetId).toBe('string');
-      expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+      expect(tab.profileAppStateDefaults.fieldsToReset).toBe('all');
+      expect(typeof tab.profileAppStateDefaults.resetId).toBe('string');
+      expect(tab.profileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
         breakdownField: '',
         columns: [],
         hideChart: false,
@@ -685,16 +693,22 @@ describe('tab_state actions', () => {
         hideSidebar: undefined,
         rowHeight: undefined,
       });
-      expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
-      expect(tab.defaultProfileState.resetId).not.toEqual('');
+      expect(tab.profileAppStateDefaults.resetId).not.toEqual(prevProfileAppStateDefaults.resetId);
+      expect(tab.profileAppStateDefaults.resetId).not.toEqual('');
+
+      expect(storageSetSpy).toHaveBeenCalledWith(DISCOVER_QUERY_MODE_KEY, {
+        currentMode: 'classic',
+        defaultMode: 'classic',
+      });
     });
   });
 
   describe('transitionFromDataViewToESQL', () => {
     it('should transition from Data View mode to ES|QL mode', async () => {
-      const { internalState, runtimeStateManager, tabId } = await setup();
+      const { internalState, runtimeStateManager, tabId, services } = await setup();
       const profileId = selectDataSourceProfileId(runtimeStateManager, tabId);
       const dataView = dataViewMockWithTimeField;
+      const storageSetSpy = jest.spyOn(services.storage, 'set');
 
       const query = { query: "foo: 'bar'", language: 'kuery' };
       const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
@@ -723,7 +737,7 @@ describe('tab_state actions', () => {
 
       let state = internalState.getState();
       let tab = selectTab(state, tabId);
-      const prevDefaultProfileState = tab.defaultProfileState;
+      const prevProfileAppStateDefaults = tab.profileAppStateDefaults;
 
       expect(tab.appState.query).toStrictEqual(query);
       expect(tab.appState.sort).toEqual([
@@ -737,10 +751,10 @@ describe('tab_state actions', () => {
         dataViewId: 'the-data-view-id',
       });
 
-      expect(prevDefaultProfileState.fieldsToReset).toBe('none');
-      expect(typeof prevDefaultProfileState.resetId).toBe('string');
-      expect(prevDefaultProfileState.resetId).not.toEqual('');
-      expect(prevDefaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+      expect(prevProfileAppStateDefaults.fieldsToReset).toBe('none');
+      expect(typeof prevProfileAppStateDefaults.resetId).toBe('string');
+      expect(prevProfileAppStateDefaults.resetId).not.toEqual('');
+      expect(prevProfileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
         breakdownField: undefined,
         columns: undefined,
         hideChart: undefined,
@@ -762,7 +776,7 @@ describe('tab_state actions', () => {
 
       // Verify the state was updated correctly
       expect(tab.appState.query).toStrictEqual({
-        esql: 'FROM the-data-view-title | WHERE KQL("""foo: \'bar\'""")',
+        esql: 'FROM the-data-view-title | SORT @timestamp DESC | WHERE KQL("""foo: \'bar\'""")',
       });
       expect(tab.appState.sort).toBeUndefined();
       expect(tab.globalState.filters).toStrictEqual([]);
@@ -771,17 +785,22 @@ describe('tab_state actions', () => {
         type: DataSourceType.Esql,
       });
 
-      expect(tab.defaultProfileState.fieldsToReset).toBe('all');
-      expect(typeof tab.defaultProfileState.resetId).toBe('string');
-      expect(tab.defaultProfileState.snapshotsByProfileId[profileId]).toEqual({
+      expect(tab.profileAppStateDefaults.fieldsToReset).toBe('all');
+      expect(typeof tab.profileAppStateDefaults.resetId).toBe('string');
+      expect(tab.profileAppStateDefaults.snapshotsByProfileId[profileId]).toEqual({
         breakdownField: undefined,
         columns: [],
         hideChart: undefined,
         hideTable: undefined,
         rowHeight: undefined,
       });
-      expect(tab.defaultProfileState.resetId).not.toEqual(prevDefaultProfileState.resetId);
-      expect(tab.defaultProfileState.resetId).not.toEqual('');
+      expect(tab.profileAppStateDefaults.resetId).not.toEqual(prevProfileAppStateDefaults.resetId);
+      expect(tab.profileAppStateDefaults.resetId).not.toEqual('');
+
+      expect(storageSetSpy).toHaveBeenCalledWith(DISCOVER_QUERY_MODE_KEY, {
+        currentMode: 'esql',
+        defaultMode: 'classic',
+      });
     });
   });
 

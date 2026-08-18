@@ -14,6 +14,8 @@ import { createAlertAttachmentType } from './alert';
 import { createBulkAlertsAttachmentType } from './alerts';
 import { createEntityAttachmentType } from './entity';
 import { createEntityAnalyticsDashboardAttachmentType } from './entity_analytics_dashboard';
+import { createEntityGraphAttachmentType } from './entity_graph';
+import { createEntityRiskScoreHistoryAttachmentType } from './entity_risk_score_history';
 import { createSiemReadinessAttachmentType } from './siem_readiness';
 import { createRulePreviewAttachmentType, getRulePreviewAlertCount } from './rule_preview';
 import { ALL_ATTACHMENT_TYPES as THREAT_INTELLIGENCE_ATTACHMENT_TYPES } from './threat_intelligence_attachment_types';
@@ -36,6 +38,10 @@ export const registerAttachments = async (
   agentBuilder.attachments.registerType(createBulkAlertsAttachmentType(core, logger));
   agentBuilder.attachments.registerType(createEntityAttachmentType());
   agentBuilder.attachments.registerType(createEntityAnalyticsDashboardAttachmentType());
+  agentBuilder.attachments.registerType(createEntityGraphAttachmentType());
+  if (experimentalFeatures.riskScoreHistoryEnabled) {
+    agentBuilder.attachments.registerType(createEntityRiskScoreHistoryAttachmentType());
+  }
   agentBuilder.attachments.registerType(createRuleAttachmentType(core, logger));
 
   // Threat-intelligence attachment types. Tools that emit these are gated by

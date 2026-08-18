@@ -88,6 +88,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   onIlmPolicyChange?: (ilmPolicy: string | undefined, isInit?: boolean) => void;
   packagePolicyId?: string;
   deploymentSelector?: React.ReactNode;
+  hideInVarGroupOptions?: Record<string, string[]>;
 }> = memo(
   ({
     namespacePlaceholder,
@@ -104,6 +105,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     onIlmPolicyChange,
     packagePolicyId,
     deploymentSelector,
+    hideInVarGroupOptions,
   }) => {
     const { docLinks, cloud } = useStartServices();
     const { enableVarGroups } = ExperimentalFeaturesService.get();
@@ -127,6 +129,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
         isAgentlessEnabled: isAgentlessSelected,
         onSelectionsChange: updatePackagePolicy,
         packagePolicy,
+        hideInVarGroupOptions,
       });
 
     const {
@@ -913,6 +916,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           isAgentlessEnabled={isAgentlessSelected}
                           disabled={isEditPage && isCloudConnectorSelected}
                           hideTitle={true}
+                          hideInVarGroupOptions={hideInVarGroupOptions}
                         />
                       </EuiFlexItem>
 

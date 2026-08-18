@@ -9,7 +9,9 @@ Every **`EuiButtonIcon`** needs two things:
 
 When the tooltip **`content`** and the button's **`aria-label`** match (same string, same variable, or same `i18n` call), also set **`disableScreenReaderOutput`** on `EuiToolTip` so screen readers announce the name once instead of twice.
 
-**Related guides:** **`focus_and_keyboard.md`** (tooltip anchors / `tabIndex`) · **`icons_and_tooltips.md`** (`EuiIconTip` vs `EuiToolTip` + `EuiIcon`) · **`tooltip_content.md`** (no interactive elements inside tooltip `content` / `title`).
+**Exception — inside `EuiCopy`:** an `EuiButtonIcon` rendered as the render-prop child of an `EuiCopy` that sets a meaningful **`beforeMessage`** already has a tooltip, supplied by `EuiCopy` itself. Do **not** wrap it — see **`copy_tooltip.md`**. It still needs `aria-label`, and `title` is still forbidden.
+
+**Related guides:** **`copy_tooltip.md`** (`EuiCopy` supplies its own tooltip) · **`focus_and_keyboard.md`** (tooltip anchors / `tabIndex`) · **`icons_and_tooltips.md`** (`EuiIconTip` vs `EuiToolTip` + `EuiIcon`) · **`tooltip_content.md`** (no interactive elements inside tooltip `content` / `title`).
 
 ## Canonical usage
 

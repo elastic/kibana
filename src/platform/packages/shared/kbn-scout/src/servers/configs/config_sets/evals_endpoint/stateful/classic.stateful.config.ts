@@ -20,13 +20,9 @@ export const servers: ScoutServerConfig = {
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'automaticTroubleshootingSkill',
         'endpointForensicAnalysisSkill',
-        'endpointResponseActionsSkill',
       ])}`,
       '--xpack.fleet.packages.0.name=endpoint',
       '--xpack.fleet.packages.0.version=latest',
-      '--xpack.fleet.packages.1.name=osquery_manager',
-      '--xpack.fleet.packages.1.version=latest',
-      '--xpack.osquery.enableExperimental=["agentBuilderTools"]',
     ],
   },
 };

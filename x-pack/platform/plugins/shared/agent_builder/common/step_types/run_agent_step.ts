@@ -113,7 +113,13 @@ export const InputSchema = z.object({
         .array(z.string().max(100))
         .max(50)
         .optional()
-        .describe('Skill IDs to enable for this execution, replacing the stored skill list.'),
+        .describe(
+          'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+        ),
+      enable_elastic_capabilities: z
+        .boolean()
+        .optional()
+        .describe('Whether to enable built-in Elastic skills for this execution.'),
     })
     .optional()
     .describe(
@@ -148,13 +154,6 @@ export const OutputSchema = z.object({
           .max(512)
           .optional()
           .describe('Id of the LLM connector used for this step, when reported by the model.'),
-        modelId: z
-          .string()
-          .max(512)
-          .optional()
-          .describe(
-            "Model identifier from the provider response for this step, when reported by the model. A step uses one connector today, so the last real value is the step's model."
-          ),
         inputTokens: z.number().describe('Total input tokens consumed across all LLM rounds.'),
         outputTokens: z.number().describe('Total output tokens produced across all LLM rounds.'),
         cachedTokens: z
@@ -162,10 +161,6 @@ export const OutputSchema = z.object({
           .optional()
           .describe('Cached input tokens reused across all LLM rounds. Subset of inputTokens.'),
         totalTokens: z.number().describe('Sum of input and output tokens across all LLM rounds.'),
-        latencyMs: z
-          .number()
-          .optional()
-          .describe('Wall-clock milliseconds spent executing this step, start to finish.'),
       }),
     })
     .describe('Step execution metadata, including token usage across all LLM rounds.')
@@ -358,7 +353,7 @@ export const runAgentStepCommonDefinition: CommonStepDefinition<
 \`\`\`yaml
 - name: investigate
   type: ${RunAgentStepTypeId}
-  agent-id: "significant_events.investigation"
+  agent-id: "significant-events.investigation"
   connector-id-by-feature: "significant_events_investigation"
   with:
     message: "Investigate the significant events in this stream."
@@ -459,6 +454,7 @@ When a schema is provided, the agent's response will be available in \`output.st
     message: "Investigate the root cause of the issue."
     configuration_overrides:
       instructions: "Focus only on the security implications."
+      enable_elastic_capabilities: false
       skill_ids:
         - "security-analysis-skill"
       tools:

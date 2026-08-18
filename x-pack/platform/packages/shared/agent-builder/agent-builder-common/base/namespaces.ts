@@ -18,6 +18,7 @@ export const internalNamespaces = {
   filestore: 'filestore',
   attachments: 'attachments',
   observability: 'observability',
+  ml: 'ml',
   search: 'search',
   security: 'security',
   osquery: 'osquery',
@@ -34,6 +35,7 @@ export const protectedNamespaces: string[] = [
   internalNamespaces.attachments,
   internalNamespaces.filestore,
   internalNamespaces.observability,
+  internalNamespaces.ml,
   internalNamespaces.platformDashboard, // Owned by agent_builder_dashboards plugin
   internalNamespaces.platformStreams,
   internalNamespaces.platformSignificantEvents,

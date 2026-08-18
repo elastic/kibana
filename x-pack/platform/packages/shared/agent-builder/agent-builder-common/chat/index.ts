@@ -6,11 +6,21 @@
  */
 
 export {
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  isConversationAccessControlRole,
+  normalizeConversationAccessControl,
   type ConversationAccessControl,
+  type ConversationAccessControlEntry,
+  type ConversationAccessControlEntryInput,
+  type ConversationAccessControlInput,
+  type ConversationAccessControlPrincipalType,
 } from './access_control';
 export {
+  DEFAULT_CONVERSATION_TITLE,
   ConversationRoundStatus,
   ConversationDisplayStatus,
   ConversationOriginType,
@@ -22,8 +32,6 @@ export {
   type ConversationRound,
   type Conversation,
   type ConversationOrigin,
-  type ConversationTemplateReference,
-  type ConversationExtendedFields,
   type ConversationRoundAuthor,
   type ConversationRoundOrigin,
   type ConversationInternalState,
@@ -60,6 +68,11 @@ export {
   type AskUserQuestionStepData,
   createAskUserQuestionStep,
   isAskUserQuestionStep,
+  type RelevantSkill,
+  type RelevantSkillsStep,
+  type RelevantSkillsStepData,
+  createRelevantSkillsStep,
+  isRelevantSkillsStep,
 } from './conversation';
 export {
   ChatEventType,
@@ -130,8 +143,30 @@ export {
   createUserQuestionAnsweredEvent,
 } from './events';
 export type { RoundState } from './round_state';
-export type {
-  ConversationExtendedFieldFilter,
-  ConversationListOptions,
-  ConversationSearchFilters,
-} from './conversation_list';
+export type { ConversationListOptions } from './conversation_list';
+export {
+  CONVERSATION_SCHEMA_VERSION,
+  EventActorType,
+  TimelineTriggerType,
+  TimelineEventType,
+  type EventActor,
+  type BaseTimelineEventInput,
+  type BaseTimelineEvent,
+  type UserMessageEventData,
+  type UserMessageEvent,
+  type PromptResponseEventData,
+  type PromptResponseEvent,
+  type ExecutionStartedEventData,
+  type ExecutionStartedEvent,
+  type PromptRequestedEventData,
+  type PromptRequestedEvent,
+  type ExecutionCompletedEventData,
+  type ExecutionCompletedEvent,
+  type ExecutionFailedEventData,
+  type ExecutionFailedEvent,
+  type ExecutionAbortedEventData,
+  type ExecutionAbortedEvent,
+  type TimelineEvent,
+  type TimelineEventInput,
+  type ActiveExecution,
+} from './timeline_events';

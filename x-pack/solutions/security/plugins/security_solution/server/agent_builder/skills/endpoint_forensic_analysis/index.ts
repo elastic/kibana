@@ -8,5 +8,4 @@
 export {
   endpointForensicAnalysisSkill,
   ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
-  ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
 } from './endpoint_forensic_analysis_skill';

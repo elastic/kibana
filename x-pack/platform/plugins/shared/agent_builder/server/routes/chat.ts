@@ -20,7 +20,6 @@ import {
   AgentExecutionMode,
   ConversationAccessControlMode,
   ConversationOriginType,
-  ExecutionStatus,
 } from '@kbn/agent-builder-common';
 import type {
   AgentExecutionService,
@@ -38,7 +37,7 @@ import type {
 import { internalApiPath, publicApiPath } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { validateToolSelection } from '../services/agents/persisted/client/utils/tools';
-import { validateSkillSelection } from '../services/agents/persisted/client/utils/skills';
+import { validateSkillIds } from '../services/agents/persisted/client/utils/skills';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { AGENT_SOCKET_TIMEOUT_MS, getSSEResponseHeaders } from './utils';
@@ -69,8 +68,8 @@ export const promptResponseEntrySchema = schema.oneOf([
     },
     {
       meta: {
-        description:
-          '**Technical Preview.** Answers to an `ask_user_question` prompt; one entry per question, in order.',
+        availability: { stability: 'tech_preview' },
+        description: 'Answers to an `ask_user_question` prompt; one entry per question, in order.',
       },
     }
   ),
@@ -102,6 +101,15 @@ export const conversePayloadSchema = schema.object({
         },
       })
     )
+  ),
+  project_routing: schema.maybe(
+    schema.string({
+      maxLength: 2048,
+      meta: {
+        description:
+          "Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.",
+      },
+    })
   ),
   conversation_id: schema.maybe(
     schema.string({
@@ -192,8 +200,8 @@ export const conversePayloadSchema = schema.object({
       ),
       {
         meta: {
-          description:
-            '**Technical Preview; added in 9.3.0.** Optional attachments to send with the message.',
+          availability: { stability: 'tech_preview', since: '9.3.0' },
+          description: 'Optional attachments to send with the message.',
         },
       }
     )
@@ -216,11 +224,20 @@ export const conversePayloadSchema = schema.object({
       },
       {
         meta: {
-          description:
-            '**Technical Preview; added in 9.5.0.** Optional conversation access control. Defaults to private.',
+          availability: { stability: 'tech_preview', since: '9.5.0' },
+          description: 'Optional conversation access control. Defaults to private.',
         },
       }
     )
+  ),
+  read_only: schema.maybe(
+    schema.boolean({
+      meta: {
+        availability: { stability: 'tech_preview', since: '9.6.0' },
+        description:
+          'When true, the created conversation is presented as read-only in the UI: its history is shown but no message input is offered. This carries no authorization meaning — the conversation can still be continued through the API. This setting is ignored when continuing an existing conversation.',
+      },
+    })
   ),
   capabilities: schema.maybe(
     schema.object(
@@ -280,11 +297,17 @@ export const conversePayloadSchema = schema.object({
           )
         ),
         skill_ids: schema.maybe(
-          schema.arrayOf(schema.string(), {
+          schema.arrayOf(schema.string({ maxLength: 256 }), {
+            maxSize: 100,
             meta: {
               description:
-                'Skill IDs to enable for this execution, replacing the stored skill list.',
+                'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.',
             },
+          })
+        ),
+        enable_elastic_capabilities: schema.maybe(
+          schema.boolean({
+            meta: { description: 'Whether to enable built-in Elastic skills for this execution.' },
           })
         ),
       },
@@ -307,8 +330,8 @@ export const conversePayloadSchema = schema.object({
   _execution_mode: schema.maybe(
     schema.oneOf([schema.literal('local'), schema.literal('task_manager')], {
       meta: {
-        description:
-          '**Experimental; added in 9.4.0.** define how to execute the agent (local execution or via task_manager)',
+        availability: { stability: 'experimental', since: '9.4.0' },
+        description: 'define how to execute the agent (local execution or via task_manager)',
       },
     })
   ),
@@ -402,14 +425,13 @@ export function registerChatRoutes({
         throw createBadRequestError(`Invalid tool override: ${errors.join(', ')}`);
       }
     }
-
     if (payload.configuration_overrides?.skill_ids) {
       const { skills: skillsService } = getInternalServices();
       const skillRegistry = await skillsService.getRegistry({ request });
-      const errors = await validateSkillSelection({
+      const errors = await validateSkillIds(
         skillRegistry,
-        skillIds: payload.configuration_overrides.skill_ids,
-      });
+        payload.configuration_overrides.skill_ids
+      );
       if (errors.length > 0) {
         throw createBadRequestError(`Invalid skill override: ${errors.join(', ')}`);
       }
@@ -480,10 +502,12 @@ export function registerChatRoutes({
       prompts,
       attachments,
       access_control: accessControl,
+      read_only: readOnly,
       capabilities,
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
       action,
+      project_routing: projectRouting,
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
@@ -502,12 +526,14 @@ export function registerChatRoutes({
         conversationId,
         autoCreateConversationWithId: true,
         accessControl,
+        readOnly,
         origin,
         callback,
         capabilities,
         browserApiTools,
         configurationOverrides,
         action,
+        projectRouting,
         nextInput: {
           message: input,
           prompts,
@@ -677,7 +703,6 @@ export function registerChatRoutes({
         return response.accepted<ChatCallbackAcceptedResponse>({
           body: {
             execution_id: executionId,
-            status: ExecutionStatus.scheduled,
           },
         });
       })

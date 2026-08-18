@@ -13,7 +13,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
 import type { TaskManagerConfig } from '../config';
-import { CLAIM_STRATEGY_MGET, DEFAULT_POLL_INTERVAL, MAX_CAPACITY } from '../config';
+import { CLAIM_STRATEGY_MGET, LOW_UTILIZATION_POLL_INTERVAL, MAX_CAPACITY } from '../config';
 import { TaskCost } from '../task';
 import { getBulkUpdateStatusCode, isClusterBlockException, getMsearchStatusCode } from './errors';
 
@@ -144,10 +144,13 @@ export function createPollIntervalScan(
           // If the task claim strategy is mget, increase the poll interval if the the avg used capacity over 15s is less than 25%.
           const queue = tmUtilizationQueue(tmUtilization);
           avgTmUtilization = stats.mean(queue);
-          if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
+          if (
+            claimStrategy === CLAIM_STRATEGY_MGET &&
+            newPollInterval < LOW_UTILIZATION_POLL_INTERVAL
+          ) {
             updatedForCapacity = true;
             if (avgTmUtilization < 25) {
-              newPollInterval = DEFAULT_POLL_INTERVAL;
+              newPollInterval = LOW_UTILIZATION_POLL_INTERVAL;
             } else {
               // If the the used capacity is greater than or equal to 25% reset the polling interval.
               newPollInterval = startingPollInterval;

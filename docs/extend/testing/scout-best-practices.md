@@ -117,6 +117,42 @@ Scout is deployment-agnostic: write once, run locally and on Elastic Cloud.
 - Every suite must have [deployment tags](../testing/deployment-tags.md). Use tags to target the environments where your tests apply (for example, a feature that only exists in stateful deployments).
 - Within a test, avoid relying on configuration, data, or behavior specific to a single deployment. Test logic should produce the same result locally and on Cloud.
 - Run your tests against a real Elastic Cloud project before merging to catch environment-specific surprises early.
+
+## Expect a shared test environment [expect-a-shared-test-environment]
+
+Your tests shouldn't assume they run in a clean environment, as other suites may run before and after your tests, sometimes leaving objects behind. Also, Elastic Cloud projects and deployments often start out with content a local stack doesn't have (Fleet installs a set of dashboards with every integration, Security ships prebuilt detection rules, and Cloud adds preconfigured connectors).
+
+Any assertion over a list has to tolerate entries your test didn't create:
+
+- **Narrow the query to your test data.** Filter by a term only your test data matches, then assert on the filtered results. This also keeps result caps and pagination from quietly dropping your rows once the deployment holds more data than your local stack.
+- **Address objects by identity, not position.** Use an ID or a name, never a row index or whichever row happens to render first.
+- **Assert containment, not totality.** `toContainText('my-fixture')` passes even when the deployment has other data; `toHaveCount(4)` does not.
+
+:::::{dropdown} Examples
+❌ **Don't:** assume the only dashboards on the deployment are yours. This passes locally and fails on Cloud, where integration dashboards push your test data past global search's cap of 40 results per provider:
+
+```ts
+await pageObjects.globalSearch.searchFor('type:dashboard');
+await expect(pageObjects.globalSearch.resultLabels).toHaveCount(4);
+```
+
+✔️ **Do:** include a term only your test data matches, and assert on those:
+
+```ts
+await pageObjects.globalSearch.searchFor('type:dashboard my-fixture');
+await expect(pageObjects.globalSearch.resultLabels).toContainText('my-fixture-1');
+```
+
+:::::
+
+:::::{tip}
+The same logic applies in reverse: whatever your suite creates or changes, clean it up so the next config on the same lane doesn't inherit it. Saved objects, indices, and feature flags all persist across suites.
+
+- **Per-test data**: clean up in `afterEach`/`afterAll`.
+- **Suite-wide state** (feature flags, global settings, shared archives): reset it in a [global teardown hook](./global-setup-hook.md#global-teardown-hook).
+
+:::::
+
 ## Keep tests close to the code they test [keep-tests-close-to-source-code]
 
 A test should live in the plugin or package that owns the code it exercises. When writing or reviewing a test, confirm that the scenarios logically belong to the plugin they were added to:
@@ -126,7 +162,7 @@ A test should live in the plugin or package that owns the code it exercises. Whe
 
 This also keeps Scout's selective testing effective: on a PR it runs only the tests owned by the modules that PR affects, so a test placed outside the plugin that owns the code it covers may silently not run when that code changes — a coverage gap you won't notice until the full suite runs post-merge on `kibana-on-merge`.
 
-## Prefer runtime feature flags [prefer-runtime-feature-flags]
+## Prefer runtime feature flags over defining test server overrides [prefer-runtime-feature-flags]
 
 When a feature is gated behind a flag, enable it at runtime with `apiServices.core.settings()` rather than creating a custom server config. Runtime flags work locally and on Cloud, don’t require a server restart, and avoid the CI cost of a dedicated server instance.
 

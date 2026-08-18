@@ -5,23 +5,45 @@
  * 2.0.
  */
 
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import {
-  ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
+  ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
   endpointForensicAnalysisSkill,
 } from './endpoint_forensic_analysis_skill';
-import { platformCoreTools } from '@kbn/agent-builder-common';
 
 describe('endpointForensicAnalysisSkill', () => {
-  it('binds Osquery live-query tools so they are available when the skill loads', () => {
+  it('uses an allow-listed built-in skill id', () => {
+    expect(isAllowedBuiltinSkill(ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID)).toBe(true);
+  });
+
+  it('exposes ES|QL and index discovery platform registry tools only (read-only scope)', () => {
     const registryTools = endpointForensicAnalysisSkill.getRegistryTools?.() ?? [];
+    expect(registryTools).toEqual([
+      platformCoreTools.listIndices,
+      platformCoreTools.getIndexMapping,
+      platformCoreTools.generateEsql,
+      platformCoreTools.executeEsql,
+    ]);
+  });
 
-    for (const osqueryToolId of ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS) {
-      expect(registryTools).toContain(osqueryToolId);
-    }
+  it('does not define any inline tools — relies on platform.core.list_indices for discovery', async () => {
+    const inlineTools = await endpointForensicAnalysisSkill.getInlineTools?.();
+    expect(inlineTools ?? []).toHaveLength(0);
+  });
 
-    expect(registryTools).toContain(platformCoreTools.generateEsql);
-    expect(registryTools).toContain(platformCoreTools.executeEsql);
-    expect(registryTools).toContain('osquery.get_live_query_results');
-    expect(registryTools).toContain('osquery.run_live_query');
+  it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
+    expect(endpointForensicAnalysisSkill.description).toContain('antivirus');
+    expect(endpointForensicAnalysisSkill.description).toContain(
+      'elastic-defend-configuration-troubleshooting'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'Conflicting or incompatible security software'
+    );
+    expect(endpointForensicAnalysisSkill.content).toContain('antivirus');
+    expect(endpointForensicAnalysisSkill.content).toContain('Naming a specific host does');
+    expect(endpointForensicAnalysisSkill.content).toContain(
+      'elastic-defend-configuration-troubleshooting'
+    );
   });
 });

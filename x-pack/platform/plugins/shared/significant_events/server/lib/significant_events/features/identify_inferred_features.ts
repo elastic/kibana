@@ -445,7 +445,7 @@ async function tryIdentifyFeatures(
 // ---------------------------------------------------------------------------
 
 interface RunInferredIterationOptions {
-  esClient: ElasticsearchClient;
+  samplingEsClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
   streamName: string;
   samplingSource: string;
@@ -460,13 +460,13 @@ interface RunInferredIterationOptions {
   logger: Logger;
   signal: AbortSignal;
   tuning: IterationTuningParams;
-  diverseOffset: number;
+  iteration: number;
   additionalTools?: Record<string, ToolDefinition>;
   additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 type InferredIterationResult =
-  | { hasDocuments: false; nextDiverseOffset: number }
+  | { hasDocuments: false }
   | {
       hasDocuments: true;
       docsCount: number;
@@ -474,7 +474,6 @@ type InferredIterationResult =
       totalFilters: number;
       filtersCapped: boolean;
       hasFilteredDocuments: boolean;
-      nextDiverseOffset: number;
       outcome:
         | { state: 'failure' }
         | {
@@ -491,7 +490,7 @@ type InferredIterationResult =
     };
 
 async function runInferredIteration({
-  esClient,
+  samplingEsClient,
   kiClient,
   streamName,
   samplingSource,
@@ -506,7 +505,7 @@ async function runInferredIteration({
   logger,
   signal,
   tuning,
-  diverseOffset,
+  iteration,
   additionalTools,
   additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
@@ -525,7 +524,7 @@ async function runInferredIteration({
   } = tuning;
 
   const batchResult = await fetchSampleDocuments({
-    esClient,
+    esClient: samplingEsClient,
     index: samplingSource,
     start,
     end,
@@ -535,12 +534,12 @@ async function runInferredIteration({
     entityFilteredRatio,
     diverseRatio,
     maxEntityFilters,
-    diverseOffset,
+    iteration,
     samplingTimeoutMs,
   });
 
   if (batchResult.documents.length === 0) {
-    return { hasDocuments: false, nextDiverseOffset: batchResult.nextOffset };
+    return { hasDocuments: false };
   }
 
   const { totalFilters, filtersCapped, hasFilteredDocuments } = batchResult;
@@ -608,7 +607,6 @@ async function runInferredIteration({
       totalFilters,
       filtersCapped,
       hasFilteredDocuments,
-      nextDiverseOffset: batchResult.nextOffset,
       outcome: { state: 'failure' },
     };
   }
@@ -637,7 +635,6 @@ async function runInferredIteration({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    nextDiverseOffset: batchResult.nextOffset,
     outcome: {
       state: 'success',
       tokensUsed,
@@ -658,6 +655,12 @@ async function runInferredIteration({
 
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
+  /**
+   * Client used to sample documents from `samplingSource`. Separate from `esClient` because the
+   * sampling source can live on a remote CPS-connected project, while `esClient` reads the
+   * plugin's own (origin-only) indices.
+   */
+  samplingEsClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
@@ -672,7 +675,6 @@ export interface IdentifyInferredFeaturesOptions {
   runId: string;
   iteration?: number;
   tuning?: IterationTuningParams;
-  diverseOffset?: number;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
   agentBuilderTools?: ToolsStart;
   request?: KibanaRequest;
@@ -684,11 +686,11 @@ export interface IdentifyInferredFeaturesResult {
   docIds: string[];
   discoveredFeatures: FeatureUpsert[];
   iterationResult: IterationResult;
-  nextDiverseOffset: number;
 }
 
 export async function identifyInferredFeatures({
   esClient,
+  samplingEsClient,
   kiClient,
   soClient,
   inferenceClient,
@@ -703,7 +705,6 @@ export async function identifyInferredFeatures({
   runId,
   iteration = 1,
   tuning = {},
-  diverseOffset = 0,
   trackFeaturesIdentified,
   agentBuilderTools,
   request,
@@ -758,7 +759,7 @@ export async function identifyInferredFeatures({
   const startedAt = Date.now();
 
   const iterationResult = await runInferredIteration({
-    esClient,
+    samplingEsClient,
     kiClient,
     streamName,
     samplingSource,
@@ -773,7 +774,7 @@ export async function identifyInferredFeatures({
     logger,
     signal,
     tuning,
-    diverseOffset,
+    iteration,
     additionalTools,
     additionalToolCallbacks,
   });
@@ -793,7 +794,6 @@ export async function identifyInferredFeatures({
         newFeatures: [],
         updatedFeatures: [],
       },
-      nextDiverseOffset: iterationResult.nextDiverseOffset,
     };
   }
 
@@ -834,7 +834,6 @@ export async function identifyInferredFeatures({
       docIds,
       discoveredFeatures,
       iterationResult: failedEntry,
-      nextDiverseOffset: iterationResult.nextDiverseOffset,
     };
   }
 
@@ -897,6 +896,5 @@ export async function identifyInferredFeatures({
     docIds,
     discoveredFeatures: Array.from(discoveredMap.values()),
     iterationResult: iterationEntry,
-    nextDiverseOffset: iterationResult.nextDiverseOffset,
   };
 }

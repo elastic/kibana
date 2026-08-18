@@ -22,48 +22,24 @@ export type TemplateIdEnum = typeof TemplateId.enum;
 export const TemplateIdEnum = TemplateId.enum;
 
 /**
- * Template revision this record was instantiated from. Pinned on the record at creation so a later template revision does not retroactively change how an existing record is validated or rendered.
- */
-export const TemplateVersion = lazySchema(() => z.number().int().min(1));
-export type TemplateVersion = z.infer<typeof TemplateVersion>;
-
-/**
  * Brief bucket recommendation for an investigation
  */
 export const RecommendedAction = lazySchema(() =>
-  z.enum(['contain', 'escalate', 'investigate', 'tune', 'create'])
+  z.enum(['contain', 'escalate', 'investigate', 'tune'])
 );
 export type RecommendedAction = z.infer<typeof RecommendedAction>;
 export type RecommendedActionEnum = typeof RecommendedAction.enum;
 export const RecommendedActionEnum = RecommendedAction.enum;
 
 export const ProposalStatus = lazySchema(() =>
-  z.enum(['pending', 'approved', 'modified', 'dismissed', 'escalated', 'deferred', 'executed'])
+  z.enum(['pending', 'approved', 'modified', 'dismissed', 'executed'])
 );
 export type ProposalStatus = z.infer<typeof ProposalStatus>;
 export type ProposalStatusEnum = typeof ProposalStatus.enum;
 export const ProposalStatusEnum = ProposalStatus.enum;
 
-/**
- * Structured reason an analyst dismissed a proposal (MVP requirement).
- */
-export const DismissalReason = lazySchema(() =>
-  z.enum([
-    'wrong',
-    'duplicate',
-    'insufficient_evidence',
-    'low_value',
-    'out_of_scope',
-    'already_handled',
-    'other',
-  ])
-);
-export type DismissalReason = z.infer<typeof DismissalReason>;
-export type DismissalReasonEnum = typeof DismissalReason.enum;
-export const DismissalReasonEnum = DismissalReason.enum;
-
 export const WatchTier = lazySchema(() =>
-  z.enum(['floor', 'officer', 'dark', 'deep', 'detection', 'ad'])
+  z.enum(['floor', 'officer', 'dark', 'deep', 'detection'])
 );
 export type WatchTier = z.infer<typeof WatchTier>;
 export type WatchTierEnum = typeof WatchTier.enum;
@@ -106,7 +82,6 @@ export const Investigation = lazySchema(() =>
   z.object({
     id: z.string(),
     template_id: z.literal('investigation'),
-    template_version: TemplateVersion.optional(),
     title: z.string(),
     /**
      * ISO 8601 timestamp
@@ -146,22 +121,10 @@ export const Investigation = lazySchema(() =>
 );
 export type Investigation = z.infer<typeof Investigation>;
 
-export const RuleTuningTrigger = lazySchema(() =>
-  z.object({
-    reason: z.literal('false_positive'),
-    alertId: z.string(),
-    ruleRef: z.string().optional(),
-    confidence: z.number().min(0).max(1),
-    investigationId: z.string(),
-  })
-);
-export type RuleTuningTrigger = z.infer<typeof RuleTuningTrigger>;
-
 export const Proposal = lazySchema(() =>
   z.object({
     id: z.string(),
     template_id: z.literal('proposal'),
-    template_version: TemplateVersion.optional(),
     /**
      * Investigation id this proposal belongs to
      */
@@ -184,20 +147,6 @@ export const Proposal = lazySchema(() =>
     approvalRequired: z.boolean(),
     summary: z.string(),
     recommendation: z.string(),
-    /**
-     * Set when status is dismissed; structured reason (MVP requirement).
-     */
-    dismissalReason: DismissalReason.optional(),
-    /** ISO timestamp set when an analyst decision is recorded. */
-    decidedAt: z.string().optional(),
-    /**
-     * Contrary evidence — shown alongside supporting evidenceRefs so uncertainty is visible (MVP requirement).
-     */
-    evidenceAgainst: z.array(EvidenceRef).optional(),
-    /**
-     * Optional — surfaced by Floor Worker when an alert is dispositioned as false positive. Detection Watch subscribes to this.
-     */
-    ruleTuningTrigger: RuleTuningTrigger.optional(),
   })
 );
 export type Proposal = z.infer<typeof Proposal>;
@@ -206,7 +155,6 @@ export const Incident = lazySchema(() =>
   z.object({
     id: z.string(),
     template_id: z.literal('incident'),
-    template_version: TemplateVersion.optional(),
     forkedFromInvestigationId: z.string(),
     watch_id: z.string().optional(),
     status: z.string().optional(),

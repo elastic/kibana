@@ -38,15 +38,15 @@ export const allowedExperimentalValues = Object.freeze({
    * Fleet config fans the pack-level schedule onto each query that doesn't have
    * its own override. Requires osquerybeat with RRULE support.
    */
-  rruleScheduling: false,
+  rruleScheduling: true,
   /**
-   * Enables Agent Builder tool registration in the osquery plugin. When enabled,
-   * the plugin registers read-only Osquery inline tools (check_integration,
-   * list_saved_queries, get_table_schema, run_live_query, list_packs) that can
-   * be referenced by skills such as endpoint-forensic-analysis. Tools are
-   * fleet-wide-capable and gated behind the osquery integration being installed.
+   * Enables osquery cross-project search (CPS) read support on serverless. When enabled
+   * (and the platform `cps.cpsEnabled` flag is on), osquery result and action-response
+   * reads fan out across linked projects as the current user, and the read-only CPS
+   * project picker is registered on osquery pages. Has no effect on stateful Kibana or
+   * when CPS is disabled.
    */
-  agentBuilderTools: true,
+  crossProjectSearch: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
