@@ -43,7 +43,7 @@ const previewQuery = (query: string): string =>
 export const createEsqlValidSyntaxVerifier = (): KiVerifier => ({
   id: ESQL_VALID_SYNTAX_VERIFIER_ID,
   applies: (ki) => extractQueries(ki).length > 0,
-  async verify(ki) {
+  async verify(ki, { abortSignal }) {
     const queries = extractQueries(ki);
     if (queries.length > MAX_ESQL_QUERIES) {
       return {
@@ -54,6 +54,7 @@ export const createEsqlValidSyntaxVerifier = (): KiVerifier => ({
 
     const failures: string[] = [];
     for (const query of queries) {
+      abortSignal?.throwIfAborted();
       if (query.length > MAX_ESQL_QUERY_LENGTH) {
         failures.push(
           `ES|QL query "${previewQuery(

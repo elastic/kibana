@@ -171,6 +171,18 @@ describe('esql-valid-syntax verifier', () => {
       }
     });
 
+    it('stops validating when the abort signal fires', async () => {
+      const abortController = new AbortController();
+      abortController.abort();
+
+      await expect(
+        verifier.verify(makeKi([VALID_QUERY, VALID_QUERY]), {
+          ...context,
+          abortSignal: abortController.signal,
+        })
+      ).rejects.toThrow('Aborted');
+    });
+
     it('never calls the cluster', async () => {
       await verifier.verify(makeKi(VALID_QUERY), context);
       await verifier.verify(makeKi('FROM logs-* | WHERE | LIMIT'), context);
