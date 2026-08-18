@@ -65,8 +65,8 @@ describe('useWorkflowsSolutionNav', () => {
 
       expect(getLinkIds(result)).toEqual([
         'workflows:list',
-        'workflows:library',
         'workflows:executions',
+        'workflows:library',
       ]);
     });
 
@@ -83,15 +83,15 @@ describe('useWorkflowsSolutionNav', () => {
 
       expect(getLinks(result).map((link) => link.name)).toEqual([
         'Workflows',
-        'Template Library',
         'Executions',
+        'Template Library',
       ]);
     });
 
     it('should strip the app base url so hrefs stay app-relative for the router', () => {
       const { result } = renderSolutionNav();
 
-      expect(getLinks(result).map((link) => link.href)).toEqual(['/', '/library', '/executions']);
+      expect(getLinks(result).map((link) => link.href)).toEqual(['/', '/executions', '/library']);
     });
   });
 
