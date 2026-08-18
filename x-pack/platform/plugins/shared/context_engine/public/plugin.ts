@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
@@ -47,7 +48,10 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
-  /** Registered Agent Builder hooks. */
+  private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
+    Promise.resolve(undefined);
+
+  /** Registered suggest-automation hooks from context_engine_agent_builder. */
   private agentBuilderIntegration?: AgentBuilderIntegration;
 
   constructor(_context: PluginInitializerContext) {}
@@ -55,9 +59,9 @@ export class ContextEnginePlugin
   setup(
     core: CoreSetup<ContextEngineStartDependencies, ContextEnginePluginStart>
   ): ContextEnginePluginSetup {
+    this.setupAgentBuilderStart(core);
     const startServices = core.getStartServices();
-    // Captured in a closure so `mount` (where `this` is the app config) can read the opener
-    // registered on `start`.
+    const getAgentBuilder = () => this.agentBuilderPromise;
     const getAgentBuilderIntegration = (): AgentBuilderIntegration | undefined =>
       this.agentBuilderIntegration;
 
@@ -87,20 +91,37 @@ export class ContextEnginePlugin
       ),
       defaultPath: '/',
       async mount(params: AppMountParameters) {
-        const { mountApp } = await import('./application');
+        const [{ mountApp }, { createAnalyzeChatOpener }] = await Promise.all([
+          import('./application'),
+          import('./analyze_chat_opener'),
+        ]);
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const agentBuilder = await getAgentBuilder();
+        const chatOpener = createAnalyzeChatOpener({ coreStart, agentBuilder });
         coreStart.chrome.docTitle.change(APP_TITLE);
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
+          getChatOpener: () => chatOpener,
           getAgentBuilderIntegration,
         });
       },
     });
 
     return {};
+  }
+
+  private setupAgentBuilderStart(core: CoreSetup<ContextEngineStartDependencies>): void {
+    try {
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
+        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
+        .catch(() => undefined);
+    } catch {
+      this.agentBuilderPromise = Promise.resolve(undefined);
+    }
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {

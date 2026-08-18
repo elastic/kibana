@@ -12,11 +12,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../../common/http_api/ai_indices';
-import type {
-  AnalyzeAndImproveProvider,
-  ChatOpener,
-  SuggestAutomationProvider,
-} from '../../../types';
+import type { ChatOpener } from '../../../types';
 import { useFeedbackLoopEnabled } from '../../hooks/use_feedback_loop_enabled';
 import { useSignalGroups } from '../../hooks/use_signal_groups';
 import { useSignals } from '../../hooks/use_signals';
@@ -26,6 +22,12 @@ import { buildSignal } from './signal_test_fixtures';
 jest.mock('../../hooks/use_feedback_loop_enabled', () => ({ useFeedbackLoopEnabled: jest.fn() }));
 jest.mock('../../hooks/use_signal_groups', () => ({ useSignalGroups: jest.fn() }));
 jest.mock('../../hooks/use_signals', () => ({ useSignals: jest.fn() }));
+jest.mock('../../hooks/use_agent_builder_agents', () => ({
+  useAgentBuilderAgents: () => ({ agents: [], isLoading: false, error: undefined }),
+}));
+jest.mock('../../hooks/use_update_feedback_agent', () => ({
+  useUpdateFeedbackAgent: () => ({ mutate: jest.fn(), isLoading: false }),
+}));
 jest.mock('@kbn/llm-trace-waterfall', () => ({
   TraceWaterfall: () => <div />,
   createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
@@ -63,45 +65,28 @@ const signalsResult = (overrides = {}) => ({
   ...overrides,
 });
 
-const noopSuggestAutomationProvider: SuggestAutomationProvider = {
-  canSuggest: () => false,
-  suggestAutomation: jest.fn(),
-  subscribeToAutomationSaved: () => () => {},
-};
-
 const renderPanel = ({
   isLoading = false,
-  canAnalyze = false,
-  analyzeAndImprove = jest.fn(),
-}: {
-  isLoading?: boolean;
-  canAnalyze?: boolean;
-  analyzeAndImprove?: ChatOpener;
-} = {}) => {
-  const analyzeAndImproveProvider: AnalyzeAndImproveProvider = {
-    canAnalyze: () => canAnalyze,
-    analyzeAndImprove,
-  };
+  chatOpener,
+  index = aiIndex,
+}: { isLoading?: boolean; chatOpener?: ChatOpener; index?: GetAiIndexResponse } = {}) => {
   const services = {
     ...coreMock.createStart(),
     data: { search: { search: jest.fn() } },
-    getAgentBuilderIntegration: canAnalyze
-      ? () => ({
-          analyzeAndImprove: analyzeAndImproveProvider,
-          suggestAutomation: noopSuggestAutomationProvider,
-        })
-      : undefined,
+    getChatOpener: () => chatOpener,
   };
   render(
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <SignalsPanel isLoading={isLoading} aiIndex={aiIndex} />
+          <SignalsPanel isLoading={isLoading} aiIndex={index} />
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
   );
 };
+
+const aiIndexWithAgent: GetAiIndexResponse = { ...aiIndex, feedback_agent_id: 'my-agent' };
 
 describe('SignalsPanel', () => {
   beforeEach(() => {
@@ -165,19 +150,50 @@ describe('SignalsPanel', () => {
     expect(screen.getByTestId('contextSignalRow')).toBeInTheDocument();
   });
 
-  it('hides the Analyze & improve button when analyze is unavailable', () => {
+  it('hides the Analyze & improve button when no opener is registered', () => {
     renderPanel();
     expect(screen.queryByTestId('contextSignalsAnalyzeButton')).not.toBeInTheDocument();
   });
 
-  it('shows the Analyze & improve button and invokes the registered provider without signals', () => {
-    const analyzeAndImproveMock = jest.fn();
-    renderPanel({ canAnalyze: true, analyzeAndImprove: analyzeAndImproveMock });
+  it('shows the Analyze & improve button and invokes the registered opener without signals', () => {
+    const opener = jest.fn();
+    renderPanel({ chatOpener: opener, index: aiIndexWithAgent });
 
     fireEvent.click(screen.getByTestId('contextSignalsAnalyzeButton'));
 
-    expect(analyzeAndImproveMock).toHaveBeenCalledWith({ aiIndex, tag: undefined });
-    expect(analyzeAndImproveMock.mock.calls[0][0]).not.toHaveProperty('signals');
+    expect(opener).toHaveBeenCalledWith({ aiIndex: aiIndexWithAgent, tag: undefined });
+    expect(opener.mock.calls[0][0]).not.toHaveProperty('signals');
+  });
+
+  it('renders the agent selector and disables Analyze with a prompt when no agent is configured', () => {
+    const opener = jest.fn();
+    renderPanel({ chatOpener: opener });
+
+    expect(screen.getByTestId('contextSignalsFeedbackAgentSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeDisabled();
+    expect(screen.getByTestId('contextSignalsFeedbackAgentPrompt')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('contextSignalsAnalyzeButton'));
+    expect(opener).not.toHaveBeenCalled();
+  });
+
+  it('enables Analyze and hides the prompt once an agent is configured', () => {
+    renderPanel({ chatOpener: jest.fn(), index: aiIndexWithAgent });
+
+    expect(screen.getByTestId('contextSignalsAnalyzeButton')).toBeEnabled();
+    expect(screen.queryByTestId('contextSignalsFeedbackAgentPrompt')).not.toBeInTheDocument();
+  });
+
+  it('does not render the agent selector when no chat opener is registered', () => {
+    renderPanel();
+    expect(screen.queryByTestId('contextSignalsFeedbackAgentSelect')).not.toBeInTheDocument();
+  });
+
+  it('does not render the agent selector or prompt for a managed index', () => {
+    renderPanel({ chatOpener: jest.fn(), index: { ...aiIndex, managed: true } });
+
+    expect(screen.queryByTestId('contextSignalsFeedbackAgentSelect')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextSignalsFeedbackAgentPrompt')).not.toBeInTheDocument();
   });
 
   it('renders a distinct error state when the groups query fails', () => {

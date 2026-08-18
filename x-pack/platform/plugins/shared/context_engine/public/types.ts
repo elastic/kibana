@@ -10,6 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AiIndexHttpItem, GetAiIndexResponse } from '../common/http_api/ai_indices';
 
 /**
@@ -25,7 +26,19 @@ export interface AnalyzeAndImproveContext {
 }
 
 /** Opens Agent Builder to analyze the given signals. */
-export type ChatOpener = (context: AnalyzeAndImproveContext) => void;
+export type ChatOpener = (context: AnalyzeAndImproveContext) => void | Promise<void>;
+
+/** Options passed to Agent Builder `openChat` for an Analyze & improve hand-off. */
+export interface AnalyzeChatOptions {
+  /** Feedback agent to open. */
+  agentId?: string;
+  /** When true, start a new conversation. */
+  newConversation: boolean;
+  /** Session tag for this AI index's conversation. */
+  sessionTag: string;
+  /** Attachments passed to Agent Builder. */
+  attachments: AttachmentInput[];
+}
 
 /** Powers the Analyze & improve button. Registered via {@link AgentBuilderIntegration}. */
 export interface AnalyzeAndImproveProvider {

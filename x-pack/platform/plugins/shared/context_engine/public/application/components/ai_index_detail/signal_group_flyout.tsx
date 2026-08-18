@@ -48,10 +48,9 @@ interface SignalGroupFlyoutProps {
 export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyoutProps) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'ctxSignalGroupFlyout' });
   const {
-    services: { getAgentBuilderIntegration },
+    services: { getChatOpener },
   } = useKibana();
-  const analyzeAndImproveProvider = getAgentBuilderIntegration?.()?.analyzeAndImprove;
-  const canAnalyze = analyzeAndImproveProvider?.canAnalyze({ aiIndex }) ?? false;
+  const chatOpener = getChatOpener?.();
 
   // Load-more pagination: grow the page size on demand up to the server's per-request cap so the
   // member list (and the stacked detail flyout's Prev/Next) can reach signals beyond the first page.
@@ -88,14 +87,13 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                 })}
               </EuiBadge>
             </EuiFlexItem>
-            {canAnalyze && (
+            {chatOpener && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   size="s"
                   iconType="sparkles"
                   onClick={() =>
-                    aiIndex &&
-                    analyzeAndImprove(getAgentBuilderIntegration, { aiIndex, tag: group.tag })
+                    aiIndex && analyzeAndImprove(getChatOpener, { aiIndex, tag: group.tag })
                   }
                   isDisabled={aiIndex === undefined}
                   data-test-subj="contextSignalGroupAnalyzeButton"
@@ -168,7 +166,7 @@ export const SignalGroupFlyout = ({ group, aiIndex, onClose }: SignalGroupFlyout
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           size="s"
-                          iconType="chevronSingleDown"
+                          iconType="arrowDown"
                           isLoading={isLoading}
                           onClick={loadMore}
                           data-test-subj="contextSignalsGroupLoadMore"
