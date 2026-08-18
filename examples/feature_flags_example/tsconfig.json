@@ -13,6 +13,7 @@
   ],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/core-feature-flags-server",
     "@kbn/core-plugins-server",

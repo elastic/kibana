@@ -191,9 +191,9 @@ function run(pluginDir) {
   // Keep non-core imports (drop PluginInitializerContext, CoreSetup, CoreStart, Plugin etc.)
   const CORE_LIFECYCLE_PATTERN =
     /PluginInitializerContext|CoreSetup|CoreStart|Plugin\b|PrebootPlugin|Logger\b/;
-  // We'll check if imported names are referenced in the new constructor body or remaining code.
-  // Build the "new code" text (everything that will end up in the file except import block).
-  const newBodyText = ctorBody + stopSection + startTodo;
+  // We'll check if imported names are referenced in the active (non-TODO) constructor body.
+  // startTodo is commented-out code — imports that appear only there should be removed.
+  const newBodyText = ctorBody + stopSection;
   const originalImports = sourceFile
     .getImportDeclarations()
     .filter((imp) => {
@@ -203,8 +203,17 @@ function run(pluginDir) {
         const namedImports = imp.getNamedImports().map((ni) => ni.getName());
         return namedImports.some((n) => !CORE_LIFECYCLE_PATTERN.test(n));
       }
-      // For type-only imports, check if ALL named imports are used in the new code.
-      // Drop the whole import declaration if none of the imported names appear in the new body.
+      // Drop any import (value or type) if ALL named imports are absent from the active body.
+      // This catches imports that were only used in start() body (now in a commented-out TODO).
+      if (hasRealStart) {
+        const namedImports = imp.getNamedImports().map((ni) => ni.getName());
+        if (namedImports.length > 0) {
+          const anyUsedInBody = namedImports.some((n) => newBodyText.includes(n));
+          const allInStart = namedImports.every((n) => startBody.includes(n));
+          if (!anyUsedInBody && allInStart) return false;
+        }
+      }
+      // For type-only imports, drop if no named imports appear in the active body.
       if (imp.isTypeOnly()) {
         const namedImports = imp.getNamedImports().map((ni) => ni.getName());
         const anyUsed = namedImports.some((n) => newBodyText.includes(n));
