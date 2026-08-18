@@ -17,9 +17,9 @@ const LAYER_ID = 'layer-esql-legacy-slot';
 // authoritative per-layer query of the legacy document
 const LAYER_QUERY = 'FROM logstash-* | STATS count = COUNT(*)';
 // diverged, stale aggregate copy in the legacy `state.query` slot — dead data
-const STALE_SLOT_QUERY = 'FROM logstash-* | STATS count = COUNT(*) | LIMIT 999';
+const STALE_SLOT_QUERY = `${LAYER_QUERY} | LIMIT 999`;
 // query typed during the edit step
-const UPDATED_QUERY = 'FROM logstash-* | STATS count = COUNT(*) | LIMIT 5';
+const UPDATED_QUERY = `${LAYER_QUERY} | LIMIT 5`;
 
 /**
  * Legacy dual-written by-value ES|QL Lens attributes: the ES|QL query is
@@ -197,10 +197,18 @@ test.describe(
           type: 'dashboard',
           id: DASHBOARD_ID,
         });
-        // the stale aggregate copy must never survive a save: the slot is
-        // either dropped or a refreshed mirror of the authoritative layer
-        // query (mixed-version compat write, see `withLegacyAggregateQuerySlot`)
+        // the stale aggregate copy must never survive a save
         expect(attributes.panelsJSON).not.toContain(STALE_SLOT_QUERY);
+
+        // two-outcome contract for the persisted slot: absent (slot removed,
+        // or panel stored in API format without a slot) or a refreshed mirror
+        // of the authoritative layer query (mixed-version compat write, see
+        // `withLegacyAggregateQuerySlot`) — never anything else
+        const [panel] = JSON.parse(attributes.panelsJSON) as Array<{
+          embeddableConfig?: { attributes?: { state?: { query?: { esql?: unknown } } } };
+        }>;
+        const slotEsql = panel?.embeddableConfig?.attributes?.state?.query?.esql;
+        expect([undefined, UPDATED_QUERY]).toContain(slotEsql);
       });
     });
   }
