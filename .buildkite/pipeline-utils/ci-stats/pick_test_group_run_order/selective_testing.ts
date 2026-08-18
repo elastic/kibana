@@ -74,7 +74,7 @@ export function filterJestUnitConfigsByAffected(
   });
 }
 
-/** Like the unit filter, but always re-adds ALWAYS_RUN_JEST_INTEGRATION_CONFIGS. */
+/** Narrow Jest integration configs to those owned by affected packages, unless a critical file changed. */
 export function filterJestIntegrationConfigsByAffected(
   jestIntegrationConfigs: string[],
   context: SelectiveTestingContext
@@ -83,7 +83,6 @@ export function filterJestIntegrationConfigsByAffected(
     label: 'integration',
     configs: jestIntegrationConfigs,
     criticalFiles: CRITICAL_FILES_JEST_INTEGRATION_TESTS,
-    alwaysRun: ALWAYS_RUN_JEST_INTEGRATION_CONFIGS,
     context,
   });
 }
@@ -92,10 +91,9 @@ function filterByAffected(args: {
   label: 'unit' | 'integration';
   configs: string[];
   criticalFiles: string[];
-  alwaysRun?: readonly string[];
   context: SelectiveTestingContext;
 }): string[] {
-  const { label, configs, criticalFiles, alwaysRun = [], context } = args;
+  const { label, configs, criticalFiles, context } = args;
 
   if (touchedCriticalFiles(context.prChangedFiles, criticalFiles)) {
     console.log(`Not filtering Jest ${label} tests because critical files changed`);
@@ -103,5 +101,6 @@ function filterByAffected(args: {
   }
 
   const filtered = filterFilesByPackages(configs, context.affectedPackages);
+  console.log(`Filtering Jest ${label} tests: ${configs.length} -> ${filtered.length}`);
   return filtered;
 }
