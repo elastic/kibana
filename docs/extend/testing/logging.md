@@ -4,7 +4,7 @@ navigation_title: Logging
 
 # Logging in Scout tests [scout-logging]
 
-This page explains how logging works in Scout: the `log` fixture used inside tests, and how to inspect logs from the systems under test (Kibana, Elasticsearch, the browser, and UIAM) when running against a serverless project in MKI.
+This page explains how logging works in Scout: the `log` [fixture](./fixtures.md) used inside tests, and how to inspect logs from the systems under test (Kibana, Elasticsearch, the browser, and UIAM) when running against a serverless project in MKI.
 
 ## The `log` fixture [scout-logging-fixture]
 
@@ -21,6 +21,8 @@ test('does the thing', async ({ log }) => {
 Standard levels are available: `error`, `warning`, `success`, `info`, `debug`, and `verbose`. Prefer `debug` for ad hoc diagnostic logging in your test — avoid adding `info`-level logs too liberally, since `info` is the default level and prints on every run.
 
 Scout's own services and fixtures log their setup at the `debug` level (for example, `[serviceName] loaded`), so if you want to see fixture wiring and lifecycle messages, run with `debug` (see below).
+
+You'll see this output in your local console, in the Buildkite job log for CI runs, and in the Scout HTML report (attached to each test).
 
 ## Controlling verbosity: `SCOUT_LOG_LEVEL` [scout-logging-level]
 
@@ -48,7 +50,7 @@ See also [Debug Scout test runs](./debugging.md) for other debugging tips.
 
 ## Server logs (Kibana, Elasticsearch) [scout-logging-servers]
 
-When Scout starts a local Kibana/Elasticsearch stack (for example via `node scripts/scout start-server`), server logs print directly to that same console by default. To capture them to files instead, pass `--logToFile`, which writes `kibana.log` and `es-cluster-<name>.log` under a generated directory in `data/ftr_servers_logs/`.
+When Scout starts a local Kibana/Elasticsearch stack (for example via `node scripts/scout start-server`), server logs print directly to that same console by default. To capture them to files instead, pass `--logToFile`, which writes `kibana.log` and `es-cluster-<name>.log` under a generated directory in `data/ftr_servers_logs/` (yes, `ftr_servers_logs` — Scout reuses the legacy FTR server-management code and its log directory naming).
 
 This only applies to servers Scout manages directly (local runs). It doesn't apply when running against Cloud (ECH) or MKI serverless projects — see the next section for how to find server logs in that case.
 
