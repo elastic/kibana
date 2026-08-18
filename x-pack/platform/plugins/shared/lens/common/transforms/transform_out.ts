@@ -63,7 +63,7 @@ export const getTransformOut = (
       } satisfies LensByRefTransformOutResult;
     }
 
-    // Falback to handle legacy SO with missing savedObjectRef reference
+    // Fallback to handle legacy SO with missing savedObjectRef reference
     if (!attributes && legacySavedObjectId && typeof legacySavedObjectId === 'string') {
       return { ...state, ref_id: legacySavedObjectId } satisfies LensByRefTransformOutResult;
     }
