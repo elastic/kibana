@@ -42,6 +42,7 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
+import type { CasesClientSource } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
@@ -241,9 +242,13 @@ export class CasePlugin
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
     plugins.licensing.featureUsage.register(LICENSING_CASE_OBSERVABLES_FEATURE, 'platinum');
 
-    const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
-      const [coreStart] = await core.getStartServices();
-      return this.getCasesClientWithRequest(coreStart)(request);
+    const getCasesClient = (
+      clientSource: CasesClientSource
+    ): ((request: KibanaRequest) => Promise<CasesClient>) => {
+      return async (request: KibanaRequest) => {
+        const [coreStart] = await core.getStartServices();
+        return this.getCasesClientWithRequest(coreStart, clientSource)(request);
+      };
     };
 
     const getSpaceId = (request?: KibanaRequest) => {
@@ -263,7 +268,7 @@ export class CasePlugin
       alerting: plugins.alerting,
       core,
       logger: this.logger,
-      getCasesClient,
+      getCasesClient: getCasesClient('connector'),
       getSpaceId,
       serverlessProjectType,
       isCasesAttachmentsEnabled: this.caseConfig.attachments?.enabled === true,
@@ -272,7 +277,7 @@ export class CasePlugin
 
     registerCaseWorkflowSteps(
       plugins.workflowsExtensions,
-      getCasesClient,
+      getCasesClient('workflow'),
       this.unifiedAttachmentTypeRegistry,
       this.caseConfig.attachments?.enabled === true,
       this.caseConfig.templates?.enabled === true,
@@ -283,7 +288,7 @@ export class CasePlugin
     if (plugins.agentBuilder) {
       registerCasesAgentBuilderTools(
         plugins.agentBuilder,
-        getCasesClient,
+        getCasesClient('agent_builder'),
         core,
         this.unifiedAttachmentTypeRegistry,
         {
@@ -489,7 +494,7 @@ export class CasePlugin
     });
 
     return {
-      getCasesClientWithRequest: this.getCasesClientWithRequest(core),
+      getCasesClientWithRequest: this.getCasesClientWithRequest(core, 'plugin_contract'),
       getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
       config: this.caseConfig,
     };
@@ -532,6 +537,7 @@ export class CasePlugin
             request,
             scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
             savedObjectsService: savedObjects,
+            clientSource: 'rest_api',
           });
         },
       };
@@ -539,7 +545,7 @@ export class CasePlugin
   };
 
   private getCasesClientWithRequest =
-    (core: CoreStart) =>
+    (core: CoreStart, clientSource: CasesClientSource) =>
     async (request: KibanaRequest): Promise<CasesClient> => {
       const client = core.elasticsearch.client;
 
@@ -547,6 +553,7 @@ export class CasePlugin
         request,
         scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
+        clientSource,
       });
     };
 }
