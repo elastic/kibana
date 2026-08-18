@@ -8,7 +8,6 @@
  */
 
 import type { ActionContext, AuthTypeDef } from '../../connector_spec';
-import { generateSecretsSchemaFromSpec } from '../../lib/generate_secrets_schema_from_spec';
 import { GoogleDocsConnector } from './google_docs';
 
 // Mock withMcpClient so action handlers don't need a real MCP transport.
@@ -112,23 +111,6 @@ describe('GoogleDocsConnector', () => {
         },
       });
     });
-
-    it('bearer auth is retained for existing connectors (isLegacy)', () => {
-      const bearerType = GoogleDocsConnector.auth?.types.find(
-        (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'bearer'
-      );
-      expect(bearerType).toBeDefined();
-      expect(bearerType?.isLegacy).toBe(true);
-    });
-
-    it('existing connectors with bearer auth pass schema validation', () => {
-      const schema = generateSecretsSchemaFromSpec(GoogleDocsConnector.auth, {
-        isEarsEnabled: true,
-        isEarsExperimentalEnabled: true,
-      });
-      const result = schema.safeParse({ authType: 'bearer', token: 'some-token' });
-      expect(result.success).toBe(true);
-    });
   });
 
   // =========================================================================
@@ -162,7 +144,7 @@ describe('GoogleDocsConnector', () => {
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'read_doc',
-        arguments: { document_id: 'doc-abc123' },
+        arguments: { documentId: 'doc-abc123' },
       });
     });
 
@@ -195,7 +177,7 @@ describe('GoogleDocsConnector', () => {
 
       expect(mockCallTool).toHaveBeenCalledWith({
         name: 'update_doc',
-        arguments: { document_id: 'doc-abc123', requests },
+        arguments: { documentId: 'doc-abc123', requests },
       });
     });
 
@@ -209,7 +191,7 @@ describe('GoogleDocsConnector', () => {
 
       expect(mockCallTool).toHaveBeenCalledWith(
         expect.objectContaining({
-          arguments: expect.objectContaining({ requests }),
+          arguments: expect.objectContaining({ documentId: 'doc-1', requests }),
         })
       );
     });

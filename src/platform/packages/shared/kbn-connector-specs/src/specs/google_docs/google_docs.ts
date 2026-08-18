@@ -73,7 +73,6 @@ export const GoogleDocsConnector: ConnectorSpec = {
           scope: 'https://www.googleapis.com/auth/documents',
         },
       },
-      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
   },
 
@@ -111,7 +110,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
         'docs.google.com/document/d/{document_id}/edit.',
       input: ReadDocInputSchema,
       handler: async (ctx, input: ReadDocInput) => {
-        return callToolJson(ctx, 'read_doc', { document_id: input.document_id });
+        return callToolJson(ctx, 'read_doc', { documentId: input.document_id });
       },
     },
 
@@ -128,7 +127,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
       input: UpdateDocInputSchema,
       handler: async (ctx, input: UpdateDocInput) => {
         return callToolJson(ctx, 'update_doc', {
-          document_id: input.document_id,
+          documentId: input.document_id,
           requests: input.requests,
         });
       },

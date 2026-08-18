@@ -19,12 +19,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 
 ### Connector configuration [google-docs-connector-configuration]
 
-Google Docs connectors support **Bearer Token** (a static access token you supply) or **OAuth 2.0 authorization code**
-(Google signs the user in through {{kib}} and {{kib}} stores refreshable tokens). Choose the authentication type when you
-create or edit the connector.
-
-Bearer Token
-:   A Google OAuth 2.0 access token with the `https://www.googleapis.com/auth/documents` scope. See **Get API credentials**.
+Google Docs connectors use **OAuth 2.0 authorization code** — Google signs the user in through {{kib}} and {{kib}} stores refreshable tokens.
 
 OAuth 2.0 authorization code
 :   Uses a **Web application** OAuth client in Google Cloud. In {{kib}} you provide:
@@ -88,12 +83,3 @@ Start in **[Google Cloud Console](https://console.cloud.google.com/)**.
 4. Create the client, then copy **Client ID** and **Client secret** into the connector in {{kib}} when you select **OAuth
    2.0 authorization code**. The connector automatically configures the correct Google OAuth endpoints and scope.
 
-### Bearer token (manual, short-lived)
-
-To use **Bearer Token** authentication, you need a Google OAuth 2.0 access token with the `https://www.googleapis.com/auth/documents` scope. One way to obtain a token for testing is Google's OAuth 2.0 Playground.
-
-1. Open the [OAuth 2.0 Playground](https://developers.google.com/oauthplayground/).
-2. In the list of APIs, select **Google Docs API v1** and select the `https://www.googleapis.com/auth/documents` scope.
-3. Select **Authorize APIs** and sign in with your Google account.
-4. Select **Exchange authorization code for tokens**.
-5. Copy the **Access token** and enter it as the **Bearer Token** when configuring the connector in {{kib}}.
