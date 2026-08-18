@@ -10,19 +10,45 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 
+import type { FormBasedPersistedState, TextBasedPersistedState } from '../datasources/types';
+
 /**
  * Minimal structural shape shared by `LensDocument`, the persisted attributes
  * and other hand-built attribute objects. Only the parts these helpers need.
+ *
+ * Why not reuse `LensDocument` / `TypedLensSerializedState['attributes']`
+ * wholesale?
+ * - Callers pass heterogeneous shapes: `LensDocument`, saved-object
+ *   attributes, embeddable runtime attributes, and hand-built attribute
+ *   objects (e.g. in `kbn-unified-histogram`). No single existing document
+ *   type covers all of them without casts:
+ *   `LensDocument.state.datasourceStates` is `Record<string, unknown>` (no
+ *   layer information), while `TypedLensSerializedState['attributes']`
+ *   rejects `LensDocument` and lacks the legacy aggregate `state.query`
+ *   slot value `getDocQuery` must read. A thin duck-typed wrapper with an
+ *   optional `state` and a widened `query` union accepts all of them.
+ * - The layer shapes themselves are reused (type-only imports, cycle-free):
+ *   `DocLikeLayers` derives loosened views of `FormBasedPersistedState` /
+ *   `TextBasedPersistedState` (as in `StructuredDatasourceStates`). The
+ *   loosening (`layers` optional, layer entries `Partial`) reflects that
+ *   persisted documents may predate the strict types (e.g. legacy form-based
+ *   docs with an empty `textBased: {}` stub), which the helpers guard
+ *   against at runtime. The `Record<string, unknown>` intersection keeps
+ *   `LensDocument`'s untyped `datasourceStates` assignable.
+ *
+ * Assignability of the real types to this shape is enforced implicitly by
+ * the call sites (e.g. Lens plugin, `kbn-unified-histogram`), which pass
+ * those types to these helpers without casts.
  */
+interface DocLikeLayers<T extends { layers: Record<string, unknown> }> {
+  layers?: Record<string, Partial<T['layers'][string]> | undefined>;
+}
+
 export interface LensDocLikeState {
   query?: Query | AggregateQuery;
   datasourceStates?: {
-    formBased?: {
-      layers?: Record<string, unknown>;
-    };
-    textBased?: {
-      layers?: Record<string, { query?: AggregateQuery | null } | undefined>;
-    };
+    formBased?: DocLikeLayers<FormBasedPersistedState>;
+    textBased?: DocLikeLayers<TextBasedPersistedState>;
   } & Record<string, unknown>;
 }
 
