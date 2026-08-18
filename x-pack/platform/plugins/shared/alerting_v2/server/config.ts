@@ -25,12 +25,27 @@ const MAX_MINIMUM_SCHEDULE_INTERVAL = '30d';
 
 /** Default and highest value of `xpack.alerting_v2.rules.run.alerts.max`. */
 const MAX_ALERTS_PER_RUN = 10000;
+/** Default cap on the ES response body size for non-streaming rule queries (50 MB). */
+const DEFAULT_MAX_QUERY_RESPONSE_SIZE_BYTES = 50 * 1024 * 1024;
 
 const rulesRunSchema = schema.object({
   alerts: schema.object({
     max: schema.number({ defaultValue: MAX_ALERTS_PER_RUN, min: 1, max: MAX_ALERTS_PER_RUN }),
   }),
   timeout: schema.maybe(schema.string({ validate: validateDuration })),
+  query: schema.object({
+    /**
+     * Maximum allowed Elasticsearch response body size (in bytes) for
+     * non-streaming rule queries (recovery, data-presence). Queries whose
+     * response exceeds this limit are aborted and the execution is attributed
+     * to the rule owner so they can narrow the query or raise the limit.
+     * Defaults to 50 MB.
+     */
+    maxResponseSize: schema.number({
+      defaultValue: DEFAULT_MAX_QUERY_RESPONSE_SIZE_BYTES,
+      min: 1024,
+    }),
+  }),
 });
 
 const rulesSchema = schema.object({

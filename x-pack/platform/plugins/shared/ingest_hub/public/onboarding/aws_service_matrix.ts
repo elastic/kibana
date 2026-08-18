@@ -323,7 +323,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     name: 'AWS GuardDuty',
     category: 'Security, Identity and Compliance',
     signalType: 'logs',
-    deliveryMethods: [{ method: 'cloud_forwarder', preferred: true }],
+    deliveryMethods: [{ method: 'agentless', preferred: true }],
     inputs: ['aws-s3', 'httpjson'],
     requiredConfig: ['aws_region', 'detector_id', 'bucket_arn', 'region'],
     mandatoryFields: [
@@ -335,7 +335,7 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     policyTemplate: 'guardduty',
     defaultEnabled: true,
     showInUI: true,
-    identityFederationSupported: false,
+    identityFederationSupported: true,
   },
   {
     id: 'inspector',
