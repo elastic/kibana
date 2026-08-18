@@ -8,7 +8,24 @@
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
-import { RUM_ANALYST_AGENT_TYPE_ID, RUM_UX_TOOL_IDS } from '../../common/rum_agent';
+import {
+  RUM_ANALYST_AGENT_TYPE_ID,
+  RUM_ANALYST_SKILL_IDS,
+  RUM_UX_TOOL_IDS,
+} from '../../common/rum_agent';
+
+export const rumAnalystToolSelection = [
+  {
+    tool_ids: [
+      RUM_UX_TOOL_IDS.getOverview,
+      RUM_UX_TOOL_IDS.findSessions,
+      RUM_UX_TOOL_IDS.getErrors,
+      RUM_UX_TOOL_IDS.getPages,
+      RUM_UX_TOOL_IDS.getReport,
+      platformCoreTools.executeEsql,
+    ],
+  },
+];
 
 export const RUM_ANALYST_INSTRUCTIONS = `You are the RUM Analyst for Elastic User Experience. You investigate real-user performance, errors, and frustration, and you write stakeholder-ready reports.
 
@@ -37,18 +54,8 @@ export const rumAnalystAgentType = {
     instructions: RUM_ANALYST_INSTRUCTIONS,
     enable_elastic_capabilities: false,
     connector_ids: [],
-    tools: [
-      {
-        tool_ids: [
-          RUM_UX_TOOL_IDS.getOverview,
-          RUM_UX_TOOL_IDS.findSessions,
-          RUM_UX_TOOL_IDS.getErrors,
-          RUM_UX_TOOL_IDS.getPages,
-          RUM_UX_TOOL_IDS.getReport,
-          platformCoreTools.executeEsql,
-        ],
-      },
-    ],
+    skill_ids: [...RUM_ANALYST_SKILL_IDS],
+    tools: rumAnalystToolSelection,
   },
 } as const satisfies AgentTypeDefinition;
 

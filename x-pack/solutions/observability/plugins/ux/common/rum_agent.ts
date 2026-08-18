@@ -18,3 +18,19 @@ export const RUM_UX_TOOL_IDS = {
 } as const;
 
 export type RumUxToolId = (typeof RUM_UX_TOOL_IDS)[keyof typeof RUM_UX_TOOL_IDS];
+
+export const RUM_UX_SKILL_IDS = {
+  slowUsers: 'observability.ux.rum-slow-users',
+  slowPages: 'observability.ux.rum-slow-pages',
+  errors: 'observability.ux.rum-errors',
+  frustration: 'observability.ux.rum-frustration',
+  report: 'observability.ux.rum-report',
+} as const;
+
+export const RUM_ANALYST_SKILL_IDS = [
+  RUM_UX_SKILL_IDS.slowUsers,
+  RUM_UX_SKILL_IDS.slowPages,
+  RUM_UX_SKILL_IDS.errors,
+  RUM_UX_SKILL_IDS.frustration,
+  RUM_UX_SKILL_IDS.report,
+] as const;

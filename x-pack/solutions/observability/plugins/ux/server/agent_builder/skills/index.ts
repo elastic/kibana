@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export { registerRumTools } from './tools';
-export { registerRumAnalystAgentType } from './agent';
-export { registerRumSkills } from './skills';
-export { installRumAnalystAgent } from './install';
+export { registerRumSkills } from './register_skills';

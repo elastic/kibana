@@ -7,8 +7,12 @@
 
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import { RUM_ANALYST_AGENT_ID, RUM_ANALYST_AGENT_TYPE_ID } from '../../common/rum_agent';
-import { rumAnalystAgentType } from './agent';
+import {
+  RUM_ANALYST_AGENT_ID,
+  RUM_ANALYST_AGENT_TYPE_ID,
+  RUM_ANALYST_SKILL_IDS,
+} from '../../common/rum_agent';
+import { rumAnalystAgentType, rumAnalystToolSelection } from './agent';
 
 export const installRumAnalystAgent = async ({
   agentBuilder,
@@ -28,9 +32,10 @@ export const installRumAnalystAgent = async ({
       avatar_symbol: 'RUM',
       access_control: { access_mode: AgentAccessControlMode.Public },
       configuration: {
-        tools: [],
-        skill_ids: [],
+        tools: rumAnalystToolSelection,
+        skill_ids: [...RUM_ANALYST_SKILL_IDS],
         connector_ids: [],
+        enable_elastic_capabilities: false,
       },
     },
   });

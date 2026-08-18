@@ -25,6 +25,7 @@ import { rumAppSavedObjectType } from './saved_objects/rum_app';
 import {
   installRumAnalystAgent,
   registerRumAnalystAgentType,
+  registerRumSkills,
   registerRumTools,
 } from './agent_builder';
 import type { UxPluginSetupDeps, UxPluginStartDeps } from './plugin_types';
@@ -83,6 +84,7 @@ export class Plugin implements PluginType {
         core,
         logger: this.logger,
       });
+      registerRumSkills(plugins.agentBuilder);
       registerRumAnalystAgentType(plugins.agentBuilder);
     }
 

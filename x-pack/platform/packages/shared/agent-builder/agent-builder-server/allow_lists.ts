@@ -249,6 +249,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'observability.rca',
   'observability.investigation',
   'observability.service-map',
+  'observability.ux.rum-slow-users',
+  'observability.ux.rum-slow-pages',
+  'observability.ux.rum-errors',
+  'observability.ux.rum-frustration',
+  'observability.ux.rum-report',
 
   // ML
   `${internalNamespaces.ml}.anomaly-detection`,

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { RUM_ANALYST_AGENT_TYPE_ID, RUM_UX_TOOL_IDS } from '../../common/rum_agent';
+import {
+  RUM_ANALYST_AGENT_TYPE_ID,
+  RUM_ANALYST_SKILL_IDS,
+  RUM_UX_TOOL_IDS,
+} from '../../common/rum_agent';
 import { registerRumTools } from './tools';
 
 describe('registerRumTools', () => {
@@ -47,5 +51,12 @@ describe('registerRumTools', () => {
   it('uses allow-listed ids', () => {
     expect(RUM_ANALYST_AGENT_TYPE_ID).toBe('observability.ux.rum-analyst-type');
     expect(RUM_UX_TOOL_IDS.getOverview).toBe('observability.ux.get_overview');
+    expect([...RUM_ANALYST_SKILL_IDS]).toEqual([
+      'observability.ux.rum-slow-users',
+      'observability.ux.rum-slow-pages',
+      'observability.ux.rum-errors',
+      'observability.ux.rum-frustration',
+      'observability.ux.rum-report',
+    ]);
   });
 });
