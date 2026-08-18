@@ -42,6 +42,14 @@ describe('InfoBlocks', () => {
     expect(screen.getAllByTestId('infoBlock')).toHaveLength(3);
   });
 
+  it('keeps the full string value available in the value element', () => {
+    const resource = 'etcd-cspm-control-plane-8fO2b-1a2b3c4d5e6f7g8h9i0j-kube-system';
+    render(<InfoBlocks items={[{ title: 'Resource', value: resource }]} />);
+
+    // Truncation itself is visual, so it can only be asserted where text can be measured.
+    expect(screen.getByTestId('infoBlockValue')).toHaveTextContent(resource);
+  });
+
   it('honors a custom data-test-subj on the container', () => {
     render(<InfoBlocks data-test-subj="myBlocks" items={[{ title: 'A', value: '1' }]} />);
     expect(screen.getByTestId('myBlocks')).toBeInTheDocument();
