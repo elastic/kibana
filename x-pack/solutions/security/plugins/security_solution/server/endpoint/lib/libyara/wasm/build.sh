@@ -18,8 +18,19 @@ DIST_DIR="${SCRIPT_DIR}/dist"
 YARA_SRC="${BUILD_DIR}/yara-${YARA_VERSION}"
 PATCHES_DIR="${SCRIPT_DIR}/patches"
 
+# The emsdk image entrypoint sources emsdk_env.sh, which unsets every EMSDK_*
+# variable it does not own. Do not name this EMSDK_IMAGE.
+if [[ -z "${LIBYARA_EMSDK_IMAGE:-}" ]]; then
+  echo "error: LIBYARA_EMSDK_IMAGE is required so ENGINE.md records the exact image that produced the binary." >&2
+  echo "Pass the same image used to run this script, e.g.:" >&2
+  echo "  LIBYARA_EMSDK_IMAGE=emscripten/emsdk:<tag>@sha256:<digest>" >&2
+  echo "  docker run --rm -e \"LIBYARA_EMSDK_IMAGE=\${LIBYARA_EMSDK_IMAGE}\" -v \"\$PWD\":/src -w /src \"\$LIBYARA_EMSDK_IMAGE\" bash ./build.sh" >&2
+  echo "See ../README.md" >&2
+  exit 1
+fi
+
 if ! command -v emcc >/dev/null 2>&1; then
-  echo "error: emcc not found. Run inside the emscripten/emsdk Docker image." >&2
+  echo "error: emcc not found. Run inside ${LIBYARA_EMSDK_IMAGE}." >&2
   exit 1
 fi
 
@@ -192,13 +203,17 @@ emcc \
   -s EXPORTED_RUNTIME_METHODS='["ccall","cwrap","UTF8ToString","stringToUTF8","lengthBytesUTF8","getValue"]' \
   -o "${DIST_DIR}/validate_yara.js"
 
-# Document engine pin next to the artifact
+# Document engine pin next to the artifact.
+# Registry digest is not visible from inside the container; the README docker run
+# passes LIBYARA_EMSDK_IMAGE so the pin can be recorded here.
 cat > "${DIST_DIR}/ENGINE.md" <<EOF
 # libyara WASM engine pin
 
 - **YARA version:** ${YARA_VERSION}
 - **Source:** ${YARA_URL}
 - **sha256:** ${YARA_SHA256}
+- **Emscripten:** $(emcc --version | head -n 1)
+- **Emscripten image:** ${LIBYARA_EMSDK_IMAGE}
 - **Matches:** Elastic Endpoint \`cmake/dependencies.cmake\` (YaraBundle / YaraSha256)
 - **Built at:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
 - **Notes:** STACK_SIZE=1MiB; WASM-safe hash-table free adapters (see \`patches/\`)

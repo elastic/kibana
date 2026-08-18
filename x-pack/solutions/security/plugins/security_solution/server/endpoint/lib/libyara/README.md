@@ -45,7 +45,10 @@ Requires Docker with the Emscripten SDK image:
 cd x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/libyara/wasm
 # Clean prior build intermediates when changing patches/flags:
 rm -rf .build
-docker run --rm -v "$PWD":/src -w /src emscripten/emsdk:3.1.74 bash ./build.sh
+# Image is pinned by digest (the 3.1.74 tag can be retagged).
+# To bump: docker buildx imagetools inspect emscripten/emsdk:<tag>
+LIBYARA_EMSDK_IMAGE=emscripten/emsdk:3.1.74@sha256:af45409f3199d88db4b1b03af0098532c8fb33a375ac257463eeb0a622870d06
+docker run --rm -e "LIBYARA_EMSDK_IMAGE=${LIBYARA_EMSDK_IMAGE}" -v "$PWD":/src -w /src "$LIBYARA_EMSDK_IMAGE" bash ./build.sh
 ```
 
 Artifacts land in `wasm/dist/` (`validate_yara.js`, `validate_yara.wasm`, `ENGINE.md`).
