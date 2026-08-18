@@ -1150,7 +1150,7 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('retries once on a 409 conflict, re-reading the document with the updated sequence', async () => {
+    it('retries on a 409 conflict, re-reading the document with the updated sequence', async () => {
       mockEsClient.search
         .mockResolvedValueOnce({
           hits: { hits: [createConversationDocument({ seqNo: 1, rounds: [round] })] },
@@ -1168,17 +1168,18 @@ describe('ConversationClient', () => {
       );
     });
 
-    it('throws on a second 409 without further retries', async () => {
+    it('throws a write conflict error once retries are exhausted', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocument({ rounds: [round] })] },
       });
       mockEsClient.index.mockRejectedValue(createConflictError());
 
-      await expect(
-        client.updateRoundFeedback('conversation-1', 'round-1', { vote: 'up' })
-      ).rejects.toMatchObject({ statusCode: 409 });
+      const error = await client
+        .updateRoundFeedback('conversation-1', 'round-1', { vote: 'up' })
+        .catch((e) => e);
 
-      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
+      expect(isConversationWriteConflictError(error)).toBe(true);
+      expect(error.meta.statusCode).toBe(409);
     });
 
     it('is restricted to the conversation owner', async () => {

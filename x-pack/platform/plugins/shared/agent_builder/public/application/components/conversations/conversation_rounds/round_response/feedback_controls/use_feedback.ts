@@ -90,6 +90,7 @@ export const useFeedback = (
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isSubmittingRef = useRef(false);
+  const isSubmitInFlightRef = useRef(false);
   const voteRef = useRef(vote);
   const timer1Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
   const timer2Ref = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -114,6 +115,7 @@ export const useFeedback = (
       setSubmittedPhase('idle');
       setIsSubmitting(false);
       isSubmittingRef.current = false;
+      isSubmitInFlightRef.current = false;
     },
     [clearSubmittedTimers]
   );
@@ -280,10 +282,10 @@ export const useFeedback = (
 
   const submit = useCallback(() => {
     const currentVote = voteRef.current;
-    if (!currentVote || !conversationId || isSubmittingRef.current) return;
+    if (!currentVote || !conversationId || isSubmitInFlightRef.current) return;
 
     setModalOpen(false);
-    isSubmittingRef.current = true;
+    isSubmitInFlightRef.current = true;
     setIsSubmitting(true);
 
     conversationsService
@@ -335,7 +337,7 @@ export const useFeedback = (
         resetTo();
       })
       .finally(() => {
-        isSubmittingRef.current = false;
+        isSubmitInFlightRef.current = false;
         setIsSubmitting(false);
       });
   }, [

@@ -441,60 +441,39 @@ class ConversationClientImpl implements ConversationClient {
     roundId: string,
     feedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string }
   ): Promise<void> {
-    return this._updateRoundFeedbackWithRetry(conversationId, roundId, feedback, false);
-  }
-
-  private async _updateRoundFeedbackWithRetry(
-    conversationId: string,
-    roundId: string,
-    userFeedback: { vote: 'up' | 'down' | null; chips?: FeedbackChipId[]; comment?: string },
-    isRetry: boolean
-  ): Promise<void> {
-    const document = await this.getDocumentWithAccess({
+    await this.writeConversation({
       conversationId,
       access: 'owner',
+      fields: (current) => {
+        const roundIndex = current.rounds.findIndex((r) => r.id === roundId);
+
+        if (roundIndex === -1) {
+          throw createConversationNotFoundError({ conversationId });
+        }
+
+        const round = current.rounds[roundIndex];
+        const { feedback: _removed, ...roundWithoutFeedback } = round;
+
+        const updatedRound =
+          feedback.vote === null
+            ? roundWithoutFeedback
+            : {
+                ...round,
+                feedback: {
+                  vote: feedback.vote,
+                  chips: feedback.chips ?? [],
+                  comment: feedback.comment ?? '',
+                  submitted_at: new Date().toISOString(),
+                  connector_id: round.model_usage?.connector_id,
+                  model: round.model_usage?.model,
+                } satisfies ConversationRoundFeedback,
+              };
+
+        return {
+          rounds: current.rounds.map((r, i) => (i === roundIndex ? updatedRound : r)),
+        };
+      },
     });
-    const rounds = document._source!.rounds ?? document._source!.conversation_rounds ?? [];
-    const roundIndex = rounds.findIndex((r) => r.id === roundId);
-
-    if (roundIndex === -1) {
-      throw createConversationNotFoundError({ conversationId });
-    }
-
-    const round = rounds[roundIndex];
-    const { feedback: _removed, ...roundWithoutFeedback } = round;
-
-    const updatedRound =
-      userFeedback.vote === null
-        ? roundWithoutFeedback
-        : {
-            ...round,
-            feedback: {
-              vote: userFeedback.vote,
-              chips: userFeedback.chips ?? [],
-              comment: userFeedback.comment ?? '',
-              submitted_at: new Date().toISOString(),
-              connector_id: round.model_usage?.connector_id,
-              model: round.model_usage?.model,
-            } satisfies ConversationRoundFeedback,
-          };
-
-    const updatedRounds = rounds.map((r, i) => (i === roundIndex ? updatedRound : r));
-
-    try {
-      await this.storage.getClient().index({
-        id: conversationId,
-        document: { ...document._source!, rounds: undefined, conversation_rounds: updatedRounds },
-        if_seq_no: document._seq_no,
-        if_primary_term: document._primary_term,
-      });
-    } catch (err: unknown) {
-      const httpErr = err as { statusCode?: number };
-      if (!isRetry && httpErr?.statusCode === 409) {
-        return this._updateRoundFeedbackWithRetry(conversationId, roundId, userFeedback, true);
-      }
-      throw err;
-    }
   }
 
   async delete(conversationId: string): Promise<boolean> {
