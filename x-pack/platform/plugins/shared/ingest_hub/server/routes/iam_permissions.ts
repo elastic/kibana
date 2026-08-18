@@ -118,9 +118,7 @@ export const registerIamPermissionsRoute = (
             packageName: lookup.packageName,
             policyTemplate: lookup.policyTemplate,
             inputs: lookup.inputs,
-            // Use the lookup's dataStream override when the service id differs from
-            // the actual data stream path in the package (e.g. fargate → task_stats).
-            dataStream: lookup.dataStream ?? id,
+            dataStream: id,
           });
 
           if (

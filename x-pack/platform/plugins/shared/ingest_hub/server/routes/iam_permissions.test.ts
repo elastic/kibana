@@ -234,7 +234,7 @@ describe('registerIamPermissionsRoute', () => {
   });
 
   it('handles a mix of manifest-sourced and matrix-fallback services', async () => {
-    // cloudtrail returns manifest permissions; fargate is from a different package (awsfargate)
+    // cloudtrail returns manifest permissions; task_stats is from a different package (awsfargate)
     // with no manifest permissions → falls back to matrix.
     mockGetLatestPackageInfo.mockImplementation((pkgName: string) => {
       if (pkgName === 'aws') {
@@ -249,7 +249,7 @@ describe('registerIamPermissionsRoute', () => {
     });
 
     const request = httpServerMock.createKibanaRequest({
-      query: { services: 'cloudtrail,fargate' },
+      query: { services: 'cloudtrail,task_stats' },
     });
     const response = httpServerMock.createResponseFactory();
     const handler = getHandler();
@@ -262,10 +262,12 @@ describe('registerIamPermissionsRoute', () => {
     // cloudtrail: uses manifest
     expect(body.byService.cloudtrail.policy.Statement[0].Action).toContain('cloudtrail:GetTrail');
 
-    // fargate: uses matrix fallback
-    const fargateMatrix = AWS_SERVICE_PROVIDER_PERMISSIONS.fargate?.actions ?? [];
-    if (fargateMatrix.length > 0) {
-      expect(body.byService.fargate.policy.Statement[0].Action).toEqual([...fargateMatrix].sort());
+    // task_stats: uses matrix fallback
+    const taskStatsMatrix = AWS_SERVICE_PROVIDER_PERMISSIONS.task_stats?.actions ?? [];
+    if (taskStatsMatrix.length > 0) {
+      expect(body.byService.task_stats.policy.Statement[0].Action).toEqual(
+        [...taskStatsMatrix].sort()
+      );
     }
   });
 

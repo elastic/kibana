@@ -197,7 +197,7 @@ export const AWS_SERVICE_PROVIDER_PERMISSIONS: Readonly<Record<string, ProviderP
   ]),
 
   // ── awsfargate ──────────────────────────────────────────────────────────
-  fargate: actions(AWS_METRICS_PACKAGE_ACTIONS, [
+  task_stats: actions(AWS_METRICS_PACKAGE_ACTIONS, [
     'ecs:ListClusters',
     'ecs:ListServices',
     'ecs:DescribeServices',
