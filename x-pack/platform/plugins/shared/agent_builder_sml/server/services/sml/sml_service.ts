@@ -981,13 +981,7 @@ const buildTitlePrefixClause = (text: string): Record<string, unknown> => ({
   match_bool_prefix: { title: { query: text, operator: 'and' } },
 });
 
-/**
- * `type` is a low-cardinality keyword, so a `prefix` query is cheap.
- *
- * `type` carries a lowercase normalizer, which already handles casing on both
- * sides. Lowercasing here too keeps matching correct on an index created before
- * that normalizer landed, until the crawler rebuilds it.
- */
+/** `type` is a low-cardinality keyword, so a `prefix` query is cheap. */
 const buildTypePrefixClause = (text: string): Record<string, unknown> => ({
   prefix: { type: text.toLowerCase() },
 });

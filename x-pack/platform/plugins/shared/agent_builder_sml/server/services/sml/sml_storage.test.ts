@@ -15,10 +15,6 @@ describe('smlIndexName', () => {
 
 describe('storageSettings', () => {
   it('normalizes `type` to lowercase for the @ menu prefix query', () => {
-    // Knowingly a breaking mapping change: `normalizer` is not updateable, so the
-    // adapter's in-place `putMapping` fails on indices created before it existed.
-    // The crawler's `applyMappingsOrRebuild` drops and rebuilds the index in that
-    // case, which is acceptable while the feature is behind a flag.
     expect(storageSettings.schema.properties.type).toMatchObject({
       type: 'keyword',
       normalizer: 'lowercase',

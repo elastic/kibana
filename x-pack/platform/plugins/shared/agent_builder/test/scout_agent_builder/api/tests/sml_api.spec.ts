@@ -50,9 +50,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   const slashTitleEntryId = `sml-slash-title-${searchRunId}`;
   const slashTitle = `sales/marketing overview ${searchRunId}`;
 
-  // Written with a non-canonical `type` casing, which the registry would normally
-  // reject, to prove the mapping's lowercase normalizer applies at index time.
-  const mixedCaseTypeEntryId = `sml-mixed-type-${searchRunId}`;
+  const capitalizedTypeEntryId = `sml-capitalized-type-${searchRunId}`;
 
   apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -129,19 +127,17 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
 
     await sysEsClient.index({
       index: smlIndexName,
-      id: mixedCaseTypeEntryId,
+      id: capitalizedTypeEntryId,
       document: {
         ...baseDocument,
-        id: mixedCaseTypeEntryId,
+        id: capitalizedTypeEntryId,
         type: 'Workflow',
-        title: `mixed case type entry ${searchRunId}`,
-        origin: { uri: `workflow://${mixedCaseTypeEntryId}` },
-        content: 'mixed case type for sml scout',
+        title: `capitalized type entry ${searchRunId}`,
+        origin: { uri: `workflow://${capitalizedTypeEntryId}` },
+        content: 'capitalized type for sml scout',
       },
     });
 
-    // Refresh once, after every insert, so this doesn't silently depend on which
-    // document happens to be indexed last.
     await sysEsClient.indices.refresh({ index: smlIndexName });
   });
 
@@ -151,7 +147,7 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       longTitleEntryId,
       shortTitleEntryId,
       slashTitleEntryId,
-      mixedCaseTypeEntryId,
+      capitalizedTypeEntryId,
     ]) {
       try {
         await sysEsClient.delete({ index: smlIndexName, id, refresh: true });
@@ -256,12 +252,10 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   );
 
   apiTest(
-    'POST /internal/agent_builder_sml/sml/_autocomplete matches a type whose stored casing differs',
+    'POST /internal/agent_builder_sml/sml/_autocomplete matches a type stored as "Workflow"',
     async ({ apiClient }) => {
-      // The document was written with `type: 'Workflow'`. The mapping's lowercase
-      // normalizer is what makes a lowercase prefix query find it.
       const results = await autocomplete(apiClient, 'workflo');
-      expect(results.some((r) => r.id === mixedCaseTypeEntryId)).toBe(true);
+      expect(results.some((r) => r.id === capitalizedTypeEntryId)).toBe(true);
     }
   );
 

@@ -25,19 +25,7 @@ const SEMANTIC_MULTI_FIELD = {
  */
 const smlStorageSchemaProperties = {
   id: types.keyword({}),
-  /**
-   * The @ menu prefix-matches this field, so it normalizes to lowercase at index
-   * and search time.
-   *
-   * This is a breaking mapping change: `normalizer` is not an updateable
-   * parameter, so the adapter's in-place `putMapping` fails on any index created
-   * before it was added (`Cannot update parameter [normalizer] from [null] to
-   * [lowercase]`). Accepted while the feature is behind a flag and has no real
-   * users. The crawler recovers on its own — `applyMappingsOrRebuild` catches the
-   * failed reconcile, drops the index and re-crawls — but note that until the next
-   * crawl runs, writes through `indexAttachment` fail, and the rebuild discards
-   * any manually attached entries.
-   */
+  /** Normalized to lowercase so the @ menu's `prefix` query is case-insensitive. */
   type: types.keyword({ normalizer: 'lowercase' }),
   title: types.text({ fields: SEMANTIC_MULTI_FIELD }),
   origin: types.object({
