@@ -9,7 +9,7 @@
 
 const Path = require('path');
 const Crypto = require('crypto');
-const startOfDay = /** @type {import('date-fns/startOfDay').default} */ (
+const startOfDay = /** @type {typeof import('date-fns').startOfDay} */ (
   /** @type {unknown} */ (require('date-fns/startOfDay'))
 );
 
@@ -208,6 +208,4 @@ directory and report this error to the Operations team.\n`);
   }
 }
 
-module.exports = {
-  LmdbCache,
-};
+exports.LmdbCache = LmdbCache;

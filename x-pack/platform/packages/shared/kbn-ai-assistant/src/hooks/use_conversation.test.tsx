@@ -13,6 +13,7 @@ import {
   MessageRole,
   StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
+  type Conversation,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import type { AIAssistantAppService } from '../service/create_app_service';
@@ -170,9 +171,16 @@ describe('useConversation', () => {
   describe('with a conversation id that successfully loads', () => {
     beforeEach(async () => {
       mockService.callApi.mockResolvedValueOnce({
+        '@timestamp': new Date().toISOString(),
         conversation: {
           id: 'my-conversation-id',
+          last_updated: new Date().toISOString(),
+          title: EMPTY_CONVERSATION_TITLE,
         },
+        labels: {},
+        numeric_labels: {},
+        namespace: 'default',
+        public: false,
         systemMessage: 'System',
         messages: [
           {
@@ -201,9 +209,13 @@ describe('useConversation', () => {
 
     it('returns the loaded conversation', () => {
       expect(hookResult.result.current.conversation.value).toEqual({
+        '@timestamp': expect.any(String),
         conversation: {
           id: 'my-conversation-id',
+          last_updated: expect.any(String),
+          title: EMPTY_CONVERSATION_TITLE,
         },
+        labels: {},
         systemMessage: 'System',
         messages: [
           {
@@ -214,6 +226,9 @@ describe('useConversation', () => {
             },
           },
         ],
+        namespace: 'default',
+        numeric_labels: {},
+        public: false,
       });
     });
 
@@ -422,7 +437,7 @@ describe('useConversation', () => {
     });
 
     describe('with a stored conversation', () => {
-      let resolve: (value: unknown) => void;
+      let resolve: (value: Conversation) => void;
       beforeEach(async () => {
         mockService.callApi.mockImplementation(async (endpoint, request) => {
           if (
@@ -436,10 +451,12 @@ describe('useConversation', () => {
             '@timestamp': new Date().toISOString(),
             conversation: {
               id: 'my-conversation-id',
+              last_updated: new Date().toISOString(),
               title: EMPTY_CONVERSATION_TITLE,
             },
             labels: {},
             numeric_labels: {},
+            namespace: 'default',
             public: false,
             messages: [],
           };
@@ -500,10 +517,12 @@ describe('useConversation', () => {
             '@timestamp': new Date().toISOString(),
             conversation: {
               id: 'my-conversation-id',
+              last_updated: new Date().toISOString(),
               title: 'my-new-title',
             },
             labels: {},
             numeric_labels: {},
+            namespace: 'default',
             public: false,
             messages: [],
           };
@@ -511,9 +530,17 @@ describe('useConversation', () => {
 
         await act(async () => {
           resolve({
+            '@timestamp': new Date().toISOString(),
             conversation: {
+              id: 'my-conversation-id',
+              last_updated: new Date().toISOString(),
               title: 'my-new-title',
             },
+            labels: {},
+            messages: [],
+            namespace: 'default',
+            numeric_labels: {},
+            public: false,
           });
         });
 

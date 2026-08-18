@@ -31,12 +31,41 @@ import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifact
 import { LOCAL_CACHE_ROOT } from './src/archive/constants';
 import { isCiEnvironment } from './src/archive/utils';
 import { formatPathForLog } from './src/normalize_project_path';
+import { resolveTypeCheckCompiler } from './src/resolve_compiler';
+import {
+  buildConcurrencyArgs,
+  resolveMemoryLimit,
+  resolveTypeCheckConcurrency,
+} from './src/resolve_concurrency';
 
 export const TSC_LABEL = 'tsc';
+
+const TYPE_CHECK_ONLY_PATHS = {
+  antlr4: ['./node_modules/antlr4/src/antlr4/index.d.ts'],
+} as const;
 
 const rel = (from: string, to: string) => {
   const path = Path.relative(from, to);
   return path.startsWith('.') ? path : `./${path}`;
+};
+
+/** Resolves the generated root directory when a project includes source files from a parent. */
+export const resolveTypeCheckRootDir = (include: readonly string[] | undefined): string => {
+  const parentDepth = (include ?? []).reduce((maxDepth, pattern) => {
+    const normalizedPattern = pattern.replaceAll('\\', '/');
+    const isSourceFile = /\.[cm]?[jt]sx?$/.test(normalizedPattern);
+    const isDeclarationFile = /\.d\.[cm]?ts$/.test(normalizedPattern);
+
+    if (!isSourceFile || isDeclarationFile) {
+      return maxDepth;
+    }
+
+    const parentPrefix = normalizedPattern.match(/^(\.\.\/)+/)?.[0];
+    const depth = parentPrefix?.match(/\.\.\//g)?.length ?? 0;
+    return Math.max(maxDepth, depth);
+  }, 0);
+
+  return parentDepth === 0 ? '.' : Array.from({ length: parentDepth }, () => '..').join('/');
 };
 
 const isTsProjectWithinMoonSourceRoots = (
@@ -83,10 +112,16 @@ export async function createTypeCheckConfigs(
       compilerOptions: {
         ...config.compilerOptions,
         composite: true,
-        rootDir: '.',
+        rootDir: resolveTypeCheckRootDir(config.include),
         noEmit: false,
         emitDeclarationOnly: true,
-        paths: project.repoRel === 'tsconfig.base.json' ? config.compilerOptions?.paths : undefined,
+        paths:
+          project.repoRel === 'tsconfig.base.json'
+            ? {
+                ...(config.compilerOptions?.paths as Record<string, string[]> | undefined),
+                ...TYPE_CHECK_ONLY_PATHS,
+              }
+            : undefined,
       },
       kbn_references: undefined,
       references: project.getKbnRefs(allProjects).map((refd) => {
@@ -306,17 +341,22 @@ export const executeTypeCheckValidation = async ({
         ].sort((left, right) => left.localeCompare(right));
 
     if (buildTargets.length > 0) {
+      const concurrency = resolveTypeCheckConcurrency();
+      log.info(
+        `tsgo build concurrency: --builders ${concurrency.builders} --checkers ${concurrency.checkers}`
+      );
       await procRunner.run(TSC_LABEL, {
-        cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+        cmd: Path.relative(REPO_ROOT, resolveTypeCheckCompiler()),
         args: [
           '-b',
           ...buildTargets,
+          ...buildConcurrencyArgs(concurrency),
           ...(pretty ? ['--pretty'] : []),
           ...(verbose ? ['--verbose'] : []),
           ...(extendedDiagnostics ? ['--extendedDiagnostics'] : []),
         ],
         env: {
-          NODE_OPTIONS: '--max-old-space-size=12288',
+          GOMEMLIMIT: resolveMemoryLimit(),
         },
         cwd: REPO_ROOT,
         wait: true,

@@ -10,7 +10,7 @@ import { RouteDependencies } from '../../../types';
 import { API_BASE_PATH } from '../../../../common/constants';
 
 const paramsSchema = schema.object({
-  database_id: schema.string(),
+  database_id: schema.string({ maxLength: 1000 }),
 });
 
 export const registerDeleteDatabaseRoute = ({

@@ -40,11 +40,6 @@ const exactFilePathMatcher = (relativePath) =>
  */
 const JS_YAML_LEGACY_CONSUMERS = [
   'src/platform/packages/private/kbn-gen-ai-functional-testing/src/connectors.ts',
-  'src/platform/packages/shared/kbn-scout/src/cli/create_test_tracks.ts',
-  'src/platform/packages/shared/kbn-scout/src/servers/configs/discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.test.ts',
-  'src/platform/packages/shared/kbn-scout/src/tests_discovery/search_configs.ts',
-  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/ftr_configs_manifest.ts',
   'src/platform/plugins/private/interactive_setup/server/kibana_config_writer.ts',
   'x-pack/platform/packages/shared/kbn-inference-cli/src/eis/get_eis_gateway_config.ts',
   'x-pack/platform/packages/shared/kbn-inference-cli/src/eis/get_service_configuration.ts',
@@ -60,7 +55,6 @@ const JS_YAML_LEGACY_CONSUMERS = [
   'x-pack/platform/plugins/shared/integration_assistant/server/util/samples.ts',
   'x-pack/solutions/observability/plugins/apm/scripts/shared/read_kibana_config.ts',
   'x-pack/solutions/observability/plugins/apm/server/routes/fleet/get_apm_package_policy_definition.ts',
-  'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/read_kibana_config.ts',
   'x-pack/solutions/security/plugins/cloud_defend/common/utils/helpers.ts',
   'x-pack/solutions/security/plugins/cloud_defend/public/components/control_general_view/index.test.tsx',
   'x-pack/solutions/security/test/security_solution_playwright/api_utils/api_key.ts',
