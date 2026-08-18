@@ -29,7 +29,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
-import { hasOwnerUnifiedPrefix, toUnifiedAttachmentType } from '../../../common/utils/attachments';
+import { toUnifiedAttachmentType } from '../../../common/utils/attachments';
 import type { AttachmentRequestV2, BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case, CaseSeverity } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
@@ -73,7 +73,6 @@ interface CasesConnectorExecutorParams {
   casesClient: CasesClient;
   actionsClient: PublicMethodsOf<ActionsClient>;
   spaceId: string;
-  isCasesAttachmentsEnabled?: boolean;
   isTemplatesEnabled?: boolean;
   isAtLeastPlatinum?: () => Promise<boolean>;
 }
@@ -118,7 +117,6 @@ export class CasesConnectorExecutor {
   private readonly casesClient: CasesClient;
   private readonly actionsClient: PublicMethodsOf<ActionsClient>;
   private readonly spaceId: string;
-  private readonly isCasesAttachmentsEnabled: boolean;
   private readonly isTemplatesEnabled: boolean;
   private readonly isAtLeastPlatinum: () => Promise<boolean>;
 
@@ -129,7 +127,6 @@ export class CasesConnectorExecutor {
     casesClient,
     actionsClient,
     spaceId,
-    isCasesAttachmentsEnabled = false,
     isTemplatesEnabled = false,
     isAtLeastPlatinum = async () => true,
   }: CasesConnectorExecutorParams) {
@@ -139,7 +136,6 @@ export class CasesConnectorExecutor {
     this.casesClient = casesClient;
     this.actionsClient = actionsClient;
     this.spaceId = spaceId;
-    this.isCasesAttachmentsEnabled = isCasesAttachmentsEnabled;
     this.isTemplatesEnabled = isTemplatesEnabled;
     this.isAtLeastPlatinum = isAtLeastPlatinum;
   }
@@ -1351,19 +1347,11 @@ export class CasesConnectorExecutor {
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
       ({ theCase, alerts, comments }) => {
         const extraComments: AttachmentRequestV2[] =
-          comments?.map((comment) =>
-            this.isCasesAttachmentsEnabled
-              ? {
-                  type: COMMENT_ATTACHMENT_TYPE,
-                  data: { content: comment },
-                  owner: theCase.owner,
-                }
-              : {
-                  type: AttachmentType.user,
-                  comment,
-                  owner: theCase.owner,
-                }
-          ) ?? [];
+          comments?.map((comment) => ({
+            type: COMMENT_ATTACHMENT_TYPE,
+            data: { content: comment },
+            owner: theCase.owner,
+          })) ?? [];
         const rulePayload = internallyManagedAlerts
           ? { id: null, name: null }
           : { id: rule.id, name: rule.name };
@@ -1381,31 +1369,12 @@ export class CasesConnectorExecutor {
           { alertIds: [], alertIndices: [] }
         );
 
-        // Only write the unified shape when the feature flag is on AND the
-        // case owner has a registered unified prefix.
-        const isUnifiedAlertValid =
-          this.isCasesAttachmentsEnabled && hasOwnerUnifiedPrefix(theCase.owner);
-
-        if (this.isCasesAttachmentsEnabled && !isUnifiedAlertValid) {
-          this.logger.warn(
-            `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Owner "${theCase.owner}" has no unified attachment prefix; falling back to legacy alert attachment for case ${theCase.id}.`
-          );
-        }
-
-        const alertAttachment: AttachmentRequestV2 = isUnifiedAlertValid
-          ? {
-              type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
-              attachmentId: alertIds,
-              metadata: { index: alertIndices, rule: rulePayload },
-              owner: theCase.owner,
-            }
-          : {
-              type: AttachmentType.alert,
-              rule: rulePayload,
-              alertId: alertIds,
-              index: alertIndices,
-              owner: theCase.owner,
-            };
+        const alertAttachment: AttachmentRequestV2 = {
+          type: toUnifiedAttachmentType(AttachmentType.alert, theCase.owner),
+          attachmentId: alertIds,
+          metadata: { index: alertIndices, rule: rulePayload },
+          owner: theCase.owner,
+        };
 
         return {
           caseId: theCase.id,
