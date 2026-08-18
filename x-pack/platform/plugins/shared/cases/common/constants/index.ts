@@ -285,13 +285,6 @@ export const AUTHORABLE_SNAKE_KEY = new RegExp(`^[${AUTHORABLE_KEY_CHARS}]+$`);
 export const SAFE_SNAKE_KEY = new RegExp(`^[${AUTHORABLE_KEY_CHARS}${READ_TOLERATED_KEY_CHARS}]+$`);
 
 /**
- * Maximum byte-length for a derived extended-field key (`${name}_as_${type}`). 256 is chosen
- * to leave comfortable headroom below Elasticsearch's flattened-field path limit while keeping
- * the Painless compile budget safe.
- */
-export const MAX_SNAKE_KEY_LENGTH = 256 as const;
-
-/**
  * The longest `type` literal that any inline field can carry (the second half of the
  * `${name}_as_${type}` key). Used when validating `$ref` aliases that have no locally-known
  * type — checking against this value guarantees the derived key fits MAX_SNAKE_KEY_LENGTH
@@ -304,6 +297,13 @@ export const MAX_SNAKE_KEY_LENGTH = 256 as const;
  */
 export const LONGEST_STORAGE_TYPE = 'unsigned_long' as const;
 
+/**
+ * Maximum length of a full `${name}_as_${type}` extended-field storage key.
+ * Shared by the friendly-name generator (which reserves room for the longest
+ * type suffix) and the analytics runtime-field guard so a generated name can
+ * never produce a key the analytics layer rejects.
+ */
+export const MAX_SNAKE_KEY_LENGTH = 256 as const;
 /**
  * Bounds for `extendedFieldFilters` on find/search and All Cases URL state.
  * Field Library values can legitimately occupy the full template/value payload, and each of the

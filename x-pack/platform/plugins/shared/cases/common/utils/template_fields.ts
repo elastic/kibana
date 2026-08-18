@@ -108,6 +108,25 @@ export const collectNormalizedRefNames = (
   }, new Set<string>());
 
 /**
+ * Filters out the `$ref` entries of a template's fields array that target one of
+ * `excludedDefinitionNames` (normalized — see {@link normalizeFieldDefinitionName}).
+ *
+ * Used by the create form when a field definition's linked legacy custom field is itself
+ * rendered as an input: the `$ref` to that definition must not produce a second control or a
+ * second submitted value for the same logical field. Only `$ref` entries are dropped by
+ * definition identity — inline template fields are template-local and pass through even when
+ * their names coincide with an excluded definition.
+ */
+export const excludeRefFieldsToDefinitions = (
+  fields: readonly Field[] | undefined,
+  excludedDefinitionNames: ReadonlySet<string>
+): Field[] =>
+  (fields ?? []).filter(
+    (field) =>
+      !isRefField(field) || !excludedDefinitionNames.has(normalizeFieldDefinitionName(field.$ref))
+  );
+
+/**
  * Parses an array of field definitions into resolved inline fields, skipping any
  * definitions that are malformed or describe reference (non-inline) fields.
  */
@@ -385,70 +404,31 @@ const isEmptyExtendedFieldValue = (value: unknown): boolean => value == null;
  * - A `customFields` entry whose value is `null` or `undefined` is skipped — the case left the
  *   field empty; the v2 field then renders empty rather than being forced to a value.
  *
+ * `resolveStorageKey` supplies the key to write under — the linked field definition's
+ * `${name}_as_${type}` (never `${legacyKey}_as_${type}`; see `field_link_resolution.ts`'s
+ * `toResolved`, the single source of truth for this derivation). A field with no resolvable
+ * link (`undefined`) is skipped entirely rather than guessed at, matching the rest of the
+ * migration's "never guess" linkage philosophy — this file is `common/` (shared with client
+ * code) and cannot import the server-only link-resolution module directly, hence the callback.
+ *
  * Returns only the entries to write (keys missing or empty). Callers are responsible for
- * spreading the result over the existing map; see {@link mergeCustomFieldsIntoExtendedFields}
- * for the combined helper.
+ * spreading the result over the existing map.
  */
 export const buildExtendedFieldsBackfill = (
   customFields: LegacyCaseCustomField[] | undefined,
-  existingExtendedFields: Record<string, unknown> | null | undefined
+  existingExtendedFields: Record<string, unknown> | null | undefined,
+  resolveStorageKey: (customField: LegacyCaseCustomField) => string | undefined
 ): Record<string, string> => {
   const existing = existingExtendedFields ?? {};
   const additions: Record<string, string> = {};
 
   for (const cf of customFields ?? []) {
     const hasValue = cf.value !== null && cf.value !== undefined;
-    if (hasValue) {
-      const snakeKey = getFieldSnakeKey(cf.key, getV2FieldType(cf.type));
-      if (isEmptyExtendedFieldValue(existing[snakeKey])) {
-        additions[snakeKey] = String(cf.value);
-      }
+    const storageKey = hasValue ? resolveStorageKey(cf) : undefined;
+    if (storageKey !== undefined && isEmptyExtendedFieldValue(existing[storageKey])) {
+      additions[storageKey] = String(cf.value);
     }
   }
 
   return additions;
-};
-
-/**
- * Mirrors `customFields` values into an existing `extended_fields` map with
- * **customFields-win** semantics — the live write-time counterpart of {@link buildExtendedFieldsBackfill}.
- *
- * Rules applied for each customField entry:
- * - non-null / non-undefined value → override (or add) the mirror key with `String(value)`.
- * - null / undefined value → delete the mirror key so the v2 field renders empty rather than
- *   retaining a stale value.
- *
- * Returns:
- * - `existingExtendedFields` unchanged (same reference) when every key in the result would be
- *   identical to the current map — callers use reference equality to detect a no-op and skip
- *   the SO write.
- * - a new merged map otherwise.
- *
- * Note: the one-shot migration backfill ({@link buildExtendedFieldsBackfill}) retains
- * existing-wins semantics so it never clobbers values written through the v2 system.
- */
-export const mergeCustomFieldsIntoExtendedFields = (
-  customFields: LegacyCaseCustomField[] | undefined,
-  existingExtendedFields: Record<string, unknown> | null | undefined
-): Record<string, string> | null | undefined => {
-  const existing = existingExtendedFields ?? {};
-  const merged: Record<string, string> = { ...existing } as Record<string, string>;
-
-  for (const cf of customFields ?? []) {
-    const snakeKey = getFieldSnakeKey(cf.key, getV2FieldType(cf.type));
-    if (cf.value !== null && cf.value !== undefined) {
-      merged[snakeKey] = String(cf.value);
-    } else {
-      delete merged[snakeKey];
-    }
-  }
-
-  // Return the same reference when the result is value-identical — signals no-op to callers.
-  const existingKeys = Object.keys(existing);
-  const mergedKeys = Object.keys(merged);
-  const isNoOp =
-    existingKeys.length === mergedKeys.length &&
-    mergedKeys.every((k) => merged[k] === (existing as Record<string, string>)[k]);
-
-  return isNoOp ? (existingExtendedFields as Record<string, string> | null | undefined) : merged;
 };

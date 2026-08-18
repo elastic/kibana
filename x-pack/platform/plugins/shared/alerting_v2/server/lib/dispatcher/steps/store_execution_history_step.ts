@@ -11,6 +11,7 @@ import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import type { EventLogServiceContract } from '../../services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../../services/event_log_service/tokens';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -27,7 +28,7 @@ import {
   type ActionPolicyEventAction,
   type DispatchFailureReason,
 } from './constants';
-import { getUnmatchedEpisodes } from './unmatched_episodes';
+import { getUnmatchedEpisodes } from './utils/unmatched_episodes';
 import { episodeSubject } from './utils/subject';
 
 /** Index of workflow ids that recorded a dispatch failure, keyed by action group id. */
@@ -100,7 +101,10 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
     private readonly eventLogService: EventLogServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const {
       dispatch = [],
       throttled = [],
