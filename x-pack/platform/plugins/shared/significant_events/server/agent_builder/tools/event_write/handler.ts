@@ -51,6 +51,9 @@ export interface EventsWriteResult {
   event_id: string;
   status: SignificantEvent['status'];
   written: true;
+  /** Set when the stored title and symptom_hypothesis were preserved because this continuation
+   *  introduced no new rule UUIDs — preventing identity hijack by an unrelated condition. */
+  narrative_preserved?: true;
 }
 
 export interface EventsWriteDuplicateResult {
@@ -426,7 +429,39 @@ const resolveDedupSkips = (
   return toWrite;
 };
 
-/** Full ordered history for continuation no-op evaluation and lineage merge. */
+/**
+ * When a continuation introduces no new rule UUIDs beyond those the event already carries, freezes
+ * the event's stored `title` and `symptom_hypothesis` to prevent identity hijack — the scenario
+ * where an unrelated condition's narrative replaces the original event title/hypothesis while the
+ * old rules are still listed in `signals`.
+ *
+ * Returns frozen values plus `narrativePreserved: true` when the guard fires, or `undefined` when
+ * the caller may use the submitted narrative unchanged.
+ *
+ * `summary` and `assessment_note` are intentionally NOT frozen: those fields carry per-cycle
+ * observations and must remain caller-controlled. Only the event identity fields are protected.
+ */
+const preserveStableNarrative = (
+  submittedRuleUuids: string[],
+  latestEvent: SignificantEvent | undefined
+):
+  | (Pick<SignificantEvent, 'title' | 'symptom_hypothesis'> & { narrativePreserved: true })
+  | undefined => {
+  if (latestEvent === undefined) return undefined;
+
+  const storedRuleSet = new Set(extractRuleUuids(latestEvent.signals));
+  const hasNewRules = submittedRuleUuids.some((uuid) => !storedRuleSet.has(uuid));
+  if (hasNewRules) return undefined;
+
+  // No new rules — freeze the stored narrative to block identity hijack.
+  return {
+    title: latestEvent.title,
+    symptom_hypothesis: latestEvent.symptom_hypothesis,
+    narrativePreserved: true,
+  };
+};
+
+/** Full history for remaining continuation writes (lineage merge). */
 const fetchPriorDocsByEventId = async (
   eventClient: EventClient,
   candidates: WriteCandidate[]
@@ -477,11 +512,22 @@ const buildPendingWrite = (
   // Discovery assigns the final status directly; persist caller-supplied status for all write modes.
   const status = candidate.input.status;
 
+  // For continuations: if no new rule UUIDs are introduced, freeze title and symptom_hypothesis to
+  // prevent identity hijack — the scenario where an unrelated condition's narrative replaces the
+  // original event identity while the old rules are still listed in signals (#1082).
+  const frozenNarrative = isContinuation
+    ? preserveStableNarrative(extractRuleUuids(candidate.input.signals), latestEvent)
+    : undefined;
+
   return {
     candidate,
     status,
+    narrativePreserved: frozenNarrative?.narrativePreserved,
     document: {
       ...rest,
+      ...(frozenNarrative
+        ? { title: frozenNarrative.title, symptom_hypothesis: frozenNarrative.symptom_hypothesis }
+        : {}),
       '@timestamp': timestamp,
       event_uuid: candidate.eventUuid,
       event_id: candidate.eventId,
@@ -503,24 +549,30 @@ const applyBulkResults = (
   createResults: BulkResponseItem[],
   results: BulkResults
 ): void => {
-  pendingWrites.forEach(({ candidate, status }, responseIndex) => {
+  pendingWrites.forEach(({ candidate, status, narrativePreserved }, responseIndex) => {
     const detail = createResults[responseIndex];
-    results[candidate.index] = detail.error
-      ? {
-          index: candidate.index,
-          event_id: candidate.eventId,
-          status,
-          written: false,
-          reason: 'bulk_error',
-          error: toCompactBulkError(detail),
-        }
-      : {
-          index: candidate.index,
-          event_uuid: candidate.eventUuid,
-          event_id: candidate.eventId,
-          status,
-          written: true,
-        };
+    if (detail.error) {
+      results[candidate.index] = {
+        index: candidate.index,
+        event_id: candidate.eventId,
+        status,
+        written: false,
+        reason: 'bulk_error',
+        error: toCompactBulkError(detail),
+      };
+    } else {
+      const result: EventsWriteResult = {
+        index: candidate.index,
+        event_uuid: candidate.eventUuid,
+        event_id: candidate.eventId,
+        status,
+        written: true,
+      };
+      if (narrativePreserved) {
+        result.narrative_preserved = true;
+      }
+      results[candidate.index] = result;
+    }
   });
 };
 
@@ -535,10 +587,12 @@ const applyBulkResults = (
  *  - Otherwise write a new event with the caller-supplied status.
  *
  * Snapshot-mode items (`event_id` present):
- *  - Skip the write (unchanged_outcome) when the latest stored version has the same severity and
+ *  - Skip the write (`unchanged_outcome`) when the latest stored version has the same severity and
  *    status, avoiding pure-churn duplicates.
  *  - Otherwise write a new version of the identified event, persisting the caller-supplied status.
- *  - Merge signals and topology with prior versions when history is found.
+ *    Merges signals and topology with prior versions when history is found.
+ *    When no new rule UUIDs are introduced, the stored `title` and `symptom_hypothesis` are
+ *    preserved (`narrative_preserved: true` on the result) to prevent identity hijack.
  */
 export async function eventsWriteBulkHandler({
   eventClient,

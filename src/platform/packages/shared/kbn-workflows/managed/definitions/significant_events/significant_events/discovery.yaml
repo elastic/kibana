@@ -184,7 +184,9 @@ steps:
               rule_uuid of every detection signal across all events where the final
               events_write result was written: true or skipped with reason:
               existing_active_event or unchanged_outcome.
-              Failed (bulk_error) or unattempted writes must not be included.
+              Failed writes (bulk_error, duplicate_in_batch) and unattempted writes must
+              not be included — their detections must remain in the workflow queue for
+              re-routing next cycle.
               Used both as a hallucination guardrail (schema validation forces the agent
               to report real activity) and as the per-rule filter for which detections
               get stamped as processed. Full discovery data is written via the
@@ -214,7 +216,7 @@ steps:
                   description: 'true when events_write appended the event version.'
                 reason:
                   type: string
-                  enum: [bulk_error, existing_active_event, unchanged_outcome]
+                  enum: [bulk_error, duplicate_in_batch, existing_active_event, unchanged_outcome]
                   description: 'Failure or skip reason when written is false.'
               required: [event_id, severity, status, written]
         required: [written_rule_uuids, significant_events]

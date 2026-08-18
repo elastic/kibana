@@ -155,7 +155,9 @@ export function createEventsWriteTool({
       **With event_id**: append a version to an existing event with the supplied status.
       Signals and topology are merged with prior versions. No-op if severity and status are
       unchanged (written: false, reason: unchanged_outcome). Keep an open continuation at or
-      above the prior severity unless grounding shows reduced impact.
+      above the prior severity unless grounding shows reduced impact. When no new rule UUIDs are
+      introduced, title and symptom_hypothesis are frozen to the stored values and
+      narrative_preserved: true is returned.
 
       **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
       set contains the submitted rules and shares at least one stream name. If found, returns it

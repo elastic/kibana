@@ -1117,3 +1117,131 @@ describe('eventsWriteItemSchema', () => {
     expect(eventsWriteItemSchema.safeParse({ ...validItem, ...overrides }).success).toBe(false);
   });
 });
+
+describe('eventsWriteBulkHandler — narrative hijack guard', () => {
+  type DetectionSignal = Extract<SignalEntry, { type: 'detection' }>;
+
+  const makeDetectionSignal = (ruleUuid: string): DetectionSignal => ({
+    type: 'detection',
+    stream_name: 'logs.app',
+    description: `Signal for ${ruleUuid}`,
+    confirmed: true,
+    metadata: {
+      detection_id: `det-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      rule_name: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+
+  const makeCausal = (featureId: string): CausalFeature => ({
+    feature_id: featureId,
+    name: featureId,
+    stream_name: 'logs.app',
+  });
+
+  const makeBlast = (featureId: string): BlastRadiusEntry => ({
+    feature_id: featureId,
+    type: 'entity',
+    name: featureId,
+  });
+
+  const makeSnapshotInput = (
+    eventId: string,
+    overrides: Partial<EventsWriteInput> = {}
+  ): EventsWriteInput => ({
+    ...baseInput,
+    // Use a severity that differs from makeStoredEvent's '60-high' default so the no-op guard
+    // (shouldSkipAsNoOp) does not suppress writes in tests that are verifying the gate, not the
+    // no-op. Tests specifically exercising the no-op interaction override this via `overrides`.
+    severity: '80-critical',
+    event_id: eventId,
+    signals: [makeDetectionSignal('rule-eis-auth')],
+    causal_features: [],
+    blast_radius: [],
+    ...overrides,
+  });
+
+  const makeStoredEventWithRules = (
+    eventId: string,
+    ruleUuids: string[],
+    topologyOverrides: {
+      causal_features?: CausalFeature[];
+      blast_radius?: BlastRadiusEntry[];
+    } = {}
+  ): SignificantEvent =>
+    makeStoredEvent(eventId, {
+      signals: ruleUuids.map((uuid) => makeDetectionSignal(uuid)),
+      causal_features: topologyOverrides.causal_features ?? [],
+      blast_radius: topologyOverrides.blast_radius ?? [],
+    });
+
+  it('narrative guard: preserves stored title and symptom_hypothesis when no new rules are introduced', async () => {
+    const eventId = 'event-narrative-stable';
+    const stored = makeStoredEventWithRules(eventId, ['rule-eis-auth'], {
+      causal_features: [makeCausal('svc-eis')],
+    });
+    stored.title = 'EIS gateway — authorization endpoint HTTP errors';
+    stored.symptom_hypothesis = 'EIS auth route returns >=400 for all clients.';
+
+    const eventClient = makeEventClient({
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map([[eventId, stored]])),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        makeSnapshotInput(eventId, {
+          signals: [makeDetectionSignal('rule-eis-auth')], // same rule — no new rules
+          title: 'Agentless CEL state registry — cleanup remove 404 not_found', // attempted hijack
+          symptom_hypothesis: 'CEL filebeat registry-remove 404s.', // attempted hijack
+        }),
+      ],
+    });
+
+    expect(result.written).toBe(true);
+    if (result.written) {
+      expect(result.narrative_preserved).toBe(true);
+    }
+    // Verify the stored values were written to ES, not the caller's hijack values
+    const writtenDoc = eventClient.bulkCreate.mock.calls[0][0][0] as Partial<SignificantEvent>;
+    expect(writtenDoc.title).toBe('EIS gateway — authorization endpoint HTTP errors');
+    expect(writtenDoc.symptom_hypothesis).toBe('EIS auth route returns >=400 for all clients.');
+  });
+
+  it('narrative guard: allows submitted narrative when a new related rule is introduced', async () => {
+    const eventId = 'event-narrative-updated';
+    const stored = makeStoredEventWithRules(eventId, ['rule-eis-auth']);
+    stored.title = 'EIS gateway — authorization endpoint HTTP errors';
+    stored.symptom_hypothesis = 'EIS auth route returns >=400 for all clients.';
+
+    const eventClient = makeEventClient({
+      findLatestByEventIds: jest.fn().mockResolvedValue(new Map([[eventId, stored]])),
+    });
+
+    const [result] = await eventsWriteBulkHandler({
+      eventClient,
+      inputs: [
+        makeSnapshotInput(eventId, {
+          signals: [
+            makeDetectionSignal('rule-eis-auth'), // existing
+            makeDetectionSignal('rule-sagemaker'), // NEW related rule
+          ],
+          title: 'EIS gateway — auth and SageMaker provider errors',
+          symptom_hypothesis: 'Both auth route and SageMaker provider return >=400.',
+        }),
+      ],
+    });
+
+    expect(result.written).toBe(true);
+    if (result.written) {
+      expect(result.narrative_preserved).toBeUndefined();
+    }
+    const writtenDoc = eventClient.bulkCreate.mock.calls[0][0][0] as Partial<SignificantEvent>;
+    expect(writtenDoc.title).toBe('EIS gateway — auth and SageMaker provider errors');
+    expect(writtenDoc.symptom_hypothesis).toBe(
+      'Both auth route and SageMaker provider return >=400.'
+    );
+  });
+});
