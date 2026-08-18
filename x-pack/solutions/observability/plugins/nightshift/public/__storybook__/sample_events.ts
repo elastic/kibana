@@ -122,6 +122,7 @@ export const checkoutDetectionSignal: SignalEntry = {
   stream_name: 'logs.checkout-api',
   description:
     'P95 latency for `checkout-api` rose from 420 ms to 2.8 s immediately after the latest deployment.',
+  verdict: 'confirms',
   evidence: {
     esql_query:
       'FROM logs.checkout-api\n| STATS p95_latency = PERCENTILE(transaction.duration, 95) BY DATE_TRUNC(5 minutes, @timestamp)',
