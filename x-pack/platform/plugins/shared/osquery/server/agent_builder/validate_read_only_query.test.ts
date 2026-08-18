@@ -166,6 +166,27 @@ describe('validateReadOnlyQuery', () => {
         )
       ).toMatch(/not read-only/i);
     });
+
+    // github-actions review #4961400745: SQLite needs whitespace only between
+    // two bareword tokens, so `JOIN"curl"` / ``JOIN`curl` `` tokenize fine and
+    // must not slip past extraction.
+    it.each([
+      [
+        'JOIN + double-quoted table with no whitespace',
+        'SELECT * FROM processes JOIN"curl"c ON 1=1',
+      ],
+      [
+        'JOIN + backtick-quoted table with no whitespace',
+        'SELECT * FROM processes JOIN`curl`c ON 1=1',
+      ],
+      [
+        'FROM + double-quoted table with no whitespace',
+        `SELECT * FROM"curl" WHERE url = 'http://169.254.169.254/'`,
+      ],
+      ['FROM + backtick-quoted table with no whitespace', 'SELECT * FROM`carves` WHERE carve = 1'],
+    ])('rejects a side-effect table when %s', (_desc, query) => {
+      expect(validateReadOnlyQuery(query, ALLOWED)).toMatch(/not read-only/i);
+    });
   });
 
   describe('multi-statement rejection (review finding)', () => {

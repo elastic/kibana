@@ -39,7 +39,7 @@ const extractTableRefs = (sql: string): string[] => {
   // parenthesized group and finds FROM/JOIN at every nesting level. Without
   // the `[()]` boundary a table immediately before `)` is dropped entirely.
   const clauseRe =
-    /\b(?:FROM|JOIN)\s+([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|JOIN|ON|USING)\b|[()]|$)/gi;
+    /\b(?:FROM|JOIN)(?:\s+|(?=[`"]))([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|JOIN|ON|USING)\b|[()]|$)/gi;
 
   for (const clause of sql.matchAll(clauseRe)) {
     for (const item of clause[1].split(',')) {

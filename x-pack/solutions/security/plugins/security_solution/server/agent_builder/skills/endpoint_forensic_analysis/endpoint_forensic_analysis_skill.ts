@@ -59,7 +59,9 @@ const discoverTelemetrySchema = z.object({
 const extractIocsSchema = z.object({
   hosts: z
     .array(z.string())
-    .describe('Named host.name values to extract IoCs from (at least one required)'),
+    .min(1)
+    .max(50)
+    .describe('Named host.name values to extract IoCs from (at least one required, max 50)'),
   time_window_hours: z
     .number()
     .int()

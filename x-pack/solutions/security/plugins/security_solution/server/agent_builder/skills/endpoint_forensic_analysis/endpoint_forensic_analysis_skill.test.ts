@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { z } from '@kbn/zod';
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import {
@@ -44,6 +45,26 @@ describe('endpointForensicAnalysisSkill', () => {
       'security.endpoint_forensic.discover_telemetry',
       'security.endpoint_forensic.extract_iocs',
     ]);
+  });
+
+  // github-actions review #4958365269: an empty `hosts` array built an
+  // `IN ()` ES|QL clause whose syntax error was swallowed, so a malformed call
+  // reported "no indicators found" instead of failing.
+  it('bounds extract_iocs hosts so an empty array cannot produce a false-negative', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    );
+
+    expect(extractIocs).toBeDefined();
+    expect(extractIocs).toHaveProperty('schema');
+    const schema = (extractIocs as { schema: z.ZodTypeAny }).schema;
+
+    expect(schema.safeParse({ hosts: [] }).success).toBe(false);
+    expect(schema.safeParse({ hosts: Array.from({ length: 51 }, (_, i) => `h${i}`) }).success).toBe(
+      false
+    );
+    expect(schema.safeParse({ hosts: ['WKSTN-RECV01'] }).success).toBe(true);
   });
 
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
