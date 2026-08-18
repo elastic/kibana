@@ -6,6 +6,7 @@
  */
 
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { WORKFLOW_SML_TYPE, WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
@@ -119,9 +120,7 @@ export const createWorkflowSmlType = (api: WorkflowsManagementApi): SmlTypeDefin
    * because workflows are stored in a dedicated Elasticsearch index, not as
    * Kibana saved objects.
    */
-  getPermissions: () => ({
-    kibana: { privileges: { name: `ai_index:${WORKFLOW_SML_TYPE}/get` } },
-  }),
+  getPermissions: () => kibanaPermissions({ kiType: WORKFLOW_SML_TYPE }),
 
   toAttachment: async (item, context) => {
     const workflow = await api.getWorkflow(item.origin_id ?? '', context.spaceId);

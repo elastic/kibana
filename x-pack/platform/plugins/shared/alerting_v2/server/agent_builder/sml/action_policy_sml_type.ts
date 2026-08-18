@@ -7,6 +7,7 @@
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   ACTION_POLICY_ATTACHMENT_TYPE,
   ACTION_POLICY_SML_TYPE,
@@ -105,11 +106,7 @@ export const createActionPolicySmlType = ({
    * privilege — the same gate the action policies API checks before
    * surfacing policy data.
    */
-  getPermissions: () => ({
-    kibana: {
-      privileges: { name: `ai_index:${ACTION_POLICY_SML_TYPE}/get` },
-    },
-  }),
+  getPermissions: () => kibanaPermissions({ kiType: ACTION_POLICY_SML_TYPE }),
 
   toAttachment: async (item, context) => {
     if (!(await getIsAlertingV2Enabled())) {

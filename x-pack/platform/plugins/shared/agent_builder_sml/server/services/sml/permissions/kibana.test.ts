@@ -8,18 +8,18 @@
 import { kibanaPermissions } from './kibana';
 
 describe('kibanaPermissions', () => {
-  it('returns the standard `ai_index:<type>/get` privilege', () => {
+  it('returns the standard `ai_index:<type>/read` privilege', () => {
     expect(kibanaPermissions({ kiType: 'lens' })).toEqual({
-      kibana: { privileges: { name: 'ai_index:lens/get' } },
+      kibana: { privileges: { name: 'ai_index:lens/read' } },
     });
   });
 
   it('builds the privilege from the supplied KI type id (dashboard vs lens vs custom)', () => {
     expect(kibanaPermissions({ kiType: 'dashboard' }).kibana.privileges).toEqual({
-      name: 'ai_index:dashboard/get',
+      name: 'ai_index:dashboard/read',
     });
     expect(kibanaPermissions({ kiType: 'custom-type' }).kibana.privileges).toEqual({
-      name: 'ai_index:custom-type/get',
+      name: 'ai_index:custom-type/read',
     });
   });
 

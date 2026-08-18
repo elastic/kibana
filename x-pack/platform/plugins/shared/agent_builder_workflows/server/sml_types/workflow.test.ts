@@ -10,7 +10,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 import { createWorkflowSmlType } from './workflow';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { workflowIndexName } from '@kbn/workflows-management-plugin/server/storage/workflow_storage';
 
@@ -46,9 +46,10 @@ const createSmlDocument = (overrides: Partial<SmlDocument> = {}): SmlDocument =>
   content: 'My Workflow\nA test workflow',
   created_at: '2025-01-01T00:00:00.000Z',
   updated_at: '2025-01-01T00:00:00.000Z',
-  spaces: ['default'],
   permissions: {
-    kibana: { privileges: [] },
+    kibana: {
+      privileges: [{ space: 'default', name: [`ai_index:${WORKFLOW_SML_TYPE}/read`], count: 1 }],
+    },
   },
   ingestion_method: 'crawled',
   ...overrides,
@@ -432,7 +433,7 @@ describe('workflowSmlType', () => {
   });
 
   describe('getPermissions', () => {
-    it('returns the api:workflowsManagement:read privilege', () => {
+    it('returns the registered ai_index read action for workflows', () => {
       const smlType = createWorkflowSmlType(createMockApi());
       const permissions = smlType.getPermissions!('workflow-abc', {
         esClient: createMockEsClient(),
@@ -440,7 +441,7 @@ describe('workflowSmlType', () => {
         logger: createMockLogger(),
       });
       expect(permissions).toEqual({
-        kibana: { privileges: [{ name: `api:${WorkflowsManagementApiActions.read}` }] },
+        kibana: { privileges: { name: `ai_index:${WORKFLOW_SML_TYPE}/read` } },
       });
     });
   });

@@ -6,6 +6,7 @@
  */
 
 import type { SmlEntry, SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import { type SignificantEvent } from '@kbn/significant-events-schema';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
@@ -105,9 +106,7 @@ export const createSignificantEventSmlType = ({
      * Significant events are gated by the Streams read API privilege — the
      * same gate the Streams API checks before surfacing event data.
      */
-    getPermissions: () => ({
-      kibana: { privileges: { name: `ai_index:${SIGNIFICANT_EVENT_SML_TYPE}/get` } },
-    }),
+    getPermissions: () => kibanaPermissions({ kiType: SIGNIFICANT_EVENT_SML_TYPE }),
 
     toAttachment: async (item, context) => {
       if (!item.origin_id) {

@@ -7,6 +7,7 @@
 
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
+import { kibanaPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
   RULE_SML_TYPE,
@@ -92,9 +93,7 @@ export const createRuleSmlType = ({
    * Rules are gated by the Alerting v2 rules read API privilege — the same
    * gate the rules API checks before surfacing rule data.
    */
-  getPermissions: () => ({
-    kibana: { privileges: { name: `ai_index:${RULE_SML_TYPE}/get` } },
-  }),
+  getPermissions: () => kibanaPermissions({ kiType: RULE_SML_TYPE }),
 
   toAttachment: async (item, context) => {
     if (!(await getIsAlertingV2Enabled())) {

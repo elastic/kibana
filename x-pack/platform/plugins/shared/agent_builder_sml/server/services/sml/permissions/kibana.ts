@@ -9,18 +9,14 @@ import type { SmlPermissionsInput } from '../types';
 
 /**
  * Returns the `SmlPermissionsInput` for an SML type.
- * Centralised so all SML types use the same `ai_index:<type>/get` privilege
+ * Centralised so all SML types use the same `ai_index:<type>/read` privilege
  * string and a future SML permission-model change only needs one update.
  */
-export const kibanaPermissions = ({
-  kiType,
-}: {
-  kiType: string;
-}): SmlPermissionsInput => {
+export const kibanaPermissions = ({ kiType }: { kiType: string }): SmlPermissionsInput => {
   if (!kiType) {
     throw new Error('kibanaPermissions: kiType is required');
   }
   return {
-    kibana: { privileges: { name: `ai_index:${kiType}/get` } },
+    kibana: { privileges: { name: `ai_index:${kiType}/read` } },
   };
 };

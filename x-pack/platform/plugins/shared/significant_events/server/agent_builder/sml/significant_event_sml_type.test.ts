@@ -119,7 +119,7 @@ describe('createSignificantEventSmlType', () => {
       logger: loggingSystemMock.createLogger(),
     });
     expect(permissions).toEqual({
-      kibana: { privileges: [{ name: 'api:read_stream' }] },
+      kibana: { privileges: { name: `ai_index:${SIGNIFICANT_EVENT_SML_TYPE}/read` } },
     });
   });
 
@@ -139,9 +139,16 @@ describe('createSignificantEventSmlType', () => {
           content: 'Payment outage',
           created_at: '2026-01-01T00:00:00.000Z',
           updated_at: '2026-01-01T00:00:00.000Z',
-          spaces: ['default'],
           permissions: {
-            kibana: { privileges: [{ name: 'api:read_stream' }] },
+            kibana: {
+              privileges: [
+                {
+                  space: 'default',
+                  name: [`ai_index:${SIGNIFICANT_EVENT_SML_TYPE}/read`],
+                  count: 1,
+                },
+              ],
+            },
           },
           ingestion_method: 'manual',
         },
