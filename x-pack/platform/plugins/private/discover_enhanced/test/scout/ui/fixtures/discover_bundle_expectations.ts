@@ -53,27 +53,29 @@ function isExpectedSourcePathPluginChunk(label: string, expectedPlugins: string[
   );
 }
 
+/**
+ * Returns true when all loaded labels are expected; throws with the offending
+ * labels otherwise.
+ */
 export function evaluateDiscoverBundlePluginAssertion(
   loadedPluginNames: string[],
   expectedPlugins: string[],
   sharedBundleLabels: readonly string[]
-): { ok: true } | { ok: false; detail: string } {
+): true {
   const allowed = new Set([...expectedPlugins, ...sharedBundleLabels]);
-  const subsetOk = loadedPluginNames.every(
-    (name) =>
-      allowed.has(name) ||
-      name.startsWith('lazy') ||
-      isExpectedSourcePathPluginChunk(name, expectedPlugins) ||
-      (isSourcePathPlatformPackageChunk(name) && allowed.has('shared-packages')) ||
-      (isSourcePathSolutionPackageChunk(name) && allowed.has('shared-solution-packages'))
-  );
-  if (subsetOk) {
-    return { ok: true };
+  const isAllowed = (name: string) =>
+    allowed.has(name) ||
+    name.startsWith('lazy') ||
+    isExpectedSourcePathPluginChunk(name, expectedPlugins) ||
+    (isSourcePathPlatformPackageChunk(name) && allowed.has('shared-packages')) ||
+    (isSourcePathSolutionPackageChunk(name) && allowed.has('shared-solution-packages'));
+  const unexpected = loadedPluginNames.filter((name) => !isAllowed(name));
+  if (unexpected.length > 0) {
+    throw new Error(
+      `Unexpected plugin bundles loaded on page: ${JSON.stringify(
+        unexpected
+      )}. Loaded=${JSON.stringify(loadedPluginNames)}, allowed=${JSON.stringify([...allowed])}`
+    );
   }
-  return {
-    ok: false,
-    detail: `Unexpected labels found. Loaded=${JSON.stringify(
-      loadedPluginNames
-    )}, allowed=${JSON.stringify([...allowed])}`,
-  };
+  return true;
 }

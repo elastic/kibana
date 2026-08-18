@@ -123,12 +123,13 @@ test.describe(
       ).toBeLessThan(BUNDLE_SIZE_LIMITS.bundleCount);
 
       const expectedPlugins = getExpectedDiscoverPluginIds(config.projectType);
-      const bundleAssertion = evaluateDiscoverBundlePluginAssertion(
+      // Throws with the offending bundle labels when unexpected plugins were loaded
+      const onlyExpectedBundlesLoaded = evaluateDiscoverBundlePluginAssertion(
         loadedPluginNames,
         expectedPlugins,
         SHARED_BUNDLE_LABELS
       );
-      expect(bundleAssertion, 'Unexpected plugins were loaded on page').toStrictEqual({ ok: true });
+      expect(onlyExpectedBundlesLoaded).toBe(true);
     });
 
     test('measures Performance Metrics before and after Discover load', async ({
