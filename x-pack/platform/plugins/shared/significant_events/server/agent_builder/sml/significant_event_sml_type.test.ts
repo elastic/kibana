@@ -62,7 +62,7 @@ describe('createSignificantEventSmlType', () => {
     );
   });
 
-  it('equals SIGNIFICANT_EVENT_SML_TYPE', () => {
+  it('equals SIGNIFICANT_EVENT_KI_TYPE', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
     });

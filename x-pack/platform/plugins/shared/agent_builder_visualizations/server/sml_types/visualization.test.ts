@@ -42,7 +42,7 @@ describe('visualizationSmlType', () => {
   });
 
   describe('id', () => {
-    it('equals VISUALIZATION_SML_TYPE', () => {
+    it('equals VISUALIZATION_KI_TYPE', () => {
       expect(visualizationSmlType.id).toBe(VISUALIZATION_KI_TYPE);
     });
   });

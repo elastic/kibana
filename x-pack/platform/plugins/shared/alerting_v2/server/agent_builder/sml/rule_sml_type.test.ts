@@ -92,7 +92,7 @@ describe('createRuleSmlType', () => {
     });
 
   describe('id and fetchFrequency', () => {
-    it('uses the shared RULE_SML_TYPE constant', () => {
+    it('uses the shared RULE_KI_TYPE constant', () => {
       expect(buildDefinition().id).toBe(RULE_KI_TYPE);
     });
 

@@ -13,12 +13,15 @@
  * - the `aiIndex: { read: [...] }` entry of the feature privilege that grants read access to that content
  *
  * They live here so both sides can import the same constant. Neither side can import from the other: the
- * plugin registering the SML type and the plugin declaring the privilege sit on opposite ends of a plugin
+ * plugin registering the KI type and the plugin declaring the privilege sit on opposite ends of a plugin
  * dependency chain, so an import either way would be circular.
  *
- * An id also ends up in the generated privilege action (`ai_index:<kiType>/read`) and on the documents
- * already in the AI Index, so renaming one means updating the serverless authorization expectations and
- * waiting for the next crawl to re-index.
+ * An id also becomes part of the generated privilege action (`ai_index:<kiType>/read`) and is stamped on every
+ * document the crawler writes (`type_id`, plus the `<kiType>://<origin_id>` origin URI). Renaming an id means
+ * new documents will be added by the crawler, but the old documents will remain in the index until they are manually deleted.
+ * User roles need no changes. A role grants a feature privilege by name (e.g. `feature_dashboard.all`), never an
+ * individual action string, and Kibana rebuilds the action list behind each name from the feature registration on
+ * startup — so roles pick up the renamed action on their own.
  */
 
 export const VISUALIZATION_KI_TYPE = 'visualization' as const;
