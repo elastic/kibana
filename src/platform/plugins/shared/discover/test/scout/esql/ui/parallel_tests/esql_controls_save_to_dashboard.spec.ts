@@ -12,21 +12,10 @@
  * carries the control and its current selection across, and that adding a new
  * Discover panel whose control matches an existing dashboard control updates that
  * control instead of duplicating it.
- *
- * Migrated from `src/platform/test/functional/apps/discover/esql_4/_esql_controls.ts`
- * (`when saving a Discover table with ES|QL controls to a dashboard` and
- * `when saving a new by-value Discover session panel back to a dashboard with
- * matching controls` groups).
  */
 
 import { expect } from '@kbn/scout/ui';
-import {
-  createEsqlControl,
-  getOnlyControlId,
-  loadSavedObjectIdFromArchive,
-  spaceTest,
-  testData,
-} from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 const INITIAL_SELECTION = 'AE';
 const UPDATED_SELECTION = 'CN';
@@ -40,11 +29,18 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
-      discoverSessionId = await loadSavedObjectIdFromArchive(
-        discoverScoutSpace,
-        testData.SESSION_WITH_CONTROL_KBN_ARCHIVE,
-        'search'
+      // Imported with `createNewCopies`, so the id is read back from the response rather
+      // than taken from the fixture file.
+      const imported = await discoverScoutSpace.savedObjects.load(
+        testData.SESSION_WITH_CONTROL_KBN_ARCHIVE
       );
+      const session = imported.find(({ type }) => type === 'search');
+      if (!session) {
+        throw new Error(
+          `No Discover session found in ${testData.SESSION_WITH_CONTROL_KBN_ARCHIVE}`
+        );
+      }
+      discoverSessionId = session.id;
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {
@@ -66,7 +62,7 @@ spaceTest.describe(
         await pageObjects.discover.goto({ queryMode: 'esql', savedSearchId: discoverSessionId });
         await pageObjects.discover.waitUntilTabIsLoaded();
 
-        const discoverControlId = await getOnlyControlId(page);
+        const discoverControlId = await pageObjects.dashboard.getOnlyControlId();
         await expect(
           pageObjects.discover.controls.getSelectionsLocator(discoverControlId)
         ).toHaveText(INITIAL_SELECTION);
@@ -93,20 +89,17 @@ spaceTest.describe(
 
         await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
         await expect(
-          pageObjects.dashboard.getOptionsListSelectionsLocator(await getOnlyControlId(page))
+          pageObjects.dashboard.getOptionsListSelectionsLocator(
+            await pageObjects.dashboard.getOnlyDashboardControlId()
+          )
         ).toHaveText(UPDATED_SELECTION);
       }
     );
 
-    // The dashboard is built through the UI and left unsaved on purpose, so that unlinking
-    // creates the control in-session and it is registered before the panel is added.
-    // Reusing it depends on `AddDiscoverSessionPanelAction` snapshotting the dashboard's
-    // controls via `getAllEsqlControls()`, which reads only the container children present
-    // at that moment. A control still mounting is missing from the snapshot, and an empty
-    // snapshot is truthy, so it passes the `if (!dashboardControlGroupState)` guard in
-    // `reconcileControlGroupState` with no variable to match and the Discover-side panel id
-    // survives as a second control. Loading an already-saved dashboard here reintroduces
-    // that race (https://github.com/elastic/kibana/issues/265636).
+    // The dashboard is built through the UI and left unsaved on purpose: unlinking creates
+    // the control in-session, so it is registered by the time the panel is added. Starting
+    // from an already-saved dashboard instead makes this duplicate the control intermittently
+    // (https://github.com/elastic/kibana/issues/265636).
     spaceTest(
       'should update the existing dashboard control instead of creating a duplicate',
       async ({ page, pageObjects }) => {
@@ -116,7 +109,7 @@ spaceTest.describe(
         await pageObjects.dashboard.unlinkFromLibrary(testData.SESSION_WITH_CONTROL_TITLE);
         await pageObjects.dashboard.waitForRenderComplete();
 
-        const initialDashboardControlId = await getOnlyControlId(page);
+        const initialDashboardControlId = await pageObjects.dashboard.getOnlyDashboardControlId();
         await expect(
           pageObjects.dashboard.getOptionsListSelectionsLocator(initialDashboardControlId)
         ).toHaveText(INITIAL_SELECTION);
@@ -131,13 +124,13 @@ spaceTest.describe(
         await pageObjects.discover.selectTextBaseLang();
         await pageObjects.discover.waitUntilTabIsLoaded();
 
-        await createEsqlControl(page, 'FROM logstash-* | WHERE geo.dest == ', {
+        await pageObjects.discover.createEsqlControl('FROM logstash-* | WHERE geo.dest == ', {
           variableName: '?geo_dest',
           label: 'Updated destination',
         });
         await pageObjects.discover.waitUntilTabIsLoaded();
 
-        const discoverControlId = await getOnlyControlId(page);
+        const discoverControlId = await pageObjects.dashboard.getOnlyControlId();
         await pageObjects.dashboard.optionsListOpenPopover(discoverControlId);
         await pageObjects.dashboard.optionsListPopoverSelectOption(UPDATED_SELECTION);
         await pageObjects.dashboard.optionsListEnsurePopoverIsClosed();
@@ -151,7 +144,7 @@ spaceTest.describe(
         await pageObjects.dashboard.waitForRenderComplete();
 
         // The matching control is reused, not duplicated.
-        const updatedDashboardControlId = await getOnlyControlId(page);
+        const updatedDashboardControlId = await pageObjects.dashboard.getOnlyDashboardControlId();
         expect(updatedDashboardControlId).toBe(initialDashboardControlId);
         await expect(
           pageObjects.dashboard.getOptionsListSelectionsLocator(updatedDashboardControlId)

@@ -574,6 +574,21 @@ export class DashboardApp {
   }
 
   /**
+   * Asserts the dashboard renders exactly one control and returns its id.
+   */
+  async getOnlyDashboardControlId() {
+    const controls = this.getDashboardControlsLocator();
+    await expect(controls).toHaveCount(1);
+
+    const controlId = await controls.getAttribute('data-control-id');
+    if (!controlId) {
+      throw new Error('Dashboard control is rendered but has an empty data-control-id');
+    }
+
+    return controlId;
+  }
+
+  /**
    * Gets the count of dashboard controls
    */
   async getControlCount(): Promise<number> {

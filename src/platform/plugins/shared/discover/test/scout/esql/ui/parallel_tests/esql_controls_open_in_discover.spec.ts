@@ -11,14 +11,11 @@
  * Verifies that "Open in Discover" on a dashboard ES|QL panel carries the
  * dashboard's ES|QL control (and its selection) over into the Discover tab it
  * opens.
- *
- * Migrated from `src/platform/test/functional/apps/discover/esql_4/_esql_controls.ts`
- * (`when adding an ES|QL panel with controls in Dashboard and exploring it in Discover` group).
  */
 
 import { DiscoverApp, extendPlaywrightPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import { loadSavedObjectIdFromArchive, spaceTest, testData } from '../fixtures';
+import { spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Discover ES|QL controls - open dashboard panel in Discover',
@@ -28,11 +25,16 @@ spaceTest.describe(
 
     spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
       await discoverScoutSpace.setupDiscoverDefaults();
-      dashboardId = await loadSavedObjectIdFromArchive(
-        discoverScoutSpace,
-        testData.ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE,
-        'dashboard'
+      // Imported with `createNewCopies`, so the id is read back from the response rather
+      // than taken from the fixture file.
+      const imported = await discoverScoutSpace.savedObjects.load(
+        testData.ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE
       );
+      const dashboard = imported.find(({ type }) => type === 'dashboard');
+      if (!dashboard) {
+        throw new Error(`No dashboard found in ${testData.ESQL_CONTROLS_DASHBOARD_KBN_ARCHIVE}`);
+      }
+      dashboardId = dashboard.id;
     });
 
     spaceTest.beforeEach(async ({ browserAuth }) => {

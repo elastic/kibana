@@ -578,6 +578,58 @@ export class DiscoverApp {
   }
 
   /**
+   * Creates an ES|QL control from the editor: types a query ending in a variable position,
+   * picks "Create control" from the suggestion widget and saves the flyout. Returns once
+   * the control group is rendered.
+   */
+  async createEsqlControl(
+    query: string,
+    {
+      variableName,
+      label,
+      values,
+    }: { variableName?: string; label?: string; values?: string[] } = {}
+  ) {
+    // Monaco registers its text model only once the editor has mounted, and the ES|QL
+    // editor can still be mounting after the tab reports loaded, for instance right after
+    // adding a new Discover panel. Setting a value or triggering suggestions before then
+    // has no model to act on.
+    await this.codeEditor.waitCodeEditorReady('ESQLEditor');
+    await this.codeEditor.setCodeEditorValue(query);
+    await this.codeEditor.triggerSuggest(query);
+
+    const suggestionWidget = this.codeEditor.getCodeEditorSuggestWidget();
+    await suggestionWidget.waitFor({ state: 'visible' });
+    await suggestionWidget.locator('.monaco-list-row', { hasText: 'Create control' }).click();
+
+    const flyout = this.page.testSubj.locator('create_esql_control_flyout');
+    await flyout.waitFor({ state: 'visible' });
+
+    if (variableName !== undefined) {
+      await this.page.testSubj.fill('esqlVariableName', variableName);
+    }
+    if (label !== undefined) {
+      await this.page.testSubj.fill('esqlControlLabel', label);
+    }
+    if (values) {
+      const valuesComboBox = this.page.components.comboBox('esqlValuesOptions');
+      for (const value of values) {
+        await valuesComboBox.setCustomSelectedOptions([value]);
+      }
+    }
+
+    const saveButton = this.page.testSubj.locator('saveEsqlControlsFlyoutButton');
+    // Save stays disabled until `available_options` is populated (see `formIsInvalid` in
+    // esql/public/triggers/esql_controls/control_flyout/index.tsx), so this waits on the
+    // control's own ES|QL query rather than on rendering. Query latency, not the default
+    // assertion timeout, sets the budget.
+    await expect(saveButton).toBeEnabled({ timeout: 30_000 });
+    await saveButton.click();
+    await flyout.waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
+  }
+
+  /**
    * Clicks "Save and return" in the top nav, available when Discover is opened as
    * the editor for a by-value dashboard panel. Transfers the panel state straight
    * back to the dashboard without opening a save modal.
