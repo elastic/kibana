@@ -33,8 +33,10 @@ import type { FormBasedPersistedState, TextBasedPersistedState } from '../dataso
  *   loosening (`layers` optional, layer entries `Partial`) reflects that
  *   persisted documents may predate the strict types (e.g. legacy form-based
  *   docs with an empty `textBased: {}` stub), which the helpers guard
- *   against at runtime. The `Record<string, unknown>` intersection keeps
- *   `LensDocument`'s untyped `datasourceStates` assignable.
+ *   against at runtime. `datasourceStates` itself stays `Record<string,
+ *   unknown>` so both `LensDocument`'s untyped shape and the strict
+ *   persisted shapes are assignable; the helpers narrow to `LooseLayers`
+ *   views internally (single, documented cast).
  *
  * Assignability of the real types to this shape is enforced implicitly by
  * the call sites (e.g. Lens plugin, `kbn-unified-histogram`), which pass
@@ -46,15 +48,24 @@ interface LooseLayers<T extends { layers: Record<string, unknown> }> {
 
 export interface MinimalLensState {
   query?: Query | AggregateQuery;
-  datasourceStates?: {
-    formBased?: LooseLayers<FormBasedPersistedState>;
-    textBased?: LooseLayers<TextBasedPersistedState>;
-  } & Record<string, unknown>;
+  datasourceStates?: Record<string, unknown>;
 }
 
 export interface MinimalLensAttributes {
   state?: MinimalLensState;
 }
+
+interface LooseDatasourceStates {
+  formBased?: LooseLayers<FormBasedPersistedState>;
+  textBased?: LooseLayers<TextBasedPersistedState>;
+}
+
+// single narrowing point from the duck-typed `Record<string, unknown>` to the
+// loosened persisted layer shapes; every access below runtime-guards anyway
+const viewDatasourceStates = (
+  attributes: MinimalLensAttributes | undefined
+): LooseDatasourceStates | undefined =>
+  attributes?.state?.datasourceStates as LooseDatasourceStates | undefined;
 
 /**
  * Structural check for text-based (ES|QL) documents: based on the `textBased`
@@ -65,7 +76,7 @@ export interface MinimalLensAttributes {
  * any form-based layers (e.g. a freshly created ES|QL document).
  */
 export const isTextBasedAttributes = (attributes: MinimalLensAttributes | undefined): boolean => {
-  const datasourceStates = attributes?.state?.datasourceStates;
+  const datasourceStates = viewDatasourceStates(attributes);
   if (!datasourceStates || !('textBased' in datasourceStates)) {
     return false;
   }
@@ -81,7 +92,7 @@ export const isTextBasedAttributes = (attributes: MinimalLensAttributes | undefi
 export const getTextBasedLayerQueries = (
   attributes: MinimalLensAttributes | undefined
 ): AggregateQuery[] => {
-  const layers = attributes?.state?.datasourceStates?.textBased?.layers;
+  const layers = viewDatasourceStates(attributes)?.textBased?.layers;
   if (!layers) {
     return [];
   }
@@ -103,6 +114,36 @@ export const getRepresentativeQuery = (
   // the slot fallback covers form-based documents (chart-scoped filter) and
   // legacy text-based documents that only carry the aggregate slot copy
   return firstLayerQuery ?? attributes?.state?.query;
+};
+
+/**
+ * Compatibility write for mixed-version windows (serverless rollback,
+ * rolling Cloud upgrades): older Kibana versions detect ES|QL mode via the
+ * aggregate value in `state.query`, so saves mirror the first authoritative
+ * layer query back into the slot. Newer readers ignore the mirror (see
+ * `getChartScopedFilterQuery`).
+ *
+ * The mirror is only written when the slot is empty (undefined, an empty
+ * KQL/Lucene default, or an existing aggregate copy): a non-empty
+ * KQL/Lucene value is a chart-scoped filter of a mixed form+text document
+ * and must never be overwritten.
+ *
+ * @deprecated remove (along with its call sites) once the minimum
+ * version compatible with this deployment ships structural readers — i.e.
+ * one release after the slot removal lands.
+ */
+export const withLegacyAggregateQuerySlot = <T extends MinimalLensAttributes>(attributes: T): T => {
+  const [firstLayerQuery] = getTextBasedLayerQueries(attributes);
+  if (!firstLayerQuery || !attributes.state) {
+    return attributes;
+  }
+  const slot = attributes.state.query;
+  const isSlotEmpty =
+    !slot || isOfAggregateQueryType(slot) || ('query' in slot && slot.query === '');
+  if (!isSlotEmpty || slot === firstLayerQuery) {
+    return attributes;
+  }
+  return { ...attributes, state: { ...attributes.state, query: firstLayerQuery } };
 };
 
 /**

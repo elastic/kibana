@@ -12,6 +12,7 @@ import {
   getTextBasedLayerQueries,
   getRepresentativeQuery,
   getChartScopedFilterQuery,
+  withLegacyAggregateQuerySlot,
   type MinimalLensAttributes,
 } from './lens_attributes_queries';
 
@@ -135,5 +136,56 @@ describe('getChartScopedFilterQuery', () => {
 
   it('returns undefined for undefined', () => {
     expect(getChartScopedFilterQuery(undefined)).toBeUndefined();
+  });
+});
+
+describe('withLegacyAggregateQuerySlot', () => {
+  it('mirrors the first layer query into an undefined slot', () => {
+    const result = withLegacyAggregateQuerySlot(textBasedDoc);
+    expect(result.state?.query).toEqual(esqlQuery);
+  });
+
+  it('mirrors the first layer query into an empty KQL default slot', () => {
+    const doc: MinimalLensAttributes = {
+      state: {
+        ...textBasedDoc.state,
+        query: { query: '', language: 'kuery' },
+      },
+    };
+    expect(withLegacyAggregateQuerySlot(doc).state?.query).toEqual(esqlQuery);
+  });
+
+  it('refreshes a stale aggregate slot copy', () => {
+    const result = withLegacyAggregateQuerySlot(legacyDualWrittenDoc);
+    expect(result.state?.query).toEqual(esqlQuery);
+  });
+
+  it('never overwrites a chart-scoped KQL filter of a mixed document', () => {
+    const mixedDoc: MinimalLensAttributes = {
+      state: {
+        query: kqlQuery,
+        datasourceStates: {
+          formBased: { layers: { layerA: {} } },
+          textBased: { layers: { layer1: { query: esqlQuery } } },
+        },
+      },
+    };
+    expect(withLegacyAggregateQuerySlot(mixedDoc)).toBe(mixedDoc);
+  });
+
+  it('returns form-based documents unchanged', () => {
+    expect(withLegacyAggregateQuerySlot(formBasedDoc)).toBe(formBasedDoc);
+  });
+
+  it('returns documents without layer queries unchanged', () => {
+    expect(withLegacyAggregateQuerySlot(legacySlotOnlyDoc)).toBe(legacySlotOnlyDoc);
+  });
+
+  it('does not mutate the input', () => {
+    const doc: MinimalLensAttributes = {
+      state: { datasourceStates: { textBased: { layers: { layer1: { query: esqlQuery } } } } },
+    };
+    withLegacyAggregateQuerySlot(doc);
+    expect(doc.state?.query).toBeUndefined();
   });
 });

@@ -442,5 +442,6 @@ export {
   getTextBasedLayerQueries,
   getRepresentativeQuery,
   getChartScopedFilterQuery,
+  withLegacyAggregateQuerySlot,
 } from './esql/lens_attributes_queries';
 export type { MinimalLensAttributes, MinimalLensState } from './esql/lens_attributes_queries';
