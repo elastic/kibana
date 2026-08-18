@@ -8,7 +8,9 @@ This page explains how logging works in Scout: the `log` [fixture](./fixtures.md
 
 ## The `log` fixture [scout-logging-fixture]
 
-Scout exposes a worker-scoped `log` fixture backed by `ScoutLogger`, a thin wrapper around `@kbn/tooling-log`'s `ToolingLog`. Each worker gets its own logger instance tagged with a context string, and messages are written to stdout. This is logging for the **test process itself** — separate from the server-side logs of the systems under test (Kibana, Elasticsearch, and so on), covered later on this page.
+`log` is a [fixture](./fixtures.md) available in every Scout test, for logging from the **test process itself** — separate from the server-side logs of the systems under test (Kibana, Elasticsearch, and so on), covered later on this page.
+
+Standard levels are available: `error`, `warning`, `success`, `info`, `debug`, and `verbose`. Prefer `debug` for ad hoc diagnostic logging in your test — avoid adding `info`-level logs too liberally, since `info` is the default level and prints on every run.
 
 Use it inside a test or fixture like any other fixture:
 
@@ -18,11 +20,11 @@ test('does the thing', async ({ log }) => {
 });
 ```
 
-Standard levels are available: `error`, `warning`, `success`, `info`, `debug`, and `verbose`. Prefer `debug` for ad hoc diagnostic logging in your test — avoid adding `info`-level logs too liberally, since `info` is the default level and prints on every run.
+You'll see this output in your local console, in the Buildkite job log for CI runs, and in the Scout HTML report (attached to each test).
 
 Scout's own services and fixtures log their setup at the `debug` level (for example, `[serviceName] loaded`), so if you want to see fixture wiring and lifecycle messages, run with `debug` (see below).
 
-You'll see this output in your local console, in the Buildkite job log for CI runs, and in the Scout HTML report (attached to each test).
+Under the hood, `log` is backed by `ScoutLogger`, a thin wrapper around `@kbn/tooling-log`'s `ToolingLog`. Each worker gets its own logger instance tagged with a context string, and messages are written to stdout.
 
 ## Controlling verbosity: `SCOUT_LOG_LEVEL` [scout-logging-level]
 
