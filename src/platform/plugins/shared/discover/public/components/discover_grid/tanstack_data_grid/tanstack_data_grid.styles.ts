@@ -57,6 +57,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     position: 'sticky',
     top: 0,
     zIndex: 2,
+    width: '100%',
+    minWidth: 0,
     backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     borderBottom: `2px solid ${euiTheme.colors.borderBaseFormsControl}`,
   }),
@@ -147,6 +149,8 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   row: css({
     display: 'flex',
     height: '100%',
+    width: '100%',
+    minWidth: 0,
     borderBottom: euiTheme.border.thin,
     boxSizing: 'border-box',
     '&:hover': {
@@ -176,11 +180,13 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     minWidth: 0,
+    width: '100%',
     flex: 1,
     display: '-webkit-box',
     WebkitBoxOrient: 'vertical',
     WebkitLineClamp: 'var(--tsg-body-max-lines, 1)',
     wordBreak: 'break-word',
+    whiteSpace: 'normal',
   }),
 
   controlCell: css({
@@ -201,12 +207,40 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   }),
 
   summaryCell: css({
+    // Flex item of the row: take remaining width without overflowing it.
     flex: 1,
+    width: 0,
+    minWidth: 0,
     padding: 'var(--tsg-cell-padding-v, 4px) var(--tsg-cell-padding-h, 8px)',
     overflow: 'hidden',
-    minWidth: 0,
     lineHeight: 1.5,
     fontSize: 'var(--tsg-font-size, 14px)',
+    boxSizing: 'border-box',
+    // Match EuiDataGrid lineCount cells: wrap at the cell width, then clamp to body lines.
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
+    whiteSpace: 'pre-wrap',
+    // The description list must stay `display: block` so inline title/value pairs wrap.
+    // Do not put -webkit-box on the <dl> — that turns dt/dd into flex items and forces a single line.
+    '.unifiedDataTable__descriptionList': {
+      display: 'block',
+      margin: 0,
+      width: '100%',
+      minWidth: 0,
+      whiteSpace: 'normal',
+    },
+    '.unifiedDataTable__cellValue': {
+      fontFamily: euiTheme.font.familyCode,
+    },
+  }),
+
+  summaryCellContent: css({
+    display: '-webkit-box',
+    WebkitBoxOrient: 'vertical',
+    WebkitLineClamp: 'var(--tsg-body-max-lines, 1)',
+    overflow: 'hidden',
+    width: '100%',
+    minWidth: 0,
   }),
 
   timestampCell: css({

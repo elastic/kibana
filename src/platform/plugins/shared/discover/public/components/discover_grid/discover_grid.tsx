@@ -163,6 +163,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
           expandedDoc={props.expandedDoc}
           setExpandedDoc={props.setExpandedDoc}
           renderDocumentView={props.renderDocumentView}
+          setRenderDocumentViewMeta={props.setRenderDocumentViewMeta}
           loadingState={props.loadingState}
           onFilter={props.onFilter}
           getRowIndicator={getRowIndicator}

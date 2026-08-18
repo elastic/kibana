@@ -45,14 +45,16 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils';
-import { getShouldShowFieldHandler, formatFieldValue } from '@kbn/discover-utils';
+import { getShouldShowFieldHandler, formatFieldValueText } from '@kbn/discover-utils';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import {
   SourceDocument,
   DataLoadingState,
+  getDisplayedColumns,
   type UnifiedDataTableProps,
   type SortOrder,
   type DataGridDensity,
+  type RenderDocumentViewMeta,
 } from '@kbn/unified-data-table';
 import type { AggregateQuery } from '@kbn/es-query';
 import {
@@ -95,6 +97,7 @@ export interface TanStackDataGridProps {
   expandedDoc?: DataTableRecord;
   setExpandedDoc?: UnifiedDataTableProps['setExpandedDoc'];
   renderDocumentView?: UnifiedDataTableProps['renderDocumentView'];
+  setRenderDocumentViewMeta?: UnifiedDataTableProps['setRenderDocumentViewMeta'];
 
   loadingState?: DataLoadingState;
   onFilter?: UnifiedDataTableProps['onFilter'];
@@ -653,7 +656,7 @@ const VirtualRow = React.memo(
     return (
       <div
         data-index={virtualRow.index}
-        style={{ height: rowHeight }}
+        style={{ height: rowHeight, width: '100%' }}
         role="row"
         aria-rowindex={rowIndex + 2}
         aria-selected={isSelected}
@@ -748,7 +751,9 @@ const VirtualCell = React.memo(
             }
           }}
         >
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          <div css={styles.summaryCellContent}>
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </div>
         </div>
       );
     }
@@ -874,6 +879,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     expandedDoc,
     setExpandedDoc,
     renderDocumentView,
+    setRenderDocumentViewMeta,
     loadingState,
     onFilter,
     getRowIndicator,
@@ -1134,6 +1140,41 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const toggleExpandDocRef = useRef(toggleExpandDoc);
     toggleExpandDocRef.current = toggleExpandDoc;
 
+    const displayedColumns = useMemo(
+      () => getDisplayedColumns(columns, dataView),
+      [columns, dataView]
+    );
+
+    // When the document view is rendered externally, we need to provide some metadata
+    // to the consumer to allow them to properly render the doc viewer component
+    const prevRenderDocumentViewMeta = useRef<RenderDocumentViewMeta>();
+
+    useEffect(() => {
+      if (renderDocumentView !== 'external' || !setRenderDocumentViewMeta) {
+        prevRenderDocumentViewMeta.current = undefined;
+        return;
+      }
+
+      if (!expandedDoc) {
+        prevRenderDocumentViewMeta.current = undefined;
+        setRenderDocumentViewMeta(undefined);
+        return;
+      }
+
+      const prevMeta = prevRenderDocumentViewMeta.current;
+      const metaChanged =
+        prevMeta?.displayedColumns !== displayedColumns || prevMeta?.displayedRows !== rows;
+
+      if (metaChanged) {
+        const nextMeta: RenderDocumentViewMeta = {
+          displayedColumns,
+          displayedRows: rows,
+        };
+        setRenderDocumentViewMeta(nextMeta);
+        prevRenderDocumentViewMeta.current = nextMeta;
+      }
+    }, [displayedColumns, rows, expandedDoc, renderDocumentView, setRenderDocumentViewMeta]);
+
     const onFilterRef = useRef(onFilter);
     onFilterRef.current = onFilter;
 
@@ -1322,7 +1363,8 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         defs.push({
           id: SOURCE_COLUMN_ID,
           header: 'Summary',
-          size: 99999,
+          size: 1,
+          minSize: 0,
           enableResizing: false,
           enableSorting: false,
           meta: { isSummary: true },
@@ -1349,7 +1391,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             minSize: MIN_COL_WIDTH,
             enableSorting: isSortEnabled,
             meta: { isTimestamp: isTimeField, fieldName: colId },
-            cell: function DataCell({ getValue, row }) {
+            cell: function DataCell({ getValue }) {
               const val = getValue();
               let formatted: string;
               if (isTimeField) {
@@ -1357,14 +1399,12 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
               } else {
                 const dvField = dataView.getFieldByName(colId);
                 if (dvField && fieldFormats) {
-                  formatted = formatFieldValue(
-                    val,
-                    row.original.raw,
+                  formatted = formatFieldValueText({
+                    value: val,
                     fieldFormats,
                     dataView,
-                    dvField,
-                    'text'
-                  );
+                    field: dvField,
+                  });
                 } else {
                   formatted = formatCellValue(val);
                 }
@@ -1430,12 +1470,17 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     });
 
     const tableRows = table.getRowModel().rows;
-    const bodyRowHeight = useMemo(() => {
-      if (bodyMaxLines <= 1 || bodyMaxLines === 0) return densityCfg.rowHeight;
+    const baseRowHeight = useMemo(() => {
+      // Auto / unlimited: keep a density-based estimate so the virtualizer has a size
+      if (bodyMaxLines <= 0) {
+        return isSummaryMode ? densityCfg.summaryRowHeight : densityCfg.rowHeight;
+      }
+      if (bodyMaxLines === 1) {
+        return densityCfg.rowHeight;
+      }
       const lineH = densityCfg.fontSize * 1.5;
       return Math.round(densityCfg.cellPaddingV * 2 + lineH * bodyMaxLines);
-    }, [bodyMaxLines, densityCfg]);
-    const baseRowHeight = isSummaryMode ? densityCfg.summaryRowHeight : bodyRowHeight;
+    }, [bodyMaxLines, densityCfg, isSummaryMode]);
     const totalColCount = table.getVisibleLeafColumns().length;
 
     const getRowHeight = useCallback((): number => {
@@ -1562,7 +1607,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const canRenderDocumentView = Boolean(setExpandedDoc && renderDocumentView);
     const isLoading = loadingState === DataLoadingState.loading;
     const isEmpty = !isLoading && rows.length === 0;
-    const totalWidth = table.getTotalSize();
+    const totalWidth = isSummaryMode ? '100%' : table.getTotalSize();
 
     const densityVars = useMemo(
       () =>
@@ -1571,7 +1616,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           '--tsg-cell-padding-v': `${densityCfg.cellPaddingV}px`,
           '--tsg-cell-padding-h': `${densityCfg.cellPaddingH}px`,
           '--tsg-header-max-lines': String(headerMaxLines),
-          '--tsg-body-max-lines': bodyMaxLines === 0 ? 'none' : String(bodyMaxLines),
+          '--tsg-body-max-lines': bodyMaxLines <= 0 ? 'none' : String(bodyMaxLines),
         } as React.CSSProperties),
       [densityCfg, headerMaxLines, bodyMaxLines]
     );
@@ -1988,11 +2033,13 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             </div>
           )}
 
-          {canRenderDocumentView && currentExpandedDoc && (
-            <span className="dscTable__flyout">
-              {renderDocumentView!(currentExpandedDoc, rows, columns, setExpandedDoc!, columnsMeta)}
-            </span>
-          )}
+          {canRenderDocumentView &&
+            currentExpandedDoc &&
+            typeof renderDocumentView === 'function' && (
+              <span className="dscTable__flyout">
+                {renderDocumentView(currentExpandedDoc, rows, displayedColumns, columnsMeta)}
+              </span>
+            )}
         </div>
 
         {/* Cell popover */}
