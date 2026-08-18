@@ -68,7 +68,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
     this.logger.debug(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
     const schemaDropped = await this.checkSchemaVersionOrDrop({ esClient, storage });
-    const indexRebuilt = schemaDropped || (await this.applyMappingsOrRebuild({ storage, esClient }));
+    const indexRebuilt =
+      schemaDropped || (await this.applyMappingsOrRebuild({ storage, esClient }));
 
     const integrityResetNeeded =
       indexRebuilt ||
@@ -179,7 +180,9 @@ export class SmlCrawlerImpl implements SmlCrawler {
     }
 
     this.logger.warn(
-      `SML crawler: SML schema version mismatch (stored: ${storedVersion ?? 'none'}, expected: ${SML_SCHEMA_VERSION}) — dropping index '${smlIndexName}' and forcing full re-crawl`
+      `SML crawler: SML schema version mismatch (stored: ${
+        storedVersion ?? 'none'
+      }, expected: ${SML_SCHEMA_VERSION}) — dropping index '${smlIndexName}' and forcing full re-crawl`
     );
 
     try {
@@ -213,7 +216,9 @@ export class SmlCrawlerImpl implements SmlCrawler {
         } catch (stampError) {
           if (!isResponseError(stampError) || stampError.statusCode !== 404) {
             this.logger.warn(
-              `SML crawler: failed to stamp schema version on index '${smlIndexName}': ${(stampError as Error).message}`
+              `SML crawler: failed to stamp schema version on index '${smlIndexName}': ${
+                (stampError as Error).message
+              }`
             );
           }
         }
