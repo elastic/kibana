@@ -10,8 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { IS_INGEST_HUB_ONBOARDING_ENABLED } from '../../../common/feature_flags';
 import { FleetCardsProvider } from './fleet_cards_provider';
 import {
@@ -97,9 +96,7 @@ const createWrapper = (services: ReturnType<typeof buildServices> = buildService
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>
-        <MemoryRouter initialEntries={['/']}>
-          <CompatRouter>{children}</CompatRouter>
-        </MemoryRouter>
+        <MemoryRouter initialEntries={['/']}>{children}</MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
   );
@@ -113,9 +110,7 @@ const createProviderWrapper = () => {
     <I18nProvider>
       <KibanaContextProvider services={buildServices()}>
         <MemoryRouter initialEntries={['/']}>
-          <CompatRouter>
-            <FleetCardsProvider enabled>{children}</FleetCardsProvider>
-          </CompatRouter>
+          <FleetCardsProvider enabled>{children}</FleetCardsProvider>
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>

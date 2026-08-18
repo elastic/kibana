@@ -15,7 +15,7 @@ import userEvent from '@testing-library/user-event';
 import { matchers } from '@emotion/jest';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
-import { CompatRouter, useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { createCallApi } from '../../services/rest/create_call_api';
@@ -255,9 +255,7 @@ const renderWithFlag = (
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[initialPath]}>
-          <CompatRouter>
-            <LandingPage />
-          </CompatRouter>
+          <LandingPage />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
@@ -275,10 +273,8 @@ const renderLandingWithRouter = (enabled: boolean) => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={['/']}>
-          <CompatRouter>
-            <LandingPage />
-            <LocationDisplay />
-          </CompatRouter>
+          <LandingPage />
+          <LocationDisplay />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
@@ -296,11 +292,9 @@ const renderLandingAtPathWithSearch = (initialPath: string) => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[initialPath]}>
-          <CompatRouter>
-            <LandingPage />
-            <LocationSearchDisplay />
-            <CollectionParamControls />
-          </CompatRouter>
+          <LandingPage />
+          <LocationSearchDisplay />
+          <CollectionParamControls />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
@@ -318,9 +312,7 @@ const renderFlowAtPath = (enabled: boolean, path: string) => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[path]}>
-          <CompatRouter>
-            <ObservabilityOnboardingFlow />
-          </CompatRouter>
+          <ObservabilityOnboardingFlow />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>

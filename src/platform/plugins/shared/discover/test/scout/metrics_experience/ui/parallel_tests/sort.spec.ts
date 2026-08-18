@@ -77,5 +77,54 @@ spaceTest.describe(
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
       });
     });
+
+    spaceTest('restores a non-default sort after a page reload', async ({ pageObjects, page }) => {
+      await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
+      const { metricsExperience } = pageObjects;
+
+      await spaceTest.step('a fresh session defaults to ascending order', async () => {
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
+      });
+
+      await spaceTest.step('change the sort to descending', async () => {
+        await metricsExperience.setSortDirection('desc');
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+      });
+
+      await spaceTest.step('wait for the sort to be persisted to local tab storage', async () => {
+        // Tab state is written to local storage on a trailing throttle, so an
+        // immediate reload could race the write. Poll storage until the sort
+        // lands to deterministically test "persisted sort survives a reload".
+        // The `metricsState` key mirrors `METRICS_STATE_DEF.key`
+        // (not importable from Scout specs); keep in sync if that key ever changes.
+        await expect
+          .poll(() =>
+            page.evaluate((storageKey) => {
+              const raw = window.localStorage.getItem(storageKey);
+              if (!raw) {
+                return false;
+              }
+              const { openTabs } = JSON.parse(raw) as {
+                openTabs?: Array<{
+                  profileState?: { metricsState?: { sortDirection?: string } };
+                }>;
+              };
+              return Boolean(
+                openTabs?.some((tab) => tab.profileState?.metricsState?.sortDirection === 'desc')
+              );
+            }, testData.DISCOVER_TABS_LOCAL_STORAGE_KEY)
+          )
+          .toBe(true);
+      });
+
+      await spaceTest.step('the descending sort survives a full page reload', async () => {
+        await page.reload();
+        // The grid only mounts once the post-reload metrics fetch resolves, and a cold
+        // Discover re-init plus that fetch regularly exceeds the default 10s on serverless CI
+        // (matching `waitForDiscoverPage`'s own 30s allowance for the same reason).
+        await expect(metricsExperience.grid).toBeVisible({ timeout: 30_000 });
+        await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
+      });
+    });
   }
 );

@@ -12,8 +12,7 @@ import type { IntegrationCardItem, UseLocalSearchType } from '@kbn/fleet-plugin/
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { isCollectionCard } from './collection_card';
 import { useAddDataResultItems } from './use_add_data_result_items';
 
@@ -40,9 +39,7 @@ const makeCard = (overrides: Partial<IntegrationCardItem>): IntegrationCardItem 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <I18nProvider>
     <KibanaContextProvider services={coreMock.createStart()}>
-      <MemoryRouter initialEntries={['/']}>
-        <CompatRouter>{children}</CompatRouter>
-      </MemoryRouter>
+      <MemoryRouter initialEntries={['/']}>{children}</MemoryRouter>
     </KibanaContextProvider>
   </I18nProvider>
 );

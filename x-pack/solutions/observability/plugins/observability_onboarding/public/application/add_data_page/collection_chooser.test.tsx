@@ -10,8 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { CollectionChooser } from './collection_chooser';
 import { FleetCardsProvider } from './fleet_cards_provider';
 
@@ -68,16 +67,14 @@ const renderChooser = ({
     <I18nProvider>
       <KibanaContextProvider services={coreMock.createStart()}>
         <MemoryRouter initialEntries={['/']}>
-          <CompatRouter>
-            <FleetCardsProvider enabled>
-              <CollectionChooser
-                collection={collection}
-                searchTerm={searchTerm}
-                onClose={jest.fn()}
-              />
-              <div data-test-subj="probeMounted" />
-            </FleetCardsProvider>
-          </CompatRouter>
+          <FleetCardsProvider enabled>
+            <CollectionChooser
+              collection={collection}
+              searchTerm={searchTerm}
+              onClose={jest.fn()}
+            />
+            <div data-test-subj="probeMounted" />
+          </FleetCardsProvider>
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
