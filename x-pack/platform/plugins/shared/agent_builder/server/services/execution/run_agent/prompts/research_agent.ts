@@ -7,6 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
+import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import {
   getSkillsInstructions,
   getRelevantSkillsPointerInstructions,
@@ -20,6 +21,7 @@ import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
+import { getTemplate } from '../../../conversation/templates/registry';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
@@ -66,6 +68,45 @@ export const getResearchAgentPrompt = async (
   ];
 };
 
+const renderFieldValue = (value: SerializedMetadataValue | undefined): string => {
+  if (value === undefined) return '_not yet set_';
+  if (Array.isArray(value)) return `**[${value.join(', ')}]**`;
+  return `**${value}**`;
+};
+
+const getConversationMetadataSection = (
+  templateId: string | undefined,
+  metadata: Record<string, SerializedMetadataValue> | undefined
+): string => {
+  const template = templateId ? getTemplate(templateId) : undefined;
+  if (!template) return '';
+
+  const fieldEntries = Object.entries(template.fields);
+  if (fieldEntries.length === 0) return '';
+
+  const fieldLines = fieldEntries
+    .map(([fieldName, def]) => {
+      const current = metadata?.[fieldName];
+      const valueStr = renderFieldValue(current);
+      const descStr = def.description ? ` — ${def.description}` : '';
+      const optionsStr =
+        def.input_type === 'SELECT' && def.options ? ` (options: ${def.options.join(' | ')})` : '';
+      return `- \`${fieldName}\` (${def.input_type})${optionsStr}${descStr}: ${valueStr}`;
+    })
+    .join('\n');
+
+  const templateDesc = template.description ? `\n\n${template.description}` : '';
+
+  return `## CONVERSATION METADATA
+
+This conversation uses the **${template.name}** template.${templateDesc}
+
+The list below shows the metadata fields for this conversation. Fields marked _not yet set_ should be captured from the user as the conversation progresses and written back using the \`set_conversation_metadata\` tool.
+
+${fieldLines}
+`;
+};
+
 const getAgentSystemMessage = async ({
   configuration: { instructions: customInstructions },
   outputSchema,
@@ -74,7 +115,12 @@ const getAgentSystemMessage = async ({
   relevantSkillsEnabled,
   capabilities,
   renderers,
+  processedConversation,
 }: ResearchAgentPromptParams): Promise<string> => {
+  const conversationTemplateId = processedConversation.template_id;
+  const conversationMetadata = processedConversation.metadata as
+    | Record<string, SerializedMetadataValue>
+    | undefined;
   const visEnabled = capabilities.visualizations;
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
@@ -141,6 +187,7 @@ ${
     : ''
 }
 
+${getConversationMetadataSection(conversationTemplateId, conversationMetadata)}
 ## INSTRUCTIONS
 
 ${customInstructions}
