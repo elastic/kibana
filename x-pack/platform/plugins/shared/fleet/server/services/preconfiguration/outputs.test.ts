@@ -1631,8 +1631,6 @@ describe('createManagedBulkOutputMatcher', () => {
   });
 
   it('matches the ECH bulk output on hostname, ignoring the port added by normalizeHostsForAgents', () => {
-    // getManagedBulkEndpoint yields '…/_es' without a port; normalizeHostsForAgents adds :443
-    // before persisting, so the saved host is '…:443/_es'. Hostname comparison dissolves that.
     (appContextService.getCloud as jest.Mock).mockReturnValue({
       managedOtlp: { url: 'https://managed-otlp.example.invalid' },
     });
