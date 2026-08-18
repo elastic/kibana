@@ -8,6 +8,8 @@
 import type { CommandArgDefinition, CommandArgs, CommandDefinition } from '../types';
 
 export const getCommandNameWithArgs = (command: Partial<CommandDefinition>): string => {
+  // FIXME:PT Remove this utility and use `buildCommandUsageList()` instead
+
   if (!command.mustHaveArgs || !command.args) {
     return command.name ?? '';
   }
@@ -124,7 +126,7 @@ interface ExclusiveOrArgGroupsResponse {
  * @param [param1]
  * @param [param1.includeConditionallyRequiredArgs]
  */
-const getExclusiveOrArgGroups = (
+export const getExclusiveOrArgGroups = (
   commandDef: CommandDefinition,
   {
     includeConditionallyRequiredArgs = false,
@@ -156,7 +158,7 @@ const getExclusiveOrArgGroups = (
  * Returns a list of required arguments.
  * @param commandDef
  */
-const getRequiredArgs = (commandDef: CommandDefinition): ArgNameAndDefinition[] => {
+export const getRequiredArgs = (commandDef: CommandDefinition): ArgNameAndDefinition[] => {
   if (commandDef.args) {
     return Object.entries(commandDef.args)
       .filter(([, argDef]) => argDef.required)
@@ -174,7 +176,7 @@ interface ConditionallyRequiredArgsResponse {
  * Returns an object whose keys are the arguments names that when used, require the arguments listed in the value array.
  * @param commandDef
  */
-const getConditionallyRequiredArgs = (
+export const getConditionallyRequiredArgs = (
   commandDef: CommandDefinition
 ): ConditionallyRequiredArgsResponse => {
   const response: ConditionallyRequiredArgsResponse = {};
@@ -200,7 +202,7 @@ const getConditionallyRequiredArgs = (
  * Returns a list of optional arguments.
  * @param commandDef
  */
-const getOptionalArgs = (commandDef: CommandDefinition): ArgNameAndDefinition[] => {
+export const getOptionalArgs = (commandDef: CommandDefinition): ArgNameAndDefinition[] => {
   if (commandDef.args) {
     return Object.entries(commandDef.args)
       .filter(

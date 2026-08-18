@@ -25,11 +25,16 @@ export interface CommandArgDefinition {
    * the user has entered the argument name - it does not validate that the argument must have a
    * value. Arguments that have no value entered by the user have (by default) a value of
    * `true` boolean.
+   *
+   * NOTE: an argument should not be both `required` and `conditionallyRequired`.
    */
   required: boolean;
 
   /**
-   * Indicates that this argument is required only when one of the other arguments in the list defined is used by the user
+   * Indicates that this argument is required only when one of the other arguments in the
+   * list defined is used by the user
+   *
+   * NOTE: an argument should not be both `required` and `conditionallyRequired`.
    */
   conditionallyRequired?: string[];
 
@@ -60,13 +65,15 @@ export interface CommandArgDefinition {
   /**
    * Specifies that one or more arguments might be required, but only one of them can be used at a time.
    * Note that currently, only one set of exclusive OR arguments is supported.
+   *
    * @deprecated use `exclusiveOrGroupId`
    */
   exclusiveOr?: boolean;
 
   /**
    * Indicates that the argument definition is part of a group of arguments (all sharing the same id) and
-   * that only one of them can be used at a time.
+   * that only one of them can be used at a time. Defining this property will make the argument group
+   * required for command input
    */
   exclusiveOrGroupId?: string;
 
