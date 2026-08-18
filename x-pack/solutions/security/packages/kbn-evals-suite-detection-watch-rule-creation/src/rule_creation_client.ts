@@ -16,6 +16,7 @@ import {
 } from '@kbn/workflows';
 import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 import { draftRuleSchema, type DraftRule } from './types';
+import { respondToWorkflowApproval } from './workflow_fixture';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -149,12 +150,7 @@ export class RuleCreationClient {
     }
 
     const sourceId = `${RULE_CREATION_WORKFLOW_ID}:${workflowExecutionId}:${reviewStep.id}`;
-    await this.fetch(`/internal/inbox/actions/workflows/${encodeURIComponent(sourceId)}/respond`, {
-      method: 'POST',
-      headers: { 'elastic-api-version': '1', 'kbn-xsrf': 'true' },
-      body: JSON.stringify({ input: { approved } }),
-    });
-    this.log.info(`Sent approval=${approved} for execution ${workflowExecutionId}`);
+    await respondToWorkflowApproval({ fetch: this.fetch, sourceId, approved, log: this.log });
 
     const deadline = Date.now() + maxWaitMs;
     let execution: WorkflowExecutionDto | undefined;

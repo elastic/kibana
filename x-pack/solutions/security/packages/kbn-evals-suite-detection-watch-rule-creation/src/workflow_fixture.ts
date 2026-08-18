@@ -10,6 +10,8 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 
+export const INBOX_API_VERSION = '1';
+
 export const ensureConnectorAccessible = async ({
   fetch,
   connector,
@@ -43,6 +45,25 @@ export const ensureConnectorAccessible = async ({
  * A missing workflow is an environment failure and should fail loudly here rather than surface as
  * mystery zeroes across every evaluator.
  */
+export const respondToWorkflowApproval = async ({
+  fetch,
+  sourceId,
+  approved,
+  log,
+}: {
+  fetch: HttpHandler;
+  sourceId: string;
+  approved: boolean;
+  log: ToolingLog;
+}): Promise<void> => {
+  log.info(`Sending approval=${approved} for inbox source ${sourceId}`);
+  await fetch(`/internal/inbox/actions/workflows/${encodeURIComponent(sourceId)}/respond`, {
+    method: 'POST',
+    headers: { 'elastic-api-version': INBOX_API_VERSION, 'kbn-xsrf': 'true' },
+    body: JSON.stringify({ input: { approved } }),
+  });
+};
+
 export const assertWorkflowInstalled = async ({
   fetch,
   log,
