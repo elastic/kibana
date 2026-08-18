@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export async function plugin() {
-  const { FieldFormatsExamplePlugin } = await import('./plugin');
-  return new FieldFormatsExamplePlugin();
-}
+export { default as cordisPlugin } from './plugin';

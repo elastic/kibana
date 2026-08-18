@@ -7,26 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, PluginInitializerContext, CoreSetup, Logger } from '@kbn/core/server';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import type { RouteDependencies } from './types';
 import { registerRoutes } from './routes';
 
-export class ScreenshotModeExamplePlugin implements Plugin<void, void> {
-  log: Logger;
-  constructor(ctx: PluginInitializerContext) {
-    this.log = ctx.logger.get();
-  }
-  setup(core: CoreSetup, { screenshotMode }: { screenshotMode: ScreenshotModePluginSetup }): void {
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ScreenshotModeExamplePlugin extends Service {
+  static readonly inject = ['core.http', 'screenshotMode.setup'];
+  static readonly provide = 'screenshotModeExample';
+
+  constructor(ctx: Context) {
+    super(ctx, 'screenshotModeExample');
+    const screenshotMode = (ctx.get('screenshotMode.setup') as any).contract;
     const deps: RouteDependencies = {
-      screenshotMode,
-      router: core.http.createRouter(),
-      log: this.log,
-    };
+          screenshotMode,
+          router: (ctx.get('core.http') as any).createRouter(),
+          log: (ctx.get('core.logger') as any).get('plugins', 'screenshotModeExample'),
+        };
 
-    registerRoutes(deps);
+        registerRoutes(deps);
   }
-
-  start() {}
-  stop() {}
 }

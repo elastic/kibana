@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
-export const plugin = async (ctx: PluginInitializerContext) => {
-  const { ScreenshotModeExamplePlugin } = await import('./plugin');
-  return new ScreenshotModeExamplePlugin(ctx);
-};
+export { default as cordisPlugin } from './plugin';

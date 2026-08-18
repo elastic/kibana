@@ -16,6 +16,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/cordis",
     "@kbn/developer-examples-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/data-plugin",

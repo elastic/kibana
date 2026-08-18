@@ -170,10 +170,13 @@ function run(pluginDir) {
     );
   }
 
-  // Rewrite logger references from initializerContext.logger.get() pattern
+  // Rewrite logger references: this.logger, this.log, this.#logger, this.#log
+  const loggerReplacement = `(ctx.get('core.logger') as any).get('plugins', '${pluginId}')`;
   ctorBody = ctorBody
-    .replace(/this\.logger\b/g, '(ctx.get(\'core.logger\') as any).get(\'plugins\', \'__PLUGIN_ID__\')')
-    .replace(/__PLUGIN_ID__/g, pluginId);
+    .replace(/this\.#logger\b/g, loggerReplacement)
+    .replace(/this\.#log\b/g, loggerReplacement)
+    .replace(/this\.logger\b/g, loggerReplacement)
+    .replace(/this\.log\b/g, loggerReplacement);
 
   // Build stop wiring
   const stopSection = hasRealStop
@@ -181,14 +184,16 @@ function run(pluginDir) {
     : '';
 
   const startTodo = hasRealStart
-    ? `\n    // TODO: start() had a non-empty body — migrate manually:\n    // ${startBody}`
+    ? '\n    // TODO: start() had a non-empty body — migrate manually:\n' +
+      startBody.split('\n').map((l) => `    // ${l}`).join('\n')
     : '';
 
   // Keep non-core imports (drop PluginInitializerContext, CoreSetup, CoreStart, Plugin etc.)
   const CORE_LIFECYCLE_PATTERN =
     /PluginInitializerContext|CoreSetup|CoreStart|Plugin\b|PrebootPlugin|Logger\b/;
-  // Types from SetupDeps / StartDeps interfaces are no longer used in the migrated code
-  const UNUSED_TYPE_PATTERN = /SetupDeps|StartDeps/;
+  // We'll check if imported names are referenced in the new constructor body or remaining code.
+  // Build the "new code" text (everything that will end up in the file except import block).
+  const newBodyText = ctorBody + stopSection + startTodo;
   const originalImports = sourceFile
     .getImportDeclarations()
     .filter((imp) => {
@@ -198,26 +203,21 @@ function run(pluginDir) {
         const namedImports = imp.getNamedImports().map((ni) => ni.getName());
         return namedImports.some((n) => !CORE_LIFECYCLE_PATTERN.test(n));
       }
-      // Drop type-only imports where ALL named imports are now unused (SetupDeps, StartDeps, etc.)
+      // For type-only imports, check if ALL named imports are used in the new code.
+      // Drop the whole import declaration if none of the imported names appear in the new body.
       if (imp.isTypeOnly()) {
         const namedImports = imp.getNamedImports().map((ni) => ni.getName());
-        if (namedImports.every((n) => UNUSED_TYPE_PATTERN.test(n))) return false;
+        const anyUsed = namedImports.some((n) => newBodyText.includes(n));
+        return anyUsed;
       }
       return true;
     })
     .map((imp) => imp.getText())
     .join('\n');
 
-  // Indent constructor body
-  const indentedCtorBody = ctorBody
-    .split('\n')
-    .map((line) => (line.trim() ? `    ${line.trim()}` : ''))
-    .join('\n');
-
-  const indentedStop = stopSection
-    .split('\n')
-    .map((line) => (line.trim() ? `    ${line.trim()}` : ''))
-    .join('\n');
+  // Indent constructor body: normalize to 4-space indent (strip common prefix, re-add 4 spaces)
+  const indentedCtorBody = reindent(ctorBody, 4);
+  const indentedStop = reindent(stopSection, 4);
 
   // Build the new file content
   const newClassBody = `// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
@@ -354,6 +354,24 @@ function rewriteCoreAccesses(bodyText, coreParam, coreProps) {
 /** Strip leading `{` and trailing `}` from a method body string. */
 function stripBraces(body) {
   return body.trim().replace(/^\{/, '').replace(/\}$/, '').trim();
+}
+
+/**
+ * Normalize indentation: strip the common leading whitespace from all non-empty lines,
+ * then re-indent with `targetSpaces` spaces.
+ */
+function reindent(text, targetSpaces) {
+  const lines = text.split('\n');
+  const nonEmpty = lines.filter((l) => l.trim().length > 0);
+  if (nonEmpty.length === 0) return text;
+  const minIndent = nonEmpty.reduce((min, l) => {
+    const m = l.match(/^(\s*)/);
+    return Math.min(min, m ? m[1].length : 0);
+  }, Infinity);
+  const prefix = ' '.repeat(targetSpaces);
+  return lines
+    .map((l) => (l.trim() ? prefix + l.slice(minIndent) : ''))
+    .join('\n');
 }
 
 /** Return true if a method body is effectively empty (no real statements). */

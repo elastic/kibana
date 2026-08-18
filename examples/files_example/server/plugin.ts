@@ -7,37 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { exampleFileKind } from '../common';
-import type { FilesExamplePluginsSetup, FilesExamplePluginsStart } from './types';
 
-export class FilesExamplePlugin
-  implements Plugin<unknown, unknown, FilesExamplePluginsSetup, FilesExamplePluginsStart>
-{
-  private readonly logger: Logger;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class FilesExamplePlugin extends Service {
+  static readonly inject = ['files.setup'];
+  static readonly provide = 'filesExample';
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(ctx: Context) {
+    super(ctx, 'filesExample');
+    const files = (ctx.get('files.setup') as any).contract;
+    (ctx.get('core.logger') as any).get('plugins', 'filesExample').debug('filesExample: Setup');
+
+        files.registerFileKind(exampleFileKind);
+    // TODO: start() had a non-empty body — migrate manually:
+    // {
+    //     this.logger.debug('filesExample: Started');
+    //     return {};
+    //   }
   }
-
-  public setup(core: CoreSetup, { files }: FilesExamplePluginsSetup) {
-    this.logger.debug('filesExample: Setup');
-
-    files.registerFileKind(exampleFileKind);
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    this.logger.debug('filesExample: Started');
-    return {};
-  }
-
-  public stop() {}
 }

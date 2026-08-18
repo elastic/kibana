@@ -7,24 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { registerExampleFormat } from './examples/2_creating_custom_formatter';
 
-interface SetupDeps {
-  fieldFormats: FieldFormatsSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class FieldFormatsExamplePlugin extends Service {
+  static readonly inject = ['fieldFormats.setup'];
+  static readonly provide = 'fieldFormatsExample';
 
-interface StartDeps {
-  fieldFormats: FieldFormatsStart;
-}
-
-export class FieldFormatsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, deps: SetupDeps) {
+  constructor(ctx: Context) {
+    super(ctx, 'fieldFormatsExample');
+    const deps = {
+    fieldFormats: (ctx.get('fieldFormats.setup') as any).contract,
+    };
     registerExampleFormat(deps.fieldFormats);
   }
-  public start(core: CoreStart) {
-    return {};
-  }
-  public stop() {}
 }
