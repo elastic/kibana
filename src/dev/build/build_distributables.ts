@@ -89,13 +89,19 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
 
     await globalRun(Tasks.CreateEmptyDirsAndFiles);
     await globalRun(Tasks.CreateReadme);
-    await globalRun(Tasks.BuildPackages);
-    await globalRun(Tasks.ReplaceFavicon);
     // [rspack-transition] Use Rspack by default, with an explicit legacy webpack opt-out.
-    // When legacy is removed, keep only Tasks.BuildRspackBundles.
+    // When legacy is removed, keep only Tasks.BuildRspackBundles and collapse the branch.
     if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
-      await globalRun(Tasks.BuildRspackBundles);
+      // BuildPackages (shared webpack + package copies), ReplaceFavicon, and BuildRspackBundles
+      // are fully independent — run them in parallel to cut wall-clock time.
+      await Promise.all([
+        globalRun(Tasks.BuildPackages),
+        globalRun(Tasks.ReplaceFavicon),
+        globalRun(Tasks.BuildRspackBundles),
+      ]);
     } else {
+      await globalRun(Tasks.BuildPackages);
+      await globalRun(Tasks.ReplaceFavicon);
       await globalRun(Tasks.BuildKibanaPlatformPlugins);
     }
     await globalRun(Tasks.CreatePackageJson);

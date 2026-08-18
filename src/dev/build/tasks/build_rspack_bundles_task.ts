@@ -29,11 +29,16 @@ const brotliCompressAsync = promisify(zlib.brotliCompress);
 export const BuildRspackBundles: Task = {
   description: 'Building distributable versions of Kibana bundles with RSPack',
   async run(buildConfig, log, build) {
+    // On PR builds the plugin source rarely changes in bulk, so let rspack
+    // reuse its cache. On merge/release builds always compile from scratch.
+    const isPrBuild =
+      Boolean(process.env.BUILDKITE_PULL_REQUEST) &&
+      process.env.BUILDKITE_PULL_REQUEST !== 'false';
     const result = await runBuild({
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
       dist: true,
-      cache: false,
+      cache: isPrBuild,
       watch: false,
       hmr: false,
       examples: buildConfig.pluginSelector.examples,
