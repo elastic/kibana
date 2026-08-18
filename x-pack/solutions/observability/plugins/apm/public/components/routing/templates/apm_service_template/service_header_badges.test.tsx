@@ -29,10 +29,11 @@ const mockShare = {
       get: jest.fn().mockReturnValue({
         getUrl: jest
           .fn()
-          .mockImplementation(async ({ serviceName, query }: any) =>
-            `/app/apm/services/${serviceName}/overview?comparisonEnabled=${
-              query?.comparisonEnabled ?? true
-            }`
+          .mockImplementation(
+            async ({ serviceName, query }: any) =>
+              `/app/apm/services/${serviceName}/overview?comparisonEnabled=${
+                query?.comparisonEnabled ?? true
+              }`
           ),
       }),
     },

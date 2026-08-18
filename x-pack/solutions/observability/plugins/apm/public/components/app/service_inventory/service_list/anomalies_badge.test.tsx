@@ -12,16 +12,18 @@ import { AnomalyDetectorType } from '@kbn/apm-types';
 import type { AnomaliesBadgeNavigationProps } from './anomalies_badge';
 import { AnomaliesBadge } from './anomalies_badge';
 
-const mockGetUrl = jest.fn().mockImplementation(async ({ serviceName, isMobileAgentName, query }: any) => {
-  const base = isMobileAgentName
-    ? `/app/apm/mobile-services/${serviceName}/overview`
-    : `/app/apm/services/${serviceName}/overview`;
-  const params = new URLSearchParams();
-  Object.entries(query ?? {}).forEach(([k, v]) => {
-    if (v !== undefined) params.set(k, String(v));
+const mockGetUrl = jest
+  .fn()
+  .mockImplementation(async ({ serviceName, isMobileAgentName, query }: any) => {
+    const base = isMobileAgentName
+      ? `/app/apm/mobile-services/${serviceName}/overview`
+      : `/app/apm/services/${serviceName}/overview`;
+    const params = new URLSearchParams();
+    Object.entries(query ?? {}).forEach(([k, v]) => {
+      if (v !== undefined) params.set(k, String(v));
+    });
+    return `${base}?${params.toString()}`;
   });
-  return `${base}?${params.toString()}`;
-});
 
 const mockLocators = {
   get: jest.fn().mockReturnValue({ getUrl: mockGetUrl }),
