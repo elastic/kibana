@@ -584,9 +584,8 @@ function matchOptionsForceAndOperator(node: ESQLAstItem | undefined): boolean {
 }
 
 function getColumnName(node: ESQLAstItem | undefined): string {
-  if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'column') return '<field>';
-  const { name } = node as { name?: unknown };
-  return typeof name === 'string' ? name : '<field>';
+  if (!node || Array.isArray(node)) return '<field>';
+  return BasicPrettyPrinter.expression(node as ESQLSingleAstItem);
 }
 
 /**
