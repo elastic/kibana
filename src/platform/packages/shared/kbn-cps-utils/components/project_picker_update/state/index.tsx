@@ -15,8 +15,14 @@ import React, {
   type PropsWithChildren,
   useEffect,
 } from 'react';
+import type { ProjectRouting } from '@kbn/es-query';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { useCreateStore, type ActionsFromReducers } from './store';
-import { createStoreReducers } from './reducers';
+import {
+  createStoreReducers,
+  createFilterExpressionsMap,
+  getProjectRoutingState,
+} from './reducers';
 import { type ProjectPickerState } from './reducers';
 import { projectPickerDerivatives } from './derivatives';
 import { type CPSProject } from '../../../types';
@@ -29,6 +35,9 @@ interface ProjectPickerContext {
 export interface ProjectPickerStateProviderProps extends Pick<ProjectPickerState, 'isReadOnly'> {
   children: React.ReactNode;
   availableProjects: CPSProject[];
+  defaultProjectRouting?: ProjectRouting;
+  initialProjectRouting?: ProjectRouting;
+  originProjectId?: string;
 }
 
 export const createProjectPickerContext = once(() =>
@@ -56,18 +65,33 @@ export const useProjectPickerState = () => {
 export const ProjectPickerStateProvider = ({
   children,
   availableProjects,
+  defaultProjectRouting = PROJECT_ROUTING.ALL,
+  initialProjectRouting,
   isReadOnly,
+  originProjectId,
 }: PropsWithChildren<ProjectPickerStateProviderProps>) => {
   const ProjectPickerContext = useMemo(() => createProjectPickerContext(), []);
   const projectPickerReducers = useMemo(() => createStoreReducers(), []);
+  const { excludedProjectIds, filterExpressions } = useMemo(
+    () =>
+      getProjectRoutingState({
+        availableProjects,
+        originProjectId,
+        projectRouting: initialProjectRouting,
+      }),
+    [availableProjects, initialProjectRouting, originProjectId]
+  );
 
   const store = useCreateStore<ProjectPickerState, typeof projectPickerReducers>({
     initialState: {
       isReadOnly,
-      filterExpressions: new Map(),
+      hasUserModifiedRouting: false,
+      defaultProjectRouting,
+      originProjectId,
+      filterExpressions: createFilterExpressionsMap(filterExpressions),
       filteringDimensions: [],
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
-      excludedOverrides: [],
+      excludedOverrides: excludedProjectIds,
       filteredProjectIds: [],
       visibleProjectIds: [],
       selectedProjects: [],
@@ -80,9 +104,20 @@ export const ProjectPickerStateProvider = ({
     store.actions._setStoreState({
       isReadOnly,
       availableProjects: new Map(availableProjects.map((project) => [project._id, project])),
-      filterExpressions: [],
+      defaultProjectRouting,
+      excludedOverrides: excludedProjectIds,
+      filterExpressions,
+      originProjectId,
     });
-  }, [availableProjects, isReadOnly, store.actions]);
+  }, [
+    availableProjects,
+    defaultProjectRouting,
+    excludedProjectIds,
+    filterExpressions,
+    isReadOnly,
+    originProjectId,
+    store.actions,
+  ]);
 
   return <ProjectPickerContext.Provider value={store}>{children}</ProjectPickerContext.Provider>;
 };

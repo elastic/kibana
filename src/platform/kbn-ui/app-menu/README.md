@@ -28,6 +28,15 @@ viewport breakpoint using the previous viewport mapping: `xs` and `s` collapse, 
 the medium layout, and `xl` shows the full menu. Menus that should preserve viewport-based behavior,
 such as the Classic and legacy Project Chrome headers, set `breakpointSource="viewport"`.
 
+## Strict props
+
+The public types are the contract. A type assertion can still pass a React node as a `label`, or
+extra keys that get spread into EUI, and the menu paints custom UI.
+
+The renderer only uses declared fields, and only as real strings. A non-string becomes empty (or is
+omitted if optional); leftover keys are dropped. In development this logs a one-time `console.warn`.
+Do not pass `FormattedMessage` or other nodes.
+
 ## Compatibility
 
 `@kbn/core-chrome-app-menu-components` re-exports this package for existing consumers.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, intersection, uniq } from 'lodash';
+import { compact, intersection, isString, uniq } from 'lodash';
 import type { Feature, QueryLink } from '@kbn/significant-events-schema';
 import type {
   KnowledgeIndicator,
@@ -32,14 +32,64 @@ const isFeatureIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorFea
 const isQueryIndicator = (ki: KnowledgeIndicator): ki is KnowledgeIndicatorQuery =>
   ki.kind === 'query';
 
+// Collects all source/target endpoints of dependency features that reference any of the seed IDs.
+// Called once per filter pass so entity expansion doesn't re-scan the indicator list per indicator.
+function buildConnectedEndpoints(
+  indicators: KnowledgeIndicator[],
+  featureIds: Set<string>
+): Set<string> {
+  const endpoints = new Set<string>();
+  for (const ki of indicators) {
+    if (!isFeatureIndicator(ki) || ki.feature.type !== 'dependency') continue;
+    const { source, target } = ki.feature.properties;
+    if (
+      (isString(source) && featureIds.has(source)) ||
+      (isString(target) && featureIds.has(target)) ||
+      featureIds.has(ki.feature.id)
+    ) {
+      if (isString(source)) endpoints.add(source);
+      if (isString(target)) endpoints.add(target);
+    }
+  }
+  return endpoints;
+}
+
+function featureMatchesTopology(
+  { feature }: KnowledgeIndicatorFeature,
+  featureIds: Set<string>,
+  connectedEndpoints: Set<string>
+): boolean {
+  if (featureIds.has(feature.id)) return true;
+  const { type, properties } = feature;
+  if (type === 'dependency') {
+    const { source, target } = properties;
+    return (
+      (isString(source) && featureIds.has(source)) || (isString(target) && featureIds.has(target))
+    );
+  }
+  if (type === 'entity') {
+    const { name, technology } = properties;
+    return (
+      (isString(name) && connectedEndpoints.has(name)) ||
+      (isString(technology) && connectedEndpoints.has(technology))
+    );
+  }
+  return false;
+}
+
 const compareFeatures = (
   current: KnowledgeIndicatorFeature,
   next: KnowledgeIndicatorFeature
 ): number => {
   const byConfidence = (next.feature.confidence ?? 0) - (current.feature.confidence ?? 0);
-  if (byConfidence !== 0) return byConfidence;
+  if (byConfidence !== 0) {
+    return byConfidence;
+  }
   const byStream = current.feature.stream_name.localeCompare(next.feature.stream_name);
-  if (byStream !== 0) return byStream;
+  if (byStream !== 0) {
+    return byStream;
+  }
+
   const byId = current.feature.id.localeCompare(next.feature.id);
   return byId !== 0 ? byId : current.feature.uuid.localeCompare(next.feature.uuid);
 };
@@ -49,9 +99,14 @@ const compareQueries = (
   next: KnowledgeIndicatorQuery
 ): number => {
   const byScore = (next.query.severity_score ?? -1) - (current.query.severity_score ?? -1);
-  if (byScore !== 0) return byScore;
+  if (byScore !== 0) {
+    return byScore;
+  }
   const byStream = current.stream_name.localeCompare(next.stream_name);
-  if (byStream !== 0) return byStream;
+  if (byStream !== 0) {
+    return byStream;
+  }
+
   const byId = current.query.id.localeCompare(next.query.id);
   return byId !== 0 ? byId : current.rule.id.localeCompare(next.rule.id);
 };
@@ -152,11 +207,16 @@ function filterIndicators(
   indicators: KnowledgeIndicator[],
   params: SearchKnowledgeIndicatorsInput
 ): KnowledgeIndicator[] {
+  const featureIdSet = params.feature_ids?.length ? new Set(params.feature_ids) : undefined;
+  const connectedEndpoints = featureIdSet
+    ? buildConnectedEndpoints(indicators, featureIdSet)
+    : new Set<string>();
+
   return indicators.filter((indicator) => {
     if (isFeatureIndicator(indicator)) {
       return (
         (!params.feature_types?.length || params.feature_types.includes(indicator.feature.type)) &&
-        (!params.feature_ids?.length || params.feature_ids.includes(indicator.feature.id))
+        (!featureIdSet || featureMatchesTopology(indicator, featureIdSet, connectedEndpoints))
       );
     }
 
