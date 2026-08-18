@@ -27,10 +27,7 @@ import {
   buildEcfCrowdstrikeCloudFormationUrl,
 } from '../ecf_cloudformation';
 import type { EcfServiceConfig } from '../ecf_cloudformation';
-import type {
-  ServiceInstance,
-  ServiceVars,
-} from './service_settings_step/use_service_settings';
+import type { ServiceInstance, ServiceVars } from './service_settings_step/use_service_settings';
 
 interface UseEcfDeploymentOpts {
   instances: ServiceInstance[];
@@ -101,7 +98,11 @@ export const useEcfDeployment = ({
   const unifiedLaunchUrl = useMemo(
     () =>
       hasEcfUnified
-        ? buildEcfUnifiedCloudFormationUrl({ ecfConfigs: ecfUnifiedConfigs, region: globalRegion, otlpEndpoint })
+        ? buildEcfUnifiedCloudFormationUrl({
+            ecfConfigs: ecfUnifiedConfigs,
+            region: globalRegion,
+            otlpEndpoint,
+          })
         : undefined,
     [hasEcfUnified, ecfUnifiedConfigs, globalRegion, otlpEndpoint]
   );
@@ -109,7 +110,11 @@ export const useEcfDeployment = ({
   const otelLaunchUrl = useMemo(
     () =>
       hasEcfOtel
-        ? buildEcfOtelCloudFormationUrl({ ecfConfigs: ecfOtelConfigs, region: globalRegion, otlpEndpoint })
+        ? buildEcfOtelCloudFormationUrl({
+            ecfConfigs: ecfOtelConfigs,
+            region: globalRegion,
+            otlpEndpoint,
+          })
         : undefined,
     [hasEcfOtel, ecfOtelConfigs, globalRegion, otlpEndpoint]
   );
