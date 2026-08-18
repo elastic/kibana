@@ -77,6 +77,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const titleManager = initializeTitleManager(initialState);
     let storedPrompt = initialState.prompt ?? '';
+    let storedReturnFocus: (() => void) | undefined;
     const esqlQuery$ = new BehaviorSubject<string | undefined>(initialState.esqlQuery);
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const isFlyoutOpen$ = new BehaviorSubject<boolean>(false);
@@ -140,8 +141,9 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom content',
         }),
-      onEdit: async ({ isNewPanel } = {}) => {
+      onEdit: async ({ isNewPanel, returnFocus } = {}) => {
         if (tracksOverlays(parentApi)) parentApi.clearOverlays();
+        storedReturnFocus = returnFocus;
         isNewPanel$.next(isNewPanel ?? false);
         isFlyoutOpen$.next(true);
       },
@@ -187,6 +189,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlQuery,
           savedTemplate,
           isFlyoutOpen,
+          isNewPanel,
           panelTitle,
           isApproximate,
           projectRouting,
@@ -197,6 +200,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           esqlQuery$,
           template$,
           isFlyoutOpen$,
+          isNewPanel$,
           titleManager.api.title$,
           isApproximate$,
           projectRouting$,
@@ -237,6 +241,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             previewHtml$.next(null);
             applyConfigUpdate({ esqlQuery: newEsqlQuery, template: newTemplate });
             setGenerationVersion((v) => v + 1);
+            storedReturnFocus?.();
+            storedReturnFocus = undefined;
           },
           []
         );
@@ -288,6 +294,8 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           isNewPanel$.next(false);
           previewHtml$.next(null);
           isFlyoutOpen$.next(false);
+          storedReturnFocus?.();
+          storedReturnFocus = undefined;
         }, []);
 
         const handleGenerateWithChat = useCallback(() => {
@@ -332,6 +340,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   query={query}
                   filters={filters}
                   panelTitle={panelTitle ?? undefined}
+                  isNewPanel={isNewPanel}
                   onSave={handleFlyoutSave}
                   onClose={handleFlyoutClose}
                   onRunPreview={handleRunPreview}
