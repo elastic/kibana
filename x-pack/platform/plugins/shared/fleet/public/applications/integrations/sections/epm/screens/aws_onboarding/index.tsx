@@ -68,28 +68,32 @@ const ServiceCard: React.FunctionComponent<{
   checked: boolean;
   onToggle: (id: string) => void;
 }> = ({ service, checked, onToggle }) => {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiCheckableCard
       id={`awsService-${service.id}`}
       checkableType="checkbox"
       checked={checked}
       onChange={() => onToggle(service.id)}
+      color="plain"
+      css={{ borderColor: euiTheme.colors.borderBasePlain }}
       label={
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type="logoAWS" size="m" />
           </EuiFlexItem>
           <EuiFlexItem style={{ minWidth: 0 }}>
-            <EuiText size="s" className="eui-textTruncate">
+            <EuiText
+              size="s"
+              className="eui-textTruncate"
+              style={{ fontWeight: checked ? euiTheme.font.weight.medium : undefined }}
+            >
               {service.name}
             </EuiText>
           </EuiFlexItem>
-          {/* "default" instead of "hollow" — a soft tinted fill instead of
-              a hard border, so the pill recedes rather than competing with
-              the service name for attention. */}
           {service.dataTypes.map((dt) => (
             <EuiFlexItem grow={false} key={dt}>
-              <EuiBadge color="default">{dt}</EuiBadge>
+              <EuiBadge color="hollow">{dt}</EuiBadge>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -105,6 +109,7 @@ const CategorySidebarItem: React.FunctionComponent<{
   selectedCount: number;
   onClick: () => void;
 }> = ({ category, isActive, visibleCount, selectedCount, onClick }) => {
+  const { euiTheme } = useEuiTheme();
   const exampleNames = category.services
     .slice(0, 2)
     .map((s) => s.name)
@@ -120,10 +125,9 @@ const CategorySidebarItem: React.FunctionComponent<{
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
-          {/* Not bold — the colored background already shows which
-              category is active, so the label doesn't also need to
-              compete in weight with the main panel's heading below. */}
-          <EuiText size="s">{category.label}</EuiText>
+          <EuiText size="s" style={{ fontWeight: euiTheme.font.weight.semiBold }}>
+            {category.label}
+          </EuiText>
           <EuiText size="xs" color="subdued" className="eui-textTruncate">
             {exampleNames}, ...
           </EuiText>
