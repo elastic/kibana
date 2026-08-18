@@ -11,13 +11,12 @@ import {
   ADD_CUSTOM_CONTENT_ACTION_ID,
 } from './add_custom_content_action';
 import { CustomContentIcon } from './custom_content_icon';
+import { apiIsPresentationContainer, hasEditCapabilities } from '@kbn/presentation-publishing';
 
 jest.mock('@kbn/presentation-publishing', () => ({
   apiIsPresentationContainer: jest.fn(),
   hasEditCapabilities: jest.fn(),
 }));
-
-import { apiIsPresentationContainer, hasEditCapabilities } from '@kbn/presentation-publishing';
 
 const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.MockedFunction<
   typeof apiIsPresentationContainer

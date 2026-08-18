@@ -8,13 +8,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-
-jest.mock('@kbn/shared-ux-ai-components', () => ({
-  AiButton: ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
-    <button onClick={onClick}>{children}</button>
-  ),
-}));
-
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 
 describe('CustomContentEmptyPrompt', () => {

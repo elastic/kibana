@@ -14,13 +14,13 @@ import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
+import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 
 jest.mock('@kbn/presentation-publishing', () => {
   const actual = jest.requireActual('@kbn/presentation-publishing');
   return { ...actual, apiIsPresentationContainer: jest.fn(() => false) };
 });
 
-import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 const mockApiIsPresentationContainer = apiIsPresentationContainer as jest.MockedFunction<
   typeof apiIsPresentationContainer
 >;
