@@ -17,7 +17,7 @@ import { APP_FIXED_VIEWPORT_ID } from '../../kibana_layout_constants';
 const kibanaGlobalLayoutStyles = css`
   :root {
     // These variables remain for backward compatibility with Kibana applications.
-    // https://github.com/elastic/kibana/issues/225264
+    // https://github.com/elastic/kibana/issues/285537
     --kbnHeaderBannerHeight: ${layoutVar('banner.height', '0px')};
     --kbnAppHeadersOffset: ${layoutVar('application.topBar.height', '0px')};
     --kbn-application--sticky-headers-offset: ${layoutVar('application.topBar.height', '0px')};
