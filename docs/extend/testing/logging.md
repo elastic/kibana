@@ -71,4 +71,4 @@ Elasticians only: for how to inspect Kibana, Elasticsearch, and UIAM logs for a 
 
 ## Browser logs [scout-logging-browser]
 
-Scout's UI test fixtures capture browser console errors during a test run and attach them to the failure report and test artifacts when a test fails. You can find them in the Scout HTML report, alongside the rest of the test's artifacts — there's no separate console output to watch for these locally.
+Scout's UI test fixtures capture browser console errors during a test run and attach them to the test's artifacts whenever any console errors were produced (regardless of whether the test passed or failed). You can find them in the Scout HTML report, alongside the rest of the test's artifacts — there's no separate console output to watch for these locally.
