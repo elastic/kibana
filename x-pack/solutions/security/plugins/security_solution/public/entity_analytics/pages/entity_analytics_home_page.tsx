@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux-v7';
 import { useHistory, useLocation } from 'react-router-dom';
-import {
-  EuiButtonGroup,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +17,6 @@ import type { AppHeaderMenu } from '@kbn/app-header';
 import { SecurityPageName } from '../../app/types';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
-import { Title } from '../../common/components/header_page/title';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { inputsActions } from '../../common/store/inputs';
@@ -36,9 +28,8 @@ import { PageLoader } from '../../common/components/page_loader';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useEntityStoreDataView } from '../components/home/use_entity_store_data_view';
 import {
-  DEFAULT_FACELIFT_VERSION,
-  setActiveFaceliftVersion,
-  type FaceliftVersion,
+  isFaceliftAppHeaderVersion,
+  useActiveFaceliftVersion,
 } from '../components/home/facelift/active_version';
 import { FaceliftHome, FaceliftPageDescription } from '../components/home/facelift/facelift_home';
 
@@ -57,11 +48,6 @@ import { DEFAULT_FROM, DEFAULT_TO } from '../../../common/constants';
 const PAGE_TITLE = i18n.translate('xpack.securitySolution.entityAnalytics.homePage.pageTitle', {
   defaultMessage: 'Entity analytics',
 });
-
-const FACELIFT_VERSION_OPTIONS: Array<{ id: FaceliftVersion; label: string }> = [
-  { id: 'v2', label: 'v.2' },
-  { id: 'v1', label: 'v.1' },
-];
 
 const MANAGEMENT_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.managementButtonLabel',
@@ -121,7 +107,7 @@ const EntityAnalyticsHomePageContent = () => {
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
   const { dataView, isLoading: dataViewLoading } = useEntityStoreDataView(spaceId);
-  const [faceliftVersion, setFaceliftVersion] = useState<FaceliftVersion>(DEFAULT_FACELIFT_VERSION);
+  const [faceliftVersion] = useActiveFaceliftVersion();
 
   // Only subscribe to `search` rather than the whole `location` object so this
   // component doesn't re-render (and re-create callbacks) on unrelated URL
@@ -130,7 +116,7 @@ const EntityAnalyticsHomePageContent = () => {
   const history = useHistory();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
-  /** v.2 AppHeader Management → Entity Risk Score tab. */
+  /** v.2 / v.3 AppHeader Management → Entity Risk Score tab. */
   const managementHref = useMemo(
     () =>
       getSecuritySolutionUrl({
@@ -175,36 +161,34 @@ const EntityAnalyticsHomePageContent = () => {
     [history]
   );
 
-  const onFaceliftVersionChange = useCallback((id: string) => {
-    const next = id as FaceliftVersion;
-    // Sync before remount so flyout / table bridges match the new snapshot
-    // on the first render after switch.
-    setActiveFaceliftVersion(next);
-    setFaceliftVersion(next);
-  }, []);
-
-  const faceliftAppMenu = useMemo<AppHeaderMenu>(
-    () => ({
-      primaryActionItem: {
-        id: 'entityAnalyticsSaveView',
-        label: SAVE_VIEW_BUTTON_LABEL,
-        iconType: 'save',
-        // Prototype: no-op until save-view is wired.
-        run: () => undefined,
-        testId: 'eaFaceliftSaveViewButton',
+  const faceliftAppMenu = useMemo<AppHeaderMenu>(() => {
+    const items = [
+      {
+        id: 'entityAnalyticsManagement',
+        label: MANAGEMENT_BUTTON_LABEL,
+        iconType: 'gear' as const,
+        href: managementHref,
+        testId: 'eaFaceliftManagementButton',
       },
-      items: [
-        {
-          id: 'entityAnalyticsManagement',
-          label: MANAGEMENT_BUTTON_LABEL,
-          iconType: 'gear',
-          href: managementHref,
-          testId: 'eaFaceliftManagementButton',
+    ];
+
+    // Save view is v.2 only — v.3 drops the primary header action.
+    if (faceliftVersion === 'v2') {
+      return {
+        primaryActionItem: {
+          id: 'entityAnalyticsSaveView',
+          label: SAVE_VIEW_BUTTON_LABEL,
+          iconType: 'save',
+          // Prototype: no-op until save-view is wired.
+          run: () => undefined,
+          testId: 'eaFaceliftSaveViewButton',
         },
-      ],
-    }),
-    [managementHref]
-  );
+        items,
+      };
+    }
+
+    return { items };
+  }, [faceliftVersion, managementHref]);
 
   // Design prototype: show "Today" in the KQL bar date picker on page entry
   // (same relative range Alerts/Discover use via DEFAULT_FROM / DEFAULT_TO).
@@ -247,27 +231,12 @@ const EntityAnalyticsHomePageContent = () => {
     return <PageLoader />;
   }
 
-  const versionToggle = (
-    <EuiButtonGroup
-      legend={i18n.translate(
-        'xpack.securitySolution.entityAnalytics.homePage.faceliftVersionLegend',
-        { defaultMessage: 'Facelift prototype version' }
-      )}
-      options={FACELIFT_VERSION_OPTIONS}
-      idSelected={faceliftVersion}
-      onChange={onFaceliftVersionChange}
-      color="primary"
-      buttonSize="compressed"
-      data-test-subj="eaFaceliftVersionToggle"
-    />
-  );
-
   return (
     <>
-      {faceliftVersion === 'v2' ? (
+      {isFaceliftAppHeaderVersion(faceliftVersion) ? (
         <Global
           styles={css`
-            /* v.2 layout: let AppHeader go edge-to-edge; content owns its own inset. */
+            /* AppHeader layout: let header go edge-to-edge; content owns its own inset. */
             [data-test-subj='pageContainer'].securityPageWrapper {
               padding-inline: 0 !important;
             }
@@ -285,40 +254,11 @@ const EntityAnalyticsHomePageContent = () => {
         </FiltersGlobal>
       ) : null}
 
-      {faceliftVersion === 'v2' ? (
-        <div
-          css={css`
-            position: relative;
-          `}
-        >
-          <AppHeader title={PAGE_TITLE} menu={faceliftAppMenu} />
-          {/*
-            TEMPORARY prototype overlay — AppHeader's public API has no titleAppend.
-            Place beside the title for design review; delete this block when shipping.
-          */}
-          <div
-            css={css`
-              position: absolute;
-              /* AppHeader is sticky with z-index: levels.mask — sit above it. */
-              z-index: ${euiTheme.levels.mask + 1};
-              top: ${euiTheme.size.m};
-              left: calc(${euiTheme.size.base} + 12em);
-            `}
-          >
-            {versionToggle}
-          </div>
-        </div>
+      {isFaceliftAppHeaderVersion(faceliftVersion) ? (
+        <AppHeader title={PAGE_TITLE} menu={faceliftAppMenu} />
       ) : (
         <HeaderPage
           title={PAGE_TITLE}
-          titleNode={
-            <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <Title title={PAGE_TITLE} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{versionToggle}</EuiFlexItem>
-            </EuiFlexGroup>
-          }
           border
           subtitle={<FaceliftPageDescription version={faceliftVersion} />}
           rightSideItems={[
@@ -348,7 +288,7 @@ const EntityAnalyticsHomePageContent = () => {
         />
       )}
 
-      {faceliftVersion === 'v2' ? (
+      {isFaceliftAppHeaderVersion(faceliftVersion) ? (
         <div
           css={css`
             padding-inline: ${euiTheme.size.base}; /* 16px */

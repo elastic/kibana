@@ -169,6 +169,29 @@ describe('global header', () => {
     expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it('shows the prototype version control left of Add integrations on Entity analytics home', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/entity_analytics_home_page' });
+    const { getByTestId, getByText } = render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+    expect(getByTestId('eaFaceliftVersionHeaderControl')).toBeInTheDocument();
+    expect(getByText('Prototype version:')).toBeInTheDocument();
+    expect(getByTestId('eaFaceliftVersionSelect')).toBeInTheDocument();
+    expect(getByText('Add integrations')).toBeInTheDocument();
+  });
+
+  it('hides the prototype version control off Entity analytics home', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/alerts' });
+    const { queryByTestId } = render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+    expect(queryByTestId('eaFaceliftVersionHeaderControl')).not.toBeInTheDocument();
+  });
+
   it('shows AI Assistant header link', () => {
     const { findByTestId } = render(
       <TestProviders store={store}>

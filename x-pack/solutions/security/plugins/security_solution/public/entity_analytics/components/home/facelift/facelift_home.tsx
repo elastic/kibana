@@ -16,13 +16,34 @@ import {
   FaceliftHome as FaceliftHomeV2,
   FaceliftPageDescription as FaceliftPageDescriptionV2,
 } from './v2/facelift_home';
+import {
+  FaceliftHome as FaceliftHomeV3,
+  FaceliftPageDescription as FaceliftPageDescriptionV3,
+} from './v3/facelift_home';
 
 export type { FaceliftHomeProps };
 
-export const FaceliftPageDescription: React.FC<{ version: FaceliftVersion }> = ({ version }) =>
-  version === 'v1' ? <FaceliftPageDescriptionV1 /> : <FaceliftPageDescriptionV2 />;
+export const FaceliftPageDescription: React.FC<{ version: FaceliftVersion }> = ({ version }) => {
+  switch (version) {
+    case 'v1':
+      return <FaceliftPageDescriptionV1 />;
+    case 'v2':
+      return <FaceliftPageDescriptionV2 />;
+    case 'v3':
+      return <FaceliftPageDescriptionV3 />;
+  }
+};
 
 export const FaceliftHome: React.FC<FaceliftHomeProps & { version: FaceliftVersion }> = ({
   version,
   ...props
-}) => (version === 'v1' ? <FaceliftHomeV1 {...props} /> : <FaceliftHomeV2 {...props} />);
+}) => {
+  switch (version) {
+    case 'v1':
+      return <FaceliftHomeV1 {...props} />;
+    case 'v2':
+      return <FaceliftHomeV2 {...props} />;
+    case 'v3':
+      return <FaceliftHomeV3 {...props} />;
+  }
+};

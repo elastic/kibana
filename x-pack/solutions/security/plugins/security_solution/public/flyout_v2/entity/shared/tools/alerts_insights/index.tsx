@@ -27,18 +27,19 @@ const TITLE = ALERTS_INSIGHTS_TITLE;
 
 const ICON_TYPE = EntityIconByType;
 const FIELD: Record<
-  EntityType.host | EntityType.user | EntityType.generic,
+  EntityType.host | EntityType.user | EntityType.service | EntityType.generic,
   CloudPostureEntityIdentifier
 > = {
   [EntityType.host]: EntityIdentifierFields.hostName,
   [EntityType.user]: EntityIdentifierFields.userName,
+  [EntityType.service]: EntityIdentifierFields.serviceName,
   // `related.entity` carries the entity id used to filter alerts for generic entities.
   [EntityType.generic]: 'related.entity',
 };
 
 export interface AlertsInsightsProps {
   /** Which entity type this tool is scoped to. Controls the icon, query field, and entity type passed to the table. */
-  entityType: EntityType.host | EntityType.user | EntityType.generic;
+  entityType: EntityType.host | EntityType.user | EntityType.service | EntityType.generic;
   /** Field value used to query alerts — e.g. `host.name` for hosts, the entity id for generic. */
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) when already resolved. */
@@ -80,8 +81,8 @@ export const AlertsInsights = memo(
             field={FIELD[entityType]}
             value={value}
             entityId={entityId}
-            // The alerts table only resolves host/user entity types; for generic it relies on
-            // the `field`/`value` filter (`related.entity`) instead.
+            // The alerts table only resolves host/user entity types; for service/generic it relies on
+            // the `field`/`value` filter instead.
             entityType={
               entityType === EntityType.host || entityType === EntityType.user
                 ? entityType

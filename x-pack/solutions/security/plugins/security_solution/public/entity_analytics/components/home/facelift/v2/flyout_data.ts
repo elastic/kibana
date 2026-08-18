@@ -27,6 +27,9 @@ import {
   IDENTITY_BY_ID,
   IDENTITIES,
   RAW_RECORDS,
+  anomaliesCountForIdentity,
+  firstSeenForIdentity,
+  firstSeenForRecord,
   getFaceliftRiskLevel,
   recordsForIdentity,
   sourcesForIdentity,
@@ -45,6 +48,16 @@ const rawRecordByEntityId = Object.fromEntries(
 const resolveIdentityId = (entityId: string): string | undefined => {
   if (IDENTITY_BY_ID[entityId]) return entityId;
   return rawRecordByEntityId[entityId]?.resolvedTo;
+};
+
+/**
+ * Anomaly count for a table / flyout entity id (target, alias, or unresolved).
+ * Unresolved solos have no Behavioral anomalies section → 0.
+ */
+export const anomaliesCountForEntityId = (entityId: string): number => {
+  const identityId = resolveIdentityId(entityId);
+  const identity = identityId ? IDENTITY_BY_ID[identityId] : undefined;
+  return identity ? anomaliesCountForIdentity(identity) : 0;
 };
 
 /** True for targets, aliases, and unresolved solos in the facelift corpus. */
@@ -70,11 +83,7 @@ const toRiskLevel = (
   return EntityRiskLevelsEnum[level];
 };
 
-const firstSeenFor = (identity: FaceliftIdentity): string => {
-  // Dormant accounts: first seen long ago; others ~90 days.
-  const days = identity.isDormantActive ? 400 : 90;
-  return new Date(Date.now() - days * 24 * 36e5).toISOString();
-};
+const firstSeenFor = (identity: FaceliftIdentity): string => firstSeenForIdentity(identity.id);
 
 const domainFor = (identity: FaceliftIdentity): string => {
   const record = recordsForIdentity(identity.id)[0];
@@ -234,7 +243,7 @@ const buildUserEntityFromRecord = (record: FaceliftRawRecord): UserEntity => {
       EngineMetadata: { Type: 'user' },
       source: [SOURCE_TOKEN[record.source] ?? record.source.toLowerCase()],
       lifecycle: {
-        first_seen: new Date(new Date(record.lastSeen).getTime() - 90 * 24 * 36e5).toISOString(),
+        first_seen: firstSeenForRecord(record),
         last_activity: record.lastSeen,
       },
       attributes: {
@@ -268,7 +277,7 @@ const buildHostEntityFromRecord = (record: FaceliftRawRecord): HostEntity => ({
     EngineMetadata: { Type: 'host' },
     source: [SOURCE_TOKEN[record.source] ?? record.source.toLowerCase()],
     lifecycle: {
-      first_seen: new Date(new Date(record.lastSeen).getTime() - 90 * 24 * 36e5).toISOString(),
+      first_seen: firstSeenForRecord(record),
       last_activity: record.lastSeen,
     },
     risk: {
@@ -304,7 +313,7 @@ const buildServiceEntityFromRecord = (record: FaceliftRawRecord): ServiceEntity 
     EngineMetadata: { Type: 'service' },
     source: [SOURCE_TOKEN[record.source] ?? record.source.toLowerCase()],
     lifecycle: {
-      first_seen: new Date(new Date(record.lastSeen).getTime() - 90 * 24 * 36e5).toISOString(),
+      first_seen: firstSeenForRecord(record),
       last_activity: record.lastSeen,
     },
     risk: {
@@ -498,6 +507,8 @@ export const getFaceliftAnomalyOverview = (entityId: string): GetAnomalyOverview
     };
   }
 
+  const totalAnomaliesCount = anomaliesCountForIdentity(identity);
+
   const buckets = [6, 5, 4, 3, 2, 1, 0].map((daysAgo, index): AnomalyTimeBucket => {
     const timestamp = new Date(now - daysAgo * 24 * 36e5).toISOString();
     const maxScore = 45 + index * 7 + (identity.riskScore % 10);
@@ -538,7 +549,7 @@ export const getFaceliftAnomalyOverview = (entityId: string): GetAnomalyOverview
       },
     ],
     tacticCounts: { TA0001: 8, TA0003: 4, TA0006: 3 },
-    totalAnomaliesCount: 15,
+    totalAnomaliesCount,
     from,
     to,
     hasJobsMissingThreatTactics: false,

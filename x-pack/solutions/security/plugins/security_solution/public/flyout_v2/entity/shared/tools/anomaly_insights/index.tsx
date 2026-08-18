@@ -8,6 +8,7 @@
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { EntityType } from '../../../../../../common/entity_analytics/types';
+import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { AnomaliesTab } from '../../../../../entity_analytics/components/anomalies/anomalies_tab';
 import { ANOMALY_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
@@ -15,12 +16,10 @@ import { ANOMALY_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = ANOMALY_INSIGHTS_TITLE;
 
-const ICON_TYPE = { [EntityType.host]: 'storage', [EntityType.user]: 'user' } as const;
-
 export interface AnomalyInsightsProps {
-  /** Whether this tool is scoped to a host or user entity. Controls the icon and the entity type passed to the tab. */
-  entityType: EntityType.host | EntityType.user;
-  /** Entity name shown in the header context label (`host.name` for hosts, `user.name` for users). */
+  /** Entity type for the header icon and anomalies query scope. */
+  entityType: EntityType.host | EntityType.user | EntityType.service;
+  /** Entity name shown in the header context label. */
   value: string;
   /** Canonical Entity Store v2 id (`entity.id`) used to query anomalies. */
   entityId?: string;
@@ -40,7 +39,7 @@ export const AnomalyInsights = memo(
             title={TITLE}
             onTitleClick={onOpenEntity}
             label={value}
-            iconType={ICON_TYPE[entityType]}
+            iconType={EntityIconByType[entityType]}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody data-test-subj={ANOMALY_INSIGHTS_TOOL_TEST_ID}>

@@ -23,6 +23,7 @@ import {
   CASES_FEATURE_ID,
   CASES_PATH,
   DASHBOARDS_PATH,
+  ENTITY_ANALYTICS_HOME_PAGE_PATH,
   EXCEPTIONS_PATH,
   RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
@@ -174,6 +175,12 @@ export const isDetectionsPath = (pathname: string): boolean => {
     strict: false,
   });
 };
+
+export const isEntityAnalyticsHomePagePath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: ENTITY_ANALYTICS_HOME_PAGE_PATH,
+    strict: false,
+  });
 
 export const isDashboardViewPath = (pathname: string): boolean =>
   matchPath(pathname, {

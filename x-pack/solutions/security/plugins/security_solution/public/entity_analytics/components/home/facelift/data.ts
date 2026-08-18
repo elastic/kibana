@@ -7,15 +7,26 @@
 
 /**
  * Stable import path for facelift mock entity data.
- * Implementation lives in `./v1` / `./v2`; keep this file as a thin bridge so
- * external call sites do not hard-code a version folder.
+ * Implementation lives in `./v1` / `./v2` / `./v3`; keep this file as a thin
+ * bridge so external call sites do not hard-code a version folder.
+ * v.3 re-exports v.2's corpus so mocks stay shared.
  */
 
 import { getActiveFaceliftVersion } from './active_version';
 import * as v1 from './v1/data';
 import * as v2 from './v2/data';
+import * as v3 from './v3/data';
 
-const impl = () => (getActiveFaceliftVersion() === 'v1' ? v1 : v2);
+const impl = () => {
+  switch (getActiveFaceliftVersion()) {
+    case 'v1':
+      return v1;
+    case 'v2':
+      return v2;
+    case 'v3':
+      return v3;
+  }
+};
 
 /** Flag is identical across versions today; re-exported for existing call sites. */
 export const USE_FACELIFT_MOCK_ENTITIES = v2.USE_FACELIFT_MOCK_ENTITIES;

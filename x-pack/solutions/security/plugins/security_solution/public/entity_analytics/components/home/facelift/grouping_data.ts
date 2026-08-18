@@ -7,14 +7,24 @@
 
 /**
  * Stable import path for facelift grouping / grid mock helpers.
- * Routes to the active version snapshot under `./v1` or `./v2`.
+ * Routes to the active version snapshot under `./v1`, `./v2`, or `./v3`.
  */
 
 import { getActiveFaceliftVersion } from './active_version';
 import * as v1 from './v1/grouping_data';
 import * as v2 from './v2/grouping_data';
+import * as v3 from './v3/grouping_data';
 
-const impl = () => (getActiveFaceliftVersion() === 'v1' ? v1 : v2);
+const impl = () => {
+  switch (getActiveFaceliftVersion()) {
+    case 'v1':
+      return v1;
+    case 'v2':
+      return v2;
+    case 'v3':
+      return v3;
+  }
+};
 
 export const filterHitsByEsQuery = (
   ...args: Parameters<typeof v2.filterHitsByEsQuery>

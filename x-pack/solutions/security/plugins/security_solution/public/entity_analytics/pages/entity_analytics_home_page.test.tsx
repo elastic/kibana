@@ -296,7 +296,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    // The SiemSearchBar is in-page under the header for v.2 (default).
+    // The SiemSearchBar is in-page under the header for v.3 (default; same as v.2).
     expect(screen.getByTestId('entityAnalyticsHomePage')).toBeInTheDocument();
   });
 
@@ -338,7 +338,7 @@ describe('EntityAnalyticsHomePage', () => {
     );
   });
 
-  it('renders the Save view primary action', () => {
+  it('does not render the Save view primary action on v.3 (default)', () => {
     render(
       <MemoryRouter>
         <EntityAnalyticsHomePage />
@@ -346,7 +346,7 @@ describe('EntityAnalyticsHomePage', () => {
       { wrapper: TestProviders }
     );
 
-    expect(screen.getByRole('button', { name: 'Save view' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Save view' })).not.toBeInTheDocument();
   });
 
   it('renders the homepage (not onboarding) when running even if the data view has no matched indices', () => {

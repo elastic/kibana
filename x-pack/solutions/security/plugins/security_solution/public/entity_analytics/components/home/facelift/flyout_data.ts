@@ -7,7 +7,7 @@
 
 /**
  * Stable import path for facelift flyout mocks.
- * Routes to the active version snapshot under `./v1` or `./v2`.
+ * Routes to the active version snapshot under `./v1`, `./v2`, or `./v3`.
  */
 
 import type { EntityType } from '../../../../../common/entity_analytics/types';
@@ -15,8 +15,18 @@ import type { RiskScoreState } from '../../../api/hooks/use_risk_score';
 import { getActiveFaceliftVersion } from './active_version';
 import * as v1 from './v1/flyout_data';
 import * as v2 from './v2/flyout_data';
+import * as v3 from './v3/flyout_data';
 
-const impl = () => (getActiveFaceliftVersion() === 'v1' ? v1 : v2);
+const impl = () => {
+  switch (getActiveFaceliftVersion()) {
+    case 'v1':
+      return v1;
+    case 'v2':
+      return v2;
+    case 'v3':
+      return v3;
+  }
+};
 
 export const USE_FACELIFT_MOCK_FLYOUT = v2.USE_FACELIFT_MOCK_FLYOUT;
 

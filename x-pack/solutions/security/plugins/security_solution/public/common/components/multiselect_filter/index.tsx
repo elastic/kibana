@@ -24,6 +24,8 @@ export interface MultiselectFilterProps<T = unknown> {
    *  https://eui.elastic.co/#/forms/selectable#sizing-and-containers
    */
   width?: number;
+  /** When inside a `fullWidth` EuiFilterGroup, set true so the button fills available space. */
+  grow?: boolean;
 }
 
 interface MultiselectFilterOption<T> {
@@ -55,6 +57,7 @@ const MultiselectFilterComponent = <T extends unknown>({
   items,
   selectedItems,
   width,
+  grow = false,
   onSelectionChange = noop,
   renderLabel = String,
   renderItem = renderLabel,
@@ -91,7 +94,7 @@ const MultiselectFilterComponent = <T extends unknown>({
         <EuiFilterButton
           data-test-subj={`${dataTestSubj}-popoverButton`}
           iconType="chevronSingleDown"
-          grow={false}
+          grow={grow}
           numFilters={items.length}
           numActiveFilters={selectedItems.length}
           hasActiveFilters={selectedItems.length > 0}

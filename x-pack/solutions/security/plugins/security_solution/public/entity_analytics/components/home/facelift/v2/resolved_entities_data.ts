@@ -14,7 +14,7 @@
 
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import type { CriticalityLevelWithUnassigned } from '../../../../../../common/entity_analytics/asset_criticality/types';
-import type { FaceliftIdentity, FaceliftRawRecord, PageFilters } from './data';
+import type { FaceliftIdentity, FaceliftRawRecord, FaceliftWatchlist, PageFilters } from './data';
 import {
   EMPTY_PAGE_FILTERS,
   IDENTITIES,
@@ -27,6 +27,16 @@ import {
   recordsForIdentity,
   riskDeltaPercent,
   scoreDeltaPercent,
+  watchlistsForIdentity,
+  watchlistsForRecord,
+  casesCountForIdentity,
+  casesCountForRecord,
+  anomaliesCountForIdentity,
+  anomaliesCountForRecord,
+  firstSeenForIdentity,
+  firstSeenForRecord,
+  lastAlertForIdentity,
+  lastAlertForRecord,
 } from './data';
 import { filterHitsByEsQuery } from './grouping_data';
 
@@ -57,6 +67,16 @@ export interface EntityRow {
   alerts: number;
   alertsBySeverity: AlertSeverityCounts;
   lastSeen: string;
+  /** Watchlists this entity belongs to (prototype mock). */
+  watchlists: FaceliftWatchlist[];
+  /** Case attachments count (prototype mock, 0–25). */
+  cases: number;
+  /** Behavioral anomalies count — matches the entity flyout overview. */
+  anomalies: number;
+  /** When this entity was first observed (prototype mock). */
+  firstSeen: string;
+  /** Most recent alert on this entity; undefined when there are no alerts. */
+  lastAlert?: string;
 }
 
 export interface ResolvedEntityRow extends EntityRow {
@@ -169,10 +189,16 @@ const rowFromRecord = (record: FaceliftRawRecord): EntityRow => ({
   alerts: record.alerts,
   alertsBySeverity: splitAlertsBySeverity(record.alerts, record.riskScore),
   lastSeen: record.lastSeen,
+  watchlists: watchlistsForRecord(record),
+  cases: casesCountForRecord(record),
+  anomalies: anomaliesCountForRecord(record),
+  firstSeen: firstSeenForRecord(record),
+  lastAlert: lastAlertForRecord(record),
 });
 
 const groupFromIdentity = (identity: FaceliftIdentity): ResolvedEntityRow => {
   const rawRecords = recordsForIdentity(identity.id).map(rowFromRecord);
+  const alerts = rawRecords.reduce((total, record) => total + record.alerts, 0);
 
   return {
     id: identity.id,
@@ -185,9 +211,14 @@ const groupFromIdentity = (identity: FaceliftIdentity): ResolvedEntityRow => {
     riskDelta24h: identity.riskDelta24h,
     riskChangePercent: riskDeltaPercent(identity),
     criticality: highestCriticality(rawRecords.map((record) => record.criticality)),
-    alerts: rawRecords.reduce((total, record) => total + record.alerts, 0),
+    alerts,
     alertsBySeverity: sumSeverities(rawRecords.map((record) => record.alertsBySeverity)),
     lastSeen: mostRecent(rawRecords.map((record) => record.lastSeen)),
+    watchlists: watchlistsForIdentity(identity.id),
+    cases: casesCountForIdentity(identity.id),
+    anomalies: anomaliesCountForIdentity(identity),
+    firstSeen: firstSeenForIdentity(identity.id),
+    lastAlert: lastAlertForIdentity(identity.id, alerts),
     rawRecords,
     isUnresolved: false,
   };

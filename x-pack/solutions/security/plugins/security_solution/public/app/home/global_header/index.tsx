@@ -5,21 +5,30 @@
  * 2.0.
  */
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHeaderLink,
   EuiHeaderLinks,
   EuiHeaderSection,
   EuiHeaderSectionItem,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { PageScope } from '../../../data_view_manager/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
-import { isDashboardViewPath, isDetectionsPath, isRuleChangesHistoryPath } from '../../../helpers';
+import {
+  isDashboardViewPath,
+  isDetectionsPath,
+  isEntityAnalyticsHomePagePath,
+  isRuleChangesHistoryPath,
+} from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
 import { timelineSelectors } from '../../../timelines/store';
@@ -30,6 +39,7 @@ import {
 } from '../../../sourcerer/containers/sourcerer_paths';
 import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
 import { DataViewPicker } from '../../../data_view_manager/components/data_view_picker';
+import { FaceliftVersionHeaderControl } from './facelift_version_header_control';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -41,6 +51,7 @@ const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.butt
  */
 export const GlobalHeader = React.memo(() => {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
+  const { euiTheme } = useEuiTheme();
   const {
     theme,
     setHeaderActionMenu,
@@ -61,6 +72,7 @@ export const GlobalHeader = React.memo(() => {
   const showDataViewPicker = showDataViewPickerByPath(pathname);
   const dashboardViewPath = isDashboardViewPath(pathname);
   const changesHistoryPath = isRuleChangesHistoryPath(pathname);
+  const entityAnalyticsHomePath = isEntityAnalyticsHomePagePath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -109,22 +121,39 @@ export const GlobalHeader = React.memo(() => {
         )}
 
         <EuiHeaderSectionItem>
-          <EuiHeaderLinks>
-            {canAddData && (
-              <EuiHeaderLink
-                color="primary"
-                data-test-subj="add-data"
-                href={href}
-                iconType="indexOpen"
-                onClick={onClick}
-              >
-                {BUTTON_ADD_DATA}
-              </EuiHeaderLink>
-            )}
-            {showDataViewPicker && !showTimeline && (
-              <DataViewPicker scope={pageScope} disabled={pageScope === PageScope.alerts} />
-            )}
-          </EuiHeaderLinks>
+          <EuiFlexGroup
+            gutterSize="none"
+            alignItems="center"
+            responsive={false}
+            css={css`
+              /* 16px between Prototype version dropdown and Add integrations */
+              gap: ${euiTheme.size.base};
+            `}
+          >
+            {entityAnalyticsHomePath ? (
+              <EuiFlexItem grow={false}>
+                <FaceliftVersionHeaderControl />
+              </EuiFlexItem>
+            ) : null}
+            <EuiFlexItem grow={false}>
+              <EuiHeaderLinks>
+                {canAddData && (
+                  <EuiHeaderLink
+                    color="primary"
+                    data-test-subj="add-data"
+                    href={href}
+                    iconType="indexOpen"
+                    onClick={onClick}
+                  >
+                    {BUTTON_ADD_DATA}
+                  </EuiHeaderLink>
+                )}
+                {showDataViewPicker && !showTimeline && (
+                  <DataViewPicker scope={pageScope} disabled={pageScope === PageScope.alerts} />
+                )}
+              </EuiHeaderLinks>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
     </InPortal>

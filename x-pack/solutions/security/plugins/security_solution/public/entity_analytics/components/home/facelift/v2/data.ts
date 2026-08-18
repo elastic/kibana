@@ -509,6 +509,218 @@ export const IDENTITY_BY_ID: Record<string, FaceliftIdentity> = Object.fromEntri
   IDENTITIES.map((identity) => [identity.id, identity])
 );
 
+// ---------------------------------------------------------------------------
+// Watchlists (prototype membership — drives the filter + Watchlists column)
+// ---------------------------------------------------------------------------
+
+export const FACELIFT_WATCHLISTS = [
+  'Privileged users',
+  'Departing employees',
+  'My custom watchlist',
+] as const;
+
+export type FaceliftWatchlist = (typeof FACELIFT_WATCHLISTS)[number];
+
+/**
+ * Resolved-identity membership. Privileged users are on the prebuilt list;
+ * others are mixed across custom lists so the column shows 0–3 badges.
+ */
+const IDENTITY_WATCHLISTS: Record<string, FaceliftWatchlist[]> = {
+  'id-amber': ['Privileged users', 'My custom watchlist'],
+  'id-james': ['Privileged users'],
+  'id-liam': ['Privileged users', 'Departing employees'],
+  'id-maria': ['Departing employees', 'My custom watchlist'],
+  'id-sofia': ['Departing employees'],
+  'id-eva': ['My custom watchlist'],
+  'id-noah': ['Privileged users', 'Departing employees', 'My custom watchlist'],
+  'id-tomas': ['Departing employees'],
+  'id-web-prod': ['My custom watchlist'],
+  'id-svc-ci': ['My custom watchlist'],
+  'id-svc-backup': ['Privileged users'],
+};
+
+/** Unresolved solos that still appear on a watchlist. */
+const UNRESOLVED_RECORD_WATCHLISTS: Record<string, FaceliftWatchlist[]> = {
+  'rec-ad-un01': ['Privileged users', 'My custom watchlist'],
+  'rec-okta-un04': ['Departing employees'],
+};
+
+export const watchlistsForIdentity = (identityId: string): FaceliftWatchlist[] =>
+  IDENTITY_WATCHLISTS[identityId] ?? [];
+
+export const watchlistsForRecord = (record: FaceliftRawRecord): FaceliftWatchlist[] => {
+  if (record.resolvedTo) return watchlistsForIdentity(record.resolvedTo);
+  return UNRESOLVED_RECORD_WATCHLISTS[record.id] ?? [];
+};
+
+// ---------------------------------------------------------------------------
+// Cases (prototype — count of case attachments per entity)
+// ---------------------------------------------------------------------------
+
+/** Case attachment counts for resolved identities (0–25). */
+const IDENTITY_CASE_COUNTS: Record<string, number> = {
+  'id-amber': 12,
+  'id-svc-ci': 3,
+  'id-web-prod': 7,
+  'id-james': 25,
+  'id-db-core': 0,
+  'id-maria': 4,
+  'id-vpn-gw': 1,
+  'id-svc-backup': 0,
+  'id-liam': 18,
+  'id-kiosk': 2,
+  'id-sofia': 9,
+  'id-build-runner': 0,
+  'id-tomas': 6,
+  'id-svc-report': 1,
+  'id-eva': 14,
+  'id-print-srv': 0,
+  'id-noah': 21,
+  'id-iot-sensor': 5,
+};
+
+const UNRESOLVED_CASE_COUNTS: Record<string, number> = {
+  'rec-ad-un01': 8,
+  'rec-ep-un02': 0,
+  'rec-ad-un03': 2,
+  'rec-okta-un04': 11,
+};
+
+export const casesCountForIdentity = (identityId: string): number =>
+  IDENTITY_CASE_COUNTS[identityId] ?? 0;
+
+export const casesCountForRecord = (record: FaceliftRawRecord): number => {
+  if (record.resolvedTo) return casesCountForIdentity(record.resolvedTo);
+  return UNRESOLVED_CASE_COUNTS[record.id] ?? 0;
+};
+
+// ---------------------------------------------------------------------------
+// Anomalies (must match Behavioral anomalies / getFaceliftAnomalyOverview)
+// ---------------------------------------------------------------------------
+
+/**
+ * Per-identity totals for entities with `hasNewAnomalies`. Used by the
+ * Entities table and the flyout overview so both stay in lockstep.
+ */
+const IDENTITY_ANOMALY_COUNTS: Record<string, number> = {
+  'id-amber': 15,
+  'id-web-prod': 8,
+  'id-maria': 12,
+  'id-liam': 22,
+  'id-sofia': 5,
+};
+
+export const anomaliesCountForIdentity = (identity: FaceliftIdentity): number => {
+  if (!identity.hasNewAnomalies) return 0;
+  return IDENTITY_ANOMALY_COUNTS[identity.id] ?? 15;
+};
+
+export const anomaliesCountForRecord = (record: FaceliftRawRecord): number => {
+  if (!record.resolvedTo) return 0;
+  const identity = IDENTITY_BY_ID[record.resolvedTo];
+  return identity ? anomaliesCountForIdentity(identity) : 0;
+};
+
+// ---------------------------------------------------------------------------
+// First seen / Last alert (prototype timeline fields)
+// ---------------------------------------------------------------------------
+
+const daysAgo = (days: number): string => ago(days * 24);
+
+/**
+ * First-seen timestamps: most entities months–a year ago; a few are recent
+ * (new-this-week / short-lived).
+ */
+const IDENTITY_FIRST_SEEN: Record<string, string> = {
+  'id-amber': daysAgo(240),
+  'id-svc-ci': daysAgo(150),
+  'id-web-prod': daysAgo(95),
+  'id-james': daysAgo(380),
+  'id-db-core': daysAgo(420),
+  'id-maria': daysAgo(60),
+  'id-vpn-gw': ago(30), // recent
+  'id-svc-backup': ago(18), // recent
+  'id-liam': daysAgo(200),
+  'id-kiosk': ago(40), // recent
+  'id-sofia': daysAgo(5), // recent
+  'id-build-runner': daysAgo(110),
+  'id-tomas': daysAgo(310),
+  'id-svc-report': daysAgo(85),
+  'id-eva': daysAgo(175),
+  'id-print-srv': daysAgo(500),
+  'id-noah': daysAgo(45),
+  'id-iot-sensor': daysAgo(130),
+};
+
+const UNRESOLVED_FIRST_SEEN: Record<string, string> = {
+  'rec-ad-un01': daysAgo(14),
+  'rec-ep-un02': ago(8), // recent
+  'rec-ad-un03': daysAgo(280),
+  'rec-okta-un04': daysAgo(70),
+};
+
+/**
+ * Last-alert timestamps — between first seen and now. Omitted when the entity
+ * has no alerts (table shows —).
+ */
+const IDENTITY_LAST_ALERT: Record<string, string> = {
+  'id-amber': ago(0.2),
+  'id-svc-ci': ago(1.5),
+  'id-web-prod': ago(3),
+  'id-james': ago(12),
+  'id-db-core': ago(48),
+  'id-maria': ago(0.5),
+  'id-vpn-gw': ago(4),
+  'id-svc-backup': ago(6),
+  'id-liam': ago(2),
+  'id-kiosk': ago(10),
+  'id-sofia': ago(1),
+  'id-build-runner': ago(72),
+  'id-tomas': daysAgo(20),
+  'id-svc-report': ago(36),
+  'id-eva': ago(8),
+  'id-print-srv': daysAgo(40),
+  'id-noah': ago(16),
+  'id-iot-sensor': daysAgo(12),
+};
+
+const UNRESOLVED_LAST_ALERT: Record<string, string> = {
+  'rec-ad-un01': ago(0.4),
+  'rec-ep-un02': ago(2),
+  'rec-ad-un03': ago(24),
+  'rec-okta-un04': ago(5),
+};
+
+/** Ensure last alert is not earlier than first seen. */
+const clampAfterFirstSeen = (firstSeen: string, lastAlert: string): string =>
+  lastAlert >= firstSeen ? lastAlert : firstSeen;
+
+export const firstSeenForIdentity = (identityId: string): string =>
+  IDENTITY_FIRST_SEEN[identityId] ?? daysAgo(90);
+
+export const lastAlertForIdentity = (
+  identityId: string,
+  alerts: number
+): string | undefined => {
+  if (alerts <= 0) return undefined;
+  const firstSeen = firstSeenForIdentity(identityId);
+  const lastAlert = IDENTITY_LAST_ALERT[identityId] ?? ago(24);
+  return clampAfterFirstSeen(firstSeen, lastAlert);
+};
+
+export const firstSeenForRecord = (record: FaceliftRawRecord): string => {
+  if (record.resolvedTo) return firstSeenForIdentity(record.resolvedTo);
+  return UNRESOLVED_FIRST_SEEN[record.id] ?? daysAgo(90);
+};
+
+export const lastAlertForRecord = (record: FaceliftRawRecord): string | undefined => {
+  if (record.alerts <= 0) return undefined;
+  if (record.resolvedTo) return lastAlertForIdentity(record.resolvedTo, record.alerts);
+  const firstSeen = firstSeenForRecord(record);
+  const lastAlert = UNRESOLVED_LAST_ALERT[record.id] ?? ago(24);
+  return clampAfterFirstSeen(firstSeen, lastAlert);
+};
+
 /**
  * Records are listed in contribution order within each resolution group: the
  * first record of a group is the one the resolved entity takes its name from,
@@ -1351,6 +1563,8 @@ export interface PageFilters {
   sources: string[];
   riskLevels: FaceliftRiskLevel[];
   criticalities: CriticalityLevelWithUnassigned[];
+  /** Watchlist display names from {@link FACELIFT_WATCHLISTS}. */
+  watchlists: FaceliftWatchlist[];
 }
 
 export const EMPTY_PAGE_FILTERS: PageFilters = {
@@ -1358,13 +1572,15 @@ export const EMPTY_PAGE_FILTERS: PageFilters = {
   sources: [],
   riskLevels: [],
   criticalities: [],
+  watchlists: [],
 };
 
 export const isPageFiltersEmpty = (filters: PageFilters): boolean =>
   !filters.entityTypes.length &&
   !filters.sources.length &&
   !filters.riskLevels.length &&
-  !filters.criticalities.length;
+  !filters.criticalities.length &&
+  !filters.watchlists.length;
 
 /** The `entity.source` value stored on documents for a source display label. */
 export const entitySourceToken = (label: string): string =>
@@ -1377,9 +1593,10 @@ const matchesFacets = (
     sources: string[];
     riskScore: number;
     criticality: CriticalityLevelWithUnassigned;
+    watchlists: FaceliftWatchlist[];
   }
 ): boolean => {
-  const { entityTypes, sources, riskLevels, criticalities } = filters;
+  const { entityTypes, sources, riskLevels, criticalities, watchlists } = filters;
 
   if (entityTypes.length && !entityTypes.includes(candidate.entityType as EntityType)) return false;
   if (sources.length && !candidate.sources.some((source) => sources.includes(source))) return false;
@@ -1387,6 +1604,12 @@ const matchesFacets = (
     return false;
   }
   if (criticalities.length && !criticalities.includes(candidate.criticality)) return false;
+  if (
+    watchlists.length &&
+    !candidate.watchlists.some((watchlist) => watchlists.includes(watchlist))
+  ) {
+    return false;
+  }
 
   return true;
 };
@@ -1400,6 +1623,7 @@ export const identityMatchesPageFilters = (
     sources: sourcesForIdentity(identity.id),
     riskScore: identity.riskScore,
     criticality: identity.criticality,
+    watchlists: watchlistsForIdentity(identity.id),
   });
 
 export const recordMatchesPageFilters = (
@@ -1411,10 +1635,22 @@ export const recordMatchesPageFilters = (
     sources: [record.source],
     riskScore: record.riskScore,
     criticality: record.criticality,
+    watchlists: watchlistsForRecord(record),
   });
 
 const hitMatchesPageFilters = (hit: FaceliftEntityEsHit, filters: PageFilters): boolean => {
   const { entity, asset } = hit._source;
+  const resolvedTo = entity.relationships?.resolution?.resolved_to;
+  let watchlists: FaceliftWatchlist[] = [];
+  if (resolvedTo) {
+    watchlists = watchlistsForIdentity(resolvedTo);
+  } else if (IDENTITY_BY_ID[entity.id]) {
+    watchlists = watchlistsForIdentity(entity.id);
+  } else if (hit._id.startsWith('unresolved-')) {
+    const record = RAW_RECORDS.find((entry) => entry.id === hit._id.slice('unresolved-'.length));
+    watchlists = record ? watchlistsForRecord(record) : [];
+  }
+
   return matchesFacets(
     { ...filters, sources: filters.sources.map(entitySourceToken) },
     {
@@ -1422,38 +1658,66 @@ const hitMatchesPageFilters = (hit: FaceliftEntityEsHit, filters: PageFilters): 
       sources: entity.source,
       riskScore: entity.risk.calculated_score_norm,
       criticality: asset.criticality,
+      watchlists,
     }
   );
 };
 
 /**
- * Share of a card's own population that survives the page filters. The cards
- * keep their designed headline numbers (which are larger than the mock corpus),
- * and filtering scales them, so the whole band moves together and stays
- * consistent with the table underneath.
+ * Resolved-entity rows that match a signal card — same membership as
+ * {@link filterIdentities} for `type: 'card'`, plus page filters. Only identities
+ * that appear in the Entities table (have at least one raw record) are counted.
  */
-const cardPopulationRatio = (cardId: SignalCardId, filters: PageFilters): number => {
-  const population = IDENTITIES.filter(CARD_IDENTITY_PREDICATES[cardId]);
-  if (!population.length) return 0;
-  return (
-    population.filter((identity) => identityMatchesPageFilters(identity, filters)).length /
-    population.length
-  );
-};
-
-export const getSignalCards = (filters: PageFilters = EMPTY_PAGE_FILTERS): SignalCardData[] => {
-  if (isPageFiltersEmpty(filters)) return SIGNAL_CARDS;
-
-  return SIGNAL_CARDS.map((card) => {
-    const ratio = cardPopulationRatio(card.id, filters);
-    return {
-      ...card,
-      value: Math.round(card.value * ratio),
-      ...(card.delta === undefined ? {} : { delta: Math.round(card.delta * ratio) }),
-      ...(card.trend ? { trend: card.trend.map((value) => Math.round(value * ratio)) } : {}),
-    };
+const identitiesForCard = (cardId: SignalCardId, filters: PageFilters): FaceliftIdentity[] => {
+  const predicate = CARD_IDENTITY_PREDICATES[cardId];
+  return IDENTITIES.filter((identity) => {
+    if (!predicate(identity)) return false;
+    if (!recordsForIdentity(identity.id).length) return false;
+    return identityMatchesPageFilters(identity, filters);
   });
 };
+
+/**
+ * Raw-record rows that belong to identities matching a signal card — same
+ * membership rules as {@link filterRawRecords} for `type: 'card'`.
+ */
+const rawRecordsForCard = (cardId: SignalCardId, filters: PageFilters): FaceliftRawRecord[] => {
+  const predicate = CARD_IDENTITY_PREDICATES[cardId];
+  return RAW_RECORDS.filter((record) => {
+    if (!record.resolvedTo) return false;
+    const identity = IDENTITY_BY_ID[record.resolvedTo];
+    if (!identity || !predicate(identity)) return false;
+    return recordMatchesPageFilters(record, filters);
+  });
+};
+
+/**
+ * Metric cards for the Overview band. Values are live corpus counts for the
+ * active table view so each card equals the row count after Filter for / out:
+ * - Resolved: matching identities (lower)
+ * - Raw: matching raw records (higher — multiple records per identity)
+ * Designed {@link SIGNAL_CARDS} baselines only scale deltas / trends.
+ */
+export const getSignalCards = (
+  filters: PageFilters = EMPTY_PAGE_FILTERS,
+  tableView: TableView = 'resolved'
+): SignalCardData[] =>
+  SIGNAL_CARDS.map((card) => {
+    const count =
+      tableView === 'raw'
+        ? rawRecordsForCard(card.id, filters).length
+        : identitiesForCard(card.id, filters).length;
+    const baseline = card.value;
+    const ratio = baseline > 0 ? count / baseline : 0;
+    return {
+      ...card,
+      value: count,
+      ...(card.delta === undefined ? {} : { delta: Math.round(card.delta * ratio) }),
+      ...(card.trend
+        ? { trend: card.trend.map((value) => Math.round(value * ratio)) }
+        : {}),
+    };
+  });
 
 /**
  * Risk level × asset criticality counts for the Overview matrix, counted over the
