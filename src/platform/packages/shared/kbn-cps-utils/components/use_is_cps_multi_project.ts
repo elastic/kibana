@@ -21,27 +21,32 @@ import type { ICPSManager } from '../types';
  * synchronously on first render would report `false` even in a multi-project deployment.
  */
 export const useIsCpsMultiProject = (cpsManager?: ICPSManager): boolean | undefined => {
-  const [hasLinkedProjects, setHasLinkedProjects] = useState<boolean | undefined>(undefined);
+  const [isCpsMultiProject, setIsCpsMultiProject] = useState<boolean | undefined>(() =>
+    cpsManager ? undefined : false
+  );
 
   useEffect(() => {
     if (!cpsManager) {
+      // Must match the initial state, or every consumer gets an extra render on mount; this only
+      // does work when `cpsManager` goes from set to unset, which the initializer can't observe.
+      setIsCpsMultiProject(false);
       return;
     }
 
     let isMounted = true;
     // No-op on mount, but resets to pending when the manager itself changes.
-    setHasLinkedProjects(undefined);
+    setIsCpsMultiProject(undefined);
 
     cpsManager
       .whenReady()
       .then(() => {
         if (isMounted) {
-          setHasLinkedProjects(cpsManager.hasLinkedProjects());
+          setIsCpsMultiProject(cpsManager.hasLinkedProjects());
         }
       })
       .catch(() => {
         if (isMounted) {
-          setHasLinkedProjects(false);
+          setIsCpsMultiProject(false);
         }
       });
 
@@ -50,6 +55,5 @@ export const useIsCpsMultiProject = (cpsManager?: ICPSManager): boolean | undefi
     };
   }, [cpsManager]);
 
-  // Derived rather than stored, so the no-manager case never sets state and never costs a render.
-  return cpsManager ? hasLinkedProjects : false;
+  return isCpsMultiProject;
 };
