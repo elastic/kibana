@@ -342,6 +342,8 @@ export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
   user?: AuthenticatedUser;
   skipUnassignFromAgentPolicies?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   force?: boolean;
   asyncDeploy?: boolean;
   ignoreMissing?: boolean;
@@ -350,6 +352,8 @@ export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {
 export interface PackagePolicyClientBulkUpdateOptions {
   user?: AuthenticatedUser;
   force?: boolean;
+  /** Skip the agent policy revision bump when the caller will perform it separately. */
+  bumpRevision?: boolean;
   asyncDeploy?: boolean;
   fromBulkUpgrade?: boolean;
   oldPackagePolicies?: PackagePolicy[];
