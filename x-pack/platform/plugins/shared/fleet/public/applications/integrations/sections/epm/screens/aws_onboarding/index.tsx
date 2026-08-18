@@ -360,31 +360,17 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
 
       {currentStep === 1 && (
         <>
-          <EuiTitle size="m">
-            <h2>Which AWS services do you want to monitor?</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              Select the services you use. Elastic will set up everything needed to start
-              collecting data from your AWS account.
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          {/* gutterSize="s" = 8px, per design. Data format sits between
-              search and the type filter — same row, same compressed
-              height, so the three read as one control group. */}
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem>
-              <EuiFieldSearch
-                fullWidth
-                compressed
-                placeholder="Search services"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                isClearable
-                data-test-subj="awsOnboardingSearch"
-              />
+          {/* Data format sits apart from the task controls below (search,
+              filter) — it's a real decision with downstream effects, not
+              something that just changes what's visible in the list, so it
+              doesn't belong in that row. Positioned near the title instead,
+              matching how "Deployment method" sits at the top of its own
+              step rather than mixed into a control row. */}
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="m">
+                <h2>Which AWS services do you want to monitor?</h2>
+              </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false} style={{ width: 260 }}>
               {/* Most users never need to touch this. Styled like Step 2's
@@ -405,11 +391,33 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 data-test-subj="awsOnboardingEditSchema"
               />
             </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <EuiText size="s" color="subdued">
+            <p>
+              Select the services you use. Elastic will set up everything needed to start
+              collecting data from your AWS account.
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          {/* gutterSize="s" = 8px, per design. */}
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem>
+              <EuiFieldSearch
+                fullWidth
+                compressed
+                placeholder="Search services"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                isClearable
+                data-test-subj="awsOnboardingSearch"
+              />
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {/* buttonSize="s" matches a compressed field's height exactly
                   (both resolve to the same token) — "compressed" is
                   actually a touch shorter than that, which read as uneven
-                  next to the search bar and this select. */}
+                  next to the search bar. */}
               <EuiButtonGroup
                 legend="Filter services by data type"
                 options={DATA_TYPE_OPTIONS}
