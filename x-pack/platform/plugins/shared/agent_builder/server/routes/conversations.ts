@@ -265,6 +265,7 @@ export function registerConversationRoutes({
             body: schema.object({
               agent_id: schema.maybe(
                 schema.string({
+                  maxLength: 256,
                   meta: {
                     description:
                       'The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.',
@@ -273,6 +274,7 @@ export function registerConversationRoutes({
               ),
               conversation_id: schema.maybe(
                 schema.string({
+                  maxLength: 256,
                   validate: (v) =>
                     uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID',
                   meta: {
