@@ -11,8 +11,15 @@ import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core/server';
 import { RulesClient } from '../lib/rules_client';
+import { ActionPolicyClient } from '../lib/action_policy_client';
+import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
-import type { AlertingServerStart, RulesClientApi } from '../types';
+import type {
+  AlertingServerStart,
+  RulesClientApi,
+  ActionPolicyClientApi,
+  AlertEventsClientApi,
+} from '../types';
 
 export function bindContract({ bind }: ContainerModuleLoadOptions) {
   bind(Start).toDynamicValue(({ get }) => {
@@ -38,6 +45,20 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         spaceId: string
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
+      },
+      async getActionPolicyClientWithRequest(
+        request: KibanaRequest
+      ): Promise<ActionPolicyClientApi> {
+        return buildScope(request).get(ActionPolicyClient);
+      },
+      async getActionPolicyClientWithRequestInSpace(
+        request: KibanaRequest,
+        spaceId: string
+      ): Promise<ActionPolicyClientApi> {
+        return buildScope(request, spaceId).get(ActionPolicyClient);
+      },
+      async getAlertEventsClientWithRequest(request: KibanaRequest): Promise<AlertEventsClientApi> {
+        return buildScope(request).get(AlertEventsClient);
       },
     };
     return contract;

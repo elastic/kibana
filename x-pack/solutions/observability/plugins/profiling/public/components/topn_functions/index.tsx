@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiScreenReaderOnly,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -269,16 +270,24 @@ export const TopNFunctionsGrid = ({
             setSelectedRow(sortedRows[rowIndex]);
           }
           return (
-            <EuiButtonIcon
-              data-test-subj="profilingTopNFunctionsGridButton"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.profiling.topNFunctionsGrid.euiButtonIcon.showActionsLabel',
                 { defaultMessage: 'Show actions' }
               )}
-              iconType="maximize"
-              color="text"
-              onClick={handleOnClick}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="profilingTopNFunctionsGridButton"
+                aria-label={i18n.translate(
+                  'xpack.profiling.topNFunctionsGrid.euiButtonIcon.showActionsLabel',
+                  { defaultMessage: 'Show actions' }
+                )}
+                iconType="maximize"
+                color="text"
+                onClick={handleOnClick}
+              />
+            </EuiToolTip>
           );
         },
       });

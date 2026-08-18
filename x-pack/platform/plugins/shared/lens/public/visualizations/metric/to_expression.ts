@@ -6,7 +6,7 @@
  */
 
 import type { CustomPaletteParams, PaletteRegistry, PaletteOutput } from '@kbn/coloring';
-import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteColors } from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
   MetricVisExpressionFunctionDefinition,
@@ -41,19 +41,23 @@ function computePaletteParams(
   paletteService: PaletteRegistry,
   palette: PaletteOutput<CustomPaletteParams>
 ) {
-  const stops = getOverridePaletteStops(paletteService, palette);
+  const colors = getOverridePaletteColors(paletteService, palette);
 
   return {
     ...palette.params,
-    // rewrite colors and stops as two distinct arguments
-    colors: stops?.map(({ color }) => color),
-    stops: palette.params?.name === 'custom' ? stops?.map(({ stop }) => stop) : [],
+    colors,
+    // Positions are a custom-palette concept only. Named palettes distribute uniformly at render.
+    stops:
+      palette.params?.name === CUSTOM_PALETTE
+        ? palette.params?.stops?.map(({ stop }) => stop) ?? []
+        : [],
     reverse: false, // managed at UI level
   };
 }
 
 const getTrendlineExpression = (
   state: MetricVisualizationState,
+  datasourceLayers: DatasourceLayers,
   datasourceExpressionsByLayers: Record<string, Ast>
 ): Ast | undefined => {
   const { trendlineLayerId, trendlineMetricAccessor, trendlineTimeAccessor } = state;
@@ -67,34 +71,41 @@ const getTrendlineExpression = (
     return;
   }
 
+  const trendlineDatasource = datasourceLayers[trendlineLayerId];
+  const trendlineBreakdownBy =
+    state.trendlineBreakdownByAccessor &&
+    !state.collapseFn &&
+    trendlineDatasource?.getOperationForColumnId(state.trendlineBreakdownByAccessor)
+      ? state.trendlineBreakdownByAccessor
+      : undefined;
+
+  const trendlineArgs = {
+    metric: trendlineMetricAccessor,
+    timeField: trendlineTimeAccessor,
+    breakdownBy: trendlineBreakdownBy,
+    inspectorTableId: trendlineLayerId,
+    table: [
+      {
+        ...datasourceExpression,
+        chain: [
+          ...datasourceExpression.chain,
+          ...(state.collapseFn
+            ? [
+                buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
+                  by: [trendlineTimeAccessor],
+                  metric: [trendlineMetricAccessor],
+                  fn: [state.collapseFn],
+                }).toAst(),
+              ]
+            : []),
+        ],
+      },
+    ],
+  };
+
   const metricTrendlineFn = buildExpressionFunction<TrendlineExpressionFunctionDefinition>(
     'metricTrendline',
-    {
-      metric: trendlineMetricAccessor,
-      timeField: trendlineTimeAccessor,
-      breakdownBy:
-        state.trendlineBreakdownByAccessor && !state.collapseFn
-          ? state.trendlineBreakdownByAccessor
-          : undefined,
-      inspectorTableId: trendlineLayerId,
-      table: [
-        {
-          ...datasourceExpression,
-          chain: [
-            ...datasourceExpression.chain,
-            ...(state.collapseFn
-              ? [
-                  buildExpressionFunction<CollapseExpressionFunction>('lens_collapse', {
-                    by: [trendlineTimeAccessor],
-                    metric: [trendlineMetricAccessor],
-                    fn: [state.collapseFn],
-                  }).toAst(),
-                ]
-              : []),
-          ],
-        },
-      ],
-    }
+    trendlineArgs
   );
   return buildExpression([metricTrendlineFn]).toAst();
 };
@@ -156,7 +167,11 @@ export const toExpression = (
       ).toAst()
     : undefined;
 
-  const trendlineExpression = getTrendlineExpression(state, datasourceExpressionsByLayers);
+  const trendlineExpression = getTrendlineExpression(
+    state,
+    datasourceLayers,
+    datasourceExpressionsByLayers
+  );
   const { isNumeric: isNumericType } = getAccessorType(datasource, state.secondaryMetricAccessor);
 
   const secondaryDynamicColorMode = getColorMode(state.secondaryTrend, isNumericType);
@@ -220,6 +235,7 @@ export const toExpression = (
     secondaryAlign,
     iconAlign,
     valueFontSize: state.valueFontMode ?? LENS_METRIC_STATE_DEFAULTS.valueFontMode,
+    density: state.density ?? LENS_METRIC_STATE_DEFAULTS.density,
     primaryPosition,
     color: state.color ?? getDefaultColor(state, isMetricNumeric),
     icon: hasMetricIcon ? state.icon : undefined,

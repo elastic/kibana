@@ -24,21 +24,25 @@ jest.mock('./lib/get_user', () => ({
 }));
 
 const mockBulkCreateWorkflowExecutions = jest.fn();
+const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
+const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     bulkCreateWorkflowExecutions: mockBulkCreateWorkflowExecutions,
-    createWorkflowExecution: jest.fn().mockResolvedValue(undefined),
+    createWorkflowExecution: mockCreateWorkflowExecution,
+    getWorkflowExecutionById: mockGetWorkflowExecutionById,
   })),
 }));
 
 const mockAreWorkflowsEnabled = jest.fn();
+const mockIsWorkflowEnabled = jest.fn().mockResolvedValue(true);
 jest.mock('@kbn/workflows', () => {
   const actual = jest.requireActual('@kbn/workflows');
   return {
     ...actual,
     WorkflowRepository: jest.fn().mockImplementation(() => ({
       areWorkflowsEnabled: mockAreWorkflowsEnabled,
-      isWorkflowEnabled: jest.fn().mockResolvedValue(true),
+      isWorkflowEnabled: mockIsWorkflowEnabled,
     })),
   };
 });
@@ -94,6 +98,8 @@ describe('bulkScheduleWorkflow', () => {
     mockConcurrencyCheckConcurrency.mockResolvedValue(true);
     mockEvaluateConcurrencyKey.mockReturnValue(null);
     mockAreWorkflowsEnabled.mockResolvedValue(new Map<string, boolean>());
+    mockIsWorkflowEnabled.mockResolvedValue(true);
+    mockCreateWorkflowExecution.mockResolvedValue(undefined);
 
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
@@ -170,7 +176,7 @@ describe('bulkScheduleWorkflow', () => {
     expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
     const [scheduledTasks, scheduleOptions] = taskManager.bulkSchedule.mock.calls[0];
     expect(scheduledTasks).toHaveLength(2);
-    expect(scheduleOptions).toEqual({ request });
+    expect(scheduleOptions).toEqual({ request, cloneApiKey: true });
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
@@ -459,5 +465,93 @@ describe('bulkScheduleWorkflow', () => {
         error: { message: 'Workflow is disabled: wf-bad. Enable the workflow to run it.' },
       },
     ]);
+  });
+
+  it('still checks saved workflow enabled state for test runs', async () => {
+    const testRunWorkflow = createWorkflow('wf-test', { isTestRun: true });
+    mockAreWorkflowsEnabled.mockResolvedValue(new Map([['default:wf-test', false]]));
+
+    const result = await pluginStart.bulkScheduleWorkflow(
+      [{ workflow: testRunWorkflow, context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(mockAreWorkflowsEnabled).toHaveBeenCalledWith(
+      [{ workflowId: 'wf-test', spaceId: 'default' }],
+      { includeGlobal: true }
+    );
+    expect(mockBulkCreateWorkflowExecutions).not.toHaveBeenCalled();
+    expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
+    expect(result).toEqual([
+      {
+        status: 'error',
+        error: { message: 'Workflow is disabled: wf-test. Enable the workflow to run it.' },
+      },
+    ]);
+  });
+
+  it('skips saved workflow enabled checks for ephemeral workflows', async () => {
+    const ephemeralWorkflow = createWorkflow('wf-ephemeral', { isEphemeral: true });
+    mockBulkCreateWorkflowExecutions.mockImplementation(async (executions: Array<{ id: string }>) =>
+      executions.map(({ id }) => ({ id }))
+    );
+
+    const result = await pluginStart.bulkScheduleWorkflow(
+      [{ workflow: ephemeralWorkflow, context: { spaceId: 'default' } }],
+      request
+    );
+
+    expect(mockAreWorkflowsEnabled).not.toHaveBeenCalled();
+    expect(mockBulkCreateWorkflowExecutions).toHaveBeenCalledWith(
+      [expect.objectContaining({ workflowId: 'wf-ephemeral' })],
+      { refresh: 'wait_for' }
+    );
+    expect(taskManager.bulkSchedule).toHaveBeenCalledTimes(1);
+    expect(result).toEqual([
+      {
+        status: 'scheduled',
+        workflowExecutionId: expect.any(String),
+      },
+    ]);
+  });
+
+  it('checks saved workflow enabled state for single test-run executions', async () => {
+    mockIsWorkflowEnabled.mockResolvedValue(false);
+
+    await expect(
+      pluginStart.executeWorkflow(
+        createWorkflow('wf-test', { isTestRun: true }),
+        { spaceId: 'default' },
+        request
+      )
+    ).rejects.toThrow('Workflow is disabled: wf-test. Enable the workflow to run it.');
+
+    expect(mockIsWorkflowEnabled).toHaveBeenCalledWith('wf-test', 'default', {
+      includeGlobal: true,
+    });
+    expect(mockCreateWorkflowExecution).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
+  });
+
+  it('skips saved workflow enabled state for single ephemeral executions', async () => {
+    mockIsWorkflowEnabled.mockResolvedValue(false);
+
+    const result = await pluginStart.executeWorkflow(
+      createWorkflow('wf-ephemeral', { isEphemeral: true }),
+      { spaceId: 'default' },
+      request
+    );
+
+    expect(result).toEqual({ workflowExecutionId: expect.any(String) });
+    expect(mockIsWorkflowEnabled).not.toHaveBeenCalled();
+    expect(mockCreateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowId: 'wf-ephemeral' }),
+      { refresh: false }
+    );
+    expect(taskManager.schedule).toHaveBeenCalledTimes(1);
+    expect(taskManager.schedule).toHaveBeenCalledWith(
+      expect.any(Object),
+      expect.objectContaining({ request, cloneApiKey: true })
+    );
   });
 });

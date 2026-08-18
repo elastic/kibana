@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Space } from '../../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../../common/constants';
 import type { SpaceValidator } from '../../lib';
+import type { CustomizeSpaceFormValues } from '../../types';
 import { SectionPanel } from '../section_panel';
 
 type SolutionView = Space['solution'];
@@ -39,7 +40,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
       value: 'es',
       inputDisplay: (
         <>
-          <EuiIcon type="logoElasticsearch" css={iconCss} />
+          <EuiIcon type="logoElasticsearch" css={iconCss} aria-hidden={true} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.searchOptionLabel',
             { defaultMessage: 'Elasticsearch' }
@@ -52,7 +53,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
       value: 'oblt',
       inputDisplay: (
         <>
-          <EuiIcon type="logoObservability" css={iconCss} />
+          <EuiIcon type="logoObservability" css={iconCss} aria-hidden={true} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.obltOptionLabel',
             { defaultMessage: 'Observability' }
@@ -65,7 +66,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
       value: 'security',
       inputDisplay: (
         <>
-          <EuiIcon type="logoSecurity" css={iconCss} />
+          <EuiIcon type="logoSecurity" css={iconCss} aria-hidden={true} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.securityOptionLabel',
             { defaultMessage: 'Security' }
@@ -78,7 +79,7 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
       value: 'classic',
       inputDisplay: (
         <>
-          <EuiIcon type="logoElasticStack" css={iconCss} />
+          <EuiIcon type="logoElasticStack" css={iconCss} aria-hidden={true} />
           {i18n.translate(
             'xpack.spaces.management.manageSpacePage.solutionViewSelect.classicOptionLabel',
             { defaultMessage: 'Classic' }
@@ -91,8 +92,8 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
 };
 
 interface Props {
-  space: Partial<Space>;
-  onChange: (space: Partial<Space>) => void;
+  space: CustomizeSpaceFormValues;
+  onChange: (space: CustomizeSpaceFormValues) => void;
   isEditing: boolean;
   validator: SpaceValidator;
   sectionTitle?: string;

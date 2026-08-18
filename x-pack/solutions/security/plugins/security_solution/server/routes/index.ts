@@ -54,12 +54,17 @@ import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/s
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
+import { registerInferenceConnectorRoutes } from '../lib/inference_connector/register_inference_connector_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
 import { registerInitializationRoutes } from '../lib/initialization';
+import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/register_alert_analysis_routes';
+import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
+import { registerAlertAnalysisWorkflowSettingsRoutes } from '../workflows/alert_analysis_workflow/settings_routes';
+import { registerAlertAnalysisWorkflowRuleAttachmentRoutes } from '../workflows/alert_analysis_workflow/rule_attachment_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -137,6 +142,8 @@ export const initRoutes = (
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
 
+  registerAttacksRoutes(router, ruleDataClient, telemetrySender);
+
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
 
   if (previewTelemetryUrlEnabled) {
@@ -152,13 +159,17 @@ export const initRoutes = (
     logger,
     telemetrySender,
     ml,
+    hasEncryptionKey,
   });
+  registerInferenceConnectorRoutes({ router, getStartServices, logger });
   registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
+  registerAlertAnalysisWorkflowSettingsRoutes(router, getStartServices, logger);
+  registerAlertAnalysisWorkflowRuleAttachmentRoutes(router);
 
   registerAssetInventoryRoutes({ router, logger });
 
@@ -167,6 +178,7 @@ export const initRoutes = (
   registerTrialCompanionRoutes(trialCompanionDeps);
 
   registerInitializationRoutes({ router, logger });
+  registerAlertAnalysisRoutes(router, logger);
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

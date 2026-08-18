@@ -8,59 +8,48 @@
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
 import { inject, injectable } from 'inversify';
 import { type DispatcherServiceContract } from './dispatcher';
-import {
-  DispatcherEnabledProviderToken,
-  DispatcherServiceInternalToken,
-  type DispatcherEnabledProvider,
-} from './tokens';
+import { DispatcherServiceInternalToken } from './tokens';
 import type {
   DispatcherExecutionParams,
   DispatcherExecutionResult,
   DispatcherTaskState,
 } from './types';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
 @injectable()
 export class DispatcherTaskRunner {
   constructor(
     @inject(DispatcherServiceInternalToken)
     private readonly dispatcherService: DispatcherServiceContract,
-    @inject(DispatcherEnabledProviderToken)
-    private readonly dispatcherEnabledProvider: DispatcherEnabledProvider
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
-    const isEnabled = await this.safeIsEnabled();
-
-    if (!isEnabled) {
-      return { state: taskInstance.state };
-    }
-
-    const params = this.createDispatcherParams(taskInstance, abortController);
+  public async run({ taskInstance, signal }: TaskRunParams): Promise<RunResult> {
+    const params = this.createDispatcherParams(taskInstance, signal);
 
     const result = await this.dispatcherService.run(params);
 
     return this.buildRunResult(result);
   }
 
-  private async safeIsEnabled(): Promise<boolean> {
-    try {
-      return await this.dispatcherEnabledProvider();
-    } catch {
-      return true;
-    }
-  }
-
   private createDispatcherParams(
     taskInstance: TaskRunParams['taskInstance'],
-    abortController: AbortController
+    signal: AbortSignal
   ): DispatcherExecutionParams {
     const state: DispatcherTaskState = taskInstance.state;
+    const logger = this.logger.forSubsystem('dispatcher').withLabels({
+      task_id: taskInstance.id,
+    });
 
     return {
       previousStartedAt: state.previousStartedAt ? new Date(state.previousStartedAt) : undefined,
-      abortController,
+      signal,
+      logger,
     };
   }
 

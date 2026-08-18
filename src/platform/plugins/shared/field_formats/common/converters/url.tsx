@@ -14,7 +14,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { getHighlightReact } from '../utils';
 import { FieldFormat } from '../field_format';
 import type {
-  ReactContextTypeSingleConvert,
+  ReactConvertFunction,
   TextContextTypeConvert,
   FieldFormatMetaParams,
   FieldFormatParams,
@@ -23,6 +23,16 @@ import { FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];
+
+/**
+ * Escapes a value for embedding inside a single-quoted rison string: rison
+ * protects its delimiters with `!`, so `'` becomes `!'` and `!` becomes `!!`.
+ * Composed with encodeURIComponent this reproduces exactly how Kibana itself
+ * encodes such values in its app URLs, making `{{risonValue}}` safe to place
+ * inside the rison state of a Kibana URL template (e.g. `query:'{{risonValue}}'`)
+ * where a plain `{{value}}` would break the rison parser.
+ */
+const risonEscape = (value: string): string => value.replace(/[!']/g, (char) => `!${char}`);
 
 const URL_TYPES = [
   {
@@ -99,6 +109,7 @@ export class UrlFormat extends FieldFormat {
 
     return this.compileTemplate(template)({
       value: encodeURIComponent(strValue),
+      risonValue: encodeURIComponent(risonEscape(strValue)),
       rawValue: value,
     });
   }
@@ -135,7 +146,7 @@ export class UrlFormat extends FieldFormat {
     return this.formatLabel(value);
   };
 
-  reactConvertSingle: ReactContextTypeSingleConvert = (rawValue, options = {}) => {
+  reactConvert: ReactConvertFunction = (rawValue, options = {}) => {
     const missing = this.checkForMissingValueReact(rawValue);
     if (missing) return missing;
 
@@ -216,10 +227,7 @@ export class UrlFormat extends FieldFormat {
 
         const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
         const fieldName = field?.name;
-        const linkContent =
-          fieldName && hit?.highlight?.[fieldName]
-            ? getHighlightReact(label, hit.highlight[fieldName])
-            : label;
+        const linkContent = getHighlightReact(label, fieldName, hit);
 
         return (
           <a href={`${prefix}${url}`} target={linkTarget} rel="noopener noreferrer">

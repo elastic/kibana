@@ -1,0 +1,33 @@
+{
+  "sha1": "befe397fd9ee6550fdb79074fe0001c97804cc79",
+  "tests": [
+    {
+      "id": "5c681991b7b4c2a-4ba6c35e1027b9d",
+      "title": "User Storage - first paint renders the registered default for test:string_key on first paint",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/ui/tests/render.spec.ts",
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "5c681991b7b4c2a-f9479b3703effbb",
+      "title": "User Storage - first paint renders the registered default for test:string_key_lazy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/core/packages/user-storage/test/scout_user_storage/ui/tests/render.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    }
+  ]
+}

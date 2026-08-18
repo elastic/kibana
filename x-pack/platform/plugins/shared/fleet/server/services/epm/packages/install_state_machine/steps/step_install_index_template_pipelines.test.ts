@@ -11,7 +11,7 @@ import type {
 } from '@kbn/core/server';
 import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common/constants';
 import { ElasticsearchAssetType } from '../../../../../types';
@@ -20,9 +20,12 @@ import type { EsAssetReference, Installation } from '../../../../../../common';
 import { appContextService } from '../../../../app_context';
 import { createAppContextStartContractMock } from '../../../../../mocks';
 import { installIndexTemplatesAndPipelines } from '../../install_index_template_pipeline';
+import { optimisticallyAddEsAssetReferences } from '../../es_assets_reference';
 import { deletePrerequisiteAssets, cleanupComponentTemplate } from '../../remove';
+import { generateESIndexPatterns } from '../../../elasticsearch/template/template';
 
 jest.mock('../../install_index_template_pipeline');
+jest.mock('../../es_assets_reference');
 jest.mock('../../remove', () => {
   return {
     ...jest.requireActual('../../remove'),
@@ -30,11 +33,23 @@ jest.mock('../../remove', () => {
     cleanupComponentTemplate: jest.fn(),
   };
 });
+jest.mock('../../../elasticsearch/template/template', () => ({
+  generateESIndexPatterns: jest.fn((dataStreams) => {
+    const result: Record<string, string> = {};
+    for (const ds of dataStreams) {
+      result[ds.path] = `${ds.type}-${ds.path}-*`;
+    }
+    return result;
+  }),
+}));
 const mockCleanupComponentTemplate = cleanupComponentTemplate as jest.MockedFunction<
   typeof cleanupComponentTemplate
 >;
 const mockDeletePrerequisiteAssets = deletePrerequisiteAssets as jest.MockedFunction<
   typeof deletePrerequisiteAssets
+>;
+const mockedGenerateESIndexPatterns = generateESIndexPatterns as jest.MockedFunction<
+  typeof generateESIndexPatterns
 >;
 
 import { createArchiveIteratorFromMap } from '../../../archive/archive_iterator';
@@ -79,6 +94,8 @@ describe('stepInstallIndexTemplatePipelines', () => {
   });
   afterEach(async () => {
     jest.mocked(mockedInstallIndexTemplatesAndPipelines).mockReset();
+    jest.mocked(optimisticallyAddEsAssetReferences).mockReset();
+    mockedGenerateESIndexPatterns.mockClear();
   });
 
   it('Should call installIndexTemplatesAndPipelines if packageInfo type is integration', async () => {
@@ -652,6 +669,272 @@ describe('stepInstallIndexTemplatePipelines', () => {
       ],
     });
     expect(mockedInstallIndexTemplatesAndPipelines).not.toBeCalled();
+  });
+
+  describe('reinstall custom dataset templates during upgrade', () => {
+    const makeIntegrationContext = (dataStreams: any[] = []) => ({
+      packageInfo: {
+        title: 'title',
+        name: 'test-package',
+        version: '2.0.0',
+        description: 'test',
+        type: 'integration',
+        categories: ['cloud', 'custom'],
+        format_version: 'string',
+        release: 'experimental',
+        conditions: { kibana: { version: 'x.y.z' } },
+        owner: { github: 'elastic/fleet' },
+        data_streams: dataStreams,
+      } as any,
+      assetsMap: new Map(),
+      archiveIterator: createArchiveIteratorFromMap(new Map()),
+      paths: [],
+    });
+
+    it('should reinstall custom dataset templates when upgrading an integration package', async () => {
+      const dataStreams = [{ dataset: 'test-package.access', type: 'logs', path: 'access' }];
+
+      const standardRefs = [
+        { id: 'logs-test-package.access', type: ElasticsearchAssetType.indexTemplate },
+      ];
+      const updatedRefsWithCustom = [
+        ...standardRefs,
+        {
+          id: 'logs-my_custom_access',
+          type: ElasticsearchAssetType.indexTemplate,
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
+        },
+      ];
+
+      mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+        installedTemplates: [],
+        esReferences: standardRefs,
+      });
+
+      jest
+        .mocked(optimisticallyAddEsAssetReferences)
+        .mockResolvedValue(updatedRefsWithCustom as any);
+
+      const mockInstalledPackageSo = getMockInstalledPackageSo([
+        {
+          id: 'logs-test-package.access',
+          type: ElasticsearchAssetType.indexTemplate,
+        },
+        {
+          id: 'logs-my_custom_access',
+          type: ElasticsearchAssetType.indexTemplate,
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
+        },
+      ]);
+
+      const result = await stepInstallIndexTemplatePipelines({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext: makeIntegrationContext(dataStreams),
+        installedPkg: mockInstalledPackageSo,
+        installType: 'update',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+        esReferences: [],
+      });
+
+      expect(mockedInstallIndexTemplatesAndPipelines).toHaveBeenCalledTimes(2);
+
+      const secondCall = mockedInstallIndexTemplatesAndPipelines.mock.calls[1][0];
+      expect(secondCall.onlyForDataStreams).toHaveLength(1);
+      expect(secondCall.onlyForDataStreams![0].dataset).toBe('my_custom_access');
+      expect(secondCall.onlyForDataStreams![0].type).toBe('logs');
+      expect(secondCall.onlyForDataStreams![0].path).toBe('access');
+      expect(secondCall.customDataStreamOriginDataset).toBe('test-package.access');
+      expect(secondCall.customDataStreamOriginType).toBe('logs');
+
+      expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
+        soClient,
+        'test-package',
+        [],
+        { my_custom_access: 'logs-my_custom_access-*' }
+      );
+
+      expect(result?.esReferences).toEqual(updatedRefsWithCustom);
+    });
+
+    it('passes packageInfo when generating the index pattern for a custom dataset, so an OTel-derived custom dataset can be detected as OTel', async () => {
+      const dataStreams = [{ dataset: 'test-package.access', type: 'logs', path: 'access' }];
+
+      mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+        installedTemplates: [],
+        esReferences: [],
+      });
+      jest.mocked(optimisticallyAddEsAssetReferences).mockResolvedValue([]);
+
+      const mockInstalledPackageSo = getMockInstalledPackageSo([
+        {
+          id: 'logs-my_custom_access',
+          type: ElasticsearchAssetType.indexTemplate,
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
+        },
+      ]);
+
+      const packageInstallContext = makeIntegrationContext(dataStreams);
+
+      await stepInstallIndexTemplatePipelines({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext,
+        installedPkg: mockInstalledPackageSo,
+        installType: 'update',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+        esReferences: [],
+      });
+
+      // Without packageInfo, this pattern would keep an unsuffixed dataset that
+      // stepSaveSystemObject's manifest-driven recompute can't repair later.
+      expect(mockedGenerateESIndexPatterns).toHaveBeenCalledWith(
+        [expect.objectContaining({ dataset: 'my_custom_access', path: 'my_custom_access' })],
+        packageInstallContext.packageInfo
+      );
+    });
+
+    it('should skip if no custom dataset refs exist in installed_es', async () => {
+      const dataStreams = [{ dataset: 'test-package.access', type: 'logs', path: 'access' }];
+
+      mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+        installedTemplates: [],
+        esReferences: [],
+      });
+
+      const mockInstalledPackageSo = getMockInstalledPackageSo([
+        {
+          id: 'logs-test-package.access',
+          type: ElasticsearchAssetType.indexTemplate,
+        },
+      ]);
+
+      await stepInstallIndexTemplatePipelines({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext: makeIntegrationContext(dataStreams),
+        installedPkg: mockInstalledPackageSo,
+        installType: 'update',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+        esReferences: [],
+      });
+
+      expect(mockedInstallIndexTemplatesAndPipelines).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip if package has no matching data stream for the origin dataset', async () => {
+      const dataStreams = [{ dataset: 'test-package.other', type: 'metrics', path: 'other' }];
+
+      mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+        installedTemplates: [],
+        esReferences: [],
+      });
+
+      const mockInstalledPackageSo = getMockInstalledPackageSo([
+        {
+          id: 'logs-my_custom_access',
+          type: ElasticsearchAssetType.indexTemplate,
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
+        },
+      ]);
+
+      await stepInstallIndexTemplatePipelines({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext: makeIntegrationContext(dataStreams),
+        installedPkg: mockInstalledPackageSo,
+        installType: 'update',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+        esReferences: [],
+      });
+
+      expect(mockedInstallIndexTemplatesAndPipelines).toHaveBeenCalledTimes(1);
+    });
+
+    it('should continue upgrade even if custom dataset reinstallation fails', async () => {
+      const dataStreams = [{ dataset: 'test-package.access', type: 'logs', path: 'access' }];
+
+      mockedInstallIndexTemplatesAndPipelines
+        .mockResolvedValueOnce({
+          installedTemplates: [],
+          esReferences: [],
+        })
+        .mockRejectedValueOnce(new Error('ES error'));
+
+      const mockInstalledPackageSo = getMockInstalledPackageSo([
+        {
+          id: 'logs-my_custom_access',
+          type: ElasticsearchAssetType.indexTemplate,
+          customDataStreamOriginDataset: 'test-package.access',
+          customDataStreamOriginType: 'logs',
+        },
+      ]);
+
+      const logger = loggerMock.create();
+
+      const result = await stepInstallIndexTemplatePipelines({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger,
+        packageInstallContext: makeIntegrationContext(dataStreams),
+        installedPkg: mockInstalledPackageSo,
+        installType: 'update',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+        esReferences: [],
+      });
+
+      expect(result).toBeDefined();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to reinstall custom dataset template')
+      );
+    });
+
+    it('should not reinstall custom dataset templates when installedPkg is not present (fresh install)', async () => {
+      const dataStreams = [{ dataset: 'test-package.access', type: 'logs', path: 'access' }];
+
+      mockedInstallIndexTemplatesAndPipelines.mockResolvedValue({
+        installedTemplates: [],
+        esReferences: [],
+      });
+
+      await stepInstallIndexTemplatePipelines({
+        savedObjectsClient: soClient,
+        // @ts-ignore
+        savedObjectsImporter: jest.fn(),
+        esClient,
+        logger: loggerMock.create(),
+        packageInstallContext: makeIntegrationContext(dataStreams),
+        installType: 'install',
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+        esReferences: [],
+      });
+
+      expect(mockedInstallIndexTemplatesAndPipelines).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('Should not call installIndexTemplatesAndPipelines if packageInfo type is undefined', async () => {

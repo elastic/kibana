@@ -17,6 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server/feature_privilege_iterator';
+import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { defineAnalyticsRoutes } from './analytics';
@@ -65,6 +66,8 @@ export interface RouteDefinitionParams {
   getAuthenticationService: () => InternalAuthenticationServiceStart;
   getUserProfileService: () => UserProfileServiceStartInternal;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
+  serverlessProjectId: string | undefined;
+  serverlessProjectType: KibanaSolution | undefined;
   analyticsService: AnalyticsServiceSetup;
   buildFlavor: BuildFlavor;
   docLinks: DocLinksServiceSetup;

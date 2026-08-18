@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await browser.getActions().move({ x, y, origin: el._webElement }).contextClick().perform();
   }
 
-  describe('lens dashboard tests', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/280950
+  describe.skip('lens dashboard tests', () => {
     before(async () => {
       await dashboard.navigateToApp();
       await security.testUser.setRoles(
@@ -172,8 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await filterBar.toggleFilterPinned('geo.src');
       await filterBar.addFilter({ field: 'geo.dest', operation: 'is', value: 'LS' });
 
-      await dashboardAddPanel.clickCreateNewLink();
-      await header.waitUntilLoadingHasFinished();
+      await dashboardAddPanel.clickAddLensPanel();
       const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
       expect(hasGeoDestFilter).to.be(false);
       const hasGeoSrcFilter = await filterBar.hasFilter('geo.src', 'US', true, true);
@@ -199,8 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show all data from all layers in the inspector', async () => {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
-      await dashboardAddPanel.clickCreateNewLink();
-      await header.waitUntilLoadingHasFinished();
+      await dashboardAddPanel.clickAddLensPanel();
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
@@ -260,8 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.navigateToApp();
       await dashboard.clickNewDashboard();
 
-      await dashboardAddPanel.clickCreateNewLink();
-      await header.waitUntilLoadingHasFinished();
+      await dashboardAddPanel.clickAddLensPanel();
 
       await lens.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',

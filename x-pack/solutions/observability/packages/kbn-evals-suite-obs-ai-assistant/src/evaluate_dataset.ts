@@ -68,7 +68,7 @@ export function createEvaluateObservabilityAIAssistantDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
+        datasets: [dataset],
         task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({
             messages: input.question,

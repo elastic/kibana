@@ -22,8 +22,9 @@ const styles = css`
 
 ## API Reference
 
-See [`css_variables.ts`](./src/css_variables.ts) for complete API documentation and [`css_variables.test.ts`](./src/css_variables.test.ts) for usage examples.
+See [`@kbn/ui-chrome-layout-constants`](../../../../platform/kbn-ui/chrome-layout-constants) for the implementation and usage examples.
 
 ## Related
 
-- [`@kbn/core-chrome-layout-components`](../core-chrome-layout-components) - React components using these variables
+- [`@kbn/ui-chrome-layout-constants`](../../../../platform/kbn-ui/chrome-layout-constants) - implementation (this package re-exports it)
+- [`@kbn/ui-chrome-layout`](../../../../platform/kbn-ui/chrome-layout) - React components using these variables

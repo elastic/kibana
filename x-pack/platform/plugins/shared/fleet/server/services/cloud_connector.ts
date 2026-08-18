@@ -8,6 +8,7 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
+import { isCloudConnectorSecretReference } from '../../common/types/models/cloud_connector';
 import type {
   CloudConnector,
   CloudConnectorListOptions,
@@ -544,7 +545,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
       }
 
-      const externalId: CloudConnectorSecretReference = awsVars.external_id?.value;
+      const externalIdValue = awsVars.external_id?.value;
+      const externalId: CloudConnectorSecretReference | undefined = isCloudConnectorSecretReference(
+        externalIdValue
+      )
+        ? externalIdValue
+        : undefined;
       if (!externalId) {
         logger.error('Package policy must contain valid external_id secret reference');
         throw new CloudConnectorInvalidVarsError(

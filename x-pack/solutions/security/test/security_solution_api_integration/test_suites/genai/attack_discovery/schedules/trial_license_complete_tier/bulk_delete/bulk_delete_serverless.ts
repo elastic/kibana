@@ -52,8 +52,6 @@ export default ({ getService }: FtrProviderContext) => {
     describe('Happy path for predefined users', () => {
       const roles = [
         'editor',
-        ROLES.t1_analyst,
-        ROLES.t2_analyst,
         ROLES.t3_analyst,
         ROLES.rule_author,
         ROLES.soc_manager,
@@ -82,26 +80,33 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('RBAC', () => {
-      it('should not be able to bulk delete schedules with the "viewer" role', async () => {
-        const testAgent = await utils.createSuperTest('viewer');
-        const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
+      // These roles have `securitySolutionAttackDiscovery: minimal_all`, which grants read-only
+      // Attack Discovery access without the schedule management privilege, so they cannot bulk
+      // delete schedules (mirroring their read-only Rule privileges).
+      const minimalAllRoles = ['viewer', ROLES.t1_analyst, ROLES.t2_analyst];
 
-        const result = await apis.bulkDelete({
-          ids: [createdSchedule.id],
-          kibanaSpace: kibanaSpace1,
-          expectedHttpCode: 403,
-        });
+      minimalAllRoles.forEach((role) => {
+        it(`should not be able to bulk delete schedules with the "${role}" role`, async () => {
+          const testAgent = await utils.createSuperTest(role);
+          const apis = getAttackDiscoverySchedulesApis({ supertest: testAgent });
 
-        expect(result).toEqual(
-          getMissingScheduleKibanaPrivilegesError({
-            routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE}`,
-          })
-        );
+          const result = await apis.bulkDelete({
+            ids: [createdSchedule.id],
+            kibanaSpace: kibanaSpace1,
+            expectedHttpCode: 403,
+          });
 
-        await checkIfScheduleExists({
-          getService,
-          id: createdSchedule.id,
-          kibanaSpace: kibanaSpace1,
+          expect(result).toEqual(
+            getMissingScheduleKibanaPrivilegesError({
+              routeDetails: `POST ${ATTACK_DISCOVERY_SCHEDULES_BULK_DELETE}`,
+            })
+          );
+
+          await checkIfScheduleExists({
+            getService,
+            id: createdSchedule.id,
+            kibanaSpace: kibanaSpace1,
+          });
         });
       });
 

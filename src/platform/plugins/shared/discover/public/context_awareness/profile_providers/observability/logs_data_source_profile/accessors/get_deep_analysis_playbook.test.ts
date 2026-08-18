@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../..';
 import { getDeepAnalysisPlaybook } from './get_deep_analysis_playbook';
 
 describe('getDeepAnalysisPlaybook (logs)', () => {
   it('returns a logs shape contribution with characteristic fields and guidance', () => {
     // The accessor ignores both prev and context, so we pass minimal stubs.
-    const accessor = getDeepAnalysisPlaybook!(() => undefined, { context: {} as never });
+    const accessor = getDeepAnalysisPlaybook!(() => undefined, {
+      context: {} as never,
+      toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+    });
     const result = accessor({ dataView: undefined, query: undefined });
 
     expect(result).toBeDefined();

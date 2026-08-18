@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
@@ -110,9 +111,8 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
       width: '40px',
       isExpander: true,
       render: (item: NodeItem) => (
-        <EuiButtonIcon
-          onClick={toggleDetails.bind(null, item)}
-          aria-label={
+        <EuiToolTip
+          content={
             itemIdToExpandedRowMap[item.id]
               ? i18n.translate('xpack.ml.trainedModels.nodesList.collapseRow', {
                   defaultMessage: 'Collapse',
@@ -121,8 +121,22 @@ export const NodesList: FC<NodesListProps> = ({ compactView = false }) => {
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            onClick={toggleDetails.bind(null, item)}
+            aria-label={
+              itemIdToExpandedRowMap[item.id]
+                ? i18n.translate('xpack.ml.trainedModels.nodesList.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.ml.trainedModels.nodesList.expandRow', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={itemIdToExpandedRowMap[item.id] ? 'chevronSingleDown' : 'chevronSingleRight'}
+          />
+        </EuiToolTip>
       ),
       'data-test-subj': 'mlNodesTableRowDetailsToggle',
     },

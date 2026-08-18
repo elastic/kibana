@@ -10,6 +10,7 @@ import { getNewRule } from '../../objects/rule';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 import { rootRequest, deleteAlertsAndRules } from '../../tasks/api_calls/common';
+import { disableNewFlyout } from '../../tasks/api_calls/kibana_advanced_settings';
 import {
   expandFirstAlertHostFlyout,
   expandFirstAlertUserFlyout,
@@ -198,6 +199,7 @@ describe(
   { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     beforeEach(() => {
+      disableNewFlyout();
       deleteAlertsAndRules();
       login();
       createRule(getNewRule());

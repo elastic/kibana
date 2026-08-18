@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/260291
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-06-01
+areas:
+- Kibana platform
+title: Add OpenTelemetry telemetry collection plugin
+description: Adds a new plugin that collects OpenTelemetry (OTel) telemetry data from Kibana for observability purposes.

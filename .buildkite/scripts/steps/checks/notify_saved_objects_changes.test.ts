@@ -15,8 +15,10 @@ import {
   buildCommentBody,
   buildFailureBody,
   buildSuccessBody,
+  formatFindingForComment,
   type SavedObjectsCheckFinding,
   type SavedObjectsCheckReport,
+  type TypeChangeDetails,
 } from './notify_saved_objects_changes';
 
 const finding = (overrides: Partial<SavedObjectsCheckFinding> = {}): SavedObjectsCheckFinding => ({
@@ -54,6 +56,18 @@ describe('buildCommentBody', () => {
     const body = buildCommentBody(report({ status: 'fail', findings: [finding()] }));
     expect(body).toContain('Saved Objects CI check failed');
   });
+
+  it('returns null when testMode is true, even if SO types appear changed (pass)', () => {
+    expect(
+      buildCommentBody(report({ updatedTypes: ['person-so-type'], testMode: true }))
+    ).toBeNull();
+  });
+
+  it('returns null when testMode is true, even if the check failed', () => {
+    expect(
+      buildCommentBody(report({ status: 'fail', findings: [finding()], testMode: true }))
+    ).toBeNull();
+  });
 });
 
 describe('buildSuccessBody', () => {
@@ -74,6 +88,7 @@ describe('buildSuccessBody', () => {
   it('includes the 2-step release reminder when types were updated', () => {
     const body = buildSuccessBody(report({ updatedTypes: ['task'] }));
     expect(body).toMatch(/2-step release/);
+    expect(body).toContain('[!CAUTION]');
     expect(body).toContain('https://www.elastic.co/docs/extend/kibana/saved-objects');
   });
 
@@ -86,6 +101,83 @@ describe('buildSuccessBody', () => {
     const body = buildSuccessBody(report({ newTypes: ['shiny-new-type'] }));
     expect(body).not.toMatch(/2-step release/);
     expect(body).toContain('**New types:** `shiny-new-type`');
+  });
+
+  it('renders a new model version line for updated types', () => {
+    const typeChanges: Record<string, TypeChangeDetails> = {
+      task: { newModelVersions: ['10.3.0'], modifiedModelVersions: [] },
+    };
+    const body = buildSuccessBody(report({ updatedTypes: ['task'], typeChanges }));
+    expect(body).toContain('A new model version was introduced for type `task`: `10.3.0`.');
+  });
+
+  it('renders modified model version lines for updated types', () => {
+    const typeChanges: Record<string, TypeChangeDetails> = {
+      config: { newModelVersions: [], modifiedModelVersions: ['10.1.0', '10.2.0'] },
+    };
+    const body = buildSuccessBody(report({ updatedTypes: ['config'], typeChanges }));
+    expect(body).toContain(
+      'The following model versions have been modified for type `config`: `10.1.0`, `10.2.0`.'
+    );
+  });
+
+  it('renders both new and modified version lines when both are present', () => {
+    const typeChanges: Record<string, TypeChangeDetails> = {
+      task: { newModelVersions: ['10.4.0'], modifiedModelVersions: ['10.2.0'] },
+    };
+    const body = buildSuccessBody(report({ updatedTypes: ['task'], typeChanges }));
+    expect(body).toContain('A new model version was introduced for type `task`: `10.4.0`.');
+    expect(body).toContain(
+      'The following model versions have been modified for type `task`: `10.2.0`.'
+    );
+  });
+
+  it('omits the change details section when typeChanges is absent', () => {
+    const body = buildSuccessBody(report({ updatedTypes: ['task'] }));
+    expect(body).not.toContain('model version was introduced');
+    expect(body).not.toContain('model versions have been modified');
+  });
+
+  it('includes the IMPORTANT mappings banner for new types', () => {
+    const body = buildSuccessBody(report({ newTypes: ['shiny-new-type'] }));
+    expect(body).toContain('[!IMPORTANT]');
+    expect(body).toContain('searchable and/or sortable');
+  });
+
+  it('includes the IMPORTANT mappings banner for updated types with a new model version', () => {
+    const typeChanges: Record<string, TypeChangeDetails> = {
+      task: { newModelVersions: ['10.3.0'], modifiedModelVersions: [] },
+    };
+    const body = buildSuccessBody(report({ updatedTypes: ['task'], typeChanges }));
+    expect(body).toContain('[!IMPORTANT]');
+  });
+
+  it('omits the IMPORTANT mappings banner for updated types with only modified model versions', () => {
+    const typeChanges: Record<string, TypeChangeDetails> = {
+      task: { newModelVersions: [], modifiedModelVersions: ['10.2.0'] },
+    };
+    const body = buildSuccessBody(report({ updatedTypes: ['task'], typeChanges }));
+    expect(body).not.toContain('[!IMPORTANT]');
+  });
+
+  it('includes the IMPORTANT mappings banner for updated types when typeChanges is absent (conservative fallback)', () => {
+    const body = buildSuccessBody(report({ updatedTypes: ['task'] }));
+    expect(body).toContain('[!IMPORTANT]');
+  });
+
+  it('includes the WARNING banner when an ancestor baseline snapshot was used', () => {
+    const body = buildSuccessBody(
+      report({
+        updatedTypes: ['search'],
+        baseline: 'merge-base-sha',
+        baselineSnapshotSha: 'older-sha',
+        baselineSnapshotUsedAncestor: true,
+      })
+    );
+
+    expect(body).toContain('[!WARNING]');
+    expect(body).toContain('older than the requested merge-base');
+    expect(body).toContain('`merge-base-sha` → `older-sha`');
   });
 });
 
@@ -144,6 +236,21 @@ describe('buildFailureBody', () => {
     expect(body).toContain('node scripts/check_saved_objects --baseline deadbeef');
   });
 
+  it('includes the WARNING banner when an ancestor baseline snapshot was used', () => {
+    const body = buildFailureBody(
+      report({
+        status: 'fail',
+        baseline: 'merge-base-sha',
+        baselineSnapshotSha: 'older-sha',
+        baselineSnapshotUsedAncestor: true,
+        findings: [finding()],
+      })
+    );
+
+    expect(body).toContain('[!WARNING]');
+    expect(body).toContain('rebase onto the latest `main`');
+  });
+
   it('falls back to a placeholder when no baseline is available', () => {
     const body = buildFailureBody(
       report({ status: 'fail', baseline: undefined, findings: [finding()] })
@@ -161,6 +268,48 @@ describe('buildFailureBody', () => {
     );
 
     expect(body).not.toContain('_Fix:_');
+  });
+
+  it('renders fixture mismatch diffs in a diff code block without ANSI codes', () => {
+    const body = buildFailureBody(
+      report({
+        status: 'fail',
+        findings: [
+          finding({
+            ruleId: 'documents/fixture-mismatch',
+            typeName: 'search',
+            message:
+              "A document of type 'search' did NOT match any of the fixtures. Closest match: fixtures['10.13.0'][0] (path/to/fixture.json)\n\u001B[32m- Expected\u001B[39m",
+            details: `- Expected - 1
++ Received + 1
+
+  Object {
+-   "id": "old",
++   "id": "new",
+  }`,
+          }),
+        ],
+      })
+    );
+
+    expect(body).toContain('```diff');
+    expect(body).toContain('-   "id": "old",');
+    expect(body).not.toContain('\u001B[');
+    expect(body).not.toContain('[32m');
+  });
+
+  it('strips ANSI codes from legacy fixture mismatch messages without details', () => {
+    const formatted = formatFindingForComment(
+      finding({
+        ruleId: 'documents/fixture-mismatch',
+        message: `summary line\n\u001B[31m+ Received + 1\u001B[39m\n+   "id": "new",`,
+      })
+    );
+
+    expect(formatted).toContain('summary line');
+    expect(formatted).toContain('```diff');
+    expect(formatted).toContain('+   "id": "new",');
+    expect(formatted).not.toContain('\u001B[');
   });
 
   describe('when the run failed but no findings were collected', () => {

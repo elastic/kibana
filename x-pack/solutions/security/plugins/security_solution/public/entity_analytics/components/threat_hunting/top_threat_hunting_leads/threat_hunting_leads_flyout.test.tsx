@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render as rtlRender, screen, fireEvent } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { ThreatHuntingLeadsFlyout } from './threat_hunting_leads_flyout';
 import type { HuntingLead } from './types';
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
 jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn(),
@@ -17,6 +20,31 @@ jest.mock('@kbn/react-query', () => ({
 
 jest.mock('../../../api/api', () => ({
   useEntityAnalyticsRoutes: jest.fn(),
+}));
+
+const mockOpenFlyout = jest.fn();
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: () => ({
+    openFlyout: mockOpenFlyout,
+  }),
+}));
+
+jest.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => ({
+  useIsNewFlyoutEnabled: () => false,
+}));
+
+jest.mock('../../../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({
+    openEntityFlyout: jest.fn(),
+  }),
+}));
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: () => ({
+    services: {},
+  }),
+  useDateFormat: jest.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+  useTimeZone: jest.fn(() => 'UTC'),
 }));
 
 const mockUseQuery = jest.requireMock('@kbn/react-query').useQuery as jest.Mock;
@@ -63,11 +91,65 @@ describe('ThreatHuntingLeadsFlyout', () => {
     });
   });
 
-  it('renders the flyout with title "All Hunting Leads"', () => {
+  it('renders the flyout with title "Recent threat hunting leads"', () => {
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
     expect(screen.getByTestId('threatHuntingLeadsFlyout')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Threat hunting leads' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Recent threat hunting leads' })
+    ).toBeInTheDocument();
+  });
+
+  it('fetches leads with a perPage of 20 so the flyout is not artificially capped at 10', () => {
+    const mockFetchLeads = jest.fn().mockResolvedValue({ leads: [], total: 0 });
+    mockUseEntityAnalyticsRoutes.mockReturnValue({ fetchLeads: mockFetchLeads });
+    let capturedQueryFn: ((ctx: { signal?: AbortSignal }) => unknown) | undefined;
+    mockUseQuery.mockImplementation(
+      (config: { queryFn?: (ctx: { signal?: AbortSignal }) => unknown }) => {
+        capturedQueryFn = config.queryFn;
+        return { data: { leads: [createApiLead()], total: 1 }, isLoading: false };
+      }
+    );
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+    capturedQueryFn?.({ signal: undefined });
+
+    expect(mockFetchLeads).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ perPage: 20 }),
+      })
+    );
+  });
+
+  it('renders a badge with the leads count beside the title', () => {
+    mockUseQuery.mockReturnValue({
+      data: { leads: [createApiLead(), createApiLead({ id: 'lead-2' })], total: 2 },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.getByTestId('leadsCountBadge')).toHaveTextContent('2');
+  });
+
+  it('does not render the leads count badge while loading', () => {
+    mockUseQuery.mockReturnValue({ data: undefined, isLoading: true });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.queryByTestId('leadsCountBadge')).not.toBeInTheDocument();
+  });
+
+  it('shows a no-matching-leads message when the search query matches nothing', () => {
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    fireEvent.change(screen.getByTestId('leadSearchField'), {
+      target: { value: 'nonexistent-query' },
+    });
+
+    expect(screen.getByTestId('noMatchingLeads')).toHaveTextContent(
+      'No hunting leads match your filter criteria'
+    );
   });
 
   it('close button calls onClose', () => {
@@ -97,6 +179,83 @@ describe('ThreatHuntingLeadsFlyout', () => {
     );
   });
 
+  it('clicking an entity badge in a list item opens the entity flyout and does not trigger onSelectLead', () => {
+    const onSelectLead = jest.fn();
+    mockUseQuery.mockReturnValue({
+      data: {
+        leads: [
+          createApiLead({
+            id: 'lead-badge',
+            byline: 'User jsmith on host server-01',
+            entities: [{ type: 'user', name: 'jsmith' }],
+          }),
+        ],
+        total: 1,
+      },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} onSelectLead={onSelectLead} />);
+
+    fireEvent.click(screen.getByTestId('leadEntityBadge-jsmith'));
+
+    expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: 'user-panel',
+        params: {
+          userName: 'jsmith',
+          // No real entity id on this lead, so it falls back to `type:name`.
+          entityId: 'user:jsmith',
+          contextID: 'entity-analytics-threat-hunting-leads',
+          scopeId: 'entity-analytics-threat-hunting-leads',
+        },
+      },
+    });
+    expect(onSelectLead).not.toHaveBeenCalled();
+  });
+
+  it('opens the entity flyout using the real entity id (EUID) when the lead entity carries one', () => {
+    const onSelectLead = jest.fn();
+    mockUseQuery.mockReturnValue({
+      data: {
+        leads: [
+          createApiLead({
+            id: 'lead-euid',
+            byline: 'Host 8c67cb16-b7f2-4052-82f9-6edb87bb63ef triggered an alert',
+            entities: [
+              {
+                type: 'host',
+                name: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+                id: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+              },
+            ],
+          }),
+        ],
+        total: 1,
+      },
+      isLoading: false,
+    });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} onSelectLead={onSelectLead} />);
+
+    fireEvent.click(screen.getByTestId('leadEntityBadge-8c67cb16-b7f2-4052-82f9-6edb87bb63ef'));
+
+    expect(mockOpenFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenFlyout).toHaveBeenCalledWith({
+      right: {
+        id: 'host-panel',
+        params: {
+          hostName: '8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          entityId: 'host:8c67cb16-b7f2-4052-82f9-6edb87bb63ef',
+          contextID: 'entity-analytics-threat-hunting-leads',
+          scopeId: 'entity-analytics-threat-hunting-leads',
+        },
+      },
+    });
+    expect(onSelectLead).not.toHaveBeenCalled();
+  });
+
   it('renders lead byline in list items', () => {
     mockUseQuery.mockReturnValue({
       data: {
@@ -111,10 +270,10 @@ describe('ThreatHuntingLeadsFlyout', () => {
     expect(screen.getByText('Host server-01 with risk score 80')).toBeInTheDocument();
   });
 
-  it('renders tags as badges in list items', () => {
+  it('does not render tag badges in list items', () => {
     mockUseQuery.mockReturnValue({
       data: {
-        leads: [createApiLead({ id: 'lead-tags', tags: ['malware'] })],
+        leads: [createApiLead({ id: 'lead-tags', tags: ['malware', 'lateral-movement'] })],
         total: 1,
       },
       isLoading: false,
@@ -122,22 +281,8 @@ describe('ThreatHuntingLeadsFlyout', () => {
 
     render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
 
-    expect(screen.getByText('malware')).toBeInTheDocument();
-  });
-
-  it('shows overflow badge when tags exceed the visible limit', () => {
-    mockUseQuery.mockReturnValue({
-      data: {
-        leads: [createApiLead({ id: 'lead-tags-overflow', tags: ['malware', 'lateral-movement'] })],
-        total: 1,
-      },
-      isLoading: false,
-    });
-
-    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
-
-    expect(screen.getByText('malware')).toBeInTheDocument();
-    expect(screen.getByText('+1')).toBeInTheDocument();
+    expect(screen.queryByText('malware')).not.toBeInTheDocument();
+    expect(screen.queryByText('lateral-movement')).not.toBeInTheDocument();
   });
 
   it('does not render timestamps on lead list items', () => {
@@ -153,5 +298,28 @@ describe('ThreatHuntingLeadsFlyout', () => {
 
     expect(container.textContent).not.toContain('just now');
     expect(container.textContent).not.toContain('ago');
+  });
+
+  it('renders a skeleton while leads are loading', () => {
+    mockUseQuery.mockReturnValue({ data: undefined, isLoading: true });
+
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.getByTestId('leadsFlyoutLoadingSkeleton')).toBeInTheDocument();
+    expect(screen.queryByTestId('leadListItem-lead-1')).not.toBeInTheDocument();
+  });
+
+  it('displays the generation timestamp when lastRunTimestamp is provided', () => {
+    render(
+      <ThreatHuntingLeadsFlyout {...defaultProps} lastRunTimestamp="2026-03-13T14:30:00.000Z" />
+    );
+
+    expect(screen.getByTestId('leadsFlyoutGeneratedTimestamp')).toBeInTheDocument();
+  });
+
+  it('does not display the generation timestamp when lastRunTimestamp is absent', () => {
+    render(<ThreatHuntingLeadsFlyout {...defaultProps} />);
+
+    expect(screen.queryByTestId('leadsFlyoutGeneratedTimestamp')).not.toBeInTheDocument();
   });
 });

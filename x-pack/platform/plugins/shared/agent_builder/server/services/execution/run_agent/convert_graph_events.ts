@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { isArray } from 'lodash';
 import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
@@ -19,8 +18,8 @@ import {
   createPromptRequestEvent,
   createReasoningEvent,
   createTextChunkEvent,
-  createBackgroundAgentCompleteEvent,
   createThinkingCompleteEvent,
+  createBackgroundAgentCompleteEvent,
   createToolCallEvent,
   createToolResultEvent,
   extractTextContent,
@@ -31,18 +30,18 @@ import {
   toolIdentifierFromToolCall,
 } from '@kbn/agent-builder-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
-import type { RunToolReturn } from '@kbn/agent-builder-server';
-import { createErrorResult } from '@kbn/agent-builder-server';
 import { AgentPromptRequestSourceType } from '@kbn/agent-builder-common/agents';
+import { isAskUserQuestionPrompt } from '@kbn/agent-builder-common/agents/prompts';
+import { createUserQuestionAskedEvent } from '@kbn/agent-builder-common/chat';
+import { internalTools } from '@kbn/agent-builder-common';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import type { StateType } from './state';
 import { BROWSER_TOOL_PREFIX, steps, tags } from './constants';
-import type { ToolCallResult } from './actions';
+import { extractToolReturn } from './utils/extract_tool_return';
 import {
-  isAnswerAction,
   isBackgroundExecutionCompleteAction,
   isExecuteToolAction,
-  isStructuredAnswerAction,
+  isHandoverAction,
   isToolCallAction,
   isToolPromptAction,
 } from './actions';
@@ -51,18 +50,27 @@ import { createFinalStateEvent } from './events';
 
 export type ConvertedEvents = ChatAgentEvent | InternalEvent;
 
+/**
+ * Tools that have their own dedicated step lifecycle event and therefore should NOT produce a default `toolCallEvent`.
+ */
+const TOOLS_WITH_DEDICATED_STEP_LIFECYCLE: ReadonlySet<string> = new Set([
+  internalTools.askUserQuestion,
+]);
+
 export const convertGraphEvents = ({
   graphName,
   toolManager,
   pendingRound,
   logger,
   startTime,
+  structuredOutput,
 }: {
   graphName: string;
   toolManager: ToolManager;
   pendingRound: ConversationRound | undefined;
   logger: Logger;
   startTime: Date;
+  structuredOutput: boolean;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
@@ -74,9 +82,12 @@ export const convertGraphEvents = ({
       });
     }
 
-    const messageId = uuidv4();
+    // message identifier for emitted chunks
+    let messageId = uuidv4();
 
-    let isThinkingComplete = false;
+    // Tracks the timestamp of the first text chunk of the current research turn.
+    // Used to backdate `thinkingCompleteEvent` to the first chunk of the terminal turn
+    let currentTurnFirstChunkAt: number | undefined;
 
     return streamEvents$.pipe(
       mergeMap((event) => {
@@ -84,19 +95,31 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
-        // stream answering text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, tags.answerAgent)) {
+        // reset per-turn first-chunk tracker at the start of each research turn
+        if (matchEvent(event, 'on_chain_start') && matchName(event, steps.researchAgent)) {
+          // reset per-turn first-chunk tracker at the start of each research turn
+          currentTurnFirstChunkAt = undefined;
+          // reset message id between research turns
+          messageId = uuidv4();
+          return EMPTY;
+        }
+
+        // streaming text chunks for the UI (answering + research)
+        if (
+          matchEvent(event, 'on_chat_model_stream') &&
+          (hasTag(event, tags.answerAgent) || hasTag(event, tags.researchAgent))
+        ) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            const events: ConvertedEvents[] = [];
-            if (!isThinkingComplete) {
-              // Emit thinking complete event when first chunk arrives
-              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
-              isThinkingComplete = true;
+            if (
+              !structuredOutput &&
+              hasTag(event, tags.researchAgent) &&
+              currentTurnFirstChunkAt === undefined
+            ) {
+              currentTurnFirstChunkAt = Date.now();
             }
-            events.push(createTextChunkEvent(textContent, { messageId }));
-            return of(...events);
+            return of(createTextChunkEvent(textContent, { messageId }));
           }
         }
 
@@ -136,14 +159,16 @@ export const convertGraphEvents = ({
                       params: toolCallArgs,
                     })
                   );
-                } else {
+                } else if (!TOOLS_WITH_DEDICATED_STEP_LIFECYCLE.has(toolId)) {
+                  const { origin: toolOrigin, type: toolType } = toolManager.getToolMeta(toolId);
                   events.push(
                     createToolCallEvent({
                       toolId,
                       toolCallId,
                       params: toolCallArgs,
                       toolCallGroupId,
-                      toolOrigin: toolManager.getToolOrigin(toolId),
+                      toolOrigin,
+                      toolType,
                     })
                   );
                 }
@@ -151,30 +176,30 @@ export const convertGraphEvents = ({
             }
           }
 
-          return of(...events);
-        }
-
-        // emit messages for answering step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.answerAgent)) {
-          const events: ConvertedEvents[] = [];
-
-          // process last emitted message
-          const answerActions = (event.data.output as StateType).answerActions;
-          const lastAction = answerActions[answerActions.length - 1];
-
-          if (isStructuredAnswerAction(lastAction)) {
-            const messageEvent = createMessageEvent(lastAction.data, {
-              messageId,
-            });
-            events.push(messageEvent);
-          } else if (isAnswerAction(lastAction)) {
-            const messageEvent = createMessageEvent(lastAction.message, {
-              messageId,
-            });
-            events.push(messageEvent);
+          // Backdated thinking-complete: when the research agent's terminal turn
+          // produces a HandoverAction in non-structured mode, emit
+          // thinkingCompleteEvent with the timestamp of the first chunk of that
+          // turn. Falls back to "now" if no chunk timestamp was captured.
+          if (!structuredOutput && isHandoverAction(nextAction)) {
+            const firstChunkOffset =
+              currentTurnFirstChunkAt !== undefined
+                ? currentTurnFirstChunkAt - startTime.getTime()
+                : Date.now() - startTime.getTime();
+            events.push(createThinkingCompleteEvent(firstChunkOffset));
           }
 
           return of(...events);
+        }
+
+        // emit messageEvent at finalize: state.finalAnswer is the canonical answer
+        // (string for non-structured, object for structured)
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.finalize)) {
+          const finalState = event.data.output as StateType;
+          const finalAnswer = finalState.finalAnswer;
+          if (finalAnswer !== undefined && finalAnswer !== null && finalAnswer !== '') {
+            return of(createMessageEvent(finalAnswer, { messageId }));
+          }
+          return EMPTY;
         }
 
         // emit tool result events and/or prompt request events
@@ -208,6 +233,15 @@ export const convertGraphEvents = ({
                     },
                   })
                 );
+
+                if (isAskUserQuestionPrompt(prompt)) {
+                  resultEvents.push(
+                    createUserQuestionAskedEvent({
+                      prompt_id: prompt.id,
+                      questions: prompt.questions,
+                    })
+                  );
+                }
               }
             }
           }
@@ -242,27 +276,4 @@ export const convertGraphEvents = ({
       })
     );
   };
-};
-
-export const extractToolReturn = (message: ToolCallResult): RunToolReturn => {
-  if (message.artifact) {
-    if (!isArray(message.artifact.results)) {
-      throw new Error(
-        `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
-          message.artifact
-        )}`
-      );
-    }
-
-    return message.artifact as RunToolReturn;
-  } else {
-    // langchain tool validation error (such as schema errors) are out of our control and don't emit artifacts...
-    if (message.content.startsWith('Error:')) {
-      return {
-        results: [createErrorResult(message.content)],
-      };
-    } else {
-      throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
-    }
-  }
 };

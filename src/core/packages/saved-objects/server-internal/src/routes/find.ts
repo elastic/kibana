@@ -11,6 +11,16 @@ import path from 'node:path';
 import { schema } from '@kbn/config-schema';
 import type { RouteAccess, RouteDeprecationInfo } from '@kbn/core-http-server';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import {
+  MAX_SAVED_OBJECT_ID_LENGTH,
+  MAX_SAVED_OBJECT_NAME_LENGTH,
+  MAX_SAVED_OBJECT_NAMESPACE_LENGTH,
+  MAX_SAVED_OBJECT_AGGS_LENGTH,
+  MAX_SAVED_OBJECT_SEARCH_LENGTH,
+  MAX_SAVED_OBJECT_TYPE_LENGTH,
+  MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+  MAX_SAVED_OBJECTS_PER_QUERY,
+} from '@kbn/core-saved-objects-server';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
@@ -30,8 +40,8 @@ export const registerFindRoute = (
   { config, coreUsageData, logger, access, deprecationInfo }: RouteDependencies
 ) => {
   const referenceSchema = schema.object({
-    type: schema.string(),
-    id: schema.string(),
+    type: schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+    id: schema.string({ maxLength: MAX_SAVED_OBJECT_ID_LENGTH }),
   });
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
@@ -73,55 +83,113 @@ For transferring or backing up saved objects, prefer the export API (\`POST /api
             defaultValue: 1,
             meta: { description: 'The page index to return.' },
           }),
-          type: schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-            meta: {
-              description:
-                'The saved object type or types to search for. Use multiple `type` values to search across types.',
-            },
-          }),
-          search: schema.maybe(schema.string({ meta: { description: 'A text search string.' } })),
-          default_search_operator: searchOperatorSchema,
-          search_fields: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-              meta: { description: 'The fields to search on.' },
-            })
-          ),
-          sort_field: schema.maybe(
-            schema.string({ meta: { description: 'The field to sort on.' } })
-          ),
-          has_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })], {
+          type: schema.oneOf(
+            [
+              schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }),
+              schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_TYPE_LENGTH }), {
+                maxSize: MAX_SAVED_OBJECT_TYPES_PER_QUERY,
+              }),
+            ],
+            {
               meta: {
                 description:
-                  'Return only saved objects that have a reference to the specified saved object(s).',
+                  'The saved object type or types to search for. Use multiple `type` values to search across types.',
               },
+            }
+          ),
+          search: schema.maybe(
+            schema.string({
+              maxLength: MAX_SAVED_OBJECT_SEARCH_LENGTH,
+              meta: { description: 'A text search string.' },
             })
+          ),
+          default_search_operator: searchOperatorSchema,
+          search_fields: schema.maybe(
+            schema.oneOf(
+              [
+                schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+                schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }), {
+                  maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
+                }),
+              ],
+              {
+                meta: { description: 'The fields to search on.' },
+              }
+            )
+          ),
+          sort_field: schema.maybe(
+            schema.string({
+              maxLength: MAX_SAVED_OBJECT_NAME_LENGTH,
+              meta: { description: 'The field to sort on.' },
+            })
+          ),
+          has_reference: schema.maybe(
+            schema.oneOf(
+              [
+                referenceSchema,
+                schema.arrayOf(referenceSchema, { maxSize: MAX_SAVED_OBJECTS_PER_QUERY }),
+              ],
+              {
+                meta: {
+                  description:
+                    'Return only saved objects that have a reference to the specified saved object(s).',
+                },
+              }
+            )
           ),
           has_reference_operator: searchOperatorSchema,
           has_no_reference: schema.maybe(
-            schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema, { maxSize: 100 })], {
-              meta: {
-                description:
-                  'Return only saved objects that do not have a reference to the specified saved object(s).',
-              },
-            })
+            schema.oneOf(
+              [
+                referenceSchema,
+                schema.arrayOf(referenceSchema, { maxSize: MAX_SAVED_OBJECTS_PER_QUERY }),
+              ],
+              {
+                meta: {
+                  description:
+                    'Return only saved objects that do not have a reference to the specified saved object(s).',
+                },
+              }
+            )
           ),
           has_no_reference_operator: searchOperatorSchema,
           fields: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-              meta: { description: 'The fields to return for each saved object.' },
-            })
+            schema.oneOf(
+              [
+                schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }),
+                schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAME_LENGTH }), {
+                  maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
+                }),
+              ],
+              {
+                meta: { description: 'The fields to return for each saved object.' },
+              }
+            )
           ),
           filter: schema.maybe(
-            schema.string({ meta: { description: 'A KQL filter to apply to the search.' } })
+            schema.string({
+              maxLength: MAX_SAVED_OBJECT_SEARCH_LENGTH,
+              meta: { description: 'A KQL filter to apply to the search.' },
+            })
           ),
           aggs: schema.maybe(
-            schema.string({ meta: { description: 'Aggregations as a JSON string.' } })
+            schema.string({
+              maxLength: MAX_SAVED_OBJECT_AGGS_LENGTH,
+              meta: { description: 'Aggregations as a JSON string.' },
+            })
           ),
           namespaces: schema.maybe(
-            schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { maxSize: 100 })], {
-              meta: { description: 'The namespaces (spaces) to search in.' },
-            })
+            schema.oneOf(
+              [
+                schema.string({ maxLength: MAX_SAVED_OBJECT_NAMESPACE_LENGTH }),
+                schema.arrayOf(schema.string({ maxLength: MAX_SAVED_OBJECT_NAMESPACE_LENGTH }), {
+                  maxSize: MAX_SAVED_OBJECTS_PER_QUERY,
+                }),
+              ],
+              {
+                meta: { description: 'The namespaces (spaces) to search in.' },
+              }
+            )
           ),
         }),
       },

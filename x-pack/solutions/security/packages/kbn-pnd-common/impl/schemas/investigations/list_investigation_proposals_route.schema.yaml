@@ -1,0 +1,38 @@
+openapi: 3.0.0
+info:
+  title: List PND Investigation Proposals API endpoint
+  version: '1'
+paths:
+  /internal/pnd/investigations/{id}/proposals:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: ListInvestigationProposals
+      description: List child proposals for an investigation
+      summary: List investigation proposals
+      tags:
+        - PND API
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Parent investigation id
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  proposals:
+                    type: array
+                    items:
+                      $ref: '../components/investigation.schema.yaml#/components/schemas/Proposal'
+                  total:
+                    type: integer
+                required:
+                  - proposals
+                  - total

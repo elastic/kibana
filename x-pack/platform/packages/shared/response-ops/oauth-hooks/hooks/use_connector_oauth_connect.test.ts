@@ -182,14 +182,186 @@ describe('useConnectorOAuthConnect', () => {
 
       const onMutationSuccess = capturedMutationOptions.onSuccess as (data: {
         authorizationUrl: string;
+        state: string;
       }) => void;
 
       act(() => {
-        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth' });
+        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state: 'abc-state' });
       });
 
       expect(window.open).toHaveBeenCalledWith('https://oauth.provider/auth', '_blank', 'noopener');
       expect(result.current.isAwaitingCallback).toBe(true);
+    });
+  });
+
+  describe('cancelConnect', () => {
+    const triggerMutationSuccess = (state = 'pending-state') => {
+      const onMutationSuccess = capturedMutationOptions.onSuccess as (data: {
+        authorizationUrl: string;
+        state: string;
+      }) => void;
+      act(() => {
+        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state });
+      });
+    };
+
+    it('resets isAwaitingCallback synchronously', () => {
+      const { result } = renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+        })
+      );
+
+      triggerMutationSuccess();
+      expect(result.current.isAwaitingCallback).toBe(true);
+
+      act(() => result.current.cancelConnect());
+
+      expect(result.current.isAwaitingCallback).toBe(false);
+    });
+
+    it('posts to the cancel endpoint when a pending state exists', () => {
+      mockHttpPost.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+        })
+      );
+
+      triggerMutationSuccess('my-oauth-state');
+      act(() => result.current.cancelConnect());
+
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        '/internal/actions/connector/conn-1/_oauth_cancel',
+        { body: JSON.stringify({ state: 'my-oauth-state' }) }
+      );
+    });
+
+    it('does not post to the cancel endpoint when no state has been captured', () => {
+      mockHttpPost.mockClear();
+
+      const { result } = renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+        })
+      );
+
+      // Cancel before any flow has started
+      act(() => result.current.cancelConnect());
+
+      expect(mockHttpPost).not.toHaveBeenCalled();
+    });
+
+    it('encodes connectorId in the cancel URL', () => {
+      mockHttpPost.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'id/with special&chars',
+          redirectMode: OAuthRedirectMode.NewTab,
+        })
+      );
+
+      triggerMutationSuccess('some-state');
+      act(() => result.current.cancelConnect());
+
+      expect(mockHttpPost).toHaveBeenCalledWith(
+        expect.stringContaining(encodeURIComponent('id/with special&chars')),
+        expect.anything()
+      );
+    });
+
+    it('clears the pending state so a second cancel does not re-post', () => {
+      mockHttpPost.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+        })
+      );
+
+      triggerMutationSuccess('my-oauth-state');
+      act(() => result.current.cancelConnect());
+      mockHttpPost.mockClear();
+
+      act(() => result.current.cancelConnect());
+
+      expect(mockHttpPost).not.toHaveBeenCalled();
+    });
+
+    it('clears the pending state after a successful broadcast', () => {
+      mockHttpPost.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+          onSuccess: jest.fn(),
+        })
+      );
+
+      triggerMutationSuccess('my-state');
+
+      const channel = MockBroadcastChannel.instances.find(
+        (c) => c.name === OAUTH_BROADCAST_CHANNEL_NAME
+      )!;
+      act(() => {
+        channel.onmessage!({
+          data: { connectorId: 'conn-1', status: OAuthAuthorizationStatus.Success },
+        } as MessageEvent);
+      });
+
+      mockHttpPost.mockClear();
+      act(() => result.current.cancelConnect());
+
+      expect(mockHttpPost).not.toHaveBeenCalled();
+    });
+
+    it('clears the pending state after the timeout fires', () => {
+      mockHttpPost.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+          timeout: 5000,
+          onError: jest.fn(),
+        })
+      );
+
+      triggerMutationSuccess('my-state');
+      act(() => jest.advanceTimersByTime(5000));
+      mockHttpPost.mockClear();
+
+      act(() => result.current.cancelConnect());
+
+      expect(mockHttpPost).not.toHaveBeenCalled();
+    });
+
+    it('clears the pending state when connect is called for a new flow', () => {
+      mockHttpPost.mockResolvedValue(undefined);
+
+      const { result } = renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+        })
+      );
+
+      triggerMutationSuccess('old-state');
+
+      // Start a new flow
+      act(() => result.current.connect());
+      mockHttpPost.mockClear();
+
+      act(() => result.current.cancelConnect());
+
+      expect(mockHttpPost).not.toHaveBeenCalled();
     });
   });
 
@@ -206,8 +378,11 @@ describe('useConnectorOAuthConnect', () => {
 
       const onMutationSuccess = capturedMutationOptions.onSuccess as (data: {
         authorizationUrl: string;
+        state: string;
       }) => void;
-      act(() => onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth' }));
+      act(() =>
+        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state: 'test-state' })
+      );
 
       const channel = MockBroadcastChannel.instances.find(
         (c) => c.name === OAUTH_BROADCAST_CHANNEL_NAME
@@ -236,8 +411,11 @@ describe('useConnectorOAuthConnect', () => {
 
       const onMutationSuccess = capturedMutationOptions.onSuccess as (data: {
         authorizationUrl: string;
+        state: string;
       }) => void;
-      act(() => onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth' }));
+      act(() =>
+        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state: 'test-state' })
+      );
 
       const channel = MockBroadcastChannel.instances.find(
         (c) => c.name === OAUTH_BROADCAST_CHANNEL_NAME
@@ -265,8 +443,11 @@ describe('useConnectorOAuthConnect', () => {
 
       const onMutationSuccess = capturedMutationOptions.onSuccess as (data: {
         authorizationUrl: string;
+        state: string;
       }) => void;
-      act(() => onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth' }));
+      act(() =>
+        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state: 'test-state' })
+      );
 
       const channel = MockBroadcastChannel.instances.find(
         (c) => c.name === OAUTH_BROADCAST_CHANNEL_NAME
@@ -300,8 +481,11 @@ describe('useConnectorOAuthConnect', () => {
 
       const onMutationSuccess = capturedMutationOptions.onSuccess as (data: {
         authorizationUrl: string;
+        state: string;
       }) => void;
-      act(() => onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth' }));
+      act(() =>
+        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state: 'test-state' })
+      );
 
       act(() => jest.advanceTimersByTime(5000));
 
@@ -325,8 +509,11 @@ describe('useConnectorOAuthConnect', () => {
 
       const onMutationSuccess = capturedMutationOptions.onSuccess as (data: {
         authorizationUrl: string;
+        state: string;
       }) => void;
-      act(() => onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth' }));
+      act(() =>
+        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state: 'test-state' })
+      );
 
       const channel = MockBroadcastChannel.instances.find(
         (c) => c.name === OAUTH_BROADCAST_CHANNEL_NAME
@@ -345,6 +532,54 @@ describe('useConnectorOAuthConnect', () => {
     });
   });
 
+  describe('mutation onError', () => {
+    it('surfaces body.message from an HttpFetchError', () => {
+      const onError = jest.fn();
+      renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+          onError,
+        })
+      );
+
+      const onMutationError = capturedMutationOptions.onError as (error: unknown) => void;
+      // isHttpFetchError requires `request` to be present on the error (see @kbn/core-http-browser).
+      const httpError = Object.assign(new Error('Internal Server Error'), {
+        request: {} as Request,
+        body: {
+          message:
+            'EARS base URL not configured. Please set xpack.actions.auth.ears.url in kibana.yml',
+        },
+      });
+
+      act(() => onMutationError(httpError));
+
+      expect(onError).toHaveBeenCalledWith(
+        new Error(
+          'EARS base URL not configured. Please set xpack.actions.auth.ears.url in kibana.yml'
+        )
+      );
+    });
+
+    it('falls back to error.message when body.message is absent', () => {
+      const onError = jest.fn();
+      renderHook(() =>
+        useConnectorOAuthConnect({
+          connectorId: 'conn-1',
+          redirectMode: OAuthRedirectMode.NewTab,
+          onError,
+        })
+      );
+
+      const onMutationError = capturedMutationOptions.onError as (error: unknown) => void;
+
+      act(() => onMutationError(new Error('Network request failed')));
+
+      expect(onError).toHaveBeenCalledWith(new Error('Network request failed'));
+    });
+  });
+
   describe('Redirect mode', () => {
     it('calls window.location.assign on mutation success', () => {
       renderHook(() =>
@@ -356,10 +591,11 @@ describe('useConnectorOAuthConnect', () => {
 
       const onMutationSuccess = capturedMutationOptions.onSuccess as (data: {
         authorizationUrl: string;
+        state: string;
       }) => void;
 
       act(() => {
-        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth' });
+        onMutationSuccess({ authorizationUrl: 'https://oauth.provider/auth', state: 'test-state' });
       });
 
       expect(window.location.assign).toHaveBeenCalledWith('https://oauth.provider/auth');

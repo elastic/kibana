@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -16,5 +17,6 @@ export interface SetupDependencies {
   serverless: ServerlessPluginSetup;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StartDependencies {}
+export interface StartDependencies {
+  dataViews: DataViewsServerPluginStart;
+}

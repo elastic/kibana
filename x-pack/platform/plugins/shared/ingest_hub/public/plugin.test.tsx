@@ -144,7 +144,7 @@ describe('IngestHubPlugin', () => {
         const { updater$ } = coreSetup.application.register.mock.calls[0][0];
         const updater = await firstValueFrom(updater$!);
         expect((updater as AppUpdater)!({} as unknown as Parameters<AppUpdater>[0])).toEqual({
-          visibleIn: ['sideNav', 'globalSearch'],
+          visibleIn: ['classicSideNav', 'projectSideNav', 'globalSearch'],
         });
       });
 

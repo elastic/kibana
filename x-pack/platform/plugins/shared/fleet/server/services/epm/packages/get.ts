@@ -11,9 +11,11 @@ import type { MMRegExp } from 'minimatch';
 import { minimatch } from 'minimatch';
 import type {
   ElasticsearchClient,
+  SavedObject,
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
 } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
@@ -42,6 +44,7 @@ import type {
   PackagePolicyAssetsMap,
   PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
+  ArchiveIterator,
 } from '../../../../common/types';
 
 import {
@@ -270,6 +273,7 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
       version,
       status: installStatus,
       dataStreams,
+      rolledBack: integrationSavedObject.attributes.rolled_back,
     };
   });
 
@@ -709,9 +713,11 @@ export async function getPackageDependencies(
   );
 }
 
-interface PackageResponse {
+export interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
+  assetsMap?: AssetsMap;
+  archiveIterator?: ArchiveIterator;
 }
 type GetPackageResponse = PackageResponse | undefined;
 
@@ -767,6 +773,10 @@ export async function getPackageFromSource(options: {
         // in the unlikely event its missing from cache, storage, and never installed from registry
       }
     }
+    if (!res && pkgInstallSource === 'bundled') {
+      res = await Registry.getBundledArchive(pkgName, pkgVersion);
+      logger.debug(`retrieved bundled package ${pkgName}-${pkgVersion} from bundled archive`);
+    }
   } else {
     try {
       res = await Registry.getPackage(pkgName, pkgVersion, { ignoreUnverified });
@@ -786,6 +796,8 @@ export async function getPackageFromSource(options: {
   return {
     paths: res.paths,
     packageInfo: res.packageInfo,
+    assetsMap: res.assetsMap,
+    archiveIterator: res.archiveIterator,
   };
 }
 
@@ -798,7 +810,11 @@ export async function getInstallationObject(options: {
   const installation = await savedObjectsClient
     .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
     .catch((e) => {
-      logger?.error(e);
+      // Not being installed is an expected condition (e.g. fetching input schema for a package
+      // that hasn't been installed yet), not a real error — avoid polluting logs at error level.
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        logger?.error(e);
+      }
       return undefined;
     });
 
@@ -825,7 +841,9 @@ async function getInstallationObjects(options: {
     pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
   );
 
-  const installations = res.saved_objects.filter((so) => so?.attributes);
+  const installations = res.saved_objects.filter(
+    (so): so is SavedObject<Installation> => !isSavedObjectErrorResult(so)
+  );
 
   for (const installation of installations) {
     auditLoggingService.writeCustomSoAuditLog({
@@ -1013,16 +1031,12 @@ export async function getAgentTemplateAssetsMap({
 export async function getPackageKnowledgeBase(options: {
   esClient: ElasticsearchClient;
   pkgName: string;
-  abortController?: AbortController;
+  signal?: AbortSignal;
 }): Promise<PackageKnowledgeBase | undefined> {
-  const { esClient, pkgName, abortController } = options;
+  const { esClient, pkgName, signal } = options;
 
   try {
-    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
-      esClient,
-      pkgName,
-      abortController
-    );
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName, signal);
 
     if (knowledgeBaseItems.length === 0) {
       return undefined;

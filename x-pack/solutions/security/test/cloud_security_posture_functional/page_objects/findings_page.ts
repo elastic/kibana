@@ -291,9 +291,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt = createNotInstalledObject(
     '3p-integrations-no-vulnerabilities-findings-prompt'
   );
-  const thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt = createNotInstalledObject(
-    '3p-integrations-no-misconfigurations-findings-prompt'
-  );
 
   const vulnerabilityDataGrid = {
     getVulnerabilityTable: async () => testSubjects.find('euiDataGrid'),
@@ -333,7 +330,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       const menuItemsOptions = await Promise.all(menuItems.map((item) => item.getVisibleText()));
       const menuItemValueIndex = menuItemsOptions.findIndex((item) => item === value);
       await menuItems[menuItemValueIndex].click();
-      return await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      await testSubjects.missingOrFail('is-loading-grouping-table', { timeout: 5000 });
+      // 'None' renders a flat table, not accordion rows — skip the accordion wait.
+      if (value !== 'None') {
+        await testSubjects.existOrFail('grouping-accordion', { timeout: 5000 });
+      }
     },
     async openDropDown() {
       const element = await this.getElement();
@@ -378,7 +379,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     latestVulnerabilitiesTable,
     notInstalledVulnerabilities,
     notInstalledCSP,
-    thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt,
     thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt,
     index,
     vulnerabilitiesIndex,

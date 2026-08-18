@@ -185,6 +185,7 @@ export { GAP_AUTO_FILL_STATUS } from './constants';
 export type { GapAutoFillStatus } from './constants';
 export { backfillInitiator } from './constants';
 export type { BackfillInitiator } from './constants';
+export { PROVISION_UIAM_API_KEYS_FEATURE_FLAG } from './constants';
 export {
   mappingFromFieldMap,
   getComponentTemplateFromFieldMap,
@@ -206,6 +207,8 @@ export const INTERNAL_ALERTING_SNOOZE_RULE =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}/_snooze` as const;
 export const INTERNAL_ALERTING_API_FIND_RULES_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find` as const;
+export const INTERNAL_ALERTING_API_FIND_MUTED_ALERT_INSTANCES_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_find_muted_alerts` as const;
 
 export const INTERNAL_ALERTING_BACKFILL_API_PATH =
   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill` as const;

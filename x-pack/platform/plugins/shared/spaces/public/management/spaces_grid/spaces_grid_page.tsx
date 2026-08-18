@@ -29,12 +29,13 @@ import type {
   NotificationsStart,
   ScopedHistory,
 } from '@kbn/core/public';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
-import { addSpaceIdToPath, type Space } from '../../../common';
+import type { Space } from '../../../common';
 import { isReservedSpace } from '../../../common';
 import { ENTER_SPACE_PATH } from '../../../common/constants';
 import { getSpacesFeatureDescription } from '../../constants';
@@ -64,6 +65,7 @@ interface Props {
 interface State {
   spaces: Space[];
   spacesFiltered: Space[];
+  queryText: string;
   activeSpace: Space | null;
   features: KibanaFeature[];
   loading: boolean;
@@ -77,6 +79,7 @@ export class SpacesGridPage extends Component<Props, State> {
     this.state = {
       spaces: [],
       spacesFiltered: [],
+      queryText: '',
       activeSpace: null,
       features: [],
       loading: true,
@@ -118,19 +121,24 @@ export class SpacesGridPage extends Component<Props, State> {
     );
   }
 
-  public onQueryChange = ({ query }: EuiSearchBarOnChangeArgs) => {
-    const text = query?.text?.toLowerCase() || '';
+  private filterSpacesByQuery = (spaces: Space[], queryText: string): Space[] => {
+    if (!queryText) {
+      return spaces;
+    }
 
-    this.setState({ loading: true });
-
-    const spacesFiltered = this.state.spaces.filter(
+    return spaces.filter(
       (space) =>
-        space.name.toLowerCase().includes(text) || space.description?.toLowerCase().includes(text)
+        space.name.toLowerCase().includes(queryText) ||
+        space.description?.toLowerCase().includes(queryText)
     );
+  };
+
+  public onQueryChange = ({ query }: EuiSearchBarOnChangeArgs) => {
+    const queryText = query?.text?.toLowerCase() || '';
 
     this.setState({
-      spacesFiltered,
-      loading: false,
+      queryText,
+      spacesFiltered: this.filterSpacesByQuery(this.state.spaces, queryText),
     });
   };
 
@@ -260,13 +268,16 @@ export class SpacesGridPage extends Component<Props, State> {
         getActiveSpace,
         getFeatures(),
       ]);
-      this.setState({
+      // Re-apply any query typed while load was in flight; otherwise an early
+      // filter is wiped when this resolves and the table shows every space
+      // while the search box still shows the query text.
+      this.setState((state) => ({
         loading: false,
         spaces,
-        spacesFiltered: spaces,
+        spacesFiltered: this.filterSpacesByQuery(spaces, state.queryText),
         activeSpace,
         features,
-      });
+      }));
     } catch (error) {
       this.setState({
         loading: false,

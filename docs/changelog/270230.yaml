@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/270230
+issues:
+- https://github.com/elastic/kibana/issues/270190
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-26
+areas:
+- Dashboards and visualizations
+title: 'Fix **Links** panel saving unsupported `enhancements` property'

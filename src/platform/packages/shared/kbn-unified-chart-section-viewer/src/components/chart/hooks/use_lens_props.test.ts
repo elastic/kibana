@@ -14,6 +14,7 @@ import { useChartLayers } from './use_chart_layers';
 import {
   LensConfigBuilder,
   type LensAttributes,
+  type LensLegendConfig,
   type LensSeriesLayer,
 } from '@kbn/lens-embeddable-utils';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -24,13 +25,10 @@ import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 
 jest.mock('./use_chart_layers');
 jest.mock('@kbn/lens-embeddable-utils');
-jest.mock('../utils/report_chart_section_error', () => ({
-  reportChartSectionError: jest.fn(),
+const mockReportError = jest.fn();
+jest.mock('./use_report_chart_section_error', () => ({
+  useReportChartSectionError: jest.fn(() => mockReportError),
 }));
-
-const { reportChartSectionError: mockReportChartSectionError } = jest.requireMock(
-  '../utils/report_chart_section_error'
-) as { reportChartSectionError: jest.Mock };
 
 const LensConfigBuilderMock = LensConfigBuilder as jest.MockedClass<typeof LensConfigBuilder>;
 const useChartLayersMock = useChartLayers as jest.MockedFunction<typeof useChartLayers>;
@@ -50,6 +48,7 @@ describe('useLensProps', () => {
 
   const mockEmptyChartLayers: Array<LensSeriesLayer> = [];
   const mockError = new Error('Test error');
+  const legendConfig: LensLegendConfig = { show: true, position: 'right' };
 
   const fetchParams = getFetchParamsMock();
   let discoverFetch$: UnifiedHistogramFetch$;
@@ -195,6 +194,38 @@ describe('useLensProps', () => {
     });
   });
 
+  it('uses provided legend config when legend prop is set', async () => {
+    const chartRef = createMockChartRef();
+
+    renderHook(() =>
+      useLensProps({
+        chartId: 'testChartId',
+        title: 'Test Chart',
+        query: 'FROM metrics-*',
+        services: servicesMock as UnifiedHistogramServices,
+        fetchParams,
+        discoverFetch$,
+        chartRef,
+        chartLayers: mockChartLayers,
+        legend: legendConfig,
+        profileId: 'testProfileId',
+      })
+    );
+
+    act(() => {
+      discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(LensConfigBuilder.prototype.build).toHaveBeenCalledWith(
+        expect.objectContaining({
+          legend: { show: true, position: 'right' },
+        }),
+        expect.anything()
+      );
+    });
+  });
+
   it('updates lensProps when discoverFetch$ emits', async () => {
     const chartRef = createMockChartRef();
     const testFetchParams = {
@@ -241,6 +272,47 @@ describe('useLensProps', () => {
       );
     });
     expect(result.current?.lastReloadRequestTime).toBeGreaterThan(0);
+  });
+
+  it('updates isApproximate when Fast mode changes', async () => {
+    const chartRef = createMockChartRef();
+    const approximateFetchParams = { ...fetchParams, isApproximate: true };
+    const exactFetchParams = { ...fetchParams, isApproximate: false };
+    const { result, rerender } = renderHook(
+      ({ currentFetchParams }) =>
+        useLensProps({
+          chartId: 'testChartId',
+          title: 'Test Chart',
+          query: 'FROM metrics-*',
+          services: servicesMock as UnifiedHistogramServices,
+          fetchParams: currentFetchParams,
+          discoverFetch$,
+          chartRef,
+          chartLayers: mockChartLayers,
+          profileId: 'testProfileId',
+        }),
+      { initialProps: { currentFetchParams: approximateFetchParams } }
+    );
+
+    act(() => {
+      discoverFetch$.next({
+        fetchParams: approximateFetchParams,
+        lensVisServiceState: undefined,
+      });
+    });
+
+    await waitFor(() => {
+      expect(result.current?.isApproximate).toBe(true);
+    });
+
+    rerender({ currentFetchParams: exactFetchParams });
+    act(() => {
+      discoverFetch$.next({ fetchParams: exactFetchParams, lensVisServiceState: undefined });
+    });
+
+    await waitFor(() => {
+      expect(result.current?.isApproximate).toBe(false);
+    });
   });
 
   it('handles chartRef as null gracefully', async () => {
@@ -355,10 +427,10 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+        expect(mockReportError).toHaveBeenCalledTimes(1);
       });
 
-      expect(mockReportChartSectionError).toHaveBeenCalledWith({
+      expect(mockReportError).toHaveBeenCalledWith({
         error: builderError,
         source: 'useLensProps',
         labels: {
@@ -400,7 +472,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportChartSectionError).toHaveBeenCalled();
+        expect(mockReportError).toHaveBeenCalled();
       });
 
       await waitFor(() => {
@@ -445,7 +517,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+        expect(mockReportError).toHaveBeenCalledTimes(1);
       });
 
       for (let i = 0; i < 5; i++) {
@@ -454,7 +526,7 @@ describe('useLensProps', () => {
         });
       }
 
-      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+      expect(mockReportError).toHaveBeenCalledTimes(1);
     });
 
     it('reports again after a recovery when the same failure resurfaces', async () => {
@@ -488,7 +560,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportChartSectionError).toHaveBeenCalledTimes(2);
+        expect(mockReportError).toHaveBeenCalledTimes(2);
       });
     });
 
@@ -515,7 +587,7 @@ describe('useLensProps', () => {
       );
 
       await waitFor(() => {
-        expect(mockReportChartSectionError).toHaveBeenCalled();
+        expect(mockReportError).toHaveBeenCalled();
       });
 
       await act(async () => {

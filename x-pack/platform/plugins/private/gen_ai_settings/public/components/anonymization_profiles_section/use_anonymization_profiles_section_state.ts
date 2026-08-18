@@ -7,7 +7,6 @@
 
 import { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import type { StartServices } from '../../hooks/use_kibana';
 import { isAnonymizationCapabilities } from '../../utils/anonymization_capabilities';
 
@@ -39,11 +38,7 @@ export const useAnonymizationProfilesSectionState = ({
 }) => {
   const { application, http, notifications } = services;
 
-  const { spaceId: pathSpaceId } = getSpaceIdFromPath(
-    http.basePath.get(),
-    http.basePath.serverBasePath
-  );
-  const activeSpaceId = pathSpaceId;
+  const activeSpaceId = http.spaceId;
 
   const anonymizationCapabilities = useMemo<AnonymizationCapabilities>(() => {
     const capabilityValue = application.capabilities[ANONYMIZATION_FEATURE_ID];

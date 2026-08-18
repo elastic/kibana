@@ -1,0 +1,21 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+  AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT,
+} from '@kbn/as-code-shared-schemas';
+import type { CoreRequestHandlerContext } from '@kbn/core/server';
+
+export async function getUseGASchemas(core: CoreRequestHandlerContext): Promise<boolean> {
+  return core.featureFlags.getBooleanValue(
+    AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG,
+    AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+  );
+}

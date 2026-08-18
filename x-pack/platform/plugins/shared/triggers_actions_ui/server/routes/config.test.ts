@@ -55,6 +55,7 @@ describe('createConfigRoute', () => {
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
         run: { alerts: { max: 1000 }, actions: { max: 100000 } },
+        apiKeyType: 'es' as const,
       }),
       getRulesClientWithRequest: async () => mockRulesClient,
     });
@@ -71,6 +72,7 @@ describe('createConfigRoute', () => {
         isUsingSecurity: true,
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
+        apiKeyType: 'es',
       },
     });
   });
@@ -90,6 +92,7 @@ describe('createConfigRoute', () => {
         maxScheduledPerMinute: 10000,
         minimumScheduleInterval: { value: '1m', enforce: false },
         run: { alerts: { max: 1000 }, actions: { max: 100000 } },
+        apiKeyType: 'es' as const,
       }),
       getRulesClientWithRequest: async () => mockRulesClient,
     });

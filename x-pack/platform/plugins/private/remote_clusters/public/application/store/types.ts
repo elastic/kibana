@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ThunkAction, ThunkDispatch } from 'redux-thunk';
+import type { ThunkAction, ThunkDispatch } from 'redux-thunk-v2';
 
 import type { RemoteCluster } from '../services/http';
 import type {

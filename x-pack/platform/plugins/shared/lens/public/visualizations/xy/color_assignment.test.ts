@@ -76,7 +76,7 @@ describe('color_assignment', () => {
 
   const formatFactory = (() =>
     ({
-      convert(x: unknown) {
+      convertToText(x: unknown) {
         return x;
       },
     } as unknown)) as FormatFactory;
@@ -125,7 +125,7 @@ describe('color_assignment', () => {
         },
         (() =>
           ({
-            convert: formatMock,
+            convertToText: formatMock,
           } as unknown)) as FormatFactory
       );
       expect(assignments.palette1.totalSeriesCount).toEqual(2 * 2);
@@ -201,7 +201,7 @@ describe('color_assignment', () => {
         },
         (() =>
           ({
-            convert: () => 'formatted',
+            convertToText: () => 'formatted',
           } as unknown)) as FormatFactory
       );
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2

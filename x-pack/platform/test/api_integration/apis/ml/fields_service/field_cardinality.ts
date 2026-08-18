@@ -25,12 +25,14 @@ export default ({ getService }: FtrProviderContext) => {
         fieldNames: ['customer_first_name.keyword', 'customer_last_name.keyword'],
         query: { bool: { must: [{ match_all: {} }] } },
         timeFieldName: 'order_date',
+        earliestMs: 1686787200000, // June 15, 2023 12:00:00 AM GMT
+        latestMs: 1686873599000, //  June 15, 2023 11:59:59 PM GMT
       },
       expected: {
         statusCode: 200,
         responseBody: {
-          'customer_first_name.keyword': 46,
-          'customer_last_name.keyword': 183,
+          'customer_first_name.keyword': 42,
+          'customer_last_name.keyword': 98,
         },
       },
     },

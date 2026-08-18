@@ -26,7 +26,6 @@ describe('AlertProcessingKeyInsight', () => {
   };
 
   const defaultProps: React.ComponentProps<typeof AlertProcessingKeyInsight> = {
-    isLoading: false,
     valueMetrics: defaultValueMetrics,
   };
 
@@ -52,7 +51,6 @@ describe('AlertProcessingKeyInsight', () => {
   [
     'alertProcessingKeyInsightsContainer',
     'alertProcessingKeyInsightsGreetingGroup',
-    'alertProcessingKeyInsightsLogo',
     'alertProcessingKeyInsightsGreeting',
   ].forEach((testId) => {
     it(`returns the ${testId} element`, () => {

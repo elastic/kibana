@@ -28,7 +28,7 @@ export interface HasSerializableState<SerializedState extends object = object> {
   /**
    * Applies a serialized state snapshot owned by the parent container.
    */
-  applySerializedState: (state?: SerializedState) => MaybePromise<void>;
+  applySerializedState: (state: SerializedState) => MaybePromise<void>;
 }
 
 export const apiHasSerializableState = (api: unknown | null): api is HasSerializableState => {

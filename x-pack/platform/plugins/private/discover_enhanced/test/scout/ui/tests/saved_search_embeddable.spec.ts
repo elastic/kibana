@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import type { ScoutWorkerFixtures } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
@@ -40,9 +41,6 @@ const createSavedSearch = async (
   });
 
 test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAgnostic }, () => {
-  const SAVED_SEARCH_TITLE = 'TempSearch';
-  const SAVED_SEARCH_ID = '90943e30-9a47-11e8-b64d-95841ca0b247';
-
   test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
@@ -67,22 +65,26 @@ test.describe('Discover app - saved search embeddable', { tag: tags.deploymentAg
     page,
     pageObjects,
   }) => {
+    const savedSearchId = randomUUID().replace(/-/g, '');
+    const savedSearchTitle = `TempSearch ${savedSearchId}`;
+    const dashboardTitle = `Dashboard with deleted saved search ${savedSearchId}`;
+
     await pageObjects.dashboard.openNewDashboard();
     await createSavedSearch(
       kbnClient,
-      SAVED_SEARCH_ID,
-      SAVED_SEARCH_TITLE,
+      savedSearchId,
+      savedSearchTitle,
       testData.DATA_VIEW_ID.LOGSTASH
     );
-    await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
+    await pageObjects.dashboard.addPanelFromLibrary(savedSearchTitle);
     await page.testSubj.locator('savedSearchTotalDocuments').waitFor({
       state: 'visible',
     });
 
-    await pageObjects.dashboard.saveDashboard('Dashboard with deleted saved search');
+    await pageObjects.dashboard.saveDashboard(dashboardTitle);
     await kbnClient.savedObjects.delete({
       type: 'search',
-      id: SAVED_SEARCH_ID,
+      id: savedSearchId,
     });
 
     await page.reload();

@@ -5,21 +5,15 @@
  * 2.0.
  */
 
+import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import { SecurityEventAttachmentPayloadSchema } from '../common/cases/attachments/event';
 import { getEventAttachmentType } from './cases/attachments/event';
 
 describe('security.event attachment type', () => {
-  it('accepts metadata.index as string and string[]', () => {
+  it('registers the full-payload zod schema on the unified registry', () => {
     const eventAttachmentType = getEventAttachmentType();
 
-    expect(() => eventAttachmentType.schemaValidator({ index: 'logs-endpoint-*' })).not.toThrow();
-    expect(() => eventAttachmentType.schemaValidator({ index: ['logs-endpoint-*'] })).not.toThrow();
-  });
-
-  it('rejects invalid metadata.index types', () => {
-    const eventAttachmentType = getEventAttachmentType();
-
-    expect(() => eventAttachmentType.schemaValidator({ index: 123 })).toThrow(
-      'metadata.index must be a string or an array of strings'
-    );
+    expect(eventAttachmentType.id).toBe(SECURITY_EVENT_ATTACHMENT_TYPE);
+    expect(eventAttachmentType.schema).toBe(SecurityEventAttachmentPayloadSchema);
   });
 });

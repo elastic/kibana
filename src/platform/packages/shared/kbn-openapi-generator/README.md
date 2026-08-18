@@ -144,7 +144,6 @@ Then add the code generation script to the build pipeline. Open the buildkite ch
 
 ```sh
 ...
-.buildkite/scripts/steps/checks/saved_objects_definition_change.sh
 .buildkite/scripts/steps/code_generation/elastic_assistant_codegen.sh
 .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
 .buildkite/scripts/steps/code_generation/osquery_codegen.sh

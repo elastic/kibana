@@ -17,64 +17,53 @@
 import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
-  * Search mode for free-text search combined with the KQL `filter`.
+  * Search mode for free-text search combined with `filter`.
 
   */
 export const GranularRulesSearchMode = lazySchema(() => z.literal('legacy').default('legacy'));
 export type GranularRulesSearchMode = z.infer<typeof GranularRulesSearchMode>;
 
 /**
-  * Free-text search combined with the KQL `filter`. Interpreted according to search mode.
+  * Free-text search combined with `filter`. Interpreted according to search mode.
 
   */
 export const GranularRulesSearch = lazySchema(() =>
   z
     .object({
-      term: z.string(),
+      term: z.string().max(10000),
       mode: GranularRulesSearchMode.optional(),
     })
     .strict()
 );
 export type GranularRulesSearch = z.infer<typeof GranularRulesSearch>;
 
+/**
+  * How `GranularRulesFilter.term` is interpreted. Defaults to KQL.
+
+  */
+export const GranularRulesFilterMode = lazySchema(() => z.literal('KQL').default('KQL'));
+export type GranularRulesFilterMode = z.infer<typeof GranularRulesFilterMode>;
+
+/**
+  * String filter expression interpreted according to `mode`.
+
+  */
+export const GranularRulesFilter = lazySchema(() =>
+  z
+    .object({
+      term: z.string().max(10000),
+      mode: GranularRulesFilterMode.optional(),
+    })
+    .strict()
+);
+export type GranularRulesFilter = z.infer<typeof GranularRulesFilter>;
+
 export const GranularRulesFacetCategory = lazySchema(() =>
-  z.enum(['tags', 'type', 'enabled', 'updatedBy', 'createdBy', 'lastRunOutcome'])
+  z.enum(['tags', 'enabled', 'updatedBy', 'createdBy', 'lastRunOutcome', 'isCustomized', 'type'])
 );
 export type GranularRulesFacetCategory = z.infer<typeof GranularRulesFacetCategory>;
 export type GranularRulesFacetCategoryEnum = typeof GranularRulesFacetCategory.enum;
 export const GranularRulesFacetCategoryEnum = GranularRulesFacetCategory.enum;
-
-/**
-  * A rule attribute that can be requested via the `fields` parameter on `_search`.
-
-  */
-export const SearchRulesField = lazySchema(() =>
-  z.enum([
-    'id',
-    'name',
-    'tags',
-    'enabled',
-    'alertTypeId',
-    'params',
-    'schedule',
-    'actions',
-    'createdBy',
-    'updatedBy',
-    'createdAt',
-    'updatedAt',
-    'revision',
-    'executionStatus',
-    'lastRun',
-    'monitoring',
-    'snoozeSchedule',
-    'muteAll',
-    'running',
-    'nextRun',
-  ])
-);
-export type SearchRulesField = z.infer<typeof SearchRulesField>;
-export type SearchRulesFieldEnum = typeof SearchRulesField.enum;
-export const SearchRulesFieldEnum = SearchRulesField.enum;
 
 /**
   * Aggregation options on `_search`.

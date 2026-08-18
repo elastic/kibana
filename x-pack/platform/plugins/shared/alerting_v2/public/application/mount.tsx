@@ -31,7 +31,7 @@ import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/publi
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { RulesApp } from './rules_app';
-import { RuleDoctorApp } from './rule_doctor_app';
+import { RuleLibraryApp } from './rule_library_app';
 import { ActionPoliciesApp } from './action_policies_app';
 import { EpisodesApp } from './episodes_app';
 import { ExecutionHistoryApp } from './execution_history_app';
@@ -77,7 +77,7 @@ export const mountAlertingV2App = async ({
   return () => ReactDOM.unmountComponentAtNode(element);
 };
 
-export const mountRuleDoctorApp = async ({
+export const mountRuleLibraryApp = async ({
   params,
   container,
   coreStart,
@@ -97,7 +97,7 @@ export const mountRuleDoctorApp = async ({
           <BreadcrumbProvider setBreadcrumbs={setBreadcrumbs}>
             <I18nProvider>
               <Router history={history}>
-                <RuleDoctorApp />
+                <RuleLibraryApp />
               </Router>
             </I18nProvider>
           </BreadcrumbProvider>

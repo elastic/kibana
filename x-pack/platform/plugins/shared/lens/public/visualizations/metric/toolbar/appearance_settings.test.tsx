@@ -51,6 +51,7 @@ const fullState: Required<
   primaryPosition: 'bottom',
   iconAlign: 'right',
   valueFontMode: 'default',
+  density: 'default',
   secondaryTrend: { type: 'none' },
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
@@ -215,6 +216,19 @@ describe('appearance settings', () => {
     btnGroup.select('Default');
 
     expect(mockSetState.mock.calls.map(([s]) => s.valueFontMode)).toEqual(['default']);
+  });
+
+  it('should set density to Default', async () => {
+    renderComponent({ density: 'compact' });
+
+    const btnGroup = new EuiButtonGroupTestHarness('lens-metric-appearance-other-density-btn');
+
+    expect(btnGroup.getSelected()?.textContent).toBe('Compact');
+
+    btnGroup.select('Default');
+    btnGroup.select('Compact');
+
+    expect(mockSetState.mock.calls.map(([s]) => s.density)).toEqual(['default']);
   });
 
   it('should set iconAlign when Left position option is selected', async () => {

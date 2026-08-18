@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { type FC, type MouseEventHandler, useCallback, useMemo, useState } from 'react';
+import React, { type FC, useCallback, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { EuiSearchBarProps } from '@elastic/eui';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -20,8 +19,10 @@ import {
   EuiPopover,
   EuiSearchBar,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
+import type { TransformFunction } from '../../../../../../common/constants';
 import {
   isReauthorizeActionDisabled,
   ReauthorizeActionModal,
@@ -86,7 +87,7 @@ function getItemIdToExpandedRowMap(
 
 interface TransformListProps {
   isLoading: boolean;
-  onCreateTransform: MouseEventHandler<HTMLButtonElement>;
+  onCreateTransform: (transformFunction: TransformFunction) => void;
   pageState: ListingPageUrlState;
   transformNodes: number;
   transforms: TransformListRow[];
@@ -128,10 +129,6 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkScheduleNowAction = useScheduleNowAction(false, transformNodes);
 
   const capabilities = useTransformCapabilities();
-  const disabled =
-    !capabilities.canCreateTransform ||
-    !capabilities.canPreviewTransform ||
-    !capabilities.canStartStopTransform;
 
   const { sorting, pagination, onTableChange } = useTableSettings<TransformListRow>(
     TRANSFORM_LIST_COLUMN.ID,
@@ -166,17 +163,13 @@ export const TransformList: FC<TransformListProps> = ({
           </h2>
         }
         actions={[
-          <EuiButton
-            color="primary"
-            fill
-            onClick={onCreateTransform}
-            isDisabled={disabled}
-            data-test-subj="transformCreateFirstButton"
-          >
-            {i18n.translate('xpack.transform.list.emptyPromptButtonText', {
+          <CreateTransformButton
+            label={i18n.translate('xpack.transform.list.emptyPromptButtonText', {
               defaultMessage: 'Create your first transform',
             })}
-          </EuiButton>,
+            onClick={onCreateTransform}
+            transformNodes={transformNodes}
+          />,
         ]}
         data-test-subj="transformNoTransformsFound"
       />
@@ -278,20 +271,30 @@ export const TransformList: FC<TransformListProps> = ({
 
   const renderToolsLeft = () => {
     const buttonIcon = (
-      <EuiButtonIcon
-        size="s"
-        iconType="gear"
-        color="text"
-        onClick={() => {
-          setIsActionsMenuOpen(true);
-        }}
-        aria-label={i18n.translate(
+      <EuiToolTip
+        content={i18n.translate(
           'xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel',
           {
             defaultMessage: 'Management actions',
           }
         )}
-      />
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          size="s"
+          iconType="gear"
+          color="text"
+          onClick={() => {
+            setIsActionsMenuOpen(true);
+          }}
+          aria-label={i18n.translate(
+            'xpack.transform.multiTransformActionsMenu.managementActionsAriaLabel',
+            {
+              defaultMessage: 'Management actions',
+            }
+          )}
+        />
+      </EuiToolTip>
     );
 
     const bulkActionIcon = (

@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { TestProviders } from '../../../../common/mock';
-import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { TABLE_SECTION_TEST_ID, TableSection } from './table_section';
 import { useUserData } from '../../user_info';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
@@ -17,8 +17,9 @@ import { useListsConfig } from '../../../containers/detection_engine/lists/use_l
 jest.mock('../../user_info');
 jest.mock('../../../containers/detection_engine/lists/use_lists_config');
 
-const dataViewSpec: DataViewSpec = { title: '.alerts-security.alerts-default' };
-const dataView: DataView = createStubDataView({ spec: dataViewSpec });
+const dataView: DataView = createStubDataView({
+  spec: { title: '.alerts-security.alerts-default' },
+});
 
 describe('<GroupedTable />', () => {
   it('should render correctly', () => {
@@ -33,13 +34,7 @@ describe('<GroupedTable />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <TableSection
-          assignees={[]}
-          dataView={dataView}
-          dataViewSpec={dataViewSpec}
-          pageFilters={[]}
-          statusFilter={[]}
-        />
+        <TableSection assignees={[]} dataView={dataView} pageFilters={[]} statusFilter={[]} />
       </TestProviders>
     );
 
@@ -59,13 +54,7 @@ describe('<GroupedTable />', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <TableSection
-          assignees={[]}
-          dataView={dataView}
-          dataViewSpec={dataViewSpec}
-          pageFilters={[]}
-          statusFilter={[]}
-        />
+        <TableSection assignees={[]} dataView={dataView} pageFilters={[]} statusFilter={[]} />
       </TestProviders>
     );
 
@@ -84,13 +73,7 @@ describe('<GroupedTable />', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <TableSection
-          assignees={[]}
-          dataView={dataView}
-          dataViewSpec={dataViewSpec}
-          pageFilters={[]}
-          statusFilter={[]}
-        />
+        <TableSection assignees={[]} dataView={dataView} pageFilters={[]} statusFilter={[]} />
       </TestProviders>
     );
 
@@ -112,7 +95,6 @@ describe('<GroupedTable />', () => {
         <TableSection
           assignees={[]}
           dataView={dataView}
-          dataViewSpec={dataViewSpec}
           pageFilters={undefined}
           statusFilter={[]}
         />

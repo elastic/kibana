@@ -25,6 +25,11 @@ import { useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { useEmbeddableAttributes } from './use_embeddable_attributes';
 
+// The cases plugin auto-registers its own "Add to case" action on the Lens panel
+// menu. Exploratory View already provides its own `expViewAddToCase` action, so we
+// disable the built-in one to avoid a duplicate menu entry (see issue #231475).
+const DISABLED_ACTIONS = ['embeddable_addToExistingCase'];
+
 export interface ExploratoryEmbeddableProps {
   id?: string;
   appendTitle?: JSX.Element;
@@ -204,6 +209,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         attributes={{ ...attributesJSON, title: '', description: '' }}
         onBrushEnd={onBrushEnd}
         withDefaultActions={Boolean(withActions)}
+        disabledActions={DISABLED_ACTIONS}
         extraActions={actions}
         viewMode={'view'}
         searchSessionId={searchSessionId}

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
-import { Subscription } from 'rxjs';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Subscription, of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import {
   ControlGroupRenderer,
   type ControlGroupCreationOptions,
@@ -16,6 +17,8 @@ import {
 } from '@kbn/control-group-renderer';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import {
   SERVICE_MAP_CONTROLS_CONFIG,
   type ServiceMapControlConfig,
@@ -54,6 +57,15 @@ export function ServiceMapControls({
   const initialSelectionsRef = useRef(initialSelections);
   const controlsConfigRef = useRef(controlsConfig);
 
+  // Forward the active CPS (cross-project search) scope so options list suggestions
+  // query the same projects as the APM APIs; without it they only see the origin project.
+  const { services } = useKibana<{ cps?: CPSPluginStart }>();
+  const cpsManager = services.cps?.cpsManager;
+  const projectRouting = useObservable(
+    useMemo(() => cpsManager?.getProjectRouting$() ?? of(undefined), [cpsManager]),
+    cpsManager?.getProjectRouting()
+  );
+
   const getCreationOptions = useCallback(
     async (
       _initialState: ControlGroupRuntimeState,
@@ -68,6 +80,7 @@ export function ServiceMapControls({
           width: config.width,
           grow: config.grow,
           selected_options: initialSelectionsRef.current?.[config.field_name] ?? [],
+          single_select: config.single_select,
         });
       }
       return { initialState: state as ControlGroupRuntimeState };
@@ -103,6 +116,7 @@ export function ServiceMapControls({
       timeRange={timeRange}
       query={query}
       filters={filters}
+      projectRouting={projectRouting}
       compressed
     />
   );

@@ -27,7 +27,7 @@ const workpadResponse = {
 };
 
 // Mock the hooks, actions, and services used by the UseWorkpad hook
-jest.mock('react-redux', () => ({
+jest.mock('react-redux-v7', () => ({
   useDispatch: () => mockDispatch,
   useSelector: () => mockSelector,
 }));

@@ -22,8 +22,7 @@ export const getDiscoverSession = async (
     id: so.item.id,
     title: so.item.attributes.title,
     description: so.item.attributes.description,
-    // TODO: so.item.attributes.tabs shouldn't be nullable soon
-    tabs: so.item.attributes.tabs!.map((tab) => ({
+    tabs: so.item.attributes.tabs.map((tab) => ({
       id: tab.id,
       label: tab.label,
       sort: tab.attributes.sort as SortOrder[],
@@ -41,6 +40,7 @@ export const getDiscoverSession = async (
       hideAggregatedPreview: tab.attributes.hideAggregatedPreview,
       rowHeight: tab.attributes.rowHeight,
       headerRowHeight: tab.attributes.headerRowHeight,
+      esqlApproximation: tab.attributes.esqlApproximation,
       timeRestore: tab.attributes.timeRestore,
       timeRange: tab.attributes.timeRange,
       refreshInterval: tab.attributes.refreshInterval,

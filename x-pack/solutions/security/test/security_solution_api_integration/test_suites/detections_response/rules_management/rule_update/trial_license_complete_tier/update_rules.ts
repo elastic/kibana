@@ -28,6 +28,7 @@ import type TestAgent from 'supertest/lib/agent';
 import type {
   RuleResponse,
   RuleUpdateProps,
+  ThreatMatchRuleUpdateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { v4 as uuidV4 } from 'uuid';
 import { createSupertestErrorLogger } from '../../../../edr_workflows/utils';
@@ -51,6 +52,7 @@ import {
   getActionsWithoutFrequencies,
   getSomeActionsWithFrequencies,
   getCustomQueryRuleParams,
+  getSimpleThreatMatch,
 } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -555,6 +557,57 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      describe('threat_match rule type', () => {
+        // https://github.com/elastic/kibana/issues/276203
+        it('should preserve concurrent_searches and items_per_search when they are included in the update payload', async () => {
+          const ruleId = 'rule-1';
+          await createRule(supertest, log, {
+            ...getSimpleThreatMatch(ruleId),
+            concurrent_searches: 4,
+            items_per_search: 2500,
+          });
+
+          const updatedRule: ThreatMatchRuleUpdateProps = {
+            ...getSimpleThreatMatch(ruleId),
+            rule_id: ruleId,
+            name: 'updated name',
+            concurrent_searches: 4,
+            items_per_search: 2500,
+          };
+
+          const { body: outputRule } = await detectionsApi
+            .updateRule({ body: updatedRule })
+            .expect(200);
+
+          expect(outputRule.name).to.be('updated name');
+          expect(outputRule.concurrent_searches).to.be(4);
+          expect(outputRule.items_per_search).to.be(2500);
+        });
+
+        it('should reset concurrent_searches and items_per_search to their defaults when they are omitted from the update payload', async () => {
+          const ruleId = 'rule-1';
+          await createRule(supertest, log, {
+            ...getSimpleThreatMatch(ruleId),
+            concurrent_searches: 4,
+            items_per_search: 2500,
+          });
+
+          const updatedRule: ThreatMatchRuleUpdateProps = {
+            ...getSimpleThreatMatch(ruleId),
+            rule_id: ruleId,
+            name: 'updated name',
+          };
+
+          const { body: outputRule } = await detectionsApi
+            .updateRule({ body: updatedRule })
+            .expect(200);
+
+          expect(outputRule.name).to.be('updated name');
+          expect(outputRule.concurrent_searches).to.be(undefined);
+          expect(outputRule.items_per_search).to.be(undefined);
+        });
+      });
+
       describe('per-action frequencies', () => {
         const updateSingleRule = async (
           ruleId: string,
@@ -774,14 +827,42 @@ export default ({ getService }: FtrProviderContext) => {
 
       describe('with endpoint response actions', () => {
         let superTestResponseActionsNoAuthz: TestAgent;
+        let superTestResponseActionsAuthz: TestAgent;
         let ruleToUpdate: RuleResponse;
         let updatePayload: RuleUpdateProps;
+
+        const getRuleAlertingUpdateBody = async (id: string, responseActions: unknown[]) => {
+          const { body: current } = await supertest
+            .get(`/api/alerting/rule/${id}`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+
+          return {
+            name: current.name,
+            tags: current.tags,
+            schedule: current.schedule,
+            throttle: current.throttle ?? null,
+            notify_when: current.notify_when ?? null,
+            actions: current.actions,
+            params: { ...current.params, responseActions },
+          };
+        };
+
+        const isolateResponseAction = [
+          { actionTypeId: '.endpoint', params: { command: 'isolate', comment: 'test isolation' } },
+        ];
 
         before(async () => {
           superTestResponseActionsNoAuthz = await utils.createSuperTestWithCustomRole({
             name: ROLE.endpoint_response_actions_no_access,
             privileges: rolesUsersProvider.loader.getPreDefinedRole(
               ROLE.endpoint_response_actions_no_access
+            ),
+          });
+          superTestResponseActionsAuthz = await utils.createSuperTestWithCustomRole({
+            name: ROLE.endpoint_response_actions_access,
+            privileges: rolesUsersProvider.loader.getPreDefinedRole(
+              ROLE.endpoint_response_actions_access
             ),
           });
         });
@@ -863,6 +944,27 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body.name).to.eql('updated rule name');
           expect(body.response_actions).to.eql(ruleToUpdate.response_actions);
+        });
+
+        it('should update rule response actions via the Alerting API when user has authz', async () => {
+          await superTestResponseActionsAuthz
+            .put(`/api/alerting/rule/${ruleToUpdate.id}`)
+            .set('kbn-xsrf', 'true')
+            .send(await getRuleAlertingUpdateBody(ruleToUpdate.id, isolateResponseAction))
+            .expect(200);
+        });
+
+        it('should error updating response actions via the Alerting API when user DOES NOT have authz', async () => {
+          const { body } = await superTestResponseActionsNoAuthz
+            .put(`/api/alerting/rule/${ruleToUpdate.id}`)
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+            .send(await getRuleAlertingUpdateBody(ruleToUpdate.id, isolateResponseAction))
+            .expect(403);
+
+          expect(body.message).to.eql(
+            'User is not authorized to create/update isolate response action'
+          );
         });
       });
     });

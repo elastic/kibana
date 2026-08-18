@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276635
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Alerting and reporting
+title: 'Add "Add to chat" and "Summarize" buttons to the case detail view'
+description: "Adds Agent Builder actions to the case detail view so you can send case context to chat or generate a case summary."
