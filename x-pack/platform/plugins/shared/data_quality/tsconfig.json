@@ -11,6 +11,7 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/dataset-quality-plugin",
     "@kbn/i18n",

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import {
   partitionLabelsFunction,
   pieVisFunction,
@@ -15,31 +16,19 @@ import {
   mosaicVisFunction,
   waffleVisFunction,
 } from '../common';
-import type {
-  ExpressionPartitionVisPluginSetup,
-  ExpressionPartitionVisPluginStart,
-  SetupDeps,
-  StartDeps,
-} from './types';
 
-export class ExpressionPartitionVisPlugin
-  implements
-    Plugin<
-      ExpressionPartitionVisPluginSetup,
-      ExpressionPartitionVisPluginStart,
-      SetupDeps,
-      StartDeps
-    >
-{
-  public setup(core: CoreSetup, { expressions }: SetupDeps) {
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ExpressionPartitionVisPlugin extends Service {
+  static readonly inject = ['expressions.setup'];
+  static readonly provide = 'expressionPartitionVis';
+
+  constructor(ctx: Context) {
+    super(ctx, 'expressionPartitionVis');
+    const expressions = (ctx.get('expressions.setup') as any).contract;
     expressions.registerFunction(partitionLabelsFunction);
-    expressions.registerFunction(pieVisFunction);
-    expressions.registerFunction(treemapVisFunction);
-    expressions.registerFunction(mosaicVisFunction);
-    expressions.registerFunction(waffleVisFunction);
+        expressions.registerFunction(pieVisFunction);
+        expressions.registerFunction(treemapVisFunction);
+        expressions.registerFunction(mosaicVisFunction);
+        expressions.registerFunction(waffleVisFunction);
   }
-
-  public start(core: CoreStart, deps: StartDeps) {}
-
-  public stop() {}
 }

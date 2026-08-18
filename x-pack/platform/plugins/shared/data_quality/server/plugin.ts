@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
-
-import type { ManagementAppLocatorParams } from '@kbn/management-plugin/common/locator';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import type { Dependencies } from './types';
 import { ELASTICSEARCH_FEATURE, KIBANA_FEATURE } from './features';
 import {
   DatasetQualityDetailsLocatorDefinition,
   DatasetQualityLocatorDefinition,
 } from '../common/locators';
 
-export class DataQualityPlugin implements Plugin<void, void, Dependencies> {
-  public setup(_coreSetup: CoreSetup, { features, share }: Dependencies) {
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class DataQualityPlugin extends Service {
+  static readonly inject = ['features.setup', 'share.setup'];
+  static readonly provide = 'dataQuality';
+
+  constructor(ctx: Context) {
+    super(ctx, 'dataQuality');
+    const features = (ctx.get('features.setup') as any).contract;
+    const share = (ctx.get('share.setup') as any).contract;
     features.registerKibanaFeature(KIBANA_FEATURE);
-    features.registerElasticsearchFeature(ELASTICSEARCH_FEATURE);
+        features.registerElasticsearchFeature(ELASTICSEARCH_FEATURE);
 
-    const managementLocator =
-      share.url.locators.get<ManagementAppLocatorParams>(MANAGEMENT_APP_LOCATOR);
+        const managementLocator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
 
-    if (managementLocator) {
-      share.url.locators.create(
-        new DatasetQualityLocatorDefinition({
-          useHash: false,
-          managementLocator,
-        })
-      );
-      share.url.locators.create(
-        new DatasetQualityDetailsLocatorDefinition({
-          useHash: false,
-          managementLocator,
-        })
-      );
-    }
+        if (managementLocator) {
+          share.url.locators.create(
+            new DatasetQualityLocatorDefinition({
+              useHash: false,
+              managementLocator,
+            })
+          );
+          share.url.locators.create(
+            new DatasetQualityDetailsLocatorDefinition({
+              useHash: false,
+              managementLocator,
+            })
+          );
+        }
   }
-
-  public start() {}
-
-  public stop() {}
 }

@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export const plugin = async () => {
-  const { DataQualityPlugin } = await import('./plugin');
-  return new DataQualityPlugin();
-};
+export { default as cordisPlugin } from './plugin';
