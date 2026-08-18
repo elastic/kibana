@@ -201,7 +201,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     scanUrl: {
       isTool: true,
-      annotations: { scope: 'write' },
+      scope: 'write',
       input: lazySchema(() =>
         z.object({
           url: urlOrDomainSchema.describe('Absolute URL to scan, or bare domain to look up'),
@@ -314,7 +314,7 @@ export const VirusTotalConnector: ConnectorSpec = {
 
     submitFile: {
       isTool: true,
-      annotations: { scope: 'write' },
+      scope: 'write',
       input: lazySchema(() =>
         z.object({
           file: z.string().describe('Base64-encoded file content'),

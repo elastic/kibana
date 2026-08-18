@@ -222,7 +222,7 @@ export const Sentry: ConnectorSpec = {
 
     resolveIssue: {
       isTool: true,
-      annotations: { scope: 'destroy' },
+      scope: 'destroy',
       description:
         'Resolve a Sentry issue, the closing step of an incident workflow. Set inNextRelease to resolve conditionally on the next deploy instead of immediately.',
       input: SentryResolveIssueInputSchema,
@@ -244,7 +244,7 @@ export const Sentry: ConnectorSpec = {
 
     ignoreIssue: {
       isTool: true,
-      annotations: { scope: 'destroy' },
+      scope: 'destroy',
       description:
         'Ignore (archive) a noisy Sentry issue so it drops out of the default review list. Pass ignoreDuration (minutes) to auto-unignore later, or omit to ignore indefinitely.',
       input: SentryIgnoreIssueInputSchema,
@@ -267,7 +267,7 @@ export const Sentry: ConnectorSpec = {
 
     unresolveIssue: {
       isTool: true,
-      annotations: { scope: 'destroy' },
+      scope: 'destroy',
       description:
         'Move a Sentry issue back to unresolved. Use to re-escalate an issue on regression or a new event.',
       input: SentryUnresolveIssueInputSchema,
@@ -286,7 +286,7 @@ export const Sentry: ConnectorSpec = {
 
     assignIssue: {
       isTool: true,
-      annotations: { scope: 'destroy' },
+      scope: 'destroy',
       description:
         'Assign a Sentry issue to a user (by primary email or "user:<user-id>") or a team (using "team:<team-slug>"), so automated routing puts the error group in front of the right owner.',
       input: SentryAssignIssueInputSchema,
@@ -346,7 +346,7 @@ export const Sentry: ConnectorSpec = {
 
     bulkUpdateIssues: {
       isTool: true,
-      annotations: { scope: 'destroy' },
+      scope: 'destroy',
       description:
         'Update the status and/or assignee of multiple Sentry issues in one call, so a cleanup workflow does not fan out one request per issue.',
       input: SentryBulkUpdateIssuesInputSchema,
@@ -443,7 +443,7 @@ export const Sentry: ConnectorSpec = {
 
     createIssueAlertRule: {
       isTool: true,
-      annotations: { scope: 'write' },
+      scope: 'write',
       description:
         "Create a new issue alert rule on a Sentry project, so an onboarding workflow can provision monitor coverage for a new service. Conditions/actions use Sentry's rule id catalog (see the Sentry issue alert rule docs).",
       input: SentryCreateIssueAlertRuleInputSchema,
@@ -469,7 +469,7 @@ export const Sentry: ConnectorSpec = {
 
     updateIssueAlertRule: {
       isTool: true,
-      annotations: { scope: 'destroy' },
+      scope: 'destroy',
       description:
         'Update an existing Sentry issue alert rule (name, conditions, actions, or frequency) so an audit workflow can adjust thresholds on provisioned monitor coverage.',
       input: SentryUpdateIssueAlertRuleInputSchema,

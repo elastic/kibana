@@ -14,11 +14,11 @@ import {
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import { getConnectorSpec } from '@kbn/connector-specs';
-import type { ActionAnnotations } from '@kbn/connector-specs';
+import type { ActionScope } from '@kbn/connector-specs';
 
-function formatAnnotationHint(annotations: ActionAnnotations | undefined): string {
-  if (!annotations?.scope || annotations.scope === 'read') return '';
-  return annotations.scope === 'destroy' ? '[DESTROY]' : '[WRITE]';
+function formatAnnotationHint(scope: ActionScope | undefined): string {
+  if (!scope || scope === 'read') return '';
+  return scope === 'destroy' ? '[DESTROY]' : '[WRITE]';
 }
 
 /**
@@ -84,7 +84,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
               const paramsSummary = action.input
                 ? formatSchemaForLlm(action.input)
                 : 'No parameters';
-              const hint = formatAnnotationHint(action.annotations);
+              const hint = formatAnnotationHint(action.scope);
               parts.push(`  - ${actionName}${hint ? ` ${hint}` : ''}: ${actionDesc}`);
               parts.push(`    Parameters: ${paramsSummary}`);
             }

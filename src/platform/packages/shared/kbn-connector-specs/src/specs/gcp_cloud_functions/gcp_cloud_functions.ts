@@ -163,7 +163,7 @@ export const GcpCloudFunctionsConnector: ConnectorSpec = {
   actions: {
     invoke: {
       isTool: true,
-      annotations: { scope: 'destroy' },
+      scope: 'destroy',
       description:
         'Invoke a GCP Cloud Function or Cloud Run function by name using its HTTP trigger URL. Use this when you need to run a known function with an optional JSON payload and return the function response.',
       input: lazySchema(() =>

@@ -256,7 +256,7 @@ describe('connector attachment type', () => {
             actions: {
               sendMessage: {
                 isTool: true,
-                annotations: { scope: 'write' },
+                scope: 'write',
                 description: 'Send a message to a channel',
                 input: inputSchema,
                 handler: jest.fn(),
@@ -297,7 +297,7 @@ describe('connector attachment type', () => {
             actions: {
               deleteMessage: {
                 isTool: true,
-                annotations: { scope: 'destroy' },
+                scope: 'destroy',
                 description: 'Delete a message',
                 input: inputSchema,
                 handler: jest.fn(),
