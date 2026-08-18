@@ -8,14 +8,14 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter, useLocation, useNavigate } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from '@kbn/shared-ux-router';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useAddDataSearchUrlSync } from './use_add_data_search_url_sync';
 
 const Probe = () => {
   const [value, setValue] = useAddDataSearchUrlSync();
   const location = useLocation();
-  const navigate = useNavigate();
+  const history = useHistory();
 
   return (
     <>
@@ -25,7 +25,7 @@ const Probe = () => {
         onChange={(event) => setValue(event.target.value)}
       />
       <div data-test-subj="probeSearch">{location.search}</div>
-      <button data-test-subj="probeNavigate" onClick={() => navigate('/?search=from-url')} />
+      <button data-test-subj="probeNavigate" onClick={() => history.push('/?search=from-url')} />
     </>
   );
 };
@@ -33,9 +33,7 @@ const Probe = () => {
 const renderProbe = (initialEntry: string) =>
   render(
     <MemoryRouter initialEntries={[initialEntry]}>
-      <CompatRouter>
-        <Probe />
-      </CompatRouter>
+      <Probe />
     </MemoryRouter>
   );
 
