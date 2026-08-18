@@ -9,6 +9,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import type { ApiServicesFixture, PageObjects } from '@kbn/scout';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { spaceTest, tags, testData, type DiscoverScoutSpace } from '../fixtures';
 
@@ -43,7 +44,7 @@ const createSavedSearch = async (
           time_restore: false,
         },
       ],
-    },
+    } satisfies DiscoverSessionApiDataInput,
     discoverScoutSpace.id
   );
 };

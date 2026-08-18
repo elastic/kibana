@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, tags } from '../fixtures';
 
 // Discover is a platform feature available across all deployment types.
@@ -49,7 +50,7 @@ spaceTest.describe(
                   },
                 },
               ],
-            },
+            } satisfies DiscoverSessionApiDataInput,
             discoverScoutSpace.id
           );
           await discover.loadSavedSearch('logstash-adhoc-query-test');
@@ -114,7 +115,7 @@ spaceTest.describe(
                     column_order: ['_bytes-runtimefield'],
                   },
                 ],
-              },
+              } satisfies DiscoverSessionApiDataInput,
               discoverScoutSpace.id
             );
           }
@@ -171,7 +172,7 @@ spaceTest.describe(
                   },
                 },
               ],
-            },
+            } satisfies DiscoverSessionApiDataInput,
             discoverScoutSpace.id
           );
           await discover.loadSavedSearch('logstas-filter-toast-test');

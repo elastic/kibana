@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, testData } from '../fixtures';
 
 const FIRST_TAB_LABEL = 'Persisted data view';
@@ -155,7 +156,7 @@ spaceTest.describe(
                   },
                 },
               ],
-            },
+            } satisfies DiscoverSessionApiDataInput,
             discoverScoutSpace.id
           );
         });
