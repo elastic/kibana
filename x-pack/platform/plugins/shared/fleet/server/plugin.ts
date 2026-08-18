@@ -52,10 +52,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { ReportingStart } from '@kbn/reporting-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-<<<<<<< HEAD
-=======
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
->>>>>>> 96875849ce7666fed7af7f5925814c711e686510
 
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
@@ -197,10 +194,7 @@ export interface FleetSetupDeps {
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
   workflowsManagement?: WorkflowsServerPluginSetup;
-<<<<<<< HEAD
-=======
   agentBuilder?: AgentBuilderPluginSetup;
->>>>>>> 96875849ce7666fed7af7f5925814c711e686510
 }
 
 export interface FleetStartDeps {
@@ -404,10 +398,7 @@ export class FleetPlugin
       config.experimentalFeatures || {}
     );
     appContextService.setWorkflowsManagementSetup(deps.workflowsManagement);
-<<<<<<< HEAD
-=======
     appContextService.setAgentBuilderSetup(deps.agentBuilder);
->>>>>>> 96875849ce7666fed7af7f5925814c711e686510
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
