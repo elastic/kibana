@@ -5,27 +5,22 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { URL_DRILLDOWN_SUPPORTED_TRIGGERS, URL_DRILLDOWN_TYPE } from '../common/constants';
 import { urlDrilldownSchema } from './schemas';
 
-interface SetupDependencies {
-  embeddable: EmbeddableSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class UrlDrilldownPlugin extends Service {
+  static readonly inject = ['embeddable.setup'];
+  static readonly provide = 'urlDrilldown';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface StartDependencies {}
-
-export class UrlDrilldownPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies>
-{
-  public setup(core: CoreSetup, { embeddable }: SetupDependencies) {
+  constructor(ctx: Context) {
+    super(ctx, 'urlDrilldown');
+    const embeddable = (ctx.get('embeddable.setup') as any).contract;
     embeddable.registerDrilldown(URL_DRILLDOWN_TYPE, {
-      schema: urlDrilldownSchema,
-      supportedTriggers: URL_DRILLDOWN_SUPPORTED_TRIGGERS,
-    });
+          schema: urlDrilldownSchema,
+          supportedTriggers: URL_DRILLDOWN_SUPPORTED_TRIGGERS,
+        });
   }
-
-  public start(core: CoreStart) {}
 }

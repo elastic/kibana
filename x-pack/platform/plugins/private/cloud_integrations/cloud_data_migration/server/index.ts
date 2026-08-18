@@ -5,9 +5,5 @@
  * 2.0.
  */
 
+export { default as cordisPlugin } from './plugin';
 export { config } from './config';
-
-export const plugin = async () => {
-  const { CloudDataMigrationPlugin } = await import('./plugin');
-  return new CloudDataMigrationPlugin();
-};

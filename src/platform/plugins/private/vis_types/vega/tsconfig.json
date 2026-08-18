@@ -15,6 +15,7 @@
     "public/test_utils/vega_graph.json",
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",

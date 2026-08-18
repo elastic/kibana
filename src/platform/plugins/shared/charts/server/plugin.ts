@@ -7,25 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
-import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { palette, systemPalette } from '../common';
 
-interface SetupDependencies {
-  expressions: ExpressionsServerSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ChartsServerPlugin extends Service {
+  static readonly inject = ['expressions.setup'];
+  static readonly provide = 'charts';
 
-export class ChartsServerPlugin implements Plugin<object, object> {
-  public setup(core: CoreSetup, dependencies: SetupDependencies) {
+  constructor(ctx: Context) {
+    super(ctx, 'charts');
+    const dependencies = {
+      expressions: (ctx.get('expressions.setup') as any).contract,
+    };
     dependencies.expressions.registerFunction(palette);
-    dependencies.expressions.registerFunction(systemPalette);
-
-    return {};
+        dependencies.expressions.registerFunction(systemPalette);
   }
-
-  public start() {
-    return {};
-  }
-
-  public stop() {}
 }

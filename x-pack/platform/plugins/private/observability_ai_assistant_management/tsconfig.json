@@ -5,6 +5,7 @@
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",

@@ -13,7 +13,7 @@ import type { Context } from '@kbn/cordis';
 
 // Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
 export default class NewsfeedPlugin extends Service {
-  static readonly inject = [];
+  static readonly inject: string[] = [];
   static readonly provide = 'newsfeed';
 
   constructor(ctx: Context) {

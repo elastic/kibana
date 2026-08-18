@@ -11,7 +11,7 @@ import type { Context } from '@kbn/cordis';
 
 // Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
 export default class ObservabilityLogsExplorerServerPlugin extends Service {
-  static readonly inject = [];
+  static readonly inject: string[] = [];
   static readonly provide = 'observabilityLogsExplorer';
 
   constructor(ctx: Context) {

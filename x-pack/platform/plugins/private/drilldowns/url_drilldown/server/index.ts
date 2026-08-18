@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
+export { default as cordisPlugin } from './plugin';
 export type { UrlDrilldownState } from './types';
-
-export const plugin = async (context: PluginInitializerContext) => {
-  const { UrlDrilldownPlugin } = await import('./plugin');
-  return new UrlDrilldownPlugin();
-};

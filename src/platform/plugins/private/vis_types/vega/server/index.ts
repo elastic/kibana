@@ -7,21 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-
-import type { ConfigSchema } from './config';
-import { configSchema } from './config';
-
-export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {
-    enableExternalUrls: true,
-  },
-  schema: configSchema,
-};
-
-export async function plugin(initializerContext: PluginInitializerContext) {
-  const { VisTypeVegaPlugin } = await import('./plugin');
-  return new VisTypeVegaPlugin(initializerContext);
-}
-
+export { default as cordisPlugin } from './plugin';
 export type { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';

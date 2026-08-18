@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { Context } from '@kbn/cordis';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/server/mocks';
-import { GlobalSearchProvidersPlugin } from './plugin';
+import GlobalSearchProvidersPlugin from './plugin';
 
 describe('GlobalSearchProvidersPlugin', () => {
-  let plugin: GlobalSearchProvidersPlugin;
+  let ctx: Context;
   let globalSearchSetup: ReturnType<typeof globalSearchPluginMock.createSetupContract>;
 
   beforeEach(() => {
-    plugin = new GlobalSearchProvidersPlugin();
+    ctx = new Context();
     globalSearchSetup = globalSearchPluginMock.createSetupContract();
+    ctx.provide('globalSearch.setup', { contract: globalSearchSetup });
   });
 
-  describe('#setup', () => {
-    it('registers the `savedObjects` result provider', () => {
-      const coreSetup = coreMock.createSetup();
-      plugin.setup(coreSetup, { globalSearch: globalSearchSetup });
+  it('registers the `savedObjects` result provider', async () => {
+    await ctx.plugin(GlobalSearchProvidersPlugin);
 
-      expect(globalSearchSetup.registerResultProvider).toHaveBeenCalledTimes(1);
-      expect(globalSearchSetup.registerResultProvider).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'savedObjects',
-        })
-      );
-    });
+    expect(globalSearchSetup.registerResultProvider).toHaveBeenCalledTimes(1);
+    expect(globalSearchSetup.registerResultProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'savedObjects',
+      })
+    );
   });
 });

@@ -9,6 +9,7 @@
     "../../../../../typings/**/*",
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/global-search-plugin"
   ],

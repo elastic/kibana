@@ -231,7 +231,7 @@ function run(pluginDir) {
   // Build the new file content
   const newClassBody = `// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
 export default class ${className} extends Service {
-  static readonly inject = [${injectKeys.join(', ')}];
+  static readonly inject${injectKeys.length === 0 ? ': string[]' : ''} = [${injectKeys.join(', ')}];
   static readonly provide = '${pluginId}';
 
   constructor(ctx: Context) {
@@ -348,7 +348,11 @@ function detectUsedPluginDeps(bodyText, pluginsParamName, allPlugins) {
       return b.trim().split(':')[0].trim().replace(/\s*=\s*.*$/, '');
     });
     for (const id of allPlugins) {
-      if (bindings.includes(id)) used.add(id);
+      // Must be in the destructuring AND actually referenced in the method body text.
+      // (A dep that is destructured but never used in the body should not be injected.)
+      if (bindings.includes(id) && new RegExp(`\\b${escapeRegex(id)}\\b`).test(bodyText)) {
+        used.add(id);
+      }
     }
   } else {
     // Plain identifier: look for `pluginsParamName.X` accesses

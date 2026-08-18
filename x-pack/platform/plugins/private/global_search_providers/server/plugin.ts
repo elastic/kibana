@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
-import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { createSavedObjectsResultProvider } from './providers';
 
-export interface GlobalSearchProvidersPluginSetupDeps {
-  globalSearch: GlobalSearchPluginSetup;
-}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class GlobalSearchProvidersPlugin extends Service {
+  static readonly inject = ['globalSearch.setup'];
+  static readonly provide = 'globalSearchProviders';
 
-export class GlobalSearchProvidersPlugin
-  implements Plugin<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}>
-{
-  setup(
-    { getStartServices }: CoreSetup<{}, {}>,
-    { globalSearch }: GlobalSearchProvidersPluginSetupDeps
-  ) {
+  constructor(ctx: Context) {
+    super(ctx, 'globalSearchProviders');
+    const globalSearch = (ctx.get('globalSearch.setup') as any).contract;
     globalSearch.registerResultProvider(createSavedObjectsResultProvider());
-    return {};
-  }
-
-  start() {
-    return {};
   }
 }

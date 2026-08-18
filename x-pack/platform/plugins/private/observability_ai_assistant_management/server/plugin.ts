@@ -5,26 +5,17 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { uiSettings } from '../common/ui_settings';
 
-export type ObservabilityPluginSetup = ReturnType<AiAssistantManagementPlugin['setup']>;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class AiAssistantManagementPlugin extends Service {
+  static readonly inject = ['core.uiSettings'];
+  static readonly provide = 'observabilityAiAssistantManagement';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface PluginSetup {}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface PluginStart {}
-
-export class AiAssistantManagementPlugin implements Plugin<ObservabilityPluginSetup> {
-  constructor() {}
-
-  public setup(core: CoreSetup<PluginStart>, plugins: PluginSetup) {
-    core.uiSettings.register(uiSettings);
-    return {};
+  constructor(ctx: Context) {
+    super(ctx, 'observabilityAiAssistantManagement');
+    (ctx.get('core.uiSettings') as any).register(uiSettings);
   }
-
-  public start(core: CoreStart, plugins: PluginStart) {}
-
-  public stop() {}
 }

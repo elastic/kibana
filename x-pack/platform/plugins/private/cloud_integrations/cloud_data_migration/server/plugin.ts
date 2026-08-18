@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { PLUGIN_ID } from '../common';
 
-import type { Dependencies } from './types';
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class CloudDataMigrationPlugin extends Service {
+  static readonly inject = ['features.setup'];
+  static readonly provide = 'cloudDataMigration';
 
-export class CloudDataMigrationPlugin implements Plugin<void, void, any, any> {
-  public setup(coreSetup: CoreSetup, { features }: Dependencies) {
+  constructor(ctx: Context) {
+    super(ctx, 'cloudDataMigration');
+    const features = (ctx.get('features.setup') as any).contract;
     features.registerElasticsearchFeature({
-      id: PLUGIN_ID,
-      management: {
-        data: [PLUGIN_ID],
-      },
-      privileges: [
-        {
-          requiredClusterPrivileges: ['manage'],
-          ui: [],
-        },
-      ],
-    });
+          id: PLUGIN_ID,
+          management: {
+            data: [PLUGIN_ID],
+          },
+          privileges: [
+            {
+              requiredClusterPrivileges: ['manage'],
+              ui: [],
+            },
+          ],
+        });
   }
-
-  public start() {}
-
-  public stop() {}
 }

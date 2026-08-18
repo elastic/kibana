@@ -7,22 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-import type {
-  VisTypeVegaPluginSetupDependencies,
-  VisTypeVegaPluginSetup,
-  VisTypeVegaPluginStart,
-} from './types';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
-  constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
-    return {};
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class VisTypeVegaPlugin extends Service {
+  static readonly inject: string[] = [];
+  static readonly provide = 'visTypeVega';
+
+  constructor(ctx: Context) {
+    super(ctx, 'visTypeVega');
+
   }
-
-  public start(core: CoreStart) {
-    return {};
-  }
-  public stop() {}
 }

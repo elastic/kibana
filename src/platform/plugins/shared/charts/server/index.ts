@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { default as cordisPlugin } from './plugin';
 export type { CustomPaletteArguments, CustomPaletteState, SystemPaletteArguments } from '../common';
 export { paletteIds } from '../common';
-
-export const plugin = async () => {
-  const { ChartsServerPlugin } = await import('./plugin');
-  return new ChartsServerPlugin();
-};
