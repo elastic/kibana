@@ -15,8 +15,6 @@ export type SignalType = 'logs' | 'metrics';
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
 
-export type AuthType = 'identity_federation' | 'api_key';
-
 export type Badge = 'technical_preview' | 'beta';
 
 function releaseToBadge(release: string | undefined): Badge | undefined {
@@ -52,8 +50,6 @@ export interface AwsServiceMatrixEntry {
   category: ServiceCategory;
   signalType: SignalType;
   deploymentMethods: DeploymentMethodEntry[];
-  /** Authentication types available per deployment method. Populated once IF rollout status is confirmed. */
-  authTypes?: AuthType[];
   /** Whether OIDC-based IAM role assumption is supported.
    *  Derived from the package manifest: true when none of the service's inputs hide
    *  the 'identity_federation' option in the 'credential_type' var_group. */
