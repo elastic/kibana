@@ -14,7 +14,8 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  * Config set for the detection-watch-rule-creation eval suite. The suite measures the
  * managed rule-creation workflow the pnd plugin installs at start, so pnd must be
  * enabled; the workflow's ai.agent step additionally requires the Workflows UI and
- * agent settings.
+ * agent settings, and the approval-gate tests respond to the review step through the
+ * inbox plugin's respond route, which is also disabled by default.
  */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
@@ -23,6 +24,7 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
       '--xpack.pnd.enabled=true',
+      '--xpack.inbox.enabled=true',
       '--uiSettings.overrides.workflows:ui:enabled=true',
       '--uiSettings.overrides.workflows:aiAgent:enabled=true',
     ],
