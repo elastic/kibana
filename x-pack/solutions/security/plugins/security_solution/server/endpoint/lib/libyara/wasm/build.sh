@@ -206,16 +206,22 @@ emcc \
 # Document engine pin next to the artifact.
 # Registry digest is not visible from inside the container; the README docker run
 # passes LIBYARA_EMSDK_IMAGE so the pin can be recorded here.
+# Artifact sha256s let a reviewer independently rebuild and confirm the committed
+# blobs match; do not stamp a build date (it would make identical rebuilds differ).
+WASM_SHA256="$(sha256sum "${DIST_DIR}/validate_yara.wasm" | awk '{print $1}')"
+JS_SHA256="$(sha256sum "${DIST_DIR}/validate_yara.js" | awk '{print $1}')"
+
 cat > "${DIST_DIR}/ENGINE.md" <<EOF
 # libyara WASM engine pin
 
 - **YARA version:** ${YARA_VERSION}
 - **Source:** ${YARA_URL}
-- **sha256:** ${YARA_SHA256}
+- **Source sha256:** ${YARA_SHA256}
+- **validate_yara.wasm sha256:** ${WASM_SHA256}
+- **validate_yara.js sha256:** ${JS_SHA256}
 - **Emscripten:** $(emcc --version | head -n 1)
 - **Emscripten image:** ${LIBYARA_EMSDK_IMAGE}
 - **Matches:** Elastic Endpoint \`cmake/dependencies.cmake\` (YaraBundle / YaraSha256)
-- **Built at:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
 - **Notes:** STACK_SIZE=1MiB; WASM-safe hash-table free adapters (see \`patches/\`)
 EOF
 
