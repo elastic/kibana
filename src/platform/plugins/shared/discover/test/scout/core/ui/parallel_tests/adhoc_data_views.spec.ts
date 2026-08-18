@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, tags } from '../fixtures';
 
 spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnostic }, () => {
@@ -44,7 +45,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
               },
             },
           ],
-        },
+        } satisfies DiscoverSessionApiDataInput,
         discoverScoutSpace.id
       );
       await discover.loadSavedSearch('logstash-adhoc');
@@ -87,7 +88,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
               column_order: ['_bytes-runtimefield'],
             },
           ],
-        },
+        } satisfies DiscoverSessionApiDataInput,
         discoverScoutSpace.id
       );
       await discover.loadSavedSearch('logstash-adhoc-surrounding');
@@ -134,7 +135,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
               column_order: ['_bytes-runtimefield'],
             },
           ],
-        },
+        } satisfies DiscoverSessionApiDataInput,
         discoverScoutSpace.id
       );
       await discover.loadSavedSearch('logstash-adhoc-single-doc');
@@ -181,7 +182,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
               column_order: ['_bytes-runtimefield'],
             },
           ],
-        },
+        } satisfies DiscoverSessionApiDataInput,
         discoverScoutSpace.id
       );
       await discover.loadSavedSearch('logstash-adhoc-save');
@@ -227,7 +228,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
                   column_order: ['_bytes-runtimefield'],
                 },
               ],
-            },
+            } satisfies DiscoverSessionApiDataInput,
             discoverScoutSpace.id
           );
           await discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
@@ -301,7 +302,7 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
               column_order: ['_bytes-runtimefield'],
             },
           ],
-        },
+        } satisfies DiscoverSessionApiDataInput,
         discoverScoutSpace.id
       );
       await discover.loadSavedSearch('logst-runtimefield-edit');
