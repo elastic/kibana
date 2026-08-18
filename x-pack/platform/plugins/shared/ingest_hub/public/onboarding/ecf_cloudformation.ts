@@ -24,7 +24,10 @@
 
 import type { EcfLogType } from './aws_service_matrix';
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
-import type { ServiceVars } from './step_components/service_settings_step/use_service_settings';
+import type {
+  ServiceInstance,
+  ServiceVars,
+} from './step_components/service_settings_step/use_service_settings';
 
 // ── Template URLs ─────────────────────────────────────────────────────────────
 
@@ -67,47 +70,65 @@ export interface EcfServiceConfig {
   serviceId: string;
   /** ECF log type identifier for the unified template `LogTypes` parameter. */
   ecfLogType: EcfLogType;
-  /** S3 bucket ARN configured for this service (when using the S3 transport). */
-  bucketArn?: string;
-  /** CloudWatch log group ARN configured for this service (when using the CloudWatch transport).
-   *  Must end in `:*` as required by the ECF template; the builder appends it if absent. */
-  logGroupArn?: string;
+  /**
+   * S3 bucket ARNs from all instances of this service (base + duplicates).
+   * Multiple entries occur when the user duplicated a service in Step 2 to collect from
+   * more than one bucket.
+   */
+  bucketArns: string[];
+  /**
+   * CloudWatch log group ARNs from all instances of this service.
+   * Each entry ends in `:*` as required by the ECF template (appended by the builder if absent).
+   */
+  logGroupArns: string[];
 }
 
 // ── ECF param derivation ──────────────────────────────────────────────────────
 
 /**
- * Derives ECF configuration for each selected service that supports the unified template.
- * Returns only entries for services that have an `ecfLogType` defined.
+ * Derives ECF configuration for each selected service that supports the ECF template.
+ * Returns one entry per unique service ID, with ARNs aggregated across all instances
+ * (base + duplicates) so that duplicate instances — used when a service collects from
+ * more than one S3 bucket or log group — each contribute their ARN to the launch URL.
  *
- * @param selectedServiceIds  Service IDs chosen by the user in Step 1.
- * @param serviceVars         Per-service field values from Step 2 (bucket ARNs, log group ARNs).
+ * @param instances    All service instances from Step 2 (including duplicates).
+ * @param serviceVars  Per-instance field values from Step 2, keyed by instanceId.
  */
 export const getEcfServiceConfigs = (
-  selectedServiceIds: string[],
+  instances: ServiceInstance[],
   serviceVars: Record<string, ServiceVars>
 ): EcfServiceConfig[] => {
-  const configs: EcfServiceConfig[] = [];
+  const configsByServiceId = new Map<string, EcfServiceConfig>();
 
-  for (const serviceId of selectedServiceIds) {
+  for (const { serviceId, instanceId } of instances) {
     const entry = AWS_SERVICES_MAP.get(serviceId);
     if (!entry?.ecfLogType) continue;
 
-    const entryVars = serviceVars[serviceId];
+    const entryVars = serviceVars[instanceId];
     const vars = entryVars?.vars ?? {};
     const trigger = entryVars?.trigger;
-    configs.push({
-      serviceId,
-      ecfLogType: entry.ecfLogType,
-      // Gate each ARN on the selected trigger so stale values from a previous transport
-      // selection don't end up in the launch URL and misconfigure the ECF stack.
-      bucketArn: trigger === 'aws-s3' ? vars.bucket_arn?.trim() || undefined : undefined,
-      logGroupArn:
-        trigger === 'aws-cloudwatch' ? vars.log_group_arn?.trim() || undefined : undefined,
-    });
+
+    // Gate each ARN on the selected trigger so stale values from a previous transport
+    // selection don't end up in the launch URL and misconfigure the ECF stack.
+    const bucketArn = trigger === 'aws-s3' ? vars.bucket_arn?.trim() || undefined : undefined;
+    const logGroupArn =
+      trigger === 'aws-cloudwatch' ? vars.log_group_arn?.trim() || undefined : undefined;
+
+    const existing = configsByServiceId.get(serviceId);
+    if (existing) {
+      if (bucketArn) existing.bucketArns.push(bucketArn);
+      if (logGroupArn) existing.logGroupArns.push(logGroupArn);
+    } else {
+      configsByServiceId.set(serviceId, {
+        serviceId,
+        ecfLogType: entry.ecfLogType,
+        bucketArns: bucketArn ? [bucketArn] : [],
+        logGroupArns: logGroupArn ? [logGroupArn] : [],
+      });
+    }
   }
 
-  return configs;
+  return [...configsByServiceId.values()];
 };
 
 // ── URL builders ──────────────────────────────────────────────────────────────
@@ -145,15 +166,8 @@ export const buildEcfUnifiedCloudFormationUrl = ({
   region: string;
   otlpEndpoint?: string;
 }): string => {
-  const s3BucketArns = ecfConfigs
-    .map((c) => c.bucketArn)
-    .filter((arn): arn is string => Boolean(arn));
-
-  const logGroupArns = ecfConfigs
-    .map((c) => c.logGroupArn)
-    .filter((arn): arn is string => Boolean(arn))
-    .map(normaliseLogGroupArn);
-
+  const s3BucketArns = ecfConfigs.flatMap((c) => c.bucketArns);
+  const logGroupArns = ecfConfigs.flatMap((c) => c.logGroupArns.map(normaliseLogGroupArn));
   const logTypes = ecfConfigs.map((c) => c.ecfLogType);
 
   const url = new URL('https://console.aws.amazon.com/cloudformation/home');
@@ -242,15 +256,8 @@ export const buildEcfOtelCloudFormationUrl = ({
   region: string;
   otlpEndpoint?: string;
 }): string => {
-  const s3BucketArns = ecfConfigs
-    .map((c) => c.bucketArn)
-    .filter((arn): arn is string => Boolean(arn));
-
-  const logGroupArns = ecfConfigs
-    .map((c) => c.logGroupArn)
-    .filter((arn): arn is string => Boolean(arn))
-    .map(normaliseLogGroupArn);
-
+  const s3BucketArns = ecfConfigs.flatMap((c) => c.bucketArns);
+  const logGroupArns = ecfConfigs.flatMap((c) => c.logGroupArns.map(normaliseLogGroupArn));
   const logTypes = ecfConfigs.map((c) => c.ecfLogType);
 
   const url = new URL('https://console.aws.amazon.com/cloudformation/home');

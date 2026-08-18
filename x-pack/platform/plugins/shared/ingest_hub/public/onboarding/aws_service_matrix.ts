@@ -23,14 +23,7 @@ export type DeliveryMethod = 'agentless' | 'cloud_forwarder' | 'firehose' | 'age
  * Services with `ecfLogType` set are deployed via the "Launch CloudFormation" button in Step 4.
  * @see https://github.com/elastic/edot-cloud-forwarder-aws/tree/main/templates/release
  */
-export type EcfLogType =
-  | 'vpcflow'
-  | 'elbaccess'
-  | 'cloudtrail'
-  | 'waf'
-  | 'guardduty'
-  | 'netskope_transaction'
-  | 'netskope_alerts_events';
+export type EcfLogType = 'vpcflow' | 'cloudtrail' | 'waf';
 
 /**
  * Marker for services that use a dedicated ECF CloudFormation template rather than the shared
@@ -370,7 +363,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     defaultEnabled: true,
     showInUI: true,
     identityFederationSupported: false,
-    ecfLogType: 'guardduty',
   },
   {
     id: 'inspector',
@@ -499,7 +491,6 @@ const AWS_SERVICES_MATRIX_RAW: Omit<AwsServiceMatrixEntry, 'providerPermissions'
     policyTemplate: 'elb',
     defaultEnabled: true,
     showInUI: true,
-    ecfLogType: 'elbaccess',
   },
   {
     id: 'elb_metrics',
