@@ -8,7 +8,8 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE, SIGNIFICANT_EVENT_SML_TYPE } from '../../../common';
+import { SIGNIFICANT_EVENT_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { SIGNIFICANT_EVENT_ATTACHMENT_TYPE } from '../../../common';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../routes/types';
 import { EventService } from '../../lib/significant_events/events/event_service';
 import { createSignificantEventSmlType } from './significant_event_sml_type';
@@ -61,17 +62,12 @@ describe('createSignificantEventSmlType', () => {
     );
   });
 
-  it('uses the KI type id the streams feature privilege grants (see streams/server/plugin.ts)', () => {
-    // `aiIndex: { read: ['significant_event'] }` on the Streams feature is a literal rather than an
-    // import of SIGNIFICANT_EVENT_SML_TYPE, because `significant_events` already requires `streams`
-    // and importing back would be a circular plugin dependency. Renaming the constant without
-    // updating that literal would silently drop AI Index visibility rather than fail to compile.
+  it('equals SIGNIFICANT_EVENT_SML_TYPE', () => {
     const smlType = createSignificantEventSmlType({
       getScopedClients: createGetScopedClients([]),
     });
 
     expect(smlType.id).toBe(SIGNIFICANT_EVENT_SML_TYPE);
-    expect(SIGNIFICANT_EVENT_SML_TYPE).toBe('significant_event');
   });
 
   it('lists significant events for SML indexing', async () => {

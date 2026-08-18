@@ -13,9 +13,8 @@ import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/serv
 import type { ConnectorAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
 import { getConnectorSpec } from '@kbn/connector-specs';
+import { CONNECTOR_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
-
-const CONNECTOR_SML_TYPE = 'connector';
 
 interface ConnectorSmlTypeDeps {
   /**

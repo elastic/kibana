@@ -9,6 +9,7 @@ import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import { kibanaSavedObjectPermissions } from '@kbn/agent-builder-sml-plugin/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { VISUALIZATION_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   withLensReferences,
   toLensApiConfig,
@@ -16,7 +17,6 @@ import {
   extractEsqlFromLens,
 } from '../lens_reference';
 
-const VISUALIZATION_SML_TYPE = 'visualization';
 const VISUALIZATION_SAVED_OBJECT_TYPE = 'lens';
 
 const getChartType = (attributes: LensAttributes): string => {

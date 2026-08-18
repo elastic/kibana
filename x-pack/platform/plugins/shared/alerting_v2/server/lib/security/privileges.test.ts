@@ -7,7 +7,10 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { ACTION_POLICY_SML_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ACTION_POLICY_SML_TYPE,
+  RULE_SML_TYPE,
+} from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { registerFeaturePrivileges } from './privileges';
 import { ALERTING_V2_FEATURES, getFeatureManagementApps } from '../../../common/feature_privileges';
