@@ -468,6 +468,7 @@ export class CasePlugin
       usageCounter: this.usageCounter!,
       config: this.caseConfig,
       casesEventBus: this.casesEventBus,
+      domainEvents: core.domainEvents,
       closeReasonValidator:
         this.closeReasonValidators.size > 0
           ? (closeReason, owner, request) => {

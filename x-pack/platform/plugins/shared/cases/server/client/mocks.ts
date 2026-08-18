@@ -294,6 +294,7 @@ export const createCasesClientMockArgs = () => {
       assigneeIdentity: { enabled: true },
     },
     casesEventBus: createCasesEventBusMock(),
+    domainEvents: { publish: jest.fn() },
     request: httpServerMock.createKibanaRequest(),
     clientSource: 'rest_api' as CasesClientSource,
   };
@@ -322,6 +323,7 @@ export const createCasesClientFactoryMockArgs = () => {
     config: ConfigSchema.validate({}),
     unifiedAttachmentTypeRegistry: createUnifiedAttachmentTypeRegistryMock(),
     casesEventBus: createCasesEventBusMock(),
+    domainEvents: { publish: jest.fn() },
     // Tests don't drive analytics v2; the no-op writers keep every hook
     // invoked through the factory a tight no-op. The data view refresher
     // gets the same treatment so the templates service is happy without

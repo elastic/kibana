@@ -178,6 +178,7 @@ export async function setupDependencies(
     workflowLogger,
     workflowExecutionState,
     stepIoService,
+    request: fakeRequest,
     coreStart,
     dependencies,
     telemetryClient,

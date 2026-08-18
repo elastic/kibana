@@ -12,7 +12,7 @@ import type { EsWorkflowExecution } from '@kbn/workflows';
 import {
   ConcurrencySlotOccupyingExecutionStatuses,
   ExecutionStatus,
-  TerminalExecutionStatuses,
+  isTerminalStatus,
 } from '@kbn/workflows';
 import type { WorkflowExecutionRepository as WorkflowExecutionRepositoryType } from '../../server/repositories/workflow_execution_repository';
 
@@ -136,9 +136,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   ): Promise<boolean> {
     let results = Array.from(this.workflowExecutions.values()).filter(
       (exec) =>
-        exec.workflowId === workflowId &&
-        exec.spaceId === spaceId &&
-        !TerminalExecutionStatuses.includes(exec.status)
+        exec.workflowId === workflowId && exec.spaceId === spaceId && !isTerminalStatus(exec.status)
     );
 
     if (triggeredBy) {
@@ -156,9 +154,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
   ): Promise<Array<{ _source: EsWorkflowExecution; _id: string; _index: string }>> {
     let results = Array.from(this.workflowExecutions.values()).filter(
       (exec) =>
-        exec.workflowId === workflowId &&
-        exec.spaceId === spaceId &&
-        !TerminalExecutionStatuses.includes(exec.status)
+        exec.workflowId === workflowId && exec.spaceId === spaceId && !isTerminalStatus(exec.status)
     );
 
     if (triggeredBy) {
@@ -193,7 +189,7 @@ export class WorkflowExecutionRepositoryMock implements Required<WorkflowExecuti
         (exec) =>
           exec.workflowId === workflowId &&
           exec.spaceId === spaceId &&
-          !TerminalExecutionStatuses.includes(exec.status)
+          !isTerminalStatus(exec.status)
       )
       .sort((a, b) => {
         const byCreated = a.createdAt.localeCompare(b.createdAt);

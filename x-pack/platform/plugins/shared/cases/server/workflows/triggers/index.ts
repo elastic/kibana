@@ -7,12 +7,12 @@
 
 import type { CasesServerSetupDependencies } from '../../types';
 import {
-  caseCreatedTriggerCommonDefinition,
-  caseUpdatedTriggerCommonDefinition,
-  caseStatusUpdatedTriggerCommonDefinition,
-  attachmentsAddedTriggerCommonDefinition,
-  commentsAddedTriggerCommonDefinition,
-} from '../../../common/workflows/triggers';
+  attachmentsAddedTriggerDefinition,
+  caseCreatedTriggerDefinition,
+  caseStatusUpdatedTriggerDefinition,
+  caseUpdatedTriggerDefinition,
+  commentsAddedTriggerDefinition,
+} from './triggers';
 
 export function registerCaseWorkflowTriggers(
   workflowsExtensions: CasesServerSetupDependencies['workflowsExtensions']
@@ -21,9 +21,9 @@ export function registerCaseWorkflowTriggers(
     return;
   }
 
-  workflowsExtensions.registerTriggerDefinition(caseCreatedTriggerCommonDefinition);
-  workflowsExtensions.registerTriggerDefinition(caseUpdatedTriggerCommonDefinition);
-  workflowsExtensions.registerTriggerDefinition(caseStatusUpdatedTriggerCommonDefinition);
-  workflowsExtensions.registerTriggerDefinition(attachmentsAddedTriggerCommonDefinition);
-  workflowsExtensions.registerTriggerDefinition(commentsAddedTriggerCommonDefinition);
+  workflowsExtensions.registerTriggerDefinition(caseCreatedTriggerDefinition);
+  workflowsExtensions.registerTriggerDefinition(caseUpdatedTriggerDefinition);
+  workflowsExtensions.registerTriggerDefinition(caseStatusUpdatedTriggerDefinition);
+  workflowsExtensions.registerTriggerDefinition(attachmentsAddedTriggerDefinition);
+  workflowsExtensions.registerTriggerDefinition(commentsAddedTriggerDefinition);
 }

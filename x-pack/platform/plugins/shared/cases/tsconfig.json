@@ -105,6 +105,8 @@
     "@kbn/openapi-generator",
     "@kbn/workflows-extensions",
     "@kbn/workflows",
+    "@kbn/domain-events",
+    "@kbn/core-domain-events-server",
     "@kbn/agent-builder-plugin",
     "@kbn/agent-builder-common",
     "@kbn/agent-builder-server",

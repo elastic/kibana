@@ -10,7 +10,6 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
-import { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from '@kbn/workflows-extensions/server';
 
 import { mockContextDependencies } from './__mock__/context_dependencies';
 import {
@@ -54,7 +53,6 @@ describe('resumeWorkflow', () => {
     let mockGetWorkflowExecution: jest.Mock;
     let mockStateGetWorkflowExecution: jest.Mock;
 
-    /** After a successful loop, `emitWorkflowExecutionFailedEventIfFailed` still runs in `finally`. */
     const nonFailedRuntimeMethods = () => ({
       getWorkflowExecutionStatus: jest.fn().mockReturnValue(ExecutionStatus.COMPLETED),
       getWorkflowExecution: jest.fn().mockReturnValue({
