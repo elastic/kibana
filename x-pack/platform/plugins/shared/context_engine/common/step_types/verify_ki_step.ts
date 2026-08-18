@@ -13,6 +13,7 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 export const VERIFY_KI_STEP_TYPE_ID = 'context-engine.verifyKi';
 
 export const MAX_KI_ATTRIBUTES = 100;
+export const MAX_KI_ATTRIBUTES_SIZE = 100_000;
 
 const KnowledgeIndicatorSchema = z.object({
   type: z.string().max(256).optional(),
@@ -24,6 +25,9 @@ const KnowledgeIndicatorSchema = z.object({
     .record(z.string().max(256), z.unknown())
     .refine((attributes) => Object.keys(attributes).length <= MAX_KI_ATTRIBUTES, {
       message: `attributes must have at most ${MAX_KI_ATTRIBUTES} entries`,
+    })
+    .refine((attributes) => JSON.stringify(attributes).length <= MAX_KI_ATTRIBUTES_SIZE, {
+      message: `attributes must serialize to at most ${MAX_KI_ATTRIBUTES_SIZE} characters`,
     })
     .optional(),
 });
