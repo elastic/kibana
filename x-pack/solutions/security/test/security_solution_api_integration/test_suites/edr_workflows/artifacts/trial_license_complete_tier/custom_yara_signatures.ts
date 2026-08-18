@@ -206,20 +206,20 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           // todo: deeper YARA rules validation is coming soon
-          describe('YARA rules validation', () => {
+          describe(`YARA rules validation - ${customYaraSignatureApiCall.info}`, () => {
             describe('Supported modules', () => {
               const supportedModules: Record<string, string> = {
                 pe: 'pe.is_pe',
                 elf: 'elf.type == elf.ET_NONE',
                 math: 'math.abs(-1) == 1',
-                time: 'time.now() >= 0',
+                time: 'time .now() >= 0',
                 string: 'string.length("a") == 1',
                 console: 'console.log("x")',
                 tests: 'tests.foobar(1) == "foo"',
               };
 
               for (const [module, condition] of Object.entries(supportedModules)) {
-                it(`accepts rules that import the ${module} module`, async () => {
+                it(`accepts rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
                   const body = customYaraSignatureApiCall.getBody();
 
                   (body.entries[0] as EntryMatch).value = `
@@ -253,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
               ];
 
               for (const module of unsupportedModules) {
-                it(`rejects rules that import the ${module} module`, async () => {
+                it(`rejects rules that import the ${module} module on [${customYaraSignatureApiCall.method}]`, async () => {
                   const body = customYaraSignatureApiCall.getBody();
 
                   (body.entries[0] as EntryMatch).value = `
