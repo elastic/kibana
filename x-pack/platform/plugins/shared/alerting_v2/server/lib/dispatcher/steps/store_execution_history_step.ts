@@ -284,6 +284,11 @@ export class StoreExecutionHistoryStep implements DispatcherStep {
   }
 }
 
+/**
+ * Aggregate dispatched groups into per-policy summaries, excluding workflow
+ * destinations that recorded a DispatchFailure. Groups where every destination
+ * failed are skipped entirely so they do not appear in the `dispatched` event.
+ */
 function aggregateByPolicy(
   groups: readonly ActionGroup[],
   dispatchedExecutions?: Map<ActionGroupId, string[]>,

@@ -40,6 +40,6 @@ test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }
       testData.ESQL_CONVERSION_PANEL_IDS.INLINE_METRIC
     );
 
-    await expect(lens.convertToEsqlButton).toBeHidden();
+    await expect(lens.workspace.convertToEsqlButton).toBeHidden();
   });
 });

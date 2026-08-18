@@ -56,16 +56,16 @@ spaceTest.describe(
 
         await spaceTest.step('return with no changes and no modal', async () => {
           await openInLens();
-          await lens.goBackToPreviousApp();
+          await lens.workspace.goBackToPreviousApp();
           await expect(visualize.getEditInLensButton()).toBeVisible();
         });
 
         await spaceTest.step('warn and discard after unsaved Lens changes', async () => {
           await openInLens();
           await lens.configureDimension(TIMESTAMP_X_AXIS_DIMENSION);
-          await lens.goBackToPreviousApp();
-          await expect(lens.discardChangesModal).toBeVisible();
-          await lens.confirmDiscardChangesModal();
+          await lens.workspace.goBackToPreviousApp();
+          await expect(lens.workspace.discardChangesModal).toBeVisible();
+          await lens.workspace.confirmDiscardChangesModal();
           await expect(visualize.getEditInLensButton()).toBeVisible();
         });
 
@@ -75,8 +75,8 @@ spaceTest.describe(
           await lens.save(`Migrated Viz saved in Lens ${scoutSpace.id}`, {
             addToDashboard: 'none',
           });
-          await lens.goBackToPreviousApp();
-          await expect(lens.discardChangesModal).toBeHidden();
+          await lens.workspace.goBackToPreviousApp();
+          await expect(lens.workspace.discardChangesModal).toBeHidden();
           await expect(visualize.getEditInLensButton()).toBeVisible();
         });
       }

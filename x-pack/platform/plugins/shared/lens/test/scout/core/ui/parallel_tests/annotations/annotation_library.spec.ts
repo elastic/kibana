@@ -93,14 +93,17 @@ spaceTest.describe('Lens annotation library', { tag: '@local-stateful-classic' }
           // click), unlike opening a previously-saved one.
           await dashboard.ensureEditMode();
           await dashboard.clickPanelAction('embeddablePanelAction-editPanel', FIRST_VIS_TITLE);
-          await expect(lens.inlineEditor).toBeVisible();
+          await expect(lens.workspace.inlineEditor).toBeVisible();
 
           // Unlike the standalone editor, the inline flyout mounts a fresh Lens editor frame
           // asynchronously, so the layer tabs may not exist yet; `activateLayerTab` polls for
           // them rather than assuming a snapshot read is already settled.
           await lens.layers.activateLayerTab(1);
-          await lens.openDimensionEditor('lnsXY_xAnnotationsPanel > lns-dimensionTrigger', 1);
-          await lens.setAnnotationTextVisibility('name');
+          await lens.dimensions.openDimensionEditor(
+            'lnsXY_xAnnotationsPanel > lns-dimensionTrigger',
+            1
+          );
+          await lens.style.setAnnotationTextVisibility('name');
           await lens.closeDimensionEditor();
 
           // "Apply and close" auto-saves the linked annotation group to the library and
