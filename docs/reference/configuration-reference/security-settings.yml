@@ -825,7 +825,7 @@ groups:
 
           * A plain string, which must equal the username exactly.
           * {applies_to}`stack: ga 9.6+` A regular expression wrapped in slashes (`/pattern/`), which matches if the pattern is found anywhere in the username. Patterns use [RE2 syntax](https://github.com/google/re2/wiki/Syntax) and are unanchored; use `^` and `$` to match the entire username.
-          * {applies_to}`stack: ga 9.6+` A negated regular expression (`!/pattern/`), which matches if the pattern is not found in the username. Use this form to exclude all events except those from usernames matching the pattern.
+          * {applies_to}`stack: ga 9.6+` A negated regular expression (`!/pattern/`), which matches if the pattern is not found in the username. When used as the only entry, this lets you filter all usernames except those matching the pattern.
 
           {applies_to}`stack: ga 9.6+` To match a literal username that itself begins and ends with a slash, write it as an escaped regular expression (for example, `/^\/name\/$/`).
         datatype: string
