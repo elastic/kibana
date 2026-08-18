@@ -88,13 +88,11 @@ describe('verify_ki workflow step', () => {
     expect(output).toEqual({ passed: true, results: [] });
   });
 
-  it('is a no-op when the Context Engine setting is off', async () => {
+  it('throws when the Context Engine setting is off', async () => {
     setContextEngineEnabled(false);
 
-    const output = await runHandler({
-      attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' },
-    });
-
-    expect(output).toEqual({ passed: true, results: [] });
+    await expect(
+      runHandler({ attributes: { esql: 'FROM logs-* | EVAL x = NOT_A_FUNCTION(1)' } })
+    ).rejects.toThrow('Context Engine is disabled');
   });
 });

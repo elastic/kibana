@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
@@ -23,7 +24,10 @@ export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logge
       const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
       const isEnabled = (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
       if (!isEnabled) {
-        return { output: { passed: true, results: [] } };
+        throw new ExecutionError({
+          type: 'FeatureDisabledError',
+          message: `Context Engine is disabled. Enable the ${CONTEXT_ENGINE_ENABLED_SETTING_ID} advanced setting to verify knowledge indicators.`,
+        });
       }
 
       const esClient = context.contextManager.getScopedEsClient();
