@@ -6,19 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiTextColor,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
-
-// Light lavender-white tint used for card header bands, matched to the
-// design reference (Step 14.svg / Deploy & Detect mockups).
-export const HEADER_TINT = '#F6F9FC';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 
 // Shaded header band (icon + title + optional "N services"), bled to the
 // panel's edges via negative margins so the parent EuiPanel keeps its normal
@@ -35,7 +23,7 @@ export const CardHeader: React.FunctionComponent<{
       style={{
         margin: `-${euiTheme.size.l} -${euiTheme.size.l} 0`,
         padding: euiTheme.size.l,
-        background: HEADER_TINT,
+        background: euiTheme.colors.backgroundBaseSubdued,
         borderBottom: euiTheme.border.thin,
       }}
     >
@@ -53,10 +41,8 @@ export const CardHeader: React.FunctionComponent<{
         </EuiFlexItem>
         {servicesCount !== undefined && (
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <EuiTextColor color="primary">
-                {`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}
-              </EuiTextColor>
+            <EuiText size="s" color="subdued">
+              {`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}
             </EuiText>
           </EuiFlexItem>
         )}

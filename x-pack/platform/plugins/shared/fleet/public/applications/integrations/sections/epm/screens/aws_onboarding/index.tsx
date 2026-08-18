@@ -81,12 +81,15 @@ const ServiceCard: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem style={{ minWidth: 0 }}>
             <EuiText size="s" className="eui-textTruncate">
-              <strong>{service.name}</strong>
+              {service.name}
             </EuiText>
           </EuiFlexItem>
+          {/* "default" instead of "hollow" — a soft tinted fill instead of
+              a hard border, so the pill recedes rather than competing with
+              the service name for attention. */}
           {service.dataTypes.map((dt) => (
             <EuiFlexItem grow={false} key={dt}>
-              <EuiBadge color="hollow">{dt}</EuiBadge>
+              <EuiBadge color="default">{dt}</EuiBadge>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
@@ -117,9 +120,10 @@ const CategorySidebarItem: React.FunctionComponent<{
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{category.label}</strong>
-          </EuiText>
+          {/* Not bold — the colored background already shows which
+              category is active, so the label doesn't also need to
+              compete in weight with the main panel's heading below. */}
+          <EuiText size="s">{category.label}</EuiText>
           <EuiText size="xs" color="subdued" className="eui-textTruncate">
             {exampleNames}, ...
           </EuiText>

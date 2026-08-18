@@ -40,7 +40,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTextColor,
   EuiTitle,
   EuiToolTip,
   useEuiTheme,
@@ -148,7 +147,7 @@ const AccordionCard: React.FunctionComponent<{
             margin: `-${euiTheme.size.l} -${euiTheme.size.l} 0`,
             width: `calc(100% + ${euiTheme.size.l} * 2)`,
             padding: euiTheme.size.l,
-            background: euiTheme.colors.lightestShade,
+            background: euiTheme.colors.backgroundBaseSubdued,
             borderBottom: euiTheme.border.thin,
           },
         }}
@@ -175,10 +174,8 @@ const AccordionCard: React.FunctionComponent<{
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <EuiTextColor color="primary">
-                  {`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}
-                </EuiTextColor>
+              <EuiText size="s" color="subdued">
+                {`${servicesCount} service${servicesCount === 1 ? '' : 's'}`}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -1443,11 +1440,15 @@ export const StepAuthentication: React.FunctionComponent<{
           style={{
             margin: `-${euiTheme.size.l} -${euiTheme.size.l}`,
             padding: euiTheme.size.l,
-            background: euiTheme.colors.lightestShade,
+            background: euiTheme.colors.backgroundBaseSubdued,
           }}
         >
           <EuiFlexGroup alignItems="flexStart" responsive={false}>
-            <EuiFlexItem grow={false}>
+            {/* A couple of px nudge — flexStart aligns the icon to the very
+                top of the line box, but the title's own leading pushes its
+                visible glyphs down slightly, so the icon reads as sitting
+                too high next to it without this. */}
+            <EuiFlexItem grow={false} style={{ paddingTop: 2 }}>
               <EuiIcon type="gear" size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
