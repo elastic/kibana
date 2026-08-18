@@ -6,6 +6,7 @@
  */
 
 import type { Subscription } from 'rxjs';
+import { first } from 'rxjs';
 import { BehaviorSubject, debounceTime, filter, map, merge, skip } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';

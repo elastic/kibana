@@ -14,7 +14,6 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import { apiPublishesSettings, initializeStateApi } from '@kbn/presentation-publishing';
 import {
   apiHasDisableTriggers,
@@ -500,7 +499,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
         const renderCount = useStateFromPublishingSubject(renderCount$);
-        const hasRendered = useStateFromPublishingSubject(hasRendered$);
         const [hideTitle, title, defaultTitle] = useBatchedPublishingSubjects(
           api.hideTitle$,
           api.title$,
@@ -522,12 +520,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             serializedVisSubscription.unsubscribe();
           };
         }, []);
-
-        useEffect(() => {
-          if (hasRendered && domNode.current) {
-            dispatchRenderComplete(domNode.current);
-          }
-        }, [hasRendered]);
 
         return (
           <div
