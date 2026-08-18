@@ -22,7 +22,6 @@ import {
   isSignalQueryBreachOnly,
   isSignalUsingStandaloneFormat,
 } from '@kbn/alerting-v2-schemas';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
@@ -240,38 +239,38 @@ export function validateMergedRuleAttributes(
     {
       valid: isSignalUsingStandaloneFormat(attrs),
       message: 'kind "signal" requires query.format "standalone".',
-      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+      code: ALERTING_V2_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
     {
       valid: isSignalQueryBreachOnly(attrs),
       message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
-      code: ALERTING_ERROR_CODES.INVALID_SIGNAL_RULE,
+      code: ALERTING_V2_ERROR_CODES.INVALID_SIGNAL_RULE,
       details: { rule_id: ruleId, rule_kind: attrs.kind },
     },
     {
       valid: isRecoveryQueryConsistentWithStrategy(attrs),
       message: 'query.recovery is only allowed when recovery_strategy is "query".',
-      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      code: ALERTING_V2_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
     {
       valid: isRecoveryQueryProvidedForStrategy(attrs),
       message: 'query.recovery is required when recovery_strategy is "query".',
-      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      code: ALERTING_V2_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
     {
       valid: isNoDataQueryConsistentWithStrategy(attrs),
       message: 'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
-      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      code: ALERTING_V2_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
     {
       valid: isNoDataQueryProvidedForStrategy(attrs),
       message:
         'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
-      code: ALERTING_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
+      code: ALERTING_V2_ERROR_CODES.INVALID_RULE_QUERY_CONFIG,
       details: { rule_id: ruleId },
     },
   ];
