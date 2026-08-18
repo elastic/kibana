@@ -59,6 +59,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         { override: true }
       );
+      if (!logsdbDataViewId) {
+        throw new Error(`Failed to create data view for "${logsdbDataView}"`);
+      }
       log.info(`updating settings to use the "${logsdbDataView}" dataView...`);
       await kibanaServer.uiSettings.update({
         'dateFormat:tz': 'UTC',
