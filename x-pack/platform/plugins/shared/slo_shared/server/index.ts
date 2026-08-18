@@ -6,3 +6,4 @@
  */
 
 export { default as cordisPlugin } from './plugin';
+export type { SloSharedPluginSetup, SloSharedPluginStart } from './types';

@@ -5,17 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-import { type PluginConfigDescriptor } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-
-export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { Plugin } = await import('./plugin');
-  return new Plugin();
-};
-
-export const config: PluginConfigDescriptor = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
-};
+export { default as cordisPlugin } from './plugin';

@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
-export const plugin = async (initializerContext: PluginInitializerContext) => {
-  const { Plugin } = await import('./plugin');
-  return new Plugin();
-};
-
+export { default as cordisPlugin } from './plugin';
 export { config } from '../common/config';

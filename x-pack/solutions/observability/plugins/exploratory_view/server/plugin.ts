@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { CoreStart, CoreSetup, Plugin as PluginType } from '@kbn/core/server';
 
-export class Plugin implements PluginType {
-  constructor() {}
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-  public setup(core: CoreSetup, plugins: {}) {
-    return {};
+
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ExploratoryViewPlugin extends Service {
+  static readonly inject: string[] = [];
+  static readonly provide = 'exploratoryView';
+
+  constructor(ctx: Context) {
+    super(ctx, 'exploratoryView');
+
   }
-
-  public start(coreStart: CoreStart, pluginsStart: {}) {}
-
-  public stop() {}
 }

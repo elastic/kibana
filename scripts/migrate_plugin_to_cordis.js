@@ -78,21 +78,30 @@ function run(pluginDir) {
   const project = new Project({ addFilesFromTsConfig: false });
   const sourceFile = project.addSourceFileAtPath(pluginFile);
 
-  // Find the plugin class
-  const pluginClass = sourceFile.getClasses().find((cls) => {
+  // Find the plugin class: either explicitly implements Plugin/CorePlugin, or any class
+  // with a setup() method (handles `class Plugin implements PluginType` alias patterns).
+  let pluginClass = sourceFile.getClasses().find((cls) => {
     return cls.getImplements().some((impl) => {
       const name = impl.getExpression().getText();
-      return name === 'Plugin' || name === 'CorePlugin';
+      return name === 'Plugin' || name === 'CorePlugin' || name === 'PluginType';
     });
   });
+  if (!pluginClass) {
+    // Fallback: any class with a setup() method
+    pluginClass = sourceFile.getClasses().find((cls) => cls.getMethod('setup') != null);
+  }
 
   if (!pluginClass) {
     console.error('Could not find a class implementing Plugin in', pluginFile);
     process.exit(1);
   }
 
-  const className = pluginClass.getName();
   const pluginId = deriveCordisId(pluginDir);
+  const rawClassName = pluginClass.getName() || '';
+  // If the class is the generic name 'Plugin', derive a proper name from the plugin ID.
+  const className = (rawClassName === 'Plugin' || rawClassName === '')
+    ? pluginId.charAt(0).toUpperCase() + pluginId.slice(1) + 'Plugin'
+    : rawClassName;
 
   console.log(`Migrating ${className} → native Cordis Service (provide: '${pluginId}')`);
 
@@ -270,8 +279,12 @@ ${indentedCtorBody}${indentedStop}${startTodo}
     const reexports = [];
     for (const line of stripped.split('\n')) {
       const t = line.trim();
-      // Keep re-exports from other modules (not from './plugin')
+      // Keep re-exports: `export type { ... } from '...'` (not from './plugin')
       if (/^export\s+(?:type\s+)?\{/.test(t) && /from\s+['"](?!\.\/plugin)/.test(t)) {
+        reexports.push(t);
+      }
+      // Keep bare re-exports: `export type { ... }` without a `from` clause (re-exports of imports)
+      if (/^export\s+type\s+\{/.test(t) && !/from\s+/.test(t)) {
         reexports.push(t);
       }
     }

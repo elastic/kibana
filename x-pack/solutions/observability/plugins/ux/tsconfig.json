@@ -13,6 +13,7 @@
     "test/scout/**/*"
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
