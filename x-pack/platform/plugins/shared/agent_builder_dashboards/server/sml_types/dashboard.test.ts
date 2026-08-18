@@ -104,7 +104,7 @@ const createLogger = (): Logger =>
 const createSavedObjectsClient = () => ({} as never);
 
 describe('dashboardSmlType', () => {
-  it('equals DASHBOARD_SML_TYPE', () => {
+  it('equals DASHBOARD_KI_TYPE', () => {
     const dashboardSmlType = createDashboardSmlType({
       getDashboardClient: async () => createDashboardClient(),
     });

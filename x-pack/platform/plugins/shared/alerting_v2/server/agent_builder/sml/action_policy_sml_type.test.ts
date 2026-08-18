@@ -78,7 +78,7 @@ describe('createActionPolicySmlType', () => {
     });
 
   describe('id and fetchFrequency', () => {
-    it('uses the shared ACTION_POLICY_SML_TYPE constant', () => {
+    it('uses the shared ACTION_POLICY_KI_TYPE constant', () => {
       expect(buildDefinition().id).toBe(ACTION_POLICY_KI_TYPE);
     });
 
