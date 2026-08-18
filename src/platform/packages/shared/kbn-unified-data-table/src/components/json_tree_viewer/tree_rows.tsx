@@ -85,7 +85,11 @@ export const NodeRowView = memo(function NodeRowView({
     >
       {hasChildren ? (
         <span css={styles.caret}>
-          <EuiIcon type={isExpanded ? 'arrowDown' : 'arrowRight'} size="s" aria-hidden />
+          <EuiIcon
+            type={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+            size="s"
+            aria-hidden
+          />
         </span>
       ) : (
         <span css={styles.caret} aria-hidden />

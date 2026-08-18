@@ -6,8 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Navigate, useNavigate } from 'react-router-dom-v5-compat';
+import { Redirect, useHistory, useParams } from 'react-router-dom';
 
 import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
@@ -18,7 +17,7 @@ import { appPaths } from '../../utils/app_paths';
 
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
-  const navigate = useNavigate();
+  const history = useHistory();
   const lastAgentId = useLastAgentId();
   const { conversationsService } = useAgentBuilderServices();
 
@@ -37,22 +36,19 @@ export const LegacyConversationRedirect: React.FC = () => {
 
   useEffect(() => {
     if (conversation?.agent_id && conversationId) {
-      navigate(
+      history.replace(
         appPaths.agent.conversations.byId({
           agentId: conversation.agent_id,
           conversationId,
-        }),
-        { replace: true }
+        })
       );
     } else if (isError && conversationId) {
-      navigate(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }), {
-        replace: true,
-      });
+      history.replace(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }));
     }
-  }, [conversation, conversationId, isError, lastAgentId, navigate]);
+  }, [conversation, conversationId, isError, lastAgentId, history]);
 
   if (isNewConversation) {
-    return <Navigate to={appPaths.agent.root({ agentId: lastAgentId })} replace />;
+    return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;
   }
 
   if (isLoading) {
