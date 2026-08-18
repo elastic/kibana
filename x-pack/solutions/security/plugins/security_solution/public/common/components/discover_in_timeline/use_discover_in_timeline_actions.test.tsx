@@ -226,6 +226,34 @@ describe('useDiscoverInTimelineActions', () => {
       );
     });
 
+    it('should initialize the local saved search after creating a new one', async () => {
+      // Without this, the redux copy stays null and every later timeline save skips persisting
+      // the Discover session, because `patchTimeline` is guarded on it.
+      const newSavedSearchId = 'newly-created-saved-search-id';
+      (startServicesMock.savedSearch.save as jest.Mock).mockResolvedValueOnce(newSavedSearchId);
+
+      const { result } = renderTestHook();
+
+      await waitFor(() =>
+        expect(result.current).toEqual(
+          expect.objectContaining({
+            updateSavedSearch: expect.any(Function),
+          })
+        )
+      );
+
+      await act(async () => {
+        await result.current.updateSavedSearch(savedSearchMock, TimelineId.active);
+      });
+
+      expect(mockDispatch).toHaveBeenCalledWith(
+        timelineActions.initializeSavedSearch({
+          id: TimelineId.active,
+          savedSearch: { ...savedSearchMock, id: newSavedSearchId },
+        })
+      );
+    });
+
     it('should initialize saved search when it is not set on the timeline model yet', async () => {
       const localMockState: State = {
         ...mockGlobalState,

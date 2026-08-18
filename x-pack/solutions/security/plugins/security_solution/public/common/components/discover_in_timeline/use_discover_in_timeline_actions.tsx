@@ -295,6 +295,17 @@ export const useDiscoverInTimelineActions = (
                 savedSearchId: response.id,
               })
             );
+            // Seed the local saved search with the one that was just created. Without this the
+            // redux copy stays null: the sync effect that would normally initialize it
+            // short-circuits because the local and persisted states are already equal right
+            // after creation. A null copy makes every later timeline save skip persisting the
+            // Discover session, because `patchTimeline` is guarded on it.
+            dispatch(
+              timelineActions.initializeSavedSearch({
+                id: TimelineId.active,
+                savedSearch: { ...savedSearch, id: response.id },
+              })
+            );
             // Also save the timeline, this will only happen once, in case there is no saved search id yet
             dispatch(timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false }));
             onUpdate?.();
