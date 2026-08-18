@@ -1076,7 +1076,7 @@ const WhereToAddCard: React.FunctionComponent<{
                 : "Don't see the policy you need?"}
             </p>
           </EuiText>
-          <EuiSpacer size="xs" />
+          <EuiSpacer size="m" />
           {/* A standalone button, not a link embedded in the sentence above
               — same "add/create something" action category as Add agent /
               Add another agent, styled the same way (bordered, text color,
@@ -1445,7 +1445,7 @@ export const StepAuthentication: React.FunctionComponent<{
             separate Setup access card was redundant. */}
         {deploymentMethod === 'agent' && (
           <>
-            <EuiSpacer size="xl" />
+            <EuiSpacer size="xxl" />
             <EuiFormRow
               label={
                 <span>
