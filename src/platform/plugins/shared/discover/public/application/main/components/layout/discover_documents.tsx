@@ -426,7 +426,7 @@ function DiscoverDocumentsComponent({
     internalStateActions.setCascadedDocumentsDataGridUiState
   );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
-  const isApproximate = useAppStateSelector((state) => state.isApproximate ?? false);
+  const esqlApproximation = useAppStateSelector((state) => state.esqlApproximation ?? false);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
     if (
       !isCascadedDocumentsVisible(availableCascadeGroups, query) ||
@@ -443,7 +443,7 @@ function DiscoverDocumentsComponent({
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
-      isApproximate,
+      esqlApproximation,
       renderViewModeToggle,
       expandedDoc$,
       expandedDocOwner$,
@@ -471,7 +471,7 @@ function DiscoverDocumentsComponent({
     expandedDocOwner$,
     getExpandedDocSetter,
     getRenderDocumentViewMetaSetter,
-    isApproximate,
+    esqlApproximation,
     latestCascadedDocumentsDataGridsUiState,
     latestDataCascadeUiState,
     onUpdateESQLQuery,

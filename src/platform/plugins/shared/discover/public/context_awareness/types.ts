@@ -110,7 +110,7 @@ export interface OpenInNewTabParams {
   /**
    * Whether the new tab should use approximate ES|QL execution
    */
-  isApproximate?: boolean;
+  esqlApproximation?: boolean;
 }
 
 /**
