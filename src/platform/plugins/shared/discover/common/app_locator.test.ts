@@ -340,7 +340,7 @@ describe('Discover url generator', () => {
           boxColor: 'transparent',
           unknownValue: 'ignored',
         },
-        metricsGridSettings: {
+        metricsState: {
           counterAggregation: 'max',
           gaugeAggregation: 'last_value',
           histogramPercentile: 'p90',
@@ -362,7 +362,7 @@ describe('Discover url generator', () => {
         exampleProfileState: {
           rowControlColor: 'text',
         },
-        metricsGridSettings: {
+        metricsState: {
           counterAggregation: 'max',
           gaugeAggregation: 'last_value',
           histogramPercentile: 'p90',
@@ -456,23 +456,23 @@ describe('Discover url generator', () => {
     });
   });
 
-  describe('when isApproximate is used', () => {
-    test('should include isApproximate in appState', async () => {
+  describe('when esqlApproximation is used', () => {
+    test('should include esqlApproximation in appState', async () => {
       const { locator } = await setup();
-      const { path } = await locator.getLocation({ isApproximate: true });
+      const { path } = await locator.getLocation({ esqlApproximation: true });
       const { _a } = getStatesFromKbnUrl(path, ['_a']);
 
-      expect((_a as Record<string, unknown>).isApproximate).toBe(true);
+      expect((_a as Record<string, unknown>).esqlApproximation).toBe(true);
     });
   });
 
-  describe('when isApproximate is not used', () => {
-    test('isApproximate should not be set in appState', async () => {
+  describe('when esqlApproximation is not used', () => {
+    test('esqlApproximation should not be set in appState', async () => {
       const { locator } = await setup();
       const { path } = await locator.getLocation({ dataViewId });
       const { _a } = getStatesFromKbnUrl(path, ['_a']);
 
-      expect((_a as Record<string, unknown>).isApproximate).toBeUndefined();
+      expect((_a as Record<string, unknown>).esqlApproximation).toBeUndefined();
     });
   });
 
