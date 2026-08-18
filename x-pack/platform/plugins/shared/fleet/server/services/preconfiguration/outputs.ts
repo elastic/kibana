@@ -31,11 +31,10 @@ import {
   DEFAULT_OUTPUT,
   ECH_AGENTLESS_OUTPUT_ID,
   ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
   SERVERLESS_DEFAULT_OUTPUT_ID,
   SERVERLESS_PRIVATE_OUTPUT_ID,
 } from '../../constants';
-import { outputType } from '../../../common/constants';
+import { AGENTLESS_MANAGED_BULK_OUTPUT_IDS, outputType } from '../../../common/constants';
 import { outputService } from '../output';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
@@ -144,11 +143,6 @@ export function getPreconfiguredOutputFromConfig(config?: FleetConfigType) {
   });
 }
 
-const MANAGED_BULK_OUTPUT_IDS: ReadonlySet<string> = new Set([
-  ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
-]);
-
 /**
  * Builds a predicate matching outputs that route through HOTel's managed `_bulk` gateway,
  * comparing on hostname only so host normalization (explicit ports, trailing slashes) can't
@@ -157,7 +151,7 @@ const MANAGED_BULK_OUTPUT_IDS: ReadonlySet<string> = new Set([
 export const createManagedBulkOutputMatcher = (config?: FleetConfigType) => {
   const managedBulkHostnames = new Set(
     (config ? getPreconfiguredOutputFromConfig(config) : [])
-      .filter(({ id }) => MANAGED_BULK_OUTPUT_IDS.has(id))
+      .filter(({ id }) => AGENTLESS_MANAGED_BULK_OUTPUT_IDS.has(id))
       .flatMap(({ hosts }) => hosts ?? [])
       .flatMap((host) => {
         try {
