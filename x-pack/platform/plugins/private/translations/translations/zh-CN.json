@@ -42417,7 +42417,6 @@
     "xpack.securitySolution.console.builtInCommands.help.helpTitle": "可用命令",
     "xpack.securitySolution.console.builtInCommands.helpAbout": "列出所有可用命令",
     "xpack.securitySolution.console.commandList.addButtonTooltip": "添加到文本栏",
-    "xpack.securitySolution.console.commandList.callout.escapeDoubleDashes": "将双破折号 (--) 的值转义为 \\-\\-，除非它们是命令参数；否则控制台会将它们解释为参数。",
     "xpack.securitySolution.console.commandList.callout.leavingResponder": "离开响应控制台不会终止已提交的任何操作。",
     "xpack.securitySolution.console.commandList.callout.multipleResponses": "您可以输入连续响应操作 — 无需等待之前的操作完成。",
     "xpack.securitySolution.console.commandList.callout.readMoreLink": "了解详情",
