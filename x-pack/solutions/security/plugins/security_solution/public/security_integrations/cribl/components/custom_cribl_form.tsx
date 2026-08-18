@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import type {
   NewPackagePolicy,
   PackagePolicyReplaceDefineStepExtensionComponentProps,
@@ -61,10 +62,6 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
     onDeleteEntry,
   }) => {
     const routeEntry = routeEntries[index]; // the route entry for this row
-    const namespaceValidation = routeEntry.namespace
-      ? isValidNamespace(routeEntry.namespace, false)
-      : undefined;
-    const isNamespaceInvalid = !!(namespaceValidation && !namespaceValidation.valid);
     const isDataIdInvalid = !!routeEntry.dataId && !isValidDataId(routeEntry.dataId);
     const dataIdError = i18n.translate(
       'xpack.securitySolution.securityIntegration.cribl.invalidDataId',

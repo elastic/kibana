@@ -1952,7 +1952,7 @@ describe('Package policy service', () => {
     });
 
     it('should forward request context to packagePolicyUpdate external callbacks', async () => {
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const mockPackagePolicy = createPackagePolicyMock();
       const attributes = {
@@ -2006,7 +2006,7 @@ describe('Package policy service', () => {
     });
 
     it('should rethrow packagePolicyUpdate callback errors with apiPassThrough', async () => {
-      const soClient = createSavedObjectClientMock();
+      const soClient = savedObjectsClientMock.create();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const mockPackagePolicy = createPackagePolicyMock();
       const attributes = {
