@@ -92,7 +92,7 @@ export const SourceDocumentJsonMode = ({
           iconProps={{ 'data-test-subj': 'sourceDocumentTruncatedWarning' }}
           content={i18n.translate('unifiedDataTable.sourceDocumentJsonMode.truncatedWarning', {
             defaultMessage:
-              'This document is too large to display in full. Only the first {maxValues} values are displayed.',
+              'JSON is too large to display in full. Only the first {maxValues} values are displayed.',
             values: {
               maxValues: MAX_TREE_VALUES,
             },
