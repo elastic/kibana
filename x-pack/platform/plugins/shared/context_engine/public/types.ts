@@ -40,12 +40,6 @@ export interface AnalyzeChatOptions {
   attachments: AttachmentInput[];
 }
 
-/** Powers the Analyze & improve button. Registered via {@link AgentBuilderIntegration}. */
-export interface AnalyzeAndImproveProvider {
-  canAnalyze: (params: { aiIndex: GetAiIndexResponse | undefined }) => boolean;
-  analyzeAndImprove: ChatOpener;
-}
-
 export interface SuggestAutomationParams {
   aiIndex: GetAiIndexResponse;
   onSaved: () => void;
@@ -59,9 +53,8 @@ export interface SuggestAutomationProvider {
   subscribeToAutomationSaved: (aiIndexId: string, onSaved: () => void) => () => void;
 }
 
-/** Agent Builder hooks registered by context_engine_agent_builder. */
+/** Suggest-automation hooks registered by context_engine_agent_builder. */
 export interface AgentBuilderIntegration {
-  analyzeAndImprove: AnalyzeAndImproveProvider;
   suggestAutomation: SuggestAutomationProvider;
 }
 
@@ -69,7 +62,7 @@ export interface AgentBuilderIntegration {
 export interface ContextEnginePluginSetup {}
 
 export interface ContextEnginePluginStart {
-  /** Registers Agent Builder integration hooks used by the Context Engine UI. */
+  /** Registers suggest-automation hooks used by the Context Engine UI. */
   registerAgentBuilderIntegration: (integration: AgentBuilderIntegration) => void;
 }
 

@@ -17,5 +17,6 @@ Shared constants live in `common/` (`agent_builder_attachments.ts`, `agent_build
 
 ## Browser
 
-On start, registers the full Agent Builder integration on the Context Engine plugin.
-Engine UI delegates AB actions to that integration — Context Engine itself has no Agent Builder imports.
+On start, registers suggest-automation hooks on the Context Engine plugin via
+`registerAgentBuilderIntegration`. Analyze & improve stays in `contextEngine` (main's feedback-loop
+hand-off); this plugin only owns **Suggest automation**.

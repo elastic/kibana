@@ -6,7 +6,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { createAnalyzeAndImproveProvider } from './create_analyze_and_improve_provider';
 import { createSuggestAutomationProvider } from './create_suggest_automation_provider';
 import type {
   ContextEngineAgentBuilderPublicSetup,
@@ -40,10 +39,6 @@ export class ContextEngineAgentBuilderPlugin
     { contextEngine, agentBuilder }: ContextEngineAgentBuilderPublicStartDependencies
   ): ContextEngineAgentBuilderPublicStart {
     contextEngine.registerAgentBuilderIntegration({
-      analyzeAndImprove: createAnalyzeAndImproveProvider({
-        agentBuilder,
-        application: core.application,
-      }),
       suggestAutomation: createSuggestAutomationProvider({
         agentBuilder,
         application: core.application,

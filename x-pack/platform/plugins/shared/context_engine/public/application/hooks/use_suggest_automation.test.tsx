@@ -11,7 +11,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
-import type { AnalyzeAndImproveProvider, SuggestAutomationProvider } from '../../types';
+import type { SuggestAutomationProvider } from '../../types';
 import type { ContextEngineServices } from './use_kibana';
 import { useSuggestAutomation } from './use_suggest_automation';
 
@@ -53,21 +53,11 @@ const renderSuggestHook = ({
     subscribeToAutomationSaved: subscribeToAutomationSavedMock,
   };
 
-  const analyzeAndImproveProvider: AnalyzeAndImproveProvider = {
-    canAnalyze: () => false,
-    analyzeAndImprove: jest.fn(),
-  };
-
   const services = {
     ...coreMock.createStart(),
     share: {} as ContextEngineServices['share'],
     triggersActionsUi: {} as ContextEngineServices['triggersActionsUi'],
-    getAgentBuilderIntegration: hasProvider
-      ? () => ({
-          analyzeAndImprove: analyzeAndImproveProvider,
-          suggestAutomation: provider,
-        })
-      : undefined,
+    getAgentBuilderIntegration: hasProvider ? () => ({ suggestAutomation: provider }) : undefined,
   } as unknown as ContextEngineServices;
 
   const wrapper = ({ children }: { children: React.ReactNode }) => (

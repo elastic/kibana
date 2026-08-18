@@ -10,7 +10,6 @@ import { ContextEnginePlugin } from './plugin';
 
 export type {
   AgentBuilderIntegration,
-  AnalyzeAndImproveProvider,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   SuggestAutomationParams,
