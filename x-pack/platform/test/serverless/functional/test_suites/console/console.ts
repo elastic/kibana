@@ -48,22 +48,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should open API Reference documentation page when open documentation button is clicked', async () => {
       await PageObjects.console.clearEditorText();
       await PageObjects.console.enterText('GET _search');
+
+      // Capture the opened URL instead of navigating to the live external docs page, which can hang the renderer.
+      await browser.execute(() => {
+        window.sessionStorage.removeItem('__consoleDocUrl');
+        window.open = ((url?: string | URL) => {
+          window.sessionStorage.setItem('__consoleDocUrl', String(url ?? ''));
+          return null;
+        }) as typeof window.open;
+      });
+
       await PageObjects.console.clickContextMenu();
       await PageObjects.console.clickOpenDocumentationButton();
 
-      await retry.tryForTime(10000, async () => {
-        await browser.switchTab(1);
+      await retry.waitFor('the docs URL to be passed to window.open', async () => {
+        const url = await browser.execute(() => window.sessionStorage.getItem('__consoleDocUrl'));
+        return typeof url === 'string' && url.includes('/docs/api');
       });
-
-      // Retry until the documentation is loaded
-      await retry.try(async () => {
-        const url = await browser.getCurrentUrl();
-        expect(url).to.contain('/docs/api');
-      });
-
-      // Close the documentation tab
-      await browser.closeCurrentWindow();
-      await browser.switchTab(0);
     });
   });
 }
