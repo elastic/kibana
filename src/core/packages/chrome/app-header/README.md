@@ -23,7 +23,8 @@ that bar. Keep new regions flat until they earn a folder; don't pre-folder simpl
 ## Which API should I use?
 
 Use `AppHeader` when the page can render its header inline. This is the preferred model for pages
-that own their title, back target, tabs, badges, and app menu locally.
+that own their title, back target, tabs, badges, and app menu locally. Use `AppHeaderLoading` in
+the same slot while that content is not ready yet.
 
 Use `ChromeAppHeaderRegistration` when Chrome should own the top-bar slot. This keeps migration
 small for pages with sticky or shared top-nav constraints while still using the shared header view.
@@ -79,6 +80,32 @@ the title. This is a Discover-specific layout exception; other apps should use t
 this internal title slot cannot be forced through a type suppression. When the tabs bar is present,
 it owns the bottom separator and title actions remain visible without hovering.
 
+## Loading skeleton
+
+When the page title and menu are not ready yet, mount `AppHeaderLoading` instead of gating the
+whole page behind a spinner. It claims the same inline slot as `AppHeader` and skeletons both
+regions with defaults that match a typical title + overflow + primary header:
+
+```tsx
+<AppHeaderLoading />
+```
+
+`back` still renders when provided. Once data arrives, replace it with the real `AppHeader`.
+
+The fully supported swap is a **single-row** header: title (optional back) plus the app menu.
+`AppHeaderLoading` does not skeleton tabs, description, metadata, or title actions. Swapping from
+the loading placeholder to a multi-row `AppHeader` will change the header height.
+
+The menu skeleton can be customized later if the loaded header will not look like the default
+(for example two icon buttons and no primary). `buttonCount` is clamped to AppMenu's
+`APP_MENU_ITEM_LIMIT` (3); the primary action is separate and does not count toward that limit.
+The menu uses the same responsive collapsed / minimal / expanded layouts as `AppMenu`.
+
+```tsx
+<AppHeaderLoading menu={{ buttonCount: 2, hasPrimary: false }} />
+<AppHeaderLoading back="/app/my-app" />
+```
+
 ## Editable titles
 
 Pass a title object when the page title can be renamed from the header:
@@ -127,6 +154,21 @@ To add a URL rendered with the fixed label "Learn more", use the object form:
 Description and `metadata` share the secondary row and are mutually exclusive. Use metadata for
 structured entity facts such as status, owner, or creation time. Documentation links that are not
 part of a necessary description belong in the app menu via `docLink`.
+
+## Strict props
+
+The public types are the contract: strings, callbacks, known unions. A type assertion can still
+pass a React node as a `label`, or extra keys that get spread into EUI. Either path paints custom
+UI and the header stops looking like one component.
+
+The renderer only uses declared fields, and only as real strings. A non-string becomes empty (or is
+omitted if optional); leftover keys are dropped. In development this logs a one-time `console.warn`.
+Do not pass `FormattedMessage` or other nodes.
+
+If a layout cannot be expressed with the public API, extend the API. The deprecated
+`renderCustomBadge` hatch is the only supported custom-UI path today.
+
+Menu item text is coerced the same way in `@kbn/ui-app-menu`.
 
 ## Title size
 
