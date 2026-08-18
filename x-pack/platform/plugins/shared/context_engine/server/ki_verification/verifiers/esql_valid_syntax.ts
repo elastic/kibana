@@ -20,14 +20,7 @@ export const MAX_ESQL_QUERY_LENGTH = 10_000;
 
 const REASON_QUERY_PREVIEW_LENGTH = 200;
 
-const extractQueries = (ki: KnowledgeIndicator): string[] => {
-  const value = ki.attributes?.[ESQL_ATTRIBUTE_KEY];
-  const candidates = typeof value === 'string' ? [value] : Array.isArray(value) ? value : [];
-  return candidates
-    .filter((query): query is string => typeof query === 'string')
-    .map((query) => query.trim())
-    .filter((query) => query.length > 0);
-};
+const getEsqlValue = (ki: KnowledgeIndicator): unknown => ki.attributes?.[ESQL_ATTRIBUTE_KEY];
 
 const formatValidationError = (error: ESQLMessage | EditorError): string =>
   'text' in error
@@ -42,15 +35,36 @@ const previewQuery = (query: string): string =>
 /** Statically validates a KI's ES|QL. */
 export const createEsqlValidSyntaxVerifier = (): KiVerifier => ({
   id: ESQL_VALID_SYNTAX_VERIFIER_ID,
-  applies: (ki) => extractQueries(ki).length > 0,
+  applies: (ki) => getEsqlValue(ki) !== undefined,
   async verify(ki, { abortSignal }) {
-    const queries = extractQueries(ki);
-    if (queries.length > MAX_ESQL_QUERIES) {
+    const value = getEsqlValue(ki);
+    const candidates = typeof value === 'string' ? [value] : Array.isArray(value) ? value : null;
+    if (!candidates || candidates.length === 0) {
       return {
         passed: false,
-        reason: `KI carries ${queries.length} ES|QL queries; the maximum is ${MAX_ESQL_QUERIES}`,
+        reason: `attributes.${ESQL_ATTRIBUTE_KEY} must be a non-empty ES|QL query string or a non-empty array of query strings`,
       };
     }
+    if (candidates.length > MAX_ESQL_QUERIES) {
+      return {
+        passed: false,
+        reason: `KI carries ${candidates.length} ES|QL queries; the maximum is ${MAX_ESQL_QUERIES}`,
+      };
+    }
+    const invalidIndexes = candidates.flatMap((entry, index) =>
+      typeof entry === 'string' && entry.trim().length > 0 ? [] : [index]
+    );
+    if (invalidIndexes.length > 0) {
+      return {
+        passed: false,
+        reason: `attributes.${ESQL_ATTRIBUTE_KEY} must contain only non-empty query strings (invalid at index ${invalidIndexes.join(
+          ', '
+        )})`,
+      };
+    }
+    const queries = candidates
+      .filter((entry): entry is string => typeof entry === 'string')
+      .map((query) => query.trim());
 
     const failures: string[] = [];
     for (const query of queries) {

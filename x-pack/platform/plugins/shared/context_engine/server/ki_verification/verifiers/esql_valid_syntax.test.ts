@@ -41,17 +41,11 @@ describe('esql-valid-syntax verifier', () => {
       expect(verifier.applies({ attributes: { severity: 'high' } })).toBe(false);
     });
 
-    it('is false for an empty or whitespace-only esql attribute', () => {
-      expect(verifier.applies(makeKi(''))).toBe(false);
-      expect(verifier.applies(makeKi('   '))).toBe(false);
-      expect(verifier.applies(makeKi([]))).toBe(false);
-      expect(verifier.applies(makeKi(['', '  ']))).toBe(false);
-    });
-
-    it('is false for non-string esql values', () => {
-      expect(verifier.applies(makeKi(42))).toBe(false);
-      expect(verifier.applies(makeKi({ query: VALID_QUERY }))).toBe(false);
-      expect(verifier.applies(makeKi([42, true]))).toBe(false);
+    it('is true whenever the esql attribute is present, even when malformed', () => {
+      expect(verifier.applies(makeKi(''))).toBe(true);
+      expect(verifier.applies(makeKi([]))).toBe(true);
+      expect(verifier.applies(makeKi(42))).toBe(true);
+      expect(verifier.applies(makeKi([42, true]))).toBe(true);
     });
 
     it('is true for a query string', () => {
@@ -64,6 +58,25 @@ describe('esql-valid-syntax verifier', () => {
   });
 
   describe('verify', () => {
+    it('fails non-string and empty esql values with a shape reason', async () => {
+      for (const value of [42, { query: VALID_QUERY }, null, '', '   ', []]) {
+        const outcome = await verifier.verify(makeKi(value), context);
+        expect(outcome.passed).toBe(false);
+        if (!outcome.passed) {
+          expect(outcome.reason).toContain('attributes.esql');
+        }
+      }
+    });
+
+    it('fails a mixed array instead of dropping non-string entries, naming the indexes', async () => {
+      const outcome = await verifier.verify(makeKi([VALID_QUERY, 42, null]), context);
+
+      expect(outcome.passed).toBe(false);
+      if (!outcome.passed) {
+        expect(outcome.reason).toContain('invalid at index 1, 2');
+      }
+    });
+
     it('passes a single valid query', async () => {
       const outcome = await verifier.verify(makeKi(VALID_QUERY), context);
 
