@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import {
-  aiIndexAttachmentDataSchema,
-  type AiIndexAttachmentData,
-} from '@kbn/context-engine-plugin/common/ai_index_schemas';
-
-export { aiIndexAttachmentDataSchema, type AiIndexAttachmentData };
-
 export const AI_INDEX_ATTACHMENT_TYPE = 'platform.context_engine.ai_index' as const;
 
 export const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml' as const;
-
-export type AiIndexAttachment = Attachment<typeof AI_INDEX_ATTACHMENT_TYPE, AiIndexAttachmentData>;

@@ -6,11 +6,11 @@
  */
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import { AI_INDEX_ATTACHMENT_TYPE } from '../../common/agent_builder_attachments';
 import {
-  AI_INDEX_ATTACHMENT_TYPE,
   aiIndexAttachmentDataSchema,
   type AiIndexAttachmentData,
-} from '../../common/agent_builder_attachments';
+} from '../../common/agent_builder_attachment_schemas';
 import {
   KI_AUTOMATION_GENERATION_SKILL_ID,
   KI_RETRIEVAL_SKILL_ID,
