@@ -36,7 +36,7 @@ export const customContentPanelConfigSchema = customContentStateSchema
   });
 
 /** Edit schema: prompt and esqlQuery only — template is generated server-side. */
-const customContentEditConfigSchema = z.object({
+const customContentEditConfigSchema = customContentStateSchema.omit({ template: true }).extend({
   prompt: z
     .string()
     .min(1)
