@@ -334,10 +334,7 @@ export const vegaEmbeddableFactory = (
     return {
       api,
       Component: () => {
-        const [renderInput, rendered] = useBatchedPublishingSubjects(
-          renderInput$,
-          rendered$
-        );
+        const [renderInput, rendered] = useBatchedPublishingSubjects(renderInput$, rendered$);
         const domNode = useRef<HTMLDivElement>(null);
 
         useEffect(
