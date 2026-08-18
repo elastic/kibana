@@ -26,12 +26,12 @@ module.exports = {
       // Point to the built ChromeLayout package
       '@kbn/ui-chrome-layout': path.resolve(__dirname, '../../target'),
     },
-    // Resolve nested package dependencies before falling back to Kibana's node_modules.
-    modules: ['node_modules', path.resolve(KIBANA_ROOT, 'node_modules')],
+    // Use Kibana's node_modules for all dependencies
+    modules: [path.resolve(KIBANA_ROOT, 'node_modules'), 'node_modules'],
   },
   resolveLoader: {
     // Use Kibana's loaders
-    modules: ['node_modules', path.resolve(KIBANA_ROOT, 'node_modules')],
+    modules: [path.resolve(KIBANA_ROOT, 'node_modules'), 'node_modules'],
   },
   module: {
     rules: [
