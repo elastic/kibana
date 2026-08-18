@@ -16,7 +16,7 @@ export const DESIGN_EXPLORATION_FEATURE_FLAG_KEY = 'core.chrome.designExploratio
 
 export const DESIGN_EXPLORATION_VARIANT_SESSION_KEY = 'dev.core.chrome.designExploration.variant';
 
-export const DEFAULT_DESIGN_EXPLORATION_VARIANT_ID = 'nirbana';
+export const DEFAULT_DESIGN_EXPLORATION_VARIANT_ID = 'target';
 
 export interface DesignExplorationVariantOption {
   id: string;
@@ -31,6 +31,7 @@ export const DESIGN_EXPLORATION_VARIANT_OPTIONS: DesignExplorationVariantOption[
   { id: 'attbana', label: 'Attbana' },
   { id: 'interbana', label: 'Interbana' },
   { id: 'nirbana', label: 'Nirbana' },
+  { id: 'target', label: 'Target' },
 ];
 
 type FeatureFlagsBooleanReader = Pick<FeatureFlagsStart, 'getBooleanValue'>;
