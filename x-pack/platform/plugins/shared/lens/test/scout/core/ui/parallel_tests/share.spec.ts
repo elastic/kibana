@@ -23,6 +23,7 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
+  // One journey: share enablement and CSV builds on the same editor session (FTR share.ts).
   spaceTest(
     'enables share/export for a valid config and preserves filters in the shared URL',
     async ({ page, pageObjects, context, kbnUrl }) => {
@@ -99,52 +100,52 @@ spaceTest.describe('Lens share and CSV export', { tag: '@local-stateful-classic'
         const csvContent = await waitForLensCsvContent(page, 1);
         expect(Object.keys(csvContent)).toHaveLength(1);
       });
+
+      await spaceTest.step('download CSV for multi-layer visualization', async () => {
+        // Start from a fresh editor so layer add is not racing a saved-object reload
+        // after clearing filters on the shared saved viz (share-URL already covered filters).
+        await suiteSetup.openEmptyLensEditor(pageObjects);
+        await lens.configureDimension({
+          dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+        await lens.waitForVisualization('xyVisChart');
+
+        await lens.layers.createLayer('data', undefined, 'bar');
+        await lens.layers.ensureLayerTabIsActive(1);
+        await expect(
+          page.testSubj.locator('lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension')
+        ).toBeVisible();
+        await lens.configureDimension({
+          dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
+          operation: 'date_histogram',
+          field: '@timestamp',
+        });
+        await lens.configureDimension({
+          dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'median',
+          field: 'bytes',
+        });
+        await lens.waitForVisualization('xyVisChart');
+
+        await page.evaluate(() => {
+          window.ELASTIC_LENS_CSV_CONTENT = undefined;
+          window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
+        });
+        await completeLensCsvExport(page);
+        const csvContent = await waitForLensCsvContent(page, 2);
+        expect(Object.keys(csvContent)).toHaveLength(2);
+
+        await page.evaluate(() => {
+          window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = false;
+        });
+      });
     }
   );
-
-  // Own test so `beforeEach` opens a fresh editor. Doing this after save/share in the
-  // journey above races a saved-object reload (empty-dimension / layer-add timeouts).
-  spaceTest('downloads CSV for a multi-layer visualization', async ({ page, pageObjects }) => {
-    const { lens } = pageObjects;
-
-    await lens.configureDimension({
-      dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-    await lens.configureDimension({
-      dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'average',
-      field: 'bytes',
-    });
-    await lens.waitForVisualization('xyVisChart');
-
-    await lens.layers.createLayer('data', undefined, 'bar');
-    await expect(
-      page.testSubj.locator('lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension')
-    ).toBeVisible();
-    await lens.configureDimension({
-      dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
-      operation: 'date_histogram',
-      field: '@timestamp',
-    });
-    await lens.configureDimension({
-      dimension: 'lns-layerPanel-1 > lnsXY_yDimensionPanel > lns-empty-dimension',
-      operation: 'median',
-      field: 'bytes',
-    });
-    await lens.waitForVisualization('xyVisChart');
-
-    await page.evaluate(() => {
-      window.ELASTIC_LENS_CSV_CONTENT = undefined;
-      window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = true;
-    });
-    await completeLensCsvExport(page);
-    const csvContent = await waitForLensCsvContent(page, 2);
-    expect(Object.keys(csvContent)).toHaveLength(2);
-
-    await page.evaluate(() => {
-      window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG = false;
-    });
-  });
 });

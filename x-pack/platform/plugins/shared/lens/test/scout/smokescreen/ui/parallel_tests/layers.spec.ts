@@ -6,7 +6,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { addDataLayer, createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
+import { createLogstashLensEditorSuiteSetup, spaceTest } from '../fixtures';
 
 // Chart switcher list is virtualized; always pass an explicit `search` so the target row is rendered.
 
@@ -33,7 +33,7 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
         field: 'bytes',
       });
 
-      await addDataLayer(page, 'bar');
+      await lens.layers.createLayer('data', undefined, 'bar');
 
       await lens.layers.ensureLayerTabIsActive(0);
       await lens.openChartSwitchPopover({ visType: 'line', search: 'line' });
@@ -78,7 +78,7 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
         field: 'bytes',
       });
 
-      await addDataLayer(page, 'bar');
+      await lens.layers.createLayer('data', undefined, 'bar');
       expect(await lens.getChartSwitchType()).toBe('Bar');
 
       await lens.configureDimension({
@@ -125,7 +125,7 @@ spaceTest.describe('Lens layers', { tag: '@local-stateful-classic' }, () => {
         field: 'bytes',
       });
 
-      await addDataLayer(page, 'bar');
+      await lens.layers.createLayer('data', undefined, 'bar');
 
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
