@@ -11,7 +11,7 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import { isConditionShardedLocation } from '../synthetics_service/private_location/assign_by_condition';
-import { getAgentInfo, type AgentInfo } from '../synthetics_service/private_location/get_agent_info';
+import { getAgentInfo } from '../synthetics_service/private_location/get_agent_info';
 import { getRecentlyActiveAgentIds } from '../synthetics_service/private_location/get_active_agent_ids';
 import {
   isCheckinStale,
@@ -92,61 +92,67 @@ export class RebalancePrivateLocationShardsTask {
       const nextHealthySince: Record<string, number> = {};
 
       for (const location of scalableLocations) {
-        let agents: Map<string, AgentInfo>;
         try {
-          agents = await getAgentInfo(this.serverSetup, location.agentPolicyId);
-        } catch (e) {
+          const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId);
+
+          // Data-plane liveness veto: only worth a `synthetics-*` query when at
+          // least one agent looks stale by check-in. In steady state (all fresh)
+          // we skip it, so a healthy location adds no extra ES load.
+          const hasStaleAgent = [...agents.values()].some((info) => isCheckinStale(info, now));
+          const activeAgentIds = hasStaleAgent
+            ? await getRecentlyActiveAgentIds(
+                this.serverSetup,
+                [...agents.keys()],
+                STALE_DATA_MS,
+                now
+              )
+            : undefined;
+
+          const {
+            healthyAgentIds,
+            recoveryAgentIds,
+            capacities,
+            nextHealthySince: locationHealthySince,
+          } = planLocationRebalance({
+            agents,
+            now,
+            priorHealthySince,
+            agentPolicyId: location.agentPolicyId,
+            activeAgentIds,
+          });
+          // Keys are policy-scoped, so merging every location into one map is safe.
+          Object.assign(nextHealthySince, locationHealthySince);
+
+          if (healthyAgentIds.length === 0) {
+            // Leave monitors pinned where they are rather than break at-most-once:
+            // with no healthy target there is nowhere safe to move them to.
+            logger.warn(
+              `[RebalancePrivateLocationShardsTask] No healthy agents for private location ${location.id} (${location.label}); skipping rebalance.`
+            );
+            continue;
+          }
+
           this.debugLog(
-            `Agent read failed for location ${location.id}; skipping this cycle: ${e.message}`
+            `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, recovery-eligible=${recoveryAgentIds.length}`
           );
-          continue;
+
+          // Idempotent placement + diff-based writes: only monitors whose assigned
+          // agent changed are rewritten; steady state performs zero writes.
+          const { total, moved } =
+            await this.syntheticsMonitorClient.privateLocationAPI.rebalanceShards({
+              location: {
+                id: location.id,
+                label: location.label,
+                agentPolicyId: location.agentPolicyId,
+              },
+              healthyAgentIds,
+              recoveryAgentIds,
+              capacities,
+            });
+          this.debugLog(`location ${location.id}: moved ${moved}/${total} monitor(s)`);
+        } catch (e) {
+          this.debugLog(`Rebalance failed for location ${location.id}; skipping: ${e.message}`);
         }
-
-        // Data-plane liveness veto: only worth a `synthetics-*` query when at
-        // least one agent looks stale by check-in. In steady state (all fresh)
-        // we skip it, so a healthy location adds no extra ES load.
-        const hasStaleAgent = [...agents.values()].some((info) => isCheckinStale(info, now));
-        const activeAgentIds = hasStaleAgent
-          ? await getRecentlyActiveAgentIds(this.serverSetup, [...agents.keys()], STALE_DATA_MS, now)
-          : undefined;
-
-        const {
-          healthyAgentIds,
-          recoveryAgentIds,
-          capacities,
-          nextHealthySince: locationHealthySince,
-        } = planLocationRebalance({
-          agents,
-          now,
-          priorHealthySince,
-          agentPolicyId: location.agentPolicyId,
-          activeAgentIds,
-        });
-        // Keys are policy-scoped, so merging every location into one map is safe.
-        Object.assign(nextHealthySince, locationHealthySince);
-
-        if (healthyAgentIds.length === 0) {
-          // Leave monitors pinned where they are rather than break at-most-once:
-          // with no healthy target there is nowhere safe to move them to.
-          logger.warn(
-            `[RebalancePrivateLocationShardsTask] No healthy agents for private location ${location.id} (${location.label}); skipping rebalance.`
-          );
-          continue;
-        }
-
-        this.debugLog(
-          `location ${location.id}: healthy=${healthyAgentIds.length}/${agents.size}, recovery-eligible=${recoveryAgentIds.length}`
-        );
-
-        // Idempotent placement + diff-based writes: only monitors whose assigned
-        // agent changed are rewritten; steady state performs zero writes.
-        const { total, moved } = await this.syntheticsMonitorClient.privateLocationAPI.rebalanceShards({
-          location: { id: location.id, label: location.label, agentPolicyId: location.agentPolicyId },
-          healthyAgentIds,
-          recoveryAgentIds,
-          capacities,
-        });
-        this.debugLog(`location ${location.id}: moved ${moved}/${total} monitor(s)`);
       }
 
       return {

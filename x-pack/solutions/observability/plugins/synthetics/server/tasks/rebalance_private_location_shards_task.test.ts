@@ -234,6 +234,36 @@ describe('RebalancePrivateLocationShardsTask', () => {
       );
     });
 
+    it('keeps processing later locations (and persists streaks) when rebalanceShards throws', async () => {
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockResolvedValue([
+          location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
+          location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
+        ]);
+      jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValueOnce(new Map([['agent-a', agentInfo(NOW)]]))
+        .mockResolvedValueOnce(new Map([['agent-b', agentInfo(NOW)]]));
+      // The first location's write fails; the second must still be rebalanced.
+      mockRebalanceShards
+        .mockRejectedValueOnce(new Error('bulkUpdate boom'))
+        .mockResolvedValueOnce({ total: 1, moved: 1 });
+
+      const result = await makeTask().runTask({ taskInstance: taskInstance() });
+
+      expect(mockRebalanceShards).toHaveBeenCalledTimes(2);
+      expect(mockRebalanceShards).toHaveBeenLastCalledWith(
+        expect.objectContaining({ healthyAgentIds: ['agent-b'] })
+      );
+      // Streaks for both locations survive — the failure is not propagated to the
+      // outer catch (which would discard the whole run's accumulated state).
+      expect(result.state.healthySince).toEqual({
+        [healthySinceKey('ap-a', 'agent-a')]: NOW,
+        [healthySinceKey('ap-b', 'agent-b')]: NOW,
+      });
+    });
+
     it('does not throw when getPrivateLocations fails; returns the prior state', async () => {
       jest
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
