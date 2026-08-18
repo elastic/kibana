@@ -40,6 +40,11 @@ export type {
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
 } from './plugin_contract';
+export type {
+  ConversationTemplateTabDefinition,
+  ConversationTemplateUIDefinition,
+  ConversationTemplateServiceStartContract,
+} from './templates';
 export { McpClientDetails, McpClientDetailsContent, McpClientLogo } from './oauth_clients';
 export type {
   McpClientDetailsProps,

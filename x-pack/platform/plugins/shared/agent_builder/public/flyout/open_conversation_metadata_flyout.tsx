@@ -11,15 +11,25 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ConversationsService } from '../services/conversations/conversations_service';
+import type { ConversationTemplatesService } from '../services/conversation_templates';
 
 const generateTitleId = htmlIdGenerator('agentBuilderConversationMetadataFlyoutTitle');
 
-export const openConversationMetadataFlyout = async (
-  core: CoreStart,
-  conversationsService: ConversationsService,
-  conversationId: string,
-  onClose?: () => void
-): Promise<() => void> => {
+export interface OpenConversationMetadataFlyoutOptions {
+  core: CoreStart;
+  conversationsService: ConversationsService;
+  conversationTemplatesService: ConversationTemplatesService;
+  conversationId: string;
+  onClose?: () => void;
+}
+
+export const openConversationMetadataFlyout = async ({
+  core,
+  conversationsService,
+  conversationTemplatesService,
+  conversationId,
+  onClose,
+}: OpenConversationMetadataFlyoutOptions): Promise<() => void> => {
   const { ConversationMetadataFlyoutSnapshot } = await import('./conversation_metadata_flyout');
   const titleId = generateTitleId();
   const queryClient = new QueryClient();
@@ -30,6 +40,7 @@ export const openConversationMetadataFlyout = async (
         <ConversationMetadataFlyoutSnapshot
           conversationId={conversationId}
           conversationsService={conversationsService}
+          conversationTemplatesService={conversationTemplatesService}
           titleId={titleId}
         />
       </QueryClientProvider>,

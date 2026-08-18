@@ -30,6 +30,8 @@ import {
   RenderersService,
   ChatService,
   ConversationsService,
+  ConversationTemplatesService,
+  registerMockTemplateUIDefinitions,
   DocLinksService,
   NavigationService,
   ToolsService,
@@ -42,6 +44,7 @@ import {
 } from './services';
 import { createPublicEmbeddableChatAccess } from './services/access';
 import { createPublicAttachmentContract } from './services/attachments';
+import { createPublicConversationTemplatesContract } from './services/conversation_templates';
 import { createPublicRenderersContract } from './services/renderers';
 import { createPublicToolContract } from './services/tools';
 import { createPublicAgentsContract } from './services/agents';
@@ -162,6 +165,9 @@ export class AgentBuilderPlugin
     const eventsService = new EventsService();
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
+    const conversationTemplatesService = new ConversationTemplatesService();
+    // TODO: remove mock template definitions before merge
+    registerMockTemplateUIDefinitions(conversationTemplatesService);
     const docLinksService = new DocLinksService(core.docLinks.links);
     const toolsService = new ToolsService({ http });
     const skillsService = new SkillsService({ http });
@@ -227,7 +233,13 @@ export class AgentBuilderPlugin
       conversationId,
       onClose,
     }: OpenConversationMetadataOptions): Promise<() => void> => {
-      return openConversationMetadataFlyout(core, conversationsService, conversationId, onClose);
+      return openConversationMetadataFlyout({
+        core,
+        conversationsService,
+        conversationTemplatesService,
+        conversationId,
+        onClose,
+      });
     };
 
     const internalServices: AgentBuilderInternalService = {
@@ -236,6 +248,7 @@ export class AgentBuilderPlugin
       renderersService,
       chatService,
       conversationsService,
+      conversationTemplatesService,
       docLinksService,
       navigationService,
       toolsService,
@@ -320,6 +333,9 @@ export class AgentBuilderPlugin
     const agentBuilderService: AgentBuilderPluginStart = {
       agents: createPublicAgentsContract({ agentService }),
       attachments: createPublicAttachmentContract({ attachmentsService }),
+      conversationTemplates: createPublicConversationTemplatesContract({
+        conversationTemplatesService,
+      }),
       renderers: createPublicRenderersContract({ renderersService }),
       tools: createPublicToolContract({ toolsService }),
       events: createPublicEventsContract({ eventsService }),

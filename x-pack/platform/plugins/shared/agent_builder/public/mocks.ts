@@ -70,6 +70,10 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
   return {
     agents: createAgentStartMock(),
     attachments: createAttachmentStartMock(),
+    conversationTemplates: {
+      addTemplateUIDefinition: jest.fn(),
+      getTemplateUIDefinition: jest.fn(),
+    },
     renderers: createRendererStartMock(),
     tools: createToolStartMock(),
     events: {

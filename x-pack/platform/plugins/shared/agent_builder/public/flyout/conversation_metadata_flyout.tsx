@@ -20,9 +20,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
+import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
+import type { ConversationTemplatesService } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
-import { getConversationFlyoutTabs } from './conversation_metadata_tabs_registry';
+import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 
 const FLYOUT_TITLE = i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.title', {
   defaultMessage: 'Chat info',
@@ -32,10 +34,18 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationMetadataFlyout
   defaultMessage: 'Something went wrong while loading this conversation.',
 });
 
-interface FlyoutTab {
-  id: string;
-  content: (props: { conversation: Conversation }) => React.ReactNode;
-}
+const TIMELINE_TAB_LABEL = i18n.translate(
+  'xpack.agentBuilder.conversationMetadataFlyout.timelineTabLabel',
+  { defaultMessage: 'Timeline' }
+);
+
+const ATTACHMENTS_TAB_LABEL = i18n.translate(
+  'xpack.agentBuilder.conversationMetadataFlyout.attachmentsTabLabel',
+  { defaultMessage: 'Attachments' }
+);
+
+// Tab ids owned by the flyout itself; registry entries may not claim them.
+const RESERVED_TAB_IDS = ['timeline', 'attachments'];
 
 const TimelinePlaceholder: React.FC = () => (
   <EuiText size="s" color="subdued">
@@ -57,23 +67,22 @@ const AttachmentsPlaceholder: React.FC = () => (
   </EuiText>
 );
 
-const tabLabel = (id: string) => id.charAt(0).toUpperCase() + id.slice(1);
+const buildTabs = (
+  conversation: Conversation,
+  conversationTemplatesService: ConversationTemplatesService
+): ConversationTemplateTabDefinition[] => {
+  const definition = conversation.template_id
+    ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
+    : undefined;
 
-const buildTabs = (conversation: Conversation): FlyoutTab[] => {
-  const customTabs: FlyoutTab[] = [];
+  const templateTabs =
+    definition?.tabs.filter((entry) => !RESERVED_TAB_IDS.includes(entry.tab)) ?? [];
 
-  for (const entry of getConversationFlyoutTabs(conversation.template_id ?? '')) {
-    // Note: users should likely be able to define their own attachments tab / or at very least filter attachments to relevant ones
-    if (entry.tab === 'timeline' || entry.tab === 'attachments') {
-      continue;
-    }
-    customTabs.push({ id: entry.tab, content: entry.content });
-  }
-
+  // Note: users should likely be able to define their own attachments tab / or at very least filter attachments to only show relevant ones
   return [
-    ...customTabs,
-    { id: 'timeline', content: () => <TimelinePlaceholder /> },
-    { id: 'attachments', content: () => <AttachmentsPlaceholder /> },
+    ...templateTabs,
+    { tab: 'attachments', label: ATTACHMENTS_TAB_LABEL, content: AttachmentsPlaceholder },
+    { tab: 'timeline', label: TIMELINE_TAB_LABEL, content: TimelinePlaceholder },
   ];
 };
 
@@ -93,22 +102,29 @@ const FlyoutFrame: React.FC<{ titleId: string; children: React.ReactNode }> = ({
 
 export interface ConversationMetadataFlyoutContentProps {
   conversation: Conversation;
+  conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
 }
 
-/** Pure presentational — renders whatever conversation it is given; owns no data fetching. */
+/** Pure presenter — renders whatever conversation it is given; owns no data fetching. */
 export const ConversationMetadataFlyoutContent: React.FC<
   ConversationMetadataFlyoutContentProps
-> = ({ conversation, titleId }) => {
+> = ({ conversation, conversationTemplatesService, titleId }) => {
   const [selectedTabId, setSelectedTabId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setSelectedTabId(undefined);
   }, [conversation.id]);
 
-  const tabs = useMemo(() => buildTabs(conversation), [conversation]);
-  const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.id;
-  const selectedTab = tabs.find((tab) => tab.id === effectiveSelectedTabId);
+  const tabs = useMemo(
+    () => buildTabs(conversation, conversationTemplatesService),
+    [conversation, conversationTemplatesService]
+  );
+  const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.tab;
+  const selectedTab = tabs.find((entry) => entry.tab === effectiveSelectedTabId);
+  // Registered tab content may use hooks, so it must render as a component — not be
+  // invoked as a plain function inside this component's own render.
+  const SelectedTabContent = selectedTab?.content;
 
   return (
     <>
@@ -117,18 +133,22 @@ export const ConversationMetadataFlyoutContent: React.FC<
           <h2 id={titleId}>{FLYOUT_TITLE}</h2>
         </EuiTitle>
         <EuiTabs>
-          {tabs.map((tab) => (
+          {tabs.map((entry) => (
             <EuiTab
-              key={tab.id}
-              isSelected={tab.id === effectiveSelectedTabId}
-              onClick={() => setSelectedTabId(tab.id)}
+              key={entry.tab}
+              isSelected={entry.tab === effectiveSelectedTabId}
+              onClick={() => setSelectedTabId(entry.tab)}
             >
-              {tabLabel(tab.id)}
+              {entry.label}
             </EuiTab>
           ))}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>{selectedTab?.content({ conversation })}</EuiFlyoutBody>
+      <EuiFlyoutBody>
+        {SelectedTabContent && (
+          <SelectedTabContent key={selectedTab.tab} conversation={conversation} />
+        )}
+      </EuiFlyoutBody>
     </>
   );
 };
@@ -136,17 +156,18 @@ export const ConversationMetadataFlyoutContent: React.FC<
 export interface ConversationMetadataFlyoutSnapshotProps {
   conversationId: string;
   conversationsService: ConversationsService;
+  conversationTemplatesService: ConversationTemplatesService;
   titleId: string;
 }
 
 /**
  * Public-contract variant: fetches the conversation once when the flyout opens and renders a
  * point-in-time snapshot. It does NOT live-update — it runs in an isolated per-open QueryClient
- * outside the Agent Builder React tree.
+ * outside the Agent Builder React tree; reopen the flyout to get fresh data.
  */
 export const ConversationMetadataFlyoutSnapshot: React.FC<
   ConversationMetadataFlyoutSnapshotProps
-> = ({ conversationId, conversationsService, titleId }) => {
+> = ({ conversationId, conversationsService, conversationTemplatesService, titleId }) => {
   const {
     data: conversation,
     isLoading,
@@ -176,7 +197,13 @@ export const ConversationMetadataFlyoutSnapshot: React.FC<
     );
   }
 
-  return <ConversationMetadataFlyoutContent conversation={conversation} titleId={titleId} />;
+  return (
+    <ConversationMetadataFlyoutContent
+      conversation={conversation}
+      conversationTemplatesService={conversationTemplatesService}
+      titleId={titleId}
+    />
+  );
 };
 
 export interface ConversationMetadataFlyoutProps {
@@ -195,6 +222,7 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
     prefix: 'agentBuilderConversationMetadataFlyoutTitle',
   });
   const { conversation, isLoading } = useConversation();
+  const { conversationTemplatesService } = useAgentBuilderServices();
 
   return (
     <EuiFlyout
@@ -205,7 +233,11 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
       data-test-subj="agentBuilderConversationMetadataFlyout"
     >
       {conversation ? (
-        <ConversationMetadataFlyoutContent conversation={conversation} titleId={titleId} />
+        <ConversationMetadataFlyoutContent
+          conversation={conversation}
+          conversationTemplatesService={conversationTemplatesService}
+          titleId={titleId}
+        />
       ) : (
         <FlyoutFrame titleId={titleId}>
           {isLoading ? (
