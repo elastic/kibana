@@ -9,7 +9,10 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { ExecutionStatus } from '@kbn/workflows';
 import { SIGNIFICANT_EVENTS_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
-import { InvestigationNotFoundError, NightshiftInvestigationsClient } from './investigations_client';
+import {
+  InvestigationNotFoundError,
+  NightshiftInvestigationsClient,
+} from './investigations_client';
 
 const SPACE_ID = 'test-space';
 
@@ -110,7 +113,9 @@ describe('NightshiftInvestigationsClient.get()', () => {
     it('recovers significant_event subject from context.inputs', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
-          context: { inputs: { context: { source: 'significant_event', significant_event_id: 'se-42' } } },
+          context: {
+            inputs: { context: { source: 'significant_event', significant_event_id: 'se-42' } },
+          },
         })
       );
       const result = await makeClient().get('inv-1');
@@ -157,10 +162,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           status: ExecutionStatus.COMPLETED,
-          stepExecutions: [
-            { output: { conclusion: 'All clear.' } },
-            { output: { other: 'data' } },
-          ],
+          stepExecutions: [{ output: { conclusion: 'All clear.' } }, { output: { other: 'data' } }],
         })
       );
       const result = await makeClient().get('inv-1');
