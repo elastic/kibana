@@ -48,13 +48,13 @@ node scripts/scout.js start-server --location local --arch serverless --domain s
 ### Run the tests
 
 ```sh
-npx playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local
+node scripts/playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local
 ```
 
 To run a single spec:
 
 ```sh
-npx playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local isolation.spec.ts
+node scripts/playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local isolation.spec.ts
 ```
 
 ## Test Structure
@@ -121,7 +121,7 @@ These tests run in Buildkite. The command in CI matches the local invocation:
 
 ```sh
 node scripts/scout.js start-server --location local --arch stateful --domain classic
-npx playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local
+node scripts/playwright test --config x-pack/solutions/security/plugins/discoveries/test/scout/api/playwright.config.ts --project=local
 ```
 
 ## Troubleshooting
