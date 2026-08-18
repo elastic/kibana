@@ -79,7 +79,7 @@ export function buildPackageInputs(
     if (!inputType) continue;
 
     const inputKey = service.policyTemplate ? `${service.policyTemplate}-${inputType}` : inputType;
-    const streamKey = `${service.packageName}.${service.dataStream ?? service.id}`;
+    const streamKey = `${service.packageName}.${service.id}`;
     const streamVars = buildStreamVars(service, serviceVars, globalRegion);
 
     if (!inputs[inputKey]) {
