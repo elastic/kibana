@@ -63,14 +63,6 @@ export interface CommandArgDefinition {
   mustHaveValue?: boolean | 'non-empty-string' | 'number' | 'number-greater-than-zero' | 'truthy';
 
   /**
-   * Specifies that one or more arguments might be required, but only one of them can be used at a time.
-   * Note that currently, only one set of exclusive OR arguments is supported.
-   *
-   * @deprecated use `exclusiveOrGroupId`
-   */
-  exclusiveOr?: boolean;
-
-  /**
    * Indicates that the argument definition is part of a group of arguments (all sharing the same id) and
    * that only one of them can be used at a time. Defining this property will make the argument group
    * required for command input

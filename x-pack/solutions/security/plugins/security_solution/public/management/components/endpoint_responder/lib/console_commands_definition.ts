@@ -323,7 +323,6 @@ export const getEndpointConsoleCommands = ({
         entityId: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
           exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.killProcess.args.entityId.about,
           validate: emptyArgumentValidator,
@@ -331,7 +330,6 @@ export const getEndpointConsoleCommands = ({
         pid: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
           exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.killProcess.args.pid.about,
           validate: pidValidator,
@@ -361,7 +359,6 @@ export const getEndpointConsoleCommands = ({
         entityId: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
           exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.suspendProcess.args.entityId.about,
           validate: emptyArgumentValidator,
@@ -369,7 +366,6 @@ export const getEndpointConsoleCommands = ({
         pid: {
           required: false,
           allowMultiples: false,
-          exclusiveOr: true,
           exclusiveOrGroupId: 'processValue',
           about: CONSOLE_COMMANDS.suspendProcess.args.pid.about,
           validate: pidValidator,
@@ -840,7 +836,6 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
-          exclusiveOr: true,
           exclusiveOrGroupId: 'memoryDumpType',
           validate: () => {
             if (!endpointSupportsProcessDump) {
@@ -857,7 +852,6 @@ export const getEndpointConsoleCommands = ({
           required: false,
           allowMultiples: false,
           mustHaveValue: false,
-          exclusiveOr: true,
           exclusiveOrGroupId: 'memoryDumpType',
           validate: () => {
             if (!endpointSupportsKernelDump) {
@@ -876,7 +870,6 @@ export const getEndpointConsoleCommands = ({
                 required: false,
                 allowMultiples: false,
                 mustHaveValue: false,
-                exclusiveOr: true,
                 exclusiveOrGroupId: 'memoryDumpType',
               },
             }
@@ -1145,14 +1138,14 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.raw.about,
               mustHaveValue: 'non-empty-string',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
             },
             CloudFile: {
               required: false,
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.cloudFile.about,
               mustHaveValue: 'truthy',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
               SelectorComponent: CustomScriptSelector,
             },
             CommandLine: {
@@ -1167,7 +1160,7 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.hostPath.about,
               mustHaveValue: 'non-empty-string',
-              exclusiveOr: true,
+              exclusiveOrGroupId: 'execType',
             },
             Timeout: {
               required: false,
