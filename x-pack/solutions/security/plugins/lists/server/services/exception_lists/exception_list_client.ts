@@ -872,7 +872,7 @@ export class ExceptionListClient {
       }
     }
 
-    return bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+    await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
   };
 
   /**

@@ -10,7 +10,7 @@ import type {
   ListId,
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsBulkDeleteResponse, SavedObjectsClientContract } from '@kbn/core/server';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';
@@ -24,6 +24,34 @@ interface DeleteExceptionListItemByListOptions {
   namespaceType: NamespaceType;
   savedObjectsClient: SavedObjectsClientContract;
 }
+
+/**
+ * Throws when a page of item deletes contains a genuine failure. A 404 means the
+ * item was already gone (e.g. deleted concurrently) -- that's a no-op, not a
+ * failure. Any other error is genuine and must propagate: silently swallowing it
+ * would let the bulk-delete path go on to delete the parent list while some of
+ * its items are still left behind. This strict handling is scoped to the
+ * bulk-delete path only, so the single-delete and `_import` paths keep their
+ * original tolerant behavior.
+ */
+const assertNoUnexpectedItemDeleteErrors = (
+  statuses: SavedObjectsBulkDeleteResponse['statuses']
+): void => {
+  const realErrors = statuses.filter(
+    (status) => !status.success && status.error?.statusCode !== 404
+  );
+
+  if (realErrors.length > 0) {
+    const message = `Failed to delete ${realErrors.length} exception list item(s): ${realErrors
+      .map((status) => status.error?.message ?? 'Unknown error')
+      .join(', ')}`;
+    // Preserve the original ES status code so transformError surfaces it
+    // rather than defaulting to 500. When errors have different codes (rare),
+    // use the first one -- callers get a meaningful non-500 in the common case.
+    const statusCode = realErrors[0].error?.statusCode ?? 500;
+    throw Object.assign(new Error(message), { statusCode });
+  }
+};
 
 /**
  * Deletes all exception list items for a list by accumulating every item id
@@ -72,7 +100,12 @@ export const deleteExceptionListItemsByListStreamed = async ({
     for await (const { saved_objects: savedObjects } of finder.find()) {
       const ids = savedObjects.map((savedObject) => savedObject.id);
       if (ids.length > 0) {
-        await bulkDeleteExceptionListItems({ ids, namespaceType, savedObjectsClient });
+        const statuses = await bulkDeleteExceptionListItems({
+          ids,
+          namespaceType,
+          savedObjectsClient,
+        });
+        assertNoUnexpectedItemDeleteErrors(statuses);
       }
     }
   } finally {

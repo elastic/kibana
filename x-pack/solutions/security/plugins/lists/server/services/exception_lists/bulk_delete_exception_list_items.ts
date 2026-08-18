@@ -7,7 +7,11 @@
 
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
-import type { SavedObjectsBulkDeleteObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteResponse,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 interface BulkDeleteExceptionListItemsOptions {
   ids: string[];
@@ -15,11 +19,20 @@ interface BulkDeleteExceptionListItemsOptions {
   savedObjectsClient: SavedObjectsClientContract;
 }
 
+/**
+ * Bulk deletes exception list items and returns the per-item statuses from the
+ * saved objects client. This is intentionally tolerant: it never throws on a
+ * per-item failure, matching the behavior relied on by the single-delete and
+ * `_import?overwrite=true` paths (via `deleteExceptionListItemByList`) and the
+ * `ExceptionListClient.bulkDeleteExceptionListItems` public method. Callers that
+ * need strict per-item error handling (the bulk-delete path) should inspect the
+ * returned statuses.
+ */
 export const bulkDeleteExceptionListItems = async ({
   ids,
   namespaceType,
   savedObjectsClient,
-}: BulkDeleteExceptionListItemsOptions): Promise<void> => {
+}: BulkDeleteExceptionListItemsOptions): Promise<SavedObjectsBulkDeleteResponse['statuses']> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
 
   const bulkDeleteObjects = ids.map<SavedObjectsBulkDeleteObject>((id) => ({
@@ -29,22 +42,5 @@ export const bulkDeleteExceptionListItems = async ({
 
   const { statuses } = await savedObjectsClient.bulkDelete(bulkDeleteObjects);
 
-  // A 404 means the item was already gone (e.g. deleted concurrently) -- that's a
-  // no-op, not a failure. Any other error is genuine and must propagate: silently
-  // swallowing it would let the caller go on to delete the parent list while some
-  // of its items are still left behind.
-  const realErrors = statuses.filter(
-    (status) => !status.success && status.error?.statusCode !== 404
-  );
-
-  if (realErrors.length > 0) {
-    const message = `Failed to delete ${realErrors.length} exception list item(s): ${realErrors
-      .map((status) => status.error?.message ?? 'Unknown error')
-      .join(', ')}`;
-    // Preserve the original ES status code so transformError surfaces it
-    // rather than defaulting to 500. When errors have different codes (rare),
-    // use the first one — callers get a meaningful non-500 in the common case.
-    const statusCode = realErrors[0].error?.statusCode ?? 500;
-    throw Object.assign(new Error(message), { statusCode });
-  }
+  return statuses;
 };

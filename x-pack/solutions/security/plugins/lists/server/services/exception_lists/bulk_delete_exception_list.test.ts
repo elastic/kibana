@@ -71,10 +71,10 @@ const errorSavedObject = (
   } as unknown as SavedObject<ExceptionListSoSchema>);
 
 const emptyFindResponse: SavedObjectsFindResponse = {
+  page: 1,
+  per_page: 10000,
   saved_objects: [],
   total: 0,
-  per_page: 10000,
-  page: 1,
 };
 
 const ruleSavedObject = ({
@@ -87,16 +87,22 @@ const ruleSavedObject = ({
   soId: string;
   name: string;
   referencedListIds: string[];
-}) => ({
-  id: soId,
-  type: 'alert',
+}): {
+  attributes: { name: string; params: { ruleId: string } };
+  id: string;
+  references: Array<{ id: string; name: string; type: string }>;
+  score: number;
+  type: string;
+} => ({
   attributes: { name, params: { ruleId } },
+  id: soId,
   references: referencedListIds.map((listId, index) => ({
-    name: `param:exceptionsList_${index}`,
     id: listId,
+    name: `param:exceptionsList_${index}`,
     type: 'exception-list',
   })),
   score: 0,
+  type: 'alert',
 });
 
 describe('bulkDeleteExceptionList', () => {
@@ -135,7 +141,7 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.success).toBe(true);
       expect(result.results).toEqual([list1, list2]);
       expect(result.errors).toEqual([]);
-      expect(result.summary).toEqual({ total: 2, succeeded: 2, failed: 0, skipped: 0 });
+      expect(result.summary).toEqual({ failed: 0, skipped: 0, succeeded: 2, total: 2 });
       expect(callOrder.indexOf('delete items list-1')).toBeLessThan(
         callOrder.indexOf('delete container so-1')
       );
@@ -164,12 +170,12 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.results).toEqual([list1]);
       expect(result.errors).toEqual([
         {
+          lists: [{ id: 'so-2' }],
           message: 'exception list id: "so-2" does not exist',
           status_code: 404,
-          lists: [{ id: 'so-2' }],
         },
       ]);
-      expect(result.summary).toEqual({ total: 2, succeeded: 1, failed: 1, skipped: 0 });
+      expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 1, total: 2 });
     });
 
     test('reports 404 and does not delete when id belongs to an exception list item', async () => {
@@ -189,12 +195,12 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.results).toEqual([]);
       expect(result.errors).toEqual([
         {
+          lists: [{ id: 'item-so-id' }],
           message: 'exception list id: "item-so-id" does not exist',
           status_code: 404,
-          lists: [{ id: 'item-so-id' }],
         },
       ]);
-      expect(result.summary).toEqual({ total: 1, succeeded: 0, failed: 1, skipped: 0 });
+      expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
       expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
       expect(savedObjectsClient.delete).not.toHaveBeenCalled();
     });
@@ -214,9 +220,9 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.success).toBe(false);
       expect(result.errors).toEqual([
         {
+          lists: [{ id: 'so-1' }],
           message: 'forbidden',
           status_code: 403,
-          lists: [{ id: 'so-1' }],
         },
       ]);
     });
@@ -238,7 +244,7 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.errors).toHaveLength(2);
       expect(result.errors[0].status_code).toBe(404);
       expect(result.errors[1].status_code).toBe(404);
-      expect(result.summary).toEqual({ total: 2, succeeded: 0, failed: 2, skipped: 0 });
+      expect(result.summary).toEqual({ failed: 2, skipped: 0, succeeded: 0, total: 2 });
       expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
       expect(savedObjectsClient.delete).not.toHaveBeenCalled();
     });
@@ -262,7 +268,7 @@ describe('bulkDeleteExceptionList', () => {
       expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
       expect(result.success).toBe(true);
       expect(result.results).toEqual([list]);
-      expect(result.summary).toEqual({ total: 1, succeeded: 1, failed: 0, skipped: 1 });
+      expect(result.summary).toEqual({ failed: 0, skipped: 1, succeeded: 1, total: 1 });
     });
 
     test('reports per-list error when item cascade fails, without affecting other lists', async () => {
@@ -292,12 +298,12 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.results).toEqual([list2]);
       expect(result.errors).toEqual([
         {
+          lists: [{ id: 'so-1', list_id: 'list-1' }],
           message: 'boom',
           status_code: 500,
-          lists: [{ id: 'so-1', list_id: 'list-1' }],
         },
       ]);
-      expect(result.summary).toEqual({ total: 2, succeeded: 1, failed: 1, skipped: 0 });
+      expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 1, total: 2 });
     });
 
     test('reports per-list error when container delete fails', async () => {
@@ -321,9 +327,9 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.results).toEqual([]);
       expect(result.errors).toEqual([
         {
+          lists: [{ id: 'so-1', list_id: 'list-1' }],
           message: 'conflict deleting object',
           status_code: 409,
-          lists: [{ id: 'so-1', list_id: 'list-1' }],
         },
       ]);
     });
@@ -367,10 +373,10 @@ describe('bulkDeleteExceptionList', () => {
       });
 
       expect(result).toEqual({
-        success: true,
-        results: [],
         errors: [],
-        summary: { total: 0, succeeded: 0, failed: 0, skipped: 0 },
+        results: [],
+        success: true,
+        summary: { failed: 0, skipped: 0, succeeded: 0, total: 0 },
       });
       expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
       expect(savedObjectsClient.find).not.toHaveBeenCalled();
@@ -387,15 +393,15 @@ describe('bulkDeleteExceptionList', () => {
       });
       savedObjectsClient.find.mockResolvedValue({
         ...emptyFindResponse,
-        total: 1,
         saved_objects: [
           ruleSavedObject({
-            ruleId: 'rule-1',
-            soId: 'rule-so-1',
             name: 'Malware Detection Rule',
             referencedListIds: ['so-1'],
+            ruleId: 'rule-1',
+            soId: 'rule-so-1',
           }),
         ],
+        total: 1,
       } as SavedObjectsFindResponse);
 
       const result = await bulkDeleteExceptionList({
@@ -408,14 +414,14 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.results).toEqual([]);
       expect(result.errors).toEqual([
         {
+          lists: [{ id: 'so-1', list_id: 'list-1' }],
           message:
             'Exception list "My Detection List" cannot be deleted because it is linked to 1 rule. Unlink the list from all rules before retrying.',
+          rule_references: [{ id: 'rule-so-1', name: 'Malware Detection Rule', rule_id: 'rule-1' }],
           status_code: 409,
-          lists: [{ id: 'so-1', list_id: 'list-1' }],
-          rule_references: [{ rule_id: 'rule-1', id: 'rule-so-1', name: 'Malware Detection Rule' }],
         },
       ]);
-      expect(result.summary).toEqual({ total: 1, succeeded: 0, failed: 1, skipped: 0 });
+      expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 0, total: 1 });
       expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
       expect(savedObjectsClient.delete).not.toHaveBeenCalled();
     });
@@ -429,27 +435,27 @@ describe('bulkDeleteExceptionList', () => {
       });
       savedObjectsClient.find.mockResolvedValue({
         ...emptyFindResponse,
-        total: 3,
         saved_objects: [
           ruleSavedObject({
-            ruleId: 'rule-1',
-            soId: 'rule-so-1',
             name: 'Rule A',
             referencedListIds: ['so-1'],
+            ruleId: 'rule-1',
+            soId: 'rule-so-1',
           }),
           ruleSavedObject({
-            ruleId: 'rule-2',
-            soId: 'rule-so-2',
             name: 'Rule B',
             referencedListIds: ['so-1'],
+            ruleId: 'rule-2',
+            soId: 'rule-so-2',
           }),
           ruleSavedObject({
-            ruleId: 'rule-3',
-            soId: 'rule-so-3',
             name: 'Rule C',
             referencedListIds: ['so-1'],
+            ruleId: 'rule-3',
+            soId: 'rule-so-3',
           }),
         ],
+        total: 3,
       } as SavedObjectsFindResponse);
 
       const result = await bulkDeleteExceptionList({
@@ -464,11 +470,11 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.errors[0].status_code).toBe(409);
     });
 
-    test('skips rule reference check for endpoint-type lists and deletes them normally', async () => {
+    test('skips rule reference check for endpoint artifact lists and deletes them normally', async () => {
       const endpointList = getListMock({
         id: 'so-1',
         list_id: 'endpoint-list-1',
-        type: 'endpoint',
+        type: 'endpoint_trusted_apps',
       });
 
       const savedObjectsClient = savedObjectsClientMock.create();
@@ -486,13 +492,12 @@ describe('bulkDeleteExceptionList', () => {
 
       expect(result.success).toBe(true);
       expect(result.results).toEqual([endpointList]);
-      // find() should not be called since there are no non-endpoint lists to check
+      // find() should not be called since there are no reference-checkable lists
       expect(savedObjectsClient.find).not.toHaveBeenCalled();
     });
 
     test('skips rule reference check for all endpoint artifact types', async () => {
-      const endpointTypes = [
-        'endpoint',
+      const endpointArtifactTypes = [
         'endpoint_trusted_apps',
         'endpoint_trusted_devices',
         'endpoint_events',
@@ -500,7 +505,7 @@ describe('bulkDeleteExceptionList', () => {
         'endpoint_blocklists',
         'endpoint_custom_yara_signatures',
       ];
-      const lists = endpointTypes.map((type, index) =>
+      const lists = endpointArtifactTypes.map((type, index) =>
         getListMock({ id: `so-${index}`, list_id: `list-${index}`, type: type as 'endpoint' })
       );
 
@@ -517,8 +522,49 @@ describe('bulkDeleteExceptionList', () => {
       });
 
       expect(result.success).toBe(true);
-      expect(result.results).toHaveLength(7);
+      expect(result.results).toHaveLength(6);
       expect(savedObjectsClient.find).not.toHaveBeenCalled();
+    });
+
+    test('checks rule references for the plain endpoint list type and blocks it when linked', async () => {
+      const endpointList = getListMock({
+        id: 'so-1',
+        list_id: 'endpoint-list',
+        name: 'Elastic Endpoint Exceptions',
+        type: 'endpoint',
+      });
+
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [savedObjectFor(endpointList)],
+      });
+      savedObjectsClient.find.mockResolvedValue({
+        ...emptyFindResponse,
+        saved_objects: [
+          ruleSavedObject({
+            name: 'Endpoint Rule',
+            referencedListIds: ['so-1'],
+            ruleId: 'rule-1',
+            soId: 'rule-so-1',
+          }),
+        ],
+        total: 1,
+      } as SavedObjectsFindResponse);
+
+      const result = await bulkDeleteExceptionList({
+        ids: ['so-1'],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hasReference: [{ id: 'so-1', type: 'exception-list' }],
+        })
+      );
+      expect(result.success).toBe(false);
+      expect(result.errors[0].status_code).toBe(409);
+      expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
     });
 
     test('partial failure: linked lists blocked, unlinked lists deleted', async () => {
@@ -539,15 +585,15 @@ describe('bulkDeleteExceptionList', () => {
       });
       savedObjectsClient.find.mockResolvedValue({
         ...emptyFindResponse,
-        total: 1,
         saved_objects: [
           ruleSavedObject({
-            ruleId: 'rule-1',
-            soId: 'rule-so-1',
             name: 'Some Rule',
             referencedListIds: ['so-linked'],
+            ruleId: 'rule-1',
+            soId: 'rule-so-1',
           }),
         ],
+        total: 1,
       } as SavedObjectsFindResponse);
       (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
 
@@ -562,7 +608,7 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.errors).toHaveLength(1);
       expect(result.errors[0].status_code).toBe(409);
       expect(result.errors[0].lists).toEqual([{ id: 'so-linked', list_id: 'linked-list' }]);
-      expect(result.summary).toEqual({ total: 2, succeeded: 1, failed: 1, skipped: 0 });
+      expect(result.summary).toEqual({ failed: 1, skipped: 0, succeeded: 1, total: 2 });
       expect(savedObjectsClient.delete).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list', 'so-unlinked');
     });
@@ -581,15 +627,15 @@ describe('bulkDeleteExceptionList', () => {
       });
       savedObjectsClient.find.mockResolvedValue({
         ...emptyFindResponse,
-        total: 1,
         saved_objects: [
           ruleSavedObject({
-            ruleId: 'owning-rule',
-            soId: 'owning-rule-so',
             name: 'Owner Rule',
             referencedListIds: ['so-rd'],
+            ruleId: 'owning-rule',
+            soId: 'owning-rule-so',
           }),
         ],
+        total: 1,
       } as SavedObjectsFindResponse);
 
       const result = await bulkDeleteExceptionList({
@@ -601,7 +647,7 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.success).toBe(false);
       expect(result.errors[0].status_code).toBe(409);
       expect(result.errors[0].rule_references).toEqual([
-        { rule_id: 'owning-rule', id: 'owning-rule-so', name: 'Owner Rule' },
+        { id: 'owning-rule-so', name: 'Owner Rule', rule_id: 'owning-rule' },
       ]);
       expect(deleteExceptionListItemsByListStreamed).not.toHaveBeenCalled();
     });
@@ -626,21 +672,54 @@ describe('bulkDeleteExceptionList', () => {
       expect(savedObjectsClient.find).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'alert',
+          filter: 'alert.attributes.consumer: siem',
           hasReference: [
-            { type: 'exception-list', id: 'so-1' },
-            { type: 'exception-list', id: 'so-2' },
+            { id: 'so-1', type: 'exception-list' },
+            { id: 'so-2', type: 'exception-list' },
           ],
           hasReferenceOperator: 'OR',
+          type: 'alert',
         })
       );
     });
 
-    test('mixed endpoint and detection lists: only detection lists checked for references', async () => {
+    test('counts a rule that references the same list twice only once', async () => {
+      const list = getListMock({ id: 'so-1', list_id: 'list-1', name: 'Shared List' });
+
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [savedObjectFor(list)],
+      });
+      savedObjectsClient.find.mockResolvedValue({
+        ...emptyFindResponse,
+        saved_objects: [
+          ruleSavedObject({
+            name: 'Duplicated Reference Rule',
+            referencedListIds: ['so-1', 'so-1'],
+            ruleId: 'rule-1',
+            soId: 'rule-so-1',
+          }),
+        ],
+        total: 1,
+      } as SavedObjectsFindResponse);
+
+      const result = await bulkDeleteExceptionList({
+        ids: ['so-1'],
+        namespaceType: 'single',
+        savedObjectsClient,
+      });
+
+      expect(result.errors[0].message).toContain('linked to 1 rule');
+      expect(result.errors[0].rule_references).toEqual([
+        { id: 'rule-so-1', name: 'Duplicated Reference Rule', rule_id: 'rule-1' },
+      ]);
+    });
+
+    test('mixed endpoint artifact and detection lists: only detection lists checked for references', async () => {
       const endpointList = getListMock({
         id: 'so-ep',
         list_id: 'ep-list',
-        type: 'endpoint',
+        type: 'endpoint_trusted_apps',
       });
       const detectionList = getListMock({
         id: 'so-det',
@@ -665,41 +744,93 @@ describe('bulkDeleteExceptionList', () => {
       expect(result.results).toHaveLength(2);
       expect(savedObjectsClient.find).toHaveBeenCalledWith(
         expect.objectContaining({
-          hasReference: [{ type: 'exception-list', id: 'so-det' }],
+          hasReference: [{ id: 'so-det', type: 'exception-list' }],
         })
       );
     });
+  });
 
-    test('falls back to SO id as rule_id when params.ruleId is missing', async () => {
-      const list = getListMock({ id: 'so-1', list_id: 'list-1', name: 'Test List' });
+  describe('agnostic namespace', () => {
+    test('resolves against the agnostic saved object type for bulkGet, find and delete', async () => {
+      const list = getListMock({ id: 'so-1', list_id: 'list-1', namespace_type: 'agnostic' });
 
       const savedObjectsClient = savedObjectsClientMock.create();
-      savedObjectsClient.bulkGet.mockResolvedValue({
-        saved_objects: [savedObjectFor(list)],
-      });
-      savedObjectsClient.find.mockResolvedValue({
-        ...emptyFindResponse,
-        total: 1,
-        saved_objects: [
-          {
-            id: 'rule-so-1',
-            type: 'alert',
-            attributes: { name: 'Non-Detection Rule', params: {} },
-            references: [{ name: 'param:exceptionsList_0', id: 'so-1', type: 'exception-list' }],
-            score: 0,
-          },
-        ],
-      } as SavedObjectsFindResponse);
+      savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [savedObjectFor(list)] });
+      savedObjectsClient.find.mockResolvedValue(emptyFindResponse);
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
 
       const result = await bulkDeleteExceptionList({
         ids: ['so-1'],
+        namespaceType: 'agnostic',
+        savedObjectsClient,
+      });
+
+      expect(result.success).toBe(true);
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { id: 'so-1', type: 'exception-list-agnostic' },
+      ]);
+      expect(savedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          hasReference: [{ id: 'so-1', type: 'exception-list-agnostic' }],
+        })
+      );
+      expect(deleteExceptionListItemsByListStreamed).toHaveBeenCalledWith(
+        expect.objectContaining({ namespaceType: 'agnostic' })
+      );
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list-agnostic', 'so-1');
+    });
+
+    test('deletes an agnostic endpoint artifact list without a rule reference check', async () => {
+      // Endpoint artifact lists are agnostic in production -- exercise that path.
+      const endpointList = getListMock({
+        id: 'so-1',
+        list_id: 'endpoint-list-1',
+        namespace_type: 'agnostic',
+        type: 'endpoint_trusted_apps',
+      });
+
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [savedObjectFor(endpointList)],
+      });
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
+
+      const result = await bulkDeleteExceptionList({
+        ids: ['so-1'],
+        namespaceType: 'agnostic',
+        savedObjectsClient,
+      });
+
+      expect(result.success).toBe(true);
+      expect(savedObjectsClient.find).not.toHaveBeenCalled();
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('exception-list-agnostic', 'so-1');
+    });
+  });
+
+  describe('batch size', () => {
+    test('deletes the full batch at the 100-list contractual maximum', async () => {
+      const lists = Array.from({ length: 100 }, (_, index) =>
+        getListMock({ id: `so-${index}`, list_id: `list-${index}` })
+      );
+
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: lists.map((list) => savedObjectFor(list)),
+      });
+      savedObjectsClient.find.mockResolvedValue(emptyFindResponse);
+      (deleteExceptionListItemsByListStreamed as jest.Mock).mockResolvedValue(undefined);
+
+      const result = await bulkDeleteExceptionList({
+        ids: lists.map((list) => list.id),
         namespaceType: 'single',
         savedObjectsClient,
       });
 
-      expect(result.errors[0].rule_references).toEqual([
-        { rule_id: 'rule-so-1', id: 'rule-so-1', name: 'Non-Detection Rule' },
-      ]);
+      expect(result.success).toBe(true);
+      expect(result.results).toHaveLength(100);
+      expect(result.summary).toEqual({ failed: 0, skipped: 0, succeeded: 100, total: 100 });
+      expect(savedObjectsClient.delete).toHaveBeenCalledTimes(100);
+      expect(deleteExceptionListItemsByListStreamed).toHaveBeenCalledTimes(100);
     });
   });
 });

@@ -52,8 +52,17 @@ const BULK_DELETE_LIST_CONCURRENCY = 10;
 
 const RULE_SAVED_OBJECT_TYPE = 'alert';
 
-const ENDPOINT_EXCEPTION_LIST_TYPES = new Set([
-  'endpoint',
+// Detection rules are alerting rules with the security solution consumer. We scope
+// the reference query to this consumer so non-detection alerting rules (which never
+// hold exception-list references in practice) can't leak into the results.
+const SECURITY_SOLUTION_RULE_CONSUMER = 'siem';
+
+// Endpoint artifact lists (trusted apps, blocklists, etc.) are pushed to endpoints
+// via policy and are never referenced by detection rules, so they skip the rule
+// reference check. Note: the plain `endpoint` type is deliberately NOT in this set
+// -- the Elastic Endpoint exceptions list CAN be attached to detection rules, so it
+// must go through the reference check like any other detection list.
+const ENDPOINT_ARTIFACT_EXCEPTION_LIST_TYPES = new Set([
   'endpoint_trusted_apps',
   'endpoint_trusted_devices',
   'endpoint_events',
@@ -82,18 +91,23 @@ const findRuleReferences = async ({
   }
 
   const hasReference = lists.map((list) => ({
-    type: savedObjectType,
     id: list.id,
+    type: savedObjectType,
   }));
 
+  // NOTE: This reference check lives in the lists plugin (rather than delegating to
+  // security_solution's rulesClient/`_find_references`) to avoid a lists -> security_solution
+  // dependency. As a consequence we query the raw `alert` saved object directly and scope
+  // it to the security solution consumer so only detection rules are considered.
   const { saved_objects: rules } = await savedObjectsClient.find<{
     name: string;
-    params: { ruleId?: string };
+    params: { ruleId: string };
   }>({
-    type: RULE_SAVED_OBJECT_TYPE,
+    filter: `${RULE_SAVED_OBJECT_TYPE}.attributes.consumer: ${SECURITY_SOLUTION_RULE_CONSUMER}`,
     hasReference,
     hasReferenceOperator: 'OR',
     perPage: 10000,
+    type: RULE_SAVED_OBJECT_TYPE,
   });
 
   const listIdSet = new Set(lists.map((l) => l.id));
@@ -101,13 +115,17 @@ const findRuleReferences = async ({
 
   for (const rule of rules) {
     const ruleRef: RuleReference = {
-      rule_id: rule.attributes.params?.ruleId ?? rule.id,
       id: rule.id,
       name: rule.attributes.name,
+      rule_id: rule.attributes.params.ruleId,
     };
 
+    // A rule can carry the same list id in more than one reference entry; only
+    // record it once per list so the reference count isn't inflated.
+    const seenListIds = new Set<string>();
     for (const ref of rule.references) {
-      if (ref.type === savedObjectType && listIdSet.has(ref.id)) {
+      if (ref.type === savedObjectType && listIdSet.has(ref.id) && !seenListIds.has(ref.id)) {
+        seenListIds.add(ref.id);
         const existing = listToRules.get(ref.id) ?? [];
         existing.push(ruleRef);
         listToRules.set(ref.id, existing);
@@ -139,9 +157,9 @@ const deleteListWithItems = async ({
     const { message, statusCode } = transformError(err);
     return {
       error: {
+        lists: [{ id: list.id, list_id: list.list_id }],
         message,
         status_code: statusCode,
-        lists: [{ id: list.id, list_id: list.list_id }],
       },
       list,
     };
@@ -154,9 +172,9 @@ const deleteListWithItems = async ({
     const { message, statusCode } = transformError(err);
     return {
       error: {
+        lists: [{ id: list.id, list_id: list.list_id }],
         message,
         status_code: statusCode,
-        lists: [{ id: list.id, list_id: list.list_id }],
       },
       list,
     };
@@ -173,10 +191,10 @@ export const bulkDeleteExceptionList = async ({
 
   if (uniqueIds.length === 0) {
     return {
-      success: true,
-      results: [],
       errors: [],
-      summary: { total: 0, succeeded: 0, failed: 0, skipped: skippedCount },
+      results: [],
+      success: true,
+      summary: { failed: 0, skipped: skippedCount, succeeded: 0, total: 0 },
     };
   }
 
@@ -193,18 +211,18 @@ export const bulkDeleteExceptionList = async ({
     const id = uniqueIds[index];
     if (isSavedObjectErrorResult(savedObject)) {
       validationErrors.push({
+        lists: [{ id }],
         message:
           savedObject.error.statusCode === 404
             ? getErrorMessageExceptionList({ id, listId: undefined })
             : savedObject.error.message,
         status_code: savedObject.error.statusCode ?? 500,
-        lists: [{ id }],
       });
     } else if (savedObject.attributes.list_type !== 'list') {
       validationErrors.push({
+        lists: [{ id }],
         message: getErrorMessageExceptionList({ id, listId: undefined }),
         status_code: 404,
-        lists: [{ id }],
       });
     } else {
       foundLists.push(transformSavedObjectToExceptionList({ savedObject }));
@@ -213,51 +231,54 @@ export const bulkDeleteExceptionList = async ({
 
   if (foundLists.length === 0) {
     return {
-      success: validationErrors.length === 0,
-      results: [],
       errors: validationErrors,
+      results: [],
+      success: validationErrors.length === 0,
       summary: {
-        total: uniqueIds.length,
-        succeeded: 0,
         failed: validationErrors.length,
         skipped: skippedCount,
+        succeeded: 0,
+        total: uniqueIds.length,
       },
     };
   }
 
-  // Separate endpoint-type lists (no rule references possible) from checkable lists
-  const endpointLists: ExceptionListSchema[] = [];
+  // Endpoint artifact lists are pushed to endpoints via policy and are never
+  // referenced by detection rules, so they skip the rule reference check. Every
+  // other type (including the plain `endpoint` list, which can be attached to
+  // rules) is checked for rule references before deletion.
+  const endpointArtifactLists: ExceptionListSchema[] = [];
   const checkableLists: ExceptionListSchema[] = [];
   for (const list of foundLists) {
-    if (ENDPOINT_EXCEPTION_LIST_TYPES.has(list.type)) {
-      endpointLists.push(list);
+    if (ENDPOINT_ARTIFACT_EXCEPTION_LIST_TYPES.has(list.type)) {
+      endpointArtifactLists.push(list);
     } else {
       checkableLists.push(list);
     }
   }
 
-  // Check rule references for non-endpoint lists
+  // Check rule references for all non-endpoint-artifact lists
   const listToRules = await findRuleReferences({
     lists: checkableLists,
-    savedObjectsClient,
     savedObjectType,
+    savedObjectsClient,
   });
 
   const referenceErrors: BulkDeleteExceptionListError[] = [];
-  const deletableLists: ExceptionListSchema[] = [...endpointLists];
+  const deletableLists: ExceptionListSchema[] = [...endpointArtifactLists];
 
   for (const list of checkableLists) {
     const rules = listToRules.get(list.id);
     if (rules && rules.length > 0) {
       referenceErrors.push({
+        lists: [{ id: list.id, list_id: list.list_id }],
         message: `Exception list "${list.name}" cannot be deleted because it is linked to ${
           rules.length
         } ${
           rules.length === 1 ? 'rule' : 'rules'
         }. Unlink the list from all rules before retrying.`,
-        status_code: 409,
-        lists: [{ id: list.id, list_id: list.list_id }],
         rule_references: rules,
+        status_code: 409,
       });
     } else {
       deletableLists.push(list);
@@ -289,14 +310,14 @@ export const bulkDeleteExceptionList = async ({
   const allErrors = [...validationErrors, ...referenceErrors, ...deleteErrors];
 
   return {
-    success: allErrors.length === 0,
-    results,
     errors: allErrors,
+    results,
+    success: allErrors.length === 0,
     summary: {
-      total: uniqueIds.length,
-      succeeded: results.length,
       failed: allErrors.length,
       skipped: skippedCount,
+      succeeded: results.length,
+      total: uniqueIds.length,
     },
   };
 };
