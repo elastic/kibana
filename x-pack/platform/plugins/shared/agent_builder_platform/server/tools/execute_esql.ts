@@ -89,6 +89,13 @@ The \`filter\` parameter takes an Elasticsearch Query DSL object that is combine
 Use it only when something outside the query itself requires the results to be narrowed; it is not a substitute for writing a \`WHERE\` clause in the query.
 It is parsed separately from the query text, so it cannot reference \`?named\` parameters.
 Prefer a filter that every targeted index can match: against a wildcard pattern such as \`FROM logs-*\`, a clause naming a field that only some indices have will drop the others from the results.`,
+    annotations: {
+      title: 'Execute ES|QL',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: executeEsqlToolSchema,
     handler: async (
       {
