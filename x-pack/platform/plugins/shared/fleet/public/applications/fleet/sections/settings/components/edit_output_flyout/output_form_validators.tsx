@@ -30,6 +30,7 @@ const getAllIndices = (str: string, substring: string): number[] => {
   }
   return indices;
 };
+
 export function validateKafkaHosts(value: string[]) {
   const res: Array<{ message: string; index?: number }> = [];
   const urlIndexes: { [key: string]: number[] } = {};
@@ -395,7 +396,7 @@ export function validateDynamicKafkaTopics(value: Array<EuiComboBoxOptionOption<
         );
       }
       // check for preceding percent sign
-      if (!openingBrackets.every((item) => val?.value![item - 1] === '%')) {
+      if (!openingBrackets.every((item) => val.value[item - 1] === '%')) {
         res.push(
           i18n.translate('xpack.fleet.settings.outputForm.kafkaTopicPercentError', {
             defaultMessage: 'Opening brackets should be preceded by a percent sign',
