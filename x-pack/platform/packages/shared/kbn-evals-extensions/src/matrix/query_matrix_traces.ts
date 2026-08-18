@@ -203,12 +203,7 @@ export const queryMatrixTraces = async (
             executionId: exp.execution_id ?? exp.experiment_id,
           });
 
-          completeCount = processScoreBatch(
-            scores,
-            modelScores.modelId,
-            suiteId,
-            traces
-          );
+          completeCount = processScoreBatch(scores, modelScores.modelId, suiteId, traces);
 
           if (completeCount > 0) {
             log.debug(
