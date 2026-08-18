@@ -19,7 +19,6 @@ project:
 dependsOn:
   - '@kbn/zod'
   - '@kbn/data-views-plugin'
-  - '@kbn/zod'
   - '@kbn/zod-helpers'
 tags:
   - shared-common
