@@ -164,6 +164,54 @@ describe('test endpoint app context services', () => {
     });
   });
 
+  describe('Analyzer resolver scoped cluster client', () => {
+    let service: EndpointAppContextService;
+    let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;
+    const request = httpServerMock.createKibanaRequest();
+
+    const startService = (platformCpsEnabled: boolean) => {
+      startContract = {
+        ...createMockEndpointAppContextServiceStartContract(),
+        platformCpsEnabled,
+      };
+      service.setup(createMockEndpointAppContextServiceSetupContract());
+      service.start(startContract);
+    };
+
+    beforeEach(() => {
+      service = new EndpointAppContextService();
+    });
+
+    afterEach(() => {
+      service.stop();
+    });
+
+    it('scopes without project routing when platform CPS is off', () => {
+      startService(false);
+
+      service.getResolverScopedClusterClient(request);
+
+      expect(startContract.clusterClient.asScoped).toHaveBeenCalledWith(request);
+    });
+
+    it('scopes with space project routing when platform CPS is on', () => {
+      startService(true);
+
+      service.getResolverScopedClusterClient(request);
+
+      expect(startContract.clusterClient.asScoped).toHaveBeenCalledWith(request, {
+        projectRouting: 'space',
+      });
+    });
+
+    it('does not fan out Analyzer reads without a request identity', () => {
+      startService(true);
+
+      expect(service.isPlatformCpsRead()).toBe(false);
+      expect(service.isPlatformCpsRead(request)).toBe(true);
+    });
+  });
+
   describe('asScoped', () => {
     let service: EndpointAppContextService;
     let startContract: ReturnType<typeof createMockEndpointAppContextServiceStartContract>;

@@ -20,10 +20,13 @@ import {
   telemetryIndexPattern,
 } from '../../../common/endpoint/constants';
 import {
+  firstConcreteIndex,
   isFannedInHit,
   isEndpointIndex,
   isFleetIndex,
   shouldUseInternalSearchClient,
+  stripRemoteIndexPatterns,
+  toLocalIndexName,
 } from './cps_read_routing';
 
 describe('CPS read routing classifiers', () => {
@@ -111,6 +114,55 @@ describe('CPS read routing classifiers', () => {
 
     it('should return false when the hit index is undefined', () => {
       expect(isFannedInHit(undefined)).toBe(false);
+    });
+  });
+
+  describe('toLocalIndexName()', () => {
+    it('should strip a project or CCS prefix', () => {
+      expect(toLocalIndexName('linked-project:logs-endpoint.events-default')).toBe(
+        'logs-endpoint.events-default'
+      );
+    });
+
+    it('should leave a local index unchanged', () => {
+      expect(toLocalIndexName('logs-endpoint.events-default')).toBe('logs-endpoint.events-default');
+    });
+  });
+
+  describe('stripRemoteIndexPatterns()', () => {
+    it('should leave patterns unchanged when the read cannot fan out', () => {
+      expect(stripRemoteIndexPatterns(['*:logs-*', 'logs-*'], false)).toEqual([
+        '*:logs-*',
+        'logs-*',
+      ]);
+    });
+
+    it('should drop CCS and project-prefixed patterns when the read fans out', () => {
+      expect(
+        stripRemoteIndexPatterns(
+          ['logs-*', '*:logs-*', 'linked-project:.alerts-security.alerts-default'],
+          true
+        )
+      ).toEqual(['logs-*']);
+    });
+
+    it('should fall back to local names when every pattern is prefixed', () => {
+      expect(stripRemoteIndexPatterns(['*:logs-*', 'alias:metrics-*'], true)).toEqual([
+        'logs-*',
+        'metrics-*',
+      ]);
+    });
+  });
+
+  describe('firstConcreteIndex()', () => {
+    it('should return the first non-wildcard index, including a project-qualified one', () => {
+      expect(
+        firstConcreteIndex(['logs-*', 'linked-project:.ds-logs-endpoint.events-default-2024.01.01'])
+      ).toBe('linked-project:.ds-logs-endpoint.events-default-2024.01.01');
+    });
+
+    it('should return undefined when every entry is a wildcard pattern', () => {
+      expect(firstConcreteIndex(['logs-*', 'metrics-*'])).toBeUndefined();
     });
   });
 });

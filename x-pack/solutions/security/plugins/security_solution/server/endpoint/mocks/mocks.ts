@@ -323,6 +323,7 @@ export const createMockEndpointAppContextServiceStartContract =
       dataStart:
         dataPluginMock.createStartContract() as unknown as DeeplyMockedKeys<DataPluginStart>,
       cpsEnabled: false,
+      platformCpsEnabled: false,
       savedObjectsServiceStart: savedObjectsServiceMock.createStartContract(),
       connectorActions: {
         getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),

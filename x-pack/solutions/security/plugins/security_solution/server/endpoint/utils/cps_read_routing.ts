@@ -49,3 +49,38 @@ export const shouldUseInternalSearchClient = (indices: string[], cpsRead: boolea
  * is not relied on anywhere.
  */
 export const isFannedInHit = (hitIndex?: string): boolean => Boolean(hitIndex?.includes(':'));
+
+/**
+ * CCS remote patterns (`cluster:index`) and CPS project-qualified names (`alias:index`) both use a
+ * colon prefix. A fanned-out search must not also send those expressions: the two topologies are
+ * not verified to combine, matching Defend's `ccsEnabled && !cpsRead` suppression.
+ */
+export const isRemoteOrProjectPrefixed = (index: string): boolean => index.includes(':');
+
+/** Strip a CCS/project prefix, leaving the local index or pattern. */
+export const toLocalIndexName = (index: string): string => {
+  const colon = index.indexOf(':');
+  return colon === -1 ? index : index.slice(colon + 1);
+};
+
+/**
+ * When project routing is active, drop remote/project-prefixed expressions so the request only
+ * names local patterns. If every entry was prefixed, fall back to the local names so the search
+ * still has an index list.
+ */
+export const stripRemoteIndexPatterns = (indices: string[], cpsRead: boolean): string[] => {
+  if (!cpsRead) {
+    return indices;
+  }
+
+  const local = indices.filter((index) => !isRemoteOrProjectPrefixed(index));
+  if (local.length > 0) {
+    return local;
+  }
+
+  return indices.map(toLocalIndexName);
+};
+
+/** First index that names a concrete document rather than a wildcard pattern. */
+export const firstConcreteIndex = (indices: string[]): string | undefined =>
+  indices.find((index) => !toLocalIndexName(index).includes('*'));

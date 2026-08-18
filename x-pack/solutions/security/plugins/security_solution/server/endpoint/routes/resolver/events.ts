@@ -11,8 +11,11 @@ import type { RuleRegistryPluginStartContract } from '@kbn/rule-registry-plugin/
 import { EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER } from '../../../../common/constants';
 import type { ResolverPaginatedEvents, SafeResolverEvent } from '../../../../common/endpoint/types';
 import type { validateEvents } from '../../../../common/endpoint/schema/resolver';
+import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import { EventsQuery } from './queries/events';
 import { PaginationBuilder } from './utils/pagination';
+import { getResolverClusterClient } from './utils/scoped_client';
+import { stripRemoteIndexPatterns } from '../../utils/cps_read_routing';
 
 /**
  * Creates an object that the events handler would return
@@ -36,14 +39,15 @@ export function handleEvents(
 ): RequestHandler<
   unknown,
   TypeOf<typeof validateEvents.query>,
-  TypeOf<typeof validateEvents.body>
+  TypeOf<typeof validateEvents.body>,
+  SecuritySolutionRequestHandlerContext
 > {
   return async (context, req, res) => {
     const {
       query: { limit, afterEvent },
       body,
     } = req;
-    const eventsClient = (await context.core).elasticsearch.client;
+    const { client, cpsRead } = await getResolverClusterClient(context, req);
     const ruleRegistry = await getRuleRegistry();
     const alertsClient = await ruleRegistry.getRacClientWithRequest(req);
     const shouldExcludeColdAndFrozenTiers = await (
@@ -52,12 +56,12 @@ export function handleEvents(
 
     const eventsQuery = new EventsQuery({
       pagination: PaginationBuilder.createBuilder(limit, afterEvent),
-      indexPatterns: body.indexPatterns,
+      indexPatterns: stripRemoteIndexPatterns(body.indexPatterns, cpsRead),
       timeRange: body.timeRange,
       shouldExcludeColdAndFrozenTiers,
       agentId: body.agentId,
     });
-    const results = await eventsQuery.search(eventsClient, body, alertsClient);
+    const results = await eventsQuery.search(client, body, alertsClient);
     return res.ok({
       body: createEvents(results, PaginationBuilder.buildCursorRequestLimit(limit, results)),
     });
