@@ -95,6 +95,8 @@ steps:
       persistedQueries: []
       skipFeatures: "${{ inputs.skipFeatures }}"
       skipQueries: "${{ inputs.skipQueries }}"
+      # Default false: the recency-skip path never runs features, so the computed gate stays neutral.
+      computedFeaturesChanged: false
       featuresTokensUsed: {}
       queriesTokensUsed: {}
       featuresConnectorUsed: ""
@@ -157,14 +159,16 @@ steps:
           discoveredFeatures: "${{ steps.identify_features.output.discoveredFeatures }}"
           featuresTokensUsed: "${{ steps.identify_features.output.tokensUsed }}"
           featuresConnectorUsed: "${{ steps.identify_features.output.connectorId }}"
+          computedFeaturesChanged: "${{ steps.identify_features.output.computedFeaturesMaterialChange }}"
 
   # -----------------------------------------------------------------------
-  # Step 3: Skip queries when no features were discovered this cycle.
+  # Step 3: Skip queries only when this cycle produced no new inferred features
+  #         AND the computed features did not change in a query-relevant way.
   #         inputs.skipFeatures == true (queries-only run) bypasses this gate.
   # -----------------------------------------------------------------------
   - name: check_should_generate_queries
     type: if
-    condition: "${{ inputs.skipFeatures == false and variables.discoveredFeatures.size == 0 }}"
+    condition: "${{ inputs.skipFeatures == false and variables.discoveredFeatures.size == 0 and variables.computedFeaturesChanged == false }}"
     steps:
       - name: set_skip_queries
         type: data.set

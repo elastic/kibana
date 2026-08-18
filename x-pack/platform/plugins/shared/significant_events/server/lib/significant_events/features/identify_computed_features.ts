@@ -7,8 +7,9 @@
 
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import { getStreamTypeFromDefinition, type Streams } from '@kbn/streams-schema';
-import { type FeatureUpsert } from '@kbn/significant-events-schema';
+import { COMPUTED_FEATURE_TYPES, type FeatureUpsert } from '@kbn/significant-events-schema';
 import type { ToolsStart } from '@kbn/agent-builder-server';
 import {
   generateAllComputedFeatures,
@@ -19,6 +20,7 @@ import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
 import { createCodeAnalysisProvider } from '../../semantic_code_search_grounding/compute_code_analysis';
 import type { EbtTelemetryClient } from '../../telemetry/ebt';
 import { reconcileComputedFeatures } from './reconcile_features';
+import { assessComputedFeatureMateriality } from './assess_computed_feature_materiality';
 
 export interface IdentifyComputedFeaturesOptions {
   stream: Streams.all.Definition;
@@ -38,6 +40,15 @@ export interface IdentifyComputedFeaturesOptions {
   request?: KibanaRequest;
   /** Optional telemetry client to record code_analysis grounding outcomes. */
   telemetry?: EbtTelemetryClient;
+  /** Pre-bound to the gate connector. Omit to skip the gate; `materialChange` is then `false`. */
+  gateInferenceClient?: BoundInferenceClient;
+  signal?: AbortSignal;
+}
+
+export interface IdentifyComputedFeaturesResult {
+  features: FeatureUpsert[];
+  materialChange: boolean;
+  materialChangeReason?: string;
 }
 
 export async function identifyComputedFeatures({
@@ -52,7 +63,9 @@ export async function identifyComputedFeatures({
   agentBuilderTools,
   request,
   telemetry,
-}: IdentifyComputedFeaturesOptions): Promise<FeatureUpsert[]> {
+  gateInferenceClient,
+  signal,
+}: IdentifyComputedFeaturesOptions): Promise<IdentifyComputedFeaturesResult> {
   const providers: Record<string, ComputedFeatureProvider> | undefined =
     agentBuilderTools && request
       ? {
@@ -89,6 +102,12 @@ export async function identifyComputedFeatures({
     runId,
   });
 
+  // Read the prior set before the bulk write overwrites it; the reader only returns the latest revision.
+  const previousComputedFeatures = gateInferenceClient
+    ? (await kiClient.getFeatures(streamName, { type: [...COMPUTED_FEATURE_TYPES], includeExpired: true }))
+        .hits
+    : [];
+
   if (reconciledComputedFeatures.length > 0) {
     const expiresAt = kiClient.getDefaultExpiresAt();
     await kiClient.bulk(
@@ -99,5 +118,17 @@ export async function identifyComputedFeatures({
     );
   }
 
-  return reconciledComputedFeatures;
+  if (!gateInferenceClient) {
+    return { features: reconciledComputedFeatures, materialChange: false };
+  }
+
+  const { materialChange, reason } = await assessComputedFeatureMateriality({
+    inferenceClient: gateInferenceClient,
+    previous: previousComputedFeatures,
+    current: reconciledComputedFeatures,
+    logger: logger.get('query_gate'),
+    signal,
+  });
+
+  return { features: reconciledComputedFeatures, materialChange, materialChangeReason: reason };
 }

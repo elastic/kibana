@@ -14,6 +14,7 @@ import {
   SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_QUERY_GATE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_MEMORY_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -46,6 +47,12 @@ const INVESTIGATION_RECOMMENDED_MODELS = [
 // Background memory upkeep is low-stakes curation, not deep reasoning — a
 // smaller/cheaper model keeps latency and cost down.
 const MEMORY_RECOMMENDED_MODELS = [
+  '.anthropic-claude-4.5-haiku-chat_completion',
+  '.openai-gpt-5.4-mini-chat_completion',
+];
+
+// Small/fast model: the gate is a single cheap yes/no judgment.
+const KI_QUERY_GATE_RECOMMENDED_MODELS = [
   '.anthropic-claude-4.5-haiku-chat_completion',
   '.openai-gpt-5.4-mini-chat_completion',
 ];
@@ -129,6 +136,21 @@ export function registerSignificantEventsInferenceFeatures(
         }
       ),
       recommendedEndpoints: KI_QUERY_GENERATION_RECOMMENDED_MODELS,
+      ignoreGlobalDefault: true,
+    },
+    {
+      featureId: SIGNIFICANT_EVENTS_KI_QUERY_GATE_INFERENCE_FEATURE_ID,
+      featureName: i18n.translate('xpack.significantEvents.inferenceFeature.kiQueryGateName', {
+        defaultMessage: 'Knowledge Indicator Query gate',
+      }),
+      featureDescription: i18n.translate(
+        'xpack.significantEvents.inferenceFeature.kiQueryGateDescription',
+        {
+          defaultMessage:
+            'Model used for the cheap materiality check deciding whether computed feature changes warrant re-running Knowledge Indicator Query generation.',
+        }
+      ),
+      recommendedEndpoints: KI_QUERY_GATE_RECOMMENDED_MODELS,
       ignoreGlobalDefault: true,
     },
     {

@@ -17,4 +17,9 @@ export type {
 } from './identify_inferred_features';
 
 export { identifyComputedFeatures } from './identify_computed_features';
-export type { IdentifyComputedFeaturesOptions } from './identify_computed_features';
+export type {
+  IdentifyComputedFeaturesOptions,
+  IdentifyComputedFeaturesResult,
+} from './identify_computed_features';
+export { assessComputedFeatureMateriality } from './assess_computed_feature_materiality';
+export type { AssessComputedFeatureMaterialityResult } from './assess_computed_feature_materiality';

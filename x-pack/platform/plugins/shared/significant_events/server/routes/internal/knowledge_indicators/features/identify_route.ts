@@ -11,9 +11,11 @@ import { getStreamSamplingSource, getStreamTypeFromDefinition } from '@kbn/strea
 import {
   MAX_ID_LENGTH,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
+  SIGNIFICANT_EVENTS_KI_QUERY_GATE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
 } from '@kbn/significant-events-schema';
 import { isInferenceProviderError } from '@kbn/inference-common';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
@@ -28,6 +30,7 @@ import {
 } from '../../../../lib/significant_events/features';
 import { shouldIdentifyFeatures } from '../../../../lib/significant_events/features/should_identify_features';
 import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled';
+import { isSignificantEventsKiQueryGateEnabled } from '../../../../lib/feature_flags/is_significant_events_ki_query_gate_enabled';
 import type { SyncWorkflowService } from '../../../../lib/workflows/sync_workflow';
 import type { SignificantEventsMaintenanceService } from '../../../../lib/maintenance/maintenance_service';
 import { stateBlocksNewActivity } from '../../../../../common/maintenance/state_machine';
@@ -277,7 +280,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, streamsClient, licensing } = scopedClients;
+    const { streamDataEsClient, streamsClient, inferenceClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -298,8 +301,39 @@ const identifyComputedFeaturesRoute = createServerRoute({
       Boolean(server.agentBuilder?.tools) &&
       (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
 
+    // Connector resolution is best-effort: a failure must never block computed-feature persistence,
+    // so we degrade to "gate unavailable" (treated as a material change downstream).
+    const gateEnabled = isSignificantEventsKiQueryGateEnabled(server.core.featureFlags);
+    let gateInferenceClient: BoundInferenceClient | undefined;
+    if (gateEnabled) {
+      try {
+        const gateConnectorId = await resolveConnectorForFeature({
+          searchInferenceEndpoints: server.searchInferenceEndpoints,
+          featureId: SIGNIFICANT_EVENTS_KI_QUERY_GATE_INFERENCE_FEATURE_ID,
+          featureName: 'KI query generation gate',
+          request,
+        });
+        gateInferenceClient = inferenceClient.bindTo({
+          connectorId: gateConnectorId,
+          metadata: {
+            connectorTelemetry: {
+              pluginId: SIGNIFICANT_EVENTS_KI_QUERY_GATE_INFERENCE_FEATURE_ID,
+              aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+            },
+          },
+        });
+      } catch (error) {
+        routeLogger.warn(
+          `KI query gate connector unavailable, assuming a material change: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+    const gateUnavailable = gateEnabled && !gateInferenceClient;
+
     try {
-      const computedFeatures = await identifyComputedFeatures({
+      const { features, materialChange, materialChangeReason } = await identifyComputedFeatures({
         stream,
         streamName,
         start,
@@ -308,14 +342,20 @@ const identifyComputedFeaturesRoute = createServerRoute({
         kiClient,
         logger: routeLogger,
         runId,
+        gateInferenceClient,
+        signal: getRequestAbortSignal(request),
         ...(codeGroundingEnabled
           ? { agentBuilderTools: server.agentBuilder?.tools, request, telemetry }
           : {}),
       });
 
       return {
-        computedFeatures,
-        computedFeaturesCount: computedFeatures.length,
+        computedFeatures: features,
+        computedFeaturesCount: features.length,
+        materialChange: gateUnavailable ? true : materialChange,
+        materialChangeReason: gateUnavailable
+          ? 'Gate connector unavailable; assuming a material change.'
+          : materialChangeReason,
       };
     } catch (error) {
       routeLogger.error(

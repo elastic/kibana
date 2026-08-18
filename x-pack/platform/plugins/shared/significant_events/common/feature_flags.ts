@@ -34,3 +34,10 @@ export const SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG =
  * integrations (e.g. the Elastic Slack App) can be connected via the Relay service.
  */
 export const STREAMS_SIGNIFICANT_EVENTS_APPS_ENABLED_FLAG = 'streams.significantEventsAppsEnabled';
+
+/**
+ * Kill switch for the computed-feature materiality gate on KI query generation. Default on;
+ * disabling falls back to gating query generation on inferred-feature changes only.
+ */
+export const SIGNIFICANT_EVENTS_KI_QUERY_GATE_ENABLED_FLAG =
+  'streams.significantEventsKiQueryGateEnabled';
