@@ -7,6 +7,7 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
@@ -15,9 +16,10 @@ import { useStartServices } from '../../../../../../../hooks';
 interface Props {
   queryParams: URLSearchParams;
   integrationsPath: string;
+  collectionTitle?: string;
 }
 
-export function BackLink({ queryParams, integrationsPath }: Props) {
+export function BackLink({ queryParams, integrationsPath, collectionTitle }: Props) {
   const {
     application: { navigateToApp },
   } = useStartServices();
@@ -29,14 +31,21 @@ export function BackLink({ queryParams, integrationsPath }: Props) {
     };
   }, [queryParams]);
 
-  const appId = returnAppId && returnPath ? returnAppId : 'integrations';
-  const path = returnAppId && returnPath ? returnPath : integrationsPath;
+  // collectionTitle takes full priority: suppress the returnPath/returnAppId override so the
+  // label ("Back to X collection") and the click destination always agree.
+  const useReturnPath = !collectionTitle && returnAppId && returnPath;
+  const appId = useReturnPath ? returnAppId : 'integrations';
+  const path = useReturnPath ? returnPath : integrationsPath;
 
   // Maintain 'Back to integrations' for the AI4SOC integrations page
-  const message =
-    !returnPath || returnPath.includes('/configurations/integrations')
-      ? BACK_TO_INTEGRATIONS
-      : BACK_TO_SELECTION;
+  const message = collectionTitle
+    ? i18n.translate('xpack.fleet.epm.backToCollectionText', {
+        defaultMessage: 'Back to {collectionTitle} collection',
+        values: { collectionTitle },
+      })
+    : !returnPath || returnPath.includes('/configurations/integrations')
+    ? BACK_TO_INTEGRATIONS
+    : BACK_TO_SELECTION;
 
   return (
     <>
