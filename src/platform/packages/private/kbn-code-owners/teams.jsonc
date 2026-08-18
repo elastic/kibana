@@ -215,9 +215,7 @@
   {
     "id": "kibana-cloud-security-posture",
     "name": "Contextual Security Apps Team",
-    "areas": [
-      "security"
-    ],
+    "areas": [],
     "github": {
       "team": "elastic/kibana-cloud-security-posture",
       "label": "Team:Cloud Security"
