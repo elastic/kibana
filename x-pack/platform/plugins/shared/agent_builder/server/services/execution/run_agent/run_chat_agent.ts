@@ -365,6 +365,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     promptFactory,
     backgroundExecutionService,
     roundId,
+    sessionId: conversation?.id ?? executionId,
+    cacheControl: { type: 'ephemeral', ttl: '5m' },
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
