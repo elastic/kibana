@@ -101,7 +101,7 @@ Add the `UNREAD` label to a message. Reversible with `markAsRead`. Available as 
 
 #### Modify labels
 
-Add and/or remove labels on a message. The quarantine primitive: pass the quarantine label ID in `addLabelIds` and `["INBOX"]` in `removeLabelIds` to move a message out of the inbox. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+Add or remove labels on a message. The quarantine primitive: pass the quarantine label ID in `addLabelIds` and `["INBOX"]` in `removeLabelIds` to move a message out of the inbox. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
 
 `messageId`
 :   (Required) Gmail message ID.
@@ -132,7 +132,7 @@ Restore a message from Trash. Rolls back a `trashMessage` call. Only effective w
 
 #### Send message
 
-Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain-text and HTML bodies; bare addr-spec recipients only; no attachments in v1. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
+Send an email from the authenticated user's Gmail account. Irreversible once accepted by the receiving mail server. Supports plain-text and HTML bodies, bare addr-spec recipients only, and no attachments in v1. Available in Workflows only. Requires OAuth 2.0 authorization code auth.
 
 `to`
 :   (Required) Recipient email addresses (bare addr-spec, for example `["user@example.com"]`).
@@ -188,7 +188,7 @@ To use write actions, create a Google OAuth 2.0 app and authorize it with the `g
 
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/) and create or select a project.
 2. Enable the **Gmail API** for the project.
-3. Under **APIs & Services > Credentials**, create an OAuth 2.0 client ID of type **Web application**. Add your Kibana instance URL as an authorized redirect URI.
+3. Under **APIs & Services → Credentials**, create an OAuth 2.0 client ID of type **Web application**. Add your Kibana instance URL as an authorized redirect URI.
 4. Note the **Client ID** and **Client Secret**.
 5. When creating the Gmail connector in Kibana, select **OAuth 2.0 authorization code**, enter the client ID and secret, and authorize the connector. Google will prompt you to grant `gmail.modify` access.
 
