@@ -1073,8 +1073,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       rowHeight,
       rowHeightLines: rowHeightLinesSetting,
       lineCountInput,
-      onChangeRowHeight: onChangeRowHeightSetting,
-      onChangeRowHeightLines: onChangeRowHeightLinesSetting,
+      onChangeRowHeight,
+      onChangeRowHeightLines,
     } = useRowHeight({
       type: RowHeightType.row,
       storage,
@@ -1086,12 +1086,9 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateRowHeight,
     });
 
-    // In JSON mode the source cell renders a variable-height tree: force the body cell height to auto
-    // and hide the "Body cell lines" setting.
-    const isJsonSourceMode = sourceDisplayMode === 'json';
-    const rowHeightLines = isJsonSourceMode ? ROWS_HEIGHT_OPTIONS.auto : rowHeightLinesSetting;
-    const onChangeRowHeight = isJsonSourceMode ? undefined : onChangeRowHeightSetting;
-    const onChangeRowHeightLines = isJsonSourceMode ? undefined : onChangeRowHeightLinesSetting;
+    // In JSON mode the source cell renders a variable-height tree, so force the body cell height to auto.
+    const rowHeightLines =
+      sourceDisplayMode === 'json' ? ROWS_HEIGHT_OPTIONS.auto : rowHeightLinesSetting;
 
     const euiGridColumns = useMemo(
       () =>

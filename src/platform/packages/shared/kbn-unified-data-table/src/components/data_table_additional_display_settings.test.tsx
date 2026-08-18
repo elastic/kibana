@@ -329,6 +329,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       expect(screen.getByTestId('mockDensityControl')).toBeVisible();
       expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
       expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeVisible();
+      expect(screen.getByText('Sample size')).toBeVisible();
       expect(screen.queryByTestId('unifiedDataTableHideNullsSwitch')).not.toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDataTableWrapLinesSwitch')).not.toBeInTheDocument();
     });
@@ -343,18 +344,18 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       expect(onChangeSourceDisplayMode).toHaveBeenCalledWith('json');
     });
 
-    it('should add the JSON-only switches while keeping the other controls in "JSON" mode', () => {
-      // In JSON mode the caller stops providing onChangeRowHeight, so "Body cell lines" is omitted,
-      // while density and header controls remain available.
+    it('should only show sample size, view mode, hide-nulls, and wrap-lines in "JSON" mode', () => {
       renderWithAllControls({
         sourceDisplayMode: 'json',
-        onChangeRowHeight: undefined,
-        onChangeRowHeightLines: undefined,
       });
 
+      expect(screen.getByText('Sample size')).toBeVisible();
+      expect(screen.getByTestId('unifiedDataTableViewModeSettings')).toBeVisible();
       expect(screen.queryByTestId('unifiedDataTableRowHeightSettings')).not.toBeInTheDocument();
-      expect(screen.getByTestId('mockDensityControl')).toBeVisible();
-      expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
+      expect(
+        screen.queryByTestId('unifiedDataTableHeaderRowHeightSettings')
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mockDensityControl')).not.toBeInTheDocument();
 
       // The JSON-only switches appear with "Hide nulls" off and "Wrap lines" on by default
       expect(screen.getByTestId('unifiedDataTableHideNullsSwitch')).not.toBeChecked();

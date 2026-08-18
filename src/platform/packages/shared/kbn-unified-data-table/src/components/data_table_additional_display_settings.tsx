@@ -43,6 +43,121 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
 
 const defaultOnChangeSampleSize = () => {};
 
+const DisplaySettingsHorizontalRule = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiHorizontalRule
+      margin="xs"
+      css={{
+        marginInlineStart: `-${euiTheme.size.s}`,
+        marginInlineEnd: `-${euiTheme.size.s}`,
+        inlineSize: 'unset',
+      }}
+    />
+  );
+};
+
+const SampleSizeSettings = ({
+  activeSampleSize,
+  minRangeSampleSize,
+  maxAllowedSampleSize,
+  onChangeActiveSampleSize,
+}: {
+  activeSampleSize: number | '';
+  minRangeSampleSize: number;
+  maxAllowedSampleSize: number;
+  onChangeActiveSampleSize: NonNullable<EuiRangeProps['onChange']>;
+}) => {
+  let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
+
+  if (
+    step > 1 &&
+    ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||
+      !checkIfValueIsMultipleOfStep(minRangeSampleSize, step) ||
+      !checkIfValueIsMultipleOfStep(maxAllowedSampleSize, step))
+  ) {
+    step = 1; // Eui is very strict about step, so we need to switch to 1 if the value is not a multiple of the step
+  }
+
+  const sampleSizeLabel = i18n.translate('unifiedDataTable.sampleSizeSettings.sampleSizeLabel', {
+    defaultMessage: 'Sample size',
+  });
+
+  return (
+    <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+      <EuiRange
+        compressed
+        fullWidth
+        min={minRangeSampleSize}
+        max={maxAllowedSampleSize}
+        step={step}
+        showInput
+        value={activeSampleSize}
+        onChange={onChangeActiveSampleSize}
+        data-test-subj="unifiedDataTableSampleSizeInput"
+        showRange
+      />
+    </EuiFormRow>
+  );
+};
+
+const JsonModeDisplaySettings = ({
+  jsonModeSettings,
+  onChangeJsonModeSettings,
+}: {
+  jsonModeSettings: JsonModeSettings;
+  onChangeJsonModeSettings?: (jsonModeSettings: JsonModeSettings) => void;
+}) => {
+  const hideNulls = jsonModeSettings.hideNulls ?? false;
+  const wrapLines = jsonModeSettings.wrapLines ?? true;
+
+  const hideNullsLabel = i18n.translate('unifiedDataTable.hideNullsLabel', {
+    defaultMessage: 'Hide nulls',
+  });
+
+  const wrapLinesLabel = i18n.translate('unifiedDataTable.wrapLinesLabel', {
+    defaultMessage: 'Wrap lines',
+  });
+
+  return (
+    <>
+      <EuiFormRow
+        label={hideNullsLabel}
+        display="columnCompressed"
+        data-test-subj="unifiedDataTableHideNullsSettings"
+      >
+        <EuiSwitch
+          label={hideNullsLabel}
+          showLabel={false}
+          checked={hideNulls}
+          compressed
+          onChange={(e) =>
+            onChangeJsonModeSettings?.({ ...jsonModeSettings, hideNulls: e.target.checked })
+          }
+          data-test-subj="unifiedDataTableHideNullsSwitch"
+        />
+      </EuiFormRow>
+      <EuiFormRow
+        label={wrapLinesLabel}
+        display="columnCompressed"
+        data-test-subj="unifiedDataTableWrapLinesSettings"
+      >
+        <EuiSwitch
+          label={wrapLinesLabel}
+          showLabel={false}
+          checked={wrapLines}
+          compressed
+          onChange={(e) =>
+            onChangeJsonModeSettings?.({ ...jsonModeSettings, wrapLines: e.target.checked })
+          }
+          data-test-subj="unifiedDataTableWrapLinesSwitch"
+        />
+      </EuiFormRow>
+    </>
+  );
+};
+
 export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   UnifiedDataTableAdditionalDisplaySettingsProps
 > = ({
@@ -64,13 +179,10 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   onChangeJsonModeSettings,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
-  const hideNulls = jsonModeSettings.hideNulls ?? false;
-  const wrapLines = jsonModeSettings.wrapLines ?? true;
   const minRangeSampleSize = Math.max(
     Math.min(RANGE_MIN_SAMPLE_SIZE, sampleSize),
     MIN_ALLOWED_SAMPLE_SIZE
   ); // flexible: allows to go lower than RANGE_MIN_SAMPLE_SIZE but greater than MIN_ALLOWED_SAMPLE_SIZE
-  const { euiTheme } = useEuiTheme();
 
   const debouncedOnChangeSampleSize = useMemo(
     () =>
@@ -100,166 +212,75 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     [maxAllowedSampleSize, setActiveSampleSize, debouncedOnChangeSampleSize]
   );
 
-  const sampleSizeLabel = i18n.translate('unifiedDataTable.sampleSizeSettings.sampleSizeLabel', {
-    defaultMessage: 'Sample size',
-  });
-
-  const hideNullsLabel = i18n.translate('unifiedDataTable.hideNullsLabel', {
-    defaultMessage: 'Hide nulls',
-  });
-
-  const wrapLinesLabel = i18n.translate('unifiedDataTable.wrapLinesLabel', {
-    defaultMessage: 'Wrap lines',
-  });
-
-  const isJsonMode = sourceDisplayMode === 'json';
-
   useEffect(() => {
     setActiveSampleSize(sampleSize); // reset local state
   }, [sampleSize, setActiveSampleSize]);
 
-  const renderHorizontalRule = () => (
-    <EuiHorizontalRule
-      margin="xs"
-      css={{
-        marginInlineStart: `-${euiTheme.size.s}`,
-        marginInlineEnd: `-${euiTheme.size.s}`,
-        inlineSize: 'unset',
-      }}
+  const isJsonMode = sourceDisplayMode === 'json';
+  const viewModeSettings = onChangeSourceDisplayMode ? (
+    <ViewModeSettings
+      sourceDisplayMode={sourceDisplayMode}
+      onChangeSourceDisplayMode={onChangeSourceDisplayMode}
     />
-  );
+  ) : null;
 
-  const settings = [];
-
-  if (onChangeSampleSize) {
-    let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
-
-    if (
-      step > 1 &&
-      ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||
-        !checkIfValueIsMultipleOfStep(minRangeSampleSize, step) ||
-        !checkIfValueIsMultipleOfStep(maxAllowedSampleSize, step))
-    ) {
-      step = 1; // Eui is very strict about step, so we need to switch to 1 if the value is not a multiple of the step
-    }
-
-    settings.push(
-      <>
-        <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-          <EuiRange
-            compressed
-            fullWidth
-            min={minRangeSampleSize}
-            max={maxAllowedSampleSize}
-            step={step}
-            showInput
-            value={activeSampleSize}
-            onChange={onChangeActiveSampleSize}
-            data-test-subj="unifiedDataTableSampleSizeInput"
-            showRange
-          />
-        </EuiFormRow>
-      </>
-    );
-    settings.push(renderHorizontalRule());
-  }
-
-  const viewModeIndex = settings.length;
-
-  if (onChangeSourceDisplayMode) {
-    settings.push(
-      <ViewModeSettings
-        sourceDisplayMode={sourceDisplayMode}
-        onChangeSourceDisplayMode={onChangeSourceDisplayMode}
-      />
-    );
-  }
-
-  // The JSON-only switches are shown in addition to the regular controls while in JSON mode.
-  if (isJsonMode) {
-    settings.push(
-      <EuiFormRow
-        label={hideNullsLabel}
-        display="columnCompressed"
-        data-test-subj="unifiedDataTableHideNullsSettings"
-      >
-        <EuiSwitch
-          label={hideNullsLabel}
-          showLabel={false}
-          checked={hideNulls}
-          compressed
-          onChange={(e) =>
-            onChangeJsonModeSettings?.({ ...jsonModeSettings, hideNulls: e.target.checked })
-          }
-          data-test-subj="unifiedDataTableHideNullsSwitch"
-        />
-      </EuiFormRow>,
-      <EuiFormRow
-        label={wrapLinesLabel}
-        display="columnCompressed"
-        data-test-subj="unifiedDataTableWrapLinesSettings"
-      >
-        <EuiSwitch
-          label={wrapLinesLabel}
-          showLabel={false}
-          checked={wrapLines}
-          compressed
-          onChange={(e) =>
-            onChangeJsonModeSettings?.({ ...jsonModeSettings, wrapLines: e.target.checked })
-          }
-          data-test-subj="unifiedDataTableWrapLinesSwitch"
-        />
-      </EuiFormRow>
-    );
-  }
-
-  if (Boolean(densityControl)) {
-    settings.push(densityControl);
-  }
-
-  if (onChangeHeaderRowHeight && onChangeHeaderRowHeightLines) {
-    settings.push(
-      <RowHeightSettings
-        rowHeight={headerRowHeight}
-        label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
-          defaultMessage: 'Max header cell lines',
-        })}
-        onChangeRowHeight={onChangeHeaderRowHeight}
-        onChangeLineCountInput={onChangeHeaderRowHeightLines}
-        data-test-subj="unifiedDataTableHeaderRowHeightSettings"
-        maxRowHeight={5}
-        lineCountInput={headerLineCountInput}
-      />
-    );
-  }
-
-  // In JSON mode the body cell renders a variable-height tree, so the caller stops passing
-  // onChangeRowHeight and this "Body cell lines" control is omitted.
-  if (onChangeRowHeight && onChangeRowHeightLines) {
-    settings.push(
-      <RowHeightSettings
-        rowHeight={rowHeight}
-        label={i18n.translate('unifiedDataTable.rowHeightLabel', {
-          defaultMessage: 'Body cell lines',
-        })}
-        onChangeRowHeight={onChangeRowHeight}
-        onChangeLineCountInput={onChangeRowHeightLines}
-        data-test-subj="unifiedDataTableRowHeightSettings"
-        lineCountInput={lineCountInput}
-      />
-    );
-  }
-
-  // When the view mode toggle is shown, separate it from the settings that follow it.
-  if (onChangeSourceDisplayMode && settings.length > viewModeIndex + 1) {
-    settings.splice(viewModeIndex + 1, 0, renderHorizontalRule());
-  }
+  const showSampleSize = Boolean(onChangeSampleSize);
+  const showDensity = !isJsonMode && Boolean(densityControl);
+  const showHeaderRowHeight =
+    !isJsonMode && Boolean(onChangeHeaderRowHeight && onChangeHeaderRowHeightLines);
+  const showRowHeight = !isJsonMode && Boolean(onChangeRowHeight && onChangeRowHeightLines);
+  const hasControlsAfterSampleSize =
+    Boolean(viewModeSettings) || isJsonMode || showDensity || showHeaderRowHeight || showRowHeight;
+  const hasControlsAfterViewMode =
+    isJsonMode || showDensity || showHeaderRowHeight || showRowHeight;
 
   return (
     <>
-      {settings.map((setting, index) => (
-        <React.Fragment key={`setting-${index}`}>{setting}</React.Fragment>
-      ))}
+      {showSampleSize && (
+        <>
+          <SampleSizeSettings
+            activeSampleSize={activeSampleSize}
+            minRangeSampleSize={minRangeSampleSize}
+            maxAllowedSampleSize={maxAllowedSampleSize}
+            onChangeActiveSampleSize={onChangeActiveSampleSize}
+          />
+          {hasControlsAfterSampleSize && <DisplaySettingsHorizontalRule />}
+        </>
+      )}
+      {viewModeSettings}
+      {viewModeSettings && hasControlsAfterViewMode && <DisplaySettingsHorizontalRule />}
+      {isJsonMode && (
+        <JsonModeDisplaySettings
+          jsonModeSettings={jsonModeSettings}
+          onChangeJsonModeSettings={onChangeJsonModeSettings}
+        />
+      )}
+      {showDensity && densityControl}
+      {showHeaderRowHeight && onChangeHeaderRowHeight && onChangeHeaderRowHeightLines && (
+        <RowHeightSettings
+          rowHeight={headerRowHeight}
+          label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
+            defaultMessage: 'Max header cell lines',
+          })}
+          onChangeRowHeight={onChangeHeaderRowHeight}
+          onChangeLineCountInput={onChangeHeaderRowHeightLines}
+          data-test-subj="unifiedDataTableHeaderRowHeightSettings"
+          maxRowHeight={5}
+          lineCountInput={headerLineCountInput}
+        />
+      )}
+      {showRowHeight && onChangeRowHeight && onChangeRowHeightLines && (
+        <RowHeightSettings
+          rowHeight={rowHeight}
+          label={i18n.translate('unifiedDataTable.rowHeightLabel', {
+            defaultMessage: 'Body cell lines',
+          })}
+          onChangeRowHeight={onChangeRowHeight}
+          onChangeLineCountInput={onChangeRowHeightLines}
+          data-test-subj="unifiedDataTableRowHeightSettings"
+          lineCountInput={lineCountInput}
+        />
+      )}
     </>
   );
 };

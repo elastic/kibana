@@ -1360,25 +1360,6 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
-      'hides the "Body cell lines" display setting in JSON mode, leaving the header control',
-      async () => {
-        await renderComponent({
-          ...getProps(),
-          onUpdateRowHeight: jest.fn(),
-          onUpdateHeaderRowHeight: jest.fn(),
-          sourceDisplayMode: 'json',
-        });
-
-        await userEvent.click(screen.getByTestId('dataGridDisplaySelectorButton'));
-        await waitForEuiPopoverOpen();
-
-        expect(screen.queryByTestId('unifiedDataTableRowHeightSettings')).not.toBeInTheDocument();
-        expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
-
-    it(
       'shows the "Body cell lines" display setting in summary mode',
       async () => {
         await renderComponent({
