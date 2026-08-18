@@ -8,7 +8,6 @@
 import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export const SIGNIFICANT_EVENT_STATUS_COLORS: Record<SignificantEventStatus, string> = {
-  pending: 'default',
   open: 'danger',
   closed: 'default',
   dismissed: 'default',

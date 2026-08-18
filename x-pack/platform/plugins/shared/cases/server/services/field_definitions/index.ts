@@ -26,6 +26,16 @@ import {
 import type { FieldDefinitionsFindResponse } from '../../../common/types/api/field_definition/v1';
 import { getYamlDefaultAsString } from '../../../common/utils';
 
+const sortGlobalFieldDefinitions = (fieldDefinitions: FieldDefinition[]): FieldDefinition[] =>
+  fieldDefinitions
+    .map((fieldDefinition, index) => ({
+      fieldDefinition,
+      index,
+      displayOrder: fieldDefinition.displayOrder ?? index,
+    }))
+    .sort((a, b) => a.displayOrder - b.displayOrder || a.index - b.index)
+    .map(({ fieldDefinition }) => fieldDefinition);
+
 export class FieldDefinitionsService {
   constructor(
     private readonly dependencies: {
@@ -82,7 +92,9 @@ export class FieldDefinitionsService {
     const allDefs = result.saved_objects.map((so) => so.attributes);
 
     const fieldDefinitions =
-      isGlobal === true ? allDefs.filter((fd) => fd.isGlobal === true) : allDefs;
+      isGlobal === true
+        ? sortGlobalFieldDefinitions(allDefs.filter((fd) => fd.isGlobal === true))
+        : allDefs;
 
     return {
       fieldDefinitions,
@@ -130,9 +142,27 @@ export class FieldDefinitionsService {
     this.assertFieldDefinitionIsValid(input.definition);
 
     const id = uuidv4();
+    const globalFieldDefinitions = input.isGlobal
+      ? await this.getFieldDefinitions(input.owner, { isGlobal: true })
+      : undefined;
     const created = await this.dependencies.unsecuredSavedObjectsClient.create<FieldDefinition>(
       CASE_FIELD_DEFINITION_SAVED_OBJECT,
-      { ...input, fieldDefinitionId: id },
+      {
+        ...input,
+        fieldDefinitionId: id,
+        // Append after the highest existing order, not at `total`: after a deletion the count
+        // no longer equals max(displayOrder) + 1, and reusing a taken order makes the sort fall
+        // back to find-order tie-breaking, landing the new field somewhere arbitrary.
+        ...(globalFieldDefinitions
+          ? {
+              displayOrder:
+                globalFieldDefinitions.fieldDefinitions.reduce(
+                  (max, { displayOrder }) => Math.max(max, displayOrder ?? -1),
+                  -1
+                ) + 1,
+            }
+          : {}),
+      },
       { id }
     );
 

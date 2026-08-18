@@ -6,7 +6,7 @@
  */
 
 import { getEpisodesFromDocIds, uniqueGroupEpisodes } from './bulk_selection';
-import type { AlertEpisode } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 const ep = (id: string, groupHash: string): AlertEpisode =>
   ({ 'episode.id': id, group_hash: groupHash } as AlertEpisode);
 

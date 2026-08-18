@@ -634,6 +634,81 @@ describe('UiamService', () => {
       });
     });
 
+    it('withholds both the shared secret and the client certificate when client authentication is not requested', async () => {
+      const mockResponse: GrantUiamApiKeyResponse = {
+        id: 'api-key-id',
+        key: 'essu_api_key_from_grant',
+        description: 'api-key-from-grant',
+      };
+      const mtlsUiamService = new UiamService(
+        loggingSystemMock.createLogger(),
+        ConfigSchema.validate(
+          {
+            uiam: {
+              enabled: true,
+              url: 'https://uiam.service',
+              sharedSecret: 'secret',
+              ssl: {
+                certificateAuthorities: '/some/ca/path',
+                certificate: '/path/to/cert.pem',
+                key: '/path/to/key.pem',
+              },
+            },
+          },
+          { serverless: true }
+        ).uiam,
+        { kibanaServerResourceURL: 'https://kibana.test', kibanaVersion: '9.0.0' }
+      );
+      agentSpy.mockClear();
+
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: async () => mockResponse,
+      });
+
+      await expect(
+        mtlsUiamService.grantApiKey(
+          new HTTPAuthorizationHeader('ApiKey', 'essu_api_key'),
+          {
+            name: 'api-key-from-grant',
+          },
+          { includeClientAuthentication: false }
+        )
+      ).resolves.toEqual(mockResponse);
+
+      const expectedRequestBody: GrantUiamApiKeyRequestBody = {
+        description: 'api-key-from-grant',
+        internal: true,
+        role_assignments: {
+          limit: {
+            access: ['application'],
+            resource: ['project'],
+          },
+        },
+      };
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith('https://uiam.service/uiam/api/v1/api-keys/_grant', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': 'Kibana/9.0.0',
+          Authorization: 'ApiKey essu_api_key',
+        },
+        body: JSON.stringify(expectedRequestBody),
+        dispatcher: AGENT_MOCK,
+      });
+      // The dispatcher this grant used keeps the CAs and server verification, but presents no
+      // client certificate.
+      expect(agentSpy).toHaveBeenCalledWith({
+        connect: {
+          ca: ['mocked file content for /some/ca/path'],
+          allowPartialTrustChain: true,
+          rejectUnauthorized: true,
+        },
+      });
+    });
+
     it('properly calls UIAM service to grant an API key with expiration', async () => {
       const mockResponse: GrantUiamApiKeyResponse = {
         id: 'api-key-id-with-exp',
@@ -1309,6 +1384,54 @@ describe('UiamService', () => {
     });
   });
 
+  describe('#deleteOAuthClient', () => {
+    it('properly calls UIAM service to delete an OAuth client', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(
+        uiamService.deleteOAuthClient('access-token', 'client-id')
+      ).resolves.toBeUndefined();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id',
+        {
+          method: 'DELETE',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if deletion fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'OAuth client not found' } }),
+      });
+
+      await expect(uiamService.deleteOAuthClient('access-token', 'client-id')).rejects.toThrowError(
+        'OAuth client not found'
+      );
+    });
+
+    it('encodes reserved characters in the client id path segment', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await uiamService.deleteOAuthClient('access-token', 'weird/id?x#y');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/weird%2Fid%3Fx%23y',
+        expect.objectContaining({ method: 'DELETE' })
+      );
+    });
+  });
+
   describe('#listOAuthConnections', () => {
     it('properly calls UIAM service to list OAuth connections', async () => {
       const mockResponse = { connections: [] };
@@ -1527,6 +1650,54 @@ describe('UiamService', () => {
       expect(fetchSpy).toHaveBeenCalledWith(
         'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx/_revoke',
         expect.objectContaining({ method: 'POST' })
+      );
+    });
+  });
+
+  describe('#deleteOAuthConnection', () => {
+    it('properly calls UIAM service to delete an OAuth connection', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await expect(
+        uiamService.deleteOAuthConnection('access-token', 'client-id', 'conn-id')
+      ).resolves.toBeUndefined();
+
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client-id/connections/conn-id',
+        {
+          method: 'DELETE',
+          headers: {
+            'User-Agent': 'Kibana/9.0.0',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: 'secret',
+            Authorization: 'Bearer access-token',
+          },
+          dispatcher: AGENT_MOCK,
+        }
+      );
+    });
+
+    it('throws error if deletion fails', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: false,
+        status: 404,
+        headers: new Headers(),
+        json: async () => ({ error: { message: 'Connection not found' } }),
+      });
+
+      await expect(
+        uiamService.deleteOAuthConnection('access-token', 'client-id', 'conn-id')
+      ).rejects.toThrowError('Connection not found');
+    });
+
+    it('encodes reserved characters in both path segments', async () => {
+      fetchSpy.mockResolvedValue({ ok: true, status: 204 });
+
+      await uiamService.deleteOAuthConnection('access-token', 'client/id#y', 'conn/id?x');
+
+      expect(fetchSpy).toHaveBeenCalledWith(
+        'https://uiam.service/uiam/api/v1/oauth/clients/client%2Fid%23y/connections/conn%2Fid%3Fx',
+        expect.objectContaining({ method: 'DELETE' })
       );
     });
   });

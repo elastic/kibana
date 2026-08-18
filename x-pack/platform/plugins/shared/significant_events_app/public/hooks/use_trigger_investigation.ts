@@ -45,7 +45,7 @@ export const useTriggerInvestigation = ({
     },
     dependencies: {
       start: {
-        significant_events: { significantEventsRepositoryClient },
+        significantEvents: { significantEventsRepositoryClient },
       },
     },
   } = useKibana();

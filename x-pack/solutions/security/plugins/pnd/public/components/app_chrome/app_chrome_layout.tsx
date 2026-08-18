@@ -9,7 +9,24 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import { AskPndFab } from './pnd_chrome';
+
+/** Routes that render a fixed-height layout of their own and must not be scrolled as one block. */
+const FIXED_HEIGHT_ROUTES = ['/chats'];
+
+/**
+ * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
+ *
+ * These must leave `overflow` at `visible`. Any other value makes this element the containing
+ * scrollport for `position: sticky` descendants — and because this element sits in a chain of
+ * auto-height flex boxes it never actually scrolls, so nothing anchored to it can ever pin. That is
+ * what kept the Watches subnav scrolling away with the page. The chrome's own stylesheet carries the
+ * same warning for `#kibana-body`: "DO NOT ADD ANY OVERFLOW BEHAVIORS HERE / It will break the
+ * sticky navigation".
+ */
+const CHROME_SCROLLED_ROUTES = ['/watches'];
+
+const matchesRoute = (pathname: string, prefixes: string[]) =>
+  prefixes.some((prefix) => pathname.startsWith(prefix));
 
 interface AppChromeLayoutProps {
   children: React.ReactNode;
@@ -21,8 +38,13 @@ interface AppChromeLayoutProps {
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
   const { euiTheme } = useEuiTheme();
-  const location = useLocation();
-  const isChats = location.pathname.startsWith('/chats');
+  const { pathname } = useLocation();
+
+  const overflow = matchesRoute(pathname, FIXED_HEIGHT_ROUTES)
+    ? 'hidden'
+    : matchesRoute(pathname, CHROME_SCROLLED_ROUTES)
+    ? 'visible'
+    : 'auto';
 
   return (
     <div
@@ -31,13 +53,12 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
         flex-direction: column;
         flex: 1;
         min-height: 0;
-        overflow: ${isChats ? 'hidden' : 'auto'};
+        overflow: ${overflow};
         background: ${euiTheme.colors.body};
       `}
       data-test-subj="pndAppChromeLayout"
     >
       {children}
-      <AskPndFab />
     </div>
   );
 };

@@ -19,6 +19,7 @@ import type { RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { combineLatest, distinctUntilChanged, filter, skip, switchMap } from 'rxjs';
 import type { Subscription } from 'rxjs';
 import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { getRelayAppConnectionSavedObjectType } from './lib/slack_app/saved_object';
 import { getSignificantEventsMaintenanceStateSavedObjectType } from './lib/maintenance/saved_object';
 import {
@@ -82,7 +83,7 @@ import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '../common/feature_fla
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 
-const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significant_events';
+const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 
 export class SignificantEventsPlugin
   implements
@@ -149,13 +150,22 @@ export class SignificantEventsPlugin
       const uiSettingsClient = coreStart.uiSettings.asScopedToClient(scopedSoClient);
       const globalUiSettingsClient = coreStart.uiSettings.globalAsScopedToClient(scopedSoClient);
 
+      // `scopedClusterClient`: origin-only. Used for everything the plugin owns (its hidden
+      // data streams), which only ever exists in the origin project.
+      // `streamDataEsClient`: always routed across every CPS-linked project, regardless of the
+      // active space's project routing expression. Knowledge indicators are not space-scoped -
+      // they model all data available to a stream - so extraction must always read across every
+      // linked project.
+      //
+      // This currently splits generation from detection: rule execution still follows the
+      // space's project routing expression, so a rule can be blind to data its knowledge
+      // indicator was derived from. That split is transitional: once alerting v2 supports
+      // per-rule project routing, significant events rules will opt into all linked projects
+      // too, and both scopes will match.
       const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-      // A Query Stream's ES|QL view can resolve to indices that live on remote CPS-connected
-      // projects, so reads of stream data must follow the space's project routing expression
-      // rather than the origin project only. `scopedClusterClient` deliberately stays
-      // origin-only: the plugin's own hidden data streams only ever exist in the origin project.
       const streamDataEsClient = coreStart.elasticsearch.client.asScoped(request, {
-        projectRouting: 'space',
+        projectRouting: 'expression',
+        value: PROJECT_ROUTING_ALL,
       }).asCurrentUser;
       const soClient = scopedSoClient;
       const inferenceClient = pluginsStart.inference.getClient({ request });
@@ -427,13 +437,12 @@ export class SignificantEventsPlugin
       })
     );
 
-    // Editable investigation + discovery/judge agents: installed via agents.ensure with the same
-    // availability gate as registered tools. Profiles stay installed; Agent Builder hides them
-    // when significant events is unavailable. Always ensure at start so the in-memory availability
-    // handler is registered even when the feature is currently off (otherwise leftover profiles
-    // from a prior enablement would show as available). Per-space installs also happen
-    // just-in-time from triggerInvestigationWorkflow, scheduled discovery enablement, and manual
-    // discovery execute.
+    // Editable investigation + discovery agents: installed via agents.ensure when
+    // significant events is available. skip(1) on availabilityEnabled$ drops the initial
+    // emission, so catch up at startup as well. Per-space installs also happen just-in-time
+    // from triggerInvestigationWorkflow (investigation), scheduled discovery enablement,
+    // and manual discovery execute (discovery).
+    // Pause re-assert runs inside ensureSignificantEventsInstalled after every install.
     if (plugins.agentBuilder && this.server) {
       const agentBuilder = plugins.agentBuilder;
       const availability = createSignificantEventsAvailability({
@@ -533,7 +542,7 @@ export class SignificantEventsPlugin
   ): Promise<void> {
     if (!(await isAvailable())) {
       this.logger.debug(
-        'significant_events: availability flag disabled, skipping managed resource installation'
+        'significantEvents: availability flag disabled, skipping managed resource installation'
       );
       return;
     }
@@ -589,7 +598,7 @@ export class SignificantEventsPlugin
 
   private logManagedResourceError(context: string, error: unknown): void {
     this.logger.error(
-      `significant_events: failed to install managed resources (${context}): ${
+      `significantEvents: failed to install managed resources (${context}): ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -597,7 +606,7 @@ export class SignificantEventsPlugin
 
   private logSkillsRegistrationError(scope: string, error: unknown): void {
     this.logger.error(
-      `significant_events: failed to register ${scope} skills: ${
+      `significantEvents: failed to register ${scope} skills: ${
         error instanceof Error ? error.message : String(error)
       }`
     );

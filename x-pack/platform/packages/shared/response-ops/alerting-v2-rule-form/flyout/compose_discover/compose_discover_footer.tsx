@@ -12,7 +12,6 @@ import { useWatch } from 'react-hook-form';
 import type { ComposeDiscoverAction, ComposeDiscoverState, StepDefinition } from './types';
 import { isAlertConditionStepId, isBuilderConditionStepId } from './types';
 import type { FormValues } from '../../form/types';
-import { getEsqlSummaryState } from './compose_discover_form/esql_query_summary_section';
 import { isCommittedQueryValid } from './validation/committed_query_validation';
 
 const CREATE_RULE_BUTTON_LABEL = i18n.translate(
@@ -38,19 +37,6 @@ const NEXT_BUTTON_LABEL = i18n.translate(
 const NEXT_DISABLED_TOOLTIP = i18n.translate(
   'xpack.alertingV2.composeDiscover.flyout.nextDisabledTooltip',
   { defaultMessage: 'Define a query in the editor before continuing' }
-);
-
-const NO_ALERT_CONDITION_NEXT_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.noAlertConditionNextTooltip',
-  { defaultMessage: 'Add an alert condition to the query before continuing' }
-);
-
-const SPLIT_FAILED_NEXT_TOOLTIP = i18n.translate(
-  'xpack.alertingV2.composeDiscover.flyout.splitFailedNextTooltip',
-  {
-    defaultMessage:
-      'Review your query or separate the base query and alert condition before continuing',
-  }
 );
 
 const VALIDATION_ERRORS_NEXT_TOOLTIP = i18n.translate(
@@ -109,39 +95,24 @@ export const ComposeDiscoverFooter = ({
    */
   const timeFieldUnresolved = currentStep?.id === 'alertCondition' && !watchedTimeField;
 
-  /*
-   * Per #621/#623: when authoring an alert via the heuristic-split flow, step 1
-   * can only advance once the query has a valid alert condition (composed base +
-   * alert segment). no_where, split-failed and empty all block Next.
-   */
-  const alertConditionState =
-    currentStep?.id === 'alertCondition' && isAlert
-      ? getEsqlSummaryState(uiState.queryCommitted, watchedQuery)
-      : undefined;
-  /*
-   * Only a clean auto-split ('success') lets an alert rule advance. This blocks
-   * 'no_alert_condition', 'empty', and 'split_failed'. Note #622's table shows
-   * 'split_failed' as Next-enabled, but that assumes the manual-split CTA (#624)
-   * exists to resolve the split; until #624 lands we block it (per #623) to avoid
-   * dead-ending users at Create with an unresolvable query.
-   */
-  const invalidAlertCondition =
-    alertConditionState !== undefined && alertConditionState !== 'success';
+  const invalidCommittedQuery =
+    isConditionStep &&
+    !isBuilderStep &&
+    isAlert &&
+    !isCommittedQueryValid(watchedQuery, 'alert', uiState.queryCommitted);
 
   const nextDisabled =
     (!isBuilderMode && uiState.childOpen) ||
     hasValidationErrors ||
     (isConditionStep && !isBuilderStep && !uiState.queryCommitted) ||
     (isBuilderStep && !isBuilderStepValid) ||
-    invalidAlertCondition ||
+    invalidCommittedQuery ||
     timeFieldUnresolved;
 
   const getNextTooltip = (): string | undefined => {
     if (hasValidationErrors) return VALIDATION_ERRORS_NEXT_TOOLTIP;
     if (isConditionStep && !uiState.queryCommitted) return NEXT_DISABLED_TOOLTIP;
-    if (alertConditionState === 'no_alert_condition') return NO_ALERT_CONDITION_NEXT_TOOLTIP;
-    if (alertConditionState === 'split_failed') return SPLIT_FAILED_NEXT_TOOLTIP;
-    if (invalidAlertCondition) return NEXT_DISABLED_TOOLTIP;
+    if (invalidCommittedQuery) return NEXT_DISABLED_TOOLTIP;
     if (timeFieldUnresolved) return TIME_FIELD_UNRESOLVED_NEXT_TOOLTIP;
     return undefined;
   };
@@ -192,7 +163,7 @@ export const ComposeDiscoverFooter = ({
           {uiState.step > 0 && (
             <EuiButton
               color="text"
-              iconType="arrowLeft"
+              iconType="chevronSingleLeft"
               isDisabled={!isBuilderMode && uiState.childOpen}
               onClick={() => dispatch({ type: 'GO_BACK', isBuilderMode })}
               data-test-subj="composeDiscoverBack"
@@ -216,7 +187,7 @@ export const ComposeDiscoverFooter = ({
             <EuiToolTip content={getNextTooltip()}>
               <EuiButton
                 color="text"
-                iconType="arrowRight"
+                iconType="chevronSingleRight"
                 iconSide="right"
                 isDisabled={nextDisabled}
                 onClick={onNext}

@@ -793,7 +793,6 @@ export const NewRelic: ConnectorSpec = {
         `{ actor { user { name email } } }`
       );
       return {
-        ok: true,
         message: `Connected to New Relic NerdGraph as ${data.actor.user.name} (${data.actor.user.email}).`,
       };
     },

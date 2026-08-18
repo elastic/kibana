@@ -1,5 +1,5 @@
 {
-  "sha1": "8433a06bd534bed01093b01ff001b3af14592268",
+  "sha1": "259bac0a76a1cabd8da0a8f2af39267108bcb1a9",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -12,8 +12,8 @@
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/global.setup.ts",
-        "line": 10,
-        "column": 16
+        "line": 5,
+        "column": 1
       }
     },
     {
@@ -26,8 +26,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
-        "line": 15,
-        "column": 14
+        "line": 14,
+        "column": 9
       }
     },
     {
@@ -40,13 +40,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation_destinations.spec.ts",
-        "line": 70,
-        "column": 14
+        "line": 51,
+        "column": 29
       }
     },
     {
-      "id": "b760102fdea7e93-8fde21219c56e4f",
-      "title": "serverless security navigation security serverless side nav, breadcrumbs, Launchpad panel, and active nav highlight",
+      "id": "b760102fdea7e93-de1b1b33189da0f",
+      "title": "serverless security navigation security serverless navigation, Launchpad panel, and active nav highlight",
       "expectedStatus": "passed",
       "tags": [
         "@local-serverless-security_complete",
@@ -54,8 +54,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
-        "line": 22,
-        "column": 14
+        "line": 18,
+        "column": 51
       }
     },
     {
@@ -68,8 +68,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution_serverless/test/scout/ui/parallel_tests/navigation.spec.ts",
-        "line": 71,
-        "column": 14
+        "line": 46,
+        "column": 15
       }
     }
   ]

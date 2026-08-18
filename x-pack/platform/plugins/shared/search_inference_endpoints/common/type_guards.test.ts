@@ -10,6 +10,7 @@ import {
   isInferenceEndpointWithKibanaConnectorHeuristic,
   isInferenceEndpointWithDisplayNameMetadata,
   isCspRegion,
+  isReasoningEffortLevel,
 } from './type_guards';
 
 const baseEndpoint = (overrides: Partial<InferenceInferenceEndpointInfo> = {}) =>
@@ -89,5 +90,29 @@ describe('isCspRegion', () => {
 
   it('returns false when region is not a string', () => {
     expect(isCspRegion({ csp: 'aws', region: null })).toBe(false);
+  });
+});
+
+describe('isReasoningEffortLevel', () => {
+  it.each(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])(
+    'returns true for valid level %s',
+    (level) => {
+      expect(isReasoningEffortLevel(level)).toBe(true);
+    }
+  );
+
+  it('returns false for an unsupported value', () => {
+    expect(isReasoningEffortLevel('extra_high')).toBe(false);
+  });
+
+  it('returns false for an empty string', () => {
+    expect(isReasoningEffortLevel('')).toBe(false);
+  });
+
+  it('returns false for non-string values', () => {
+    expect(isReasoningEffortLevel(undefined)).toBe(false);
+    expect(isReasoningEffortLevel(null)).toBe(false);
+    expect(isReasoningEffortLevel(42)).toBe(false);
+    expect(isReasoningEffortLevel({ effort: 'high' })).toBe(false);
   });
 });

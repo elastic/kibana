@@ -39,7 +39,7 @@ const retryableWriteCall = (): ConverseStep => ({
 });
 
 const allExpectedTools: ConverseStep[] = [
-  toolCall(TOOL_ID_EVENT_SEARCH, { exclude_unconfirmed_signals: true }),
+  toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }),
   toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
   toolCall(TOOL_ID_EXECUTE_ESQL),
   toolCall(TOOL_ID_EVENTS_WRITE),
@@ -82,26 +82,51 @@ describe('scoreToolUsage', () => {
     expect(result.label).toBe(`missing-${TOOL_ID_EVENT_SEARCH}`);
   });
 
-  it('rejects event searches that include confirmed false signals', () => {
-    const steps = allExpectedTools.map((step) =>
-      step.tool_id === TOOL_ID_EVENT_SEARCH
-        ? toolCall(TOOL_ID_EVENT_SEARCH, { exclude_unconfirmed_signals: false })
-        : step
-    );
-    const result = scoreToolUsage({ steps, detectionCount: 1 });
+  it('requires topology search before writing a topology-bearing event after a zero-result rule search', () => {
+    const steps = [
+      toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }, [
+        { data: { total: 0, events: [] } },
+      ]),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ causal_features: [{ feature_id: 'checkout' }], blast_radius: [] }],
+      }),
+    ];
 
-    expect(result.score).toBe(0);
-    expect(result.label).toBe('unfiltered-event-search');
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
+      score: 0,
+      label: 'missing-topology-search',
+    });
+  });
+
+  it('allows topology writes on a new episode when no open event candidates exist', () => {
+    const steps = [
+      toolCall(
+        TOOL_ID_EVENT_SEARCH,
+        { exclude_unconfirmed_signals: true, rule_uuids: ['rule-uuid-1'] },
+        [{ data: { total: 0, events: [] } }]
+      ),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ causal_features: [{ feature_id: 'checkout' }], blast_radius: [] }],
+      }),
+    ];
+
+    expect(
+      scoreToolUsage({ steps, detectionCount: 1, allowNewEventTopologyWrite: true }).label
+    ).toBe('correct');
   });
 
   it('requires query KI search', () => {
     const steps = [
-      toolCall(TOOL_ID_EVENT_SEARCH, { exclude_unconfirmed_signals: true }),
+      toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }),
       toolCall(TOOL_ID_KI_SEARCH, { kind: ['feature'] }),
       toolCall(TOOL_ID_EVENTS_WRITE),
     ];
 
-    expect(scoreToolUsage({ steps, detectionCount: 1 }).label).toBe('missing-query-ki-search');
+    expect(scoreToolUsage({ steps, detectionCount: 1 }).label).toBe(`missing-${TOOL_ID_KI_SEARCH}`);
   });
 
   it('penalizes multiple event writes without a partial-failure retry', () => {
@@ -109,10 +134,13 @@ describe('scoreToolUsage', () => {
       steps: [...allExpectedTools, toolCall(TOOL_ID_EVENTS_WRITE)],
       detectionCount: 1,
     });
-    expect(result).toMatchObject({ score: 0.75, label: 'multiple-events-write-calls' });
+    expect(result).toMatchObject({ score: 0.75, label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls` });
+    expect(result.explanation).toBe(
+      `${TOOL_ID_EVENTS_WRITE} was called 2 times without one justified partial-failure retry`
+    );
   });
 
-  it('allows one retry after a discovery bulk item fails', () => {
+  it('allows one retry after an event bulk item fails', () => {
     const steps = allExpectedTools.map((step) =>
       step.tool_id === TOOL_ID_EVENTS_WRITE ? retryableWriteCall() : step
     );
@@ -185,12 +213,39 @@ describe('scoreToolUsageContinuation', () => {
           ...allExpectedTools,
           toolCall(TOOL_ID_EVENT_SEARCH, {
             topology_feature_ids: ['transactionhistory'],
-            exclude_unconfirmed_signals: true,
           }),
         ],
       },
     ]);
 
     expect(result.score).toBe(1);
+  });
+
+  it('still flags missing-topology-search when expectReuse is false (new event after closed seed)', () => {
+    const stepsWithTopologyWrite = [
+      toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }, [
+        { data: { total: 0, events: [] } },
+      ]),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ causal_features: [{ feature_id: 'checkout' }], blast_radius: [] }],
+      }),
+    ];
+
+    expect(scoreToolUsage({ steps: stepsWithTopologyWrite, detectionCount: 1 }).label).toBe(
+      'missing-topology-search'
+    );
+
+    const result = scoreToolUsageContinuation([
+      {
+        producedEventIds: ['event-new'],
+        expectReuse: false,
+        steps: stepsWithTopologyWrite,
+      },
+    ]);
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('cycle 1: missing-topology-search (0)');
   });
 });

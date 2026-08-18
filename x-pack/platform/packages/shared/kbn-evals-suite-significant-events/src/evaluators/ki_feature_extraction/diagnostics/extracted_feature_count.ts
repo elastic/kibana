@@ -25,7 +25,7 @@ export const extractedFeatureCountEvaluator = {
     return {
       score: features.length,
       explanation: `Returned ${features.length} feature(s) with ${totalEvidence} evidence string(s)`,
-      details: {
+      metadata: {
         featureCount: features.length,
         totalEvidence,
         maxEvidencePerFeature: evidenceCounts.length ? Math.max(...evidenceCounts) : 0,

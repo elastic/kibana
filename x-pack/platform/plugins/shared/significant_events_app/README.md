@@ -9,17 +9,14 @@ knowledge indicators, rules (queries), detections, events, memory and settings. 
 consumes the `significant_events` plugin (server APIs via the typed
 `significantEventsRepositoryClient`).
 
-The app is gated behind the Significant Events rollout feature flag
-(`streams.significantEventsAvailable`), the Enterprise license and the pricing tier;
-when unavailable it is hidden from navigation/global search and direct visits show
+Availability is decided server-side by `GET /internal/significant_events/availability`
+(rollout feature flag, project type, pricing tier, Enterprise license and required
+plugins). It gates app/deep-link visibility in global search and the page itself; when
+unavailable the app is hidden from navigation/global search and direct visits show
 `SignificantEventsNotEnabledPrompt`.
 
 ## Start contract
 
-- `availability$`: client-side gate (flag + license + pricing). Used for app/deep-link
-  visibility in global search. Streams does **not** subscribe to this; it probes
-  `GET /internal/significant_events/availability` via the optional `significant_events`
-  start client instead (that endpoint also covers required plugins).
 - `getKnowledgeIndicatorsPanel()`: factory returning a lazy embeddable panel for
   Streams stream overview. Pass `{ streamName }`. Providers and the panel chunk stay
   behind a dynamic import so they are not part of SEA page-load.
