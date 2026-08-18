@@ -22,12 +22,8 @@ const clampStyle = (lines: number) => css`
   overflow: hidden;
 `;
 
-const rowOverrideStyle = css`
-  display: contents;
-
-  .euiCard {
-    padding: 12px;
-  }
+const cardOverrideStyle = css`
+  padding: 12px;
 
   .euiCard__title {
     ${clampStyle(TITLE_LINES)}
@@ -40,22 +36,21 @@ export interface VariantRowProps {
 
 /** One collection method inside the chooser. */
 export const VariantRow = ({ variant }: VariantRowProps) => (
-  <div css={rowOverrideStyle}>
-    <EuiCard
-      layout="horizontal"
-      titleSize="xs"
-      hasBorder
-      paddingSize="none"
-      icon={variant.icon}
-      title={variant.title}
-      description={
-        <EuiTextColor color="subdued" css={clampStyle(DESCRIPTION_LINES)}>
-          {variant.description}
-        </EuiTextColor>
-      }
-      href={variant.href}
-      onClick={variant.onClick}
-      data-test-subj={variant['data-test-subj']}
-    />
-  </div>
+  <EuiCard
+    css={cardOverrideStyle}
+    layout="horizontal"
+    titleSize="xs"
+    hasBorder
+    paddingSize="none"
+    icon={variant.icon}
+    title={variant.title}
+    description={
+      <EuiTextColor color="subdued" css={clampStyle(DESCRIPTION_LINES)}>
+        {variant.description}
+      </EuiTextColor>
+    }
+    href={variant.href}
+    onClick={variant.onClick}
+    data-test-subj={variant['data-test-subj']}
+  />
 );
