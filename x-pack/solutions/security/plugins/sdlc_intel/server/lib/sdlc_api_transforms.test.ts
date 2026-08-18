@@ -41,7 +41,15 @@ describe('sdlc_api_transforms', () => {
     ticketsByRepo: [
       {
         repo: 'elastic/kibana',
-        items: [{ issueRef: '#11201', number: 11201, title: 'Workflow fetch', status: 'open', prRefs: [] }],
+        items: [
+          {
+            issueRef: '#11201',
+            number: 11201,
+            title: 'Workflow fetch',
+            status: 'open',
+            prRefs: [],
+          },
+        ],
       },
     ],
   };

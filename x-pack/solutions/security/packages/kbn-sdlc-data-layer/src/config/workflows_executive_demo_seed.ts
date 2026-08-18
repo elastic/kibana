@@ -113,7 +113,10 @@ const buildDemoTickets = (displayId: string) => [
   },
 ];
 
-export const buildWorkflowsExecutiveDemoDocuments = (): Array<{ id: string; doc: Record<string, unknown> }> => {
+export const buildWorkflowsExecutiveDemoDocuments = (): Array<{
+  id: string;
+  doc: Record<string, unknown>;
+}> => {
   const timestamp = new Date().toISOString();
   const roadmap = {
     ...ELASTIC_WORKFLOWS_ROADMAP,

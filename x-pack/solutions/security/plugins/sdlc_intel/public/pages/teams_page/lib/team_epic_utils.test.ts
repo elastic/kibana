@@ -6,11 +6,7 @@
  */
 
 import type { SdlcEpicPhaseSummary, SdlcTeamCard } from '../../../../common/api/types';
-import {
-  computeAverageTeamsPerEpic,
-  readTicketRollup,
-  resolveTeamName,
-} from './team_epic_utils';
+import { computeAverageTeamsPerEpic, readTicketRollup, resolveTeamName } from './team_epic_utils';
 
 const createEpic = (overrides: Partial<SdlcEpicPhaseSummary> = {}): SdlcEpicPhaseSummary => ({
   id: 'epic:dlvp:phase-a',
@@ -66,7 +62,17 @@ describe('team_epic_utils', () => {
   describe('computeAverageTeamsPerEpic', () => {
     it('dedupes epics across teams and averages team counts', () => {
       const epicsByTeam = {
-        siem: [createEpic({ id: 'a', teams: { ownOrgTeam: 'siem', contributingOrgTeams: ['siem'], crossTeam: false, teamCount: 1 } })],
+        siem: [
+          createEpic({
+            id: 'a',
+            teams: {
+              ownOrgTeam: 'siem',
+              contributingOrgTeams: ['siem'],
+              crossTeam: false,
+              teamCount: 1,
+            },
+          }),
+        ],
         si: [
           createEpic({
             id: 'a',
@@ -79,7 +85,12 @@ describe('team_epic_utils', () => {
           }),
           createEpic({
             id: 'b',
-            teams: { ownOrgTeam: 'si', contributingOrgTeams: ['si'], crossTeam: false, teamCount: 1 },
+            teams: {
+              ownOrgTeam: 'si',
+              contributingOrgTeams: ['si'],
+              crossTeam: false,
+              teamCount: 1,
+            },
           }),
         ],
       };

@@ -189,9 +189,7 @@ export const groupEpicsByRoadmap = (epics: readonly SdlcEpicPhaseSummary[]): Sdl
     groups.set(roadmapId, {
       id: roadmapId,
       title:
-        roadmapId === 'unmapped'
-          ? UNMAPPED_ROADMAP_GROUP_TITLE
-          : epic.roadmap.title ?? roadmapId,
+        roadmapId === 'unmapped' ? UNMAPPED_ROADMAP_GROUP_TITLE : epic.roadmap.title ?? roadmapId,
       product: epic.roadmap.product ?? 'Unknown',
       coveragePct: 0,
       epicCount: 1,
@@ -213,7 +211,9 @@ export const groupEpicsByRoadmap = (epics: readonly SdlcEpicPhaseSummary[]): Sdl
     .sort((left, right) => left.title.localeCompare(right.title));
 };
 
-export const buildPortfolioSummary = (epics: readonly SdlcEpicPhaseSummary[]): SdlcPortfolioSummary => {
+export const buildPortfolioSummary = (
+  epics: readonly SdlcEpicPhaseSummary[]
+): SdlcPortfolioSummary => {
   const statusCounts = { closed: 0, inProgress: 0, open: 0 };
   let ticketsWithoutPrCount = 0;
 
@@ -271,8 +271,7 @@ export const buildTeamMatrixRows = ({
     const teamKey = teamRecord.org_team.key;
     const teamEpics = epics.filter(
       (epic) =>
-        epic.teams.ownOrgTeam === teamKey ||
-        epic.teams.contributingOrgTeams.includes(teamKey)
+        epic.teams.ownOrgTeam === teamKey || epic.teams.contributingOrgTeams.includes(teamKey)
     );
 
     const cells: Record<string, SdlcTeamMatrixCell> = {};
@@ -319,8 +318,7 @@ export const buildTeamCards = ({
     const teamKey = teamRecord.org_team.key;
     const teamEpics = epics.filter(
       (epic) =>
-        epic.teams.ownOrgTeam === teamKey ||
-        epic.teams.contributingOrgTeams.includes(teamKey)
+        epic.teams.ownOrgTeam === teamKey || epic.teams.contributingOrgTeams.includes(teamKey)
     );
 
     let ticketsDone = 0;
@@ -331,10 +329,16 @@ export const buildTeamCards = ({
     for (const epic of teamEpics) {
       const p4 = epic.phases.p4_tickets;
       if (p4 && typeof p4 === 'object') {
-        const done = typeof (p4 as { done?: number }).done === 'number' ? (p4 as { done: number }).done : 0;
-        const total = typeof (p4 as { total?: number }).total === 'number' ? (p4 as { total: number }).total : 0;
+        const done =
+          typeof (p4 as { done?: number }).done === 'number' ? (p4 as { done: number }).done : 0;
+        const total =
+          typeof (p4 as { total?: number }).total === 'number'
+            ? (p4 as { total: number }).total
+            : 0;
         const aiGen =
-          typeof (p4 as { ai_gen?: number }).ai_gen === 'number' ? (p4 as { ai_gen: number }).ai_gen : 0;
+          typeof (p4 as { ai_gen?: number }).ai_gen === 'number'
+            ? (p4 as { ai_gen: number }).ai_gen
+            : 0;
         ticketsDone += done;
         ticketsTotal += total;
         aiGenerated += aiGen;
@@ -344,7 +348,9 @@ export const buildTeamCards = ({
 
     const gatesPct =
       teamEpics.length > 0
-        ? Math.round(teamEpics.reduce((sum, epic) => sum + epic.gatesPassedPct, 0) / teamEpics.length)
+        ? Math.round(
+            teamEpics.reduce((sum, epic) => sum + epic.gatesPassedPct, 0) / teamEpics.length
+          )
         : 0;
 
     return {
@@ -371,8 +377,7 @@ export const groupEpicsByTeam = (
     const teamKey = teamRecord.org_team.key;
     grouped[teamKey] = epics.filter(
       (epic) =>
-        epic.teams.ownOrgTeam === teamKey ||
-        epic.teams.contributingOrgTeams.includes(teamKey)
+        epic.teams.ownOrgTeam === teamKey || epic.teams.contributingOrgTeams.includes(teamKey)
     );
   }
 

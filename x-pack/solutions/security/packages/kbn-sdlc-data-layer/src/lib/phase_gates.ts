@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -112,10 +119,7 @@ export const computeP4Gate = (tickets: TicketRollup): PhaseGateStatus => {
   return 'fail';
 };
 
-export const computeP5Gate = (
-  tickets: TicketRollup,
-  prs: PullRequestRollup
-): PhaseGateStatus => {
+export const computeP5Gate = (tickets: TicketRollup, prs: PullRequestRollup): PhaseGateStatus => {
   if (prs.total === 0 && tickets.total === 0) {
     return 'ns';
   }
@@ -179,7 +183,6 @@ export const computeGateRollup = (
 ): { applicable: number; passed: number; pct: number } => {
   const applicable = gates.filter((gate) => gate !== 'ns');
   const passed = applicable.filter((gate) => gate === 'pass');
-  const pct =
-    applicable.length > 0 ? Math.round((passed.length / applicable.length) * 100) : 0;
+  const pct = applicable.length > 0 ? Math.round((passed.length / applicable.length) * 100) : 0;
   return { applicable: applicable.length, passed: passed.length, pct };
 };

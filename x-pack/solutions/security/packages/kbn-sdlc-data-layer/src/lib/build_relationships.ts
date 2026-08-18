@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -36,8 +43,7 @@ export interface TeamForRelationships {
 
 export const buildIssueRef = (repo: string, number: number): string => `issue:${repo}#${number}`;
 
-export const buildPullRequestRef = (repo: string, number: number): string =>
-  `pr:${repo}#${number}`;
+export const buildPullRequestRef = (repo: string, number: number): string => `pr:${repo}#${number}`;
 
 export const buildEpicRef = (projectNumber: number, epicKey: string): string =>
   `epic:${projectNumber}:${slugifyEpicKey(epicKey)}`;
@@ -51,11 +57,8 @@ export const buildRepoRef = (fullName: string): string => `repo:${fullName}`;
 
 const sanitizeForDocumentId = (value: string): string => value.replace(/[:#/]/g, '_');
 
-export const buildRelationshipDocumentId = (
-  from: string,
-  relation: string,
-  to: string
-): string => `edge:${sanitizeForDocumentId(from)}:${relation}:${sanitizeForDocumentId(to)}`;
+export const buildRelationshipDocumentId = (from: string, relation: string, to: string): string =>
+  `edge:${sanitizeForDocumentId(from)}:${relation}:${sanitizeForDocumentId(to)}`;
 
 const isPullRequestContent = (contentRef?: ProjectItemForRelationships['contentRef']): boolean =>
   contentRef?.type === 'PullRequest';

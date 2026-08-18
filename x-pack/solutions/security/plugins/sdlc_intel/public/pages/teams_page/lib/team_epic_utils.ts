@@ -61,7 +61,5 @@ export const computeAverageTeamsPerEpic = (
   return Math.round((totalTeams / epics.length) * 10) / 10;
 };
 
-export const resolveTeamName = (
-  teamKey: string,
-  teams: readonly SdlcTeamCard[]
-): string => teams.find((team) => team.key === teamKey)?.name ?? teamKey;
+export const resolveTeamName = (teamKey: string, teams: readonly SdlcTeamCard[]): string =>
+  teams.find((team) => team.key === teamKey)?.name ?? teamKey;

@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -75,9 +82,7 @@ const ensureIndices = async (
       });
       created += 1;
     } catch (error) {
-      failed.push(
-        `${indexName}: ${error instanceof Error ? error.message : String(error)}`
-      );
+      failed.push(`${indexName}: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
@@ -110,9 +115,7 @@ export const setupSdlcIndices = async (esClient: ElasticsearchClient) => {
     await ensureLegacySyncStateAlias(esClient);
   } catch (error) {
     failed.push(
-      `${LEGACY_GITHUB_SYNC_STATE_ALIAS}: ${
-        error instanceof Error ? error.message : String(error)
-      }`
+      `${LEGACY_GITHUB_SYNC_STATE_ALIAS}: ${error instanceof Error ? error.message : String(error)}`
     );
   }
   return { processed: ALL_SDLC_DATA_INDICES.length, created, failed };
@@ -140,10 +143,12 @@ export const seedSdlcReferenceData = async (esClient: ElasticsearchClient) => {
     }
   }
 
-  const indexOperations = documents.flatMap(({ id, doc }: { id: string; doc: TeamDimensionRecord }) => [
-    { index: { _index: SDLC_INDEX_NAMES.SDLC_TEAM_DIMENSION, _id: id } },
-    doc,
-  ]);
+  const indexOperations = documents.flatMap(
+    ({ id, doc }: { id: string; doc: TeamDimensionRecord }) => [
+      { index: { _index: SDLC_INDEX_NAMES.SDLC_TEAM_DIMENSION, _id: id } },
+      doc,
+    ]
+  );
   const operations = [...staleDeleteOperations, ...indexOperations];
   if (operations.length) {
     await esClient.bulk({ refresh: 'wait_for', operations });
@@ -515,9 +520,7 @@ export const syncGithubProjects = async ({
       resumedProjectNumbers.push(projectNumber);
     }
 
-    let projectItemsProcessed = shouldResume
-      ? existingSyncState?.stats?.items_processed ?? 0
-      : 0;
+    let projectItemsProcessed = shouldResume ? existingSyncState?.stats?.items_processed ?? 0 : 0;
     let projectMissing = false;
 
     await writeProjectSyncState({
@@ -598,8 +601,9 @@ export const syncGithubProjects = async ({
 
       for (const item of project.items.nodes) {
         const fieldMap = fieldValuesToMap(
-          ((item.fieldValues as { nodes?: Array<Record<string, unknown>> })?.nodes ??
-            []) as Array<Record<string, unknown>>
+          ((item.fieldValues as { nodes?: Array<Record<string, unknown>> })?.nodes ?? []) as Array<
+            Record<string, unknown>
+          >
         );
         const content = item.content as
           | {
@@ -1032,9 +1036,7 @@ export const syncGithubOrgCatalog = async ({
         processed += 1;
         updated += 1;
       } catch (error) {
-        failedTeams.push(
-          `${team.slug}: ${error instanceof Error ? error.message : String(error)}`
-        );
+        failedTeams.push(`${team.slug}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
 
@@ -1075,7 +1077,9 @@ const projectItemFieldsToMap = (
       .map((field) => [field.name as string, field.value as string])
   );
 
-const resolveEpicKeyFromProjectItem = (source: EpicPhaseProjectItemSource | undefined): string | undefined => {
+const resolveEpicKeyFromProjectItem = (
+  source: EpicPhaseProjectItemSource | undefined
+): string | undefined => {
   if (!source) {
     return undefined;
   }
@@ -1324,7 +1328,9 @@ const buildEpicPhasesForProject = async ({
     const representativeChildFieldMap =
       childFieldMaps.find(
         (fieldMap) => fieldMap['Product Initiative'] || fieldMap.Team || fieldMap.Status
-      ) ?? childFieldMaps[0] ?? {};
+      ) ??
+      childFieldMaps[0] ??
+      {};
 
     const fields: Record<string, string> = {
       ...representativeChildFieldMap,
@@ -1491,9 +1497,7 @@ const deleteProjectRelationshipEdges = async ({
   });
 };
 
-const deleteOrgCatalogRelationshipEdges = async (
-  esClient: ElasticsearchClient
-): Promise<void> => {
+const deleteOrgCatalogRelationshipEdges = async (esClient: ElasticsearchClient): Promise<void> => {
   await esClient.deleteByQuery({
     index: SDLC_INDEX_NAMES.GITHUB_INTEL_RELATIONSHIPS,
     conflicts: 'proceed',
@@ -1561,14 +1565,7 @@ export const buildRelationshipsForProject = async ({
     query: {
       term: { 'project.number': projectNumber },
     },
-    _source: [
-      'entity.id',
-      'project.number',
-      'org.login',
-      'hierarchy',
-      'content_ref',
-      'fields',
-    ],
+    _source: ['entity.id', 'project.number', 'org.login', 'hierarchy', 'content_ref', 'fields'],
   });
 
   const items = response.hits.hits

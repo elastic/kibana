@@ -103,7 +103,7 @@ export const PhaseGateCell = ({
           border: ${cell.gate === 'ns' ? `1.5px dashed ${euiTheme.border.color}` : 'none'};
         `}
       >
-        <EuiIcon type={gateStyles.icon} size="s" />
+        <EuiIcon type={gateStyles.icon} size="s" aria-hidden={true} />
       </div>
       <EuiText size="xs">
         <strong style={{ color: gateStyles.color }}>{gateStyles.label}</strong>
@@ -128,7 +128,11 @@ export const PhaseGateCell = ({
         </EuiButtonEmpty>
       ) : null}
       {expanded && cell.ticketDetails ? (
-        <div css={css`width: 100%;`}>
+        <div
+          css={css`
+            width: 100%;
+          `}
+        >
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem>
               <EuiText size="xs" color="subdued">

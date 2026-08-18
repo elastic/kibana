@@ -21,7 +21,11 @@ export const CoverageRing = ({
   const circumference = 2 * Math.PI * radius;
   const dash = (coveragePct / 100) * circumference;
   const level =
-    coveragePct >= 70 ? euiTheme.colors.success : coveragePct >= 30 ? euiTheme.colors.warning : euiTheme.colors.danger;
+    coveragePct >= 70
+      ? euiTheme.colors.success
+      : coveragePct >= 30
+      ? euiTheme.colors.warning
+      : euiTheme.colors.danger;
 
   return (
     <div

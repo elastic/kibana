@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -19,7 +26,10 @@ const resolveConnector = async (
   expectedTypeId: string
 ): Promise<{ id: string; actionTypeId: string }> => {
   try {
-    const connector = await actionsClient.get({ id: connectorIdOrName, throwIfSystemAction: false });
+    const connector = await actionsClient.get({
+      id: connectorIdOrName,
+      throwIfSystemAction: false,
+    });
     if (connector.actionTypeId !== expectedTypeId) {
       throw new Error(
         `Connector '${connectorIdOrName}' has type '${connector.actionTypeId}', expected '${expectedTypeId}'.`
@@ -29,7 +39,8 @@ const resolveConnector = async (
   } catch {
     const connectors = await actionsClient.getAll({});
     const byName = connectors.find(
-      (connector) => connector.name === connectorIdOrName && connector.actionTypeId === expectedTypeId
+      (connector) =>
+        connector.name === connectorIdOrName && connector.actionTypeId === expectedTypeId
     );
     if (!byName) {
       throw new Error(

@@ -172,8 +172,22 @@ describe('ElasticsearchActionStepImpl', () => {
         errors: true,
         items: [
           { index: { _index: 'my-test', _id: 'doc1', status: 201 } },
-          { index: { _index: 'my-test', _id: 'doc2', status: 400, error: { type: 'mapper_parsing_exception', reason: 'failed' } } },
-          { index: { _index: 'my-test', _id: 'doc3', status: 500, error: { type: 'exception', reason: 'timeout' } } },
+          {
+            index: {
+              _index: 'my-test',
+              _id: 'doc2',
+              status: 400,
+              error: { type: 'mapper_parsing_exception', reason: 'failed' },
+            },
+          },
+          {
+            index: {
+              _index: 'my-test',
+              _id: 'doc3',
+              status: 500,
+              error: { type: 'exception', reason: 'timeout' },
+            },
+          },
         ],
       };
       mockEsClient.transport.request = jest.fn().mockResolvedValue(bulkResponse);

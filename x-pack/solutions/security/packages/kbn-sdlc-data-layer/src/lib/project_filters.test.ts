@@ -1,15 +1,30 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
 import { filterGithubProjects, resolveGithubProjectsToSync } from './project_filters';
 
 const PROJECTS = [
-  { number: 705, title: 'Security Roadmap 2025', url: 'https://github.com/orgs/elastic/projects/705' },
+  {
+    number: 705,
+    title: 'Security Roadmap 2025',
+    url: 'https://github.com/orgs/elastic/projects/705',
+  },
   { number: 100, title: 'Platform Backlog', url: 'https://github.com/orgs/elastic/projects/100' },
-  { number: 200, title: 'Security Experiments', url: 'https://github.com/orgs/elastic/projects/200' },
+  {
+    number: 200,
+    title: 'Security Experiments',
+    url: 'https://github.com/orgs/elastic/projects/200',
+  },
 ];
 
 describe('filterGithubProjects', () => {

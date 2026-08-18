@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -33,10 +40,16 @@ const inferMilestone = (text: string): ReleaseMilestone | undefined => {
   if (FEATURE_FREEZE_KEYWORDS.test(normalized)) {
     return 'feature_freeze';
   }
-  if (QA_KEYWORDS.test(normalized) && (PROMOTION_KEYWORDS.test(normalized) || RELEASE_KEYWORDS.test(normalized))) {
+  if (
+    QA_KEYWORDS.test(normalized) &&
+    (PROMOTION_KEYWORDS.test(normalized) || RELEASE_KEYWORDS.test(normalized))
+  ) {
     return 'qa_promotion';
   }
-  if (PRODUCTION_KEYWORDS.test(normalized) && (PROMOTION_KEYWORDS.test(normalized) || RELEASE_KEYWORDS.test(normalized))) {
+  if (
+    PRODUCTION_KEYWORDS.test(normalized) &&
+    (PROMOTION_KEYWORDS.test(normalized) || RELEASE_KEYWORDS.test(normalized))
+  ) {
     return 'public_release';
   }
   if (RELEASE_KEYWORDS.test(normalized)) {
@@ -106,5 +119,4 @@ export const parseServerlessSlackMessage = (
 
 export const parseServerlessSlackMessages = (
   messages: SlackMessageForReleaseParse[]
-): ReleaseCalendarEvent[] =>
-  messages.flatMap((message) => parseServerlessSlackMessage(message));
+): ReleaseCalendarEvent[] => messages.flatMap((message) => parseServerlessSlackMessage(message));

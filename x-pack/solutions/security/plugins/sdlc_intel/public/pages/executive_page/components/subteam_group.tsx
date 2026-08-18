@@ -59,7 +59,13 @@ export const SubteamGroup = ({
             value={averageCoverage}
             max={100}
             size="s"
-            color={coverageLevel === 'good' ? 'success' : coverageLevel === 'amber' ? 'warning' : 'danger'}
+            color={
+              coverageLevel === 'good'
+                ? 'success'
+                : coverageLevel === 'amber'
+                ? 'warning'
+                : 'danger'
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

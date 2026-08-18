@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -137,7 +144,10 @@ describe('buildEpicPhaseDocument', () => {
       ticketsByRepo: [],
     });
 
-    expect(doc.roadmap).toMatchObject({ id: 'workflows', title: 'Elastic Workflows (Automation) Roadmap' });
+    expect(doc.roadmap).toMatchObject({
+      id: 'workflows',
+      title: 'Elastic Workflows (Automation) Roadmap',
+    });
     expect(doc.teams).toMatchObject({ own_org_team: 'siem', cross_team: false });
     expect(doc.phases).toMatchObject({
       p4_tickets: expect.objectContaining({ gate: 'warn', total: 2 }),

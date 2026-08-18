@@ -98,7 +98,7 @@ export const RoadmapCard = ({
                 justify-content: center;
               `}
             >
-              <EuiIcon type={accent.icon} />
+              <EuiIcon type={accent.icon} aria-hidden={true} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -183,19 +183,19 @@ export const RoadmapCard = ({
           gap: ${euiTheme.size.s};
         `}
       >
-        {shouldRenderEpics
-          ? roadmap.epics.map((epic) => (
-              <EpicItem key={epic.id} epic={epic} forceOpen={forceEpicsOpen} />
-            ))
-          : (
-            <EuiText size="xs" color="subdued">
-              <FormattedMessage
-                id="xpack.sdlcIntel.executive.roadmap.expandToLoad"
-                defaultMessage="Expand to load {count, plural, one {# epic} other {# epics}}"
-                values={{ count: roadmap.epicCount }}
-              />
-            </EuiText>
-          )}
+        {shouldRenderEpics ? (
+          roadmap.epics.map((epic) => (
+            <EpicItem key={epic.id} epic={epic} forceOpen={forceEpicsOpen} />
+          ))
+        ) : (
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.sdlcIntel.executive.roadmap.expandToLoad"
+              defaultMessage="Expand to load {count, plural, one {# epic} other {# epics}}"
+              values={{ count: roadmap.epicCount }}
+            />
+          </EuiText>
+        )}
       </div>
     </EuiAccordion>
   );

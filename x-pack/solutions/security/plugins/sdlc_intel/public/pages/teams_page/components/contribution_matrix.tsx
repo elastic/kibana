@@ -31,7 +31,10 @@ interface MatrixRow {
   readonly cells: Readonly<Record<string, { pct: number; phaseGates: readonly MiniPhaseGate[] }>>;
 }
 
-const miniGateColor = (gate: MiniPhaseGate, euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']) => {
+const miniGateColor = (
+  gate: MiniPhaseGate,
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme']
+) => {
   if (gate === 'p') {
     return euiTheme.colors.backgroundLightSuccess;
   }
@@ -80,9 +83,7 @@ export const ContributionMatrix = ({
   const columns: Array<EuiBasicTableColumn<MatrixRow>> = [
     {
       field: 'roadmapLabel',
-      name: (
-        <FormattedMessage id="xpack.sdlcIntel.teams.matrix.roadmap" defaultMessage="Roadmap" />
-      ),
+      name: <FormattedMessage id="xpack.sdlcIntel.teams.matrix.roadmap" defaultMessage="Roadmap" />,
       width: TEAMS_MATRIX_ROADMAP_COLUMN_WIDTH,
       render: (_, item) => (
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -125,7 +126,11 @@ export const ContributionMatrix = ({
             <EuiText size="xs" color="subdued">
               {cell.pct}%
             </EuiText>
-            <div css={css`width: 36px;`}>
+            <div
+              css={css`
+                width: 36px;
+              `}
+            >
               <EuiProgress value={cell.pct} max={100} size="s" color="primary" />
             </div>
             <div

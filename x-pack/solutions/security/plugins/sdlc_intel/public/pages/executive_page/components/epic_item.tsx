@@ -19,11 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SdlcEpicPhaseSummary } from '../../../../common/api/types';
-import {
-  getDeckBucketLabel,
-  getEpicStatusLabel,
-  getCoverageLevel,
-} from '../lib/coverage_utils';
+import { getDeckBucketLabel, getEpicStatusLabel, getCoverageLevel } from '../lib/coverage_utils';
 import { TicketsView } from './tickets_view';
 
 const getEpicStatusColor = (status: string): 'success' | 'warning' | 'default' => {
@@ -61,7 +57,9 @@ export const EpicItem = ({
       css={css`
         border: ${euiTheme.border.thin};
         border-radius: ${euiTheme.border.radius.medium};
-        background: ${isAtRisk ? euiTheme.colors.backgroundLightWarning : euiTheme.colors.emptyShade};
+        background: ${isAtRisk
+          ? euiTheme.colors.backgroundLightWarning
+          : euiTheme.colors.emptyShade};
         overflow: hidden;
       `}
       buttonProps={{
@@ -132,7 +130,13 @@ export const EpicItem = ({
                   value={epic.coveragePct}
                   max={100}
                   size="s"
-                  color={coverageLevel === 'good' ? 'success' : coverageLevel === 'amber' ? 'warning' : 'danger'}
+                  color={
+                    coverageLevel === 'good'
+                      ? 'success'
+                      : coverageLevel === 'amber'
+                      ? 'warning'
+                      : 'danger'
+                  }
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>

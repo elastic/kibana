@@ -91,11 +91,22 @@ export const SubteamHealthCards = ({
                 gap: 4px;
               `}
             >
-              <MetricBar label="Gates" value={subteam.gatesPct} color={getBarColor(subteam.gatesPct)} />
+              <MetricBar
+                label="Gates"
+                value={subteam.gatesPct}
+                color={getBarColor(subteam.gatesPct)}
+              />
               <MetricBar label="To prod" value={subteam.toProdPct} color="primary" />
             </div>
 
-            <EuiFlexGroup gutterSize="xs" responsive={false} wrap css={css`margin-top: ${euiTheme.size.s};`}>
+            <EuiFlexGroup
+              gutterSize="xs"
+              responsive={false}
+              wrap
+              css={css`
+                margin-top: ${euiTheme.size.s};
+              `}
+            >
               <EuiFlexItem grow={false}>
                 <EuiBadge style={{ background: accent.background, color: accent.color }}>
                   <FormattedMessage
@@ -138,7 +149,11 @@ const SubteamLinks = ({ subteam }: { subteam: SdlcSubteamCard }) => {
   }
 
   return (
-    <div css={css`margin-top: ${euiTheme.size.s};`}>
+    <div
+      css={css`
+        margin-top: ${euiTheme.size.s};
+      `}
+    >
       <EuiText size="xs" color="subdued">
         <FormattedMessage id="xpack.sdlcIntel.teams.subteam.links" defaultMessage="Links" />
       </EuiText>
@@ -152,14 +167,14 @@ const SubteamLinks = ({ subteam }: { subteam: SdlcSubteamCard }) => {
         {subteam.githubTeamUrls.map((url) => (
           <li key={url}>
             <EuiLink href={url} target="_blank" external>
-              <EuiIcon type="users" size="s" /> GitHub team
+              <EuiIcon type="users" size="s" aria-hidden={true} /> GitHub team
             </EuiLink>
           </li>
         ))}
         {subteam.githubProjects.map((project) => (
           <li key={project.url}>
             <EuiLink href={project.url} target="_blank" external>
-              <EuiIcon type="calendar" size="s" />{' '}
+              <EuiIcon type="calendar" size="s" aria-hidden={true} />{' '}
               {project.title ?? (
                 <FormattedMessage
                   id="xpack.sdlcIntel.teams.subteam.projectLink"

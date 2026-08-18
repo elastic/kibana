@@ -20,7 +20,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SdlcEpicPhaseSummary, SdlcSubteamCard, SdlcTeamCard } from '../../../../common/api/types';
+import type {
+  SdlcEpicPhaseSummary,
+  SdlcSubteamCard,
+  SdlcTeamCard,
+} from '../../../../common/api/types';
 import { getOwnerInitials } from '../../executive_page/lib/coverage_utils';
 import { getTeamAccent } from '../lib/team_accents';
 import { getMiniPhaseGates, readTicketRollup, resolveTeamName } from '../lib/team_epic_utils';
@@ -89,7 +93,7 @@ export const TeamEpicPipeline = ({
                   justify-content: center;
                 `}
               >
-                <EuiIcon type={accent.icon} size="m" />
+                <EuiIcon type={accent.icon} size="m" aria-hidden={true} />
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -138,7 +142,11 @@ export const TeamEpicPipeline = ({
       {subteam ? <SubteamLinksPanel subteam={subteam} /> : null}
 
       {epics.length === 0 ? (
-        <div css={css`margin-top: ${euiTheme.size.m};`}>
+        <div
+          css={css`
+            margin-top: ${euiTheme.size.m};
+          `}
+        >
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.sdlcIntel.teams.pipeline.empty"
@@ -150,7 +158,13 @@ export const TeamEpicPipeline = ({
             />
           </EuiText>
           {team.subteams.length > 0 ? (
-            <EuiText size="xs" color="subdued" css={css`margin-top: ${euiTheme.size.s};`}>
+            <EuiText
+              size="xs"
+              color="subdued"
+              css={css`
+                margin-top: ${euiTheme.size.s};
+              `}
+            >
               <FormattedMessage
                 id="xpack.sdlcIntel.teams.pipeline.emptySubteams"
                 defaultMessage="Subteams: {subteams}"
@@ -192,7 +206,13 @@ const EpicPipelineCard = ({
   const toProdPct = epic.deliveryCoveragePct ?? 0;
 
   return (
-    <EuiPanel hasBorder paddingSize="s" css={css`background: ${euiTheme.colors.emptyShade};`}>
+    <EuiPanel
+      hasBorder
+      paddingSize="s"
+      css={css`
+        background: ${euiTheme.colors.emptyShade};
+      `}
+    >
       <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={2}>
           <EuiText size="s">
@@ -201,7 +221,14 @@ const EpicPipelineCard = ({
           <EuiText size="xs" color="subdued">
             {epic.roadmap.title ?? epic.roadmap.id} · {epic.displayId}
           </EuiText>
-          <EuiFlexGroup gutterSize="xs" wrap responsive={false} css={css`margin-top: ${euiTheme.size.xs};`}>
+          <EuiFlexGroup
+            gutterSize="xs"
+            wrap
+            responsive={false}
+            css={css`
+              margin-top: ${euiTheme.size.xs};
+            `}
+          >
             {[
               ...(epic.teams.ownOrgTeam ? [epic.teams.ownOrgTeam] : []),
               ...epic.teams.contributingOrgTeams.filter((team) => team !== epic.teams.ownOrgTeam),
@@ -225,7 +252,13 @@ const EpicPipelineCard = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <div css={css`margin-top: ${euiTheme.size.s}; display: flex; gap: 2px;`}>
+      <div
+        css={css`
+          margin-top: ${euiTheme.size.s};
+          display: flex;
+          gap: 2px;
+        `}
+      >
         {phaseGates.map((gate, index) => {
           const styles = miniGateStyles(gate, euiTheme);
           return (
@@ -243,9 +276,20 @@ const EpicPipelineCard = ({
         })}
       </div>
 
-      <EuiFlexGroup gutterSize="m" responsive={false} css={css`margin-top: ${euiTheme.size.s};`}>
+      <EuiFlexGroup
+        gutterSize="m"
+        responsive={false}
+        css={css`
+          margin-top: ${euiTheme.size.s};
+        `}
+      >
         <EuiFlexItem>
-          <Metric label="Tickets done" value={`${tickets.done}/${tickets.total}`} pct={donePct} color="success" />
+          <Metric
+            label="Tickets done"
+            value={`${tickets.done}/${tickets.total}`}
+            pct={donePct}
+            color="success"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <Metric label="To prod" value={`${toProdPct}%`} pct={toProdPct} color="primary" />
@@ -260,8 +304,7 @@ const EpicPipelineCard = ({
 
 const SubteamLinksPanel = ({ subteam }: { subteam: SdlcSubteamCard }) => {
   const { euiTheme } = useEuiTheme();
-  const hasLinks =
-    subteam.githubTeamUrls.length > 0 || subteam.githubProjects.length > 0;
+  const hasLinks = subteam.githubTeamUrls.length > 0 || subteam.githubProjects.length > 0;
 
   if (!hasLinks) {
     return null;
@@ -279,14 +322,14 @@ const SubteamLinksPanel = ({ subteam }: { subteam: SdlcSubteamCard }) => {
       {subteam.githubTeamUrls.map((url) => (
         <EuiFlexItem grow={false} key={url}>
           <EuiLink href={url} target="_blank" external>
-            <EuiIcon type="users" size="s" /> GitHub team
+            <EuiIcon type="users" size="s" aria-hidden={true} /> GitHub team
           </EuiLink>
         </EuiFlexItem>
       ))}
       {subteam.githubProjects.map((project) => (
         <EuiFlexItem grow={false} key={project.url}>
           <EuiLink href={project.url} target="_blank" external>
-            <EuiIcon type="calendar" size="s" />{' '}
+            <EuiIcon type="calendar" size="s" aria-hidden={true} />{' '}
             {project.title ?? `Project ${project.number}`}
           </EuiLink>
         </EuiFlexItem>

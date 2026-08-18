@@ -57,7 +57,7 @@ export const PipelineVisionPanel = () => {
                 color: ${euiTheme.colors.ghost};
               `}
             >
-              <EuiIcon type="globe" size="s" />
+              <EuiIcon type="globe" size="s" aria-hidden={true} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -117,7 +117,13 @@ export const PipelineVisionPanel = () => {
           </EuiFlexGroup>
         </EuiPanel>
 
-        <EuiText size="xs" color="subdued" css={css`margin: ${euiTheme.size.m} 0 ${euiTheme.size.s};`}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css`
+            margin: ${euiTheme.size.m} 0 ${euiTheme.size.s};
+          `}
+        >
           <FormattedMessage
             id="xpack.sdlcIntel.pipeline.vision.hierarchy.label"
             defaultMessage="1 product · 4 capabilities · 12 SOC functions"
@@ -140,7 +146,14 @@ export const PipelineVisionPanel = () => {
           ))}
         </EuiFlexGroup>
 
-        <EuiFlexGroup gutterSize="s" responsive wrap css={css`margin-top: ${euiTheme.size.s};`}>
+        <EuiFlexGroup
+          gutterSize="s"
+          responsive
+          wrap
+          css={css`
+            margin-top: ${euiTheme.size.s};
+          `}
+        >
           {SOC_FUNCTIONS.map((socFunction) => (
             <EuiFlexItem key={socFunction.key} style={{ minWidth: 200, flex: '1 1 200px' }}>
               <EuiPanel
@@ -174,7 +187,13 @@ export const PipelineVisionPanel = () => {
           ))}
         </EuiFlexGroup>
 
-        <EuiText size="xs" color="subdued" css={css`margin: ${euiTheme.size.m} 0 ${euiTheme.size.s};`}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css`
+            margin: ${euiTheme.size.m} 0 ${euiTheme.size.s};
+          `}
+        >
           <FormattedMessage
             id="xpack.sdlcIntel.pipeline.vision.phases.label"
             defaultMessage="How every epic moves through the pipeline"
@@ -220,7 +239,11 @@ export const PipelineVisionPanel = () => {
                       <EuiFlexItem key={phase.key}>
                         <EuiText size="xs">
                           <strong>{phase.label}</strong> — {phase.title}
-                          <span css={css`color: ${euiTheme.colors.textSubdued};`}>
+                          <span
+                            css={css`
+                              color: ${euiTheme.colors.textSubdued};
+                            `}
+                          >
                             {' '}
                             ({phase.subtitle})
                           </span>
@@ -234,7 +257,13 @@ export const PipelineVisionPanel = () => {
           })}
         </EuiFlexGroup>
 
-        <EuiText size="xs" color="subdued" css={css`margin: ${euiTheme.size.m} 0 ${euiTheme.size.s};`}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css`
+            margin: ${euiTheme.size.m} 0 ${euiTheme.size.s};
+          `}
+        >
           <FormattedMessage
             id="xpack.sdlcIntel.pipeline.vision.maturity.label"
             defaultMessage="Roadmap maturity on GitHub epics"
@@ -270,7 +299,13 @@ export const PipelineVisionPanel = () => {
           ))}
         </EuiFlexGroup>
 
-        <EuiText size="xs" color="subdued" css={css`margin-top: ${euiTheme.size.m};`}>
+        <EuiText
+          size="xs"
+          color="subdued"
+          css={css`
+            margin-top: ${euiTheme.size.m};
+          `}
+        >
           <FormattedMessage
             id="xpack.sdlcIntel.pipeline.vision.readingGuide"
             defaultMessage="The grid below tracks each epic through these gates. P4 (tickets) and P5 (PRs merged) are live from GitHub ingest; P1–P3 and P6–P8 show as upcoming until planning docs and release telemetry are connected."

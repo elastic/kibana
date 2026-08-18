@@ -43,7 +43,10 @@ const toEpicOrgTeamInput = (epic: SdlcEpicPhaseSummary) => ({
   phases: epic.phases,
 });
 
-const epicMatchesProductRoadmap = (epic: SdlcEpicPhaseSummary, productRoadmapId: string): boolean => {
+const epicMatchesProductRoadmap = (
+  epic: SdlcEpicPhaseSummary,
+  productRoadmapId: string
+): boolean => {
   if (!productRoadmapId) {
     return true;
   }
@@ -122,7 +125,9 @@ const buildRoadmapGroup = ({
   epics: [...epics].sort((left, right) => left.title.localeCompare(right.title)),
 });
 
-const flattenOrgTeamGroups = (orgTeamGroups: readonly ExecutiveOrgTeamGroup[]): SdlcRoadmapGroup[] =>
+const flattenOrgTeamGroups = (
+  orgTeamGroups: readonly ExecutiveOrgTeamGroup[]
+): SdlcRoadmapGroup[] =>
   orgTeamGroups.flatMap((orgTeam) =>
     orgTeam.subteams.map((subteam) =>
       buildRoadmapGroup({
@@ -185,7 +190,9 @@ export const buildPipelineDisplayGroups = (
   }
 
   if (scope.productRoadmapId) {
-    const canonical = CANONICAL_PRODUCT_ROADMAPS.find((entry) => entry.id === scope.productRoadmapId);
+    const canonical = CANONICAL_PRODUCT_ROADMAPS.find(
+      (entry) => entry.id === scope.productRoadmapId
+    );
     return [
       buildRoadmapGroup({
         id: scope.productRoadmapId,
@@ -283,7 +290,10 @@ export const buildSubteamScopeOptions = (
   ];
 };
 
-export const buildProductRoadmapScopeOptions = (): ReadonlyArray<{ value: string; text: string }> => [
+export const buildProductRoadmapScopeOptions = (): ReadonlyArray<{
+  value: string;
+  text: string;
+}> => [
   {
     value: '',
     text: 'All product roadmaps',

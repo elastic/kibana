@@ -94,7 +94,9 @@ describe('team_subteams', () => {
 
     const oneWorkflow = cards.find((card) => card.key === 'one-workflow');
     expect(oneWorkflow?.epicCount).toBe(1);
-    expect(oneWorkflow?.githubTeamUrls).toContain('https://github.com/orgs/elastic/teams/one-workflow');
+    expect(oneWorkflow?.githubTeamUrls).toContain(
+      'https://github.com/orgs/elastic/teams/one-workflow'
+    );
     expect(oneWorkflow?.githubProjects[0]?.number).toBe(705);
   });
 });

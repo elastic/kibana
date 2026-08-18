@@ -81,12 +81,8 @@ const epicRollupMetrics = (
   };
 };
 
-export const epicBelongsToOrgTeam = (
-  epic: EpicSubteamMatchInput,
-  orgTeamKey: string
-): boolean =>
-  epic.ownOrgTeam === orgTeamKey ||
-  (epic.contributingOrgTeams ?? []).includes(orgTeamKey);
+export const epicBelongsToOrgTeam = (epic: EpicSubteamMatchInput, orgTeamKey: string): boolean =>
+  epic.ownOrgTeam === orgTeamKey || (epic.contributingOrgTeams ?? []).includes(orgTeamKey);
 
 export const epicBelongsToSubteam = (
   epic: EpicSubteamMatchInput,

@@ -97,7 +97,10 @@ export const usePipelineData = () => {
   );
 
   const orgTeamOptions = useMemo(() => buildOrgTeamScopeOptions(), []);
-  const subteamOptions = useMemo(() => buildSubteamScopeOptions(scope.orgTeamKey), [scope.orgTeamKey]);
+  const subteamOptions = useMemo(
+    () => buildSubteamScopeOptions(scope.orgTeamKey),
+    [scope.orgTeamKey]
+  );
   const productRoadmapOptions = useMemo(() => buildProductRoadmapScopeOptions(), []);
 
   const setOrgTeamKey = (orgTeamKey: string) => {

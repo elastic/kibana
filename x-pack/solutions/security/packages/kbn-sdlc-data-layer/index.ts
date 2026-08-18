@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './src/index';
+export * from './src';

@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -10,11 +17,7 @@ export {
   ALL_SDLC_DATA_INDICES,
   type SdlcIndexName,
 } from './constants/indices';
-export {
-  SDLC_INDEX_DEFINITIONS,
-  getIndexDefinition,
-  type IndexDefinition,
-} from './mappings/index';
+export { SDLC_INDEX_DEFINITIONS, getIndexDefinition, type IndexDefinition } from './mappings';
 export { TEAM_DIMENSION_SEED, type TeamDimensionRecord } from './config/team_dimension';
 export {
   CANONICAL_PRODUCT_ROADMAPS,

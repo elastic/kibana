@@ -66,13 +66,7 @@ export const fetchEpicPhaseSummaries = async ({
     must.push({
       multi_match: {
         query: search,
-        fields: [
-          'epic.key',
-          'epic.title',
-          'epic.summary',
-          'epic.owner',
-          'release.initiative',
-        ],
+        fields: ['epic.key', 'epic.title', 'epic.summary', 'epic.owner', 'release.initiative'],
       },
     });
   }
@@ -82,7 +76,10 @@ export const fetchEpicPhaseSummaries = async ({
       index: SDLC_INDEX_NAMES.SDLC_EPIC_PHASES,
       size: EPIC_PHASES_QUERY_SIZE,
       query: must.length > 0 ? { bool: { must } } : { match_all: {} },
-      sort: [{ 'epic.title.keyword': { order: 'asc', unmapped_type: 'keyword' } }, { '@timestamp': 'desc' }],
+      sort: [
+        { 'epic.title.keyword': { order: 'asc', unmapped_type: 'keyword' } },
+        { '@timestamp': 'desc' },
+      ],
     });
 
     const epics: SdlcEpicPhaseSummary[] = [];
@@ -150,10 +147,7 @@ export const fetchSyncStatus = async (
       index: SDLC_INDEX_NAMES.GITHUB_SYNC_STATE,
       query: {
         bool: {
-          must: [
-            { term: { entity_type: 'project' } },
-            { term: { last_run_status: 'completed' } },
-          ],
+          must: [{ term: { entity_type: 'project' } }, { term: { last_run_status: 'completed' } }],
         },
       },
     });

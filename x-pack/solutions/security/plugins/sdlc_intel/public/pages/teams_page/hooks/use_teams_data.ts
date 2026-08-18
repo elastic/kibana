@@ -6,10 +6,10 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { formatSubteamSelectionKey } from '@kbn/sdlc-data-layer';
 import type { SdlcSubteamCard, SdlcTeamsResponse } from '../../../../common/api/types';
 import { useSdlcApi } from '../../../context/sdlc_api_context';
 import { computeAverageTeamsPerEpic } from '../lib/team_epic_utils';
-import { formatSubteamSelectionKey } from '@kbn/sdlc-data-layer';
 
 interface TeamsDataState {
   readonly loading: boolean;

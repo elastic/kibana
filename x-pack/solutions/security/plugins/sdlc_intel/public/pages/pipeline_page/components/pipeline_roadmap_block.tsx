@@ -76,7 +76,7 @@ export const PipelineRoadmapBlock = ({
                 justify-content: center;
               `}
             >
-              <EuiIcon type={accent.icon} size="s" />
+              <EuiIcon type={accent.icon} size="s" aria-hidden={true} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>

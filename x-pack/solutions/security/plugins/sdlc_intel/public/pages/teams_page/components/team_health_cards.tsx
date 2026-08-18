@@ -91,7 +91,7 @@ export const TeamHealthCards = ({
                     justify-content: center;
                   `}
                 >
-                  <EuiIcon type={accent.icon} size="s" />
+                  <EuiIcon type={accent.icon} size="s" aria-hidden={true} />
                 </div>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -106,13 +106,27 @@ export const TeamHealthCards = ({
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            <div css={css`margin-top: ${euiTheme.size.s}; display: flex; flex-direction: column; gap: 4px;`}>
+            <div
+              css={css`
+                margin-top: ${euiTheme.size.s};
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+              `}
+            >
               <MetricBar label="Gates" value={team.gatesPct} color={getBarColor(team.gatesPct)} />
               <MetricBar label="To prod" value={team.toProdPct} color="primary" />
               <MetricBar label="AI tkts" value={team.aiPct} color="accent" />
             </div>
 
-            <EuiFlexGroup gutterSize="xs" responsive={false} wrap css={css`margin-top: ${euiTheme.size.s};`}>
+            <EuiFlexGroup
+              gutterSize="xs"
+              responsive={false}
+              wrap
+              css={css`
+                margin-top: ${euiTheme.size.s};
+              `}
+            >
               <EuiFlexItem grow={false}>
                 <EuiBadge style={{ background: accent.background, color: accent.color }}>
                   <FormattedMessage

@@ -49,7 +49,7 @@ export const ProductGroup = ({
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="globe" color="subdued" />
+          <EuiIcon type="globe" color="subdued" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
@@ -70,7 +70,13 @@ export const ProductGroup = ({
             value={averageCoverage}
             max={100}
             size="s"
-            color={coverageLevel === 'good' ? 'success' : coverageLevel === 'amber' ? 'warning' : 'danger'}
+            color={
+              coverageLevel === 'good'
+                ? 'success'
+                : coverageLevel === 'amber'
+                ? 'warning'
+                : 'danger'
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

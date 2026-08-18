@@ -65,7 +65,7 @@ export const TicketsView = ({
           <div key={repoGroup.repo}>
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiIcon type="logoGithub" />
+                <EuiIcon type="logoGithub" aria-hidden={true} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">

@@ -65,9 +65,15 @@ export const SyncStatusBanner = () => {
       <EuiFlexItem grow={false}>
         <EuiBadge color={data.healthy ? 'success' : 'warning'}>
           {data.healthy ? (
-            <FormattedMessage id="xpack.sdlcIntel.syncStatus.healthy" defaultMessage="Sync healthy" />
+            <FormattedMessage
+              id="xpack.sdlcIntel.syncStatus.healthy"
+              defaultMessage="Sync healthy"
+            />
           ) : (
-            <FormattedMessage id="xpack.sdlcIntel.syncStatus.stale" defaultMessage="Sync stale or missing" />
+            <FormattedMessage
+              id="xpack.sdlcIntel.syncStatus.stale"
+              defaultMessage="Sync stale or missing"
+            />
           )}
         </EuiBadge>
       </EuiFlexItem>

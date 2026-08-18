@@ -62,20 +62,23 @@ export const registerSdlcReadRoutes = (router: IRouter, logger: Logger): void =>
       access: 'internal',
       security: ROUTE_SECURITY,
     })
-    .addVersion({ version: SDLC_INTERNAL_API_VERSION, validate: {} }, async (context, _request, response) => {
-      try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const body = await fetchSyncStatus(esClient);
-        return response.ok({ body });
-      } catch (error) {
-        return handleRouteError({
-          logger,
-          response,
-          error,
-          message: 'Failed to fetch SDLC sync status',
-        });
+    .addVersion(
+      { version: SDLC_INTERNAL_API_VERSION, validate: {} },
+      async (context, _request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const body = await fetchSyncStatus(esClient);
+          return response.ok({ body });
+        } catch (error) {
+          return handleRouteError({
+            logger,
+            response,
+            error,
+            message: 'Failed to fetch SDLC sync status',
+          });
+        }
       }
-    });
+    );
 
   router.versioned
     .get({
@@ -155,20 +158,23 @@ export const registerSdlcReadRoutes = (router: IRouter, logger: Logger): void =>
       access: 'internal',
       security: ROUTE_SECURITY,
     })
-    .addVersion({ version: SDLC_INTERNAL_API_VERSION, validate: {} }, async (context, _request, response) => {
-      try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const body = await getTeamsResponse(esClient);
-        return response.ok({ body });
-      } catch (error) {
-        return handleRouteError({
-          logger,
-          response,
-          error,
-          message: 'Failed to fetch SDLC teams dashboard data',
-        });
+    .addVersion(
+      { version: SDLC_INTERNAL_API_VERSION, validate: {} },
+      async (context, _request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const body = await getTeamsResponse(esClient);
+          return response.ok({ body });
+        } catch (error) {
+          return handleRouteError({
+            logger,
+            response,
+            error,
+            message: 'Failed to fetch SDLC teams dashboard data',
+          });
+        }
       }
-    });
+    );
 
   router.versioned
     .post({
@@ -176,18 +182,21 @@ export const registerSdlcReadRoutes = (router: IRouter, logger: Logger): void =>
       access: 'internal',
       security: ROUTE_SECURITY,
     })
-    .addVersion({ version: SDLC_INTERNAL_API_VERSION, validate: {} }, async (context, _request, response) => {
-      try {
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const body = await seedSdlcWorkflowsExecutiveDemo(esClient);
-        return response.ok({ body });
-      } catch (error) {
-        return handleRouteError({
-          logger,
-          response,
-          error,
-          message: 'Failed to seed Workflows executive demo data',
-        });
+    .addVersion(
+      { version: SDLC_INTERNAL_API_VERSION, validate: {} },
+      async (context, _request, response) => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const body = await seedSdlcWorkflowsExecutiveDemo(esClient);
+          return response.ok({ body });
+        } catch (error) {
+          return handleRouteError({
+            logger,
+            response,
+            error,
+            message: 'Failed to seed Workflows executive demo data',
+          });
+        }
       }
-    });
+    );
 };

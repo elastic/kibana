@@ -17,7 +17,13 @@ export const PIPELINE_GRID_TEMPLATE =
 
 const BandSeparator = () => {
   const { euiTheme } = useEuiTheme();
-  return <div css={css`background: ${euiTheme.border.color};`} />;
+  return (
+    <div
+      css={css`
+        background: ${euiTheme.border.color};
+      `}
+    />
+  );
 };
 
 export const PipelineGridHeader = () => {
@@ -67,11 +73,7 @@ export const PipelineGridHeader = () => {
   );
 };
 
-const PhaseHeaderCell = ({
-  definition,
-}: {
-  definition: (typeof PHASE_DEFINITIONS)[number];
-}) => {
+const PhaseHeaderCell = ({ definition }: { definition: (typeof PHASE_DEFINITIONS)[number] }) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -91,7 +93,7 @@ const PhaseHeaderCell = ({
       <EuiText size="xs">
         <strong>{definition.label}</strong>
       </EuiText>
-      <EuiIcon type={definition.icon} size="s" />
+      <EuiIcon type={definition.icon} size="s" aria-hidden={true} />
       <EuiText size="xs" textAlign="center">
         <strong>{definition.title}</strong>
       </EuiText>

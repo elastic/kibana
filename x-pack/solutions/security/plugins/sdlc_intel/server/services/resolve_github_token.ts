@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -34,7 +41,10 @@ const resolveGithubConnector = async (
   connectorIdOrName: string
 ): Promise<{ id: string; actionTypeId: string }> => {
   try {
-    const connector = await actionsClient.get({ id: connectorIdOrName, throwIfSystemAction: false });
+    const connector = await actionsClient.get({
+      id: connectorIdOrName,
+      throwIfSystemAction: false,
+    });
     return { id: connector.id, actionTypeId: connector.actionTypeId };
   } catch {
     const connectors = await actionsClient.getAll({});

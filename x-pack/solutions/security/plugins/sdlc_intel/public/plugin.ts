@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { AppDeepLink, AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type {
+  AppDeepLink,
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';

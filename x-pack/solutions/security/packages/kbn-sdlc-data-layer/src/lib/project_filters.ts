@@ -1,6 +1,13 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License 2.0.
  */
 
@@ -28,8 +35,12 @@ export const filterGithubProjects = (
 ): GithubProjectSummary[] => {
   const includeNumbers = filters.includeProjectNumbers ?? [];
   const excludeNumbers = new Set(filters.excludeProjectNumbers ?? []);
-  const titleIncludes = (filters.titleIncludes ?? []).filter((pattern) => pattern.trim().length > 0);
-  const titleExcludes = (filters.titleExcludes ?? []).filter((pattern) => pattern.trim().length > 0);
+  const titleIncludes = (filters.titleIncludes ?? []).filter(
+    (pattern) => pattern.trim().length > 0
+  );
+  const titleExcludes = (filters.titleExcludes ?? []).filter(
+    (pattern) => pattern.trim().length > 0
+  );
 
   return projects.filter((project) => {
     if (includeNumbers.length > 0 && !includeNumbers.includes(project.number)) {
@@ -63,7 +74,10 @@ export const resolveGithubProjectsToSync = ({
   const hasExcludeNumbers = (filters.excludeProjectNumbers?.length ?? 0) > 0;
   const hasIncludeNumbers = (filters.includeProjectNumbers?.length ?? 0) > 0;
   const needsDiscovery =
-    explicitProjectNumbers.length === 0 || hasTitleFilters || hasExcludeNumbers || hasIncludeNumbers;
+    explicitProjectNumbers.length === 0 ||
+    hasTitleFilters ||
+    hasExcludeNumbers ||
+    hasIncludeNumbers;
 
   if (!needsDiscovery) {
     return explicitProjectNumbers.map((number) => ({ number, title: '' }));

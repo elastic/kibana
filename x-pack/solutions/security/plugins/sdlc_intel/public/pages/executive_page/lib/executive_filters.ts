@@ -70,9 +70,7 @@ const groupEpicsIntoRoadmaps = (epics: readonly SdlcEpicPhaseSummary[]): SdlcRoa
     groups.set(roadmapId, {
       id: roadmapId,
       title:
-        roadmapId === 'unmapped'
-          ? UNMAPPED_ROADMAP_GROUP_TITLE
-          : epic.roadmap.title ?? roadmapId,
+        roadmapId === 'unmapped' ? UNMAPPED_ROADMAP_GROUP_TITLE : epic.roadmap.title ?? roadmapId,
       product: epic.roadmap.product ?? 'Unknown',
       coveragePct: 0,
       epicCount: 1,
@@ -127,7 +125,10 @@ const epicMatchesEngineeringTeam = (
   return teams.some((team) => team === engineeringTeam);
 };
 
-const epicMatchesDeckBucket = (epic: SdlcEpicPhaseSummary, deckBucket: DeckBucketFilter): boolean => {
+const epicMatchesDeckBucket = (
+  epic: SdlcEpicPhaseSummary,
+  deckBucket: DeckBucketFilter
+): boolean => {
   if (!deckBucket) {
     return true;
   }
@@ -159,8 +160,7 @@ const epicMatchesSearch = (epic: SdlcEpicPhaseSummary, search: string): boolean 
   return epic.ticketsByRepo.some((repoGroup) =>
     (repoGroup.items ?? []).some(
       (ticket) =>
-        ticket.title.toLowerCase().includes(query) ||
-        ticket.issueRef.toLowerCase().includes(query)
+        ticket.title.toLowerCase().includes(query) || ticket.issueRef.toLowerCase().includes(query)
     )
   );
 };

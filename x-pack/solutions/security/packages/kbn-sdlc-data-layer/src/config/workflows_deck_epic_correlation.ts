@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 /** GitHub Projects board linked from the Workflows roadmap deck (Product Board / view 134). */
 export const WORKFLOWS_ROADMAP_GITHUB_PROJECT_NUMBER = 705;
 export const WORKFLOWS_ROADMAP_GITHUB_VIEW_NUMBER = 134;
@@ -48,10 +47,7 @@ export const WORKFLOWS_DECK_EPIC_CORRELATIONS: readonly WorkflowsDeckEpicCorrela
   {
     deckFeature: 'Workflow Management',
     deckBucket: 'released_9_3',
-    githubEpicKeys: [
-      '[One Workflow] Serverless Pricing Launch',
-      '[Epic] Workflow Visualization',
-    ],
+    githubEpicKeys: ['[One Workflow] Serverless Pricing Launch', '[Epic] Workflow Visualization'],
     notes: 'Lifecycle + packaging (deck groups under management).',
   },
   {
@@ -62,14 +58,12 @@ export const WORKFLOWS_DECK_EPIC_CORRELATIONS: readonly WorkflowsDeckEpicCorrela
   {
     deckFeature: 'Core Workflow Steps',
     deckBucket: 'now',
-    githubEpicKeys: [
-      '[Epic] Lifecycle Hooks',
-      '[Epic] Define an allowed list of internal actions',
-    ],
+    githubEpicKeys: ['[Epic] Lifecycle Hooks', '[Epic] Define an allowed list of internal actions'],
     notes: 'Flow control / internal action surface.',
   },
   {
-    deckFeature: 'Introduce core primitives for controlling the flow of workflow execution (if/else, looping)',
+    deckFeature:
+      'Introduce core primitives for controlling the flow of workflow execution (if/else, looping)',
     deckBucket: 'now',
     githubEpicKeys: ['[Epic] Workflow Visualization', '[Epic] Lifecycle Hooks'],
     notes: 'Shares delivery epics with steps / visualization.',
@@ -119,9 +113,7 @@ export const WORKFLOWS_DECK_EPIC_CORRELATIONS: readonly WorkflowsDeckEpicCorrela
   {
     deckFeature: 'Data Transformation',
     deckBucket: 'next',
-    githubEpicKeys: [
-      '[One Workflow] Support Cross Project Search (CPS) in Elasticsearch steps',
-    ],
+    githubEpicKeys: ['[One Workflow] Support Cross Project Search (CPS) in Elasticsearch steps'],
   },
   {
     deckFeature: 'Expand Connector Library',
@@ -256,4 +248,3 @@ export const isWorkflowsGithubEpicKey = ({
 
   return false;
 };
-

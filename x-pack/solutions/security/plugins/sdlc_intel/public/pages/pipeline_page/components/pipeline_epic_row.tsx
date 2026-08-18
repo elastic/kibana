@@ -18,7 +18,13 @@ import { PIPELINE_GRID_TEMPLATE } from './pipeline_grid_header';
 
 const BandSeparator = () => {
   const { euiTheme } = useEuiTheme();
-  return <div css={css`background: ${euiTheme.border.color};`} />;
+  return (
+    <div
+      css={css`
+        background: ${euiTheme.border.color};
+      `}
+    />
+  );
 };
 
 export const PipelineEpicRow = ({

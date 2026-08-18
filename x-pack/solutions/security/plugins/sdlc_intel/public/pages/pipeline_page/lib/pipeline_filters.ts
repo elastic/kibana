@@ -29,7 +29,10 @@ const epicMatchesSearch = (epic: SdlcEpicPhaseSummary, search: string): boolean 
   );
 };
 
-const epicMatchesGateStatus = (cells: readonly PhaseCellModel[], gateStatus: GateStatusFilter): boolean => {
+const epicMatchesGateStatus = (
+  cells: readonly PhaseCellModel[],
+  gateStatus: GateStatusFilter
+): boolean => {
   if (gateStatus === 'all') {
     return true;
   }
@@ -46,7 +49,10 @@ export const filterPipelineRoadmaps = (
       ...roadmap,
       epics: roadmap.epics.filter((epic) => {
         const cells = buildPhaseCells(epic);
-        return epicMatchesSearch(epic, filters.search) && epicMatchesGateStatus(cells, filters.gateStatus);
+        return (
+          epicMatchesSearch(epic, filters.search) &&
+          epicMatchesGateStatus(cells, filters.gateStatus)
+        );
       }),
     }))
     .filter((roadmap) => roadmap.epics.length > 0);
@@ -59,7 +65,9 @@ export interface RoadmapPipelineStats {
   readonly deliveryCoveragePct: number | null;
 }
 
-export const computeRoadmapStats = (epics: readonly SdlcEpicPhaseSummary[]): RoadmapPipelineStats => {
+export const computeRoadmapStats = (
+  epics: readonly SdlcEpicPhaseSummary[]
+): RoadmapPipelineStats => {
   let passCount = 0;
   let warnCount = 0;
   let failCount = 0;
