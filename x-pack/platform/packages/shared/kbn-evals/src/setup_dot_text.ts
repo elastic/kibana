@@ -12,7 +12,7 @@ import { getJsSourceSync } from '@kbn/dot-text';
  * Force-register a Node require hook for the `*.text` mustache templates imported by the
  * evaluator modules in this package.
  *
- * `@kbn/babel-register` already installs a `pirates`-based `.text` handler, but on Node >=23.5
+ * `@kbn/swc-register` already installs a `pirates`-based `.text` handler, but on Node >=23.5
  * Playwright (>=1.61) registers a synchronous `module.registerHooks` load hook that intercepts the
  * file first and Babel-parses the raw template, throwing `SyntaxError: ... Missing semicolon`.
  * Compiling the template here and calling `module._compile` directly bypasses that load hook.

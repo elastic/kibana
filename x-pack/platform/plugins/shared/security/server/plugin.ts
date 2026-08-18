@@ -271,6 +271,7 @@ export class SecurityPlugin
       config: config.audit,
       logging: core.logging,
       http: core.http,
+      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,

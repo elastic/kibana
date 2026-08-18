@@ -95,6 +95,7 @@ export const getQueryOccurrencesResponse: QueryOccurrencesResponse = {
         query: 'FROM logs.nginx | WHERE log.level == "error" | STATS count = COUNT(*) BY host.name',
       },
       severity_score: 75,
+      rule_uuid: '9fdfcf5a-4e1d-5ee3-b05d-7bc2b014e81c',
       stream_name: 'logs.nginx',
       occurrences: [
         { date: '2025-01-15T10:00:00.000Z', count: 42 },

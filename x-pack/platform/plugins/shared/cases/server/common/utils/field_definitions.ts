@@ -8,7 +8,12 @@
 import { stringify as stringifyYaml } from 'yaml';
 import { CustomFieldTypes } from '../../../common/types/domain/custom_field/v1';
 import { FieldType } from '../../../common/types/domain/template/fields';
-import { getV2FieldType } from '../../../common/utils/template_fields';
+import {
+  getV2FieldType,
+  normalizeFieldDefinitionName,
+} from '../../../common/utils/template_fields';
+
+export { normalizeFieldDefinitionName };
 
 interface LegacyCustomField {
   key: string;
@@ -36,6 +41,27 @@ const coerceLegacyToggleDefault = (value: string | number | boolean): boolean | 
     return false;
   }
   return undefined;
+};
+
+/**
+ * Builds a normalized (case-insensitive) name → definition index from any array of
+ * objects. Generic so the hook can index `FieldDefinition` values while the migration
+ * task indexes `SavedObject<FieldDefinition>` values without an intermediate mapping
+ * step.
+ */
+export const buildFieldDefinitionNameIndex = <T>(
+  defs: T[],
+  getName: (def: T) => string
+): Map<string, T> => {
+  const index = new Map<string, T>();
+  for (const def of defs) {
+    const key = normalizeFieldDefinitionName(getName(def));
+    if (!index.has(key)) {
+      // First-wins: stable behaviour when duplicates already exist.
+      index.set(key, def);
+    }
+  }
+  return index;
 };
 
 /**

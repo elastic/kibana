@@ -22,7 +22,7 @@ import {
   LENS_API_ACCESS,
   LENS_API_TAG,
 } from '../../../../common/constants';
-import type { LensUpdateIn, LensSavedObject } from '../../../content_management';
+import type { LensUpdateIn, LensSavedObject } from '../../../content_management/zod';
 
 import type { RegisterAPIRouteFn } from '../../types';
 import type { LensUpdateResponseBody } from './types';
@@ -53,8 +53,8 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
     options: {
       tags: [LENS_API_TAG],
       availability: {
-        stability: 'experimental',
-        since: '9.4.0',
+        stability: 'stable',
+        since: '9.5.0',
       },
     },
     security: {
@@ -140,7 +140,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
 
         if (createdNew) {
           try {
-            asCodeIdSchema.validate(req.params.id);
+            asCodeIdSchema.parse(req.params.id);
           } catch (error) {
             return res.badRequest({ body: { message: error.message } });
           }

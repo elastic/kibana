@@ -12,6 +12,5 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     // load new oblt (except APM) deployment-agnostic tests here
     loadTestFile(require.resolve('../../apis/alerting'));
     loadTestFile(require.resolve('../../apis/dataset_quality'));
-    loadTestFile(require.resolve('../../apis/infra'));
   });
 }

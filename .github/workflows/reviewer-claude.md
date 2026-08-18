@@ -24,6 +24,7 @@ resources:
   - prefetch-pr-context.yml
 imports:
   - .github/agents/code-reviewer.md
+  - .github/workflows/shared/app-dex-agents-otel.md
 engine:
   id: claude
   version: "2.1.206"
@@ -43,6 +44,7 @@ engine:
 # - Draft PR events activate only when the ci:draft-checks label is present.
 # - ready_for_review activates the first review when a draft is marked ready.
 # - Adding the ci:draft-checks label activates a review; other label events are ignored.
+# - Synchronize events for merge commits are ignored; only code pushes activate a new review.
 # - Comment follow-up runs are dispatched by Reviewer Comment Dispatcher after fork-safe validation.
 if: >-
   !github.event.repository.fork &&
@@ -101,7 +103,14 @@ network:
     - github
     - openrouter.ai
 jobs:
+  check_reviewable_commit:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/check-reviewable-commit.yml
+
   prefetch_pr_context:
+    needs: check_reviewable_commit
+    if: needs.check_reviewable_commit.outputs.should_review == 'true'
     permissions:
       contents: read
       issues: read

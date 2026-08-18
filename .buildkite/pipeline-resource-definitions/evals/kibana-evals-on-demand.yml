@@ -5,7 +5,7 @@ metadata:
   name: bk-kibana-evals-on-demand
   description: 'Runs a single @kbn/evals suite and model on demand'
   links:
-    - url: 'https://buildkite.com/elastic/kibana-evals-on-demand'
+    - url: 'https://buildkite.com/elastic/kibana-evals-on-demand-llm-evals'
       title: Pipeline link
 spec:
   type: buildkite-pipeline

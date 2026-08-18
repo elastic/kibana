@@ -6,10 +6,11 @@
  */
 
 import React, { Component } from 'react';
-import { EuiCallOut, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import type { RenderWizardArguments } from '@kbn/maps-plugin/public';
 import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { CustomRasterSource } from './custom_raster_source';
 
 export class CustomRasterEditor extends Component<RenderWizardArguments> {
@@ -29,12 +30,11 @@ export class CustomRasterEditor extends Component<RenderWizardArguments> {
   render() {
     return (
       <EuiPanel>
-        <EuiCallOut title="NOAA Weather">
-          <p>
-            Displays NOAA weather data. Kibana time is passed to request so weather data is
-            displayed for selected time range.
-          </p>
-        </EuiCallOut>
+        <KbnInfoCallout
+          title="NOAA Weather"
+          text="Displays NOAA weather data. Kibana time is passed to request so weather data is
+            displayed for selected time range."
+        />
       </EuiPanel>
     );
   }

@@ -28,6 +28,7 @@ import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
 import { ApiKeyField } from './api_key_field';
 import { EndpointField } from './endpoint_field';
+import { MoreEndpointsPopover } from './more_endpoints_popover';
 import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
 import { SecurityCallout } from './security_callout';
@@ -39,13 +40,18 @@ const MANAGED_INPUTS_DOCS_LINK = 'https://ela.st/managed-inputs';
 const API_ENDPOINTS_SECTION_ID = 'apiEndpoints';
 const TITLE_ID = `${API_ENDPOINTS_SECTION_ID}Title`;
 
-export const ApiEndpoints = () => {
+export interface ApiEndpointsProps {
+  /** Heading tag for the section title. Defaults to `h3`, V2 passes `h2`. */
+  titleTag?: 'h2' | 'h3';
+}
+
+export const ApiEndpoints = ({ titleTag: TitleTag = 'h3' }: ApiEndpointsProps) => {
   const {
     services: { share, application },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
 
-  const { endpoints, isLoading, isError } = useApiEndpoints();
+  const { endpoints, popoverEndpoints, isLoading, isError } = useApiEndpoints();
   const { encodedApiKeys, keyCreatedBeforeByEndpointId, creatingEndpointId, createApiKey } =
     useApiKeys();
   const { dismissedByEndpointId, dismissCallout } = useSecurityCalloutDismissal();
@@ -90,11 +96,11 @@ export const ApiEndpoints = () => {
       <EuiHorizontalRule margin="xl" />
       <section id={API_ENDPOINTS_SECTION_ID} aria-labelledby={TITLE_ID}>
         <EuiTitle size="s">
-          <h3 id={TITLE_ID}>
+          <TitleTag id={TITLE_ID}>
             {i18n.translate('xpack.observability_onboarding.apiEndpoints.title', {
               defaultMessage: 'Connect directly to the endpoint',
             })}
-          </h3>
+          </TitleTag>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">
@@ -123,21 +129,40 @@ export const ApiEndpoints = () => {
             alignItems={isMobile ? undefined : 'center'}
           >
             <EuiFlexItem>
-              <EuiTabs bottomBorder={false}>
-                {endpoints.map((endpoint) => (
-                  <EuiTab
-                    key={endpoint.id}
-                    isSelected={endpoint.id === selectedEndpoint.id}
-                    onClick={() => setSelectedEndpointId(endpoint.id)}
-                    prepend={
-                      <LogoIcon logo={endpoint.logo} euiIconType={endpoint.euiIconType} size="m" />
-                    }
-                    data-test-subj={`observabilityOnboardingApiEndpointTab-${endpoint.id}`}
-                  >
-                    {endpoint.label}
-                  </EuiTab>
-                ))}
-              </EuiTabs>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                <EuiFlexItem grow={false}>
+                  <EuiTabs bottomBorder={false}>
+                    {endpoints.map((endpoint) => (
+                      <EuiTab
+                        key={endpoint.id}
+                        isSelected={endpoint.id === selectedEndpoint.id}
+                        onClick={() => setSelectedEndpointId(endpoint.id)}
+                        prepend={
+                          <LogoIcon
+                            logo={endpoint.logo}
+                            euiIconType={endpoint.euiIconType}
+                            size="m"
+                          />
+                        }
+                        data-test-subj={`observabilityOnboardingApiEndpointTab-${endpoint.id}`}
+                      >
+                        {endpoint.label}
+                      </EuiTab>
+                    ))}
+                  </EuiTabs>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <MoreEndpointsPopover
+                    vendors={popoverEndpoints}
+                    encodedApiKeys={encodedApiKeys}
+                    keyCreatedBeforeByEndpointId={keyCreatedBeforeByEndpointId}
+                    creatingEndpointId={creatingEndpointId}
+                    canCreateApiKey={canCreateApiKey}
+                    isLoading={isLoading}
+                    onCreateApiKey={createApiKey}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
             {!isMobile && canCreateApiKey && (
               <EuiLink
@@ -185,9 +210,50 @@ export const ApiEndpoints = () => {
                 canCreate={canCreateApiKey}
                 wasKeyCreatedBefore={Boolean(keyCreatedBeforeByEndpointId[selectedEndpoint.id])}
                 onCreate={() => createApiKey(selectedEndpoint.id)}
+                isDisabled={
+                  creatingEndpointId !== undefined && creatingEndpointId !== selectedEndpoint.id
+                }
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+          {selectedEndpoint.additionalEndpoints.map((vendor) => (
+            <React.Fragment key={vendor.id}>
+              <EuiSpacer size="m" />
+              <EuiHorizontalRule margin="none" />
+              <EuiSpacer size="m" />
+              <EuiFlexGroup
+                direction={isMobile ? 'column' : 'row'}
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem>
+                  <EndpointField
+                    url={vendor.url}
+                    isLoading={isLoading}
+                    label={vendor.fieldLabel}
+                    dataTestSubjSuffix={`-${vendor.id}`}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <ApiKeyField
+                    encodedApiKey={encodedApiKeys[vendor.id]}
+                    isCreating={creatingEndpointId === vendor.id}
+                    canCreate={canCreateApiKey}
+                    wasKeyCreatedBefore={Boolean(keyCreatedBeforeByEndpointId[vendor.id])}
+                    onCreate={() => createApiKey(vendor.id)}
+                    dataTestSubjSuffix={`-${vendor.id}`}
+                    ariaLabel={i18n.translate(
+                      'xpack.observability_onboarding.apiEndpoints.vendorApiKeyAriaLabel',
+                      { defaultMessage: '{vendor} API key', values: { vendor: vendor.cardTitle } }
+                    )}
+                    isDisabled={
+                      creatingEndpointId !== undefined && creatingEndpointId !== vendor.id
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </React.Fragment>
+          ))}
           {isMobile && canCreateApiKey && (
             <>
               <EuiSpacer size="m" />

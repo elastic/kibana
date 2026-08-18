@@ -191,6 +191,12 @@ export interface SmlTypeDefinition {
    * Defaults to '10m' if not provided.
    */
   fetchFrequency?: () => string;
+
+  /**
+   * Hidden saved object types that this type's `list` and `getSmlEntry` hooks
+   * require access to (e.g. ['action'] for connectors.)
+   */
+  requiredHiddenTypes?: readonly string[];
 }
 
 /**

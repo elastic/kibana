@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/280430
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-28
+- product: kibana
+title: Fix response actions RBAC bypass through Alerting API rule writes
+description: Users with Rules and Exceptions privileges can no longer attach Elastic Defend or osquery response actions to rules through the generic Alerting API without Endpoint or osquery permissions.

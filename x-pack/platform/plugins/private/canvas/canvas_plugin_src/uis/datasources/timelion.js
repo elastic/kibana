@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import {
   EuiFormRow,
   EuiFieldText,
-  EuiCallOut,
   EuiSpacer,
   EuiCode,
   EuiTextArea,
@@ -18,6 +17,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getSimpleArg, setSimpleArg } from '../../../public/lib/arg_helpers';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
 import { useCanvasTextAreaCodeStyles } from '../../../public/lib/use_canvas_text_area_code_styles';
@@ -61,7 +61,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
 
   return (
     <div>
-      <EuiCallOut title={strings.getTipsHeading()} size="s" iconType="info">
+      <KbnInfoCallout title={strings.getTipsHeading()} size="s">
         <ul>
           <li>
             <FormattedMessage
@@ -84,7 +84,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
             />
           </li>
         </ul>
-      </EuiCallOut>
+      </KbnInfoCallout>
 
       <EuiSpacer size="m" />
 
