@@ -515,4 +515,43 @@ describe('TaskPool', () => {
       expect(shouldNotRun).not.toHaveBeenCalled();
     });
   });
+
+  describe('cancelRunningTasksByTypes', () => {
+    test('cancels only tasks matching the given types', async () => {
+      const pool = new TaskPool({
+        capacity$: of(10),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+
+      const fooCancel = jest.fn(async () => undefined);
+      const barCancel = jest.fn(async () => undefined);
+      const fooTask = mockTask({ taskType: 'foo', cancel: fooCancel });
+      const barTask = mockTask({ taskType: 'bar', cancel: barCancel });
+
+      await pool.run([fooTask, barTask]);
+
+      pool.cancelRunningTasksByTypes(['foo']);
+
+      expect(fooCancel).toHaveBeenCalledTimes(1);
+      expect(barCancel).not.toHaveBeenCalled();
+    });
+
+    test('is a no-op when passed an empty list', async () => {
+      const pool = new TaskPool({
+        capacity$: of(10),
+        definitions,
+        logger,
+        strategy: CLAIM_STRATEGY_MGET,
+      });
+
+      const cancel = jest.fn(async () => undefined);
+      await pool.run([mockTask({ taskType: 'foo', cancel })]);
+
+      pool.cancelRunningTasksByTypes([]);
+
+      expect(cancel).not.toHaveBeenCalled();
+    });
+  });
 });

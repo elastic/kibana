@@ -27,10 +27,12 @@ import type { ChatEvent, ConversationAction } from '@kbn/agent-builder-common';
 import {
   agentBuilderDefaultAgentId,
   isRoundCompleteEvent,
+  isConversationCreatedEvent,
   isAgentBuilderError,
   AgentBuilderErrorCode,
   AgentExecutionMode,
   createInternalError,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import { getConnectorProvider } from '@kbn/inference-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
@@ -41,7 +43,8 @@ import type {
   StandaloneAgentExecution,
 } from '@kbn/agent-builder-server/execution';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
-import { ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import { ElasticGenAIAttributes, UserAttributes } from '@kbn/inference-tracing';
+import type { Span } from '@opentelemetry/api';
 import type { ConversationService, ConversationClient } from '../conversation';
 import type { AgentsServiceStart } from '../agents';
 import {
@@ -83,6 +86,20 @@ export interface AgentExecutionDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
 }
 
+export const setUserAttributes = (
+  span: Span | undefined,
+  user: { id?: string; username?: string }
+): void => {
+  if (!span) {
+    return;
+  }
+  if (user.id) {
+    span.setAttribute(UserAttributes.UserId, user.id);
+  }
+  if (user.username) {
+    span.setAttribute(UserAttributes.UserName, user.username);
+  }
+};
 /**
  * Unified entry point for agent execution. Dispatches to the appropriate handler
  * based on the execution mode.
@@ -136,6 +153,7 @@ const handleConversationExecution = async ({
     telemetryMetadata,
     maxContentLength,
     accessControl,
+    readOnly,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -157,12 +175,12 @@ const handleConversationExecution = async ({
     autoCreateConversationWithId,
     conversationClient,
     accessControl,
+    readOnly,
     origin: origin ? { external_conversation_id: origin.external_conversation_id } : undefined,
   });
 
   const author = await deps.conversationService.getConversationRoundAuthor({
     request,
-    conversation,
     origin,
   });
 
@@ -194,10 +212,11 @@ const handleConversationExecution = async ({
     action,
   });
 
-  // Generate title (for CREATE) or use existing title (for UPDATE).
-  // shareReplay so persistence and the span attribute share one emission.
+  // Generate title when creating a new conversation
+  // OR when the conversation still carries the default placeholder title
+  const needsTitle = conversation.operation === 'CREATE' || conversationNeedsTitle(conversation);
   const title$ = (
-    conversation.operation === 'CREATE'
+    needsTitle
       ? generateTitle({
           chatModel: (await modelProvider.selectModel({ effortLevel: 'low' })).chatModel,
           conversation,
@@ -243,6 +262,13 @@ const handleConversationExecution = async ({
       opikHeaders,
     },
     (span) => {
+      if (author || conversation.operation !== 'CREATE') {
+        setUserAttributes(span, {
+          id: author?.id ?? conversation.user.id,
+          username: author?.username ?? conversation.user.username,
+        });
+      }
+
       const titleAttr$ = storeConversation
         ? title$.pipe(
             tap((title) => {
@@ -255,6 +281,13 @@ const handleConversationExecution = async ({
       return merge(conversationIdEvent$, agentEvents$, persistenceEvents$, titleAttr$).pipe(
         handleCancellation(abortSignal),
         tap((event) => {
+          if (isConversationCreatedEvent(event) && !author) {
+            setUserAttributes(span, {
+              id: event.data.user.id,
+              username: event.data.user.username,
+            });
+          }
+
           try {
             if (isRoundCompleteEvent(event)) {
               const isReplacingRound = action === 'regenerate' || event.data?.resumed === true;
@@ -416,6 +449,9 @@ const getHttpStatusFromError = (error: unknown): number | undefined => {
     : undefined;
 };
 
+const conversationNeedsTitle = (conversation: { title?: string }): boolean =>
+  !conversation.title || conversation.title === DEFAULT_CONVERSATION_TITLE;
+
 const buildPersistenceEvents = ({
   conversation,
   conversationClient,
@@ -445,6 +481,7 @@ const buildPersistenceEvents = ({
     conversation,
     roundCompletedEvents$,
     action,
+    title$: conversationNeedsTitle(conversation) ? title$ : undefined,
   });
 };
 
