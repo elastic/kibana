@@ -120,9 +120,10 @@ export const updateConversation$ = ({
 
       // Persist the generated title if provided
       return forkJoin({ updated: roundUpserted$, title: title$ }).pipe(
-        switchMap(({ title }) =>
-          conversationClient.update({ id: conversation.id, title }, { access: 'rename' })
-        )
+        switchMap(({ title }) => {
+          // system-driven write of generated title, not a user-initiated rename, so converse access is the right check.
+          return conversationClient.update({ id: conversation.id, title }, { access: 'converse' });
+        })
       );
     }),
     switchMap((updatedConversation) => {

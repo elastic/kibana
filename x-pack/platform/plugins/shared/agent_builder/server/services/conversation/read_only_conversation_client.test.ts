@@ -91,7 +91,7 @@ describe('createConversationPublicClient', () => {
         agent_id: 'custom-agent',
         id: 'conv-1',
         title: 'My chat',
-        access_control: { access_mode: ConversationAccessControlMode.Private },
+        access_control: { access_mode: ConversationAccessControlMode.Private, entries: [] },
         rounds: [],
       });
     });

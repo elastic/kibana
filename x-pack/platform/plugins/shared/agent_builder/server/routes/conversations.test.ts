@@ -443,7 +443,7 @@ describe('POST /conversations', () => {
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'My chat',
-        access_control: { access_mode: 'public' },
+        access_control: { access_mode: 'public', entries: [] },
       })
     );
   });

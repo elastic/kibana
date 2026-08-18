@@ -332,9 +332,21 @@ class ConversationClientImpl implements ConversationClient {
       resolvedTemplateVersion = template.version;
     }
 
+    const normalizedAccessControl = conversationWithoutTemplateId.access_control
+      ? {
+          access_mode: conversationWithoutTemplateId.access_control.access_mode,
+          entries: validateAccessControlEntries({
+            entries: conversationWithoutTemplateId.access_control.entries,
+            ownerId: this.user.id,
+            addedAtById: new Map(),
+          }),
+        }
+      : undefined;
+
     const attributes = createRequestToEs({
       conversation: {
         ...conversationWithoutTemplateId,
+        access_control: normalizedAccessControl,
         metadata: resolvedMetadata,
         ...(resolvedTemplateId ? { template_id: resolvedTemplateId } : {}),
         ...(resolvedTemplateVersion !== undefined
@@ -751,8 +763,7 @@ class ConversationClientImpl implements ConversationClient {
 
   /**
    * Read-modify-write against the stored conversation, retrying on conflict.
-   * `fields` is replayed per attempt against the freshly read conversation, so
-   * it must be free of side effects.
+   * `fields` is replayed per attempt against the freshly read conversation, so it must be free of side effects.
    */
   private async writeConversation({
     conversationId,
@@ -861,68 +872,68 @@ class ConversationClientImpl implements ConversationClient {
 
     return {
       access_mode: accessMode,
-      entries: this.validateAccessControlEntries({ entries, ownerId, addedAtById }),
+      entries: validateAccessControlEntries({ entries, ownerId, addedAtById }),
     };
   }
+}
 
-  /**
-   * Validates each requested entry and stamps `added_at`, carrying it over for members already
-   * listed in `addedAtById` so re-sharing does not reset when they were added. An entry naming
-   * the owner is dropped, since owner access is keyed off document ownership, not entries.
-   */
-  private validateAccessControlEntries({
-    entries,
-    ownerId,
-    addedAtById,
-  }: {
-    entries: UpdateConversationAccessControlRequestBody['entries'];
-    ownerId: string | undefined;
-    addedAtById: Map<string, string>;
-  }): ConversationAccessControlEntry[] {
-    const now = new Date().toISOString();
-    const seen = new Set<string>();
-    const normalizedEntries: ConversationAccessControlEntry[] = [];
+/**
+ * Validates each requested entry and stamps `added_at`, carrying it over from `addedAtById`
+ * for members already listed so re-sharing does not reset when they were added. An entry
+ * naming the owner is dropped, since owner access is keyed off document ownership, not entries.
+ */
+export const validateAccessControlEntries = ({
+  entries,
+  ownerId,
+  addedAtById,
+}: {
+  entries: UpdateConversationAccessControlRequestBody['entries'];
+  ownerId: string | undefined;
+  addedAtById: Map<string, string>;
+}): ConversationAccessControlEntry[] => {
+  const now = new Date().toISOString();
+  const seen = new Set<string>();
+  const normalizedEntries: ConversationAccessControlEntry[] = [];
 
-    for (const entry of entries) {
-      if (!entry || entry.type !== 'user') {
-        throw createBadRequestError('Each ACL entry requires a type of "user"');
-      }
-
-      if (typeof entry.id !== 'string' || entry.id.length === 0) {
-        throw createBadRequestError('Each ACL entry requires a non-empty id');
-      }
-
-      if (entry.id.length > CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
-        throw createBadRequestError(
-          `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`
-        );
-      }
-
-      if (!isConversationAccessControlRole(entry.role)) {
-        throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
-      }
-
-      // Owner access is keyed off document ownership, so an owner entry would be inert.
-      if (ownerId !== undefined && entry.id === ownerId) {
-        continue;
-      }
-
-      const key = `${entry.type}:${entry.id}`;
-
-      if (seen.has(key)) {
-        throw createBadRequestError(`Duplicate ACL entry for ${entry.type} "${entry.id}"`);
-      }
-
-      seen.add(key);
-
-      normalizedEntries.push({
-        type: entry.type,
-        id: entry.id,
-        role: entry.role,
-        added_at: addedAtById.get(key) ?? now,
-      });
+  for (const entry of entries) {
+    if (!entry || entry.type !== 'user') {
+      throw createBadRequestError('Each ACL entry requires a type of "user"');
     }
 
-    return normalizedEntries;
+    if (typeof entry.id !== 'string' || entry.id.length === 0) {
+      throw createBadRequestError('Each ACL entry requires a non-empty id');
+    }
+
+    if (entry.id.length > CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH) {
+      throw createBadRequestError(
+        `ACL principal id exceeds maximum length of ${CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH}`
+      );
+    }
+
+    if (!isConversationAccessControlRole(entry.role)) {
+      throw createBadRequestError(`Unknown ACL role: ${String(entry.role)}`);
+    }
+
+    // Owner access is keyed off document ownership, so an owner entry would be inert.
+    if (ownerId !== undefined && entry.id === ownerId) {
+      continue;
+    }
+
+    const key = `${entry.type}:${entry.id}`;
+
+    if (seen.has(key)) {
+      throw createBadRequestError(`Duplicate ACL entry for ${entry.type} "${entry.id}"`);
+    }
+
+    seen.add(key);
+
+    normalizedEntries.push({
+      type: entry.type,
+      id: entry.id,
+      role: entry.role,
+      added_at: addedAtById.get(key) ?? now,
+    });
   }
-}
+
+  return normalizedEntries;
+};
