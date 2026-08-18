@@ -5,40 +5,26 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '@kbn/core/server';
-
-import type { InferenceEndpointPluginSetup, InferenceEndpointPluginStart } from './types';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { getInferenceServicesRoute } from './routes';
 
-export class InferenceEndpointPlugin
-  implements Plugin<InferenceEndpointPluginSetup, InferenceEndpointPluginStart>
-{
-  private readonly logger: Logger;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class InferenceEndpointPlugin extends Service {
+  static readonly inject = ['core.http'];
+  static readonly provide = 'inferenceEndpoint';
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(ctx: Context) {
+    super(ctx, 'inferenceEndpoint');
+    (ctx.get('core.logger') as any).get('plugins', 'inferenceEndpoint').debug('inference-endpoint: Setup');
+        const router = (ctx.get('core.http') as any).createRouter();
+
+        // Register server side APIs
+        getInferenceServicesRoute(router, (ctx.get('core.logger') as any).get('plugins', 'inferenceEndpoint'));
+    // TODO: start() had a non-empty body — migrate manually:
+    // {
+    //     this.logger.debug('inference-endpoint: Started');
+    //     return {};
+    //   }
   }
-
-  public setup(core: CoreSetup) {
-    this.logger.debug('inference-endpoint: Setup');
-    const router = core.http.createRouter();
-
-    // Register server side APIs
-    getInferenceServicesRoute(router, this.logger);
-
-    return {};
-  }
-
-  public start(core: CoreStart) {
-    this.logger.debug('inference-endpoint: Started');
-    return {};
-  }
-
-  public stop() {}
 }

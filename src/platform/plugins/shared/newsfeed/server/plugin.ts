@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 
-export class NewsfeedPlugin implements Plugin {
-  public setup() {}
 
-  public start() {}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class NewsfeedPlugin extends Service {
+  static readonly inject = [];
+  static readonly provide = 'newsfeed';
 
-  public stop() {}
+  constructor(ctx: Context) {
+    super(ctx, 'newsfeed');
+
+  }
 }

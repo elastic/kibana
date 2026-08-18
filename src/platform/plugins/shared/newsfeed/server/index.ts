@@ -7,20 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginConfigDescriptor } from '@kbn/core/server';
-import type { NewsfeedConfigType } from './config';
-import { configSchema } from './config';
-
-export const config: PluginConfigDescriptor<NewsfeedConfigType> = {
-  schema: configSchema,
-  exposeToBrowser: {
-    service: true,
-    mainInterval: true,
-    fetchInterval: true,
-  },
-};
-
-export async function plugin() {
-  const { NewsfeedPlugin } = await import('./plugin');
-  return new NewsfeedPlugin();
-}
+export { default as cordisPlugin } from './plugin';

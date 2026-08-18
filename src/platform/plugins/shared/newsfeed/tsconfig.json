@@ -5,6 +5,7 @@
   },
   "include": ["public/**/*", "server/**/*", "common/*", "../../../../../typings/**/*"],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/screenshot-mode-plugin",
     "@kbn/i18n-react",

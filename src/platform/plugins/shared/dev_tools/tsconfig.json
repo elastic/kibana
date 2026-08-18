@@ -5,6 +5,7 @@
   },
   "include": ["common/*", "public/**/*", "server/**/*", "test/scout/**/*"],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/url-forwarding-plugin",
     "@kbn/management-plugin",

@@ -7,23 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
-
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { uiSettings } from './ui_settings';
-export class DevToolsServerPlugin implements Plugin<object, object> {
-  constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup<object>) {
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class DevToolsServerPlugin extends Service {
+  static readonly inject = ['core.uiSettings'];
+  static readonly provide = 'devTools';
+
+  constructor(ctx: Context) {
+    super(ctx, 'devTools');
     /**
-     * Register Dev Tools UI Settings
-     */
-    core.uiSettings.register(uiSettings);
-    return {};
+         * Register Dev Tools UI Settings
+         */
+        (ctx.get('core.uiSettings') as any).register(uiSettings);
   }
-
-  public start() {
-    return {};
-  }
-
-  public stop() {}
 }
