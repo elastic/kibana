@@ -56,7 +56,14 @@ export class ContextEnginePlugin
 
   constructor(_context: PluginInitializerContext) {}
 
-  setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
+  setup(
+    core: CoreSetup<ContextEngineStartDependencies>,
+    setupDeps: ContextEngineSetupDependencies
+  ): ContextEnginePluginSetup {
+    setupDeps.workflowsExtensions?.registerStepDefinition(() =>
+      import('./steps/verify_ki_step').then((m) => m.VerifyKiStepDefinition)
+    );
+
     const startServices = core.getStartServices();
     // Captured in a closure so `mount` (where `this` is the app config) can read the opener
     // registered on `start`.
