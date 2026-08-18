@@ -8,7 +8,7 @@
  */
 
 import { useMemo } from 'react';
-import type { AppMenuStaticItem } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuStaticItem } from '@kbn/app-menu';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { useObservable } from '@kbn/use-observable';
 import { i18n } from '@kbn/i18n';

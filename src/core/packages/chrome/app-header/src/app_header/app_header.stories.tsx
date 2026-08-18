@@ -19,7 +19,7 @@ import type {
   AppHeaderMetadataItems,
   AppHeaderTab,
 } from '@kbn/core-chrome-browser';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
+import type { AppMenuConfig } from '@kbn/app-menu';
 import type { AppHeaderSpacing } from '../types';
 import { AppHeaderView } from './app_header';
 
