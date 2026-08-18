@@ -1,5 +1,5 @@
 {
-  "sha1": "cd900c9eb22d38bf30086cd6fd63107dfdfa1dbf",
+  "sha1": "6b781be93e8cf63d7a58d538c5db71fb4b7d922f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -2518,6 +2518,230 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/tools_legacy_migration_api.spec.ts",
         "line": 130,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-af25adc0012c6c2",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) updates name and description",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 74,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-86aefdc766dde58",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) updates labels",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 89,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-1a3bd8eedb23b38",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) updates avatar_symbol and avatar_color",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 100,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-c2973c66f9cd944",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) updates configuration.instructions (the overview-page edit-details flow)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 111,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-a7e246efc63200b",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) updates configuration.enable_elastic_capabilities",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 126,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-9d7c61823cdb722",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) updates configuration.workflow_ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 137,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-7a7e8001762027c",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) accepts access_control with only access_mode: public",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 153,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-aaf9af5a514fa4e",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) accepts access_control with only access_mode: private",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 164,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-6e975aef41c4546",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) rejects access_control payload that includes entries (regression guard for elastic/search-team#15698)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 175,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-684e81ea45d6b22",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) rejects unknown top-level properties in the update body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 203,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-287d1e1b8501122",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) rejects unknown nested properties inside configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 213,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-8faf6df025d3690",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) updating only instructions does not clobber other configuration fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 232,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-a41a96825a69cbf",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) updating only access_mode does not affect configuration",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 269,
+        "column": 12
+      }
+    },
+    {
+      "id": "d7dad72099260ea-9726fdf9d3b50fa",
+      "title": "Agent Builder — update agent API (PUT /agents/:id) GET after PUT returns the same document as the PUT response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/update_agent_api.spec.ts",
+        "line": 290,
         "column": 12
       }
     }

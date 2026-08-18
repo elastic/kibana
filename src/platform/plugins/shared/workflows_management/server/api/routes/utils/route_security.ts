@@ -103,7 +103,7 @@ export const WORKFLOW_DELETE_SECURITY: RouteSecurity = {
 };
 export const WORKFLOW_EXECUTE_SECURITY: RouteSecurity = {
   authz: {
-    requiredPrivileges: [WorkflowsManagementApiActions.execute, WorkflowsManagementApiActions.read],
+    requiredPrivileges: [WorkflowsManagementApiActions.execute],
   },
 };
 export const WORKFLOW_EXECUTION_READ_SECURITY: RouteSecurity = {
