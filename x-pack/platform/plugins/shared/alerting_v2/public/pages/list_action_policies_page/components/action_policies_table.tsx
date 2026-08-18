@@ -98,8 +98,7 @@ export const ActionPoliciesTable = () => {
   );
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
-  const createWithAgentTooltipText =
-    getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
+  const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
 
   const navigateToCreate = useCallback(() => {
     navigateToUrl(basePath.prepend(paths.actionPolicyCreate));

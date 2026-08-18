@@ -25,9 +25,7 @@ jest.mock('@kbn/content-list-provider', () => {
 const onCreatePolicy = jest.fn();
 const onCreateWithAgent = jest.fn();
 
-const renderHeader = (
-  props?: Partial<React.ComponentProps<typeof ActionPoliciesListHeader>>
-) =>
+const renderHeader = (props?: Partial<React.ComponentProps<typeof ActionPoliciesListHeader>>) =>
   render(
     <ListPageTestProviders>
       <ActionPoliciesListHeader

@@ -128,10 +128,7 @@ describe('ActionPolicyCreateOptionsPanel', () => {
   });
 
   it('shows a tooltip without disabling when only tooltipText is set', async () => {
-    renderPanel([
-      createPolicyOption(),
-      createWithAgentOption({ tooltipText: 'Extra context' }),
-    ]);
+    renderPanel([createPolicyOption(), createWithAgentOption({ tooltipText: 'Extra context' })]);
 
     const agentCard = screen.getByTestId('createActionPolicyWithAgentCard');
     expect(agentCard).not.toHaveAttribute('aria-disabled', 'true');
