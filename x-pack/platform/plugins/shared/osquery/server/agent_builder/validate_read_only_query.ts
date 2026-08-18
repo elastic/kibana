@@ -74,13 +74,25 @@ export const validateReadOnlyQuery = (
     return 'Query must not be empty';
   }
 
+  // Blank string literals FIRST, then strip comments. The order is
+  // load-bearing (github-actions #4961701853): a `--` or `/* */` *inside* a
+  // string literal is not a comment — e.g. `name = 'x--'`. Stripping comments
+  // from the raw query would delete everything after that `--`, so the
+  // validator would scan only the truncated prefix while `run_live_query`
+  // dispatches the ORIGINAL query — bypassing the table allowlist.
+  // Blank string literals FIRST, then strip comments. The order is
+  // load-bearing (github-actions #4961701853): a `--` or `/* */` *inside* a
+  // string literal is not a comment — e.g. `name = 'x--'`. Stripping comments
+  // from the raw query would delete everything after that `--`, so the
+  // validator would scan only the truncated prefix while `run_live_query`
+  // dispatches the ORIGINAL query — bypassing the table allowlist.
+  const withoutLiterals = blankStringLiterals(trimmed);
+
   // Strip single-line and block comments before keyword checks
-  const withoutComments = trimmed
+  const scannable = withoutLiterals
     .replace(/--[^\n]*/g, ' ')
     .replace(/\/\*[\s\S]*?\*\//g, ' ')
     .trim();
-
-  const scannable = blankStringLiterals(withoutComments);
 
   // extractTableRefs only scans the first statement's clause keywords.
   if (scannable.includes(';')) {

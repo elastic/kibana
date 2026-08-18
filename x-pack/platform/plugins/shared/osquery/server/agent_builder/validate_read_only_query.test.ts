@@ -217,4 +217,38 @@ describe('validateReadOnlyQuery', () => {
       ).toBeNull();
     });
   });
+
+  describe('comment stripping order (review finding #4961701853)', () => {
+    it('rejects a side-effect table hidden behind `--` inside a string literal', () => {
+      expect(
+        validateReadOnlyQuery(
+          "SELECT pid FROM processes WHERE name = 'x--' UNION SELECT * FROM curl WHERE url = 'http://169.254.169.254/'",
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+
+    it('handles a block-comment-looking sequence inside a string literal without corrupting the scan', () => {
+      // `/* */` is non-greedy and self-contained, so it never truncates the
+      // validated view the way `--` (which runs to end-of-line) does. This is a
+      // correctness guard, not a bypass regression: the query must still be
+      // rejected for the real reason (the `carves` table).
+      expect(
+        validateReadOnlyQuery(
+          "SELECT pid FROM processes WHERE name = 'x/* */' UNION SELECT * FROM carves WHERE carve = 1",
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+
+    it('still strips a genuine trailing line comment', () => {
+      expect(
+        validateReadOnlyQuery('SELECT pid FROM processes -- ok\nWHERE pid = 1', ALLOWED)
+      ).toBeNull();
+    });
+
+    it('still strips a genuine block comment', () => {
+      expect(validateReadOnlyQuery('SELECT pid FROM processes /* note */ WHERE pid = 1', ALLOWED)).toBeNull();
+    });
+  });
 });
