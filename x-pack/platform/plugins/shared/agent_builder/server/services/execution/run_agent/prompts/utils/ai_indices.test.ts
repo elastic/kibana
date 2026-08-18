@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
+import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 import { getAiIndicesInstructions } from './ai_indices';
 
 describe('getAiIndicesInstructions', () => {
@@ -12,19 +14,58 @@ describe('getAiIndicesInstructions', () => {
     expect(getAiIndicesInstructions({ aiIndices: [], spaceId: 'default' })).toBe('');
   });
 
-  it('names the space the conversation runs in', () => {
+  it('explains what an AI index is and how it is named', () => {
     const instructions = getAiIndicesInstructions({
-      aiIndices: ['elastic'],
-      spaceId: 'marketing',
+      aiIndices: [agentBuilderDefaultAiIndexId],
+      spaceId: 'default',
     });
 
     expect(instructions).toContain('## AI INDICES');
+    expect(instructions).toContain('`ai-index-idx-*`');
+    expect(instructions).toContain('`ai-index-ds-*`');
+  });
+
+  it('names the backing index of the default AI index and what it holds', () => {
+    const instructions = getAiIndicesInstructions({
+      aiIndices: [agentBuilderDefaultAiIndexId],
+      spaceId: 'default',
+    });
+
+    expect(instructions).toContain(`\`${smlIndexName}\``);
+    expect(instructions).toContain('dashboards');
+    expect(instructions).toContain('connectors');
+  });
+
+  it('tells the agent that entries have to be attached before they can be acted on', () => {
+    const instructions = getAiIndicesInstructions({
+      aiIndices: [agentBuilderDefaultAiIndexId],
+      spaceId: 'default',
+    });
+
+    expect(instructions).toContain('attached to the conversation');
+  });
+
+  it('names no SML tool, so the section survives their replacement by ES|QL', () => {
+    const instructions = getAiIndicesInstructions({
+      aiIndices: [agentBuilderDefaultAiIndexId],
+      spaceId: 'default',
+    });
+
+    expect(instructions).not.toContain('sml_');
+  });
+
+  it('names the space the conversation runs in', () => {
+    const instructions = getAiIndicesInstructions({
+      aiIndices: [agentBuilderDefaultAiIndexId],
+      spaceId: 'marketing',
+    });
+
     expect(instructions).toContain('`marketing`');
   });
 
   it('renders a filter that also matches indices without a spaces field', () => {
     const instructions = getAiIndicesInstructions({
-      aiIndices: ['elastic'],
+      aiIndices: [agentBuilderDefaultAiIndexId],
       spaceId: 'marketing',
     });
     const filter = JSON.parse(instructions.match(/```json\n(.+)\n```/)![1]);
@@ -43,10 +84,29 @@ describe('getAiIndicesInstructions', () => {
 
   it('does not leak the Context Engine ids of the declared indices', () => {
     const instructions = getAiIndicesInstructions({
-      aiIndices: ['elastic', 'some-private-id'],
+      aiIndices: [agentBuilderDefaultAiIndexId, 'some-private-id'],
       spaceId: 'default',
     });
 
     expect(instructions).not.toContain('some-private-id');
+  });
+
+  it('points at index discovery for declared indices it cannot name', () => {
+    const instructions = getAiIndicesInstructions({
+      aiIndices: [agentBuilderDefaultAiIndexId, 'some-private-id'],
+      spaceId: 'default',
+    });
+
+    expect(instructions).toContain('`list_indices`');
+  });
+
+  it('omits the catalog heading when no declared index can be named', () => {
+    const instructions = getAiIndicesInstructions({
+      aiIndices: ['some-private-id'],
+      spaceId: 'default',
+    });
+
+    expect(instructions).not.toContain('Available to this agent');
+    expect(instructions).toContain('`list_indices`');
   });
 });

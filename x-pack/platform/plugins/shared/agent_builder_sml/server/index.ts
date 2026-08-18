@@ -32,7 +32,11 @@ export type {
 
 export { kibanaSavedObjectPermissions } from './services/sml/permissions/kibana_saved_object';
 
-export { smlElasticsearchIndexMappings, smlIndexName } from './services/sml/sml_storage';
+export {
+  smlAiIndexDescription,
+  smlElasticsearchIndexMappings,
+  smlIndexName,
+} from './services/sml/sml_storage';
 export { SmlSearchFilterType } from '../common/http_api/sml';
 
 export const plugin: PluginInitializer<
