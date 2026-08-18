@@ -25,7 +25,7 @@ export const goldenClusterPrivileges = {
             privileges: [
               'auto_configure',
               'create_index',
-              'create_doc',
+              'create',
               'read',
               'view_index_metadata',
             ],
@@ -35,7 +35,7 @@ export const goldenClusterPrivileges = {
             privileges: [
               'auto_configure',
               'create_index',
-              'create_doc',
+              'create',
               'read',
               'view_index_metadata',
             ],
@@ -45,7 +45,7 @@ export const goldenClusterPrivileges = {
             privileges: [
               'auto_configure',
               'create_index',
-              'create_doc',
+              'create',
               'read',
               'view_index_metadata',
               'delete',
