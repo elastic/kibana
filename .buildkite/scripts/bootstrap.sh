@@ -11,7 +11,13 @@ if [[ "${BOOTSTRAP_ALWAYS_FORCE_INSTALL:-}" ]]; then
   BOOTSTRAP_PARAMS+=(--force-install)
 fi
 
-if [[ -d ~/.kibana/node_modules ]]; then
+if [[ "$(pwd)" == "/dev/shm"* && -d ~/.kibana/node_modules ]]; then
+  echo "--- Mock: compress node_modules archive"
+  tar -cf - -C ~/.kibana node_modules | zstd -T0 -o ~/.kibana/node_modules.tar.zst
+
+  echo "--- Mock: extract node_modules"
+  tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
+elif [[ -d ~/.kibana/node_modules ]]; then
   echo "Using ~/.kibana/node_modules as a starting point"
   mv ~/.kibana/node_modules ./
 fi
