@@ -6,10 +6,10 @@
  */
 
 /**
- * Page-level filter bar shown under the Entity analytics title. Opens with
- * Resolved entities | Raw records as paired `EuiFilterButton`s (`withNext`),
- * then the shared `MultiselectFilter` dropdowns. The group is `fullWidth` so
- * it spans the page content.
+ * Page-level filter bar shown under the Entity analytics title. Shared
+ * `MultiselectFilter` dropdowns first, then Resolved entities | Raw records
+ * as paired `EuiFilterButton`s (`withNext`) at the end. The group is
+ * `fullWidth` so it spans the page content.
  */
 
 import React, { useCallback } from 'react';
@@ -191,31 +191,6 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
 
   return (
     <EuiFilterGroup compressed fullWidth data-test-subj="eaFaceliftEntityFilters">
-      <EuiFilterButton
-        withNext
-        isToggle
-        grow={false}
-        iconType="aggregate"
-        iconSide="left"
-        isSelected={isResolved}
-        hasActiveFilters={isResolved}
-        onClick={onSelectResolved}
-        data-test-subj="eaFaceliftEntitiesViewResolved"
-      >
-        {TITLES.resolvedEntities}
-      </EuiFilterButton>
-      <EuiFilterButton
-        isToggle
-        grow={false}
-        iconType="listBullet"
-        iconSide="left"
-        isSelected={isRaw}
-        hasActiveFilters={isRaw}
-        onClick={onSelectRaw}
-        data-test-subj="eaFaceliftEntitiesViewRaw"
-      >
-        {TITLES.rawRecords}
-      </EuiFilterButton>
       <MultiselectFilter<EntityType>
         data-test-subj="eaFaceliftEntityTypeFilter"
         title={TITLES.entityType}
@@ -266,6 +241,31 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
         width={190}
         grow
       />
+      <EuiFilterButton
+        withNext
+        isToggle
+        grow={false}
+        iconType="aggregate"
+        iconSide="left"
+        isSelected={isResolved}
+        hasActiveFilters={isResolved}
+        onClick={onSelectResolved}
+        data-test-subj="eaFaceliftEntitiesViewResolved"
+      >
+        {TITLES.resolvedEntities}
+      </EuiFilterButton>
+      <EuiFilterButton
+        isToggle
+        grow={false}
+        iconType="listBullet"
+        iconSide="left"
+        isSelected={isRaw}
+        hasActiveFilters={isRaw}
+        onClick={onSelectRaw}
+        data-test-subj="eaFaceliftEntitiesViewRaw"
+      >
+        {TITLES.rawRecords}
+      </EuiFilterButton>
     </EuiFilterGroup>
   );
 };

@@ -105,16 +105,20 @@ const SELECTION_WIDTH = 32;
 /**
  * Rows draw their own bottom border so the line falls under the expanded raw
  * records rather than between them and the entity they belong to.
+ *
+ * Display defaults match the Display options popover:
+ * Density = Normal (fontSize/cellPadding `m`); Lines per row = Static
+ * (`defaultHeight` undefined = single-line static).
  */
 const gridStyle: EuiDataGridStyle = {
   border: 'none',
-  cellPadding: 'l',
-  fontSize: 's',
+  cellPadding: 'm',
+  fontSize: 'm',
   stripes: false,
   header: 'underline',
 };
 
-const rowHeightsOptions: EuiDataGridRowHeightsOptions = { defaultHeight: 44 };
+const rowHeightsOptions: EuiDataGridRowHeightsOptions = {};
 const detailsRowHeightsOptions: EuiDataGridRowHeightsOptions = { defaultHeight: 'auto' };
 const detailsCellStyle: CSSProperties = { width: '100%', height: 'auto' };
 
@@ -367,6 +371,7 @@ const columnIdsForView = (view: TableView): string[] => columnsForView(view).map
 interface RenderValueOptions {
   onOpenDetails?: (row: EntityRow) => void;
   onOpenResolvedTo?: (target: ResolvedToTarget) => void;
+  onOpenRecords?: (row: EntityRow) => void;
   onOpenAnomalies?: (row: EntityRow) => void;
   onOpenAlerts?: (row: EntityRow) => void;
 }
@@ -378,7 +383,13 @@ interface RenderValueOptions {
 const renderValue = (
   columnId: string,
   row: EntityRow | RawRecordRow,
-  { onOpenDetails, onOpenResolvedTo, onOpenAnomalies, onOpenAlerts }: RenderValueOptions = {}
+  {
+    onOpenDetails,
+    onOpenResolvedTo,
+    onOpenRecords,
+    onOpenAnomalies,
+    onOpenAlerts,
+  }: RenderValueOptions = {}
 ): ReactNode => {
   switch (columnId) {
     case 'name':
@@ -398,12 +409,26 @@ const renderValue = (
       );
     case 'entityType':
       return <EntityTypeCell entityType={row.entityType} />;
-    case 'records':
+    case 'records': {
+      const count = row.records;
+      if (onOpenRecords) {
+        return (
+          <EuiText size="s" textAlign="right">
+            <EuiLink
+              onClick={() => onOpenRecords(row)}
+              data-test-subj={`eaFaceliftRecords-${row.id}`}
+            >
+              {count}
+            </EuiLink>
+          </EuiText>
+        );
+      }
       return (
         <EuiText size="s" textAlign="right">
-          {row.records}
+          {count}
         </EuiText>
       );
+    }
     case 'resolvedTo': {
       const target = 'resolvedTo' in row ? row.resolvedTo : undefined;
       if (!target) {
@@ -829,7 +854,12 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
   } = useUserPrivileges();
   const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
-  const { openEntityFlyout, openEntityAnomalyInsights, openEntityAlertsInsights } = useFlyoutApi();
+  const {
+    openEntityFlyout,
+    openEntityResolution,
+    openEntityAnomalyInsights,
+    openEntityAlertsInsights,
+  } = useFlyoutApi();
   const { dataView, dataViewIsLoading } = useContext(DataViewContext);
   const { setQuery, deleteQuery } = useGlobalTime();
 
@@ -979,6 +1009,38 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
     [openEntityDetails]
   );
 
+  /** Opens the Resolution group tool flyout for the entity's records count. */
+  const onOpenRecords = useCallback(
+    (row: EntityRow) => {
+      openEntityResolution({
+        entityId: row.entityId,
+        entityType: row.entityType,
+        entityName: row.name,
+        scopeId: ENTITY_ANALYTICS_TABLE_ID,
+        origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+        onShowEntity: () => {
+          openEntityFlyout({
+            engineType: row.entityType,
+            entityId: row.entityId,
+            entityName: row.name,
+            scopeId: ENTITY_ANALYTICS_TABLE_ID,
+            origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+          });
+        },
+        onShowRelatedEntity: ({ engineType, entityId, entityName }) => {
+          openEntityFlyout({
+            engineType: (engineType as EntityType) || row.entityType,
+            entityId,
+            entityName: entityName ?? row.name,
+            scopeId: ENTITY_ANALYTICS_TABLE_ID,
+            origin: FLYOUT_ORIGIN.TOOL_HEADER_TITLE,
+          });
+        },
+      });
+    },
+    [openEntityFlyout, openEntityResolution]
+  );
+
   /** Opens the Behavioral anomalies tool flyout for every entity row (including 0). */
   const onOpenAnomalies = useCallback(
     (row: EntityRow) => {
@@ -1036,11 +1098,12 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
       return renderValue(columnId, row, {
         onOpenDetails: columnId === 'name' ? onOpenDetails : undefined,
         onOpenResolvedTo: columnId === 'resolvedTo' ? onOpenResolvedTo : undefined,
+        onOpenRecords: columnId === 'records' ? onOpenRecords : undefined,
         onOpenAnomalies: columnId === 'anomalies' ? onOpenAnomalies : undefined,
         onOpenAlerts: columnId === 'alerts' ? onOpenAlerts : undefined,
       });
     },
-    [rows, onOpenDetails, onOpenResolvedTo, onOpenAnomalies, onOpenAlerts]
+    [rows, onOpenDetails, onOpenResolvedTo, onOpenRecords, onOpenAnomalies, onOpenAlerts]
   );
 
   const leadingControlColumns = useMemo<EuiDataGridControlColumn[]>(() => {

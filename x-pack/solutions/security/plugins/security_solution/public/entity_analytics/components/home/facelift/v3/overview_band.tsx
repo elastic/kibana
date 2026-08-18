@@ -99,6 +99,8 @@ export const OverviewBand: React.FC<OverviewBandProps> = ({
         <MetricChartsPanel
           activeFilter={activeFilter}
           cards={cards}
+          pageFilters={pageFilters}
+          tableView={tableView}
           onFilterForCard={onFilterForCard}
           onFilterOutCard={onFilterOutCard}
           onAddCardToTimeline={onAddCardToTimeline}

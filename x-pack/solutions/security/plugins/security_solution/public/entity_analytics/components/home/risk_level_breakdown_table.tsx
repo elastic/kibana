@@ -17,7 +17,10 @@ import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreLevel } from '../severity/common';
 import type { SeverityCount } from '../severity/types';
-import { SecurityCellActionType } from '../../../common/components/cell_actions';
+import {
+  SecurityCellActions,
+  SecurityCellActionType,
+} from '../../../common/components/cell_actions';
 
 export const ENTITY_RISK_LEVEL_FIELD = 'entity.risk.calculated_level';
 
@@ -36,12 +39,24 @@ interface RiskLevelBreakdownTableProps {
    * for `entity.risk.calculated_level`.
    */
   entityDataView?: DataView;
+  /** Overrides the count column header (defaults to "Entities"). */
+  countColumnName?: React.ReactNode;
+  /**
+   * When true, always show the Alerts-style ⋮ cell-actions column using the
+   * field name (no data-view FieldSpec required). Prefer this for prototypes.
+   */
+  showCellActions?: boolean;
+  /** Custom ⋮ cell renderer — when set, replaces the default SecurityCellActions. */
+  renderCellActions?: (level: RiskSeverity) => React.ReactNode;
 }
 
 export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = ({
   severityCount,
   loading = false,
   entityDataView,
+  countColumnName,
+  showCellActions = false,
+  renderCellActions,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -91,7 +106,9 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
     [entityDataView?.id]
   );
 
-  const showCellActions = !!riskLevelFieldSpec && !!entityDataView?.id;
+  const showDataViewCellActions = !!riskLevelFieldSpec && !!entityDataView?.id;
+  const showActionsColumn =
+    Boolean(renderCellActions) || showCellActions || showDataViewCellActions;
 
   const columns: Array<EuiBasicTableColumn<RiskLevelBreakdownItem>> = useMemo(() => {
     const baseColumns: Array<EuiBasicTableColumn<RiskLevelBreakdownItem>> = [
@@ -128,7 +145,7 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
       },
       {
         field: 'count',
-        name: (
+        name: countColumnName ?? (
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.homePage.riskLevelBreakdown.numberOfEntities"
             defaultMessage="Entities"
@@ -144,29 +161,55 @@ export const RiskLevelBreakdownTable: React.FC<RiskLevelBreakdownTableProps> = (
       },
     ];
 
-    if (showCellActions && riskLevelFieldSpec) {
+    if (showActionsColumn) {
       baseColumns.push({
         field: 'level',
         name: '',
         width: '40px',
         'data-test-subj': 'riskLevelBreakdownTable-actions',
-        render: (level: RiskSeverity) => (
-          <CellActions
-            mode={CellActionsMode.INLINE}
-            visibleCellActions={0}
-            triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
-            data={{ field: riskLevelFieldSpec, value: level }}
-            metadata={getCellActionsMetadata(level)}
-            disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
-            extraActionsIconType="boxesVertical"
-            extraActionsColor="text"
-          />
-        ),
+        render: (level: RiskSeverity) => {
+          if (renderCellActions) {
+            return <>{renderCellActions(level)}</>;
+          }
+          if (showCellActions || !riskLevelFieldSpec) {
+            return (
+              <SecurityCellActions
+                mode={CellActionsMode.INLINE}
+                visibleCellActions={0}
+                triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
+                data={{ field: ENTITY_RISK_LEVEL_FIELD, value: level }}
+                disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+                extraActionsIconType="boxesVertical"
+                extraActionsColor="text"
+              />
+            );
+          }
+          return (
+            <CellActions
+              mode={CellActionsMode.INLINE}
+              visibleCellActions={0}
+              triggerId={SECURITY_CELL_ACTIONS_DEFAULT}
+              data={{ field: riskLevelFieldSpec, value: level }}
+              metadata={getCellActionsMetadata(level)}
+              disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+              extraActionsIconType="boxesVertical"
+              extraActionsColor="text"
+            />
+          );
+        },
       });
     }
 
     return baseColumns;
-  }, [euiTheme, showCellActions, riskLevelFieldSpec, getCellActionsMetadata]);
+  }, [
+    euiTheme,
+    showActionsColumn,
+    showCellActions,
+    riskLevelFieldSpec,
+    getCellActionsMetadata,
+    countColumnName,
+    renderCellActions,
+  ]);
 
   return (
     <EuiInMemoryTable

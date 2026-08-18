@@ -20,6 +20,7 @@ import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 
 import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
+import { METRIC_CHARTS_BODY_HEIGHT } from './metric_charts_layout';
 
 export interface SignalCardsProps {
   activeFilter: ActiveFilter | null;
@@ -31,10 +32,10 @@ export interface SignalCardsProps {
 }
 
 /**
- * Tall enough for the 42px value, title and subtitle at six columns once the
- * value sits in the bottom-right corner.
+ * Match the Summary tab body height (Entities by / Sources panels).
+ * Outer panel uses the shared height (border-box) so both accordion views align.
  */
-const CARDS_HEIGHT = 160;
+const CARDS_HEIGHT = METRIC_CHARTS_BODY_HEIGHT;
 const VALUE_FONT_SIZE = 42;
 
 const FILTER_FOR = i18n.translate(
@@ -208,10 +209,18 @@ export const SignalCards: React.FC<SignalCardsProps> = ({
   );
 
   return (
-    <EuiPanel hasBorder paddingSize="none" data-test-subj="eaFaceliftSignalCards">
+    <EuiPanel
+      hasBorder
+      paddingSize="none"
+      data-test-subj="eaFaceliftSignalCards"
+      css={css`
+        block-size: ${CARDS_HEIGHT}px;
+        overflow: hidden;
+      `}
+    >
       <div
         css={css`
-          height: ${CARDS_HEIGHT}px;
+          block-size: 100%;
 
           /* Metric theme exposes titleWeight but not value weight — match the 700 title. */
           .echMetricText__value {

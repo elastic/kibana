@@ -13,8 +13,9 @@ import { i18n } from '@kbn/i18n';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { KpiPanel } from '../../../../../detections/components/alerts_kpis/common/components';
-import type { ActiveFilter, SignalCardData, SignalCardId } from './data';
+import type { ActiveFilter, PageFilters, SignalCardData, SignalCardId, TableView } from './data';
 import { SignalCards } from './signal_cards';
+import { SummaryCharts } from './summary_charts';
 
 const METRIC_CHARTS_PANEL_ID = 'ea-facelift-v3-metric-charts-panel';
 
@@ -50,6 +51,9 @@ const TOGGLE_ARIA_LABEL = i18n.translate(
 export interface MetricChartsPanelProps {
   activeFilter: ActiveFilter | null;
   cards: SignalCardData[];
+  /** Top filter group — Summary charts count the same corpus as the Entities table. */
+  pageFilters: PageFilters;
+  tableView: TableView;
   onFilterForCard: (cardId: SignalCardId) => void;
   onFilterOutCard: (cardId: SignalCardId) => void;
   onAddCardToTimeline: (cardId: SignalCardId) => void;
@@ -57,11 +61,13 @@ export interface MetricChartsPanelProps {
 
 /**
  * Alerts-page-style KPI panel: chevron expand/collapse + view button group.
- * Body: existing metric cards under Needs attention; Summary left blank.
+ * Body: metric cards under Needs attention; Risk / Criticality / Sources under Summary.
  */
 export const MetricChartsPanel: React.FC<MetricChartsPanelProps> = ({
   activeFilter,
   cards,
+  pageFilters,
+  tableView,
   onFilterForCard,
   onFilterOutCard,
   onAddCardToTimeline,
@@ -108,16 +114,30 @@ export const MetricChartsPanel: React.FC<MetricChartsPanelProps> = ({
       hasBorder
       data-test-subj="eaFaceliftMetricChartsPanel"
     >
-      <HeaderSection
-        outerDirection="row"
-        title={title}
-        titleSize="s"
-        hideSubtitle
-        showInspectButton={false}
-        toggleStatus={isExpanded}
-        toggleAriaLabel={TOGGLE_ARIA_LABEL}
-        toggleQuery={toggleQuery}
-      />
+      {/*
+        HeaderSection `.toggle-expand` uses 24px margin; padding on this wrapper
+        (not margin) so the gap under the toggle is a stable 16px.
+      */}
+      <div
+        css={css`
+          padding-bottom: 16px;
+
+          & > [data-test-subj='header-section'] {
+            margin-bottom: 0 !important;
+          }
+        `}
+      >
+        <HeaderSection
+          outerDirection="row"
+          title={title}
+          titleSize="s"
+          hideSubtitle
+          showInspectButton={false}
+          toggleStatus={isExpanded}
+          toggleAriaLabel={TOGGLE_ARIA_LABEL}
+          toggleQuery={toggleQuery}
+        />
+      </div>
       {isExpanded && view === 'needsAttention' ? (
         <SignalCards
           activeFilter={activeFilter}
@@ -128,7 +148,7 @@ export const MetricChartsPanel: React.FC<MetricChartsPanelProps> = ({
         />
       ) : null}
       {isExpanded && view === 'summary' ? (
-        <div data-test-subj="eaFaceliftMetricChartsSummaryEmpty" />
+        <SummaryCharts pageFilters={pageFilters} tableView={tableView} />
       ) : null}
     </KpiPanel>
   );
