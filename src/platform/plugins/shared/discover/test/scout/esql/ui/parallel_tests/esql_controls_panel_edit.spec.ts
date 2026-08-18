@@ -61,11 +61,11 @@ spaceTest.describe(
           await pageObjects.dashboard.addSavedSearch(testData.SESSION_WITH_CONTROL_TITLE);
           await pageObjects.dashboard.waitForRenderComplete();
 
-          await expect(
-            pageObjects.dashboard.getOptionsListSelectionsLocator(
-              await pageObjects.dashboard.getOnlyDashboardControlId()
-            )
-          ).toHaveText(INITIAL_SELECTION);
+          await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await pageObjects.dashboard.getDashboardControlId();
+          await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+            INITIAL_SELECTION
+          );
         });
 
         await spaceTest.step('unlink it, converting the panel to by-value', async () => {
@@ -74,11 +74,11 @@ spaceTest.describe(
           await pageObjects.dashboard.waitForRenderComplete();
 
           // The ES|QL control survives the by-value conversion, selection intact.
-          await expect(
-            pageObjects.dashboard.getOptionsListSelectionsLocator(
-              await pageObjects.dashboard.getOnlyDashboardControlId()
-            )
-          ).toHaveText(INITIAL_SELECTION);
+          await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await pageObjects.dashboard.getDashboardControlId();
+          await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+            INITIAL_SELECTION
+          );
         });
 
         await spaceTest.step('save the dashboard and re-open the panel in Discover', async () => {
@@ -120,11 +120,11 @@ spaceTest.describe(
         await pageObjects.dashboard.openDashboardWithId(dashboard.id);
         await pageObjects.dashboard.ensureEditMode();
 
-        await expect(
-          pageObjects.dashboard.getOptionsListSelectionsLocator(
-            await pageObjects.dashboard.getOnlyDashboardControlId()
-          )
-        ).toHaveText(INITIAL_SELECTION);
+        await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
+        const controlId = await pageObjects.dashboard.getDashboardControlId();
+        await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+          INITIAL_SELECTION
+        );
 
         await pageObjects.dashboard.clickPanelAction(
           'embeddablePanelAction-editPanel',
@@ -171,11 +171,11 @@ spaceTest.describe(
           await expect(
             pageObjects.dashboard.getPanelHoverActionsLocator(testData.SESSION_WITH_CONTROL_TITLE)
           ).toBeVisible();
-          await expect(
-            pageObjects.dashboard.getOptionsListSelectionsLocator(
-              await pageObjects.dashboard.getOnlyDashboardControlId()
-            )
-          ).toHaveText(UPDATED_SELECTION);
+          await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await pageObjects.dashboard.getDashboardControlId();
+          await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+            UPDATED_SELECTION
+          );
         });
       }
     );
@@ -196,11 +196,11 @@ spaceTest.describe(
           await expect(
             pageObjects.dashboard.getPanelHoverActionsLocator(testData.SESSION_WITH_CONTROL_TITLE)
           ).toBeVisible();
-          await expect(
-            pageObjects.dashboard.getOptionsListSelectionsLocator(
-              await pageObjects.dashboard.getOnlyDashboardControlId()
-            )
-          ).toHaveText(INITIAL_SELECTION);
+          await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
+          const controlId = await pageObjects.dashboard.getDashboardControlId();
+          await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+            INITIAL_SELECTION
+          );
         });
       }
     );

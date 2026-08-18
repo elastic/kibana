@@ -12,6 +12,7 @@ import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { DataGrid } from './data_grid';
 import { expect } from '..';
+import { SavedObjectSaveModal } from './saved_object_save_modal';
 import { KibanaCodeEditorWrapper } from '../ui_components';
 import { resolveSelector } from '../utils';
 
@@ -41,10 +42,13 @@ const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 export class DiscoverApp {
   public readonly codeEditor: KibanaCodeEditorWrapper;
   private readonly dataGrid: DataGrid;
+  /** Save modal locators/actions, shared with other apps (e.g. Maps) via `SavedObjectSaveModal`. */
+  public readonly saveModal: SavedObjectSaveModal;
 
   constructor(private readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
     this.dataGrid = new DataGrid(page);
+    this.saveModal = new SavedObjectSaveModal(page);
   }
 
   async goto(options: DiscoverGotoOptions) {
@@ -618,13 +622,11 @@ export class DiscoverApp {
       }
     }
 
-    const saveButton = this.page.testSubj.locator('saveEsqlControlsFlyoutButton');
     // Save stays disabled until `available_options` is populated (see `formIsInvalid` in
-    // esql/public/triggers/esql_controls/control_flyout/index.tsx), so this waits on the
-    // control's own ES|QL query rather than on rendering. Query latency, not the default
-    // assertion timeout, sets the budget.
-    await expect(saveButton).toBeEnabled({ timeout: 30_000 });
-    await saveButton.click();
+    // esql/public/triggers/esql_controls/control_flyout/index.tsx), and the click waits for
+    // it to become enabled. That means waiting on the control's own ES|QL query rather than
+    // on rendering, so query latency sets the budget.
+    await this.page.testSubj.locator('saveEsqlControlsFlyoutButton').click({ timeout: 30_000 });
     await flyout.waitFor({ state: 'hidden' });
     await this.page.testSubj.locator('controls-group-wrapper').waitFor({ state: 'visible' });
   }
@@ -645,9 +647,7 @@ export class DiscoverApp {
    */
   async cancelEditorChanges() {
     await this.page.testSubj.click('discoverSaveButton-secondary-button');
-    const cancelButton = this.page.testSubj.locator('discoverCancelButton');
-    await expect(cancelButton).toBeVisible();
-    await cancelButton.click();
+    await this.page.testSubj.locator('discoverCancelButton').click();
   }
 
   /**
@@ -655,29 +655,29 @@ export class DiscoverApp {
    * panel on a brand-new dashboard, then navigates to that dashboard.
    */
   async saveTableToNewDashboard(title: string) {
-    const saveModal = this.page.testSubj.locator('savedObjectSaveModal');
     await this.page.testSubj.click('saveDiscoverTableToDashboardButton');
-    await expect(saveModal).toBeVisible();
+    await this.saveModal.modal.waitFor({ state: 'visible' });
 
-    // The modal defaults to "existing dashboard" with nothing selected, which keeps the
-    // confirm button disabled, so "new" has to be picked. Pick it before filling the title,
-    // which re-renders the modal. The EuiRadio input is visually hidden, so click its label.
-    await saveModal.locator('label[for="new-dashboard-option"]').click();
-    await this.page.testSubj.fill('savedObjectTitle', title);
+    // Pick "new" before the title: filling the title re-renders the modal and would reset
+    // the radio (confirm stays disabled on "existing" with no pick).
+    await this.saveModal.selectNewDashboard();
+    await this.saveModal.fillTitle(title);
+    // Not `saveModal.confirm()`: it waits for the modal to close, which cannot happen yet.
+    // Saving navigates away, and a session with unsaved changes raises the app-leave prompt
+    // first, which keeps the save modal mounted until it is dismissed below.
     await this.page.testSubj.click('confirmSaveSavedObjectButton');
 
-    // Leaving a session with unsaved changes prompts for confirmation. The prompt can also
-    // unmount on its own once navigation starts, so confirming it is best effort.
+    // The leave prompt can also unmount on its own once navigation starts, so confirming it
+    // is best effort.
     await this.page.testSubj
       .locator('appLeaveConfirmModal')
       .getByTestId('confirmModalConfirmButton')
       .click()
       .catch(() => {});
 
-    await expect(saveModal).toBeHidden({ timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
+    await this.saveModal.modal.waitFor({ state: 'hidden', timeout: DEFAULT_SAVE_MODAL_TIMEOUT });
     // The panel travels to the dashboard in session storage and is consumed on arrival, so
-    // only reaching the dashboard proves it was handed over. The save modal closes as soon
-    // as `onSave` runs, whether or not the navigation follows.
+    // the method only returns once the dashboard is reached.
     await this.page.waitForURL(/\/app\/dashboards/);
   }
 

@@ -88,11 +88,11 @@ spaceTest.describe(
         await pageObjects.dashboard.waitForRenderComplete();
 
         await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
-        await expect(
-          pageObjects.dashboard.getOptionsListSelectionsLocator(
-            await pageObjects.dashboard.getOnlyDashboardControlId()
-          )
-        ).toHaveText(UPDATED_SELECTION);
+        await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
+        const controlId = await pageObjects.dashboard.getDashboardControlId();
+        await expect(pageObjects.dashboard.getOptionsListSelectionsLocator(controlId)).toHaveText(
+          UPDATED_SELECTION
+        );
       }
     );
 
@@ -109,7 +109,8 @@ spaceTest.describe(
         await pageObjects.dashboard.unlinkFromLibrary(testData.SESSION_WITH_CONTROL_TITLE);
         await pageObjects.dashboard.waitForRenderComplete();
 
-        const initialDashboardControlId = await pageObjects.dashboard.getOnlyDashboardControlId();
+        await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
+        const initialDashboardControlId = await pageObjects.dashboard.getDashboardControlId();
         await expect(
           pageObjects.dashboard.getOptionsListSelectionsLocator(initialDashboardControlId)
         ).toHaveText(INITIAL_SELECTION);
@@ -143,8 +144,9 @@ spaceTest.describe(
         await pageObjects.discover.saveAndReturnToEditor();
         await pageObjects.dashboard.waitForRenderComplete();
 
-        // The matching control is reused, not duplicated.
-        const updatedDashboardControlId = await pageObjects.dashboard.getOnlyDashboardControlId();
+        // The matching control is reused, not duplicated: still one control, same id.
+        await expect(pageObjects.dashboard.getDashboardControlsLocator()).toHaveCount(1);
+        const updatedDashboardControlId = await pageObjects.dashboard.getDashboardControlId();
         expect(updatedDashboardControlId).toBe(initialDashboardControlId);
         await expect(
           pageObjects.dashboard.getOptionsListSelectionsLocator(updatedDashboardControlId)

@@ -574,13 +574,12 @@ export class DashboardApp {
   }
 
   /**
-   * Asserts the dashboard renders exactly one control and returns its id.
+   * Id of the dashboard's control, including one that is not in a control group, such as an
+   * ES|QL control saved as a top-level `esql_control` panel. Expects a single control, so
+   * assert the count in the test first.
    */
-  async getOnlyDashboardControlId() {
-    const controls = this.getDashboardControlsLocator();
-    await expect(controls).toHaveCount(1);
-
-    const controlId = await controls.getAttribute('data-control-id');
+  async getDashboardControlId(): Promise<string> {
+    const controlId = await this.getDashboardControlsLocator().getAttribute('data-control-id');
     if (!controlId) {
       throw new Error('Dashboard control is rendered but has an empty data-control-id');
     }
