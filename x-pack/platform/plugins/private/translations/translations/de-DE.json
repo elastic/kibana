@@ -16957,7 +16957,6 @@
     "xpack.cases.caseView.attach.menu.timeline": "Zeitleiste",
     "xpack.cases.caseView.attach.savedObjectModal.attachAction": "Anhängen",
     "xpack.cases.caseView.attach.savedObjectModal.attachedAction": "Angehängt",
-    "xpack.cases.caseView.attach.savedObjectModal.attachSuccessTitle": "Gespeichertes Objekt dem Ticket beigefügt",
     "xpack.cases.caseView.attach.savedObjectModal.fetchErrorTitle": "Fehler beim Abrufen der gespeicherten Objekte",
     "xpack.cases.caseView.attach.savedObjectModal.filterAll": "Alle",
     "xpack.cases.caseView.attach.savedObjectModal.filterTypeLabel": "Nach Typ filtern",

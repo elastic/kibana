@@ -16932,7 +16932,6 @@
     "xpack.cases.caseView.attach.menu.timeline": "Chronologie",
     "xpack.cases.caseView.attach.savedObjectModal.attachAction": "Joindre",
     "xpack.cases.caseView.attach.savedObjectModal.attachedAction": "Joint",
-    "xpack.cases.caseView.attach.savedObjectModal.attachSuccessTitle": "Objet enregistré joint au cas",
     "xpack.cases.caseView.attach.savedObjectModal.fetchErrorTitle": "Impossible de récupérer les objets enregistrés",
     "xpack.cases.caseView.attach.savedObjectModal.filterAll": "Tous",
     "xpack.cases.caseView.attach.savedObjectModal.filterTypeLabel": "Filtrer par type",

@@ -17004,7 +17004,6 @@
     "xpack.cases.caseView.attach.menu.timeline": "タイムライン",
     "xpack.cases.caseView.attach.savedObjectModal.attachAction": "添付",
     "xpack.cases.caseView.attach.savedObjectModal.attachedAction": "添付済み",
-    "xpack.cases.caseView.attach.savedObjectModal.attachSuccessTitle": "保存されたオブジェクトをケースに添付",
     "xpack.cases.caseView.attach.savedObjectModal.fetchErrorTitle": "保存されたオブジェクトを取得できませんでした",
     "xpack.cases.caseView.attach.savedObjectModal.filterAll": "すべて",
     "xpack.cases.caseView.attach.savedObjectModal.filterTypeLabel": "型で絞り込み",
