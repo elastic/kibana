@@ -19,7 +19,7 @@ import {
 import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
 import { customContentContextAttachmentUiDefinition } from './attachment_types/custom_content_context';
 import { setServices } from './services';
-import { ADD_CUSTOM_CONTENT_ACTION_ID } from './actions/add_custom_content_action';
+import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../common/constants';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;

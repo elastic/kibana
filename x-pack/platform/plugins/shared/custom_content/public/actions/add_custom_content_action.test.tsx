@@ -6,10 +6,8 @@
  */
 
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import {
-  getAddCustomContentAction,
-  ADD_CUSTOM_CONTENT_ACTION_ID,
-} from './add_custom_content_action';
+import { getAddCustomContentAction } from './add_custom_content_action';
+import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../../common/constants';
 import { CustomContentIcon } from './custom_content_icon';
 import { apiIsPresentationContainer, hasEditCapabilities } from '@kbn/presentation-publishing';
 
@@ -41,23 +39,23 @@ describe('getAddCustomContentAction', () => {
   });
 
   it('returns the correct display name', () => {
-    expect(action.getDisplayName!({} as any)).toBe('Custom');
+    expect(action.getDisplayName!({ embeddable: {} })).toBe('Custom');
   });
 
   it('returns CustomContentIcon as the icon type', () => {
-    expect(action.getIconType!({} as any)).toBe(CustomContentIcon);
+    expect(action.getIconType!({ embeddable: {} })).toBe(CustomContentIcon);
   });
 
   describe('isCompatible', () => {
     it('returns true for a presentation container', async () => {
       mockApiIsPresentationContainer.mockReturnValue(true);
-      const result = await action.isCompatible!({ embeddable: {} } as any);
+      const result = await action.isCompatible!({ embeddable: {} });
       expect(result).toBe(true);
     });
 
     it('returns false when the embeddable is not a presentation container', async () => {
       mockApiIsPresentationContainer.mockReturnValue(false);
-      const result = await action.isCompatible!({ embeddable: {} } as any);
+      const result = await action.isCompatible!({ embeddable: {} });
       expect(result).toBe(false);
     });
   });
@@ -65,9 +63,7 @@ describe('getAddCustomContentAction', () => {
   describe('execute', () => {
     it('throws IncompatibleActionError when embeddable is not a presentation container', async () => {
       mockApiIsPresentationContainer.mockReturnValue(false);
-      await expect(action.execute({ embeddable: {} } as any)).rejects.toThrow(
-        IncompatibleActionError
-      );
+      await expect(action.execute({ embeddable: {} })).rejects.toThrow(IncompatibleActionError);
     });
 
     it('calls addNewPanel and then onEdit on the returned api', async () => {
@@ -79,7 +75,7 @@ describe('getAddCustomContentAction', () => {
       mockApiIsPresentationContainer.mockReturnValue(true);
       mockHasEditCapabilities.mockReturnValue(true);
 
-      await action.execute({ embeddable: mockEmbeddable } as any);
+      await action.execute({ embeddable: mockEmbeddable });
 
       expect(mockAddNewPanel).toHaveBeenCalledWith(
         expect.objectContaining({ panelType: 'custom_content' }),
@@ -95,7 +91,7 @@ describe('getAddCustomContentAction', () => {
       mockApiIsPresentationContainer.mockReturnValue(true);
       mockHasEditCapabilities.mockReturnValue(false);
 
-      await action.execute({ embeddable: mockEmbeddable } as any);
+      await action.execute({ embeddable: mockEmbeddable });
 
       expect(mockAddNewPanel).toHaveBeenCalled();
     });

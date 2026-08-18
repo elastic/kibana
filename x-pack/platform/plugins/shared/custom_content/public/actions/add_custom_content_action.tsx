@@ -16,8 +16,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
 import { CustomContentIcon } from './custom_content_icon';
-
-export const ADD_CUSTOM_CONTENT_ACTION_ID = 'ADD_CUSTOM_CONTENT_PANEL';
+import { ADD_CUSTOM_CONTENT_ACTION_ID } from '../../common/constants';
 
 export const getAddCustomContentAction = (): ActionDefinition<EmbeddableApiContext> => ({
   id: ADD_CUSTOM_CONTENT_ACTION_ID,

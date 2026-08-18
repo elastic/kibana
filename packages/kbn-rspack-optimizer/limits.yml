@@ -5,7 +5,7 @@ pageLoadAssetSize:
   agentBuilderDashboards: 3074
   agentBuilderPlatform: 21685
   agentBuilderSml: 328
-  agentBuilderVisualizations: 1284
+  agentBuilderVisualizations: 1282
   agentBuilderWorkflows: 761
   aiAssistantManagementSelection: 355
   aiops: 317
@@ -16,7 +16,7 @@ pageLoadAssetSize:
   apmSourcesAccess: 906
   automaticImport: 13257
   banners: 1157
-  canvas: 6000
+  canvas: 5965
   cases: 2799
   charts: 1188
   clientApps: 1017
@@ -31,12 +31,12 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 2789
   contentManagement: 6737
-  contextEngine: 1527
+  contextEngine: 1526
   controls: 4166
   core: 320
   cps: 5002
   crossClusterReplication: 7691
-  customContent: 1848
+  customContent: 2128
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
@@ -137,15 +137,15 @@ pageLoadAssetSize:
   observability: 3614
   observabilityAgentBuilder: 679
   observabilityAIAssistant: 1967
-  observabilityAIAssistantApp: 6377
+  observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7767
+  observabilityOnboarding: 7685
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
-  pnd: 4501
-  presentationUtil: 669
+  pnd: 4489
+  presentationUtil: 350
   productDocBase: 4218
   productIntercept: 4738
   profiling: 12944
@@ -185,7 +185,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 348361
+  shared-core: 336543
   shared-misc: 114567
   shared-packages: 4546017
   shared-plugins: 13536562
@@ -225,7 +225,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 3118
   visTypeTimelion: 6660
   visTypeTimeseries: 12718
-  visTypeVega: 4860
+  visTypeVega: 3994
   visTypeVislib: 21971
   visTypeXy: 24402
   visualizationListing: 1339

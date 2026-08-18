@@ -129,7 +129,7 @@ export const EditCustomContentFlyout = ({
     position: 'absolute',
     top: euiTheme.size.xs,
     right: euiTheme.size.m,
-    zIndex: 1,
+    zIndex: euiTheme.levels.content,
   });
 
   return (
