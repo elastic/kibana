@@ -118,7 +118,7 @@ const lensAttributes = {
   references: [],
 } as unknown as TypedLensSerializedState['attributes'];
 // Structurally text-based variant: the ES|QL query lives on the text-based
-// datasource layer, the top-level slot stays empty (see `isTextBasedDoc`)
+// datasource layer, the top-level slot stays empty (see `isTextBasedAttributes`)
 const mockTextBasedState = {
   layers: {
     layer1: { query: { esql: 'from index1 | limit 10' }, columns: [] },

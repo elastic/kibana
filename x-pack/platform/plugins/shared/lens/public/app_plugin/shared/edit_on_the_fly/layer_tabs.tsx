@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 import type { LayerAction, Visualization } from '@kbn/lens-common';
-import { isTextBasedDoc } from '@kbn/lens-common';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -69,7 +69,7 @@ export function LayerTabs({
 
   const [datasource] = Object.values(framePublicAPI.datasourceLayers);
   const isTextBasedLanguage =
-    datasource?.isTextBasedLanguage() || isTextBasedDoc(attributes) || false;
+    datasource?.isTextBasedLanguage() || isTextBasedAttributes(attributes) || false;
 
   const dispatchLens = useLensDispatch();
 

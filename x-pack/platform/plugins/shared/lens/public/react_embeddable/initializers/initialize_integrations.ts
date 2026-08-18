@@ -11,7 +11,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { GetStateType, IntegrationCallbacks, LensSerializedState } from '@kbn/lens-common';
-import { getDocQuery } from '@kbn/lens-common';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import type {
   LegacyLensStateApi,
   LensByRefSerializedAPIConfig,
@@ -76,7 +76,7 @@ export function initializeIntegrations(getLatestState: GetStateType): {
       getSavedVis: () => getLatestState().attributes,
       isTextBasedLanguage: () => isTextBasedLanguage(getLatestState()),
       getTextBasedLanguage: () => {
-        const query = getDocQuery(getLatestState().attributes);
+        const query = getRepresentativeQuery(getLatestState().attributes);
         if (!query || !isOfAggregateQueryType(query)) {
           return;
         }

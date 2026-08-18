@@ -22,7 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { TypedLensSerializedState, LensDatasourceId } from '@kbn/lens-common';
-import { LENS_DATASOURCE_ID, isTextBasedDoc } from '@kbn/lens-common';
+import { LENS_DATASOURCE_ID, isTextBasedAttributes } from '@kbn/lens-common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
 import type { TextBasedQueryState } from '../../../editor_frame_service/editor_frame/config_panel/types';
 import { getLensFeatureFlags } from '../../../get_feature_flags';
@@ -214,7 +214,7 @@ export function LensEditConfigurationFlyout({
     onCancelCallback,
   ]);
 
-  const textBasedMode = isTextBasedDoc(attributes);
+  const textBasedMode = isTextBasedAttributes(attributes);
 
   const currentAttributes: TypedLensSerializedState['attributes'] | undefined =
     useCurrentAttributes({

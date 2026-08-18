@@ -8,18 +8,18 @@
  */
 
 import {
-  isTextBasedDoc,
+  isTextBasedAttributes,
   getTextBasedLayerQueries,
-  getDocQuery,
+  getRepresentativeQuery,
   getChartScopedFilterQuery,
-  type LensDocLike,
-} from './doc_queries';
+  type MinimalLensAttributes,
+} from './lens_attributes_queries';
 
 const kqlQuery = { query: 'bytes > 100', language: 'kuery' };
 const esqlQuery = { esql: 'FROM index | LIMIT 10' };
 const esqlQuery2 = { esql: 'FROM index2 | LIMIT 5' };
 
-const textBasedDoc: LensDocLike = {
+const textBasedDoc: MinimalLensAttributes = {
   state: {
     datasourceStates: {
       textBased: { layers: { layer1: { query: esqlQuery }, layer2: { query: esqlQuery2 } } },
@@ -27,7 +27,7 @@ const textBasedDoc: LensDocLike = {
   },
 };
 
-const formBasedDoc: LensDocLike = {
+const formBasedDoc: MinimalLensAttributes = {
   state: {
     query: kqlQuery,
     datasourceStates: { formBased: { layers: { layer1: {} } } },
@@ -35,7 +35,7 @@ const formBasedDoc: LensDocLike = {
 };
 
 // legacy dual-written doc: stale aggregate copy in the slot
-const legacyDualWrittenDoc: LensDocLike = {
+const legacyDualWrittenDoc: MinimalLensAttributes = {
   state: {
     query: { esql: 'FROM index | LIMIT 999' }, // diverged, stale
     datasourceStates: { textBased: { layers: { layer1: { query: esqlQuery } } } },
@@ -43,7 +43,7 @@ const legacyDualWrittenDoc: LensDocLike = {
 };
 
 // legacy doc that only carries the aggregate slot copy (no layer query)
-const legacySlotOnlyDoc: LensDocLike = {
+const legacySlotOnlyDoc: MinimalLensAttributes = {
   state: {
     query: esqlQuery,
     datasourceStates: { textBased: { layers: { layer1: {} } } },
@@ -51,7 +51,7 @@ const legacySlotOnlyDoc: LensDocLike = {
 };
 
 // legacy form-based doc with an empty textBased stub next to formBased
-const formBasedDocWithTextBasedStub: LensDocLike = {
+const formBasedDocWithTextBasedStub: MinimalLensAttributes = {
   state: {
     query: kqlQuery,
     datasourceStates: {
@@ -62,29 +62,29 @@ const formBasedDocWithTextBasedStub: LensDocLike = {
 };
 
 // freshly created ES|QL doc: textBased present, no layers yet
-const newTextBasedDoc: LensDocLike = {
+const newTextBasedDoc: MinimalLensAttributes = {
   state: { datasourceStates: { textBased: {} } },
 };
 
-describe('isTextBasedDoc', () => {
+describe('isTextBasedAttributes', () => {
   it('returns true for documents with text-based layers', () => {
-    expect(isTextBasedDoc(textBasedDoc)).toBe(true);
+    expect(isTextBasedAttributes(textBasedDoc)).toBe(true);
   });
 
   it('returns true for a new text-based document without layers or form-based layers', () => {
-    expect(isTextBasedDoc(newTextBasedDoc)).toBe(true);
+    expect(isTextBasedAttributes(newTextBasedDoc)).toBe(true);
   });
 
   it('returns false for form-based documents', () => {
-    expect(isTextBasedDoc(formBasedDoc)).toBe(false);
+    expect(isTextBasedAttributes(formBasedDoc)).toBe(false);
   });
 
   it('returns false for form-based documents with an empty textBased stub', () => {
-    expect(isTextBasedDoc(formBasedDocWithTextBasedStub)).toBe(false);
+    expect(isTextBasedAttributes(formBasedDocWithTextBasedStub)).toBe(false);
   });
 
   it('returns false for undefined', () => {
-    expect(isTextBasedDoc(undefined)).toBe(false);
+    expect(isTextBasedAttributes(undefined)).toBe(false);
   });
 });
 
@@ -102,25 +102,25 @@ describe('getTextBasedLayerQueries', () => {
   });
 });
 
-describe('getDocQuery', () => {
+describe('getRepresentativeQuery', () => {
   it('returns the first layer query for text-based documents', () => {
-    expect(getDocQuery(textBasedDoc)).toEqual(esqlQuery);
+    expect(getRepresentativeQuery(textBasedDoc)).toEqual(esqlQuery);
   });
 
   it('prefers the authoritative layer query over a stale slot copy', () => {
-    expect(getDocQuery(legacyDualWrittenDoc)).toEqual(esqlQuery);
+    expect(getRepresentativeQuery(legacyDualWrittenDoc)).toEqual(esqlQuery);
   });
 
   it('falls back to the legacy aggregate slot copy when layers carry no query', () => {
-    expect(getDocQuery(legacySlotOnlyDoc)).toEqual(esqlQuery);
+    expect(getRepresentativeQuery(legacySlotOnlyDoc)).toEqual(esqlQuery);
   });
 
   it('returns the chart-scoped filter for form-based documents', () => {
-    expect(getDocQuery(formBasedDoc)).toEqual(kqlQuery);
+    expect(getRepresentativeQuery(formBasedDoc)).toEqual(kqlQuery);
   });
 
   it('returns undefined for slot-less documents without layer queries', () => {
-    expect(getDocQuery(newTextBasedDoc)).toBeUndefined();
+    expect(getRepresentativeQuery(newTextBasedDoc)).toBeUndefined();
   });
 });
 

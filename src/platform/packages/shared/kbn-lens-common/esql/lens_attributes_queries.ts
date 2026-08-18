@@ -25,10 +25,10 @@ import type { FormBasedPersistedState, TextBasedPersistedState } from '../dataso
  *   `LensDocument.state.datasourceStates` is `Record<string, unknown>` (no
  *   layer information), while `TypedLensSerializedState['attributes']`
  *   rejects `LensDocument` and lacks the legacy aggregate `state.query`
- *   slot value `getDocQuery` must read. A thin duck-typed wrapper with an
+ *   slot value `getRepresentativeQuery` must read. A thin duck-typed wrapper with an
  *   optional `state` and a widened `query` union accepts all of them.
  * - The layer shapes themselves are reused (type-only imports, cycle-free):
- *   `DocLikeLayers` derives loosened views of `FormBasedPersistedState` /
+ *   `LooseLayers` derives loosened views of `FormBasedPersistedState` /
  *   `TextBasedPersistedState` (as in `StructuredDatasourceStates`). The
  *   loosening (`layers` optional, layer entries `Partial`) reflects that
  *   persisted documents may predate the strict types (e.g. legacy form-based
@@ -40,20 +40,20 @@ import type { FormBasedPersistedState, TextBasedPersistedState } from '../dataso
  * the call sites (e.g. Lens plugin, `kbn-unified-histogram`), which pass
  * those types to these helpers without casts.
  */
-interface DocLikeLayers<T extends { layers: Record<string, unknown> }> {
+interface LooseLayers<T extends { layers: Record<string, unknown> }> {
   layers?: Record<string, Partial<T['layers'][string]> | undefined>;
 }
 
-export interface LensDocLikeState {
+export interface MinimalLensState {
   query?: Query | AggregateQuery;
   datasourceStates?: {
-    formBased?: DocLikeLayers<FormBasedPersistedState>;
-    textBased?: DocLikeLayers<TextBasedPersistedState>;
+    formBased?: LooseLayers<FormBasedPersistedState>;
+    textBased?: LooseLayers<TextBasedPersistedState>;
   } & Record<string, unknown>;
 }
 
-export interface LensDocLike {
-  state?: LensDocLikeState;
+export interface MinimalLensAttributes {
+  state?: MinimalLensState;
 }
 
 /**
@@ -64,8 +64,8 @@ export interface LensDocLike {
  * text-based when it has text-based layers, or a `textBased` state without
  * any form-based layers (e.g. a freshly created ES|QL document).
  */
-export const isTextBasedDoc = (doc: LensDocLike | undefined): boolean => {
-  const datasourceStates = doc?.state?.datasourceStates;
+export const isTextBasedAttributes = (attributes: MinimalLensAttributes | undefined): boolean => {
+  const datasourceStates = attributes?.state?.datasourceStates;
   if (!datasourceStates || !('textBased' in datasourceStates)) {
     return false;
   }
@@ -78,8 +78,10 @@ export const isTextBasedDoc = (doc: LensDocLike | undefined): boolean => {
  * Returns the authoritative per-layer ES|QL queries of a text-based document
  * (`state.datasourceStates.textBased.layers[id].query`), in layer order.
  */
-export const getTextBasedLayerQueries = (doc: LensDocLike | undefined): AggregateQuery[] => {
-  const layers = doc?.state?.datasourceStates?.textBased?.layers;
+export const getTextBasedLayerQueries = (
+  attributes: MinimalLensAttributes | undefined
+): AggregateQuery[] => {
+  const layers = attributes?.state?.datasourceStates?.textBased?.layers;
   if (!layers) {
     return [];
   }
@@ -94,11 +96,13 @@ export const getTextBasedLayerQueries = (doc: LensDocLike | undefined): Aggregat
  *   aggregate value still present in `state.query` (dual-written docs)
  * - form-based documents: the chart-scoped KQL/Lucene filter in `state.query`
  */
-export const getDocQuery = (doc: LensDocLike | undefined): Query | AggregateQuery | undefined => {
-  const [firstLayerQuery] = getTextBasedLayerQueries(doc);
+export const getRepresentativeQuery = (
+  attributes: MinimalLensAttributes | undefined
+): Query | AggregateQuery | undefined => {
+  const [firstLayerQuery] = getTextBasedLayerQueries(attributes);
   // the slot fallback covers form-based documents (chart-scoped filter) and
   // legacy text-based documents that only carry the aggregate slot copy
-  return firstLayerQuery ?? doc?.state?.query;
+  return firstLayerQuery ?? attributes?.state?.query;
 };
 
 /**

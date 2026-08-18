@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getDocQuery } from '@kbn/lens-common';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import { useFetchContext } from '@kbn/presentation-publishing';
 import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
@@ -85,7 +85,7 @@ export function ESQLEditor({
   updateSuggestion,
   onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
-  const initialQuery = getDocQuery(attributes) || { esql: '' };
+  const initialQuery = getRepresentativeQuery(attributes) || { esql: '' };
   const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
   const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);
 

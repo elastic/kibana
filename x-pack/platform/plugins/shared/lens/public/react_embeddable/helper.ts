@@ -24,7 +24,11 @@ import type {
   XYVisualizationState,
   XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
-import { LENS_UNKNOWN_VIS, getChartScopedFilterQuery, isTextBasedDoc } from '@kbn/lens-common';
+import {
+  LENS_UNKNOWN_VIS,
+  getChartScopedFilterQuery,
+  isTextBasedAttributes,
+} from '@kbn/lens-common';
 import type {
   LensByValueSerializedAPIConfig,
   LensSerializedAPIConfig,
@@ -156,7 +160,7 @@ function dropLegacyAggregateQuerySlot<
  * `state.datasourceStates.textBased.layers[id].query`.
  */
 export function isTextBasedLanguage(state: LensRuntimeState) {
-  return isTextBasedDoc(state.attributes);
+  return isTextBasedAttributes(state.attributes);
 }
 
 export function getViewMode(api: unknown) {

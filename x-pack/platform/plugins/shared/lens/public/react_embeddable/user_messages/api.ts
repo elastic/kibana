@@ -15,7 +15,7 @@ import type {
   VisualizationContextHelper,
   LensInternalApi,
 } from '@kbn/lens-common';
-import { getDocQuery } from '@kbn/lens-common';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
 import {
   filterAndSortUserMessages,
@@ -174,7 +174,7 @@ export function buildUserMessagesHelpers(
         datasourceMap,
         dataViewObject.indexPatterns
       ),
-      query: getDocQuery(activeAttributes) ?? { query: '', language: 'kuery' },
+      query: getRepresentativeQuery(activeAttributes) ?? { query: '', language: 'kuery' },
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',

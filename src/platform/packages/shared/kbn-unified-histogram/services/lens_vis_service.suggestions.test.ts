@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDocQuery } from '@kbn/lens-common';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -129,7 +129,7 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
-    expect(getDocQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 
   test('should return histogramSuggestion even if the ESQL query contains a DROP @timestamp statement', async () => {
@@ -167,7 +167,7 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
-    expect(getDocQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 
   test('should return histogramSuggestion with FROM for a timeseries user query', async () => {
@@ -205,7 +205,7 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
-    expect(getDocQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 
   test('should not return histogramSuggestion if no suggestions returned by the api and transformational commands', async () => {
@@ -348,7 +348,7 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 30 minute) | sort \`var0\` asc`,
     };
 
-    expect(getDocQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 
   test('should return histogramSuggestion even if suggestions returned by the api', async () => {
@@ -429,6 +429,6 @@ describe('LensVisService suggestions', () => {
 | STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
-    expect(getDocQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 });

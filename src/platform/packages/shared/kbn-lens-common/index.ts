@@ -438,9 +438,9 @@ export {
   queryHasStatsCommand,
 } from './esql/trendline_query';
 export {
-  isTextBasedDoc,
+  isTextBasedAttributes,
   getTextBasedLayerQueries,
-  getDocQuery,
+  getRepresentativeQuery,
   getChartScopedFilterQuery,
-} from './esql/doc_queries';
-export type { LensDocLike, LensDocLikeState } from './esql/doc_queries';
+} from './esql/lens_attributes_queries';
+export type { MinimalLensAttributes, MinimalLensState } from './esql/lens_attributes_queries';

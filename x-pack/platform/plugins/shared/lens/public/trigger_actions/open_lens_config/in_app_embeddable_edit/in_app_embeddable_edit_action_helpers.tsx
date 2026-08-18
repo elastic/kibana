@@ -6,7 +6,7 @@
  */
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { isTextBasedDoc } from '@kbn/lens-common';
+import { isTextBasedAttributes } from '@kbn/lens-common';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
@@ -29,7 +29,7 @@ export function isEmbeddableEditActionCompatible(
   attributes: TypedLensByValueInput['attributes']
 ) {
   // for ES|QL is compatible only when advanced setting is enabled
-  return isTextBasedDoc(attributes) ? core.uiSettings.get(ENABLE_ESQL) : true;
+  return isTextBasedAttributes(attributes) ? core.uiSettings.get(ENABLE_ESQL) : true;
 }
 
 export async function getEditEmbeddableFlyout({

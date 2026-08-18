@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getDocQuery } from '@kbn/lens-common';
+import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -831,6 +831,6 @@ describe('LensVisService attributes', () => {
       allSuggestions: [], // none available
       isTransformationalESQL: false,
     });
-    expect(getDocQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
+    expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
   });
 });

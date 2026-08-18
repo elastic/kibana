@@ -17,7 +17,11 @@ import type {
   XYVisualizationState,
 } from '@kbn/lens-common';
 import { getDatasourceId } from '@kbn/visualization-utils';
-import { getDocQuery, getTextBasedLayerQueries, isTextBasedDoc } from '@kbn/lens-common';
+import {
+  getRepresentativeQuery,
+  getTextBasedLayerQueries,
+  isTextBasedAttributes,
+} from '@kbn/lens-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { UnifiedHistogramVisContext } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
@@ -187,11 +191,11 @@ export function deriveLensSuggestionFromLensAttributes({
       // vis context is stale when none of them matches the current query.
       if (queryParams) {
         const attributes = externalVisContext.attributes;
-        const isStale = isTextBasedDoc(attributes)
+        const isStale = isTextBasedAttributes(attributes)
           ? !getTextBasedLayerQueries(attributes).some((layerQuery) =>
               isEqual(layerQuery, queryParams.query)
             )
-          : !isEqual(getDocQuery(attributes), queryParams.query);
+          : !isEqual(getRepresentativeQuery(attributes), queryParams.query);
         if (isStale) {
           return undefined;
         }
