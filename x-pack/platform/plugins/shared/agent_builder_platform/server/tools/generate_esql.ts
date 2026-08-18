@@ -71,7 +71,15 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description: 'Generate an ES|QL query from a natural language query.',
+    description:
+      'Generate an ES|QL query from a natural language query. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+    annotations: {
+      title: 'Generate ES|QL',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: nlToEsqlToolSchema,
     handler: async (
       {
