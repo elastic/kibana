@@ -12,6 +12,10 @@ import { faker } from '@faker-js/faker';
 import { makeAttributeService } from '../mocks/services_mock';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
+jest.mock('../lazy_builder', () => ({
+  getLensBuilder: jest.fn(() => null),
+}));
+
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
   const resetMocks = () =>
