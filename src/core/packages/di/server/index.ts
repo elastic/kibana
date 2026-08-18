@@ -8,9 +8,9 @@
  */
 
 export {
-  CapabilitiesAccessor,
   CapabilitiesProvider,
-  type ICapabilitiesAccessor,
+  CapabilitiesResolver,
+  type ICapabilitiesResolver,
 } from './src/services/capabilities';
 export {
   ElasticsearchClient,

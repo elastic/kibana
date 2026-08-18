@@ -33,12 +33,12 @@ export const CapabilitiesProvider: ServiceToken<ICapabilitiesProvider> =
  * Resolves the {@link Capabilities} for the current HTTP request.
  * @public
  */
-export type ICapabilitiesAccessor = (options: ResolveCapabilitiesOptions) => Promise<Capabilities>;
+export type ICapabilitiesResolver = (options: ResolveCapabilitiesOptions) => Promise<Capabilities>;
 
 /**
- * The accessor resolving the capabilities in the current HTTP request context.
- * @see {@link ICapabilitiesAccessor}
+ * The resolver of the capabilities in the current HTTP request context.
+ * @see {@link ICapabilitiesResolver}
  * @public
  */
-export const CapabilitiesAccessor: ServiceToken<ICapabilitiesAccessor> =
-  createToken('CapabilitiesAccessor');
+export const CapabilitiesResolver: ServiceToken<ICapabilitiesResolver> =
+  createToken('CapabilitiesResolver');

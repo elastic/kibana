@@ -12,8 +12,8 @@ import { OnSetup } from '@kbn/core-di';
 import { capabilitiesServiceMock } from '@kbn/core-capabilities-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import {
-  CapabilitiesAccessor,
   CapabilitiesProvider,
+  CapabilitiesResolver,
   CoreSetup,
   CoreStart,
   Request,
@@ -54,8 +54,8 @@ describe('loadCapabilities', () => {
     expect(capabilitiesSetup.registerProvider).toHaveBeenCalledWith(capabilitiesProvider);
   });
 
-  it('should not resolve the capabilities when resolving the accessor', () => {
-    container.get(CapabilitiesAccessor);
+  it('should not resolve the capabilities when resolving the resolver', () => {
+    container.get(CapabilitiesResolver);
 
     expect(capabilitiesStart.resolveCapabilities).not.toHaveBeenCalled();
   });
@@ -65,16 +65,16 @@ describe('loadCapabilities', () => {
     capabilitiesStart.resolveCapabilities.mockResolvedValue(capabilities);
 
     await expect(
-      container.get(CapabilitiesAccessor)({ capabilityPath: 'myPlugin.*' })
+      container.get(CapabilitiesResolver)({ capabilityPath: 'myPlugin.*' })
     ).resolves.toBe(capabilities);
     expect(capabilitiesStart.resolveCapabilities).toHaveBeenCalledWith(request, {
       capabilityPath: 'myPlugin.*',
     });
   });
 
-  it('should create the capabilities accessor only once per scope', () => {
+  it('should create the capabilities resolver only once per scope', () => {
     const fork = injection.fork();
 
-    expect(fork.get(CapabilitiesAccessor)).toBe(fork.get(CapabilitiesAccessor));
+    expect(fork.get(CapabilitiesResolver)).toBe(fork.get(CapabilitiesResolver));
   });
 });

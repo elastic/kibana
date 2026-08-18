@@ -10,11 +10,11 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { cacheInScope } from '@kbn/core-di-internal';
 import {
-  CapabilitiesAccessor,
   CapabilitiesProvider,
+  CapabilitiesResolver,
   CoreSetup,
   CoreStart,
-  type ICapabilitiesAccessor,
+  type ICapabilitiesResolver,
   Request,
 } from '@kbn/core-di-server';
 import { OnSetup } from '@kbn/core-di';
@@ -30,13 +30,13 @@ export function loadCapabilities({ bind, onActivation }: ContainerModuleLoadOpti
     container.getAll(CapabilitiesProvider);
   });
 
-  bind(CapabilitiesAccessor)
+  bind(CapabilitiesResolver)
     .toResolvedValue(
-      (capabilities, request): ICapabilitiesAccessor =>
+      (capabilities, request): ICapabilitiesResolver =>
         (options) =>
           capabilities.resolveCapabilities(request, options),
       [CoreStart('capabilities'), Request]
     )
     .inRequestScope()
-    .onActivation(cacheInScope(CapabilitiesAccessor));
+    .onActivation(cacheInScope(CapabilitiesResolver));
 }
