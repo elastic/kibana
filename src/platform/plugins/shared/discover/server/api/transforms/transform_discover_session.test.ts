@@ -14,7 +14,7 @@ import {
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData } from '../schema';
+import type { DiscoverSessionApiData, DiscoverSessionApiEsqlTab } from '../schema';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {
@@ -103,17 +103,41 @@ describe('discover session API transforms', () => {
 
   describe('transform out', () => {
     it('maps saved object attributes to API data', () => {
-      const transformed = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes);
       expect(transformed).toEqual(discoverSessionApiData);
     });
 
     it('extracts tag IDs from saved object references', () => {
-      const transformed = transformDiscoverSessionOut(discoverSessionAttributes, [
+      const { sessionState: transformed } = transformDiscoverSessionOut(discoverSessionAttributes, [
         { type: 'tag', id: 'tag-1', name: 'tag-ref-tag-1' },
         { type: 'index-pattern', id: 'data-view-1', name: 'data-view-ref' },
       ]);
 
       expect(transformed.tags).toEqual(['tag-1']);
+    });
+
+    it('maps esqlApproximation to esql_approximation for ES|QL tabs', () => {
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...discoverSessionAttributes.tabs[1],
+            attributes: {
+              ...discoverSessionAttributes.tabs[1].attributes,
+              esqlApproximation: true,
+            },
+          },
+        ],
+      });
+      expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(true);
+    });
+
+    it('omits esql_approximation when esqlApproximation is absent from an ES|QL tab', () => {
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [discoverSessionAttributes.tabs[1]],
+      });
+      expect(sessionState.tabs[0]).not.toHaveProperty('esql_approximation');
     });
 
     it('converts legacy flat tab sort to API sort objects', () => {
@@ -132,7 +156,7 @@ describe('discover session API transforms', () => {
         ),
       };
 
-      const transformed = transformDiscoverSessionOut(attributes);
+      const { sessionState: transformed } = transformDiscoverSessionOut(attributes);
       expect(transformed.tabs[0].sort).toEqual([{ name: '@timestamp', direction: 'desc' }]);
     });
   });
@@ -267,6 +291,27 @@ describe('discover session API transforms', () => {
         ],
       });
       expect(references).toEqual([]);
+    });
+
+    it('maps esql_approximation to esqlApproximation for ES|QL tabs', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [{ ...esqlTab, esql_approximation: true } as DiscoverSessionApiEsqlTab],
+      });
+      expect(attributes.tabs[0].attributes.esqlApproximation).toBe(true);
+    });
+
+    it('omits esqlApproximation when esql_approximation is absent from an ES|QL tab', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({ ...apiData, tabs: [esqlTab] });
+      expect(attributes.tabs[0].attributes).not.toHaveProperty('esqlApproximation');
+    });
+
+    it('does not set esqlApproximation for classic tabs', () => {
+      const [classicTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({ ...apiData, tabs: [classicTab] });
+      expect(attributes.tabs[0].attributes).not.toHaveProperty('esqlApproximation');
     });
 
     it('creates unique saved object references for tags', () => {
@@ -469,15 +514,16 @@ describe('discover session API transforms', () => {
   describe('round-trip', () => {
     it('round-trips fixture API data through persistence', () => {
       const { attributes, references } = transformDiscoverSessionIn(discoverSessionApiData);
-      const roundTripped = transformDiscoverSessionOut(attributes, references);
+      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
 
       expect(roundTripped).toEqual(discoverSessionApiData);
     });
 
     it('round-trips fixture saved object attributes through API', () => {
-      const apiDataFromStored = transformDiscoverSessionOut(discoverSessionAttributes);
+      const { sessionState: apiDataFromStored } =
+        transformDiscoverSessionOut(discoverSessionAttributes);
       const { attributes, references } = transformDiscoverSessionIn(apiDataFromStored);
-      const roundTripped = transformDiscoverSessionOut(attributes, references);
+      const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
 
       expect(apiDataFromStored).toEqual(discoverSessionApiData);
       expect(roundTripped).toEqual(discoverSessionApiData);
@@ -486,7 +532,7 @@ describe('discover session API transforms', () => {
 
     it('round-trips fixture saved object attributes preserving API-representable persistence values', () => {
       const reverted = transformDiscoverSessionIn(
-        transformDiscoverSessionOut(discoverSessionAttributes)
+        transformDiscoverSessionOut(discoverSessionAttributes).sessionState
       ).attributes;
       const expected = transformDiscoverSessionIn(discoverSessionApiData).attributes;
 
@@ -512,7 +558,7 @@ describe('discover session API transforms', () => {
 
   it('round-trips API data and preserves semantic values', () => {
     const { attributes, references } = transformDiscoverSessionIn(apiData);
-    const roundTripped = transformDiscoverSessionOut(attributes, references);
+    const { sessionState: roundTripped } = transformDiscoverSessionOut(attributes, references);
     const reverted = transformDiscoverSessionIn(roundTripped);
 
     expect(roundTripped).toMatchObject(apiData);
