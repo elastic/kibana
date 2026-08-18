@@ -643,6 +643,45 @@ describe('ComposeDiscoverFlyout', () => {
       { key: 'window', value: '15m', type: ESQLVariableType.TIME_LITERAL },
     ];
 
+    it('treats a populated base-only query as committed', () => {
+      renderFlyout({ initialQuery: 'FROM logs-* | LIMIT 500' });
+
+      expect(getLatestFormProps().state.queryCommitted).toBe(true);
+      expect(readCommittedQuery?.()).toEqual({
+        format: 'composed',
+        base: 'FROM logs-* | LIMIT 500',
+        breach: { segment: '' },
+      });
+      expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
+    });
+
+    it('keeps a populated base-only query committed when Discover updates it', async () => {
+      const props = {
+        ...defaultProps,
+        initialQuery: 'FROM logs-* | WHERE status >= 500',
+      };
+      const { rerender } = render(
+        <TestWrapper>
+          <ComposeDiscoverFlyout {...props} />
+        </TestWrapper>
+      );
+
+      rerender(
+        <TestWrapper>
+          <ComposeDiscoverFlyout {...props} initialQuery="FROM metrics-* | LIMIT 500" />
+        </TestWrapper>
+      );
+
+      await waitFor(() => {
+        expect(getLatestFormProps().state.queryCommitted).toBe(true);
+        expect(readCommittedQuery?.()).toEqual({
+          format: 'composed',
+          base: 'FROM metrics-* | LIMIT 500',
+          breach: { segment: '' },
+        });
+      });
+    });
+
     it('shows unresolved variables in a callout and disables YAML Create rule', () => {
       renderFlyout({
         initialQuery: 'FROM logs-* | WHERE @timestamp > NOW() - ?window | LIMIT 5',
