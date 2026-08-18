@@ -19,8 +19,7 @@ const standaloneQuery: RuleQuery = {
   breach: { query: 'FROM logs-* | LIMIT 10' },
 };
 
-const PROMQL_QUERY =
-  'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))';
+const PROMQL_QUERY = 'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))';
 
 describe('getTimeFieldResolutionQuery', () => {
   it('returns the base query in alert mode when committed', () => {
