@@ -245,6 +245,7 @@ describe('createEpisodeAttachmentType', () => {
         'Failed to resolve episode attachment',
         expect.objectContaining({
           labels: {
+            attachment_type: EPISODE_ATTACHMENT_TYPE,
             episode_id: 'ep-missing',
             space_id: SPACE_ID,
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_RESOLVE_FAILED,
@@ -270,7 +271,11 @@ describe('createEpisodeAttachmentType', () => {
       expect(result).toBeUndefined();
       expect(getEpisode).not.toHaveBeenCalled();
       expect(mockLogger.debug).toHaveBeenCalledWith('Unauthorized to resolve episode attachment', {
-        labels: { episode_id: 'ep-1', space_id: SPACE_ID },
+        labels: {
+          attachment_type: EPISODE_ATTACHMENT_TYPE,
+          episode_id: 'ep-1',
+          space_id: SPACE_ID,
+        },
       });
     });
 
@@ -368,6 +373,7 @@ describe('createEpisodeAttachmentType', () => {
         'Failed to check episode attachment staleness',
         expect.objectContaining({
           labels: {
+            attachment_type: EPISODE_ATTACHMENT_TYPE,
             episode_id: 'ep-1',
             space_id: SPACE_ID,
             code: ALERTING_LOG_CODES.AGENT_BUILDER_EPISODE_STALENESS_CHECK_FAILED,

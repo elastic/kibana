@@ -6,6 +6,7 @@
  */
 
 import type { RulesClient } from '../../lib/rules_client';
+import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 
 export interface RuleMetadata {
   ruleName?: string;
@@ -14,7 +15,8 @@ export interface RuleMetadata {
 
 export const loadRuleMetadata = async (
   rulesClient: RulesClient,
-  ruleId: string
+  ruleId: string,
+  logger: LoggerServiceContract
 ): Promise<RuleMetadata> => {
   try {
     const rule = await rulesClient.getRule({ id: ruleId });
@@ -22,7 +24,12 @@ export const loadRuleMetadata = async (
       ruleName: rule.metadata.name,
       groupingFields: rule.grouping?.fields,
     };
-  } catch {
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    logger.debug({
+      message: `Failed to load rule metadata for episode label; falling back to rule id: ${reason}`,
+      labels: { rule_id: ruleId },
+    });
     return {};
   }
 };

@@ -87,7 +87,8 @@ export const refreshEpisodeTool = ({
           request: toolContext.request,
           spaceId: toolContext.spaceId,
         }),
-        episode['rule.id']
+        episode['rule.id'],
+        logger
       );
 
       const data = episodeAttachmentDataSchema.parse(
