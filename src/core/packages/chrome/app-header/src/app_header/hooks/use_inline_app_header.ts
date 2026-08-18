@@ -7,15 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  useBasePath,
-  useCanAccessIntegrations,
-  useCapabilities,
-  useLegacyActionMenu,
-  useHasLegacyActionMenu,
-} from './chrome';
-export { useBackNavTargets } from './use_back_navigation';
-export type { BackNavigation } from './use_back_navigation';
-export { useResolvedBadges } from './use_app_badges';
-export { useAppHeaderStaticItems } from './use_app_header_menu';
-export { useInlineAppHeader } from './use_inline_app_header';
+import { useLayoutEffect } from 'react';
+import { useChromeService } from '@kbn/core-chrome-browser-context';
+
+/**
+ * Claims the Chrome Next inline app-header slot so Chrome does not also render a chrome-owned header.
+ */
+export const useInlineAppHeader = (): void => {
+  const chrome = useChromeService();
+  useLayoutEffect(() => {
+    chrome.next.inlineAppHeader.set(true);
+    return () => chrome.next.inlineAppHeader.set(false);
+  }, [chrome]);
+};
