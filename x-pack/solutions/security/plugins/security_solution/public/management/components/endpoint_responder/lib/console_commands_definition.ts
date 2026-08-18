@@ -877,12 +877,14 @@ export const getEndpointConsoleCommands = ({
                 allowMultiples: false,
                 mustHaveValue: false,
                 exclusiveOr: true,
+                exclusiveOrGroupId: 'memoryDumpType',
               },
             }
           : {}),
         entityId: {
           required: false,
           conditionallyRequired: ['process'],
+          exclusiveOrGroupId: 'processIdentifier',
           allowMultiples: false,
           mustHaveValue: 'non-empty-string',
           about: CONSOLE_COMMANDS.memoryDump.entityIdArgAbout,
@@ -890,6 +892,7 @@ export const getEndpointConsoleCommands = ({
         pid: {
           required: false,
           conditionallyRequired: ['process'],
+          exclusiveOrGroupId: 'processIdentifier',
           allowMultiples: false,
           mustHaveValue: 'number-greater-than-zero',
           about: CONSOLE_COMMANDS.memoryDump.pidArgAbout,
@@ -901,10 +904,6 @@ export const getEndpointConsoleCommands = ({
       helpCommandPosition: 6,
       helpDisabled: !doesEndpointSupportCommand('memory-dump'),
       helpHidden: !getRbacControl({ commandName: 'execute', privileges: endpointPrivileges }),
-      // FIXME:PT Remove this now that the Console framework handles creating all usage examples
-      helpUsage: getMemoryDumpHelpUsage(
-        agentType === 'endpoint' && responseActionsEndpointMemoryDumpRaw && endpointSupportsRawDump
-      ),
     });
   }
 
