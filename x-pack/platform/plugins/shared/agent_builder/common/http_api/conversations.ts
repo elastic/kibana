@@ -7,7 +7,7 @@
 
 import type {
   ConversationAccessControl,
-  ConversationAccessControlEntry,
+  ConversationAccessControlEntryInput,
   ConversationAccessControlMode,
   Conversation,
   ConversationWithoutRounds,
@@ -50,9 +50,11 @@ export interface MarkPinnedConversationResponse {
   pinned: boolean;
 }
 
+export type CreateConversationResponse = ConversationWithPermissions;
+
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;
-  entries: Array<Omit<ConversationAccessControlEntry, 'added_at'>>;
+  entries: ConversationAccessControlEntryInput[];
 }
 
 export type UpdateConversationAccessControlResponse = ConversationAccessControl;
