@@ -27,7 +27,8 @@ const plan = (
   priorHealthySince: Record<string, number> = {},
   now: number = NOW,
   activeAgentIds?: ReadonlySet<string>
-) => planLocationRebalance({ agents, now, priorHealthySince, agentPolicyId: POLICY, activeAgentIds });
+) =>
+  planLocationRebalance({ agents, now, priorHealthySince, agentPolicyId: POLICY, activeAgentIds });
 
 describe('isCheckinStale', () => {
   it('is false within the window (including the exact boundary) and true past it', () => {

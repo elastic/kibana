@@ -64,7 +64,9 @@ const location = (over: Partial<Record<string, unknown>> = {}) =>
     agentPolicyId: 'ap-1',
     isAgentSharding: true,
     ...over,
-  } as unknown as Awaited<ReturnType<typeof getPrivateLocationsModule.getPrivateLocations>>[number]);
+  } as unknown as Awaited<
+    ReturnType<typeof getPrivateLocationsModule.getPrivateLocations>
+  >[number]);
 
 const agentInfo = (lastCheckin: number, memoryMib: number | null = null): AgentInfo => ({
   lastCheckin,
@@ -202,9 +204,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
       jest
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
-      jest
-        .spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds')
-        .mockResolvedValue(new Set());
+      jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
 
       await makeTask().runTask({ taskInstance: taskInstance() });
 

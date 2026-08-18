@@ -43,7 +43,9 @@ describe('getRecentlyActiveAgentIds', () => {
 
   it('returns the agent ids that wrote synthetics data within the window', async () => {
     mockValidApiKey();
-    search.mockResolvedValue({ aggregations: { agents: { buckets: [{ key: 'a' }, { key: 'c' }] } } });
+    search.mockResolvedValue({
+      aggregations: { agents: { buckets: [{ key: 'a' }, { key: 'c' }] } },
+    });
 
     const active = await getRecentlyActiveAgentIds(makeServer(), ['a', 'b', 'c'], WINDOW, NOW);
 
