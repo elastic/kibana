@@ -11,7 +11,7 @@ import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { VIEW_MODE } from '../../common';
 import { MODEL_VERSIONS, typeVersionGuesser } from './model_versions';
-import type { SCHEMA_DISCOVER_SESSION_V13 } from './schema';
+import type { SCHEMA_DISCOVER_SESSION_V14 } from './schema';
 import { DISCOVER_SESSION_MODEL_VERSIONS } from './schema';
 import type { SCHEMA_SEARCH_MODEL_VERSION_5 } from './schema_legacy';
 import type { SCHEMA_SEARCH_MODEL_VERSION_12_SO_API_WORKAROUND } from './schema_legacy';
@@ -92,8 +92,8 @@ describe('model_versions', () => {
       expect(typeVersionGuesser(createDocument(attributes))).toBe(12);
     });
 
-    it('should return the discover session version for v13 documents', () => {
-      const attributes: TypeOf<typeof SCHEMA_DISCOVER_SESSION_V13> = {
+    it('should return the discover session version for v14 documents', () => {
+      const attributes: TypeOf<typeof SCHEMA_DISCOVER_SESSION_V14> = {
         title: 'discover session',
         description: '',
         tabs: [
@@ -116,7 +116,7 @@ describe('model_versions', () => {
         ],
       };
 
-      expect(typeVersionGuesser(createDocument(attributes))).toBe(13);
+      expect(typeVersionGuesser(createDocument(attributes))).toBe(14);
     });
 
     it('should preserve the pre-guesser fallback by returning the latest version when no schema matches', () => {
@@ -126,7 +126,7 @@ describe('model_versions', () => {
         tabs: [],
       });
 
-      expect(typeVersionGuesser(document)).toBe(13);
+      expect(typeVersionGuesser(document)).toBe(14);
     });
   });
 });
