@@ -35,24 +35,24 @@ export interface NotificationQueryDeps {
   logger: Logger;
 }
 
-/** Per-user read state used to annotate the list; absent for profile-less callers. */
+/** Per-user read state used to annotate the list; absent for API-key callers without userStorage access. */
 export interface NotificationReadState {
   read: string[];
   readAllBefore: string;
 }
 
-const earliestSourceSchema = z.object({ '@timestamp': z.iso.datetime() }).loose();
-
-/** The shape of a collapsed hit carrying the group's earliest in-horizon copy. */
+/** The shape of a collapsed hit carrying a notification's earliest copy. */
 interface CollapsedHit {
   inner_hits?: Record<string, { hits: { hits: Array<{ _source?: unknown }> } }>;
 }
 
+const earliestCopySchema = z.object({ '@timestamp': z.iso.datetime() }).loose();
+
 /**
  * Annotate a notification with the user's read state. `readAllBefore` is compared against the
- * id's *earliest* in-horizon copy (from the collapse `inner_hits`), not the collapsed latest:
- * anchoring on the latest would flip a mark-all-read notification back to unread whenever a
- * producer re-pushes it. Falls back to the item's own timestamp if the inner hit is missing.
+ * id's oldest copy (from `inner_hits` in the collapse query). This is the "anchor".
+ * Using the newest copy would flip a notification back to unread whenever a
+ * plugin re-pushes it. Falls back to the item's own timestamp if the inner hit is missing.
  */
 const annotateReadState = (
   notification: Notification,
@@ -62,7 +62,7 @@ const annotateReadState = (
   if (read.includes(notification.notification_id)) {
     return { ...notification, isRead: true };
   }
-  const earliest = earliestSourceSchema.safeParse(hit.inner_hits?.earliest?.hits.hits[0]?._source);
+  const earliest = earliestCopySchema.safeParse(hit.inner_hits?.earliest?.hits.hits[0]?._source);
   const anchor = earliest.success ? earliest.data['@timestamp'] : notification['@timestamp'];
   return { ...notification, isRead: Date.parse(anchor) <= Date.parse(readAllBefore) };
 };
@@ -83,9 +83,10 @@ const buildFilters = (params: NotificationQueryParamsParsed): QueryDslQueryConta
 };
 
 /**
- * The from/to window is applied in-memory on the collapsed items rather than as a doc-level
- * ES filter: a doc-level range would change which copy is the group's earliest visible one,
- * so the same notification would flip between read and unread across time-windowed views.
+ * The from/to window is applied in-memory on the collapsed items instead of as a query filter.
+ * The ES query must consider the whole range of timestamps in order to get the proper earliest copy
+ * that we use as the "anchor" to check against the readAllBefore marker. We don't want
+ * a from/to window to change which copy is used as the anchor.
  */
 const withinWindow = (timestamp: string, { from, to }: NotificationQueryParamsParsed): boolean => {
   const instant = Date.parse(timestamp);
@@ -113,7 +114,8 @@ export const queryNotifications = async (
     query: { bool: { filter: buildFilters(validated) } },
     collapse: {
       field: 'notification_id',
-      // The readAllBefore anchor; skipped for profile-less callers who get no annotation
+      // Use the oldest copy of each unique notification_id. readAllBefore marker will be compared against this
+      // "anchor" to determine if that notification_id should show as unread or read.
       ...(readState && {
         inner_hits: {
           name: 'earliest',
