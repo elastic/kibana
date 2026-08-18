@@ -151,13 +151,7 @@ export const selectCurrentTabType = (runtimeStateManager: RuntimeStateManager, t
     .getContexts().dataSourceContext.tabType;
 };
 
-/**
- * The tab type to use when persisting a tab (to local storage or the saved object). Once the
- * tab's data source profile has resolved, the resolved tab type wins -- `undefined` included,
- * so editing a tab out of its profile drops the type on the next persist. Before that, the
- * inherited value (from local storage, duplication, or a restored recently-closed tab) is used
- * instead, so a tab that hasn't resolved yet doesn't transiently lose a type it already had.
- */
+/** Uses the resolved tab type when available, otherwise the inherited type. */
 export const selectTabTypeForPersistence = ({
   runtimeStateManager,
   tabState,
@@ -168,9 +162,9 @@ export const selectTabTypeForPersistence = ({
   const scopedProfilesManager = selectTabRuntimeState(
     runtimeStateManager,
     tabState.id
-  )?.scopedProfilesManager$.getValue();
+  ).scopedProfilesManager$.getValue();
 
-  return scopedProfilesManager?.hasResolvedDataSourceProfile()
+  return scopedProfilesManager.hasResolvedDataSourceProfile()
     ? selectCurrentTabType(runtimeStateManager, tabState.id)
     : tabState.initialInternalState?.tabType;
 };

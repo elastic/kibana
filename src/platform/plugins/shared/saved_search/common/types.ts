@@ -25,11 +25,6 @@ import type {
 } from '../server';
 import type { VIEW_MODE } from '.';
 
-/**
- * The saved shape of a tab's type-specific state, e.g. `{ type: 'metrics', dimensions: [...] }`.
- * Derived from the versioned schema literal so it never needs to be restated here -- see
- * `discover/common/context_awareness`'s `TabTypeStateMap`, which re-keys this by `type`.
- */
 export type DiscoverSessionTabTypeState = NonNullable<DiscoverSessionTabAttributes['tabTypeState']>;
 
 export interface DiscoverGridSettings extends SerializableRecord {

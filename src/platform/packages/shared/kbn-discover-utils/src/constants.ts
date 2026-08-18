@@ -55,14 +55,7 @@ export enum DataGridDensity {
   NORMAL = 'normal',
 }
 
-/**
- * Identifies the kind of experience a Discover tab represents, e.g. `Metrics`.
- * Declared by data source profiles and persisted with the tab. `Default` is the
- * absence of a tab type: it never appears in a saved tab's `tabTypeState` (an
- * undefined value means default), but is an explicit member here since
- * `saved_search` cannot import from `discover` to reference profile code
- * directly.
- */
+/** Identifies the experience represented by a Discover tab. */
 export enum DiscoverTabType {
   Default = 'default',
   Metrics = 'metrics',

@@ -86,10 +86,6 @@ export const fromSavedObjectTabToTabState = ({
     ...existingTab,
     id: tab.id,
     label: tab.label,
-    // The persisted tab type selects the transform, since no profile has resolved at load
-    // time. Merging over `existingTab?.profileState` also covers a saved Ui field: local
-    // storage only retains Persistent/Url fields, so after a refresh the saved object is the
-    // only source for it.
     profileState: profileStateRegistry.mergeState(
       profileSavedStateRegistry.fromSavedState(tab.tabTypeState),
       existingTab?.profileState

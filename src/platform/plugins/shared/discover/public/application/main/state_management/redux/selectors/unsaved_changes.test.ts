@@ -374,9 +374,6 @@ describe('selectHasUnsavedChanges', () => {
     });
 
     it('does not flag a phantom unsaved change when the tab type resolves for the first time with only default state', async () => {
-      // Simulates a session saved before this tab's profile declared a tab type: nothing
-      // was actually saved under `tabTypeState`, but the profile now resolves to metrics
-      // with only default (unset) dimensions -- both sides should normalize identically.
       const { internalState, runtimeStateManager, services } = await setupMetricsTab({
         persistedDimensions: [],
         resolvedTabType: DiscoverTabType.Metrics,

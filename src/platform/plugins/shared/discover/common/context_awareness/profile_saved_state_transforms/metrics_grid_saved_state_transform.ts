@@ -11,12 +11,6 @@ import { DiscoverTabType } from '@kbn/discover-utils';
 import { createProfileSavedStateTransform } from '../profile_saved_state';
 import { METRICS_STATE_DEF } from '../profile_state_definitions/metrics_grid_profile_state';
 
-/**
- * Saves the selected metrics grid dimensions with the tab. The other `MetricsState`
- * fields (the per-instrument aggregation overrides and sort) are not saved -- they stay
- * local to the tab, so this transform contributes only `dimensions` to the `metrics` tab
- * type payload.
- */
 export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransform({
   tabType: DiscoverTabType.Metrics,
   stateDefinition: METRICS_STATE_DEF,

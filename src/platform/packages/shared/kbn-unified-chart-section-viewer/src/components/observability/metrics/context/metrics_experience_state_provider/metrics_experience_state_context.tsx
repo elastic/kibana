@@ -29,8 +29,7 @@ export interface MetricsExperienceStateContextValue extends MetricsExperienceRes
   profileId: string;
   gridSettings: MetricsGridSettings;
   metricsSort: MetricsSort;
-  // Derived from `gridSettings.dimensions` (names only), not restorable state --
-  // `dimensions` is the source of truth and travels with the saved session.
+  /** Derived from the persisted dimension names. */
   selectedDimensions: Dimension[];
   recentlyExploredMetrics: readonly string[];
   onMetricExplored?: (metricUniqueKey: string) => void;
@@ -81,9 +80,6 @@ export function MetricsExperienceStateProvider({
   // When sorting is disabled, ignore any host-provided sort
   const effectiveMetricsSort = isSortingEnabled ? metricsSort : METRICS_GRID_SORT_DEFAULTS;
 
-  // `dimensions` (names only) is the source of truth -- it's the piece that
-  // travels with the saved session. `type` is never read by any consumer, so
-  // there's no need to resolve it against the fetched dimensions list here.
   const selectedDimensions = useMemo<Dimension[]>(
     () => gridSettings.dimensions.map((name) => ({ name })),
     [gridSettings.dimensions]

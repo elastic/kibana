@@ -82,9 +82,7 @@ export const selectHasUnsavedChanges = (
     const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
     const currentDataView = tabRuntimeState?.currentDataView$.getValue();
 
-    // Computed once and reused for both conversions below: both sides must normalize against
-    // the same tab type, otherwise a session saved before its profile declared a tab type
-    // would normalize differently on each side and report a phantom unsaved change.
+    // Normalize both sides against the same tab type to avoid phantom changes.
     const tabType = selectTabTypeForPersistence({ runtimeStateManager, tabState });
 
     // Ensure the persisted tab accounts for default app state values when comparing,

@@ -12,25 +12,12 @@ import type { DiscoverTabType } from '@kbn/discover-utils';
 import type { DiscoverSessionTabTypeState } from '@kbn/saved-search-plugin/common';
 import type { ProfileStateDefinition, ProfileStateMap } from './profile_state';
 
-/**
- * The saved payload for each tab type, keyed by `type` with the discriminator field omitted.
- * Derived from the versioned saved object schema (`DiscoverSessionTabTypeState`) rather than
- * restated here, so a new tab type or saved field flows into this map, and into every
- * `ProfileSavedStateTransform` that targets it, automatically.
- */
+/** Saved payloads by tab type, derived from the saved object schema. */
 export type TabTypeStateMap = {
   [T in DiscoverSessionTabTypeState as T['type']]: Omit<T, 'type'>;
 };
 
-/**
- * Declares how one `ProfileStateDefinition`'s runtime state contributes a slice of a tab
- * type's saved payload. Several transforms can share a tab type as long as their
- * `savedFields` are disjoint -- `ProfileSavedStateRegistry.registerTransform` enforces this.
- *
- * Saved-ness is deliberately not a field-level annotation on `ProfileStateDefinition`: the two
- * state models (runtime and saved) are parallel, and a transform is the only thing that knows
- * about both.
- */
+/** Maps runtime profile state to and from part of a tab type's saved payload. */
 export interface ProfileSavedStateTransform<
   TTabType extends keyof TabTypeStateMap,
   TState extends SerializableRecord,
@@ -45,8 +32,7 @@ export interface ProfileSavedStateTransform<
 }
 
 /**
- * Identity helper so `TField` infers from `savedFields` and callers never write the transform's
- * generics by hand.
+ * Identity helper so callers don't have to write the transform's generics by hand.
  */
 export const createProfileSavedStateTransform = <
   TTabType extends keyof TabTypeStateMap,
@@ -56,12 +42,7 @@ export const createProfileSavedStateTransform = <
   transform: ProfileSavedStateTransform<TTabType, TState, TField>
 ): ProfileSavedStateTransform<TTabType, TState, TField> => transform;
 
-/**
- * Storage shape for a registered transform, with its saved-field slice erased to a plain
- * `SerializableRecord`. `registerTransform`'s generics keep each transform sound for its
- * author; the registry itself holds transforms for many different tab types and fields at
- * once, a heterogeneity TypeScript can't express without erasing it somewhere.
- */
+/** Type-erased storage for transforms with heterogeneous state and saved fields. */
 interface RegisteredTransform {
   stateDefinition: ProfileStateDefinition<SerializableRecord>;
   savedFields: ReadonlySet<string>;
@@ -69,18 +50,11 @@ interface RegisteredTransform {
   fromSavedState: (saved: SerializableRecord) => Partial<SerializableRecord>;
 }
 
-/**
- * Registry of `ProfileSavedStateTransform`s, parallel to and independent of
- * `ProfileStateRegistry`. Connects runtime `ProfileStateMap`s to the saved tab type payload
- * persisted on the Discover session saved object.
- */
+/** Converts between runtime profile state and persisted tab type state. */
 export class ProfileSavedStateRegistry {
   private readonly transformsByTabType = new Map<string, RegisteredTransform[]>();
 
-  /**
-   * Registers a transform for a tab type. Throws if another transform already registered
-   * under the same tab type claims one of `savedFields`.
-   */
+  /** Registers a transform, rejecting saved fields already claimed for its tab type. */
   public registerTransform<
     TTabType extends keyof TabTypeStateMap,
     TState extends SerializableRecord,
@@ -106,8 +80,6 @@ export class ProfileSavedStateRegistry {
       {
         stateDefinition: transform.stateDefinition,
         savedFields: new Set(transform.savedFields as readonly string[]),
-        // See the `RegisteredTransform` comment: erased from the transform's own slice-typed
-        // signature to the registry's erased storage shape.
         toSavedState: transform.toSavedState as unknown as (
           state: SerializableRecord
         ) => SerializableRecord,
@@ -118,16 +90,7 @@ export class ProfileSavedStateRegistry {
     ]);
   }
 
-  /**
-   * Builds the saved tab type payload for `tabType` from `profileStateMap`. Each registered
-   * transform receives its definition's *effective* state (explicit overrides merged over
-   * `defaultState`), matching every other persistence boundary (local storage, the URL) --
-   * so a saved session pins its values regardless of what the defaults become later.
-   *
-   * Returns `undefined` when `tabType` is undefined, otherwise always returns at least
-   * `{ type: tabType }`, even when no transform is registered for it, so an unopened tab's
-   * type survives a save it never triggered a transform for.
-   */
+  /** Builds saved state from each transform's effective runtime state. */
   public toSavedState(
     tabType: DiscoverTabType | undefined,
     profileStateMap: ProfileStateMap
@@ -147,18 +110,10 @@ export class ProfileSavedStateRegistry {
       payload = { ...payload, ...transform.toSavedState(effectiveState) };
     }
 
-    // The registry is the only thing that knows both the flat saved payload shape and the
-    // per-transform slices that compose it -- asserting the merge back to the discriminated
-    // union is what lets each transform stay typed to its own slice.
     return { type: tabType, ...payload } as DiscoverSessionTabTypeState;
   }
 
-  /**
-   * Builds a `ProfileStateMap` from a saved tab type payload, keyed by each contributing
-   * transform's `stateDefinition.key`. A saved field with no matching transform (e.g. the
-   * type was persisted before this transform existed) is silently dropped, the same way
-   * `ProfileStateRegistry.mergeState` ignores unregistered keys.
-   */
+  /** Restores registered profile state and ignores unclaimed saved fields. */
   public fromSavedState(tabTypeState: DiscoverSessionTabTypeState | undefined): ProfileStateMap {
     const profileStateMap: ProfileStateMap = {};
 

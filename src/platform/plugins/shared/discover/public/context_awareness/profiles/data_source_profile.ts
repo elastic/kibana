@@ -69,7 +69,6 @@ export interface DataSourceContext {
   profileState?: ProfileStateDefinition<SerializableRecord>;
   /**
    * Optional tab type identifying the kind of experience this tab represents (e.g. metrics).
-   * Persisted with the tab so it can be restored before any profile has resolved.
    */
   tabType?: DiscoverTabType;
 }

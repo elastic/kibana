@@ -14,13 +14,7 @@ import type {
   SimpleAggregation,
 } from '@kbn/discover-utils';
 
-/**
- * The subset of `MetricsGridSettings` this flyout edits. `dimensions` lives
- * in the same settings object (it travels with the saved session alongside
- * these), but is edited through the dimensions selector, not this flyout --
- * excluded here so an external dimensions change made while the flyout is
- * open is neither reported as a pending flyout change nor reverted on Apply.
- */
+/** Settings owned by this flyout. */
 export const FLYOUT_SETTING_KEYS = [
   'counterAggregation',
   'gaugeAggregation',

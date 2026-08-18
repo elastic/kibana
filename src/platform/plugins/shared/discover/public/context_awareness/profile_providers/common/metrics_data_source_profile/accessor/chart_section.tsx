@@ -23,10 +23,8 @@ import { METRICS_STATE_DEF, type MetricsState } from '../../../../../../common/c
 import { METRICS_DATA_SOURCE_PROFILE_ID } from '../profile';
 import { RecentMetricsStorage } from './recent_metrics_storage';
 /**
- * Wrapper component that reads breakdownField from Discover's app state and passes it to
- * UnifiedMetricsExperienceGrid, which uses it only to seed dimensions once (on mount) for
- * backward compatibility with pre-existing links. Changes to dimensions are no longer
- * written back to breakdownField.
+ * Wrapper component that reads breakdownField from Discover's app state
+ * and passes it to UnifiedMetricsExperienceGrid for syncing with dimensions selector.
  */
 const MetricsExperienceGridWrapper = (
   props: ChartSectionProps & {

@@ -21,9 +21,8 @@ import type { Dimension } from '../../../../types';
  *
  * The initial render is implicitly skipped because `usePrevious` returns
  * `undefined` until the effect first runs, which preserves a restored
- * `currentPage` on tab duplication where `selectedDimensions` (derived from
- * `gridSettings.dimensions`) is available synchronously in that same first
- * render.
+ * `currentPage` on tab duplication where `useRestorableState` hydrates
+ * `selectedDimensions` synchronously in that same first render.
  */
 export function useResetPageOnDimensionsChange(
   selectedDimensions: Dimension[],

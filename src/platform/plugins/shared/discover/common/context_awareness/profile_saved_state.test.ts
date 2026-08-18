@@ -19,11 +19,6 @@ import {
 } from './profile_saved_state';
 import { METRICS_GRID_SAVED_STATE_TRANSFORM } from './profile_saved_state_transforms/metrics_grid_saved_state_transform';
 
-/**
- * Shared helper: every transform's saved payload must round-trip through both directions,
- * i.e. `toSavedState(fromSavedState(x))` is stable. Generic so future transforms get this
- * check for free.
- */
 const expectRoundTripStable = <
   TTabType extends DiscoverTabType.Metrics,
   TState extends SerializableRecord,
@@ -35,9 +30,6 @@ const expectRoundTripStable = <
   const registry = new ProfileSavedStateRegistry();
   registry.registerTransform(transform);
 
-  // The generic fixture's exact shape isn't known to line up with the real discriminated
-  // union member for `transform.tabType` -- this helper is generic specifically so future
-  // transforms get the same round-trip check without writing it themselves.
   const savedTabTypeState = {
     type: transform.tabType,
     ...savedFixture,
@@ -51,10 +43,6 @@ const expectRoundTripStable = <
 
 describe('ProfileSavedStateRegistry', () => {
   describe('registerTransform', () => {
-    // The `metrics` tab type currently has a single saved field (`dimensions`), so this is
-    // the only field two transforms can genuinely collide over today. A test exercising two
-    // transforms contributing *disjoint* fields under one tab type needs a second real field
-    // to type-check honestly -- add one alongside the next transform that needs it.
     it('rejects a transform claiming a field already claimed under the same tab type', () => {
       const registry = new ProfileSavedStateRegistry();
       registry.registerTransform(METRICS_GRID_SAVED_STATE_TRANSFORM);
@@ -107,14 +95,10 @@ describe('ProfileSavedStateRegistry', () => {
       const registry = new ProfileSavedStateRegistry();
       registry.registerTransform(METRICS_GRID_SAVED_STATE_TRANSFORM);
 
-      // A session saved with an explicit, non-default value...
       const savedState = registry.toSavedState(DiscoverTabType.Metrics, {
         metricsState: { dimensions: ['host.name'] },
       });
 
-      // ...is unaffected by what METRICS_GRID_SETTINGS_DEFAULTS.dimensions becomes later,
-      // because toSavedState only ever reads the *current* default to fill in unset fields,
-      // never to override an explicit one.
       expect(savedState).toEqual({ type: DiscoverTabType.Metrics, dimensions: ['host.name'] });
     });
   });

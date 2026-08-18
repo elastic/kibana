@@ -55,12 +55,6 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
   </MetricsExperienceStateProvider>
 );
 
-/**
- * `selectedDimensions` is derived from the `gridSettings` prop, not owned
- * locally, so exercising `onDimensionsChange` needs a wrapper that actually
- * plumbs `onGridSettingsChange` back into `gridSettings` -- mirroring how
- * `chart_section.tsx` round-trips through the profile state adapter.
- */
 const StatefulGridSettingsWrapper = ({ children }: { children: React.ReactNode }) => {
   const [gridSettings, setGridSettings] = useState<MetricsGridSettings>(
     METRICS_GRID_SETTINGS_DEFAULTS

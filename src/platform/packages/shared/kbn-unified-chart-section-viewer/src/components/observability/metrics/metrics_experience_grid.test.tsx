@@ -580,8 +580,6 @@ describe('MetricsExperienceGrid', () => {
 
       useMetricsExperienceStateMock.mockReturnValue({
         currentPage: 0,
-        // Must be a real dimension for this stream (in `allDimensions`/`dimensions`
-        // fixture below) so useDimensionsWipe doesn't prune it and confound this test.
         selectedDimensions: [dimensions[0]],
         onDimensionsChange,
         onPageChange: jest.fn(),

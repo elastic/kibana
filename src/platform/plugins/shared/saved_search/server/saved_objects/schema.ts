@@ -173,8 +173,8 @@ const SCHEMA_DISCOVER_SESSION_V14 = SCHEMA_DISCOVER_SESSION_V13.extends({
   tabs: schema.arrayOf(SCHEMA_TAB_V14, { minSize: 1, maxSize: MAX_DISCOVER_SESSION_TABS }),
 });
 
-// Tab type payloads, keyed by `type`. Absent `tabTypeState` means DiscoverTabType.Default, so
-// there is no `default` member here -- see @kbn/discover-utils's `DiscoverTabType`.
+// Tab type payloads, keyed by `type`.
+// Absent `tabTypeState` means DiscoverTabType.Default.
 const SCHEMA_TAB_TYPE_STATE_V15 = schema.oneOf([
   schema.object({
     type: schema.literal(DiscoverTabType.Metrics),

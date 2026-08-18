@@ -88,12 +88,7 @@ export const MetricsExperienceGrid = ({
     recentlyExploredMetrics,
   });
 
-  // Seeds the initial dimension selection from Discover's breakdownField (`_a` URL state),
-  // for backward compatibility with links created before `dimensions` became its own
-  // dedicated (session-persisted) profile state. Runs once, at mount, from the initial
-  // values only -- dimensions is the sole source of truth from then on, so this must not
-  // react to later changes to either value. Unvalidated: if breakdownField isn't a real
-  // dimension for this stream, useDimensionsWipe below prunes it once allDimensions loads.
+  // Seed dimensions once for links created before dimensions had dedicated profile state.
   useMount(() => {
     if (selectedDimensions.length === 0 && breakdownField) {
       onDimensionsChange([{ name: breakdownField }]);

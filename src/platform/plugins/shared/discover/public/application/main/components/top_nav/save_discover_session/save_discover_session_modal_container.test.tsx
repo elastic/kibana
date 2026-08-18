@@ -652,10 +652,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
     });
 
     it('should include the resolved profile state when navigating to a newly saved session', async () => {
-      // Regression test: the locator builds its URL from these params alone, not from the
-      // current address bar, so a profile state field synced only through the URL (like the
-      // metrics grid's selected dimensions) was silently dropped from the post-save navigation
-      // unless it's passed here explicitly.
       const services = createDiscoverServicesMock();
       services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
       const navigateSpy = jest.spyOn(services.locator, 'navigate');
@@ -665,8 +661,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
       });
       const tabId = toolkit.getCurrentTab().id;
 
-      // Simulates the user changing a URL-synced profile state value (e.g. picking a metrics
-      // grid dimension) before saving.
       toolkit.internalState.dispatch(
         internalStateActions.setProfileState({
           tabId,
@@ -683,8 +677,6 @@ describe('DiscoverSessionSaveModalContainer', () => {
         savedSearchId: 'new-session',
         tab: { id: tabId },
         profileState: {
-          // Only the Url and Persistent fields travel with the locator -- Ui-typed fields
-          // (uiValue, nestedValue) are session-local and don't belong in a shareable URL.
           testProfileState: {
             persistentValue: TEST_PROFILE_STATE_DEF.defaultState.persistentValue,
             urlValue: 'picked-value',

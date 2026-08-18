@@ -158,14 +158,11 @@ export const DiscoverSessionSaveModalContainer = ({
         if (shouldNavigateToSavedSession) {
           services.embeddableEditor.clearEditorState();
 
+          // Preserve URL profile state when navigating to the saved session,
+          // otherwise it will be cleared by URL sync in create_url_sync_observables.ts.
           const nextTab = response.nextSelectedTabId
             ? selectTab(getState(), response.nextSelectedTabId)
             : undefined;
-          // The locator builds its URL from these params alone, not from the current address
-          // bar. If profile state (e.g. the metrics grid's selected dimensions) isn't passed
-          // explicitly, the constructed URL omits it -- and the still-active URL sync
-          // subscription from before this navigation then treats that omission as an explicit
-          // instruction to clear it from Redux (see create_url_sync_observables.ts).
           const profileState = nextTab
             ? selectCurrentProfileLocatorState({
                 runtimeStateManager,

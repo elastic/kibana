@@ -93,7 +93,6 @@ describe('selectCurrentTabType', () => {
 describe('selectTabTypeForPersistence', () => {
   it('falls back to the inherited tab type when the tab has never resolved a profile', () => {
     const runtimeStateManager = getRuntimeStateManagerMock();
-    // No runtime state registered for this tab at all, e.g. an unopened tab from a saved session.
     const tabState = getTabStateMock({
       id: 'tab-1',
       initialInternalState: { tabType: DiscoverTabType.Metrics },
@@ -131,7 +130,6 @@ describe('selectTabTypeForPersistence', () => {
       query: { esql: 'TS metrics-*' },
     });
 
-    // No inherited tab type at all -- the tab is gaining one because its query now matches.
     const tabState = getTabStateMock({ id: 'tab-1' });
 
     expect(selectTabTypeForPersistence({ runtimeStateManager, tabState })).toBe(
