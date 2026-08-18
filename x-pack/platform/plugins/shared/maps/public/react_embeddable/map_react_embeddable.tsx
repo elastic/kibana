@@ -252,11 +252,6 @@ export const mapEmbeddableFactory: EmbeddablePublicDefinition<MapEmbeddableState
               title={title ?? defaultTitle}
               description={description ?? defaultDescription}
               waitUntilTimeLayersLoad$={waitUntilTimeLayersLoad$(savedMap.getStore())}
-              isSharable={
-                isMapRendererApi(parentApi) && typeof parentApi.isSharable === 'boolean'
-                  ? parentApi.isSharable
-                  : true
-              }
             />
           </Provider>
         );

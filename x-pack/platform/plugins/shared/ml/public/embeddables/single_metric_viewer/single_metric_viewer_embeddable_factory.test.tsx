@@ -69,8 +69,6 @@ jest.mock('../../shared_components/single_metric_viewer', () => {
         return (
           <div
             data-test-subj={`mlSingleMetricViewer_${props.uuid}`}
-            data-shared-item=""
-            data-render-complete={props.isRenderComplete ?? false}
             ref={props.wrapperRef}
           />
         );

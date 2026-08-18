@@ -51,7 +51,7 @@ export function GroupOverviewPanel({
         }
       `}
     >
-      <EuiFlexGroup data-test-subj="sloGroupOverviewPanel" data-shared-item="">
+      <EuiFlexGroup data-test-subj="sloGroupOverviewPanel">
         <EuiFlexItem
           css={({ euiTheme }: UseEuiTheme) => css`
             margin-top: ${euiTheme.base * 1.25}px;
@@ -73,7 +73,7 @@ export function GroupOverviewPanel({
 
 export function SingleOverviewCardList({ sloId }: { sloId: string }) {
   return (
-    <div data-test-subj="sloSingleOverviewPanel" data-shared-item="" style={{ width: '100%' }}>
+    <div data-test-subj="sloSingleOverviewPanel" style={{ width: '100%' }}>
       <SloCardChartList data-test-subj="sloSingleOverviewPanel" sloId={sloId} />
     </div>
   );

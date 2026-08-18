@@ -60,28 +60,10 @@ export function LensEmbeddableComponent({
   // take care of dispatching the event from the DOM node
   const rootRef = useDispatcher(hasRendered, api);
 
-  // Publish the data attributes only if avaialble/visible
-  const title = useMemo(
-    () =>
-      internalApi.getDisplayOptions()?.noPanelTitle
-        ? undefined
-        : { 'data-title': panelTitle ?? api.defaultTitle$?.getValue() },
-    [api.defaultTitle$, panelTitle, internalApi]
-  );
-  const description = api.description$?.getValue()
-    ? {
-        'data-description': api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
-      }
-    : undefined;
-
   return (
     <div
       css={{ width: '100%', height: '100%', position: 'relative' }}
       data-rendering-count={renderCount + 1}
-      data-render-complete={hasRendered}
-      {...title}
-      {...description}
-      data-shared-item
       ref={rootRef}
     >
       {expressionParams == null || blockingErrors.length ? null : (

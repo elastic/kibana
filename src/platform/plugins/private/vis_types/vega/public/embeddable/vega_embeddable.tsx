@@ -363,10 +363,6 @@ export const vegaEmbeddableFactory = (
           <div
             ref={domNode}
             css={{ width: '100%', height: '100%', display: 'flex' }}
-            data-render-complete={rendered}
-            data-title={hideTitle ? '' : title ?? ''}
-            data-description={description ?? ''}
-            data-shared-item
           >
             {renderInput ? (
               <Suspense fallback={<EuiLoadingChart size="l" />}>

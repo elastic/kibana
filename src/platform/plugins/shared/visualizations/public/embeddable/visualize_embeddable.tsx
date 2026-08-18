@@ -535,10 +535,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             ref={domNode}
             data-test-subj="visualizationLoader"
             data-rendering-count={renderCount /* Used for functional tests */}
-            data-render-complete={hasRendered}
-            data-title={dataTitle}
-            data-description={api.description$?.getValue() ?? ''}
-            data-shared-item
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup css={{ height: '100%' }} justifyContent="center" alignItems="center">
