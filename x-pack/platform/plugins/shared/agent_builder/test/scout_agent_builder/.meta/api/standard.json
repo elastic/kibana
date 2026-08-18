@@ -1,5 +1,5 @@
 {
-  "sha1": "71876873250ed9ffcb061ea51e4355b2442c62cc",
+  "sha1": "ad15075a26cdd2f76a0ece263a542141d6833627",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -609,8 +609,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 414,
-        "column": 29
+        "line": 460,
+        "column": 7
       }
     },
     {
@@ -623,8 +623,50 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 789,
-        "column": 5
+        "line": 832,
+        "column": 20
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-e38e31fb05e9d1c",
+      "title": "Agent Builder — conversations access-control API the owner shares a private conversation through the access-control routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 877,
+        "column": 16
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-9eb3af49d734524",
+      "title": "Agent Builder — conversations access-control API cluster admin can rename and delete a public conversation they do not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 1070,
+        "column": 26
+      }
+    },
+    {
+      "id": "5e1819ccd21625a-89debe42fbe73e7",
+      "title": "Agent Builder — conversations access-control API cluster admin cannot rename or delete a private conversation they do not own",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
+        "line": 1121,
+        "column": 70
       }
     },
     {
@@ -637,8 +679,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_access_control_api.spec.ts",
-        "line": 833,
-        "column": 53
+        "line": 1173,
+        "column": 29
       }
     },
     {
@@ -653,7 +695,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 74,
+        "line": 76,
         "column": 44
       }
     },
@@ -669,7 +711,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 100,
+        "line": 102,
         "column": 14
       }
     },
@@ -685,7 +727,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 114,
+        "line": 116,
         "column": 29
       }
     },
@@ -701,7 +743,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 138,
+        "line": 140,
         "column": 8
       }
     },
@@ -717,7 +759,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 150,
+        "line": 152,
         "column": 26
       }
     },
@@ -733,7 +775,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 168,
+        "line": 170,
         "column": 21
       }
     },
@@ -749,7 +791,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 182,
+        "line": 184,
         "column": 28
       }
     },
@@ -765,8 +807,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 231,
+        "line": 233,
         "column": 8
+      }
+    },
+    {
+      "id": "908082c6d828973-b049acf3d770a33",
+      "title": "Agent Builder — conversations API converse create stores the read_only flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 282,
+        "column": 28
+      }
+    },
+    {
+      "id": "908082c6d828973-66ec29b5fadc9a1",
+      "title": "Agent Builder — conversations API converse ignores read_only when continuing a conversation, and a read-only conversation can still be continued",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
+        "line": 296,
+        "column": 9
       }
     },
     {
@@ -781,8 +855,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 280,
-        "column": 28
+        "line": 339,
+        "column": 30
       }
     },
     {
@@ -797,8 +871,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 287,
-        "column": 23
+        "line": 353,
+        "column": 9
       }
     },
     {
@@ -813,8 +887,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 301,
-        "column": 15
+        "line": 365,
+        "column": 24
       }
     },
     {
@@ -829,8 +903,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 307,
-        "column": 89
+        "line": 374,
+        "column": 16
       }
     },
     {
@@ -845,8 +919,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/conversations_api.spec.ts",
-        "line": 322,
-        "column": 25
+        "line": 387,
+        "column": 13
       }
     },
     {
@@ -1549,7 +1623,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/api/tests/converse_tracing_snapshot_api.spec.ts",
-        "line": 208,
+        "line": 209,
         "column": 9
       }
     },
