@@ -106,15 +106,6 @@ export const Header: React.FC<HeaderProps> = ({
           testId: 'dataSourceActionButton',
         },
         {
-          id: 'uploadFile',
-          label: i18n.translate('xpack.searchPlayground.setupPage.uploadFileLabel', {
-            defaultMessage: 'Upload file',
-          }),
-          iconType: 'plusCircle',
-          run: showFileUploadFlyout,
-          testId: 'uploadFileButton',
-        },
-        {
           id: 'export',
           label: i18n.translate('xpack.searchPlayground.export.actionButtonLabel', {
             defaultMessage: 'Export',
@@ -123,6 +114,16 @@ export const Header: React.FC<HeaderProps> = ({
           run: () => setShowViewCodeFlyout(true),
           disableButton: hasNoIndices,
           testId: 'viewCodeActionButton',
+        },
+        {
+          id: 'uploadFile',
+          label: i18n.translate('xpack.searchPlayground.setupPage.uploadFileLabel', {
+            defaultMessage: 'Upload file',
+          }),
+          iconType: 'plusCircle',
+          overflow: true,
+          run: showFileUploadFlyout,
+          testId: 'uploadFileButton',
         },
       ],
       primaryActionItem: {

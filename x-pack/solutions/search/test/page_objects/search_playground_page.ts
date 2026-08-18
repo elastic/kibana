@@ -174,7 +174,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         await testSubjects.existOrFail('setupPage');
         await testSubjects.existOrFail('connectLLMButton');
         await testSubjects.existOrFail('createIndexButton');
-        await testSubjects.existOrFail('uploadFileButton');
+        await testSubjects.existOrFail('uploadFileButtonEmpty');
       },
       async expectDeprecatedLLMConnectorCardsMissing() {
         await testSubjects.existOrFail('create-connector-flyout');
@@ -190,13 +190,13 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
 
       async expectPlaygroundHeaderComponentsToExist() {
         await testSubjects.existOrFail('app-menu');
-        await testSubjects.existOrFail('appHeaderMenuDocumentation');
+        await testSubjects.existOrFail('dataSourceActionButton');
+        await testSubjects.existOrFail('viewCodeActionButton');
       },
 
       async expectPlaygroundHeaderComponentsToDisabled() {
         expect(await testSubjects.isEnabled('chatMode')).to.be(false);
         expect(await testSubjects.isEnabled('queryMode')).to.be(false);
-        expect(await testSubjects.isEnabled('uploadFileButton')).to.be(true);
         expect(await testSubjects.isEnabled('dataSourceActionButton')).to.be(false);
         expect(await testSubjects.isEnabled('viewCodeActionButton')).to.be(false);
       },
@@ -585,7 +585,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
       },
       async expectModeIsSelected(mode: 'chatMode' | 'queryMode') {
         await testSubjects.existOrFail(mode);
-        const modeSelectedValue = await testSubjects.getAttribute(mode, 'aria-pressed');
+        const modeSelectedValue = await testSubjects.getAttribute(mode, 'aria-selected');
         expect(modeSelectedValue).to.be('true');
       },
       async selectPageMode(mode: 'chatMode' | 'queryMode', playgroundId?: string) {
