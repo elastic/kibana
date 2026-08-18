@@ -65,7 +65,7 @@ describe('connectorSmlType', () => {
   });
 
   describe('id', () => {
-    it('equals CONNECTOR_SML_TYPE', () => {
+    it('equals CONNECTOR_KI_TYPE', () => {
       expect(connectorSmlType.id).toBe(CONNECTOR_KI_TYPE);
     });
   });
