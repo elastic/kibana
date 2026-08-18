@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { osqueryTool, agentBuilderToolsAvailability } from './common';
+import { osqueryTool, osqueryLivePathAvailability } from './common';
 import { packSavedObjectType } from '../../common/types';
 import type { PackSavedObject } from '../common/types';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
@@ -38,7 +38,7 @@ export const listPacksTool = (
   description:
     'List available Osquery packs (curated query bundles from Elastic and custom packs). Use this when the analyst references a pack by name (e.g. "Windows persistence pack"). Returns pack name, queries, and enabled status. Pack queries can be run with osquery.run_live_query after applying analyst-scope filters.',
   schema: listPacksSchema,
-  availability: agentBuilderToolsAvailability(osqueryContext),
+  availability: osqueryLivePathAvailability(osqueryContext),
   handler: async (input, { request }) => {
     const { search, enabled, page, page_size: pageSize } = input;
 

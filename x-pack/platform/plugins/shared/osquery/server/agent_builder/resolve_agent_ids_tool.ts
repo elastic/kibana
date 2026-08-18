@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { osqueryTool, agentBuilderToolsAvailability } from './common';
+import { osqueryTool, osqueryLivePathAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 import {
@@ -92,7 +92,7 @@ export const resolveAgentIdsTool = (
     'Only returns agents enrolled in an Osquery-capable agent policy. ' +
     'Returns one entry per requested hostname; agent_id is null if no enrolled Osquery-capable agent matched.',
   schema: resolveAgentIdsSchema,
-  availability: agentBuilderToolsAvailability(osqueryContext),
+  availability: osqueryLivePathAvailability(osqueryContext),
   handler: async (input, { request }) => {
     const { hostnames } = input;
     const agentService = osqueryContext.service.getAgentService();

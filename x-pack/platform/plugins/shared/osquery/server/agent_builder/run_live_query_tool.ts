@@ -11,7 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { osqueryTool, agentBuilderToolsAvailability } from './common';
+import { osqueryTool, osqueryLivePathAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import type { SchemaService } from '../lib/schema_service';
 import type { OsqueryTable } from '../../common/types/schema';
@@ -62,7 +62,7 @@ export const runLiveQueryTool = (
   description:
     'Run a read-only Osquery live query on specified agents and wait briefly for results. Enforces SchemaService catalog allowlist — only SELECT against known tables. Returns rows when agents respond within ~30s; otherwise returns action_id — call osquery.get_live_query_results to wait longer and display rows in chat.',
   schema: runLiveQuerySchema,
-  availability: agentBuilderToolsAvailability(osqueryContext),
+  availability: osqueryLivePathAvailability(osqueryContext),
   handler: async (input, { request }) => {
     const { query, agent_ids: agentIds, timeout } = input;
 

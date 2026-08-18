@@ -10,7 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
-import { osqueryTool, agentBuilderToolsAvailability } from './common';
+import { osqueryTool, osqueryLivePathAvailability } from './common';
 import type { OsqueryAppContext } from '../lib/osquery_app_context_services';
 import type { SchemaService } from '../lib/schema_service';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
@@ -42,7 +42,7 @@ export const getTableSchemaTool = (
   description:
     'Get the Osquery table schema (columns, types, descriptions) for a specific table. Use this before authoring a custom Osquery query to verify column names and types. The schema is sourced from the installed osquery_manager integration package.',
   schema: getTableSchemaSchema,
-  availability: agentBuilderToolsAvailability(osqueryContext),
+  availability: osqueryLivePathAvailability(osqueryContext),
   handler: async (input, { request }) => {
     const { table_name: tableName, platform } = input;
 
