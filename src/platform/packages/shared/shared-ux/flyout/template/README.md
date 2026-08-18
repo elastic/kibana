@@ -37,7 +37,7 @@ The root forwards a fixed subset of `EuiFlyoutProps` — `onClose`, `size`, `min
 - `titleIcon` — EUI icon type rendered after the title. Without `titleTooltip` it is decorative (`aria-hidden`).
 - `titleTooltip` — when set, the title icon becomes a focusable `EuiIconTip` using `titleIcon` as its type, defaulting to `info`.
 - `description` — arbitrary `ReactNode` rendered below the title in subdued text. Not wrapped in a `<p>`, so block content is valid.
-- `children` — reserved for future header parts. No header parts exist yet, so any child is dropped and logs a dev warning naming it.
+- `children` — reserved for future header parts. No header parts exist yet, so any child is dropped.
 
 **`FlyoutTemplate.Body`** renders arbitrary children inside `EuiFlyoutBody` in source order, with no sectioning, titling, or dividers added by the template. Each child manages its own layout.
 

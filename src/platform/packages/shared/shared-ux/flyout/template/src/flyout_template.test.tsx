@@ -13,15 +13,6 @@ import { FlyoutTemplate } from './flyout_template';
 
 const noop = () => {};
 
-const FakeCallout = () => null;
-
-/** Minimal body used across header-focused tests. */
-const minimalBody = (
-  <FlyoutTemplate.Body>
-    <p>content</p>
-  </FlyoutTemplate.Body>
-);
-
 const renderTemplate = (ui: React.ReactElement) => render(ui);
 
 describe('FlyoutTemplate', () => {
@@ -115,22 +106,6 @@ describe('FlyoutTemplate', () => {
     expect(screen.queryByRole('heading')).not.toBeInTheDocument();
     expect(screen.getByText('filter bar').closest('.euiPanel')).toBeNull();
     expect(container.querySelectorAll('hr.euiHorizontalRule')).toHaveLength(0);
-  });
-
-  it('does not warn about unstructured body content', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never">
-        <FlyoutTemplate.Body>
-          {/* A component, not an intrinsic element: the body opts into these deliberately. */}
-          <FakeCallout />
-          <p>content</p>
-        </FlyoutTemplate.Body>
-      </FlyoutTemplate>
-    );
-
-    expect(warn).not.toHaveBeenCalled();
-    warn.mockRestore();
   });
 
   it('is valid without a header (body is the only required zone)', () => {
@@ -317,51 +292,5 @@ describe('FlyoutTemplate header title icon and description', () => {
     );
 
     expect(screen.getByTestId('myFlyoutHeader').textContent).toBe('Alert details');
-  });
-});
-
-describe('FlyoutTemplate unstructured header content', () => {
-  const body = (
-    <FlyoutTemplate.Body>
-      <span>body content</span>
-    </FlyoutTemplate.Body>
-  );
-
-  const unsupportedMessage =
-    '[FlyoutTemplate] <FakeCallout> is not a Header part and is not rendered; put free-form content in the Body.';
-
-  it('does not render a component that is not a header part, and warns once', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
-        <FlyoutTemplate.Header title="Alert details">
-          <FakeCallout />
-        </FlyoutTemplate.Header>
-        {minimalBody}
-      </FlyoutTemplate>
-    );
-
-    expect(screen.getByTestId('myFlyoutHeader').textContent).toBe('Alert details');
-    expect(warn).toHaveBeenCalledTimes(1);
-    expect(warn).toHaveBeenCalledWith(unsupportedMessage);
-    warn.mockRestore();
-  });
-
-  it('warns for markup and bare text too, since neither is rendered', () => {
-    const warn = jest.spyOn(console, 'warn').mockImplementation(noop);
-    renderTemplate(
-      <FlyoutTemplate onClose={noop} session="never" data-test-subj="myFlyout">
-        <FlyoutTemplate.Header title="Alert details">
-          <div>raw markup</div>
-          bare text
-        </FlyoutTemplate.Header>
-        {body}
-      </FlyoutTemplate>
-    );
-
-    expect(screen.getByTestId('myFlyoutHeader').textContent).toBe('Alert details');
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('<div> is not a Header part'));
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('"bare text" is not a Header part'));
-    warn.mockRestore();
   });
 });
