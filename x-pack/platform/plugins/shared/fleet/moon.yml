@@ -122,6 +122,7 @@ dependsOn:
   - '@kbn/scout'
   - '@kbn/reporting-common'
   - '@kbn/reporting-plugin'
+  - '@kbn/workflows-management-plugin'
   - '@kbn/user-profile-components'
   - '@kbn/css-utils'
   - '@kbn/rison'
@@ -134,6 +135,8 @@ dependsOn:
   - '@kbn/elastic-agent-condition-language'
   - '@kbn/app-header'
   - '@kbn/core-http-browser'
+  - '@kbn/agent-builder-server'
+  - '@kbn/agent-builder-common'
 tags:
   - plugin
   - prod
