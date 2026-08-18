@@ -75,16 +75,18 @@ function VarField({
         ]
       : null;
   return (
-    <Suspense fallback={<EuiLoadingSpinner size="m" />}>
-      <LazyPackagePolicyInputVarField
-        varDef={meta.def}
-        value={value}
-        onChange={(next) => onFieldChange(fieldName, toDraft(next))}
-        errors={errors}
-        forceShowErrors={forceShowErrors}
-        packageName={service.packageName}
-      />
-    </Suspense>
+    <div data-test-subj={`serviceSettingsFlyout-field-${fieldName}`}>
+      <Suspense fallback={<EuiLoadingSpinner size="m" />}>
+        <LazyPackagePolicyInputVarField
+          varDef={meta.def}
+          value={value}
+          onChange={(next) => onFieldChange(fieldName, toDraft(next))}
+          errors={errors}
+          forceShowErrors={forceShowErrors}
+          packageName={service.packageName}
+        />
+      </Suspense>
+    </div>
   );
 }
 
