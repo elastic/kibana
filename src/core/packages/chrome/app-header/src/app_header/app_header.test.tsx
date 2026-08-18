@@ -17,7 +17,7 @@ import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-type
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
-import { APP_MENU_TEST_SUBJECTS } from '@kbn/core-chrome-app-menu-components';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 import type { AppHeaderMetadataItems } from '../types';
 import { AppHeaderView, DiscoverAppHeader } from './app_header';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
