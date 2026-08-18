@@ -48,6 +48,11 @@ SCOUT_LOG_LEVEL=debug node scripts/scout run-tests \
 
 See also [Debug Scout test runs](./debugging.md) for other debugging tips.
 
+### Best practices [scout-logging-best-practices]
+
+- **Log sparingly.** When a test fails, the assertion failure (expected/received, stack trace) usually already tells you what went wrong — you don't need to log every step to diagnose it.
+- **Prefer interactive debugging over log statements** when working locally. [Playwright UI mode](./debugging.md#playwright-ui-mode) or breakpoints often get you to the root cause faster than adding `log.debug` calls and re-running.
+
 ## Server logs (Kibana, Elasticsearch) [scout-logging-servers]
 
 When Scout starts a local Kibana/Elasticsearch stack (for example via `node scripts/scout start-server`), server logs print directly to that same console by default. To capture them to files instead, pass `--logToFile`, which writes `kibana.log` and `es-cluster-<name>.log` under a generated directory in `data/ftr_servers_logs/` (yes, `ftr_servers_logs` — Scout reuses the legacy FTR server-management code and its log directory naming).
@@ -84,4 +89,9 @@ Retention on this data view is roughly on the order of weeks for Kibana/Elastics
 - **Kibana logs** — server-side logs from the Kibana instance backing the serverless project. Filterable by `serverless.project.id`. Useful fields: `log.level`, `log.logger`, `message`.
 - **Elasticsearch logs** — server-side logs from the project's Elasticsearch cluster, same pipeline/schema as Kibana logs and filterable by `serverless.project.id`.
 - **UIAM logs** — logs from the Unified Identity and Access Management service, useful when investigating auth-related test failures in serverless (where UIAM handles API keys and identity, unlike the local environment). UIAM is a shared regional service, so these logs are **not** tagged with `serverless.project.id` — correlate them to your project via a known user identity or token visible in the log `message` instead.
-- **Browser logs** — console output captured during UI test runs. Locally, Scout's UI test fixtures capture browser console errors and attach them to the failure report/test artifacts when a test fails. The Overview cluster's `discover-observability-solution-all-logs` data view does not currently include raw browser/RUM application logs — only synthetic monitor results, which are a different thing.
+
+## Browser logs [scout-logging-browser]
+
+Scout's UI test fixtures capture browser console errors during a test run and attach them to the failure report and test artifacts when a test fails. You can find them in the Scout HTML report, alongside the rest of the test's artifacts — there's no separate console output to watch for these locally.
+
+The Overview cluster's `discover-observability-solution-all-logs` data view (see above) does not currently include raw browser/RUM application logs for MKI runs — only synthetic monitor results, which are a different thing.
