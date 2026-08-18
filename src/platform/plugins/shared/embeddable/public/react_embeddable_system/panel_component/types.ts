@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HasPanelCapabilities, PublishesHideBorder } from '@kbn/presentation-publishing';
+import type {
+  HasPanelCapabilities,
+  PublishesHideBorder,
+  PublishesRendered,
+} from '@kbn/presentation-publishing';
 import type {
   CanLockHoverActions,
   HasParentApi,
@@ -34,6 +38,12 @@ export interface PresentationPanelProps<
     setVisibility: (isVisible: boolean) => void;
   };
   componentProps?: PropsType;
+
+  /**
+   * Set to true when rendering within data-shared-items-container
+   * to enable sharing "data-share-item" attributes for panel
+   */
+  isSharedItem?: boolean;
 
   showShadow?: boolean;
   showBorder?: boolean;
@@ -80,6 +90,7 @@ export interface DefaultPresentationPanelApi
     Partial<
       PublishesTitle &
         PublishesDataLoading &
+        PublishesRendered &
         PublishesBlockingError &
         PublishesDescription &
         PublishesDisabledActionIds &
