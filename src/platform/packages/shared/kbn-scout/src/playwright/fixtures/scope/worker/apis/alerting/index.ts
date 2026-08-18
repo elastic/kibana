@@ -62,6 +62,23 @@ export interface RequestOptions {
   ignoreErrors?: number[];
 }
 
+export interface UpdateFlappingSettingsParams {
+  enabled: boolean;
+  lookBackWindow: number;
+  statusChangeThreshold: number;
+}
+
+export interface UpdateQueryDelaySettingsParams {
+  delay: number;
+}
+
+export interface ScheduleSnoozeParams {
+  duration?: number;
+  id?: string;
+  start?: Date | string;
+  tzid?: string;
+}
+
 export interface AlertingApiService {
   rules: {
     create: (params: CreateRuleParams, spaceId?: string) => Promise<any>;
@@ -76,6 +93,11 @@ export interface AlertingApiService {
     muteAlert: (ruleId: string, alertId: string, spaceId?: string) => Promise<void>;
     unmuteAlert: (ruleId: string, alertId: string, spaceId?: string) => Promise<void>;
     snooze: (ruleId: string, duration: number, spaceId?: string) => Promise<any>;
+    scheduleSnooze: (
+      ruleId: string,
+      params?: ScheduleSnoozeParams,
+      spaceId?: string
+    ) => Promise<any>;
     unsnooze: (ruleId: string, scheduleIds?: string[], spaceId?: string) => Promise<any>;
     runSoon: (ruleId: string, spaceId?: string) => Promise<void>;
     getRuleTypes: (spaceId?: string) => Promise<any>;
@@ -94,6 +116,11 @@ export interface AlertingApiService {
     getAll: (spaceId?: string) => Promise<any>;
     getTypes: (spaceId?: string) => Promise<any>;
     execute: (connectorId: string, params: Record<string, any>, spaceId?: string) => Promise<any>;
+  };
+  settings: {
+    updateFlapping: (params: UpdateFlappingSettingsParams, spaceId?: string) => Promise<any>;
+    updateQueryDelay: (params: UpdateQueryDelaySettingsParams, spaceId?: string) => Promise<any>;
+    reset: (spaceId?: string) => Promise<void>;
   };
   waiting: {
     waitForRuleStatus: (
@@ -160,6 +187,32 @@ export const getAlertingApiHelper = (
         lastResult!
       )}`
     );
+  };
+
+  const updateFlapping = async (params: UpdateFlappingSettingsParams, spaceId?: string) => {
+    return await measurePerformanceAsync(log, 'alertingApi.settings.updateFlapping', async () => {
+      return await kbnClient.request({
+        method: 'POST',
+        path: `${buildSpacePath(spaceId)}/internal/alerting/rules/settings/_flapping`,
+        retries: 3,
+        body: {
+          enabled: params.enabled,
+          look_back_window: params.lookBackWindow,
+          status_change_threshold: params.statusChangeThreshold,
+        },
+      });
+    });
+  };
+
+  const updateQueryDelay = async (params: UpdateQueryDelaySettingsParams, spaceId?: string) => {
+    return await measurePerformanceAsync(log, 'alertingApi.settings.updateQueryDelay', async () => {
+      return await kbnClient.request({
+        method: 'POST',
+        path: `${buildSpacePath(spaceId)}/internal/alerting/rules/settings/_query_delay`,
+        retries: 3,
+        body: { delay: params.delay },
+      });
+    });
   };
 
   return {
@@ -379,6 +432,34 @@ export const getAlertingApiHelper = (
         );
       },
 
+      scheduleSnooze: async (ruleId: string, params?: ScheduleSnoozeParams, spaceId?: string) => {
+        return await measurePerformanceAsync(
+          log,
+          `alertingApi.rules.scheduleSnooze [${ruleId}]`,
+          async () => {
+            const start = params?.start ?? new Date(Date.now() + 3 * 60 * 60 * 1000);
+            const dtstart = start instanceof Date ? start.toISOString() : start;
+
+            return await kbnClient.request({
+              method: 'POST',
+              path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}/_snooze`,
+              retries: 3,
+              body: {
+                snooze_schedule: {
+                  duration: params?.duration ?? 0,
+                  ...(params?.id && { id: params.id }),
+                  rRule: {
+                    count: 1,
+                    dtstart,
+                    tzid: params?.tzid ?? 'UTC',
+                  },
+                },
+              },
+            });
+          }
+        );
+      },
+
       unsnooze: async (ruleId: string, scheduleIds?: string[], spaceId?: string) => {
         return await measurePerformanceAsync(
           log,
@@ -559,6 +640,24 @@ export const getAlertingApiHelper = (
             return response.data;
           }
         );
+      },
+    },
+
+    settings: {
+      updateFlapping,
+      updateQueryDelay,
+      reset: async (spaceId?: string) => {
+        return await measurePerformanceAsync(log, 'alertingApi.settings.reset', async () => {
+          await updateFlapping(
+            {
+              enabled: true,
+              lookBackWindow: 10,
+              statusChangeThreshold: 10,
+            },
+            spaceId
+          );
+          await updateQueryDelay({ delay: 10 }, spaceId);
+        });
       },
     },
 
