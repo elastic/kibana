@@ -63,10 +63,10 @@ describe('<CustomCriblForm />', () => {
       expect(datastream).toBeInTheDocument();
     });
 
-    await userEvent.type(dataId, 'myDataId');
+    await userEvent.type(dataId, 'myDataId', { delay: null });
 
     const datastreamComboBox = getByTestId('comboBoxSearchInput');
-    await userEvent.type(datastreamComboBox, datastreamOpts[0]);
+    await userEvent.type(datastreamComboBox, datastreamOpts[0], { delay: null });
 
     const datastreamComboBoxOpts = getByTestId('comboBoxOptionsList');
     await waitFor(() => {
@@ -106,10 +106,10 @@ describe('<CustomCriblForm />', () => {
     });
 
     const invalidDataId = `evil' || true || '`;
-    await userEvent.type(dataId, invalidDataId);
+    await userEvent.type(dataId, invalidDataId, { delay: null });
 
     const datastreamComboBox = getByTestId('comboBoxSearchInput');
-    await userEvent.type(datastreamComboBox, datastreamOpts[0]);
+    await userEvent.type(datastreamComboBox, datastreamOpts[0], { delay: null });
 
     const datastreamComboBoxOpts = getByTestId('comboBoxOptionsList');
     await waitFor(() => {
