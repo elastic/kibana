@@ -9,7 +9,6 @@ import React, { type FC, type PropsWithChildren, useCallback, useMemo, useState 
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiCallOut,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +21,7 @@ import {
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
@@ -762,26 +762,21 @@ export const ChangePointResults: FC<ChangePointResultsProps> = ({
 
       {cardinalityExceeded ? (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningTitle', {
               defaultMessage: 'Analysis has been limited',
             })}
-            color="warning"
-            iconType="warning"
-          >
-            <p>
-              {i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningMessage', {
-                defaultMessage:
-                  'The "{splitField}" field cardinality is {cardinality} which exceeds the limit of {cardinalityLimit}. Only the first {cardinalityLimit} partitions, sorted by document count, are analyzed.',
-                values: {
-                  cardinality: splitFieldCardinality,
-                  cardinalityLimit: SPLIT_FIELD_CARDINALITY_LIMIT,
-                  splitField: fieldConfig.splitField,
-                },
-              })}
-            </p>
-          </EuiCallOut>
+            text={i18n.translate('xpack.aiops.changePointDetection.cardinalityWarningMessage', {
+              defaultMessage:
+                'The "{splitField}" field cardinality is {cardinality} which exceeds the limit of {cardinalityLimit}. Only the first {cardinalityLimit} partitions, sorted by document count, are analyzed.',
+              values: {
+                cardinality: splitFieldCardinality,
+                cardinalityLimit: SPLIT_FIELD_CARDINALITY_LIMIT,
+                splitField: fieldConfig.splitField,
+              },
+            })}
+          />
           <EuiSpacer size="m" />
         </>
       ) : null}

@@ -25,6 +25,7 @@ import type {
 import type { RuntimeAgentConfigurationOverrides } from '../agents/definition';
 import type { ConversationAccessControl } from './access_control';
 import type { RoundState } from './round_state';
+import type { MetadataFieldValue } from '../templates';
 
 /**
  * Represents the input that initiated a conversation round.
@@ -449,6 +450,9 @@ export interface RoundModelUsageStats {
   model?: string;
 }
 
+/** Placeholder title assigned to a new conversation */
+export const DEFAULT_CONVERSATION_TITLE = 'New conversation';
+
 /**
  * Main structure representing a conversation with an agent.
  */
@@ -492,8 +496,19 @@ export interface Conversation {
   access_control?: ConversationAccessControl;
   /** External origin used to resolve conversations submitted from an external system like Slack or GitHub. */
   origin?: ConversationOrigin;
+  /**
+   * Arbitrary key/value metadata seeded from a template or set by callers.
+   * Stored in ES as a `flattened` field; typed values are recovered on read via the active template.
+   */
+  metadata?: Record<string, MetadataFieldValue>;
+  /** ID of the template applied to this conversation. */
+  template_id?: string;
+  /** Version of the template as it was when it was last applied. */
+  template_version?: number;
   /** Whether the conversation has been pinned by the user. */
   pinned?: boolean;
+  /** Whether the conversation's history is presented as frozen in the UI. Purely presentational. */
+  read_only?: boolean;
 }
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';

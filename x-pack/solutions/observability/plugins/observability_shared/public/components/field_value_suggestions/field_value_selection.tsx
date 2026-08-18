@@ -227,6 +227,7 @@ export function FieldValueSelection({
         display="block"
       >
         <EuiSelectable
+          data-test-subj="o11yFieldValueSelectionSelectable"
           searchable
           singleSelection={singleSelection}
           searchProps={{
