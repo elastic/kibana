@@ -71,7 +71,8 @@
     "@kbn/alerting-types",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/zod",
-    "@kbn/deeplinks-analytics"
+    "@kbn/deeplinks-analytics",
+    "@kbn/es-query"
   ],
   "exclude": ["target/**/*"]
 }

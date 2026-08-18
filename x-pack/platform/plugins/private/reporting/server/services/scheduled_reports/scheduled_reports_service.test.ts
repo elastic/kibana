@@ -29,6 +29,10 @@ import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
 import type { CreatedAtSearchResponse } from './scheduled_reports_service';
 import { ScheduledReportsService } from './scheduled_reports_service';
 import type { UpdateScheduledReportParams } from './types/update';
+import { buildOwnedByFilter } from './lib/ownership';
+
+const legacyOwnedByFilterNode = (username: string) =>
+  buildOwnedByFilter({ id: undefined, username });
 
 const fakeRawRequest = {
   headers: {
@@ -440,7 +444,7 @@ describe('ScheduledReportsService', () => {
         type: 'scheduled_report',
         page: 1,
         perPage: 10,
-        filter: 'scheduled_report.attributes.createdBy: "somebody"',
+        filter: legacyOwnedByFilterNode('somebody'),
         searchFields: ['title', 'created_by'],
       });
       expect(client.search).toHaveBeenCalledTimes(1);
@@ -465,6 +469,52 @@ describe('ScheduledReportsService', () => {
         size: 10,
         sort: [{ created_at: { order: 'desc' } }],
       });
+    });
+
+    it('filters by a realm-qualified id (plus legacy username fallback) for a realm-bearing user', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      await scheduledReportsService.list({
+        user: {
+          username: 'rshared',
+          authentication_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        page: 1,
+        size: 10,
+      });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: buildOwnedByFilter({
+            id: 'realm:["native","default_native","rshared"]',
+            username: 'rshared',
+          }),
+        })
+      );
+    });
+
+    it('returns an empty list without querying saved objects when there is no authenticated user', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+
+      const result = await scheduledReportsService.list({
+        user: undefined,
+        page: 1,
+        size: 10,
+      });
+
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(result).toEqual({ page: 1, per_page: 10, total: 0, data: [] });
     });
 
     it('should return an empty array when there are no hits', async () => {
@@ -906,6 +956,81 @@ describe('ScheduledReportsService', () => {
         message:
           'Failed attempt to disable scheduled report [id=2da1cb75-04c7-4202-a9f0-f8bcce63b0f4] [name=Another cool dashboard]',
       });
+    });
+
+    it('does not allow a same-username principal in a different realm to disable a report (cross-realm ownership)', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const crossRealmReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdBy: 'rshared',
+          createdById: 'realm:["file","default_file","rshared"]',
+        },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [crossRealmReport] }));
+
+      const result = await scheduledReportsService.bulkDisable({
+        user: {
+          username: 'rshared',
+          authentication_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [crossRealmReport.id],
+      });
+
+      expect(soClient.bulkUpdate).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [{ id: crossRealmReport.id, message: 'Not found.', status: 404 }],
+        total: 1,
+      });
+    });
+
+    it('stamps createdById on disable for a legacy report matched by username (lazy upgrade)', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'rshared' },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [legacyReport] }));
+      soClient.bulkUpdate = jest.fn().mockImplementationOnce(async () => ({
+        saved_objects: [{ id: legacyReport.id, type: 'scheduled_report', attributes: {} }],
+      }));
+
+      await scheduledReportsService.bulkDisable({
+        user: {
+          username: 'rshared',
+          authentication_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [legacyReport.id],
+      });
+
+      expect(soClient.bulkUpdate).toHaveBeenCalledWith([
+        {
+          id: legacyReport.id,
+          type: 'scheduled_report',
+          attributes: {
+            enabled: false,
+            createdById: 'realm:["native","default_native","rshared"]',
+          },
+        },
+      ]);
     });
 
     it('should handle errors in bulk get', async () => {
@@ -2049,6 +2174,45 @@ describe('ScheduledReportsService', () => {
       });
     });
 
+    it('does not allow a same-username principal in a different realm to delete a report (cross-realm ownership)', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const crossRealmReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdBy: 'rshared',
+          createdById: 'realm:["file","default_file","rshared"]',
+        },
+      };
+      soClient.bulkGet = jest
+        .fn()
+        .mockImplementationOnce(async () => ({ saved_objects: [crossRealmReport] }));
+
+      const result = await scheduledReportsService.bulkDelete({
+        user: {
+          username: 'rshared',
+          authentication_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+        ids: [crossRealmReport.id],
+      });
+
+      expect(soClient.bulkDelete).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        scheduled_report_ids: [],
+        errors: [{ id: crossRealmReport.id, message: 'Not found.', status: 404 }],
+        total: 1,
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        `User "rshared" attempted to delete scheduled report "${crossRealmReport.id}" created by "rshared" without sufficient privileges.`
+      );
+    });
+
     it('should handle errors in bulk get', async () => {
       soClient.bulkGet = jest.fn().mockImplementationOnce(async () => ({
         saved_objects: [
@@ -2529,6 +2693,93 @@ describe('ScheduledReportsService', () => {
         },
         message:
           'Failed attempt to update scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca]',
+      });
+    });
+
+    it('does not allow a same-username principal in a different realm to update a report (cross-realm ownership)', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const crossRealmReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: {
+          ...savedObjects[0].attributes,
+          createdBy: 'rshared',
+          createdById: 'realm:["file","default_file","rshared"]',
+        },
+      };
+      soClient.get = jest.fn().mockResolvedValue(crossRealmReport);
+
+      await expect(
+        scheduledReportsService.update({
+          ...defaultUpdateParams,
+          id: crossRealmReport.id,
+          user: {
+            username: 'rshared',
+            authentication_realm: { type: 'native', name: 'default_native' },
+          } as ReportingUser,
+        })
+      ).rejects.toMatchObject({ body: 'Not found.', statusCode: 404 });
+
+      expect(soClient.update).not.toHaveBeenCalled();
+    });
+
+    it('stamps createdById on update for a legacy report matched by username (lazy upgrade)', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'rshared' },
+      };
+      soClient.get = jest.fn().mockResolvedValue(legacyReport);
+
+      await scheduledReportsService.update({
+        ...defaultUpdateParams,
+        id: legacyReport.id,
+        user: {
+          username: 'rshared',
+          authentication_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith('scheduled_report', legacyReport.id, {
+        schedule: mockSchedule,
+        title: 'foobar',
+        notification: mockNotification,
+        createdById: 'realm:["native","default_native","rshared"]',
+      });
+    });
+
+    it('does not stamp createdById when an admin updates another legacy report', async () => {
+      // canManageReportingForSpace resolves true by default (see beforeEach)
+      const legacyReport: SavedObject<ScheduledReportType> = {
+        ...savedObjects[0],
+        attributes: { ...savedObjects[0].attributes, createdBy: 'someone-else' },
+      };
+      soClient.get = jest.fn().mockResolvedValue(legacyReport);
+
+      await scheduledReportsService.update({
+        ...defaultUpdateParams,
+        id: legacyReport.id,
+        user: {
+          username: 'admin-user',
+          authentication_realm: { type: 'native', name: 'default_native' },
+        } as ReportingUser,
+      });
+
+      expect(soClient.update).toHaveBeenCalledWith('scheduled_report', legacyReport.id, {
+        schedule: mockSchedule,
+        title: 'foobar',
+        notification: mockNotification,
       });
     });
 

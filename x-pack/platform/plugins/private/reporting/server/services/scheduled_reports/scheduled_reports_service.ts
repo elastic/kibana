@@ -30,6 +30,8 @@ import type {
   ScheduledReportType,
 } from '../../types';
 import { SCHEDULED_REPORT_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import type { ReportingUserIdentity } from '../../lib';
+import { getReportingUserIdentity } from '../../lib';
 import type { ScheduledReportAuditEventParams } from '../audit_events/audit_events';
 import {
   ScheduledReportAuditAction,
@@ -41,6 +43,7 @@ import type { BulkOperationError } from './types';
 import { transformSingleResponse } from './transforms';
 import type { UpdateScheduledReportParams } from './types/update';
 import { updateScheduledReportSchema } from './schemas/update';
+import { buildOwnedByFilter, isScheduledReportOwner } from './lib/ownership';
 
 const SCHEDULED_REPORT_ID_FIELD = 'scheduled_report_id';
 const CREATED_AT_FIELD = 'created_at';
@@ -61,6 +64,8 @@ interface BulkOperationResult {
 export type CreatedAtSearchResponse = SearchResponse<{ created_at: string }>;
 
 export class ScheduledReportsService {
+  private identityPromise?: Promise<ReportingUserIdentity>;
+
   constructor(
     private auditLogger: AuditLogger,
     private userCanManageReporting: Boolean,
@@ -118,14 +123,21 @@ export class ScheduledReportsService {
       });
     }
 
-    if (!(await this._canUpdateReport({ id, user }))) {
-      this._throw404({ user, id, action: ScheduledReportAuditAction.UPDATE });
+    const { authorized, upgradeCreatedById } = await this._canUpdateReport({ id, user });
+    if (!authorized) {
+      await this._throw404({ user, id, action: ScheduledReportAuditAction.UPDATE });
     }
 
     try {
       const { title, schedule, notification } = updateParams;
 
-      await this._updateScheduledReportSavedObject({ id, title, schedule, notification });
+      await this._updateScheduledReportSavedObject({
+        id,
+        title,
+        schedule,
+        notification,
+        createdById: upgradeCreatedById,
+      });
       await this._updateScheduledReportTaskSchedule({ id, schedule });
 
       const updatedReport = await this.savedObjectsClient.get<ScheduledReportType>(
@@ -160,7 +172,14 @@ export class ScheduledReportsService {
     search?: string;
   }): Promise<ListScheduledReportsApiResponse> {
     try {
-      const username = this._getUsername(user);
+      const identity = await this._getIdentity(user);
+
+      // Security is disabled (no authenticated user) and this caller has no elevated
+      // reporting privileges: there is no principal to own anything, so return nothing
+      // rather than build a filter that could otherwise match unowned/legacy documents.
+      if (!this.userCanManageReporting && identity.id === undefined && !identity.username) {
+        return this._getEmptyListApiResponse(page, size);
+      }
 
       const response = await this.savedObjectsClient.find<ScheduledReportType>({
         type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
@@ -168,9 +187,7 @@ export class ScheduledReportsService {
         perPage: size,
         search,
         searchFields: ['title', 'created_by'],
-        ...(!this.userCanManageReporting
-          ? { filter: `scheduled_report.attributes.createdBy: "${username}"` }
-          : {}),
+        ...(!this.userCanManageReporting ? { filter: buildOwnedByFilter(identity) } : {}),
       });
 
       if (!response) {
@@ -271,7 +288,7 @@ export class ScheduledReportsService {
     user: ReportingUser;
   }): Promise<BulkOperationResult> {
     try {
-      const username = this._getUsername(user);
+      const identity = await this._getIdentity(user);
 
       const bulkGetResult = await this.savedObjectsClient.bulkGet<ScheduledReportType>(
         ids.map((id) => ({ id, type: SCHEDULED_REPORT_SAVED_OBJECT_TYPE }))
@@ -283,13 +300,15 @@ export class ScheduledReportsService {
       const bulkGetErrors = bulkGetResult.saved_objects.filter(isSavedObjectErrorResult);
       const [authorizedSchedules, unauthorizedSchedules] = partition(
         validSchedules,
-        (so) => so.attributes.createdBy === username || this.userCanManageReporting
+        (so) =>
+          this.userCanManageReporting ||
+          isScheduledReportOwner({ report: so.attributes, currentUser: identity })
       );
 
       const authErrors = this._formatAndAuditBulkDeleteAuthErrors({
         bulkGetErrors,
         unauthorizedSchedules,
-        username,
+        username: identity.username,
       });
       this._auditBulkGetAuthorized({
         action: ScheduledReportAuditAction.DELETE,
@@ -363,7 +382,7 @@ export class ScheduledReportsService {
   }: {
     bulkGetErrors: SavedObjectErrorResult[];
     unauthorizedSchedules: SavedObject<ScheduledReportType>[];
-    username: string | boolean;
+    username?: string;
   }) {
     const bulkErrors: BulkOperationError[] = [];
     bulkGetErrors.forEach((so) => {
@@ -439,8 +458,16 @@ export class ScheduledReportsService {
     return bulkErrors;
   }
 
-  private _getUsername(user: ReportingUser): string | boolean {
-    return user ? user.username : false;
+  /** Resolves the acting principal's identity once per service instance (one per request). */
+  private async _getIdentity(user: ReportingUser): Promise<ReportingUserIdentity> {
+    if (!this.identityPromise) {
+      this.identityPromise = getReportingUserIdentity({
+        user,
+        request: this.request,
+        esClient: this.esClient,
+      });
+    }
+    return this.identityPromise;
   }
 
   private _getEmptyListApiResponse(page: number, perPage: number): ListScheduledReportsApiResponse {
@@ -478,7 +505,8 @@ export class ScheduledReportsService {
     title,
     schedule,
     notification,
-  }: { id: string } & UpdateScheduledReportParams) {
+    createdById,
+  }: { id: string; createdById?: string } & UpdateScheduledReportParams) {
     await this.savedObjectsClient.update<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
       id,
@@ -486,6 +514,7 @@ export class ScheduledReportsService {
         title,
         schedule,
         notification,
+        ...(createdById ? { createdById } : {}),
       }
     );
   }
@@ -502,22 +531,39 @@ export class ScheduledReportsService {
     }
   }
 
+  /**
+   * Checks whether `user` may update the scheduled report `id`, and whether the report is a
+   * legacy (pre-realm-aware) document owned by `user` via username only. When both are true, the
+   * caller should stamp `createdById` on the update so future requests use the stable id -
+   * mirroring the lazy-upgrade pattern in `isAgentOwner`'s callers in Agent Builder.
+   */
   private async _canUpdateReport({
     user,
     id,
   }: {
     user: ReportingUser;
     id: string;
-  }): Promise<Boolean> {
-    if (this.userCanManageReporting) return true;
+  }): Promise<{ authorized: boolean; upgradeCreatedById?: string }> {
+    if (this.userCanManageReporting) {
+      return { authorized: true };
+    }
 
-    const username = this._getUsername(user);
+    const identity = await this._getIdentity(user);
     const reportToUpdate = await this.savedObjectsClient.get<ScheduledReportType>(
       SCHEDULED_REPORT_SAVED_OBJECT_TYPE,
       id
     );
 
-    return reportToUpdate.attributes.createdBy === username;
+    if (!isScheduledReportOwner({ report: reportToUpdate.attributes, currentUser: identity })) {
+      return { authorized: false };
+    }
+
+    const upgradeCreatedById =
+      reportToUpdate.attributes.createdById === undefined && identity.id !== undefined
+        ? identity.id
+        : undefined;
+
+    return { authorized: true, upgradeCreatedById };
   }
 
   private async _bulkOperation({
@@ -540,6 +586,7 @@ export class ScheduledReportsService {
         errors: bulkErrors,
         scheduledReportSavedObjectsToUpdate,
         updatedScheduledReportIds: enabledScheduledReportIds,
+        createdByIdUpgrades,
       } = await this._addLogForBulkOperationScheduledReports({
         action: enable ? ScheduledReportAuditAction.ENABLE : ScheduledReportAuditAction.DISABLE,
         scheduledReportSavedObjects: bulkGetResult.saved_objects,
@@ -552,6 +599,7 @@ export class ScheduledReportsService {
         const bulkUpdateResult = await this._updateScheduledReportSavedObjectEnabledState({
           scheduledReportSavedObjectsToUpdate,
           shouldEnable: enable,
+          createdByIdUpgrades,
         });
 
         for (const so of bulkUpdateResult.saved_objects) {
@@ -600,18 +648,24 @@ export class ScheduledReportsService {
   private async _updateScheduledReportSavedObjectEnabledState({
     scheduledReportSavedObjectsToUpdate,
     shouldEnable,
+    createdByIdUpgrades,
   }: {
     scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>>;
     shouldEnable: boolean;
+    createdByIdUpgrades: Map<string, string>;
   }): Promise<SavedObjectsBulkUpdateResponse<ScheduledReportType>> {
     return await this.savedObjectsClient.bulkUpdate<ScheduledReportType>(
-      scheduledReportSavedObjectsToUpdate.map((so) => ({
-        id: so.id,
-        type: so.type,
-        attributes: {
-          enabled: shouldEnable,
-        },
-      }))
+      scheduledReportSavedObjectsToUpdate.map((so) => {
+        const createdById = createdByIdUpgrades.get(so.id);
+        return {
+          id: so.id,
+          type: so.type,
+          attributes: {
+            enabled: shouldEnable,
+            ...(createdById ? { createdById } : {}),
+          },
+        };
+      })
     );
   }
 
@@ -628,8 +682,11 @@ export class ScheduledReportsService {
   }) {
     const errors: BulkOperationError[] = [];
     const scheduledReportSavedObjectsToUpdate: Array<SavedObject<ScheduledReportType>> = [];
-    const username = this._getUsername(user);
+    const identity = await this._getIdentity(user);
     const updatedScheduledReportIds: Set<string> = new Set();
+    // Legacy (pre-realm-aware) documents owned via username only are stamped with the stable id
+    // on this write, mirroring the lazy-upgrade pattern in Agent Builder's `isAgentOwner` callers.
+    const createdByIdUpgrades: Map<string, string> = new Map();
 
     for (const so of scheduledReportSavedObjects) {
       if (isSavedObjectErrorResult(so)) {
@@ -640,14 +697,17 @@ export class ScheduledReportsService {
         });
       } else {
         // check if user is allowed to update this scheduled report
-        if (so.attributes.createdBy !== username && !this.userCanManageReporting) {
+        if (
+          !this.userCanManageReporting &&
+          !isScheduledReportOwner({ report: so.attributes, currentUser: identity })
+        ) {
           errors.push({
             message: `Not found.`,
             status: 404,
             id: so.id,
           });
           this.logger.warn(
-            `User "${username}" attempted to ${operation} scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
+            `User "${identity.username}" attempted to ${operation} scheduled report "${so.id}" created by "${so.attributes.createdBy}" without sufficient privileges.`
           );
           this._auditLog({
             action,
@@ -669,10 +729,22 @@ export class ScheduledReportsService {
             outcome: 'unknown',
           });
           scheduledReportSavedObjectsToUpdate.push(so);
+          if (
+            !this.userCanManageReporting &&
+            so.attributes.createdById === undefined &&
+            identity.id !== undefined
+          ) {
+            createdByIdUpgrades.set(so.id, identity.id);
+          }
         }
       }
     }
-    return { errors, scheduledReportSavedObjectsToUpdate, updatedScheduledReportIds };
+    return {
+      errors,
+      scheduledReportSavedObjectsToUpdate,
+      updatedScheduledReportIds,
+      createdByIdUpgrades,
+    };
   }
 
   private async _updateScheduledReportTaskEnabledState({
@@ -711,7 +783,7 @@ export class ScheduledReportsService {
     };
   }
 
-  private _throw404({
+  private async _throw404({
     user,
     id,
     action,
@@ -719,10 +791,10 @@ export class ScheduledReportsService {
     user: ReportingUser;
     id: string;
     action: ScheduledReportAuditAction;
-  }) {
-    const username = this._getUsername(user);
+  }): Promise<never> {
+    const identity = await this._getIdentity(user);
     this.logger.warn(
-      `User "${username}" attempted to update scheduled report "${id}" without sufficient privileges.`
+      `User "${identity.username}" attempted to update scheduled report "${id}" without sufficient privileges.`
     );
     this._auditLog({
       action,

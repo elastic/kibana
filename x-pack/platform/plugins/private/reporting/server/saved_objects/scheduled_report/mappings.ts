@@ -16,5 +16,8 @@ export const scheduledReportMappings: SavedObjectsTypeMappingDefinition = {
     createdBy: {
       type: 'keyword',
     },
+    createdById: {
+      type: 'keyword',
+    },
   },
 };
