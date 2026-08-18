@@ -16,23 +16,30 @@ import type { SyntheticsServerSetup } from '../../types';
 // The space-scoped SO client is opaque here; we tag it with the namespace it was
 // scoped to so we can assert which space a package policy was written into.
 const makeServer = () => {
-  const asScopedToNamespace = jest.fn((space: string) => ({ __space: space }));
+  const asScopedToNamespace = jest.fn((space: string) => {
+    const client = { __space: space };
+    Object.defineProperty(client, 'getCurrentNamespace', { value: () => space });
+    return client;
+  });
   const unsafeClient = { asScopedToNamespace };
   const getUnsafeInternalClient = jest.fn(() => unsafeClient);
   const fleetBulkCreate = jest.fn().mockResolvedValue({ created: [], failed: [] });
+  const fleetBulkUpdate = jest.fn().mockResolvedValue({ updatedPolicies: [], failedPolicies: [] });
   const fleetGetByIDs = jest.fn().mockResolvedValue([]);
   const fleetDelete = jest.fn().mockResolvedValue([]);
   const getByIds = jest.fn();
+  const bumpRevision = jest.fn().mockResolvedValue(undefined);
 
   const server = {
     logger: loggerMock.create(),
     fleet: {
       packagePolicyService: {
         bulkCreate: fleetBulkCreate,
+        bulkUpdate: fleetBulkUpdate,
         getByIDs: fleetGetByIDs,
         delete: fleetDelete,
       },
-      agentPolicyService: { getByIds },
+      agentPolicyService: { getByIds, bumpRevision },
     },
     coreStart: {
       savedObjects: { getUnsafeInternalClient },
@@ -46,9 +53,11 @@ const makeServer = () => {
     asScopedToNamespace,
     getUnsafeInternalClient,
     fleetBulkCreate,
+    fleetBulkUpdate,
     fleetGetByIDs,
     fleetDelete,
     getByIds,
+    bumpRevision,
   };
 };
 
@@ -146,6 +155,94 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
 
     expect(getByIds).not.toHaveBeenCalled();
     expect(clientPassedToFleet(fleetBulkCreate)).toEqual({ __space: DEFAULT_SPACE_ID });
+  });
+
+  it('coalesces concurrent scalable-location writes into one agent policy revision bump', async () => {
+    const { server, fleetBulkCreate, bumpRevision } = makeServer();
+    fleetBulkCreate.mockImplementation(async (_client, _esClient, policies) => ({
+      created: policies,
+      failed: [],
+    }));
+    const service = new PackagePolicyService(server);
+
+    await Promise.all([
+      service.bulkCreate({
+        newPolicies: [policy({ id: 'monitor-1-policyId', condition: "agent.id == 'agent-1'" })],
+        spaceId: DEFAULT_SPACE_ID,
+      }),
+      service.bulkCreate({
+        newPolicies: [policy({ id: 'monitor-2-policyId', condition: "agent.id == 'agent-2'" })],
+        spaceId: DEFAULT_SPACE_ID,
+      }),
+    ]);
+
+    expect(fleetBulkCreate).toHaveBeenCalledTimes(2);
+    expect(fleetBulkCreate).toHaveBeenNthCalledWith(
+      1,
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ bumpRevision: false })
+    );
+    expect(fleetBulkCreate).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({ bumpRevision: false })
+    );
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
+    expect(bumpRevision).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'policyId', {
+      asyncDeploy: true,
+    });
+  });
+
+  it('batches scalable-location updates before bumping the agent policy revision', async () => {
+    const { server, fleetBulkUpdate, bumpRevision } = makeServer();
+    const updatedPolicy: UpdatePackagePolicyWithId = {
+      ...policy({ condition: "agent.id == 'agent-1'" }),
+      id: 'testId-policyId',
+    };
+    fleetBulkUpdate.mockResolvedValue({
+      updatedPolicies: [updatedPolicy],
+      failedPolicies: [],
+    });
+
+    await new PackagePolicyService(server).bulkUpdate({
+      policiesToUpdate: [updatedPolicy],
+      spaceId: DEFAULT_SPACE_ID,
+    });
+
+    expect(fleetBulkUpdate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      [updatedPolicy],
+      expect.objectContaining({ bumpRevision: false })
+    );
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
+  });
+
+  it('batches scalable-location deletes before bumping the agent policy revision', async () => {
+    const { server, fleetDelete, fleetGetByIDs, bumpRevision } = makeServer();
+    const deletedPolicyId = 'testId-policyId';
+    const deletedPolicy = policy({ id: deletedPolicyId, condition: "agent.id == 'agent-1'" });
+    fleetGetByIDs.mockResolvedValue([deletedPolicy]);
+    fleetDelete.mockResolvedValue([
+      { id: deletedPolicy.id, success: true, policy_ids: deletedPolicy.policy_ids },
+    ]);
+
+    await new PackagePolicyService(server).bulkDelete({
+      policyIdsToDelete: [deletedPolicyId],
+      spaceId: DEFAULT_SPACE_ID,
+    });
+
+    expect(fleetDelete).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      [deletedPolicyId],
+      expect.objectContaining({ bumpRevision: false })
+    );
+    expect(bumpRevision).toHaveBeenCalledTimes(1);
   });
 });
 

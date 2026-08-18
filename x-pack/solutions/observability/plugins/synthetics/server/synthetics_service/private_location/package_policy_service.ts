@@ -13,6 +13,7 @@ import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
+import { AgentPolicyRevisionBatcher } from './agent_policy_revision_batcher';
 
 interface GetByIdsOptions {
   spaceId: string;
@@ -28,13 +29,25 @@ interface GetByIdsOptions {
 interface PackagePolicyWithAgentPolicyIds {
   id?: string;
   policy_ids?: string[];
+  condition?: unknown;
 }
 
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
+  private readonly revisionBatcher: AgentPolicyRevisionBatcher;
 
   constructor(_server: SyntheticsServerSetup) {
     this.server = _server;
+    this.revisionBatcher = new AgentPolicyRevisionBatcher({
+      logger: this.server.logger,
+      bumpRevision: (client, policyId) =>
+        this.server.fleet.agentPolicyService.bumpRevision(
+          client,
+          this.getInternalEsClient(),
+          policyId,
+          { asyncDeploy: true }
+        ),
+    });
   }
 
   private getSpaceSoClient(spaceId: string) {
@@ -148,20 +161,24 @@ export class PackagePolicyService {
     }
 
     const promises = (
-      await this.getDefaultAndSpacePackagePolicies({
-        policies: newPolicies,
-        spaceId,
-      })
-    ).map(({ client, policies }) =>
-      this.server.fleet.packagePolicyService.bulkCreate(
-        client,
-        this.getInternalEsClient(),
-        policies,
-        {
-          asyncDeploy: true,
-        }
-      )
-    );
+      await this.getDefaultAndSpacePackagePolicies({ policies: newPolicies, spaceId })
+    ).flatMap(({ client, policies }) => {
+      const { batched, immediate } = this.partitionByRevisionStrategy(policies);
+
+      return [
+        ...(immediate.length > 0
+          ? [
+              this.server.fleet.packagePolicyService.bulkCreate(
+                client,
+                this.getInternalEsClient(),
+                immediate,
+                { asyncDeploy: true }
+              ),
+            ]
+          : []),
+        ...(batched.length > 0 ? [this.bulkCreateWithBatchedRevision(client, batched)] : []),
+      ];
+    });
 
     const res = await Promise.all(promises);
 
@@ -183,21 +200,24 @@ export class PackagePolicyService {
     }
 
     const promises = (
-      await this.getDefaultAndSpacePackagePolicies({
-        policies: policiesToUpdate,
-        spaceId,
-      })
-    ).map(({ client, policies }) =>
-      this.server.fleet.packagePolicyService.bulkUpdate(
-        client,
-        this.getInternalEsClient(),
-        policies,
-        {
-          force: true,
-          asyncDeploy: true,
-        }
-      )
-    );
+      await this.getDefaultAndSpacePackagePolicies({ policies: policiesToUpdate, spaceId })
+    ).flatMap(({ client, policies }) => {
+      const { batched, immediate } = this.partitionByRevisionStrategy(policies);
+
+      return [
+        ...(immediate.length > 0
+          ? [
+              this.server.fleet.packagePolicyService.bulkUpdate(
+                client,
+                this.getInternalEsClient(),
+                immediate,
+                { force: true, asyncDeploy: true }
+              ),
+            ]
+          : []),
+        ...(batched.length > 0 ? [this.bulkUpdateWithBatchedRevision(client, batched)] : []),
+      ];
+    });
 
     const res = await Promise.all(promises);
     return res.flatMap((r) => r.failedPolicies);
@@ -252,24 +272,101 @@ export class PackagePolicyService {
         policies: await this.getByIds({
           spaceId,
           packagePolicyIds: policyIdsToDelete,
-          fields: ['name', 'policy_ids'],
+          fields: ['name', 'policy_ids', 'condition'],
         }),
         spaceId,
       })
-    ).map(({ client, policies }) =>
-      this.server.fleet.packagePolicyService.delete(
-        client,
-        this.getInternalEsClient(),
-        policies.map((policy) => policy.id),
-        {
-          force: true,
-          asyncDeploy: true,
-        }
-      )
-    );
+    ).flatMap(({ client, policies }) => {
+      const { batched, immediate } = this.partitionByRevisionStrategy(policies);
+
+      return [
+        ...(immediate.length > 0
+          ? [
+              this.server.fleet.packagePolicyService.delete(
+                client,
+                this.getInternalEsClient(),
+                immediate.flatMap(({ id }) => (id ? [id] : [])),
+                { force: true, asyncDeploy: true }
+              ),
+            ]
+          : []),
+        ...(batched.length > 0 ? [this.bulkDeleteWithBatchedRevision(client, batched)] : []),
+      ];
+    });
 
     const res = await Promise.all(promises);
     return res.flat();
+  }
+
+  private partitionByRevisionStrategy<T extends PackagePolicyWithAgentPolicyIds>(policies: T[]) {
+    const batched: T[] = [];
+    const immediate: T[] = [];
+
+    policies.forEach((policy) => {
+      // Only scalable private-location policies carry an agent condition. Keep
+      // classic private-location revision bumps immediate and unchanged.
+      if (typeof policy.condition === 'string') {
+        batched.push(policy);
+      } else {
+        immediate.push(policy);
+      }
+    });
+
+    return { batched, immediate };
+  }
+
+  private async bulkCreateWithBatchedRevision(
+    client: SavedObjectsClientContract,
+    policies: NewPackagePolicyWithId[]
+  ) {
+    const result = await this.server.fleet.packagePolicyService.bulkCreate(
+      client,
+      this.getInternalEsClient(),
+      policies,
+      { asyncDeploy: true, bumpRevision: false }
+    );
+
+    await this.revisionBatcher.schedule(
+      client,
+      result.created.flatMap(({ policy_ids: policyIds }) => policyIds)
+    );
+    return result;
+  }
+
+  private async bulkUpdateWithBatchedRevision(
+    client: SavedObjectsClientContract,
+    policies: UpdatePackagePolicyWithId[]
+  ) {
+    const result = await this.server.fleet.packagePolicyService.bulkUpdate(
+      client,
+      this.getInternalEsClient(),
+      policies,
+      { force: true, asyncDeploy: true, bumpRevision: false }
+    );
+
+    await this.revisionBatcher.schedule(
+      client,
+      result.updatedPolicies?.flatMap(({ policy_ids: policyIds }) => policyIds) ?? []
+    );
+    return result;
+  }
+
+  private async bulkDeleteWithBatchedRevision(
+    client: SavedObjectsClientContract,
+    policies: PackagePolicyWithAgentPolicyIds[]
+  ) {
+    const result = await this.server.fleet.packagePolicyService.delete(
+      client,
+      this.getInternalEsClient(),
+      policies.flatMap(({ id }) => (id ? [id] : [])),
+      { force: true, asyncDeploy: true, bumpRevision: false }
+    );
+
+    await this.revisionBatcher.schedule(
+      client,
+      result.flatMap(({ success, policy_ids: policyIds }) => (success ? policyIds ?? [] : []))
+    );
+    return result;
   }
 
   // The agent policies can be in the default space or the spaceId
