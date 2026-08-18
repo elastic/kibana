@@ -133,9 +133,8 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                             discover?.locator?.navigate({
                               dataViewSpec: {
                                 name: connector?.name,
-                                title: connector?.index_name,
+                                ...(connector?.index_name && { title: connector?.index_name })
                               },
-                              title: connector?.name,
                             });
                           }}
                         >
