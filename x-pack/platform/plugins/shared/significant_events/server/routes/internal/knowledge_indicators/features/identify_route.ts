@@ -257,7 +257,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Generate and persist computed KI features for a stream',
-    timeout: { idleSocket: 300_000 },
+    // ES|QL generators run in parallel; 90s covers the 30s per-query timeout with headroom.
+    timeout: { idleSocket: 90_000 },
   },
   security: {
     authz: {
