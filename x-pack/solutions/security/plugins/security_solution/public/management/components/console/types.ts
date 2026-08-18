@@ -65,7 +65,7 @@ export interface CommandArgDefinition {
   /**
    * Indicates that the argument definition is part of a group of arguments (all sharing the same id) and
    * that only one of them can be used at a time. Defining this property will make the argument group
-   * required for command input
+   * required for command input as long as it is not also defined as a conditionally required argument.
    */
   exclusiveOrGroupId?: string;
 
