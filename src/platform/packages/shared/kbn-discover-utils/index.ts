@@ -111,10 +111,9 @@ export type {
   HistogramPercentile,
   MetricsGridSettings,
   SimpleAggregation,
-  DiscoverAppLocator,
-  DiscoverAppLocatorGetLocation,
   DiscoverAppLocatorParams,
-  MainHistoryLocationState,
+  DiscoverGridSettings,
+  DiscoverGridSettingsColumn,
   ProfileStateMap,
 } from './src';
 

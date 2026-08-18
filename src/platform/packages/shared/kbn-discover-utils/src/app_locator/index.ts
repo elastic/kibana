@@ -8,9 +8,8 @@
  */
 
 export type {
-  DiscoverAppLocator,
-  DiscoverAppLocatorGetLocation,
   DiscoverAppLocatorParams,
-  MainHistoryLocationState,
+  DiscoverGridSettings,
+  DiscoverGridSettingsColumn,
   ProfileStateMap,
 } from './types';

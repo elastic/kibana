@@ -29,9 +29,8 @@ export type {
 } from './components/app_menu/types';
 
 export type {
-  DiscoverAppLocator,
-  DiscoverAppLocatorGetLocation,
   DiscoverAppLocatorParams,
-  MainHistoryLocationState,
+  DiscoverGridSettings,
+  DiscoverGridSettingsColumn,
   ProfileStateMap,
 } from './app_locator';

@@ -7,15 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { NEW_TAB_ID } from './constants';
+import { ControlPanelsState } from "@kbn/control-group-renderer";
+import { OptionsListESQLControlState } from "@kbn/controls-schemas";
+import { DataViewSpec } from "@kbn/data-views-plugin/common";
+import { DiscoverAppLocatorParams, ProfileStateMap } from "@kbn/discover-utils";
+import { LocatorDefinition, LocatorPublic } from "@kbn/share-plugin/common";
 
 export interface TabsUrlState {
   /**
    * Syncing the selected tab id with the URL
    */
-  tabId?: typeof NEW_TAB_ID | string;
+  tabId?: string;
   /**
    * (Optional) Label for the tab, used when creating a new tab via locator URL or opening a shared link.
    */
   tabLabel?: string;
 }
+
+export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
+
+/**
+ * Location state of scoped history (history instance of Kibana Platform application service)
+ */
+export interface MainHistoryLocationState {
+  dataViewSpec?: DataViewSpec;
+  esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
+  isAlertResults?: boolean;
+  profileState?: ProfileStateMap;
+}
+
+export type DiscoverAppLocatorGetLocation =
+  LocatorDefinition<DiscoverAppLocatorParams>['getLocation'];

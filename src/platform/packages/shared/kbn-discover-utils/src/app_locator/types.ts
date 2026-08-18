@@ -10,9 +10,7 @@
 import type { AsSerializableRecord, SerializableRecord } from '@kbn/utility-types';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { RefreshInterval } from '@kbn/data-plugin/public';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
+import type { RefreshInterval } from '@kbn/data-service-server';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -22,6 +20,14 @@ import type { NEW_TAB_ID, VIEW_MODE } from '../constants';
  * A map of profile state blobs keyed by their registered definition key.
  */
 export type ProfileStateMap = Record<string, SerializableRecord | undefined>;
+
+export interface DiscoverGridSettings extends SerializableRecord {
+  columns?: Record<string, DiscoverGridSettingsColumn>;
+}
+
+export interface DiscoverGridSettingsColumn extends SerializableRecord {
+  width?: number;
+}
 
 export type DiscoverAppLocatorParams = AsSerializableRecord<{
   /**
@@ -159,18 +165,3 @@ export type DiscoverAppLocatorParams = AsSerializableRecord<{
    */
   profileState?: ProfileStateMap;
 }>;
-
-export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
-
-/**
- * Location state of scoped history (history instance of Kibana Platform application service)
- */
-export interface MainHistoryLocationState {
-  dataViewSpec?: DataViewSpec;
-  esqlControls?: ControlPanelsState<OptionsListESQLControlState>;
-  isAlertResults?: boolean;
-  profileState?: ProfileStateMap;
-}
-
-export type DiscoverAppLocatorGetLocation =
-  LocatorDefinition<DiscoverAppLocatorParams>['getLocation'];

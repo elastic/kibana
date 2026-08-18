@@ -10,17 +10,14 @@ import type {
   InvestigationEvidence,
   InvestigationEvidenceCode,
 } from '@kbn/significant-events-schema';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
 
 /**
  * Discover locator params, structurally compatible with `DiscoverAppLocatorParams`. Declared here
  * so this package stays free of plugin dependencies — consumers pass the result straight to
  * `share.url.locators.get(DISCOVER_APP_LOCATOR)`.
  */
-export interface InvestigationDiscoverParams extends SerializableRecord {
-  query: { esql: string };
-  timeRange: { from: string; to: string };
-  interval: string;
-}
+export type InvestigationDiscoverParams = Pick<DiscoverAppLocatorParams, 'query' | 'timeRange' | 'interval'>
 
 /**
  * Parses a bound as an absolute instant we can hand to Discover as-is. Datemath (`now-1h`) and

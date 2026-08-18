@@ -12,11 +12,12 @@ export const APP_ICON = 'discoverApp';
 
 export { APP_STATE_URL_KEY, EMBEDDABLE_TRANSFORMS_FEATURE_FLAG_KEY } from './constants';
 export { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+export type { DiscoverAppLocatorParams } from '@kbn/discover-utils';
+
 export type {
   DiscoverAppLocator,
-  DiscoverAppLocatorParams,
   MainHistoryLocationState,
-} from '@kbn/discover-utils';
+} from './types';
 
 export type { DiscoverESQLLocator, DiscoverESQLLocatorParams } from './esql_locator';
 
