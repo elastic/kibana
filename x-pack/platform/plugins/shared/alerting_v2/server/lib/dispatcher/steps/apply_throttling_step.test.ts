@@ -7,7 +7,6 @@
 
 import { ApplyThrottlingStep, applyThrottling } from './apply_throttling_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createLastNotifiedTimestampsResponse } from '../fixtures/dispatcher';
 import {
   createAlertEpisode,
@@ -469,8 +468,7 @@ describe('applyThrottling', () => {
 describe('ApplyThrottlingStep', () => {
   it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const { loggerService } = createLoggerService();
-    const step = new ApplyThrottlingStep(queryService, loggerService);
+    const step = new ApplyThrottlingStep(queryService);
 
     const longSegment = 'q'.repeat(10_000);
     const groups = Array.from({ length: 200 }, (_, i) =>
@@ -513,8 +511,7 @@ describe('ApplyThrottlingStep', () => {
 
   it('returns empty dispatch and throttled when no groups', async () => {
     const { queryService, mockEsClient } = createQueryService();
-    const { loggerService } = createLoggerService();
-    const step = new ApplyThrottlingStep(queryService, loggerService);
+    const step = new ApplyThrottlingStep(queryService);
 
     const result = await step.execute(createDispatcherPipelineState({ groups: [] }));
 

@@ -83,6 +83,13 @@ export const createListIlmPoliciesTool = ({
     Results remain valid until the user creates or modifies policies (outside this skill's scope).
   `),
   tags: ['streams'],
+  annotations: {
+    title: 'List ILM Policies',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   schema: listIlmPoliciesSchema,
   handler: async (_input, { request }) => {
     if (isServerless) {
