@@ -437,3 +437,10 @@ export {
   buildTrendlineQueryWithMetricFieldMap,
   queryHasStatsCommand,
 } from './esql/trendline_query';
+export {
+  isTextBasedDoc,
+  getTextBasedLayerQueries,
+  getDocQuery,
+  getChartScopedFilterQuery,
+} from './esql/doc_queries';
+export type { LensDocLike, LensDocLikeState } from './esql/doc_queries';

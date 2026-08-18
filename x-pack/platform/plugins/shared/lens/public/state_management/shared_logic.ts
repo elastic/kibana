@@ -9,6 +9,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import {
@@ -28,7 +29,7 @@ export function mergeToNewDoc(
   persistedDoc: LensDocument | undefined,
   visualization: VisualizationState,
   datasourceStates: DatasourceStates,
-  query: AggregateQuery | Query,
+  query: AggregateQuery | Query | undefined,
   filters: Filter[],
   activeDatasourceId: string | null,
   adHocDataViews: Record<string, DataViewSpec>,
@@ -125,11 +126,11 @@ export function mergeToNewDoc(
     references,
     state: {
       visualization: persistibleVisualizationState,
-      // Dual-role field (see `LensDocument['state']['query']`): the editor's
-      // query bar state — a chart-scoped KQL/Lucene filter for form-based
-      // documents, or the ES|QL query for text-based documents (where the
-      // layers in `datasourceStates.textBased` hold the authoritative copy).
-      query,
+      // Chart-scoped KQL/Lucene filter only. ES|QL queries live exclusively
+      // on the text-based datasource layers (`datasourceStates.textBased`);
+      // an aggregate editor query is never persisted into this slot.
+      query:
+        query && typeof query === 'object' && !isOfAggregateQueryType(query) ? query : undefined,
       filters: [...persistableFilters, ...adHocFilters],
       datasourceStates: persistibleDatasourceStates,
       internalReferences,

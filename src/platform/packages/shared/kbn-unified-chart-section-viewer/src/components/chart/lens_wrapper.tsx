@@ -96,9 +96,18 @@ export function LensWrapper({
     }
   `;
 
+  // ES|QL lives on the text-based datasource layers; the top-level slot only
+  // carries a chart-scoped KQL/Lucene filter (legacy docs may still have an
+  // aggregate copy there, used as fallback).
+  const docQuery = useMemo(() => {
+    const layers = lensProps.attributes.state.datasourceStates.textBased?.layers ?? {};
+    const layerQuery = Object.values(layers).find((layer) => layer?.query)?.query;
+    return layerQuery ?? lensProps.attributes.state.query ?? { query: '', language: 'kuery' };
+  }, [lensProps.attributes.state]);
+
   const resolvedQuery = useMemo(
-    () => resolveEsqlVariables(lensProps.attributes.state.query, lensProps.esqlVariables),
-    [lensProps.attributes.state.query, lensProps.esqlVariables]
+    () => resolveEsqlVariables(docQuery, lensProps.esqlVariables),
+    [docQuery, lensProps.esqlVariables]
   );
 
   const handleExploreInDiscoverTab = useCallback(

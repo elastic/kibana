@@ -7,7 +7,11 @@
 
 import type { LensSerializedState } from '@kbn/lens-common';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
-import { LENS_UNKNOWN_VIS, type LensByValueSerializedState } from '@kbn/lens-common';
+import {
+  LENS_UNKNOWN_VIS,
+  getChartScopedFilterQuery,
+  type LensByValueSerializedState,
+} from '@kbn/lens-common';
 import { LENS_ITEM_VERSION_V2 } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes, LensConfigBuilder } from '@kbn/lens-embeddable-utils';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
@@ -145,12 +149,25 @@ export function migrateAttributes(
   if (isLensAttributesV0(newAttributes) || isLensAttributesV1(newAttributes)) {
     const v1Attributes = transformToV1LensItemAttributes(newAttributes);
     const v2Attributes = transformToV2LensItemAttributes({ ...v1Attributes, visualizationType });
-    return {
+    return dropLegacyAggregateQuerySlot({
       ...attributes,
       ...v2Attributes,
       version: LENS_ITEM_VERSION_V2 as LensAttributes['version'],
-    };
+    });
   }
 
-  return newAttributes as LensAttributes;
+  return dropLegacyAggregateQuerySlot(newAttributes as LensAttributes);
+}
+
+/**
+ * Read guard for legacy dual-written documents: any aggregate (ES|QL) value
+ * in the persisted `state.query` slot is dead data — the layer queries are
+ * authoritative — and is dropped. Documents self-clean on next save.
+ */
+function dropLegacyAggregateQuerySlot(attributes: LensAttributes): LensAttributes {
+  const guarded = getChartScopedFilterQuery(attributes.state?.query);
+  if (guarded === attributes.state?.query) {
+    return attributes;
+  }
+  return { ...attributes, state: { ...attributes.state, query: guarded } };
 }

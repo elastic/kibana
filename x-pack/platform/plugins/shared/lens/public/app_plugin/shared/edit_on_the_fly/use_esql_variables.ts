@@ -8,7 +8,7 @@
 import { useMemo, useCallback } from 'react';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type { TypedLensSerializedState } from '@kbn/lens-common';
+import type { TextBasedPersistedState, TypedLensSerializedState } from '@kbn/lens-common';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
@@ -61,11 +61,33 @@ export const useESQLVariables = ({
         }
       );
       if (panel && updatedQuery && attributes) {
+        // ES|QL lives exclusively on the text-based layers; update them in place
+        const textBasedState = attributes.state.datasourceStates.textBased as
+          | TextBasedPersistedState
+          | undefined;
+        const updatedTextBasedState = textBasedState
+          ? {
+              ...textBasedState,
+              layers: Object.fromEntries(
+                Object.entries(textBasedState.layers).map(([layerId, layer]) => [
+                  layerId,
+                  { ...layer, query: { esql: updatedQuery } },
+                ])
+              ),
+            }
+          : undefined;
         panel.updateAttributes({
           ...attributes,
           state: {
             ...attributes.state,
-            query: { esql: updatedQuery },
+            ...(updatedTextBasedState
+              ? {
+                  datasourceStates: {
+                    ...attributes.state.datasourceStates,
+                    textBased: updatedTextBasedState,
+                  },
+                }
+              : {}),
             needsRefresh: true,
           },
         });

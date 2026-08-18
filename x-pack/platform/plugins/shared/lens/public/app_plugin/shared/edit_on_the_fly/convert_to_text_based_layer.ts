@@ -17,7 +17,7 @@ import type {
   TypedLensSerializedState,
   ValueFormatConfig,
 } from '@kbn/lens-common';
-import { esql } from '@elastic/esql';
+import { getChartScopedFilterQuery } from '@kbn/lens-common';
 
 import { operationDefinitionMap } from '../../../datasources/form_based/operations';
 import type {
@@ -206,11 +206,9 @@ export function convertFormBasedToTextBasedLayer({
     return undefined;
   }
 
-  // Get the ES|QL query from the first converted layer
+  // Ensure the converted layer carries an ES|QL query
   const firstLayerId = layersToConvert[0].id;
-  const esqlQuery = newDatasourceState.layers[firstLayerId]?.query;
-
-  if (!esqlQuery) {
+  if (!newDatasourceState.layers[firstLayerId]?.query) {
     return undefined;
   }
 
@@ -220,7 +218,9 @@ export function convertFormBasedToTextBasedLayer({
     ...attributes,
     state: {
       ...attributes.state,
-      query: { esql: esql(esqlQuery.esql).print('wrapping') },
+      // ES|QL lives exclusively on the text-based layers; keep only a
+      // chart-scoped KQL/Lucene filter in the top-level slot (if any).
+      query: getChartScopedFilterQuery(attributes.state.query),
       datasourceStates: {
         textBased: newDatasourceState,
       },

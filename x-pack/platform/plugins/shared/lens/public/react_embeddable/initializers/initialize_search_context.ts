@@ -22,6 +22,7 @@ import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
 import { getProjectRoutingFromEsqlQuery } from '@kbn/esql-utils';
 import type { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '@kbn/lens-common';
+import { getDocQuery, isTextBasedDoc } from '@kbn/lens-common';
 import type { LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import type { LensEmbeddableStartServices } from '../types';
@@ -72,27 +73,26 @@ export function initializeSearchContext(
     injectFilterReferences(attributes.state.filters, attributes.references)
   );
 
-  // `state.query` is dual-role (see `LensDocument['state']['query']`): the
-  // chart-scoped KQL/Lucene filter for form-based documents, or a copy of the
-  // ES|QL layer query for text-based documents. Consumers of `query$` (e.g.
-  // ES|QL controls variable detection, project routing below) rely on the
-  // text-based copy staying in sync with the layer query.
-  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(attributes.state.query);
+  // Representative document query: for text-based documents the (first)
+  // authoritative ES|QL layer query, for form-based documents the
+  // chart-scoped KQL/Lucene filter. Consumers of `query$` (e.g. ES|QL
+  // controls variable detection, project routing below) rely on this.
+  const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(getDocQuery(attributes));
 
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
 
   const projectRoutingOverrides$ = new BehaviorSubject<ProjectRoutingOverrides>(
-    getProjectRoutingOverrides(attributes.state.query)
+    getProjectRoutingOverrides(query$.getValue())
   );
 
-  const usesEsql$ = new BehaviorSubject<boolean>(isOfAggregateQueryType(attributes.state.query));
+  const usesEsql$ = new BehaviorSubject<boolean>(isTextBasedDoc(attributes));
 
   const timeRangeManager = initializeTimeRangeManager(initialState);
 
   const subscriptions = [
     internalApi.attributes$
       .pipe(
-        map((attrs) => attrs.state.query),
+        map((attrs) => getDocQuery(attrs)),
         distinctUntilChanged(isEqual)
       )
       .subscribe(query$),
@@ -105,7 +105,7 @@ export function initializeSearchContext(
     query$
       .pipe(map(getProjectRoutingOverrides), distinctUntilChanged(isEqual))
       .subscribe(projectRoutingOverrides$),
-    query$.pipe(map(isOfAggregateQueryType), distinctUntilChanged()).subscribe(usesEsql$),
+    internalApi.attributes$.pipe(map(isTextBasedDoc), distinctUntilChanged()).subscribe(usesEsql$),
   ];
 
   return {

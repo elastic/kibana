@@ -24,7 +24,7 @@ import type {
   XYVisualizationState,
   XYByReferenceAnnotationLayerConfig,
 } from '@kbn/lens-common';
-import { LENS_UNKNOWN_VIS } from '@kbn/lens-common';
+import { LENS_UNKNOWN_VIS, getChartScopedFilterQuery, isTextBasedDoc } from '@kbn/lens-common';
 import type {
   LensByValueSerializedAPIConfig,
   LensSerializedAPIConfig,
@@ -68,7 +68,9 @@ export function createEmptyLensState(
       visualizationType,
       references: [],
       state: {
-        query: query || { query: '', language: 'kuery' },
+        // ES|QL lives exclusively on the text-based datasource layers; the
+        // slot only ever carries a chart-scoped KQL/Lucene filter.
+        query: !query || isTextBased ? { query: '', language: 'kuery' } : query,
         filters: filters || [],
         internalReferences: [],
         datasourceStates: { ...(isTextBased ? { textBased: {} } : { formBased: {} }) },
@@ -101,7 +103,7 @@ export async function deserializeState(
       return {
         ...state,
         ref_id: refId,
-        attributes,
+        attributes: dropLegacyAggregateQuerySlot(attributes),
         managed,
         sharingSavedObjectProps,
       } satisfies LensRuntimeState;
@@ -112,6 +114,9 @@ export async function deserializeState(
   }
 
   const newState = transformFromApiConfig(state) as LensRuntimeState;
+  if (newState.attributes) {
+    newState.attributes = dropLegacyAggregateQuerySlot(newState.attributes);
+  }
 
   if (newState.isNewPanel) {
     try {
@@ -131,13 +136,27 @@ export async function deserializeState(
 }
 
 /**
- * A document is text-based (ES|QL) when `state.query` holds an aggregate
- * query. `state.query` is dual-role (see `LensDocument['state']['query']`):
- * for text-based documents it is a copy of the authoritative layer query in
+ * Read guard for legacy dual-written documents: any aggregate (ES|QL) value
+ * in the persisted `state.query` slot is dead data — the layer queries are
+ * authoritative — and is dropped. Documents self-clean on next save.
+ */
+function dropLegacyAggregateQuerySlot<
+  T extends { state: { query?: Parameters<typeof getChartScopedFilterQuery>[0] } }
+>(attributes: T): T {
+  const guarded = getChartScopedFilterQuery(attributes.state.query);
+  if (guarded === attributes.state.query) {
+    return attributes;
+  }
+  return { ...attributes, state: { ...attributes.state, query: guarded } };
+}
+
+/**
+ * A document is text-based (ES|QL) when it has a `textBased` datasource
+ * state. The authoritative queries live in
  * `state.datasourceStates.textBased.layers[id].query`.
  */
 export function isTextBasedLanguage(state: LensRuntimeState) {
-  return isOfAggregateQueryType(state.attributes?.state.query);
+  return isTextBasedDoc(state.attributes);
 }
 
 export function getViewMode(api: unknown) {

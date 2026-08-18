@@ -17,6 +17,7 @@ import type {
   XYVisualizationState,
 } from '@kbn/lens-common';
 import { getDatasourceId } from '@kbn/visualization-utils';
+import { getDocQuery, getTextBasedLayerQueries, isTextBasedDoc } from '@kbn/lens-common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { UnifiedHistogramVisContext } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
@@ -181,12 +182,19 @@ export function deriveLensSuggestionFromLensAttributes({
   try {
     if (externalVisContext.suggestionType === UnifiedHistogramSuggestionType.lensSuggestion) {
       // should be based on same query
-      // Note: for text-based (ES|QL) Lens attributes `state.query` is a copy of
-      // the layer query (`datasourceStates.textBased.layers[id].query`, which
-      // `injectESQLQueryIntoLensLayers` treats as authoritative); it is only
-      // used here as a staleness check for the customized vis context.
-      if (queryParams && !isEqual(externalVisContext.attributes?.state?.query, queryParams.query)) {
-        return undefined;
+      // For text-based (ES|QL) Lens attributes the authoritative queries live
+      // on the layers (`datasourceStates.textBased.layers[id].query`); the
+      // vis context is stale when none of them matches the current query.
+      if (queryParams) {
+        const attributes = externalVisContext.attributes;
+        const isStale = isTextBasedDoc(attributes)
+          ? !getTextBasedLayerQueries(attributes).some((layerQuery) =>
+              isEqual(layerQuery, queryParams.query)
+            )
+          : !isEqual(getDocQuery(attributes), queryParams.query);
+        if (isStale) {
+          return undefined;
+        }
       }
 
       // it should be one of 'formBased'/'textBased' and have value
