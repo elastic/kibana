@@ -160,34 +160,34 @@ export const useEntityGrouping = ({
 
   // The fast target-only query is valid without filters. Filtered grouping requires a STATS join
   // so a match on an alias still surfaces its target group.
-  const noUserFilterActive = useMemo(
-    () => !hasActiveTopLevelBoolClauses(query) && groupFilters.length === 0,
+  const isUserFilterActive = useMemo(
+    () => hasActiveTopLevelBoolClauses(query) || groupFilters.length > 0,
     [query, groupFilters]
   );
 
   // state.query already includes any active global filter from useBaseEsQuery.
   const filteredResolutionFilter = useMemo((): ESBoolQuery | undefined => {
-    if (!isResolutionGrouping || noUserFilterActive) return undefined;
+    if (!isResolutionGrouping || !isUserFilterActive) return undefined;
     const filterClauses: ESBoolQuery[] = [];
     if (hasActiveTopLevelBoolClauses(query)) filterClauses.push(query);
     if (groupFilters.length > 0) filterClauses.push(additionalFilters);
     if (filterClauses.length === 0) return undefined;
     if (filterClauses.length === 1) return filterClauses[0];
     return { bool: { must: [], filter: filterClauses, should: [], must_not: [] } };
-  }, [isResolutionGrouping, noUserFilterActive, query, groupFilters, additionalFilters]);
+  }, [isResolutionGrouping, isUserFilterActive, query, groupFilters, additionalFilters]);
 
   // Resolution fetch hooks are always called; enabled controls execution.
   const unfilteredResolutionResult = useFetchUnfilteredResolutionGroupData({
     pageIndex,
     pageSize,
-    enabled: isResolutionGrouping && noUserFilterActive,
+    enabled: isResolutionGrouping && !isUserFilterActive,
   });
 
   const filteredResolutionResult = useFetchFilteredResolutionGroupData({
     pageIndex,
     pageSize,
     filter: filteredResolutionFilter,
-    enabled: isResolutionGrouping && !noUserFilterActive,
+    enabled: isResolutionGrouping && isUserFilterActive,
   });
 
   const nonResolutionGroupingQuery = useMemo((): EntitiesGroupingQuery => {
@@ -293,9 +293,9 @@ export const useEntityGrouping = ({
     enabled: !isResolutionGrouping && !!selectedGroup && !isNoneGroup([selectedGroup]),
   });
 
-  const activeResolutionResult = noUserFilterActive
-    ? unfilteredResolutionResult
-    : filteredResolutionResult;
+  const activeResolutionResult = isUserFilterActive
+    ? filteredResolutionResult
+    : unfilteredResolutionResult;
 
   const isFetching = isResolutionGrouping
     ? activeResolutionResult.isFetching
