@@ -800,6 +800,7 @@ src/platform/packages/shared/shared-ux/file/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/info-blocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/flyout/meta-blocks @elastic/appex-sharedux
+src/platform/packages/shared/shared-ux/flyout/sections @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/label_formatter @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/link/redirect_app/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/markdown/impl @elastic/appex-sharedux
@@ -3183,6 +3184,7 @@ x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/create_note_step @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/delete_note_step @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/get_notes_step @elastic/security-threat-hunting
+/x-pack/solutions/security/plugins/security_solution/common/workflows/step_types/update_note_step @elastic/security-threat-hunting
 
 # Public step types
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/assign_alert_step @elastic/security-threat-hunting
@@ -3194,6 +3196,7 @@ x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/create_note_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/delete_note_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/get_notes_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/public/workflows/step_types/update_note_step @elastic/security-threat-hunting
 
 # Server step types
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/assign_alert_step @elastic/security-threat-hunting
@@ -3205,6 +3208,7 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/create_note_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/delete_note_step @elastic/security-threat-hunting
 x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/get_notes_step @elastic/security-threat-hunting
+x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/update_note_step @elastic/security-threat-hunting
 
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
@@ -3529,9 +3533,9 @@ x-pack/solutions/security/plugins/security_solution/public/flyout_v2/document/to
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver.ts @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/resolver/ @elastic/security-threat-hunting
 
-## Security Solution sub teams - security-telemetry (Data Engineering)
-x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-analytics
-x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-analytics
+## Security Solution sub teams - security-telemetry (Security Data Engineering)
+x-pack/solutions/security/plugins/security_solution/server/usage/ @elastic/security-data-engineering
+x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/ @elastic/security-data-engineering
 
 ## Security Solution sub teams - Entity Analytics
 x-pack/solutions/security/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
