@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import { act, render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ListPageTestProviders } from '../../../test_utils/test_providers';
@@ -114,8 +114,12 @@ jest.mock('../../../hooks/use_fetch_workflow', () => ({
 }));
 
 let mockTagNames: string[] = [];
+const mockUseFetchTags = jest.fn();
 jest.mock('../../../hooks/use_fetch_tags', () => ({
-  useFetchTags: () => ({ data: mockTagNames, isLoading: false }),
+  useFetchTags: (params?: { search?: string }) => {
+    mockUseFetchTags(params);
+    return { data: mockTagNames, isLoading: false };
+  },
 }));
 
 jest.mock('../../../hooks/use_bulk_get_user_profiles', () => ({
@@ -131,8 +135,8 @@ jest.mock('../../../components/action_policy/delete_confirmation_modal', () => (
   DeleteActionPolicyConfirmModal: () => null,
 }));
 
-jest.mock('../../../components/action_policy/action_policy_snooze_popover', () => ({
-  ActionPolicySnoozePopover: () => <span>Snooze popover</span>,
+jest.mock('../../../components/action_policy/action_policy_snooze_button', () => ({
+  ActionPolicySnoozeButton: () => <span>Snooze button</span>,
 }));
 
 jest.mock('../../../components/action_policy/action_policy_state_badge', () => ({
@@ -157,16 +161,16 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
   enabled: true,
   destinations: [{ type: 'workflow', id: 'workflow-1' }],
   matcher: null,
-  groupBy: null,
+  group_by: null,
   tags: null,
-  groupingMode: null,
+  grouping_mode: null,
   throttle: { strategy: undefined, interval: null },
-  snoozedUntil: null,
-  auth: { owner: 'elastic', createdByUser: false },
-  createdBy: 'elastic_profile_uid',
-  createdAt: '2026-01-01T00:00:00.000Z',
-  updatedBy: 'elastic_profile_uid',
-  updatedAt: '2026-01-02T03:04:05.000Z',
+  snoozed_until: null,
+  auth: { owner: 'elastic', created_by_user: false },
+  created_by: 'elastic_profile_uid',
+  created_at: '2026-01-01T00:00:00.000Z',
+  updated_by: 'elastic_profile_uid',
+  updated_at: '2026-01-02T03:04:05.000Z',
   ...overrides,
 });
 
@@ -421,6 +425,61 @@ describe('ActionPoliciesTable', () => {
         expect(lastFindItemsFilters().tag).toBeUndefined();
       });
     });
+
+    it('sends the debounced popover search to the tags API', async () => {
+      renderTable();
+
+      await openTagsFilter();
+      fireEvent.change(await screen.findByTestId('actionPoliciesTagsFilterSearch'), {
+        target: { value: 'prod' },
+      });
+
+      await waitFor(() => {
+        expect(mockUseFetchTags).toHaveBeenCalledWith({ search: 'prod' });
+      });
+    });
+
+    it('keeps a selected tag listed once it falls outside the returned tags', async () => {
+      renderTable();
+
+      await openTagsFilter();
+      fireEvent.click(await screen.findByText('critical'));
+      await waitFor(() =>
+        expect(lastFindItemsFilters().tag).toMatchObject({ include: ['critical'] })
+      );
+
+      // A search returns tags that no longer include the selected one.
+      mockTagNames = ['production'];
+      await openTagsFilter();
+      fireEvent.change(await screen.findByTestId('actionPoliciesTagsFilterSearch'), {
+        target: { value: 'pro' },
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText('production')).toBeInTheDocument();
+        expect(screen.getByText('critical')).toBeInTheDocument();
+      });
+    });
+
+    it('shows the cap guidance only when the tags cap is reached', async () => {
+      mockTagNames = Array.from({ length: 20 }, (_, i) => `tag-${i}`);
+      renderTable();
+
+      await openTagsFilter();
+
+      expect(await screen.findByTestId('actionPoliciesTagsFilterCapGuidance')).toBeInTheDocument();
+    });
+
+    it('does not show the cap guidance below the tags cap', async () => {
+      renderTable();
+
+      await openTagsFilter();
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesTagsFilterSearch')).toBeInTheDocument()
+      );
+
+      expect(screen.queryByTestId('actionPoliciesTagsFilterCapGuidance')).not.toBeInTheDocument();
+    });
   });
 
   describe('Enabled column switch', () => {
@@ -490,15 +549,60 @@ describe('ActionPoliciesTable', () => {
     });
   });
 
+  describe('bulk actions', () => {
+    const selectAllAndOpenMenu = async () => {
+      await waitFor(() => expect(screen.getByTestId('checkboxSelectAll')).toBeInTheDocument());
+      fireEvent.click(screen.getByTestId('checkboxSelectAll'));
+      fireEvent.click(await screen.findByText('1 Selected'));
+    };
+
+    it('refetches the list after a bulk snooze so the new state is reflected', async () => {
+      renderTable();
+
+      await selectAllAndOpenMenu();
+      fireEvent.click(await screen.findByText('Snooze'));
+      fireEvent.click(await screen.findByTestId('actionPolicySnoozeModalApply'));
+
+      expect(mockBulkAction).toHaveBeenCalledWith(
+        expect.objectContaining({ action: 'snooze', ids: ['policy-1'] }),
+        expect.objectContaining({ onSuccess: expect.any(Function) })
+      );
+
+      const findItemsCallsBeforeSuccess = mockFindItems.mock.calls.length;
+      const [, { onSuccess }] = mockBulkAction.mock.calls[0];
+      act(() => onSuccess());
+
+      await waitFor(() =>
+        expect(mockFindItems.mock.calls.length).toBeGreaterThan(findItemsCallsBeforeSuccess)
+      );
+    });
+
+    it('refetches the list after a bulk action that has no confirmation step', async () => {
+      renderTable();
+
+      await selectAllAndOpenMenu();
+      fireEvent.click(await screen.findByText('Unsnooze'));
+
+      const findItemsCallsBeforeSuccess = mockFindItems.mock.calls.length;
+      const [, { onSuccess }] = mockBulkAction.mock.calls[0];
+      act(() => onSuccess());
+
+      await waitFor(() =>
+        expect(mockFindItems.mock.calls.length).toBeGreaterThan(findItemsCallsBeforeSuccess)
+      );
+    });
+  });
+
   describe('when the user only has read privilege', () => {
     beforeEach(() => {
       mockCapabilities = READ_ONLY_CAPABILITIES;
     });
 
-    it('hides the snooze popover in the notify column', async () => {
+    it('hides the snooze button in the notify column', async () => {
       renderTable();
 
-      await waitFor(() => expect(screen.queryByText('Snooze popover')).toBeNull());
+      await waitFor(() => expect(screen.getByText('Policy One')).toBeInTheDocument());
+      expect(screen.queryByText('Snooze button')).toBeNull();
     });
 
     it('does not render row selection checkboxes', async () => {

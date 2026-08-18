@@ -36,10 +36,10 @@ const baseRuleData: RuleAttachmentData = {
     breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
   },
   state_transition: null,
-  createdBy: 'elastic',
-  createdAt: '2026-04-01T00:00:00.000Z',
-  updatedBy: 'elastic',
-  updatedAt: '2026-04-10T00:00:00.000Z',
+  created_by: 'elastic',
+  created_at: '2026-04-01T00:00:00.000Z',
+  updated_by: 'elastic',
+  updated_at: '2026-04-10T00:00:00.000Z',
 };
 
 type RuleVersionedAttachment = VersionedAttachmentWithOrigin<
@@ -173,38 +173,38 @@ describe('createRuleAttachmentType', () => {
       expect(getRule).not.toHaveBeenCalled();
     });
 
-    it('returns false when rule.updatedAt equals snapshot time', async () => {
-      getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-10T00:00:00.000Z' });
+    it('returns false when rule.updated_at equals snapshot time', async () => {
+      getRule.mockResolvedValueOnce({ ...baseRuleData, updated_at: '2026-04-10T00:00:00.000Z' });
 
       const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
     });
 
-    it('returns false when rule.updatedAt is before snapshot time', async () => {
-      getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-09T00:00:00.000Z' });
+    it('returns false when rule.updated_at is before snapshot time', async () => {
+      getRule.mockResolvedValueOnce({ ...baseRuleData, updated_at: '2026-04-09T00:00:00.000Z' });
 
       const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(false);
     });
 
-    it('returns true when rule.updatedAt is after snapshot AND differs from latest version', async () => {
-      getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: '2026-04-20T00:00:00.000Z' });
+    it('returns true when rule.updated_at is after snapshot AND differs from latest version', async () => {
+      getRule.mockResolvedValueOnce({ ...baseRuleData, updated_at: '2026-04-20T00:00:00.000Z' });
 
       const result = await definition.isStale!(buildVersionedAttachment(), createResolveContext());
 
       expect(result).toBe(true);
     });
 
-    it('returns false when rule.updatedAt is after snapshot but matches latest version', async () => {
+    it('returns false when rule.updated_at is after snapshot but matches latest version', async () => {
       const sameUpdatedAt = '2026-04-15T00:00:00.000Z';
-      getRule.mockResolvedValueOnce({ ...baseRuleData, updatedAt: sameUpdatedAt });
+      getRule.mockResolvedValueOnce({ ...baseRuleData, updated_at: sameUpdatedAt });
       const attachment = buildVersionedAttachment({
         versions: [
           {
             version: 1,
-            data: { ...baseRuleData, updatedAt: sameUpdatedAt },
+            data: { ...baseRuleData, updated_at: sameUpdatedAt },
             created_at: '2026-04-15T00:00:00.000Z',
           } as never,
         ],
