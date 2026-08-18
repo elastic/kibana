@@ -258,3 +258,94 @@ export const setIntegrationsSearch = (query: string): void => {
 
 /** RxJS stream of the nav search query; drives the nav's filtered rendering. */
 export const getIntegrationsSearch$ = (): Observable<string> => getSearchState().asObservable();
+
+// ---------------------------------------------------------------------------
+// Saved views (Latest lab) — read-only mirror of streams_app `use_saved_views`
+// ---------------------------------------------------------------------------
+//
+// In the Latest lab the entity-inventory "views" a user saves surface as a
+// "Saved views" section in this nav. The source of truth is streams_app's
+// localStorage store; here we keep a tiny, read-only mirror so the nav can
+// render the section and rebuild it whenever a view is saved / renamed /
+// deleted. Cross-bundle sync rides the same window event streams_app dispatches
+// on every write — no globalThis subject sharing needed because this bundle
+// only *reads* (streams_app owns the writes). Keep the storage key + event name
+// in sync with `use_saved_views.ts`.
+//
+// Only the fields the nav needs are parsed: `id`, `name`, and the `category`
+// the view targets (drives the deep href).
+
+export interface NavSavedView {
+  readonly id: string;
+  readonly name: string;
+  readonly category: string | null;
+}
+
+const SAVED_VIEWS_STORAGE_KEY = 'entityCentricLab.savedViews.v1';
+const SAVED_VIEWS_CHANGE_EVENT = 'entity-centric-lab:saved-views-changed';
+const GLOBAL_SAVED_VIEWS_KEY = '__kbnEntityCentricLab_savedViews__' as const;
+
+interface SavedViewsSharedState {
+  readonly subject: BehaviorSubject<NavSavedView[]>;
+  hydrated: boolean;
+}
+
+const parseSavedViews = (raw: string | null): NavSavedView[] => {
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const views: NavSavedView[] = [];
+    for (const entry of parsed) {
+      if (typeof entry !== 'object' || entry === null) continue;
+      const candidate = entry as { id?: unknown; name?: unknown; state?: unknown };
+      if (typeof candidate.id !== 'string' || typeof candidate.name !== 'string') continue;
+      const state = (candidate.state ?? {}) as { category?: unknown };
+      const category = typeof state.category === 'string' ? state.category : null;
+      views.push({ id: candidate.id, name: candidate.name, category });
+    }
+    return views;
+  } catch {
+    return [];
+  }
+};
+
+const readSavedViews = (): NavSavedView[] => {
+  if (typeof window === 'undefined') return [];
+  try {
+    return parseSavedViews(window.localStorage.getItem(SAVED_VIEWS_STORAGE_KEY));
+  } catch {
+    return [];
+  }
+};
+
+const getSavedViewsState = (): SavedViewsSharedState => {
+  const root = globalThis as unknown as Record<string, SavedViewsSharedState | undefined>;
+  let state = root[GLOBAL_SAVED_VIEWS_KEY];
+  if (!state) {
+    state = { subject: new BehaviorSubject<NavSavedView[]>([]), hydrated: false };
+    root[GLOBAL_SAVED_VIEWS_KEY] = state;
+  }
+  return state;
+};
+
+const hydrateSavedViewsOnce = (): SavedViewsSharedState => {
+  const state = getSavedViewsState();
+  if (state.hydrated) return state;
+  state.hydrated = true;
+  const emit = () => state.subject.next(readSavedViews());
+  emit();
+  if (typeof window !== 'undefined') {
+    // streams_app dispatches this custom event on every save / rename / delete;
+    // the native `storage` event covers writes made in other tabs.
+    window.addEventListener(SAVED_VIEWS_CHANGE_EVENT, emit);
+    window.addEventListener('storage', (event) => {
+      if (event.key === null || event.key === SAVED_VIEWS_STORAGE_KEY) emit();
+    });
+  }
+  return state;
+};
+
+/** RxJS stream of saved views; drives the Latest nav's "Saved views" section. */
+export const getSavedViews$ = (): Observable<NavSavedView[]> =>
+  hydrateSavedViewsOnce().subject.asObservable();

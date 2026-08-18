@@ -19,8 +19,10 @@ import {
   getFavoritesState$,
   getNestedNavEnabled$,
   getIntegrationsSearch$,
+  getSavedViews$,
   type FavoritesState,
   type IntegrationSummary,
+  type NavSavedView,
 } from './entity_centric_lab_integrations';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
@@ -57,12 +59,14 @@ function createNavTree({
   showAlertingV2,
   ingestHubAvailable,
   entityCentricLabEnabled,
+  latestEnabled,
   infraShortTermEnabled,
   superShortTermEnabled,
   favoritesState = { ungrouped: [], groups: [] },
   nestedNavEnabled = false,
   installedIntegrations = [],
   integrationsSearchQuery = '',
+  savedViews = [],
   toAbsoluteHref = (path: string) => path,
 }: {
   streamsAvailable?: boolean;
@@ -71,11 +75,17 @@ function createNavTree({
   showAlertingV2?: boolean;
   ingestHubAvailable?: boolean;
   entityCentricLabEnabled?: boolean;
+  // `latest` is a variant of the entity-centric lab (it flows through the same
+  // `entityCentricLabEnabled` branch) but renames the panel to "Inventory" and
+  // adds a "Saved views" section. Never affects any other mode.
+  latestEnabled?: boolean;
   infraShortTermEnabled?: boolean;
   superShortTermEnabled?: boolean;
   favoritesState?: FavoritesState;
   nestedNavEnabled?: boolean;
   installedIntegrations?: readonly IntegrationSummary[];
+  // Latest lab: named entity-inventory views surfaced in the panel.
+  savedViews?: readonly NavSavedView[];
   // Free-text nav filter for the super-short-term integrations panel; matches
   // integration names across both the starred and installed lists.
   integrationsSearchQuery?: string;
@@ -98,7 +108,14 @@ function createNavTree({
     Boolean(streamsAvailable) &&
     (Boolean(entityCentricLabEnabled) || infraShortTermMode || superShortTermMode);
 
-  const entitiesPanelTitle = infraPanelMode
+  // Latest renames the panel to "Inventory" (it's the entity inventory hub with
+  // saved views); the other infra modes keep "Infrastructure"; entity-centric
+  // keeps "Entities".
+  const entitiesPanelTitle = latestEnabled
+    ? i18n.translate('xpack.observability.obltNav.inventory', {
+        defaultMessage: 'Inventory',
+      })
+    : infraPanelMode
     ? i18n.translate('xpack.observability.obltNav.infrastructure', {
         defaultMessage: 'Infrastructure',
       })
@@ -397,6 +414,40 @@ function createNavTree({
     ],
   };
 
+  // Latest lab: named entity-inventory views render as a "Saved views" section
+  // at the top of the panel. Each links to its target category route with the
+  // view id encoded (`?loadView=<id>`) so the destination page self-applies the
+  // saved filters / layout on arrival — chrome nav items are href-only and
+  // can't run the apply logic themselves. Uses an absolute href because the
+  // view id is dynamic (no static deep link exists). Hidden when there are no
+  // views, to avoid an empty section header.
+  const savedViewsSection =
+    latestEnabled && savedViews.length > 0
+      ? {
+          id: 'entityCentricLab-savedViews',
+          title: i18n.translate('xpack.observability.obltNav.savedViews', {
+            defaultMessage: 'Saved views',
+          }),
+          children: savedViews.map((view) => {
+            const categorySegment = view.category ? `/${view.category}` : '';
+            const path = `/app/streams/entities${categorySegment}?loadView=${encodeURIComponent(
+              view.id
+            )}`;
+            return {
+              id: `entityCentricLab-savedView-${view.id}`,
+              href: toAbsoluteHref(path),
+              title: view.name,
+              // Active when the page URL still carries this view's `loadView`
+              // id. The streams page keeps the param (rather than stripping it)
+              // precisely so the loaded view stays highlighted here and survives
+              // a refresh. href-only nodes need explicit param typing.
+              getIsActive: ({ location }: { location: Location }) =>
+                new URLSearchParams(location.search).get('loadView') === view.id,
+            };
+          }),
+        }
+      : null;
+
   // The chrome side-nav renderer can't draw an inline collapsible group, so in
   // Infra-short-term mode "Cloud" is rendered as a *section header* (no link)
   // with the three providers as flat links beneath it — always visible, no
@@ -422,10 +473,101 @@ function createNavTree({
     ],
   };
 
+  // Latest: while a saved view is loaded (`?loadView` present) the highlighted
+  // item should be the saved view, not the category page it happens to open on.
+  // Category nodes rely on default deep-link URL matching, which would light up
+  // e.g. "Kubernetes" alongside the view — so in Latest we give them an explicit
+  // getIsActive that yields to the saved view (returns false) whenever a view is
+  // loaded, and otherwise reproduces the normal path match. Scoped to Latest;
+  // the other entity-centric modes keep the standard nodes untouched.
+  const isLoadingSavedView = (location: Location): boolean =>
+    new URLSearchParams(location.search).get('loadView') !== null;
+
+  const categoryGetIsActive =
+    (appPath: string, exact = false) =>
+    ({
+      pathNameSerialized,
+      prepend,
+      location,
+    }: {
+      pathNameSerialized: string;
+      prepend: (path: string) => string;
+      location: Location;
+    }): boolean => {
+      if (isLoadingSavedView(location)) return false;
+      const target = prepend(appPath);
+      // "All entities" (`/entities`) is a prefix of every category route, so it
+      // must match exactly; the distinct category segments can use `startsWith`.
+      return exact
+        ? pathNameSerialized === target || pathNameSerialized === `${target}/`
+        : pathNameSerialized.startsWith(target);
+    };
+
+  const latestEntitiesAllSection = {
+    children: [
+      {
+        id: 'entityCentricLab-entitiesAll',
+        link: 'streams:entitiesAll' as const,
+        getIsActive: categoryGetIsActive('/app/streams/entities', true),
+      },
+    ],
+  };
+
+  const latestCategoryChildren = [
+    {
+      id: 'entityCentricLab-entitiesHosts',
+      link: 'streams:entitiesHosts' as const,
+      getIsActive: categoryGetIsActive('/app/streams/entities/hosts'),
+    },
+    {
+      id: 'entityCentricLab-entitiesKubernetes',
+      link: 'streams:entitiesKubernetes' as const,
+      getIsActive: categoryGetIsActive('/app/streams/entities/kubernetes'),
+    },
+    {
+      id: 'entityCentricLab-entitiesDatabases',
+      link: 'streams:entitiesDatabases' as const,
+      getIsActive: categoryGetIsActive('/app/streams/entities/databases'),
+    },
+    {
+      id: 'entityCentricLab-entitiesServices',
+      link: 'streams:entitiesServices' as const,
+      getIsActive: categoryGetIsActive('/app/streams/entities/services'),
+    },
+    { ...cloudCategoryNode, getIsActive: categoryGetIsActive('/app/streams/entities/cloud') },
+    {
+      id: 'entityCentricLab-entitiesMiddlewares',
+      link: 'streams:entitiesMiddlewares' as const,
+      getIsActive: categoryGetIsActive('/app/streams/entities/middlewares'),
+    },
+    {
+      id: 'entityCentricLab-entitiesLlms',
+      link: 'streams:entitiesLlms' as const,
+      getIsActive: categoryGetIsActive('/app/streams/entities/llms'),
+    },
+    {
+      id: 'entityCentricLab-entitiesOther',
+      link: 'streams:entitiesOther' as const,
+      getIsActive: categoryGetIsActive('/app/streams/entities/other'),
+    },
+  ];
+
+  const manageEntityTypesSection = {
+    // Duplicate of the Streams panel's "Manage entity types" entry: the same
+    // route is reachable from both panels per the lab design.
+    children: [
+      {
+        id: 'entityCentricLab-manage-fromEntities',
+        link: 'streams:manageEntityTypes' as const,
+      },
+    ],
+  };
+
   // Panel sections differ by mode. Entity-centric keeps the full category list
-  // plus a "Manage entity types" shortcut. Infra-short-term shows "All
-  // entities", the Cloud section (with AWS/GCP/Azure), then the remaining flat
-  // categories (Databases, Kubernetes).
+  // plus a "Manage entity types" shortcut. Latest adds the "Saved views" section
+  // and gives the categories saved-view-aware highlighting. Infra-short-term
+  // shows "All entities", the Cloud section (with AWS/GCP/Azure), then the
+  // remaining flat categories (Databases, Kubernetes).
   const entitiesPanelChildren = superShortTermMode
     ? superShortTermPanelChildren
     : infraShortTermMode
@@ -436,21 +578,22 @@ function createNavTree({
           children: [databasesCategoryNode, kubernetesCategoryNode],
         },
       ]
+    : latestEnabled
+    ? [
+        // Latest leads with the "Saved views" section (when non-empty).
+        ...(savedViewsSection ? [savedViewsSection] : []),
+        latestEntitiesAllSection,
+        {
+          children: latestCategoryChildren,
+        },
+        manageEntityTypesSection,
+      ]
     : [
         entitiesAllSection,
         {
           children: entityCentricCategoryChildren,
         },
-        {
-          // Duplicate of the Streams panel's "Manage entity types" entry: the
-          // same route is reachable from both panels per the lab design.
-          children: [
-            {
-              id: 'entityCentricLab-manage-fromEntities',
-              link: 'streams:manageEntityTypes' as const,
-            },
-          ],
-        },
+        manageEntityTypesSection,
       ];
 
   const navTree: NavigationTreeDefinition = {
@@ -1208,7 +1351,7 @@ function createNavTree({
 // `discover/server/ui_settings.ts`. Inlined here to avoid a cross-plugin
 // public import; the setting key is a stable public contract.
 const LAB_MODE_SETTING = 'discover:labMode';
-type LabMode = 'off' | 'entityCentric' | 'infraShortTerm' | 'superShortTerm';
+type LabMode = 'off' | 'entityCentric' | 'latest' | 'infraShortTerm' | 'superShortTerm';
 
 export const createDefinition = (
   coreStart: CoreStart,
@@ -1228,6 +1371,9 @@ export const createDefinition = (
     getFavoritesState$(),
     getNestedNavEnabled$(),
     getIntegrationsSearch$(),
+    // Latest lab: rebuild the "Saved views" section whenever the user saves,
+    // renames, or deletes a view (store lives in streams_app, mirrored here).
+    getSavedViews$(),
   ]).pipe(
     map(
       ([
@@ -1238,6 +1384,7 @@ export const createDefinition = (
         favoritesState,
         nestedNavEnabled,
         integrationsSearchQuery,
+        savedViews,
       ]) =>
         createNavTree({
           streamsAvailable: status === 'enabled',
@@ -1245,12 +1392,16 @@ export const createDefinition = (
           isCloudEnabled: pluginsStart.cloud?.isCloudEnabled,
           showAlertingV2: Boolean(coreStart.application.capabilities.alertingVTwo),
           ingestHubAvailable,
-          entityCentricLabEnabled: labMode === 'entityCentric',
+          // `latest` reuses the entity-centric panel but with Latest-only tweaks
+          // (see `latestEnabled` below).
+          entityCentricLabEnabled: labMode === 'entityCentric' || labMode === 'latest',
+          latestEnabled: labMode === 'latest',
           infraShortTermEnabled: labMode === 'infraShortTerm',
           superShortTermEnabled: labMode === 'superShortTerm',
           favoritesState,
           nestedNavEnabled,
           integrationsSearchQuery,
+          savedViews,
           installedIntegrations: getInstalledIntegrations(),
           // Chrome requires nav `href`s to be absolute URLs; prepend the origin
           // to the basePath-qualified app path.

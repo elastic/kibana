@@ -14,13 +14,15 @@
  * - `off`: no lab customizations.
  * - `entityCentric`: Discover renders the fake entity-centric log panel and the
  *   Observability nav exposes the full Entities section.
+ * - `latest`: currently an exact clone of `entityCentric` — a separate mode we
+ *   can iterate on independently without touching the existing experience.
  * - `infraShortTerm`: no Discover customization; the Observability nav renames
  *   the Entities section to "Infrastructure" and scopes it to a reduced set.
  * - `superShortTerm`: integrations-content-only experience (behavior TBD).
  */
 export const LAB_MODE_SETTING = 'discover:labMode' as const;
 
-export type LabMode = 'off' | 'entityCentric' | 'infraShortTerm' | 'superShortTerm';
+export type LabMode = 'off' | 'entityCentric' | 'latest' | 'infraShortTerm' | 'superShortTerm';
 
 export type FakeLogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 

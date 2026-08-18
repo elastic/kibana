@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import {
+  EuiBadge,
   EuiBetaBadge,
   EuiButton,
   EuiButtonGroup,
@@ -18,6 +20,7 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiText,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
@@ -112,8 +115,10 @@ import { EntitiesTagFilters } from './entities_tag_filters';
 import { AllEntitiesOverviewView } from './all_entities_overview_view';
 import { MonitoringAssetsView } from './monitoring_assets_view';
 import { SavedViewsBar } from './saved_views_bar';
+import { SaveViewButton } from './save_view_button';
 import {
   applyViewToStorage,
+  areStatesEqual,
   consumePendingSearch,
   useSavedViews,
   type SavedView,
@@ -326,6 +331,12 @@ export const AllEntitiesView = ({
   cloudServiceScope,
 }: AllEntitiesViewProps = {}) => {
   const router = useStreamsAppRouter();
+  // Reactive location: the Latest nav's "Saved views" links carry a
+  // `?loadView=<id>` param we resolve + apply (see effect below). Reading via
+  // react-router keeps the apply working whether the click remounts this
+  // component (cross-category) or just updates the query on the current route
+  // (same-category).
+  const location = useLocation();
   const {
     core: { notifications, uiSettings },
     dependencies: {
@@ -345,6 +356,11 @@ export const AllEntitiesView = ({
     uiSettings.get<string>('discover:labMode', 'off')
   );
   const isInfraShortTerm = labMode === 'infraShortTerm';
+  // `latest` is a separate lab experience we iterate on independently of
+  // `entityCentric`. In Latest the Monitoring assets surface is gone, so the
+  // entity pages drop the Inventory/Monitoring tab strip and render the
+  // Inventory surface directly. This flag must never affect any other mode.
+  const isLatest = labMode === 'latest';
   // URL-state-backed time range, shared with every other Streams page
   // through the same `rangeFrom`/`rangeTo` search params. The lab dataset
   // is static so the picked range doesn't actually filter the entities
@@ -467,7 +483,45 @@ export const AllEntitiesView = ({
   // and the cross-category `/entities` page. On the cross-category page
   // Overview aggregates every category (see `AllEntitiesOverviewView`),
   // so we no longer gate on `categoryScope` here.
-  const showOverviewTab = categoryTab === 'monitoring';
+  //
+  // In Latest the Monitoring/Overview surface is removed entirely, so the
+  // page always renders the Inventory surface regardless of the persisted tab.
+  const showOverviewTab = !isLatest && categoryTab === 'monitoring';
+
+  // Latest: apply a saved view opened from the left nav. The nav can only link
+  // (no click handler), so it encodes the view id in `?loadView=<id>`. We keep
+  // that param in the URL (rather than stripping it) so the view stays
+  // highlighted in the nav and survives a refresh — the id is the single source
+  // of truth for "which view is loaded".
+  const { views: savedViewsList } = savedViewsApi;
+  const loadViewId = useMemo(
+    () => (isLatest ? new URLSearchParams(location.search).get('loadView') : null),
+    [isLatest, location.search]
+  );
+  // Apply each `loadView` id exactly once. The setters below (category tab / tag
+  // filters / view mode) already persist to localStorage, so we deliberately do
+  // NOT call back into the saved-views store here: doing so re-fired this effect
+  // via the store subscription and caused an infinite update loop. The ref guard
+  // also prevents re-applying — and clobbering the user's in-progress edits —
+  // when the store emits for unrelated reasons (e.g. saving a new view).
+  const appliedLoadViewIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isLatest || !loadViewId) return;
+    if (appliedLoadViewIdRef.current === loadViewId) return;
+    const view = savedViewsList.find((candidate) => candidate.id === loadViewId);
+    if (!view) return;
+    appliedLoadViewIdRef.current = loadViewId;
+    setCategoryTab(view.state.tab);
+    setActiveTagFilters(view.state.filters);
+    setViewMode(view.state.viewMode);
+    setSearch(view.state.search);
+  }, [isLatest, loadViewId, savedViewsList, setActiveTagFilters, setCategoryTab, setViewMode]);
+  // The saved view currently referenced by the URL, if any — drives the
+  // "Viewing …" indicator in the toolbar (and its "Modified" hint).
+  const loadedView = useMemo(
+    () => (loadViewId ? savedViewsList.find((view) => view.id === loadViewId) : undefined),
+    [loadViewId, savedViewsList]
+  );
 
   const filteredEntities = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -725,30 +779,41 @@ export const AllEntitiesView = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         }
-        tabs={[
-          {
-            label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.inventory', {
-              defaultMessage: 'Inventory ({count})',
-              // Cross-category inventory covers the full dataset; per-
-              // category inventory is scoped to the current category.
-              // The button count reflects the same set the tab body
-              // renders, so `scopedEntities` is the right source either
-              // way.
-              values: { count: scopedEntities.length.toLocaleString() },
-            }),
-            isSelected: categoryTab === 'inventory',
-            onClick: () => setCategoryTab('inventory'),
-            'data-test-subj': 'entityCentricLabInventoryTab',
-          },
-          {
-            label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.monitoringAssets', {
-              defaultMessage: 'Monitoring',
-            }),
-            isSelected: categoryTab === 'monitoring',
-            onClick: () => setCategoryTab('monitoring'),
-            'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
-          },
-        ]}
+        tabs={
+          // Latest drops the Inventory/Monitoring tab strip entirely — the
+          // Monitoring assets surface is gone, so there's only the Inventory
+          // surface below and nothing to switch between. Every other mode keeps
+          // the two tabs unchanged.
+          isLatest
+            ? undefined
+            : [
+                {
+                  label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.inventory', {
+                    defaultMessage: 'Inventory ({count})',
+                    // Cross-category inventory covers the full dataset; per-
+                    // category inventory is scoped to the current category.
+                    // The button count reflects the same set the tab body
+                    // renders, so `scopedEntities` is the right source either
+                    // way.
+                    values: { count: scopedEntities.length.toLocaleString() },
+                  }),
+                  isSelected: categoryTab === 'inventory',
+                  onClick: () => setCategoryTab('inventory'),
+                  'data-test-subj': 'entityCentricLabInventoryTab',
+                },
+                {
+                  label: i18n.translate(
+                    'xpack.streams.entityCentricLab.entities.tabs.monitoringAssets',
+                    {
+                      defaultMessage: 'Monitoring',
+                    }
+                  ),
+                  isSelected: categoryTab === 'monitoring',
+                  onClick: () => setCategoryTab('monitoring'),
+                  'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
+                },
+              ]
+        }
         rightSideItems={
           isInfraShortTerm
             ? []
@@ -795,13 +860,21 @@ export const AllEntitiesView = ({
               view mode + tag filters + search under a name, and re-load
               it later (potentially on a different category, in which
               case the apply handler routes to the target page).
+
+              Latest relocates this list into the left nav (a "Saved views"
+              section), so it renders only the compact "Save view" button in
+              the filters row below instead of this full bar.
             */}
-                <SavedViewsBar
-                  currentState={currentViewState}
-                  onApplyView={handleApplyView}
-                  savedViews={savedViewsApi}
-                />
-                <EuiSpacer size="s" />
+                {isLatest ? null : (
+                  <>
+                    <SavedViewsBar
+                      currentState={currentViewState}
+                      onApplyView={handleApplyView}
+                      savedViews={savedViewsApi}
+                    />
+                    <EuiSpacer size="s" />
+                  </>
+                )}
                 {/*
           Search, tag filters and time picker share one row to keep the
           page top compact. `NO_GROW` is applied to the wrapper so the row
@@ -840,6 +913,56 @@ export const AllEntitiesView = ({
                       data-test-subj="entityCentricLabEntitiesTimePicker"
                     />
                   </EuiFlexItem>
+                  {isLatest && loadedView ? (
+                    <EuiFlexItem grow={false}>
+                      {/*
+                        Which saved view is loaded (from the `?loadView` URL
+                        param — the same signal that highlights it in the nav).
+                        A "Modified" badge appears once the on-page state drifts
+                        from the saved snapshot, mirroring the full SavedViewsBar.
+                      */}
+                      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="eye" size="s" color="subdued" />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiText size="s" color="subdued">
+                            {i18n.translate(
+                              'xpack.streams.entityCentricLab.savedViews.viewingLabel',
+                              {
+                                defaultMessage: 'Viewing "{name}"',
+                                values: { name: loadedView.name },
+                              }
+                            )}
+                          </EuiText>
+                        </EuiFlexItem>
+                        {!areStatesEqual(loadedView.state, currentViewState) ? (
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge color="warning">
+                              {i18n.translate(
+                                'xpack.streams.entityCentricLab.savedViews.modifiedBadgeLatest',
+                                { defaultMessage: 'Modified' }
+                              )}
+                            </EuiBadge>
+                          </EuiFlexItem>
+                        ) : null}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                  ) : null}
+                  {isLatest ? (
+                    <EuiFlexItem grow={false}>
+                      {/*
+                        Latest: the saved-views list lives in the left nav, so
+                        the toolbar only carries the save action. Naming happens
+                        in the button's prompt; the new view then shows up under
+                        "Saved views" in the nav (same localStorage store).
+                      */}
+                      <SaveViewButton
+                        currentState={currentViewState}
+                        onSave={savedViewsApi.saveView}
+                      />
+                    </EuiFlexItem>
+                  ) : null}
                 </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup
