@@ -6,13 +6,12 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
+import { ContextEngineAgentBuilderPlugin } from './plugin';
 
 export type {
   ContextEngineAgentBuilderPublicSetup,
   ContextEngineAgentBuilderPublicStart,
 } from './types';
 
-export const plugin = async (context: PluginInitializerContext) => {
-  const { ContextEngineAgentBuilderPlugin } = await import('./plugin');
-  return new ContextEngineAgentBuilderPlugin(context);
-};
+export const plugin = (context: PluginInitializerContext) =>
+  new ContextEngineAgentBuilderPlugin(context);
