@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-/** Same platform flag as unified search — when disabled, fall back to EuiSuperDatePicker. */
-export const DATE_RANGE_PICKER_FEATURE_FLAG = 'unifiedSearch.newDateRangePickerEnabled';
+export { AlertingDateRangePicker } from './alerting_date_range_picker';
+export type {
+  AlertingDateRangePickerProps,
+  AlertingDateRangePickerServices,
+} from './alerting_date_range_picker';

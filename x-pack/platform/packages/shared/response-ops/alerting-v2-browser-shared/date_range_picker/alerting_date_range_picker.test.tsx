@@ -11,10 +11,13 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { DateRangePickerOnChangeProps, DateRangePickerProps } from '@kbn/date-range-picker';
+import {
+  DATE_RANGE_PICKER_FEATURE_FLAG,
+  type DateRangePickerOnChangeProps,
+  type DateRangePickerProps,
+} from '@kbn/date-range-picker';
 import { AlertingDateRangePicker } from './alerting_date_range_picker';
 import type { AlertingDateRangePickerServices } from './alerting_date_range_picker';
-import { DATE_RANGE_PICKER_FEATURE_FLAG } from './constants';
 
 const mockOnChange = jest.fn();
 let lastPickerProps: DateRangePickerProps | undefined;

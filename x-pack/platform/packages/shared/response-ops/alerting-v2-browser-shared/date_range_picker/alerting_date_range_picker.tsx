@@ -19,6 +19,7 @@ import type {
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useObservable } from '@kbn/use-observable';
 import {
+  DATE_RANGE_PICKER_FEATURE_FLAG,
   DateRangePicker,
   type AutoRefreshSettings,
   type DateRangePickerOnChangeProps,
@@ -26,7 +27,6 @@ import {
   type TimeWindowButtonsConfig,
 } from '@kbn/date-range-picker';
 import { useDateRangePickerPresets, type PresetItem } from '@kbn/date-range-picker-presets';
-import { DATE_RANGE_PICKER_FEATURE_FLAG } from './constants';
 import { LegacyDateRangePicker } from './legacy_date_range_picker';
 
 const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
@@ -62,32 +62,15 @@ export interface AlertingDateRangePickerProps {
   to: string;
   onChange: (range: { from: string; to: string }) => void;
   services: AlertingDateRangePickerServices;
-  /**
-   * When provided, wires the picker's built-in auto-refresh control and renders
-   * a manual "refresh now" icon button beside the picker.
-   */
   onRefresh?: () => void;
   isLoading?: boolean;
   showTimeWindowButtons?: boolean | TimeWindowButtonsConfig;
   width?: 'auto' | 'restricted' | 'full';
   compressed?: boolean;
-  /**
-   * Whether saved presets are persisted via `data.dateRangePickerPresets` (shared
-   * user storage, also surfaced in Discover/Dashboard). When `false`, presets are
-   * the read-only quick-ranges defaults.
-   * @default true
-   */
   persistPresets?: boolean;
   'data-test-subj'?: string;
 }
 
-/**
- * Shared Alerting v2 wrapper around `@kbn/date-range-picker` that owns settings,
- * persisted presets, recent ranges, and optional auto-refresh.
- *
- * Falls back to `EuiSuperDatePicker` when `unifiedSearch.newDateRangePickerEnabled`
- * is disabled.
- */
 export const AlertingDateRangePicker = ({
   from,
   to,
@@ -163,7 +146,6 @@ export const AlertingDateRangePicker = ({
       setDateRangePickerSettings(rest);
       if (onRefresh && nextAutoRefresh) {
         setAutoRefresh((prev) => {
-          // When enabling auto-refresh, clear isPaused so the timer starts immediately.
           if (!prev.isEnabled && nextAutoRefresh.isEnabled) {
             return { ...nextAutoRefresh, isPaused: false };
           }

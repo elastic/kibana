@@ -25,10 +25,6 @@ export interface LegacyDateRangePickerProps {
   'data-test-subj'?: string;
 }
 
-/**
- * Feature-flag fallback that renders `EuiSuperDatePicker` with the same
- * onChange / recent-history contract as `AlertingDateRangePicker`.
- */
 export const LegacyDateRangePicker = ({
   from,
   to,

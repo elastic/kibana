@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { AlertingDateRangePicker } from './alerting_date_range_picker';
+export { AlertingDateRangePicker } from './date_range_picker';
 export type {
   AlertingDateRangePickerProps,
   AlertingDateRangePickerServices,
-} from './alerting_date_range_picker';
+} from './date_range_picker';
