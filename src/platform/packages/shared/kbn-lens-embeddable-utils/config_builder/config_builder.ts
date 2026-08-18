@@ -297,6 +297,16 @@ export class LensConfigBuilder {
       attributes.references ?? []
     );
 
+    // ES|QL documents carry their queries on the text-based layers and
+    // get no top-level slot unless the API provides a KQL/Lucene filter.
+    const hasTextBasedLayers =
+      Object.keys(attributes.state.datasourceStates?.textBased?.layers ?? {}).length > 0;
+    const querySlot = query
+      ? { query }
+      : hasTextBasedLayers
+      ? {}
+      : { query: { language: 'kuery', query: '' } };
+
     return {
       // @TODO investigate why it complains about missing type
       // type: 'lens',
@@ -304,13 +314,7 @@ export class LensConfigBuilder {
       references: [...(attributes.references ?? []), ...references],
       state: {
         ...attributes.state,
-        // ES|QL documents carry their queries on the text-based layers and
-        // get no top-level slot unless the API provides a KQL/Lucene filter.
-        ...(query
-          ? { query }
-          : Object.keys(attributes.state.datasourceStates?.textBased?.layers ?? {}).length > 0
-          ? {}
-          : { query: { language: 'kuery', query: '' } }),
+        ...querySlot,
         filters,
       },
     };

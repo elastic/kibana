@@ -85,6 +85,8 @@ export function ESQLEditor({
   updateSuggestion,
   onTextBasedQueryStateChange,
 }: ESQLEditorProps) {
+  // recomputed every render but only read by the useRef/useState initializers
+  // below — do not hoist into a memo, later renders intentionally ignore it
   const initialQuery = getRepresentativeQuery(attributes) || { esql: '' };
   const prevQuery = useRef<AggregateQuery | Query>(initialQuery);
   const [query, setQuery] = useState<AggregateQuery | Query>(initialQuery);

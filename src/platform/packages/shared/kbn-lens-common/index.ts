@@ -443,5 +443,7 @@ export {
   getRepresentativeQuery,
   getChartScopedFilterQuery,
   withLegacyAggregateQuerySlot,
+  dropLegacyAggregateQuerySlot,
+  EMPTY_KQL_QUERY,
 } from './esql/lens_attributes_queries';
 export type { MinimalLensAttributes, MinimalLensState } from './esql/lens_attributes_queries';

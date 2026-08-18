@@ -122,6 +122,29 @@ export const getRepresentativeQuery = (
 };
 
 /**
+ * Canonical "no chart filter" value for the `state.query` slot and the
+ * editor query seed. Treat as immutable.
+ */
+export const EMPTY_KQL_QUERY: Query = { query: '', language: 'kuery' };
+
+/**
+ * Read guard for legacy dual-written documents: any aggregate (ES|QL) value
+ * in the persisted `state.query` slot is dead data — the layer queries are
+ * authoritative — and is dropped. Documents self-clean on next save.
+ */
+export const dropLegacyAggregateQuerySlot = <
+  T extends { state?: { query?: Query | AggregateQuery } }
+>(
+  attributes: T
+): T => {
+  const guarded = getChartScopedFilterQuery(attributes.state?.query);
+  if (guarded === attributes.state?.query) {
+    return attributes;
+  }
+  return { ...attributes, state: { ...attributes.state, query: guarded } };
+};
+
+/**
  * Compatibility write for mixed-version windows (serverless rollback,
  * rolling Cloud upgrades): older Kibana versions detect ES|QL mode via the
  * aggregate value in `state.query`, so saves mirror the first authoritative

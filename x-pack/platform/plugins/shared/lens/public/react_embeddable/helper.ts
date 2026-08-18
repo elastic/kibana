@@ -26,8 +26,9 @@ import type {
 } from '@kbn/lens-common';
 import {
   LENS_UNKNOWN_VIS,
-  getChartScopedFilterQuery,
+  dropLegacyAggregateQuerySlot,
   isTextBasedAttributes,
+  EMPTY_KQL_QUERY,
 } from '@kbn/lens-common';
 import type {
   LensByValueSerializedAPIConfig,
@@ -75,7 +76,7 @@ export function createEmptyLensState(
         // built here — it enters documents exclusively via the suggestion
         // pipeline (`getLensAttributesFromSuggestion`), which writes the
         // query into `datasourceStates.textBased.layers`.
-        query: query ?? { query: '', language: 'kuery' },
+        query: query ?? EMPTY_KQL_QUERY,
         filters: filters || [],
         internalReferences: [],
         datasourceStates: { formBased: {} },
@@ -138,21 +139,6 @@ export async function deserializeState(
   }
 
   return newState;
-}
-
-/**
- * Read guard for legacy dual-written documents: any aggregate (ES|QL) value
- * in the persisted `state.query` slot is dead data — the layer queries are
- * authoritative — and is dropped. Documents self-clean on next save.
- */
-function dropLegacyAggregateQuerySlot<
-  T extends { state: { query?: Parameters<typeof getChartScopedFilterQuery>[0] } }
->(attributes: T): T {
-  const guarded = getChartScopedFilterQuery(attributes.state.query);
-  if (guarded === attributes.state.query) {
-    return attributes;
-  }
-  return { ...attributes, state: { ...attributes.state, query: guarded } };
 }
 
 /**

@@ -9,10 +9,10 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import {
+  getChartScopedFilterQuery,
   type VisualizationState,
   type DatasourceStates,
   type DatasourceMap,
@@ -129,8 +129,7 @@ export function mergeToNewDoc(
       // Chart-scoped KQL/Lucene filter only. ES|QL queries live exclusively
       // on the text-based datasource layers (`datasourceStates.textBased`);
       // an aggregate editor query is never persisted into this slot.
-      query:
-        query && typeof query === 'object' && !isOfAggregateQueryType(query) ? query : undefined,
+      query: getChartScopedFilterQuery(query),
       filters: [...persistableFilters, ...adHocFilters],
       datasourceStates: persistibleDatasourceStates,
       internalReferences,

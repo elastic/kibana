@@ -14,7 +14,7 @@ import type {
   VisualizationMap,
   LensDocument,
 } from '@kbn/lens-common';
-import { getRepresentativeQuery } from '@kbn/lens-common';
+import { getRepresentativeQuery, EMPTY_KQL_QUERY } from '@kbn/lens-common';
 import { getActiveDatasourceIdFromDoc } from './utils';
 
 export type ChartInfoApi = Promise<{
@@ -86,7 +86,7 @@ export const createChartInfoApi = async (
             layers,
             visualizationType: lensVis.visualizationType,
             filters: lensVis.state.filters,
-            query: getRepresentativeQuery(lensVis) ?? { query: '', language: 'kuery' },
+            query: getRepresentativeQuery(lensVis) ?? EMPTY_KQL_QUERY,
           }
         : undefined;
     },
