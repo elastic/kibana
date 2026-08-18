@@ -249,7 +249,7 @@ export function registerConversationRoutes({
       access: 'public',
       summary: 'Create conversation',
       description:
-        'Create an empty conversation without sending a message. Returns the created conversation immediately. Use this to obtain a conversation ID before starting a chat session. To learn more about agent conversations, refer to the agent chat documentation.',
+        'Create an empty conversation without sending a message. Returns the created conversation immediately. Use this to obtain a conversation ID before starting a chat session. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).',
       options: {
         tags: ['conversation', 'oas-tag:agent builder'],
         availability: {
