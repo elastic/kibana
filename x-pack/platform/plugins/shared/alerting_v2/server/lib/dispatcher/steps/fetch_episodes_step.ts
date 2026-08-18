@@ -19,6 +19,7 @@ import type {
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { EPISODE_QUERY_LIMIT, getDispatchableAlertEventsQuery } from '../queries';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 interface RawAlertEpisode {
   last_event_timestamp: string;
@@ -39,7 +40,10 @@ export class FetchEpisodesStep implements DispatcherStep {
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { windowStart, windowEnd, signal } = state.input;
     const gte = windowStart.toISOString();
     const lte = windowEnd.toISOString();

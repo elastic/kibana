@@ -6,6 +6,7 @@
  */
 
 import { injectable, multiInject } from 'inversify';
+import { type LoggerServiceContract } from '../services/logger_service/logger_service';
 import { DispatcherExecutionStepsToken } from './steps/tokens';
 import type {
   DispatcherPipelineInput,
@@ -18,7 +19,10 @@ import { withDispatcherSpan } from './with_dispatcher_span';
 export type { DispatcherPipelineResult };
 
 export interface DispatcherPipelineContract {
-  execute(input: DispatcherPipelineInput): Promise<DispatcherPipelineResult>;
+  execute(
+    input: DispatcherPipelineInput,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherPipelineResult>;
 }
 
 @injectable()
@@ -27,31 +31,34 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
     @multiInject(DispatcherExecutionStepsToken) private readonly steps: DispatcherStep[]
   ) {}
 
-  public async execute(input: DispatcherPipelineInput): Promise<DispatcherPipelineResult> {
+  public async execute(
+    input: DispatcherPipelineInput,
+    parentLogger: LoggerServiceContract
+  ): Promise<DispatcherPipelineResult> {
     let pipelineState: DispatcherPipelineState = { input };
 
     for (const step of this.steps) {
-      const logger = pipelineState.input.logger.withLabels({ step: step.name });
+      const logger = parentLogger.withLabels({ step: step.name });
 
       if (input.signal.aborted) {
         logger.debug({
-          message: `Dispatcher: Pipeline aborted before step: ${step.name}`,
+          message: `Pipeline aborted before step: ${step.name}`,
         });
         return { completed: false, haltReason: 'aborted', finalState: pipelineState };
       }
 
-      logger.debug({ message: `Dispatcher: Executing step: ${step.name}` });
+      logger.debug({ message: `Executing step: ${step.name}` });
 
       let output: Awaited<ReturnType<DispatcherStep['execute']>>;
       try {
-        output = await withDispatcherSpan(step.name, () => step.execute(pipelineState));
+        output = await withDispatcherSpan(step.name, () => step.execute(pipelineState, logger));
       } catch (err) {
         // If the tick signal fired while the step had an in-flight request (e.g.
         // RequestAbortedError from ES|QL), convert to a clean aborted halt so
         // dispatcher.run() can persist the watermark rather than throwing.
         if (input.signal.aborted) {
           logger.debug({
-            message: `Dispatcher: step ${step.name} threw while signal was aborted; treating as abort.`,
+            message: `step ${step.name} threw while signal was aborted; treating as abort.`,
           });
           return { completed: false, haltReason: 'aborted', finalState: pipelineState };
         }
@@ -60,7 +67,7 @@ export class DispatcherPipeline implements DispatcherPipelineContract {
 
       if (output.type === 'halt') {
         logger.debug({
-          message: `Dispatcher: Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
+          message: `Pipeline halted at step: ${step.name}, reason: ${output.reason}`,
         });
 
         return {

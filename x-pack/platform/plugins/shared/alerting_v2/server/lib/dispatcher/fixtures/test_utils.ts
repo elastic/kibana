@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
 import type {
+  ActionGroup,
   ActionPolicy,
   AlertEpisode,
   AlertEpisodeSuppression,
@@ -16,10 +19,12 @@ import type {
   DispatcherStep,
   DispatcherStepOutput,
   MatchedPair,
-  ActionGroup,
   Rule,
 } from '../types';
-import { DISPATCH_FAILURE_REASONS } from '../steps/constants';
+
+export function createStepLogger(): LoggerServiceContract {
+  return createLoggerService().loggerService;
+}
 
 export function createDispatcherPipelineInput(
   overrides: Partial<DispatcherPipelineInput> = {}
@@ -33,7 +38,6 @@ export function createDispatcherPipelineInput(
     windowEnd: new Date('2026-01-22T07:35:00.000Z'),
     executionUuid: '00000000-0000-4000-8000-000000000000',
     signal: new AbortController().signal,
-    logger: createLoggerService().loggerService,
     ...overrides,
   };
 }
@@ -145,10 +149,13 @@ export function createDispatchFailure(overrides: Partial<DispatchFailure> = {}):
 
 export function createMockDispatcherStep(
   name: string,
-  executeFn: (state: Readonly<DispatcherPipelineState>) => Promise<DispatcherStepOutput>
+  executeFn: (
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ) => Promise<DispatcherStepOutput>
 ): DispatcherStep {
   return {
     name,
-    execute: jest.fn(executeFn),
+    execute: jest.fn((state, logger) => executeFn(state, logger)),
   };
 }

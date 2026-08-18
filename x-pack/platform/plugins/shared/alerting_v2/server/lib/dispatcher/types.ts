@@ -51,7 +51,7 @@ export interface DispatcherExecutionParams {
   /** Current count of consecutive ticks in which the watermark did not advance. */
   stuckTicks?: number;
   signal?: AbortSignal;
-  logger: LoggerServiceContract;
+  taskId: string;
 }
 
 export interface DispatcherExecutionResult {
@@ -167,7 +167,6 @@ export interface DispatcherPipelineInput {
   readonly windowEnd: Date;
   readonly executionUuid: string;
   readonly signal: AbortSignal;
-  readonly logger: LoggerServiceContract;
 }
 
 export interface DispatcherPipelineState {
@@ -193,10 +192,13 @@ export interface DispatcherPipelineState {
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
 
 export type DispatcherStepOutput =
-  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input' | 'logger'>> }
+  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
   | { type: 'halt'; reason: DispatcherHaltReason };
 
 export interface DispatcherStep {
   readonly name: string;
-  execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput>;
+  execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput>;
 }

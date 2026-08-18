@@ -14,9 +14,10 @@ import type {
   DispatcherPipelineState,
   DispatcherStepOutput,
 } from '../types';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
-import { getUnmatchedEpisodes } from './unmatched_episodes';
+import { getUnmatchedEpisodes } from './utils/unmatched_episodes';
 
 @injectable()
 export class StoreActionsStep implements DispatcherStep {
@@ -26,7 +27,10 @@ export class StoreActionsStep implements DispatcherStep {
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { suppressed = [], throttled = [], dispatch = [], dispatchable = [], policies } = state;
 
     const unmatched = getUnmatchedEpisodes(dispatchable, dispatch, throttled);

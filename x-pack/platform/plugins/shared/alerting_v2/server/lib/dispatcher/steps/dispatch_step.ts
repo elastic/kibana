@@ -51,9 +51,11 @@ export class DispatchStep implements DispatcherStep {
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatch = [], policies } = state;
-    const logger = state.input.logger.withLabels({ step: this.name });
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { dispatch = [], policies = new Map<ActionPolicyId, ActionPolicy>() } = state;
 
     const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
 
@@ -65,7 +67,7 @@ export class DispatchStep implements DispatcherStep {
           if (signal.aborted) {
             return { groupId: group.id, executionIds: [], failures: [] };
           }
-          return this.dispatchGroup(group, logger, policies, signal);
+          return this.dispatchGroup(group, policies, logger, signal);
         })
       )
     );
@@ -88,9 +90,9 @@ export class DispatchStep implements DispatcherStep {
 
   private async dispatchGroup(
     group: ActionGroup,
+    policies: Map<ActionPolicyId, ActionPolicy>,
     parentLogger: LoggerServiceContract,
-    policies?: Map<ActionPolicyId, ActionPolicy>,
-    signal?: AbortSignal
+    signal: AbortSignal
   ): Promise<DispatchGroupResult> {
     const logger = parentLogger.withLabels({
       group_id: group.id,
@@ -100,7 +102,7 @@ export class DispatchStep implements DispatcherStep {
     const executionIds: string[] = [];
     const failures: DispatchFailure[] = [];
     try {
-      const policy = policies?.get(group.policyId);
+      const policy = policies.get(group.policyId);
       const apiKey = policy?.apiKey;
 
       if (!apiKey) {
