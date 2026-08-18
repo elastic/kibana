@@ -50,6 +50,41 @@ export class RuleCreationClient {
 
   constructor(private readonly fetch: HttpHandler, private readonly log: ToolingLog) {}
 
+  private async pollExecution({
+    workflowExecutionId,
+    isDone,
+    maxWaitMs,
+    pollIntervalMs,
+  }: {
+    workflowExecutionId: string;
+    isDone: (status: ExecutionStatus) => boolean;
+    maxWaitMs: number;
+    pollIntervalMs: number;
+  }): Promise<WorkflowExecutionDto> {
+    const deadline = Date.now() + maxWaitMs;
+    let execution: WorkflowExecutionDto | undefined;
+
+    while (Date.now() < deadline) {
+      execution = await this.fetch<WorkflowExecutionDto>(
+        `/api/workflows/executions/${workflowExecutionId}`,
+        {
+          method: 'GET',
+          version: WORKFLOWS_API_VERSION,
+          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
+          query: { includeOutput: true },
+        }
+      );
+
+      if (isDone(execution.status)) break;
+      await sleep(pollIntervalMs);
+    }
+
+    if (!execution) {
+      throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
+    }
+    return execution;
+  }
+
   async run({
     input,
     maxWaitMs = 10 * 60_000,
@@ -77,27 +112,12 @@ export class RuleCreationClient {
     this.log.info(`Started rule-creation workflow execution ${workflowExecutionId}`);
     this.pendingExecutionIds.push(workflowExecutionId);
 
-    const deadline = Date.now() + maxWaitMs;
-    let execution: WorkflowExecutionDto | undefined;
-
-    while (Date.now() < deadline) {
-      execution = await this.fetch<WorkflowExecutionDto>(
-        `/api/workflows/executions/${workflowExecutionId}`,
-        {
-          method: 'GET',
-          version: WORKFLOWS_API_VERSION,
-          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-          query: { includeOutput: true },
-        }
-      );
-
-      if (shouldStopPolling(execution.status)) break;
-      await sleep(pollIntervalMs);
-    }
-
-    if (!execution) {
-      throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
-    }
+    const execution = await this.pollExecution({
+      workflowExecutionId,
+      isDone: shouldStopPolling,
+      maxWaitMs,
+      pollIntervalMs,
+    });
 
     if (!shouldStopPolling(execution.status)) {
       this.log.warning(
@@ -152,26 +172,12 @@ export class RuleCreationClient {
     const sourceId = `${RULE_CREATION_WORKFLOW_ID}:${workflowExecutionId}:${reviewStep.id}`;
     await respondToWorkflowApproval({ fetch: this.fetch, sourceId, approved, log: this.log });
 
-    const deadline = Date.now() + maxWaitMs;
-    let execution: WorkflowExecutionDto | undefined;
-
-    while (Date.now() < deadline) {
-      execution = await this.fetch<WorkflowExecutionDto>(
-        `/api/workflows/executions/${workflowExecutionId}`,
-        {
-          method: 'GET',
-          version: WORKFLOWS_API_VERSION,
-          headers: { 'elastic-api-version': WORKFLOWS_API_VERSION },
-          query: { includeOutput: true },
-        }
-      );
-      if (TerminalExecutionStatuses.includes(execution.status)) break;
-      await sleep(pollIntervalMs);
-    }
-
-    if (!execution)
-      throw new Error(`No execution returned after respond for ${workflowExecutionId}`);
-    return execution;
+    return this.pollExecution({
+      workflowExecutionId,
+      isDone: (status) => TerminalExecutionStatuses.includes(status),
+      maxWaitMs,
+      pollIntervalMs,
+    });
   }
 
   async cancelPending(): Promise<void> {
