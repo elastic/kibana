@@ -6,13 +6,13 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { KibanaRole } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import type { ListAgentResponse } from '../../../../common/http_api/agents';
 import type { SpaceSettingsResponse } from '../../../../common/http_api/space_settings';
 import type { AuthedApiClient } from '../../../scout_agent_builder_shared/lib/authed_api_client';
 import { withAuth } from '../../../scout_agent_builder_shared/lib/authed_api_client';
+import { agentBuilderRole } from '../../../scout_agent_builder_shared/lib/roles';
 import { apiTest } from '../fixtures';
 import {
   API_AGENT_BUILDER,
@@ -23,26 +23,6 @@ import {
 import { spaceUrl } from '../fixtures/space_paths';
 
 const TEST_PREFIX = 'space-default-agent-test';
-
-/**
- * Convenience helper for building a Kibana role scoped to a single space with
- * the given Agent Builder sub-feature privileges.
- */
-function agentBuilderRole(spaceId: string, privileges: string[]): KibanaRole {
-  return {
-    elasticsearch: { cluster: [], indices: [] },
-    kibana: [
-      {
-        base: [],
-        feature: {
-          agentBuilder: privileges,
-          actions: ['read'],
-        },
-        spaces: [spaceId],
-      },
-    ],
-  };
-}
 
 function mockAgent(id: string) {
   return {
@@ -127,6 +107,17 @@ apiTest.describe(
         ...manageAgents.apiKeyHeader,
         'elastic-api-version': ELASTIC_API_VERSION,
       });
+    });
+
+    // Reset the assignment in both spaces after every test so each test is
+    // self-contained and order-independent (no shared-state coupling).
+    apiTest.afterEach(async ({ asAdmin }) => {
+      for (const spaceId of [SPACE_A, SPACE_B]) {
+        await asAdmin.put(spaceUrl(`${INTERNAL_AGENT_BUILDER}/space_settings`, spaceId), {
+          body: { default_agent_id: null },
+          responseType: 'json',
+        });
+      }
     });
 
     apiTest.afterAll(async ({ kbnClient, asAdmin }) => {
@@ -234,11 +225,15 @@ apiTest.describe(
           { responseType: 'json' }
         );
         expect(listAsReadOnly).toHaveStatusCode(200);
-        const restrictedAgentIds = (listAsReadOnly.body as ListAgentResponse).results
-          .filter((agent) => !agent.readonly)
-          .map((agent) => agent.id)
-          .sort();
-        expect(restrictedAgentIds).toStrictEqual([AGENT_IN_A_1, AGENT_IN_A_2].sort());
+        const restrictedAgentIds = (listAsReadOnly.body as ListAgentResponse).results.map(
+          (agent) => agent.id
+        );
+        // The list is NOT filtered to the space default, so both seeded agents
+        // are present. Assert a subset (not strict-equal) so built-in agents
+        // like `elastic-ai-agent` do not break the test.
+        expect(restrictedAgentIds).toStrictEqual(
+          expect.arrayContaining([AGENT_IN_A_1, AGENT_IN_A_2])
+        );
 
         // The manage_agents user also sees both agents.
         const listAsManager = await asManageAgents.get(
@@ -246,11 +241,10 @@ apiTest.describe(
           { responseType: 'json' }
         );
         expect(listAsManager).toHaveStatusCode(200);
-        const managerAgentIds = (listAsManager.body as ListAgentResponse).results
-          .filter((agent) => !agent.readonly)
-          .map((agent) => agent.id)
-          .sort();
-        expect(managerAgentIds).toStrictEqual([AGENT_IN_A_1, AGENT_IN_A_2].sort());
+        const managerAgentIds = (listAsManager.body as ListAgentResponse).results.map(
+          (agent) => agent.id
+        );
+        expect(managerAgentIds).toStrictEqual(expect.arrayContaining([AGENT_IN_A_1, AGENT_IN_A_2]));
       }
     );
 
@@ -281,13 +275,29 @@ apiTest.describe(
 
     apiTest(
       'does not auto-clear the assignment when the pinned agent is deleted',
-      async ({ asAdmin }) => {
+      async ({ asAdmin, kbnClient }) => {
         // The server intentionally does not eagerly clear a dangling assignment;
         // the client-side cross-check in `useEffectiveSpaceDefaultAgent` degrades
         // it to "unconfigured" for users, and an admin can re-assign or clear it.
+        //
+        // Use a throwaway agent created + pinned + deleted within this test so it
+        // is self-contained and does not consume a shared fixture agent.
+        const throwawayId = `sda-agent-del-${shortRunId}`;
+        await kbnClient.request({
+          method: 'POST',
+          path: spaceUrl(`${API_AGENT_BUILDER}/agents`, SPACE_A),
+          headers: adminApiVersionHeaders(),
+          body: mockAgent(throwawayId),
+        });
+        await asAdmin.put(spaceUrl(`${INTERNAL_AGENT_BUILDER}/space_settings`, SPACE_A), {
+          body: { default_agent_id: throwawayId },
+          responseType: 'json',
+        });
+
+        // The agents DELETE route is versioned, so it needs the api-version header.
         const deleteRes = await asAdmin.delete(
-          spaceUrl(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(AGENT_IN_A_1)}`, SPACE_A),
-          { responseType: 'json' }
+          spaceUrl(`${API_AGENT_BUILDER}/agents/${encodeURIComponent(throwawayId)}`, SPACE_A),
+          { headers: adminApiVersionHeaders(), responseType: 'json' }
         );
         expect(deleteRes).toHaveStatusCode(200);
 
@@ -297,7 +307,7 @@ apiTest.describe(
         );
         expect(settings).toHaveStatusCode(200);
         // Raw stored id returned unchanged (dangling), not auto-nulled.
-        expect((settings.body as SpaceSettingsResponse).default_agent_id).toBe(AGENT_IN_A_1);
+        expect((settings.body as SpaceSettingsResponse).default_agent_id).toBe(throwawayId);
       }
     );
 
