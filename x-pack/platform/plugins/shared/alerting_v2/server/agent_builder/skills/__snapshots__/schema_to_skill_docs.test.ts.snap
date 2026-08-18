@@ -142,7 +142,7 @@ exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed ski
 |---|---|
 | \`last_known_status\` | Holds the last known episode status when no data is present. |
 | \`emit\` | Emits a \`no_data\` alert event when no_data query returns no rows for the group. \\"emit\\" is not currently accepted by the create/update API. |
-| \`recover\` | Forces recovery when no data is present. |
+| \`recover\` | Resolves the alert episode to inactive on the first no-data run. |
 | \`none\` | No-data situations are ignored (default). |
 
 When setting \`no_data_strategy\` to anything other than \`'none'\`, add a \`no_data\` block to the standalone query:
