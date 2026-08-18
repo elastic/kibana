@@ -6,6 +6,7 @@
  */
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { DispatcherServiceContract } from './dispatcher';
 import { DispatcherTaskRunner } from './task_runner';
 
@@ -27,7 +28,7 @@ describe('DispatcherTaskRunner', () => {
 
   beforeEach(() => {
     dispatcherService = { run: jest.fn() };
-    runner = new DispatcherTaskRunner(dispatcherService);
+    runner = new DispatcherTaskRunner(dispatcherService, createLoggerService().loggerService);
     signal = new AbortController().signal;
   });
 
@@ -46,6 +47,7 @@ describe('DispatcherTaskRunner', () => {
       const [params] = dispatcherService.run.mock.calls[0];
       expect(params.signal).toBe(signal);
       expect(params.previousStartedAt?.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+      expect(params.logger).toBeDefined();
     });
 
     it('returns updated previousStartedAt in state', async () => {
