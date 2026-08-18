@@ -51,10 +51,10 @@ const buildBaseSnapshot = ({
         'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 1',
     },
   },
-  createdBy: 'admin',
-  createdAt: '2026-07-22T14:00:00.000Z',
-  updatedBy: 'admin',
-  updatedAt: '2026-07-22T14:00:00.000Z',
+  created_by: 'admin',
+  created_at: '2026-07-22T14:00:00.000Z',
+  updated_by: 'admin',
+  updated_at: '2026-07-22T14:00:00.000Z',
 });
 
 /**
@@ -82,8 +82,8 @@ export const createRuleChangeHistoryFixtures = (
       description: 'Alert when flights see thunder and lightning at destination.',
     },
     schedule: { every: '1m', lookback: '1h' },
-    updatedAt: '2026-07-25T09:15:00.000Z',
-    updatedBy: 'bailey',
+    updated_at: '2026-07-25T09:15:00.000Z',
+    updated_by: 'bailey',
   };
 
   const v3: RuleSnapshot = {
@@ -99,8 +99,8 @@ export const createRuleChangeHistoryFixtures = (
           'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 2',
       },
     },
-    updatedAt: '2026-07-30T16:42:00.000Z',
-    updatedBy: 'admin',
+    updated_at: '2026-07-30T16:42:00.000Z',
+    updated_by: 'admin',
   };
 
   const v4: RuleSnapshot = {
@@ -110,14 +110,14 @@ export const createRuleChangeHistoryFixtures = (
       version: 4,
     },
     enabled: false,
-    updatedAt: '2026-08-01T11:05:00.000Z',
-    updatedBy: 'bailey',
+    updated_at: '2026-08-01T11:05:00.000Z',
+    updated_by: 'bailey',
   };
 
   const allVersions: ChangeHistoryDetail[] = [
     {
       id: `${objectId}-evt-disable`,
-      timestamp: v4.updatedAt,
+      timestamp: v4.updated_at,
       actor: { name: 'bailey', profileId: 'user-bailey' },
       action: 'Disabled',
       isCurrent: true,
@@ -127,7 +127,7 @@ export const createRuleChangeHistoryFixtures = (
     },
     {
       id: `${objectId}-evt-query`,
-      timestamp: v3.updatedAt,
+      timestamp: v3.updated_at,
       actor: { name: 'admin', profileId: 'user-admin' },
       action: 'Updated',
       comment: 'Raised breach threshold from 1 to 2',
@@ -137,7 +137,7 @@ export const createRuleChangeHistoryFixtures = (
     },
     {
       id: `${objectId}-evt-lookback`,
-      timestamp: v2.updatedAt,
+      timestamp: v2.updated_at,
       actor: { name: 'bailey', profileId: 'user-bailey' },
       action: 'Updated',
       comment: 'Shortened lookback window',
@@ -153,7 +153,7 @@ export const createRuleChangeHistoryFixtures = (
     },
     {
       id: `${objectId}-evt-create`,
-      timestamp: v1.createdAt,
+      timestamp: v1.created_at,
       actor: { name: 'admin', profileId: 'user-admin' },
       action: 'Created',
       metadata: { version: 1 },

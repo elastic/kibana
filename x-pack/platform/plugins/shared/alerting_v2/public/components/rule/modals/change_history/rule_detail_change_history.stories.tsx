@@ -88,12 +88,12 @@ const RuleDetailChangeHistoryShell = ({
           {
             type: 'text',
             label: 'Created by',
-            value: `${rule.createdBy} on Jul 22, 2026`,
+            value: `${rule.created_by} on Jul 22, 2026`,
           },
           {
             type: 'text',
             label: 'Last updated by',
-            value: `${rule.updatedBy} on Aug 1, 2026`,
+            value: `${rule.updated_by} on Aug 1, 2026`,
           },
         ]}
         menu={menu}
