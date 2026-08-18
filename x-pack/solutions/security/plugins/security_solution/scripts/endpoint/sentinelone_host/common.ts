@@ -82,7 +82,9 @@ export class S1Client {
     const apiFullUrl = new URL(this.buildUrl(url));
     apiFullUrl.search = String(search);
 
-    this.log.debug(`Request: `, apiFullUrl.toString());
+    const redactedUrl = new URL(apiFullUrl);
+    redactedUrl.searchParams.set('APIToken', '[REDACTED]');
+    this.log.debug(`Request: `, redactedUrl.toString());
 
     return pRetry(
       async () => {
