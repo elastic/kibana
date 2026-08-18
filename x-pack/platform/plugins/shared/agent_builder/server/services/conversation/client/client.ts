@@ -12,15 +12,6 @@ import type { ConversationOrigin } from '@kbn/agent-builder-common';
 import {
   type UserIdAndName,
   type Conversation,
-  type ConversationRound,
-  type TimelineEvent,
-  type TimelineEventInput,
-  type EventActor,
-  EventActorType,
-  ConversationRoundStatus,
-  TimelineEventType,
-  TimelineTriggerType,
-  CONVERSATION_SCHEMA_VERSION,
   createBadRequestError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
@@ -55,24 +46,16 @@ import type {
   ConversationUpdateRequest,
   ConversationListOptions,
   UpsertRoundRequest,
-  GetEventsOptions,
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
-import { conversationIndexName, createStorage } from './storage';
+import { createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
-import {
-  roundsToEvents,
-  userMessageActor,
-  userMessageData,
-  agentActor,
-  executionCompletedData,
-} from './rounds_to_events';
 import {
   fromEs,
   fromEsWithoutRounds,
@@ -112,8 +95,6 @@ const buildMetadataFromTemplate = (
     {}
   );
 
-const EVENTS_APPEND_RETRY_ON_CONFLICT = 5;
-
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
@@ -135,16 +116,6 @@ export interface ConversationClient {
   delete(conversationId: string): Promise<boolean>;
   applyTemplate(conversationId: string, templateId: string): Promise<Conversation>;
   patchMetadata(conversationId: string, updates: Record<string, unknown>): Promise<Conversation>;
-  /** Append events to the conversation's timeline. */
-  appendEvents(conversationId: string, events: TimelineEventInput[]): Promise<TimelineEvent[]>;
-  /** Read the conversation's timeline, in order. */
-  getEvents(conversationId: string, options?: GetEventsOptions): Promise<TimelineEvent[]>;
-  /** Dual-write: translate a completed round into coarse timeline events and append them. */
-  appendRoundTimelineEvents(
-    conversation: Conversation,
-    round: ConversationRound,
-    options: { resumed: boolean; created: boolean }
-  ): Promise<void>;
 }
 
 export const createClient = ({
@@ -165,7 +136,6 @@ export const createClient = ({
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
     storage,
-    esClient,
     user,
     isAdmin,
     space,
@@ -177,7 +147,6 @@ export const createClient = ({
 class ConversationClientImpl implements ConversationClient {
   private readonly space: string;
   private readonly storage: ConversationStorage;
-  private readonly esClient: ElasticsearchClient;
   private readonly user: UserIdAndName;
   private readonly isAdmin: boolean;
   private readonly agentRegistry: AgentRegistry;
@@ -185,7 +154,6 @@ class ConversationClientImpl implements ConversationClient {
 
   constructor({
     storage,
-    esClient,
     user,
     isAdmin,
     space,
@@ -193,7 +161,6 @@ class ConversationClientImpl implements ConversationClient {
     logger,
   }: {
     storage: ConversationStorage;
-    esClient: ElasticsearchClient;
     user: UserIdAndName;
     isAdmin: boolean;
     space: string;
@@ -201,7 +168,6 @@ class ConversationClientImpl implements ConversationClient {
     logger: Logger;
   }) {
     this.storage = storage;
-    this.esClient = esClient;
     this.user = user;
     this.isAdmin = isAdmin;
     this.space = space;
@@ -537,143 +503,6 @@ class ConversationClientImpl implements ConversationClient {
     });
 
     return withDeserializedMetadata(result);
-  }
-
-  async appendEvents(
-    conversationId: string,
-    events: TimelineEventInput[]
-  ): Promise<TimelineEvent[]> {
-    if (events.length === 0) {
-      return [];
-    }
-
-    await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-
-    const now = new Date().toISOString();
-    const stamped = events.map((event) => this.stampEvent(event, now));
-
-    // Atomic scripted append
-    await this.esClient.update({
-      index: conversationIndexName,
-      id: conversationId,
-      retry_on_conflict: EVENTS_APPEND_RETRY_ON_CONFLICT,
-      script: {
-        source: `
-          if (ctx._source.events == null) { ctx._source.events = []; }
-          for (def event : params.new_events) { ctx._source.events.add(event); }
-          ctx._source.schema_version = params.schema_version;
-          ctx._source.updated_at = params.now;
-        `,
-        params: { new_events: stamped, now, schema_version: CONVERSATION_SCHEMA_VERSION },
-      },
-    });
-
-    return stamped;
-  }
-
-  async getEvents(
-    conversationId: string,
-    options: GetEventsOptions = {}
-  ): Promise<TimelineEvent[]> {
-    const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-
-    const isEventsNative = document._source!.schema_version === CONVERSATION_SCHEMA_VERSION;
-    let events: TimelineEvent[] = isEventsNative
-      ? document._source!.events ?? []
-      : roundsToEvents(fromEs(document));
-
-    if (options.afterEventId) {
-      const index = events.findIndex((event) => event.id === options.afterEventId);
-      if (index < 0) {
-        throw createBadRequestError(
-          `afterEventId "${options.afterEventId}" was not found in conversation ${conversationId}`
-        );
-      }
-      events = events.slice(index + 1);
-    }
-
-    if (options.limit != null) {
-      events = events.slice(0, options.limit);
-    }
-
-    return events;
-  }
-
-  async appendRoundTimelineEvents(
-    conversation: Conversation,
-    round: ConversationRound,
-    options: { resumed: boolean; created: boolean }
-  ): Promise<void> {
-    if (options.resumed || round.status !== ConversationRoundStatus.completed) {
-      return;
-    }
-
-    try {
-      // Only write events for a timeline we own: a brand-new conversation (created this run), or
-      // one that is already events-native.
-      if (!options.created) {
-        const existing = await this.getDocumentWithAccess({
-          conversationId: conversation.id,
-          access: 'converse',
-        });
-        if (existing._source?.schema_version !== CONVERSATION_SCHEMA_VERSION) {
-          return;
-        }
-      }
-
-      const executionId = uuidv4();
-      const userMessageId = uuidv4();
-      const agent = agentActor(conversation);
-
-      const events: TimelineEventInput[] = [
-        {
-          id: userMessageId,
-          created_at: round.started_at,
-          actor: userMessageActor(conversation, round),
-          type: TimelineEventType.userMessage,
-          data: userMessageData(round),
-        },
-        {
-          created_at: round.started_at,
-          actor: agent,
-          execution_id: executionId,
-          trigger_event_id: userMessageId,
-          type: TimelineEventType.executionStarted,
-          data: { trigger_type: TimelineTriggerType.userMessage },
-        },
-        {
-          created_at: new Date().toISOString(),
-          actor: agent,
-          execution_id: executionId,
-          trigger_event_id: userMessageId,
-          type: TimelineEventType.executionCompleted,
-          data: executionCompletedData(round),
-        },
-      ];
-
-      await this.appendEvents(conversation.id, events);
-    } catch (error) {
-      this.logger.warn(
-        `Failed to append timeline events for conversation ${conversation.id}: ${error.message}`
-      );
-    }
-  }
-
-  private stampEvent(event: TimelineEventInput, now: string): TimelineEvent {
-    return {
-      ...event,
-      id: event.id ?? uuidv4(),
-      created_at: event.created_at ?? now,
-      actor: event.actor ?? this.defaultActor(),
-    } as TimelineEvent;
-  }
-
-  private defaultActor(): EventActor {
-    return {
-      type: EventActorType.user,
-      id: this.user.id ?? this.user.username,
-      username: this.user.username,
-    };
   }
 
   private toResponseConversation(document: Document): ConversationWithPermissions {

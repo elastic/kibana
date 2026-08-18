@@ -57,13 +57,6 @@ export const createConversation$ = ({
           : {}),
       });
 
-      // Dual-write: also append the coarse timeline events for this round.
-      await conversationClient.appendRoundTimelineEvents(
-        createdConversation,
-        roundCompletedEvent.data.round,
-        { resumed: false, created: true }
-      );
-
       return createConversationCreatedEvent(createdConversation);
     })
   );
@@ -113,12 +106,6 @@ export const updateConversation$ = ({
         },
         { access: 'converse' }
       );
-
-      // Dual-write: also append the coarse timeline events for this round.
-      await conversationClient.appendRoundTimelineEvents(updatedConversation, round, {
-        resumed,
-        created: false,
-      });
 
       return createConversationUpdatedEvent(updatedConversation);
     })

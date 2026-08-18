@@ -39,10 +39,10 @@ const baseConversation = (rounds: ConversationRound[]): Conversation => ({
 });
 
 describe('roundsToEvents', () => {
-  it('maps a completed round to user_message + execution_completed', () => {
+  it('maps a completed round to user_message + execution_started + execution_completed', () => {
     const events = roundsToEvents(baseConversation([baseRound()]));
 
-    expect(events).toHaveLength(2);
+    expect(events).toHaveLength(3);
     expect(events[0]).toMatchObject({
       id: 'round-1::user_message',
       type: TimelineEventType.userMessage,
@@ -50,6 +50,13 @@ describe('roundsToEvents', () => {
       data: { message: 'hello' },
     });
     expect(events[1]).toMatchObject({
+      id: 'round-1::execution_started',
+      type: TimelineEventType.executionStarted,
+      execution_id: 'round-1::execution',
+      trigger_event_id: 'round-1::user_message',
+      actor: { type: EventActorType.agent, id: 'agent-1' },
+    });
+    expect(events[2]).toMatchObject({
       id: 'round-1::execution_completed',
       type: TimelineEventType.executionCompleted,
       execution_id: 'round-1::execution',
@@ -64,7 +71,7 @@ describe('roundsToEvents', () => {
     });
   });
 
-  it('maps an awaiting-prompt round to user_message + prompt_requested', () => {
+  it('maps an awaiting-prompt round to user_message + execution_started + prompt_requested', () => {
     const prompts = [{ id: 'p1' }] as unknown as PromptRequest[];
     const events = roundsToEvents(
       baseConversation([
@@ -72,8 +79,12 @@ describe('roundsToEvents', () => {
       ])
     );
 
-    expect(events).toHaveLength(2);
+    expect(events).toHaveLength(3);
     expect(events[1]).toMatchObject({
+      id: 'round-1::execution_started',
+      type: TimelineEventType.executionStarted,
+    });
+    expect(events[2]).toMatchObject({
       id: 'round-1::prompt_requested',
       type: TimelineEventType.promptRequested,
       trigger_event_id: 'round-1::user_message',
@@ -108,8 +119,10 @@ describe('roundsToEvents', () => {
     expect(first).toEqual(second);
     expect(first).toEqual([
       'round-1::user_message',
+      'round-1::execution_started',
       'round-1::execution_completed',
       'round-2::user_message',
+      'round-2::execution_started',
       'round-2::execution_completed',
     ]);
   });

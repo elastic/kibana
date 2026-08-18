@@ -40,6 +40,7 @@ import {
   needsMigration,
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
+import { roundsToEvents } from './rounds_to_events';
 
 export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
 
@@ -180,14 +181,7 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 };
 
 export const fromEs = (document: Document): Conversation => {
-  const source = document._source!;
-
-  const base = {
-    ...convertBaseFromEs(document),
-    ...(source.events !== undefined ? { events: source.events } : {}),
-    ...(source.active_execution !== undefined ? { active_execution: source.active_execution } : {}),
-    ...(source.schema_version !== undefined ? { schema_version: source.schema_version } : {}),
-  };
+  const base = convertBaseFromEs(document);
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
@@ -209,29 +203,30 @@ export const fromEs = (document: Document): Conversation => {
 
   const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
 
-  if (existingAttachments && existingAttachments.length > 0) {
-    return {
-      ...base,
-      rounds: roundsWithRefs,
-      attachments: existingAttachments,
-      ...(document._source!.state && { state: document._source!.state }),
-    };
-  }
+  const conversation: Conversation =
+    existingAttachments && existingAttachments.length > 0
+      ? {
+          ...base,
+          rounds: roundsWithRefs,
+          attachments: existingAttachments,
+          ...(document._source!.state && { state: document._source!.state }),
+        }
+      : hasLegacyRoundAttachments
+      ? {
+          ...base,
+          rounds: roundsWithRefs,
+          ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
+          ...(document._source!.state && { state: document._source!.state }),
+        }
+      : {
+          ...base,
+          rounds: roundsWithRefs,
+          ...(document._source!.state && { state: document._source!.state }),
+        };
 
-  if (hasLegacyRoundAttachments) {
-    return {
-      ...base,
-      rounds: roundsWithRefs,
-      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
-      ...(document._source!.state && { state: document._source!.state }),
-    };
-  }
-
-  return {
-    ...base,
-    rounds: roundsWithRefs,
-    ...(document._source!.state && { state: document._source!.state }),
-  };
+  // The timeline is a derived projection of the rounds, which stay the source of truth. It is
+  // exposed on the conversation object but never persisted (this PR writes rounds only).
+  return { ...conversation, events: roundsToEvents(conversation) };
 };
 
 export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
@@ -259,14 +254,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
-    // Round-trip the timeline fields so a whole-doc write preserves them (see fromEs).
-    ...(conversation.events !== undefined ? { events: conversation.events } : {}),
-    ...(conversation.active_execution !== undefined
-      ? { active_execution: conversation.active_execution }
-      : {}),
-    ...(conversation.schema_version !== undefined
-      ? { schema_version: conversation.schema_version }
-      : {}),
+    // The timeline is derived from rounds on read (see fromEs), never persisted here.
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.
@@ -330,13 +318,6 @@ export const createRequestToEs = ({
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
-    ...(conversation.events !== undefined ? { events: conversation.events } : {}),
-    ...(conversation.active_execution !== undefined
-      ? { active_execution: conversation.active_execution }
-      : {}),
-    ...(conversation.schema_version !== undefined
-      ? { schema_version: conversation.schema_version }
-      : {}),
     // Cast metadata to storage type — see note in toEs.
     ...(conversation.metadata
       ? { metadata: conversation.metadata as Record<string, SerializedMetadataValue> }

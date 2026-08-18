@@ -138,6 +138,8 @@ describe('conversation model converters', () => {
             },
           },
         ],
+        // Derived from rounds on read; content covered by rounds_to_events.test.ts.
+        events: expect.any(Array),
       });
     });
 
@@ -209,6 +211,7 @@ describe('conversation model converters', () => {
           },
         ],
         state: createTestState(),
+        events: expect.any(Array),
       });
     });
 

@@ -17,57 +17,72 @@ import {
   ConversationRoundStatus,
   EventActorType,
   TimelineEventType,
+  TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 
 /**
- * Converts a legacy (rounds-based) conversation into a timeline, on read.
- *
- * Used only for conversations written before the event producer existed, so they have no stored
- * `events`. Event ids are derived deterministically from the round id, so repeated reads produce
- * stable ids (safe for `after_event_id` cursors). A run's fine-grained detail is not reconstructed
- * here — only the coarse per-round events.
+ * Converts a single round into its coarse timeline events: `user_message`, `execution_started`,
+ * and a terminal `execution_completed` (or `prompt_requested` when the round is awaiting a prompt).
  */
-export const roundsToEvents = (conversation: Conversation): TimelineEvent[] => {
-  const events: TimelineEvent[] = [];
+export const roundToEvents = (
+  round: ConversationRound,
+  conversation: Conversation
+): TimelineEvent[] => {
+  const userMessageId = `${round.id}::user_message`;
+  const executionId = `${round.id}::execution`;
+  const agent = agentActor(conversation);
 
-  for (const round of conversation.rounds) {
-    const userMessageId = `${round.id}::user_message`;
-    const executionId = `${round.id}::execution`;
-
-    events.push({
+  const events: TimelineEvent[] = [
+    {
       id: userMessageId,
       type: TimelineEventType.userMessage,
       created_at: round.started_at,
       actor: userMessageActor(conversation, round),
       data: userMessageData(round),
-    });
-
-    const lifecycle = {
+    },
+    {
+      id: `${round.id}::execution_started`,
+      type: TimelineEventType.executionStarted,
       created_at: round.started_at,
-      actor: agentActor(conversation),
+      actor: agent,
       execution_id: executionId,
       trigger_event_id: userMessageId,
-    };
+      data: { trigger_type: TimelineTriggerType.userMessage },
+    },
+  ];
 
-    if (round.status === ConversationRoundStatus.awaitingPrompt) {
-      events.push({
-        ...lifecycle,
-        id: `${round.id}::prompt_requested`,
-        type: TimelineEventType.promptRequested,
-        data: { prompts: round.pending_prompts ?? [] },
-      });
-    } else {
-      events.push({
-        ...lifecycle,
-        id: `${round.id}::execution_completed`,
-        type: TimelineEventType.executionCompleted,
-        data: executionCompletedData(round),
-      });
-    }
+  const terminal = {
+    created_at: round.started_at,
+    actor: agent,
+    execution_id: executionId,
+    trigger_event_id: userMessageId,
+  };
+
+  if (round.status === ConversationRoundStatus.awaitingPrompt) {
+    events.push({
+      ...terminal,
+      id: `${round.id}::prompt_requested`,
+      type: TimelineEventType.promptRequested,
+      data: { prompts: round.pending_prompts ?? [] },
+    });
+  } else {
+    events.push({
+      ...terminal,
+      id: `${round.id}::execution_completed`,
+      type: TimelineEventType.executionCompleted,
+      data: executionCompletedData(round),
+    });
   }
 
   return events;
 };
+
+/**
+ * Converts a rounds-based conversation into a timeline, on read. Maps each round with
+ * {@link roundToEvents}, in round order.
+ */
+export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
+  conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
 
 /** The `user_message` payload for a round. Shared by the read converter and the live producer. */
 export const userMessageData = (round: ConversationRound): UserMessageEventData => ({
