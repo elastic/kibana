@@ -57,6 +57,7 @@ dependsOn:
   - '@kbn/dashboard-plugin'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/core-ui-settings-browser-mocks'
 tags:
   - shared-browser
   - package
