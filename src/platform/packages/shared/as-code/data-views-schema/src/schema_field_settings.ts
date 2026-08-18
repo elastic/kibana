@@ -12,7 +12,7 @@ import { formatSchema } from './field_settings/formats/format_schema';
 
 export const fieldSettingsBaseSchema = z
   .object({
-    format: formatSchema,
+    format: formatSchema.optional(),
     custom_label: z.string().min(1).optional().meta({
       id: 'kbn-field-custom-label',
       title: 'Custom label',
