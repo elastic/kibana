@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core/server';
-
-export const plugin: PluginInitializer<void, void> = async () => {
-  const { AlertingExamplePlugin } = await import('./plugin');
-  return new AlertingExamplePlugin();
-};
+export { default as cordisPlugin } from './plugin';

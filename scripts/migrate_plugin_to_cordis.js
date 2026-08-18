@@ -254,21 +254,44 @@ function run(pluginDir) {
   // Collect non-import, non-class top-level declarations used in the constructor body.
   // These include interface declarations, type aliases, and const declarations that may be
   // referenced in the setup/stop bodies but are defined in the file (not imported).
-  const otherDeclarations = sourceFile.getStatements()
-    .filter((stmt) => {
-      const kind = stmt.getKindName();
-      // Keep interface declarations, type aliases, enum declarations
-      if (!['InterfaceDeclaration', 'TypeAliasDeclaration', 'EnumDeclaration'].includes(kind)) {
-        return false;
+  // Collect module-level declarations (interface/type/enum/const/let/var) that are referenced
+  // in the constructor body (or transitively by another preserved declaration).
+  const allStatements = sourceFile.getStatements();
+  const getStmtName = (stmt) => {
+    const kind = stmt.getKindName();
+    const text = stmt.getText();
+    if (['InterfaceDeclaration', 'TypeAliasDeclaration', 'EnumDeclaration'].includes(kind)) {
+      const m = text.match(/(?:interface|type|enum)\s+(\w+)/);
+      return m ? m[1] : null;
+    }
+    if (kind === 'VariableStatement') {
+      // May declare multiple variables; return array of names by calling recursively per name
+      return [...text.matchAll(/\b(?:const|let|var)\s+(\w+)/g)].map(([, n]) => n).join(',') || null;
+    }
+    return null;
+  };
+
+  // Fixed-point: start with newBodyText, expand with text of preserved stmts
+  let searchText = newBodyText;
+  const preserved = new Set();
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const stmt of allStatements) {
+      if (preserved.has(stmt)) continue;
+      const nameStr = getStmtName(stmt);
+      if (!nameStr) continue;
+      const names = nameStr.split(',').filter(Boolean);
+      const referenced = names.some((name) => new RegExp(`\\b${escapeRegex(name)}\\b`).test(searchText));
+      if (referenced) {
+        preserved.add(stmt);
+        searchText += '\n' + stmt.getText();
+        changed = true;
       }
-      // Only keep if the name appears in the constructor body
-      const stmtText = stmt.getText();
-      const nameMatch = stmtText.match(/(?:interface|type|enum)\s+(\w+)/);
-      if (!nameMatch) return false;
-      return newBodyText.includes(nameMatch[1]);
-    })
-    .map((stmt) => stmt.getText())
-    .join('\n\n');
+    }
+  }
+  // Output in source order (allStatements preserves file order)
+  const otherDeclarations = allStatements.filter((s) => preserved.has(s)).map((stmt) => stmt.getText()).join('\n\n');
   const otherDeclsSection = otherDeclarations ? '\n' + otherDeclarations + '\n' : '';
 
   // Build the new file content

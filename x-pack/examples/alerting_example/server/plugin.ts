@@ -5,26 +5,17 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup } from '@kbn/core/server';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { i18n } from '@kbn/i18n';
-// import directly to support examples functional tests (@kbn-test/src/functional_tests/lib/babel_register_for_test_plugins.js)
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { ruleType as alwaysFiringRule } from './rule_types/always_firing';
 import { ruleType as peopleInSpaceRule } from './rule_types/astros';
 import { ruleType as patternRule } from './rule_types/pattern';
-// can't import static code from another plugin to support examples functional test
-const INDEX_THRESHOLD_ID = '.index-threshold';
 import { ALERTING_EXAMPLE_APP_ID } from '../common/constants';
 
-// this plugin's dependencies
-export interface AlertingExampleDeps {
-  alerting: AlertingServerSetup;
-  features: FeaturesPluginSetup;
-}
+const INDEX_THRESHOLD_ID = '.index-threshold';
 
 const alertingFeatures = [
   {
@@ -45,67 +36,71 @@ const alertingFeatures = [
   },
 ];
 
-export class AlertingExamplePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerting, features }: AlertingExampleDeps) {
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class AlertingExamplePlugin extends Service {
+  static readonly inject = ['alerting.setup', 'features.setup'];
+  static readonly provide = 'alertingExample';
+
+  constructor(ctx: Context) {
+    super(ctx, 'alertingExample');
+    const alerting = (ctx.get('alerting.setup') as any).contract;
+    const features = (ctx.get('features.setup') as any).contract;
     alerting.registerType(alwaysFiringRule);
-    alerting.registerType(peopleInSpaceRule);
-    alerting.registerType(patternRule);
+        alerting.registerType(peopleInSpaceRule);
+        alerting.registerType(patternRule);
 
-    features.registerKibanaFeature({
-      id: ALERTING_EXAMPLE_APP_ID,
-      name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
-        defaultMessage: 'Alerting Examples',
-      }),
-      app: [],
-      management: {
-        insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
-      },
-      category: DEFAULT_APP_CATEGORIES.management,
-      alerting: alertingFeatures,
-      privileges: {
-        all: {
-          alerting: {
-            rule: {
-              all: alertingFeatures,
-              enable: alertingFeatures,
-              manual_run: alertingFeatures,
-              manage_rule_settings: alertingFeatures,
-            },
-            alert: {
-              all: alertingFeatures,
-            },
-          },
-          savedObject: {
-            all: [],
-            read: [],
-          },
+        features.registerKibanaFeature({
+          id: ALERTING_EXAMPLE_APP_ID,
+          name: i18n.translate('alertsExample.featureRegistry.alertsExampleFeatureName', {
+            defaultMessage: 'Alerting Examples',
+          }),
+          app: [],
           management: {
             insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
           },
-          ui: [],
-        },
-        read: {
-          alerting: {
-            rule: {
-              read: alertingFeatures,
+          category: DEFAULT_APP_CATEGORIES.management,
+          alerting: alertingFeatures,
+          privileges: {
+            all: {
+              alerting: {
+                rule: {
+                  all: alertingFeatures,
+                  enable: alertingFeatures,
+                  manual_run: alertingFeatures,
+                  manage_rule_settings: alertingFeatures,
+                },
+                alert: {
+                  all: alertingFeatures,
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              management: {
+                insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
+              },
+              ui: [],
             },
-            alert: {
-              read: alertingFeatures,
+            read: {
+              alerting: {
+                rule: {
+                  read: alertingFeatures,
+                },
+                alert: {
+                  read: alertingFeatures,
+                },
+              },
+              savedObject: {
+                all: [],
+                read: [],
+              },
+              management: {
+                insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
+              },
+              ui: [],
             },
           },
-          savedObject: {
-            all: [],
-            read: [],
-          },
-          management: {
-            insightsAndAlerting: ['triggersActionsRules', 'triggersActionsAlerts'],
-          },
-          ui: [],
-        },
-      },
-    });
+        });
   }
-
-  public start() {}
-  public stop() {}
 }
