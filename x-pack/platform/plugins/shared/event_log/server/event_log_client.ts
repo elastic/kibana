@@ -19,6 +19,7 @@ import type { IEventLogClient } from './types';
 import type {
   QueryEventsBySavedObjectResult,
   QueryEventsBySavedObjectSearchAfterResult,
+  SoftDeleteByQueryParams,
 } from './es/cluster_client_adapter';
 import type { SavedObjectBulkGetterResult } from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
@@ -239,10 +240,12 @@ export class EventLogClient implements IEventLogClient {
     await this.esContext.esAdapter.refreshIndex();
   }
 
-  public async updateGapsByRuleIds(ruleIds: string[]): Promise<void> {
-    // Rule IDs are globally unique, so gaps are matched by `rule.id` alone
-    // (intentionally cross-space) rather than being scoped to the caller's namespace.
-    await this.esContext.esAdapter.updateGapsByRuleIds(ruleIds);
+  public async softDeleteByQuery(
+    params: SoftDeleteByQueryParams
+  ): Promise<estypes.UpdateByQueryResponse> {
+    // Generic, index-scoped update-by-query. The caller owns the query, so any
+    // domain scoping (e.g. rule IDs, namespace) is expressed in `params.query`.
+    return this.esContext.esAdapter.softDeleteByQuery(params);
   }
 
   public async findEventsBySavedObjectIdsSearchAfter(

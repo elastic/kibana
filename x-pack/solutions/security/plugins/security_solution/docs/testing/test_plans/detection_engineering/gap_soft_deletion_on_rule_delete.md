@@ -9,8 +9,9 @@ This is a test plan for gap soft-deletion during rule deletion, covering both bu
 
 When a rule is deleted, its gap event-log documents are marked as soft-deleted
 (`kibana.alert.rule.gap.deleted: true`). This is done with a single, blocking Elasticsearch
-`_update_by_query` exposed through the event log client (`IEventLogClient.updateGapsByRuleIds`),
-replacing an older per-gap `search_after` loop that issued ~42,000 requests to delete 10,000 rules.
+`_update_by_query`. The alerting `softDeleteGapsByQuery` helper builds the gap query and calls the
+event log client's generic `IEventLogClient.softDeleteByQuery`, which owns the event log index name.
+This replaces an older per-gap `search_after` loop that issued ~42,000 requests to delete 10,000 rules.
 Gap soft-deletion runs **after** saved-object deletion and only for the rules that were actually
 deleted, so gaps are never lost when a rule deletion fails.
 
@@ -50,8 +51,12 @@ deleted, so gaps are never lost when a rule deletion fails.
   range where a rule did not execute. Stored in the event log data stream (`.kibana-event-log-ds`).
 - **Gap soft-deletion**: setting `kibana.alert.rule.gap.deleted: true` on gap documents rather than
   physically deleting them.
-- **`updateGapsByRuleIds`**: the `IEventLogClient` method that soft-deletes all non-deleted gaps for
-  a set of rule IDs with a single blocking `_update_by_query` per 10,000-rule-ID chunk.
+- **`softDeleteGapsByQuery`**: the alerting helper (`lib/rule_gaps/soft_delete_gaps_by_query.ts`) that
+  builds the gap query, chunks rule IDs at 10,000, and calls `IEventLogClient.softDeleteByQuery` once
+  per chunk.
+- **`softDeleteByQuery`**: the generic `IEventLogClient` method that sets one boolean field to `true`
+  on every document matching a query, with a single blocking `_update_by_query` against the event log
+  data stream. It owns the index name.
 
 ## Requirements
 
@@ -65,9 +70,9 @@ deleted, so gaps are never lost when a rule deletion fails.
 
 - Gap soft-deletion runs **after** saved-object deletion, in both bulk and single delete.
 - Only the rules confirmed deleted by the saved-objects layer have their gaps soft-deleted.
-- Gap soft-deletion uses a single blocking `_update_by_query` per 10,000-rule-ID chunk, via
-  `IEventLogClient.updateGapsByRuleIds`. The event log data-stream name is owned by the event log
-  plugin.
+- Gap soft-deletion uses a single blocking `_update_by_query` per 10,000-rule-ID chunk, built by the
+  alerting `softDeleteGapsByQuery` helper and run via the generic `IEventLogClient.softDeleteByQuery`.
+  The event log data-stream name is owned by the event log plugin.
 - The query uses `conflicts: 'proceed'`; `failures`/`version_conflicts` in the response are logged.
 - Gap soft-deletion failures are logged and swallowed — they never block rule deletion or cause an
   HTTP 500.
@@ -85,7 +90,7 @@ deleted, so gaps are never lost when a rule deletion fails.
 Given several rules exist, each with gap documents in the event log data stream
 When the user bulk-deletes the rules
 Then the API returns 200 with the rules in the response
-And updateGapsByRuleIds is called with the deleted rule IDs
+And softDeleteGapsByQuery is called with the deleted rule IDs
 And every gap document for those rules has kibana.alert.rule.gap.deleted set to true
 ```
 
@@ -96,7 +101,7 @@ And every gap document for those rules has kibana.alert.rule.gap.deleted set to 
 ```Gherkin
 Given a rule exists with gap documents
 When the user deletes the rule
-Then updateGapsByRuleIds is called with the deleted rule's ID
+Then softDeleteGapsByQuery is called with the deleted rule's ID
 And the rule's gap documents have kibana.alert.rule.gap.deleted set to true
 ```
 
@@ -108,7 +113,7 @@ And the rule's gap documents have kibana.alert.rule.gap.deleted set to true
 Given 3 rules exist with gap documents
 And saved-object deletion succeeds for rule 1 and rule 3 but fails for rule 2
 When the user bulk-deletes all 3 rules
-Then updateGapsByRuleIds is called with [rule 1, rule 3] only
+Then softDeleteGapsByQuery is called with [rule 1, rule 3] only
 And rule 2's gap documents remain unchanged
 ```
 
@@ -129,8 +134,8 @@ And only the non-deleted gaps are updated
 
 ```Gherkin
 Given 15,000 rule IDs are being deleted
-When updateGapsByRuleIds runs
-Then it issues 2 update_by_query calls, of 10,000 and 5,000 rule IDs
+When softDeleteGapsByQuery runs
+Then it issues 2 softDeleteByQuery calls, of 10,000 and 5,000 rule IDs
 ```
 
 ### Ordering correctness
@@ -142,7 +147,7 @@ Then it issues 2 update_by_query calls, of 10,000 and 5,000 rule IDs
 ```Gherkin
 Given a rule exists with gap documents
 When the user deletes the rule
-Then the saved-object deletion happens before updateGapsByRuleIds is called
+Then the saved-object deletion happens before softDeleteGapsByQuery is called
 ```
 
 #### **Scenario: Gaps are preserved when saved-object deletion fails**
@@ -153,7 +158,7 @@ Then the saved-object deletion happens before updateGapsByRuleIds is called
 Given rules exist with gap documents
 And saved-object deletion fails for every rule
 When the user bulk-deletes the rules
-Then updateGapsByRuleIds is never called
+Then softDeleteGapsByQuery is never called
 And the gap documents remain unchanged
 ```
 
@@ -165,7 +170,7 @@ And the gap documents remain unchanged
 
 ```Gherkin
 Given rules exist with gap documents
-And updateGapsByRuleIds throws
+And softDeleteGapsByQuery throws
 When the user deletes the rules
 Then the API returns 200 with the rules deleted
 And the failure is logged
@@ -177,7 +182,7 @@ And the failure is logged
 
 ```Gherkin
 Given gap documents are being modified concurrently while a rule is deleted
-When updateGapsByRuleIds runs
+When softDeleteGapsByQuery runs
 Then the update_by_query uses conflicts: 'proceed'
 And version_conflicts and failures reported in the response are logged
 And rule deletion still succeeds

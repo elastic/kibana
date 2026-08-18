@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
-import { reject, isUndefined, isNumber, pick, isEmpty, get, chunk } from 'lodash';
+import { reject, isUndefined, isNumber, pick, isEmpty, get } from 'lodash';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
@@ -29,12 +29,34 @@ import type { EsNames } from './names';
 export const EVENT_BUFFER_TIME = 1000; // milliseconds
 export const EVENT_BUFFER_LENGTH = 100;
 
-// Chunk rule IDs to stay well below `index.max_terms_count` (default 65,536)
-// when building the `terms` filter for gap soft-deletion.
-export const MAX_RULE_IDS_PER_UPDATE_GAPS_QUERY = 10_000;
-// Throttle `_update_by_query` to avoid saturating write threadpools on the
-// shared event-log data stream while gaps are soft-deleted.
-export const UPDATE_GAPS_REQUESTS_PER_SECOND = 1000;
+// Default throttle for `_update_by_query` to avoid saturating write threadpools
+// on the shared event-log data stream.
+const DEFAULT_UPDATE_BY_QUERY_REQUESTS_PER_SECOND = 1000;
+
+export interface SoftDeleteByQueryParams {
+  query: estypes.QueryDslQueryContainer;
+  field: string;
+  conflicts?: estypes.Conflicts;
+  slices?: estypes.Slices;
+  requestsPerSecond?: number;
+}
+
+// Builds a null-safe Painless assignment that sets a nested boolean field to
+// `true`, but only when the field's parent object exists (a no-op otherwise), so
+// a malformed document cannot fail the batch.
+const buildSetFieldTrueScript = (field: string): string => {
+  const segments = field.split('.');
+  const assignPath = `ctx._source.${segments.join('.')}`;
+  const parents = segments.slice(0, -1);
+  if (parents.length === 0) {
+    return `${assignPath} = true;`;
+  }
+  const guardPath = `ctx._source.${parents[0]}${parents
+    .slice(1)
+    .map((segment) => `?.${segment}`)
+    .join('')}`;
+  return `if (${guardPath} != null) { ${assignPath} = true; }`;
+};
 
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
@@ -710,57 +732,31 @@ export class ClusterClientAdapter<
   }
 
   /**
-   * Soft-deletes every non-deleted gap document belonging to the given rule IDs
-   * with a single blocking `_update_by_query` per chunk. Best-effort: per-chunk
-   * failures are logged and swallowed so gap cleanup never blocks rule deletion.
+   * Sets a single boolean `field` to `true` on every document that matches
+   * `query`, using one blocking `_update_by_query` against the event log data
+   * stream. The field is only set when its parent object exists, so a malformed
+   * document cannot fail the batch. Chunking, logging, and error handling are the
+   * caller's responsibility.
    */
-  public async updateGapsByRuleIds(ruleIds: string[]): Promise<void> {
-    if (ruleIds.length === 0) {
-      return;
-    }
-
+  public async softDeleteByQuery({
+    query,
+    field,
+    conflicts = 'proceed',
+    slices = 'auto',
+    requestsPerSecond = DEFAULT_UPDATE_BY_QUERY_REQUESTS_PER_SECOND,
+  }: SoftDeleteByQueryParams): Promise<estypes.UpdateByQueryResponse> {
     const esClient = await this.elasticsearchClientPromise;
-
-    for (const ruleIdChunk of chunk(ruleIds, MAX_RULE_IDS_PER_UPDATE_GAPS_QUERY)) {
-      try {
-        const response = await esClient.updateByQuery({
-          index: this.esNames.dataStream,
-          conflicts: 'proceed',
-          slices: 'auto',
-          requests_per_second: UPDATE_GAPS_REQUESTS_PER_SECOND,
-          query: {
-            bool: {
-              must: [
-                { term: { 'event.action': 'gap' } },
-                { term: { 'event.provider': 'alerting' } },
-                { terms: { 'rule.id': ruleIdChunk } },
-              ],
-              must_not: [{ term: { 'kibana.alert.rule.gap.deleted': true } }],
-            },
-          },
-          script: {
-            source:
-              'if (ctx._source.kibana?.alert?.rule?.gap != null) { ctx._source.kibana.alert.rule.gap.deleted = true; }',
-            lang: 'painless',
-          },
-        });
-
-        if (response.failures?.length || response.version_conflicts) {
-          this.logger.warn(
-            `updateGapsByRuleIds: soft-deleted gaps for ${
-              ruleIdChunk.length
-            } rules with issues (updated=${response.updated ?? 0}, version_conflicts=${
-              response.version_conflicts ?? 0
-            }, failures=${response.failures?.length ?? 0})`
-          );
-        }
-      } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        this.logger.error(
-          `updateGapsByRuleIds: Failed to soft delete gaps for ${ruleIdChunk.length} rules: ${message}`
-        );
-      }
-    }
+    return esClient.updateByQuery({
+      index: this.esNames.dataStream,
+      conflicts,
+      slices,
+      requests_per_second: requestsPerSecond,
+      query,
+      script: {
+        source: buildSetFieldTrueScript(field),
+        lang: 'painless',
+      },
+    });
   }
 
   public async queryEventsBySavedObjectsSearchAfter(

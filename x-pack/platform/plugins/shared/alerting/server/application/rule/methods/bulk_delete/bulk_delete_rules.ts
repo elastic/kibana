@@ -40,6 +40,7 @@ import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
+import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -271,7 +272,11 @@ const bulkDeleteWithOCC = async (
   if (deletedRuleIds.length > 0) {
     try {
       const eventLogClient = await context.getEventLogClient();
-      await eventLogClient.updateGapsByRuleIds(deletedRuleIds);
+      await softDeleteGapsByQuery({
+        ruleIds: deletedRuleIds,
+        eventLogClient,
+        logger: context.logger,
+      });
     } catch (error) {
       // Failing to soft delete gaps should not block the rule deletion
       context.logger.error(

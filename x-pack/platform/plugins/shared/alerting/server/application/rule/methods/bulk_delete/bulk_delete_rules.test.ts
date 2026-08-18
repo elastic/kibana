@@ -32,10 +32,17 @@ import type { AlertsService } from '../../../../alerts_service';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
+import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => ({
+  softDeleteGapsByQuery: jest.fn(),
+}));
+
+const softDeleteGapsByQueryMock = softDeleteGapsByQuery as jest.Mock;
 
 const logger = loggerMock.create();
 const eventLogClient = eventLogClientMock.create();
@@ -186,7 +193,7 @@ describe('bulkDelete', () => {
       unsecuredSavedObjectsClient,
     });
 
-    expect(eventLogClient.updateGapsByRuleIds).toHaveBeenCalledWith(ruleIds);
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({ ruleIds, eventLogClient, logger });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
@@ -301,7 +308,7 @@ describe('bulkDelete', () => {
       ],
     });
 
-    eventLogClient.updateGapsByRuleIds.mockRejectedValueOnce(new Error('Boom!'));
+    softDeleteGapsByQueryMock.mockRejectedValueOnce(new Error('Boom!'));
 
     const result = await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
@@ -411,7 +418,11 @@ describe('bulkDelete', () => {
       unsecuredSavedObjectsClient,
     });
 
-    expect(eventLogClient.updateGapsByRuleIds).toHaveBeenCalledWith(['id1']);
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
+      ruleIds: ['id1'],
+      eventLogClient,
+      logger,
+    });
 
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
     expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
@@ -484,9 +495,17 @@ describe('bulkDelete', () => {
       expect.anything()
     );
 
-    expect(eventLogClient.updateGapsByRuleIds).toHaveBeenCalledTimes(2);
-    expect(eventLogClient.updateGapsByRuleIds).toHaveBeenNthCalledWith(1, ['id1']);
-    expect(eventLogClient.updateGapsByRuleIds).toHaveBeenNthCalledWith(2, ['id2']);
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(2);
+    expect(softDeleteGapsByQueryMock).toHaveBeenNthCalledWith(1, {
+      ruleIds: ['id1'],
+      eventLogClient,
+      logger,
+    });
+    expect(softDeleteGapsByQueryMock).toHaveBeenNthCalledWith(2, {
+      ruleIds: ['id2'],
+      eventLogClient,
+      logger,
+    });
 
     expect(result).toStrictEqual({
       rules: [returnedRuleForBulkOps1, returnedRuleForBulkOps2],
@@ -1139,8 +1158,12 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(eventLogClient.updateGapsByRuleIds).toHaveBeenCalledTimes(1);
-      expect(eventLogClient.updateGapsByRuleIds).toHaveBeenCalledWith(['id1', 'id3']);
+      expect(softDeleteGapsByQueryMock).toHaveBeenCalledTimes(1);
+      expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
+        ruleIds: ['id1', 'id3'],
+        eventLogClient,
+        logger,
+      });
     });
 
     test('should not soft-delete gaps when no rules are successfully deleted', async () => {
@@ -1153,7 +1176,7 @@ describe('bulkDelete', () => {
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(eventLogClient.updateGapsByRuleIds).not.toHaveBeenCalled();
+      expect(softDeleteGapsByQueryMock).not.toHaveBeenCalled();
     });
 
     test('should soft-delete gaps after SO deletion, not before', async () => {
@@ -1169,15 +1192,13 @@ describe('bulkDelete', () => {
         };
       });
 
-      eventLogClient.updateGapsByRuleIds.mockImplementation(async () => {
+      softDeleteGapsByQueryMock.mockImplementation(async () => {
         callOrder.push('softDeleteGaps');
       });
 
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
-      expect(callOrder.indexOf('bulkDeleteSo')).toBeLessThan(
-        callOrder.indexOf('softDeleteGaps')
-      );
+      expect(callOrder.indexOf('bulkDeleteSo')).toBeLessThan(callOrder.indexOf('softDeleteGaps'));
     });
   });
 });

@@ -13,10 +13,17 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
 }));
+
+jest.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => ({
+  softDeleteGapsByQuery: jest.fn(),
+}));
+
+const softDeleteGapsByQueryMock = softDeleteGapsByQuery as jest.Mock;
 
 const eventLogClient = eventLogClientMock.create();
 const eventLogger = eventLoggerMock.create();
@@ -201,7 +208,11 @@ describe('delete()', () => {
 
   test('attempts to soft delete gaps', async () => {
     await rulesClient.delete({ id: '1' });
-    expect(eventLogClient.updateGapsByRuleIds).toHaveBeenCalledWith(['1']);
+    expect(softDeleteGapsByQueryMock).toHaveBeenCalledWith({
+      ruleIds: ['1'],
+      eventLogClient,
+      logger: rulesClientParams.logger,
+    });
   });
 
   test('soft-deletes gaps after SO deletion, not before', async () => {
@@ -210,7 +221,7 @@ describe('delete()', () => {
       callOrder.push('deleteSo');
       return { success: true };
     });
-    eventLogClient.updateGapsByRuleIds.mockImplementation(async () => {
+    softDeleteGapsByQueryMock.mockImplementation(async () => {
       callOrder.push('softDeleteGaps');
     });
 
@@ -220,7 +231,7 @@ describe('delete()', () => {
   });
 
   test('swallows errors when soft deleting gaps fails', async () => {
-    eventLogClient.updateGapsByRuleIds.mockRejectedValueOnce(new Error('Boom!'));
+    softDeleteGapsByQueryMock.mockRejectedValueOnce(new Error('Boom!'));
     await rulesClient.delete({ id: '1' });
     expect(rulesClientParams.logger.error).toHaveBeenCalledWith(
       'delete(): Failed to soft delete gaps for rule 1: Boom!'
