@@ -37,6 +37,7 @@ describe('createInboundEventsClient (factory)', () => {
     createInboundEventsClient({
       logger,
       inboundEventsEnabled: true,
+      isActionTypeEnabled: jest.fn().mockReturnValue(true),
       maxEmitted: 25,
       emitConnectorEvents,
       getStartServices,
@@ -47,6 +48,7 @@ describe('createInboundEventsClient (factory)', () => {
       expect.objectContaining({
         logger,
         inboundEventsEnabled: true,
+        isActionTypeEnabled: expect.any(Function),
         maxEmitted: 25,
         emitConnectorEvents,
         inMemoryConnectors: [],

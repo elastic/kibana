@@ -39,7 +39,11 @@ describe('Inbound events HTTP API', () => {
   });
 
   it('serves the versioned public route and returns 404 fail-closed for unknown connector', async () => {
-    await getSupertest(kibanaServer.root, 'post', '/api/events/webhook/nonexistent-connector')
+    await getSupertest(
+      kibanaServer.root,
+      'post',
+      '/api/actions/events/webhook/nonexistent-connector'
+    )
       .set('elastic-api-version', INBOUND_EVENTS_API_VERSION)
       .set('kbn-xsrf', 'kibana')
       .send({ hello: 'world' })

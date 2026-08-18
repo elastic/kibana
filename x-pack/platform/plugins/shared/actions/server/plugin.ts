@@ -500,6 +500,8 @@ export class ActionsPlugin
           client: createInboundEventsClient({
             logger: this.logger,
             inboundEventsEnabled: true,
+            isActionTypeEnabled: (actionTypeId) =>
+              actionsConfigUtils.isActionTypeEnabled(actionTypeId),
             maxEmitted: actionsConfigUtils.getInboundEventsMaxEmitted(),
             getStartServices: core.getStartServices,
             inMemoryConnectors: this.inMemoryConnectors,

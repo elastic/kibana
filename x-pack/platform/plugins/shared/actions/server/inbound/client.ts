@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { IngestEventsRequestQuery } from '../../common/routes/events/apis/ingest';
 import type { InMemoryConnector } from '../types';
-import type { IngestInboundEventResult } from './ingest';
+import type { IngestInboundEventInput, IngestInboundEventResult } from './ingest';
 import { ingestInboundEvent } from './ingest';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
 
@@ -20,6 +19,7 @@ import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './
 interface InboundEventsClientInternalDeps {
   logger: Logger;
   inboundEventsEnabled: boolean;
+  isActionTypeEnabled: (actionTypeId: string) => boolean;
   maxEmitted: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
@@ -27,12 +27,7 @@ interface InboundEventsClientInternalDeps {
 }
 
 export interface InboundEventsClient {
-  ingest(params: {
-    request: KibanaRequest<unknown, IngestEventsRequestQuery, unknown>;
-    connectorTypeId: string;
-    connectorId: string;
-    spaceId: string;
-  }): Promise<IngestInboundEventResult>;
+  ingest(params: IngestInboundEventInput): Promise<IngestInboundEventResult>;
 }
 
 /**
@@ -42,13 +37,11 @@ export function buildInboundEventsClient(
   deps: InboundEventsClientInternalDeps
 ): InboundEventsClient {
   return {
-    ingest: ({ request, connectorTypeId, connectorId, spaceId }) =>
+    ingest: (input) =>
       ingestInboundEvent({
-        request,
-        connectorTypeId,
-        connectorId,
-        spaceId,
+        ...input,
         inboundEventsEnabled: deps.inboundEventsEnabled,
+        isActionTypeEnabled: deps.isActionTypeEnabled,
         maxEmitted: deps.maxEmitted,
         emitConnectorEvents: deps.emitConnectorEvents,
         logger: deps.logger,

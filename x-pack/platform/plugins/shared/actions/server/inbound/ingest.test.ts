@@ -99,6 +99,7 @@ describe('ingestInboundEvent', () => {
 
   const run = async (overrides?: {
     enabled?: boolean;
+    isActionTypeEnabled?: (actionTypeId: string) => boolean;
     maxEmitted?: number;
     connectorTypeId?: string;
     spaceId?: string;
@@ -106,18 +107,17 @@ describe('ingestInboundEvent', () => {
     headers?: Record<string, string>;
     emit?: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   }) => {
-    const request = httpServerMock.createKibanaRequest({
-      query: overrides?.query ?? { token },
-      headers: overrides?.headers ?? {},
-      body: { hello: 'world' },
-    });
     const response = httpServerMock.createResponseFactory();
     const result = await ingestInboundEvent({
-      request,
       connectorTypeId: overrides?.connectorTypeId ?? 'myConnector',
       connectorId,
       spaceId: overrides?.spaceId ?? spaceId,
+      requestId: 'req-1',
+      headers: overrides?.headers ?? {},
+      query: (overrides?.query ?? { token }) as { token?: string },
+      body: { hello: 'world' },
       inboundEventsEnabled: overrides?.enabled ?? true,
+      isActionTypeEnabled: overrides?.isActionTypeEnabled ?? (() => true),
       maxEmitted: overrides?.maxEmitted ?? INBOUND_EVENTS_MAX_EMITTED_DEFAULT,
       emitConnectorEvents: overrides?.emit ?? emitConnectorEvents,
       logger,
@@ -125,7 +125,7 @@ describe('ingestInboundEvent', () => {
       inMemoryConnectors: [],
     });
     mapIngestResultToResponse(result, response);
-    return { response, request, result };
+    return { response, result };
   };
 
   const expectOutcome = (level: 'debug' | 'info' | 'warn' | 'error', outcome: string) => {
@@ -156,6 +156,25 @@ describe('ingestInboundEvent', () => {
     const { response: res } = await run();
     expect(res.notFound).toHaveBeenCalled();
     expectOutcome('debug', 'no_spec');
+  });
+
+  it('returns 404 when the connector type is disabled in config', async () => {
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(jest.fn()) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({ isActionTypeEnabled: () => false });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(getUnsecuredSavedObjectsClient).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith(
+      expect.stringContaining('outcome=no_spec'),
+      expect.objectContaining({
+        inboundEvents: expect.objectContaining({
+          outcome: 'no_spec',
+          detail: 'type_disabled',
+        }),
+      })
+    );
   });
 
   it('returns 404 when loadInboundConnector returns undefined (type mismatch / miss)', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   getConnectorSpec,
   MAX_CONNECTOR_TYPE_ID_LENGTH,
@@ -30,12 +30,19 @@ export type IngestInboundEventResult =
   | { status: 'error'; statusCode: 500; body: string }
   | { status: 'accepted'; body: { ok: true } };
 
-export interface IngestInboundEventParams {
-  request: KibanaRequest<unknown, IngestEventsRequestQuery, unknown>;
+export interface IngestInboundEventInput {
   connectorTypeId: string;
   connectorId: string;
   spaceId: string;
+  requestId?: string;
+  headers: Record<string, string | string[] | undefined>;
+  query: IngestEventsRequestQuery;
+  body: unknown;
+}
+
+export interface IngestInboundEventParams extends IngestInboundEventInput {
   inboundEventsEnabled: boolean;
+  isActionTypeEnabled: (actionTypeId: string) => boolean;
   maxEmitted: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   logger: Logger;
@@ -52,11 +59,15 @@ const stripIngestTokenHash = (config: Record<string, unknown>): Record<string, u
  * Orchestrates inbound connector event ingest (no HTTP mapping).
  */
 export async function ingestInboundEvent({
-  request,
   connectorTypeId: connectorTypeIdParam,
   connectorId,
   spaceId,
+  requestId,
+  headers,
+  query,
+  body,
   inboundEventsEnabled,
+  isActionTypeEnabled,
   maxEmitted,
   emitConnectorEvents,
   logger,
@@ -68,7 +79,7 @@ export async function ingestInboundEvent({
     spaceId,
     connectorId,
     connectorTypeId,
-    requestId: request.id,
+    requestId,
   };
 
   if (!inboundEventsEnabled) {
@@ -85,6 +96,15 @@ export async function ingestInboundEvent({
   const spec = getConnectorSpec(connectorTypeId);
   if (!spec?.events) {
     logInboundIngressOutcome(logger, { ...baseLog, outcome: 'no_spec' });
+    return { status: 'not_found' };
+  }
+
+  if (!isActionTypeEnabled(connectorTypeId)) {
+    logInboundIngressOutcome(logger, {
+      ...baseLog,
+      outcome: 'no_spec',
+      detail: 'type_disabled',
+    });
     return { status: 'not_found' };
   }
 
@@ -114,8 +134,8 @@ export async function ingestInboundEvent({
 
   // Query is validated by the route schema before ingest runs.
   const providedToken = extractIngestToken({
-    query: request.query,
-    headers: request.headers,
+    query,
+    headers,
   });
   if (
     !providedToken ||
@@ -136,7 +156,7 @@ export async function ingestInboundEvent({
       connectorTypeId,
       spaceId,
       config: stripIngestTokenHash(connector.config),
-      rawBody: request.body,
+      rawBody: body,
       log: logger,
     });
 

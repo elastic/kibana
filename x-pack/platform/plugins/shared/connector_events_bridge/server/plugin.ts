@@ -34,10 +34,10 @@ export class ConnectorEventsBridgePlugin
   ) {
     const configUtils = actions.getActionsConfigurationUtilities();
     if (!configUtils.isInboundEventsEnabled()) {
-      this.logger.info('Inbound events disabled; skipping connector event emitter registration');
       return {};
     }
 
+    this.logger.info('Inbound events enabled; registering connector event emitter');
     registerWorkflowsConnectorEventEmitter({
       actions,
       getWorkflowsExtensionsStart: async () => {

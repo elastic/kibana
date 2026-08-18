@@ -22,7 +22,7 @@ describe('ConnectorEventsBridgePlugin', () => {
   };
 
   it('does not register when inbound events are disabled', () => {
-    const { plugin } = createPlugin();
+    const { plugin, logger } = createPlugin();
     const actions = actionsMock.createSetup();
     const configUtils = actionsConfigMock.create();
     configUtils.isInboundEventsEnabled.mockReturnValue(false);
@@ -35,10 +35,11 @@ describe('ConnectorEventsBridgePlugin', () => {
     plugin.setup(core, { actions });
 
     expect(actions.registerConnectorEventEmitter).not.toHaveBeenCalled();
+    expect(logger.info).not.toHaveBeenCalled();
   });
 
   it('registers the workflows emitter when inbound events are enabled', () => {
-    const { plugin } = createPlugin();
+    const { plugin, logger } = createPlugin();
     const actions = actionsMock.createSetup();
     const configUtils = actionsConfigMock.create();
     configUtils.isInboundEventsEnabled.mockReturnValue(true);
@@ -51,5 +52,8 @@ describe('ConnectorEventsBridgePlugin', () => {
     plugin.setup(core, { actions });
 
     expect(actions.registerConnectorEventEmitter).toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledWith(
+      'Inbound events enabled; registering connector event emitter'
+    );
   });
 });

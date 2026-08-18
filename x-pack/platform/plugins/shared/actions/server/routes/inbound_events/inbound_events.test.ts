@@ -39,6 +39,7 @@ describe('inboundEventsRoute', () => {
     const ingest = jest.fn();
     const { router, addVersionMock } = registerRoute({ ingest });
 
+    expect(INBOUND_EVENTS_API_PATH).toBe('/api/actions/events/{connector_type_id}/{connector_id}');
     expect(router.versioned.post).toHaveBeenCalledWith(
       expect.objectContaining({
         path: INBOUND_EVENTS_API_PATH,
@@ -46,6 +47,11 @@ describe('inboundEventsRoute', () => {
         security: INBOUND_EVENTS_SECURITY,
         options: expect.objectContaining({
           xsrfRequired: false,
+          tags: ['oas-tag:connectors'],
+          availability: {
+            since: '9.6.0',
+            stability: 'experimental',
+          },
           body: expect.objectContaining({
             maxBytes: 1024 * 1024,
           }),
@@ -76,10 +82,13 @@ describe('inboundEventsRoute', () => {
     await handler({}, request, res);
 
     expect(ingest).toHaveBeenCalledWith({
-      request,
       connectorTypeId: 'webhook',
       connectorId: 'c1',
       spaceId: 'default',
+      requestId: request.id,
+      headers: request.headers,
+      query: request.query,
+      body: request.body,
     });
     expect(res.accepted).toHaveBeenCalledWith({ body: { ok: true } });
   });

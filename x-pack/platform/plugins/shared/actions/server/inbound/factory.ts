@@ -22,6 +22,7 @@ export type { InboundEventsClient } from './client';
 export interface InboundEventsClientArgs {
   logger: Logger;
   inboundEventsEnabled: boolean;
+  isActionTypeEnabled: (actionTypeId: string) => boolean;
   maxEmitted: number;
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getStartServices: CoreSetup['getStartServices'];

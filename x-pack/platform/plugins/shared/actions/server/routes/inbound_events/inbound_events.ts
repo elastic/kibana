@@ -57,6 +57,10 @@ export function inboundEventsRoute({
       options: {
         xsrfRequired: false,
         tags: ['oas-tag:connectors'],
+        availability: {
+          since: '9.6.0',
+          stability: 'experimental',
+        },
         body: {
           accepts: ['application/json', 'application/*+json', '*/*'],
           maxBytes: maxBodyBytes,
@@ -91,10 +95,13 @@ export function inboundEventsRoute({
       async (_context, request: InboundEventsHttpRequest, response) => {
         const { connector_type_id: connectorTypeId, connector_id: connectorId } = request.params;
         const result = await inboundEventsClient.ingest({
-          request,
           connectorTypeId,
           connectorId,
           spaceId: getSpaceId(request),
+          requestId: request.id,
+          headers: request.headers,
+          query: request.query,
+          body: request.body,
         });
         return mapIngestResultToResponse(result, response);
       }
