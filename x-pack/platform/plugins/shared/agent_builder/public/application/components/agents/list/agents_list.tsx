@@ -178,12 +178,12 @@ export const AgentsList: React.FC = () => {
               }),
       });
     },
-    onError: (err) => {
+    onError: (err: Error & { body?: { message?: string } }) => {
       addErrorToast({
         title: i18n.translate('xpack.agentBuilder.agents.spaceDefaultErrorToast', {
           defaultMessage: 'Failed to update the space default agent',
         }),
-        text: err.message,
+        text: err.body?.message ?? err.message,
       });
     },
   });
