@@ -128,10 +128,16 @@ export const EditTransformRetentionPolicy: FC = () => {
     }
 
     setIsSourceIndexUnavailable(false);
+
+    if (!cpsManager) {
+      addPreviewErrorToast();
+      return;
+    }
+
     let isMounted = true;
 
     void cpsManager
-      ?.fetchProjects(PROJECT_ROUTING.ORIGIN)
+      .fetchProjects(PROJECT_ROUTING.ORIGIN)
       .then((projectsData) => {
         const shouldSuppressErrorToast = isLinkedProjectScopedSourceIndexUnavailableError(
           transformsPreviewError,
@@ -147,7 +153,11 @@ export const EditTransformRetentionPolicy: FC = () => {
           addPreviewErrorToast();
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        if (isMounted) {
+          addPreviewErrorToast();
+        }
+      });
 
     return () => {
       isMounted = false;
