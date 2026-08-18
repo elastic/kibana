@@ -810,6 +810,23 @@ describe('executeRuleOperations', () => {
       expect(result.data.metadata?.name).toBe('My Rule');
     });
 
+    it('passes validation for a complete rule with dashboard artifacts', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1'] },
+        { operation: 'validate' },
+      ];
+
+      const result = await executeRuleOperations(validRule, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-1' },
+        },
+      ]);
+    });
+
     it('throws RuleOperationValidationError when kind is missing', async () => {
       const ops: RuleOperation[] = [{ operation: 'validate' }];
 
@@ -921,6 +938,116 @@ describe('executeRuleOperations', () => {
       const result = await executeRuleOperations({}, ops);
 
       expect(result.data.schedule).toEqual({ every: '1m', lookback: '5m' });
+    });
+  });
+
+  describe('set_dashboards', () => {
+    it('stores dashboard IDs as dashboard artifacts matching the create/update API', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-1' },
+        },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-2' },
+        },
+      ]);
+      expect(result.data.artifacts?.[0].id).not.toBe(result.data.artifacts?.[1].id);
+    });
+
+    it('replaces previously linked dashboards and preserves other artifacts', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboardId: 'old-dash' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: ['new-dash'] }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'new-dash' },
+        },
+      ]);
+    });
+
+    it('reuses the existing artifact id when the same dashboard is already attached', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [{ id: 'dashboard-keep', type: 'dashboard', data: { dashboardId: 'dash-1' } }],
+      };
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'dashboard-keep', type: 'dashboard', data: { dashboardId: 'dash-1' } },
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-2' },
+        },
+      ]);
+    });
+
+    it('deduplicates dashboard IDs', async () => {
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-1'] },
+      ];
+
+      const result = await executeRuleOperations({}, ops);
+
+      expect(result.data.artifacts).toHaveLength(1);
+      expect(result.data.artifacts?.[0].data).toEqual({ dashboardId: 'dash-1' });
+    });
+
+    it('unlinks all dashboards when passed an empty array', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: [
+          { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+          { id: 'dashboard-old', type: 'dashboard', data: { dashboardId: 'old-dash' } },
+        ],
+      };
+      const ops: RuleOperation[] = [{ operation: 'set_dashboards', dashboard_ids: [] }];
+
+      const result = await executeRuleOperations(existing, ops);
+
+      expect(result.data.artifacts).toEqual([
+        { id: 'runbook-1', type: 'runbook', data: { content: 'Restart the service' } },
+      ]);
+    });
+
+    it('throws when merged artifacts would exceed the API cap', async () => {
+      const existing: Partial<RuleAttachmentData> = {
+        artifacts: Array.from({ length: 99 }, (_, index) => ({
+          id: `runbook-${index}`,
+          type: 'runbook',
+          data: { content: `step ${index}` },
+        })),
+      };
+      const ops: RuleOperation[] = [
+        { operation: 'set_dashboards', dashboard_ids: ['dash-1', 'dash-2'] },
+      ];
+
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(
+        RuleOperationValidationError
+      );
+      await expect(executeRuleOperations(existing, ops)).rejects.toThrow(/at most 100 artifacts/);
     });
   });
 });

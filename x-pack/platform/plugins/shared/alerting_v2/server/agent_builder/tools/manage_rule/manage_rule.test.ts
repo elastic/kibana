@@ -61,6 +61,13 @@ describe('manageRuleTool', () => {
     tool = manageRuleTool({ logger: logger as unknown as LoggerServiceContract });
   });
 
+  it('describes operations from the schema helpers', () => {
+    expect(tool.description).toContain('Use `set_metadata`');
+    expect(tool.description).toContain('Use `set_dashboards`');
+    expect(tool.description).toContain('data: { dashboardId }');
+    expect(tool.description).not.toMatch(/1\. set_metadata/);
+  });
+
   describe('handler', () => {
     it('creates a new rule attachment with valid operations', async () => {
       const ctx = createContext();
@@ -241,6 +248,42 @@ describe('manageRuleTool', () => {
         data: { no_data_strategy?: string };
       };
       expect(addCall.data.no_data_strategy).toBe('last_known_status');
+    });
+
+    it('stores set_dashboards IDs as dashboard artifacts on the rule attachment', async () => {
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Dashboard Rule' },
+            { operation: 'set_dashboards', dashboard_ids: ['dash-abc'] },
+          ],
+        },
+        ctx
+      );
+
+      const addCall = ctx.attachments.add.mock.calls[0][0] as {
+        data: {
+          artifacts?: Array<{ id: string; type: string; data: { dashboardId?: string } }>;
+        };
+      };
+      expect(addCall.data.artifacts).toEqual([
+        {
+          id: expect.stringMatching(/^dashboard-/),
+          type: 'dashboard',
+          data: { dashboardId: 'dash-abc' },
+        },
+      ]);
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: { ruleAttachment?: { dashboards?: string[] } };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(results[0].data?.ruleAttachment?.dashboards).toEqual(['dash-abc']);
     });
 
     it('updates an persisted attachment when ruleAttachmentId is provided', async () => {
