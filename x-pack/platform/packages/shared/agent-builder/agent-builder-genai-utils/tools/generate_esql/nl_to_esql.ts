@@ -6,6 +6,7 @@
  */
 
 import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
+import type { ChatCompleteCacheControl } from '@kbn/inference-common';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { ModelProvider, ScopedModel } from '@kbn/agent-builder-server';
@@ -112,6 +113,14 @@ export interface GenerateEsqlOptions {
    * If true, external ES|QL datasets are considered when discovering and resolving the target.
    */
   includeDatasets?: boolean;
+  /**
+   * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
+   */
+  sessionId?: string;
+  /**
+   * Prompt-cache directive. Only honored by EIS-backed connectors.
+   */
+  cacheControl?: ChatCompleteCacheControl;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -127,6 +136,8 @@ export const generateEsql = async ({
   timeRange: inputTimeRange,
   disableNamedParams,
   includeDatasets = false,
+  sessionId,
+  cacheControl,
   model: inputModel,
   modelProvider,
   esClient,
@@ -148,6 +159,8 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
+    sessionId,
+    cacheControl,
   });
 
   return withActiveInferenceSpan(
@@ -155,6 +168,15 @@ export const generateEsql = async ({
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+        ...(cacheControl
+          ? {
+              [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
+              [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl
+                ? cacheControl.ttl
+                : undefined,
+            }
+          : {}),
+        ...(sessionId ? { [ElasticGenAIAttributes.CacheControlSessionId]: sessionId } : {}),
       },
     },
     async () => {

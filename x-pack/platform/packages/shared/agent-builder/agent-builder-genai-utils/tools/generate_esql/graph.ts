@@ -9,6 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { StateGraph, Annotation } from '@langchain/langgraph';
 import type { TimeRange } from '@kbn/agent-builder-common';
 import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { ChatCompleteCacheControl } from '@kbn/inference-common';
+import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
@@ -74,6 +76,8 @@ export const createNlToEsqlGraph = ({
   documentation,
   esqlCallbacks,
   includeDatasets = false,
+  sessionId,
+  cacheControl,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
@@ -81,6 +85,8 @@ export const createNlToEsqlGraph = ({
   documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
   includeDatasets?: boolean;
+  sessionId?: string;
+  cacheControl?: ChatCompleteCacheControl;
 }) => {
   const resolveTarget = async (state: StateType) => {
     const resolvedResource = await resolveResourceForEsqlWithSamplingStats({
@@ -93,23 +99,27 @@ export const createNlToEsqlGraph = ({
     return { resource: resolvedResource };
   };
 
+  const modelCallConfig: Partial<InferenceChatModelCallOptions> = { sessionId, cacheControl };
+
   // request doc step - retrieve the list of relevant commands and functions that may be useful to generate the query
   const requestDocumentation = async (state: StateType) => {
-    const requestDocModel = model.chatModel.withStructuredOutput(
-      z
-        .object({
-          commands: z
-            .array(z.string())
-            .optional()
-            .describe('ES|QL source and processing commands to get documentation for.'),
-          functions: z
-            .array(z.string())
-            .optional()
-            .describe('ES|QL functions to get documentation for.'),
-        })
-        .describe('Tool to use to request ES|QL documentation'),
-      { name: 'request_documentation' }
-    );
+    const requestDocModel = model.chatModel
+      .withStructuredOutput(
+        z
+          .object({
+            commands: z
+              .array(z.string())
+              .optional()
+              .describe('ES|QL source and processing commands to get documentation for.'),
+            functions: z
+              .array(z.string())
+              .optional()
+              .describe('ES|QL functions to get documentation for.'),
+          })
+          .describe('Tool to use to request ES|QL documentation'),
+        { name: 'request_documentation' }
+      )
+      .withConfig(modelCallConfig);
 
     const { commands = [], functions = [] } = await requestDocModel.invoke(
       createRequestDocumentationPrompt({
@@ -135,7 +145,7 @@ export const createNlToEsqlGraph = ({
 
   // generate esql step - generate the esql query based on the doc and the user's input
   const generateEsql = async (state: StateType) => {
-    const generateModel = model.chatModel;
+    const generateModel = model.chatModel.withConfig(modelCallConfig);
 
     const response = await generateModel.invoke(
       createGenerateEsqlPrompt({
