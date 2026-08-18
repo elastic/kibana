@@ -9,6 +9,7 @@ import type {
   AlertEpisodeStatus,
   AlertEventSeverity,
 } from '../../resources/datastreams/alert_events';
+import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import type { DispatchFailureReason } from './steps/constants';
 
 export type RuleId = string;
@@ -50,6 +51,7 @@ export interface DispatcherExecutionParams {
   /** Current count of consecutive ticks in which the watermark did not advance. */
   stuckTicks?: number;
   signal?: AbortSignal;
+  logger: LoggerServiceContract;
 }
 
 export interface DispatcherExecutionResult {
@@ -165,6 +167,7 @@ export interface DispatcherPipelineInput {
   readonly windowEnd: Date;
   readonly executionUuid: string;
   readonly signal: AbortSignal;
+  readonly logger: LoggerServiceContract;
 }
 
 export interface DispatcherPipelineState {
@@ -190,7 +193,7 @@ export interface DispatcherPipelineState {
 export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
 
 export type DispatcherStepOutput =
-  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }
+  | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input' | 'logger'>> }
   | { type: 'halt'; reason: DispatcherHaltReason };
 
 export interface DispatcherStep {

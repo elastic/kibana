@@ -6,6 +6,7 @@
  */
 
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import type { DispatcherServiceContract } from './dispatcher';
 import { DispatcherTaskRunner } from './task_runner';
 import { createDispatcherPipelineInput } from './fixtures/test_utils';
@@ -33,7 +34,7 @@ describe('DispatcherTaskRunner', () => {
 
   beforeEach(() => {
     dispatcherService = { run: jest.fn() };
-    runner = new DispatcherTaskRunner(dispatcherService);
+    runner = new DispatcherTaskRunner(dispatcherService, createLoggerService().loggerService);
     signal = new AbortController().signal;
   });
 
@@ -75,6 +76,8 @@ describe('DispatcherTaskRunner', () => {
 
       const [params] = dispatcherService.run.mock.calls[0];
       expect(params.stuckTicks).toBe(0);
+      expect(params.signal).toBe(signal);
+      expect(params.logger).toBeDefined();
     });
 
     it('returns updated eventWatermark and stuckTicks in state', async () => {

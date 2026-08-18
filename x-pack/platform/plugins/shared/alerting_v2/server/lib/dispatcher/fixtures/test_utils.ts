@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import type {
   ActionPolicy,
   AlertEpisode,
@@ -32,16 +33,18 @@ export function createDispatcherPipelineInput(
     windowEnd: new Date('2026-01-22T07:35:00.000Z'),
     executionUuid: '00000000-0000-4000-8000-000000000000',
     signal: new AbortController().signal,
+    logger: createLoggerService().loggerService,
     ...overrides,
   };
 }
 
 export function createDispatcherPipelineState(
-  state?: Partial<DispatcherPipelineState>
+  state: Partial<DispatcherPipelineState> = {}
 ): DispatcherPipelineState {
+  const input = state.input ?? createDispatcherPipelineInput();
   return {
-    input: createDispatcherPipelineInput(),
     ...state,
+    input,
   };
 }
 
