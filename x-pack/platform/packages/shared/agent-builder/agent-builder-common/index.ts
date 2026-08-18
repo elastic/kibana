@@ -149,9 +149,12 @@ export {
   type AgentDeleteRequest,
 } from './agents';
 export {
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  isConversationAccessControlRole,
   normalizeConversationAccessControl,
   type RoundInput,
   type ConverseInput,
@@ -340,3 +343,10 @@ export {
   OAuthClientType,
 } from './oauth_clients';
 export { MCP_SERVER_PATH } from './mcp';
+export type {
+  ConversationTemplate,
+  ConversationTemplateInputType,
+  ConversationTemplateFieldDefinition,
+  MetadataFieldValue,
+  SerializedMetadataValue,
+} from './templates';
