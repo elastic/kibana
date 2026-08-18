@@ -96,6 +96,7 @@ pivot:
       - 'Feature:Reporting'
       - 'Team:Reporting Services'
       - 'Feature:Alerting/v2'
+      - 'Feature:AlertingV2'
     'Dashboards and visualizations':
       - 'Feature:Dashboard'
       - 'Feature:Drilldowns'
