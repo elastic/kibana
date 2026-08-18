@@ -33,6 +33,9 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     fi
     .buildkite/scripts/common/activate_service_account.sh --unset-impersonation
   fi
+elif [[ "$(pwd)" == "/dev/shm"* && -f ~/.kibana/node_modules.tar.zst ]]; then
+  echo "Extracting ~/.kibana/node_modules.tar.zst"
+  tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
 fi
 
 # TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
