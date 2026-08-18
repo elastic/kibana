@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { getDefaultTransport, getRequiredTextFields } from './field_config';
 import type { TransportType } from './field_config';
@@ -41,7 +42,7 @@ interface PersistedState {
   instances?: ServiceInstance[];
 }
 
-export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
+export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
 
 /** Derive the canonical base instances (one per serviceId) from the selected ids list. */
 function baseInstances(selectedServiceIds: string[]): ServiceInstance[] {
