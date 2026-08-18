@@ -15,8 +15,8 @@ import {
   getLensRuntimeStateMock,
   createUnifiedSearchApi,
   getLensInternalApiMock,
+  getTextBasedLensSerializedStateMock,
 } from '../mocks';
-import { createEmptyLensState } from '../helper';
 import { mockDrilldownsManager } from '@kbn/embeddable-plugin/public/mocks';
 const DATAVIEW_ID = 'myDataView';
 
@@ -80,11 +80,7 @@ describe('Dashboard actions', () => {
     });
 
     it('should expose drilldowns for ES|QL chart types', async () => {
-      const api = setupActionsApi(
-        createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
-          esql: 'FROM index',
-        })
-      );
+      const api = setupActionsApi(getTextBasedLensSerializedStateMock());
       expect(api.setDrilldowns).toBeDefined();
     });
   });
@@ -128,9 +124,7 @@ describe('Dashboard actions', () => {
 
     it('should expose the "explore in discover" capability for ES|QL chart types', async () => {
       const api = setupActionsApi(
-        createEmptyLensState('lnsXY', faker.lorem.words(), faker.lorem.text(), {
-          esql: 'FROM index',
-        }),
+        getTextBasedLensSerializedStateMock(),
         visualizationContextMockOverrides
       );
       api.loadViewUnderlyingData();

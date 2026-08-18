@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import {
   EVENT_ANNOTATION_GROUP_TYPE,
   type EventAnnotationGroupConfig,
@@ -60,10 +60,9 @@ export function createEmptyLensState(
   visualizationType: null | string = null,
   title?: LensSerializedState['title'],
   description?: LensSerializedState['description'],
-  query?: LensSerializedState['query'],
+  query?: Query,
   filters?: LensSerializedState['filters']
 ): LensRuntimeState {
-  const isTextBased = query && isOfAggregateQueryType(query);
   return {
     attributes: {
       version: LENS_ITEM_LATEST_VERSION,
@@ -72,12 +71,14 @@ export function createEmptyLensState(
       visualizationType,
       references: [],
       state: {
-        // ES|QL lives exclusively on the text-based datasource layers; the
-        // slot only ever carries a chart-scoped KQL/Lucene filter.
-        query: !query || isTextBased ? { query: '', language: 'kuery' } : query,
+        // chart-scoped KQL/Lucene filter only; ES|QL initial state is never
+        // built here — it enters documents exclusively via the suggestion
+        // pipeline (`getLensAttributesFromSuggestion`), which writes the
+        // query into `datasourceStates.textBased.layers`.
+        query: query ?? { query: '', language: 'kuery' },
         filters: filters || [],
         internalReferences: [],
-        datasourceStates: { ...(isTextBased ? { textBased: {} } : { formBased: {} }) },
+        datasourceStates: { formBased: {} },
         visualization: {},
       },
     },
