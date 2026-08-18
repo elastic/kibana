@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WORKFLOW_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { type WorkflowDetailDto, WorkflowsManagementApiActions } from '@kbn/workflows';
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,

@@ -9,10 +9,10 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import type { SmlTypeDefinition } from '@kbn/agent-builder-sml-plugin/server';
 import {
   RULE_ATTACHMENT_TYPE,
-  RULE_SML_TYPE,
   ruleAttachmentDataSchema,
   getBreachEsqlQuery,
 } from '@kbn/alerting-v2-schemas';
+import { RULE_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';

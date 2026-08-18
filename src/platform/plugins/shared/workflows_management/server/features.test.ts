@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows';
+import { WORKFLOW_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
 import { WorkflowsManagementFeatureConfig } from './features';
 

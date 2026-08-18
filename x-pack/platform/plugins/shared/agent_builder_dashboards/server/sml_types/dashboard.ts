@@ -17,8 +17,8 @@ import type {
   DashboardSection,
   DashboardState,
 } from '@kbn/dashboard-plugin/server';
+import { DASHBOARD_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 
-const DASHBOARD_SML_TYPE = 'dashboard';
 const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 
 interface CreateDashboardSmlTypeOptions {

@@ -9,6 +9,7 @@
 // TODO: remove eslint exceptions once we have a better way to handle this
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { WORKFLOW_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type {
   SmlIndexAction,
   SmlIndexAttachmentParams,
@@ -38,7 +39,6 @@ import type {
   WorkflowListDto,
   WorkflowYaml,
 } from '@kbn/workflows';
-import { WORKFLOW_SML_TYPE } from '@kbn/workflows/common/constants';
 import {
   WorkflowExecutionInvalidStatusError,
   WorkflowNotFoundError,

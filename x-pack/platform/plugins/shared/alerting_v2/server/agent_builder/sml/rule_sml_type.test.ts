@@ -10,7 +10,8 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { RULE_ATTACHMENT_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
+import { RULE_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import type { RulesClient } from '../../lib/rules_client';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';

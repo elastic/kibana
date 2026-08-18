@@ -17,7 +17,10 @@ import {
   ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_RULES_APP_ID,
 } from '@kbn/alerting-v2-constants';
-import { ACTION_POLICY_SML_TYPE, RULE_SML_TYPE } from '@kbn/alerting-v2-schemas';
+import {
+  ACTION_POLICY_SML_TYPE,
+  RULE_SML_TYPE,
+} from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
