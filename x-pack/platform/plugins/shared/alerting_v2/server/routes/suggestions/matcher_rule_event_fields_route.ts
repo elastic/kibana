@@ -7,22 +7,20 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
-import { z } from '@kbn/zod/v4';
+import {
+  errorResponseSchema,
+  matcherDataFieldsQuerySchema,
+  matcherDataFieldsResponseSchema,
+  type MatcherDataFieldsQuery,
+} from '@kbn/alerting-v2-schemas';
 import { inject, injectable } from 'inversify';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { MatcherSuggestionsService } from '../../lib/services/matcher_suggestions_service/matcher_suggestions_service';
 import { ALERTING_V2_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { matcherDataFieldsOasExamples } from './matcher_data_fields_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
-
-const matcherRuleEventFieldsQuerySchema = z.object({
-  matcher: z.string().min(1).max(2048).optional(),
-});
-
-const matcherRuleEventFieldsResponseSchema = z
-  .array(z.string())
-  .describe('The list of available rule event field names');
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 @injectable()
 export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
@@ -34,21 +32,22 @@ export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
     },
   };
   static routeOptions = {
-    summary: 'Get rule event fields suggestions',
-    description: 'Get suggestions for field names from the .rule-events data stream.',
+    summary: 'Get matcher data fields suggestions',
+    description: 'Get suggestions for matcher data fields.',
+    oasOperationObject: matcherDataFieldsOasExamples,
   } as const;
   static schemas = {
     request: {
-      query: matcherRuleEventFieldsQuerySchema,
+      query: matcherDataFieldsQuerySchema,
     },
     response: {
       200: {
-        body: () => matcherRuleEventFieldsResponseSchema,
-        description: 'Returns the available rule event field names.',
+        body: () => matcherDataFieldsResponseSchema,
+        description: 'Returns the available matcher data field names.',
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid query parameters.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
     },
   };
@@ -58,11 +57,7 @@ export class MatcherRuleEventFieldsRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<
-      unknown,
-      z.infer<typeof matcherRuleEventFieldsQuerySchema>,
-      unknown
-    >,
+    private readonly request: KibanaRequest<unknown, MatcherDataFieldsQuery, unknown>,
     @inject(MatcherSuggestionsService)
     private readonly suggestionsService: MatcherSuggestionsService
   ) {

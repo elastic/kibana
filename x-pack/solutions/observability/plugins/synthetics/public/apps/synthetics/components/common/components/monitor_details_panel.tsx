@@ -24,6 +24,7 @@ import { PanelWithTitle } from './panel_with_title';
 import { MonitorEnabled } from '../../monitors_page/management/monitor_list_table/monitor_enabled';
 import { getMonitorAction } from '../../../state';
 import { LocationsStatus } from '../../monitor_details/monitor_summary/locations_status';
+import { MonitorAssignedAgents } from './monitor_assigned_agents';
 import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
@@ -181,6 +182,8 @@ export const MonitorDetailsPanel = ({
             </EuiDescriptionListDescription>
           </>
         )}
+
+        {!hideLocations && <MonitorAssignedAgents monitorLocations={monitor.locations} />}
 
         <EuiDescriptionListTitle>{TAGS_LABEL}</EuiDescriptionListTitle>
         <EuiDescriptionListDescription>

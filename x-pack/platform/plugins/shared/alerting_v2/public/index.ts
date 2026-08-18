@@ -22,19 +22,21 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import {
+  ALERTING_V2_ENABLED_SETTING_ID,
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
+  ALERTING_V2_RULE_LIBRARY_APP_ID,
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
   ALERTING_V2_EXECUTION_HISTORY_APP_ID,
-} from './constants';
+} from '@kbn/alerting-v2-constants';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { UserCapabilities } from './services/user_capabilities';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
+import { registerCreateAlertEventStep } from './lib/workflow_extensions/register_create_alert_event_step';
 import { disableAlertingManagementUi } from './lib/disable_management_ui';
 import { setKibanaServices } from './kibana_services';
 import type { AlertingV2UIConfig } from './kibana_services';
@@ -73,6 +75,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
     ) as WorkflowsExtensionsPublicPluginSetup;
 
     registerTriggerDefinitions(workflowsExtensionsSetup);
+    registerCreateAlertEventStep(workflowsExtensionsSetup);
 
     const management = container.get(PluginSetup('management')) as ManagementSetup;
     const alertingSection = management.sections.register({
@@ -98,11 +101,28 @@ const pluginModule = new ContainerModule(({ bind }) => {
     });
 
     alertingSection.registerApp({
+      id: ALERTING_V2_RULE_LIBRARY_APP_ID,
+      title: i18n.translate('xpack.alertingV2.management.ruleLibraryNavTitle', {
+        defaultMessage: 'Rule library',
+      }),
+      order: 2,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountRuleLibraryApp } = await import('./application/mount');
+        return mountRuleLibraryApp({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
+    });
+
+    alertingSection.registerApp({
       id: ALERTING_V2_EPISODES_APP_ID,
       title: i18n.translate('xpack.alertingV2.management.alertEpisodesNavTitle', {
         defaultMessage: 'Alerts',
       }),
-      order: 2,
+      order: 3,
       async mount(params) {
         const [coreStart] = await getStartServices();
         const { mountEpisodesApp } = await import('./application/mount');
@@ -119,7 +139,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
       title: i18n.translate('xpack.alertingV2.management.actionPoliciesNavTitle', {
         defaultMessage: 'Action Policies',
       }),
-      order: 3,
+      order: 4,
       async mount(params) {
         const [coreStart] = await getStartServices();
         const { mountActionPoliciesApp } = await import('./application/mount');

@@ -16,6 +16,7 @@ export interface ApiEndpointContext {
   isManagedOtlpServiceAvailable: boolean;
   isServerless: boolean;
   managedOtlpPrwEndpointEnabled: boolean;
+  vendorEndpointsEnabled: boolean;
 }
 
 export interface ApiEndpointDefinition {
@@ -156,7 +157,7 @@ export const VENDOR_ENDPOINTS: readonly VendorEndpointDefinition[] = [
     ),
     logo: 'supabase',
     placements: ['opentelemetryTab', 'morePopover'],
-    getUrl: (context) => getManagedVendorUrl(context, '/supabase/v1/logs'),
+    getUrl: (context) => getManagedVendorUrl(context, '/inputs/supabase/_default_/v1/logs'),
   },
   {
     id: ApiEndpointId.Vercel,
@@ -169,7 +170,7 @@ export const VENDOR_ENDPOINTS: readonly VendorEndpointDefinition[] = [
     logo: 'vercel_black',
     darkLogo: 'vercel_white',
     placements: ['morePopover'],
-    getUrl: (context) => getManagedVendorUrl(context, '/vercel'),
+    getUrl: (context) => getManagedVendorUrl(context, '/inputs/vercel/_default_'),
   },
 ];
 
@@ -195,7 +196,7 @@ export const getVendorEndpointsForTab = (
   context: ApiEndpointContext
 ): ResolvedVendorEndpoint[] => {
   const placement = TAB_PLACEMENTS[tabId];
-  if (!placement) {
+  if (!placement || !context.vendorEndpointsEnabled) {
     return [];
   }
   return resolveVendorEndpoints(
@@ -204,8 +205,14 @@ export const getVendorEndpointsForTab = (
   );
 };
 
-export const getPopoverVendorEndpoints = (context: ApiEndpointContext): ResolvedVendorEndpoint[] =>
-  resolveVendorEndpoints(
+export const getPopoverVendorEndpoints = (
+  context: ApiEndpointContext
+): ResolvedVendorEndpoint[] => {
+  if (!context.vendorEndpointsEnabled) {
+    return [];
+  }
+  return resolveVendorEndpoints(
     VENDOR_ENDPOINTS.filter((definition) => definition.placements.includes('morePopover')),
     context
   );
+};

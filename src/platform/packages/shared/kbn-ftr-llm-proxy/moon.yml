@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ftr-llm-proxy'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/ftr-llm-proxy'
   description: Moon project for @kbn/ftr-llm-proxy
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: src/platform/packages/shared/kbn-ftr-llm-proxy
 dependsOn:
   - '@kbn/tooling-log'

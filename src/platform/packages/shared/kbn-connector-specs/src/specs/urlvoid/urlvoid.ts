@@ -130,22 +130,13 @@ export const URLVoidConnector: ConnectorSpec = {
 
   test: {
     handler: async (ctx) => {
-      try {
-        const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
-        await ctx.client.get(`https://api.urlvoid.com/api1000/${apiKey}/stats/remained`);
-        return {
-          ok: true,
-          message: 'Successfully connected to URLVoid API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect: ${error}`,
-        };
-      }
+      const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
+      await ctx.client.get(`https://api.urlvoid.com/api1000/${apiKey}/stats/remained`);
+      return {};
     },
     description: i18n.translate('connectorSpecs.urlvoid.test.description', {
       defaultMessage: 'Verifies URLVoid API key',
     }),
+    enabled: true,
   },
 };
