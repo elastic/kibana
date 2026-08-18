@@ -8,9 +8,7 @@
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
-
-export const INBOX_API_VERSION = '1';
+import { INBOX_API_VERSION, RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 
 export const ensureConnectorAccessible = async ({
   fetch,
@@ -35,16 +33,7 @@ export const ensureConnectorAccessible = async ({
   }
 };
 
-/**
- * Asserts the managed rule-creation workflow the pnd plugin installs at start is present, and
- * returns its yaml.
- *
- * This deliberately does NOT create the workflow. The eval must measure the artifact production
- * ships — if the suite carried its own copy of the yaml, or created one on the fly, it would score
- * green against a document that no user ever runs while the real workflow regressed unobserved.
- * A missing workflow is an environment failure and should fail loudly here rather than surface as
- * mystery zeroes across every evaluator.
- */
+/** Approves or rejects a paused waitForInput step via the inbox respond route. */
 export const respondToWorkflowApproval = async ({
   fetch,
   sourceId,
@@ -64,6 +53,16 @@ export const respondToWorkflowApproval = async ({
   });
 };
 
+/**
+ * Asserts the managed rule-creation workflow the pnd plugin installs at start is present, and
+ * returns its yaml.
+ *
+ * This deliberately does NOT create the workflow. The eval must measure the artifact production
+ * ships — if the suite carried its own copy of the yaml, or created one on the fly, it would score
+ * green against a document that no user ever runs while the real workflow regressed unobserved.
+ * A missing workflow is an environment failure and should fail loudly here rather than surface as
+ * mystery zeroes across every evaluator.
+ */
 export const assertWorkflowInstalled = async ({
   fetch,
   log,

@@ -80,7 +80,7 @@ export class RuleCreationClient {
     }
 
     if (!execution) {
-      throw new Error(`No execution returned for workflow run ${workflowExecutionId}`);
+      throw new Error(`No execution state returned while polling ${workflowExecutionId}`);
     }
     return execution;
   }

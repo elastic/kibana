@@ -20,6 +20,20 @@ const APPROVAL_INPUT = {
   confidence: 0.85,
 };
 
+const findRuleByName = async (
+  fetch: HttpHandler,
+  ruleName: string
+): Promise<{ id: string; name: string } | undefined> => {
+  const { data } = await fetch<{ data: Array<{ id: string; name: string }> }>(
+    `/api/detection_engine/rules/_find`,
+    {
+      method: 'GET',
+      query: { filter: `alert.attributes.name: "${ruleName}"`, per_page: 1 },
+    }
+  );
+  return data?.[0];
+};
+
 evaluate.describe(
   'Rule Creation Worker — approval gate',
   { tag: tags.serverless.security.complete },
@@ -67,24 +81,19 @@ evaluate.describe(
         const ruleName = result.rule.name;
         log.info(`Verifying rule "${ruleName}" was created in the detection engine`);
 
-        const { data } = await fetch<{ data: Array<{ name: string; id: string }> }>(
-          `/api/detection_engine/rules/_find`,
-          {
-            method: 'GET',
-            query: { filter: `alert.attributes.name: "${ruleName}"`, per_page: 1 },
-          }
-        );
-
-        if (!data?.length) {
+        const rule = await findRuleByName(fetch, ruleName);
+        if (!rule) {
           throw new Error(
             `Rule "${ruleName}" was not found in the detection engine after approval`
           );
         }
 
+        // Delete immediately — a leaked rule would false-fail the rejection
+        // test's name-based lookup, since both tests share APPROVAL_INPUT.
         log.info(`Rule "${ruleName}" confirmed in detection engine — cleaning up`);
         await fetch(`/api/detection_engine/rules`, {
           method: 'DELETE',
-          query: { id: data[0].id },
+          query: { id: rule.id },
         });
       }
     );
@@ -102,11 +111,18 @@ evaluate.describe(
 
         const ruleName = result.rule?.name;
 
-        await ruleCreationClient.respond({
+        const execution = await ruleCreationClient.respond({
           workflowExecutionId: result.workflowExecutionId,
           stepExecutions: result.stepExecutions,
           approved: false,
         });
+
+        // create_rule is if-guarded, not a workflow failure: rejection still completes.
+        if (execution.status !== ExecutionStatus.COMPLETED) {
+          throw new Error(
+            `Workflow did not complete after rejection — status: ${execution.status}`
+          );
+        }
 
         if (!ruleName) {
           log.info('No rule name from draft_creation — skipping detection engine check');
@@ -115,15 +131,8 @@ evaluate.describe(
 
         log.info(`Verifying rule "${ruleName}" was NOT created after rejection`);
 
-        const { data } = await fetch<{ data: Array<{ name: string }> }>(
-          `/api/detection_engine/rules/_find`,
-          {
-            method: 'GET',
-            query: { filter: `alert.attributes.name: "${ruleName}"`, per_page: 1 },
-          }
-        );
-
-        if (data?.length) {
+        const rule = await findRuleByName(fetch, ruleName);
+        if (rule) {
           throw new Error(
             `Rule "${ruleName}" was found in the detection engine after rejection — create_rule should not have fired`
           );
