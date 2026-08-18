@@ -9,12 +9,15 @@ import { ApplyThrottlingStep, applyThrottling } from './apply_throttling_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createLastNotifiedTimestampsResponse } from '../fixtures/dispatcher';
 import {
-  createAlertEpisode,
   createActionGroup,
   createActionPolicy,
+  createAlertEpisode,
   createDispatcherPipelineState,
+  createStepLogger,
 } from '../fixtures/test_utils';
 import type { ActionGroupId, LastNotifiedInfo } from '../types';
+
+const logger = createStepLogger();
 
 const NOW = new Date('2026-01-22T10:00:00.000Z');
 
@@ -495,7 +498,7 @@ describe('ApplyThrottlingStep', () => {
     });
 
     const state = createDispatcherPipelineState({ groups, policies });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(mockEsClient.esql.query.mock.calls.length).toBeGreaterThanOrEqual(2);
     for (const [args] of mockEsClient.esql.query.mock.calls) {
@@ -513,7 +516,7 @@ describe('ApplyThrottlingStep', () => {
     const { queryService, mockEsClient } = createQueryService();
     const step = new ApplyThrottlingStep(queryService);
 
-    const result = await step.execute(createDispatcherPipelineState({ groups: [] }));
+    const result = await step.execute(createDispatcherPipelineState({ groups: [] }), logger);
 
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
     expect(result.type).toBe('continue');
