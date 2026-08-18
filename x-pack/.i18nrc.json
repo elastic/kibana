@@ -47,6 +47,7 @@
     "xpack.ecsDataQualityDashboard": "solutions/security/plugins/ecs_data_quality_dashboard",
     "xpack.endpoint": "plugins/endpoint",
     "xpack.enterpriseSearch": "solutions/search/plugins/enterprise_search",
+    "xpack.entitiesCaue": "solutions/observability/plugins/entities_caue",
     "xpack.failureStoreModal": "platform/packages/shared/kbn-failure-store-modal",
     "xpack.features": "platform/plugins/shared/features",
     "xpack.dataFederation": "platform/plugins/private/data_federation",
