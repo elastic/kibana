@@ -7,12 +7,8 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  AgentCreateRequest,
-  Conversation,
-  ConversationWithoutRounds,
-  ConversationListOptions,
-} from '@kbn/agent-builder-common';
+import type { AgentCreateRequest } from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -196,27 +192,13 @@ export interface RuntimeStart {
 }
 
 /**
- * A read-only conversation client exposing only get and list operations.
- */
-export interface ReadOnlyConversationClient {
-  /**
-   * Retrieve a single conversation by its ID, including all rounds.
-   */
-  get(conversationId: string): Promise<Conversation>;
-  /**
-   * List conversations for the current user, optionally filtered by agent ID.
-   */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
-}
-
-/**
- * AgentBuilder conversations service's start contract (read-only).
+ * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
   /**
-   * Returns a read-only conversation client scoped to the given request's user and space.
+   * Returns a conversation client scoped to the given request's user and space.
    */
-  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
 }
 
 /**

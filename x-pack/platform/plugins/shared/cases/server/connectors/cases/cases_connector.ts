@@ -136,7 +136,6 @@ export class CasesConnector extends SubActionConnector<
         casesService: this.casesService,
         casesClient,
         spaceId,
-        isCasesAttachmentsEnabled: this.casesParams.isCasesAttachmentsEnabled,
         isTemplatesEnabled: this.casesParams.isTemplatesEnabled,
       });
 

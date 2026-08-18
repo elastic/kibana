@@ -131,7 +131,6 @@ describe('CasesConnector', () => {
       casesOracleService: expect.any(CasesOracleService),
       casesService: expect.any(CasesService),
       spaceId: 'default',
-      isCasesAttachmentsEnabled: false,
       isTemplatesEnabled: false,
     });
   });
