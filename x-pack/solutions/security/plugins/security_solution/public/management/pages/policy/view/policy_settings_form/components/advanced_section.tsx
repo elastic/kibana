@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useCallback, useState } from 'react';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import {
@@ -138,16 +139,30 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
 
     return (
       <div data-test-subj={getTestId()}>
-        <EuiButtonEmpty
-          data-test-subj={getTestId('showButton')}
-          onClick={handleAdvancedSettingsButtonClick}
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policy.advanced.showHideButtonLabel"
-            defaultMessage="{action} advanced settings"
-            values={{ action: showAdvancedPolicy ? HIDE : SHOW }}
-          />
-        </EuiButtonEmpty>
+        <EuiFlexGroup responsive={false} gutterSize="none">
+          <EuiFlexItem grow>
+            <EuiButtonEmpty
+              data-test-subj={getTestId('showButton')}
+              onClick={handleAdvancedSettingsButtonClick}
+              aria-expanded={showAdvancedPolicy}
+              iconType={showAdvancedPolicy ? 'arrowUp' : 'arrowDown'}
+              iconSide="right"
+              css={css`
+                inline-size: 100%;
+                .euiButtonEmpty__content {
+                  inline-size: 100%;
+                  justify-content: center;
+                }
+              `}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policy.advanced.showHideButtonLabel"
+                defaultMessage="{action} advanced settings"
+                values={{ action: showAdvancedPolicy ? HIDE : SHOW }}
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="l" />
 
         {showAdvancedPolicy && (

@@ -13,7 +13,7 @@ import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoin
 import { FleetPackagePolicyGenerator } from '../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { PolicyConfig } from '../../../../../../../common/endpoint/types';
 import { DeviceControlAccessLevel as DeviceControlAccessLevelEnum } from '../../../../../../../common/endpoint/types';
-import { exactMatchText, expectIsViewOnly } from '../mocks';
+import { expectIsViewOnly } from '../mocks';
 import type { DeviceControlSettingCardSwitchProps } from './device_control_setting_card_switch';
 import { DeviceControlSettingCardSwitch } from './device_control_setting_card_switch';
 
@@ -49,10 +49,8 @@ const setDeviceControlMode = ({
   if (enabled) {
     windowsDeviceControl.usb_storage = DeviceControlAccessLevelEnum.deny_all;
     macDeviceControl.usb_storage = DeviceControlAccessLevelEnum.deny_all;
-  } else {
-    windowsDeviceControl.usb_storage = DeviceControlAccessLevelEnum.audit;
-    macDeviceControl.usb_storage = DeviceControlAccessLevelEnum.audit;
   }
+  // When disabling, keep existing usb_storage — matches section toggle-off (preserves prior level).
 
   policy.windows.popup.device_control = { enabled, message: '' };
   policy.mac.popup.device_control = { enabled, message: '' };
@@ -77,7 +75,7 @@ describe('Policy form DeviceControlSettingCardSwitch component', () => {
       mode: 'edit',
       'data-test-subj': 'test',
       selected: true,
-      protectionLabel: 'Device Control',
+      protectionLabel: 'Device control',
       osList: ['windows', 'mac'],
     };
 
@@ -94,7 +92,7 @@ describe('Policy form DeviceControlSettingCardSwitch component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'true');
-    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Device Control'));
+    expect(getByTestId('test')).toHaveAttribute('aria-label', 'Device control');
   });
 
   it('should render expected output when disabled', () => {
@@ -102,7 +100,7 @@ describe('Policy form DeviceControlSettingCardSwitch component', () => {
     const { getByTestId } = render();
 
     expect(getByTestId('test')).toHaveAttribute('aria-checked', 'false');
-    expect(getByTestId('test-label')).toHaveTextContent(exactMatchText('Device Control'));
+    expect(getByTestId('test')).toHaveAttribute('aria-label', 'Device control');
   });
 
   it('should be able to disable it', async () => {
@@ -119,11 +117,10 @@ describe('Policy form DeviceControlSettingCardSwitch component', () => {
   });
 
   it('should be able to enable it', async () => {
-    // Start with it disabled
+    // Start with it disabled (no prior toggle-off snapshot: per-OS settings stay disabled)
     setDeviceControlMode({ policy: formProps.policy, turnOff: true });
 
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
-    setDeviceControlMode({ policy: expectedUpdatedPolicy, turnOff: false });
 
     render();
     await userEvent.click(renderResult.getByTestId('test'));
@@ -148,9 +145,7 @@ describe('Policy form DeviceControlSettingCardSwitch component', () => {
     it('should show option when checked', () => {
       render();
 
-      expect(renderResult.getByTestId('test-label')).toHaveTextContent(
-        exactMatchText('Device Control')
-      );
+      expect(renderResult.getByTestId('test')).toHaveAttribute('aria-label', 'Device control');
       expect(renderResult.getByTestId('test').getAttribute('aria-checked')).toBe('true');
     });
 
@@ -158,9 +153,7 @@ describe('Policy form DeviceControlSettingCardSwitch component', () => {
       setDeviceControlMode({ policy: formProps.policy, turnOff: true });
       render();
 
-      expect(renderResult.getByTestId('test-label')).toHaveTextContent(
-        exactMatchText('Device Control')
-      );
+      expect(renderResult.getByTestId('test')).toHaveAttribute('aria-label', 'Device control');
       expect(renderResult.getByTestId('test').getAttribute('aria-checked')).toBe('false');
     });
 

@@ -16,6 +16,7 @@ import {
   LOCKED_CARD_ATTACK_SURFACE_REDUCTION,
   SWITCH_LABEL,
 } from './attack_surface_reduction_card';
+import { ATTACK_SURFACE_REDUCTION_POLICY_SECTION_DESCRIPTION } from '../policy_setting_section_descriptions';
 import { useLicense as _useLicense } from '../../../../../../../common/hooks/use_license';
 import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -58,7 +59,9 @@ describe('Policy Attack Surface Reduction Card', () => {
   it('should show correct OS support', () => {
     render();
 
-    expect(renderResult.getByTestId(testSubj.osValues)).toHaveTextContent('Windows');
+    expect(renderResult.getByTestId(testSubj.osValues)).toHaveTextContent(
+      ATTACK_SURFACE_REDUCTION_POLICY_SECTION_DESCRIPTION
+    );
   });
 
   it('should show option enabled', () => {

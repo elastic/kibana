@@ -56,7 +56,7 @@ const policyResponseSections = Object.freeze(
     [
       'behavior_protection',
       i18n.translate('xpack.securitySolution.endpoint.details.policyResponse.behavior_protection', {
-        defaultMessage: 'Malicious Behavior',
+        defaultMessage: 'Malicious behavior',
       }),
     ],
   ])

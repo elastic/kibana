@@ -19,11 +19,6 @@ import { cloneDeep } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import { ProtectionModes } from '../../../../../../../common/endpoint/types';
 import userEvent from '@testing-library/user-event';
-import {
-  NOTIFY_USER_SECTION_TITLE,
-  NOTIFY_USER_CHECKBOX_LABEL,
-  CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
-} from './shared_translations';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
@@ -48,7 +43,7 @@ describe('Policy form Notify User option component', () => {
       mode: 'edit',
       'data-test-subj': 'test',
       protection: 'malware',
-      osList: ['windows', 'mac', 'linux'],
+      os: 'windows',
     };
 
     render = () => {
@@ -61,15 +56,8 @@ describe('Policy form Notify User option component', () => {
     set(formProps.policy, 'windows.popup.malware.message', 'hello world');
     const { getByTestId } = render();
 
-    expect(getByTestId('test-title')).toHaveTextContent(exactMatchText(NOTIFY_USER_SECTION_TITLE));
-    expect(getByTestId('test-supportedVersion')).toHaveTextContent(
-      exactMatchText('Agent version 7.11+')
-    );
     expect(isChecked('test-checkbox')).toBe(true);
-    expect(renderResult.getByLabelText(NOTIFY_USER_CHECKBOX_LABEL));
-    expect(getByTestId('test-customMessageTitle')).toHaveTextContent(
-      exactMatchText(CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL)
-    );
+    expect(renderResult.getByRole('checkbox', { name: /notify user/i })).toBeInTheDocument();
     expect(getByTestId('test-customMessage')).toHaveValue('hello world');
   });
 
@@ -78,7 +66,7 @@ describe('Policy form Notify User option component', () => {
     render();
 
     expect(isChecked('test-checkbox')).toBe(false);
-    expect(renderResult.queryByTestId('test-customMessage')).toBeNull();
+    expect(renderResult.getByTestId('test-customMessage')).toBeDisabled();
   });
 
   it('should render checked disabled if protection mode is OFF', () => {
@@ -92,8 +80,6 @@ describe('Policy form Notify User option component', () => {
   it('should be able to un-check the option', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.enabled', false);
-    set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', false);
-    set(expectedUpdatedPolicy, 'linux.popup.malware.enabled', false);
     render();
     await userEvent.click(renderResult.getByTestId('test-checkbox'));
 
@@ -107,8 +93,6 @@ describe('Policy form Notify User option component', () => {
     set(formProps.policy, 'windows.popup.malware.enabled', false);
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.enabled', true);
-    set(expectedUpdatedPolicy, 'mac.popup.malware.enabled', true);
-    set(expectedUpdatedPolicy, 'linux.popup.malware.enabled', true);
     render();
     await userEvent.click(renderResult.getByTestId('test-checkbox'));
 
@@ -122,8 +106,6 @@ describe('Policy form Notify User option component', () => {
     const msg = 'a';
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     set(expectedUpdatedPolicy, 'windows.popup.malware.message', msg);
-    set(expectedUpdatedPolicy, 'mac.popup.malware.message', msg);
-    set(expectedUpdatedPolicy, 'linux.popup.malware.message', msg);
     render();
     await userEvent.type(renderResult.getByTestId('test-customMessage'), msg);
 
@@ -145,10 +127,11 @@ describe('Policy form Notify User option component', () => {
       useLicenseMock.mockReturnValue(licenseServiceMocked);
     });
 
-    it('should NOT render the component', () => {
+    it('should render with notify user disabled for license below platinum', () => {
       render();
 
-      expect(renderResult.queryByTestId('test')).toBeNull();
+      expect(renderResult.getByTestId('test')).toBeInTheDocument();
+      expect(renderResult.getByTestId('test-checkbox')).toBeDisabled();
     });
   });
 
@@ -168,13 +151,7 @@ describe('Policy form Notify User option component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText(
-          'User notification' +
-            'Agent version 7.11+' +
-            'Notify user' +
-            'Notification message' +
-            'you got owned'
-        )
+        exactMatchText('Notify userInfoyou got owned')
       );
     });
 
@@ -183,7 +160,7 @@ describe('Policy form Notify User option component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('User notificationAgent version 7.11+Notify userNotification message—')
+        exactMatchText('Notify userInfo—')
       );
     });
 
@@ -192,7 +169,7 @@ describe('Policy form Notify User option component', () => {
       render();
 
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        exactMatchText('User notificationAgent version 7.11+Notify user')
+        exactMatchText('Notify userInfoyou got owned')
       );
     });
   });

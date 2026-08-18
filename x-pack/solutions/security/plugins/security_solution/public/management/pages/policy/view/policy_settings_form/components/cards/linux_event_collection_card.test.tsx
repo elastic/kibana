@@ -13,6 +13,9 @@ import React from 'react';
 import type { LinuxEventCollectionCardProps } from './linux_event_collection_card';
 import { LinuxEventCollectionCard } from './linux_event_collection_card';
 import { set } from '@kbn/safer-lodash-set';
+import userEvent from '@testing-library/user-event';
+import type { PolicyConfig } from '../../../../../../../../common/endpoint/types';
+import { EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION } from '../policy_setting_section_descriptions';
 
 describe('Policy Linux Event Collection Card', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').linuxEvents;
@@ -50,9 +53,33 @@ describe('Policy Linux Event Collection Card', () => {
     expect(getByTestId(testSubj.fileCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.networkCheckbox)).toBeChecked();
     expect(getByTestId(testSubj.processCheckbox)).toBeChecked();
-    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(exactMatchText('Linux'));
+    expect(getByTestId(testSubj.osValueContainer)).toHaveTextContent(
+      exactMatchText(EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION)
+    );
     expect(getByTestId(testSubj.sessionDataCheckbox)).not.toBeChecked();
     expect(getByTestId(testSubj.captureTerminalCheckbox)).toBeDisabled();
+  });
+
+  it('restores capture terminal output after collect session data is turned off and on again', async () => {
+    set(formProps.policy, 'linux.events.session_data', true);
+    set(formProps.policy, 'linux.events.tty_io', true);
+    render();
+
+    await userEvent.click(renderResult.getByTestId(testSubj.sessionDataCheckbox));
+    const afterSessionOff = (formProps.onChange as jest.Mock).mock.calls.at(-1)![0]
+      .updatedPolicy as PolicyConfig;
+    expect(afterSessionOff.linux.events.session_data).toBe(false);
+    expect(afterSessionOff.linux.events.tty_io).toBe(false);
+
+    formProps.policy = afterSessionOff;
+    renderResult.rerender(<LinuxEventCollectionCard {...formProps} />);
+    (formProps.onChange as jest.Mock).mockClear();
+
+    await userEvent.click(renderResult.getByTestId(testSubj.sessionDataCheckbox));
+    const afterSessionOn = (formProps.onChange as jest.Mock).mock.calls.at(-1)![0]
+      .updatedPolicy as PolicyConfig;
+    expect(afterSessionOn.linux.events.session_data).toBe(true);
+    expect(afterSessionOn.linux.events.tty_io).toBe(true);
   });
 
   describe('and is displayed in View mode', () => {
@@ -62,27 +89,19 @@ describe('Policy Linux Event Collection Card', () => {
 
     it('should render card with expected content when session data collection is disabled', () => {
       render();
-      const card = renderResult.getByTestId(testSubj.card);
+      const { getByTestId } = renderResult;
+      const card = getByTestId(testSubj.card);
 
       expectIsViewOnly(card);
-      expect(card).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Event collection' +
-            'Operating system' +
-            'Linux ' +
-            '4 / 4 event collections enabled' +
-            'Events' +
-            'DNS' +
-            'File' +
-            'Process' +
-            'Network' +
-            'Session data' +
-            'Collect session data' +
-            'Capture terminal output' +
-            'Info'
-        )
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Event collection')
       );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(card).toHaveTextContent('4 / 4 event collections enabled');
+      expect(card.textContent).not.toContain('TypeEvent collection');
+      expect(card.textContent).not.toContain('Operating system');
     });
 
     it('should render card with expected content when session data collection is enabled', () => {
@@ -91,27 +110,19 @@ describe('Policy Linux Event Collection Card', () => {
       set(formProps.policy, 'linux.events.file', false);
       render();
 
-      const card = renderResult.getByTestId(testSubj.card);
+      const { getByTestId } = renderResult;
+      const card = getByTestId(testSubj.card);
 
       expectIsViewOnly(card);
-      expect(card).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Event collection' +
-            'Operating system' +
-            'Linux ' +
-            '3 / 4 event collections enabled' +
-            'Events' +
-            'DNS' +
-            'File' +
-            'Process' +
-            'Network' +
-            'Session data' +
-            'Collect session data' +
-            'Capture terminal output' +
-            'Info'
-        )
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Event collection')
       );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(card).toHaveTextContent('3 / 4 event collections enabled');
+      expect(card.textContent).not.toContain('TypeEvent collection');
+      expect(card.textContent).not.toContain('Operating system');
     });
   });
 
@@ -134,26 +145,19 @@ describe('Policy Linux Event Collection Card', () => {
     it('should render card with 3 total events in view mode', () => {
       formProps.mode = 'view';
       render();
-      const card = renderResult.getByTestId(testSubj.card);
+      const { getByTestId } = renderResult;
+      const card = getByTestId(testSubj.card);
 
       expectIsViewOnly(card);
-      expect(card).toHaveTextContent(
-        exactMatchText(
-          'Type' +
-            'Event collection' +
-            'Operating system' +
-            'Linux ' +
-            '3 / 3 event collections enabled' +
-            'Events' +
-            'File' +
-            'Process' +
-            'Network' +
-            'Session data' +
-            'Collect session data' +
-            'Capture terminal output' +
-            'Info'
-        )
+      expect(getByTestId(`${testSubj.card}-type`)).toHaveTextContent(
+        exactMatchText('Event collection')
       );
+      expect(getByTestId(`${testSubj.card}-osValues`)).toHaveTextContent(
+        exactMatchText(EVENT_COLLECTION_POLICY_SECTION_DESCRIPTION)
+      );
+      expect(card).toHaveTextContent('3 / 3 event collections enabled');
+      expect(card.textContent).not.toContain('TypeEvent collection');
+      expect(card.textContent).not.toContain('Operating system');
     });
   });
 });

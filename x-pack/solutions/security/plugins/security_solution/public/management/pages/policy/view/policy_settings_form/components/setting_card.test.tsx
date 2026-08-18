@@ -12,6 +12,7 @@ import type { SettingCardProps } from './setting_card';
 import { SettingCard } from './setting_card';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { exactMatchText } from '../mocks';
+import { MALWARE_POLICY_SECTION_DESCRIPTION } from './policy_setting_section_descriptions';
 
 describe('Policy form SettingCard component', () => {
   let formProps: SettingCardProps;
@@ -24,6 +25,7 @@ describe('Policy form SettingCard component', () => {
     formProps = {
       type: 'Malware',
       supportedOss: [OperatingSystem.WINDOWS, OperatingSystem.MAC, OperatingSystem.LINUX],
+      sectionDescription: MALWARE_POLICY_SECTION_DESCRIPTION,
       osRestriction: undefined,
       rightCorner: undefined,
       dataTestSubj: 'test',
@@ -39,10 +41,19 @@ describe('Policy form SettingCard component', () => {
   it('should render with expected content', () => {
     const { getByTestId } = render();
 
-    expect(getByTestId('test-osValues')).toHaveTextContent(exactMatchText('Windows, Mac, Linux'));
+    expect(getByTestId('test-osValues')).toHaveTextContent(
+      exactMatchText(MALWARE_POLICY_SECTION_DESCRIPTION)
+    );
     expect(getByTestId('test-type')).toHaveTextContent(exactMatchText('Malware'));
     expect(getByTestId('test-rightCornerContainer')).toBeEmptyDOMElement();
     expect(getByTestId('test-bodyContent'));
+  });
+
+  it('should fall back to supported OS names when sectionDescription is omitted', () => {
+    formProps.sectionDescription = undefined;
+    const { getByTestId } = render();
+
+    expect(getByTestId('test-osValues')).toHaveTextContent(exactMatchText('Windows, Mac, Linux'));
   });
 
   it('should show OS restriction info', () => {

@@ -74,7 +74,6 @@ export const ProtectionUpdatesBottomBar = React.memo<ProtectionUpdatesBottomBarP
             <EuiButton
               fill={true}
               disabled={saveButtonDisabled}
-              iconType="save"
               data-test-subj="protectionUpdatesSaveButton"
               onClick={onSave}
               isLoading={isUpdating}

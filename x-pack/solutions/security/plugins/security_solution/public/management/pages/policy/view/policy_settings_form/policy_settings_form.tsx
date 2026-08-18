@@ -15,9 +15,7 @@ import { updateAntivirusRegistrationEnabled } from '../../../../../../common/end
 import { useGetProtectionsUnavailableComponent } from './hooks/use_get_protections_unavailable_component';
 import { EventMergingBanner } from './components/event_merging_banner';
 import { AntivirusRegistrationCard } from './components/cards/antivirus_registration_card';
-import { LinuxEventCollectionCard } from './components/cards/linux_event_collection_card';
-import { MacEventCollectionCard } from './components/cards/mac_event_collection_card';
-import { WindowsEventCollectionCard } from './components/cards/windows_event_collection_card';
+import { EventCollectionSection } from './components/event_collection_section';
 import { AttackSurfaceReductionCard } from './components/cards/attack_surface_reduction_card';
 import { BehaviourProtectionCard } from './components/cards/protection_settings_card/behaviour_protection_card';
 import { MemoryProtectionCard } from './components/cards/memory_protection_card';
@@ -33,11 +31,6 @@ import { DeviceControlCard } from './components/cards/device_control_card';
 const PROTECTIONS_SECTION_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.protections',
   { defaultMessage: 'Protections' }
-);
-
-const SETTINGS_SECTION_TITLE = i18n.translate(
-  'xpack.securitySolution.endpoint.policy.details.settings',
-  { defaultMessage: 'Settings' }
 );
 
 export type PolicySettingsFormProps = PolicyFormComponentCommonProps;
@@ -112,39 +105,30 @@ export const PolicySettingsForm = memo<PolicySettingsFormProps>((props) => {
           />
           <EuiSpacer size="l" />
 
+          <AntivirusRegistrationCard
+            {...props}
+            onChange={onChangeProxy}
+            data-test-subj={getTestId('antivirusRegistration')}
+          />
+          <EuiSpacer size="l" />
+
+          <BehaviourProtectionCard {...props} data-test-subj={getTestId('behaviour')} />
+          <EuiSpacer size="l" />
+
           <RansomwareProtectionCard {...props} data-test-subj={getTestId('ransomware')} />
           <EuiSpacer size="l" />
 
           <MemoryProtectionCard {...props} data-test-subj={getTestId('memory')} />
           <EuiSpacer size="l" />
 
-          <BehaviourProtectionCard {...props} data-test-subj={getTestId('behaviour')} />
-          <EuiSpacer size="l" />
+          {renderDeviceControlSection()}
 
           <AttackSurfaceReductionCard {...props} data-test-subj={getTestId('attackSurface')} />
           <EuiSpacer size="l" />
-
-          {renderDeviceControlSection()}
         </>
       )}
 
-      <FormSectionTitle>{SETTINGS_SECTION_TITLE}</FormSectionTitle>
-      <EuiSpacer size="s" />
-
-      <WindowsEventCollectionCard {...props} data-test-subj={getTestId('windowsEvents')} />
-      <EuiSpacer size="l" />
-
-      <MacEventCollectionCard {...props} data-test-subj={getTestId('macEvents')} />
-      <EuiSpacer size="l" />
-
-      <LinuxEventCollectionCard {...props} data-test-subj={getTestId('linuxEvents')} />
-      <EuiSpacer size="l" />
-
-      <AntivirusRegistrationCard
-        {...props}
-        onChange={onChangeProxy}
-        data-test-subj={getTestId('antivirusRegistration')}
-      />
+      <EventCollectionSection {...props} data-test-subj={getTestId('eventCollection')} />
 
       <EuiSpacer size="m" />
       <AdvancedSection {...props} data-test-subj={getTestId('advancedSection')} />

@@ -16,11 +16,6 @@ import { createLicenseServiceMock } from '../../../../../../../common/license/mo
 import { licenseService as licenseServiceMocked } from '../../../../../../common/hooks/__mocks__/use_license';
 import type { DeviceControlAccessLevel } from '../../../../../../../common/endpoint/types';
 import { expectIsViewOnly, exactMatchText } from '../mocks';
-import {
-  NOTIFY_USER_SECTION_TITLE,
-  NOTIFY_USER_CHECKBOX_LABEL,
-  CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL,
-} from './shared_translations';
 import type { DeviceControlNotifyUserOptionProps } from './device_control_notify_user_option';
 import { DeviceControlNotifyUserOption } from './device_control_notify_user_option';
 
@@ -52,6 +47,7 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       policy,
       onChange: jest.fn(),
       mode: 'edit',
+      os: 'windows',
       'data-test-subj': 'test',
     };
 
@@ -64,35 +60,32 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
   it('should render with expected content', () => {
     const { getByTestId } = render();
 
-    expect(getByTestId('test')).toHaveTextContent(NOTIFY_USER_SECTION_TITLE);
+    expect(getByTestId('test')).toBeInTheDocument();
     expect(isChecked('test-checkbox')).toBe(true);
-    expect(renderResult.getByLabelText(NOTIFY_USER_CHECKBOX_LABEL));
-    expect(getByTestId('test-customMessageTitle')).toHaveTextContent(
-      exactMatchText(CUSTOMIZE_NOTIFICATION_MESSAGE_LABEL)
-    );
+    expect(renderResult.getByRole('checkbox', { name: /notify user/i })).toBeInTheDocument();
     expect(getByTestId('test-customMessage')).toHaveValue('hello world');
   });
 
   it('should render with options un-checked', () => {
     formProps.policy.windows.popup.device_control!.enabled = false;
+    formProps.policy.mac.popup.device_control!.enabled = true;
     render();
 
     expect(isChecked('test-checkbox')).toBe(false);
-    expect(renderResult.queryByTestId('test-customMessage')).toBeNull();
+    expect(renderResult.getByTestId('test-customMessage')).toBeDisabled();
   });
 
-  it('should render checkbox disabled if device control is OFF', () => {
+  it('should render checkbox disabled if device control is OFF for this OS', () => {
     formProps.policy.windows.device_control!.enabled = false;
-    formProps.policy.mac.device_control!.enabled = false;
+    formProps.policy.mac.device_control!.enabled = true;
     render();
 
     expect(renderResult.getByTestId('test-checkbox')).toBeDisabled();
   });
 
-  it('should be able to un-check the option', async () => {
+  it('should be able to un-check the option without changing the other OS', async () => {
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     expectedUpdatedPolicy.windows.popup.device_control!.enabled = false;
-    expectedUpdatedPolicy.mac.popup.device_control!.enabled = false;
 
     render();
     await userEvent.click(renderResult.getByTestId('test-checkbox'));
@@ -101,13 +94,13 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
     });
+    expect(expectedUpdatedPolicy.mac.popup.device_control!.enabled).toBe(true);
   });
 
-  it('should be able to check the option', async () => {
+  it('should be able to check the option without changing the other OS', async () => {
     formProps.policy.windows.popup.device_control!.enabled = false;
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
     expectedUpdatedPolicy.windows.popup.device_control!.enabled = true;
-    expectedUpdatedPolicy.mac.popup.device_control!.enabled = true;
 
     render();
     await userEvent.click(renderResult.getByTestId('test-checkbox'));
@@ -116,13 +109,14 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
     });
+    expect(expectedUpdatedPolicy.mac.popup.device_control!.enabled).toBe(true);
   });
 
-  it('should be able to change the notification message', async () => {
+  it('should be able to change the notification message for this OS only', async () => {
     const msg = 'a';
     // Set initial value to empty to avoid concatenation
     formProps.policy.windows.popup.device_control!.message = '';
-    formProps.policy.mac.popup.device_control!.message = '';
+    formProps.policy.mac.popup.device_control!.message = 'mac only';
     const expectedUpdatedPolicy = cloneDeep(formProps.policy);
 
     render();
@@ -131,13 +125,13 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
     await userEvent.type(customMessageInput, msg);
 
     expectedUpdatedPolicy.windows.popup.device_control!.message = msg;
-    expectedUpdatedPolicy.mac.popup.device_control!.message = msg;
 
     expect(formProps.onChange).toHaveBeenCalledTimes(1);
     expect(formProps.onChange).toHaveBeenLastCalledWith({
       isValid: true,
       updatedPolicy: expectedUpdatedPolicy,
     });
+    expect(expectedUpdatedPolicy.mac.popup.device_control!.message).toBe('mac only');
   });
 
   describe('and access level is not deny_all', () => {
@@ -147,14 +141,14 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       ['no_execute', 'Read and write'],
     ])('should NOT render when access level is %s (%s)', (accessLevel) => {
       formProps.policy.windows.device_control!.usb_storage = accessLevel;
-      formProps.policy.mac.device_control!.usb_storage = accessLevel;
+      formProps.policy.mac.device_control!.usb_storage = 'deny_all';
       render();
       expect(renderResult.queryByTestId('test')).toBeNull();
     });
 
-    it('should render when access level is deny_all (Block all)', () => {
+    it('should render when this OS access level is deny_all (Block) even if the other OS is not Block', () => {
       formProps.policy.windows.device_control!.usb_storage = 'deny_all';
-      formProps.policy.mac.device_control!.usb_storage = 'deny_all';
+      formProps.policy.mac.device_control!.usb_storage = 'audit';
       render();
       expect(renderResult.queryByTestId('test')).not.toBeNull();
     });
@@ -190,7 +184,7 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
     it('should render with expected output when checked', () => {
       render();
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        'User notificationNotify userNotification messagehello world'
+        exactMatchText('Notify userInfohello world')
       );
     });
 
@@ -198,14 +192,16 @@ describe('Policy form DeviceControlNotifyUserOption component', () => {
       formProps.policy.windows.popup.device_control!.message = '';
       render();
       expect(renderResult.getByTestId('test')).toHaveTextContent(
-        'User notificationNotify userNotification message—'
+        exactMatchText('Notify userInfo—')
       );
     });
 
     it('should render with expected output when un-checked', () => {
       formProps.policy.windows.popup.device_control!.enabled = false;
       render();
-      expect(renderResult.getByTestId('test')).toHaveTextContent('User notificationNotify user');
+      expect(renderResult.getByTestId('test')).toHaveTextContent(
+        exactMatchText('Notify userInfohello world')
+      );
     });
   });
 });

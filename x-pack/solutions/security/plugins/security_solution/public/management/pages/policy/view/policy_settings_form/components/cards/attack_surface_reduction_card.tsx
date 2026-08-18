@@ -17,28 +17,22 @@ import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
 import type { PolicyFormComponentCommonProps } from '../../types';
 import { SettingCard } from '../setting_card';
-
-const ATTACK_SURFACE_OS_LIST = [OperatingSystem.WINDOWS];
+import { ATTACK_SURFACE_REDUCTION_POLICY_SECTION_DESCRIPTION } from '../policy_setting_section_descriptions';
+import { OsProtectionRow } from '../os_protection_row';
 
 export const LOCKED_CARD_ATTACK_SURFACE_REDUCTION = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.attack_surface_reduction',
-  {
-    defaultMessage: 'Attack Surface Reduction',
-  }
+  { defaultMessage: 'Attack Surface Reduction' }
 );
 
 const CARD_TITLE = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.attackSurfaceReduction.type',
-  {
-    defaultMessage: 'Attack surface reduction',
-  }
+  { defaultMessage: 'Attack surface reduction' }
 );
 
 export const SWITCH_LABEL = i18n.translate(
   'xpack.securitySolution.endpoint.policy.details.credentialHardening',
-  {
-    defaultMessage: 'Credential hardening',
-  }
+  { defaultMessage: 'Credential hardening' }
 );
 
 export type AttackSurfaceReductionCardProps = PolicyFormComponentCommonProps;
@@ -54,10 +48,8 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
     const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
       (event) => {
         const updatedPolicy = cloneDeep(policy);
-
         updatedPolicy.windows.attack_surface_reduction.credential_hardening.enabled =
           event.target.checked;
-
         onChange({ isValid: true, updatedPolicy });
       },
       [onChange, policy]
@@ -79,17 +71,24 @@ export const AttackSurfaceReductionCard = memo<AttackSurfaceReductionCardProps>(
     return (
       <SettingCard
         type={CARD_TITLE}
-        supportedOss={ATTACK_SURFACE_OS_LIST}
+        supportedOss={[OperatingSystem.WINDOWS]}
+        sectionDescription={ATTACK_SURFACE_REDUCTION_POLICY_SECTION_DESCRIPTION}
         dataTestSubj={getTestId()}
       >
-        <EuiSwitch
-          label={SWITCH_LABEL}
-          checked={isChecked}
-          disabled={!isEditMode}
-          onChange={handleSwitchChange}
-          data-test-subj={getTestId('enableDisableSwitch')}
-          labelProps={{ 'data-test-subj': getTestId('switchLabel') }}
-        />
+        <OsProtectionRow
+          isLast
+          os={OperatingSystem.WINDOWS}
+          data-test-subj={getTestId('windowsRow')}
+        >
+          <EuiSwitch
+            label={SWITCH_LABEL}
+            checked={isChecked}
+            disabled={!isEditMode}
+            onChange={handleSwitchChange}
+            data-test-subj={getTestId('enableDisableSwitch')}
+            labelProps={{ 'data-test-subj': getTestId('switchLabel') }}
+          />
+        </OsProtectionRow>
       </SettingCard>
     );
   }

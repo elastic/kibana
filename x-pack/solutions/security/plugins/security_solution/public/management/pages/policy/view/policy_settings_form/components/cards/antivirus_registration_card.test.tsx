@@ -15,6 +15,7 @@ import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endp
 import userEvent from '@testing-library/user-event';
 import { cloneDeep } from 'lodash';
 import { AntivirusRegistrationModes } from '../../../../../../../../common/endpoint/types';
+import { ANTIVIRUS_POLICY_SECTION_DESCRIPTION } from '../policy_setting_section_descriptions';
 
 describe('Policy Form Antivirus Registration Card', () => {
   const antivirusTestSubj = getPolicySettingsFormTestSubjects('test').antivirusRegistration;
@@ -22,7 +23,6 @@ describe('Policy Form Antivirus Registration Card', () => {
   let formProps: AntivirusRegistrationCardProps;
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let getRadioButton: (testSubject: string) => HTMLInputElement;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
@@ -37,59 +37,51 @@ describe('Policy Form Antivirus Registration Card', () => {
 
     render = () =>
       (renderResult = mockedContext.render(<AntivirusRegistrationCard {...formProps} />));
-
-    getRadioButton = (testSubject) => renderResult.getByTestId(testSubject).querySelector('input')!;
   });
+
+  const getModeSelect = () =>
+    renderResult.getByTestId(antivirusTestSubj.modeSelect) as HTMLSelectElement;
 
   it('should render in edit mode with default value selected', () => {
     render();
 
-    expect(renderResult.getByTestId(antivirusTestSubj.radioButtons)).toBeTruthy();
-
-    expect(getRadioButton(antivirusTestSubj.disabledRadioButton)).not.toHaveAttribute('disabled');
-    expect(getRadioButton(antivirusTestSubj.enabledRadioButton)).not.toHaveAttribute('disabled');
-    expect(getRadioButton(antivirusTestSubj.syncRadioButton)).not.toHaveAttribute('disabled');
-
-    expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
-    expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
-    expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(true);
+    expect(getModeSelect()).toBeInTheDocument();
+    expect(getModeSelect().value).toBe(AntivirusRegistrationModes.sync);
+    expect(getModeSelect().querySelectorAll('option')).toHaveLength(3);
   });
 
-  it('should check `disabled` radio button if `antivirus_registration.mode` is disabled', () => {
+  it('should show `disabled` as selected if `antivirus_registration.mode` is disabled', () => {
     formProps.policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.disabled;
 
     render();
 
-    expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(true);
-    expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
-    expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(false);
+    expect(getModeSelect().value).toBe(AntivirusRegistrationModes.disabled);
   });
 
-  it('should check `enabled` radio button if `antivirus_registration.mode` is enabled', () => {
+  it('should show `enabled` as selected if `antivirus_registration.mode` is enabled', () => {
     formProps.policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.enabled;
 
     render();
 
-    expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
-    expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(true);
-    expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(false);
+    expect(getModeSelect().value).toBe(AntivirusRegistrationModes.enabled);
   });
 
-  it('should check `sync` radio button if `antivirus_registration.mode` is sync', () => {
+  it('should show `sync` as selected if `antivirus_registration.mode` is sync', () => {
     formProps.policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.sync;
 
     render();
 
-    expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
-    expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
-    expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(true);
+    expect(getModeSelect().value).toBe(AntivirusRegistrationModes.sync);
   });
 
   it('should display for windows OS with restriction', () => {
     render();
 
     expect(renderResult.getByTestId(antivirusTestSubj.osValueContainer)).toHaveTextContent(
-      'Windows RestrictionsInfo'
+      ANTIVIRUS_POLICY_SECTION_DESCRIPTION
+    );
+    expect(renderResult.getByTestId(antivirusTestSubj.osValueContainer)).toHaveTextContent(
+      'Restrictions'
     );
   });
 
@@ -99,7 +91,7 @@ describe('Policy Form Antivirus Registration Card', () => {
 
     render();
 
-    await userEvent.click(getRadioButton(antivirusTestSubj.enabledRadioButton));
+    await userEvent.selectOptions(getModeSelect(), AntivirusRegistrationModes.enabled);
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -115,7 +107,7 @@ describe('Policy Form Antivirus Registration Card', () => {
 
     render();
 
-    await userEvent.click(getRadioButton(antivirusTestSubj.disabledRadioButton));
+    await userEvent.selectOptions(getModeSelect(), AntivirusRegistrationModes.disabled);
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -131,7 +123,7 @@ describe('Policy Form Antivirus Registration Card', () => {
 
     render();
 
-    await userEvent.click(getRadioButton(antivirusTestSubj.syncRadioButton));
+    await userEvent.selectOptions(getModeSelect(), AntivirusRegistrationModes.sync);
 
     expect(formProps.onChange).toHaveBeenCalledWith({
       isValid: true,
@@ -144,13 +136,13 @@ describe('Policy Form Antivirus Registration Card', () => {
       formProps.mode = 'view';
     });
 
-    it('should render in view mode (option disabled)', () => {
+    it('should render in view mode (option sync)', () => {
       render();
 
       expectIsViewOnly(renderResult.getByTestId(antivirusTestSubj.card));
-      expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
-      expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
-      expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(true);
+      expect(renderResult.getByTestId(antivirusTestSubj.modeSelect)).toHaveTextContent(
+        'Sync with malware protection level'
+      );
     });
 
     it('should render in view mode (option enabled)', () => {
@@ -158,19 +150,15 @@ describe('Policy Form Antivirus Registration Card', () => {
       render();
 
       expectIsViewOnly(renderResult.getByTestId(antivirusTestSubj.card));
-      expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
-      expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(true);
-      expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(false);
+      expect(renderResult.getByTestId(antivirusTestSubj.modeSelect)).toHaveTextContent('Enable');
     });
 
-    it('should render in view mode (option sync)', () => {
-      formProps.policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.sync;
+    it('should render in view mode (option disabled)', () => {
+      formProps.policy.windows.antivirus_registration.mode = AntivirusRegistrationModes.disabled;
       render();
 
       expectIsViewOnly(renderResult.getByTestId(antivirusTestSubj.card));
-      expect(getRadioButton(antivirusTestSubj.disabledRadioButton).checked).toBe(false);
-      expect(getRadioButton(antivirusTestSubj.enabledRadioButton).checked).toBe(false);
-      expect(getRadioButton(antivirusTestSubj.syncRadioButton).checked).toBe(true);
+      expect(renderResult.getByTestId(antivirusTestSubj.modeSelect)).toHaveTextContent('Disable');
     });
   });
 });

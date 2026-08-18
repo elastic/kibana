@@ -762,7 +762,6 @@ export const EditPackagePolicyForm = memo<{
                               }
                             : undefined
                         }
-                        iconType="save"
                         color="primary"
                         fill
                         data-test-subj="saveIntegration"
