@@ -42,8 +42,7 @@ import {
   isInvestigationInvestigated,
   isInvestigationTerminalFailure,
   getPrimaryRecommendation,
-  mapBlindSpots,
-  type InvestigationRecommendation,
+  type RecommendationItem,
 } from './investigation_presentation';
 
 const INLINE_BLIND_SPOT_LIMIT = 4;
@@ -125,7 +124,7 @@ function TryNextPanel({
   recommendation,
   onShowMoreRecommendations,
 }: {
-  recommendation: InvestigationRecommendation;
+  recommendation: RecommendationItem;
   onShowMoreRecommendations?: () => void;
 }): React.ReactElement {
   const { euiTheme } = useEuiTheme();
@@ -263,7 +262,7 @@ export function InvestigationSummaryCard({
   const conclusionBody = getConclusionBody(state?.conclusion);
   const primaryRecommendation = status === 'complete' ? getPrimaryRecommendation(state) : undefined;
   const blindSpots =
-    status === 'complete' ? mapBlindSpots(state?.gaps_found).slice(0, INLINE_BLIND_SPOT_LIMIT) : [];
+    status === 'complete' ? (state?.blind_spots ?? []).slice(0, INLINE_BLIND_SPOT_LIMIT) : [];
 
   return (
     <>

@@ -13,7 +13,6 @@ import {
   getInvestigationHeadline,
   getInvestigationWorkflowStatusLabel,
   getPrimaryHypothesis,
-  mapBlindSpots,
   parseInvestigationRecommendations,
   sortInvestigationHypotheses,
 } from './investigation_presentation';
@@ -40,10 +39,6 @@ Checkout deploy introduced a regression.
 ## Next Steps
 - Roll back checkout deployment · Revert commit abc123 and monitor error rate.
 - Add canary deploy guardrail · Block deploys when error rate exceeds baseline.`,
-  gaps_found: [
-    'Missing trace coverage · No spans for payment gateway calls.',
-    'Limited log retention · Request IDs older than 24h unavailable.',
-  ],
 };
 
 describe('investigation_presentation', () => {
@@ -115,7 +110,22 @@ describe('investigation_presentation', () => {
   });
 
   describe('parseInvestigationRecommendations', () => {
-    it('parses next steps bullets from the conclusion markdown', () => {
+    it('prefers the structured recommendations field when present', () => {
+      const state: InvestigationState = {
+        ...completeState,
+        recommendations: [
+          { title: 'Revert the pool-size config change', code: 'max_size: 100' },
+          { title: 'Add a connection pool utilization alert' },
+        ],
+      };
+
+      expect(parseInvestigationRecommendations(state)).toEqual([
+        { title: 'Revert the pool-size config change', code: 'max_size: 100' },
+        { title: 'Add a connection pool utilization alert' },
+      ]);
+    });
+
+    it('falls back to parsing next steps bullets from the conclusion markdown when recommendations is absent', () => {
       expect(parseInvestigationRecommendations(completeState)).toEqual([
         {
           title: 'Roll back checkout deployment',
@@ -124,6 +134,46 @@ describe('investigation_presentation', () => {
         {
           title: 'Add canary deploy guardrail',
           description: 'Block deploys when error rate exceeds baseline.',
+        },
+      ]);
+    });
+
+    it('falls back to ranked hypotheses when neither recommendations nor next steps bullets are present', () => {
+      const state: InvestigationState = {
+        summary: 'Investigate latency spike on web-frontend.',
+        hypotheses: [
+          {
+            candidate: 'Deployment regression in checkout service',
+            confidence: 0.92,
+            status: 'confirmed',
+            reason: 'Error rate rose after deploy.',
+          },
+          {
+            candidate: 'Upstream dependency timeout',
+            confidence: 0.6,
+            status: 'dismissed',
+            reason: 'Some dependency latency increase observed but inconclusive.',
+          },
+          {
+            candidate: 'Disk saturation',
+            confidence: 0.1,
+            status: 'dismissed',
+            reason: 'IOPS stayed flat.',
+          },
+        ],
+        conclusion: 'Checkout deploy introduced a regression.',
+      };
+
+      expect(parseInvestigationRecommendations(state)).toEqual([
+        {
+          title: 'Deployment regression in checkout service',
+          description: 'Error rate rose after deploy.',
+          confidence: 0.92,
+        },
+        {
+          title: 'Upstream dependency timeout',
+          description: 'Some dependency latency increase observed but inconclusive.',
+          confidence: 0.6,
         },
       ]);
     });
@@ -170,21 +220,6 @@ kubectl rollout status deployment/api-gateway
           title:
             'Monitor web-frontend latency recovery — P95 should return to ~480ms within 5–10 minutes of gateway recovery',
           code: undefined,
-        },
-      ]);
-    });
-  });
-
-  describe('mapBlindSpots', () => {
-    it('splits title and description on middle dot separators', () => {
-      expect(mapBlindSpots(completeState.gaps_found)).toEqual([
-        {
-          title: 'Missing trace coverage',
-          description: 'No spans for payment gateway calls.',
-        },
-        {
-          title: 'Limited log retention',
-          description: 'Request IDs older than 24h unavailable.',
         },
       ]);
     });

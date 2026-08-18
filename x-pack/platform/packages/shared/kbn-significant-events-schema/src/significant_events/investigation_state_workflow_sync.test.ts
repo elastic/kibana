@@ -15,7 +15,9 @@ import {
 import {
   INVESTIGATE_STEP_ID,
   investigationStateSchema,
+  MAX_BLIND_SPOTS,
   MAX_HYPOTHESIS_EVIDENCE,
+  MAX_RECOMMENDATIONS,
 } from './investigation_state';
 
 interface ParsedInvestigationWorkflow {
@@ -146,7 +148,19 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
       },
     ],
     conclusion: 'Connection pool exhaustion caused by the 14:02 deploy.',
-    gaps_found: ['No profiling data available'],
+    recommendations: [
+      {
+        title: 'Revert the pool-size config change',
+        description: 'Raise it back above the previous value.',
+        code: 'connection_pool:\n  max_size: 100',
+      },
+    ],
+    blind_spots: [
+      {
+        title: 'No profiling data available',
+        description: 'Would have confirmed whether a leak compounded the exhaustion.',
+      },
+    ],
     significant_event_updates: [severityUpdate],
   };
 
@@ -387,6 +401,61 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
 
     expect(validate(oversized)).toBe(false);
     expect(investigationStateSchema.safeParse(oversized).success).toBe(false);
+  });
+
+  it('accepts a minimal recommendation (title only) under both schemas', () => {
+    const minimalRecommendation = {
+      ...validPayload,
+      recommendations: [{ title: 'Roll back the deployment' }],
+    };
+
+    expect(validate(minimalRecommendation)).toBe(true);
+    expect(investigationStateSchema.safeParse(minimalRecommendation).success).toBe(true);
+  });
+
+  it('rejects a recommendations array exceeding MAX_RECOMMENDATIONS under both schemas', () => {
+    const tooManyRecommendations = {
+      ...validPayload,
+      recommendations: Array.from({ length: MAX_RECOMMENDATIONS + 1 }, (_, index) => ({
+        title: `Step ${index}`,
+      })),
+    };
+
+    expect(validate(tooManyRecommendations)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyRecommendations).success).toBe(false);
+  });
+
+  it('rejects a recommendation missing its title under both schemas', () => {
+    const missingTitle = {
+      ...validPayload,
+      recommendations: [{ description: 'Do the thing' }],
+    };
+
+    expect(validate(missingTitle)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingTitle).success).toBe(false);
+  });
+
+  it('rejects a blind spot missing its description under both schemas', () => {
+    const missingDescription = {
+      ...validPayload,
+      blind_spots: [{ title: 'No traces for the cart service' }],
+    };
+
+    expect(validate(missingDescription)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingDescription).success).toBe(false);
+  });
+
+  it('rejects a blind_spots array exceeding MAX_BLIND_SPOTS under both schemas', () => {
+    const tooManyBlindSpots = {
+      ...validPayload,
+      blind_spots: Array.from({ length: MAX_BLIND_SPOTS + 1 }, (_, index) => ({
+        title: `Gap ${index}`,
+        description: `Missing data ${index}`,
+      })),
+    };
+
+    expect(validate(tooManyBlindSpots)).toBe(false);
+    expect(investigationStateSchema.safeParse(tooManyBlindSpots).success).toBe(false);
   });
 
   it('rejects an event_update with an unknown field under both schemas', () => {

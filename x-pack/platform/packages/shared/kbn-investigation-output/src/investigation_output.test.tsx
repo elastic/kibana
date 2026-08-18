@@ -46,9 +46,19 @@ const finalState: InvestigationState = {
       reason: 'Pool metrics spiked exactly at deploy time.',
     },
   ],
-  conclusion:
-    '## Conclusion\n\nA deploy at 14:02 introduced a connection leak in the checkout service.',
-  gaps_found: ['No profiling data available'],
+  conclusion: 'A deploy at 14:02 introduced a connection leak in the checkout service.',
+  recommendations: [
+    {
+      title: 'Roll back the deployment that introduced the regression',
+      code: 'kubectl rollout undo deployment/checkout-service',
+    },
+  ],
+  blind_spots: [
+    {
+      title: 'No profiling data available',
+      description: 'Could not confirm whether a leak compounded the exhaustion.',
+    },
+  ],
 };
 
 const finalStateWithUpdates: InvestigationState = {
@@ -142,8 +152,27 @@ describe('InvestigationOutput', () => {
     expect(finalResults).toHaveTextContent(
       'A deploy at 14:02 introduced a connection leak in the checkout service.'
     );
-    expect(finalResults).toHaveTextContent('Gaps found');
+    expect(finalResults).toHaveTextContent('Next steps');
+    expect(finalResults).toHaveTextContent(
+      'Roll back the deployment that introduced the regression'
+    );
+    expect(finalResults).toHaveTextContent('Blind spots');
     expect(finalResults).toHaveTextContent('No profiling data available');
+  });
+
+  it('renders agent text containing markdown control characters literally', () => {
+    const stateWithMarkdownChars: InvestigationState = {
+      ...finalState,
+      recommendations: [{ title: 'Bump *max_size* to 100' }],
+      blind_spots: [{ title: 'No `apm-*` indices', description: 'Needed for _tracing_.' }],
+    };
+
+    renderWithI18n(<InvestigationOutput status="complete" state={stateWithMarkdownChars} />);
+
+    const finalResults = screen.getByTestId('investigationOutputFinalResults');
+    expect(finalResults).toHaveTextContent('Bump *max_size* to 100');
+    expect(finalResults).toHaveTextContent('No `apm-*` indices');
+    expect(finalResults).toHaveTextContent('Needed for _tracing_.');
   });
 
   it('renders a loading state while the persisted result is being fetched', () => {
