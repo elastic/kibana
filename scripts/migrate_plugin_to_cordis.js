@@ -237,6 +237,26 @@ function run(pluginDir) {
   const indentedCtorBody = reindent(ctorBody, 4);
   const indentedStop = reindent(stopSection, 4);
 
+  // Collect non-import, non-class top-level declarations used in the constructor body.
+  // These include interface declarations, type aliases, and const declarations that may be
+  // referenced in the setup/stop bodies but are defined in the file (not imported).
+  const otherDeclarations = sourceFile.getStatements()
+    .filter((stmt) => {
+      const kind = stmt.getKindName();
+      // Keep interface declarations, type aliases, enum declarations
+      if (!['InterfaceDeclaration', 'TypeAliasDeclaration', 'EnumDeclaration'].includes(kind)) {
+        return false;
+      }
+      // Only keep if the name appears in the constructor body
+      const stmtText = stmt.getText();
+      const nameMatch = stmtText.match(/(?:interface|type|enum)\s+(\w+)/);
+      if (!nameMatch) return false;
+      return newBodyText.includes(nameMatch[1]);
+    })
+    .map((stmt) => stmt.getText())
+    .join('\n\n');
+  const otherDeclsSection = otherDeclarations ? '\n' + otherDeclarations + '\n' : '';
+
   // Build the new file content
   const newClassBody = `// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
 export default class ${className} extends Service {
@@ -255,7 +275,7 @@ ${indentedCtorBody}${indentedStop}${startTodo}
     "import { Service } from '@kbn/cordis';",
     "import type { Context } from '@kbn/cordis';",
     originalImports,
-    '',
+    otherDeclsSection,
     newClassBody,
     '',
   ].join('\n');

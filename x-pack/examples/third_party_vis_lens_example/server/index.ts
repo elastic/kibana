@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core/server';
-
-export const plugin: PluginInitializer<void, void> = async () => {
-  const { ThirdPartyVisLensExamplePlugin } = await import('./plugin');
-  return new ThirdPartyVisLensExamplePlugin();
-};
+export { default as cordisPlugin } from './plugin';

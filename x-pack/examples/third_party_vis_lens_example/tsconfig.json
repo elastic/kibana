@@ -14,6 +14,7 @@
     "target/**/*",
   ],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/expressions-plugin",
     "@kbn/data-views-plugin",
