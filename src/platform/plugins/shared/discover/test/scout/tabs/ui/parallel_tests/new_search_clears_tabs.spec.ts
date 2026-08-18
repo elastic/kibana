@@ -33,33 +33,36 @@ spaceTest.describe(
 
     spaceTest(
       'clears saved and unsaved tabs when starting a new session',
-      async ({ discoverScoutSpace, pageObjects }) => {
+      async ({ apiServices, discoverScoutSpace, pageObjects }) => {
         const { discover, unifiedTabs } = pageObjects;
         const sessionName = `Clear tabs Discover session ${Date.now()}`;
 
         await spaceTest.step('clear a loaded multi-tab session', async () => {
-          await discoverScoutSpace.createDiscoverSession({
-            title: sessionName,
-            tabs: [
-              {
-                id: 'persisted-data-view',
-                label: FIRST_TAB_LABEL,
-                data_source: {
-                  type: 'data_view_reference',
-                  ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+          await apiServices.discover.create(
+            {
+              title: sessionName,
+              tabs: [
+                {
+                  id: 'persisted-data-view',
+                  label: FIRST_TAB_LABEL,
+                  data_source: {
+                    type: 'data_view_reference',
+                    ref_id: discoverScoutSpace.getDataViewId(testData.DEFAULT_DATA_VIEW),
+                  },
                 },
-              },
-              {
-                id: 'ad-hoc-data-view',
-                label: SECOND_TAB_LABEL,
-                data_source: {
-                  type: 'data_view_spec',
-                  index_pattern: 'logs*',
-                  time_field: '@timestamp',
+                {
+                  id: 'ad-hoc-data-view',
+                  label: SECOND_TAB_LABEL,
+                  data_source: {
+                    type: 'data_view_spec',
+                    index_pattern: 'logs*',
+                    time_field: '@timestamp',
+                  },
                 },
-              },
-            ],
-          });
+              ],
+            },
+            discoverScoutSpace.id
+          );
 
           await discover.loadSavedSearch(sessionName);
 
