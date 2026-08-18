@@ -357,10 +357,10 @@ export class DashboardApp {
    * Opens the "Add from library" flyout.
    */
   async openLibraryFlyout(options?: TimeoutOptions) {
-    await this.addTopNavButton.click();
+    // Wait for the add-panel flyout itself — clicking Add during a create-route remount
+    // can swallow the click and leave the empty dashboard with no Library tab.
+    await this.openAddPanelFlyout({ timeout: options?.timeout ?? 20_000 });
     const libraryTab = this.page.testSubj.locator('addToDashboardTab-library');
-    // justified: create-route remounts can detach the tab; give the flyout time to settle
-    await expect(libraryTab).toBeVisible({ timeout: options?.timeout ?? 20_000 });
     // Panel-add success toasts can appear over the tab after Add opens the flyout.
     await this.toasts.dismissAll();
     // justified: toast/portal overlap can leave the Library tab "stable" but not actionable

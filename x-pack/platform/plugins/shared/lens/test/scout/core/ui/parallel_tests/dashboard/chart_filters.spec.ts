@@ -79,6 +79,10 @@ spaceTest.describe('Lens dashboard chart filters', { tag: '@local-stateful-class
         await expect(
           filterBar.getFilterLocator({ field: 'ip', value: '97.220.3.248' })
         ).toBeVisible();
+        // The ip filter re-renders the chart; clicking again while the portal or old
+        // geometry is still up misses the next bar (CI: "Filter by time" never appears).
+        await expect(page.locator('.echTooltipActions')).toBeHidden();
+        await dashboard.waitForRenderComplete();
       });
 
       await spaceTest.step('right-click a different bar applies the time range', async () => {
