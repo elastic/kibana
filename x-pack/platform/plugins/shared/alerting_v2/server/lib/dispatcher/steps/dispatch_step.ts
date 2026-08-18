@@ -25,6 +25,7 @@ import { DISPATCH_CHUNK_SIZE } from '../constants';
 import type {
   ActionGroup,
   ActionGroupId,
+  ActionPolicyDestination,
   ActionPolicyWorkflowPayload,
   DispatcherPipelineState,
   DispatcherStep,
