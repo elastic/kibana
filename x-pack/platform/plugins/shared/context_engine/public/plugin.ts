@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
@@ -22,7 +23,6 @@ import { from, map, switchMap } from 'rxjs';
 import { CONTEXT_ENGINE_APP_ID, CONTEXT_ENGINE_APP_PATH } from '../common/features';
 import { registerStepDefinitions } from './step_types';
 import type {
-  ChatOpener,
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
   ContextEngineSetupDependencies,
@@ -48,12 +48,8 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
-  /**
-   * The registered "Analyze & improve" chat opener, or `undefined` until one is registered. A
-   * getter over this field is threaded into the app so the button reacts to an opener registered
-   * after mount, rather than a value snapshotted once at mount time.
-   */
-  private chatOpener?: ChatOpener;
+  private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
+    Promise.resolve(undefined);
 
   constructor(_context: PluginInitializerContext) {}
 
@@ -61,6 +57,7 @@ export class ContextEnginePlugin
     core: CoreSetup<ContextEngineStartDependencies>,
     setupDeps: ContextEngineSetupDependencies
   ): ContextEnginePluginSetup {
+    this.setupAgentBuilderStart(core);
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
       isContextEngineEnabled: async () => {
@@ -70,9 +67,7 @@ export class ContextEnginePlugin
     });
 
     const startServices = core.getStartServices();
-    // Captured in a closure so `mount` (where `this` is the app config) can read the opener
-    // registered on `start`.
-    const getChatOpener = () => this.chatOpener;
+    const getAgentBuilder = () => this.agentBuilderPromise;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -100,15 +95,20 @@ export class ContextEnginePlugin
       ),
       defaultPath: '/',
       async mount(params: AppMountParameters) {
-        const { mountApp } = await import('./application');
+        const [{ mountApp }, { createAnalyzeChatOpener }] = await Promise.all([
+          import('./application'),
+          import('./analyze_chat_opener'),
+        ]);
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const agentBuilder = await getAgentBuilder();
+        const chatOpener = createAnalyzeChatOpener({ coreStart, agentBuilder });
         coreStart.chrome.docTitle.change(APP_TITLE);
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
-          getChatOpener,
+          getChatOpener: () => chatOpener,
         });
       },
     });
@@ -116,12 +116,19 @@ export class ContextEnginePlugin
     return {};
   }
 
+  private setupAgentBuilderStart(core: CoreSetup<ContextEngineStartDependencies>): void {
+    try {
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
+        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
+        .catch(() => undefined);
+    } catch {
+      this.agentBuilderPromise = Promise.resolve(undefined);
+    }
+  }
+
   start(_core: CoreStart): ContextEnginePluginStart {
-    return {
-      registerChatOpener: (opener: ChatOpener) => {
-        this.chatOpener = opener;
-      },
-    };
+    return {};
   }
 
   stop() {}
