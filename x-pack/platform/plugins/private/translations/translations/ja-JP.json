@@ -1293,7 +1293,10 @@
     "core.euiFlyoutManaged.defaultTitle": "不明なフライアウト",
     "core.euiFlyoutMenu.back": "戻る",
     "core.euiFlyoutMenu.history": "履歴",
+    "core.euiFlyoutMenu.history.tooltip": "最近アクセスしたページ",
     "core.euiFlyoutMenu.pagination.counter": "{position}/{total}",
+    "core.euiFlyoutMenu.pagination.first": "最初",
+    "core.euiFlyoutMenu.pagination.last": "最後",
     "core.euiFlyoutMenu.pagination.next": "次へ",
     "core.euiFlyoutMenu.pagination.previous": "前へ",
     "core.euiForm.addressFormErrors": "ハイライトされたエラーを修正してください。",
@@ -58295,7 +58298,6 @@
     "xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel": "インジェストパイプライン",
     "xpack.transform.transformList.editFlyoutFormDocsPerSecondHelpText": "スロットリングを有効にするには、毎秒入力するドキュメントの上限を設定します。",
     "xpack.transform.transformList.editFlyoutFormDocsPerSecondLabel": "毎秒あたりのドキュメント",
-    "xpack.transform.transformList.editFlyoutFormEetentionPolicyError": "日付フィールドがないインデックスでは、保持ポリシー設定を使用できません。",
     "xpack.transform.transformList.editFlyoutFormFrequencyHelpText": "トランスフォームが連続して実行されているときに、ソースインデックスの変更を確認する間隔。",
     "xpack.transform.transformList.editFlyoutFormFrequencyLabel": "頻度",
     "xpack.transform.transformList.editFlyoutFormFrequencyNotValidErrorMessage": "頻度値が無効です。",
@@ -60770,9 +60772,6 @@
     "xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage": "Webフックポートが必要です。",
     "xpack.watcher.watchActions.webhook.usernameIsRequiredIfPasswordValidationMessage": "ユーザー名が必要です。",
     "xpack.watcher.watchEdit.thresholdWatchExpression.aggType.fieldIsRequiredValidationMessage": "フィールドを選択してください。",
-    "xpack.watcher.watcherDescription": "アラートの作成、管理、監視によりデータへの変更を検知します。",
-    "core.euiFlyoutMenu.history.tooltip": "最近アクセスしたページ",
-    "core.euiFlyoutMenu.pagination.first": "最初",
-    "core.euiFlyoutMenu.pagination.last": "最後"
+    "xpack.watcher.watcherDescription": "アラートの作成、管理、監視によりデータへの変更を検知します。"
   }
 }
