@@ -21864,8 +21864,6 @@
     "xpack.fleet.awsConnectSetup.continueButton": "Continuer",
     "xpack.fleet.awsIdentityFederationSetup.createButton": "Créer une identité",
     "xpack.fleet.awsIdentityFederationSetup.existingIdentityTab": "Identité existante",
-    "xpack.fleet.awsIdentityFederationSetup.externalIdLabel": "ID externe",
-    "xpack.fleet.awsIdentityFederationSetup.externalIdRequired": "Un identifiant externe est requis",
     "xpack.fleet.awsIdentityFederationSetup.launchCloudFormation": "Lancer CloudFormation",
     "xpack.fleet.awsIdentityFederationSetup.newIdentityTab": "Nouvelle identité",
     "xpack.fleet.awsIdentityFederationSetup.roleArnLabel": "Nom ARN de rôle",

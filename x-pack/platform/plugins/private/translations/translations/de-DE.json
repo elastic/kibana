@@ -21906,8 +21906,6 @@
     "xpack.fleet.awsConnectSetup.continueButton": "Weiter",
     "xpack.fleet.awsIdentityFederationSetup.createButton": "Identität erstellen",
     "xpack.fleet.awsIdentityFederationSetup.existingIdentityTab": "Bestehende Identität",
-    "xpack.fleet.awsIdentityFederationSetup.externalIdLabel": "Externe ID",
-    "xpack.fleet.awsIdentityFederationSetup.externalIdRequired": "Externe ID ist erforderlich",
     "xpack.fleet.awsIdentityFederationSetup.launchCloudFormation": "CloudFormation starten",
     "xpack.fleet.awsIdentityFederationSetup.newIdentityTab": "Neue Identität",
     "xpack.fleet.awsIdentityFederationSetup.roleArnLabel": "Rollen-ARN",
