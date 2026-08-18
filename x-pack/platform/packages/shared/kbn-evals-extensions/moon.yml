@@ -22,6 +22,9 @@ dependsOn:
   - '@kbn/dev-cli-runner'
   - '@kbn/dev-cli-errors'
   - '@kbn/tooling-log'
+  - '@kbn/config-schema'
+  - '@kbn/some-dev-log'
+  - '@kbn/kbn-client'
 tags:
   - test-helper
   - package

@@ -1,0 +1,168 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { MatrixConfig } from './load_matrix_config';
+import type { Matrix, MatrixCell, MatrixDisplayColumn, MatrixRow } from './build_matrix';
+
+/**
+ * Where the numbers came from. Without this, a published matrix is an
+ * undated table of scores with no way to tell which eval run, branch, or
+ * lookback window produced it — so a stale artifact is indistinguishable
+ * from a fresh one.
+ */
+export interface MatrixProvenance {
+  /** Branch filter applied to the query (undefined = any branch). */
+  branch?: string;
+  /** Lookback window in days used to select experiments. */
+  lookbackDays?: number;
+  /** Suite ids the scores were drawn from. */
+  suiteIds?: string[];
+  /** Commit the generator ran against, when known. */
+  commitSha?: string;
+  /** CI build URL that produced the artifact, when known. */
+  buildUrl?: string;
+}
+
+export interface RenderedMatrix {
+  /** CSV for the proprietary-models table (first row = header). */
+  proprietaryCsv: string;
+  /** CSV for the open-source-models table (first row = header). */
+  openSourceCsv: string;
+  /** Combined human-readable markdown document. */
+  markdown: string;
+  /** Structured JSON artifact (machine-readable). */
+  json: string;
+}
+
+const cellToString = (cell: MatrixCell, notRecommendedLabel: string): string => {
+  switch (cell.kind) {
+    case 'score':
+      return String(cell.value);
+    case 'not-recommended':
+      return notRecommendedLabel;
+    case 'missing':
+    default:
+      return '';
+  }
+};
+
+/** Escapes a value for inclusion in a CSV field per RFC 4180. */
+const csvEscape = (value: string): string => {
+  if (/[",\n]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+};
+
+const cellForColumn = (row: MatrixRow, column: MatrixDisplayColumn): MatrixCell =>
+  column.kind === 'overall' ? row.overall : row.cells[column.id] ?? { kind: 'missing' };
+
+const buildHeader = (displayColumns: MatrixDisplayColumn[]): string[] => [
+  'Model',
+  ...displayColumns.map((column) => column.label),
+];
+
+const rowToValues = (
+  displayColumns: MatrixDisplayColumn[],
+  row: MatrixRow,
+  notRecommendedLabel: string
+): string[] => [
+  row.modelLabel,
+  ...displayColumns.map((column) => cellToString(cellForColumn(row, column), notRecommendedLabel)),
+];
+
+const renderCsv = (
+  displayColumns: MatrixDisplayColumn[],
+  rows: MatrixRow[],
+  notRecommendedLabel: string
+): string => {
+  const lines = [
+    buildHeader(displayColumns),
+    ...rows.map((row) => rowToValues(displayColumns, row, notRecommendedLabel)),
+  ];
+  return lines.map((cells) => cells.map(csvEscape).join(',')).join('\n') + '\n';
+};
+
+const renderMarkdownTable = (
+  displayColumns: MatrixDisplayColumn[],
+  rows: MatrixRow[],
+  notRecommendedLabel: string
+): string => {
+  const header = buildHeader(displayColumns);
+  const separator = header.map(() => ':---');
+  const body = rows.map((row) => rowToValues(displayColumns, row, notRecommendedLabel));
+
+  const toRow = (cells: string[]): string => `| ${cells.join(' | ')} |`;
+
+  return [toRow(header), toRow(separator), ...body.map(toRow)].join('\n');
+};
+
+export const renderMatrix = (
+  matrix: Matrix,
+  config: MatrixConfig,
+  provenance: MatrixProvenance = {}
+): RenderedMatrix => {
+  const { notRecommendedLabel } = config;
+  const displayColumns = matrix.displayColumns;
+  const generatedAt = new Date().toISOString();
+
+  const proprietaryCsv = renderCsv(displayColumns, matrix.proprietary, notRecommendedLabel);
+  const openSourceCsv = renderCsv(displayColumns, matrix.openSource, notRecommendedLabel);
+
+  // Rendered as a plain line rather than a comment so it survives into the
+  // published docs — a provenance footer nobody can see defeats the purpose.
+  const provenanceLine = [
+    `Generated ${generatedAt}`,
+    provenance.branch ? `branch \`${provenance.branch}\`` : undefined,
+    provenance.lookbackDays !== undefined ? `${provenance.lookbackDays}-day lookback` : undefined,
+    provenance.commitSha ? `commit \`${provenance.commitSha}\`` : undefined,
+    provenance.buildUrl ? `[build](${provenance.buildUrl})` : undefined,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
+  const markdown = [
+    `# ${config.title}`,
+    '',
+    provenanceLine,
+    '',
+    'Higher scores indicate better performance. A score of 10 on a task means the model met or exceeded all task-specific benchmarks. ' +
+      `Models with a score of "${notRecommendedLabel}" failed testing.`,
+    '',
+    '## Proprietary models',
+    '',
+    matrix.proprietary.length > 0
+      ? renderMarkdownTable(displayColumns, matrix.proprietary, notRecommendedLabel)
+      : '_No proprietary models with results._',
+    '',
+    '## Open-source models',
+    '',
+    matrix.openSource.length > 0
+      ? renderMarkdownTable(displayColumns, matrix.openSource, notRecommendedLabel)
+      : '_No open-source models with results._',
+    '',
+  ].join('\n');
+
+  const json = JSON.stringify(
+    {
+      title: config.title,
+      generatedAt,
+      provenance,
+      columns: matrix.columns,
+      composites: matrix.composites ?? [],
+      displayColumns,
+      overallLabel: matrix.overallLabel,
+      proprietary: matrix.proprietary,
+      openSource: matrix.openSource,
+      ...(matrix.tokenCost ? { tokenCost: matrix.tokenCost } : {}),
+    },
+    null,
+    2
+  );
+
+  return { proprietaryCsv, openSourceCsv, markdown, json };
+};
