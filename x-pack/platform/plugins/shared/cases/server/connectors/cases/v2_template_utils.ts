@@ -9,12 +9,15 @@ import { parse as parseYaml } from 'yaml';
 import type { Logger } from '@kbn/core/server';
 import type { z } from '@kbn/zod/v4';
 import { ParsedTemplateDefinitionSchema } from '../../../common/types/domain/template/v1';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import {
   buildExtendedFieldsDefaults,
   parseFieldDefinitionsToInlineFields,
   resolveTemplateFields,
 } from '../../../common/utils/template_fields';
 import type { FieldDefinitionsFindRequest } from '../../../common/types/api/field_definition/v1';
+import { buildFieldLinkIndexes } from '../../common/utils/field_link_resolution';
+import { buildActiveLinkMaps } from '../../common/utils/pair_field_representations';
 import type { CasesClient } from '../../client';
 
 export type ParsedTemplateDefinition = z.infer<typeof ParsedTemplateDefinitionSchema>;
@@ -153,6 +156,19 @@ export const resolveV2TemplateForLegacyKey = async (
   };
 };
 
+export interface ExtendedFieldsFromTemplate {
+  /** Resolved template + global defaults, keyed by storage key. */
+  extendedFields: Record<string, string>;
+  /**
+   * Legacy (v1) custom-field keys whose linked definition received a value in
+   * `extendedFields`. The connector must not ALSO generate a raw v1 value for these keys:
+   * legacy configuration defaults and Field Library defaults can legitimately diverge, and
+   * sending both raw representations makes pairing reject the whole bulk request as an
+   * explicit dual-input conflict. With only the v2 value sent, pairing derives the v1 side.
+   */
+  legacyKeysWithV2Values: ReadonlySet<string>;
+}
+
 /**
  * Fetches the owner's field-definition library and resolves all template fields
  * (both inline and `$ref` entries) into a flat `extended_fields` map of defaults,
@@ -164,13 +180,20 @@ export const resolveV2TemplateForLegacyKey = async (
  * and on the reopen path an explicit `''` would overwrite values users typed into the
  * previously created cases' fields.
  *
+ * `customFieldsConfiguration` (the owner's legacy custom fields) is resolved through the
+ * standard link-resolution utilities to report which legacy keys already have a v2 value —
+ * see {@link ExtendedFieldsFromTemplate.legacyKeysWithV2Values}. Malformed or ambiguous
+ * links produce no active link and are therefore never reported, preserving their
+ * fail-closed behavior downstream.
+ *
  * Called once per connector run on the v2 template path, before case creation.
  */
 export const buildExtendedFieldsFromTemplate = async (
   casesClient: CasesClient,
   definition: ParsedTemplateDefinition,
-  owner: string
-): Promise<Record<string, string>> => {
+  owner: string,
+  customFieldsConfiguration?: CustomFieldsConfiguration
+): Promise<ExtendedFieldsFromTemplate> => {
   // The owner is already validated against the template SO; cast to the narrow owner type
   // expected by the sub-client's FieldDefinitionsFindRequest.
   const { fieldDefinitions } = await casesClient.fieldDefinitions.getFieldDefinitions({
@@ -190,7 +213,23 @@ export const buildExtendedFieldsFromTemplate = async (
     ).filter(([, value]) => value !== '')
   );
 
-  return Object.fromEntries(
+  const extendedFields = Object.fromEntries(
     Object.entries({ ...templateDefaults, ...globalDefaults }).filter(([, value]) => value !== '')
   );
+
+  // Resolve the active v1 links with the same utilities the write path uses, then report every
+  // legacy key whose linked storage key carries a generated value.
+  const activeLinks = buildActiveLinkMaps(
+    customFieldsConfiguration ?? [],
+    buildFieldLinkIndexes(fieldDefinitions)
+  );
+  const legacyKeysWithV2Values = new Set<string>();
+  for (const storageKey of Object.keys(extendedFields)) {
+    const link = activeLinks.byStorageKey.get(storageKey);
+    if (link !== undefined) {
+      legacyKeysWithV2Values.add(link.key);
+    }
+  }
+
+  return { extendedFields, legacyKeysWithV2Values };
 };

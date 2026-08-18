@@ -754,10 +754,12 @@ export class CasesConnectorExecutor {
     const { customFieldsConfigurationMap, templatesConfigurationMap } =
       await this.getCustomFieldsAndTemplatesConfiguration();
 
-    const { v2Template, extendedFields, templateRef } = await this.resolveV2TemplateWithFields(
-      params,
-      templatesConfigurationMap.get(params.owner)
-    );
+    const { v2Template, extendedFields, templateRef, legacyKeysWithV2Values } =
+      await this.resolveV2TemplateWithFields(
+        params,
+        templatesConfigurationMap.get(params.owner),
+        customFieldsConfigurationMap.get(params.owner)
+      );
 
     for (const error of nonFoundErrors) {
       if (groupedAlertsWithCaseId.has(error.caseId)) {
@@ -771,7 +773,8 @@ export class CasesConnectorExecutor {
             templatesConfigurationMap.get(params.owner),
             v2Template ?? undefined,
             extendedFields,
-            templateRef
+            templateRef,
+            legacyKeysWithV2Values
           )
         );
       }
@@ -824,12 +827,23 @@ export class CasesConnectorExecutor {
     v2Template: ParsedTemplateDefinition,
     customFieldsConfigurations?: CustomFieldsConfiguration,
     extendedFields?: Record<string, string>,
-    templateRef?: { id: string; version: number }
+    templateRef?: { id: string; version: number },
+    legacyKeysWithV2Values?: ReadonlySet<string>
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
 
-    const builtCustomFields = buildCustomFieldsForRequest(customFieldsConfigurations);
+    // Generate exactly ONE raw representation per linked field. A legacy key whose linked
+    // definition already received a generated v2 value is dropped here: legacy and Field
+    // Library defaults can legitimately diverge after an admin edits either side, and sending
+    // both raw values would make pairing reject the whole automated batch as an explicit
+    // dual-input conflict. With the v1 side absent, pairing treats the v2 value as
+    // authoritative and derives v1 from it. Required linked fields with no v2 value keep
+    // their legacy fallback (pairing then derives v2), and unlinked legacy fields are
+    // untouched.
+    const builtCustomFields = buildCustomFieldsForRequest(customFieldsConfigurations).filter(
+      (customField) => !legacyKeysWithV2Values?.has(customField.key)
+    );
 
     const baseRequest: Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } = {
       id: caseId,
@@ -879,7 +893,8 @@ export class CasesConnectorExecutor {
     templatesConfigurations?: TemplatesConfiguration,
     v2Template?: ParsedTemplateDefinition,
     extendedFields?: Record<string, string>,
-    templateRef?: { id: string; version: number }
+    templateRef?: { id: string; version: number },
+    legacyKeysWithV2Values?: ReadonlySet<string>
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId, oracleRecord, title } = groupingData;
     const flattenGrouping = getFlattenedObject(grouping);
@@ -891,7 +906,8 @@ export class CasesConnectorExecutor {
         v2Template,
         customFieldsConfigurations,
         extendedFields,
-        templateRef
+        templateRef,
+        legacyKeysWithV2Values
       );
     }
 
@@ -1200,9 +1216,11 @@ export class CasesConnectorExecutor {
       v2Template: v2TemplateForReopened,
       extendedFields: extendedFieldsForReopened,
       templateRef: templateRefForReopened,
+      legacyKeysWithV2Values: legacyKeysWithV2ValuesForReopened,
     } = await this.resolveV2TemplateWithFields(
       params,
-      templatesConfigurationMapForReopened.get(params.owner)
+      templatesConfigurationMapForReopened.get(params.owner),
+      customFieldsConfigurationMapForReopened.get(params.owner)
     );
 
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
@@ -1213,7 +1231,8 @@ export class CasesConnectorExecutor {
         templatesConfigurationMapForReopened.get(params.owner),
         v2TemplateForReopened ?? undefined,
         extendedFieldsForReopened,
-        templateRefForReopened
+        templateRefForReopened,
+        legacyKeysWithV2ValuesForReopened
       )
     );
 
@@ -1423,14 +1442,23 @@ export class CasesConnectorExecutor {
 
   private async resolveV2TemplateWithFields(
     params: CasesConnectorRunParams,
-    templatesForOwner?: TemplatesConfiguration
+    templatesForOwner?: TemplatesConfiguration,
+    customFieldsForOwner?: CustomFieldsConfiguration
   ): Promise<{
     v2Template: ParsedTemplateDefinition | null;
     extendedFields: Record<string, string> | undefined;
     templateRef: { id: string; version: number } | undefined;
+    legacyKeysWithV2Values: ReadonlySet<string> | undefined;
   }> {
+    const emptyResult = {
+      v2Template: null,
+      extendedFields: undefined,
+      templateRef: undefined,
+      legacyKeysWithV2Values: undefined,
+    };
+
     if (!this.isTemplatesEnabled || !params.templateId) {
-      return { v2Template: null, extendedFields: undefined, templateRef: undefined };
+      return emptyResult;
     }
 
     // A rule authored in the v2 UI stores the v2 templateId and its version — resolve it directly.
@@ -1444,19 +1472,21 @@ export class CasesConnectorExecutor {
       );
 
       if (!v2Template) {
-        return { v2Template: null, extendedFields: undefined, templateRef: undefined };
+        return emptyResult;
       }
 
-      const extendedFields = await buildExtendedFieldsFromTemplate(
+      const { extendedFields, legacyKeysWithV2Values } = await buildExtendedFieldsFromTemplate(
         this.casesClient,
         v2Template,
-        params.owner
+        params.owner,
+        customFieldsForOwner
       );
 
       return {
         v2Template,
         extendedFields,
         templateRef: { id: params.templateId, version: Number(params.templateVersion) },
+        legacyKeysWithV2Values,
       };
     }
 
@@ -1478,19 +1508,21 @@ export class CasesConnectorExecutor {
     );
 
     if (!resolved) {
-      return { v2Template: null, extendedFields: undefined, templateRef: undefined };
+      return emptyResult;
     }
 
-    const extendedFields = await buildExtendedFieldsFromTemplate(
+    const { extendedFields, legacyKeysWithV2Values } = await buildExtendedFieldsFromTemplate(
       this.casesClient,
       resolved.definition,
-      params.owner
+      params.owner,
+      customFieldsForOwner
     );
 
     return {
       v2Template: resolved.definition,
       extendedFields,
       templateRef: { id: resolved.templateId, version: resolved.templateVersion },
+      legacyKeysWithV2Values,
     };
   }
 
