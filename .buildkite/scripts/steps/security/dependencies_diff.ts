@@ -74,11 +74,8 @@ async function main() {
     return;
   }
 
-  const packageJsonPath = Path.join(process.cwd(), 'package.json');
-  const thirdPartyPackagesPath = Path.join(
-    process.cwd(),
-    '.buildkite/scripts/steps/security/third_party_packages.txt'
-  );
+  const packageJsonPath = Path.join(import.meta.dirname, '../../../../package.json');
+  const thirdPartyPackagesPath = Path.join(import.meta.dirname, 'third_party_packages.txt');
 
   const diffOutput = execSync(
     `git diff --name-only --diff-filter=M ${process.env.GITHUB_PR_MERGE_BASE} HEAD -- ${packageJsonPath} ${thirdPartyPackagesPath}`

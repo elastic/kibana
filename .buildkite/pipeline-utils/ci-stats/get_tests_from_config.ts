@@ -62,7 +62,7 @@ interface JestConfigRules {
  * anything the config leaves unset.
  */
 function parseJestConfigRules(configAbsPath: string): JestConfigRules {
-  const isIntegration = /jest\.integration\.config\.(js|ts)$/.test(configAbsPath);
+  const isIntegration = /jest\.integration\.config\.(c?js|ts)$/.test(configAbsPath);
   const configDir = dirname(configAbsPath);
   const requireConfig = createRequire(configAbsPath);
 

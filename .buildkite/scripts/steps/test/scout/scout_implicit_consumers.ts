@@ -22,11 +22,7 @@
  */
 
 import minimatch from 'minimatch';
-
-export interface ScoutLog {
-  info(message: string): void;
-  warning(message: string): void;
-}
+import type { ScoutLog } from './scout_log.ts';
 
 interface ImplicitConsumerRule {
   reason: string;

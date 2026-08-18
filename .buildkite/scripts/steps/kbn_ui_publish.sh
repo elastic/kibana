@@ -52,8 +52,7 @@ if [[ "${FORCE_ALL:-}" == "1" ]]; then
   affected="$(find src/platform/kbn-ui -mindepth 1 -maxdepth 1 -type d \
     ! -name '_*' -exec basename {} \;)"
 else
-  affected="$(node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON \
-    .buildkite/scripts/steps/kbn_ui_affected_packages.ts "$base_ref" HEAD)"
+  affected="$(node .buildkite/scripts/steps/kbn_ui_affected_packages.ts "$base_ref" HEAD)"
 fi
 
 if [[ -z "$affected" ]]; then

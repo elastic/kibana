@@ -8,7 +8,6 @@
  */
 
 import parseArgs from 'minimist';
-import { basename } from 'node:path';
 import { upsertComment, addComment } from '#pipeline-utils';
 
 const ALLOWED_ENV_VARS = [
@@ -71,7 +70,7 @@ export function commentOnPR({
   }
 }
 
-if (basename(process.argv[1] ?? '') === 'comment_on_pr.ts') {
+if (import.meta.main) {
   const args = parseArgs<
     CommentOnPRArgs & {
       'clear-previous'?: CommentOnPRArgs['clearPrevious'] | string;

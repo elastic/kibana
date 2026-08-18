@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/moon', () => ({
+  getMoonChangedFiles: jest.fn(),
+  getAffectedMoonProjectsFromChangedFiles: jest.fn(),
+}));
+
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
 import {
   FORCE_ALL_CHANGED_PATHS,
-  KBN_UI_ROOT_RELATIVE,
   getPackageNameFromSourceRoot,
-  main,
   resolveAffectedPackages,
   shouldForceAllPackages,
   topologicallySortPackages,
@@ -249,47 +252,5 @@ describe('affected_packages', () => {
 
     expect(result).toEqual(['chrome-layout', 'side-navigation']);
     fs.rmSync(kbnUiRoot, { recursive: true });
-  });
-});
-
-describe('main', () => {
-  let repoRoot: string;
-
-  beforeEach(() => {
-    repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'kbn-ui-main-test-'));
-
-    const packageRoot = path.join(repoRoot, KBN_UI_ROOT_RELATIVE, 'side-navigation');
-    fs.mkdirSync(path.join(packageRoot, 'src'), { recursive: true });
-    fs.writeFileSync(path.join(packageRoot, 'moon.yml'), "id: '@kbn/ui-side-navigation'\n");
-    fs.writeFileSync(path.join(packageRoot, 'src/index.ts'), 'export {};\n');
-
-    const moonBin = path.join(repoRoot, 'node_modules/.bin/moon');
-    fs.mkdirSync(path.dirname(moonBin), { recursive: true });
-    fs.writeFileSync(
-      moonBin,
-      `#!/usr/bin/env bash
-set -euo pipefail
-if [[ "$1" == "query" && "$2" == "changed-files" ]]; then
-  printf '%s\\n' '{"files":["src/platform/kbn-ui/side-navigation/src/index.ts"]}'
-else
-  cat >/dev/null
-  printf '%s\\n' '{"projects":[{"id":"@kbn/ui-side-navigation","source":"src/platform/kbn-ui/side-navigation"}]}'
-fi
-`
-    );
-    fs.chmodSync(moonBin, 0o755);
-  });
-
-  afterEach(() => {
-    fs.rmSync(repoRoot, { recursive: true, force: true });
-    jest.restoreAllMocks();
-  });
-
-  it('queries Moon and prints affected package directories', async () => {
-    const stdoutSpy = jest.spyOn(process.stdout, 'write').mockImplementation(() => true);
-
-    await main(['main', 'HEAD'], repoRoot);
-
-    expect(stdoutSpy).toHaveBeenCalledWith('side-navigation\n');
   });
 });

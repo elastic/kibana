@@ -8,7 +8,6 @@
  */
 
 // Query the GitHub API for the user's GitHub identity
-import { basename } from 'node:path';
 import { octokit } from './shared.ts';
 
 const getGitHubIdentity = async (): Promise<{
@@ -49,7 +48,7 @@ export async function main() {
   }
 }
 
-if (basename(process.argv[1] ?? '') === 'get_github_identity.ts') {
+if (import.meta.main) {
   main().then((identity) => {
     console.log(JSON.stringify(identity));
   });

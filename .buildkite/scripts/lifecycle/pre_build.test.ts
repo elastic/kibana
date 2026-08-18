@@ -160,8 +160,7 @@ describe('lifecycle pre_build.sh', () => {
     expect(result.status).toBe(0);
     expect(result.calls).toEqual(
       expect.arrayContaining([
-        expect.stringContaining('node '),
-        expect.stringContaining('ci_stats_start.ts'),
+        expect.stringMatching(/node .*ci_stats_start\.ts/),
         expect.stringContaining(
           'buildkite-agent meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT https://storage.googleapis.com/mock-bucket/manifest.json'
         ),
@@ -176,7 +175,7 @@ describe('lifecycle pre_build.sh', () => {
 
     expect(result.status).toBe(0);
     // We stub node itself, so ci_stats_start.ts is not executed in tests.
-    expect(hasCall(result.calls, 'node ')).toBe(true);
+    expect(result.calls.some((call) => /node .*ci_stats_start\.ts/.test(call))).toBe(true);
     // If ci_stats_start.ts had run, it would set ci_stats_build_id via buildkite-agent meta-data.
     expect(hasCall(result.calls, 'buildkite-agent meta-data set ci_stats_build_id')).toBe(false);
   });

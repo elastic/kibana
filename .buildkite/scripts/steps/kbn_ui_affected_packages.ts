@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { main } from '../../../src/platform/kbn-ui/_tooling/affected_packages.ts';
+import { loadKibanaModule } from '../../pipeline-utils/load_kibana_module.ts';
+
+interface AffectedPackagesModule {
+  main: () => Promise<void>;
+}
+
+const { main } = loadKibanaModule<AffectedPackagesModule>(
+  './src/platform/kbn-ui/_tooling/affected_packages'
+);
 
 main().catch((error) => {
   process.stderr.write(`${(error as Error).stack ?? error}\n`);

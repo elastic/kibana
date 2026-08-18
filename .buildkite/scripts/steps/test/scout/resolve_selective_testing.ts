@@ -37,7 +37,8 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { expandWithImplicitConsumers, type ScoutLog } from './scout_implicit_consumers.ts';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import type { ScoutLog } from './scout_log.ts';
 import { shouldSkipScoutTests } from './scout_ftr_modules.ts';
 import { computeMoonShadow } from './moon_shadow.ts';
 import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
@@ -45,7 +46,7 @@ import { getAffectedPackages, listChangedFiles } from '#pipeline-utils';
 const writeLog = (message: string) => process.stderr.write(`${message}\n`);
 const log: ScoutLog = {
   info: writeLog,
-  warning: writeLog,
+  warning: (message) => writeLog(`WARN ${message}`),
 };
 
 const [mergeBase, outPath] = process.argv.slice(2);

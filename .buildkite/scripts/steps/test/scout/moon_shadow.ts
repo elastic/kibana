@@ -14,7 +14,8 @@
  * See `affected-packages/README.md`.
  */
 
-import { expandWithImplicitConsumers, type ScoutLog } from './scout_implicit_consumers.ts';
+import { expandWithImplicitConsumers } from './scout_implicit_consumers.ts';
+import type { ScoutLog } from './scout_log.ts';
 import { getAffectedProjectsMoon } from '#pipeline-utils';
 
 export interface MoonShadowResult {

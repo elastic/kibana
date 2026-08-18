@@ -7,17 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import { getKibanaDir } from './get_kibana_dir.ts';
 
-const kibanaDir = execFileSync('git', ['rev-parse', '--show-toplevel'], {
-  encoding: 'utf8',
-}).trim();
-const requireKibana = createRequire(resolve(kibanaDir, 'package.json'));
+let requireKibana: ReturnType<typeof createRequire> | undefined;
 let environmentLoaded = false;
 
+/**
+ * Loads package IDs normally. Requests beginning with `./` are resolved relative
+ * to the repository-root package.json used to create the CommonJS loader.
+ */
 export const loadKibanaModule = <T>(request: string): T => {
+  requireKibana ??= createRequire(resolve(getKibanaDir(), 'package.json'));
+
   if (!environmentLoaded) {
     requireKibana('@kbn/setup-node-env');
     environmentLoaded = true;

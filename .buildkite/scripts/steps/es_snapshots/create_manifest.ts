@@ -9,7 +9,6 @@
 
 import fs from 'fs';
 import { execSync } from 'child_process';
-import path from 'path';
 import { BASE_BUCKET_DAILY } from './bucket_config.ts';
 
 interface ManifestEntry {
@@ -25,8 +24,7 @@ interface ManifestEntry {
 (async () => {
   console.log('--- Create ES Snapshot Manifest');
 
-  const destination =
-    process.argv[2] || path.resolve(process.cwd(), '.buildkite/scripts/steps/es_snapshots/test');
+  const destination = process.argv[2] || `${import.meta.dirname}/test`;
 
   const ES_BRANCH = process.env.ELASTICSEARCH_BRANCH;
   const ES_CLOUD_IMAGE = process.env.ELASTICSEARCH_CLOUD_IMAGE;

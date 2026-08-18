@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  parserOptions: {
-    ecmaVersion: 2022,
-  },
-  rules: {
-    '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
-  },
-};
+import { execFileSync } from 'node:child_process';
+
+export const getKibanaDir = (() => {
+  let kibanaDir: string | undefined;
+
+  return (): string => {
+    kibanaDir ??= execFileSync('git', ['rev-parse', '--show-toplevel'], {
+      encoding: 'utf8',
+    }).trim();
+
+    return kibanaDir;
+  };
+})();

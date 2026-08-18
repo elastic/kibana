@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { getKibanaDir } from './get_kibana_dir.ts';
-
-export const loadBuildkiteJson = <T>(relativePath: string): T =>
-  JSON.parse(readFileSync(resolve(getKibanaDir(), '.buildkite', relativePath), 'utf8')) as T;
+export interface ScoutLog {
+  info(message: string): void;
+  warning(message: string): void;
+}

@@ -10,7 +10,8 @@
     "allowImportingTsExtensions": true,
     "moduleResolution": "bundler",
     "outDir": "target/types",
-    "types": ["node", "jest"]
+    "types": ["node", "jest"],
+    "verbatimModuleSyntax": true
   },
   "include": [
     "pipeline-utils/**/*",
