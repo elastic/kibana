@@ -150,7 +150,7 @@ export class AgentBuilderPlugin
 
     startDependencies.cps?.cpsManager?.registerAppAccess(
       AGENTBUILDER_APP_ID,
-      () => ProjectRoutingAccess.READONLY
+      () => ProjectRoutingAccess.EDITABLE
     );
 
     const agentService = new AgentService({ http });
