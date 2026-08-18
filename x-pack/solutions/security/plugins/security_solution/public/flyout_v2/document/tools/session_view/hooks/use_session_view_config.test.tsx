@@ -80,6 +80,57 @@ describe('useSessionViewConfig', () => {
     });
   });
 
+  it(`should qualify the ancestor index with the remote cluster prefix when the alert is remote`, () => {
+    const hit = createHit({
+      index: 'remote-cluster:.alerts-security.alerts-default',
+      flattened: {
+        'kibana.alert.ancestors.index': ['.siem-signals-default'],
+        'kibana.alert.original_time': ['2023-01-01T00:00:00.000Z'],
+        'process.entity_id': ['process.entity_id'],
+        'process.entry_leader.entity_id': ['process.entry_leader.entity_id'],
+        'process.entry_leader.start': ['process.entry_leader.start'],
+      },
+    });
+
+    hookResult = renderHook((props: DataTableRecord) => useSessionViewConfig(props), {
+      initialProps: hit,
+    });
+
+    expect(hookResult.result.current).toEqual({
+      index: 'remote-cluster:.siem-signals-default',
+      investigatedAlertId: '_id',
+      jumpToCursor: '2023-01-01T00:00:00.000Z',
+      jumpToEntityId: 'process.entity_id',
+      sessionEntityId: 'process.entry_leader.entity_id',
+      sessionStartTime: 'process.entry_leader.start',
+    });
+  });
+
+  it(`should fall back to the document _index (already cluster-qualified) when ancestor index is absent and the alert is remote`, () => {
+    const hit = createHit({
+      index: 'remote-cluster:.alerts-security.alerts-default',
+      flattened: {
+        'kibana.alert.original_time': ['2023-01-01T00:00:00.000Z'],
+        'process.entity_id': ['process.entity_id'],
+        'process.entry_leader.entity_id': ['process.entry_leader.entity_id'],
+        'process.entry_leader.start': ['process.entry_leader.start'],
+      },
+    });
+
+    hookResult = renderHook((props: DataTableRecord) => useSessionViewConfig(props), {
+      initialProps: hit,
+    });
+
+    expect(hookResult.result.current).toEqual({
+      index: 'remote-cluster:.alerts-security.alerts-default',
+      investigatedAlertId: '_id',
+      jumpToCursor: '2023-01-01T00:00:00.000Z',
+      jumpToEntityId: 'process.entity_id',
+      sessionEntityId: 'process.entry_leader.entity_id',
+      sessionStartTime: 'process.entry_leader.start',
+    });
+  });
+
   it(`should return null if data isn't ready for session view`, () => {
     const hit = createHit({
       flattened: {},
