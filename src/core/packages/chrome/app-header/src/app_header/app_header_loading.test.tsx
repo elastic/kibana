@@ -10,11 +10,15 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
-import { APP_MENU_ITEM_LIMIT } from '@kbn/app-menu';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/app-menu';
 import { ChromeServiceProvider } from '@kbn/core-chrome-browser-context';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { AppHeaderLoading, AppHeaderLoadingView } from './app_header_loading';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
+
+jest.mock('@kbn/ui-chrome-layout-utils', () => ({
+  useCurrentChromeApplicationBreakpoint: () => 'xl',
+}));
 
 const renderLoading = (
   ui: React.ReactElement,
@@ -26,19 +30,16 @@ const renderLoading = (
   };
 };
 
-const menuRectangles = (): NodeListOf<Element> =>
-  screen
-    .getByTestId(APP_HEADER_TEST_SUBJECTS.skeletonMenu)
-    .querySelectorAll('.euiSkeletonRectangle');
-
 describe('AppHeaderLoadingView', () => {
   it('skeletons the title and the default overflow + primary menu', () => {
     renderLoading(<AppHeaderLoadingView />);
 
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.root)).toBeInTheDocument();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.skeleton)).toBeInTheDocument();
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.skeletonMenu)).toBeInTheDocument();
-    expect(menuRectangles()).toHaveLength(2);
+    expect(screen.getByTestId(APP_MENU_TEST_SUBJECTS.loading)).toBeInTheDocument();
+    expect(
+      screen.getByTestId(APP_MENU_TEST_SUBJECTS.loading).querySelectorAll('.euiSkeletonRectangle')
+    ).toHaveLength(2);
   });
 
   it('keeps the back button next to the title skeleton', () => {
@@ -54,13 +55,15 @@ describe('AppHeaderLoadingView', () => {
   it('customizes the menu skeleton', () => {
     renderLoading(<AppHeaderLoadingView menu={{ buttonCount: 2, hasPrimary: false }} />);
 
-    expect(menuRectangles()).toHaveLength(2);
+    expect(
+      screen.getByTestId(APP_MENU_TEST_SUBJECTS.loading).querySelectorAll('.euiSkeletonRectangle')
+    ).toHaveLength(2);
   });
 
-  it('clamps buttonCount to APP_MENU_ITEM_LIMIT', () => {
-    renderLoading(<AppHeaderLoadingView menu={{ buttonCount: 99 }} />);
+  it('omits the menu when nothing is requested', () => {
+    renderLoading(<AppHeaderLoadingView menu={{ buttonCount: 0, hasPrimary: false }} />);
 
-    expect(menuRectangles()).toHaveLength(APP_MENU_ITEM_LIMIT + 1);
+    expect(screen.queryByTestId(APP_MENU_TEST_SUBJECTS.loading)).not.toBeInTheDocument();
   });
 });
 

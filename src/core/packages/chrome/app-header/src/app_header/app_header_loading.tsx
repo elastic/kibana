@@ -8,11 +8,12 @@
  */
 
 import React from 'react';
+import { AppMenuLoading } from '@kbn/app-menu';
 import type { AppHeaderBack, AppHeaderSpacing } from '../types';
 import { useInlineAppHeader } from './hooks';
 import { AppHeaderShell } from './app_header_shell';
 import { TitleArea } from './title_area';
-import { AppHeaderSkeletonMenu, AppHeaderSkeletonTitle } from './app_header_skeleton';
+import { AppHeaderSkeletonTitle } from './app_header_skeleton';
 
 /**
  * Optional menu-skeleton customization. Omit the whole `menu` prop to get the default
@@ -53,15 +54,8 @@ export const AppHeaderLoadingView = React.memo<AppHeaderLoadingProps>(
 
     return (
       <AppHeaderShell
-        title={
-          <>
-            {back !== undefined ? <TitleArea back={back} size={titleSize} /> : null}
-            <AppHeaderSkeletonTitle />
-          </>
-        }
-        trailing={
-          <AppHeaderSkeletonMenu buttonCount={menu?.buttonCount} hasPrimary={menu?.hasPrimary} />
-        }
+        title={<TitleArea back={back} size={titleSize} placeholder={<AppHeaderSkeletonTitle />} />}
+        trailing={<AppMenuLoading buttonCount={menu?.buttonCount} hasPrimary={menu?.hasPrimary} />}
         sticky={sticky}
         spacing={spacing}
       />

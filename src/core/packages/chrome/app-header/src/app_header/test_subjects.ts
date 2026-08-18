@@ -30,7 +30,6 @@ export const APP_HEADER_TEST_SUBJECTS = {
   badgesOverflow: 'appHeaderBadgesOverflow',
   back: 'appHeaderBack',
   skeleton: 'appHeaderSkeleton',
-  skeletonMenu: 'appHeaderSkeletonMenu',
   menuDocumentation: 'appHeaderMenuDocumentation',
   menuFeedback: 'appHeaderMenuFeedback',
   menuAddIntegrations: 'appHeaderMenuAddIntegrations',

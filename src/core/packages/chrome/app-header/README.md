@@ -92,9 +92,14 @@ regions with defaults that match a typical title + overflow + primary header:
 
 `back` still renders when provided. Once data arrives, replace it with the real `AppHeader`.
 
+The fully supported swap is a **single-row** header: title (optional back) plus the app menu.
+`AppHeaderLoading` does not skeleton tabs, description, metadata, or title actions. Swapping from
+the loading placeholder to a multi-row `AppHeader` will change the header height.
+
 The menu skeleton can be customized later if the loaded header will not look like the default
 (for example two icon buttons and no primary). `buttonCount` is clamped to AppMenu's
-`APP_MENU_ITEM_LIMIT` (3); the primary action is separate and does not count toward that limit:
+`APP_MENU_ITEM_LIMIT` (3); the primary action is separate and does not count toward that limit.
+The menu uses the same responsive collapsed / minimal / expanded layouts as `AppMenu`.
 
 ```tsx
 <AppHeaderLoading menu={{ buttonCount: 2, hasPrimary: false }} />
