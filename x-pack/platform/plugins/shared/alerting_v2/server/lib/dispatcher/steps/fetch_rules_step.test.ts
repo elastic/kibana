@@ -9,7 +9,13 @@ import { FetchRulesStep } from './fetch_rules_step';
 import type { RulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service';
 import { createRulesSavedObjectService } from '../../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createRuleSoAttributes } from '../../test_utils';
-import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
+import {
+  createAlertEpisode,
+  createDispatcherPipelineState,
+  createStepLogger,
+} from '../fixtures/test_utils';
+
+const logger = createStepLogger();
 
 describe('FetchRulesStep', () => {
   let rulesSoService: RulesSavedObjectService;
@@ -38,7 +44,7 @@ describe('FetchRulesStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -52,7 +58,7 @@ describe('FetchRulesStep', () => {
     const step = new FetchRulesStep(rulesSoService);
 
     const state = createDispatcherPipelineState({ dispatchable: [] });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -83,7 +89,7 @@ describe('FetchRulesStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -105,7 +111,7 @@ describe('FetchRulesStep', () => {
       dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -125,7 +131,7 @@ describe('FetchRulesStep', () => {
       dispatchable: [createAlertEpisode({ rule_id: 'r1' })],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -150,7 +156,7 @@ describe('FetchRulesStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -167,7 +173,7 @@ describe('FetchRulesStep', () => {
       ],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;

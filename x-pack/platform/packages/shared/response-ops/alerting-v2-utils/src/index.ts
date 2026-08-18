@@ -12,3 +12,4 @@ export {
 } from './is_alerting_v2_enabled';
 export { normalizeTags } from './normalize_tags';
 export { resolveTimeField, type ResolveTimeFieldParams } from './time_field';
+export { parseEpisodeDataJson, getValueByFieldPath } from './episode_data';
