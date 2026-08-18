@@ -15,7 +15,12 @@ jest.mock('../../application/breadcrumb_context', () => ({
 }));
 
 jest.mock('@kbn/core-di-browser', () => ({
-  useService: () => ({}),
+  useService: (token: unknown) => {
+    if (token === 'chrome') {
+      return { docTitle: { change: jest.fn() }, setBreadcrumbs: jest.fn() };
+    }
+    return {};
+  },
   CoreStart: (key: string) => key,
 }));
 

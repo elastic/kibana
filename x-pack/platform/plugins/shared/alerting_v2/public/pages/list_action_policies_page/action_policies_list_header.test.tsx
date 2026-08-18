@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
@@ -96,7 +96,7 @@ describe('ActionPoliciesListHeader', () => {
     const agentButton = screen.getByTestId('createActionPolicyWithAgentButton');
     expect(agentButton).toBeDisabled();
 
-    await user.click(agentButton);
+    fireEvent.click(agentButton);
     expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 
