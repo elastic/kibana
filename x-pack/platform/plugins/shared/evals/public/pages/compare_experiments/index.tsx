@@ -423,7 +423,7 @@ const ExampleDrilldownFlyout: React.FC<{
                 <EuiToolTip content={i18n.FLYOUT_TRACE_A} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     color="primary"
                     aria-label={i18n.FLYOUT_TRACE_A}
                     onClick={() => setSelectedTraceId(item.traceIdA)}
@@ -436,7 +436,7 @@ const ExampleDrilldownFlyout: React.FC<{
                 <EuiToolTip content={i18n.FLYOUT_TRACE_B} disableScreenReaderOutput>
                   <EuiButtonIcon
                     size="xs"
-                    iconType="apmTrace"
+                    iconType="chartWaterfall"
                     color="accent"
                     aria-label={i18n.FLYOUT_TRACE_B}
                     onClick={() => setSelectedTraceId(item.traceIdB)}
@@ -471,7 +471,7 @@ const ExampleDrilldownFlyout: React.FC<{
         <EuiFlyoutBody>
           {!isLoading && pairs.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               title={<h3>{i18n.FLYOUT_NO_EXAMPLES_TITLE}</h3>}
               body={<p>{i18n.FLYOUT_NO_EXAMPLES_BODY}</p>}
             />
@@ -792,7 +792,7 @@ export const CompareExperimentsPage: React.FC = () => {
                   ? 'check'
                   : csvCopyState === 'failed'
                   ? 'warning'
-                  : 'exportAction'
+                  : 'upload'
               }
               onClick={handleCsvExport}
               disabled={csvCopyState !== 'idle'}
@@ -927,7 +927,7 @@ export const CompareExperimentsPage: React.FC = () => {
 
           {sortedResults.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="search"
+              iconType="magnify"
               title={<h3>{i18n.NO_RESULTS_TITLE}</h3>}
               body={<p>{i18n.NO_RESULTS_BODY}</p>}
               actions={[

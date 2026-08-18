@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import * as Rx from 'rxjs';
-import { timeout } from 'rxjs';
 import type { Writable } from 'stream';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -18,6 +17,7 @@ import {
   KibanaShuttingDownError,
   MissingAuthenticationError,
   numberToDuration,
+  QueueTimeoutError,
 } from '@kbn/reporting-common';
 import type {
   ExecutionError,
@@ -30,6 +30,8 @@ import type {
 import { ScheduleType, decryptJobHeaders, type ReportingConfigType } from '@kbn/reporting-server';
 import {
   throwRetryableError,
+  TaskErrorSource,
+  createTaskRunError,
   type ConcreteTaskInstance,
   type RunContext,
   type TaskManagerStartContract,
@@ -43,7 +45,7 @@ import { brandSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { isNumber } from 'lodash';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
 import type { ReportTaskParams, ReportingTask } from '.';
-import { ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
+import { FORCE_TIMEOUT_GRACE_PERIOD, ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
 import type { ReportingCore } from '../..';
 import type { EventTracker } from '../../usage';
 import type { SavedReport } from '../store';
@@ -98,6 +100,11 @@ export interface PrepareJobResults {
   report?: SavedReport;
   task?: ReportTaskParams;
   scheduledReport?: SavedObject<ScheduledReportType>;
+}
+
+interface PerformJobResults {
+  result: TaskRunResult;
+  timedOut: boolean;
 }
 
 type ReportTaskParamsType = Record<string, any>;
@@ -398,7 +405,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     taskInstanceFields,
     cancellationToken,
     stream,
-  }: PerformJobOpts): Promise<TaskRunResult> {
+  }: PerformJobOpts): Promise<PerformJobResults> {
     const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
@@ -414,19 +421,57 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
       encryptedHeaders: task.payload.headers,
     });
 
-    return Rx.lastValueFrom(
-      Rx.from(
-        exportType.runTask({
-          jobId: task.id,
-          payload: task.payload,
-          request,
-          taskInstanceFields,
-          cancellationToken,
-          stream,
-          useInternalUser: task.useInternalUser,
-        })
-      ).pipe(timeout(this.queueTimeout)) // throw an error if a value is not emitted before timeout
-    );
+    // We use this internal timeout mechanism (vs relying solely on the task manager cancel function)
+    // to handle scheduled exports that have been configured to retry multiple times within a single task run
+    // because task manager does not retry recurring tasks.
+    let jobTimedOut: boolean = false;
+    const timerId = setTimeout(() => {
+      jobTimedOut = true;
+      try {
+        cancellationToken.cancel();
+      } catch (err) {
+        errorLogger(this.logger, 'Error cancelling timed-out report', err);
+      }
+    }, this.queueTimeout);
+
+    const runTaskPromise = exportType.runTask({
+      jobId: task.id,
+      payload: task.payload,
+      request,
+      taskInstanceFields,
+      cancellationToken,
+      stream,
+      useInternalUser: task.useInternalUser,
+    });
+
+    // Hard timeout fallback: the cooperative timer above only cancels the token, so a runTask that
+    // ignores it would hang this run forever. Force-fail a grace period after the cancel.
+    let forceTimerId: ReturnType<typeof setTimeout> | undefined;
+    const forceTimeoutPromise = new Promise<never>((_, reject) => {
+      forceTimerId = setTimeout(() => {
+        errorLogger(
+          this.logger,
+          `Report ${task.id} did not honor the cancellation token within the grace period; force-failing the run.`
+        );
+        reject(new QueueTimeoutError());
+      }, this.queueTimeout + FORCE_TIMEOUT_GRACE_PERIOD);
+    });
+
+    try {
+      const result = await Promise.race([runTaskPromise, forceTimeoutPromise]);
+      return { result, timedOut: jobTimedOut };
+    } catch (err) {
+      // Surface the timeout even when runTask rejects on cancel instead of resolving with partial data like CSV does.
+      if (jobTimedOut) {
+        throw new QueueTimeoutError();
+      }
+      throw err;
+    } finally {
+      clearTimeout(timerId);
+      clearTimeout(forceTimerId);
+      // If the force timeout won the race, runTask may still reject later; catch to prevent unhandled rejection.
+      runTaskPromise.catch(() => {});
+    }
   }
 
   protected async completeJob(
@@ -499,7 +544,8 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     // Keep a separate local stack for each task run
     return ({ taskInstance, fakeRequest }: RunContext) => {
       let jobId: string;
-      const cancellationToken = new CancellationToken();
+      let output: PerformJobResults | undefined;
+      let cancellationToken: CancellationToken | undefined;
       const { retryAt: taskRetryAt, startedAt: taskStartedAt } = taskInstance;
 
       return {
@@ -563,6 +609,10 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               retries,
               report,
               operation: async (rep: SavedReport) => {
+                cancellationToken = new CancellationToken();
+                // Reset per attempt so a later attempt that rejects before performJob returns
+                // can't read a prior attempt's result when classifying the failure.
+                output = undefined;
                 // keep track of the number of times we try within the task
                 atmpts = isNumber(atmpts) ? atmpts + 1 : undefined;
 
@@ -601,13 +651,16 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                   stream,
                 });
 
-                let output: TaskRunResult;
                 try {
-                  output = await Promise.race<TaskRunResult>([
+                  output = await Promise.race<PerformJobResults>([
                     performJobPromise,
                     this.throwIfKibanaShutsDown(),
                     rejectIfStreamError,
                   ]);
+
+                  if (output.timedOut) {
+                    throw new QueueTimeoutError();
+                  }
                 } catch (raceErr) {
                   stream.removeListener('error', streamErrorReject!);
                   // performJob may still reject after losing the race; swallow it to avoid an
@@ -640,27 +693,26 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
                 rep._primary_term = stream.getPrimaryTerm()!;
 
                 const byteSize = stream.bytesWritten;
-                eventLog.logExecutionComplete({ ...(output.metrics ?? {}), byteSize });
+                eventLog.logExecutionComplete({ ...(output.result.metrics ?? {}), byteSize });
 
-                if (output) {
+                if (output.result) {
                   this.logger.debug(`Job output size: ${byteSize} bytes.`, { tags: [jobId] });
                   // Update the job status to "completed"
                   report = await this.completeJob(rep, isNumber(atmpts) ? atmpts : rep.attempts, {
-                    ...output,
+                    ...output.result,
                     size: byteSize,
                   });
 
                   await this.notify(
                     report,
                     taskInstance,
-                    output,
+                    output.result,
                     byteSize,
                     scheduledReport,
                     task.payload.spaceId
                   );
                 }
 
-                // untrack the report for concurrency awareness
                 this.logger.debug(`Stopping ${jobId}.`, { tags: [jobId] });
               },
             });
@@ -685,7 +737,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               }
             );
 
-            cancellationToken.cancel();
+            if (cancellationToken) {
+              cancellationToken.cancel();
+            }
 
             if (isLastAttempt) {
               this.logger.info(
@@ -699,8 +753,17 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
               );
             }
 
-            throwRetryableError(failedToExecuteErr, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
+            let error = failedToExecuteErr;
+            if (
+              failedToExecuteErr instanceof QueueTimeoutError &&
+              output?.result.user_error === true
+            ) {
+              error = createTaskRunError(failedToExecuteErr, TaskErrorSource.USER);
+            }
+
+            throwRetryableError(error, new Date(Date.now() + TIME_BETWEEN_ATTEMPTS));
           } finally {
+            // untrack the report for concurrency awareness
             this.opts.reporting.untrackReport(jobId);
             this.logger.debug(`Reports running: ${this.opts.reporting.countConcurrentReports()}.`, {
               tags: [jobId],
@@ -716,7 +779,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
           if (jobId) {
             this.logger.warn(`Cancelling job ${jobId}...`, { tags: [jobId] });
           }
-          cancellationToken.cancel();
+          if (cancellationToken) {
+            cancellationToken.cancel();
+          }
         },
       };
     };

@@ -13,6 +13,7 @@ import {
 } from '../../../client/attachment_framework/types';
 import type { CommentAttachmentData } from '../../../../common/types/domain_zod/attachment/comment/v2';
 import { basicCase } from '../../../containers/mock';
+import { allCasesPermissions } from '../../../common/mock';
 import { getCommentAttachmentType } from '.';
 
 type CommentViewProps = UnifiedValueAttachmentViewProps<CommentAttachmentData>;
@@ -30,6 +31,7 @@ describe('getCommentAttachmentType', () => {
     version: '1',
     savedObjectId: 'comment-1',
     caseData: { title: basicCase.title, id: basicCase.id },
+    permissions: allCasesPermissions(),
     rowContext: {
       appId: 'cases',
       manageMarkdownEditIds: [],
@@ -49,7 +51,7 @@ describe('getCommentAttachmentType', () => {
 
     expect(commentType).toStrictEqual({
       id: COMMENT_ATTACHMENT_TYPE,
-      icon: 'editorComment',
+      icon: 'comment',
       displayName: 'Comments',
       getAttachmentViewObject: expect.any(Function),
       getAttachmentRemovalObject: expect.any(Function),

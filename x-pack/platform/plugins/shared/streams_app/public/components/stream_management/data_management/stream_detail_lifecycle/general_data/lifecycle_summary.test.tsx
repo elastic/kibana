@@ -700,6 +700,23 @@ describe('LifecycleSummary', () => {
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
     });
 
+    it('gives the "Add data phase" button an accessible name matching its visible label', () => {
+      const definition = createIlmDefinition();
+
+      renderWithSync(
+        <LifecycleSummary
+          definition={definition}
+          isMetricsStream={false}
+          onAddDataPhase={jest.fn()}
+        />
+      );
+
+      // WCAG 2.5.3 Label in Name: the accessible name must match the visible text.
+      expect(screen.getByTestId('dataLifecycleSummaryAddPhaseButton')).toHaveAccessibleName(
+        'Add data phase'
+      );
+    });
+
     it('should show loading skeleton while fetching ILM stats', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: undefined,
