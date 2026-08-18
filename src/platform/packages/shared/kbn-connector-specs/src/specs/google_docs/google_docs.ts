@@ -60,18 +60,22 @@ export const GoogleDocsConnector: ConnectorSpec = {
 
   auth: {
     types: [
-      {
-        type: 'ears',
-        isRecommended: true,
-        isExperimental: true,
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'google',
-          scope: SCOPES,
-        },
-      },
+      // EARS is commented out until EARS supports write scopes. The `documents` scope
+      // required by updateDoc is a write scope; EARS currently only supports read-only
+      // Google scopes (drive.readonly, gmail.readonly, etc.). Re-enable once EARS adds
+      // write scope support for Google connectors.
+      // {
+      //   type: 'ears',
+      //   isRecommended: true,
+      //   isExperimental: true,
+      //   overrides: {
+      //     meta: { scope: { disabled: true } },
+      //   },
+      //   defaults: {
+      //     provider: 'google',
+      //     scope: SCOPES,
+      //   },
+      // },
       {
         type: 'oauth_authorization_code',
         overrides: {

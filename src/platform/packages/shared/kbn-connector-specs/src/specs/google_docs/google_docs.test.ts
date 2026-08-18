@@ -54,18 +54,17 @@ describe('GoogleDocsConnector', () => {
   // auth
   // =========================================================================
   describe('auth', () => {
-    it('supports ears auth type as first option', () => {
-      expect(GoogleDocsConnector.auth?.types[0]).toEqual(expect.objectContaining({ type: 'ears' }));
-    });
+    // EARS is commented out in the spec until EARS supports write scopes.
+    // it('supports ears auth type as first option', () => {
+    //   expect(GoogleDocsConnector.auth?.types[0]).toEqual(expect.objectContaining({ type: 'ears' }));
+    // });
+    // it('ears auth uses Google provider and required scopes', () => { ... });
 
-    it('ears auth uses Google provider and required scopes', () => {
+    it('does not include ears auth (pending write scope support)', () => {
       const earsType = GoogleDocsConnector.auth?.types.find(
         (t): t is AuthTypeDef => typeof t === 'object' && t.type === 'ears'
       );
-      const scope = earsType?.defaults?.scope as string;
-      expect(scope).toContain('https://www.googleapis.com/auth/drive.readonly');
-      expect(scope).toContain('https://www.googleapis.com/auth/documents');
-      expect(earsType?.overrides?.meta).toEqual({ scope: { disabled: true } });
+      expect(earsType).toBeUndefined();
     });
 
     it('supports oauth_authorization_code with correct Google defaults and hidden fields', () => {
