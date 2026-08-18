@@ -21,6 +21,8 @@ export interface UseIamPermissionsResult {
 /**
  * Fetches IAM permissions from `GET /internal/onboarding/iam_permissions?services=...`.
  * Re-fetches whenever `serviceIds` changes (by identity of the sorted comma-joined string).
+ *
+ * TODO: no call sites exist — remove this hook, AwsPermissionsViewer, and the server route.
  */
 export const useIamPermissions = (serviceIds: string[]): UseIamPermissionsResult => {
   const { services } = useKibana<CoreStart>();

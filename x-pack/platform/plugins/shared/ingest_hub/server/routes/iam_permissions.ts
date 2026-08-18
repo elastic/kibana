@@ -27,6 +27,7 @@ const toSidSegment = (id: string): string =>
     .map((seg) => seg.charAt(0).toUpperCase() + seg.slice(1))
     .join('');
 
+// TODO: no UI call sites exist — remove this route, useIamPermissions, and AwsPermissionsViewer.
 export const registerIamPermissionsRoute = (
   router: IRouter,
   getFleet: () => FleetStartContract,
