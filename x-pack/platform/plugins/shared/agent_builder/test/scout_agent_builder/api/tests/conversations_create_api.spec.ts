@@ -76,9 +76,7 @@ apiTest.describe(
       );
 
       const getRes = await asAdmin.get(
-        `${CONVERSATIONS_PATH}/${encodeURIComponent(
-          (res.body as CreateConversationResponse).id
-        )}`,
+        `${CONVERSATIONS_PATH}/${encodeURIComponent((res.body as CreateConversationResponse).id)}`,
         { responseType: 'json' }
       );
       expect(getRes).toHaveStatusCode(200);
@@ -119,22 +117,19 @@ apiTest.describe(
       }
     );
 
-    apiTest(
-      'the created conversation appears in GET /conversations',
-      async ({ asAdmin }) => {
-        const createRes = await asAdmin.post(CONVERSATIONS_PATH, {
-          body: { title: 'Listed conversation' },
-          responseType: 'json',
-        });
-        expect(createRes).toHaveStatusCode(200);
-        const id = (createRes.body as CreateConversationResponse).id;
+    apiTest('the created conversation appears in GET /conversations', async ({ asAdmin }) => {
+      const createRes = await asAdmin.post(CONVERSATIONS_PATH, {
+        body: { title: 'Listed conversation' },
+        responseType: 'json',
+      });
+      expect(createRes).toHaveStatusCode(200);
+      const id = (createRes.body as CreateConversationResponse).id;
 
-        const listRes = await asAdmin.get(CONVERSATIONS_PATH, { responseType: 'json' });
-        expect(listRes).toHaveStatusCode(200);
-        const ids = (listRes.body as { results: Array<{ id: string }> }).results.map((c) => c.id);
-        expect(ids).toContain(id);
-      }
-    );
+      const listRes = await asAdmin.get(CONVERSATIONS_PATH, { responseType: 'json' });
+      expect(listRes).toHaveStatusCode(200);
+      const ids = (listRes.body as { results: Array<{ id: string }> }).results.map((c) => c.id);
+      expect(ids).toContain(id);
+    });
 
     apiTest('stores access_control entries when provided', async ({ asAdmin }) => {
       const res = await asAdmin.post(CONVERSATIONS_PATH, {
@@ -181,35 +176,29 @@ apiTest.describe(
       expect(res).toHaveStatusCode(404);
     });
 
-    apiTest(
-      'returns 409 when the supplied conversation_id already exists',
-      async ({ asAdmin }) => {
-        const id = randomUUID();
+    apiTest('returns 409 when the supplied conversation_id already exists', async ({ asAdmin }) => {
+      const id = randomUUID();
 
-        const first = await asAdmin.post(CONVERSATIONS_PATH, {
-          body: { conversation_id: id },
-          responseType: 'json',
-        });
-        expect(first).toHaveStatusCode(200);
+      const first = await asAdmin.post(CONVERSATIONS_PATH, {
+        body: { conversation_id: id },
+        responseType: 'json',
+      });
+      expect(first).toHaveStatusCode(200);
 
-        const second = await asAdmin.post(CONVERSATIONS_PATH, {
-          body: { conversation_id: id },
-          responseType: 'json',
-        });
-        expect(second).toHaveStatusCode(409);
-      }
-    );
+      const second = await asAdmin.post(CONVERSATIONS_PATH, {
+        body: { conversation_id: id },
+        responseType: 'json',
+      });
+      expect(second).toHaveStatusCode(409);
+    });
 
-    apiTest(
-      'returns 400 when conversation_id is not a valid UUID',
-      async ({ asAdmin }) => {
-        const res = await asAdmin.post(CONVERSATIONS_PATH, {
-          body: { conversation_id: 'not-a-uuid' },
-          responseType: 'json',
-        });
+    apiTest('returns 400 when conversation_id is not a valid UUID', async ({ asAdmin }) => {
+      const res = await asAdmin.post(CONVERSATIONS_PATH, {
+        body: { conversation_id: 'not-a-uuid' },
+        responseType: 'json',
+      });
 
-        expect(res).toHaveStatusCode(400);
-      }
-    );
+      expect(res).toHaveStatusCode(400);
+    });
   }
 );
