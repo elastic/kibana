@@ -63,9 +63,11 @@ apiTest.describe(
     const testRunId = randomUUID();
     const SPACE_A = `${TEST_PREFIX}-a-${testRunId}`;
     const SPACE_B = `${TEST_PREFIX}-b-${testRunId}`;
-    const AGENT_IN_A_1 = `${TEST_PREFIX}-agent-a1-${testRunId}`;
-    const AGENT_IN_A_2 = `${TEST_PREFIX}-agent-a2-${testRunId}`;
-    const AGENT_IN_B_1 = `${TEST_PREFIX}-agent-b1-${testRunId}`;
+
+    const shortRunId = testRunId.slice(0, 8);
+    const AGENT_IN_A_1 = `sda-agent-a1-${shortRunId}`;
+    const AGENT_IN_A_2 = `sda-agent-a2-${shortRunId}`;
+    const AGENT_IN_B_1 = `sda-agent-b1-${shortRunId}`;
 
     // API-key-authed clients for the two Agent Builder personas in SPACE_A
     let asReadOnly: AuthedApiClient;
