@@ -39,6 +39,7 @@ import { uxAppHref, mergeRumSearch, pushRumPath, sessionsPatch } from '../../uti
 import { serviceNameFromPath, uxAppPath, uxSessionIdFromPath } from '../../utils/ux_app_path';
 import { useLegacyUrlParams } from '../../context/url_params_context/use_url_params';
 import { BackendCallsPanel } from '../trace/backend_calls_panel';
+import { SyntheticsMonitorChip } from '../trace/synthetics_monitor_chip';
 import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../trace/trace_waterfall_flyout';
 
 const ACTION_ICON: Record<SessionAction['kind'], string> = {
@@ -851,6 +852,15 @@ export function SessionDetailPage() {
                       </EuiFlexItem>
                     )}
                   </EuiFlexGroup>
+                  {detail.pageVisits[0]?.path && (
+                    <>
+                      <EuiSpacer size="m" />
+                      <SyntheticsMonitorChip
+                        pagePath={detail.pageVisits[0].path}
+                        showCreateCheck={false}
+                      />
+                    </>
+                  )}
                   <EuiSpacer size="l" />
                   <EuiFlexGroup gutterSize="xl" wrap responsive={false}>
                     <EuiFlexItem grow={false}>

@@ -39,8 +39,9 @@ import {
   type RumReportScheduleFilters,
   type RumReportScheduleSpec,
 } from '../../../../common/rum_report_schedule';
-import { ScheduleCadenceFields } from './schedule_cadence_fields';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
+import { useUxFlyoutSession, uxFlyoutProps } from '../../flyout/ux_flyout_props';
+import { ScheduleCadenceFields } from './schedule_cadence_fields';
 import {
   createRumReportSchedule,
   deleteRumReportSchedule,
@@ -97,6 +98,7 @@ export function ScheduleEmailFlyout({
   onClose: () => void;
 }) {
   const { http, notifications, application, inference, uiSettings } = useKibanaServices();
+  const session = useUxFlyoutSession();
   const [connectors, setConnectors] = useState<RumEmailConnectorOption[]>([]);
   const [aiConnectors, setAiConnectors] = useState<InferenceConnector[]>([]);
   const [schedules, setSchedules] = useState<RumReportSchedule[]>([]);
@@ -214,21 +216,20 @@ export function ScheduleEmailFlyout({
     }
   };
 
+  const flyoutTitle = i18n.translate('xpack.ux.reports.schedule.flyoutTitle', {
+    defaultMessage: 'Email this report',
+  });
+
   return (
     <EuiFlyout
-      ownFocus
+      {...uxFlyoutProps({ title: flyoutTitle, size: 's', session })}
       onClose={onClose}
-      size="s"
       aria-labelledby="uxReportScheduleTitle"
       data-test-subj="uxReportScheduleFlyout"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id="uxReportScheduleTitle">
-            {i18n.translate('xpack.ux.reports.schedule.flyoutTitle', {
-              defaultMessage: 'Email this report',
-            })}
-          </h2>
+          <h2 id="uxReportScheduleTitle">{flyoutTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiText size="s" color="subdued">

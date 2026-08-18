@@ -388,6 +388,7 @@ export function RumBudgetsPanel() {
         <SloDetailsFlyout
           sloId={selected.id}
           sloInstanceId={selected.instanceId}
+          session="start"
           onClose={() => setSelected(null)}
         />
       )}

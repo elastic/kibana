@@ -21,8 +21,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { rangeAroundTimestamp } from '../../../common/rum_backend';
+import { rangeAroundTimestamp, resolveTimeRange } from '../../../common/rum_backend';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
+import { uxFlyoutProps, type UxFlyoutSession } from '../flyout/ux_flyout_props';
 
 export interface TraceFlyoutTarget {
   traceId: string;
@@ -42,19 +43,21 @@ export const TraceWaterfallFlyout = ({
   rangeFrom,
   rangeTo,
   onClose,
+  session = 'start',
 }: {
   target: TraceFlyoutTarget;
   rangeFrom: string;
   rangeTo: string;
   onClose: () => void;
+  session?: UxFlyoutSession;
 }) => {
   const { apmShared, observabilityShared } = useKibanaServices();
   const [fullTrace, setFullTrace] = useState(true);
   const titleId = useGeneratedHtmlId({ prefix: 'uxTraceWaterfallTitle' });
-  const range = useMemo(
-    () => rangeAroundTimestamp(target.timestamp ?? undefined, rangeFrom, rangeTo),
-    [target.timestamp, rangeFrom, rangeTo]
-  );
+  const range = useMemo(() => {
+    const resolved = resolveTimeRange(rangeFrom, rangeTo);
+    return rangeAroundTimestamp(target.timestamp ?? undefined, resolved.rangeFrom, resolved.rangeTo);
+  }, [target.timestamp, rangeFrom, rangeTo]);
 
   const apmHref = observabilityShared.locators.apm.transactionDetailsByTraceId.getRedirectUrl({
     traceId: target.traceId,
@@ -65,10 +68,15 @@ export const TraceWaterfallFlyout = ({
 
   const Focused = apmShared.FocusedTraceWaterfallWithFetching;
   const Full = apmShared.TraceWaterfallWithFetching;
+  const title =
+    target.title ??
+    i18n.translate('xpack.ux.traceWaterfall.title', {
+      defaultMessage: 'Backend trace',
+    });
 
   return (
     <EuiFlyout
-      size="l"
+      {...uxFlyoutProps({ title, session })}
       onClose={onClose}
       aria-labelledby={titleId}
       data-test-subj="uxTraceWaterfallFlyout"
@@ -77,12 +85,7 @@ export const TraceWaterfallFlyout = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size="s">
-              <h2 id={titleId}>
-                {target.title ??
-                  i18n.translate('xpack.ux.traceWaterfall.title', {
-                    defaultMessage: 'Backend trace',
-                  })}
-              </h2>
+              <h2 id={titleId}>{title}</h2>
             </EuiTitle>
             <EuiText size="xs" color="subdued">
               {target.traceId}

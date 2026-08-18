@@ -50,6 +50,7 @@ import {
 } from '../../../../common/rum_budgets';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
+import { useUxFlyoutSession, uxFlyoutProps } from '../../flyout/ux_flyout_props';
 import { fetchRumAlertStatus } from '../../../services/rest/rum_alerts_api';
 import { fetchRumAnalyticsStatus } from '../../../services/rest/rum_analytics_api';
 import { createRumBudget, generateRumBudgetKql } from '../../../services/rest/rum_budgets_api';
@@ -79,6 +80,7 @@ export function CreateBudgetFlyout({
 }) {
   const { http, notifications } = useKibanaServices();
   const { euiTheme } = useEuiTheme();
+  const session = useUxFlyoutSession();
   const {
     urlParams: { serviceName, pageUrl },
   } = useLegacyUrlParams();
@@ -259,16 +261,19 @@ export function CreateBudgetFlyout({
   };
 
   const unit = rumBudgetThresholdUnit(templateId);
+  const flyoutTitle = i18n.translate('xpack.ux.budgets.create.title', {
+    defaultMessage: 'Create performance budget',
+  });
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="l" aria-labelledby="uxCreateBudgetFlyoutTitle">
+    <EuiFlyout
+      {...uxFlyoutProps({ title: flyoutTitle, size: 'l', session })}
+      onClose={onClose}
+      aria-labelledby="uxCreateBudgetFlyoutTitle"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id="uxCreateBudgetFlyoutTitle">
-            {i18n.translate('xpack.ux.budgets.create.title', {
-              defaultMessage: 'Create performance budget',
-            })}
-          </h2>
+          <h2 id="uxCreateBudgetFlyoutTitle">{flyoutTitle}</h2>
         </EuiTitle>
         <EuiText size="s" color="subdued">
           <p>

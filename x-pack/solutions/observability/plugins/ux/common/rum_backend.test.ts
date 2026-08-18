@@ -8,6 +8,7 @@
 import {
   originFromUrl,
   rangeAroundTimestamp,
+  resolveTimeRange,
   statusFromHttpLabel,
   summarizeBackendCallsFromActions,
 } from './rum_backend';
@@ -56,6 +57,23 @@ describe('rangeAroundTimestamp', () => {
     expect(rangeAroundTimestamp('not-a-date', 'now-24h', 'now')).toEqual({
       rangeFrom: 'now-24h',
       rangeTo: 'now',
+    });
+  });
+});
+
+describe('resolveTimeRange', () => {
+  it('turns datemath into ISO timestamps', () => {
+    const range = resolveTimeRange('now-1h', 'now');
+    expect(Date.parse(range.rangeFrom)).toBeLessThan(Date.parse(range.rangeTo));
+    expect(range.rangeFrom).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(range.rangeTo).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('leaves already-ISO bounds unchanged besides parsing', () => {
+    const range = resolveTimeRange('2026-08-16T12:00:00.000Z', '2026-08-16T13:00:00.000Z');
+    expect(range).toEqual({
+      rangeFrom: '2026-08-16T12:00:00.000Z',
+      rangeTo: '2026-08-16T13:00:00.000Z',
     });
   });
 });

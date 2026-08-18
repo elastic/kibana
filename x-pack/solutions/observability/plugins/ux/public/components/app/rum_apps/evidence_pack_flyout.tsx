@@ -61,6 +61,7 @@ import { fetchSessionReplaySessions } from '../../../services/rest/session_repla
 import type { RumAiLocationState } from '../../../utils/rum_search';
 import { mergeRumSearch, pushRumPath, sessionsPatch } from '../../../utils/rum_search';
 import { uxAppPath } from '../../../utils/ux_app_path';
+import { useUxFlyoutSession, uxFlyoutProps } from '../../flyout/ux_flyout_props';
 import { formatRelativeTime, shortenPath } from '../../session_replay/session_ui';
 import { RumGithubLinks } from '../rum_settings/rum_github_links';
 import { EvidenceAnalystPanel } from './evidence_analyst_panel';
@@ -296,6 +297,7 @@ export function EvidencePackFlyout({
   const { euiTheme } = useEuiTheme();
   const { http } = useKibanaServices();
   const history = useHistory();
+  const flyoutSession = useUxFlyoutSession();
   const facts = useMemo(() => buildEvidenceFacts(app, firing), [app, firing]);
 
   const [pages, setPages] = useState<RumPageRow[]>([]);
@@ -423,10 +425,14 @@ export function EvidencePackFlyout({
     onClose();
   };
 
+  const flyoutTitle = i18n.translate('xpack.ux.evidence.flyoutTitle', {
+    defaultMessage: 'Investigate {name}',
+    values: { name: app.name },
+  });
+
   return (
     <EuiFlyout
-      ownFocus
-      size="m"
+      {...uxFlyoutProps({ title: flyoutTitle, session: flyoutSession })}
       onClose={onClose}
       aria-labelledby={titleId}
       data-test-subj="uxEvidencePackFlyout"
@@ -436,10 +442,7 @@ export function EvidencePackFlyout({
           <EuiFlexItem>
             <EuiTitle size="s">
               <h2 id={titleId} className="eui-textBreakWord">
-                {i18n.translate('xpack.ux.evidence.flyoutTitle', {
-                  defaultMessage: 'Investigate {name}',
-                  values: { name: app.name },
-                })}
+                {flyoutTitle}
               </h2>
             </EuiTitle>
             <EuiSpacer size="xs" />

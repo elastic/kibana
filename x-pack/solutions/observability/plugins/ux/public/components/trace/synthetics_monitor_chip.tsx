@@ -6,14 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibanaServices } from '../../hooks/use_kibana_services';
 import {
@@ -57,22 +50,25 @@ export const SyntheticsMonitorChip = ({
       path: `/monitor/${encodeURIComponent(match.configId)}`,
     });
     return (
-      <>
-        <EuiText size="xs" color="subdued">
-          {i18n.translate('xpack.ux.synthetics.monitoredLabel', {
-            defaultMessage: 'Synthetics',
-          })}
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiBadge
-          href={href}
-          color="hollow"
-          iconType="chartLine"
-          data-test-subj="uxSyntheticsMonitorChip"
-        >
-          {match.name}
-        </EuiBadge>
-      </>
+      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('xpack.ux.synthetics.monitoredLabel', {
+              defaultMessage: 'Synthetics',
+            })}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            href={href}
+            color="hollow"
+            iconType="chartLine"
+            data-test-subj="uxSyntheticsMonitorChip"
+          >
+            {match.name}
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

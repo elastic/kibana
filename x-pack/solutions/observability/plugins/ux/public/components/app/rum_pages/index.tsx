@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -17,16 +17,18 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiProgress,
   EuiSpacer,
   EuiStat,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  euiPaletteColorBlind,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -47,14 +49,15 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumPageDetail, fetchRumPages } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { uxFlyoutProps } from '../../flyout/ux_flyout_props';
 import { Sparkline } from '../../session_replay/session_ui';
-import { TabTrendChart } from '../rum_overview/tab_trend_chart';
-import { BudgetChips } from '../rum_budgets/budget_chips';
-import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
-import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 import { BackendCallsPanel } from '../../trace/backend_calls_panel';
 import { SyntheticsMonitorChip } from '../../trace/synthetics_monitor_chip';
 import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../../trace/trace_waterfall_flyout';
+import { BudgetChips } from '../rum_budgets/budget_chips';
+import { useRumBudgets } from '../rum_budgets/use_rum_budgets';
+import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
+import { TabTrendChart } from '../rum_overview/tab_trend_chart';
 
 const ERROR_RATE_WARN = 0.05;
 
@@ -72,13 +75,6 @@ const formatMs = (ms: number | null): string => {
 
 const percent = (ratio: number | null): string =>
   ratio == null ? '—' : `${Math.round(ratio * 1000) / 10}%`;
-
-const dash = (value: string | number | null | undefined): string => {
-  if (value == null || value === '') {
-    return '—';
-  }
-  return String(value);
-};
 
 const vitalBadge = (
   rating: RumVitalRating
@@ -180,17 +176,84 @@ const PagesKpiStrip = ({ kpis }: { kpis: RumPagesKpis }) => {
   );
 };
 
+const truncateDetail = (value: string, max = 72): React.ReactNode => {
+  const compact = value.replace(/\s+/g, ' ').trim();
+  if (compact.length <= max) {
+    return compact;
+  }
+  return (
+    <EuiToolTip content={compact}>
+      <span
+        css={css`
+          display: inline-block;
+          max-width: 100%;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          vertical-align: bottom;
+        `}
+      >
+        {`${compact.slice(0, Math.max(24, max - 16))}…${compact.slice(-12)}`}
+      </span>
+    </EuiToolTip>
+  );
+};
+
+const resourceFileName = (url: string): string => {
+  try {
+    const parsed = new URL(url);
+    const last = parsed.pathname.split('/').filter(Boolean).pop();
+    return last ? decodeURIComponent(last) : parsed.hostname;
+  } catch {
+    const last = url.split('/').filter(Boolean).pop();
+    return last ?? url;
+  }
+};
+
+const hasAttributionValue = (attribution: RumVitalAttribution): boolean =>
+  Boolean(
+    attribution.lcpElement ||
+      attribution.lcpUrl ||
+      attribution.inpTarget ||
+      attribution.clsSource ||
+      attribution.lcpTtfb != null ||
+      attribution.lcpResourceLoadDelay != null ||
+      attribution.lcpResourceLoadDuration != null ||
+      attribution.lcpElementRenderDelay != null ||
+      attribution.inpInputDelay != null ||
+      attribution.inpProcessing != null ||
+      attribution.inpPresentation != null
+  );
+
 const WhySlow = ({ attribution }: { attribution: RumVitalAttribution }) => {
-  const items = [
-    {
+  if (!hasAttributionValue(attribution)) {
+    return null;
+  }
+
+  const items: Array<{ title: string; description: React.ReactNode }> = [];
+  if (attribution.lcpElement) {
+    items.push({
       title: i18n.translate('xpack.ux.pages.why.lcpElement', { defaultMessage: 'LCP element' }),
-      description: dash(attribution.lcpElement),
-    },
-    {
+      description: truncateDetail(attribution.lcpElement),
+    });
+  }
+  if (attribution.lcpUrl) {
+    items.push({
       title: i18n.translate('xpack.ux.pages.why.lcpUrl', { defaultMessage: 'LCP resource' }),
-      description: dash(attribution.lcpUrl),
-    },
-    {
+      description: (
+        <EuiToolTip content={attribution.lcpUrl}>
+          <span>{resourceFileName(attribution.lcpUrl)}</span>
+        </EuiToolTip>
+      ),
+    });
+  }
+  if (
+    attribution.lcpTtfb != null ||
+    attribution.lcpResourceLoadDelay != null ||
+    attribution.lcpResourceLoadDuration != null ||
+    attribution.lcpElementRenderDelay != null
+  ) {
+    items.push({
       title: i18n.translate('xpack.ux.pages.why.lcpParts', { defaultMessage: 'LCP sub-parts' }),
       description: i18n.translate('xpack.ux.pages.why.lcpPartsValue', {
         defaultMessage: 'TTFB {ttfb} · delay {delay} · download {download} · render {render}',
@@ -201,14 +264,22 @@ const WhySlow = ({ attribution }: { attribution: RumVitalAttribution }) => {
           render: formatMs(attribution.lcpElementRenderDelay),
         },
       }),
-    },
-    {
+    });
+  }
+  if (attribution.inpTarget) {
+    items.push({
       title: i18n.translate('xpack.ux.pages.why.inp', { defaultMessage: 'INP target' }),
-      description: attribution.inpTarget
-        ? `${attribution.inpTarget} (${attribution.inpType ?? 'interaction'})`
-        : '—',
-    },
-    {
+      description: truncateDetail(
+        `${attribution.inpTarget} (${attribution.inpType ?? 'interaction'})`
+      ),
+    });
+  }
+  if (
+    attribution.inpInputDelay != null ||
+    attribution.inpProcessing != null ||
+    attribution.inpPresentation != null
+  ) {
+    items.push({
       title: i18n.translate('xpack.ux.pages.why.inpParts', { defaultMessage: 'INP breakdown' }),
       description: i18n.translate('xpack.ux.pages.why.inpPartsValue', {
         defaultMessage: 'input {input} · processing {processing} · presentation {presentation}',
@@ -218,35 +289,74 @@ const WhySlow = ({ attribution }: { attribution: RumVitalAttribution }) => {
           presentation: formatMs(attribution.inpPresentation),
         },
       }),
-    },
-    {
+    });
+  }
+  if (attribution.clsSource) {
+    items.push({
       title: i18n.translate('xpack.ux.pages.why.cls', { defaultMessage: 'CLS source' }),
-      description: dash(attribution.clsSource),
-    },
-  ];
-  return <EuiDescriptionList listItems={items} />;
+      description: truncateDetail(attribution.clsSource),
+    });
+  }
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiTitle size="xxs">
+        <h3>
+          {i18n.translate('xpack.ux.pages.why.title', {
+            defaultMessage: 'Why is this slow',
+          })}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiDescriptionList type="column" compressed listItems={items} />
+    </>
+  );
 };
 
-const PhaseBar = ({ label, ms, max }: { label: string; ms: number | null; max: number }) => (
-  <div
-    css={css`
-      margin-bottom: 4px;
-    `}
-  >
-    <EuiText size="xs">
-      {label}: {formatMs(ms)}
-    </EuiText>
-    <EuiProgress
-      value={ms ?? 0}
-      max={Math.max(max, 1)}
-      size="s"
-      color="primary"
-      aria-label={label}
-    />
-  </div>
-);
+const RESOURCE_PHASES: Array<{
+  key: keyof Pick<
+    RumResourceRow,
+    'queueMs' | 'dnsMs' | 'tcpMs' | 'tlsMs' | 'requestMs' | 'responseMs'
+  >;
+  label: string;
+}> = [
+  {
+    key: 'queueMs',
+    label: i18n.translate('xpack.ux.pages.resources.queue', { defaultMessage: 'Queue' }),
+  },
+  {
+    key: 'dnsMs',
+    label: i18n.translate('xpack.ux.pages.resources.dns', { defaultMessage: 'DNS' }),
+  },
+  {
+    key: 'tcpMs',
+    label: i18n.translate('xpack.ux.pages.resources.tcp', { defaultMessage: 'TCP' }),
+  },
+  {
+    key: 'tlsMs',
+    label: i18n.translate('xpack.ux.pages.resources.tls', { defaultMessage: 'TLS' }),
+  },
+  {
+    key: 'requestMs',
+    label: i18n.translate('xpack.ux.pages.resources.request', { defaultMessage: 'Request' }),
+  },
+  {
+    key: 'responseMs',
+    label: i18n.translate('xpack.ux.pages.resources.response', { defaultMessage: 'Response' }),
+  },
+];
+
+const resourcePhaseMs = (resource: RumResourceRow): number[] =>
+  RESOURCE_PHASES.map(({ key }) => resource[key] ?? 0);
 
 const ResourcePanel = ({ resources }: { resources: RumResourceRow[] }) => {
+  const { euiTheme } = useEuiTheme();
+  const colors = euiPaletteColorBlind();
+
   if (resources.length === 0) {
     return (
       <EuiText size="s" color="subdued">
@@ -256,61 +366,108 @@ const ResourcePanel = ({ resources }: { resources: RumResourceRow[] }) => {
       </EuiText>
     );
   }
+
+  const scaleMs = Math.max(
+    1,
+    ...resources.map((resource) => {
+      const phaseTotal = resourcePhaseMs(resource).reduce((sum, ms) => sum + ms, 0);
+      return Math.max(resource.avgDurationMs ?? 0, phaseTotal);
+    })
+  );
+  const rows = resources.slice(0, 8);
+
   return (
     <>
-      {resources.map((resource) => {
-        const phases = [
-          resource.queueMs,
-          resource.dnsMs,
-          resource.tcpMs,
-          resource.tlsMs,
-          resource.requestMs,
-          resource.responseMs,
-        ];
-        const max = Math.max(1, ...phases.map((v) => v ?? 0));
+      {rows.map((resource) => {
+        const phases = RESOURCE_PHASES.map((phase, index) => ({
+          ...phase,
+          ms: resource[phase.key] ?? 0,
+          color: colors[index],
+        })).filter((phase) => phase.ms > 0);
+        const totalMs = phases.reduce((sum, phase) => sum + phase.ms, 0);
+        const usedPct = Math.min(
+          100,
+          (Math.max(totalMs, resource.avgDurationMs ?? 0) / scaleMs) * 100
+        );
+        const fileName = resourceFileName(resource.url);
+
         return (
-          <div key={resource.url} css={{ marginBottom: 12 }}>
-            <EuiText size="s">
-              <strong>{resource.url}</strong>
-              {resource.renderBlocking === 'blocking'
-                ? ` · ${i18n.translate('xpack.ux.pages.resources.blocking', {
-                    defaultMessage: 'render-blocking',
-                  })}`
-                : ''}
-            </EuiText>
-            <EuiText size="xs" color="subdued">
-              {formatMs(resource.avgDurationMs)}
-              {resource.status != null ? ` · ${resource.status}` : ''}
-            </EuiText>
-            <PhaseBar
-              label={i18n.translate('xpack.ux.pages.resources.queue', { defaultMessage: 'Queue' })}
-              ms={resource.queueMs}
-              max={max}
-            />
-            <PhaseBar
-              label={i18n.translate('xpack.ux.pages.resources.dns', { defaultMessage: 'DNS' })}
-              ms={resource.dnsMs}
-              max={max}
-            />
-            <PhaseBar
-              label={i18n.translate('xpack.ux.pages.resources.tcp', { defaultMessage: 'TCP' })}
-              ms={resource.tcpMs}
-              max={max}
-            />
-            <PhaseBar
-              label={i18n.translate('xpack.ux.pages.resources.request', {
-                defaultMessage: 'Request',
+          <div
+            key={resource.url}
+            css={css`
+              margin-bottom: ${euiTheme.size.m};
+            `}
+          >
+            <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
+              <EuiFlexItem grow>
+                <EuiToolTip content={resource.url}>
+                  <EuiText
+                    size="s"
+                    css={css`
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                      font-family: ${euiTheme.font.familyCode};
+                    `}
+                  >
+                    <strong>{fileName}</strong>
+                    {resource.renderBlocking === 'blocking'
+                      ? ` · ${i18n.translate('xpack.ux.pages.resources.blocking', {
+                          defaultMessage: 'render-blocking',
+                        })}`
+                      : ''}
+                  </EuiText>
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {formatMs(resource.avgDurationMs)}
+                  {resource.status != null ? ` · ${resource.status}` : ''}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <div
+              css={css`
+                display: flex;
+                height: 8px;
+                margin-top: ${euiTheme.size.xs};
+                border-radius: ${euiTheme.border.radius.small};
+                overflow: hidden;
+                background: ${euiTheme.colors.lightestShade};
+              `}
+              role="img"
+              aria-label={i18n.translate('xpack.ux.pages.resources.barAria', {
+                defaultMessage: '{name} {duration}',
+                values: { name: fileName, duration: formatMs(resource.avgDurationMs) },
               })}
-              ms={resource.requestMs}
-              max={max}
-            />
-            <PhaseBar
-              label={i18n.translate('xpack.ux.pages.resources.response', {
-                defaultMessage: 'Response',
-              })}
-              ms={resource.responseMs}
-              max={max}
-            />
+            >
+              <div
+                css={css`
+                  display: flex;
+                  width: ${usedPct}%;
+                  min-width: ${usedPct > 0 ? '4px' : 0};
+                  height: 100%;
+                `}
+              >
+                {phases.map((phase) => (
+                  <div
+                    key={phase.key}
+                    title={`${phase.label}: ${formatMs(phase.ms)}`}
+                    css={css`
+                      width: ${totalMs > 0 ? (phase.ms / totalMs) * 100 : 0}%;
+                      min-width: 2px;
+                      height: 100%;
+                      background: ${phase.color};
+                    `}
+                  />
+                ))}
+              </div>
+            </div>
+            {phases.length > 0 && (
+              <EuiText size="xs" color="subdued" css={{ marginTop: 4 }}>
+                {phases.map((phase) => `${phase.label} ${formatMs(phase.ms)}`).join(' · ')}
+              </EuiText>
+            )}
           </div>
         );
       })}
@@ -402,6 +559,19 @@ export function RumPagesPanel() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const autoOpenedPageUrl = useRef<string | null>(null);
+  useEffect(() => {
+    if (!pageUrl || pages.length === 0 || autoOpenedPageUrl.current === pageUrl) {
+      return;
+    }
+    const match = pages.find((page) => page.path === pageUrl);
+    if (!match) {
+      return;
+    }
+    autoOpenedPageUrl.current = pageUrl;
+    setSelected(match);
+  }, [pageUrl, pages]);
 
   const selectedPath = selected?.path;
 
@@ -698,109 +868,155 @@ export function RumPagesPanel() {
         )}
 
         {selected && (
-          <EuiFlyout size="m" onClose={() => setSelected(null)} aria-labelledby="uxPageDetailTitle">
+          <EuiFlyout
+            {...uxFlyoutProps({ title: displayPagePath(selected.path), session: 'start' })}
+            onClose={() => {
+              setTraceTarget(null);
+              setSelected(null);
+            }}
+            aria-labelledby="uxPageDetailTitle"
+            data-test-subj="uxPageDetailFlyout"
+          >
             <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="s">
-                <h2 id="uxPageDetailTitle">{displayPagePath(selected.path)}</h2>
-              </EuiTitle>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
+                <EuiFlexItem grow>
+                  <EuiTitle size="s">
+                    <h2 id="uxPageDetailTitle">{displayPagePath(selected.path)}</h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SyntheticsMonitorChip
+                    pagePath={selected.path}
+                    showCreateCheck={
+                      rateVital('lcp', selected.p75Lcp) === 'poor' ||
+                      rateVital('inp', selected.p75Inp) === 'poor' ||
+                      rateVital('cls', selected.p75Cls) === 'poor' ||
+                      (selected.views > 0 &&
+                        selected.errorCount / selected.views >= ERROR_RATE_WARN)
+                    }
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlyoutHeader>
             <EuiFlyoutBody>
-              <EuiDescriptionList
-                listItems={[
-                  {
-                    title: i18n.translate('xpack.ux.pages.detail.views', {
+              <EuiFlexGroup gutterSize="l" wrap responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiStat
+                    title={selected.views}
+                    description={i18n.translate('xpack.ux.pages.detail.views', {
                       defaultMessage: 'Views',
-                    }),
-                    description: String(selected.views),
-                  },
-                  {
-                    title: i18n.translate('xpack.ux.pages.detail.sessionsLabel', {
+                    })}
+                    titleSize="s"
+                    textAlign="left"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiStat
+                    title={selected.sessionCount}
+                    description={i18n.translate('xpack.ux.pages.detail.sessionsLabel', {
                       defaultMessage: 'Sessions',
-                    }),
-                    description: String(selected.sessionCount),
-                  },
-                  {
-                    title: i18n.translate('xpack.ux.pages.detail.errors', {
+                    })}
+                    titleSize="s"
+                    textAlign="left"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiStat
+                    title={selected.errorCount}
+                    description={i18n.translate('xpack.ux.pages.detail.errors', {
                       defaultMessage: 'Errors',
-                    }),
-                    description: String(selected.errorCount),
-                  },
-                  {
-                    title: i18n.translate('xpack.ux.pages.detail.lcp', {
-                      defaultMessage: 'LCP p75',
-                    }),
-                    description: formatMs(selected.p75Lcp),
-                  },
-                  {
-                    title: i18n.translate('xpack.ux.pages.detail.inp', {
-                      defaultMessage: 'INP p75',
-                    }),
-                    description: formatMs(selected.p75Inp),
-                  },
-                  {
-                    title: i18n.translate('xpack.ux.pages.detail.cls', {
-                      defaultMessage: 'CLS p75',
-                    }),
-                    description: selected.p75Cls == null ? '—' : selected.p75Cls.toFixed(3),
-                  },
-                  {
-                    title: i18n.translate('xpack.ux.pages.detail.load', {
+                    })}
+                    titleSize="s"
+                    textAlign="left"
+                    titleColor={selected.errorCount > 0 ? 'danger' : undefined}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiStat
+                    title={formatMs(selected.avgDurationMs)}
+                    description={i18n.translate('xpack.ux.pages.detail.load', {
                       defaultMessage: 'Avg load',
-                    }),
-                    description: formatMs(selected.avgDurationMs),
-                  },
-                ]}
-              />
+                    })}
+                    titleSize="s"
+                    textAlign="left"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
               <EuiSpacer />
               <EuiTitle size="xxs">
                 <h3>
-                  {i18n.translate('xpack.ux.pages.why.title', {
-                    defaultMessage: 'Why is this slow',
+                  {i18n.translate('xpack.ux.pages.detail.vitals', {
+                    defaultMessage: 'Core Web Vitals',
                   })}
                 </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
-              {detailLoading ? (
-                <EuiLoadingSpinner size="m" />
-              ) : (
-                <WhySlow attribution={selected.attribution} />
-              )}
-              <EuiSpacer />
-              <EuiTitle size="xxs">
-                <h3>
-                  {i18n.translate('xpack.ux.pages.resources.title', {
-                    defaultMessage: 'Slowest resources',
+              {selected.p75Lcp == null && selected.p75Inp == null && selected.p75Cls == null ? (
+                <EuiText size="s" color="subdued">
+                  {i18n.translate('xpack.ux.pages.detail.vitalsEmpty', {
+                    defaultMessage: 'No web vitals for this page yet.',
                   })}
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              {detailLoading ? (
-                <EuiLoadingSpinner size="m" />
+                </EuiText>
               ) : (
-                <ResourcePanel resources={selected.resources} />
+                <EuiFlexGroup gutterSize="l" wrap responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('xpack.ux.pages.detail.lcp', { defaultMessage: 'LCP p75' })}
+                    </EuiText>
+                    <VitalCell vital="lcp" value={selected.p75Lcp} format={formatMs} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('xpack.ux.pages.detail.inp', { defaultMessage: 'INP p75' })}
+                    </EuiText>
+                    <VitalCell vital="inp" value={selected.p75Inp} format={formatMs} />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="xs" color="subdued">
+                      {i18n.translate('xpack.ux.pages.detail.cls', { defaultMessage: 'CLS p75' })}
+                    </EuiText>
+                    <VitalCell
+                      vital="cls"
+                      value={selected.p75Cls}
+                      format={(next) => (next == null ? '—' : next.toFixed(3))}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               )}
-              <EuiSpacer />
               {detailLoading ? (
-                <EuiLoadingSpinner size="m" />
+                <>
+                  <EuiSpacer />
+                  <EuiLoadingSpinner size="m" />
+                </>
               ) : (
-                <BackendCallsPanel
-                  calls={backendCalls}
-                  rangeFrom={rangeFrom}
-                  rangeTo={rangeTo}
-                  onViewTrace={setTraceTarget}
-                />
+                <>
+                  {hasAttributionValue(selected.attribution) && (
+                    <>
+                      <EuiSpacer />
+                      <WhySlow attribution={selected.attribution} />
+                    </>
+                  )}
+                  <EuiSpacer />
+                  <EuiTitle size="xxs">
+                    <h3>
+                      {i18n.translate('xpack.ux.pages.resources.title', {
+                        defaultMessage: 'Slowest resources',
+                      })}
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <ResourcePanel resources={selected.resources} />
+                  <EuiSpacer />
+                  <BackendCallsPanel
+                    calls={backendCalls}
+                    rangeFrom={rangeFrom}
+                    rangeTo={rangeTo}
+                    onViewTrace={setTraceTarget}
+                  />
+                </>
               )}
-              <EuiSpacer />
-              <SyntheticsMonitorChip
-                pagePath={selected.path}
-                showCreateCheck={
-                  rateVital('lcp', selected.p75Lcp) === 'poor' ||
-                  rateVital('inp', selected.p75Inp) === 'poor' ||
-                  rateVital('cls', selected.p75Cls) === 'poor' ||
-                  (selected.views > 0 && selected.errorCount / selected.views >= ERROR_RATE_WARN)
-                }
-              />
-              <EuiSpacer />
+            </EuiFlyoutBody>
+            <EuiFlyoutFooter>
               <EuiButton
                 data-test-subj="uxRumPagesPanelViewSessionsOnThisPageButton"
                 fill
@@ -812,16 +1028,17 @@ export function RumPagesPanel() {
                   defaultMessage: 'View sessions on this page',
                 })}
               </EuiButton>
-            </EuiFlyoutBody>
+            </EuiFlyoutFooter>
+            {traceTarget && (
+              <TraceWaterfallFlyout
+                session="inherit"
+                target={traceTarget}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                onClose={() => setTraceTarget(null)}
+              />
+            )}
           </EuiFlyout>
-        )}
-        {traceTarget && (
-          <TraceWaterfallFlyout
-            target={traceTarget}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            onClose={() => setTraceTarget(null)}
-          />
         )}
       </EuiPanel>
     </>

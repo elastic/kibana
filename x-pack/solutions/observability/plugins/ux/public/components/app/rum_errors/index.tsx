@@ -46,13 +46,14 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumAppSettings, fetchRumErrors } from '../../../services/rest/rum_api';
 import { pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { uxFlyoutProps, type UxFlyoutSession } from '../../flyout/ux_flyout_props';
 import { formatRelativeTime, formatTime, shortenPath } from '../../session_replay/session_ui';
+import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../../trace/trace_waterfall_flyout';
 import { useRumAlertFlyout } from '../rum_alerts/alert_flyout_context';
 import { useRumPageLoading } from '../rum_dashboard/rum_page_loading';
 import { RumGithubLinks } from '../rum_settings/rum_github_links';
 import { ErrorsOverTimeChart } from './errors_over_time_chart';
 import { ErrorPatternBadge, SharedFailureBadge } from './error_pattern_badge';
-import { TraceWaterfallFlyout, type TraceFlyoutTarget } from '../../trace/trace_waterfall_flyout';
 
 type ErrorSortField = 'count' | 'sessionCount' | 'userCount' | 'firstSeen' | 'lastSeen';
 
@@ -156,6 +157,8 @@ export const ErrorDetailFlyout = ({
   onOpenPage,
   onViewTrace,
   onOpenApp,
+  children,
+  session = 'start',
 }: {
   group: RumErrorGroup;
   apmHref: string | null;
@@ -168,8 +171,15 @@ export const ErrorDetailFlyout = ({
   onOpenPage: (path: string) => void;
   onViewTrace?: (target: TraceFlyoutTarget) => void;
   onOpenApp?: (serviceName: string) => void;
+  children?: React.ReactNode;
+  session?: UxFlyoutSession;
 }) => (
-  <EuiFlyout size="m" onClose={onClose} aria-labelledby="uxErrorDetailTitle">
+  <EuiFlyout
+    {...uxFlyoutProps({ title: group.type, session })}
+    onClose={onClose}
+    aria-labelledby="uxErrorDetailTitle"
+    data-test-subj="uxErrorDetailFlyout"
+  >
     <EuiFlyoutHeader hasBorder>
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -373,6 +383,7 @@ export const ErrorDetailFlyout = ({
       <EuiSpacer />
       <RumGithubLinks links={githubLinks} onAddRepository={onAddRepository} />
     </EuiFlyoutBody>
+    {children}
   </EuiFlyout>
 );
 
@@ -776,20 +787,25 @@ export function RumErrorsPanel() {
                   }
                 : undefined
             }
-            onClose={() => setSelected(null)}
+            onClose={() => {
+              setTraceTarget(null);
+              setSelected(null);
+            }}
             onViewSessions={() => openSessions(selected, false)}
             onWatchReplay={() => openSessions(selected, true)}
             onOpenPage={(path) => pushRumPath(history, '/pages', { pageUrl: path })}
             onViewTrace={setTraceTarget}
-          />
-        )}
-        {traceTarget && (
-          <TraceWaterfallFlyout
-            target={traceTarget}
-            rangeFrom={rangeFrom}
-            rangeTo={rangeTo}
-            onClose={() => setTraceTarget(null)}
-          />
+          >
+            {traceTarget && (
+              <TraceWaterfallFlyout
+                session="inherit"
+                target={traceTarget}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                onClose={() => setTraceTarget(null)}
+              />
+            )}
+          </ErrorDetailFlyout>
         )}
       </EuiPanel>
     </>

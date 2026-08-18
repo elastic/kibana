@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import datemath from '@kbn/datemath';
 import type { SessionAction } from './session_replay';
 
 /** Client-side HTTP destination rollup (page detail or session timeline). */
@@ -19,6 +20,19 @@ export interface RumBackendCall {
 }
 
 export const TRACE_RANGE_PAD_MS = 5 * 60 * 1000;
+
+/** APM unified-traces routes reject datemath; they need ISO start/end. */
+export const resolveTimeRange = (
+  rangeFrom: string,
+  rangeTo: string
+): { rangeFrom: string; rangeTo: string } => {
+  const from = datemath.parse(rangeFrom);
+  const to = datemath.parse(rangeTo, { roundUp: true });
+  if (!from?.isValid() || !to?.isValid()) {
+    return { rangeFrom, rangeTo };
+  }
+  return { rangeFrom: from.toISOString(), rangeTo: to.toISOString() };
+};
 
 /** Origin (scheme + host + port) from a URL, or the raw string if unparseable. */
 export const originFromUrl = (raw: string | null | undefined): string | null => {

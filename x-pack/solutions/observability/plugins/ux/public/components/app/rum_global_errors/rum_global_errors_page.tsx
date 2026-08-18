@@ -715,7 +715,10 @@ function GlobalErrorsBody() {
               rangeTo,
             }
           )}
-          onClose={() => setSelected(null)}
+          onClose={() => {
+            setTraceTarget(null);
+            setSelected(null);
+          }}
           onViewSessions={() => openSessions(selected, false)}
           onWatchReplay={() => openSessions(selected, true)}
           onOpenPage={(path) =>
@@ -726,15 +729,17 @@ function GlobalErrorsBody() {
           }
           onOpenApp={openAppErrors}
           onViewTrace={setTraceTarget}
-        />
-      )}
-      {traceTarget && (
-        <TraceWaterfallFlyout
-          target={traceTarget}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
-          onClose={() => setTraceTarget(null)}
-        />
+        >
+          {traceTarget && (
+            <TraceWaterfallFlyout
+              session="inherit"
+              target={traceTarget}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              onClose={() => setTraceTarget(null)}
+            />
+          )}
+        </ErrorDetailFlyout>
       )}
     </div>
   );

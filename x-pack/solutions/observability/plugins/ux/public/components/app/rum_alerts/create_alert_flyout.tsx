@@ -50,6 +50,7 @@ import {
 import { parseRecipientList } from '../../../../common/rum_report_schedule';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
+import { useUxFlyoutSession, uxFlyoutProps } from '../../flyout/ux_flyout_props';
 import {
   createRumAlert,
   fetchRumAlertStatus,
@@ -83,6 +84,7 @@ export function CreateAlertFlyout({
 }) {
   const { http, notifications } = useKibanaServices();
   const { euiTheme } = useEuiTheme();
+  const session = useUxFlyoutSession();
   const {
     urlParams: { serviceName, browser, location, pageUrl },
   } = useLegacyUrlParams();
@@ -265,14 +267,19 @@ export function CreateAlertFlyout({
   };
 
   const isAi = isRumAiAlertTemplate(templateId);
+  const flyoutTitle = i18n.translate('xpack.ux.alerts.create.title', {
+    defaultMessage: 'Create RUM alert',
+  });
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="l" aria-labelledby="uxCreateAlertFlyoutTitle">
+    <EuiFlyout
+      {...uxFlyoutProps({ title: flyoutTitle, size: 'l', session })}
+      onClose={onClose}
+      aria-labelledby="uxCreateAlertFlyoutTitle"
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
-          <h2 id="uxCreateAlertFlyoutTitle">
-            {i18n.translate('xpack.ux.alerts.create.title', { defaultMessage: 'Create RUM alert' })}
-          </h2>
+          <h2 id="uxCreateAlertFlyoutTitle">{flyoutTitle}</h2>
         </EuiTitle>
         <EuiText size="s" color="subdued">
           <p>
