@@ -573,7 +573,6 @@ const getModelUsage = (
     (call) => call.connectorId === mainConnectorId && call.model
   )?.model;
 
-
   return {
     connector_id: mainConnectorId,
     llm_calls: stats.calls.length,
