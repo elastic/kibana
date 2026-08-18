@@ -40,7 +40,8 @@ export const MAX_ATTACK_ID_LENGTH = 256;
  */
 export const MAX_NOTE_ID_LENGTH = 256;
 
-/* Maximum length for a note's text content.
+/**
+ * Maximum length for a note's text content.
  * Notes support markdown and can be reasonably long, but we cap the length here to
  * prevent unbounded string input (DoS).
  */

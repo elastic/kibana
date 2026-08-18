@@ -58,6 +58,7 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(() =>
     import('./create_note_step/create_note_step').then((m) => m.createNoteStepDefinition)
   );
+
   workflowsExtensions.registerStepDefinition(() =>
     import('./delete_note_step/delete_note_step').then((m) => m.deleteNoteStepDefinition)
   );
