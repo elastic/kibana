@@ -22,15 +22,6 @@ const doc = (id: string, ts: string, overrides: Record<string, unknown> = {}) =>
   ...overrides,
 });
 
-/** Mock hit carrying the collapse `inner_hits` for the group's earliest in-horizon copy. */
-const hitWithEarliest = (source: Record<string, unknown>, earliest: string, i: number) => ({
-  _id: `doc-${i}`,
-  _source: source,
-  inner_hits: {
-    earliest: { hits: { hits: [{ _source: { '@timestamp': earliest } }] } },
-  },
-});
-
 const setup = (docs: Array<Record<string, unknown>> = []) => {
   const search = jest.fn().mockResolvedValue({
     hits: { hits: docs.map((source, i) => ({ _id: `doc-${i}`, _source: source })) },
@@ -104,13 +95,14 @@ describe('queryNotifications', () => {
     });
   });
 
-  it('composes namespace, type, and severity filters', async () => {
+  it('composes namespace, type, and time-range doc-level filters', async () => {
     const { deps, search } = setup();
 
     await queryNotifications(deps, {
       namespace: 'inference',
       type: 'modelStatus',
-      severity: ['warning', 'error'],
+      from: '2026-07-01T00:00:00.000Z',
+      to: '2026-07-20T00:00:00.000Z',
     });
 
     const [{ query }] = search.mock.calls[0];
@@ -118,26 +110,27 @@ describe('queryNotifications', () => {
       expect.arrayContaining([
         { term: { namespace: 'inference' } },
         { term: { type: 'modelStatus' } },
-        { terms: { severity: ['warning', 'error'] } },
+        {
+          range: {
+            '@timestamp': { gte: '2026-07-01T00:00:00.000Z', lte: '2026-07-20T00:00:00.000Z' },
+          },
+        },
       ])
     );
   });
 
-  it('applies the from/to window in-memory instead of as a doc-level filter', async () => {
+  it('filters severity on the collapsed representative, not at the doc level', async () => {
+    // Severity is mutable across a notification's copies, so a doc-level filter could
+    // surface a stale copy as the representative; the representative's severity is the
+    // current one and is what the filter must judge.
     const { deps, search } = setup([
-      doc('late', '2026-07-20T00:00:00.000Z'),
-      doc('in', '2026-07-10T00:00:00.000Z'),
-      doc('early', '2026-07-01T00:00:00.000Z'),
+      doc('escalated', '2026-07-15T00:00:00.000Z', { severity: 'error' }),
+      doc('calm', '2026-07-14T00:00:00.000Z', { severity: 'info' }),
     ]);
 
-    const result = await queryNotifications(deps, {
-      from: '2026-07-05T00:00:00.000Z',
-      to: '2026-07-15T00:00:00.000Z',
-    });
+    const result = await queryNotifications(deps, { severity: ['error'] });
 
-    expect(result.items.map(({ notification_id: id }) => id)).toEqual(['in']);
-    // Only the severity-TTL horizon: a doc-level range would change which copy is
-    // the group's earliest visible one and destabilize the read-state anchor.
+    expect(result.items.map(({ notification_id: id }) => id)).toEqual(['escalated']);
     const [{ query }] = search.mock.calls[0];
     expect(query.bool.filter).toHaveLength(1);
   });
@@ -188,6 +181,22 @@ describe('queryNotifications', () => {
     expect(result.truncated).toBe(true);
   });
 
+  it('flags truncated even when the severity filter narrows the returned items', async () => {
+    // The cap applies to the collapsed set before the post-collapse severity filter,
+    // so a filtered response can be small while older matches were still cut off.
+    const { deps } = setup([
+      doc('critical-0', '2026-07-15T00:00:00.000Z', { severity: 'critical' }),
+      ...Array.from({ length: NOTIFICATION_QUERY_RESULT_LIMIT }, (_, i) =>
+        doc(`info-${i}`, '2026-07-14T00:00:00.000Z')
+      ),
+    ]);
+
+    const result = await queryNotifications(deps, { severity: ['critical'] });
+
+    expect(result.items.map(({ notification_id: id }) => id)).toEqual(['critical-0']);
+    expect(result.truncated).toBe(true);
+  });
+
   it('rejects params that fail schema validation before querying', async () => {
     const { deps, search } = setup();
 
@@ -215,7 +224,7 @@ describe('queryNotifications', () => {
   });
 
   describe('read-state annotation', () => {
-    it('marks an individually-read id as read', async () => {
+    it('marks an individually-acknowledged id as read', async () => {
       const { deps } = setup([
         doc('a', '2026-07-15T00:00:00.000Z'),
         doc('b', '2026-07-14T00:00:00.000Z'),
@@ -233,20 +242,13 @@ describe('queryNotifications', () => {
       ]);
     });
 
-    it('anchors readAllBefore on the earliest in-horizon copy, not the latest re-push', async () => {
-      // Re-pushed after mark-all-read: latest copy is newer than readAllBefore,
-      // but the earliest visible copy predates it, so it must stay read.
-      const search = jest.fn().mockResolvedValue({
-        hits: {
-          hits: [
-            hitWithEarliest(doc('a', '2026-07-20T00:00:00.000Z'), '2026-07-10T00:00:00.000Z', 0),
-            hitWithEarliest(doc('b', '2026-07-20T00:00:00.000Z'), '2026-07-16T00:00:00.000Z', 1),
-          ],
-        },
-      });
-      const dataStreams = dataStreamServiceMock.createStartContract();
-      dataStreams.initializeClient.mockResolvedValue({ search } as never);
-      const deps = { dataStreams, logger: loggingSystemMock.createLogger() };
+    it('resurfaces a re-push after readAllBefore as unread', async () => {
+      // readAllBefore is anchored on the representative (the newest copy), so a copy
+      // pushed after a mark-all-read is new activity and comes back unread.
+      const { deps } = setup([
+        doc('re-pushed', '2026-07-20T00:00:00.000Z'),
+        doc('quiet', '2026-07-10T00:00:00.000Z'),
+      ]);
 
       const result = await queryNotifications(
         deps,
@@ -255,29 +257,23 @@ describe('queryNotifications', () => {
       );
 
       expect(result.items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
-        ['b', false],
-        ['a', true],
+        ['re-pushed', false],
+        ['quiet', true],
       ]);
     });
 
-    it('requests the earliest in-horizon copy per group only when annotating', async () => {
-      const { deps, search } = setup();
+    it('keeps an individually-acknowledged id read across a later re-push', async () => {
+      // The read list is identity-based and durable (a mute): unlike readAllBefore,
+      // it is not escaped by new copies of the same id.
+      const { deps } = setup([doc('muted', '2026-07-20T00:00:00.000Z')]);
 
-      await queryNotifications(deps, {}, { read: [], readAllBefore: READ_ALL_BEFORE_DEFAULT });
-
-      expect(search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          collapse: {
-            field: 'notification_id',
-            inner_hits: {
-              name: 'earliest',
-              size: 1,
-              sort: [{ '@timestamp': 'asc' }],
-              _source: ['@timestamp'],
-            },
-          },
-        })
+      const result = await queryNotifications(
+        deps,
+        {},
+        { read: ['muted'], readAllBefore: '2026-07-15T00:00:00.000Z' }
       );
+
+      expect(result.items[0].isRead).toBe(true);
     });
 
     it('sorts unread before read, newest first within each', async () => {
@@ -302,14 +298,24 @@ describe('queryNotifications', () => {
       ]);
     });
 
-    it('does not fetch inner hits for profile-less callers', async () => {
-      const { deps, search } = setup();
+    it('accepts read state as a promise resolved alongside the search', async () => {
+      const { deps } = setup([doc('a', '2026-07-15T00:00:00.000Z')]);
 
-      await queryNotifications(deps);
-
-      expect(search).toHaveBeenCalledWith(
-        expect.objectContaining({ collapse: { field: 'notification_id' } })
+      const result = await queryNotifications(
+        deps,
+        {},
+        Promise.resolve({ read: ['a'], readAllBefore: READ_ALL_BEFORE_DEFAULT })
       );
+
+      expect(result.items[0].isRead).toBe(true);
+    });
+
+    it('returns an unannotated list when the read-state promise resolves to undefined', async () => {
+      const { deps } = setup([doc('a', '2026-07-15T00:00:00.000Z')]);
+
+      const result = await queryNotifications(deps, {}, Promise.resolve(undefined));
+
+      expect(result.items[0]).not.toHaveProperty('isRead');
     });
 
     // Locked decision on search-team#14979: listing stays open to API-key/headless

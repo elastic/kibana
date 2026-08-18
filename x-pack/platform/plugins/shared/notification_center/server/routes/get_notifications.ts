@@ -35,7 +35,8 @@ export const registerGetNotificationsRoute = ({ router, core, logger }: Notifica
       async (_context, request, response) => {
         const [{ dataStreams, userStorage }] = await core.getStartServices();
         const client = userStorage.asScoped(request);
-        const readState = client ? await getReadState(client) : undefined;
+        // Passed unawaited so the read-state fetch runs concurrently with the ES query
+        const readState = client ? getReadState(client, logger) : undefined;
         const result = await queryNotifications({ dataStreams, logger }, request.query, readState);
         return response.ok({ body: result });
       }

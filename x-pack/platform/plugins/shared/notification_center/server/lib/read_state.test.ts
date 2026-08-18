@@ -6,6 +6,7 @@
  */
 
 import type { IUserStorageClient } from '@kbn/core-user-storage-common';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { MAX_READ_IDS, READ_ALL_BEFORE_KEY, READ_KEY } from '../storage/user_storage';
 import { getReadState, markRead, markAllRead } from './read_state';
 
@@ -53,7 +54,9 @@ describe('markRead', () => {
 });
 
 describe('markAllRead', () => {
-  it('advances readAllBefore and clears the read list', async () => {
+  it('advances readAllBefore without touching the read list', async () => {
+    // Individually-acknowledged ids are durable mutes; a bulk catch-up must not
+    // silently un-mute them.
     const { client, store } = createClient({
       read: ['a', 'b'],
       readAllBefore: '1970-01-01T00:00:00.000Z',
@@ -62,25 +65,28 @@ describe('markAllRead', () => {
 
     expect(store[READ_ALL_BEFORE_KEY]).toBe(marker);
     expect(Date.parse(marker)).not.toBeNaN();
-    expect(store[READ_KEY]).toEqual([]);
-  });
-
-  it('writes the marker before clearing the list', async () => {
-    const { client } = createClient({ read: ['a'] });
-    await markAllRead(client);
-
-    const setKeys = (client.set as jest.Mock).mock.calls.map(([key]) => key);
-    expect(setKeys).toEqual([READ_ALL_BEFORE_KEY, READ_KEY]);
+    expect(store[READ_KEY]).toEqual(['a', 'b']);
+    expect(client.set).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('getReadState', () => {
+  const logger = loggingSystemMock.createLogger();
+
   it('returns the read list and readAllBefore marker', async () => {
     const { client } = createClient({ read: ['a'], readAllBefore: '2026-07-01T00:00:00.000Z' });
 
-    await expect(getReadState(client)).resolves.toEqual({
+    await expect(getReadState(client, logger)).resolves.toEqual({
       read: ['a'],
       readAllBefore: '2026-07-01T00:00:00.000Z',
     });
+  });
+
+  it('degrades to undefined with a warning when userStorage fails', async () => {
+    const { client } = createClient();
+    (client.get as jest.Mock).mockRejectedValue(new Error('storage unavailable'));
+
+    await expect(getReadState(client, logger)).resolves.toBeUndefined();
+    expect(logger.warn).toHaveBeenCalledTimes(1);
   });
 });

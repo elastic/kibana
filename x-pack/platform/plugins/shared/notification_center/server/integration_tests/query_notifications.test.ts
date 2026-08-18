@@ -74,7 +74,7 @@ describe('queryNotifications [integration]', () => {
         doc('old-error', daysAgo(40), { severity: 'error' }),
         doc('recent-warning', daysAgo(1), { severity: 'warning' }),
         doc('other-type', daysAgo(3), { type: 'other' }),
-        // one copy past the info TTL, one inside: only the in-horizon copy may anchor read state
+        // one copy past the info TTL, one inside: the in-horizon copy represents the group
         doc('revived', daysAgo(40), { title: 'revived v1' }),
         doc('revived', daysAgo(1.5), { title: 'revived v2' }),
       ],
@@ -108,7 +108,7 @@ describe('queryNotifications [integration]', () => {
     expect(ids).toContain('old-error');
   });
 
-  it('composes attribute filters', async () => {
+  it('composes attribute filters, judging severity on the representative', async () => {
     const bySeverity = await query({ severity: ['error'] });
     expect(bySeverity.items.map(({ notification_id: id }) => id)).toEqual(['old-error']);
 
@@ -119,18 +119,27 @@ describe('queryNotifications [integration]', () => {
     expect(byNamespace.items).toEqual([]);
   });
 
-  it('annotates isRead from the earliest in-horizon copy and sorts unread first', async () => {
+  it('includes any notification with in-window activity, represented by its newest in-window copy', async () => {
+    const { items } = await query({ from: daysAgo(6), to: daysAgo(3) });
+
+    // `dup` was re-pushed after the window closed, but its 5d copy is in-window, so it
+    // appears here represented by that copy — not dropped, and not shown as `dup v2`.
+    expect(items.map(({ notification_id: id }) => id)).toEqual(['other-type', 'dup']);
+    expect(items.find(({ notification_id: id }) => id === 'dup')?.title).toBe('dup v1');
+  });
+
+  it('annotates isRead from the representative and sorts unread first', async () => {
     const { items } = await query({}, { read: ['other-type'], readAllBefore: daysAgo(3) });
 
     expect(items.map(({ notification_id: id, isRead }) => [id, isRead])).toEqual([
-      // Unread, newest first. `revived` has a pre-marker copy, but it is out of horizon
-      // and must not anchor; its earliest visible copy postdates the marker.
+      // Unread, newest first. `dup` was re-pushed after the marker, so the mark-all-read
+      // is escaped and it resurfaces — the deliberate latest-copy-anchor behavior.
       ['recent-warning', false],
       ['revived', false],
-      // Read, newest first. `dup`'s latest copy postdates the marker (a producer re-push),
-      // but its earliest in-horizon copy predates it, so mark-all-read holds.
-      ['dup', true],
-      ['other-type', true], // individually read
+      ['dup', false],
+      // Read, newest first. `other-type` is individually acknowledged (durable across
+      // re-pushes); `old-error` predates the marker.
+      ['other-type', true],
       ['old-error', true],
     ]);
   });

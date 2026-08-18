@@ -13,13 +13,14 @@ import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
  * This is used to track whether users have marked notifications as read.
  */
 
-/** Timestamp marker: notifications at or before it are read; also used to ensure
- * new users are not flooded with notifications.
+/** Timestamp marker: notification copies at or before it are read (a later re-push of the
+ * same id resurfaces as unread); also used to ensure new users are not flooded with
+ * notifications.
  */
 export const READ_ALL_BEFORE_KEY = 'notificationCenter:readAllBefore';
 
-/** Individually-read ids newer than `readAllBefore`;
- * advancing the readAllBefore marker keeps this within a reasonable size.
+/** Individually-acknowledged ids, durable across re-pushes and mark-all-read;
+ * kept within bounds by the MAX_READ_IDS cap (oldest ids are dropped).
  */
 export const READ_KEY = 'notificationCenter:read';
 
