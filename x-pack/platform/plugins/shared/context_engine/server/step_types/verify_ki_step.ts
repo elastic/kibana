@@ -17,9 +17,9 @@ export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logge
     handler: async (context) => {
       const [coreStart] = await coreSetup.getStartServices();
       const fakeRequest = context.contextManager.getFakeRequest();
-      const esClient = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
       const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
       const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
+      const esClient = context.contextManager.getScopedEsClient();
       const isEnabled = (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
 
       const service = new KiVerificationService(createKiVerifierRegistry());

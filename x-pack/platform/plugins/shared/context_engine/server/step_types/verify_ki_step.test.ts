@@ -17,7 +17,7 @@ const makeHandlerContext = (ki: VerifyKiHandlerContext['input']['ki']): VerifyKi
     input: { ki },
     config: {},
     rawInput: { ki },
-    contextManager: { getFakeRequest: jest.fn() },
+    contextManager: { getFakeRequest: jest.fn(), getScopedEsClient: jest.fn() },
     logger: loggingSystemMock.createLogger(),
     abortSignal: new AbortController().signal,
     stepId: 'verify_ki',
