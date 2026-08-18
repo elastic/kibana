@@ -11,7 +11,7 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
+import type { ConversationRoundAuthor, CurrentUser } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest } from '../utils';
@@ -52,12 +52,7 @@ export class ConversationServiceImpl implements ConversationService {
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
-    const user = await getUserFromRequest({
-      request,
-      security: this.security,
-      esClient: this.getScopedEsClient(request).asCurrentUser,
-    });
-
+    const user = await this.getCurrentUser({ request });
     const esClient = this.getScopedEsClient(request).asInternalUser;
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
@@ -89,17 +84,21 @@ export class ConversationServiceImpl implements ConversationService {
       return origin.author;
     }
 
-    const user = await getUserFromRequest({
-      request,
-      security: this.security,
-      esClient: this.getScopedEsClient(request).asCurrentUser,
-    });
+    const user = await this.getCurrentUser({ request });
 
     if (user.id === undefined) {
       return undefined;
     }
 
     return { id: user.id, username: user.username };
+  }
+
+  private async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
+    return getUserFromRequest({
+      request,
+      security: this.security,
+      esClient: this.getScopedEsClient(request).asCurrentUser,
+    });
   }
 
   private getScopedEsClient(request: KibanaRequest) {
