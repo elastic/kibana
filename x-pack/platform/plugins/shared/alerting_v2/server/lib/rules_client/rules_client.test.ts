@@ -563,10 +563,12 @@ describe('RulesClient', () => {
         },
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-stale-recovery',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
@@ -579,7 +581,7 @@ describe('RulesClient', () => {
         message: 'query.recovery is only allowed when recovery_strategy is "query".',
       });
 
-      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('throws 400 when setting recovery_strategy "query" without a query.recovery block', async () => {
@@ -590,10 +592,12 @@ describe('RulesClient', () => {
         kind: 'alert',
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-missing-recovery',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
@@ -606,7 +610,7 @@ describe('RulesClient', () => {
         message: 'query.recovery is required when recovery_strategy is "query".',
       });
 
-      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('throws 400 when clearing no_data_strategy leaves a stale query.no_data block', async () => {
@@ -623,10 +627,12 @@ describe('RulesClient', () => {
         },
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-stale-no-data',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
@@ -640,7 +646,7 @@ describe('RulesClient', () => {
           'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
       });
 
-      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('throws 400 when setting a no_data_strategy without a query.no_data block (standalone)', async () => {
@@ -651,10 +657,12 @@ describe('RulesClient', () => {
         kind: 'alert',
       };
 
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-missing-no-data',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
@@ -668,7 +676,7 @@ describe('RulesClient', () => {
           'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
       });
 
-      expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
     it('allows setting state_transition to null on a signal rule (removing it)', async () => {
@@ -2736,10 +2744,12 @@ describe('RulesClient', () => {
 
     it('attaches INVALID_RULE_QUERY_CONFIG code when an update desynchronizes a strategy and its query block', async () => {
       const client = createClient();
-      rulesSavedObjectService.get.mockResolvedValueOnce({
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
         id: 'rule-id-query-config',
         attributes: { ...baseSoAttrs, kind: 'alert' },
         version: 'v1',
+        type: RULE_SAVED_OBJECT_TYPE,
+        references: [],
       });
 
       await expect(
