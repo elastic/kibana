@@ -50,7 +50,7 @@ const CopyableField = ({ label, value }: { label: string; value: string }) => (
           {(copy) => (
             <EuiToolTip content={copyLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="copyClipboard"
+                iconType="copy"
                 onClick={copy}
                 aria-label={copyLabel}
                 data-test-subj="exemplarFlyoutCopyButton"
