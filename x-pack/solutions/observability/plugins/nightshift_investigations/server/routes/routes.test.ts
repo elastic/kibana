@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { InvestigationNotFoundError } from '../client/investigations_client';
-import { nightshiftInvestigationsRouteRepository } from './index';
+import { nightshiftInvestigationsRouteRepository } from '.';
 
 const startEndpoint = 'POST /internal/nightshift/investigations' as const;
 const getEndpoint = 'GET /internal/nightshift/investigations/{id}' as const;
@@ -31,10 +31,9 @@ describe('POST /internal/nightshift/investigations', () => {
 
   it('returns investigation_id from client.start()', async () => {
     const start = jest.fn().mockResolvedValue({ investigation_id: 'exec-123' });
-    const resources = makeResources(
-      makeClient({ start }),
-      { body: { subject: { type: 'significant_event', id: 'se-1' } } }
-    );
+    const resources = makeResources(makeClient({ start }), {
+      body: { subject: { type: 'significant_event', id: 'se-1' } },
+    });
 
     const result = await handler(resources as any);
 
@@ -63,10 +62,9 @@ describe('POST /internal/nightshift/investigations', () => {
 
   it('propagates errors from client.start()', async () => {
     const start = jest.fn().mockRejectedValue(new Error('Investigations are not configured'));
-    const resources = makeResources(
-      makeClient({ start }),
-      { body: { subject: { type: 'alert', id: 'alert-1' } } }
-    );
+    const resources = makeResources(makeClient({ start }), {
+      body: { subject: { type: 'alert', id: 'alert-1' } },
+    });
 
     await expect(handler(resources as any)).rejects.toThrow('Investigations are not configured');
   });
