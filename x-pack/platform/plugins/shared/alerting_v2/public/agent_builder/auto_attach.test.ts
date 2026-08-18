@@ -252,9 +252,7 @@ describe('registerAutoAttach', () => {
     jest.runOnlyPendingTimers();
 
     expect(addAttachment).toHaveBeenCalledTimes(2);
-    expect(addAttachment).toHaveBeenLastCalledWith(
-      expect.objectContaining({ id: 'test:item-2' })
-    );
+    expect(addAttachment).toHaveBeenLastCalledWith(expect.objectContaining({ id: 'test:item-2' }));
     expect(removeAttachment).toHaveBeenCalledTimes(1);
   });
 
