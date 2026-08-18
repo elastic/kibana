@@ -63,6 +63,9 @@ describe('ConversationServiceImpl', () => {
       expect(createClientMock).toHaveBeenCalledWith(
         expect.objectContaining({ esClient: asInternalUser })
       );
+      expect(getUserFromRequestMock).toHaveBeenCalledWith(
+        expect.objectContaining({ esClient: asCurrentUser })
+      );
     });
   });
 
