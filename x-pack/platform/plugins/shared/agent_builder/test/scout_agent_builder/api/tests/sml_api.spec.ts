@@ -50,6 +50,10 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
   const slashTitleEntryId = `sml-slash-title-${searchRunId}`;
   const slashTitle = `sales/marketing overview ${searchRunId}`;
 
+  // Written with a non-canonical `type` casing, which the registry would normally
+  // reject, to prove the mapping's lowercase normalizer applies at index time.
+  const mixedCaseTypeEntryId = `sml-mixed-type-${searchRunId}`;
+
   apiTest.beforeAll(async ({ samlAuth, esClient, config }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminInteractiveCookieHeader = cookieHeader;
@@ -113,7 +117,6 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
     await sysEsClient.index({
       index: smlIndexName,
       id: shortTitleEntryId,
-      refresh: 'wait_for',
       document: {
         ...baseDocument,
         id: shortTitleEntryId,
@@ -123,10 +126,33 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
         content: 'yellowfin short title for sml scout ranking',
       },
     });
+
+    await sysEsClient.index({
+      index: smlIndexName,
+      id: mixedCaseTypeEntryId,
+      document: {
+        ...baseDocument,
+        id: mixedCaseTypeEntryId,
+        type: 'Workflow',
+        title: `mixed case type entry ${searchRunId}`,
+        origin: { uri: `workflow://${mixedCaseTypeEntryId}` },
+        content: 'mixed case type for sml scout',
+      },
+    });
+
+    // Refresh once, after every insert, so this doesn't silently depend on which
+    // document happens to be indexed last.
+    await sysEsClient.indices.refresh({ index: smlIndexName });
   });
 
   apiTest.afterAll(async () => {
-    for (const id of [searchEntryId, longTitleEntryId, shortTitleEntryId, slashTitleEntryId]) {
+    for (const id of [
+      searchEntryId,
+      longTitleEntryId,
+      shortTitleEntryId,
+      slashTitleEntryId,
+      mixedCaseTypeEntryId,
+    ]) {
       try {
         await sysEsClient.delete({ index: smlIndexName, id, refresh: true });
       } catch {
@@ -226,6 +252,16 @@ apiTest.describe('Agent Builder — SML internal API', { tag: [...tags.stateful.
       // other than connector, so the visualization entry must drop out.
       const wrongType = await autocomplete(apiClient, 'connector/pacif');
       expect(wrongType.some((r) => r.id === searchEntryId)).toBe(false);
+    }
+  );
+
+  apiTest(
+    'POST /internal/agent_builder_sml/sml/_autocomplete matches a type whose stored casing differs',
+    async ({ apiClient }) => {
+      // The document was written with `type: 'Workflow'`. The mapping's lowercase
+      // normalizer is what makes a lowercase prefix query find it.
+      const results = await autocomplete(apiClient, 'workflo');
+      expect(results.some((r) => r.id === mixedCaseTypeEntryId)).toBe(true);
     }
   );
 

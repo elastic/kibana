@@ -984,9 +984,9 @@ const buildTitlePrefixClause = (text: string): Record<string, unknown> => ({
 /**
  * `type` is a low-cardinality keyword, so a `prefix` query is cheap.
  *
- * Lowercasing the typed text is all that's needed for case-insensitive matching:
- * `type` carries no normalizer, but the type registry rejects any id that isn't
- * lowercase (`SML_TYPE_ID_PATTERN`), so the indexed values are already canonical.
+ * `type` carries a lowercase normalizer, which already handles casing on both
+ * sides. Lowercasing here too keeps matching correct on an index created before
+ * that normalizer landed, until the crawler rebuilds it.
  */
 const buildTypePrefixClause = (text: string): Record<string, unknown> => ({
   prefix: { type: text.toLowerCase() },

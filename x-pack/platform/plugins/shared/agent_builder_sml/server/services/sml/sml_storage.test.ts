@@ -14,12 +14,14 @@ describe('smlIndexName', () => {
 });
 
 describe('storageSettings', () => {
-  it('leaves `type` without a normalizer so mapping updates stay additive', () => {
-    // `normalizer` is not an updateable mapping parameter, and the storage adapter
-    // reconciles schema drift with an in-place `putMapping`. Adding one here would
-    // break indexing into any index created beforehand. Case-insensitive matching
-    // comes from the registry rejecting non-lowercase type ids plus the query
-    // lowercasing the typed text.
-    expect(storageSettings.schema.properties.type).not.toHaveProperty('normalizer');
+  it('normalizes `type` to lowercase for the @ menu prefix query', () => {
+    // Knowingly a breaking mapping change: `normalizer` is not updateable, so the
+    // adapter's in-place `putMapping` fails on indices created before it existed.
+    // The crawler's `applyMappingsOrRebuild` drops and rebuilds the index in that
+    // case, which is acceptable while the feature is behind a flag.
+    expect(storageSettings.schema.properties.type).toMatchObject({
+      type: 'keyword',
+      normalizer: 'lowercase',
+    });
   });
 });
