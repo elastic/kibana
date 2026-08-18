@@ -33,14 +33,14 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
     const clients = { esClient, internalEsClient };
     // Seed endpoint data for response-action tests
     await seedScenario(clients, {
-      agentId: 'eval-agent-isolate-001',
+      agentId: 'eval-agent-ts-isolate-001',
       hostName: 'eval-host-isolate',
       os: { name: 'Windows', version: '10' },
       policyName: 'eval-policy-response',
       policyStatus: 'success',
     });
     await seedScenario(clients, {
-      agentId: 'eval-agent-release-001',
+      agentId: 'eval-agent-ts-release-001',
       hostName: 'eval-host-release',
       os: { name: 'Linux', version: 'Ubuntu 22.04' },
       policyName: 'eval-policy-response',
