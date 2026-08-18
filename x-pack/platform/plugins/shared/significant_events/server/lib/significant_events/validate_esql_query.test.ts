@@ -279,4 +279,60 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
       ).toThrow('ES|QL query must use FROM $.query');
     });
   });
+
+  describe('over-broad full-text predicates', () => {
+    const stream = createWiredStreamDefinition('logs');
+
+    it('should reject a multi-word `:` value', () => {
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* | WHERE message : "request failed"',
+          stream,
+        })
+      ).toThrow('match ANY word');
+    });
+
+    it('should render a rejected MATCH as a function call, not `field MATCH value`', () => {
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* | WHERE MATCH(message, "request failed")',
+          stream,
+        })
+      ).toThrow('MATCH(message, "request failed")');
+    });
+
+    it('should reject with a 400 status', () => {
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* | WHERE message : "request failed"',
+          stream,
+        })
+      ).toThrow(expect.objectContaining({ statusCode: 400 }));
+    });
+
+    it('should accept a single-word `:` value', () => {
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* | WHERE message : "timeout"',
+          stream,
+        })
+      ).not.toThrow();
+    });
+
+    it('should accept MATCH_PHRASE and AND-of-single-terms', () => {
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* | WHERE MATCH_PHRASE(message, "request failed")',
+          stream,
+        })
+      ).not.toThrow();
+
+      expect(() =>
+        validateEsqlQueryForStreamOrThrow({
+          esqlQuery: 'FROM logs, logs.* | WHERE message:"request" AND message:"failed"',
+          stream,
+        })
+      ).not.toThrow();
+    });
+  });
 });
