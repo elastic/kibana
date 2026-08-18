@@ -31,6 +31,7 @@ import { dataViewMock, dataViewMockWithTimeField } from '@kbn/discover-utils/src
 import { dataViewWithTimefieldMock } from '../../../../../__mocks__/data_view_with_timefield';
 import { TransferAction } from '../../../../../plugin_imports/embeddable_editor_service';
 import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provider';
+import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 
 jest.mock('./discover_session_save_dashboard_modal', () => ({
   DiscoverSessionSaveDashboardModal: jest.fn(() => null),
@@ -646,6 +647,48 @@ describe('DiscoverSessionSaveModalContainer', () => {
         savedSearchId: 'new-session',
         tab: {
           id: toolkit.getCurrentTab().id,
+        },
+      });
+    });
+
+    it('should include the resolved profile state when navigating to a newly saved session', async () => {
+      // Regression test: the locator builds its URL from these params alone, not from the
+      // current address bar, so a profile state field synced only through the URL (like the
+      // metrics grid's selected dimensions) was silently dropped from the post-save navigation
+      // unless it's passed here explicitly.
+      const services = createDiscoverServicesMock();
+      services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
+      const navigateSpy = jest.spyOn(services.locator, 'navigate');
+      const { modalProps, toolkit } = await setup({
+        persistedDiscoverSession: false,
+        services,
+      });
+      const tabId = toolkit.getCurrentTab().id;
+
+      // Simulates the user changing a URL-synced profile state value (e.g. picking a metrics
+      // grid dimension) before saving.
+      toolkit.internalState.dispatch(
+        internalStateActions.setProfileState({
+          tabId,
+          profileStateDefinition: TEST_PROFILE_STATE_DEF,
+          profileState: { ...TEST_PROFILE_STATE_DEF.defaultState, urlValue: 'picked-value' },
+        })
+      );
+
+      await act(async () => {
+        await modalProps?.onSave(getOnSaveProps());
+      });
+
+      expect(navigateSpy).toHaveBeenCalledWith({
+        savedSearchId: 'new-session',
+        tab: { id: tabId },
+        profileState: {
+          // Only the Url and Persistent fields travel with the locator -- Ui-typed fields
+          // (uiValue, nestedValue) are session-local and don't belong in a shareable URL.
+          testProfileState: {
+            persistentValue: TEST_PROFILE_STATE_DEF.defaultState.persistentValue,
+            urlValue: 'picked-value',
+          },
         },
       });
     });

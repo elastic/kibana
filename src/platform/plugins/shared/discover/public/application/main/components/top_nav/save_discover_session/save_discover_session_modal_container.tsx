@@ -21,11 +21,14 @@ import {
   getSerializedSearchSourceDataViewDetails,
   internalStateActions,
   selectAllTabs,
+  selectCurrentProfileLocatorState,
   selectPersistedDiscoverSession,
   selectSavedDataViews,
+  selectTab,
   selectTabRuntimeState,
   useCurrentTabRuntimeState,
   useInternalStateDispatch,
+  useInternalStateGetState,
   useInternalStateSelector,
   useRuntimeStateManager,
 } from '../../../state_management/redux';
@@ -48,6 +51,7 @@ export const DiscoverSessionSaveModalContainer = ({
   services,
 }: DiscoverSessionSaveModalContainerProps) => {
   const dispatch = useInternalStateDispatch();
+  const getState = useInternalStateGetState();
   const runtimeStateManager = useRuntimeStateManager();
   const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
   const allTabs = useInternalStateSelector(selectAllTabs);
@@ -153,9 +157,28 @@ export const DiscoverSessionSaveModalContainer = ({
       } else {
         if (shouldNavigateToSavedSession) {
           services.embeddableEditor.clearEditorState();
+
+          const nextTab = response.nextSelectedTabId
+            ? selectTab(getState(), response.nextSelectedTabId)
+            : undefined;
+          // The locator builds its URL from these params alone, not from the current address
+          // bar. If profile state (e.g. the metrics grid's selected dimensions) isn't passed
+          // explicitly, the constructed URL omits it -- and the still-active URL sync
+          // subscription from before this navigation then treats that omission as an explicit
+          // instruction to clear it from Redux (see create_url_sync_observables.ts).
+          const profileState = nextTab
+            ? selectCurrentProfileLocatorState({
+                runtimeStateManager,
+                tabId: nextTab.id,
+                profileStateMap: nextTab.profileState,
+                profileStateRegistry: services.profileStateRegistry,
+              })
+            : undefined;
+
           services.locator.navigate({
             savedSearchId: response.discoverSession.id,
             ...(response?.nextSelectedTabId ? { tab: { id: response.nextSelectedTabId } } : {}),
+            ...(profileState ? { profileState } : {}),
           });
         } else if (isEmbeddedEditor) {
           services.embeddableEditor.transferBackToEditor(TransferAction.SaveSession);
