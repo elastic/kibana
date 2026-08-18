@@ -305,6 +305,18 @@ export async function stepInstallWorkflowAssets(
         };
 
         if (existingWorkflow) {
+          // FLEET-012: Preserve user-disabled state across upgrades.
+          // If the user explicitly disabled a managed workflow, don't re-enable it.
+          const existingYaml = existingWorkflow.yaml ?? '';
+          const existingParsed = parse(existingYaml) as { enabled?: boolean };
+          if (existingParsed.enabled === false && workflowDefinition.enabled !== false) {
+            logger.debug(
+              `Workflow ${workflowId} was disabled by user — preserving disabled state on upgrade`
+            );
+            workflowDefinition.enabled = false;
+            workflowYaml = stringify(workflowDefinition);
+          }
+
           await workflowsApi.updateWorkflow(
             workflowId,
             { yaml: workflowYaml, ...managedWorkflowFields },
@@ -345,6 +357,30 @@ export async function stepInstallWorkflowAssets(
       installAsAdditionalSpace,
       true
     );
+    // FLEET-012: Reconcile removed workflows — delete managed workflows that
+    // belong to this package but are no longer in the new archive.
+    const newAssetIds = new Set(assetRefs.map((r) => r.id));
+    const managedWorkflowPrefix = `${spaceId ?? "default"}-${pkgName}-`;
+    try {
+      const finder = savedObjectsClient.createPointInTimeFinder({
+        type: KibanaSavedObjectType.workflow,
+        filter: `${KibanaSavedObjectType.workflow}.attributes.managed: true AND ${KibanaSavedObjectType.workflow}.attributes.managedBy: ${pkgName}`,
+        perPage: 100,
+      });
+      for await (const soPage of finder.find()) {
+        for (const so of soPage.saved_objects) {
+          if (so.id.startsWith(managedWorkflowPrefix) && !newAssetIds.has(so.id)) {
+            logger.info(
+              `FLEET-012: removing orphaned workflow ${so.id} (no longer in package archive)`
+            );
+            await savedObjectsClient.delete(KibanaSavedObjectType.workflow, so.id);
+          }
+        }
+      }
+      await finder.close();
+    } catch (err) {
+      logger.warn(`FLEET-012: failed to reconcile removed workflows: ${err}`);
+    }
   });
 }
 
