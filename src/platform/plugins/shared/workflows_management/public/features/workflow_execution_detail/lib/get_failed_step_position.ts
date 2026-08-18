@@ -18,8 +18,9 @@ export interface FailedStepPosition {
   /** Failed step to open / scroll to (may be nested). */
   step: WorkflowStepExecutionDto;
   /**
-   * 1-based index among definition top-level steps when numbering is unambiguous.
-   * Omitted for nested-only failures (Result reads plain "Failed").
+   * 1-based index among definition top-level steps when an owning top-level
+   * step can be resolved. Omitted when ownership cannot be mapped (Result
+   * reads plain "Failed").
    */
   index?: number;
   /** Definition top-level step count; present only with `index`. */
@@ -42,44 +43,38 @@ const isNumberableStep = (step: WorkflowStepExecutionDto): boolean =>
   !PSEUDO_OR_BRANCH_TYPES.has(step.stepType ?? '') &&
   !(step.stepType?.startsWith('trigger_') ?? false);
 
-/** Scopes that mean the failure sits inside control-flow nesting (not plain retry). */
-const CONTROL_FLOW_SCOPE_TYPES = new Set([
-  'foreach',
-  'enter-foreach',
-  'while',
-  'enter-while',
-  'if',
-  'enter-condition',
-  'switch',
-  'enter-switch',
-  'parallel',
-  'enter-parallel',
-]);
-
-const scopeHasControlFlowNesting = (step: WorkflowStepExecutionDto): boolean =>
-  (step.scopeStack ?? []).some((frame) =>
-    frame.nestedScopes.some((scope) => CONTROL_FLOW_SCOPE_TYPES.has(scope.nodeType ?? ''))
-  );
-
 /**
- * Owning top-level definition step name for a failed execution record.
- * Retry scopes still belong to that step; control-flow nesting is ambiguous for numbering.
+ * Owning top-level definition step for a failed execution record.
+ *
+ * Same ownership rule as the danger border: retry attempts are internal to
+ * their step (`stepId` is shared), so a retried top-level failure numbers
+ * against that step. When the failed leaf is nested under control flow, the
+ * outermost scope frame that matches a definition top-level step is the owner
+ * (e.g. the foreach that contains the failure).
  */
-const owningTopLevelStepId = (step: WorkflowStepExecutionDto): string | undefined => {
-  if (!step.scopeStack?.length) {
+const owningTopLevelStepId = (
+  step: WorkflowStepExecutionDto,
+  topLevelNames: ReadonlySet<string>
+): string | undefined => {
+  // Attempts / plain top-level failures: stepId is the definition step.
+  if (topLevelNames.has(step.stepId)) {
     return step.stepId;
   }
-  if (scopeHasControlFlowNesting(step)) {
-    return undefined;
+
+  // Nested leaf (foreach/if/switch/…): walk scopes outermost → innermost.
+  for (const frame of step.scopeStack ?? []) {
+    if (topLevelNames.has(frame.stepId)) {
+      return frame.stepId;
+    }
   }
-  // Retry-only (or other non-control-flow) scopes: outermost frame is the step.
-  return step.scopeStack[0]?.stepId ?? step.stepId;
+
+  return undefined;
 };
 
 /**
- * Find the failed step for the Result stat. When a failure maps cleanly to a
- * definition top-level step (no control-flow nesting), include 1-based
- * `{index, total}`; otherwise omit them so the UI shows plain "Failed".
+ * Find the failed step for the Result stat. Resolve ownership first, then
+ * number `{index, total}` against the definition's top-level steps when the
+ * owner maps cleanly; otherwise omit them so the UI shows plain "Failed".
  */
 export const getFailedStepPosition = (
   execution: WorkflowExecutionDto | null | undefined,
@@ -122,25 +117,17 @@ export const getFailedStepPosition = (
     return { step: failedStep };
   }
 
-  // Number from the earliest unambiguous top-level owner among dangerous steps.
-  const numbered = [...dangerous]
-    .map((s) => ({ step: s, owner: owningTopLevelStepId(s) }))
-    .filter(
-      (entry): entry is { step: WorkflowStepExecutionDto; owner: string } =>
-        entry.owner != null && definitionSteps.some((d) => d.name === entry.owner)
-    )
-    .sort(
-      (a, b) =>
-        (a.step.globalExecutionIndex ?? 0) - (b.step.globalExecutionIndex ?? 0) ||
-        (a.step.stepExecutionIndex ?? 0) - (b.step.stepExecutionIndex ?? 0)
-    );
-
-  if (numbered.length === 0) {
+  const topLevelNames = new Set(definitionSteps.map((s) => s.name));
+  const ownerName = owningTopLevelStepId(failedStep, topLevelNames);
+  if (ownerName == null) {
     return { step: failedStep };
   }
 
-  const ownerName = numbered[0].owner;
   const defIndex = definitionSteps.findIndex((s) => s.name === ownerName);
+  if (defIndex < 0) {
+    return { step: failedStep };
+  }
+
   return {
     step: failedStep,
     index: defIndex + 1,

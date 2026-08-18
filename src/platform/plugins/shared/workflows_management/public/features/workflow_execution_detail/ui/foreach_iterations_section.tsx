@@ -25,8 +25,8 @@ interface ForeachIterationsSectionProps {
 
 /**
  * Navigable Iterations section for foreach/while (and similar repetitive control)
- * step subflyouts. High-level iteration rows only — selecting one opens that
- * iteration in the step panel. Pin/gap collapse is shared with the Table tab.
+ * step subflyouts. Full flat list of high-level iteration rows (no pin/gap
+ * collapse) — selecting one opens that iteration in the step panel.
  */
 export const ForeachIterationsSection: React.FC<ForeachIterationsSectionProps> = ({
   foreachStep,
@@ -85,7 +85,7 @@ export const ForeachIterationsSection: React.FC<ForeachIterationsSectionProps> =
     >
       <div css={{ display: 'flex', alignItems: 'center', height: '32px', gap: '4px' }}>
         <EuiButtonIcon
-          iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+          iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
           size="xs"
           color="text"
           aria-label={i18n.translate('workflows.executionFlyout.iterationsSection.toggle', {

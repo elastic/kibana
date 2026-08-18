@@ -304,6 +304,11 @@ function convertTreeToOpenNodes(
     /** Sibling-aware derived statuses (includes trailing not-run constraint). */
     iterationStatusOverrides?: Map<number, ExecutionStatus>;
     definition?: WorkflowYaml | null;
+    /**
+     * When false, foreach/while iteration children render as a full list
+     * (every iteration pinned, no gap rows). Defaults to true (Table tab).
+     */
+    collapseIterations?: boolean;
   }
 ): OpenTreeNode[] {
   return treeItems.flatMap((item) => {
@@ -478,6 +483,8 @@ function convertTreeToOpenNodes(
 
       const plan = planIterationCollapse(infos, {
         isExecutionComplete: options?.isExecutionComplete ?? true,
+        threshold:
+          options?.collapseIterations === false ? Number.POSITIVE_INFINITY : undefined,
       });
 
       const pinByIndex = new Map<number, { kinds: IterationPinKind[]; autoExpand: boolean }>();
@@ -911,8 +918,8 @@ const collectDefaultExpandedIds = (nodes: OpenTreeNode[], into: Set<string>) => 
 };
 
 /**
- * Iterations section rows: keep pin/gap navigation but drop nested step trees so
- * each iteration is a single selectable leaf (no expand chevrons).
+ * Iterations section rows: full flat list of iteration leaves (no nested step
+ * trees / expand chevrons). Gap rows are already disabled via collapseIterations.
  */
 const asFlatIterationRows = (nodes: OpenTreeNode[]): OpenTreeNode[] =>
   nodes.map((node) => {
@@ -940,9 +947,8 @@ export interface StepExecutionOpenTreeProps {
   onStepExecutionClick: (stepExecutionId: string) => void;
   isExecutionComplete?: boolean;
   /**
-   * When true, render only the converted roots' children (foreach → iterations).
-   * Uses the same convert/pin/gap path as the Table tab, then flattens each
-   * iteration to a leaf so nested steps are not expandable here.
+   * When true, render only the converted roots' children (foreach → iterations)
+   * as a full flat list — no pin/gap collapse, no nested step expand.
    */
   childrenOnly?: boolean;
   statusPlacement?: StatusPlacement;
@@ -951,7 +957,8 @@ export interface StepExecutionOpenTreeProps {
 
 /**
  * Shared open-tree renderer used by the Table tab and foreach Iterations section.
- * Same StepExecutionTreeRow / pin-and-gap mechanics — not a fork.
+ * Table tab keeps pin-and-gap; Iterations section (`childrenOnly`) lists every
+ * iteration as a leaf.
  */
 export const StepExecutionOpenTree = ({
   roots,
@@ -994,7 +1001,11 @@ export const StepExecutionOpenTree = ({
       onStepExecutionClick,
       expandedGapIds,
       onToggleGap,
-      { isExecutionComplete }
+      {
+        isExecutionComplete,
+        // Iterations section: show every iteration; Table tab keeps pin/gap.
+        collapseIterations: childrenOnly ? false : undefined,
+      }
     );
     if (childrenOnly && converted.length === 1) {
       return asFlatIterationRows(converted[0].children);
@@ -1054,17 +1065,6 @@ export const StepExecutionOpenTree = ({
   );
 };
 
-const filterStepTree = (items: StepExecutionTreeItem[], query: string): StepExecutionTreeItem[] => {
-  const lower = query.toLowerCase();
-  return items.reduce<StepExecutionTreeItem[]>((acc, item) => {
-    const filteredChildren = filterStepTree(item.children, query);
-    if (item.stepId.toLowerCase().includes(lower) || filteredChildren.length > 0) {
-      acc.push({ ...item, children: filteredChildren });
-    }
-    return acc;
-  }, []);
-};
-
 const flattenIfBranches = (items: StepExecutionTreeItem[]): StepExecutionTreeItem[] =>
   items.flatMap((item) => {
     if (item.stepType === 'if-branch' || item.stepType === 'enter-case-branch') {
@@ -1099,7 +1099,6 @@ export interface WorkflowStepExecutionTreeProps {
   selectedId: string | null;
   childExecutionsMap?: ChildWorkflowExecutionsMap;
   isLoadingChildExecutions?: boolean;
-  searchQuery?: string;
   /** Auto-expand the inline error panel for this step execution id (failed execution open). */
   autoExpandErrorForStepId?: string | null;
   /** One-shot arrival pulse on the error region for this step execution id. */
@@ -1116,7 +1115,6 @@ export const WorkflowStepExecutionTree = ({
   selectedId,
   childExecutionsMap,
   isLoadingChildExecutions,
-  searchQuery,
   autoExpandErrorForStepId,
   errorArrivalPulseStepId,
   statusPlacement = 'inline',
@@ -1217,8 +1215,10 @@ export const WorkflowStepExecutionTree = ({
       }
     }
     const visibleTree = stepExecutionsTree.filter((item) => item.stepType !== '__overview');
-    const filteredTree = searchQuery ? filterStepTree(visibleTree, searchQuery) : visibleTree;
-    const flatTree = flattenIfBranches(filteredTree);
+    // No step-tree text filter: collapse/pin/gap findability is auto-scroll, the
+    // header failure link, and iteration pins. If search returns, spec
+    // expand-on-match and matches inside collapsed gaps/attempts first.
+    const flatTree = flattenIfBranches(visibleTree);
 
     return convertTreeToOpenNodes(
       flatTree,
@@ -1247,7 +1247,6 @@ export const WorkflowStepExecutionTree = ({
     isLoadingChildExecutions,
     onStepExecutionClick,
     onToggleGap,
-    searchQuery,
     selectedId,
   ]);
 

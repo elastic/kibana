@@ -76,16 +76,16 @@ describe('getFailedStepPosition', () => {
   it('numbers retry-scoped failures against the owning definition step', () => {
     const failedAttempt = step({
       id: 'attempt-4',
-      stepId: 'triage_overview',
+      stepId: 'triage_agent',
       status: ExecutionStatus.FAILED,
       error: { type: 'Error', message: 'boom' },
       globalExecutionIndex: 3,
       scopeStack: [
         {
-          stepId: 'triage_overview',
+          stepId: 'triage_agent',
           nestedScopes: [
             {
-              nodeId: 'enterRetry_triage_overview',
+              nodeId: 'enterRetry_triage_agent',
               nodeType: 'enter-retry',
               scopeId: '4-attempt',
             },
@@ -101,12 +101,12 @@ describe('getFailedStepPosition', () => {
     expect(
       getFailedStepPosition(
         execution,
-        definition(['start', 'mid', 'triage_overview', 'process_alerts', 'final_summary', 'done'])
+        definition(['start', 'triage_agent', 'process_alerts', 'final_summary', 'done'])
       )
     ).toEqual({
       step: failedAttempt,
-      index: 3,
-      total: 6,
+      index: 2,
+      total: 5,
     });
   });
 
@@ -153,7 +153,7 @@ describe('getFailedStepPosition', () => {
     });
   });
 
-  it('returns plain Failed (no index) for nested-only control-flow failures', () => {
+  it('numbers nested control-flow failures against the top-level owner step', () => {
     const nestedFailed = step({
       id: 'nested',
       stepId: 'inner',
@@ -171,7 +171,6 @@ describe('getFailedStepPosition', () => {
       status: ExecutionStatus.FAILED,
       stepExecutions: [
         step({ id: '1', stepId: 'prep', globalExecutionIndex: 0 }),
-        // Foreach itself did not record a top-level failure — only the nested step did.
         step({
           id: '2',
           stepId: 'loop',
@@ -185,6 +184,8 @@ describe('getFailedStepPosition', () => {
 
     expect(getFailedStepPosition(execution, definition(['prep', 'loop', 'after']))).toEqual({
       step: nestedFailed,
+      index: 2,
+      total: 3,
     });
   });
 

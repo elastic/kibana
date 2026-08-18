@@ -289,7 +289,7 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
         }}
       >
         <EuiButtonIcon
-          iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+          iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
           size="xs"
           color="text"
           onClick={() => setIsOpen((v) => !v)}
@@ -308,7 +308,7 @@ const StepDataSection = ({ label, data }: { label: string; data: unknown }) => {
             button={
               <EuiButtonEmpty
                 size="xs"
-                iconType="arrowDown"
+                iconType="chevronSingleDown"
                 iconSide="right"
                 onClick={() => setIsViewPopoverOpen((v) => !v)}
               >
@@ -482,7 +482,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const { application, notifications } = useKibana().services;
     const [activeTab, setActiveTab] = useState<FlyoutTabId>('table');
     const [selectedStepExecutionId, setSelectedStepExecutionId] = useState<string | null>(null);
-    const [stepSearchQuery, setStepSearchQuery] = useState('');
     const [autoExpandErrorForStepId, setAutoExpandErrorForStepId] = useState<string | null>(null);
     const [errorArrivalPulseStepId, setErrorArrivalPulseStepId] = useState<string | null>(null);
     const autoExpandedForExecutionIdRef = useRef<string | null>(null);
@@ -946,7 +945,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
               >
                 <EuiButtonEmpty
                   size="s"
-                  iconType="editorUndo"
+                  iconType="undo"
                   color="text"
                   flush="left"
                   onClick={onClose}
@@ -1263,24 +1262,13 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       {i18nTexts.jsonTab}
                     </EuiTab>
                   </EuiTabs>
-                  {activeTab === 'table' && (
-                    <div css={{ padding: `${euiTheme.size.base} ${euiTheme.size.base} 0` }}>
-                      <EuiFieldSearch
-                        fullWidth
-                        compressed
-                        placeholder={i18n.translate(
-                          'workflows.executionFlyout.stepSearch.placeholder',
-                          { defaultMessage: 'Type text' }
-                        )}
-                        value={stepSearchQuery}
-                        onChange={(e) => setStepSearchQuery(e.target.value)}
-                        aria-label={i18n.translate(
-                          'workflows.executionFlyout.stepSearch.ariaLabel',
-                          { defaultMessage: 'Search steps' }
-                        )}
-                      />
-                    </div>
-                  )}
+                  {/*
+                    No Table-tab step search: findability is auto-scroll, the header
+                    failure link, and iteration pins. If step search returns, spec
+                    expand-on-match and match handling inside collapsed gaps/attempts
+                    first — naive filter breaks the pin/gap model. (Subflyout
+                    Input/Output field/value search is separate and required.)
+                  */}
                   <div
                     css={{
                       padding: `${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base}`,
@@ -1295,7 +1283,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         selectedId={selectedStepExecutionId}
                         childExecutionsMap={childExecutions}
                         isLoadingChildExecutions={isLoadingChildExecutions}
-                        searchQuery={stepSearchQuery}
                         autoExpandErrorForStepId={autoExpandErrorForStepId}
                         errorArrivalPulseStepId={errorArrivalPulseStepId}
                       />

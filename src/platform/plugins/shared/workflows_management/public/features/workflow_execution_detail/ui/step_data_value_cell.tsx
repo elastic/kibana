@@ -154,7 +154,7 @@ export const StepDataValueCell = React.memo<StepDataValueCellProps>(({ value }) 
       >
         {value}
       </span>
-      <EuiIcon type="expand" size="s" color="subdued" css={{ flexShrink: 0 }} />
+      <EuiIcon type="maximize" size="s" color="subdued" css={{ flexShrink: 0 }} />
     </button>
   );
 });

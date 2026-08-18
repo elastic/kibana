@@ -54,7 +54,7 @@ export const AiStepSection = React.memo<AiStepSectionProps>(({ ai, connectorName
     >
       <div css={{ display: 'flex', alignItems: 'center', height: '32px', gap: '4px' }}>
         <EuiButtonIcon
-          iconType={isOpen ? 'arrowUp' : 'arrowDown'}
+          iconType={isOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
           size="xs"
           color="text"
           aria-label={i18n.translate('workflows.executionFlyout.aiSection.toggle', {

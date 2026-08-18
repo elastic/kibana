@@ -470,7 +470,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             >
               {isExpandable ? (
                 <EuiButtonIcon
-                  iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+                  iconType={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
                   size="xs"
                   color="text"
                   aria-label={expandLabel}

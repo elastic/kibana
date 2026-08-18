@@ -120,7 +120,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
         items.push(
           <EuiContextMenuItem
             key="openFailed"
-            icon="editorCodeBlock"
+            icon="code"
             onClick={handleOpenFailedStep}
             data-test-subj="workflowExecutionFlyoutOpenFailedStep"
           >
@@ -192,6 +192,7 @@ export const ExecutionTakeActionSplitButton = React.memo<ExecutionTakeActionSpli
               })}
             </EuiSplitButton.ActionPrimary>
             <EuiSplitButton.ActionSecondary
+              iconType="chevronSingleDown"
               onClick={() => setIsMenuOpen((v) => !v)}
               aria-label={i18n.translate('workflows.executionFlyout.takeAction.menuAriaLabel', {
                 defaultMessage: 'More actions',

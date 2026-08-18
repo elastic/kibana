@@ -124,7 +124,7 @@ export const IterationGapRow = React.memo<IterationGapRowProps>(
             `}
             data-test-subj="workflowStepTreeGapEllipsisSlot"
           >
-            <EuiIcon type="boxesHorizontal" size="s" color="subdued" aria-hidden="true" />
+            <EuiIcon type="ellipsis" size="s" color="subdued" aria-hidden="true" />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
