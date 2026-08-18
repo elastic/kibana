@@ -29,7 +29,7 @@ export const consoleTranslations = Object.freeze({
     'xpack.securitySolution.management.console.keyAvailbleAutoCompleteValues',
     {
       defaultMessage:
-        'Pressing [ALT][SPACE] keys will show list of available commands or list of available command arguments, if a command has alredy been entered.',
+        'Pressing [ALT][SPACE] keys will show list of available commands or list of available command arguments, if a command has already been entered.',
     }
   ),
 });

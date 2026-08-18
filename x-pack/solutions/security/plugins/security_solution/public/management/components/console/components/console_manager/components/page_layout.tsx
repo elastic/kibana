@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PropsWithChildren, ReactNode } from 'react';
+import type { KeyboardEventHandler, PropsWithChildren, ReactNode } from 'react';
 import React, { useRef, useCallback, memo, useMemo } from 'react';
 import type { EuiPanelProps } from '@elastic/eui';
 import {
@@ -106,12 +106,12 @@ export const PageLayout = memo<PageLayoutProps>(
       );
     }, [getTestId, headerBackComponent, hideHeader, pageTitle]);
 
-    const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback((event) => {
       // We prevent the response console - which is currently displayed in a full page overlay - from
       // closing if the user hits `esc` while focus is on the console overlay.
       // However, there are still issues when closing Flyouts and certain popup (ex. argument selectors)
       // where the entire response action may be closed when user hits `ESC`.
-      if (event.key === 'Escape' && panelRef.current.contains(event.target as Node)) {
+      if (event.key === 'Escape' && panelRef.current?.contains(event.target as Node)) {
         event.preventDefault();
         event.stopPropagation();
       }
