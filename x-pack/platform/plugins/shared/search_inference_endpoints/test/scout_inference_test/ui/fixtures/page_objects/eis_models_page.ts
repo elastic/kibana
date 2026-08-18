@@ -60,6 +60,11 @@ export class EisModelsPage {
   readonly confirmRegionChangeModalRegionList: Locator;
   readonly confirmRegionChangeSaveButton: Locator;
   readonly confirmRegionChangeCancelButton: Locator;
+  readonly confirmRegionSelectionModal: Locator;
+  readonly confirmRegionSelectionGeoList: Locator;
+  readonly confirmRegionSelectionCallout: Locator;
+  readonly confirmRegionSelectionIgnoreCheckbox: Locator;
+  readonly confirmRegionSelectionSaveButton: Locator;
   // Confirm Delete Region Policy Modal
   readonly confirmDeleteRegionPolicyModal: Locator;
   readonly confirmDeleteRegionPolicySaveButton: Locator;
@@ -129,6 +134,19 @@ export class EisModelsPage {
     this.confirmRegionChangeCancelButton = this.confirmRegionChangeModal.locator(
       '[data-test-subj="confirmModalCancelButton"]'
     );
+    this.confirmRegionSelectionModal = this.page.testSubj.locator('confirmRegionSelectionModal');
+    this.confirmRegionSelectionGeoList = this.page.testSubj.locator(
+      'confirmRegionSelectionGeoList'
+    );
+    this.confirmRegionSelectionCallout = this.page.testSubj.locator(
+      'confirmRegionSelectionCallout'
+    );
+    this.confirmRegionSelectionIgnoreCheckbox = this.page.testSubj.locator(
+      'confirmRegionSelectionIgnoreCheckbox'
+    );
+    this.confirmRegionSelectionSaveButton = this.page.testSubj.locator(
+      'confirmRegionSelectionSaveButton'
+    );
     // Confirm Delete Region Policy Modal
     this.confirmDeleteRegionPolicyModal = this.page.testSubj.locator(
       'confirmDeleteRegionPolicyModal'
@@ -175,6 +193,18 @@ export class EisModelsPage {
 
   public geoZoneCheckbox(geo: string): Locator {
     return this.page.testSubj.locator(`geoZoneCheckbox-${geo}`);
+  }
+
+  public confirmRegionSelectionIssue(index: number): Locator {
+    return this.page.testSubj.locator(`confirmRegionSelectionIssue-${index}`);
+  }
+
+  public async startGeoPolicySave(geo: string) {
+    await this.manageRegionsButton.click();
+    await this.manageRegionsLoading.waitFor({ state: 'hidden' });
+    await this.manageRegionsCustomPolicyToggle.click();
+    await this.geoZoneCheckbox(geo).click();
+    await this.manageRegionsSaveButton.click();
   }
 
   public regionZonePanel(geo: string): Locator {
