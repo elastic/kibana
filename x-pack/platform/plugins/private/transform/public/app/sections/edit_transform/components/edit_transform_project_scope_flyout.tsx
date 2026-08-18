@@ -58,9 +58,13 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
   );
 
   const applyProjectScope = useCallback(() => {
+    if (stagedProjectRouting === undefined) {
+      return;
+    }
+
     setFormField({ field: 'projectRouting', value: draftProjectRouting });
     onClose();
-  }, [draftProjectRouting, onClose, setFormField]);
+  }, [draftProjectRouting, onClose, setFormField, stagedProjectRouting]);
 
   const discardProjectScopeChanges = useCallback(() => {
     setStagedProjectRouting(undefined);
@@ -85,6 +89,7 @@ export const EditTransformProjectScopeFlyout: FC<EditTransformProjectScopeFlyout
         }
       )}
       key={pickerResetCounter}
+      isApplyDisabled={stagedProjectRouting === undefined}
       onApplyChanges={applyProjectScope}
       onClose={onClose}
       onDiscardChanges={discardProjectScopeChanges}

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { PROJECT_ROUTING } from '@kbn/cps-utils';
 
@@ -43,7 +44,11 @@ const linkedProject = {
 
 const ProjectRoutingProbe = () => {
   const { value } = useFormField('projectRouting');
-  return <div data-test-subj="projectRoutingProbe">{value}</div>;
+  return (
+    <div data-project-routing={value} data-test-subj="projectRoutingProbe">
+      {value}
+    </div>
+  );
 };
 
 const renderFlyout = (projectRouting: string) => {
@@ -98,9 +103,10 @@ describe('EditTransformProjectScopeFlyout', () => {
       );
     });
 
+    expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeDisabled();
     fireEvent.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
 
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByTestId('projectRoutingProbe')).toHaveTextContent(exactAllIdsSnapshot);
     expect(screen.getByTestId('projectRoutingProbe')).not.toHaveTextContent(PROJECT_ROUTING.ALL);
   });
@@ -113,11 +119,26 @@ describe('EditTransformProjectScopeFlyout', () => {
       expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toBeInTheDocument();
     });
 
+    expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeDisabled();
     fireEvent.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
 
-    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onClose).not.toHaveBeenCalled();
     expect(screen.getByTestId('projectRoutingProbe')).toHaveTextContent(namedRouting);
     expect(screen.getByTestId('projectRoutingProbe')).not.toHaveTextContent(PROJECT_ROUTING.ALL);
+  });
+
+  it('does not write origin routing when applying without edits for unset project routing', async () => {
+    const { onClose } = renderFlyout('');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('projectPickerListItemSwitch-p1')).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeDisabled();
+    fireEvent.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByTestId('projectRoutingProbe')).toHaveAttribute('data-project-routing', '');
   });
 
   it('reverts to the default project routing verbatim', async () => {
@@ -129,9 +150,9 @@ describe('EditTransformProjectScopeFlyout', () => {
       expect(screen.getByTestId('projectPickerListItemSwitch-p2')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByTestId('projectPickerHeaderActionsButton'));
-    fireEvent.click(screen.getByText('Revert to space defaults'));
-    fireEvent.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
+    await userEvent.click(screen.getByTestId('projectPickerHeaderActionsButton'));
+    await userEvent.click(screen.getByText('Revert to space defaults'));
+    await userEvent.click(screen.getByTestId('projectPickerFlyoutApplyButton'));
 
     expect(screen.getByTestId('projectRoutingProbe')).toHaveTextContent(PROJECT_ROUTING.ORIGIN);
     expect(screen.getByTestId('projectRoutingProbe')).not.toHaveTextContent(PROJECT_ROUTING.ALL);
