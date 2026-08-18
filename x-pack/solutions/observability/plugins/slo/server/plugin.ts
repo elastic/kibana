@@ -206,23 +206,24 @@ export class SLOPlugin
             isDev: this.isDev,
           });
 
-          const [dataViewsService, rulesClient, { id: spaceId }, racClient] = await Promise.all([
-            pluginsStart.dataViews.dataViewsServiceFactory(
-              soClient,
-              scopedClusterClient.asCurrentUser
-            ),
-            pluginsStart.alerting.getRulesClientWithRequest(request),
-            pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
-            pluginsStart.ruleRegistry.getRacClientWithRequest(request),
-          ]);
+          const [dataViewsService, rulesClient, { id: spaceId }, racClient, isCpsAvailable] =
+            await Promise.all([
+              pluginsStart.dataViews.dataViewsServiceFactory(
+                soClient,
+                scopedClusterClient.asCurrentUser
+              ),
+              pluginsStart.alerting.getRulesClientWithRequest(request),
+              pluginsStart.spaces?.spacesService.getActiveSpace(request) ?? { id: 'default' },
+              pluginsStart.ruleRegistry.getRacClientWithRequest(request),
+              this.isCpsEnabled
+                ? (plugins.cps?.isTierEligible() ?? Promise.resolve(false))
+                : Promise.resolve(false),
+            ]);
 
           const repository = new DefaultSLODefinitionRepository(soClient, logger);
           const compositeRepository = new DefaultCompositeSLORepository(soClient, logger);
           const settingsRepository = new DefaultSLOSettingsRepository(soClient);
           const templateRepository = new DefaultSLOTemplateRepository(soClient);
-
-          const isCpsAvailable =
-            this.isCpsEnabled && (await (plugins.cps?.isTierEligible() ?? Promise.resolve(false)));
 
           const transformManager = new DefaultTransformManager(
             createTransformGenerators(spaceId, dataViewsService, this.isServerless, isCpsAvailable),
@@ -242,6 +243,7 @@ export class SLOPlugin
             dataViewsService,
             rulesClient,
             spaceId,
+            isCpsAvailable,
             repository,
             compositeRepository,
             settingsRepository,

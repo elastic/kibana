@@ -12,13 +12,13 @@ export const getSloProjectRouting = (
   slo: SLODefinition,
   {
     isServerless,
-    isCpsEnabled,
+    isCpsAvailable,
   }: {
     isServerless: boolean;
-    isCpsEnabled: boolean;
+    isCpsAvailable: boolean;
   }
 ): string | undefined => {
-  if (!isServerless || !isCpsEnabled) {
+  if (!isServerless || !isCpsAvailable) {
     return undefined;
   }
 

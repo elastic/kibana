@@ -14,10 +14,7 @@ import {
 } from '@kbn/es';
 import { servers as uiamConfig } from '../../uiam_local/serverless/security_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-
-const isSecurityTestEndpointsPluginPath = (arg: string) =>
-  arg.startsWith('--plugin-path=') &&
-  arg.includes('x-pack/platform/test/security_functional/plugins/test_endpoints');
+import { isSecurityTestEndpointsPluginPath } from './utils';
 
 export const servers: ScoutServerConfig = {
   ...uiamConfig,

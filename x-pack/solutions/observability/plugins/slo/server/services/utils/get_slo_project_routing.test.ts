@@ -32,10 +32,10 @@ const sloWith = (
 const GATED_OFF: Array<{
   name: string;
   isServerless: boolean;
-  isCpsEnabled: boolean;
+  isCpsAvailable: boolean;
 }> = [
-  { name: 'stateful', isServerless: false, isCpsEnabled: false },
-  { name: 'serverless without CPS', isServerless: true, isCpsEnabled: false },
+  { name: 'stateful', isServerless: false, isCpsAvailable: false },
+  { name: 'serverless without CPS', isServerless: true, isCpsAvailable: false },
 ];
 
 const PRECEDENCE_CASES: Array<{
@@ -89,16 +89,16 @@ const PRECEDENCE_CASES: Array<{
 ];
 
 describe('getSloProjectRouting', () => {
-  describe.each(GATED_OFF)('when $name', ({ isServerless, isCpsEnabled }) => {
+  describe.each(GATED_OFF)('when $name', ({ isServerless, isCpsAvailable }) => {
     it.each(PRECEDENCE_CASES)('returns undefined for $name', ({ settings }) => {
       expect(
-        getSloProjectRouting(sloWith({ ...settings }), { isServerless, isCpsEnabled })
+        getSloProjectRouting(sloWith({ ...settings }), { isServerless, isCpsAvailable })
       ).toBeUndefined();
     });
   });
 
   describe('when serverless+CPS', () => {
-    const flags = { isServerless: true, isCpsEnabled: true };
+    const flags = { isServerless: true, isCpsAvailable: true };
 
     it.each(PRECEDENCE_CASES)('returns $expected for $name', ({ settings, expected }) => {
       expect(getSloProjectRouting(sloWith({ ...settings }), flags)).toBe(expected);

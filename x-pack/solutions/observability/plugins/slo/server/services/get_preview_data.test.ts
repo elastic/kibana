@@ -540,14 +540,14 @@ describe('GetPreviewData', () => {
   describe('project_routing', () => {
     const createService = ({
       isServerless = false,
-      isCpsEnabled = false,
+      isCpsAvailable = false,
     }: {
       isServerless?: boolean;
-      isCpsEnabled?: boolean;
+      isCpsAvailable?: boolean;
     } = {}) =>
       new GetPreviewData(esClientMock, 'default', mockDataViewsService, {
         isServerless,
-        isCpsEnabled,
+        isCpsAvailable,
       });
 
     const searchRequest = () => esClientMock.search.mock.calls[0][0];
@@ -555,7 +555,7 @@ describe('GetPreviewData', () => {
     it.each(INDICATOR_PREVIEW_CASES)(
       'includes project_routing on $name search when serverless+CPS and projectRoutings is set',
       async ({ params }) => {
-        await createService({ isServerless: true, isCpsEnabled: true }).execute({
+        await createService({ isServerless: true, isCpsAvailable: true }).execute({
           ...params,
           projectRoutings: SUBSET_ROUTING,
         });
@@ -565,8 +565,8 @@ describe('GetPreviewData', () => {
     );
 
     it.each([
-      { name: 'stateful', isServerless: false, isCpsEnabled: false },
-      { name: 'serverless without CPS', isServerless: true, isCpsEnabled: false },
+      { name: 'stateful', isServerless: false, isCpsAvailable: false },
+      { name: 'serverless without CPS', isServerless: true, isCpsAvailable: false },
     ])('omits project_routing when $name even if projectRoutings is set', async (flags) => {
       await createService(flags).execute({
         ...kqlPreviewParams,
@@ -577,7 +577,7 @@ describe('GetPreviewData', () => {
     });
 
     it('defaults project_routing to _alias:_origin when serverless+CPS and projectRoutings is omitted', async () => {
-      await createService({ isServerless: true, isCpsEnabled: true }).execute(kqlPreviewParams);
+      await createService({ isServerless: true, isCpsAvailable: true }).execute(kqlPreviewParams);
 
       expect(searchRequest()).toHaveProperty('project_routing', LOCAL_PROJECT_ROUTING);
     });

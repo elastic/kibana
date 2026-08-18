@@ -20,7 +20,7 @@ export abstract class TransformGenerator {
     protected spaceId: string,
     protected dataViewService: DataViewsService,
     protected isServerless: boolean = false,
-    protected isCpsEnabled: boolean = false
+    protected isCpsAvailable: boolean = false
   ) {}
 
   public abstract getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest>;
@@ -28,7 +28,7 @@ export abstract class TransformGenerator {
   protected getProjectRouting(slo: SLODefinition): string | undefined {
     return getSloProjectRouting(slo, {
       isServerless: this.isServerless,
-      isCpsEnabled: this.isCpsEnabled,
+      isCpsAvailable: this.isCpsAvailable,
     });
   }
 

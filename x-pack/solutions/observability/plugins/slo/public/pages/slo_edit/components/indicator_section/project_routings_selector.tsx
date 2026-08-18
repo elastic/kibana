@@ -17,7 +17,11 @@ import type { ProjectRouting } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../../../../common/project_routings';
+import {
+  ALL_PROJECT_ROUTING,
+  LOCAL_PROJECT_ROUTING,
+  normalizeDefinedRouting,
+} from '../../../../../common/project_routings';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import type { CreateSLOForm } from '../../types';
@@ -76,15 +80,8 @@ const toPickerInput = (
   stored: string | null | undefined,
   originProjectId: string | undefined
 ): string => {
-  const normalized =
-    stored === null || stored === undefined || stored === LOCAL_PROJECT_ROUTING
-      ? LOCAL_PROJECT_ROUTING
-      : stored;
-
-  if (normalized !== LOCAL_PROJECT_ROUTING || !originProjectId) {
-    return normalized;
-  }
-
+  const normalized = stored == null ? LOCAL_PROJECT_ROUTING : normalizeDefinedRouting(stored);
+  if (normalized !== LOCAL_PROJECT_ROUTING || !originProjectId) return normalized;
   return originOnlyExpression(originProjectId);
 };
 

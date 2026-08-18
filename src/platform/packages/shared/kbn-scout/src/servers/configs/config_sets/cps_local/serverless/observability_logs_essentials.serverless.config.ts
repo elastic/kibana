@@ -14,10 +14,7 @@ import {
 } from '@kbn/es';
 import { servers as uiamConfig } from '../../uiam_local/serverless/observability_logs_essentials.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-
-const isSecurityTestEndpointsPluginPath = (arg: string) =>
-  arg.startsWith('--plugin-path=') &&
-  arg.includes('x-pack/platform/test/security_functional/plugins/test_endpoints');
+import { isSecurityTestEndpointsPluginPath } from './utils';
 
 // Same CPS local wiring as the `observability_complete` variant, but on the
 // `logs_essentials` tier, which is NOT eligible for cross-project search. Use

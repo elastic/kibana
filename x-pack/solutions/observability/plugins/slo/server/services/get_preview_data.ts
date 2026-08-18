@@ -52,7 +52,7 @@ const RANGE_DURATION_24HOURS_LIMIT = 24 * 60 * 60 * 1000 + 60 * 1000; // 24 hour
 
 export class GetPreviewData {
   private readonly isServerless: boolean;
-  private readonly isCpsEnabled: boolean;
+  private readonly isCpsAvailable: boolean;
 
   constructor(
     private esClient: ElasticsearchClient,
@@ -60,11 +60,11 @@ export class GetPreviewData {
     private dataViewService: DataViewsService,
     {
       isServerless = false,
-      isCpsEnabled = false,
-    }: { isServerless?: boolean; isCpsEnabled?: boolean } = {}
+      isCpsAvailable = false,
+    }: { isServerless?: boolean; isCpsAvailable?: boolean } = {}
   ) {
     this.isServerless = isServerless;
-    this.isCpsEnabled = isCpsEnabled;
+    this.isCpsAvailable = isCpsAvailable;
   }
 
   private async getDataView(dataViewId?: string): Promise<DataView | undefined> {
@@ -894,7 +894,7 @@ export class GetPreviewData {
         interval: `${bucketSize}m`,
         groupBy: params.groupBy?.filter((value) => value !== ALL_VALUE),
         projectRouting:
-          this.isServerless && this.isCpsEnabled
+          this.isServerless && this.isCpsAvailable
             ? toEsProjectRouting(params.projectRoutings, undefined)
             : undefined,
       };
