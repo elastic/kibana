@@ -44,6 +44,7 @@ export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
     | 'excludeFromOAS'
     | 'excludeFromRateLimiter'
     | 'httpResource'
+    | 'httpResponseLogLevel'
     | 'availability'
   >;
   /** See {@link RouteConfigOptions<RouteMethod>['access']} */

@@ -28,8 +28,6 @@ const FORBIDDEN_HEADERS = [
 ];
 const REDACTED_HEADER_TEXT = '[REDACTED]';
 
-export const INFO_RESPONSE_LOG_PATHS = new Set(['/internal/api/endpoint/agent_status']);
-
 type HapiHeaders = Record<string, string | string[] | undefined>;
 
 // We are excluding sensitive headers by default, until we have a log filtering mechanism.
@@ -123,5 +121,32 @@ export function getEcsResponseLog(request: Request, log: Logger) {
   return {
     message,
     meta,
+  };
+}
+
+export function getSlimInfoResponseLog(request: Request): { message: string; meta: LogMeta } {
+  const { path, response } = request;
+  const method = request.method.toUpperCase();
+  const statusCode = response
+    ? isBoom(response)
+      ? response.output.statusCode
+      : response.statusCode
+    : undefined;
+  const { requestId } = (request.app as KibanaRequestState) ?? {};
+
+  return {
+    message: statusCode !== undefined ? `${method} ${path} ${statusCode}` : `${method} ${path}`,
+    meta: {
+      http: {
+        request: {
+          method,
+          ...(requestId !== undefined ? { id: requestId } : {}),
+        },
+        ...(statusCode !== undefined ? { response: { status_code: statusCode } } : {}),
+      },
+      url: {
+        path,
+      },
+    },
   };
 }

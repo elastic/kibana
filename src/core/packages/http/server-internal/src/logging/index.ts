@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getEcsResponseLog, INFO_RESPONSE_LOG_PATHS } from './get_response_log';
+export { getEcsResponseLog, getSlimInfoResponseLog } from './get_response_log';
