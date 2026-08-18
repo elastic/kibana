@@ -94,9 +94,12 @@ const renderReactEmbeddable = ({
       };
     }, []);
 
-    const panelProps = useMemo(() => ({
-      isSharedItem: true,
-    }), []);
+    const panelProps = useMemo(
+      () => ({
+        isSharedItem: true,
+      }),
+      []
+    );
 
     return (
       <EmbeddableRenderer

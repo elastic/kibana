@@ -260,13 +260,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
             />
           );
 
-        return (
-          <div
-            css={flexCss}
-          >
-            {editorContent}
-          </div>
-        );
+        return <div css={flexCss}>{editorContent}</div>;
       },
     };
   },

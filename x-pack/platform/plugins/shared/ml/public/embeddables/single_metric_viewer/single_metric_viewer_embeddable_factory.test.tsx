@@ -56,12 +56,7 @@ jest.mock('../../shared_components/single_metric_viewer', () => {
     getSingleMetricViewerComponent: () => {
       return function MockSingleMetricViewer(props: SingleMetricViewerProps) {
         mockLatestSmvProps = props;
-        return (
-          <div
-            data-test-subj={`mlSingleMetricViewer_${props.uuid}`}
-            ref={props.wrapperRef}
-          />
-        );
+        return <div data-test-subj={`mlSingleMetricViewer_${props.uuid}`} ref={props.wrapperRef} />;
       };
     },
   };

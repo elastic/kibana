@@ -360,10 +360,7 @@ export const vegaEmbeddableFactory = (
         }, [rendered]);
 
         return (
-          <div
-            ref={domNode}
-            css={{ width: '100%', height: '100%', display: 'flex' }}
-          >
+          <div ref={domNode} css={{ width: '100%', height: '100%', display: 'flex' }}>
             {renderInput ? (
               <Suspense fallback={<EuiLoadingChart size="l" />}>
                 <LazyVegaVisComponent
