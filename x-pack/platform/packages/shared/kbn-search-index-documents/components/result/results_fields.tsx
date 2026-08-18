@@ -47,6 +47,8 @@ export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }
             fieldName={field.fieldName}
             fieldValue={field.fieldValue}
             fieldType={field.fieldType}
+            dimensions={field.dimensions}
+            embeddings={field.embeddings}
             key={field.fieldName}
           />
         ))}

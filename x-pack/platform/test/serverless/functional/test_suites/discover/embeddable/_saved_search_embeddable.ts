@@ -31,7 +31,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const nonLogsSavedSearchName = 'Rendering-Test:-saved-search-non-logs';
 
   describe('discover saved search embeddable', () => {
-    before(async () => {
+    before(async function () {
+      // This hook drives a full Discover UI flow (ad-hoc data view + save search) on top of
+      // two esArchiver loads, which legitimately runs ~2 min and overruns the 120s default hook
+      // budget. Restore the previously-proven budget for just this hook.
+      this.timeout(360_000);
       await browser.setWindowSize(1300, 800);
       await svlCommonPage.loginWithPrivilegedRole();
       await esArchiver.loadIfNeeded(

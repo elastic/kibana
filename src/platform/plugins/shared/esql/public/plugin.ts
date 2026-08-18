@@ -17,7 +17,10 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { registerESQLEditorAnalyticsEvents } from '@kbn/esql-editor';
+import {
+  registerESQLEditorAnalyticsEvents,
+  type ESQLEditorTelemetryService,
+} from '@kbn/esql-editor';
 import { registerIndexEditorActions, registerIndexEditorAnalyticsEvents } from '@kbn/index-editor';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -65,6 +68,10 @@ export interface EsqlPluginStart {
   isServerless: boolean;
   enrichSources: (sources: ESQLSourceResult[]) => Promise<ESQLSourceResult[]>;
   enrichViews: (views: EsqlView[]) => Promise<EsqlView[]>;
+  /**
+   * Lazily resolves the ES|QL editor telemetry service.
+   */
+  getTelemetryService: () => Promise<ESQLEditorTelemetryService>;
 }
 
 export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
@@ -153,12 +160,22 @@ export class EsqlPlugin implements Plugin<EsqlPluginSetup, EsqlPluginStart> {
 
     const variablesService = new EsqlVariablesService();
 
+    let telemetryServicePromise: Promise<ESQLEditorTelemetryService> | undefined;
+
     const start = {
       isServerless,
       variablesService,
       getLicense: async () => await licensing?.getLicense(),
       enrichSources: (sources: ESQLSourceResult[]) => this.sourceEnricherService.enrich(sources),
       enrichViews: (views: EsqlView[]) => this.viewEnricherService.enrich(views),
+      getTelemetryService: () => {
+        if (!telemetryServicePromise) {
+          telemetryServicePromise = import('@kbn/esql-editor').then(
+            ({ ESQLEditorTelemetryService }) => new ESQLEditorTelemetryService(core.analytics)
+          );
+        }
+        return telemetryServicePromise;
+      },
     };
 
     setKibanaServices(

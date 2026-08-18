@@ -29,7 +29,8 @@
     ],
     "optionalPlugins": [
       "usageCollection",
-      "cps"
+      "cps",
+      "licensing"
     ],
     "requiredBundles": [
       "kibanaUtils",

@@ -13,6 +13,7 @@ import type { ExtendedScoutTestFixtures } from '../../fixtures';
 import { STATEFUL_APM_ALERTS_INDEX, SERVERLESS_APM_ALERTS_INDEX } from '../../fixtures/constants';
 import {
   type AlertTestConfig,
+  ANOMALY_LATENCY_CONFIG,
   LATENCY_THRESHOLD_CONFIG,
   FAILED_TRANSACTION_RATE_CONFIG,
   setupAlertForTest,
@@ -39,7 +40,7 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
       await alertDetailsPage.goto(alertDocId);
     });
 
-    await test.step('verify all chart panels are rendered', async () => {
+    await test.step('verify all expected chart panels are rendered', async () => {
       await expect(async () => {
         await expect(alertDetailsPage.getChartPanel(config.primaryChartTitle)).toBeVisible();
         for (const title of config.secondaryChartTitles) {
@@ -54,9 +55,23 @@ function createChartLayoutTest(alertIndex: string, config: AlertTestConfig) {
         await expect(alertDetailsPage.getOpenActionsButton(title)).toBeVisible();
       }
     });
+
+    if (config.ruleTypeId === 'apm.anomaly') {
+      await test.step('verify anomaly callout and badge are visible', async () => {
+        await expect(async () => {
+          await expect(alertDetailsPage.anomalyCallout).toBeVisible();
+          await expect(alertDetailsPage.anomalySeverityBadge).toBeVisible();
+          await expect(alertDetailsPage.anomalyChartPanel).toBeVisible();
+          await expect(
+            alertDetailsPage.getAnomalySeverityBadgeInPanel(config.primaryChartTitle)
+          ).toBeVisible();
+        }).toPass({ timeout: 60_000, intervals: [2_000] });
+      });
+    }
   };
 }
 
+test.setTimeout(120_000);
 test.describe('Alert details - Chart layout', () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsAdmin();
@@ -91,5 +106,17 @@ test.describe('Alert details - Chart layout', () => {
     'Serverless - Failed transaction rate renders correct chart layout',
     { tag: tags.serverless.observability.complete },
     createChartLayoutTest(SERVERLESS_APM_ALERTS_INDEX, FAILED_TRANSACTION_RATE_CONFIG)
+  );
+
+  test(
+    'Stateful - Anomaly alert renders callout and badge',
+    { tag: tags.stateful.classic },
+    createChartLayoutTest(STATEFUL_APM_ALERTS_INDEX, ANOMALY_LATENCY_CONFIG)
+  );
+
+  test(
+    'Serverless - Anomaly alert renders callout and badge',
+    { tag: tags.serverless.observability.complete },
+    createChartLayoutTest(SERVERLESS_APM_ALERTS_INDEX, ANOMALY_LATENCY_CONFIG)
   );
 });

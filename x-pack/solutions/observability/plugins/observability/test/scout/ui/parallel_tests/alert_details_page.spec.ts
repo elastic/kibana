@@ -9,16 +9,26 @@ import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../fixtures';
 import { GENERATED_METRICS } from '../fixtures/constants';
+import { ALERTS_ONLY_ROLE } from '../fixtures/roles';
+import {
+  alertIdForRule,
+  cleanRuleLinkRbacAlerts,
+  ingestRuleLinkRbacAlerts,
+} from '../fixtures/rule_link_rbac_data';
 
 test.describe(
   'Alert Details Page',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     let ruleId: string;
+    // Deterministic alert (and its cleanup tag) backing the alerts-only RBAC test
+    // below, ingested via API so that test can run as a single persona.
+    let fallbackAlertId: string;
+    let fallbackCleanupTag: string;
 
     const alertName = `Write bytes test rule ${Date.now()}`;
 
-    test.beforeAll(async ({ apiServices }) => {
+    test.beforeAll(async ({ apiServices, esClient }) => {
       const createdRule = (await apiServices.alerting.rules.create({
         tags: [],
         params: {
@@ -56,10 +66,27 @@ test.describe(
         actions: [],
       })) as { data: { id: string } };
       ruleId = createdRule.data.id;
+
+      // Ingest a deterministic logs-consumer custom threshold alert. The
+      // alerts-only persona can read the alert (observabilityAlerts: ['read'])
+      // but not the logs rule behind it, so the details page must fall back to
+      // the generic overview — exactly what the RBAC test below asserts. Only the
+      // logs alert is used here.
+      const ingested = await ingestRuleLinkRbacAlerts({
+        esClient,
+        apiServices,
+        timestamp: new Date().toISOString(),
+      });
+      fallbackAlertId = alertIdForRule(ingested.logsRuleId);
+      fallbackCleanupTag = ingested.cleanupTag;
     });
 
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
+    });
+
+    test.afterAll(async ({ apiServices, esClient }) => {
+      await cleanRuleLinkRbacAlerts({ esClient, apiServices, cleanupTag: fallbackCleanupTag });
     });
 
     test('should show an error when the alert does not exist', async ({ page, pageObjects }) => {
@@ -136,6 +163,42 @@ test.describe(
         await page.testSubj.locator('relatedDashboardsTab').click();
         await expect(page.testSubj.locator('alertRelatedDashboards')).toBeVisible();
       }).toPass({ timeout: 60_000, intervals: [2_000] });
+    });
+
+    test('should fall back to the generic overview for an Observability alerts user without rule read', async ({
+      page,
+      browserAuth,
+      pageObjects,
+    }) => {
+      // Drive this as a single persona: log in once as the alerts-only user
+      // before navigating. This user can read the alert (observabilityAlerts:
+      // ['read']) but not the rule behind it, so the alert id is resolved via API
+      // rather than the rule-read-gated admin rules page. Switching personas
+      // mid-test on the worker's shared, name-cached custom-role slot is
+      // order-dependent and was the source of this flake.
+      await browserAuth.loginWithCustomRole(ALERTS_ONLY_ROLE);
+
+      await expect(async () => {
+        await pageObjects.alertPage.goto(fallbackAlertId);
+        await expect(page.testSubj.locator('alertDetailsTabbedContent')).toBeVisible();
+        // The generic overview renders (rule-specific app section is gated on rule read).
+        await expect(page.testSubj.locator('overviewTabPanel')).toBeVisible();
+      }).toPass({ timeout: 60_000, intervals: [2_000] });
+
+      // The custom threshold app section must NOT render without rule read.
+      await expect(page.testSubj.locator('thresholdAlertOverviewSection')).toBeHidden();
+
+      // Tabs that depend on rule data are hidden without rule read.
+      await expect(page.testSubj.locator('investigationGuideTab')).toBeHidden();
+      await expect(page.testSubj.locator('relatedDashboardsTab')).toBeHidden();
+
+      // No error state is shown (the rule fetch and its 403 are skipped entirely).
+      await expect(page.testSubj.locator('alertDetailsError')).toBeHidden();
+
+      // The non-rule-dependent tabs are still available.
+      await expect(page.testSubj.locator('overviewTab')).toBeVisible();
+      await expect(page.testSubj.locator('metadataTab')).toBeVisible();
+      await expect(page.testSubj.locator('relatedAlertsTab')).toBeVisible();
     });
   }
 );

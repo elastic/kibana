@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';

@@ -8,6 +8,7 @@ import type { Sort, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/ap
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import type { TransactionTraceSamplesResponse } from '@kbn/apm-api-shared';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AT_TIMESTAMP,
@@ -22,15 +23,6 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 const TRACE_SAMPLES_SIZE = 500;
-
-export interface TransactionTraceSamplesResponse {
-  traceSamples: Array<{
-    score: number | null | undefined;
-    timestamp: string;
-    transactionId: string;
-    traceId: string;
-  }>;
-}
 
 export async function getTraceSamples({
   environment,

@@ -11,6 +11,23 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "remote_cluster": "",
+      "follow_index_pattern": "",
+      "leader_index_patterns": [],
+      "leader_index_exclusion_patterns": [],
+      "max_outstanding_read_requests": "",
+      "settings": {},
+      "max_outstanding_write_requests": "",
+      "read_poll_timeout": "",
+      "max_read_request_operation_count": "",
+      "max_read_request_size": "",
+      "max_retry_delay": "",
+      "max_write_buffer_count": "",
+      "max_write_buffer_size": "",
+      "max_write_request_operation_count": "",
+      "max_write_request_size": ""
+    },
     "methods": [
       "PUT"
     ],

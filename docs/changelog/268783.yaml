@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/268783
+issues:
+- https://github.com/elastic/kibana/issues/219947
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Dashboards and visualizations
+title: "Add public REST API for links panel management"
+description: "You can now create, update, and manage by-reference links panels through the public `kbn:/api/links` REST API."

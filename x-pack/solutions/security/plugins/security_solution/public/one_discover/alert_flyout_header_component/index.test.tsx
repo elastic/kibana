@@ -12,13 +12,21 @@ import TestRenderer, { act } from 'react-test-renderer';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import { AlertFlyoutHeader } from '.';
 import type { StartServices } from '../../types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
+import {
+  FlyoutV2EventTypes,
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
 
 const mockDocumentHeader = jest.fn((props: unknown) => {
   const { onShowNotes } = props as { onShowNotes?: () => void };
@@ -29,6 +37,7 @@ const mockDocumentHeader = jest.fn((props: unknown) => {
     </button>
   );
 });
+const mockReportEvent = jest.fn();
 
 jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
   UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
@@ -59,8 +68,18 @@ jest.mock('../../cases/components/provider/provider', () => ({
 jest.mock('../../assistant/provider', () => ({
   AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => ({
+  MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
 jest.mock('../../common/hooks/is_in_security_app', () => ({
   useIsInSecurityApp: jest.fn(),
+}));
+
+// EntityStoreEuidApiProvider uses a dynamic import('./euid_browser') in a useEffect.
+// That async import causes react-test-renderer's act() to wait indefinitely when
+// the component tree is inspected via TestRenderer. Mock it out to avoid the hang.
+jest.mock('@kbn/entity-store/public', () => ({
+  EntityStoreEuidApiProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 describe('AlertFlyoutHeader', () => {
@@ -72,7 +91,10 @@ describe('AlertFlyoutHeader', () => {
   });
 
   const servicesMock = {
-    overlays: { openSystemFlyout: jest.fn() },
+    overlays: {
+      openSystemFlyout: jest.fn(() => ({ onClose: new Promise<void>(() => {}) })),
+    },
+    telemetry: { reportEvent: mockReportEvent },
     uiActions: {
       getTriggerCompatibleActions: jest.fn().mockResolvedValue([]),
     },
@@ -82,6 +104,21 @@ describe('AlertFlyoutHeader', () => {
       },
     },
     upselling: {},
+    data: {
+      query: {
+        timefilter: {
+          timefilter: {
+            getAbsoluteTime: jest.fn().mockReturnValue({
+              from: '2023-01-01T00:00:00.000Z',
+              to: '2023-12-31T23:59:59.999Z',
+            }),
+          },
+        },
+      },
+    },
+    notifications: {
+      toasts: { addError: jest.fn(), addDanger: jest.fn(), addSuccess: jest.fn() },
+    },
   } as unknown as StartServices;
 
   it('wraps the header in KibanaContextProvider and ReactQueryClientProvider', async () => {
@@ -92,12 +129,8 @@ describe('AlertFlyoutHeader', () => {
     } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
     const storePromise = Promise.resolve(store as never);
+    const servicesPromise = Promise.resolve(servicesMock);
     const history = createMemoryHistory({ initialEntries: ['/discover'] });
-
-    let resolveServices: (services: StartServices) => void;
-    const servicesPromise = new Promise<StartServices>((resolve) => {
-      resolveServices = resolve;
-    });
 
     let tree!: TestRenderer.ReactTestRenderer;
     await act(async () => {
@@ -114,7 +147,6 @@ describe('AlertFlyoutHeader', () => {
     });
 
     await act(async () => {
-      resolveServices(servicesMock);
       await servicesPromise;
       await storePromise;
     });
@@ -220,6 +252,49 @@ describe('AlertFlyoutHeader', () => {
     expect(renderCellActions).not.toBe(noopCellActionRenderer);
   });
 
+  it('reports telemetry while an alert document flyout is open in Discover', async () => {
+    const hit = {
+      id: '1',
+      raw: { _id: '1', _index: 'test' },
+      flattened: {},
+    } as unknown as DataTableRecord;
+    const store = createStore(() => ({}));
+    const history = createMemoryHistory({ initialEntries: ['/discover'] });
+
+    const { unmount } = render(
+      <Router history={history}>
+        <AlertFlyoutHeader
+          hit={hit}
+          servicesPromise={Promise.resolve(servicesMock)}
+          storePromise={Promise.resolve(store as never)}
+          onAlertUpdated={jest.fn()}
+        />
+      </Router>
+    );
+
+    await waitFor(() => {
+      expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+        surface: FLYOUT_SURFACE.FLYOUT,
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: undefined,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.DISCOVER_TABLE,
+      });
+    });
+
+    unmount();
+
+    expect(mockReportEvent).toHaveBeenCalledWith(
+      FlyoutV2EventTypes.FlyoutClosed,
+      expect.objectContaining({
+        flyoutType: FLYOUT_TYPE.DOCUMENT,
+        tool: undefined,
+        session: FLYOUT_SESSION_KIND.START,
+        durationMs: expect.any(Number),
+      })
+    );
+  });
+
   it('opens notes in a nested system flyout from Discover header', async () => {
     const hit = { id: '1', raw: { _id: '1' }, flattened: {} } as unknown as DataTableRecord;
     const store = createStore(() => ({}));
@@ -252,6 +327,13 @@ describe('AlertFlyoutHeader', () => {
         size: 'm',
       })
     );
+    expect(mockReportEvent).toHaveBeenCalledWith(FlyoutV2EventTypes.FlyoutOpened, {
+      surface: FLYOUT_SURFACE.TOOL,
+      flyoutType: FLYOUT_TYPE.DOCUMENT,
+      tool: FLYOUT_TOOL.NOTES,
+      session: FLYOUT_SESSION_KIND.START,
+      origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+    });
   });
 
   it('uses Security history key when opened inside Security app', async () => {

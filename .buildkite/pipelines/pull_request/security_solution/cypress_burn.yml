@@ -2,10 +2,12 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_burn.sh
     label: '[Soft fail] Defend Workflows Cypress Tests, burning changed specs'
     key: defend-workflows-burn
+    env:
+      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 125
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -20,10 +22,12 @@ steps:
     label: '[Soft fail] Defend Workflows Cypress Tests on Serverless, burning changed specs'
     key: defend-workflows-serverless-burn
     if: "build.env('GITHUB_PR_TARGET_BRANCH') == 'main'"
+    env:
+      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
-      diskSizeGb: 125
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:
@@ -54,7 +58,7 @@ steps:
     key: osquery-cypress-burn
     agents:
       machineType: n2-standard-4
-      diskSizeGb: 120
+      diskSizeGb: 130
       preemptible: true
       spotZones: us-central1-f,us-central1-c,us-central1-a
     depends_on:

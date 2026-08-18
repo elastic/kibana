@@ -12,9 +12,12 @@ export type {
   UiamOAuthClientResponse,
   UiamOAuthClientLogo,
   UiamOAuthClientType,
+  UiamOAuthProjectType,
   UiamOAuthConnectionsSummary,
   UiamOAuthConnectionResponse,
   CreateUiamOAuthClientParams,
   UpdateUiamOAuthClientParams,
   UpdateUiamOAuthConnectionParams,
+  UiamUserInfo,
+  UiamResolvedUsersResponse,
 } from './uiam_oauth';

@@ -5,16 +5,34 @@
  * 2.0.
  */
 
-import type { UserActionFindResponse } from '../../../common/types/api';
-import { UserActionFindRequestRt, UserActionFindResponseRt } from '../../../common/types/api';
+import type { KueryNode } from '@kbn/es-query';
+import type {
+  UserActionInternalFindRequest,
+  UserActionFindResponse,
+} from '../../../common/types/api';
+import {
+  UserActionInternalFindRequestRt,
+  UserActionFindResponseRt,
+} from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import type { CasesClientArgs } from '../types';
 import type { UserActionFind } from './types';
 import { Operations } from '../../authorization';
-import { formatSavedObjects } from './utils';
+import { formatSavedObject, formatSavedObjects, matchesSearch } from './utils';
 import { createCaseError } from '../../common/error';
 import { asArray } from '../../common/utils';
 import type { CasesClient } from '../client';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
+import { MAX_USER_ACTIONS_FOR_SEARCH } from '../../../common/constants';
+
+interface FindWithSearchParams {
+  caseId: string;
+  search: string;
+  queryParams: Omit<UserActionInternalFindRequest, 'search'>;
+  authorizationFilter?: KueryNode;
+  ensureSavedObjectsAreAuthorized: (entities: Array<{ owner: string; id: string }>) => void;
+  userActionService: CasesClientArgs['services']['userActionService'];
+}
 
 export const find = async (
   { caseId, params }: UserActionFind,
@@ -30,16 +48,32 @@ export const find = async (
   try {
     // supertest and query-string encode a single entry in an array as just a string so make sure we have an array
     const types = asArray(params.types);
+    const authors = asArray(params.authors);
 
-    const queryParams = decodeWithExcessOrThrow(UserActionFindRequestRt)({ ...params, types });
+    const queryParams = decodeWithExcessOrThrow(UserActionInternalFindRequestRt)({
+      ...params,
+      types,
+      authors,
+    });
 
     const [authorizationFilterRes] = await Promise.all([
       authorization.getAuthorizationFilter(Operations.findUserActions),
-      // ensure that we have authorization for reading the case
       casesClient.cases.resolve({ id: caseId, includeComments: false }),
     ]);
 
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } = authorizationFilterRes;
+
+    if (queryParams.search) {
+      const { search, ...rest } = queryParams;
+      return findWithSearch({
+        caseId,
+        search,
+        queryParams: rest,
+        authorizationFilter,
+        ensureSavedObjectsAreAuthorized,
+        userActionService,
+      });
+    }
 
     const userActions = await userActionService.finder.find({
       caseId,
@@ -66,4 +100,52 @@ export const find = async (
       logger,
     });
   }
+};
+
+const findWithSearch = async ({
+  caseId,
+  search,
+  queryParams,
+  authorizationFilter,
+  ensureSavedObjectsAreAuthorized,
+  userActionService,
+}: FindWithSearchParams): Promise<UserActionFindResponse> => {
+  const { page, perPage, ...findAllParams } = queryParams;
+
+  /**
+   * `matchesSearch` only reads `type`, `payload`, and `created_by` off the raw
+   * (transformed but undecoded) attributes, so we skip `decodeOrThrow` here and
+   * only decode the page of results we actually return. Otherwise we'd pay the
+   * io-ts decode cost for every user action in the case just to discard most of
+   * them during filtering/pagination.
+   */
+  const allUserActions = await userActionService.finder.findAll({
+    caseId,
+    ...findAllParams,
+    filter: authorizationFilter,
+    limit: MAX_USER_ACTIONS_FOR_SEARCH,
+    decode: false,
+  });
+
+  ensureSavedObjectsAreAuthorized(
+    allUserActions.map((so) => ({ owner: so.attributes.owner, id: so.id }))
+  );
+
+  const filtered = allUserActions.filter((so) => matchesSearch(so.attributes, search));
+
+  const currentPage = page ?? DEFAULT_PAGE;
+  const currentPerPage = perPage ?? DEFAULT_PER_PAGE;
+  const start = (currentPage - 1) * currentPerPage;
+  const paged = userActionService.finder.decodeUserActions(
+    filtered.slice(start, start + currentPerPage)
+  );
+
+  const res = {
+    userActions: paged.map(formatSavedObject),
+    page: currentPage,
+    perPage: currentPerPage,
+    total: filtered.length,
+  };
+
+  return decodeOrThrow(UserActionFindResponseRt)(res);
 };

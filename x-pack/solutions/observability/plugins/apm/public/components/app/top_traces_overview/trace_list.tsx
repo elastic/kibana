@@ -17,6 +17,8 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import styled from '@emotion/styled';
+import type { APIReturnType } from '@kbn/apm-api-shared';
+import { truncate } from '@kbn/apm-common';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { ApmRoutes } from '../../routing/apm_route_config';
 import {
@@ -27,15 +29,12 @@ import {
 import { useApmParams } from '../../../hooks/use_apm_params';
 import type { FetcherResult } from '../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { truncate } from '../../../utils/style';
 import { EmptyMessage } from '../../shared/empty_message';
 import { ImpactBar } from '../../shared/impact_bar';
 import { TransactionDetailLink } from '../../shared/links/apm/transaction_detail_link';
 import type { ITableColumn } from '../../shared/managed_table';
 import { ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/links/apm/service_link';
-import { TruncateWithTooltip } from '../../shared/truncate_with_tooltip';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmIndexSettingsContext } from '../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useTraceActions } from './use_trace_actions';
@@ -70,7 +69,7 @@ export function getTraceListColumns({
       name: i18n.translate('xpack.apm.tracesTable.nameColumnLabel', {
         defaultMessage: 'Name',
       }),
-      width: '40%',
+      maxWidth: '40%',
       sortable: true,
       render: (_: string, { serviceName, transactionName, transactionType }: TraceGroup) => (
         <EuiToolTip content={transactionName} anchorClassName="eui-textTruncate">
@@ -97,18 +96,14 @@ export function getTraceListColumns({
       name: i18n.translate('xpack.apm.tracesTable.originatingServiceColumnLabel', {
         defaultMessage: 'Originating service',
       }),
+      minWidth: '14em',
+      maxWidth: '25em',
       sortable: true,
       render: (_: string, { serviceName, agentName, transactionType }) => (
-        <TruncateWithTooltip
-          data-test-subj="apmTraceListAppLink"
-          text={serviceName || NOT_AVAILABLE_LABEL}
-          content={
-            <ServiceLink
-              agentName={agentName}
-              query={{ ...query, transactionType, serviceGroup: '' }}
-              serviceName={serviceName}
-            />
-          }
+        <ServiceLink
+          agentName={agentName}
+          query={{ ...query, transactionType, serviceGroup: '' }}
+          serviceName={serviceName || NOT_AVAILABLE_LABEL}
         />
       ),
     },
@@ -234,6 +229,7 @@ export function TraceList({ response }: Props) {
       initialPageSize={25}
       actions={traceRowActions}
       isActionsDisabled={isActionsDisabled}
+      tableLayout="auto"
     />
   );
 }

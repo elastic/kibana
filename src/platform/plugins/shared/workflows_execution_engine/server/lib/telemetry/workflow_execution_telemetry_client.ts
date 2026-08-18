@@ -190,6 +190,22 @@ function buildBaseExecutionTelemetryFields(
     ...(executionMetadata.eventChainDepth !== undefined && {
       eventChainDepth: executionMetadata.eventChainDepth,
     }),
+    ...(workflowExecution.usage && {
+      inputTokensUsed: workflowExecution.usage.inputTokens,
+      outputTokensUsed: workflowExecution.usage.outputTokens,
+      cachedTokensUsed: workflowExecution.usage.cachedTokens ?? 0,
+      totalTokensUsed: workflowExecution.usage.totalTokens,
+    }),
+    ...(workflowExecution.stepUsage?.length && {
+      aiStepsUsage: workflowExecution.stepUsage.map((step) => ({
+        stepId: step.stepId,
+        ...(step.connectorId ? { connectorId: step.connectorId } : {}),
+        inputTokens: step.inputTokens,
+        outputTokens: step.outputTokens,
+        cachedTokens: step.cachedTokens ?? 0,
+        totalTokens: step.totalTokens,
+      })),
+    }),
   };
 }
 

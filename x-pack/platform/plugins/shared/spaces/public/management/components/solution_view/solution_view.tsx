@@ -27,6 +27,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Space } from '../../../../common';
 import { SOLUTION_VIEW_CLASSIC } from '../../../../common/constants';
 import type { SpaceValidator } from '../../lib';
+import type { CustomizeSpaceFormValues } from '../../types';
 import { SectionPanel } from '../section_panel';
 
 type SolutionView = Space['solution'];
@@ -91,8 +92,8 @@ const getOptions = ({ size }: EuiThemeComputed): Array<EuiSuperSelectOption<Solu
 };
 
 interface Props {
-  space: Partial<Space>;
-  onChange: (space: Partial<Space>) => void;
+  space: CustomizeSpaceFormValues;
+  onChange: (space: CustomizeSpaceFormValues) => void;
   isEditing: boolean;
   validator: SpaceValidator;
   sectionTitle?: string;

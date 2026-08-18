@@ -8,12 +8,14 @@
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 import { encode, decode } from '../../common/lib/embeddable_dataurl';
 import type { WorkpadAttributes } from '../routes/workpad/workpad_attributes';
 import { embeddableService, logger } from '../kibana_services';
 
 export const transformWorkpadIn = (
-  workpad: WorkpadAttributes
+  workpad: WorkpadAttributes,
+  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
 ): {
   attributes: WorkpadAttributes;
   references: SavedObjectReference[];
@@ -37,8 +39,10 @@ export const transformWorkpadIn = (
 
           try {
             if (transforms?.transformIn) {
-              const { state, references: panelReferences = [] } =
-                transforms.transformIn(embeddableConfig);
+              const { state, references: panelReferences = [] } = transforms.transformIn(
+                embeddableConfig,
+                useGASchemas
+              );
 
               // Prefix references with the element id so we will know later which element it goes with
               references.push(

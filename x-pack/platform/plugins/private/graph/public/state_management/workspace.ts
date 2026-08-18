@@ -10,7 +10,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import { i18n } from '@kbn/i18n';
 import { takeLatest, select, call, put } from 'redux-saga/effects';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import type { GraphStoreDependencies, GraphState } from '.';
 import { fillWorkspace } from '.';
 import { reset } from './global';

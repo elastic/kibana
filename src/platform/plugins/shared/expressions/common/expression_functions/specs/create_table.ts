@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '../types';
 import type { Datatable, DatatableColumn } from '../../expression_types';
 
+const MAX_CREATE_TABLE_ROWS = 10_000; // matches default ES index.max_result_window
+
 export interface CreateTableArguments {
   ids?: string[];
   names?: string[] | null;
@@ -58,7 +60,8 @@ export const createTable: ExpressionFunctionDefinition<
       types: ['number'],
       help: i18n.translate('expressions.functions.createTable.args.rowCountText', {
         defaultMessage:
-          'The number of empty rows to add to the table, to be assigned a value later',
+          'The number of empty rows to add to the table, to be assigned a value later. Maximum {max}.',
+        values: { max: MAX_CREATE_TABLE_ROWS },
       }),
       default: 1,
       required: false,
@@ -75,10 +78,20 @@ export const createTable: ExpressionFunctionDefinition<
       });
     });
 
+    const rowCount = args.rowCount ?? 1;
+    if (!Number.isInteger(rowCount) || rowCount < 0 || rowCount > MAX_CREATE_TABLE_ROWS) {
+      throw new Error(
+        i18n.translate('expressions.functions.createTable.rowCountErrorMessage', {
+          defaultMessage: 'rowCount must be an integer between 0 and {max}.',
+          values: { max: MAX_CREATE_TABLE_ROWS },
+        })
+      );
+    }
+
     return {
       columns,
       // Each row gets a unique object
-      rows: [...Array(args.rowCount)].map(() => ({})),
+      rows: Array.from({ length: rowCount }, () => ({})),
       type: 'datatable',
     };
   },

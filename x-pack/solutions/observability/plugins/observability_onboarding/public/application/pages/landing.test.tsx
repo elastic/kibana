@@ -12,13 +12,17 @@ import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public'
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { matchers } from '@emotion/jest';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { CompatRouter } from 'react-router-dom-v5-compat';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
+import { createCallApi } from '../../services/rest/create_call_api';
 import { ObservabilityOnboardingFlow } from '../observability_onboarding_flow';
 import { LandingPage } from './landing';
+
+expect.extend(matchers);
 
 jest.mock('../onboarding_flow_form/onboarding_flow_form', () => ({
   OnboardingFlowForm: () => <div data-test-subj="onboardingFlowFormStub" />,
@@ -44,6 +48,10 @@ jest.mock('../shared/use_flow_breadcrumbs', () => ({
 
 jest.mock('../shared/use_managed_otlp_service_availability', () => ({
   useManagedOtlpServiceAvailability: () => false,
+}));
+
+jest.mock('../add_data_page/observability_search_results', () => ({
+  ObservabilitySearchResults: () => <div data-test-subj="observabilitySearchResultsStub" />,
 }));
 
 const LocationDisplay = () => {
@@ -89,9 +97,11 @@ const renderWithFlag = (enabled: boolean, initialPath: string = '/') => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
+  const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
-      <KibanaContextProvider services={coreStart}>
+      <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={[initialPath]}>
           <CompatRouter>
             <LandingPage />
@@ -107,9 +117,11 @@ const renderLandingWithRouter = (enabled: boolean) => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
+  const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
-      <KibanaContextProvider services={coreStart}>
+      <KibanaContextProvider services={services}>
         <MemoryRouter initialEntries={['/']}>
           <CompatRouter>
             <LandingPage />
@@ -126,6 +138,7 @@ const renderFlowAtPath = (enabled: boolean, path: string) => {
   coreStart.featureFlags.getBooleanValue.mockImplementation((id, fallback) =>
     id === IS_ADD_DATA_PAGE_V2_ENABLED ? enabled : fallback
   );
+  createCallApi(coreStart);
   const services = createObservabilityServices(coreStart);
   return render(
     <I18nProvider>
@@ -151,6 +164,20 @@ describe('LandingPage', () => {
 
   it('does not render the V2 layout when the flag is off', () => {
     expect(renderWithFlag(false).queryByTestId('addDataPageV2')).not.toBeInTheDocument();
+  });
+
+  it('renders the API endpoints section in the V2 layout', () => {
+    const view = renderWithFlag(true);
+    expect(
+      view.queryByTestId('observabilityOnboardingApiEndpointTab-elasticsearch')
+    ).toBeInTheDocument();
+    expect(
+      view.getByRole('heading', { level: 2, name: 'Connect directly to the endpoint' })
+    ).toBeInTheDocument();
+  });
+
+  it('renders the documentation and support section in the V2 layout', () => {
+    expect(renderWithFlag(true).queryByTestId('addDataDocsLinks')).toBeInTheDocument();
   });
 });
 
@@ -184,5 +211,39 @@ describe('LandingPage host tile routes (V2 gated)', () => {
     expect(screen.getByTestId('onboardingFlowFormStub')).toBeInTheDocument();
     expect(screen.queryByTestId('hostLinuxOtelPageStub')).toBeNull();
     expect(screen.queryByTestId('addDataPageV2')).toBeNull();
+  });
+});
+
+describe('LandingPage search (V2, Variant A)', () => {
+  it('keeps the curated grid visible while a search term is active', () => {
+    renderWithFlag(true, '/?search=docker');
+    expect(screen.getByTestId('observabilitySearchResultsStub')).toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes')
+    ).toBeInTheDocument();
+  });
+
+  it('does not render the results block without a search term', () => {
+    renderWithFlag(true);
+    expect(screen.queryByTestId('observabilitySearchResultsStub')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId('observabilityOnboardingIntegrationTile-kubernetes')
+    ).toBeInTheDocument();
+  });
+
+  it('places the search bar before the All integrations section', () => {
+    renderWithFlag(true);
+    const searchBar = screen.getByTestId('observabilityOnboardingIntegrationsSearchFieldSearch');
+    const heading = screen.getByRole('heading', { name: 'All integrations' });
+    expect(searchBar.compareDocumentPosition(heading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+});
+
+describe('LandingPage integrations section header spacing (V2)', () => {
+  it('matches the design spec 12px gap between the title and subtitle', () => {
+    renderWithFlag(true);
+    const heading = screen.getByRole('heading', { level: 2, name: 'All integrations' });
+    const spacer = heading.nextElementSibling;
+    expect(spacer).toHaveStyleRule('block-size', '12px');
   });
 });

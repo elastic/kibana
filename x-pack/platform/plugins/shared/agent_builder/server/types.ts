@@ -29,9 +29,9 @@ import type {
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type {
-  AgentContextLayerPluginSetup,
-  AgentContextLayerPluginStart,
-} from '@kbn/agent-context-layer-plugin/server';
+  AgentBuilderSmlPluginSetup,
+  AgentBuilderSmlPluginStart,
+} from '@kbn/agent-builder-sml-plugin/server';
 
 export type {
   AgentBuilderPluginSetup,
@@ -65,7 +65,7 @@ export interface AgentBuilderSetupDependencies {
   actions: ActionsPluginSetup;
   home: HomeServerPluginSetup;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginSetup;
-  agentContextLayer: AgentContextLayerPluginSetup;
+  agentBuilderSml: AgentBuilderSmlPluginSetup;
 }
 
 export interface AgentBuilderStartDependencies {
@@ -78,5 +78,5 @@ export interface AgentBuilderStartDependencies {
   taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
-  agentContextLayer: AgentContextLayerPluginStart;
+  agentBuilderSml: AgentBuilderSmlPluginStart;
 }

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/275461
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+title: Add Jina V5 support for product documentation artifacts
+description: "Agent Builder now prefers Jina V5 embeddings when installing product documentation artifacts on Elastic Inference Service, and falls back to ELSER when Jina V5 is unavailable."

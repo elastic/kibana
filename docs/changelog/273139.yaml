@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/273139
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Add anomalies section to entity details flyout and details tab

@@ -102,4 +102,3 @@ export declare function useLayoutUpdate(): (updates: Partial<ChromeLayoutConfig>
 export declare function useLayoutConfig(): ChromeLayoutConfig;
 export declare function LayoutDebugOverlay(): React.ReactNode;
 export declare function GridLayoutGlobalStyles(props: GridLayoutGlobalStylesProps): React.ReactNode;
-export declare function CommonGlobalAppStyles(): React.ReactNode;

@@ -11,9 +11,11 @@ import React, { Suspense, lazy } from 'react';
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal-types';
+import type { InternalThemeServiceStart } from '@kbn/core-theme-browser-internal-types';
 
 import { BehaviorSubject } from 'rxjs';
-import type { DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+import { type DeveloperToolbarItemProps } from '@kbn/developer-toolbar';
+
 import { NEXT_CHROME_FEATURE_FLAG_KEY } from '@kbn/core-chrome-feature-flags';
 
 export type UnregisterItemFn = () => void;
@@ -23,6 +25,12 @@ export interface DeveloperToolbarItemRegistry {
 
 export type DeveloperToolbarSetup = DeveloperToolbarItemRegistry;
 export type DeveloperToolbarStart = DeveloperToolbarItemRegistry;
+
+const LazyColorThemeToggle = lazy(() =>
+  import('@kbn/developer-toolbar').then(({ LiveColorThemeToggle }) => ({
+    default: LiveColorThemeToggle,
+  }))
+);
 
 const LazyMeasureButton = lazy(() =>
   import('@kbn/design-tools').then(({ MeasureButton }) => ({
@@ -58,6 +66,15 @@ export class DeveloperToolbarPlugin
     );
 
     this.registerItem({
+      id: 'Color Theme',
+      children: (
+        <Suspense fallback={null}>
+          <LazyColorThemeToggle theme={core.theme as InternalThemeServiceStart} />
+        </Suspense>
+      ),
+    });
+
+    this.registerItem({
       id: 'Measure Component',
       children: (
         <Suspense fallback={null}>
@@ -75,7 +92,7 @@ export class DeveloperToolbarPlugin
       ),
     });
 
-    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, false)) {
+    if (core.featureFlags.getBooleanValue(NEXT_CHROME_FEATURE_FLAG_KEY, true)) {
       import('@kbn/core-chrome-feature-flags/chrome_next_toggle').then(({ ChromeNextToggle }) => {
         this.registerItem({
           id: 'Chrome Next',

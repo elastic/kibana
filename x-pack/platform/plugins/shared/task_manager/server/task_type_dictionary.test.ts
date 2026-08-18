@@ -10,7 +10,7 @@ import type { RunContext, TaskDefinition } from './task';
 import { TaskCost, TaskPriority } from './task';
 import { mockLogger } from './test_utils';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
-import { sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
+import { REMOVED_TYPES, sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
 
 jest.mock('./constants', () => ({
   CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
@@ -57,6 +57,10 @@ describe('taskTypeDictionary', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     definitions = new TaskTypeDictionary(logger);
+  });
+
+  it('recognizes the retired Significant Events v1 rule task type', () => {
+    expect(REMOVED_TYPES).toContain('alerting:streams.rules.esql');
   });
 
   describe('sanitizeTaskDefinitions', () => {

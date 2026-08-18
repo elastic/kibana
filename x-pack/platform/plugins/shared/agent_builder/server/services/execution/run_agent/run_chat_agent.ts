@@ -13,12 +13,18 @@ import {
   reverseMap,
   type ToolIdMapping,
 } from '@kbn/agent-builder-genai-utils/langchain';
-import type { BrowserApiToolMetadata, ChatAgentEvent, RoundInput } from '@kbn/agent-builder-common';
+import type {
+  BrowserApiToolMetadata,
+  ChatAgentEvent,
+  RoundInput,
+  SerializedMetadataValue,
+} from '@kbn/agent-builder-common';
 import { ToolOrigin } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
   AgentExecutionMode,
   isToolCallStep,
+  isRelevantSkillsStep,
 } from '@kbn/agent-builder-common';
 import type { AgentEventEmitterFn, AgentHandlerContext } from '@kbn/agent-builder-server';
 import { HookLifecycle } from '@kbn/agent-builder-server';
@@ -38,11 +44,17 @@ import {
   estimatePerRoundTokens,
 } from './utils';
 import { registerInternalTools } from './tools/register_internal_tools';
+import {
+  selectRelevantSkills,
+  buildRecentContext,
+  type RelevantSkillSelection,
+} from './utils/relevant_skills/select_relevant_skills';
 import { resolveCapabilities } from './utils/capabilities';
 import { resolveConfiguration } from './utils/configuration';
 import { ensureValidInput } from './utils/preflight_checks';
 import { buildPendingRoundActions } from './utils/build_pending_round_actions';
 import { computeContextBudget } from './utils/context_budget';
+import { DEFAULT_MAX_TOOL_RESULT_TOKENS } from './utils/tool_result_guardrail';
 import { compactConversation } from './utils/conversation_compactor';
 import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
@@ -51,6 +63,8 @@ import { steps } from './constants';
 import { createPromptFactory } from './prompts';
 import { BackgroundExecutionService } from './background_execution_service';
 import type { StateType } from './state';
+import { conversationIndexName } from '../../conversation/client/storage';
+import { getTemplate } from '../../conversation/templates/registry';
 
 const chatAgentGraphName = 'default-agent-builder-agent';
 
@@ -76,6 +90,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
     conversation,
+    origin,
+    author,
     agentConfiguration,
     capabilities,
     runId = uuidv4(),
@@ -101,12 +117,12 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     stateManager,
     events,
     promptManager,
-    filestore,
     skills,
     skillsStore,
     toolManager,
     experimentalFeatures,
     todoStateManager,
+    renderers,
   } = context;
 
   ensureValidInput({ input: nextInput, conversation, action });
@@ -133,12 +149,23 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedCapabilities = resolveCapabilities(capabilities);
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
+  // Context-aware skill filtering is active only when its flag is on AND a dedicated fast model is
+  // configured. Without a fast model, `selectModel({ effortLevel: 'low' })` falls back to the default
+  // (expensive) model, which defeats the feature — so we treat it as off (original full-list behavior).
+  const relevantSkillsEnabled =
+    experimentalFeatures.relevantSkills && (await modelProvider.hasFastModel());
+
   const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
+  const skillIdsOverride = configurationOverrides?.skill_ids;
+  const filteredPluginSkillIds =
+    skillIdsOverride !== undefined
+      ? pluginSkillIds.filter((id) => skillIdsOverride.includes(id))
+      : pluginSkillIds;
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
     agentConfiguration,
-    additionalSkillIds: pluginSkillIds,
+    additionalSkillIds: filteredPluginSkillIds,
   });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
@@ -150,6 +177,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     manualEvents$.next(event);
   };
   toolManager.setEventEmitter(eventEmitter);
+  toolManager.setMaxToolResultTokens(DEFAULT_MAX_TOOL_RESULT_TOKENS);
 
   // Pass action so regenerate uses the last round's original input instead of request input
   let processedConversation = await prepareConversation({
@@ -157,6 +185,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     previousRounds: conversation?.rounds ?? [],
     context,
     action,
+    metadata: conversation?.metadata,
+    templateId: conversation?.template_id,
   });
 
   const beforeHookResult = await context.hooks.run(HookLifecycle.beforeAgent, {
@@ -167,6 +197,20 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
   processedConversation.nextInput = beforeHookResult.nextInput ?? processedConversation.nextInput;
 
+  const relevantSkillsSelectionPromise: Promise<RelevantSkillSelection> | undefined =
+    relevantSkillsEnabled && !pendingRound
+      ? selectRelevantSkills({
+          skills: filteredSkills,
+          context: {
+            userMessage: processedConversation.nextInput.message,
+            recentContext: buildRecentContext(processedConversation.previousRounds),
+          },
+          modelProvider,
+          logger,
+          abortSignal,
+        })
+      : undefined;
+
   const { staticTools, dynamicTools } = await selectTools({
     conversation: processedConversation,
     previousDynamicToolIds: conversation?.state?.dynamic_tool_ids ?? [],
@@ -175,12 +219,9 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     toolProvider,
     agentConfiguration,
     attachmentsService: attachments,
-    filestore,
     request,
-    experimentalFeatures,
     spaceId: context.spaceId,
     runner: context.runner,
-    todoStateManager,
   });
 
   // First add static tools
@@ -196,6 +237,30 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     }),
   ]);
 
+  const conversationId = conversation?.id;
+  const updateConversationMetadata =
+    conversationId && conversation?.template_id
+      ? async (updates: Record<string, SerializedMetadataValue>) => {
+          // Painless script merge — preserves any metadata keys written by concurrent tool
+          // calls in the same run that a doc-replace update would silently discard.
+          await context.esClient.asInternalUser.update({
+            index: conversationIndexName,
+            id: conversationId,
+            script: {
+              lang: 'painless',
+              source:
+                'if (ctx._source.metadata == null) { ctx._source.metadata = params.updates; } else { ctx._source.metadata.putAll(params.updates); }',
+              params: { updates },
+            },
+            retry_on_conflict: 3,
+          });
+        }
+      : undefined;
+
+  const conversationTemplate = conversation?.template_id
+    ? getTemplate(conversation.template_id)
+    : undefined;
+
   await registerInternalTools({
     context,
     agentId,
@@ -203,6 +268,10 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     capabilities,
     abortSignal,
     backgroundExecutionService,
+    updateConversationMetadata,
+    conversationTemplate,
+    filteredSkills,
+    relevantSkillsEnabled,
   });
 
   // Then add dynamic tools
@@ -229,8 +298,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resultTransformer = createResultTransformer({
     toolRegistry,
     toolManager,
-    filestore,
-    filestoreEnabled: experimentalFeatures.filestore,
+    resultStore: context.resultStore,
     conversationTokenEstimate,
   });
 
@@ -251,19 +319,37 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     eventEmitter: events.emit,
   });
 
-  // Reassign to the (possibly compacted) conversation for prompt construction
-  processedConversation = compactionResult.processedConversation;
+  // Reassign to the (possibly compacted) conversation for prompt construction.
+  // Re-propagate conversation-level fields that compaction does not touch.
+  processedConversation = {
+    ...compactionResult.processedConversation,
+    metadata: conversation?.metadata,
+    template_id: conversation?.template_id,
+  };
+
+  let relevantSkillsSelection: RelevantSkillSelection | undefined;
+  if (relevantSkillsEnabled) {
+    if (pendingRound) {
+      const persisted = pendingRound.steps.find(isRelevantSkillsStep);
+      relevantSkillsSelection = persisted ? { skills: persisted.skills } : undefined;
+    } else if (relevantSkillsSelectionPromise) {
+      relevantSkillsSelection = await relevantSkillsSelectionPromise;
+    }
+  }
 
   const promptFactory = createPromptFactory({
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
-    filestore,
+    skills: filteredSkills,
     processedConversation,
     toolManager,
     resultTransformer,
     outputSchema,
     conversationTimestamp,
     experimentalFeatures,
+    relevantSkillsEnabled,
+    relevantSkills: relevantSkillsSelection,
+    renderers: renderers?.getRegisteredRenderers() ?? [],
   });
 
   const agentGraph = createAgentGraph({
@@ -279,6 +365,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     promptFactory,
     backgroundExecutionService,
     roundId,
+    sessionId: conversation?.id ?? executionId,
+    cacheControl: { type: 'ephemeral', ttl: '5m' },
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -289,7 +377,7 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       agentBuilderToLangchainIdMap: reverseMap(toolManager.getToolIdMapping()),
       cycleLimit: CYCLE_LIMIT,
       promptManager,
-      eventEmitter: events.emit,
+      eventEmitter,
     }),
     {
       version: 'v2',
@@ -325,7 +413,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
 
   const processedInput: RoundInput = {
     message: processedConversation.nextInput.message,
-    attachments: processedConversation.nextInput.attachments.map((a) => a.attachment),
+    attachments: [], // legacy attachments are always stripped in `prepare_conversation` and replaced with refs
+    attachment_refs: processedConversation.nextInput.attachment_refs,
   };
 
   // Use provided overrides, or fall back to pending round's overrides (for HITL resume)
@@ -334,6 +423,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const events$ = merge(graphEvents$, manualEvents$).pipe(
     addRoundCompleteEvent({
       userInput: processedInput,
+      origin,
+      author,
       getConversationState: () =>
         getConversationState({
           promptManager,
@@ -351,6 +442,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
       compactionResult,
       roundId,
       initialTodos,
+      relevantSkillsSelection,
+      getWorkspaceId: () => context.bashService?.getWorkspaceId(),
     }),
     evictInternalEvents(),
     shareReplay()
@@ -364,6 +457,13 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   });
 
   const round = await extractRound(events$);
+
+  // Persist filesystem state for this round (today: the workspace volume).
+  try {
+    await context.filesystemService.flush();
+  } catch (err) {
+    logger.error(`Failed to flush filesystem state after round: ${err.message ?? err}`);
+  }
   return {
     round,
   };

@@ -70,14 +70,16 @@ describe('TemplateFormFields', () => {
     });
   });
 
-  it('shows saved check icon when isSaved is true', () => {
+  it('shows the draft saved status when isSaved is true', () => {
     render(
       <TestProviders>
         <TemplateYamlEditor value="test: value" onChange={mockOnChange} isSaved={true} />
       </TestProviders>
     );
 
-    expect(screen.getByTestId('template-saved-icon')).toBeInTheDocument();
+    const status = screen.getByTestId('templateDraftStatus');
+    expect(status).toBeInTheDocument();
+    expect(status).toHaveTextContent('Draft saved');
   });
 
   it('calls useFieldNameValidation hook with editor and value', () => {

@@ -48,9 +48,25 @@ export const useCasesConfig = () => {
       // TODO: flip defaults to `true` once attachments/templates are GA.
       // https://github.com/elastic/security-team/issues/15066
       attachmentsEnabled: config?.attachments?.enabled ?? false,
+      chatEnabled: config?.chat?.enabled ?? false,
       templatesEnabled: config?.templates?.enabled ?? false,
+      detailsRedesignEnabled: config?.casesRedesign?.details ?? false,
+      // Single source of truth for the `casesRedesign.{list,details,settings}` flags so
+      // routing and layout decisions don't each re-derive this object from the raw config.
+      casesRedesign: {
+        list: config?.casesRedesign?.list ?? false,
+        details: config?.casesRedesign?.details ?? false,
+        settings: config?.casesRedesign?.settings ?? false,
+      },
     }),
-    [config?.attachments?.enabled, config?.templates?.enabled]
+    [
+      config?.attachments?.enabled,
+      config?.chat?.enabled,
+      config?.templates?.enabled,
+      config?.casesRedesign?.list,
+      config?.casesRedesign?.details,
+      config?.casesRedesign?.settings,
+    ]
   );
 };
 

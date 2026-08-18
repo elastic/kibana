@@ -32,6 +32,11 @@ describe('getLookupIndicesFromQuery', () => {
     expect(getLookupIndicesFromQuery(query)).toEqual(['lookup_index']);
   });
 
+  it('should remove the coordinator prefix from lookup indices', () => {
+    const query = 'FROM remote_cluster:my_index | LOOKUP JOIN _coordinator:lookup_index ON id';
+    expect(getLookupIndicesFromQuery(query)).toEqual(['lookup_index']);
+  });
+
   it('should extract multiple lookup indices from a query with multiple joins', () => {
     const query = `FROM my_index
     | LOOKUP JOIN lookup1 ON id

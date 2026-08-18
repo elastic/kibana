@@ -28,6 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'dashboard',
   ]);
 
+  /**
+   * Purpose: Time slider control smoke test
+   *
+   * Migration: Migrate to scout
+   */
   describe('Time Slider Control', () => {
     before(async () => {
       await security.testUser.setRoles([

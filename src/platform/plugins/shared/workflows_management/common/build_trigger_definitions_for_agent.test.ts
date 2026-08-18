@@ -17,6 +17,7 @@ import {
 
 const mockCasesTrigger = {
   id: 'cases.caseUpdated',
+  stability: 'tech_preview' as const,
   eventSchema: z.object({
     caseId: z.string(),
     owner: z.string(),
@@ -145,6 +146,7 @@ describe('lookupTriggerDefinitionsForAgent', () => {
       registeredTriggers: [
         {
           id: 'example.minimal',
+          stability: 'tech_preview' as const,
           eventSchema: z.object({ value: z.string() }),
           title: 'Minimal trigger',
           description: 'Minimal trigger for testing.',

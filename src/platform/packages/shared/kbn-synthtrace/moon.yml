@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/synthtrace'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-presentation-team'
+  defaultOwner: '@elastic/obs-signals-traces-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/synthtrace'
   description: Moon project for @kbn/synthtrace
   channel: ''
-  owner: '@elastic/obs-presentation-team'
+  owner: '@elastic/obs-signals-traces-team'
   sourceRoot: src/platform/packages/shared/kbn-synthtrace
 dependsOn:
   - '@kbn/datemath'

@@ -6,12 +6,39 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useCheckDocumentAttachments } from './use_check_alert_attachments';
+import { hasDocReferences, useCheckDocumentAttachments } from './use_check_alert_attachments';
 import { useFindCasesContainingAllSelectedDocuments } from './use_find_cases_containing_all_selected_alerts';
 
 jest.mock('./use_find_cases_containing_all_selected_alerts');
 
 const cases = [{ id: 'case-1' }, { id: 'case-2' }];
+
+describe('hasDocReferences', () => {
+  it('returns true for an alert attachment', () => {
+    expect(hasDocReferences({ alertId: 'alert-1' })).toBe(true);
+  });
+
+  it('returns true for an event attachment', () => {
+    expect(hasDocReferences({ eventId: 'event-1' })).toBe(true);
+  });
+
+  it('returns true for an external reference attachment', () => {
+    expect(hasDocReferences({ externalReferenceId: 'ext-1' })).toBe(true);
+  });
+
+  it('returns true for a unified attachment with attachmentId (e.g. entity)', () => {
+    expect(hasDocReferences({ attachmentId: 'user:alice@host@default' })).toBe(true);
+  });
+
+  it('returns false when no document reference field is present', () => {
+    expect(hasDocReferences({ type: 'lens', data: {} })).toBe(false);
+  });
+
+  it('returns false for non-object values', () => {
+    expect(hasDocReferences(null)).toBe(false);
+    expect(hasDocReferences('attachmentId')).toBe(false);
+  });
+});
 
 describe('useCheckDocumentAttachments', () => {
   beforeEach(() => {
@@ -38,6 +65,24 @@ describe('useCheckDocumentAttachments', () => {
     expect(getAttachments).toHaveBeenCalledWith({ theCase: undefined });
     expect(useFindCasesContainingAllSelectedDocuments).toHaveBeenCalledWith(
       ['alert-1', 'event-1', 'alert-2', 'event-2', 'external-ref-1'],
+      ['case-1', 'case-2']
+    );
+  });
+
+  it('extracts the attachmentId from an entity attachment so entities participate in dedup', () => {
+    const entityId = 'user:alice@host@default';
+    const getAttachments = jest.fn().mockReturnValue([
+      {
+        type: 'security.entity',
+        attachmentId: entityId,
+        metadata: { entityName: 'alice', entityType: 'user' },
+      },
+    ]);
+
+    renderHook(() => useCheckDocumentAttachments({ cases, getAttachments }));
+
+    expect(useFindCasesContainingAllSelectedDocuments).toHaveBeenCalledWith(
+      [entityId],
       ['case-1', 'case-2']
     );
   });

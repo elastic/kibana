@@ -17,8 +17,8 @@ const makeAction = (id: string, label: string) => ({
 });
 
 const mockCommands: EditorCommand[] = [
-  { id: 'foldAll', label: 'Collapse all', iconType: 'minusInCircle' },
-  { id: 'unfoldAll', label: 'Expand all', iconType: 'plusInCircle' },
+  { id: 'foldAll', label: 'Collapse all', iconType: 'minusCircle' },
+  { id: 'unfoldAll', label: 'Expand all', iconType: 'plusCircle' },
 ];
 
 const mockJumps: JumpToStepEntry[] = [
@@ -138,6 +138,22 @@ describe('buildDisplayOptions', () => {
       const cmds = result.filter((o) => o.data?.menuItem?.kind === 'command');
       expect(cmds).toHaveLength(1);
       expect(cmds[0].label).toBe('Collapse all');
+    });
+
+    it('matches commands by description when label does not include the term', () => {
+      const commands: EditorCommand[] = [
+        ...mockCommands,
+        {
+          id: 'toggleEditorMode',
+          label: 'Toggle graph editor',
+          description: 'Switch between YAML and graph view',
+          iconType: 'visGraph',
+        },
+      ];
+      const result = buildDisplayOptions({ ...base, commands, searchTerm: 'yaml' });
+      const cmds = result.filter((o) => o.data?.menuItem?.kind === 'command');
+      expect(cmds).toHaveLength(1);
+      expect(cmds[0].label).toBe('Toggle graph editor');
     });
 
     it('shows jump entries when search matches step names', () => {

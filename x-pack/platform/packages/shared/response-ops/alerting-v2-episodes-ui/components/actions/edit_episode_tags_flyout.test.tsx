@@ -9,7 +9,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { MAX_TAG_LENGTH, MAX_TAGS_PER_EPISODE } from '@kbn/alerting-v2-constants';
+import { MAX_TAG_LENGTH, MAX_TAGS } from '@kbn/alerting-v2-constants';
 import { AlertEpisodeTagsFlyout } from './edit_episode_tags_flyout';
 import { useFetchAlertEpisodeTagSuggestions } from '../../hooks/use_fetch_alert_episode_tag_suggestions';
 import {
@@ -86,7 +86,7 @@ describe('AlertEpisodeTagsFlyout', () => {
 
   it('caps select all at the maximum number of tags per episode', async () => {
     const user = userEvent.setup();
-    const manySuggestions = Array.from({ length: MAX_TAGS_PER_EPISODE + 5 }, (_, i) => `tag-${i}`);
+    const manySuggestions = Array.from({ length: MAX_TAGS + 5 }, (_, i) => `tag-${i}`);
     useFetchAlertEpisodeTagSuggestionsMock.mockReturnValue({
       data: manySuggestions,
       isLoading: false,
@@ -100,9 +100,7 @@ describe('AlertEpisodeTagsFlyout', () => {
 
     await user.click(screen.getByTestId('alertingEpisodeTagsFlyout-select-all'));
 
-    expect(
-      screen.getByText(new RegExp(`Selected:\\s*${MAX_TAGS_PER_EPISODE}`))
-    ).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`Selected:\\s*${MAX_TAGS}`))).toBeInTheDocument();
     expect(screen.queryByTestId('alertingEpisodeTagsFlyoutTooManyTagsWarning')).toBeInTheDocument();
   });
 

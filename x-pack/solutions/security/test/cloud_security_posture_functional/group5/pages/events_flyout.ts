@@ -462,8 +462,8 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             es,
             logger,
             retry,
-            entitiesIndex: '.entities.v2.latest.security_*',
-            expectedCount: 36,
+            entitiesIndex: '.entities.v2.latest.*',
+            expectedCount: 46,
           });
         });
 

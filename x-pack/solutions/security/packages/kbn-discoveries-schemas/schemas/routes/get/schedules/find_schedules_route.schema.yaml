@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: Find Attack Discovery Schedules Internal API endpoint
+  version: '2023-10-31'
+paths:
+  /internal/attack_discovery/schedules/_find:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: FindAttackDiscoverySchedules
+      x-state: Technical Preview
+      summary: Find attack discovery schedules matching search criteria
+      description: >-
+        Internal API that finds attack discovery schedules matching the search criteria.
+        Supports pagination and sorting by various fields.
+      parameters:
+        - name: page
+          description: Page number to return. Defaults to 1.
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: per_page
+          description: Number of schedules to return per page. Defaults to 10.
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: sort_field
+          description: Field used to sort results.
+          in: query
+          required: false
+          schema:
+            $ref: '../../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        - name: sort_direction
+          description: Sort order direction.
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        '200':
+          description: Schedules found successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - page
+                  - per_page
+                  - total
+                  - data
+                properties:
+                  page:
+                    type: number
+                    description: Current page number
+                  per_page:
+                    type: number
+                    description: Number of items per page
+                  total:
+                    type: number
+                    description: Total number of matching schedules
+                  data:
+                    type: array
+                    description: Array of matched schedules
+                    items:
+                      $ref: '../../../common/schedules/schedule_types.schema.yaml#/components/schemas/AttackDiscoverySchedule'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status_code
+                  - error
+                  - message
+                properties:
+                  status_code:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+components:
+  x-codegen-enabled: true

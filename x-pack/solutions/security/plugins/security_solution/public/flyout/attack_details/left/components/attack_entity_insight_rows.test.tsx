@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { AttackHostInsightsRow } from './attack_entity_insight_rows';
+import { AttackHostInsightsRow, AttackUserInsightsRow } from './attack_entity_insight_rows';
 import { EuiProvider } from '@elastic/eui';
 
 jest.mock('../../../../common/lib/kibana', () => {
@@ -30,6 +30,14 @@ jest.mock('../../../document_details/left/components/host_details', () => ({
   HostDetails: (props: { hostName: string }) => (
     <div data-test-subj="host-details-mock" data-host-name={props.hostName}>
       {props.hostName}
+    </div>
+  ),
+}));
+
+jest.mock('../../../document_details/left/components/user_details', () => ({
+  UserDetails: (props: { userName: string }) => (
+    <div data-test-subj="user-details-mock" data-user-name={props.userName}>
+      {props.userName}
     </div>
   ),
 }));
@@ -59,5 +67,29 @@ describe('AttackHostInsightsRow', () => {
       'data-host-name',
       'Host-dbzugdlqdn'
     );
+  });
+});
+
+describe('AttackUserInsightsRow', () => {
+  it('passes resolved user.name to UserDetails', () => {
+    const identityFields = {
+      'user.name': 'alice',
+    };
+    const sampleSource = {
+      user: { name: 'alice' },
+    };
+
+    render(
+      <EuiProvider>
+        <AttackUserInsightsRow
+          identityFields={identityFields}
+          sampleSource={sampleSource}
+          timestamp="2025-06-01T00:00:00Z"
+          scopeId="attacks-page"
+        />
+      </EuiProvider>
+    );
+
+    expect(screen.getByTestId('user-details-mock')).toHaveAttribute('data-user-name', 'alice');
   });
 });

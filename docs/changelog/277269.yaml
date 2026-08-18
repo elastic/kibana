@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/277269
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Alerting and reporting
+title: "Add fields and configuration tabs to the cases templates editor"
+description: "The cases templates v2 editor now uses separate fields and configuration tabs with consistent binding rules, including a zero-data-loss migration from v1 templates."

@@ -1,0 +1,41 @@
+{
+  "sha1": "c8500880f0a50addcfc6db090f9208fef74da3ce",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "94d8324266bde9b-77cfcc3a64ac143",
+      "title": "Audit log — ECS field shape (local file appender) user_login success: core ECS fields present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit/api/tests/audit_log.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "94d8324266bde9b-cc26015599a3bc8",
+      "title": "Audit log — ECS field shape (local file appender) http_request: trace.id present, method lowercase (ECS), kibana.space_id set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit/api/tests/audit_log.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    }
+  ]
+}

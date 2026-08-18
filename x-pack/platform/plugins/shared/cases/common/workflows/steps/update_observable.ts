@@ -14,9 +14,14 @@ import { CasesStepCaseIdSchema, CasesStepSingleCaseOutputSchema } from './shared
 export const UpdateObservableStepTypeId = 'cases.updateObservable';
 
 const InputSchema = CasesStepCaseIdSchema.extend({
-  observable_id: z.string().min(1, 'observable_id is required'),
-  value: z.string().min(1, 'value is required'),
-  description: z.string().nullable().optional(),
+  observable_id: z.string().min(1, 'observable_id is required').max(500),
+  value: z.string().min(1, 'value is required').max(500),
+  description: z
+    .string()
+    .max(500)
+    .nullable()
+    .optional()
+    .describe('Observable description. Pass null to clear.'),
 });
 
 const OutputSchema = CasesStepSingleCaseOutputSchema;
