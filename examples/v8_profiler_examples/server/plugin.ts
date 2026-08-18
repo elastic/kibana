@@ -7,24 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
-
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { registerRoutes } from './routes';
 
-// this plugin's dependencies
-export class V8ProfilerExamplesPlugin implements Plugin<void, void> {
-  readonly logger: Logger;
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class V8ProfilerExamplesPlugin extends Service {
+  static readonly inject = ['core.http'];
+  static readonly provide = 'v8ProfilerExamples';
 
-  constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get();
+  constructor(ctx: Context, _config: never) {
+    super(ctx, 'v8ProfilerExamples');
+    const router = (ctx.get('core.http') as any).createRouter();
+    registerRoutes((ctx.get('core.logger') as any).get('plugins', 'v8ProfilerExamples'), router);
   }
-
-  public setup(core: CoreSetup) {
-    const router = core.http.createRouter();
-    registerRoutes(this.logger, router);
-  }
-
-  public start() {}
-
-  public stop() {}
 }

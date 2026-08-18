@@ -13,6 +13,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/cordis",
     "@kbn/config-schema",
   ]
 }
