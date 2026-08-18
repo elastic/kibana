@@ -2031,7 +2031,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create an empty conversation without sending a message. Returns the created conversation immediately. Use this to obtain a conversation ID before starting a chat session. To learn more about agent conversations, refer to the agent chat documentation.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        Create an empty conversation without sending a message. Returns the created conversation immediately. Use this to obtain a conversation ID before starting a chat session. To learn more about agent conversations, refer to the [agent chat documentation](https://www.elastic.co/docs/explore-analyze/ai-features/agent-builder/chat).<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-agent-builder-conversations
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2103,9 +2103,11 @@ paths:
                     - access_mode
                 agent_id:
                   description: The ID of the agent to associate with the conversation. Defaults to the default Elastic AI agent.
+                  maxLength: 256
                   type: string
                 conversation_id:
                   description: Optional client-supplied UUID for the conversation. Server-generated if omitted.
+                  maxLength: 256
                   type: string
                 title:
                   description: Title for the conversation. Defaults to "New conversation".
