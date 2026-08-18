@@ -13,6 +13,18 @@ import { createIntegrationsTestRendererMock } from '../../../../../../../../mock
 
 import { AgentlessPackagePoliciesTable } from './agentless_table';
 
+const mockUseLocation = jest.fn().mockReturnValue({
+  pathname: '/',
+  search: '',
+  hash: '',
+  state: undefined,
+});
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => mockUseLocation(),
+}));
+
 jest.mock('../../../../../../hooks', () => ({
   ...jest.requireActual('../../../../../../hooks'),
   useConfirmForceInstall: jest.fn(),
@@ -47,6 +59,12 @@ describe('AgentlessPackagePoliciesTable', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseLocation.mockReturnValue({
+      pathname: '/',
+      search: '',
+      hash: '',
+      state: undefined,
+    });
   });
 
   const defaultProps = {
@@ -135,7 +153,7 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
         perPage: 10000,
-        kuery: `${AGENTS_PREFIX}.policy_id: "policy1"`,
+        kuery: `(${AGENTS_PREFIX}.policy_base_id:(policy1) or (${AGENTS_PREFIX}.policy_id:(policy1) and not ${AGENTS_PREFIX}.policy_base_id:*))`,
       });
     });
     expect(await result.findByText('Healthy')).toBeInTheDocument();
@@ -147,12 +165,70 @@ describe('AgentlessPackagePoliciesTable', () => {
     await waitFor(() => {
       expect(mockSendGetAgents).toHaveBeenCalledWith({
         perPage: 10000,
-        kuery: `${AGENTS_PREFIX}.policy_id: "policy1"`,
+        kuery: `(${AGENTS_PREFIX}.policy_base_id:(policy1) or (${AGENTS_PREFIX}.policy_id:(policy1) and not ${AGENTS_PREFIX}.policy_base_id:*))`,
       });
     });
     await act(async () => {
       fireEvent.click(await result.findByText('Healthy'));
     });
     expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+  });
+
+  it('opens flyout when openEnrollmentFlyout query param matches an agent policy id', async () => {
+    mockUseLocation.mockReturnValue({
+      pathname: '/',
+      search: '?openEnrollmentFlyout=policy1',
+      hash: '',
+      state: undefined,
+    });
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+    await waitFor(() => {
+      expect(result.getByText('Confirm agentless enrollment')).toBeInTheDocument();
+    });
+  });
+
+  it('displays agent health status when agent has a version-specific variant policy_id', async () => {
+    // Simulate an agent whose .fleet-agents doc has policy_id: 'policy1#9.2' (suffix from the
+    // version-specific assignment task). The result map must key by the stripped base id so the
+    // lookup by agentPolicy.id ('policy1') still resolves correctly.
+    mockSendGetAgents.mockResolvedValueOnce({
+      data: {
+        items: [
+          {
+            policy_id: 'policy1#9.2',
+            id: 'agent-variant',
+            packages: ['package'],
+            type: 'PERMANENT',
+            active: true,
+            enrolled_at: '2023-01-01T00:00:00Z',
+            local_metadata: {},
+            status: 'online',
+          },
+        ],
+        total: 1,
+        page: 1,
+        perPage: 10000,
+      },
+      error: null,
+    });
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+    expect(await result.findByText('Healthy')).toBeInTheDocument();
+  });
+
+  it('does not open flyout when openEnrollmentFlyout query param does not match any policy', async () => {
+    mockUseLocation.mockReturnValue({
+      pathname: '/',
+      search: '?openEnrollmentFlyout=nonexistent-id',
+      hash: '',
+      state: undefined,
+    });
+    const renderer = createIntegrationsTestRendererMock();
+    const result = renderer.render(<AgentlessPackagePoliciesTable {...defaultProps} />);
+    await waitFor(() => {
+      expect(mockSendGetAgents).toHaveBeenCalled();
+    });
+    expect(result.queryByText('Confirm agentless enrollment')).not.toBeInTheDocument();
   });
 });
