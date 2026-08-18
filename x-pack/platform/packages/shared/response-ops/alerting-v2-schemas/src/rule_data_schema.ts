@@ -144,7 +144,7 @@ export const noDataStrategySchema = z.union([
     .describe(
       'Emits a `no_data` alert event when no_data query returns no rows for the group. "emit" is not currently accepted by the create/update API.'
     ),
-  z.literal('recover').describe('Forces recovery when no data is present.'),
+  z.literal('recover').describe('Resolves the alert episode to inactive on the first no-data run.'),
   z.literal('none').describe('No-data situations are ignored (default).'),
 ]);
 export const noDataStrategy = {
