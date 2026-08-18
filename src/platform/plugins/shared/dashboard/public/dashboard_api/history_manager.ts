@@ -22,10 +22,10 @@ import { startTrackingHistory } from '@kbn/rxjs-history';
 import type { DashboardState } from '../../common';
 import type { initializeDataLoadingManager } from './data_loading_manager';
 import type { initializeTrackOverlay } from './track_overlay';
-import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
+import type { initializeLayoutManager } from './layout_manager';
 
 export function initializeHistoryManager({
-  unsavedChanges$,
+  anyStateChange$,
   hasOverlays$,
   setState,
   getState,
@@ -34,9 +34,7 @@ export function initializeHistoryManager({
     api: { dataLoading$ },
   },
 }: {
-  unsavedChanges$: ReturnType<
-    typeof initializeUnsavedChangesManager
-  >['internalApi']['unsavedChanges$'];
+  anyStateChange$: ReturnType<typeof initializeLayoutManager>['internalApi']['anyStateChange$'];
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
   initialState: DashboardState;
   getState: () => DashboardState;
@@ -47,7 +45,7 @@ export function initializeHistoryManager({
   cleanup: () => void;
 } {
   const disableUndoRedo$ = new BehaviorSubject<boolean>(false);
-  const dashboardCurrentState$ = new BehaviorSubject<DashboardState>(initialState);
+  const dashboardCurrentState$ = new BehaviorSubject<DashboardState | undefined>(undefined);
 
   combineLatest([hasOverlays$, dataLoading$])
     .pipe(map(([hasOverlays, dataLoading]) => Boolean(hasOverlays || dataLoading)))
@@ -69,14 +67,14 @@ export function initializeHistoryManager({
     }
   );
 
-  const onAnyStateChangeSubscription = combineLatest([unsavedChanges$, dataLoading$])
+  const onAnyStateChangeSubscription = combineLatest([anyStateChange$, dataLoading$])
     .pipe(
-      debounceTime(60),
+      debounceTime(200),
       withLatestFrom(hasOverlays$),
       // do not push to history while a child is loading or an editor is open
       filter(([[, loading], hasOverlays]) => !loading && !hasOverlays)
     )
-    .subscribe(() => {
+    .subscribe(([[, loading]]) => {
       dashboardCurrentState$.next(getState());
     });
 

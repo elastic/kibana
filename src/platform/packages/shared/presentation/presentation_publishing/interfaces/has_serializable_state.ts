@@ -18,6 +18,7 @@ export interface HasSerializableState<SerializedState extends object = object> {
    * Must not debounce.
    */
   anyStateChange$: Observable<void>;
+  latestState$: Observable<SerializedState>;
 
   /**
    * Serializes all state into a format that can be saved into

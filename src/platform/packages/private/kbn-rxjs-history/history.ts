@@ -9,7 +9,7 @@
 
 import * as jsondiffpatch from 'jsondiffpatch';
 
-import { BehaviorSubject, combineLatest, debounceTime, map, pairwise, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter, map, pairwise, skip } from 'rxjs';
 
 export function startTrackingHistory<T extends object = {}>({
   state$,
@@ -17,24 +17,29 @@ export function startTrackingHistory<T extends object = {}>({
   maxSize,
   disableUndoRedo$ = new BehaviorSubject<boolean>(true),
 }: {
-  state$: BehaviorSubject<T>;
+  state$: BehaviorSubject<T | undefined>;
   mapState: (state: T) => T;
   maxSize: number;
   disableUndoRedo$?: BehaviorSubject<boolean>;
 }) {
   const history: jsondiffpatch.Delta[] = [];
-  const pointer$: BehaviorSubject<number> = new BehaviorSubject<number>(-1);
+  const pointer$ = new BehaviorSubject<number>(-1);
   let undoOrRedoAction = false;
 
-  const currentState$: BehaviorSubject<T> = new BehaviorSubject<T>(state$.getValue());
-  const disabledActions$: BehaviorSubject<{ undo: boolean; redo: boolean }> = new BehaviorSubject({
+  const currentState$ = new BehaviorSubject<T | undefined>(state$.getValue());
+  const disabledActions$ = new BehaviorSubject({
     undo: true as boolean,
     redo: true as boolean,
   });
 
   const stateSubscription = state$
-    .pipe(map(mapState), pairwise())
+    .pipe(
+      filter((state): state is T => Boolean(state)),
+      map(mapState),
+      pairwise()
+    )
     .subscribe(([previous, current]) => {
+      // console.log({ previous, current });
       if (undoOrRedoAction) {
         // do not add to history if state change is coming from undo or redo action
         undoOrRedoAction = false;
@@ -42,6 +47,7 @@ export function startTrackingHistory<T extends object = {}>({
       }
       const diff = jsondiffpatch.diff(previous, current);
       if (!diff) return;
+      // console.log('ADD TO HISTORY', { diff });
 
       const pointer = pointer$.getValue();
       if (pointer !== history.length - 1) {

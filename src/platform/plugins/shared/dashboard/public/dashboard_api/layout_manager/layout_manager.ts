@@ -46,6 +46,8 @@ import {
   getTitle,
   logStateDiff,
   shouldLogStateDiff,
+  childrenLatestState$,
+  UNSAVED_CHANGES_DEBOUNCE,
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 import type { PinnedControlLayoutState } from '@kbn/controls-schemas';
@@ -80,7 +82,6 @@ import {
   type DashboardPinnablePanel,
 } from './types';
 import { getPlacementHints } from '../../panel_placement/get_placement_hints';
-import { anyChildrenChanges$ } from './any_children_changes';
 
 export function initializeLayoutManager(
   viewModeManager: ReturnType<typeof initializeViewModeManager>,
@@ -97,6 +98,7 @@ export function initializeLayoutManager(
     initialPanels,
     initialPinnedPanels
   );
+  const currentChildState = initialChildState;
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
@@ -125,13 +127,11 @@ export function initializeLayoutManager(
     }
   );
 
+  const latestChildrenState$ = childrenLatestState$(children$);
   const childrenChanges$ = childrenUnsavedChanges$(children$);
-  const childrenChangesSubscription = childrenChanges$.subscribe((childrenChanges) => {
-    for (const { uuid, hasUnsavedChanges } of childrenChanges) {
-      const childApi = children$.value[uuid];
-      if (hasUnsavedChanges && childApi && apiHasSerializableState(childApi)) {
-        currentChildState[uuid] = childApi.serializeState();
-      }
+  const stateChangedSubscription = latestChildrenState$.subscribe((childrenState) => {
+    for (const { uuid, latestState } of childrenState) {
+      currentChildState[uuid] = latestState;
     }
   });
 
@@ -155,10 +155,9 @@ export function initializeLayoutManager(
     distinctUntilChanged()
   );
 
-  let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
   let lastSavedLayout = initialLayout;
-
   let lastSavedChildState = initialChildState;
+
   const resetLayout = async (state: DashboardState) => {
     const { layout: layoutToApply, childState: childStateToApply } = deserializeLayout(
       state.panels,
@@ -168,7 +167,6 @@ export function initializeLayoutManager(
     if (!areLayoutsEqual(layout$.getValue(), layoutToApply)) {
       layout$.next({ ...layoutToApply });
     }
-    currentChildState = { ...childStateToApply };
 
     let childrenModified = false;
     const currentChildren = { ...children$.value };
@@ -516,12 +514,9 @@ export function initializeLayoutManager(
   return {
     internalApi: {
       anyStateChange$: merge(
-        layout$.pipe(
-          skip(1),
-          map(() => undefined)
-        ),
-        anyChildrenChanges$(children$)
-      ),
+        layout$.pipe(skip(1)),
+        latestChildrenState$.pipe(debounceTime(UNSAVED_CHANGES_DEBOUNCE))
+      ).pipe(map(() => undefined)),
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       gridLayout$,
@@ -705,7 +700,7 @@ export function initializeLayoutManager(
       },
     },
     cleanup: () => {
-      childrenChangesSubscription.unsubscribe();
+      stateChangedSubscription.unsubscribe();
       gridLayoutSubscription.unsubscribe();
     },
   };

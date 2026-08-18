@@ -32,24 +32,28 @@ export const initializeStateApi = <StateType extends object = object>({
     getComparators: () => StateComparators<StateType>;
     defaultState?: Partial<StateType>;
   }): PublishesUnsavedChanges & HasSerializableState<StateType> => {
+  const latestState$ = anyStateChange$.pipe(
+    // anyStateChange$ does not emit on subscribe
+    // use startWith to get latest state on subscribe
+    startWith(undefined),
+    map(() => serializeState())
+  );
+
   if (!apiHasLastSavedChildState<StateType>(parentApi)) {
     return {
       anyStateChange$,
       applySerializedState,
       hasUnsavedChanges$: of(false),
       serializeState,
+      latestState$,
     };
   }
 
-  const hasUnsavedChanges$ = anyStateChange$.pipe(
-    // anyStateChange$ does not emit on subscribe
-    // use startWith to compare unsaved changes on subscribe
-    startWith(undefined),
+  const hasUnsavedChanges$ = latestState$.pipe(
     combineLatestWith(parentApi.lastSavedStateForChild$(uuid)),
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
     map(([, lastSavedState]) => {
       const currentState = serializeState();
-
       // check state equality
       return !areComparatorsEqual(
         getComparators(),
@@ -68,5 +72,11 @@ export const initializeStateApi = <StateType extends object = object>({
     })
   );
 
-  return { anyStateChange$, applySerializedState, hasUnsavedChanges$, serializeState };
+  return {
+    anyStateChange$,
+    applySerializedState,
+    hasUnsavedChanges$,
+    latestState$,
+    serializeState,
+  };
 };
