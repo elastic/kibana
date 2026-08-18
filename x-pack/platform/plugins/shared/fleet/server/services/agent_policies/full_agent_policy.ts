@@ -356,7 +356,7 @@ export async function getFullAgentPolicy(
     ) {
       const originalOutput = outputs.find((o) => getOutputIdForAgentPolicy(o) === outputId);
 
-      if (originalOutput && isManagedBulkOutput(originalOutput)) {
+      if (agentPolicy.supports_agentless && originalOutput && isManagedBulkOutput(originalOutput)) {
         outputPermissions[outputId] = {
           _managed_bulk_apm: {
             applications: [

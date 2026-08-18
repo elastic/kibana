@@ -1737,7 +1737,10 @@ describe('getFullAgentPolicy', () => {
         is_preconfigured: false,
       },
     });
-    mockAgentPolicy({ data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID });
+    mockAgentPolicy({
+      supports_agentless: true,
+      data_output_id: ECH_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+    });
 
     const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
@@ -1801,7 +1804,10 @@ describe('getFullAgentPolicy', () => {
         is_preconfigured: false,
       },
     });
-    mockAgentPolicy({ data_output_id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID });
+    mockAgentPolicy({
+      supports_agentless: true,
+      data_output_id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+    });
 
     const agentPolicy = await getFullAgentPolicy(createSavedObjectClientMock(), 'agent-policy');
 
