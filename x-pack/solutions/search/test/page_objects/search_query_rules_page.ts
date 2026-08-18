@@ -12,6 +12,7 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
+  const retry = getService('retry');
 
   return {
     QueryRulesEmptyPromptPage: {
@@ -108,10 +109,14 @@ export function SearchQueryRulesPageProvider({ getService }: FtrProviderContext)
         RULESET_RULE_ITEM_ACTIONS_EDIT_BUTTON: 'searchQueryRulesQueryRulesetDetailEditButton',
       },
       async expectQueryRulesDetailPageNavigated(name: string) {
-        const text = await testSubjects.getVisibleText(this.TEST_IDS.RULESET_DETAILS_PAGE_TITLE);
-        if (text !== name) {
-          throw new Error(`Expected page title to be "${name}" but got "${text}"`);
-        }
+        // The app header title exists on both the list and the detail page, so retry
+        // until navigation lands on the detail page and the title matches.
+        await retry.tryForTime(5000, async () => {
+          const text = await testSubjects.getVisibleText(this.TEST_IDS.RULESET_DETAILS_PAGE_TITLE);
+          if (text !== name) {
+            throw new Error(`Expected page title to be "${name}" but got "${text}"`);
+          }
+        });
       },
       async expectQueryRulesDetailPageBackButtonToExist() {
         await testSubjects.existOrFail(this.TEST_IDS.RULESET_DETAILS_PAGE_BACK_BUTTON);
