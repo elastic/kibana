@@ -20,15 +20,16 @@ const GOOGLE_DOCS_MIME_TYPE = 'application/vnd.google-apps.document';
 const SCOPES =
   'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/documents';
 
-function throwGoogleDocsError(error: unknown): void {
+function throwGoogleDocsError(error: unknown): never {
   const axiosError = error as {
     response?: { data?: { error?: { message?: string; code?: number } } };
   };
   const googleError = axiosError.response?.data?.error;
   if (googleError) {
+    const code = googleError.code ?? 'unknown';
     const message = googleError.message
-      ? `Google Docs API error (${googleError.code}): ${googleError.message}`
-      : `Google Docs API error (${googleError.code})`;
+      ? `Google Docs API error (${code}): ${googleError.message}`
+      : `Google Docs API error (${code})`;
     const newError = new Error(message);
     const meta = getConnectorActionErrorMeta(error);
     if (meta) {
@@ -36,6 +37,10 @@ function throwGoogleDocsError(error: unknown): void {
     }
     throw newError;
   }
+  if (error instanceof Error) {
+    throw error;
+  }
+  throw new Error(String(error));
 }
 
 export const GoogleDocsConnector: ConnectorSpec = {
@@ -123,7 +128,6 @@ export const GoogleDocsConnector: ConnectorSpec = {
           webViewLink = meta.webViewLink;
         } catch (error: unknown) {
           throwGoogleDocsError(error);
-          throw error;
         }
 
         let content: string;
@@ -138,10 +142,17 @@ export const GoogleDocsConnector: ConnectorSpec = {
           content = exportResponse.data as string;
         } catch (error: unknown) {
           throwGoogleDocsError(error);
-          throw error;
         }
 
         const totalCharacters = content.length;
+
+        if (offset > 0 && offset >= totalCharacters) {
+          throw new Error(
+            `Offset ${offset} is past the end of the document (${totalCharacters} characters total). ` +
+              'Pass offset: 0 or a next_offset value from a previous response.'
+          );
+        }
+
         const slice = content.slice(offset, offset + max_characters);
         const truncated = offset + max_characters < totalCharacters;
 
@@ -150,7 +161,7 @@ export const GoogleDocsConnector: ConnectorSpec = {
           title,
           content: slice,
           offset,
-          next_offset: truncated ? offset + max_characters : undefined,
+          ...(truncated ? { next_offset: offset + max_characters } : {}),
           total_characters: totalCharacters,
           truncated,
           web_view_link: webViewLink,
@@ -182,7 +193,6 @@ export const GoogleDocsConnector: ConnectorSpec = {
           return response.data;
         } catch (error: unknown) {
           throwGoogleDocsError(error);
-          throw error;
         }
       },
     },
@@ -200,7 +210,6 @@ export const GoogleDocsConnector: ConnectorSpec = {
         return {};
       } catch (error: unknown) {
         throwGoogleDocsError(error);
-        throw error;
       }
     },
     enabled: true,

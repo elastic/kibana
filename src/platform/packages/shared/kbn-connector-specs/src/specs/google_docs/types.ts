@@ -59,7 +59,11 @@ export const UpdateDocInputSchema = lazySchema(() =>
           'docs.google.com/document/d/{document_id}/edit. Example: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms"'
       ),
     requests: z
-      .array(z.record(z.string().max(200), z.unknown()))
+      .array(
+        z.record(z.string().max(200), z.unknown()).refine((obj) => Object.keys(obj).length === 1, {
+          message: 'Each request object must contain exactly one operation key',
+        })
+      )
       .min(1)
       .max(100)
       .describe(

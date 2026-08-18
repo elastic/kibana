@@ -251,6 +251,16 @@ describe('GoogleDocsConnector', () => {
     it('rejects max_characters above 200,000', () => {
       expect(() => parse('readDoc', { document_id: DOC_ID, max_characters: 200_001 })).toThrow();
     });
+
+    it('throws when offset is past the end of the document', async () => {
+      const content = 'a'.repeat(5_000);
+      mockGet.mockResolvedValueOnce(META_RESPONSE).mockResolvedValueOnce({ data: content });
+
+      const input = parse('readDoc', { document_id: DOC_ID, offset: 10_000 });
+      await expect(GoogleDocsConnector.actions.readDoc.handler(mockContext, input)).rejects.toThrow(
+        'Offset 10000 is past the end of the document'
+      );
+    });
   });
 
   // =========================================================================
@@ -331,6 +341,20 @@ describe('GoogleDocsConnector', () => {
           requests: [{ replaceAllText: { containsText: { text: 'a' }, replaceText: 'b' } }],
         })
       ).toThrow();
+    });
+
+    it('rejects a request object with more than one operation key', () => {
+      expect(() =>
+        parse('updateDoc', {
+          document_id: DOC_ID,
+          requests: [
+            {
+              replaceAllText: { containsText: { text: 'a' }, replaceText: 'b' },
+              insertText: { location: { index: 1 }, text: 'Hello' },
+            },
+          ],
+        })
+      ).toThrow('exactly one operation key');
     });
   });
 
