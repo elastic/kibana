@@ -2367,14 +2367,16 @@ fields: []
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2401,14 +2403,16 @@ fields: []
             caseId: 'mock-id-4',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2473,11 +2477,13 @@ fields: []
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: ['alert-id-0', 'alert-id-2'],
-                index: ['alert-index-0', 'alert-index-2'],
+                attachmentId: ['alert-id-0', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-0', 'alert-index-2'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -2486,11 +2492,10 @@ fields: []
             caseId: 'mock-id-2',
             attachments: [
               {
-                alertId: ['alert-id-1'],
-                index: ['alert-index-1'],
+                attachmentId: ['alert-id-1'],
+                metadata: { index: ['alert-index-1'], rule: { id: null, name: null } },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -2499,11 +2504,10 @@ fields: []
             caseId: 'mock-id-3',
             attachments: [
               {
-                alertId: ['alert-id-3'],
-                index: ['alert-index-3'],
+                attachmentId: ['alert-id-3'],
+                metadata: { index: ['alert-index-3'], rule: { id: null, name: null } },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -2794,14 +2798,16 @@ fields: []
             caseId: 'mock-id-1',
             attachments: [
               {
-                alertId: alerts.map((alert) => alert._id),
-                index: alerts.map((alert) => alert._index),
-                owner: 'securitySolution',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: alerts.map((alert) => alert._id),
+                metadata: {
+                  index: alerts.map((alert) => alert._index),
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                type: 'alert',
+                owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2871,14 +2877,16 @@ fields: []
             caseId: 'mock-id-3',
             attachments: [
               {
-                type: 'alert',
-                rule: {
-                  id: 'rule-test-id',
-                  name: 'Test rule',
+                attachmentId: ['alert-id-4', 'alert-id-5'],
+                metadata: {
+                  index: ['alert-index-4', 'alert-index-5'],
+                  rule: {
+                    id: 'rule-test-id',
+                    name: 'Test rule',
+                  },
                 },
-                alertId: ['alert-id-4', 'alert-id-5'],
-                index: ['alert-index-4', 'alert-index-5'],
                 owner: 'securitySolution',
+                type: 'security.alert',
               },
             ],
           });
@@ -2984,14 +2992,16 @@ fields: []
           caseId: 'mock-id-1',
           attachments: [
             {
-              alertId: alerts.map((alert) => alert._id),
-              index: alerts.map((alert) => alert._index),
-              owner: 'securitySolution',
-              rule: {
-                id: 'rule-test-id',
-                name: 'Test rule',
+              attachmentId: alerts.map((alert) => alert._id),
+              metadata: {
+                index: alerts.map((alert) => alert._index),
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
               },
-              type: 'alert',
+              owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -3221,14 +3231,16 @@ fields: []
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3237,14 +3249,16 @@ fields: []
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3333,14 +3347,16 @@ fields: []
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3349,14 +3365,16 @@ fields: []
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3414,14 +3432,16 @@ fields: []
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3430,14 +3450,16 @@ fields: []
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3490,14 +3512,16 @@ fields: []
         caseId: 'mock-id-4',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3506,14 +3530,16 @@ fields: []
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3544,14 +3570,16 @@ fields: []
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3560,14 +3588,16 @@ fields: []
         caseId: 'mock-id-1',
         attachments: [
           {
-            alertId: ['alert-id-0', 'alert-id-2'],
-            index: ['alert-index-0', 'alert-index-2'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-0', 'alert-id-2'],
+            metadata: {
+              index: ['alert-index-0', 'alert-index-2'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3576,14 +3606,16 @@ fields: []
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3592,14 +3624,16 @@ fields: []
         caseId: 'mock-id-2',
         attachments: [
           {
-            alertId: ['alert-id-1'],
-            index: ['alert-index-1'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-1'],
+            metadata: {
+              index: ['alert-index-1'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3608,14 +3642,16 @@ fields: []
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: ['alert-id-3'],
-            index: ['alert-index-3'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-3'],
+            metadata: {
+              index: ['alert-index-3'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3624,14 +3660,16 @@ fields: []
         caseId: 'mock-id-3',
         attachments: [
           {
-            alertId: ['alert-id-3'],
-            index: ['alert-index-3'],
-            owner: 'securitySolution',
-            rule: {
-              id: 'rule-test-id',
-              name: 'Test rule',
+            attachmentId: ['alert-id-3'],
+            metadata: {
+              index: ['alert-index-3'],
+              rule: {
+                id: 'rule-test-id',
+                name: 'Test rule',
+              },
             },
-            type: 'alert',
+            owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3710,11 +3748,13 @@ fields: []
           caseId: 'mock-id-1',
           attachments: [
             {
-              type: 'alert',
-              alertId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
-              index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
-              rule: { id: 'rule-test-id', name: 'Test rule' },
+              attachmentId: ['alert-id-0', 'alert-id-2', 'alert-id-1', 'alert-id-3'],
+              metadata: {
+                index: ['alert-index-0', 'alert-index-2', 'alert-index-1', 'alert-index-3'],
+                rule: { id: 'rule-test-id', name: 'Test rule' },
+              },
               owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -3790,14 +3830,16 @@ fields: []
           caseId: 'mock-id-1',
           attachments: [
             {
-              alertId: allAlerts.map((alert) => alert._id),
-              index: allAlerts.map((alert) => alert._index),
-              owner: 'securitySolution',
-              rule: {
-                id: 'rule-test-id',
-                name: 'Test rule',
+              attachmentId: allAlerts.map((alert) => alert._id),
+              metadata: {
+                index: allAlerts.map((alert) => alert._index),
+                rule: {
+                  id: 'rule-test-id',
+                  name: 'Test rule',
+                },
               },
-              type: 'alert',
+              owner: 'securitySolution',
+              type: 'security.alert',
             },
           ],
         });
@@ -3877,11 +3919,10 @@ fields: []
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3890,11 +3931,10 @@ fields: []
         caseId: 'mock-id-2',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3903,11 +3943,10 @@ fields: []
         caseId: 'mock-id-3',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3977,11 +4016,10 @@ fields: []
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -3990,11 +4028,10 @@ fields: []
         caseId: 'mock-id-2',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -4003,11 +4040,10 @@ fields: []
         caseId: 'mock-id-3',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -4073,11 +4109,10 @@ fields: []
         caseId: 'mock-id-1',
         attachments: [
           {
-            type: 'alert',
-            alertId: ['test-id'],
-            index: ['test-index'],
-            rule: { id: 'rule-test-id', name: 'Test rule' },
+            attachmentId: ['test-id'],
+            metadata: { index: ['test-index'], rule: { id: 'rule-test-id', name: 'Test rule' } },
             owner: 'securitySolution',
+            type: 'security.alert',
           },
         ],
       });
@@ -4431,7 +4466,6 @@ fields: []
             casesClient: casesClientMock,
             actionsClient,
             spaceId: 'default',
-            isCasesAttachmentsEnabled: true,
           });
 
           await connectorExecutorWithFlagOn.execute(paramsWithGroupedAlerts);
@@ -4475,16 +4509,18 @@ fields: []
             caseId: 'mock-id-1',
             attachments: [
               {
-                comment: 'comment-1',
+                data: { content: 'comment-1' },
                 owner: 'securitySolution',
-                type: 'user',
+                type: 'comment',
               },
               {
-                alertId: ['alert-id-1', 'alert-id-2'],
-                index: ['alert-index-1', 'alert-index-1'],
+                attachmentId: ['alert-id-1', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-1', 'alert-index-1'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });
@@ -4511,11 +4547,13 @@ fields: []
             caseId: 'mock-id-4',
             attachments: [
               {
-                alertId: ['alert-id-1', 'alert-id-2'],
-                index: ['alert-index-1', 'alert-index-1'],
+                attachmentId: ['alert-id-1', 'alert-id-2'],
+                metadata: {
+                  index: ['alert-index-1', 'alert-index-1'],
+                  rule: { id: null, name: null },
+                },
                 owner: 'securitySolution',
-                rule: { id: null, name: null },
-                type: 'alert',
+                type: 'security.alert',
               },
             ],
           });

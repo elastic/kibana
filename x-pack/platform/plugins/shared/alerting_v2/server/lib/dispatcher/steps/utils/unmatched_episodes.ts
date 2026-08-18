@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ActionGroup, AlertEpisode } from '../types';
-import { suppressionEpisodeKey } from './utils/suppression_key';
+import type { ActionGroup, AlertEpisode } from '../../types';
+import { suppressionEpisodeKey } from './suppression_key';
 
 export function getUnmatchedEpisodes(
   dispatchable: readonly AlertEpisode[],
