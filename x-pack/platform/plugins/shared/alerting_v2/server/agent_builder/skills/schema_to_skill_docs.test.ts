@@ -301,6 +301,84 @@ describe('schema_to_skill_docs', () => {
     });
   });
 
+  /**
+   * Every schema carrying a `.meta({ id })` — added so the OAS emits named
+   * components — is hoisted into `definitions` / `$defs` by `z.toJSONSchema`
+   * and replaced by a `$ref` (`#/definitions/...` or `#/$defs/...`). These
+   * docs are read by an LLM, so the pointers have to be expanded back into
+   * real types rather than rendered as `unknown`.
+   */
+  describe('schemas extracted into `definitions` / `$defs`', () => {
+    const allDocs = () => [
+      generateRuleSchemaDoc(),
+      generateRuleOperationsDoc(),
+      generateActionPolicySchemaDoc(),
+      generateActionPolicyOperationsDoc(),
+      generateActionPolicyWorkflowPayloadDoc(),
+    ];
+
+    it('never leaves an unresolved pointer or type in any doc', () => {
+      for (const doc of allDocs()) {
+        expect(doc).not.toContain('$ref');
+        expect(doc).not.toContain('| unknown');
+        expect(doc).not.toContain('unknown[]');
+      }
+    });
+
+    it('renders referenced object schemas with their type and description', () => {
+      const doc = generateRuleSchemaDoc();
+      expect(doc).toContain('| `metadata` | object | required | Rule metadata. |');
+      expect(doc).toContain(
+        '| `schedule` | object | required | Execution schedule configuration. |'
+      );
+    });
+
+    it('renders a referenced discriminated union as its variants', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `query` | { format: "composed", ... } \\| { format: "standalone", ... } | required | Detection query configuration. |'
+      );
+      expect(generateRuleOperationsDoc()).toContain(
+        '| `query` | { format: "composed", ... } \\| { format: "standalone", ... } | required | Detection query configuration. |'
+      );
+    });
+
+    it('expands the variant tables of a referenced union', () => {
+      const doc = generateRuleSchemaDoc();
+      expect(doc).toContain('## Query Formats');
+      expect(doc).toContain('#### `format: "composed"`');
+      expect(doc).toContain('#### `format: "standalone"`');
+      expect(doc).toContain(
+        '| `base` | string | required | Base ES\\|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |'
+      );
+    });
+
+    it('renders arrays whose items are referenced schemas', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`. (max items: 100) |'
+      );
+      expect(generateActionPolicySchemaDoc()).toContain(
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
+      );
+    });
+
+    it('merges a reference with the sibling keys draft-7 moves into `allOf`', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `grouping` | object | optional | Grouping configuration. |'
+      );
+      expect(generateActionPolicySchemaDoc()).toContain(
+        '| `throttle` | object | optional | The throttle configuration for notifications. |'
+      );
+    });
+
+    it('keeps the referencing field description when the definition also has one', () => {
+      const doc = generateActionPolicySchemaDoc();
+      expect(doc).toContain(
+        '| `grouping_mode` | "per_episode" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
+      );
+      expect(doc).not.toContain('per_episode groups by episode lifecycle');
+    });
+  });
+
   describe('generateActionPolicyOperationsDoc', () => {
     /**
      * Snapshot of the generated skill markdown for `manage_action_policy`
