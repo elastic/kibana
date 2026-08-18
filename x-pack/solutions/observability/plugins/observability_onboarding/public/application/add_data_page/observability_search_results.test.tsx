@@ -11,8 +11,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { CompatRouter } from 'react-router-dom-v5-compat';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import { ObservabilitySearchResults } from './observability_search_results';
 
 const mockUseAvailablePackages = jest.fn();
@@ -33,9 +32,7 @@ const renderResults = (searchTerm = 'redis') =>
     <I18nProvider>
       <KibanaContextProvider services={coreMock.createStart()}>
         <MemoryRouter initialEntries={['/']}>
-          <CompatRouter>
-            <ObservabilitySearchResults searchTerm={searchTerm} />
-          </CompatRouter>
+          <ObservabilitySearchResults searchTerm={searchTerm} />
         </MemoryRouter>
       </KibanaContextProvider>
     </I18nProvider>
