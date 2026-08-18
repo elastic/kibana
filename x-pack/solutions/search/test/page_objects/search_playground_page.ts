@@ -470,10 +470,9 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         const removeFieldButton = await wrapper.findByCssSelector(
           `[aria-label="Remove ${fieldToRemove} from selection in this group"]`
         );
-        // Scroll the badge away from the fixed embedded console bar at the bottom of the
-        // page, which otherwise intercepts the click.
-        await removeFieldButton.scrollIntoViewIfNecessary();
-        await removeFieldButton.click();
+        // The fixed embedded console bar intercepts Selenium clicks on badges near the
+        // bottom of the viewport. Use a JS click to bypass the overlay check.
+        await browser.execute((el: HTMLElement) => el.click(), removeFieldButton);
         expect(
           await comboBox.getComboBoxSelectedOptions(`contextFieldsSelectable-${indexName}`)
         ).to.eql(['bar', 'baz', 'baz.keyword', 'foo', 'nestedField']);
