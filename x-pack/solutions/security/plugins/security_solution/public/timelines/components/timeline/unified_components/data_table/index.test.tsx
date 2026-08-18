@@ -238,6 +238,40 @@ describe('unified data table', () => {
   );
 
   it(
+    'resolves the paginated document index from the row rather than its ECS fields',
+    async () => {
+      jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
+
+      // The row carries a concrete `_index`, while ECS — which is optional and often
+      // absent — does not. `DocumentFlyoutWrapper` skips the search on a null index, so
+      // resolving from ECS would leave the flyout stuck on its loading state.
+      const eventWithoutEcsIndex = [
+        {
+          ...mockTimelineData[0],
+          _index: 'timeline-index',
+          ecs: { ...mockTimelineData[0].ecs, _index: undefined },
+        },
+      ];
+
+      render(<TestComponent events={eventWithoutEcsIndex} totalCount={1} />);
+      expect(await screen.findByTestId('discoverDocTable')).toBeVisible();
+
+      fireEvent.click(screen.getAllByTestId('docTableExpandToggleColumn')[0]);
+
+      await waitFor(() => {
+        expect(mockOpenSystemFlyout).toHaveBeenCalled();
+      });
+
+      const element = mockOpenSystemFlyout.mock.calls[0][0] as React.ReactElement;
+      expect(element.props.value.getSnapshot()).toMatchObject({
+        flyoutDocumentId: mockTimelineData[0]._id,
+        flyoutDocumentIndexName: 'timeline-index',
+      });
+    },
+    SPECIAL_TEST_TIMEOUT
+  );
+
+  it(
     'updates the expanded row icon when the document flyout paginates',
     async () => {
       jest.mocked(useIsNewFlyoutEnabled).mockReturnValue(true);
