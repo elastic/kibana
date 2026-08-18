@@ -26,8 +26,6 @@ export {
   type GridLayoutGlobalStylesProps,
 } from './src/layouts/grid_global_app_style';
 
-export { CommonGlobalAppStyles } from './src/layouts/global_app_styles';
-
 export {
   DESIGN_EXPLORATION_BODY_ATTR,
   DESIGN_EXPLORATION_VARIANT_ATTR,
@@ -40,6 +38,12 @@ export {
 } from './src/design_exploration/design_exploration_chrome_styles';
 
 export { DesignExplorationKnobsPanel } from './src/design_exploration/design_exploration_knobs_panel';
+
+export {
+  TARGET_NAV_COLLAPSED_WIDTH,
+  TARGET_NAV_EXPANDED_WIDTH,
+  TARGET_SIDE_PANEL_WIDTH,
+} from './src/design_exploration/variant_target';
 
 export {
   DESIGN_EXPLORATION_KNOB_DEFINITIONS,

@@ -29,8 +29,8 @@ export const TARGET_VARIANT_ID = 'target';
 // Nirbana's airy spacing, soft radii, quieter hairlines, and surface layering:
 //   - much airier padding/gaps everywhere (toolbar rows, panel internals,
 //     gutter between panels)
-//   - large, soft radii — buttons read as full capsules/pills, panels use a
-//     bigger radius than Linear's crisper 8-10px geometry
+//   - large, soft radii on panels/containers; buttons share a consistent 8px radius
+//     (no pill CTAs) vs Linear's mixed button geometry
 //   - far fewer *internal* dividers — separation between individual settings
 //     rows/cards comes from generous gap + each card having its own border,
 //     not from a shared hairline splitting one container into rows
@@ -44,10 +44,11 @@ const TARGET_SURFACE_APP_LIGHT = '#f7f8f9';
 const TARGET_SURFACE_APP_DARK = '#10141a'; // soft step above dark canvas
 const TARGET_TOP_BAR_HEIGHT = 80;
 const TARGET_APP_HEADER_TRANSITION_MS = 200;
-const TARGET_NAV_EXPANDED_WIDTH = 220;
-const TARGET_NAV_WIDE_WIDTH = 468;
-const TARGET_NAV_COLLAPSED_WIDTH = 56;
-const TARGET_SIDE_PANEL_WIDTH = 248;
+/** Keep in sync with `mapDesignExplorationNavWidth` in design_exploration_project_side_nav. */
+export const TARGET_NAV_EXPANDED_WIDTH = 220;
+export const TARGET_NAV_COLLAPSED_WIDTH = 56;
+export const TARGET_SIDE_PANEL_WIDTH = 248;
+const TARGET_NAV_WIDE_WIDTH = TARGET_NAV_EXPANDED_WIDTH + TARGET_SIDE_PANEL_WIDTH;
 const TARGET_NAV_COLLAPSED_WIDE_WIDTH = TARGET_NAV_COLLAPSED_WIDTH + TARGET_SIDE_PANEL_WIDTH;
 
 const TARGET_NAV_EXPANDED_SELECTOR = `[data-test-subj='sideNavCollapseButton'][aria-pressed='true']`;
@@ -130,6 +131,22 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       font-weight: 500 !important;
     }
 
+    ${scope} .euiLink:not(:disabled) {
+      text-decoration: underline dotted !important;
+      text-decoration-thickness: 1px !important;
+      text-underline-offset: 0.15em !important;
+    }
+
+    ${scope} .euiLink:not(:disabled):hover,
+    ${scope} .euiLink:not(:disabled):focus-visible,
+    ${scope} .euiTableCellContent .euiLink:not(:disabled):hover,
+    ${scope} .euiTableCellContent .euiLink:not(:disabled):focus-visible {
+      color: ${colors.textPrimary} !important;
+      text-decoration: underline solid !important;
+      text-decoration-thickness: from-font !important;
+      text-underline-offset: 0.15em !important;
+    }
+
     ${scope} .euiTableCellContent .euiText:has([data-test-subj^='dashboardListingTitleLink-']) + .euiText {
       font-size: 12px !important;
     }
@@ -166,10 +183,20 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       )} !important;
     }
 
-    ${scope}
-    .kbnChromeNav-root:not(:has(${TARGET_NAV_EXPANDED_SELECTOR}))[class*='getNavWrapperStyles'] {
+    ${scope} .kbnChromeNav-root:not(:has(${TARGET_NAV_EXPANDED_SELECTOR})) {
       width: ${TARGET_NAV_COLLAPSED_WIDTH}px !important;
       flex-shrink: 0 !important;
+    }
+
+    ${scope}:not(:has(${TARGET_NAV_EXPANDED_SELECTOR})) .kbnChromeNav-iconWrapper,
+    ${scope}:not(:has(${TARGET_NAV_EXPANDED_SELECTOR})) .kbnChromeNav-iconWrapper::before {
+      border-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope}:not(:has(${TARGET_NAV_EXPANDED_SELECTOR}))
+      [data-menu-item='true'][data-highlighted='true']
+      .kbnChromeNav-iconWrapper {
+      background-color: ${colors.backgroundBasePlain} !important;
     }
 
     /* ----- Target expanded nav — layout width + grid column sync ----- */
@@ -193,8 +220,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     /* ----- Target expanded nav — primary rail ----- */
-    ${scope}
-    .kbnChromeNav-root:has(${TARGET_NAV_EXPANDED_SELECTOR})[class*='getNavWrapperStyles'] {
+    ${scope} .kbnChromeNav-root:has(${TARGET_NAV_EXPANDED_SELECTOR}) {
       width: ${TARGET_NAV_EXPANDED_WIDTH}px !important;
       flex-shrink: 0 !important;
     }
@@ -588,16 +614,18 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       padding: ${knobVar('padding')} !important;
     }
 
-    /* Larger, softer radius than Linbana; still flat/no-shadow. */
+    /* All panels share the 12px panel radius — EUI panels, dashboard cards, empty prompts. */
+    ${scope} .euiPanel,
+    ${scope} .embPanel,
+    ${scope} .euiEmptyPrompt,
     ${scope} [data-test-subj='embeddablePanel'] {
       border-radius: ${knobVar('radiusPanel')} !important;
+    }
+
+    ${scope} [data-test-subj='embeddablePanel'] {
       border: ${TARGET_HAIRLINE} !important;
       box-shadow: none !important;
       background-color: ${knobVar('surface')} !important;
-    }
-
-    ${scope} [data-test-subj='embeddablePanel']:has(.echMetricText) {
-      border-radius: ${knobVar('radiusPanelCompact')} !important;
     }
 
     ${scope} .embPanel__hoverActions,
@@ -740,17 +768,41 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       box-shadow: none !important;
     }
 
-    /* Primary / accent buttons: flat orange fill, no gradient, no border.
-       Full capsule radius vs. Linbana's smaller button radius. */
+    /* All EUI buttons share the 8px control radius. Split/group join rules below
+       still square the inner corners. */
+    ${scope} .euiButton,
+    ${scope} .euiButtonEmpty,
+    ${scope} .euiButtonIcon,
+    ${scope} .euiSplitButton,
+    ${scope} .euiButtonDisplay,
+    ${scope} [class*='-euiButtonDisplay'],
+    ${scope} [class*='-euiButtonEmpty'],
+    ${scope} [class*='-euiButtonIcon'] {
+      border-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} .euiButtonGroup,
+    ${scope} .euiButtonGroup__buttons {
+      border-radius: ${knobVar('radiusControl')} !important;
+      overflow: hidden;
+    }
+
+    ${scope} .euiButtonGroup .euiButtonGroupButton,
+    ${scope} .euiButtonGroup [class*='-euiButtonDisplay'],
+    ${scope} .euiButtonGroup .euiButtonIcon {
+      border-radius: 0 !important;
+    }
+
+    /* Primary / accent buttons: flat fill, no gradient, no border. */
     ${scope} [class*='css-'][class*='-euiButtonDisplay'][class*='fill']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary) {
       border: none !important;
       box-shadow: none !important;
-      border-radius: ${knobVar('radiusButton')} !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope} .euiSplitButtonActionPrimary {
-      border-start-start-radius: ${knobVar('radiusButton')} !important;
-      border-end-start-radius: ${knobVar('radiusButton')} !important;
+      border-start-start-radius: ${knobVar('radiusControl')} !important;
+      border-end-start-radius: ${knobVar('radiusControl')} !important;
       border-start-end-radius: 0 !important;
       border-end-end-radius: 0 !important;
       padding-left: 12px !important;
@@ -758,8 +810,8 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .euiSplitButtonActionSecondary {
-      border-start-end-radius: ${knobVar('radiusButton')} !important;
-      border-end-end-radius: ${knobVar('radiusButton')} !important;
+      border-start-end-radius: ${knobVar('radiusControl')} !important;
+      border-end-end-radius: ${knobVar('radiusControl')} !important;
       border-start-start-radius: 0 !important;
       border-end-start-radius: 0 !important;
       padding-right: 4px !important;
@@ -1098,8 +1150,12 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     /* ----- App header ----- */
     /* Flat, static, no glass/blur — same philosophy as Linbana. */
-    ${scope} [class*='css-'][class*='-app_header_shell--primaryRow'] {
+    ${scope} [data-test-subj='appHeader'] > div:not([data-test-subj='appHeaderTabs']) {
       padding-block-start: ${knobVar('padding')} !important;
+    }
+
+    ${scope} [data-test-subj='appHeaderTabs'] {
+      padding-block: 0 !important;
     }
 
     /* Discover: session tabs arrive via titleAppend (same primary row as the
@@ -1137,7 +1193,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='dataView-add-field_btn'] {
-      border-radius: 12px !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope} [class*='css-'][class*='-tab_with_background--TabWithBackground'] {
@@ -1207,7 +1263,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay'][class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
-      border-radius: ${knobVar('radiusButton')} !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:hover
@@ -1215,7 +1271,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:focus
       [class*='app_menu_action_button--buttonCss'] {
       background-color: transparent !important;
-      border-radius: ${knobVar('radiusButton')} !important;
+      border-radius: ${knobVar('radiusControl')} !important;
     }
 
     ${scope} [data-test-subj='appHeader'] [class*='css-'][class*='-euiButtonDisplay-euiButtonEmpty'][class*='app_menu_item--buttonCss'] {
@@ -1227,30 +1283,36 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='appHeader'] .euiSplitButtonActionPrimary {
-      border-start-start-radius: ${knobVar('radiusButton')} !important;
-      border-end-start-radius: ${knobVar('radiusButton')} !important;
+      border-start-start-radius: ${knobVar('radiusControl')} !important;
+      border-end-start-radius: ${knobVar('radiusControl')} !important;
       border-start-end-radius: 0 !important;
       border-end-end-radius: 0 !important;
       padding-inline-end: 12px !important;
     }
 
     ${scope} [data-test-subj='appHeader'] .euiSplitButtonActionSecondary {
-      border-start-end-radius: ${knobVar('radiusButton')} !important;
-      border-end-end-radius: ${knobVar('radiusButton')} !important;
+      border-start-end-radius: ${knobVar('radiusControl')} !important;
+      border-end-end-radius: ${knobVar('radiusControl')} !important;
       border-start-start-radius: 0 !important;
       border-end-start-radius: 0 !important;
     }
 
-    ${scope} .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
+    /* Chrome-owned top-bar slot only. Dashboards render AppHeader inline in
+       app content — do not reserve this 80px there or the header is pushed down. */
+    ${scope} .kbnChromeLayoutApplication:has(.kbnChromeLayoutApplicationTopBar) {
       --kbn-application--top-bar-height: ${TARGET_TOP_BAR_HEIGHT}px !important;
-      border-radius: ${knobVar('radiusContainer')} !important;
-      // border: ${TARGET_HAIRLINE} !important;
+    }
+
+    ${scope} .kbnChromeLayoutApplication:not(:has(.kbnChromeLayoutApplicationTopBar)) {
+      --kbn-application--top-bar-height: 0px !important;
+      --kbn-application--sticky-headers-offset: 0px !important;
+      --kbnAppHeadersOffset: 0px !important;
     }
 
     /* Opaque topBar shell — never faded — so scroll content cannot bleed through on reveal.
        Hairline lives on the shell, not appHeader: fixed height + overflow:hidden clips the
        header's bottom border on dashboard detail view. */
-    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
+    ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR}) .kbnChromeLayoutApplicationTopBar {
       height: ${TARGET_TOP_BAR_HEIGHT}px !important;
       min-height: 0 !important;
       opacity: 1 !important;
@@ -1261,7 +1323,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope}:has(${DASHBOARD_CONTAINER_SELECTOR})
-      .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader'])
+      .kbnChromeLayoutApplicationTopBar
       [data-test-subj='appHeader'] {
       border-block-end: none !important;
       margin-bottom: 0 !important;
@@ -1273,7 +1335,8 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       top: auto !important;
     }
 
-    ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] > div {
+    ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] > div:not([data-test-subj='appHeaderTabs']) {
+      padding-block: 16px !important;
       opacity: 1;
       transition: opacity ${TARGET_APP_HEADER_TRANSITION_MS}ms ease
         ${TARGET_APP_HEADER_TRANSITION_MS}ms !important;
@@ -1287,13 +1350,15 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutApplication {
       background-color: ${knobVar('surface')} !important;
+      border-radius: ${knobVar('radiusContainer')} !important;
       box-shadow: ${knobVar('shellShadow')} !important;
       outline: none !important;
       margin-right: 8px !important;
     }
 
-    /* No border-block-end at rest — Intercom relies on spacing; show hairline on scroll. */
-    ${scope} .kbnChromeLayoutApplication div:has(> #dashboardTitle) {
+    /* Offset the dashboard query bar only when chrome owns a separate top-bar slot. */
+    ${scope} .kbnChromeLayoutApplication:has(.kbnChromeLayoutApplicationTopBar)
+      div:has(> #dashboardTitle) {
       top: ${TARGET_TOP_BAR_HEIGHT}px !important;
       width: 100% !important;
       border-block-end: ${TARGET_HAIRLINE} !important;
@@ -1303,6 +1368,18 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       -webkit-backdrop-filter: none !important;
       margin-inline: 0 !important;
       transition: top ${TARGET_APP_HEADER_TRANSITION_MS}ms ease !important;
+    }
+
+    ${scope} .kbnChromeLayoutApplication:not(:has(.kbnChromeLayoutApplicationTopBar))
+      div:has(> #dashboardTitle) {
+      top: 0 !important;
+      width: 100% !important;
+      border-block-end: ${TARGET_HAIRLINE} !important;
+      box-shadow: none !important;
+      background-color: ${knobVar('surface')} !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      margin-inline: 0 !important;
     }
 
     /* Fullscreen hides chrome — no app header to offset against; pin top nav immediately. */
@@ -1317,14 +1394,14 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
-      .kbnChromeLayoutApplication:has([data-test-subj='appHeader']) {
+      .kbnChromeLayoutApplication:has(.kbnChromeLayoutApplicationTopBar) {
       --kbn-application--top-bar-height: 0px !important;
       --kbn-application--sticky-headers-offset: 0px !important;
       --kbnAppHeadersOffset: 0px !important;
     }
 
     ${scope}[${DESIGN_EXPLORATION_APP_HEADER_HIDDEN_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
-      .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
+      .kbnChromeLayoutApplicationTopBar {
       height: 0 !important;
       min-height: 0 !important;
       overflow: hidden !important;
@@ -1348,7 +1425,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope}[${DESIGN_EXPLORATION_SCROLLED_BODY_ATTR}='true']:has(${DASHBOARD_CONTAINER_SELECTOR})
-      .kbnChromeLayoutApplication > div:has([data-test-subj='appHeader']) {
+      .kbnChromeLayoutApplicationTopBar {
       border-block-end: none !important;
     }
 

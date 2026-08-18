@@ -236,6 +236,7 @@ export const createVerbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutApplication {
       background-color: transparent !important;
+      border-radius: 0 !important;
       box-shadow: none !important;
       outline: none !important;
     }

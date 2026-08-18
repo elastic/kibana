@@ -89,6 +89,9 @@ export const NIRBANA_KNOB_TOKENS: DesignExplorationKnobTokens = {
 
 export const TARGET_KNOB_TOKENS: DesignExplorationKnobTokens = {
   ...NIRBANA_KNOB_TOKENS,
+  radiusButton: 8,
+  radiusPanel: 12,
+  radiusPanelCompact: 12,
 };
 
 export const DESIGN_EXPLORATION_KNOB_TOKENS_BY_VARIANT: Record<string, DesignExplorationKnobTokens> =

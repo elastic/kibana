@@ -150,8 +150,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
       )} !important;
     }
 
-    ${scope}
-    .kbnChromeNav-root:not(:has(${INTERBANA_NAV_EXPANDED_SELECTOR}))[class*='getNavWrapperStyles'] {
+    ${scope} .kbnChromeNav-root:not(:has(${INTERBANA_NAV_EXPANDED_SELECTOR})) {
       width: ${INTERBANA_NAV_COLLAPSED_WIDTH}px !important;
       flex-shrink: 0 !important;
     }
@@ -177,8 +176,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     /* ----- Interbana expanded nav — primary rail ----- */
-    ${scope}
-    .kbnChromeNav-root:has(${INTERBANA_NAV_EXPANDED_SELECTOR})[class*='getNavWrapperStyles'] {
+    ${scope} .kbnChromeNav-root:has(${INTERBANA_NAV_EXPANDED_SELECTOR}) {
       width: ${INTERBANA_NAV_EXPANDED_WIDTH}px !important;
       flex-shrink: 0 !important;
     }
@@ -1213,6 +1211,7 @@ export const createInterbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutApplication {
       background-color: ${knobVar('surface')} !important;
+      border-radius: ${knobVar('radiusContainer')} !important;
       box-shadow: ${knobVar('shellShadow')} !important;
       outline: none !important;
       margin-right: 8px !important;

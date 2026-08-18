@@ -40,7 +40,11 @@ export const LayoutApplication = ({
       data-test-subj="kbnChromeLayoutApplication"
       tabIndex={-1}
     >
-      {topBar && <div css={styles.topBar}>{topBar}</div>}
+      {topBar && (
+        <div css={styles.topBar} className="kbnChromeLayoutApplicationTopBar">
+          {topBar}
+        </div>
+      )}
       <div css={[styles.content]}>{children}</div>
       {bottomBar && <div css={styles.bottomBar}>{bottomBar}</div>}
     </div>

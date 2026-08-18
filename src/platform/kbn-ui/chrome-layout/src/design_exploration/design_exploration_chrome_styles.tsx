@@ -8,13 +8,14 @@
  */
 
 import React, { useEffect } from 'react';
-import { Global } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { getScrollContainer } from '@kbn/ui-chrome-layout-utils';
 import { getDesignExplorationVariant } from '@kbn/core-chrome-feature-flags';
 import {
   applyDesignExplorationKnobCssVars,
   DESIGN_EXPLORATION_KNOBS_CHANGED_EVENT,
+  designExplorationKnobVar as knobVar,
 } from './design_exploration_knobs';
 import {
   createActiveDesignExplorationStyles,
@@ -26,6 +27,7 @@ import {
   DESIGN_EXPLORATION_SCROLLED_BODY_ATTR,
   DESIGN_EXPLORATION_VARIANT_ATTR,
   createDesignExplorationScrollState,
+  designExplorationScope,
   updateDesignExplorationScrollState,
 } from './design_exploration_shared';
 
@@ -38,6 +40,47 @@ export {
   designExplorationScope,
   designExplorationScopedInPanels,
 } from './design_exploration_shared';
+
+/**
+ * Beat framed-appearance radii from layout_application / grid_global_app_style
+ * (Borealis medium, some with !important) so the roundness knob still controls chrome.
+ * Variant styles can override `.kbnChromeLayoutApplication` with a different token.
+ */
+const createDesignExplorationFramedChromeRadiusStyles = () => {
+  const scope = designExplorationScope();
+  const radius = knobVar('radiusContainer');
+
+  return css`
+    ${scope} .kbnChromeLayoutApplication {
+      border-radius: ${radius} !important;
+    }
+
+    ${scope} .euiOverlayMask[data-relative-to-header='below'] {
+      border-radius: ${radius} !important;
+    }
+
+    ${scope} .euiFlyout[class*='right']:not([data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']) {
+      border-top-right-radius: ${radius} !important;
+      border-bottom-right-radius: ${radius} !important;
+    }
+
+    ${scope} .euiFlyout[class*='right']:not([data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child'])
+      .euiFlyoutFooter {
+      border-bottom-right-radius: ${radius} !important;
+    }
+
+    ${scope} .euiOverlayMask[data-relative-to-header='above']
+      + [data-euiportal='true']
+      .euiFlyout[class*='right'] {
+      border-radius: 0 !important;
+    }
+
+    ${scope} .euiBottomBar.euiBottomBar--fixed {
+      border-bottom-left-radius: ${radius} !important;
+      border-bottom-right-radius: ${radius} !important;
+    }
+  `;
+};
 
 /**
  * Design exploration chrome POC — sets body scope for global style overrides when mounted.
@@ -93,5 +136,12 @@ export const DesignExplorationChromeGlobalStyles = () => {
     };
   }, [activeVariantId, colorMode]);
 
-  return <Global styles={createActiveDesignExplorationStyles(euiTheme)} />;
+  return (
+    <Global
+      styles={[
+        createDesignExplorationFramedChromeRadiusStyles(),
+        createActiveDesignExplorationStyles(euiTheme),
+      ]}
+    />
+  );
 };

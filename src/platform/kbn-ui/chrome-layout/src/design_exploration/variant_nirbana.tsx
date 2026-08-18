@@ -166,8 +166,7 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
       )} !important;
     }
 
-    ${scope}
-    .kbnChromeNav-root:not(:has(${NIRBANA_NAV_EXPANDED_SELECTOR}))[class*='getNavWrapperStyles'] {
+    ${scope} .kbnChromeNav-root:not(:has(${NIRBANA_NAV_EXPANDED_SELECTOR})) {
       width: ${NIRBANA_NAV_COLLAPSED_WIDTH}px !important;
       flex-shrink: 0 !important;
     }
@@ -193,8 +192,7 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
     }
 
     /* ----- Nirbana expanded nav — primary rail ----- */
-    ${scope}
-    .kbnChromeNav-root:has(${NIRBANA_NAV_EXPANDED_SELECTOR})[class*='getNavWrapperStyles'] {
+    ${scope} .kbnChromeNav-root:has(${NIRBANA_NAV_EXPANDED_SELECTOR}) {
       width: ${NIRBANA_NAV_EXPANDED_WIDTH}px !important;
       flex-shrink: 0 !important;
     }
@@ -1287,6 +1285,7 @@ export const createNirbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutApplication {
       background-color: ${knobVar('surface')} !important;
+      border-radius: ${knobVar('radiusContainer')} !important;
       box-shadow: ${knobVar('shellShadow')} !important;
       outline: none !important;
       margin-right: 8px !important;

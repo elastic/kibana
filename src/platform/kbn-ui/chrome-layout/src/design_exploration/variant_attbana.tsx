@@ -113,8 +113,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
 
     /* ----- Attbana expanded nav — Linear-style primary rail ----- */
 
-    ${scope}
-    .kbnChromeNav-root:has(${ATTBANA_NAV_EXPANDED_SELECTOR})[class*='getNavWrapperStyles'] {
+    ${scope} .kbnChromeNav-root:has(${ATTBANA_NAV_EXPANDED_SELECTOR}) {
       width: ${ATTBANA_NAV_EXPANDED_WIDTH}px !important;
       flex-shrink: 0 !important;
     }
@@ -739,6 +738,7 @@ export const createAttbanaStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .kbnChromeLayoutApplication {
       background-color: ${knobVar('surface')} !important;
+      border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: ${knobVar('shellShadow')} !important;
       outline: none !important;
       margin-right: 8px !important;
