@@ -40,6 +40,10 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     plugins: {
       register: jest.fn(),
     },
+    management: {
+      createOrUpdateAgent: jest.fn(),
+      deleteAgent: jest.fn(),
+    },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };
 };

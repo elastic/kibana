@@ -148,6 +148,7 @@ export type {
   ExecutionStart,
   PluginsSetup,
   PluginsStart,
+  AgentBuilderManagementSetup,
   RuntimeStart,
   ReadOnlyConversationClient,
   ConversationsStart,

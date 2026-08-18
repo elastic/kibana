@@ -260,10 +260,35 @@ export interface AgentBuilderPluginSetup {
    */
   plugins: PluginsSetup;
   /**
+   * Management contract for creating, updating, and deleting persisted agents
+   * programmatically (not via HTTP routes). Used by Fleet to install package-managed agents.
+   */
+  management: AgentBuilderManagementSetup;
+  /**
    * TOP_SNIPPETS configuration (numSnippets, numWords) from `xpack.agentBuilder.topSnippets`.
    * Exposed so that dependent plugins can pass these values to search utilities.
    */
   topSnippets: TopSnippetsConfig;
+}
+
+/**
+ * Setup-time management contract for persisted agents.
+ * Lets plugins like Fleet create/update/delete agents during package install.
+ */
+export interface AgentBuilderManagementSetup {
+  /**
+   * Create or update a persisted agent. If the agent already exists, it is updated;
+   * otherwise it is created. Uses the `ensure` pattern from AgentsServiceStart.
+   */
+  createOrUpdateAgent: (opts: {
+    spaceId: string;
+    agent: AgentCreateRequest;
+    availability?: AgentAvailabilityConfig;
+  }) => Promise<void>;
+  /**
+   * Delete a persisted agent by ID.
+   */
+  deleteAgent: (opts: { agentId: string; spaceId: string }) => Promise<boolean>;
 }
 
 /**
