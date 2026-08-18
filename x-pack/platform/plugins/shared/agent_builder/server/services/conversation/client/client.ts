@@ -20,6 +20,7 @@ import {
   ConversationRoundStatus,
   TimelineEventType,
   TimelineTriggerType,
+  CONVERSATION_SCHEMA_VERSION,
   createBadRequestError,
   createConversationNotFoundError,
   createConversationWriteConflictError,
@@ -58,7 +59,7 @@ import type {
 } from './types';
 import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
-import type { ConversationStorage, ConversationProperties } from './storage';
+import type { ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
@@ -560,9 +561,10 @@ class ConversationClientImpl implements ConversationClient {
         source: `
           if (ctx._source.events == null) { ctx._source.events = []; }
           for (def event : params.new_events) { ctx._source.events.add(event); }
+          ctx._source.schema_version = params.schema_version;
           ctx._source.updated_at = params.now;
         `,
-        params: { new_events: stamped, now },
+        params: { new_events: stamped, now, schema_version: CONVERSATION_SCHEMA_VERSION },
       },
     });
 
@@ -575,13 +577,10 @@ class ConversationClientImpl implements ConversationClient {
   ): Promise<TimelineEvent[]> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    // A conversation is events-native once it has any stored events (its timeline is written
-    // from the first round). A legacy, rounds-only conversation has none, so convert its rounds
-    // on read. The producer never writes a partial events array (see appendRoundTimelineEvents),
-    // so a present-but-nonempty array is always the full timeline.
-    const storedEvents = document._source!.events;
-    let events: TimelineEvent[] =
-      storedEvents && storedEvents.length > 0 ? storedEvents : roundsToEvents(fromEs(document));
+    const isEventsNative = document._source!.schema_version === CONVERSATION_SCHEMA_VERSION;
+    let events: TimelineEvent[] = isEventsNative
+      ? document._source!.events ?? []
+      : roundsToEvents(fromEs(document));
 
     if (options.afterEventId) {
       const index = events.findIndex((event) => event.id === options.afterEventId);
@@ -611,15 +610,13 @@ class ConversationClientImpl implements ConversationClient {
 
     try {
       // Only write events for a timeline we own: a brand-new conversation (created this run), or
-      // one that already has stored events. Skip a legacy rounds-only conversation — getEvents
-      // converts its rounds on read, and appending here would leave a PARTIAL events array
-      // (just this round), dropping the earlier rounds from the timeline.
+      // one that is already events-native.
       if (!options.created) {
         const existing = await this.getDocumentWithAccess({
           conversationId: conversation.id,
           access: 'converse',
         });
-        if ((existing._source?.events?.length ?? 0) === 0) {
+        if (existing._source?.schema_version !== CONVERSATION_SCHEMA_VERSION) {
           return;
         }
       }
@@ -853,24 +850,9 @@ class ConversationClientImpl implements ConversationClient {
     access: ConversationAccess;
     maxRetries: number;
   }): OccWriter<Conversation> {
-    // These fields live on the stored document but not on the API `Conversation`, so `toEs`
-    // cannot round-trip them. A whole-document `index` would drop the event timeline. Capture
-    // them on read and re-emit them on write. Refreshed per attempt because `readModifyWrite`
-    // re-reads on retry, so a concurrent append is picked up before the next write.
-    let preserved: Pick<ConversationProperties, 'events' | 'active_execution' | 'schema_version'> =
-      {};
-
     return new OccWriter<Conversation>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
-        const source = document._source!;
-        preserved = {
-          ...(source.events !== undefined ? { events: source.events } : {}),
-          ...(source.active_execution !== undefined
-            ? { active_execution: source.active_execution }
-            : {}),
-          ...(source.schema_version !== undefined ? { schema_version: source.schema_version } : {}),
-        };
 
         return {
           id,
@@ -881,7 +863,7 @@ class ConversationClientImpl implements ConversationClient {
       index: async ({ id, document, ifSeqNo, ifPrimaryTerm }) => {
         const response = await this.storage.getClient().index({
           id,
-          document: { ...toEs(document, this.space), ...preserved },
+          document: toEs(document, this.space),
           ...(ifSeqNo != null && ifPrimaryTerm != null
             ? { if_seq_no: ifSeqNo, if_primary_term: ifPrimaryTerm }
             : {}),

@@ -47,7 +47,10 @@ jest.mock('./storage', () => ({
 
 const esClient = { update: jest.fn(), get: jest.fn() };
 
-const makeDoc = (events: TimelineEvent[] = []) => ({
+const makeDoc = (
+  events: TimelineEvent[] = [],
+  { schemaVersion }: { schemaVersion?: number } = {}
+) => ({
   _id: 'conv-1',
   _seq_no: 1,
   _primary_term: 1,
@@ -62,6 +65,7 @@ const makeDoc = (events: TimelineEvent[] = []) => ({
     access_control: { access_mode: ConversationAccessControlMode.Private },
     conversation_rounds: [],
     events,
+    ...(schemaVersion !== undefined ? { schema_version: schemaVersion } : {}),
   },
 });
 
@@ -136,6 +140,9 @@ describe('ConversationClient timeline events', () => {
       );
       expect(arg.script.source).toContain('ctx._source.events.add');
       expect(arg.script.params.new_events).toEqual(stamped);
+      // Appending marks the conversation events-native in the same atomic update.
+      expect(arg.script.source).toContain('ctx._source.schema_version');
+      expect(arg.script.params.schema_version).toBe(1);
       // The whole-document round path (storage index) is never used for an append.
       expect(mockStorageClient.index).not.toHaveBeenCalled();
     });
@@ -157,7 +164,9 @@ describe('ConversationClient timeline events', () => {
     }));
 
     beforeEach(() => {
-      mockStorageClient.search.mockResolvedValue({ hits: { hits: [makeDoc(storedEvents)] } });
+      mockStorageClient.search.mockResolvedValue({
+        hits: { hits: [makeDoc(storedEvents, { schemaVersion: 1 })] },
+      });
     });
 
     it('returns the whole timeline in order', async () => {
@@ -181,14 +190,14 @@ describe('ConversationClient timeline events', () => {
       );
     });
 
-    it('defaults to an empty timeline when the events field is absent', async () => {
-      const doc = makeDoc();
+    it('defaults to an empty timeline when an events-native doc has no events array', async () => {
+      const doc = makeDoc([], { schemaVersion: 1 });
       delete (doc._source as { events?: unknown }).events;
       mockStorageClient.search.mockResolvedValue({ hits: { hits: [doc] } });
       expect(await client.getEvents('conv-1')).toEqual([]);
     });
 
-    it('converts legacy rounds when the conversation has no stored events', async () => {
+    it('converts legacy rounds when the conversation is not events-native (no schema_version)', async () => {
       const doc = makeDoc();
       delete (doc._source as { events?: unknown }).events;
       (doc._source as { conversation_rounds: unknown[] }).conversation_rounds = [
@@ -208,6 +217,25 @@ describe('ConversationClient timeline events', () => {
         ['r1::user_message', TimelineEventType.userMessage],
         ['r1::execution_completed', TimelineEventType.executionCompleted],
       ]);
+    });
+
+    it('converts legacy rounds even when a stale events array is present but schema_version is absent', async () => {
+      // schema_version, not events-presence, is the events-native gate (Pierre's :584).
+      const doc = makeDoc(storedEvents);
+      (doc._source as { conversation_rounds: unknown[] }).conversation_rounds = [
+        {
+          id: 'r1',
+          status: 'completed',
+          input: { message: 'hi' },
+          steps: [],
+          response: { message: 'yo' },
+          started_at: '2026-01-01T00:00:00.000Z',
+        },
+      ];
+      mockStorageClient.search.mockResolvedValue({ hits: { hits: [doc] } });
+
+      const events = await client.getEvents('conv-1');
+      expect(events.map((e) => e.id)).toEqual(['r1::user_message', 'r1::execution_completed']);
     });
   });
 
@@ -317,8 +345,10 @@ describe('ConversationClient timeline events', () => {
       expect(started.execution_id).toBe(completed.execution_id);
     });
 
-    it('appends on an update when the conversation already has stored events', async () => {
-      mockStorageClient.search.mockResolvedValue({ hits: { hits: [makeDoc([storedEvent])] } });
+    it('appends on an update when the conversation is already events-native', async () => {
+      mockStorageClient.search.mockResolvedValue({
+        hits: { hits: [makeDoc([storedEvent], { schemaVersion: 1 })] },
+      });
 
       await client.appendRoundTimelineEvents(conversation, round(), {
         resumed: false,
@@ -332,8 +362,19 @@ describe('ConversationClient timeline events', () => {
       ]);
     });
 
-    it('appends nothing on an update to a legacy conversation (no stored events)', async () => {
-      // default search mock returns makeDoc() with events: []
+    it('appends nothing on an update to a legacy conversation (no schema_version)', async () => {
+      // default search mock returns makeDoc() with no schema_version
+      await client.appendRoundTimelineEvents(conversation, round(), {
+        resumed: false,
+        created: false,
+      });
+      expect(esClient.update).not.toHaveBeenCalled();
+    });
+
+    it('appends nothing on an update when a stale events array exists but schema_version is absent', async () => {
+      // Guards the migrate-on-write rule: events-presence must not trigger a partial append.
+      mockStorageClient.search.mockResolvedValue({ hits: { hits: [makeDoc([storedEvent])] } });
+
       await client.appendRoundTimelineEvents(conversation, round(), {
         resumed: false,
         created: false,

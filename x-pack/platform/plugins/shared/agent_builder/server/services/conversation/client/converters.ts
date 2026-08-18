@@ -180,7 +180,14 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 };
 
 export const fromEs = (document: Document): Conversation => {
-  const base = convertBaseFromEs(document);
+  const source = document._source!;
+
+  const base = {
+    ...convertBaseFromEs(document),
+    ...(source.events !== undefined ? { events: source.events } : {}),
+    ...(source.active_execution !== undefined ? { active_execution: source.active_execution } : {}),
+    ...(source.schema_version !== undefined ? { schema_version: source.schema_version } : {}),
+  };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
@@ -252,6 +259,14 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    // Round-trip the timeline fields so a whole-doc write preserves them (see fromEs).
+    ...(conversation.events !== undefined ? { events: conversation.events } : {}),
+    ...(conversation.active_execution !== undefined
+      ? { active_execution: conversation.active_execution }
+      : {}),
+    ...(conversation.schema_version !== undefined
+      ? { schema_version: conversation.schema_version }
+      : {}),
     // Cast metadata to storage type — the flattened mapping requires string | string[].
     // Deserialized domain values (boolean, number) only exist on read; writes always
     // go through serializeMetadataValue before reaching this converter.
@@ -315,6 +330,13 @@ export const createRequestToEs = ({
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    ...(conversation.events !== undefined ? { events: conversation.events } : {}),
+    ...(conversation.active_execution !== undefined
+      ? { active_execution: conversation.active_execution }
+      : {}),
+    ...(conversation.schema_version !== undefined
+      ? { schema_version: conversation.schema_version }
+      : {}),
     // Cast metadata to storage type — see note in toEs.
     ...(conversation.metadata
       ? { metadata: conversation.metadata as Record<string, SerializedMetadataValue> }
