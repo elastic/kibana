@@ -80,7 +80,6 @@ export const getConnectorList = async (
 
   const inferenceEndpointConnectors: (InferenceConnector & { creator?: string })[] = endpoints.map(
     (ep) => ({
-      ...ep,
       type: InferenceConnectorType.Inference,
       name:
         ep.metadata?.display?.name ??
@@ -95,7 +94,6 @@ export const getConnectorList = async (
         },
         taskType: ep.taskType,
         service: ep.service,
-        serviceSettings: ep.serviceSettings,
         modelCreator: ep.metadata?.display?.model_creator,
       },
       capabilities: {},

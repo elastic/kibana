@@ -60,3 +60,23 @@ To make a new connector eligible, add `'contextEngine'` to the
 `supportedFeatureIds` list on the connector spec (in `kbn-connector-specs`).
 No changes to the Context Engine plugin are required.
 
+## Signals
+
+Signals are observations classified from Agent Builder traces and stored in the
+per-space `context-engine-signals-<space>` index. The AI index detail page
+renders a read-only **Signals** panel: a preaggregated grouped-by-tag list, a
+drill-down into a group's individual signals (each with a trace waterfall in a
+flyout), and an "Analyze & improve" button that opens Agent Builder when a chat
+opener has been registered.
+
+The panel is backed by two internal, read-only routes (reads run as the current
+user against the current space's signals index):
+
+| Method | Path                                      | Description                                            |
+| ------ | ----------------------------------------- | ------------------------------------------------------ |
+| `GET`  | `/internal/context_engine/signals/groups` | Signals grouped by tag (a terms aggregation over tags) |
+| `GET`  | `/internal/context_engine/signals`        | The individual signals for a `tag` (paginated)         |
+
+Both routes are gated by the same `contextEngine:enabled` advanced setting as
+the AI index API (they return 404 while it is off).
+

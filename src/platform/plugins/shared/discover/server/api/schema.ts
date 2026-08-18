@@ -9,6 +9,7 @@
 
 import { z } from '@kbn/zod';
 import {
+  asCodeEsqlApproximationSchema,
   asCodeIdSchema,
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
@@ -169,6 +170,7 @@ const discoverSessionEsqlTabSchema = z
     ...discoverSessionTabIdentitySchema.shape,
     ...esqlTabSchema.shape,
     ...discoverSessionTabPresentationSchema.shape,
+    ...asCodeEsqlApproximationSchema.shape,
   })
   .strict();
 
