@@ -6,7 +6,7 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
-import type { UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
@@ -81,6 +81,36 @@ export class PackagePolicyService {
       )
     );
     return uniqBy(ids.flat(), 'id');
+  }
+
+  /**
+   * All synthetics package policies belonging to a private location, across
+   * every space. Matches both the new (`${configId}-${locationId}`) and legacy
+   * space-suffixed (`${configId}-${locationId}-${spaceId}`) id formats. Paginated
+   * so a location with more than one page of monitors isn't truncated.
+   */
+  async listByLocation({ locationId }: { locationId: string }): Promise<PackagePolicy[]> {
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
+    const items: PackagePolicy[] = [];
+    const perPage = 1000;
+    let page = 1;
+    let hasMore = true;
+
+    while (hasMore) {
+      const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
+        kuery: 'ingest-package-policies.package.name:synthetics',
+        spaceId: ALL_SPACES_ID,
+        page,
+        perPage,
+      });
+      items.push(...pageItems);
+      hasMore = pageItems.length === perPage;
+      page += 1;
+    }
+
+    const newSuffix = `-${locationId}`;
+    const legacyInfix = `-${locationId}-`;
+    return items.filter((pkgPolicy) => pkgPolicy.id.endsWith(newSuffix) || pkgPolicy.id.includes(legacyInfix));
   }
 
   async bulkCreate({
