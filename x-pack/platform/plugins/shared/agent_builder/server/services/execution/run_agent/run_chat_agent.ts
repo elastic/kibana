@@ -137,11 +137,16 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
   const resolvedConfiguration = resolveConfiguration(agentConfiguration);
 
   const pluginSkillIds = await context.plugins.resolveSkillIds(agentConfiguration.plugin_ids ?? []);
+  const skillIdsOverride = configurationOverrides?.skill_ids;
+  const filteredPluginSkillIds =
+    skillIdsOverride !== undefined
+      ? pluginSkillIds.filter((id) => skillIdsOverride.includes(id))
+      : pluginSkillIds;
   const filteredSkills = await selectSkills({
     skills,
     skillsStore,
     agentConfiguration,
-    additionalSkillIds: pluginSkillIds,
+    additionalSkillIds: filteredPluginSkillIds,
   });
 
   logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
