@@ -248,7 +248,9 @@ describe('validateReadOnlyQuery', () => {
     });
 
     it('still strips a genuine block comment', () => {
-      expect(validateReadOnlyQuery('SELECT pid FROM processes /* note */ WHERE pid = 1', ALLOWED)).toBeNull();
+      expect(
+        validateReadOnlyQuery('SELECT pid FROM processes /* note */ WHERE pid = 1', ALLOWED)
+      ).toBeNull();
     });
   });
 });
