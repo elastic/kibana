@@ -28,4 +28,9 @@ export const agentBuilderSpaceSettingsType: SavedObjectsType<AgentBuilderSpaceSe
         defaultAgentId: { type: 'keyword' },
       },
     },
+    modelVersions: {
+      1: {
+        changes: [],
+      },
+    },
   };
