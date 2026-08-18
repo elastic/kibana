@@ -186,7 +186,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
               forecastId={singleMetricViewerData?.forecastId}
               uuid={api.uuid}
               onForecastIdChange={api.updateForecastId}
-              isRenderComplete={error ? true : !loading}
+              isRenderComplete={error ? true : !isLoading}
               onLoading={(loading) => {
                 dataLoading$.next(loading);
               }}
