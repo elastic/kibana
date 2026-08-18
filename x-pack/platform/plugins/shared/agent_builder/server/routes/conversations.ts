@@ -16,7 +16,10 @@ import {
   agentBuilderDefaultAgentId,
   isAgentNotFoundError,
   isAgentUnavailableError,
+  isConversationAlreadyExistsError,
+  type Conversation,
 } from '@kbn/agent-builder-common';
+import { createConversationPublicClient } from '../services/conversation/conversation_public_client';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import type {
@@ -317,41 +320,37 @@ export function registerConversationRoutes({
           access_control: accessControl,
         } = request.body;
 
-        const effectiveAgentId = agentId ?? agentBuilderDefaultAgentId;
+        const [client, agentRegistry] = await Promise.all([
+          conversationsService.getScopedClient({ request }),
+          agentsService.getRegistry({ request }),
+        ]);
+        const publicClient = createConversationPublicClient({ client, agentRegistry });
 
-        // Validate agent is accessible before writing — avoids creating an orphaned
-        // document when the internal create() would persist first and fail on get()
-        const agentRegistry = await agentsService.getRegistry({ request });
+        let created: Conversation;
         try {
-          await agentRegistry.get(effectiveAgentId, { access: 'use' });
+          created = await publicClient.create({
+            agentId,
+            id: conversationId,
+            title,
+            accessControl,
+          });
         } catch (e) {
-          if (isAgentNotFoundError(e) || isAgentUnavailableError(e, effectiveAgentId)) {
+          if (isAgentNotFoundError(e) || isAgentUnavailableError(e)) {
             return response.notFound({
-              body: { message: `Agent ${effectiveAgentId} not found or inaccessible` },
+              body: {
+                message: `Agent ${agentId ?? agentBuilderDefaultAgentId} not found or inaccessible`,
+              },
+            });
+          }
+          if (isConversationAlreadyExistsError(e)) {
+            return response.conflict({
+              body: { message: `Conversation ${conversationId} already exists` },
             });
           }
           throw e;
         }
 
-        const client = await conversationsService.getScopedClient({ request });
-
-        // Guard duplicate IDs — internal create() maps ES version-conflict to 404,
-        // which cannot be distinguished from a genuine post-creation failure
-        if (conversationId && (await client.exists(conversationId))) {
-          return response.conflict({
-            body: { message: `Conversation ${conversationId} already exists` },
-          });
-        }
-
-        const created = await client.create({
-          agent_id: effectiveAgentId,
-          id: conversationId,
-          title: title ?? 'New conversation',
-          access_control: accessControl,
-          rounds: [],
-        });
-
-        // client.create() returns Conversation (no permissions). Fetch via get()
+        // publicClient.create() returns Conversation (no permissions). Fetch via get()
         // to return ConversationWithPermissions — consistent with GET /conversations/{id}.
         const conversation = await client.get(created.id);
 
