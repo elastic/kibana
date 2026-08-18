@@ -51,12 +51,29 @@ The subject, not `group_hash`, is what makes a series unique. `group_hash` is on
 
 ## How one execution works
 
-Each dispatcher run has two time anchors:
+Each dispatcher run derives a bounded scan window from the persisted `eventWatermark`:
 
-- `startedAt`: start of the current run
-- `previousStartedAt`: start of the previous run
+```
+windowStart = eventWatermark − OVERLAP_WINDOW_MINUTES
+windowEnd   = min(windowStart + MAX_WINDOW_MINUTES, startedAt − SETTLE_BUFFER_SECONDS)
+```
 
-Those anchors, plus persisted action history, let the dispatcher decide which episodes are new or still relevant without blindly replaying everything on every run.
+The window caps **event** rows only. Action rows are not upper-bounded, so `last_fired` still sees records `StoreActionsStep` stamped with `now` (after the settle buffer).
+
+`eventWatermark` is a **content-addressed** progress marker — it advances only after episodes in the window have received `.alert-actions` records, never based on wall-clock alone:
+
+| Tick outcome | `nextWatermark` |
+| --- | --- |
+| Truncated (`EPISODE_QUERY_LIMIT` rows returned) | `last_event_timestamp` of the last returned episode |
+| `no_episodes` or `no_actions` halt | `windowEnd` |
+| Aborted before `StoreActionsStep` | `eventWatermark` (no advance) |
+| Normal completion | `windowEnd` |
+
+`nextWatermark` never regresses: the final value is `max(computed, eventWatermark)`.
+
+Cold start (no persisted watermark) is logged as `DISPATCHER_COLD_START` and the watermark is seeded to `startedAt − OVERLAP_WINDOW_MINUTES`.
+
+The scan window, persisted action history, and content-addressed dedup let the dispatcher decide which episodes are new or still relevant without blindly replaying everything on every run.
 
 The pipeline then moves through these phases:
 
@@ -146,8 +163,14 @@ An empty matcher is a catch-all.
 | Parameter | Value | Source |
 | --- | --- | --- |
 | Task schedule | `5s` | [`schedule_task.ts`](schedule_task.ts) |
-| Episode query cap | `10000` rows | [`queries.ts`](queries.ts) |
-| Lookback window | `10` minutes | [`constants.ts`](constants.ts) |
+| Task timeout | `1m` | `DISPATCHER_TASK_TIMEOUT` in [`constants.ts`](constants.ts) |
+| Soft deadline | `42 000 ms` (~70 % of timeout) | `TICK_DEADLINE_MS` — pipeline is aborted at this point so the returned `RunResult` is always within the TM window |
+| Episode query cap | `10 000` rows | `EPISODE_QUERY_LIMIT` in [`queries.ts`](queries.ts) — a truncated tick advances the watermark to the last returned row, not to `now` |
+| Overlap re-read | `10` minutes | `OVERLAP_WINDOW_MINUTES` — each scan re-reads this far behind the watermark; content-addressed dedup makes re-reads free |
+| Max scan window | `15` minutes | `MAX_WINDOW_MINUTES` — caps forward progress per tick; must be `> OVERLAP_WINDOW_MINUTES` |
+| Settle buffer | `5` seconds | `SETTLE_BUFFER_SECONDS` — excludes the most recent slice to avoid scanning mid-write |
+| Stuck-tick limit | `10` ticks (~50 s) | `STUCK_TICK_LIMIT` — after this many stuck ticks the escape hatch fires |
+| Pre-fetch force-advance lag | `15` minutes | `PRE_FETCH_STUCK_ADVANCE_LAG_MS` — if the hatch fires with no known episodes and lag exceeds this, skip the unread window |
 | Matcher language | KQL | `@kbn/eval-kql` |
 
 ## Important pipeline state
@@ -156,8 +179,11 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 
 | Field | Produced by | Meaning |
 | --- | --- | --- |
-| `input` | Pipeline | Time anchors that shape the run. |
-| `episodes` | `FetchEpisodesStep` | Candidate `AlertEpisode` rows. |
+| Field | Produced by | Meaning |
+| --- | --- | --- |
+| `input` | Pipeline | Window anchors (`eventWatermark`, `windowStart`, `windowEnd`) and execution context. |
+| `episodes` | `FetchEpisodesStep` | Candidate `AlertEpisode` rows fetched within `[windowStart, windowEnd]`. |
+| `truncated` | `FetchEpisodesStep` | `true` when the fetch hit `EPISODE_QUERY_LIMIT`; watermark advances to the last row, not `windowEnd`. |
 | `suppressions` | `FetchSuppressionsStep` | Suppression facts from `.alert-actions`. |
 | `dispatchable` / `suppressed` | `ApplySuppressionStep` | Split of episodes that may continue vs those that must not notify. |
 | `dispatchable` (with `data`) | `HydrateEpisodeDataStep` | Replaces `dispatchable` with the same episodes enriched with their `data` payload. |
@@ -166,6 +192,7 @@ The dispatcher carries state forward through `DispatcherPipelineState` in `types
 | `matched` | `EvaluateMatchersStep` | Concrete `(episode, policy)` matches. |
 | `groups` | `BuildGroupsStep` | Action groups to consider for delivery. |
 | `dispatch` / `throttled` | `ApplyThrottlingStep` | Groups that may send now vs groups held back. |
+| `recordedEpisodes` | `StoreActionsStep` | Count of episodes that received an `.alert-actions` record this tick. |
 
 ## Execution steps
 
@@ -190,14 +217,38 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 
 | Reason | Meaning |
 | --- | --- |
-| `no_episodes` | Nothing relevant was found for this run. |
-| `no_actions` | The run produced no stored outcomes after evaluation. |
+| `no_episodes` | Nothing relevant was found for this run; watermark advances to `windowEnd`. |
+| `no_actions` | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`. |
+| `aborted` | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`). If aborted before `StoreActionsStep`, the watermark does not advance. |
+
+## Watermark contract
+
+The invariant maintained across all ticks:
+
+> `scanLowerBound ≤ min(@timestamp of any rule-event not yet marked in .alert-actions)`
+
+`eventWatermark` is written to Task Manager state only via the returned `RunResult`. If the TM timeout elapses before `run()` returns, TM discards the state write entirely — the watermark freezes. The soft deadline (`TICK_DEADLINE_MS ≈ 70 % of task timeout`) ensures the pipeline always stops and returns a safe `RunResult` well within the TM window.
+
+### Stuck-watermark escape hatch
+
+If the watermark does not advance for `STUCK_TICK_LIMIT` consecutive ticks (default 10, ~50 s), the dispatcher:
+
+1. Logs `DISPATCHER_WATERMARK_STUCK` at error level.
+2. Force-records all blocking episodes as `unmatched` in `.alert-actions` so the content-addressed dedup mark advances past them.
+3. Advances `nextWatermark` to `input.windowEnd`.
+4. Resets the stuck-tick counter to 0.
+
+The blocking episodes are **not dispatched** — they are permanently marked as `unmatched`. This is the documented escape from a permanently un-recordable episode that would otherwise stall the dispatcher indefinitely.
+
+If the pipeline never reached `FetchEpisodesStep` (`episodes` empty), there is nothing to mark. While watermark lag is within `PRE_FETCH_STUCK_ADVANCE_LAG_MS` (one max scan window), the hatch holds the watermark, logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_STUCK`, and resets the counter so a transient outage can recover. Once lag exceeds that threshold, it logs `DISPATCHER_ESCAPE_HATCH_PRE_FETCH_FORCED_ADVANCE` and advances to `windowEnd` anyway — unread events in that window are skipped so the dispatcher cannot stall forever.
 
 ## Delivery guarantees and limits
 
-- Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may retry.
+- Delivery is effectively at-least-once. If delivery succeeds but action recording fails or the process crashes, a later run may re-deliver.
 - Destination handlers should therefore be idempotent.
-- The episode query is capped at 10,000 rows per run. Sustained backlog is processed over multiple executions.
+- The episode query is capped at `EPISODE_QUERY_LIMIT` (10 000) rows per run. A truncated tick advances the watermark only to the last returned row's timestamp; the deferred tail is scanned next tick.
+- Sustained backlog is drained over multiple ticks at up to `MAX_WINDOW_MINUTES − OVERLAP_WINDOW_MINUTES` minutes per tick.
+- Per-tick observability is emitted at `debug` level: `halt_reason`, `watermark_lag_ms`, `window_span_ms`, `truncated`, `episode_count`, `stuck_ticks`.
 
 ## When to add a new dispatcher step
 

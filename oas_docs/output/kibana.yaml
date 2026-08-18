@@ -15960,11 +15960,11 @@ paths:
           required: false
           schema:
             anyOf:
-              - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+              - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
                 enum:
                   - alert
                 type: string
-              - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+              - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
                 enum:
                   - signal
                 type: string
@@ -96438,11 +96438,11 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_alerting_rule_grouping'
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
               enum:
                 - alert
               type: string
-            - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
               enum:
                 - signal
               type: string
@@ -96935,11 +96935,11 @@ components:
           type: string
         kind:
           anyOf:
-            - description: Default. Tracks each problem as an alert episode across state changes — lifecycle, recovery detection, and notification dispatch via workflows. Use when the user wants to be notified, needs lifecycle tracking, or wants recovery detection.
+            - description: Default. Tracks each problem as an alert episode and its lifecycle, link it to workflows to notify your team. Use when the user wants to detect and respond.
               enum:
                 - alert
               type: string
-            - description: Records each match as a queryable event with no alerts, lifecycle tracking, or notifications — just data. Use for logging or detection without automated action.
+            - description: Matches are stored as queryable events. No alerts, no notifications - just data. Use when the user wants to collect evidence.
               enum:
                 - signal
               type: string
