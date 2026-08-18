@@ -40,7 +40,7 @@ export const TARGET_VARIANT_ID = 'target';
 //     lifts a true-white app surface; secondary nav side panel gets a subtle shade
 //   - warm orange accent instead of Linear's cool indigo
 const TARGET_ACCENT = '#F26522'; // warm orange accent (est. from reference)
-const TARGET_SURFACE_APP_LIGHT = '#f7f8f9';
+const TARGET_SURFACE_APP_LIGHT = '#f5f7fb';
 const TARGET_SURFACE_APP_DARK = '#10141a'; // soft step above dark canvas
 const TARGET_TOP_BAR_HEIGHT = 80;
 const TARGET_APP_HEADER_TRANSITION_MS = 200;
@@ -509,6 +509,10 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       display: none !important;
     }
 
+    ${scope} [data-test-subj='designExplorationNavTopControls'] {
+      padding-top: 24px !important;
+    }
+
     ${scope}
     .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
     [data-test-subj='kbnChromeNav-logo'] {
@@ -570,8 +574,10 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [class*='css-'][class*='-secondary_menu--titleWithBadgeStyles'],
-    ${scope} [class*='css-'][class*='-secondary_menu--titleStyles'] {
+    ${scope} [class*='css-'][class*='-secondary_menu--titleStyles'],
+    ${scope} [data-test-subj='kbnChromeNav-panelContent'] .euiTitle {
       background-color: transparent !important;
+      background: transparent !important;
       padding-block-start: 30px !important;
       padding-inline: 24px !important;
     }
@@ -624,6 +630,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='embeddablePanel'] {
       border: ${TARGET_HAIRLINE} !important;
+      outline: none !important;
       box-shadow: none !important;
       background-color: ${knobVar('surface')} !important;
     }
@@ -666,9 +673,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       background-color: ${TARGET_SURFACE_HOVER_FILL} !important;
     }
 
-    ${scope}
-    [class*='css-'][class*='use_hover_actions_styles--containerStyles-use_hover_actions_styles--singleWrapperStyles-use_hover_actions_styles--singleWrapperStyles-use_hover_actions_styles--hoverActionStyles-use_hover_actions_styles--containerStyles']
-      .embPanel {
+    ${scope} .embPanel__hoverActionsAnchor .embPanel {
       outline: none !important;
     }
 
@@ -697,8 +702,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       padding: 0 ${knobVar('panelPadding')} ${knobVar('panelPadding')} !important;
     }
 
-    ${scope} [class*='css-'][class*='react_expression_renderer--ReactExpressionRenderer']:not(.euiProgress):has(.echMetricText),
-    ${scope} [class*='css-'][class*='visualization_container--VisualizationContainer']:not(.euiProgress):has(.echMetricText) {
+    ${scope} .echMetric {
       padding: ${DESIGN_EXPLORATION_GAP + 8}px ${DESIGN_EXPLORATION_GAP + 4}px
         ${DESIGN_EXPLORATION_GAP + 4}px !important;
     }
@@ -1233,7 +1237,8 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       font-weight: 600 !important;
     }
 
-    ${scope} .echMetricText__title > span {
+    ${scope} .echMetricText__title,
+    ${scope} .echMetricText__title span {
       font-size: 14px !important;
       font-weight: 600 !important;
       color: ${bespokeVar('textNav')} !important;
@@ -1249,9 +1254,10 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       color: ${bespokeVar('textNav')} !important;
     }
 
-    ${scope} .echMetricText__title > span,
+    ${scope} .echMetricText__title,
+    ${scope} .echMetricText__title span,
     ${scope} .echMetricText__subtitle {
-      padding-left: 4px !important;
+      padding-left: 0 !important;
     }
 
     ${scope} .echMetricText__subtitle {
