@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-// The workflow id and API version are intentionally inlined here rather than imported from
-// `@kbn/workflows/managed` / the workflows_management route constants, to keep this eval package
-// free of a runtime dependency on the plugin it evaluates. The upstream sources of truth are:
-//   - PND_RULE_CREATION_WORKFLOW_ID (@kbn/workflows/managed)
-//   - API_VERSION (workflows_management route constants)
-// Same convention as kbn-evals-suite-alert-analysis-workflow/src/constants.ts.
-
 /**
  * Managed workflow id, installed globally by the pnd plugin at start via installStatic /
  * PND_WATCH_WORKFLOW_IDS. The eval asserts this exact document is present — it does not create or
  * carry its own copy, so eval and production cannot drift.
  */
-export const RULE_CREATION_WORKFLOW_ID = 'system-security-rule-creation';
+export { PND_RULE_CREATION_WORKFLOW_ID as RULE_CREATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 
-/** Public workflows_management API version (`Elastic-Api-Version` header). */
+/**
+ * Public workflows_management API version (`Elastic-Api-Version` header). Inlined: the source of
+ * truth (API_VERSION in workflows_management route constants) lives in the plugin, not a package.
+ */
 export const WORKFLOWS_API_VERSION = '2023-10-31';
+
+/** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/pnd/rule_creation.yaml). */
+export const DRAFT_STEP_ID = 'draft_creation';
+export const REVIEW_STEP_ID = 'review_creation';
 
 /**
  * Agent Builder tool the workflow's `ai.agent` step is instructed to call. Reserved for the

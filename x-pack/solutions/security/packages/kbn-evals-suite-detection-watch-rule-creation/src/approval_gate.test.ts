@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-const { readFileSync } = jest.requireActual<typeof import('fs')>('fs');
-
-const WORKFLOW_YAML_PATH = `${__dirname}/../../../../../../src/platform/packages/shared/kbn-workflows/managed/definitions/pnd/rule_creation.yaml`;
+import {
+  getManagedWorkflowDefinition,
+  PND_RULE_CREATION_WORKFLOW_ID,
+} from '@kbn/workflows/managed';
 
 describe('rule_creation workflow approval gate', () => {
   let yaml: string;
 
   beforeAll(() => {
-    yaml = readFileSync(WORKFLOW_YAML_PATH, 'utf-8');
+    const definition = getManagedWorkflowDefinition(PND_RULE_CREATION_WORKFLOW_ID);
+    if (!definition?.yaml) {
+      throw new Error(`Managed workflow ${PND_RULE_CREATION_WORKFLOW_ID} has no yaml definition`);
+    }
+    yaml = definition.yaml;
   });
 
   it('has a create_rule step', () => {

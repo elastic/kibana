@@ -14,7 +14,12 @@ import {
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
-import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
+import {
+  DRAFT_STEP_ID,
+  REVIEW_STEP_ID,
+  RULE_CREATION_WORKFLOW_ID,
+  WORKFLOWS_API_VERSION,
+} from './constants';
 import { draftRuleSchema, type DraftRule } from './types';
 import { respondToWorkflowApproval } from './workflow_fixture';
 
@@ -31,7 +36,7 @@ const stepOutputSchema = z.object({ structured_output: draftRuleSchema }).partia
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
 const extractRuleFromSteps = (steps: WorkflowStepExecutionDto[]): DraftRule | undefined => {
-  const draftSteps = steps.filter((s) => s.stepId === 'draft_creation');
+  const draftSteps = steps.filter((s) => s.stepId === DRAFT_STEP_ID);
   const resultRecord = draftSteps.find((s) => s.output != null);
   const parsed = stepOutputSchema.safeParse(resultRecord?.output);
   return parsed.success ? parsed.data.structured_output : undefined;
@@ -160,15 +165,15 @@ export class RuleCreationClient {
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<WorkflowExecutionDto> {
-    const reviewStep = stepExecutions.find(
-      (s) => s.stepId === 'review_creation' && s.output == null
-    );
+    const reviewStep = stepExecutions.find((s) => s.stepId === REVIEW_STEP_ID && s.output == null);
     if (!reviewStep) {
       throw new Error(
-        `review_creation step not found in waiting state for execution ${workflowExecutionId}`
+        `${REVIEW_STEP_ID} step not found in waiting state for execution ${workflowExecutionId}`
       );
     }
 
+    // Must match buildWorkflowSourceId in workflows_management/server/inbox/to_inbox_action.ts
+    // (plugin-private, no shared export).
     const sourceId = `${RULE_CREATION_WORKFLOW_ID}:${workflowExecutionId}:${reviewStep.id}`;
     await respondToWorkflowApproval({ fetch: this.fetch, sourceId, approved, log: this.log });
 
