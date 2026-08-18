@@ -738,6 +738,7 @@ export class SettingsPageObject extends FtrService {
 
   async removeIndexPattern() {
     let alertText;
+    let hasClickedConfirm = false;
     await this.retry.try(async () => {
       this.log.debug('click delete index pattern button');
       // Best-effort: dismiss any lingering toasts before opening the flyout, while no
@@ -755,6 +756,13 @@ export class SettingsPageObject extends FtrService {
       }
     });
     await this.retry.try(async () => {
+      if (hasClickedConfirm && !(await this.testSubjects.exists('confirmFlyoutConfirmButton'))) {
+        // A previous click already succeeded and the flyout is gone (or on its way out);
+        // deleteDataViews() has no loading/disabled state, so re-clicking here would fire a
+        // second dataViews.delete() call that 404s and never calls onDelete(), wedging this
+        // retry. Nothing left to do.
+        return;
+      }
       this.log.debug('acceptConfirmation');
       // Click via a short-retry element handle so an interception surfaces here instead of
       // being swallowed by testSubjects.click's own long internal retry. Gate success on
@@ -762,7 +770,13 @@ export class SettingsPageObject extends FtrService {
       // re-try with a fresh state.
       const confirmButton = await this.testSubjects.find('confirmFlyoutConfirmButton');
       await confirmButton.click();
-      await this.testSubjects.missingOrFail('confirmFlyoutConfirmButton');
+      hasClickedConfirm = true;
+      // The Delete button's onClick kicks off a real saved-objects delete API call and the
+      // flyout only closes once that resolves; the default waitForExists timeout (2500ms) is
+      // far shorter than a real delete round-trip under CI load, so use the same longer
+      // timeout already used for this pattern elsewhere in this file (see
+      // indexPatternEditorFlyout above).
+      await this.testSubjects.missingOrFail('confirmFlyoutConfirmButton', { timeout: 30000 });
     });
     await this.retry.try(async () => {
       const currentUrl = await this.browser.getCurrentUrl();
