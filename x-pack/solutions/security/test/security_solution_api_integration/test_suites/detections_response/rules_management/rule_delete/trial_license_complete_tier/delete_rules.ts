@@ -21,6 +21,7 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
 } from '../../../utils';
+import { generateGapsForRule } from '../../../utils/event_log/generate_gaps_for_rule';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -30,6 +31,32 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
+  const retry = getService('retry');
+
+  const EVENT_LOG_DATA_STREAM = '.kibana-event-log-ds';
+
+  const countGapsForRule = async (
+    ruleId: string,
+    { softDeleted }: { softDeleted: boolean }
+  ): Promise<number> => {
+    await es.indices.refresh({ index: EVENT_LOG_DATA_STREAM });
+    const deletedClause = { term: { 'kibana.alert.rule.gap.deleted': true } };
+    const { count } = await es.count({
+      index: EVENT_LOG_DATA_STREAM,
+      query: {
+        bool: {
+          must: [
+            { term: { 'event.action': 'gap' } },
+            { term: { 'event.provider': 'alerting' } },
+            { term: { 'rule.id': ruleId } },
+            ...(softDeleted ? [deletedClause] : []),
+          ],
+          ...(softDeleted ? {} : { must_not: [deletedClause] }),
+        },
+      },
+    });
+    return count;
+  };
 
   describe('@ess @serverless @skipInServerlessMKI delete_rules', () => {
     describe('deleting rules', () => {
@@ -109,6 +136,27 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(body).to.eql({
           message: 'rule_id: "fake_id" not found',
           status_code: 404,
+        });
+      });
+
+      it('should soft-delete gaps after deleting a single rule', async () => {
+        const createdRule = await createRule(supertest, log, getSimpleRule('rule-with-gaps'));
+
+        const { gapEvents } = await generateGapsForRule(
+          es,
+          { id: createdRule.id, name: createdRule.name },
+          5
+        );
+        expect(gapEvents.length).to.equal(5);
+        expect(await countGapsForRule(createdRule.id, { softDeleted: false })).to.equal(5);
+
+        await detectionsApi.deleteRule({ query: { rule_id: 'rule-with-gaps' } }).expect(200);
+
+        // Gap soft-deletion is synchronous (a blocking update_by_query); the retry only
+        // covers ES refresh visibility.
+        await retry.tryForTime(30_000, async () => {
+          expect(await countGapsForRule(createdRule.id, { softDeleted: true })).to.equal(5);
+          expect(await countGapsForRule(createdRule.id, { softDeleted: false })).to.equal(0);
         });
       });
     });
