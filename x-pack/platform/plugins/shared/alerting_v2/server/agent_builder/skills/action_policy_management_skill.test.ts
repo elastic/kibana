@@ -77,4 +77,25 @@ describe('createActionPolicyManagementSkill', () => {
     expect(payloadRef?.content).toContain('`rules`');
     expect(payloadRef?.content).toContain('`episode_status`');
   });
+
+  it('exposes schema-generated matcher, grouping, and throttle references', () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+    const byName = Object.fromEntries(
+      (skill.referencedContent ?? []).map((entry) => [entry.name, entry.content])
+    );
+
+    expect(byName['action-policy-matchers']).toContain('# Matcher Context Fields');
+    expect(byName['action-policy-matchers']).toContain('`episode_status`');
+    expect(byName['action-policy-matchers']).toContain('`rule.id`');
+
+    expect(byName['action-policy-grouping-modes']).toContain('`per_episode`');
+    expect(byName['action-policy-throttle-strategies']).toContain('`on_status_change`');
+    expect(byName['action-policy-throttle-strategies']).toContain(
+      'action-policy-throttle-grouping-compatibility.md'
+    );
+    expect(byName['action-policy-throttle-grouping-compatibility']).toContain(
+      '# Throttle / Grouping Compatibility'
+    );
+    expect(byName['action-policy-throttle-grouping-compatibility']).toContain('`per_episode`');
+  });
 });

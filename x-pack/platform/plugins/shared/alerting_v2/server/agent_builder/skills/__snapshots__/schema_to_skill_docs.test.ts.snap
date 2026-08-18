@@ -127,10 +127,33 @@ Only \`kind: alert\` rules produce episodes. \`kind: signal\` rules write raw si
 `;
 
 exports[`schema_to_skill_docs generateGroupingModesDoc matches the reviewed skill-doc snapshot 1`] = `
-"### Grouping Modes
+"# Grouping Modes
+
 - \`per_episode\`: one notification per alert episode lifecycle (default).
 - \`all\`: a single notification for all matching episodes.
-- \`per_field\`: group by specified \`groupBy\` fields."
+- \`per_field\`: group by specified \`groupBy\` fields.
+
+Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
+`;
+
+exports[`schema_to_skill_docs generateMatcherContextDoc matches the reviewed skill-doc snapshot 1`] = `
+"# Matcher Context Fields
+
+When the dispatcher evaluates a policy's KQL matcher, these fields are available:
+
+| Field | Type | Description |
+|---|---|---|
+| \`episode_id\` | string | The episode UUID |
+| \`episode_status\` | \`inactive\`, \`pending\`, \`active\`, \`recovering\` | Episode lifecycle status |
+| \`group_hash\` | string | Hash of the grouping fields |
+| \`last_event_timestamp\` | string | Timestamp of the most recent event |
+| \`severity\` | \`info\`, \`low\`, \`medium\`, \`high\`, \`critical\` | Episode severity when present |
+| \`rule.id\` | string | The rule's saved object ID |
+| \`rule.name\` | string | The rule's display name |
+| \`rule.tags\` | string[] | The rule's tags array |
+| \`data\` | \`data.*\` object | Rule-specific ES\\\\|QL output columns (query as \`data.*\`, e.g. \`data.host.name\`, \`data.error_count\`) |
+
+An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use \`rule.id: \\"<ruleId>\\"\`."
 `;
 
 exports[`schema_to_skill_docs generateNoDataStrategyDoc matches the reviewed skill-doc snapshot 1`] = `
@@ -337,18 +360,23 @@ State transition is only allowed on \`kind: alert\` rules. Refer to the [rule-op
 `;
 
 exports[`schema_to_skill_docs generateThrottleGroupingCompatibilityDoc matches the reviewed skill-doc snapshot 1`] = `
-"### Throttle / Grouping Compatibility
+"# Throttle / Grouping Compatibility
 
 The throttle strategy must be compatible with the grouping mode:
 - For \`per_episode\`: \`on_status_change\`, \`per_status_interval\`, \`every_time\`.
 - For \`all\` / \`per_field\`: \`time_interval\`, \`every_time\`.
-- \`per_status_interval\`, \`time_interval\` require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`)."
+- \`per_status_interval\`, \`time_interval\` require an \`interval\` (e.g. \`\\"5m\\"\`, \`\\"1h\\"\`).
+
+Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [action-policy-throttle-strategies](./action-policy-throttle-strategies.md)."
 `;
 
 exports[`schema_to_skill_docs generateThrottleStrategiesDoc matches the reviewed skill-doc snapshot 1`] = `
-"### Throttle Strategies
+"# Throttle Strategies
+
 - \`on_status_change\`: notify only on episode status transitions (default for \`per_episode\`).
 - \`per_status_interval\`: notify on transitions and at regular intervals.
 - \`time_interval\`: notify at regular intervals regardless of status (default for \`all\`/\`per_field\`).
-- \`every_time\`: notify on every evaluation cycle (high volume)."
+- \`every_time\`: notify on every evaluation cycle (high volume).
+
+Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md)."
 `;

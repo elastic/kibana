@@ -17,6 +17,7 @@ import {
   noDataStrategySchema,
   groupingModeSchema,
   throttleStrategySchema,
+  MATCHER_CONTEXT_FIELDS,
   PER_EPISODE_STRATEGIES,
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
@@ -515,16 +516,16 @@ const formatStrategySet = (strategies: Set<string>): string =>
   formatEnumValuesList([...strategies]);
 
 /**
- * Generates the Throttle / Grouping Compatibility section with heading and
- * strategy-set bullets, derived from the schema's strategy sets.
+ * Generates standalone markdown for throttle / grouping compatibility from
+ * `PER_EPISODE_STRATEGIES`, `AGGREGATE_STRATEGIES`, and `STRATEGIES_REQUIRING_INTERVAL`.
  */
 export const generateThrottleGroupingCompatibilityDoc = (): string => {
   const groupingModes = getGroupingModeValues();
   const perEpisodeMode = groupingModes.find((m) => m === 'per_episode') ?? 'per_episode';
   const aggregateModes = groupingModes.filter((m) => m !== perEpisodeMode);
 
-  const lines = [
-    '### Throttle / Grouping Compatibility',
+  return [
+    '# Throttle / Grouping Compatibility',
     '',
     'The throttle strategy must be compatible with the grouping mode:',
     `- For \`${perEpisodeMode}\`: ${formatStrategySet(PER_EPISODE_STRATEGIES)}.`,
@@ -534,8 +535,9 @@ export const generateThrottleGroupingCompatibilityDoc = (): string => {
     `- ${formatStrategySet(
       STRATEGIES_REQUIRING_INTERVAL
     )} require an \`interval\` (e.g. \`"5m"\`, \`"1h"\`).`,
-  ];
-  return lines.join('\n');
+    '',
+    'Related: [action-policy-grouping-modes](./action-policy-grouping-modes.md), [action-policy-throttle-strategies](./action-policy-throttle-strategies.md).',
+  ].join('\n');
 };
 
 /** Generates the Rule Kind section with heading, per-kind subsections, and immutability note. */
@@ -683,24 +685,69 @@ export const generateRecoveryStrategyDoc = (): string => {
   ].join('\n');
 };
 
-/** Generates the Grouping Modes section with heading and bullet list. */
+/**
+ * Generates markdown for KQL matcher context fields from `MATCHER_CONTEXT_FIELDS`,
+ * enriching enum fields from `alertEpisodeStatusSchema` / `alertEventSeveritySchema`.
+ */
+export const generateMatcherContextDoc = (): string => {
+  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const severities = formatEnumValuesList(getSeverityValues());
+
+  const formatMatcherFieldType = (path: string, type: string): string => {
+    if (path === 'episode_status') return episodeStatuses;
+    if (path === 'severity') return severities;
+    if (path === 'data') return '`data.*` object';
+    return type;
+  };
+
+  const rows = MATCHER_CONTEXT_FIELDS.map((field) => {
+    const typeCell = escapeTableCell(formatMatcherFieldType(field.path, field.type));
+    return `| \`${field.path}\` | ${typeCell} | ${escapeTableCell(field.description)} |`;
+  });
+
+  return [
+    '# Matcher Context Fields',
+    '',
+    "When the dispatcher evaluates a policy's KQL matcher, these fields are available:",
+    '',
+    '| Field | Type | Description |',
+    '|---|---|---|',
+    ...rows,
+    '',
+    'An empty matcher is a catch-all that matches all episodes in the space. To scope a policy to a single rule, use `rule.id: "<ruleId>"`.',
+  ].join('\n');
+};
+
+/** Generates standalone markdown for action-policy grouping modes. */
 export const generateGroupingModesDoc = (): string => {
   const list = generateEnumList({
     schema: groupingModeSchema,
     schemaName: 'groupingModeSchema',
   });
 
-  return ['### Grouping Modes', list].join('\n');
+  return [
+    '# Grouping Modes',
+    '',
+    list,
+    '',
+    'Throttle strategy must be compatible with the grouping mode — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md).',
+  ].join('\n');
 };
 
-/** Generates the Throttle Strategies section with heading and bullet list. */
+/** Generates standalone markdown for action-policy throttle strategies. */
 export const generateThrottleStrategiesDoc = (): string => {
   const list = generateEnumList({
     schema: throttleStrategySchema,
     schemaName: 'throttleStrategySchema',
   });
 
-  return ['### Throttle Strategies', list].join('\n');
+  return [
+    '# Throttle Strategies',
+    '',
+    list,
+    '',
+    'Compatibility with grouping modes — see [action-policy-throttle-grouping-compatibility](./action-policy-throttle-grouping-compatibility.md).',
+  ].join('\n');
 };
 
 /**
