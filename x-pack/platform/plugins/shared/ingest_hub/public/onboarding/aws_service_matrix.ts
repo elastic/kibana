@@ -11,6 +11,10 @@
 
 import type { PackageInfo, RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
+import type { ServiceCategory } from './service_categories';
+
+export type { ServiceCategory };
+
 export type SignalType = 'logs' | 'metrics';
 
 export type DeploymentMethod = 'managed_integration' | 'ecf' | 'agent_based';
@@ -22,19 +26,6 @@ function releaseToBadge(release: string | undefined): Badge | undefined {
   if (release === 'beta') return 'beta';
   return undefined;
 }
-
-export type ServiceCategory =
-  | 'Analytics'
-  | 'Application Integration'
-  | 'Cloud Financial Management'
-  | 'Compute'
-  | 'Containers'
-  | 'Databases'
-  | 'Machine Learning'
-  | 'Management and Governance'
-  | 'Networking and Content Delivery'
-  | 'Security, Identity and Compliance'
-  | 'Storage';
 
 export interface DeploymentMethodEntry {
   method: DeploymentMethod;
@@ -110,114 +101,114 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Application Integration ──────────────────────────────
   {
     id: 'apigateway_logs',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'apigateway_metrics',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'lambda',
-    category: 'Compute',
+    category: 'compute',
     packageName: 'aws',
   },
   {
     id: 'lambda_logs',
-    category: 'Compute',
+    category: 'compute',
     packageName: 'aws',
   },
 
   // ── aws package — Compute ───────────────────────────────────────────────
   {
     id: 'ec2_logs',
-    category: 'Compute',
+    category: 'compute',
     packageName: 'aws',
   },
   {
     id: 'ec2_metrics',
-    category: 'Compute',
+    category: 'compute',
     packageName: 'aws',
   },
   {
     id: 'ecs_metrics',
-    category: 'Compute',
+    category: 'compute',
     packageName: 'aws',
   },
   {
     id: 'emr_logs',
-    category: 'Compute',
+    category: 'compute',
     packageName: 'aws',
   },
   {
     id: 'emr_metrics',
-    category: 'Compute',
+    category: 'compute',
     packageName: 'aws',
   },
 
   // ── aws package — Management and Governance ──────────────────────────────
   {
     id: 'awshealth',
-    category: 'Management and Governance',
+    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'cloudwatch_logs',
-    category: 'Management and Governance',
+    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'cloudwatch_metrics',
-    category: 'Management and Governance',
+    category: 'management_governance',
     packageName: 'aws',
   },
 
   // ── aws package — Cloud Financial Management ────────────────────────────
   {
     id: 'billing',
-    category: 'Cloud Financial Management',
+    category: 'cloud_financial_management',
     packageName: 'aws',
   },
   {
     id: 'usage',
-    category: 'Cloud Financial Management',
+    category: 'cloud_financial_management',
     packageName: 'aws',
   },
 
-  // ── aws package — Management and Governance / Security, Identity and Compliance ──
+  // ── aws package — management_governance / security_identity_compliance ──
   {
     id: 'cloudtrail',
-    category: 'Management and Governance',
+    category: 'management_governance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
   },
   {
     id: 'config',
     // name: 'AWS Config',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'guardduty',
     // name: 'AWS GuardDuty',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'inspector',
     // name: 'AWS Inspector',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'firewall_logs',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'firewall_metrics',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     deploymentMethods: [{ method: 'agent_based', preferred: true }],
     packageName: 'aws',
     showInUI: false, // TODO confirm if only agent_based and if should be included in onboarding flow
@@ -225,24 +216,24 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'securityhub_findings',
     // name: 'AWS Security Hub',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'securityhub_findings_full_posture',
     // name: 'AWS Security Hub (Full Posture / CSPM)',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'securityhub_insights',
     // name: 'AWS Security Hub (Insights)',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     packageName: 'aws',
   },
   {
     id: 'waf',
-    category: 'Security, Identity and Compliance',
+    category: 'security_identity_compliance',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
   },
@@ -250,7 +241,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   // ── aws package — Networking and Content Delivery ─────────────────────────
   {
     id: 'cloudfront_logs',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     // ECF: CloudFront is in the edot-cloud-forwarder-aws#452 DoD but no released template yet
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     showInUI: false,
@@ -258,109 +249,109 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   },
   {
     id: 'elb_logs',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'elb_metrics',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'natgateway',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'route53_public_logs',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'route53_resolver_logs',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'transitgateway',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
   {
     id: 'vpcflow',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     deploymentMethods: [{ method: 'ecf', preferred: true }],
     packageName: 'aws',
   },
   {
     id: 'vpn',
-    category: 'Networking and Content Delivery',
+    category: 'networking_content_delivery',
     packageName: 'aws',
   },
 
   // ── aws package — Storage ───────────────────────────────────────────────
   {
     id: 'ebs',
-    category: 'Storage',
+    category: 'storage',
     packageName: 'aws',
   },
   {
     id: 's3_daily_storage',
-    category: 'Storage',
+    category: 'storage',
     packageName: 'aws',
   },
   {
     id: 's3_request',
-    category: 'Storage',
+    category: 'storage',
     packageName: 'aws',
   },
   {
     id: 's3access',
-    category: 'Storage',
+    category: 'storage',
     packageName: 'aws',
   },
   {
     id: 's3_storage_lens',
-    category: 'Storage',
+    category: 'storage',
     packageName: 'aws',
   },
 
   // ── aws package — Databases ──────────────────────────────────────────────
   {
     id: 'dynamodb',
-    category: 'Databases',
+    category: 'databases',
     packageName: 'aws',
   },
   {
     id: 'rds',
-    category: 'Databases',
+    category: 'databases',
     packageName: 'aws',
   },
   {
     id: 'redshift',
-    category: 'Databases',
+    category: 'databases',
     packageName: 'aws',
   },
 
-  // ── aws package — Analytics / Application Integration ───────────────────
+  // ── aws package — management_governance ─────────────────────────────────
   {
     id: 'kafka_metrics',
-    category: 'Management and Governance',
+    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'kinesis',
-    category: 'Management and Governance',
+    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'sns',
-    category: 'Management and Governance',
+    category: 'management_governance',
     packageName: 'aws',
   },
   {
     id: 'sqs',
-    category: 'Management and Governance',
+    category: 'management_governance',
     packageName: 'aws',
   },
 
@@ -368,26 +359,26 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'guardrails',
     // name: 'AWS Bedrock (Guardrails)',
-    category: 'Machine Learning',
+    category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   {
     id: 'invocation',
     // name: 'AWS Bedrock (Invocation)',
-    category: 'Machine Learning',
+    category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   {
     id: 'runtime',
     // name: 'AWS Bedrock (Runtime)',
-    category: 'Machine Learning',
+    category: 'machine_learning',
     packageName: 'aws_bedrock',
   },
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'bedrock_agentcore',
     // name: 'AWS Bedrock AgentCore',
-    category: 'Machine Learning',
+    category: 'machine_learning',
     packageName: 'aws_bedrock_agentcore',
     showInUI: false,
   },
@@ -396,16 +387,16 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'task_stats',
     // name: 'AWS Fargate',
-    category: 'Containers',
+    category: 'containers',
     packageName: 'awsfargate',
   },
 
-  // ── aws_mq package — Application Integration ────────────────────────────
+  // ── aws_mq package — application_integration ────────────────────────────
   // TODO(PM): deployment method and signal type TBD — awaiting PM ratification
   {
     id: 'mq',
     // name: 'AWS MQ',
-    category: 'Application Integration',
+    category: 'application_integration',
     packageName: 'aws_mq',
     showInUI: false,
   },
@@ -414,7 +405,7 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
   {
     id: 'aws_logs',
     // name: 'AWS Logs (Generic)',
-    category: 'Management and Governance',
+    category: 'management_governance',
     packageName: 'aws_logs',
   },
 ];

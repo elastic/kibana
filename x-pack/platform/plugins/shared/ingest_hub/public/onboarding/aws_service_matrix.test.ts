@@ -16,17 +16,17 @@ import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from './aws_service_matrix
 const VALID_SIGNAL_TYPES: SignalType[] = ['logs', 'metrics'];
 const VALID_DEPLOYMENT_METHODS: DeploymentMethod[] = ['managed_integration', 'ecf', 'agent_based'];
 const VALID_CATEGORIES: ServiceCategory[] = [
-  'Analytics',
-  'Application Integration',
-  'Cloud Financial Management',
-  'Compute',
-  'Containers',
-  'Databases',
-  'Machine Learning',
-  'Management and Governance',
-  'Networking and Content Delivery',
-  'Security, Identity and Compliance',
-  'Storage',
+  'analytics',
+  'application_integration',
+  'cloud_financial_management',
+  'compute',
+  'containers',
+  'databases',
+  'machine_learning',
+  'management_governance',
+  'networking_content_delivery',
+  'security_identity_compliance',
+  'storage',
 ];
 
 // Build a mock packages record.

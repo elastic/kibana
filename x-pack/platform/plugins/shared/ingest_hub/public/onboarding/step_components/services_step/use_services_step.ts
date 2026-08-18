@@ -7,24 +7,15 @@
 
 import { useCallback, useMemo, useState } from 'react';
 
-import type { ServiceCategory, SignalType } from '../../aws_service_matrix';
+import type { SignalType } from '../../aws_service_matrix';
+import type { ServiceCategory } from '../../service_categories';
+import { CATEGORY_ORDER } from '../../service_categories';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 
-export type SignalFilter = SignalType | 'all';
+export type { ServiceCategory };
+export { CATEGORY_ORDER };
 
-export const CATEGORY_ORDER: ServiceCategory[] = [
-  'Security, Identity and Compliance',
-  'Compute',
-  'Networking and Content Delivery',
-  'Storage',
-  'Databases',
-  'Analytics',
-  'Cloud Financial Management',
-  'Management and Governance',
-  'Application Integration',
-  'Machine Learning',
-  'Containers',
-];
+export type SignalFilter = SignalType | 'all';
 
 export function useServicesStep({ onContinue }: { onContinue: () => void }) {
   const { servicesStep, setSelectedServiceIds, awsServiceMatrix: rawMatrix } = useOnboardingFlow();

@@ -10,7 +10,7 @@ import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-// Both services are in the default "Security, Identity and Compliance" category,
+// Both services are in the default "security_identity_compliance" category,
 // visible without switching signal filter or category.
 //   guardduty → ecf (non-managed_integration): needsDeploySettingsStep = false
 //   inspector → managed_integration:           needsDeploySettingsStep = true

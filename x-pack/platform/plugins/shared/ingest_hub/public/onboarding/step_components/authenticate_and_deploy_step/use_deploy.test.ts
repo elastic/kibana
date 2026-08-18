@@ -137,7 +137,7 @@ function makeService(overrides: Partial<AwsServiceMatrixEntry> = {}): AwsService
   return {
     id: 'test_service',
     name: 'Test Service',
-    category: 'Compute',
+    category: 'compute',
     signalType: 'logs',
     packageName: 'aws',
     deploymentMethods: [{ method: 'managed_integration', preferred: true }],

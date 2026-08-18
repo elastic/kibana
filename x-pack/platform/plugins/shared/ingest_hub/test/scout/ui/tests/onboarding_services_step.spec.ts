@@ -10,7 +10,7 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 // Services are grouped by category; only the active category's rows are rendered in the DOM.
-// Default active category: Security, Identity and Compliance (first in CATEGORY_ORDER).
+// Default active category: security_identity_compliance (first in CATEGORY_ORDER).
 // No services are selected by default — the user must pick them.
 
 test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => {
@@ -53,7 +53,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
 
     await expect(page.getByText('Which AWS services do you want to monitor?')).toBeVisible();
 
-    // Security, Identity and Compliance is the default active category
+    // security_identity_compliance is the default active category
     await expect(page.testSubj.locator('servicesStep-serviceRow-guardduty')).toBeVisible();
 
     // no services are selected on first load
@@ -122,22 +122,20 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
 
     // Databases is visible in "All" mode (dynamodb, rds are metrics-only)
-    await expect(page.locator('[data-test-subj="servicesStep-category-Databases"]')).toBeVisible();
+    await expect(page.testSubj.locator('servicesStep-category-databases')).toBeVisible();
 
     // switch to Logs — Databases has no log-signal services, so it disappears from sidebar
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Logs').click();
-    await expect(page.locator('[data-test-subj="servicesStep-category-Databases"]')).toBeHidden();
+    await expect(page.testSubj.locator('servicesStep-category-databases')).toBeHidden();
 
     // switch to Metrics — Databases reappears; navigate to it
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Metrics').click();
-    await expect(page.locator('[data-test-subj="servicesStep-category-Databases"]')).toBeVisible();
-    await page.locator('[data-test-subj="servicesStep-category-Databases"]').click();
+    await expect(page.testSubj.locator('servicesStep-category-databases')).toBeVisible();
+    await page.testSubj.locator('servicesStep-category-databases').click();
     await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeVisible();
 
     // navigate to Security — guardduty is logs-only so it is not rendered with Metrics filter
-    await page
-      .locator('[data-test-subj="servicesStep-category-Security, Identity and Compliance"]')
-      .click();
+    await page.testSubj.locator('servicesStep-category-security_identity_compliance').click();
     await expect(page.testSubj.locator('servicesStep-serviceRow-guardduty')).toBeHidden();
   });
 });

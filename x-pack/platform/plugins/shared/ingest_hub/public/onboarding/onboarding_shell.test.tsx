@@ -22,7 +22,7 @@ jest.mock('./use_aws_service_matrix', () => {
     {
       id: 'apigateway_logs',
       name: 'AWS API Gateway',
-      category: 'Networking and Content Delivery',
+      category: 'networking_content_delivery',
       signalType: 'logs',
       deploymentMethods: [{ method: 'ecf', preferred: true }],
       packageName: 'aws',
@@ -33,7 +33,7 @@ jest.mock('./use_aws_service_matrix', () => {
     {
       id: 'apigateway_metrics',
       name: 'AWS API Gateway',
-      category: 'Networking and Content Delivery',
+      category: 'networking_content_delivery',
       signalType: 'metrics',
       deploymentMethods: [{ method: 'managed_integration', preferred: true }],
       packageName: 'aws',
