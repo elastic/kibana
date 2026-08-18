@@ -88,8 +88,9 @@ export class DispatcherService implements DispatcherServiceContract {
     const windowEnd = maxEnd < settled ? maxEnd : settled;
 
     if (windowEnd <= windowStart) {
-      // Degenerate: watermark is ahead of now − settle (e.g. right after cold start with a fast
-      // clock). Skip the scan and hold the watermark to avoid a regress.
+      // Degenerate: watermark is future-dated relative to now − settle. Only reachable via a
+      // persisted watermark that is ahead of the current clock — clock skew between Kibana nodes
+      // or corrupt task state. Skip the scan and hold the watermark to avoid a regress.
       logger.debug({
         message: () =>
           `Dispatcher: windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
