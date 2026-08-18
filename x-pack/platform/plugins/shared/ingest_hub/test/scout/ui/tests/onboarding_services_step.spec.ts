@@ -58,8 +58,8 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
 
     // no services are selected on first load
     await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).not.toBeChecked();
-    await expect(page.testSubj.locator('servicesStep-serviceRow-waf_otel')).toBeVisible();
-    await expect(page.testSubj.locator('servicesStep-toggle-waf_otel')).not.toBeChecked();
+    await expect(page.testSubj.locator('servicesStep-serviceRow-waf')).toBeVisible();
+    await expect(page.testSubj.locator('servicesStep-toggle-waf')).not.toBeChecked();
   });
 
   test('select and deselect a service', async ({ browserAuth, page }) => {
@@ -86,9 +86,9 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     await expect(page.testSubj.locator('servicesStep-selectAllButton')).toBeVisible();
     await expect(page.testSubj.locator('servicesStep-deselectAllButton')).toBeHidden();
 
-    // select all in the active category → waf_otel gets checked
+    // select all in the active category → waf gets checked
     await page.testSubj.locator('servicesStep-selectAllButton').click();
-    await expect(page.testSubj.locator('servicesStep-toggle-waf_otel')).toBeChecked();
+    await expect(page.testSubj.locator('servicesStep-toggle-waf')).toBeChecked();
 
     // all selected → button flips to "Deselect all"
     await expect(page.testSubj.locator('servicesStep-deselectAllButton')).toBeVisible();
@@ -97,7 +97,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     // deselect all → all Security services unchecked
     await page.testSubj.locator('servicesStep-deselectAllButton').click();
     await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).not.toBeChecked();
-    await expect(page.testSubj.locator('servicesStep-toggle-waf_otel')).not.toBeChecked();
+    await expect(page.testSubj.locator('servicesStep-toggle-waf')).not.toBeChecked();
   });
 
   test('Continue is disabled when no services are selected', async ({ browserAuth, page }) => {
