@@ -14,18 +14,23 @@ import type {
   DispatcherExecutionResult,
   DispatcherTaskState,
 } from './types';
+import {
+  LoggerServiceToken,
+  type LoggerServiceContract,
+} from '../services/logger_service/logger_service';
 
-type TaskRunParams = Pick<RunContext, 'taskInstance' | 'abortController'>;
+type TaskRunParams = Pick<RunContext, 'taskInstance' | 'signal'>;
 
 @injectable()
 export class DispatcherTaskRunner {
   constructor(
     @inject(DispatcherServiceInternalToken)
-    private readonly dispatcherService: DispatcherServiceContract
+    private readonly dispatcherService: DispatcherServiceContract,
+    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
   ) {}
 
-  public async run({ taskInstance, abortController }: TaskRunParams): Promise<RunResult> {
-    const params = this.createDispatcherParams(taskInstance, abortController);
+  public async run({ taskInstance, signal }: TaskRunParams): Promise<RunResult> {
+    const params = this.createDispatcherParams(taskInstance, signal);
 
     const result = await this.dispatcherService.run(params);
 
@@ -34,13 +39,17 @@ export class DispatcherTaskRunner {
 
   private createDispatcherParams(
     taskInstance: TaskRunParams['taskInstance'],
-    abortController: AbortController
+    signal: AbortSignal
   ): DispatcherExecutionParams {
     const state: DispatcherTaskState = taskInstance.state;
+    const logger = this.logger.forSubsystem('dispatcher').withLabels({
+      task_id: taskInstance.id,
+    });
 
     return {
       previousStartedAt: state.previousStartedAt ? new Date(state.previousStartedAt) : undefined,
-      abortController,
+      signal,
+      logger,
     };
   }
 

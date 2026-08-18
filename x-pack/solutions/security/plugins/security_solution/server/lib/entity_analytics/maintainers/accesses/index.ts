@@ -25,7 +25,7 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
     status,
     crudClient,
     entityMetadataClient,
-    abortController,
+    signal,
     telemetry,
   }) => {
     const namespace = status.metadata.namespace;
@@ -44,7 +44,8 @@ export const accessesFrequentlyMaintainer: RegisterEntityMaintainerConfig = {
       crudClient,
       entityMetadataClient,
       integrations: ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS,
-      abortController,
+      maintainerName: 'accesses_frequently_and_infrequently',
+      signal,
       telemetryCollector: collector,
     });
 

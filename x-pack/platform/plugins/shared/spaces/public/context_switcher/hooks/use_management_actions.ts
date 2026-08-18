@@ -26,6 +26,7 @@ export const useManagementActions = ({
         ? {
             headerAction: {
               id: 'manageSpaces',
+              'data-test-subj': 'manageSpaces',
               label: i18n.translate('xpack.spaces.contextSwitcher.manage', {
                 defaultMessage: 'Manage',
               }),
@@ -33,6 +34,7 @@ export const useManagementActions = ({
             },
             footerAction: {
               id: 'createSpace',
+              'data-test-subj': 'createSpace',
               label: i18n.translate('xpack.spaces.contextSwitcher.createSpace', {
                 defaultMessage: 'Create space',
               }),

@@ -14,16 +14,16 @@ import { prettifyValue } from './prettify_value';
 
 describe('prettifyValue', () => {
   describe('relative to now — collapses "to now"', () => {
-    it('simplifies "now-7d/d to now" to "-7d"', () => {
-      expect(prettifyValue('now-7d/d to now')).toBe('-7d');
+    it('simplifies "now-7d/d to now" to "-7d/d"', () => {
+      expect(prettifyValue('now-7d/d to now')).toBe('-7d/d');
     });
 
     it('simplifies "now-15m to now" to "-15m"', () => {
       expect(prettifyValue('now-15m to now')).toBe('-15m');
     });
 
-    it('simplifies "now-1h/h to now" to "-1h"', () => {
-      expect(prettifyValue('now-1h/h to now')).toBe('-1h');
+    it('simplifies "now-1h/h to now" to "-1h/h"', () => {
+      expect(prettifyValue('now-1h/h to now')).toBe('-1h/h');
     });
 
     it('simplifies "now to now+1d" to "+1d"', () => {
@@ -36,8 +36,8 @@ describe('prettifyValue', () => {
   });
 
   describe('both bounds relative — keeps delimiter', () => {
-    it('strips rounding only from start: "now-30d/d to now-7d/d" to "-30d to -7d/d"', () => {
-      expect(prettifyValue('now-30d/d to now-7d/d')).toBe('-30d to -7d/d');
+    it('preserves rounding on both bounds: "now-30d/d to now-7d/d" to "-30d/d to -7d/d"', () => {
+      expect(prettifyValue('now-30d/d to now-7d/d')).toBe('-30d/d to -7d/d');
     });
 
     it('simplifies "now-1y to now-1M" to "-1y to -1M"', () => {
@@ -48,7 +48,7 @@ describe('prettifyValue', () => {
   describe('mixed relative and absolute', () => {
     it('prettifies the relative start, formats absolute end', () => {
       expect(prettifyValue('now-1d/d to 2025-06-15T00:00:00Z')).toBe(
-        `-1d to ${moment('2025-06-15T00:00:00Z').format(DEFAULT_DATE_FORMAT)}`
+        `-1d/d to ${moment('2025-06-15T00:00:00Z').format(DEFAULT_DATE_FORMAT)}`
       );
     });
 
@@ -119,8 +119,8 @@ describe('prettifyValue', () => {
   });
 
   describe('single dateMath expression (no delimiter)', () => {
-    it('simplifies "now-7d/d" to "-7d"', () => {
-      expect(prettifyValue('now-7d/d')).toBe('-7d');
+    it('simplifies "now-7d/d" to "-7d/d"', () => {
+      expect(prettifyValue('now-7d/d')).toBe('-7d/d');
     });
 
     it('simplifies "now+1h" to "+1h"', () => {
@@ -148,15 +148,15 @@ describe('prettifyValue', () => {
 
   describe('alternative delimiters', () => {
     it('handles "until" delimiter', () => {
-      expect(prettifyValue('now-7d/d until now')).toBe('-7d');
+      expect(prettifyValue('now-7d/d until now')).toBe('-7d/d');
     });
 
     it('handles dash delimiter', () => {
-      expect(prettifyValue('now-7d/d - now')).toBe('-7d');
+      expect(prettifyValue('now-7d/d - now')).toBe('-7d/d');
     });
 
     it('handles extra consumer delimiter', () => {
-      expect(prettifyValue('now-7d/d through now', { extraDelimiter: 'through' })).toBe('-7d');
+      expect(prettifyValue('now-7d/d through now', { extraDelimiter: 'through' })).toBe('-7d/d');
     });
   });
 
@@ -185,7 +185,7 @@ describe('prettifyValue', () => {
     });
 
     it('falls through to normal prettify when no preset matches', () => {
-      expect(prettifyValue('now-3d/d to now', { presets })).toBe('-3d');
+      expect(prettifyValue('now-3d/d to now', { presets })).toBe('-3d/d');
     });
 
     it('ignores display-form preset labels (non natural-language) and prettifies the bounds', () => {
@@ -205,7 +205,7 @@ describe('prettifyValue', () => {
     });
 
     it('works without presets (no options)', () => {
-      expect(prettifyValue('now-7d/d to now')).toBe('-7d');
+      expect(prettifyValue('now-7d/d to now')).toBe('-7d/d');
     });
   });
 });

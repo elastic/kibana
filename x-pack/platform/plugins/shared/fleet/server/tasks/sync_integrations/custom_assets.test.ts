@@ -123,7 +123,7 @@ describe('custom assets', () => {
         esClientMock,
         {} as any,
         integrations,
-        new AbortController(),
+        new AbortController().signal,
         undefined
       );
 
@@ -193,7 +193,7 @@ describe('custom assets', () => {
         esClientMock,
         {} as any,
         integrations,
-        new AbortController(),
+        new AbortController().signal,
         previousSyncIntegrationsData
       );
 
@@ -241,7 +241,7 @@ describe('custom assets', () => {
         esClientMock,
         {} as any,
         integrations,
-        new AbortController(),
+        new AbortController().signal,
         previousSyncIntegrationsData
       );
 
@@ -352,7 +352,11 @@ describe('custom assets', () => {
     });
 
     it('should return pipelines from vars', async () => {
-      const pipelines = await getPipelinesFromVars(esClientMock, {} as any, new AbortController());
+      const pipelines = await getPipelinesFromVars(
+        esClientMock,
+        {} as any,
+        new AbortController().signal
+      );
 
       expect(pipelines).toEqual([
         {
@@ -408,7 +412,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -441,7 +445,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -476,7 +480,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -540,7 +544,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -604,7 +608,7 @@ describe('custom assets', () => {
           type: 'component_template',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -642,7 +646,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -673,7 +677,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -712,7 +716,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -771,7 +775,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -827,7 +831,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -884,7 +888,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -929,7 +933,7 @@ describe('custom assets', () => {
           type: 'ingest_pipeline',
         },
         esClientMock,
-        new AbortController(),
+        new AbortController().signal,
         { debug: jest.fn() } as any
       );
 
@@ -971,7 +975,7 @@ describe('custom assets', () => {
             type: 'ingest_pipeline',
           },
           esClientMock,
-          new AbortController(),
+          new AbortController().signal,
           { debug: jest.fn() } as any
         )
       ).rejects.toThrowError(

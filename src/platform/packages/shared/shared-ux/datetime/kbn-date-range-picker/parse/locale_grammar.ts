@@ -11,6 +11,24 @@ import { NOW_KEYWORD } from '../constants';
 import type { TimeUnit } from '../types';
 import { DE_DE_GRAMMAR } from './locales/de_de';
 import { FR_FR_GRAMMAR } from './locales/fr_fr';
+import { JA_JP_GRAMMAR } from './locales/ja_jp';
+import { ZH_CN_GRAMMAR } from './locales/zh_cn';
+
+/**
+ * A range delimiter recognised between the two sides of a typed range.
+ */
+export interface DelimiterSpec {
+  text: string;
+  /**
+   * Whether the delimiter needs surrounding whitespace to split.
+   * - `'required'` (default) — word delimiters ("to", "bis"): without this,
+   *   "to" would match inside "october".
+   * - `'optional'` — CJK symbol delimiters ("到", "〜"): CJK text has no
+   *   inter-word spacing ("1月22日到1月23日"). Never use for alphabetic
+   *   delimiters.
+   */
+  whitespace?: 'required' | 'optional';
+}
 
 /**
  * The language grammar for natural-language parsing and generation: named
@@ -25,7 +43,7 @@ export interface LocaleGrammar {
   /** The literal word for "now" recognised in input and used in generated text. */
   nowKeyword: string;
   /** Word delimiters between range sides (the universal dash is added on top, always). */
-  delimiters: string[];
+  delimiters: DelimiterSpec[];
   /** Localized named-range label (lowercased) → bounds. */
   namedRanges: Record<string, { start: string; end: string }>;
   /** Shorthand mnemonics → canonical named-range key (English only — see "Aliases" note). */
@@ -38,6 +56,39 @@ export interface LocaleGrammar {
   durationTemplates: { past: string[]; future: string[] };
   /** `{count} {unit}`-shaped templates for "N units ago/from now". */
   instantTemplates: { past: string[]; future: string[] };
+  /**
+   * Words that look date-related but should make parsing fail instead of
+   * falling back to absolute-date parsing. Mainly for ambiguous CJK cases
+   * like `月`, where `1月` likely means “January”, not “1 month”.
+   */
+  guardWords?: string[];
+  /**
+   * Unit forms that are only allowed in shorthand relative syntax when
+   * there is an explicit `now`, `+`, or `-`. Example: bare `22日` should
+   * not mean “22 days”; but `-22日` or `now-22日` is clearly relative.
+   */
+  shorthandPrefixRequired?: string[];
+  /**
+   * How whitespace in `durationTemplates`/`instantTemplates` is matched when
+   * RECOGNIZING input. `'required'` (default) compiles template spaces to
+   * `\s+`, keeping word-language templates strict ("last7days" must not
+   * parse). `'optional'` — for CJK locales, where spaces carry no meaning
+   * between tokens — tolerates whitespace between ALL template segments, so a
+   * single authored template accepts every spacing mix an IME produces
+   * ("最近 7 天", "最近7天", "最近 7天", "最近7 天"). Generation always uses
+   * the template text verbatim.
+   */
+  templateWhitespace?: 'required' | 'optional';
+  /**
+   * Additional words recognised as "now" on input (e.g. Japanese 現在
+   * alongside 今). Generated text always uses `nowKeyword`.
+   */
+  nowAliases?: string[];
+  /**
+   * Suffix words stripped from the END side of a delimited range before that
+   * side is parsed.
+   */
+  rangeEndSuffixes?: string[];
   // TODO: rename — bare `generation` reads like a version counter rather than an
   // exception layer applied when generating text.
   /**
@@ -71,7 +122,7 @@ export interface LocaleGrammar {
 
 export const ENGLISH_GRAMMAR: LocaleGrammar = {
   nowKeyword: NOW_KEYWORD,
-  delimiters: ['to', 'until'],
+  delimiters: [{ text: 'to' }, { text: 'until' }],
   namedRanges: {
     today: { start: 'now/d', end: 'now/d' },
     yesterday: { start: 'now-1d/d', end: 'now-1d/d' },
@@ -165,6 +216,8 @@ export const ENGLISH_GRAMMAR: LocaleGrammar = {
 const LOCALE_GRAMMARS: Record<string, LocaleGrammar> = {
   de: DE_DE_GRAMMAR,
   fr: FR_FR_GRAMMAR,
+  ja: JA_JP_GRAMMAR,
+  zh: ZH_CN_GRAMMAR,
 };
 
 function resolveGrammarKey(locale: string | undefined): string | undefined {
@@ -208,14 +261,18 @@ export interface CompiledGrammar {
   instantPast: CompiledTemplate[];
   instantFuture: CompiledTemplate[];
   /** Merged word delimiters (English + locale), excluding the universal dash. */
-  delimiters: string[];
+  delimiters: DelimiterSpec[];
   /** Precompiled split patterns for `delimiters` plus the universal dash. */
   delimiterPatterns: RegExp[];
   unitAliases: Record<string, TimeUnit>;
   namedRanges: Record<string, { start: string; end: string }>;
   namedRangeAliases: Record<string, string>;
-  /** Every recognised "now" literal (English + locale). */
+  /** Every recognised "now" literal (English + locale, including `nowAliases`). */
   nowKeywords: string[];
+  /** Locale suffixes stripped from the END side of a delimited range ("まで"). */
+  rangeEndSuffixes: readonly string[];
+  /** Surface unit forms whose shorthand needs a now/sign prefix — see {@link LocaleGrammar.shorthandPrefixRequired}. */
+  shorthandPrefixRequired: ReadonlySet<string>;
   /**
    * Every natural-language word this grammar recognises — unit aliases,
    * duration/instant template words, and "now" keywords — lowercased. A
@@ -225,15 +282,46 @@ export interface CompiledGrammar {
    * (e.g. "5 minutes to spare" would otherwise parse as May 1).
    */
   vocabulary: ReadonlySet<string>;
+  /**
+   * The subset of `vocabulary` (plus the grammar's `guardWords`) written in a
+   * CJK script. Checked by SUBSTRING containment instead of standalone-word
+   * lookup: CJK text has no inter-word spacing, so a failed glued phrase like
+   * "最近7天啊" never splits into a matchable standalone word — without this,
+   * it would fall through to the forgiving absolute-date fallback.
+   */
+  cjkVocabulary: readonly string[];
 }
 
 /** Escapes regex metacharacters in `input` so it can be embedded verbatim in a pattern. */
 export const escapeRegExp = (input: string): string => input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-/** Builds a regex that splits text on a word delimiter surrounded by whitespace. */
-export function buildDelimiterPattern(delimiter: string): RegExp | null {
-  const trimmed = delimiter.trim();
-  return trimmed ? new RegExp(`^(.+?)\\s+${escapeRegExp(trimmed)}\\s+(.+)$`) : null;
+const FULLWIDTH_DIGIT_RE = /[０-９]/g;
+
+/**
+ * Replaces full-width digits (`７`, U+FF10–U+FF19 — what CJK IMEs produce in
+ * full-width mode) with their ASCII equivalents. The replacement is
+ * 1:1 in UTF-16 code units, so character offsets into the normalized string
+ * are valid in the original (see `parse_range_parts.ts`'s `RangePart` spans).
+ * CJK numerals (`七`, `二十`) are out of scope.
+ */
+export const normalizeDigits = (text: string): string =>
+  text.replace(FULLWIDTH_DIGIT_RE, (digit) => String.fromCharCode(digit.charCodeAt(0) - 0xfee0));
+
+/** De-duplicates delimiter specs by `text`, keeping the first occurrence (English wins ties). */
+const dedupeDelimiters = (specs: DelimiterSpec[]): DelimiterSpec[] => {
+  const seen = new Set<string>();
+  return specs.filter((spec) => {
+    if (seen.has(spec.text)) return false;
+    seen.add(spec.text);
+    return true;
+  });
+};
+
+/** Builds a regex that splits text on a delimiter, honouring its whitespace mode. */
+export function buildDelimiterPattern(delimiter: DelimiterSpec): RegExp | null {
+  const trimmed = delimiter.text.trim();
+  const ws = delimiter.whitespace === 'optional' ? '\\s*' : '\\s+';
+  return trimmed ? new RegExp(`^(.+?)${ws}${escapeRegExp(trimmed)}${ws}(.+)$`) : null;
 }
 
 /** One possible way to split a text on a delimiter occurrence. */
@@ -248,20 +336,24 @@ export interface DelimiterSplitCandidate {
 }
 
 /**
- * Enumerates every position where `delimiter` (surrounded by whitespace, with
- * non-blank text on both sides) could split `text`, left to right. Callers
- * must try candidates until one produces two parseable sides rather than
- * trusting the first occurrence: a delimiter word can also appear INSIDE a
- * natural-language phrase — French's accent-less delimiter `a` is a substring
- * of the instant phrase "il y a 3 jours", so in
+ * Enumerates every position where `delimiter` (with non-blank text on both
+ * sides, and surrounding whitespace per its `whitespace` mode) could split
+ * `text`, left to right. Callers must try candidates until one produces two
+ * parseable sides rather than trusting the first occurrence: a delimiter word
+ * can also appear INSIDE a natural-language phrase — French's accent-less
+ * delimiter `a` is a substring of the instant phrase "il y a 3 jours", so in
  * `"il y a 3 jours a il y a 2 jours"` only the middle occurrence is a real
  * range delimiter.
  */
-export function findDelimiterSplits(text: string, delimiter: string): DelimiterSplitCandidate[] {
-  const trimmedDelimiter = delimiter.trim();
+export function findDelimiterSplits(
+  text: string,
+  delimiter: DelimiterSpec
+): DelimiterSplitCandidate[] {
+  const trimmedDelimiter = delimiter.text.trim();
   if (!trimmedDelimiter) return [];
 
-  const pattern = new RegExp(`\\s+${escapeRegExp(trimmedDelimiter)}\\s+`, 'g');
+  const ws = delimiter.whitespace === 'optional' ? '\\s*' : '\\s+';
+  const pattern = new RegExp(`${ws}${escapeRegExp(trimmedDelimiter)}${ws}`, 'g');
   const candidates: DelimiterSplitCandidate[] = [];
 
   for (const match of text.matchAll(pattern)) {
@@ -306,25 +398,35 @@ const LENIENT_UNIT_PATTERN = '[\\p{L}\\p{M}]+';
  * re-searching the input for literal text (robust to case/whitespace
  * differences between the template and the actual matched input).
  */
-function compileTemplate(template: string): CompiledTemplate {
+function compileTemplate(
+  template: string,
+  whitespace: 'required' | 'optional' = 'required'
+): CompiledTemplate {
   const parts = template.split(/(\{count}|\{unit})/).filter((part) => part !== '');
   const segments: TemplateSegment[] = [];
+  // 'optional' additionally tolerates whitespace at every segment boundary
+  // (not just where the template has a space): CJK input mixes spaced and
+  // glued forms freely ("最近 7天", "3天 前"), and no boundary is ambiguous —
+  // counts are digits, units are letters, literals are fixed words.
+  const ws = whitespace === 'optional' ? '\\s*' : '\\s+';
+  const glue = whitespace === 'optional' ? '\\s*' : '';
   let pattern = '';
   let groupIdx = 0;
   let countGroup = -1;
   let unitGroup = -1;
 
   for (const part of parts) {
+    const joiner = pattern ? glue : '';
     if (part === '{count}') {
       countGroup = ++groupIdx;
-      pattern += '(\\d+)';
+      pattern += `${joiner}(\\d+)`;
       segments.push({ type: 'count' });
     } else if (part === '{unit}') {
       unitGroup = ++groupIdx;
-      pattern += `(${LENIENT_UNIT_PATTERN})`;
+      pattern += `${joiner}(${LENIENT_UNIT_PATTERN})`;
       segments.push({ type: 'unit' });
     } else {
-      pattern += escapeRegExp(part).replace(/ /g, '\\s+');
+      pattern += joiner + escapeRegExp(part).replace(/ /g, ws);
       segments.push({ type: 'literal', text: part });
     }
   }
@@ -370,6 +472,9 @@ export function getPhraseWords(grammar: LocaleGrammar): ReadonlySet<string> {
   return words;
 }
 
+/** Matches any Han/kana codepoint — the scripts whose vocabulary needs substring matching. */
+const CJK_SCRIPT_RE = /[\p{sc=Han}\p{sc=Hiragana}\p{sc=Katakana}]/u;
+
 const compiledCache = new Map<string, CompiledGrammar>();
 
 function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGrammar {
@@ -383,10 +488,12 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
     ? { ...ENGLISH_GRAMMAR.namedRangeAliases, ...locale.namedRangeAliases }
     : ENGLISH_GRAMMAR.namedRangeAliases;
   const delimiters = locale
-    ? Array.from(new Set([...ENGLISH_GRAMMAR.delimiters, ...locale.delimiters]))
+    ? dedupeDelimiters([...ENGLISH_GRAMMAR.delimiters, ...locale.delimiters])
     : ENGLISH_GRAMMAR.delimiters;
   const nowKeywords = locale
-    ? Array.from(new Set([ENGLISH_GRAMMAR.nowKeyword, locale.nowKeyword]))
+    ? Array.from(
+        new Set([ENGLISH_GRAMMAR.nowKeyword, locale.nowKeyword, ...(locale.nowAliases ?? [])])
+      )
     : [ENGLISH_GRAMMAR.nowKeyword];
 
   const unitPattern = Object.keys(unitAliases)
@@ -407,31 +514,60 @@ function compileMergedGrammar(locale: LocaleGrammar | undefined): CompiledGramma
     ? [...ENGLISH_GRAMMAR.instantTemplates.future, ...locale.instantTemplates.future]
     : ENGLISH_GRAMMAR.instantTemplates.future;
 
-  const delimiterPatterns = [...delimiters, '-']
+  // Templates compile with their SOURCE grammar's whitespace mode: English
+  // stays strict even when merged under a CJK locale.
+  const localeWhitespace = locale?.templateWhitespace ?? 'required';
+  const compileMergedTemplates = (english: string[], localeTemplates: string[] | undefined) => [
+    ...english.map((template) => compileTemplate(template)),
+    ...(localeTemplates ?? []).map((template) => compileTemplate(template, localeWhitespace)),
+  ];
+
+  const delimiterPatterns = [...delimiters, { text: '-' }]
     .map(buildDelimiterPattern)
     .filter((p): p is RegExp => p !== null);
 
-  const vocabulary = new Set([
+  const vocabularyWords = [
     ...Object.keys(unitAliases).map((alias) => alias.toLowerCase()),
     ...nowKeywords,
     ...[...concatPast, ...concatFuture, ...instantPast, ...instantFuture].flatMap(
       extractTemplateWords
     ),
-  ]);
+    ...(locale?.guardWords ?? []).map((word) => word.toLowerCase()),
+    ...(locale?.rangeEndSuffixes ?? []).map((word) => word.toLowerCase()),
+  ];
+  const vocabulary = new Set(vocabularyWords);
+  const cjkVocabulary = Array.from(
+    new Set(vocabularyWords.filter((word) => CJK_SCRIPT_RE.test(word)))
+  );
 
   return {
     shorthandRegex: new RegExp(`^(now)?([+-]?)(\\d+)(${unitPattern})(\\/[smhdwMy])?$`),
-    durationPast: concatPast.map(compileTemplate),
-    durationFuture: concatFuture.map(compileTemplate),
-    instantPast: instantPast.map(compileTemplate),
-    instantFuture: instantFuture.map(compileTemplate),
+    durationPast: compileMergedTemplates(
+      ENGLISH_GRAMMAR.durationTemplates.past,
+      locale?.durationTemplates.past
+    ),
+    durationFuture: compileMergedTemplates(
+      ENGLISH_GRAMMAR.durationTemplates.future,
+      locale?.durationTemplates.future
+    ),
+    instantPast: compileMergedTemplates(
+      ENGLISH_GRAMMAR.instantTemplates.past,
+      locale?.instantTemplates.past
+    ),
+    instantFuture: compileMergedTemplates(
+      ENGLISH_GRAMMAR.instantTemplates.future,
+      locale?.instantTemplates.future
+    ),
     delimiters,
     delimiterPatterns,
     unitAliases,
     namedRanges,
     namedRangeAliases,
     nowKeywords,
+    rangeEndSuffixes: locale?.rangeEndSuffixes ?? [],
+    shorthandPrefixRequired: new Set(locale?.shorthandPrefixRequired ?? []),
     vocabulary,
+    cjkVocabulary,
   };
 }
 

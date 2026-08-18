@@ -47,7 +47,7 @@ export class ServiceFlyoutPage {
     await this.waitForHidden();
   }
 
-  async clickAction(action: string) {
+  async clickFooterAction(action: string) {
     await this.actions.click();
     await this.page.testSubj.click(`serviceFlyoutActionsMenuItem-${action}`);
   }

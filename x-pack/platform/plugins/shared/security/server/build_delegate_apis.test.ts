@@ -8,6 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { AuditLogger, CoreSecurityDelegateContract } from '@kbn/core-security-server';
+import { HTTPAuthorizationHeader } from '@kbn/core-security-server';
 import type { UserProfileData } from '@kbn/core-user-profile-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-server';
 
@@ -205,6 +206,22 @@ describe('buildSecurityApi', () => {
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledTimes(1);
         expect(authc.apiKeys.uiam!.invalidate).toHaveBeenCalledWith(request, invalidateParams);
       });
+
+      it('should properly delegate getInternalCallerAttestationHeaders to the service', () => {
+        const attestationHeaders = { 'x-some-attestation': 'some-attestation' };
+        jest
+          .mocked(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders)
+          .mockReturnValue(attestationHeaders);
+
+        const credential = new HTTPAuthorizationHeader('Bearer', 'essu_one');
+        expect(api.authc.apiKeys.uiam!.getInternalCallerAttestationHeaders(credential)).toBe(
+          attestationHeaders
+        );
+        expect(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders).toHaveBeenCalledTimes(1);
+        expect(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders).toHaveBeenCalledWith(
+          credential
+        );
+      });
     });
 
     describe('when uiam is disabled', () => {
@@ -273,6 +290,26 @@ describe('buildUserProfileApi', () => {
       const returnValue = await api.getCurrent({ request, dataPath: 'dataPath' });
 
       expect(returnValue).toBe(null);
+    });
+  });
+
+  describe('getCurrentProfileId', () => {
+    it('properly delegates to the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      await api.getCurrentProfileId({ request });
+
+      expect(userProfile.getCurrentProfileId).toHaveBeenCalledTimes(1);
+      expect(userProfile.getCurrentProfileId).toHaveBeenCalledWith({ request });
+    });
+
+    it('returns the result from the service', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      userProfile.getCurrentProfileId.mockResolvedValue('some-uid');
+
+      const returnValue = await api.getCurrentProfileId({ request });
+
+      expect(returnValue).toBe('some-uid');
     });
   });
 

@@ -15,6 +15,7 @@ describe('updateActionTagsRoute', () => {
   let routeHandler: RequestHandler;
   let mockOsqueryContext: OsqueryAppContext;
   let mockEsClient: { search: jest.Mock; update: jest.Mock; indices: { exists: jest.Mock } };
+  let mockDataReadEsClient: { search: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -24,14 +25,23 @@ describe('updateActionTagsRoute', () => {
       update: jest.fn().mockResolvedValue({}),
       indices: { exists: jest.fn().mockResolvedValue(true) },
     };
+    mockDataReadEsClient = { search: jest.fn() };
 
     mockOsqueryContext = {
+      cpsEnabled: false,
       service: {
         getActiveSpace: jest.fn().mockResolvedValue({ id: 'default' }),
       },
-      getStartServices: jest
-        .fn()
-        .mockResolvedValue([{ elasticsearch: { client: { asInternalUser: mockEsClient } } }]),
+      getStartServices: jest.fn().mockResolvedValue([
+        {
+          elasticsearch: {
+            client: {
+              asInternalUser: mockEsClient,
+              asScoped: jest.fn().mockReturnValue({ asCurrentUser: mockDataReadEsClient }),
+            },
+          },
+        },
+      ]),
     } as unknown as OsqueryAppContext;
   });
 
@@ -95,9 +105,10 @@ describe('updateActionTagsRoute', () => {
   describe('scheduled-results existence check', () => {
     it('scopes the scheduled-results check to the active space', async () => {
       // No live/rule action found -> route falls through to the scheduled check.
+      // With CPS disabled, both lookups use asInternalUser (mockEsClient).
       mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: [] } }) // primary lookup: miss
-        .mockResolvedValueOnce({ hits: { total: { value: 0 } } }); // scheduled check
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce({ hits: { total: { value: 0 } } });
 
       await callRoute('schedule-1', 'my-space');
 
@@ -110,12 +121,24 @@ describe('updateActionTagsRoute', () => {
       expect(scheduledSearch.query.bool.filter).toContainEqual({ term: { space_id: 'my-space' } });
     });
 
+    it('uses a strict default-space filter for the scheduled probe when CPS is enabled', async () => {
+      (mockOsqueryContext as { cpsEnabled: boolean }).cpsEnabled = true;
+      mockEsClient.search.mockResolvedValueOnce({ hits: { hits: [] } });
+      mockDataReadEsClient.search.mockResolvedValueOnce({ hits: { total: { value: 0 } } });
+
+      await callRoute('schedule-1', 'default');
+
+      const scheduledSearch = mockDataReadEsClient.search.mock.calls[0][0];
+      expect(scheduledSearch.query.bool.filter).toContainEqual({ term: { space_id: 'default' } });
+      expect(JSON.stringify(scheduledSearch.query.bool.filter)).not.toContain('exists');
+    });
+
     it('returns 404 when the schedule does not exist in the active space', async () => {
       // Primary lookup misses, and because the scheduled check is space-scoped,
       // a schedule_id from another space yields 0 hits here -> 404.
       mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: [] } }) // primary lookup: miss
-        .mockResolvedValueOnce({ hits: { total: { value: 0 } } }); // scoped scheduled check: miss
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce({ hits: { total: { value: 0 } } });
 
       const response = await callRoute('other-space-schedule', 'default');
 
@@ -127,8 +150,8 @@ describe('updateActionTagsRoute', () => {
 
     it('returns 400 when the schedule genuinely exists in the active space', async () => {
       mockEsClient.search
-        .mockResolvedValueOnce({ hits: { hits: [] } }) // primary lookup: miss
-        .mockResolvedValueOnce({ hits: { total: { value: 1 } } }); // scoped scheduled check: hit
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce({ hits: { total: { value: 1 } } });
 
       const response = await callRoute('in-space-schedule', 'default');
 

@@ -37,6 +37,8 @@ export type NonEmptyFlyoutTabs<TId extends string> = readonly [
 
 export interface FlyoutWithTabsProps<TId extends string> {
   title: string;
+  /** Optional content rendered inline after the title (e.g. a status badge). */
+  titleAppend?: React.ReactNode;
   showBackButton?: boolean;
   onBack?: () => void;
   tabsAriaLabel: string;
@@ -52,6 +54,7 @@ export interface FlyoutWithTabsProps<TId extends string> {
 
 export const FlyoutWithTabs = <TId extends string>({
   title,
+  titleAppend,
   showBackButton = false,
   onBack,
   tabsAriaLabel,
@@ -125,9 +128,20 @@ export const FlyoutWithTabs = <TId extends string>({
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow>
-                <EuiTitle size="s">
-                  <h2 id={flyoutTitleId}>{title}</h2>
-                </EuiTitle>
+                <EuiFlexGroup
+                  alignItems="center"
+                  gutterSize="s"
+                  responsive={false}
+                  wrap
+                  justifyContent="flexStart"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="s">
+                      <h2 id={flyoutTitleId}>{title}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  {titleAppend && <EuiFlexItem grow={false}>{titleAppend}</EuiFlexItem>}
+                </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -24,5 +24,7 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./services_detailed_statistics.spec.ts'));
     loadTestFile(require.resolve('./top_services.spec.ts'));
     loadTestFile(require.resolve('./transaction_types.spec.ts'));
+    loadTestFile(require.resolve('./has_system_metrics.spec.ts'));
+    loadTestFile(require.resolve('./ingestion_type.spec.ts'));
   });
 }

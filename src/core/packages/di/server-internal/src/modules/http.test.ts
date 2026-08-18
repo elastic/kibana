@@ -28,6 +28,11 @@ class TestRoute {
     },
   } as const;
   static validate = {};
+  // Getter mirrors DI plugins (e.g. alerting_v2) that expose route options via
+  // a static getter rather than an own enumerable property.
+  public static get options() {
+    return { access: 'public' as const, tags: ['oas-tag:test'] };
+  }
 
   constructor(
     @inject(Request) public readonly request: unknown,
@@ -38,6 +43,13 @@ class TestRoute {
     return this.response.ok();
   }
 }
+
+const expectedRouteConfig = {
+  path: TestRoute.path,
+  validate: TestRoute.validate,
+  security: TestRoute.security,
+  options: { access: 'public', tags: ['oas-tag:test'] },
+};
 
 describe('http', () => {
   let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
@@ -55,7 +67,7 @@ describe('http', () => {
     router = { post: jest.fn(), handleLegacyErrors: jest.fn() } as unknown as typeof router;
     http = { createRouter: jest.fn().mockReturnValue(router) } as unknown as typeof http;
     container = injection.getContainer();
-    container.loadSync(new ContainerModule(loadHttp));
+    container.load(new ContainerModule(loadHttp));
     container.bind(CoreSetup('http')).toConstantValue(http);
     container.bind(CoreStart('injection')).toConstantValue(injection);
     container.bind(Route).toConstantValue(TestRoute);
@@ -79,11 +91,11 @@ describe('http', () => {
     container.bind(Route).toConstantValue(TestRoute);
     setup();
 
-    expect(router.post).toHaveBeenCalledWith(TestRoute, expect.any(Function));
+    expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, expect.any(Function));
   });
 
   it('should not register a route if there are no corresponding bindings ', () => {
-    container.unbindSync(Route);
+    container.unbind(Route);
 
     expect(setup).not.toThrow();
     expect(router.post).not.toHaveBeenCalled();
@@ -93,14 +105,14 @@ describe('http', () => {
     setup();
 
     const handleSpy = jest.spyOn(TestRoute.prototype, 'handle');
-    expect(router.post).toHaveBeenCalledWith(TestRoute, expect.any(Function));
+    expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, expect.any(Function));
     const [, handler] = router.post.mock.lastCall!;
     const request = {} as unknown as KibanaRequest;
     const response = {
       ok: jest.fn(() => 'something'),
     } as unknown as jest.Mocked<KibanaResponseFactory>;
     const fork = injection.fork();
-    const unbindAllSpy = jest.spyOn(fork, 'unbindAll');
+    const unbindAllSpy = jest.spyOn(fork, 'unbindAllAsync');
 
     await expect(handler({} as any, request, response)).resolves.toBe('something');
     expect(response.ok).toHaveBeenCalled();
@@ -120,6 +132,6 @@ describe('http', () => {
     setup();
     TestRoute.handleLegacyErrors = false;
 
-    expect(router.post).toHaveBeenCalledWith(TestRoute, wrapper);
+    expect(router.post).toHaveBeenCalledWith(expectedRouteConfig, wrapper);
   });
 });

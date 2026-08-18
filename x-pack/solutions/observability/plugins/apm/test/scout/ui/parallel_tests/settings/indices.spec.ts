@@ -8,7 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../fixtures';
-import { waitForApmSettingsHeaderLink } from '../../fixtures/page_helpers';
+import { waitForApmAppMenuReady } from '../../fixtures/page_helpers';
 
 const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
 const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
@@ -55,7 +55,7 @@ test.describe('Indices', { tag: tags.stateful.classic }, () => {
     await expect(applyButton).toBeEnabled();
 
     await indicesPage.clickApplyChanges();
-    await waitForApmSettingsHeaderLink(page);
+    await waitForApmAppMenuReady(page);
 
     await expect(await indicesPage.getErrorIndexInput()).toHaveValue(newErrorIndex);
   });

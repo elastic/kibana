@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  buildAgentBuilderTracesIndexPattern,
-  buildAgentBuilderTraceLogsIndexPattern,
-} from './traces';
+import { buildAgentBuilderTracesIndexPattern } from './traces';
 
 describe('buildAgentBuilderTracesIndexPattern', () => {
   it('returns the space-scoped index pattern for a given space', () => {
@@ -20,20 +17,6 @@ describe('buildAgentBuilderTracesIndexPattern', () => {
   it('returns the default space index pattern', () => {
     expect(buildAgentBuilderTracesIndexPattern('default')).toBe(
       'traces-agent_builder.otel-default'
-    );
-  });
-});
-
-describe('buildAgentBuilderTraceLogsIndexPattern', () => {
-  it('returns the space-scoped logs index pattern for span events', () => {
-    expect(buildAgentBuilderTraceLogsIndexPattern('marketing')).toBe(
-      'logs-agent_builder.otel-marketing'
-    );
-  });
-
-  it('returns the default space logs index pattern', () => {
-    expect(buildAgentBuilderTraceLogsIndexPattern('default')).toBe(
-      'logs-agent_builder.otel-default'
     );
   });
 });

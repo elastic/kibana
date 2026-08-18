@@ -55,6 +55,10 @@ export const useAttributesFieldActions = ({ caseData }: { caseData: CaseUI }) =>
     () => isFieldUpdating(isLoading, loadingKey, 'severity'),
     [isLoading, loadingKey]
   );
+  const isStatusLoading = useMemo(
+    () => isFieldUpdating(isLoading, loadingKey, 'status'),
+    [isLoading, loadingKey]
+  );
   const isTagsLoading = useMemo(
     () => isFieldUpdating(isLoading, loadingKey, 'tags'),
     [isLoading, loadingKey]
@@ -70,21 +74,25 @@ export const useAttributesFieldActions = ({ caseData }: { caseData: CaseUI }) =>
 
   return useMemo(
     () => ({
+      onUpdateField,
       onSubmitTags,
       onSubmitCategory,
       onUpdateSeverity,
       onUpdateAssignees,
       isSeverityLoading,
+      isStatusLoading,
       isTagsLoading,
       isCategoryLoading,
       isAssigneeFieldLoading,
     }),
     [
+      onUpdateField,
       onSubmitTags,
       onSubmitCategory,
       onUpdateSeverity,
       onUpdateAssignees,
       isSeverityLoading,
+      isStatusLoading,
       isTagsLoading,
       isCategoryLoading,
       isAssigneeFieldLoading,

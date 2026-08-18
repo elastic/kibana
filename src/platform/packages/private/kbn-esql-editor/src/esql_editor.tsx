@@ -522,6 +522,20 @@ const ESQLEditorInternal = function ESQLEditor({
   const stableOnToggleVisor = useStableCallback(onToggleVisor);
   const stableOnPrettifyQuery = useStableCallback(onPrettifyQuery);
 
+  const expandToFitContent = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+    const lineCount = editor.getModel()?.getLineCount() || 1;
+    const contentHeight = editor.getTopForLineNumber(lineCount + 1) + lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical
+    setEditorHeight((currentHeight) => {
+      if (contentHeight > currentHeight) {
+        return Math.min(contentHeight, EDITOR_MAX_HEIGHT);
+      }
+      return currentHeight;
+    });
+  }, [setEditorHeight]);
+
   const esqlCallbacks = useEsqlCallbacks({
     core,
     data,
@@ -584,6 +598,7 @@ const ESQLEditorInternal = function ESQLEditor({
     isEnabled: isNlToEsqlEnabled,
     clearGhostHintRef,
     telemetryService,
+    onAfterInsert: expandToFitContent,
   });
 
   const onGenerateFromCommentRef = useRef(onGenerateFromComment);
@@ -645,6 +660,7 @@ const ESQLEditorInternal = function ESQLEditor({
     notifications: core.notifications,
     isEnabled: isNlToEsqlEnabled,
     telemetryService,
+    onAfterInsert: expandToFitContent,
   });
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
@@ -871,16 +887,9 @@ const ESQLEditorInternal = function ESQLEditor({
 
                   setMeasuredEditorWidth(editor.getLayoutInfo().width);
                   if (expandToFitQueryOnMount) {
-                    const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-                    const lineCount = editor.getModel()?.getLineCount() || 1;
-                    const padding = lineHeight * 1.25; // Extra line at the bottom, plus a bit more to compensate for hidden vertical scrollbars
-                    const height = editor.getTopForLineNumber(lineCount + 1) + padding;
-                    if (height > editorHeight && height < EDITOR_MAX_HEIGHT) {
-                      setEditorHeight(height);
-                    } else if (height >= EDITOR_MAX_HEIGHT) {
-                      setEditorHeight(EDITOR_MAX_HEIGHT);
-                    }
+                    expandToFitContent();
                   }
+
                   const layoutChangeDisposable = editor.onDidLayoutChange((layoutInfoEvent) => {
                     onLayoutChangeRef.current(layoutInfoEvent);
                   });

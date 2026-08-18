@@ -92,8 +92,8 @@ export class NavigationCustomizationService {
    *
    * - User-menu link: added the first time `security` is provided. In
    *   stateful mode this happens after the active space has confirmed a
-   *   project-nav solution; in serverless mode both capabilities are enabled
-   *   together inside the `getNavigation$` subscription.
+   *   project-nav solution; in serverless mode it happens inside
+   *   `navigation.initNavigation()`, once the solution ID is known.
    */
   enableUi({ core, chrome, security, solution }: NavigationCustomizationServiceUiDeps): void {
     if (!this.handlerRegistered) {
@@ -108,7 +108,7 @@ export class NavigationCustomizationService {
       this.reporter.reportLoadedOnce({
         analytics: core.analytics,
         getCurrentUser: () => core.security.authc.getCurrentUser(),
-        savedCustomization: core.userStorage.get<NavigationCustomization>(
+        savedCustomization: core.userStorage.peek<NavigationCustomization>(
           NAV_CUSTOMIZATION_STORAGE_KEY
         ),
       });
@@ -140,7 +140,7 @@ export class NavigationCustomizationService {
 
       const { items, defaultItemIds } = await this.getNavigationItems(chrome);
 
-      const savedCustomization = core.userStorage.get<NavigationCustomization>(
+      const savedCustomization = core.userStorage.peek<NavigationCustomization>(
         NAV_CUSTOMIZATION_STORAGE_KEY
       );
 

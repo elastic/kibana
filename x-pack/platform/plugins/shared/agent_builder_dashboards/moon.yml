@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-visualizations-server'
   - '@kbn/agent-builder-visualizations-common'
+  - '@kbn/custom-content-common'
   - '@kbn/agent-builder-server'
   - '@kbn/controls-constants'
   - '@kbn/dashboard-plugin'
@@ -37,6 +38,7 @@ dependsOn:
   - '@kbn/core-elasticsearch-server'
   - '@kbn/lens-common'
   - '@kbn/esql-utils'
+  - '@kbn/inference-common'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/es-query'
   - '@kbn/data-plugin'
@@ -45,8 +47,11 @@ dependsOn:
   - '@kbn/as-code-shared-transforms'
   - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
-  - '@kbn/esql-utils'
   - '@kbn/presentation-publishing'
+  - '@kbn/scout'
+  - '@kbn/ui-actions-plugin'
+  - '@kbn/ftr-llm-proxy'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
@@ -58,6 +63,7 @@ fileGroups:
     - common/**/*
     - public/**/*
     - server/**/*
+    - test/scout/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

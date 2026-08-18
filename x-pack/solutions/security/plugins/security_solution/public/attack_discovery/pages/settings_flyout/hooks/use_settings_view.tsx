@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING } from '../../../../../common/constants';
 import { DEFAULT_STACK_BY_FIELD } from '..';
 import { AlertSelection } from '../alert_selection';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -109,17 +110,19 @@ export const useSettingsView = ({
 
   const workflowConfiguration = draftWorkflowConfiguration;
 
-  // Load feature flag value
+  // Load feature flag value and combine with per-space uiSetting opt-in
   useEffect(() => {
     const loadFeatureFlag = async () => {
-      const enabled = await featureFlags.getBooleanValue(
+      const ffEnabled = await featureFlags.getBooleanValue(
         'securitySolution.attackDiscoveryWorkflowsEnabled',
-        false
+        true
       );
-      setIsWorkflowsEnabledFlag(enabled);
+      setIsWorkflowsEnabledFlag(
+        ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
+      );
     };
     loadFeatureFlag();
-  }, [featureFlags]);
+  }, [featureFlags, uiSettings]);
 
   const isWorkflowsEnabled = isWorkflowsEnabledOverride ?? isWorkflowsEnabledFlag;
 

@@ -348,6 +348,16 @@ paths:
         content:
           application/json:
             examples:
+              ElasticDefend:
+                summary: Cancel a response action on an Elastic Defend host
+                value:
+                  agent_type: endpoint
+                  comment: Cancelling action due to change in requirements
+                  endpoint_ids:
+                    - ed518850-681a-4d60-bb98-e22640cae2a8
+                  parameters:
+                    force: true
+                    id: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
               MicrosoftDefenderEndpoint:
                 summary: Cancel a response action on a Microsoft Defender for Endpoint host
                 value:
@@ -1258,6 +1268,7 @@ paths:
           required: true
           schema:
             example: ed518850-681a-4d60-bb98-e22640cae2a8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -1341,6 +1352,7 @@ paths:
           name: package_policy_id
           required: true
           schema:
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -1367,6 +1379,7 @@ paths:
           name: package_policy_id
           required: true
           schema:
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -1381,7 +1394,10 @@ paths:
               properties:
                 note:
                   description: The note content.
+                  maxLength: 10000
                   type: string
+              required:
+                - note
         required: true
       responses:
         '200':
@@ -1548,6 +1564,7 @@ paths:
           schema:
             description: The ID of the script entry to be deleted.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -1575,6 +1592,7 @@ paths:
           schema:
             description: The ID of the script entry.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -1612,6 +1630,7 @@ paths:
           schema:
             description: The ID of the script entry to be updated.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       requestBody:
         content:
@@ -1670,6 +1689,7 @@ paths:
           schema:
             description: The ID of the script entry.
             example: fr518850-681a-4y60-aa98-e22640cae2b8
+            maxLength: 256
             type: string
       responses:
         '200':
@@ -1750,6 +1770,7 @@ components:
         - data
     AgentId:
       description: Agent ID
+      maxLength: 256
       type: string
     AgentIds:
       description: A list of agent IDs. Max of 250.
@@ -1801,6 +1822,7 @@ components:
         in the archive that should be executed once its contents are extracted.
         The path should be relative to the root of the archive.
       example: ./bin/script.sh
+      maxLength: 4096
       type: string
     Cancel:
       allOf:
@@ -1866,15 +1888,9 @@ components:
         - type: object
           properties:
             parameters:
-              type: object
-              properties:
-                id:
-                  description: ID of the response action to cancel
-                  example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
-                  minLength: 1
-                  type: string
-              required:
-                - id
+              oneOf:
+                - $ref: '#/components/schemas/ElasticDefendCancelParameters'
+                - $ref: '#/components/schemas/MDECancelParameters'
           required:
             - parameters
     CloudFileScriptParameters:
@@ -1932,9 +1948,11 @@ components:
       properties:
         description:
           description: Description of the script and its purpose/functionality
+          maxLength: 10000
           type: string
         example:
           description: Example usage of the script
+          maxLength: 10000
           type: string
         file:
           description: The script file upload
@@ -1945,10 +1963,10 @@ components:
         instructions:
           description: Instructions for using the script, including details around its
             supported input arguments
+          maxLength: 10000
           type: string
         name:
-          description: Name of the script
-          type: string
+          $ref: '#/components/schemas/ScriptNameSchema'
         pathToExecutable:
           $ref: '#/components/schemas/ArchivePathToExecutableSchema'
         platform:
@@ -1981,6 +1999,23 @@ components:
           example: /api/endpoint/action/497f6eca-6276/file/35645-6276-4993/download
           format: uri-reference
           type: string
+    ElasticDefendCancelParameters:
+      description: Elastic Defend agent type
+      properties:
+        force:
+          description: Forcefully cancel the response action even when it is already running
+          example: true
+          type: boolean
+        id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
+          minLength: 1
+          type: string
+      required:
+        - id
+      title: ElasticDefendCancelParameters
+      type: object
     EndDate:
       description: An end date in ISO format or Date Math format.
       example: '2023-10-31T23:59:59.999Z'
@@ -2721,7 +2756,21 @@ components:
     Kuery:
       description: A KQL string.
       example: "united.endpoint.host.os.name : 'Windows'"
+      maxLength: 30000
       type: string
+    MDECancelParameters:
+      description: Microsoft Defender for Endpoint agent type
+      properties:
+        id:
+          description: ID of the response action to cancel
+          example: 7f8c9b2a-4d3e-4f5a-8b1c-2e3f4a5b6c7d
+          maxLength: 50
+          minLength: 1
+          type: string
+      required:
+        - id
+      title: MDECancelParameters
+      type: object
     MDERunScriptParameters:
       description: Parameters for Run Script response action against Microsoft
         Defender Endpoint agent type.
@@ -3096,9 +3145,11 @@ components:
       properties:
         description:
           description: Description of the script and its purpose/functionality
+          maxLength: 10000
           type: string
         example:
           description: Example usage of the script
+          maxLength: 10000
           type: string
         file:
           description: The script file upload
@@ -3109,10 +3160,10 @@ components:
         instructions:
           description: Instructions for using the script, including details around its
             supported input arguments
+          maxLength: 10000
           type: string
         name:
-          description: Name of the script
-          type: string
+          $ref: '#/components/schemas/ScriptNameSchema'
         pathToExecutable:
           $ref: '#/components/schemas/ArchivePathToExecutableSchema'
         platform:
@@ -3128,6 +3179,11 @@ components:
           items:
             $ref: '#/components/schemas/EndpointScriptTags'
           type: array
+        version:
+          description: Version of the script
+          maxLength: 256
+          minLength: 1
+          type: string
     PendingActionDataType:
       description: Number of pending actions of this type.
       type: integer
@@ -3550,6 +3606,11 @@ components:
                 - path
           required:
             - parameters
+    ScriptNameSchema:
+      description: Name of the script
+      maxLength: 256
+      minLength: 1
+      type: string
     ScriptsApiResponse:
       example:
         data:

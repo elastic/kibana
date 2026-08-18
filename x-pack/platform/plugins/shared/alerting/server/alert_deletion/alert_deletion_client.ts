@@ -80,14 +80,14 @@ export class AlertDeletionClient {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, abortController);
+              return this.runTask(taskInstance, signal);
             },
             cancel: async () => {},
           };
@@ -115,10 +115,7 @@ export class AlertDeletionClient {
     return await previewTask(this.context, settings, spaceId);
   }
 
-  private runTask = async (
-    taskInstance: ConcreteTaskInstance,
-    abortController: AbortController
-  ) => {
-    await runTask(this.context, taskInstance, abortController);
+  private runTask = async (taskInstance: ConcreteTaskInstance, signal: AbortSignal) => {
+    await runTask(this.context, taskInstance, signal);
   };
 }

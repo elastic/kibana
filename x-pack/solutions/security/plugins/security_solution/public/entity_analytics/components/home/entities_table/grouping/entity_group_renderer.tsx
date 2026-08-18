@@ -24,6 +24,9 @@ import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
 } from '../../../../../flyout/entity_details/shared/constants';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { ENTITY_ANALYTICS_TABLE_ID } from '../../constants';
 import { RISK_SCORE_NOT_AVAILABLE } from '../../../entity_resolution/translations';
 import { getRiskLevel } from '../../../../../../common/entity_analytics/risk_engine';
@@ -56,7 +59,9 @@ const ResolutionGroupPanel = ({
   targetMetadata: TargetMetadataMap;
   tableId: string;
 }) => {
+  const enableNewFlyout = useIsNewFlyoutEnabled();
   const { openFlyout } = useExpandableFlyoutApi();
+  const { openEntityFlyout } = useFlyoutApi();
 
   const entityId = String(bucket.key_as_string ?? bucket.key);
   const metadata = targetMetadata.get(entityId);
@@ -72,23 +77,27 @@ const ResolutionGroupPanel = ({
       e.stopPropagation();
       if (!targetEntityName || !entityType) return;
 
-      const panelKey = EntityPanelKeyByType[entityType];
-      const panelParam = EntityPanelParamByType[entityType];
-      if (!panelKey || !panelParam) return;
+      const sharedParams = { entityId, contextID: tableId, scopeId: tableId };
 
-      openFlyout({
-        right: {
-          id: panelKey,
-          params: {
-            [panelParam]: targetEntityName,
-            entityId,
-            contextID: tableId,
-            scopeId: tableId,
-          },
-        },
-      });
+      if (enableNewFlyout) {
+        openEntityFlyout({
+          engineType: entityType,
+          entityName: targetEntityName,
+          origin: FLYOUT_ORIGIN.ENTITIES_TABLE,
+          ...sharedParams,
+        });
+        return;
+      }
+
+      const panelKey = EntityPanelKeyByType[entityType];
+      const paramName = EntityPanelParamByType[entityType];
+      if (panelKey && paramName) {
+        openFlyout({
+          right: { id: panelKey, params: { [paramName]: targetEntityName, ...sharedParams } },
+        });
+      }
     },
-    [openFlyout, targetEntityName, entityType, entityId, tableId]
+    [enableNewFlyout, openFlyout, openEntityFlyout, targetEntityName, entityType, entityId, tableId]
   );
 
   return (
@@ -99,7 +108,7 @@ const ResolutionGroupPanel = ({
             <EuiButtonIcon
               aria-label={openEntityFlyoutLabel}
               data-test-subj={TEST_SUBJ_RESOLUTION_GROUP_OPEN_FLYOUT}
-              iconType="expand"
+              iconType="maximize"
               size="xs"
               onClick={handleOpenFlyout}
             />
@@ -210,7 +219,7 @@ export const createGroupStatsRenderer = (targetMetadata: TargetMetadataMap) => {
       const groupScore = metadata?.riskScore ?? bucket.resolutionRiskScore?.value;
       const isSoloGroup = bucket.doc_count === 1;
       const individualScore = isSoloGroup ? metadata?.individualRiskScore : undefined;
-      const riskScore = groupScore ?? individualScore ?? null;
+      const riskScore = (isSoloGroup && !groupScore ? individualScore : groupScore) ?? null;
 
       stats.push({
         title: riskScoreLabel,

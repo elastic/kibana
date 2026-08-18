@@ -33,7 +33,12 @@ import { TemplatesTableEmptyPrompt } from '../components/templates_table_empty_p
 import { DeleteConfirmationModal } from '../../configure_cases/delete_confirmation_modal';
 import { CasesAppHeader } from '../../app/cases_app_header';
 import { CasesPageBody } from '../../app/cases_page_body';
+import { GuidedTour } from '../../tour/guided_tour';
+import { TEMPLATES_TOUR_STEPS } from '../tour/tour_steps_config';
+import { TEMPLATES_TOUR_STEP_TEST_ID } from '../tour/constants';
 import { useKibana } from '../../../common/lib/kibana';
+import { useNewFeatureSeen } from '../../../common/use_new_feature_seen';
+import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 
 export const AllTemplatesPage: React.FC = () => {
   useCasesTemplatesBreadcrumbs();
@@ -44,6 +49,13 @@ export const AllTemplatesPage: React.FC = () => {
     useCasesCreateTemplateNavigation();
   const { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary } = useCasesFieldLibraryNavigation();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [isTourActive, setIsTourActive] = useState(false);
+  const { isNew: showInfoPanel, markSeen: dismissInfoPanel } = useNewFeatureSeen(
+    LOCAL_STORAGE_KEYS.templatesListInfoPanelDismissed
+  );
+
+  const startTour = useCallback(() => setIsTourActive(true), []);
+  const finishTour = useCallback(() => setIsTourActive(false), []);
 
   const openFlyout = useCallback(() => {
     setIsFlyoutOpen(true);
@@ -159,8 +171,16 @@ export const AllTemplatesPage: React.FC = () => {
         // guide via the doclinks service (kept consistent with the template editor header).
         docLink={docLinks.links.cases.manageCaseTemplates}
       />
+      <GuidedTour
+        steps={TEMPLATES_TOUR_STEPS}
+        isActive={isTourActive}
+        onFinish={finishTour}
+        testIdPrefix={TEMPLATES_TOUR_STEP_TEST_ID}
+      />
       <CasesPageBody>
-        <TemplatesInfoPanel />
+        {showInfoPanel ? (
+          <TemplatesInfoPanel onStartTour={startTour} onDismiss={dismissInfoPanel} />
+        ) : null}
         <TemplatesTableFilters
           queryParams={queryParams}
           onQueryParamsChange={setQueryParams}
