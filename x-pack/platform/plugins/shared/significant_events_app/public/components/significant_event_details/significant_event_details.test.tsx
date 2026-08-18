@@ -60,8 +60,8 @@ const baseEvent: SignificantEvent = {
 const detectionSignal: SignalEntry = {
   type: 'detection',
   stream_name: 'logs.checkout',
-  description: 'Found: connection refused. Impact: checkout blocked. Verdict: confirms.',
-  confirmed: true,
+  description: 'Found: connection refused. Impact: checkout blocked.',
+  verdict: 'confirms',
   collected_at: '2026-06-11T15:10:00.000Z',
   evidence: {
     esql_query: ESQL_QUERY,

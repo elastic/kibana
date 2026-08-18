@@ -14,6 +14,8 @@ import type {
   SignificantEventResponse,
   Severity,
   SignificantEventStatus,
+  SignalEntry,
+  SignalVerdict,
 } from '@kbn/significant-events-schema';
 import { SIGNIFICANT_EVENT_ACTIVE_STATUS_OPTIONS } from '@kbn/significant-events-schema';
 import {
@@ -49,6 +51,32 @@ import type {
 } from '../../../../common/workflows/triggers';
 
 export type EventDataStreamClient = IDataStreamClient<typeof eventsMappings, StoredEvent>;
+export type LegacySignal = Omit<SignalEntry, 'verdict'> & {
+  verdict?: SignalVerdict;
+  confirmed?: boolean;
+};
+
+// TODO: Remove this function once old signals are replaced with the new signal schema
+export const normalizeLegacyVerdict = (signal: LegacySignal): SignalEntry => {
+  if (signal.verdict !== undefined) return signal as SignalEntry;
+
+  const { confirmed, ...normalizedSignal } = signal;
+  const verdict =
+    (confirmed === true && signal.evidence?.result === 'found' ? 'confirms' : undefined) ??
+    (confirmed === false && signal.evidence?.result === 'found' ? 'refutes' : undefined) ??
+    (signal.evidence === undefined || signal.evidence === null
+      ? 'not_checked'
+      : signal.evidence.result === 'found'
+      ? 'off_topic'
+      : 'inconclusive');
+
+  return { ...normalizedSignal, verdict } as SignalEntry;
+};
+
+const normalizeLegacyVerification = (event: SignificantEvent): SignificantEvent => ({
+  ...event,
+  signals: event.signals?.map((signal) => normalizeLegacyVerdict(signal as LegacySignal)),
+});
 
 /**
  * Maximum number of distinct active events returned by findLatestActive. With stream+rule
@@ -191,7 +219,7 @@ export class EventClient {
       index: EVENTS_DATA_STREAM,
       groupBy: FIELD_EVENT_ID,
     });
-    return { hits: result.hits };
+    return { hits: result.hits.map(normalizeLegacyVerification) };
   }
 
   async findLatestPaginated(
@@ -281,7 +309,10 @@ export class EventClient {
     const paginatedHits = start >= hits.length ? [] : hits.slice(start, start + perPage);
 
     return {
-      hits: paginatedHits,
+      hits: paginatedHits.map((event) => ({
+        ...normalizeLegacyVerification(event),
+        created_at: event.created_at,
+      })),
       page,
       perPage,
       total,
@@ -328,7 +359,7 @@ export class EventClient {
       esClient: this.clients.esClient,
       query: query.keep('_source').limit(MAX_DEDUP_SCAN_LIMIT),
     });
-    return { hits };
+    return { hits: hits.map(normalizeLegacyVerification) };
   }
 
   async findByEventUuid(id: string): Promise<{ hits: SignificantEvent[] }> {
@@ -339,7 +370,7 @@ export class EventClient {
       idField: FIELD_EVENT_UUID,
       idValue: id,
     });
-    return { hits: result.hits };
+    return { hits: result.hits.map(normalizeLegacyVerification) };
   }
 
   async findByEventId(eventId: string): Promise<{ hits: SignificantEventResponse[] }> {
@@ -357,7 +388,12 @@ export class EventClient {
       query,
       fields: ['created_at'],
     });
-    return { hits };
+    return {
+      hits: hits.map((event) => ({
+        ...normalizeLegacyVerification(event),
+        created_at: event.created_at,
+      })),
+    };
   }
 
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
@@ -373,7 +409,7 @@ export class EventClient {
       groupBy: FIELD_EVENT_ID,
     });
     const map = new Map<string, SignificantEvent>();
-    for (const event of hits) {
+    for (const event of hits.map(normalizeLegacyVerification)) {
       if (event.event_id) map.set(event.event_id, event);
     }
     return map;
