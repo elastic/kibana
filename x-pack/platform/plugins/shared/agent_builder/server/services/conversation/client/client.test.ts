@@ -22,7 +22,7 @@ import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-b
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
-import { fromEs, fromEsWithoutRounds, type Document } from './converters';
+import { type Document } from './converters';
 
 jest.mock('../templates/registry');
 import { getTemplate } from '../templates/registry';
@@ -126,39 +126,6 @@ describe('ConversationClient', () => {
         username: 'test-user',
         isAdmin: false,
       },
-    });
-  });
-
-  describe('getConversationWithPermissions', () => {
-    it('preserves full conversations and adds owner permissions for the client user', () => {
-      const conversation = fromEs(createConversationDocument());
-
-      expect(client.getConversationWithPermissions(conversation)).toEqual({
-        ...conversation,
-        permissions: { rename: true, delete: true, update_access_control: true },
-      });
-    });
-
-    it('adds public-conversation admin permissions for the client user', () => {
-      const adminClient = createClient({
-        space: testSpace,
-        logger: loggerMock.create(),
-        esClient: {} as never,
-        agentRegistry: agentRegistry as unknown as AgentRegistry,
-        user: { id: 'admin-user', username: 'admin', isAdmin: true },
-      });
-      const conversation = fromEsWithoutRounds(
-        createConversationDocument({
-          userId: 'owner-user',
-          username: 'owner',
-          accessMode: ConversationAccessControlMode.Public,
-        })
-      );
-
-      expect(adminClient.getConversationWithPermissions(conversation)).toEqual({
-        ...conversation,
-        permissions: { rename: true, delete: true, update_access_control: false },
-      });
     });
   });
 
@@ -452,7 +419,7 @@ describe('ConversationClient', () => {
     });
 
     it('indexes with op_type create so existing conversations are never overwritten', async () => {
-      await client.create({
+      const result = await client.create({
         id: 'conversation-1',
         title: 'Conversation 1',
         agent_id: 'agent-1',
@@ -465,6 +432,11 @@ describe('ConversationClient', () => {
           op_type: 'create',
         })
       );
+      expect(result.permissions).toEqual({
+        rename: true,
+        delete: true,
+        update_access_control: true,
+      });
     });
 
     it('throws a not found error when the id already exists', async () => {
@@ -1720,31 +1692,39 @@ describe('ConversationClient', () => {
         accessMode: ConversationAccessControlMode.Public,
       });
 
-    it('does not decorate owned conversations with permissions on get', async () => {
+    it('returns owner permissions with conversations from get', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocument()] },
       });
 
       const result = await client.get('conversation-1');
 
-      expect(result).not.toHaveProperty('permissions');
+      expect(result.permissions).toEqual({
+        rename: true,
+        delete: true,
+        update_access_control: true,
+      });
       expect(result.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
         entries: [],
       });
     });
 
-    it('does not decorate public participant conversations with permissions on get', async () => {
+    it('returns public participant permissions with conversations from get', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [publicConversationOwnedByAnotherUser()] },
       });
 
       const result = await client.get('conversation-1');
 
-      expect(result).not.toHaveProperty('permissions');
+      expect(result.permissions).toEqual({
+        rename: false,
+        delete: false,
+        update_access_control: false,
+      });
     });
 
-    it('does not decorate listed conversations with permissions', async () => {
+    it('returns per-conversation permissions from list', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [
@@ -1756,10 +1736,11 @@ describe('ConversationClient', () => {
 
       const results = await client.list();
 
-      results.forEach((conversation) => {
-        expect(conversation).not.toHaveProperty('permissions');
-        expect(conversation).not.toHaveProperty('rounds');
-      });
+      expect(results.map(({ permissions }) => permissions)).toEqual([
+        { rename: true, delete: true, update_access_control: true },
+        { rename: false, delete: false, update_access_control: false },
+      ]);
+      results.forEach((conversation) => expect(conversation).not.toHaveProperty('rounds'));
       expect(results.map(({ id }) => id)).toEqual(['owned', 'participating']);
     });
 
@@ -1770,7 +1751,11 @@ describe('ConversationClient', () => {
 
       const result = await client.get('conversation-1');
 
-      expect(result).not.toHaveProperty('permissions');
+      expect(result.permissions).toEqual({
+        rename: false,
+        delete: false,
+        update_access_control: false,
+      });
       await expect(client.delete('conversation-1')).rejects.toThrow(
         'Conversation conversation-1 not found'
       );
@@ -1783,7 +1768,11 @@ describe('ConversationClient', () => {
 
       const result = await client.get('conversation-1');
 
-      expect(result).not.toHaveProperty('permissions');
+      expect(result.permissions).toEqual({
+        rename: false,
+        delete: false,
+        update_access_control: false,
+      });
       await expect(
         client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
       ).rejects.toThrow('Conversation conversation-1 not found');

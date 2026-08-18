@@ -9,15 +9,14 @@ import type {
   ConversationAccessControl,
   ConversationAccessControlEntry,
   ConversationAccessControlMode,
+  Conversation,
+  ConversationWithoutRounds,
 } from '@kbn/agent-builder-common';
-import type {
-  ConversationWithPermissions,
-  ConversationWithoutRoundsWithPermissions,
-} from './permissions';
+import type { WithPermissions } from './permissions';
 
-export type GetConversationResponse = ConversationWithPermissions;
+export type GetConversationResponse = WithPermissions<Conversation>;
 
-export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
+export type ListConversationsResponseItem = WithPermissions<ConversationWithoutRounds>;
 
 export interface ListConversationsResponse {
   results: ListConversationsResponseItem[];

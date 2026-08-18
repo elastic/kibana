@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { Conversation, ConversationWithoutRounds } from '@kbn/agent-builder-common';
-
 export interface ConversationPermissions {
   rename: boolean;
   delete: boolean;
@@ -16,7 +14,3 @@ export interface ConversationPermissions {
 export type WithPermissions<T> = T & {
   permissions: ConversationPermissions;
 };
-
-export type ConversationWithPermissions = WithPermissions<Conversation>;
-
-export type ConversationWithoutRoundsWithPermissions = WithPermissions<ConversationWithoutRounds>;

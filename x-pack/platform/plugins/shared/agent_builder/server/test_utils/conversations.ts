@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { type ConversationRound, ConversationRoundStatus } from '@kbn/agent-builder-common';
-import type { ConversationWithPermissions } from '../../common/http_api/permissions';
+import {
+  type Conversation,
+  type ConversationRound,
+  ConversationRoundStatus,
+} from '@kbn/agent-builder-common';
+import type { WithPermissions } from '../../common/http_api/permissions';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
 export type ConversationServiceMock = jest.Mocked<ConversationService> & {
@@ -15,8 +19,8 @@ export type ConversationServiceMock = jest.Mocked<ConversationService> & {
 export type ConversationClientMock = jest.Mocked<ConversationClient>;
 
 export const createEmptyConversation = (
-  parts: Partial<ConversationWithPermissions> = {}
-): ConversationWithPermissions => {
+  parts: Partial<WithPermissions<Conversation>> = {}
+): WithPermissions<Conversation> => {
   return {
     id: 'id',
     title: 'New conversation',
@@ -69,7 +73,6 @@ export const createConversationClientMock = (): ConversationClientMock => {
     patchMetadata: jest.fn(),
     appendEvents: jest.fn(),
     getEvents: jest.fn(),
-    getConversationWithPermissions: jest.fn(),
   };
 };
 

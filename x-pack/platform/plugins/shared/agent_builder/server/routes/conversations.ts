@@ -119,9 +119,7 @@ export function registerConversationRoutes({
 
         return response.ok<ListConversationsResponse>({
           body: {
-            results: conversations.map((conversation) =>
-              client.getConversationWithPermissions(conversation)
-            ),
+            results: conversations,
           },
         });
       })
@@ -169,7 +167,7 @@ export function registerConversationRoutes({
         const conversation = await client.get(conversationId);
 
         return response.ok<GetConversationResponse>({
-          body: client.getConversationWithPermissions(conversation),
+          body: conversation,
         });
       })
     );

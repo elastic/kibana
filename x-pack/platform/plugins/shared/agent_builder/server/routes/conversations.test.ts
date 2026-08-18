@@ -63,11 +63,11 @@ describe('registerConversationRoutes', () => {
         },
       ],
     } as Conversation;
-    const get = jest.fn().mockResolvedValue(conversation);
-    const getConversationWithPermissions = jest.fn().mockImplementation((value) => ({
-      ...value,
+    const conversationWithPermissions = {
+      ...conversation,
       permissions: { rename: true, delete: true, update_access_control: true },
-    }));
+    };
+    const get = jest.fn().mockResolvedValue(conversationWithPermissions);
 
     const router = {
       versioned: {
@@ -98,7 +98,7 @@ describe('registerConversationRoutes', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({ get, getConversationWithPermissions }),
+          getScopedClient: jest.fn().mockResolvedValue({ get }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -127,7 +127,6 @@ describe('registerConversationRoutes', () => {
     );
 
     expect(get).toHaveBeenCalledWith('conversation-1');
-    expect(getConversationWithPermissions).toHaveBeenCalledWith(conversation);
     expect(result.payload).toEqual({
       ...conversation,
       permissions: { rename: true, delete: true, update_access_control: true },
@@ -160,11 +159,11 @@ describe('registerConversationRoutes', () => {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       },
     };
-    const list = jest.fn().mockResolvedValue([conversation]);
-    const getConversationWithPermissions = jest.fn().mockImplementation((value) => ({
-      ...value,
+    const conversationWithPermissions = {
+      ...conversation,
       permissions: { rename: true, delete: true, update_access_control: true },
-    }));
+    };
+    const list = jest.fn().mockResolvedValue([conversationWithPermissions]);
 
     const router = {
       versioned: {
@@ -195,7 +194,7 @@ describe('registerConversationRoutes', () => {
       router,
       getInternalServices: jest.fn().mockReturnValue({
         conversations: {
-          getScopedClient: jest.fn().mockResolvedValue({ list, getConversationWithPermissions }),
+          getScopedClient: jest.fn().mockResolvedValue({ list }),
         },
       }),
       logger: loggingSystemMock.createLogger(),
@@ -222,7 +221,6 @@ describe('registerConversationRoutes', () => {
     );
 
     expect(list).toHaveBeenCalledWith({ agentId: undefined });
-    expect(getConversationWithPermissions).toHaveBeenCalledWith(conversation);
     expect(result.payload.results[0].origin).toEqual({
       external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
     });
@@ -246,8 +244,12 @@ describe('registerConversationRoutes', () => {
       access_control: { access_mode: ConversationAccessControlMode.Public, entries: [] },
       rounds: [],
     } as Conversation;
-    const get = jest.fn().mockResolvedValue(conversation);
-    const list = jest.fn().mockResolvedValue([conversation]);
+    const conversationWithPermissions = {
+      ...conversation,
+      permissions: { rename: true, delete: true, update_access_control: false },
+    };
+    const get = jest.fn().mockResolvedValue(conversationWithPermissions);
+    const list = jest.fn().mockResolvedValue([conversationWithPermissions]);
 
     const router = {
       versioned: {
@@ -284,10 +286,6 @@ describe('registerConversationRoutes', () => {
           getScopedClient: jest.fn().mockResolvedValue({
             get,
             list,
-            getConversationWithPermissions: jest.fn().mockImplementation((value) => ({
-              ...value,
-              permissions: { rename: true, delete: true, update_access_control: false },
-            })),
           }),
         },
       }),
