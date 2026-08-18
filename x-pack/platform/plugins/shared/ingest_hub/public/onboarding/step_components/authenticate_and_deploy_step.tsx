@@ -39,7 +39,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const miServiceIds = useMemo(
     () =>
       selectedServiceIds.filter((id) =>
-        AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'agentless')
+        AWS_SERVICES_MAP.get(id)?.deploymentMethods.some(
+          (dm) => dm.method === 'managed_integration'
+        )
       ),
     [selectedServiceIds]
   );
@@ -47,7 +49,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const ecfServiceIds = useMemo(
     () =>
       selectedServiceIds.filter((id) =>
-        AWS_SERVICES_MAP.get(id)?.deliveryMethods.some((dm) => dm.method === 'cloud_forwarder')
+        AWS_SERVICES_MAP.get(id)?.deploymentMethods.some((dm) => dm.method === 'ecf')
       ),
     [selectedServiceIds]
   );
