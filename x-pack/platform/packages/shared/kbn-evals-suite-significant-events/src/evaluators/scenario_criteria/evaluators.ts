@@ -14,12 +14,7 @@ export interface CreateScenarioCriteriaLlmEvaluatorOptions<
 > {
   criteriaFn: (criteria: EvaluationCriterion[]) => Evaluator<TExample, TJudgedOutput>;
   criteria?: EvaluationCriterion[];
-  /**
-   * Optional transform applied to the raw task output before it is sent to the judge.
-   * `TJudgedOutput` may differ from `TTaskOutput` (e.g. a composite payload that splits
-   * generated queries by type). `context.input` carries the example input so payloads can
-   * include input-seeded data (e.g. `existing_queries` on rerun arms).
-   */
+  /** Reshapes the task output before judging. `context.input` exposes the example input. */
   transformOutput?: (output: TTaskOutput, context: { input: TExample['input'] }) => TJudgedOutput;
   name?: string;
   /**
@@ -87,8 +82,7 @@ export const createScenarioCriteriaLlmEvaluator = <
       expected,
       output: transformOutput
         ? transformOutput(output, { input })
-        : // Identity cast: TJudgedOutput defaults to TTaskOutput, so this only differs when a
-          // caller sets them apart AND omits transformOutput, which no caller does.
+        : // identity when TJudgedOutput takes its default of TTaskOutput
           (output as unknown as TJudgedOutput),
       metadata,
     });

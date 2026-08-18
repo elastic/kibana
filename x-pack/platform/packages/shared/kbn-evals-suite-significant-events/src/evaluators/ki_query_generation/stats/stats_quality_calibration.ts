@@ -41,12 +41,11 @@ const getStatsQueries = (output: KIQueryGenerationOutput): Query[] => {
   return queries.filter((q: Query) => deriveQueryType(q.esql) === QUERY_TYPE_STATS);
 };
 
-// `deriveQueryType` returns only 'match' | 'stats', so `!== QUERY_TYPE_STATS` is exactly the match set.
+// `deriveQueryType` only returns 'match' | 'stats', so this is exactly the match set.
 const getMatchQueries = (output: KIQueryGenerationOutput): Query[] =>
   getQueriesFromOutput(output).filter((q: Query) => deriveQueryType(q.esql) !== QUERY_TYPE_STATS);
 
-// Rerun arms seed `existing_queries` on the example input (see build_query_gen_examples.ts);
-// the task output carries only `evaluation_arm`, not the seeds.
+// Rerun seeds live on the example input, not the task output.
 const getExistingQueries = (input: unknown): ExistingQuerySummary[] => {
   if (!input || typeof input !== 'object') {
     return [];
@@ -84,11 +83,9 @@ export const createStatsQualityCalibrationEvaluator = ({
     transformOutput: (output, { input }) => ({
       generated: {
         stats_queries: getStatsQueries(output),
-        // Filtering these out was what made detection_evidence_pairing unanswerable.
         match_queries: getMatchQueries(output),
       },
-      // Rerun arms legitimately SKIP a complement that already exists; without the seeds the
-      // criterion would penalise correct deduplication.
+      // Without the seeds the judge penalises a rerun for correctly skipping an existing complement.
       existing_queries: getExistingQueries(input),
     }),
   });
