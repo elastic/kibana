@@ -32,14 +32,6 @@ const NO_DATA_REQUESTS = {
   none: 'If a host stops sending metrics, leave the alert unchanged — ignore missing data.',
 } as const;
 
-const NO_DATA_CRITERIA = {
-  last_known_status:
-    'The second turn holds the last known alert status when a host stops sending data.',
-  recover:
-    'The second turn recovers the episode when a host goes quiet, instead of holding the previous status.',
-  none: 'The second turn ignores missing data — no status change when a host stops sending metrics.',
-} as const;
-
 const STANDALONE_PRESENCE_QUERY =
   ' Detect missing data with a separate query that counts documents per host.name — not the CPU average.';
 
@@ -95,16 +87,15 @@ export const noDataExample = ({
   output: {
     criteria: [
       format === 'composed'
-        ? 'The first-turn rule uses composed query format (shared base + breach segment), not standalone.'
-        : 'The first-turn rule uses standalone query format (independent full ES|QL queries), not composed.',
-      NO_DATA_CRITERIA[strategy],
+        ? 'The first-turn set_query uses `query.format: composed` (shared `base` + `breach.segment`), not standalone.'
+        : 'The first-turn set_query uses `query.format: standalone` (full independent ES|QL queries), not composed.',
       ...(format === 'composed'
         ? [
-            'Composed-format rules do not add a standalone no_data query block — the base query is the data-presence query.',
+            'Composed format has no `query.no_data` block — the `base` query is the data-presence query.',
           ]
         : needsStandalonePresenceQuery(strategy)
         ? [
-            'The rule uses an explicit data-presence query that counts documents per host.name (distinct from the CPU breach query).',
+            'Standalone format includes a `query.no_data` ES|QL block that counts documents per host.name, distinct from the breach query.',
           ]
         : []),
       'The no-data change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',

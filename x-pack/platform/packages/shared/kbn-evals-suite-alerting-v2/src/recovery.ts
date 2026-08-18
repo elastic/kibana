@@ -28,14 +28,6 @@ const RECOVERY_REQUESTS = {
   no_breach: 'Recover automatically once CPU is no longer above 0.9.',
 } as const;
 
-const RECOVERY_CRITERIA = {
-  query:
-    'The second turn treats recovery as a custom condition: average CPU below 0.5 (or an equivalent threshold), not merely dropping back under 0.9.',
-  none: 'The second turn disables automatic recovery — alerts stay active after CPU returns to normal.',
-  no_breach:
-    'The second turn recovers automatically when the host is no longer above the 0.9 threshold.',
-} as const;
-
 export type RecoveryExampleStrategy = keyof typeof RECOVERY_REQUESTS;
 
 const assertCustomRecoveryQuery = (
@@ -74,9 +66,13 @@ export const recoveryExample = ({
   output: {
     criteria: [
       format === 'composed'
-        ? 'The first-turn rule uses composed query format (shared base + breach segment), not standalone.'
-        : 'The first-turn rule uses standalone query format (independent full ES|QL queries), not composed.',
-      RECOVERY_CRITERIA[strategy],
+        ? 'The first-turn set_query uses `query.format: composed` (shared `base` + `breach.segment`), not standalone.'
+        : 'The first-turn set_query uses `query.format: standalone` (full independent ES|QL queries), not composed.',
+      ...(strategy === 'query'
+        ? [
+            'The second-turn set_query includes a `query.recovery` ES|QL block whose threshold is average `system.cpu.total.norm.pct` below 0.5 (not merely dropping back under 0.9).',
+          ]
+        : []),
       'The recovery change is applied with manage_rule against the existing attachment (not a new rule), and the final manage_rule call ends with a validate operation.',
       PERSIST_VIA_ATTACHMENT_CRITERION,
     ],
