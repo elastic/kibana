@@ -105,9 +105,6 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     }
   );
 
-  // No external_id: the aws package's Identity Federation path does not use
-  // one (ingest-dev#9116) — the CloudFormation trust policy has no
-  // sts:ExternalId condition and the stack emits no ExternalId output.
   const handleCreate = useCallback(() => {
     createConnector({
       name: connectorName,
