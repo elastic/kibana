@@ -10,7 +10,11 @@
 import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { FilterOperator } from './filter_input_codec';
 import { projectRoutingCodec } from './project_routing_codec';
-import { parseDefaultProjectRouting, reconcileDecodedRouting } from '.';
+import {
+  areProjectRoutingsEquivalent,
+  parseDefaultProjectRouting,
+  reconcileDecodedRouting,
+} from '.';
 
 const availableProjectIds = ['origin', 'linked1', 'linked2'];
 
@@ -55,6 +59,13 @@ describe('parseDefaultProjectRouting', () => {
     expect(parseDefaultProjectRouting('', availableProjectIds)).toEqual({
       filterExpressions: [],
       excludedOverrides: [],
+    });
+  });
+
+  it('parses a lone _id snapshot as excluding every other available project', () => {
+    expect(parseDefaultProjectRouting('_id:p2', ['p1', 'p2'], 'p1')).toEqual({
+      filterExpressions: [],
+      excludedOverrides: ['p1'],
     });
   });
 
@@ -193,5 +204,60 @@ describe('parseDefaultProjectRouting', () => {
         projectRoutingStrategy: 'dynamic',
       })
     ).toBe(defaultProjectRouting);
+  });
+});
+
+describe('areProjectRoutingsEquivalent', () => {
+  it('treats identical routing strings as equivalent', () => {
+    expect(
+      areProjectRoutingsEquivalent(
+        '_type:security AND (_id:* AND NOT _id:linked1)',
+        '_type:security AND (_id:* AND NOT _id:linked1)',
+        availableProjectIds
+      )
+    ).toBe(true);
+  });
+
+  it('treats snapshot inclusions as equivalent to the complementary dynamic exclusions', () => {
+    expect(
+      areProjectRoutingsEquivalent(
+        '(_id:origin OR _id:linked2)',
+        '(_id:* AND NOT _id:linked1)',
+        availableProjectIds
+      )
+    ).toBe(true);
+  });
+
+  it('treats PROJECT_ROUTING.ORIGIN as equivalent to excluding every non-origin project', () => {
+    expect(
+      areProjectRoutingsEquivalent(
+        PROJECT_ROUTING.ORIGIN,
+        '(_id:* AND NOT (_id:linked1 OR _id:linked2))',
+        availableProjectIds,
+        'origin'
+      )
+    ).toBe(true);
+  });
+
+  it('does not treat a snapshot of a non-origin project as ORIGIN', () => {
+    expect(areProjectRoutingsEquivalent('_id:p2', PROJECT_ROUTING.ORIGIN, ['p1', 'p2'], 'p1')).toBe(
+      false
+    );
+  });
+
+  it('returns false when exclusions differ', () => {
+    expect(
+      areProjectRoutingsEquivalent(
+        '(_id:* AND NOT _id:linked1)',
+        '(_id:* AND NOT _id:linked2)',
+        availableProjectIds
+      )
+    ).toBe(false);
+  });
+
+  it('returns false when filter expressions differ', () => {
+    expect(
+      areProjectRoutingsEquivalent('_type:security', '_organisation:acme', availableProjectIds)
+    ).toBe(false);
   });
 });

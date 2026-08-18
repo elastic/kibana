@@ -71,9 +71,6 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
     isFilterProposalPending: false,
     controlsState: 'enabled',
     ...overrides,
-    defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
-    hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
-    originProjectId: overrides.originProjectId,
   };
 };
 

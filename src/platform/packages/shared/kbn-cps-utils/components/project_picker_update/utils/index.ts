@@ -10,7 +10,11 @@
 import type { ProjectRouting } from '@kbn/es-query';
 import { PROJECT_ROUTING } from '@kbn/cps-common';
 import { getFilterExpressionLookupKey, type FilterExpressionValue } from './filter_input_codec';
-import { projectRoutingCodec, type ProjectRoutingExpression } from './project_routing_codec';
+import {
+  encodeFilterOnlyRouting,
+  projectRoutingCodec,
+  type ProjectRoutingExpression,
+} from './project_routing_codec';
 
 export {
   type FilterExpressionValue,
@@ -76,4 +80,35 @@ export function parseDefaultProjectRouting(
   }
 
   return reconcileDecodedRouting(projectRoutingCodec.decode(routing), availableProjectIds);
+}
+
+/**
+ * Whether two routing strings describe the same filters and exclusions.
+ *
+ * Compares parsed filter identity and exclusion sets rather than the strings themselves:
+ * re-encoding is not string-stable (`snapshot` expands `_id:…`; `dynamic` can collapse
+ * equivalent clauses), so byte equality would treat a no-op round-trip as a change.
+ */
+export function areProjectRoutingsEquivalent(
+  left: ProjectRouting,
+  right: ProjectRouting,
+  availableProjectIds: readonly string[],
+  originProjectId?: string
+): boolean {
+  const parsedLeft = parseDefaultProjectRouting(left, availableProjectIds, originProjectId);
+  const parsedRight = parseDefaultProjectRouting(right, availableProjectIds, originProjectId);
+
+  const filtersMatch =
+    (encodeFilterOnlyRouting(parsedLeft.filterExpressions) ?? '') ===
+    (encodeFilterOnlyRouting(parsedRight.filterExpressions) ?? '');
+
+  if (!filtersMatch) {
+    return false;
+  }
+
+  const rightExclusions = new Set(parsedRight.excludedOverrides);
+  return (
+    parsedLeft.excludedOverrides.length === rightExclusions.size &&
+    parsedLeft.excludedOverrides.every((id) => rightExclusions.has(id))
+  );
 }

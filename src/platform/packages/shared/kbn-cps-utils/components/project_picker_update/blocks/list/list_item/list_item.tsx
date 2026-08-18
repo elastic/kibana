@@ -65,7 +65,11 @@ export const ProjectPickerListItem = React.memo(function ProjectPickerListItem({
       checked={isSelected}
       disabled={isToggleDisabled || isInteractionsDisabled || controlsState === 'disabled'}
       onChange={(evt) => onToggle(project, evt.target.checked)}
-      label={null}
+      label={i18n.translate('cpsUtils.projectPicker.listItem.toggleLabel', {
+        defaultMessage: 'Include project {projectName}',
+        values: { projectName: project._alias },
+      })}
+      showLabel={false}
       data-test-subj={getProjectPickerListItemSwitchTestSubj(project._id)}
       compressed
     />
