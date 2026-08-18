@@ -40,7 +40,7 @@ export type AlertingLabels = Partial<{
 
 /**
  * Subsystems that own a child logger. A name maps to the ECS `log.logger`
- * value `plugins.alertingV2.<name>`, which is the primary axis an operator
+ * value `plugins.alertingVTwo.<name>`, which is the primary axis an operator
  * filters on.
  */
 export type AlertingSubsystemName =
