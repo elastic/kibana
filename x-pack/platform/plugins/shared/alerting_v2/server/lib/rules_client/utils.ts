@@ -22,7 +22,6 @@ import {
   isSignalQueryBreachOnly,
   isSignalUsingStandaloneFormat,
 } from '@kbn/alerting-v2-schemas';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
