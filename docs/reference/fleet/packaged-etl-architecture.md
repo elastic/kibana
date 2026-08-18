@@ -137,6 +137,6 @@ architecture:
 
 ## See also
 
-- [Integration alerting templates](fleet/integration-alerting-templates.md)
+- [Integration alerting templates](integration-alerting-templates.md)
 - [Alerting settings](../configuration-reference/alerting-settings.md)
 - [Fleet settings](../configuration-reference/fleet-settings.md)
