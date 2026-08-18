@@ -6979,6 +6979,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/flyout-sections@link:src/platform/packages/shared/shared-ux/flyout/sections":
+  version "0.0.0"
+  uid ""
+
 "@kbn/flyout-system-example-plugin@link:examples/flyout_system":
   version "0.0.0"
   uid ""

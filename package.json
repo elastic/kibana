@@ -764,6 +764,7 @@
     "@kbn/flot-charts": "link:src/platform/packages/shared/kbn-flot-charts",
     "@kbn/flyout-info-blocks": "link:src/platform/packages/shared/shared-ux/flyout/info-blocks",
     "@kbn/flyout-meta-blocks": "link:src/platform/packages/shared/shared-ux/flyout/meta-blocks",
+    "@kbn/flyout-sections": "link:src/platform/packages/shared/shared-ux/flyout/sections",
     "@kbn/flyout-system-example-plugin": "link:examples/flyout_system",
     "@kbn/foo-plugin": "link:x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin",
     "@kbn/fs": "link:x-pack/platform/packages/shared/kbn-fs",

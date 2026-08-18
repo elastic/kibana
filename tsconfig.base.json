@@ -1453,6 +1453,8 @@
       "@kbn/flyout-info-blocks/*": ["./src/platform/packages/shared/shared-ux/flyout/info-blocks/*"],
       "@kbn/flyout-meta-blocks": ["./src/platform/packages/shared/shared-ux/flyout/meta-blocks"],
       "@kbn/flyout-meta-blocks/*": ["./src/platform/packages/shared/shared-ux/flyout/meta-blocks/*"],
+      "@kbn/flyout-sections": ["./src/platform/packages/shared/shared-ux/flyout/sections"],
+      "@kbn/flyout-sections/*": ["./src/platform/packages/shared/shared-ux/flyout/sections/*"],
       "@kbn/flyout-system-example-plugin": ["./examples/flyout_system"],
       "@kbn/flyout-system-example-plugin/*": ["./examples/flyout_system/*"],
       "@kbn/foo-plugin": ["./x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin"],
