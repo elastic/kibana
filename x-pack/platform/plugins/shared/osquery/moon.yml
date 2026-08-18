@@ -96,6 +96,7 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/cps-utils'
   - '@kbn/cps'
+  - '@kbn/core-http-server-mocks'
 tags:
   - plugin
   - prod
