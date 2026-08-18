@@ -165,6 +165,27 @@ describe('executeRecoveryQuery', () => {
     expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
   });
 
+  it('marks content-length-exceeded recovery query errors as TaskErrorSource.USER', async () => {
+    const { queryService, scopedEsClient } = setup();
+
+    scopedEsClient.esql.query.mockRejectedValue(
+      new errors.RequestAbortedError('Response size exceeded the limit (content length: 52428800)')
+    );
+
+    const error = await executeRecoveryQuery({
+      queryService,
+      logger: loggerService,
+      rule: createRuleResponse({ kind: 'alert', recovery_strategy: 'query' }),
+      effectiveQuery: 'FROM logs-*',
+      input: createRuleExecutionInput(),
+      activeGroupHashes: toActive(['hash-1']),
+      breachedGroupHashes: new Set(),
+    }).catch((e: Error) => e);
+
+    expect(error).toBeInstanceOf(Error);
+    expect(getErrorSource(error as Error)).toBe(TaskErrorSource.USER);
+  });
+
   it('does not mark ResponseError(503) recovery query errors as TaskErrorSource.USER', async () => {
     const { queryService, scopedEsClient } = setup();
 
