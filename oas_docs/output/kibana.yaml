@@ -2117,10 +2117,17 @@ paths:
           application/json:
             examples:
               createConversationRequestExample:
-                description: Example request for creating an empty conversation with a custom title
+                description: Example request for creating a private shared conversation with a custom title and two members
                 value:
                   access_control:
                     access_mode: private
+                    entries:
+                      - id: u_abc123_uid
+                        role: member
+                        type: user
+                      - id: u_def456_uid
+                        role: member
+                        type: user
                   title: My new conversation
             schema:
               additionalProperties: false
@@ -2132,11 +2139,37 @@ paths:
                   type: object
                   properties:
                     access_mode:
-                      description: Access mode for the conversation. Defaults to private.
+                      description: "Access-control mode: `private` (only the owner and the listed members can read and continue the conversation), `public` (any user with access to the conversation's agent can read and continue it)."
                       enum:
                         - private
                         - public
                       type: string
+                    entries:
+                      description: Members to share the conversation with. The list replaces the stored one; submit an empty list to unshare. Entries naming the owner are ignored. Must be empty when `access_mode` is `public`; repeated ids are rejected.
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          id:
+                            description: 'Stable identifier of the user to share the conversation with: a Kibana user profile uid. Users without a profile cannot be granted access.'
+                            maxLength: 1024
+                            minLength: 1
+                            type: string
+                          role:
+                            description: 'Role granted to the principal. `member` is the only role: it grants read and converse access to the conversation.'
+                            enum:
+                              - member
+                            type: string
+                          type:
+                            enum:
+                              - user
+                            type: string
+                        required:
+                          - type
+                          - id
+                          - role
+                      maxItems: 100
+                      type: array
                   required:
                     - access_mode
                 agent_id:
@@ -2159,6 +2192,15 @@ paths:
                   value:
                     access_control:
                       access_mode: private
+                      entries:
+                        - added_at: '2026-08-14T10:00:00.000Z'
+                          id: u_abc123_uid
+                          role: member
+                          type: user
+                        - added_at: '2026-08-14T10:00:00.000Z'
+                          id: u_def456_uid
+                          role: member
+                          type: user
                     agent_id: elastic-ai-agent
                     created_at: '2026-08-14T10:00:00.000Z'
                     id: bcc176c5-38f6-40be-be0c-898e34fa1480
@@ -2184,14 +2226,20 @@ paths:
               -H "Content-Type: application/json" \
               -d '{
                 "title": "My new conversation",
-                "access_control": { "access_mode": "private" }
+                "access_control": {
+                  "access_mode": "private",
+                  "entries": [{ "type": "user", "id": "u_abc123_uid", "role": "member" }]
+                }
               }'
         - lang: Console
           source: |
             POST kbn://api/agent_builder/conversations
             {
               "title": "My new conversation",
-              "access_control": { "access_mode": "private" }
+              "access_control": {
+                "access_mode": "private",
+                "entries": [{ "type": "user", "id": "u_abc123_uid", "role": "member" }]
+              }
             }
       x-state: Added in 9.6.0
       x-metaTags:
