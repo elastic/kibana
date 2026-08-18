@@ -20,8 +20,11 @@ const BASE_DISCOVER_COLUMNS = ['@timestamp', 'extension.raw', 'bytes'];
 async function expectDiscoverColumns(discoverPage: ScoutPage, columns: string[]) {
   const discover = new DiscoverApp(discoverPage);
   await discover.waitUntilSearchingHasFinished();
-  // justified: Discover columns can lag the query-finished signal by one paint
-  await expect.poll(() => discover.getDocHeader(), { timeout: 20_000 }).toStrictEqual(columns);
+  // justified: column headers can lag the query-finished signal by one paint
+  await expect(discover.getDocHeaderLabels()).toHaveText(columns, {
+    timeout: 20_000,
+    useInnerText: true,
+  });
 }
 
 spaceTest.describe(
@@ -47,6 +50,7 @@ spaceTest.describe(
       async ({ context, kbnUrl, pageObjects }) => {
         const { lens } = pageObjects;
 
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         await openInDiscoverAndCheck({ context, kbnUrl }, lens, (discoverPage) =>
           expectDiscoverColumns(discoverPage, BASE_DISCOVER_COLUMNS)
         );
@@ -60,10 +64,15 @@ spaceTest.describe(
 
         await lens.layers.createLayer('annotations');
         await lens.layers.ensureLayerTabIsActive(0);
-        await expect
-          .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel'))
-          .toContain('extension.raw');
+        await lens.dimensions.waitForDimensionTriggerToContain(
+          'lnsXY_splitDimensionPanel',
+          'extension.raw'
+        );
+        expect(
+          await lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel')
+        ).toContain('extension.raw');
 
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         await openInDiscoverAndCheck({ context, kbnUrl }, lens, (discoverPage) =>
           expectDiscoverColumns(discoverPage, BASE_DISCOVER_COLUMNS)
         );
@@ -77,23 +86,28 @@ spaceTest.describe(
 
         await lens.layers.createLayer('referenceLine');
         await lens.layers.ensureLayerTabIsActive(0);
-        await expect
-          .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel'))
-          .toContain('extension.raw');
+        await lens.dimensions.waitForDimensionTriggerToContain(
+          'lnsXY_splitDimensionPanel',
+          'extension.raw'
+        );
+        expect(
+          await lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel')
+        ).toContain('extension.raw');
 
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         await openInDiscoverAndCheck({ context, kbnUrl }, lens, (discoverPage) =>
           expectDiscoverColumns(discoverPage, BASE_DISCOVER_COLUMNS)
         );
       }
     );
 
-    spaceTest('hides the open button with multiple data layers', async ({ page, pageObjects }) => {
+    spaceTest('hides the open button with multiple data layers', async ({ pageObjects }) => {
       const { lens } = pageObjects;
 
       await lens.layers.createLayer('data');
       await lens.layers.ensureLayerTabIsActive(1);
       await expect(
-        page.testSubj.locator('lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension')
+        lens.dimensions.getEmptyDimensionLocator('lnsXY_xDimensionPanel', 1)
       ).toBeVisible();
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',

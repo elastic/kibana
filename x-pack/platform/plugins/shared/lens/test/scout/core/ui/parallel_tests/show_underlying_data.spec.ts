@@ -45,10 +45,11 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
         await lens.waitForVisualization(testData.XY_CHART);
 
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         await openInDiscoverAndCheck({ context, kbnUrl }, lens, async (discoverPage) => {
           await new DiscoverApp(discoverPage).waitUntilSearchingHasFinished();
           const queryBar = new QueryBar(discoverPage);
-          await expect.poll(() => queryBar.getQuery()).toBe('');
+          await expect(queryBar.queryInput).toHaveValue('');
         });
       }
     );
@@ -71,18 +72,17 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
         await lens.waitForVisualization(testData.XY_CHART);
 
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         await openInDiscoverAndCheck({ context, kbnUrl }, lens, async (discoverPage) => {
           await new DiscoverApp(discoverPage).waitUntilSearchingHasFinished();
           const queryBar = new QueryBar(discoverPage);
           const discoverFilterBar = new FilterBar(discoverPage);
-          await expect
-            .poll(() => queryBar.getQuery())
-            .toBe(
-              '( ( extension.raw: "png" ) OR ( extension.raw: "css" ) OR ( extension.raw: "jpg" ) )'
-            );
-          expect(await discoverFilterBar.getFiltersLabel()).toStrictEqual([
-            'Lens context (lucene)',
-          ]);
+          await expect(queryBar.queryInput).toHaveValue(
+            '( ( extension.raw: "png" ) OR ( extension.raw: "css" ) OR ( extension.raw: "jpg" ) )'
+          );
+          await expect(
+            discoverFilterBar.getFiltersLocator().filter({ hasText: 'Lens context (lucene)' })
+          ).toBeVisible();
         });
       }
     );
@@ -93,9 +93,9 @@ spaceTest.describe(
         const { lens } = pageObjects;
 
         await lens.workspace.removeDimension('lnsXY_yDimensionPanel');
-        await expect
-          .poll(() => lens.dimensions.getDimensionTriggersTexts('lnsXY_yDimensionPanel'))
-          .toStrictEqual([]);
+        await expect(
+          lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')
+        ).toHaveCount(0);
         await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           operation: 'formula',
@@ -116,15 +116,17 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
         await lens.waitForVisualization(testData.XY_CHART);
 
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         await openInDiscoverAndCheck({ context, kbnUrl }, lens, async (discoverPage) => {
           const discover = new DiscoverApp(discoverPage);
           await discover.waitUntilSearchingHasFinished();
           const queryBar = new QueryBar(discoverPage);
           // justified: column headers can lag the query-finished signal by one paint
-          await expect
-            .poll(() => discover.getDocHeader(), { timeout: 20_000 })
-            .toStrictEqual(['@timestamp', 'extension.raw', 'memory']);
-          expect(await queryBar.getQuery()).toBe(
+          await expect(discover.getDocHeaderLabels()).toHaveText(
+            ['@timestamp', 'extension.raw', 'memory'],
+            { timeout: 20_000, useInnerText: true }
+          );
+          await expect(queryBar.queryInput).toHaveValue(
             '( ( bytes > 2000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
           );
         });
@@ -137,9 +139,9 @@ spaceTest.describe(
         const { lens } = pageObjects;
 
         await lens.workspace.removeDimension('lnsXY_yDimensionPanel');
-        await expect
-          .poll(() => lens.dimensions.getDimensionTriggersTexts('lnsXY_yDimensionPanel'))
-          .toStrictEqual([]);
+        await expect(
+          lens.dimensions.getDimensionTriggersLocator('lnsXY_yDimensionPanel')
+        ).toHaveCount(0);
         await lens.configureDimension({
           dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
           operation: 'formula',
@@ -164,14 +166,13 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
         await lens.waitForVisualization(testData.XY_CHART);
 
+        await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
         await openInDiscoverAndCheck({ context, kbnUrl }, lens, async (discoverPage) => {
           await new DiscoverApp(discoverPage).waitUntilSearchingHasFinished();
           const queryBar = new QueryBar(discoverPage);
-          await expect
-            .poll(() => queryBar.getQuery())
-            .toBe(
-              '( ( bytes > 4000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
-            );
+          await expect(queryBar.queryInput).toHaveValue(
+            '( ( bytes > 4000 ) AND ( ( extension.raw: "css" ) OR ( extension.raw: "gif" ) OR ( extension.raw: "jpg" ) ) )'
+          );
         });
       }
     );

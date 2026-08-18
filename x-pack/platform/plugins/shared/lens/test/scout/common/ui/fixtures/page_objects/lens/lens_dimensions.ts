@@ -53,6 +53,26 @@ export class LensDimensions {
     return this.page.testSubj.locator(`${dimension} > lns-dimensionTrigger`);
   }
 
+  getEmptyDimensionLocator(dimensionPanel: string, layerIndex?: number) {
+    const testSubj =
+      layerIndex === undefined
+        ? `${dimensionPanel} > lns-empty-dimension`
+        : `lns-layerPanel-${layerIndex} > ${dimensionPanel} > lns-empty-dimension`;
+    return this.page.testSubj.locator(testSubj);
+  }
+
+  async waitForDimensionTriggerToContain(dimension: string, text: string, timeout = 30_000) {
+    await this.page.waitForFunction(
+      ({ panelSubj, expected }) => {
+        const panel = document.querySelector(`[data-test-subj="${panelSubj}"]`);
+        const trigger = panel?.querySelector('[data-test-subj="lns-dimensionTrigger"]');
+        return (trigger?.textContent ?? '').replace(/\u200b/g, '').includes(expected);
+      },
+      { panelSubj: dimension, expected: text },
+      { timeout }
+    );
+  }
+
   /** Returns all dimension-trigger button locators currently rendered in the editor. */
   getDimensionTriggers() {
     return this.dimensionTriggerLocator.all();

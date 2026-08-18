@@ -25,7 +25,7 @@ spaceTest.describe(
 
     spaceTest.afterAll(suiteSetup.afterAll);
 
-    spaceTest('shows all data from all layers in the inspector', async ({ page, pageObjects }) => {
+    spaceTest('shows all data from all layers in the inspector', async ({ pageObjects }) => {
       const { dashboard, lens, inspector } = pageObjects;
 
       await dashboard.openNewDashboard();
@@ -48,7 +48,7 @@ spaceTest.describe(
       await lens.layers.createLayer('data', undefined, 'line');
       await lens.layers.ensureLayerTabIsActive(1);
       await expect(
-        page.testSubj.locator('lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension')
+        lens.dimensions.getEmptyDimensionLocator('lnsXY_xDimensionPanel', 1)
       ).toBeVisible({ timeout: 20_000 });
       await lens.configureDimension({
         dimension: 'lns-layerPanel-1 > lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -66,7 +66,9 @@ spaceTest.describe(
       await expect(dashboard.getPanelHoverActionsLocator()).toBeVisible();
 
       await dashboard.clickPanelAction('embeddablePanelAction-openInspector');
-      await expect.poll(() => inspector.getRequestNames()).toHaveLength(2);
+      await inspector.openInspectorRequestsView();
+      await expect(inspector.requests.requestChooser).toBeVisible();
+      expect(await inspector.getRequestNames()).toHaveLength(2);
     });
 
     spaceTest(

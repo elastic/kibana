@@ -16,7 +16,11 @@ import type { ScoutPage } from '..';
  * submitting; callers own the submit step when they need it.
  */
 export class QueryBar {
-  constructor(private readonly page: ScoutPage) {}
+  readonly queryInput;
+
+  constructor(private readonly page: ScoutPage) {
+    this.queryInput = this.page.testSubj.locator('queryInput');
+  }
 
   async setQuery(query: string): Promise<void> {
     const input = this.page.testSubj.locator('queryInput');

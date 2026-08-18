@@ -37,7 +37,7 @@ export class DashboardApp {
   private readonly editModeButton;
   private readonly viewOnlyModeButton;
   private readonly dashboardViewport;
-  private readonly embeddablePanel;
+  readonly embeddablePanel;
   private readonly controlsGroup;
   private readonly controlFrame;
   private readonly optionsListControlSearchInput;
@@ -71,6 +71,7 @@ export class DashboardApp {
 
   // Drilldown wizard
   private readonly drilldownWizardSubmit;
+  readonly createDrilldownFlyout;
 
   // Customize panel flyout
   private readonly customizePanelFlyout;
@@ -81,6 +82,7 @@ export class DashboardApp {
   // Chart / panel error
   readonly embeddableError;
   private readonly applyFiltersButton;
+  readonly pendingChartFiltersDialog;
 
   constructor(private readonly page: ScoutPage) {
     this.renderable = new RenderablePage(page);
@@ -134,6 +136,7 @@ export class DashboardApp {
 
     // Drilldown wizard
     this.drilldownWizardSubmit = this.page.testSubj.locator('drilldownWizardSubmit');
+    this.createDrilldownFlyout = this.page.testSubj.locator('createDrilldownFlyout');
 
     // Customize panel flyout
     this.customizePanelFlyout = this.page.testSubj.locator('customizePanel');
@@ -145,6 +148,9 @@ export class DashboardApp {
 
     this.embeddableError = this.page.testSubj.locator('embeddableError');
     this.applyFiltersButton = this.page.testSubj.locator('applyFiltersPopoverButton');
+    this.pendingChartFiltersDialog = this.page
+      .getByRole('dialog')
+      .filter({ has: this.applyFiltersButton });
   }
 
   async goto() {
@@ -893,18 +899,22 @@ export class DashboardApp {
   async waitForPanelChartReady(title?: string) {
     const panel = this.getPanelHoverActionsLocator(title);
     await this.getPanelChartCanvas(title).waitFor({ state: 'visible' });
-    await panel.locator('.echChartStatus[data-ech-render-complete="true"]').waitFor({
-      state: 'attached',
-    });
-    const debugJson = await panel.locator('.echChartStatus').getAttribute('data-ech-debug-state');
-    if (!debugJson) {
-      return;
-    }
-    await expect
-      .poll(async () => {
-        const raw = await panel.locator('.echChartStatus').getAttribute('data-ech-debug-state');
-        if (!raw) {
+    const chartStatus = panel.locator('.echChartStatus');
+    await chartStatus.waitFor({ state: 'attached' });
+    const panelSelector = title
+      ? `[data-test-subj="embeddablePanelHoverActions-${this.formatTitleForTestSubj(
+          title
+        )}"] .echChartStatus`
+      : '.embPanel__hoverActionsAnchor .echChartStatus';
+    await this.page.waitForFunction(
+      (selector) => {
+        const el = document.querySelector(selector);
+        if (!el || el.getAttribute('data-ech-render-complete') !== 'true') {
           return false;
+        }
+        const raw = el.getAttribute('data-ech-debug-state');
+        if (!raw) {
+          return true;
         }
         try {
           const state = JSON.parse(raw) as { bars?: unknown[]; partition?: unknown[] };
@@ -912,8 +922,10 @@ export class DashboardApp {
         } catch {
           return false;
         }
-      })
-      .toBe(true);
+      },
+      panelSelector,
+      { timeout: 30_000 }
+    );
   }
 
   /**
@@ -964,8 +976,7 @@ export class DashboardApp {
    */
   async getPendingChartFilterLabels(): Promise<string[]> {
     await this.applyFiltersButton.waitFor({ state: 'visible' });
-    const dialog = this.page.getByRole('dialog').filter({ has: this.applyFiltersButton });
-    return dialog.getByRole('checkbox').evaluateAll((els) =>
+    return this.pendingChartFiltersDialog.getByRole('checkbox').evaluateAll((els) =>
       els.map((el) => {
         const id = el.getAttribute('id');
         if (id) {
@@ -1172,20 +1183,6 @@ export class DashboardApp {
         `Expected panel action "${actionTestSubj}" to exist for panel "${
           title || 'first panel'
         }". Available actions: [${actionNames.join(', ')}]`
-      );
-    }
-  }
-
-  /**
-   * Asserts that a panel action does NOT exist (throws if found).
-   */
-  async expectMissingPanelAction(actionTestSubj: string, title?: string) {
-    const exists = await this.panelHasAction(actionTestSubj, title);
-    if (exists) {
-      throw new Error(
-        `Expected panel action "${actionTestSubj}" to be missing for panel "${
-          title || 'first panel'
-        }", but it exists.`
       );
     }
   }

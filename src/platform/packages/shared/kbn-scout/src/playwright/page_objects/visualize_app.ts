@@ -39,8 +39,11 @@ export class VisualizeApp {
 
   async goto() {
     await this.page.gotoApp('visualize');
-    // Kibana bootstrap ("Loading Elastic") regularly exceeds the default 10s expect
-    // timeout under parallel Scout load — wait for the listing shell instead.
+    // After a long worker, Kibana can sit on "Loading Elastic" longer than the
+    // listing wait. `hidden` succeeds immediately if the splash never appeared.
+    await this.page
+      .getByRole('progressbar', { name: 'Loading Elastic' })
+      .waitFor({ state: 'hidden', timeout: 60_000 });
     await expect(this.landingPage).toBeVisible({ timeout: 30_000 });
   }
 

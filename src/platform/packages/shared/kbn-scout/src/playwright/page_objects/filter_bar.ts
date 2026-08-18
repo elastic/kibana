@@ -124,8 +124,8 @@ export class FilterBar {
     return this.page.testSubj.locator('^filter-badge').count();
   }
 
-  async hasFilter(options: FilterStateOptions) {
-    const testSubjLocator = [
+  private getFilterTestSubj(options: FilterStateOptions): string {
+    return [
       '~filter',
       options.enabled !== undefined && `~filter-${options.enabled ? 'enabled' : 'disabled'}`,
       options.field && `~filter-key-${options.field}`,
@@ -135,8 +135,18 @@ export class FilterBar {
     ]
       .filter(Boolean)
       .join(' & ');
+  }
 
-    return this.page.testSubj.isVisible(testSubjLocator, { strict: true });
+  async hasFilter(options: FilterStateOptions) {
+    return this.page.testSubj.isVisible(this.getFilterTestSubj(options), { strict: true });
+  }
+
+  getFilterLocator(options: FilterStateOptions) {
+    return this.page.testSubj.locator(this.getFilterTestSubj(options));
+  }
+
+  getFiltersLocator() {
+    return this.page.testSubj.locator('~filter');
   }
 
   async toggleFilterEnabled(field: string) {

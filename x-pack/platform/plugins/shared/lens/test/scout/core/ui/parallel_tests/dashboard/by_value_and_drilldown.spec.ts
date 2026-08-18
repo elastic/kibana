@@ -66,7 +66,7 @@ spaceTest.describe(
 
     spaceTest(
       'adds a Discover drilldown to a Lens panel that survives save and reload',
-      async ({ page, pageObjects }) => {
+      async ({ pageObjects }) => {
         const { dashboard } = pageObjects;
         const dashboardTitle = `dashboardWithDrilldown ${Date.now()}`;
 
@@ -76,9 +76,9 @@ spaceTest.describe(
 
         await spaceTest.step('add a Discover drilldown to the pie chart', async () => {
           await dashboard.clickPanelAction('embeddablePanelAction-OPEN_FLYOUT_ADD_DRILLDOWN');
-          await expect(page.testSubj.locator('createDrilldownFlyout')).toBeVisible();
+          await expect(dashboard.createDrilldownFlyout).toBeVisible();
           await dashboard.createDiscoverDrilldown();
-          await expect(page.testSubj.locator('createDrilldownFlyout')).toBeHidden();
+          await expect(dashboard.createDrilldownFlyout).toBeHidden();
         });
 
         await spaceTest.step('the drilldown is available after clicking a slice', async () => {

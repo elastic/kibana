@@ -29,17 +29,12 @@ spaceTest.describe('Lens dashboard panel actions', { tag: '@local-stateful-class
     await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.ARTIST_METRIC);
     await dashboard.waitForRenderComplete();
 
-    await expect
-      .poll(async () => {
-        const metric = await lens.metric.getLegacyMetricData();
-        return metric.title;
-      })
-      .toBe('Maximum of bytes');
+    await expect(lens.metric.legacyMetricLabel).toHaveText('Maximum of bytes');
     const metric = await lens.metric.getLegacyMetricData();
     expect(Number(metric.value.replace(/,/g, ''))).toBeGreaterThan(0);
   });
 
-  spaceTest('hides the old "explore underlying data" action', async ({ pageObjects }) => {
+  spaceTest('hides the old "explore underlying data" action', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
 
     await dashboard.openNewDashboard();
@@ -49,23 +44,19 @@ spaceTest.describe('Lens dashboard panel actions', { tag: '@local-stateful-class
 
     // Requires xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled, which Scout's
     // stateful base config sets (see base.config.ts) but serverless does not.
-    await dashboard.expectMissingPanelAction(
-      'embeddablePanelAction-ACTION_EXPLORE_DATA',
-      testData.LENS_BASIC_TITLES.XY_VIS
-    );
+    await dashboard.openPanelContextMenu(testData.LENS_BASIC_TITLES.XY_VIS);
+    await expect(page.testSubj.locator('embeddablePanelAction-ACTION_EXPLORE_DATA')).toHaveCount(0);
   });
 
-  spaceTest('CSV export action exists in panel context menu', async ({ pageObjects }) => {
+  spaceTest('CSV export action exists in panel context menu', async ({ page, pageObjects }) => {
     const { dashboard } = pageObjects;
 
     await dashboard.openNewDashboard();
     await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.PIE_VIS);
     await dashboard.waitForRenderComplete();
 
-    await dashboard.expectExistsPanelAction(
-      'embeddablePanelAction-ACTION_EXPORT_CSV',
-      testData.LENS_BASIC_TITLES.PIE_VIS
-    );
+    await dashboard.openPanelContextMenu(testData.LENS_BASIC_TITLES.PIE_VIS);
+    await expect(page.testSubj.locator('embeddablePanelAction-ACTION_EXPORT_CSV')).toBeVisible();
   });
 
   spaceTest('unlinks then re-saves a panel to the embeddable library', async ({ pageObjects }) => {
@@ -98,7 +89,7 @@ spaceTest.describe('Lens dashboard panel actions', { tag: '@local-stateful-class
         // confirms the unlink only detached the dashboard panel — it did not delete the
         // original `PIE_VIS` library item — while also covering the copy from the previous step.
         await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.PIE_VIS, libraryCopyTitle);
-        await dashboard.expectPanelCount(2);
+        await expect(dashboard.embeddablePanel).toHaveCount(2);
       }
     );
   });

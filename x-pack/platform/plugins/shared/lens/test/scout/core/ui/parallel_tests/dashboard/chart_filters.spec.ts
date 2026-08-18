@@ -31,57 +31,69 @@ spaceTest.describe('Lens dashboard chart filters', { tag: '@local-stateful-class
 
   spaceTest(
     'adds filters and a time range by clicking a bar in an XY chart',
-    async ({ pageObjects }) => {
-      const { dashboard, datePicker, filterBar } = pageObjects;
+    async ({ page, pageObjects }) => {
+      const { dashboard, filterBar } = pageObjects;
 
       await dashboard.openNewDashboard();
       await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.XY_VIS);
       await dashboard.waitForRenderComplete();
 
       await dashboard.clickInPanelChart({ x: 30, y: 5 });
-      await expect
-        .poll(() => dashboard.getPendingChartFilterLabels())
-        .toStrictEqual([XY_BAR_TIME_FILTER_LABEL, 'ip: 97.220.3.248']);
+      const pendingFilters = dashboard.pendingChartFiltersDialog;
+      await expect(pendingFilters).toBeVisible();
+      await expect(pendingFilters.locator('label')).toHaveText([
+        XY_BAR_TIME_FILTER_LABEL,
+        'ip: 97.220.3.248',
+      ]);
       await dashboard.applyChartFilters();
       await dashboard.waitForRenderComplete();
 
       await expect(
         dashboard.getPanelHoverActionsLocator(testData.LENS_BASIC_TITLES.XY_VIS)
       ).toBeVisible();
-      await expect.poll(() => datePicker.getTimeConfig()).toStrictEqual(XY_BAR_TIME_RANGE);
-      await expect
-        .poll(() => filterBar.hasFilter({ field: 'ip', value: '97.220.3.248' }))
-        .toBe(true);
+      await expect(page.testSubj.locator('dateRangePickerControlButton')).toHaveAttribute(
+        'data-date-range',
+        `${XY_BAR_TIME_RANGE.start} to ${XY_BAR_TIME_RANGE.end}`
+      );
+      await expect(
+        filterBar.getFilterLocator({ field: 'ip', value: '97.220.3.248' })
+      ).toBeVisible();
     }
   );
 
-  spaceTest('adds a filter by right-clicking a bar in an XY chart', async ({ pageObjects }) => {
-    const { dashboard, datePicker, filterBar } = pageObjects;
+  spaceTest(
+    'adds a filter by right-clicking a bar in an XY chart',
+    async ({ page, pageObjects }) => {
+      const { dashboard, filterBar } = pageObjects;
 
-    await dashboard.openNewDashboard();
-    await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.XY_VIS);
-    await dashboard.waitForRenderComplete();
+      await dashboard.openNewDashboard();
+      await dashboard.addPanelFromLibrary(testData.LENS_BASIC_TITLES.XY_VIS);
+      await dashboard.waitForRenderComplete();
 
-    await spaceTest.step('right-click reveals the tooltip actions for a bar', async () => {
-      const ipFilterAction = dashboard.getChartTooltipAction(/Filter \d+ selected series/);
-      await dashboard.clickInPanelChart({ x: 30, y: 5 }, { button: 'right' });
-      await expect(ipFilterAction).toBeVisible();
-      // echTooltipActions portal repositions while Playwright waits for stability
-      await ipFilterAction.dispatchEvent('click');
-      await expect
-        .poll(() => filterBar.hasFilter({ field: 'ip', value: '97.220.3.248' }))
-        .toBe(true);
-    });
+      await spaceTest.step('right-click reveals the tooltip actions for a bar', async () => {
+        const ipFilterAction = dashboard.getChartTooltipAction(/Filter \d+ selected series/);
+        await dashboard.clickInPanelChart({ x: 30, y: 5 }, { button: 'right' });
+        await expect(ipFilterAction).toBeVisible();
+        // echTooltipActions portal repositions while Playwright waits for stability
+        await ipFilterAction.dispatchEvent('click');
+        await expect(
+          filterBar.getFilterLocator({ field: 'ip', value: '97.220.3.248' })
+        ).toBeVisible();
+      });
 
-    await spaceTest.step('right-click a different bar applies the time range', async () => {
-      const timeFilterAction = dashboard.getChartTooltipAction('Filter by time');
-      await dashboard.clickInPanelChart({ x: 35, y: 5 }, { button: 'right' });
-      await expect(timeFilterAction).toBeVisible();
-      // echTooltipActions portal repositions while Playwright waits for stability
-      await timeFilterAction.dispatchEvent('click');
-      await expect.poll(() => datePicker.getTimeConfig()).toStrictEqual(XY_BAR_TIME_RANGE);
-    });
-  });
+      await spaceTest.step('right-click a different bar applies the time range', async () => {
+        const timeFilterAction = dashboard.getChartTooltipAction('Filter by time');
+        await dashboard.clickInPanelChart({ x: 35, y: 5 }, { button: 'right' });
+        await expect(timeFilterAction).toBeVisible();
+        // echTooltipActions portal repositions while Playwright waits for stability
+        await timeFilterAction.dispatchEvent('click');
+        await expect(page.testSubj.locator('dateRangePickerControlButton')).toHaveAttribute(
+          'data-date-range',
+          `${XY_BAR_TIME_RANGE.start} to ${XY_BAR_TIME_RANGE.end}`
+        );
+      });
+    }
+  );
 
   spaceTest('adds a filter by clicking a slice in a pie chart', async ({ pageObjects }) => {
     const { dashboard, filterBar } = pageObjects;
@@ -92,11 +104,9 @@ spaceTest.describe('Lens dashboard chart filters', { tag: '@local-stateful-class
 
     await dashboard.clickInPanelChart({ x: 5, y: 5 });
     // justified: pie hit-testing can lag one render after canvas click
-    await expect
-      .poll(() => filterBar.hasFilter({ field: 'geo.dest', value: 'AL' }), {
-        timeout: 20_000,
-      })
-      .toBe(true);
+    await expect(filterBar.getFilterLocator({ field: 'geo.dest', value: 'AL' })).toBeVisible({
+      timeout: 20_000,
+    });
 
     await expect(
       dashboard.getPanelHoverActionsLocator(testData.LENS_BASIC_TITLES.PIE_VIS)
@@ -120,11 +130,11 @@ spaceTest.describe('Lens dashboard chart filters', { tag: '@local-stateful-class
 
       await dashboard.addNewLensPanel();
 
-      // Inline editor mount can briefly leave dashboard filters visible — poll until settled.
-      await expect.poll(() => filterBar.hasFilter({ field: 'geo.dest', value: 'LS' })).toBe(false);
-      await expect
-        .poll(() => filterBar.hasFilter({ field: 'geo.src', value: 'US', pinned: true }))
-        .toBe(true);
+      // Inline editor mount can briefly leave dashboard filters visible — wait until settled.
+      await expect(filterBar.getFilterLocator({ field: 'geo.dest', value: 'LS' })).toBeHidden();
+      await expect(
+        filterBar.getFilterLocator({ field: 'geo.src', value: 'US', pinned: true })
+      ).toBeVisible();
     }
   );
 });

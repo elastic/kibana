@@ -222,22 +222,20 @@ export async function openXyVisWithTermsSplit(
     field: 'extension.raw',
     keepOpen: true,
   });
-  await expect
-    .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel'), {
-      timeout: 30_000,
-    })
-    .toContain('extension.raw');
+  await lens.dimensions.waitForDimensionTriggerToContain(
+    'lnsXY_splitDimensionPanel',
+    'extension.raw'
+  );
   // Product default size can be 5; Discover context assertions expect the classic top-3 set.
   await lens.dimensions.setTermsNumberOfValues(3);
   await lens.closeDimensionEditor();
   await lens.waitForVisualization(XY_CHART);
   // Confirm the field persisted after close — under load the open editor can show
   // `extension.raw` while the saved split is still `ip`.
-  await expect
-    .poll(() => lens.dimensions.getDimensionTriggerText('lnsXY_splitDimensionPanel'), {
-      timeout: 30_000,
-    })
-    .toContain('extension.raw');
+  await lens.dimensions.waitForDimensionTriggerToContain(
+    'lnsXY_splitDimensionPanel',
+    'extension.raw'
+  );
 }
 
 /**
@@ -250,7 +248,6 @@ export async function openInDiscoverAndCheck(
   check: (discoverPage: ScoutPage) => Promise<void>
 ) {
   const discoverPage = await openInNewTabAsScoutPage(context, kbnUrl, async () => {
-    await expect(lens.workspace.openInDiscoverButton).toBeEnabled();
     await lens.workspace.openInDiscoverButton.click();
   });
   try {

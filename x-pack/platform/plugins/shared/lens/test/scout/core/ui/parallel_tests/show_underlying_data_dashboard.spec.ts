@@ -61,9 +61,7 @@ spaceTest.describe(
           await queryBar.setQuery('host.keyword www.elastic.co');
           await queryBar.submitQuery();
           await filterBar.addFilter({ field: 'geo.src', operator: 'is', value: 'AF' });
-          await expect
-            .poll(() => filterBar.hasFilter({ field: 'geo.src', value: 'AF' }))
-            .toBe(true);
+          await expect(filterBar.getFilterLocator({ field: 'geo.src', value: 'AF' })).toBeVisible();
           await lens.saveAndReturn();
           await dashboard.waitForRenderComplete();
         });
@@ -77,14 +75,12 @@ spaceTest.describe(
             operator: 'is',
             value: 'cdn.theacademyofperformingartsandscience.org',
           });
-          await expect
-            .poll(() =>
-              filterBar.hasFilter({
-                field: 'host.raw',
-                value: 'cdn.theacademyofperformingartsandscience.org',
-              })
-            )
-            .toBe(true);
+          await expect(
+            filterBar.getFilterLocator({
+              field: 'host.raw',
+              value: 'cdn.theacademyofperformingartsandscience.org',
+            })
+          ).toBeVisible();
           await dashboard.clickQuickSave();
         });
 
@@ -106,21 +102,19 @@ spaceTest.describe(
               const discoverFilterBar = new FilterBar(discoverPage);
               const discoverQueryBar = new QueryBar(discoverPage);
 
-              await expect
-                .poll(() =>
-                  discoverFilterBar.hasFilter({
-                    field: 'host.raw',
-                    value: 'cdn.theacademyofperformingartsandscience.org',
-                  })
-                )
-                .toBe(true);
-              await expect
-                .poll(() => discoverFilterBar.hasFilter({ field: 'geo.src', value: 'AF' }))
-                .toBe(true);
-              await expect
-                .poll(() => discoverFilterBar.getFiltersLabel())
-                .toContain('Lens context (lucene)');
-              expect(await discoverQueryBar.getQuery()).toBe('request.keyword : "/apm"');
+              await expect(
+                discoverFilterBar.getFilterLocator({
+                  field: 'host.raw',
+                  value: 'cdn.theacademyofperformingartsandscience.org',
+                })
+              ).toBeVisible();
+              await expect(
+                discoverFilterBar.getFilterLocator({ field: 'geo.src', value: 'AF' })
+              ).toBeVisible();
+              await expect(
+                discoverFilterBar.getFiltersLocator().filter({ hasText: 'Lens context (lucene)' })
+              ).toBeVisible();
+              await expect(discoverQueryBar.queryInput).toHaveValue('request.keyword : "/apm"');
             } finally {
               await discoverPage.close();
             }
