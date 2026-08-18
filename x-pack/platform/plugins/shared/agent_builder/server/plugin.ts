@@ -232,7 +232,7 @@ export class AgentBuilderPlugin
       searchInferenceEndpoints,
       security: securityPlugin,
     } = startDeps;
-    const { elasticsearch, security, uiSettings, savedObjects, dataStreams, featureFlags } =
+    const { elasticsearch, http, security, uiSettings, savedObjects, dataStreams, featureFlags } =
       coreStart;
 
     this.cleanupLegacySmlTasks(taskManager).catch((error) => {
@@ -244,6 +244,7 @@ export class AgentBuilderPlugin
       security,
       securityPlugin,
       elasticsearch,
+      http,
       inference,
       spaces,
       actions,
