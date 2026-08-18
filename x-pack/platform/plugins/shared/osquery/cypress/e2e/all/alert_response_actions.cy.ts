@@ -150,16 +150,28 @@ describe(
           multiQueryPackId = data.saved_object_id;
           multiQueryPackName = data.name;
         });
+      });
+
+      // The test saves response actions onto the rule, so every attempt needs a
+      // pristine rule. Creating it in `before` made a Cypress retry start from a
+      // rule that already had the pack response action attached: the retry then
+      // added a *second*, empty Osquery response action, the actions step failed
+      // validation ("Query is a required field") and the rule save was never
+      // issued at all.
+      beforeEach(() => {
         loadRule().then((data) => {
           ruleId = data.id;
           ruleName = data.name;
         });
       });
 
+      afterEach(() => {
+        cleanupRule(ruleId);
+      });
+
       after(() => {
         cleanupPack(packId);
         cleanupPack(multiQueryPackId);
-        cleanupRule(ruleId);
       });
 
       const openRuleActionsTab = () => {
@@ -185,13 +197,17 @@ describe(
         cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleSingleQuery');
         cy.getBySel('ruleEditSubmitButton').click();
         cy.wait('@saveRuleSingleQuery', { timeout: 15000 }).should(({ request }) => {
-          expect(request.body.response_actions[0].params.queries).to.deep.equal([
-            {
-              interval: 3600,
-              query: 'select * from uptime;',
-              id: Object.keys(packData.queries)[0],
-            },
-          ]);
+          const { queries } = request.body.response_actions[0].params;
+          // `deep.include` rather than `deep.equal`: pack queries also carry a
+          // server-generated `schedule_id` that the pack read API returns and the
+          // response action form passes straight through. It is opaque to the
+          // test, so assert the fields the UI is responsible for serializing.
+          expect(queries).to.have.length(1);
+          expect(queries[0]).to.deep.include({
+            interval: 3600,
+            query: 'select * from uptime;',
+            id: Object.keys(packData.queries)[0],
+          });
         });
         cy.contains(`${ruleName} was saved`).should('exist');
         closeToastIfVisible();
@@ -216,24 +232,24 @@ describe(
         cy.intercept('PUT', '/api/detection_engine/rules').as('saveRuleMultiQuery');
         cy.contains('Save changes').click();
         cy.wait('@saveRuleMultiQuery', { timeout: 15000 }).should(({ request }) => {
-          expect(request.body.response_actions[0].params.queries).to.deep.equal([
-            {
-              interval: 3600,
-              query: 'SELECT * FROM memory_info;',
-              platform: 'linux',
-              id: Object.keys(multiQueryPackData.queries)[0],
-            },
-            {
-              interval: 3600,
-              query: 'SELECT * FROM system_info;',
-              id: Object.keys(multiQueryPackData.queries)[1],
-            },
-            {
-              interval: 10,
-              query: 'select opera_extensions.* from users join opera_extensions using (uid);',
-              id: Object.keys(multiQueryPackData.queries)[2],
-            },
-          ]);
+          const { queries } = request.body.response_actions[0].params;
+          expect(queries).to.have.length(3);
+          expect(queries[0]).to.deep.include({
+            interval: 3600,
+            query: 'SELECT * FROM memory_info;',
+            platform: 'linux',
+            id: Object.keys(multiQueryPackData.queries)[0],
+          });
+          expect(queries[1]).to.deep.include({
+            interval: 3600,
+            query: 'SELECT * FROM system_info;',
+            id: Object.keys(multiQueryPackData.queries)[1],
+          });
+          expect(queries[2]).to.deep.include({
+            interval: 10,
+            query: 'select opera_extensions.* from users join opera_extensions using (uid);',
+            id: Object.keys(multiQueryPackData.queries)[2],
+          });
         });
       });
     });
@@ -352,7 +368,7 @@ describe(
       });
 
       it(
-        'runs a take-action query against all enrolled agents',
+        'substitutes alert parameters in a take-action query',
         { tags: ['@skipInServerless'] },
         () => {
           cy.getBySel('expand-event').first().click();
@@ -362,19 +378,17 @@ describe(
           );
           cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
           cy.getBySel('osquery-action-item').click();
-          cy.getBySel('agentSelection').within(() => {
-            cy.getBySel('comboBoxClearButton').click();
-            cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
-            cy.contains('All agents');
-          });
+          // Use only the alert's pre-selected host agent. Adding "All agents" pulls in
+          // other enrolled-but-offline agents in CI, whose results never arrive, so the
+          // assertion below would depend on a second agent that may never respond.
+          cy.contains(/^1 agent selected/);
           inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
             parseSpecialCharSequences: false,
           });
           submitQuery();
-          cy.getBySel('flyout-body-osquery').within(() => {
-            // at least 2 agents should have responded, sometimes it takes a while for the agents to respond
-            cy.get('[data-grid-row-index]', { timeout: 180000 }).should('have.length.at.least', 2);
-          });
+          // Results only come back when `{{host.os.name}}` was substituted with the
+          // alert's host OS name — an unsubstituted query matches no os_version row.
+          checkResults();
         }
       );
 
