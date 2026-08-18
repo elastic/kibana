@@ -50,7 +50,8 @@ const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
       total: {
         type: 'long',
         _meta: {
-          description: 'Total number of attachments stored on the legacy comment saved object',
+          description:
+            'Total number of attachments sourced from the legacy comment saved object (entity-aware: bulk alert/event attachments count by referenced id)',
         },
       },
     },
@@ -58,7 +59,8 @@ const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
       total: {
         type: 'long',
         _meta: {
-          description: 'Total number of attachments stored on the unified attachment saved object',
+          description:
+            'Total number of attachments sourced from the unified attachment saved object (entity-aware: bulk alert/event attachments count by referenced id)',
         },
       },
     },

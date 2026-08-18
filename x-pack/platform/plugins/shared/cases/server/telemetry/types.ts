@@ -169,9 +169,10 @@ export interface AttachmentTypeStats {
 export type AttachmentsByType = Record<string, AttachmentTypeStats>;
 
 /**
- * Legacy (`cases-comments`) vs unified (`cases-attachments`) document counts,
- * used to track adoption of the unified saved object and inform the legacy SO
- * deprecation decision.
+ * Legacy (`cases-comments`) vs unified (`cases-attachments`) attachment
+ * counts. Counts are entity-aware (bulk alert/event
+ * attachments count by referenced id, not by document), matching how
+ * `attachmentsByType` totals are computed.
  */
 export interface BySavedObjectStats {
   legacy: { total: number };

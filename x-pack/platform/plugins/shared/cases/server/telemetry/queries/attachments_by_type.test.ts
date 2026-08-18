@@ -179,13 +179,15 @@ describe('attachments_by_type', () => {
       expect(sec.externalReference).toBeUndefined();
       expect(sec.persistableState).toBeUndefined();
 
+      // entity-aware: legacy = user(3) + alert(10) + event(5) + endpoint(2) + .files(5) + .lens(4) = 29
+      // unified = security.alert(7, by entity) + comment(2) + file(3) + dashboard(1) = 13
       expect(res.securitySolution.bySavedObject).toEqual({
-        legacy: { total: 20 },
-        unified: { total: 7 },
+        legacy: { total: 29 },
+        unified: { total: 13 },
       });
 
       // only securitySolution has data, so `all` mirrors it
-      expect(res.all.bySavedObject).toEqual({ legacy: { total: 20 }, unified: { total: 7 } });
+      expect(res.all.bySavedObject).toEqual({ legacy: { total: 29 }, unified: { total: 13 } });
       expect(res.all.byType['security.alert']).toEqual({ total: 17 });
     });
 

@@ -250,6 +250,11 @@ const mergeByType = (target: RawByType, source: RawByType): void => {
   }
 };
 
+// Sums entity-aware totals (bulk alert/event attachments count by referenced
+// id, not by document) so `bySavedObject` stays consistent with `byType`.
+const sumTotals = (byType: RawByType): number =>
+  Object.values(byType).reduce((sum, stat) => sum + stat.total, 0);
+
 export const getAttachmentsByTypeData = async ({
   savedObjectsClient,
 }: {
@@ -271,12 +276,15 @@ export const getAttachmentsByTypeData = async ({
     const legacyOwner = legacyRes.aggregations?.[owner];
     const unifiedOwner = unifiedRes.aggregations?.[owner];
 
-    const byType = processLegacyOwner(owner, legacyOwner);
-    mergeByType(byType, processUnifiedOwner(unifiedOwner));
+    const legacyByType = processLegacyOwner(owner, legacyOwner);
+    const unifiedByType = processUnifiedOwner(unifiedOwner);
+
+    const byType = { ...legacyByType };
+    mergeByType(byType, unifiedByType);
 
     const bySavedObject: BySavedObjectStats = {
-      legacy: { total: legacyOwner?.doc_count ?? 0 },
-      unified: { total: unifiedOwner?.doc_count ?? 0 },
+      legacy: { total: sumTotals(legacyByType) },
+      unified: { total: sumTotals(unifiedByType) },
     };
 
     result[owner] = { byType, bySavedObject };
