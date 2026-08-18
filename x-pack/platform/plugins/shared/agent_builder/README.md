@@ -251,6 +251,64 @@ Configure Claude Desktop by adding this to its configuration:
 }
 ```
 
+### Local OAuth setup (serverless only)
+
+MCP clients can authenticate with an OAuth 2.1 access token instead of an API key. Clients discover how to
+do so from the OAuth 2.0 Protected Resource Metadata that Kibana serves at
+`/.well-known/oauth-protected-resource`, which is populated from `xpack.security.mcp.oauth2.metadata`.
+That setting only exists in serverless, so this flow requires running Kibana in serverless mode.
+
+1. Start Elasticsearch with the UIAM OAuth container:
+
+```bash
+yarn es serverless --projectType elasticsearch --uiam-oauth
+```
+
+`--uiam-oauth` defaults to `false` even though `--uiam` defaults to `true`, so it has to be passed
+explicitly. It starts an additional `uiam-oauth` container that serves the authorization server on
+`https://localhost:8444`, alongside the UIAM service itself on `https://localhost:8443`.
+
+2. Add the following to `config/kibana.dev.yml`, adjusting the URLs if you serve Kibana over HTTPS or on
+   a different port:
+
+```yaml
+server.publicBaseUrl: http://localhost:5601
+xpack.security.mcp.oauth2.metadata:
+  authorization_servers: [https://localhost:8444/oauth2]
+  resource: http://localhost:5601/api/agent_builder/mcp
+```
+
+`server.publicBaseUrl` determines the resource metadata URL that Kibana advertises in the
+`WWW-Authenticate` header when an MCP request is rejected with a 401. Without it, Kibana falls back to the
+incoming request URL, which is not necessarily reachable by the client.
+
+3. Start Kibana in serverless mode:
+
+```bash
+yarn serverless-es
+```
+
+4. Register an OAuth client from **Agents > Tools > Manage all tools > Manage MCP > Manage MCP clients
+   (OAuth) > Add MCP client**. The dialog shown after creation has the client ID and MCP server URL that
+   your client needs. Redirect URIs are client-specific, and the authorization server accepts any
+   localhost port but matches the path exactly, so refer to
+   [Create an OAuth client in Elastic Agent Builder](https://www.elastic.co/docs/deploy-manage/app-connections/create-oauth-client)
+   for the value your client expects.
+
+#### Troubleshooting
+
+Node-based clients may reject the self-signed certificate that the OAuth container serves on
+`https://localhost:8444` and fail during the token exchange. If you hit a certificate error, point Node at
+the Kibana development CA in the shell that runs the client:
+
+```bash
+# Run from the Kibana root, in the same shell as your MCP client
+export NODE_EXTRA_CA_CERTS="$(pwd)/src/platform/packages/shared/kbn-dev-utils/certs/ca.crt"
+```
+
+Whether this is needed depends on the client: some ship their own trust store, and others ignore the
+variable entirely.
+
 ## A2A Server
 
 The A2A (Agent-to-Agent) server provides a standardized interface for external A2A clients to communicate with agentBuilder agents, enabling agent-to-agent collaboration following the A2A protocol specification.
