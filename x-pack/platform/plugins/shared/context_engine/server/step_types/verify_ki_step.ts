@@ -11,18 +11,22 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { VerifyKiStepCommonDefinition } from '../../common/step_types/verify_ki_step';
 import { createKiVerifierRegistry, KiVerificationService } from '../ki_verification';
 
-export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logger) =>
-  createServerStepDefinition({
+export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logger) => {
+  const service = new KiVerificationService(createKiVerifierRegistry());
+
+  return createServerStepDefinition({
     ...VerifyKiStepCommonDefinition,
     handler: async (context) => {
       const [coreStart] = await coreSetup.getStartServices();
       const fakeRequest = context.contextManager.getFakeRequest();
       const soClient = coreStart.savedObjects.getScopedClient(fakeRequest);
       const uiSettings = coreStart.uiSettings.asScopedToClient(soClient);
-      const esClient = context.contextManager.getScopedEsClient();
       const isEnabled = (await uiSettings.get<boolean>(CONTEXT_ENGINE_ENABLED_SETTING_ID)) ?? false;
+      if (!isEnabled) {
+        return { output: { passed: true, results: [] } };
+      }
 
-      const service = new KiVerificationService(createKiVerifierRegistry());
+      const esClient = context.contextManager.getScopedEsClient();
       const summary = await service.verifyKi(context.input.ki, {
         isEnabled,
         esClient,
@@ -33,3 +37,4 @@ export const createVerifyKiStepDefinition = (coreSetup: CoreSetup, logger: Logge
       return { output: summary };
     },
   });
+};
