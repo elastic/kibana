@@ -986,25 +986,35 @@ const buildTypePrefixClause = (text: string): Record<string, unknown> => ({
   prefix: { type: text.toLowerCase() },
 });
 
-/** Whether the typed text could still grow into one of the registered type ids. */
-const looksLikeType = (text: string, registeredTypeIds: string[]): boolean => {
+const buildTypeTermsClause = (typeIds: string[]): Record<string, unknown> => ({
+  terms: { type: typeIds },
+});
+
+/**
+ * Registered type ids the typed text could still grow into, so an abbreviation
+ * like "conn" resolves to `['connector']`. Empty when the text names no type.
+ */
+const resolveTypeIds = (text: string, registeredTypeIds: string[]): string[] => {
   const lowered = text.toLowerCase();
-  return registeredTypeIds.some((id) => id.toLowerCase().startsWith(lowered));
+  return registeredTypeIds.filter((id) => id.toLowerCase().startsWith(lowered));
 };
 
 /**
  * Build the autocomplete query: `match_bool_prefix` against `title`, requiring
- * every typed token to match (including the trailing partial, as a prefix),
- * plus a prefix clause on `type`.
+ * every typed token to match (including the trailing partial, as a prefix).
  *
  * Results render as "type/title", so a "type/name" query (e.g. "connector/s3")
- * matches each half against its own field. The type half goes in filter context
- * so it doesn't skew ranking. A bare trailing slash ("connector/") matches on
- * type alone.
+ * matches each half against its own field. The slash terminates the type, so that
+ * half resolves to concrete registered ids and filters with `terms` — an
+ * abbreviation like "conn/" still resolves to `['connector']`. Filter context
+ * keeps it out of scoring. A bare trailing slash ("connector/") matches on type
+ * alone.
  *
  * A slash only means "type/name" when the text before it names a registered
  * type. Otherwise it is punctuation inside a title (e.g. "sales/marketing"), so
  * the whole string is matched against `title` — the analyzer splits on the slash.
+ *
+ * Without a slash the type is still being typed, so it stays a `prefix` query.
  *
  * After trim: empty string or `*` → `match_all`.
  */
@@ -1042,17 +1052,18 @@ const buildSmlAutocompleteQuery = (
     return buildTitlePrefixClause(namePart);
   }
 
-  if (!looksLikeType(typePart, registeredTypeIds)) {
+  const typeIds = resolveTypeIds(typePart, registeredTypeIds);
+  if (typeIds.length === 0) {
     return buildTitlePrefixClause(trimmed);
   }
 
   if (namePart === '') {
-    return { bool: { filter: [buildTypePrefixClause(typePart)] } };
+    return { bool: { filter: [buildTypeTermsClause(typeIds)] } };
   }
 
   return {
     bool: {
-      filter: [buildTypePrefixClause(typePart)],
+      filter: [buildTypeTermsClause(typeIds)],
       must: [buildTitlePrefixClause(namePart)],
     },
   };
