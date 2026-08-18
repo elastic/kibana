@@ -11,10 +11,10 @@ import { CoreStart, useService } from '@kbn/core-di-browser';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 
 /**
- * Granular prerequisites for the rule-management Agent Builder skill. Exposed (rather than only a
+ * Granular prerequisites shared by all Alerting v2 Agent Builder skills. Exposed (rather than only a
  * single boolean) so callers can explain which specific requirement is missing.
  */
-export interface RuleManagementABSkillRequirements {
+export interface AgentBuilderSkillsRequirements {
   /** Whether the user has the privilege backing `capabilities.agentBuilder.show`. */
   hasAgentBuilderCapability: boolean;
   /** Whether the `agentBuilder:experimentalFeatures` advanced setting is enabled. */
@@ -24,10 +24,10 @@ export interface RuleManagementABSkillRequirements {
 /**
  * Pure function usable outside of the DI context (e.g. the Discover flyout).
  */
-export const getRuleManagementABSkillRequirements = (
+export const getAgentBuilderSkillsRequirements = (
   application: ApplicationStart,
   uiSettings: IUiSettingsClient
-): RuleManagementABSkillRequirements => ({
+): AgentBuilderSkillsRequirements => ({
   hasAgentBuilderCapability: application.capabilities.agentBuilder?.show === true,
   isExperimentalFeaturesEnabled:
     uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID) === true,
@@ -36,29 +36,29 @@ export const getRuleManagementABSkillRequirements = (
 /**
  * Pure function usable outside of the DI context (e.g. the Discover flyout).
  */
-export const getIsRuleManagementABSkillAvailable = (
+export const getAreAgentBuilderSkillsAvailable = (
   application: ApplicationStart,
   uiSettings: IUiSettingsClient
 ): boolean => {
   const { hasAgentBuilderCapability, isExperimentalFeaturesEnabled } =
-    getRuleManagementABSkillRequirements(application, uiSettings);
+    getAgentBuilderSkillsRequirements(application, uiSettings);
   return hasAgentBuilderCapability && isExperimentalFeaturesEnabled;
 };
 
 /**
  * Hook exposing the granular skill prerequisites for components in the Inversify DI context.
  */
-export const useRuleManagementABSkillRequirements = (): RuleManagementABSkillRequirements => {
+export const useAgentBuilderSkillsRequirements = (): AgentBuilderSkillsRequirements => {
   const uiSettings = useService(CoreStart('uiSettings'));
   const application = useService(CoreStart('application'));
-  return getRuleManagementABSkillRequirements(application, uiSettings);
+  return getAgentBuilderSkillsRequirements(application, uiSettings);
 };
 
 /**
  * Hook for components rendered inside the Inversify DI context.
  */
-export const useIsRuleManagementABSkillAvailable = (): boolean => {
+export const useAreAgentBuilderSkillsAvailable = (): boolean => {
   const uiSettings = useService(CoreStart('uiSettings'));
   const application = useService(CoreStart('application'));
-  return getIsRuleManagementABSkillAvailable(application, uiSettings);
+  return getAreAgentBuilderSkillsAvailable(application, uiSettings);
 };

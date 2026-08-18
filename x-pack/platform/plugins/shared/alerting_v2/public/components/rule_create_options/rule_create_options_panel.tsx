@@ -25,7 +25,7 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleManagementABSkillRequirements } from '../../hooks/use_is_rule_management_ab_skill_available';
+import type { AgentBuilderSkillsRequirements } from '../../hooks/use_are_agent_builder_skills_available';
 import rulesListEmptyIllustration from '../../assets/illustration-results-128.svg';
 
 export interface LegacyRuleTypeItem {
@@ -161,7 +161,7 @@ const CREATE_WITH_AGENT_MISSING_ALL_TOOLTIP = i18n.translate(
 export const getCreateWithAgentTooltipText = ({
   hasAgentBuilderCapability,
   isExperimentalFeaturesEnabled,
-}: RuleManagementABSkillRequirements): string | undefined => {
+}: AgentBuilderSkillsRequirements): string | undefined => {
   if (hasAgentBuilderCapability && isExperimentalFeaturesEnabled) {
     return undefined;
   }
