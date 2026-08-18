@@ -21,7 +21,7 @@
  * waiting for the next crawl to re-index.
  */
 
-export const VISUALIZATION_SML_TYPE = 'visualization' as const;
+export const VISUALIZATION_KI_TYPE = 'visualization' as const;
 export const DASHBOARD_SML_TYPE = 'dashboard' as const;
 export const CONNECTOR_SML_TYPE = 'connector' as const;
 export const SIGNIFICANT_EVENT_SML_TYPE = 'significant_event' as const;
