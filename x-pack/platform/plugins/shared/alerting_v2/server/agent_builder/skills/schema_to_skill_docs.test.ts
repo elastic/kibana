@@ -409,14 +409,15 @@ describe('schema_to_skill_docs', () => {
       expect(generateNotificationsOverviewDoc()).toMatchSnapshot();
     });
 
-    it('uses product labels and the two-step convert-then-notify flow', () => {
+    it('uses product labels and distinguishes draft vs persisted kind changes', () => {
       const doc = generateNotificationsOverviewDoc();
       expect(doc).toContain('Alerts (`kind: alert`)');
       expect(doc).toContain('Events (`kind: signal`)');
-      expect(doc).toContain('Use `set_kind` to change it to `alert`');
+      expect(doc).toContain('**Explain the difference**');
+      expect(doc).toContain('If the rule is a **draft (in-memory)**: use `set_kind` to change it to `alert`');
+      expect(doc).toContain('If the rule is **persisted**: `kind` is immutable after creation');
+      expect(doc).toContain('existing Events (`kind: signal`) rule cannot be converted');
       expect(doc).toContain('After ensuring the rule is `kind: alert`');
-      expect(doc).not.toContain('**Explain the difference**');
-      expect(doc).not.toContain('existing Event rule cannot be converted');
     });
 
     it('links sibling references without a ./references/ prefix', () => {

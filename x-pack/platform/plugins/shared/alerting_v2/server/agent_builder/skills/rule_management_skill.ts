@@ -171,7 +171,7 @@ After composing a complete **alert** rule (has name, query, schedule, and \`kind
 Do not offer notifications if the rule is still incomplete (missing name, query, or schedule).
 If the rule's kind is \`signal\`, follow **Notifications Require Alert Kind** in the [notifications-overview reference](./references/notifications-overview.md) before proceeding.
 
-If the user agrees (or asks for notifications directly), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`) and let that skill own the workflow + action policy setup (see [notifications-overview reference](./references/notifications-overview.md)). Do **not** compose action policies or notification workflows from this skill.
+If the user agrees, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill via \`filestore.read\` (path: \`skills/platform/alerting/${ACTION_POLICY_MANAGEMENT_SKILL_ID}/SKILL.md\`). Do **not** compose action policies or notification workflows from this skill.
 
 ---
 
@@ -193,6 +193,6 @@ When the user wants alerts to recover only when a condition is met, to never rec
 When the user asks what happens if data stops arriving (missing metrics, heartbeat, "keep the last status"), set \`no_data_strategy\` on \`set_query\`. Consult the [no-data-strategy reference](./references/no-data-strategy.md).
 
 ### Notifications
-When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md) (includes **Notifications Require Alert Kind**). Do not compose action policies from this skill — load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill after the rule is \`kind: alert\`.`,
+When the user asks for email, Slack, PagerDuty, or how rules send notifications, consult the [notifications-overview reference](./references/notifications-overview.md).`,
     getInlineTools: () => [manageRuleTool(deps)],
   });
