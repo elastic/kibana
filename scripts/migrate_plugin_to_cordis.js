@@ -137,6 +137,15 @@ function run(pluginDir) {
     process.exit(1);
   }
 
+  // Check constructor for this.X member access beyond this.logger/this.log.
+  const ctorMethod = pluginClass.getConstructors()[0];
+  const ctorText = ctorMethod?.getBody()?.getText() ?? '';
+  const hasNonLoggerThisAccess = /this\.(?!logger\b|log\b|#logger\b|#log\b)\w/.test(ctorText + setupBody + stopBody);
+  if (hasNonLoggerThisAccess) {
+    console.error(`  ✗ Cannot auto-migrate: plugin stores state in class members (this.X beyond this.logger). Migrate manually.`);
+    process.exit(1);
+  }
+
   // Detect which plugin deps are actually used in the setup body.
   // Supports both destructured `{ dep1, dep2 }` and plain `plugins.dep1` patterns.
   const usedPluginDeps = detectUsedPluginDeps(
