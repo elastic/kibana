@@ -676,7 +676,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'last_value',
         field: 'bytes',
         isPreviousIncompatible: true,
+        keepOpen: true,
       });
+      await PageObjects.lens.waitForVisualization('xyVisChart');
+      await PageObjects.lens.closeDimensionEditor();
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Last value of bytes'

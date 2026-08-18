@@ -12,8 +12,18 @@ import {
   generateOperationsDoc,
   generateRuleSchemaDoc,
   generateRuleOperationsDoc,
+  generateRuleKindDoc,
+  generateEpisodeLifecycleDoc,
+  generateStateTransitionDoc,
+  generateRecoveryStrategyDoc,
+  generateNoDataStrategyDoc,
+  generateSeverityDoc,
   generateActionPolicySchemaDoc,
+  generateGroupingModesDoc,
+  generateThrottleStrategiesDoc,
+  generateThrottleGroupingCompatibilityDoc,
   getSeverityValues,
+  getDescribedEnumValues,
   generateActionPolicyOperationsDoc,
   generateActionPolicyWorkflowPayloadDoc,
 } from './schema_to_skill_docs';
@@ -50,14 +60,13 @@ describe('schema_to_skill_docs', () => {
       enabled: z.boolean().optional().describe('Whether the resource is enabled.'),
     });
 
-    it('renders title, default source line, and top-level field table', () => {
+    it('renders title and top-level field table', () => {
       const doc = generateApiSchemaDoc({
         title: 'Example API Schema Reference',
         schema: exampleApiSchema,
       });
 
       expect(doc).toContain('# Example API Schema Reference');
-      expect(doc).toContain('Auto-generated from `@kbn/alerting-v2-schemas`.');
       expect(doc).toContain('## Top-Level Fields');
       expect(doc).toContain(
         '| `name` | string | required | Display name. (min length: 1, max length: 64) |'
@@ -125,30 +134,83 @@ describe('schema_to_skill_docs', () => {
 
   describe('generateOperationsDoc', () => {
     const exampleOperationSchema = z.discriminatedUnion('operation', [
-      z.object({
-        operation: z.literal('set_name'),
-        name: z.string().min(1).max(64).describe('Display name.'),
-      }),
-      z.object({
-        operation: z.literal('validate'),
-      }),
+      z
+        .object({
+          operation: z.literal('set_name'),
+          name: z.string().min(1).max(64).describe('Display name.'),
+        })
+        .describe('Display name of the resource.'),
+      z
+        .object({
+          operation: z.literal('validate'),
+        })
+        .describe('Validates the accumulated resource against the API request schema.'),
     ]);
 
-    it('renders title, source line, and discriminated operation variants', () => {
+    it('renders title and discriminated operation variants', () => {
       const doc = generateOperationsDoc({
         title: 'Example Operations Schema Reference',
-        source: 'the example tool Zod schemas',
         schema: exampleOperationSchema,
       });
 
       expect(doc).toContain('# Example Operations Schema Reference');
-      expect(doc).toContain('Auto-generated from the example tool Zod schemas.');
       expect(doc).toContain('#### `operation: "set_name"`');
+      expect(doc).toContain('Display name of the resource.');
       expect(doc).toContain('#### `operation: "validate"`');
       expect(doc).toContain(
         '| `name` | string | required | Display name. (min length: 1, max length: 64) |'
       );
       expect(doc).toContain('| `operation` | "set_name" | required |');
+      expect(doc).toMatch(
+        /#### `operation: "set_name"`\n\nDisplay name of the resource.\n\n\| Field \|/
+      );
+    });
+
+    it('throws when an operation variant is missing a top-level describe', () => {
+      const schema = z.discriminatedUnion('operation', [
+        z.object({
+          operation: z.literal('set_name'),
+          name: z.string(),
+        }),
+      ]);
+
+      expect(() =>
+        generateOperationsDoc({
+          title: 'Missing Describe',
+          schema,
+        })
+      ).toThrow(/Missing \.describe\(\) on operation variant\(s\): set_name/);
+    });
+  });
+
+  describe('getDescribedEnumValues', () => {
+    it('returns each literal value with its .describe() copy', () => {
+      const schema = z.union([
+        z.literal('inactive').describe('Fully recovered'),
+        z.literal('active').describe('Alert is firing'),
+      ]);
+
+      expect(getDescribedEnumValues(schema, 'exampleStatusSchema')).toEqual([
+        { value: 'inactive', description: 'Fully recovered' },
+        { value: 'active', description: 'Alert is firing' },
+      ]);
+    });
+
+    it('throws when a literal is missing .describe()', () => {
+      const schema = z.union([
+        z.literal('inactive').describe('Fully recovered'),
+        z.literal('pending'),
+      ]);
+
+      expect(() => getDescribedEnumValues(schema, 'exampleStatusSchema')).toThrow(
+        /Missing \.describe\(\) on exampleStatusSchema value\(s\): pending/
+      );
+    });
+
+    it('throws when the schema is not a union of literals', () => {
+      expect(() => getDescribedEnumValues(z.enum(['a', 'b']), 'exampleStatusSchema')).toThrow(
+        /exampleStatusSchema is not a union of described literals/
+      );
     });
   });
 
@@ -197,6 +259,14 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('pending_count');
       expect(doc).toContain('recovering_count');
     });
+
+    it('describes each operation in terms of the user goal it solves', () => {
+      const doc = generateRuleOperationsDoc();
+      expect(doc).toContain(
+        'Use `set_state_transition` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes. State transition is only allowed on `kind: alert` rules.'
+      );
+      expect(doc).toContain("Use `set_kind` to choose a rule kind matching the user's goal");
+    });
   });
 
   describe('getSeverityValues', () => {
@@ -226,8 +296,86 @@ describe('schema_to_skill_docs', () => {
       expect(doc).toContain('`name`');
       expect(doc).toContain('`destinations`');
       expect(doc).toContain('`matcher`');
-      expect(doc).toContain('`groupingMode`');
+      expect(doc).toContain('`grouping_mode`');
       expect(doc).toContain('`throttle`');
+    });
+  });
+
+  /**
+   * Every schema carrying a `.meta({ id })` — added so the OAS emits named
+   * components — is hoisted into `definitions` / `$defs` by `z.toJSONSchema`
+   * and replaced by a `$ref` (`#/definitions/...` or `#/$defs/...`). These
+   * docs are read by an LLM, so the pointers have to be expanded back into
+   * real types rather than rendered as `unknown`.
+   */
+  describe('schemas extracted into `definitions` / `$defs`', () => {
+    const allDocs = () => [
+      generateRuleSchemaDoc(),
+      generateRuleOperationsDoc(),
+      generateActionPolicySchemaDoc(),
+      generateActionPolicyOperationsDoc(),
+      generateActionPolicyWorkflowPayloadDoc(),
+    ];
+
+    it('never leaves an unresolved pointer or type in any doc', () => {
+      for (const doc of allDocs()) {
+        expect(doc).not.toContain('$ref');
+        expect(doc).not.toContain('| unknown');
+        expect(doc).not.toContain('unknown[]');
+      }
+    });
+
+    it('renders referenced object schemas with their type and description', () => {
+      const doc = generateRuleSchemaDoc();
+      expect(doc).toContain('| `metadata` | object | required | Rule metadata. |');
+      expect(doc).toContain(
+        '| `schedule` | object | required | Execution schedule configuration. |'
+      );
+    });
+
+    it('renders a referenced discriminated union as its variants', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `query` | { format: "composed", ... } \\| { format: "standalone", ... } | required | Detection query configuration. |'
+      );
+      expect(generateRuleOperationsDoc()).toContain(
+        '| `query` | { format: "composed", ... } \\| { format: "standalone", ... } | required | Detection query configuration. |'
+      );
+    });
+
+    it('expands the variant tables of a referenced union', () => {
+      const doc = generateRuleSchemaDoc();
+      expect(doc).toContain('## Query Formats');
+      expect(doc).toContain('#### `format: "composed"`');
+      expect(doc).toContain('#### `format: "standalone"`');
+      expect(doc).toContain(
+        '| `base` | string | required | Base ES\\|QL query. Time filters are applied automatically via the lookback window. (min length: 1, max length: 10000) |'
+      );
+    });
+
+    it('renders arrays whose items are referenced schemas', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `artifacts` | object[] | optional | Artifacts attached to the rule, each shaped as `{ id, type, data }`. `data` carries type-specific fields: a `runbook` artifact requires `data.content` holding markdown, and a `dashboard` artifact requires `data.dashboardId` holding a dashboard saved object id. Artifacts of any other type may carry whatever fields they need in `data`. (max items: 100) |'
+      );
+      expect(generateActionPolicySchemaDoc()).toContain(
+        '| `destinations` | { type: "workflow", ... }[] | required | The list of destinations. At least one is required. (min items: 1, max items: 10) |'
+      );
+    });
+
+    it('merges a reference with the sibling keys draft-7 moves into `allOf`', () => {
+      expect(generateRuleSchemaDoc()).toContain(
+        '| `grouping` | object | optional | Grouping configuration. |'
+      );
+      expect(generateActionPolicySchemaDoc()).toContain(
+        '| `throttle` | object | optional | The throttle configuration for notifications. |'
+      );
+    });
+
+    it('keeps the referencing field description when the definition also has one', () => {
+      const doc = generateActionPolicySchemaDoc();
+      expect(doc).toContain(
+        '| `grouping_mode` | "per_episode" \\| "all" \\| "per_field" | optional | The grouping mode for alert notifications. |'
+      );
+      expect(doc).not.toContain('per_episode groups by episode lifecycle');
     });
   });
 
@@ -257,6 +405,60 @@ describe('schema_to_skill_docs', () => {
       // z.literal('set_metadata') → { const: "set_metadata" } → Type column "set_metadata"
       expect(doc).toContain('| `operation` | "set_metadata" | required |');
       expect(doc).not.toMatch(/\| `operation` \| string \|/);
+    });
+  });
+
+  describe('generateRuleKindDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateRuleKindDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateEpisodeLifecycleDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateEpisodeLifecycleDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateStateTransitionDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateStateTransitionDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateRecoveryStrategyDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateRecoveryStrategyDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateNoDataStrategyDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateNoDataStrategyDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateSeverityDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateSeverityDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateGroupingModesDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateGroupingModesDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateThrottleStrategiesDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateThrottleStrategiesDoc()).toMatchSnapshot();
+    });
+  });
+
+  describe('generateThrottleGroupingCompatibilityDoc', () => {
+    it('matches the reviewed skill-doc snapshot', () => {
+      expect(generateThrottleGroupingCompatibilityDoc()).toMatchSnapshot();
     });
   });
 
@@ -297,6 +499,28 @@ describe('schema_to_skill_docs', () => {
     it('documents the inputs.payload Liquid access pattern', () => {
       const doc = generateActionPolicyWorkflowPayloadDoc();
       expect(doc).toContain('inputs.payload');
+    });
+  });
+
+  describe('Alerting v2 agent builder start contract', () => {
+    it.each([
+      ['zodToJsonSchema via generateRuleSchemaDoc', generateRuleSchemaDoc],
+      ['zodToJsonSchema via generateActionPolicySchemaDoc', generateActionPolicySchemaDoc],
+      ['manage_rule operation .describe()', generateRuleOperationsDoc],
+      ['manage_action_policy operation .describe()', generateActionPolicyOperationsDoc],
+      ['generateEnumTable (episode status from spec)', generateEpisodeLifecycleDoc],
+      ['generateEnumTable (no-data strategy from spec)', generateNoDataStrategyDoc],
+      ['generateEnumList (recovery strategy from spec)', generateRecoveryStrategyDoc],
+      ['generateEnumList (grouping modes from spec)', generateGroupingModesDoc],
+      ['generateEnumList (throttle strategies from spec)', generateThrottleStrategiesDoc],
+      ['generateRuleKindDoc from spec', generateRuleKindDoc],
+      ['generateStateTransitionDoc field .describe()', generateStateTransitionDoc],
+      [
+        'generateActionPolicyWorkflowPayloadDoc workflow input definition',
+        generateActionPolicyWorkflowPayloadDoc,
+      ],
+    ] as const)('%s does not throw', (_label, generate) => {
+      expect(generate()).toEqual(expect.any(String));
     });
   });
 });

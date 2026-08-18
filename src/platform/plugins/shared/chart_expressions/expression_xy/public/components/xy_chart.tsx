@@ -22,6 +22,7 @@ import type {
   TooltipValue,
   PointerValue,
   AxisStyle,
+  RectStyle,
 } from '@elastic/charts';
 import {
   Chart,
@@ -82,6 +83,7 @@ import type {
   ExtendedReferenceLineDecorationConfig,
   XYChartProps,
   AxisExtentConfigResult,
+  ReferenceLineLayerConfig,
 } from '../../common/types';
 import type { AxisConfiguration, GroupsConfiguration, Series } from '../helpers';
 import {
@@ -104,7 +106,7 @@ import {
   EXEMPLARS_SERIES_ID,
   type ExemplarPoint,
 } from '../helpers';
-import { getXDomain, XyEndzones } from './x_domain';
+import { getXDomain, getXValues, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
 import {
   ReferenceLines,
@@ -265,17 +267,57 @@ export function XYChart({
   const exemplarStroke = darkMode ? euiTheme.colors.plainLight : euiTheme.colors.plainDark;
   const palettes = useKbnPalettes();
   const appFixedViewport = useAppFixedViewport();
-  const filteredLayers = getFilteredLayers(layers);
+  const filteredLayers = useMemo(() => getFilteredLayers(layers), [layers]);
   const layersById = filteredLayers.reduce<Record<string, CommonXYLayerConfig>>(
     (hashMap, layer) => ({ ...hashMap, [layer.layerId]: layer }),
     {}
   );
-  const chartHasMoreThanOneSeries =
-    filteredLayers.length > 1 ||
-    filteredLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredLayers.some(
-      (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
+
+  const hasMultipleSeries = (filtered: (ReferenceLineLayerConfig | CommonXYDataLayerConfig)[]) => {
+    return (
+      filtered.length > 1 ||
+      filtered.some((layer) => layer.accessors.length > 1) ||
+      filtered.some(
+        (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
+      )
     );
+  };
+
+  const chartHasMoreThanOneSeries = hasMultipleSeries(filteredLayers);
+
+  const dataLayers = useMemo(() => filteredLayers.filter(isDataLayer), [filteredLayers]);
+  const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
+
+  const filteredBarLayers = dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.BAR);
+  const hasBars = filteredBarLayers.length > 0;
+  const chartHasMoreThanOneBarSeries = hasMultipleSeries(filteredBarLayers);
+
+  const shouldRotate = isHorizontalChart(dataLayers);
+
+  const isTimeVis = isTimeChart(dataLayers);
+
+  const isHistogramVis = dataLayers.every((l) => l.isHistogram);
+  const isHistogramModeEnabled = dataLayers.some(
+    ({ isHistogram, seriesType, isStacked }) =>
+      isHistogram && (isStacked || seriesType !== SeriesTypes.BAR || !chartHasMoreThanOneBarSeries)
+  );
+
+  const defaultXScaleType = isTimeVis ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
+
+  const isHorizontalTimeAxis = isTimeVis && isHistogramModeEnabled && !shouldRotate;
+  const isCategoricalXAxis = useMemo(
+    () =>
+      dataLayers.every(
+        ({ xAccessor, xScaleType }) =>
+          !xAccessor || (xScaleType ?? defaultXScaleType) === XScaleTypes.ORDINAL
+      ),
+    [dataLayers, defaultXScaleType]
+  );
+
+  const categoricalXValues = useMemo(
+    () => (isCategoricalXAxis ? getXValues(dataLayers) : undefined),
+    [dataLayers, isCategoricalXAxis]
+  );
 
   const getShowLegendDefault = useCallback(() => {
     const legendStateDefault =
@@ -331,10 +373,6 @@ export function XYChart({
     [renderComplete]
   );
 
-  const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
-
-  const isTimeVis = isTimeChart(dataLayers);
-
   // POC: exemplars are mocked from the chart's own data and only shown when the
   // Metrics Experience turns the prop on. Keyed on `layers` (not the per-render
   // `dataLayers` array) so the random ids stay stable across re-renders.
@@ -380,8 +418,6 @@ export function XYChart({
     [dataLayers, splitColumnAccessor, splitRowAccessor, formatFactory]
   );
 
-  const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
-
   // Compute warning message for ES|QL computed columns that cannot be filtered.
   const warningMessage = useMemo(
     () => (isEsqlMode ? getComputedColumnWarning(dataLayers) : undefined),
@@ -424,8 +460,6 @@ export function XYChart({
       ? String(value)
       : String(xAxisFormatter.convertToText(value));
 
-  const shouldRotate = isHorizontalChart(dataLayers);
-
   const yAxesConfiguration = getAxesConfiguration(
     dataLayers,
     shouldRotate,
@@ -458,20 +492,6 @@ export function XYChart({
     { xTitle },
     yAxesConfiguration
   );
-
-  const filteredBarLayers = dataLayers.filter(({ seriesType }) => seriesType === SeriesTypes.BAR);
-
-  const chartHasMoreThanOneBarSeries =
-    filteredBarLayers.length > 1 ||
-    filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
-    filteredBarLayers.some(
-      (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
-    );
-
-  const defaultXScaleType = isTimeVis ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
-
-  const isHistogramVis = dataLayers.every((l) => l.isHistogram);
-  const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     data.datatableUtilities,
@@ -631,6 +651,19 @@ export function XYChart({
     valueLabels !== ValueLabelModes.HIDE &&
     getValueLabelsStyling(shouldRotate);
 
+  // safeguard against overly thick bars on sparse charts
+  const barRectStyle: Partial<{ rect: RecursivePartial<RectStyle> }> =
+    hasBars && isCategoricalXAxis
+      ? {
+          rect: {
+            widthPixel: 400,
+            ...(categoricalXValues?.length && categoricalXValues.length <= 2
+              ? { widthRatio: Math.min(1, 0.5 + 0.2 * categoricalXValues.length) }
+              : {}),
+          },
+        }
+      : {};
+
   const clickHandler: ElementClickListener = ([elementEvent]) => {
     // this cast is safe because we are rendering a cartesian chart
     const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
@@ -748,13 +781,6 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   };
 
-  const isHistogramModeEnabled = dataLayers.some(
-    ({ isHistogram, seriesType, isStacked }) =>
-      isHistogram && (isStacked || seriesType !== SeriesTypes.BAR || !chartHasMoreThanOneBarSeries)
-  );
-
-  const isHorizontalTimeAxis = isTimeVis && isHistogramModeEnabled && !shouldRotate;
-
   const defaultXAxisPosition = shouldRotate ? Position.Left : Position.Bottom;
 
   const gridLineStyle = {
@@ -772,11 +798,6 @@ export function XYChart({
         visible: xAxisConfig?.showTitle,
       },
     };
-
-    const isCategoricalXAxis = dataLayers.every(
-      ({ xAccessor, xScaleType }) =>
-        !xAccessor || (xScaleType ?? defaultXScaleType) === XScaleTypes.ORDINAL
-    );
 
     if (isHorizontalTimeAxis) {
       style.tickLine = {
@@ -955,6 +976,7 @@ export function XYChart({
                 {
                   barSeriesStyle: {
                     ...valueLabelsStyling,
+                    ...barRectStyle,
                   },
                   background: {
                     color: undefined, // removes background for embeddables
