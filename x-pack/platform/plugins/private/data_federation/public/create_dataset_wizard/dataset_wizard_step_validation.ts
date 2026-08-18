@@ -22,6 +22,7 @@ import {
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow3B,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from './dataset_wizard_form_state';
@@ -73,7 +74,13 @@ export const getAdditionalSettingsStepFields = (
       isFieldVisibleForFormat(fieldId, format) && isFieldVisibleForErrorMode(fieldId, errorMode)
   ).map((fieldId) => `settings.${fieldId}` as FieldPath<DatasetWizardFormValues>);
 
-  return [...regionFields, ...fields];
+  const customJsonField: Array<FieldPath<DatasetWizardFormValues>> = isDatasetWizardFlow3B(
+    flowVariant
+  )
+    ? ['settings_custom_json']
+    : [];
+
+  return [...regionFields, ...fields, ...customJsonField];
 };
 
 export const getSchemaMappingsStepFields = (

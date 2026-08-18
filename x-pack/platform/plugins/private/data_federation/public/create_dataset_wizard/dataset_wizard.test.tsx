@@ -17,7 +17,8 @@ import { DatasetWizard } from './dataset_wizard';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
-  DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3A,
+  DATASET_WIZARD_FLOW_VARIANT_3B,
 } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import { applySettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
@@ -267,7 +268,11 @@ describe('DatasetWizard step navigation', () => {
     jest.useRealTimers();
   });
 
-  it.each([DATASET_WIZARD_FLOW_VARIANT_2, DATASET_WIZARD_FLOW_VARIANT_3])(
+  it.each([
+    DATASET_WIZARD_FLOW_VARIANT_2,
+    DATASET_WIZARD_FLOW_VARIANT_3A,
+    DATASET_WIZARD_FLOW_VARIANT_3B,
+  ])(
     'shows the data preview in the review step preview results tab in %s',
     (flowVariant) => {
       const { getByTestId, getByText, queryByTestId } = renderWizard(
@@ -285,11 +290,13 @@ describe('DatasetWizard step navigation', () => {
     }
   );
 
-  it('places region on additional settings in flow 3 and allows leaving logistics without it', async () => {
+  it.each([DATASET_WIZARD_FLOW_VARIANT_3A, DATASET_WIZARD_FLOW_VARIANT_3B])(
+    'places region on additional settings in %s and allows leaving logistics without it',
+    async (flowVariant) => {
     const { getByRole, getByTestId } = renderWizard(
       '/create',
       emptyDatasetWizardFormValues(),
-      DATASET_WIZARD_FLOW_VARIANT_3
+      flowVariant
     );
 
     const additionalSettings = getByTestId('datasetWizardAdditionalSettingsStep');
@@ -321,13 +328,16 @@ describe('DatasetWizard step navigation', () => {
     expect(region).toBeVisible();
     expect(region).toHaveTextContent('US East (N. Virginia)');
     expect(region.compareDocumentPosition(format) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-  });
+    }
+  );
 
-  it('validates region on additional settings in flow 3, not on logistics', async () => {
+  it.each([DATASET_WIZARD_FLOW_VARIANT_3A, DATASET_WIZARD_FLOW_VARIANT_3B])(
+    'validates region on additional settings in %s, not on logistics',
+    async (flowVariant) => {
     const { getByRole, getByTestId } = renderWizard(
       '/create',
       emptyDatasetWizardFormValues(),
-      DATASET_WIZARD_FLOW_VARIANT_3
+      flowVariant
     );
 
     fireEvent.click(getByTestId('datasetWizardDataSource'));
@@ -362,7 +372,8 @@ describe('DatasetWizard step navigation', () => {
     expect(getByTestId('datasetWizardAdditionalSettingsStep')).toHaveTextContent(
       'Region is required.'
     );
-  });
+    }
+  );
 
   it('blocks advancing from logistics when region is not selected', async () => {
     const { getByRole, getByTestId, history } = renderWizard();

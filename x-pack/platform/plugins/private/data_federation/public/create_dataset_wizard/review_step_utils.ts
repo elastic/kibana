@@ -11,6 +11,7 @@ import type { DataSetWithName, DataSource, Dataset } from '../../common';
 import { getDataSetByIdApiPath } from '../../common';
 import { getDataSourceTypeVerbose } from '../get_data_source_type_label';
 import { buildDatasetSettingsFromFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
+import { mergeCustomJsonIntoDatasetSettings, formatSettingsCustomJsonForReview } from '../create_dataset_flyout/settings_custom_json_utils';
 import { createDatasetFlyoutStrings } from '../create_dataset_flyout/create_dataset_flyout_i18n';
 import { getDefaultSettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
 import {
@@ -41,6 +42,7 @@ import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow3B,
   type DatasetWizardFlowVariant,
 } from './dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues, SchemaMappingMode } from './dataset_wizard_form_state';
@@ -71,7 +73,10 @@ export const buildDatasetPayloadFromWizardValues = (
   values: DatasetWizardFormValues
 ): DataSetWithName => {
   const desc = values.description?.trim();
-  const settings = buildDatasetSettingsFromFormValues(values.settings);
+  const settings = mergeCustomJsonIntoDatasetSettings(
+    buildDatasetSettingsFromFormValues(values.settings),
+    values.settings_custom_json
+  );
 
   return {
     name: values.name.trim(),
@@ -332,6 +337,17 @@ export const getReviewSettingsRows = (
   }
 
   return rows;
+};
+
+export const getReviewCustomSettingsJsonDisplay = (
+  values: DatasetWizardFormValues,
+  flowVariant: DatasetWizardFlowVariant
+): string | undefined => {
+  if (!isDatasetWizardFlow3B(flowVariant)) {
+    return undefined;
+  }
+
+  return formatSettingsCustomJsonForReview(values.settings_custom_json);
 };
 
 export const getReviewSchemaMappingRows = (

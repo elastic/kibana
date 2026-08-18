@@ -242,6 +242,51 @@ export const datasetWizardStrings = {
       defaultMessage: 'Advanced settings',
     }),
 
+  settingsCustomJsonLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonLabel', {
+      defaultMessage: 'Custom settings (JSON)',
+    }),
+
+  settingsCustomJsonHelpText: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonHelpText', {
+      defaultMessage: 'Optional JSON overrides for advanced dataset settings. Example:',
+    }),
+
+  settingsCustomJsonHelpTextDocsPrefix: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonHelpTextDocsPrefix', {
+      defaultMessage: 'See the',
+    }),
+
+  settingsCustomJsonHelpTextDocsSuffix: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonHelpTextDocsSuffix', {
+      defaultMessage: 'for the full list of available properties.',
+    }),
+
+  settingsCustomJsonDocsLinkLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonDocsLinkLabel', {
+      defaultMessage: 'documentation',
+    }),
+
+  settingsCustomJsonAriaLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonAriaLabel', {
+      defaultMessage: 'Custom dataset settings JSON editor',
+    }),
+
+  settingsCustomJsonInvalidSyntax: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidSyntax', {
+      defaultMessage: 'Invalid JSON format.',
+    }),
+
+  settingsCustomJsonInvalidObject: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonInvalidObject', {
+      defaultMessage: 'Custom settings must be a JSON object.',
+    }),
+
+  reviewCustomSettingsJsonSectionTitle: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.reviewCustomSettingsJsonSectionTitle', {
+      defaultMessage: 'Custom settings (JSON)',
+    }),
+
   delimiterOptionComma: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.delimiterOptionComma', {
       defaultMessage: 'Comma (,)',

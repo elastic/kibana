@@ -15,11 +15,30 @@ import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
-  DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3A,
+  DATASET_WIZARD_FLOW_VARIANT_3B,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from '../../create_dataset_flyout/dataset_settings_options';
 import { AdditionalSettingsStep } from './additional_settings_step';
+
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({
+    value,
+    onChange,
+    'data-test-subj': dataTestSubj,
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+    'data-test-subj'?: string;
+  }) => (
+    <textarea
+      data-test-subj={dataTestSubj}
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  ),
+}));
 
 const TestHarness = ({
   resource,
@@ -60,7 +79,7 @@ describe('AdditionalSettingsStep', () => {
     expect(getByTestId('datasetWizardSettingsFormat')).toBeInTheDocument();
 
     rerender(
-      <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+      <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A} />
     );
 
     const region = getByTestId('datasetWizardRegion');
@@ -372,7 +391,7 @@ describe('AdditionalSettingsStep', () => {
   describe('flow 3 settings layout', () => {
     it('uses common panel and single advanced accordion instead of grouped accordions', async () => {
       const { getByTestId, queryByTestId } = render(
-        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A} />
       );
 
       await waitFor(() => {
@@ -387,7 +406,7 @@ describe('AdditionalSettingsStep', () => {
 
     it('shows expanded csv common fields in flow 3', async () => {
       const { getByTestId } = render(
-        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3} />
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A} />
       );
 
       await waitFor(() => {
@@ -424,7 +443,7 @@ describe('AdditionalSettingsStep', () => {
               resource="s3://bucket/data.ndjson"
               syncedResourceRef={syncedResourceRef}
               isEditMode={true}
-              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A}
             />
           </EuiProvider>
         );
@@ -436,6 +455,22 @@ describe('AdditionalSettingsStep', () => {
         expect(getByTestId('datasetWizardSettingsMaxErrors')).toBeInTheDocument();
         expect(getByTestId('datasetWizardSettingsMaxErrorRatio')).toBeInTheDocument();
       });
+    });
+    it('uses the same flow 3 settings layout for flow 3b', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardFlow3CommonSettingsPanel')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardFlow3bAdvancedSettingsAccordion')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardSettingsCustomJsonDocsLink')).toBeInTheDocument();
+      expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toHaveValue('{\n\n}');
+      });
+
+      expect(queryByTestId('datasetWizardAccordionStructureAndSchema')).toBeNull();
+      expect(queryByTestId('datasetWizardSettingsQuote')).toBeNull();
     });
   });
 });

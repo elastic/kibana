@@ -11,6 +11,7 @@ import {
   dataSetToFlyoutFormValues,
   emptyDatasetFlyoutFormValues,
 } from '../create_dataset_flyout/dataset_flyout_initial_values';
+import { EMPTY_SETTINGS_CUSTOM_JSON } from '../create_dataset_flyout/settings_custom_json_utils';
 
 export const SCHEMA_MAPPING_MODES = ['automatic', 'aws_glue_table', 'manual'] as const;
 
@@ -33,6 +34,8 @@ export interface DatasetWizardFormValues extends CreateDatasetFormValues {
   glue_catalog_region: string;
   /** Prototype-only field; not persisted to the API yet. */
   glue_aws_account_id: string;
+  /** Flow 3b optional JSON overrides for dataset settings. */
+  settings_custom_json: string;
 }
 
 export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
@@ -45,6 +48,7 @@ export const emptyDatasetWizardFormValues = (): DatasetWizardFormValues => ({
   glue_table_name: '',
   glue_catalog_region: '',
   glue_aws_account_id: '',
+  settings_custom_json: EMPTY_SETTINGS_CUSTOM_JSON,
 });
 
 export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardFormValues => ({
@@ -57,4 +61,5 @@ export const dataSetToWizardFormValues = (data: DataSetWithName): DatasetWizardF
   glue_table_name: '',
   glue_catalog_region: '',
   glue_aws_account_id: '',
+  settings_custom_json: EMPTY_SETTINGS_CUSTOM_JSON,
 });

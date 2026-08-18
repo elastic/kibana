@@ -23,7 +23,8 @@ import { getTestConfigurationPreviewFields } from '../test_configuration_preview
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   DATASET_WIZARD_FLOW_VARIANT_2,
-  DATASET_WIZARD_FLOW_VARIANT_3,
+  DATASET_WIZARD_FLOW_VARIANT_3A,
+  DATASET_WIZARD_FLOW_VARIANT_3B,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { SchemaMappingsStep } from './schema_mappings_step';
@@ -274,7 +275,7 @@ describe('SchemaMappingsStep flow 3', () => {
       <TestHarness
         dataSources={[s3DataSource]}
         dataSource="s3-source"
-        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+        flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A}
         defaultValues={{
           ...emptyDatasetWizardFormValues(),
           settings: {
@@ -328,7 +329,7 @@ describe('SchemaMappingsStep flow 3', () => {
             dataSources={[s3DataSource]}
             dataSource="s3-source"
             dataSourceRegion=""
-            flowVariant={DATASET_WIZARD_FLOW_VARIANT_3}
+            flowVariant={DATASET_WIZARD_FLOW_VARIANT_3A}
           />
           <span data-test-subj="automaticFieldTypesValue">
             {JSON.stringify(watch('automatic_field_types'))}

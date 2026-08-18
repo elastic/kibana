@@ -15,6 +15,7 @@ import { DatasetSettingsAccordions } from '../../create_dataset_flyout/dataset_s
 import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_settings_common_panel';
 import { DatasetSettingsFlow3SettingsPanel } from '../../create_dataset_flyout/dataset_settings_flow3_settings_panel';
 import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
+import { EMPTY_SETTINGS_CUSTOM_JSON } from '../../create_dataset_flyout/settings_custom_json_utils';
 import { FORMAT_SUPER_SELECT_OPTIONS } from '../../create_dataset_flyout/dataset_settings_options';
 import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
@@ -24,6 +25,7 @@ import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import {
   DATASET_WIZARD_FLOW_VARIANT_1,
   isDatasetWizardFlow3,
+  isDatasetWizardFlow3B,
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
@@ -71,8 +73,15 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
     (nextFormat: Exclude<DatasetFormatFormValue, ''>) => {
       const withDefaults = applySettingsForFormat(getValues('settings'), nextFormat);
       setValue('settings', withDefaults, { shouldDirty: true, shouldValidate: true });
+
+      if (isDatasetWizardFlow3B(flowVariant)) {
+        setValue('settings_custom_json', EMPTY_SETTINGS_CUSTOM_JSON, {
+          shouldDirty: true,
+          shouldValidate: true,
+        });
+      }
     },
-    [getValues, setValue]
+    [flowVariant, getValues, setValue]
   );
 
   const handleFormatSelection = useCallback(
@@ -126,15 +135,23 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       shouldDirty: true,
       shouldValidate: true,
     });
+    if (isDatasetWizardFlow3B(flowVariant)) {
+      setValue('settings_custom_json', EMPTY_SETTINGS_CUSTOM_JSON, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
     setAutoDetectedFormat('');
     setFormatSelectionSource('none');
   }, [
+    flowVariant,
     formatField.onChange,
     formatField.value,
     formatSelectionSource,
     handleFormatSelection,
     isEditMode,
     resource,
+    setValue,
     syncedResourceRef,
   ]);
 
@@ -218,6 +235,7 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
             <DatasetSettingsFlow3SettingsPanel
               control={control}
               format={format}
+              flowVariant={flowVariant}
               commonSettingsTitle={datasetWizardStrings.commonSettingsTitle()}
               advancedSettingsTitle={datasetWizardStrings.advancedSettingsTitleFlow3()}
               testSubjPrefix="datasetWizard"

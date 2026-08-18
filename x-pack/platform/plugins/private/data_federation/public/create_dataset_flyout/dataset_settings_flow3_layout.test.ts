@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { getFlow3AdvancedFields, getFlow3CommonFields } from './dataset_settings_flow3_layout';
+import {
+  buildFlow3bSettingsCustomJsonExample,
+  getFlow3AdvancedFields,
+  getFlow3CommonFields,
+  getFlow3bAdvancedFields,
+  getFlow3bJsonExampleFieldIds,
+} from './dataset_settings_flow3_layout';
 
 describe('dataset_settings_flow3_layout', () => {
   describe('getFlow3CommonFields', () => {
@@ -84,6 +90,31 @@ describe('dataset_settings_flow3_layout', () => {
         'max_error_ratio',
         'max_field_size',
       ]);
+    });
+  });
+
+  describe('flow 3b layout', () => {
+    it('returns trimmed advanced fields for csv', () => {
+      expect(getFlow3bAdvancedFields('csv', 'fail_fast')).toEqual([
+        'partition_path',
+        'error_mode',
+        'null_value',
+      ]);
+    });
+
+    it('returns trimmed advanced fields for ndjson', () => {
+      expect(getFlow3bAdvancedFields('ndjson', 'fail_fast')).toEqual([
+        'partition_path',
+        'segment_size',
+      ]);
+    });
+
+    it('builds commented json examples for removed csv fields', () => {
+      expect(buildFlow3bSettingsCustomJsonExample('csv', 'fail_fast')).toContain(
+        '// "quote": "\\""'
+      );
+      expect(getFlow3bJsonExampleFieldIds('csv', 'fail_fast')).toContain('quote');
+      expect(getFlow3bJsonExampleFieldIds('csv', 'fail_fast')).not.toContain('null_value');
     });
   });
 });

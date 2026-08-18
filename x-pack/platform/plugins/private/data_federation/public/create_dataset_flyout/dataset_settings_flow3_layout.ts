@@ -6,6 +6,7 @@
  */
 
 import type { DatasetErrorModeFormValue, DatasetFormatFormValue } from './create_dataset_flyout_form_state';
+import { getDefaultSettingsForFormat } from './dataset_settings_defaults';
 import type { DatasetSettingsFieldId } from './dataset_settings_visibility';
 import {
   isFieldVisibleForErrorMode,
@@ -23,11 +24,24 @@ const FLOW3_COMMON_FIELDS_BY_FORMAT: Record<
   orc: ['partition_detection', 'error_mode'],
 };
 
+const FLOW3B_ADVANCED_FIELDS_BY_FORMAT: Record<
+  Exclude<DatasetFormatFormValue, ''>,
+  readonly DatasetSettingsFieldId[]
+> = {
+  csv: ['partition_path', 'error_mode', 'null_value'],
+  tsv: ['partition_path', 'error_mode', 'null_value'],
+  ndjson: ['partition_path', 'segment_size'],
+  parquet: ['partition_path', 'hive_partitioning'],
+  orc: ['partition_path', 'hive_partitioning'],
+};
+
 const FLOW3_FORMATS_WITH_ERROR_MODE_IN_COMMON: Exclude<DatasetFormatFormValue, ''>[] = [
   'ndjson',
   'parquet',
   'orc',
 ];
+
+const ERROR_MODE_LIMIT_FIELDS: DatasetSettingsFieldId[] = ['max_errors', 'max_error_ratio'];
 
 const FLOW3_ADVANCED_FIELD_ORDER: readonly DatasetSettingsFieldId[] = [
   'partition_detection',
@@ -90,4 +104,69 @@ export const getFlow3AdvancedFields = (
       isFieldVisibleForErrorMode(field, errorMode) &&
       !commonFields.has(field)
   );
+};
+
+const getFlow3bAdvancedFieldIds = (
+  format: Exclude<DatasetFormatFormValue, ''>,
+  errorMode: DatasetErrorModeFormValue
+): DatasetSettingsFieldId[] => {
+  const advancedFields = [...FLOW3B_ADVANCED_FIELDS_BY_FORMAT[format]];
+
+  if (FLOW3_FORMATS_WITH_ERROR_MODE_IN_COMMON.includes(format) && errorMode !== 'fail_fast') {
+    return advancedFields;
+  }
+
+  return advancedFields.filter((field) => !ERROR_MODE_LIMIT_FIELDS.includes(field));
+};
+
+export const getFlow3bAdvancedFields = (
+  format: Exclude<DatasetFormatFormValue, ''>,
+  errorMode: DatasetErrorModeFormValue = ''
+): DatasetSettingsFieldId[] =>
+  getFlow3bAdvancedFieldIds(format, errorMode).filter(
+    (field) =>
+      isFieldVisibleForFormat(field, format) && isFieldVisibleForErrorMode(field, errorMode)
+  );
+
+export const getFlow3bJsonExampleFieldIds = (
+  format: Exclude<DatasetFormatFormValue, ''>,
+  errorMode: DatasetErrorModeFormValue = ''
+): DatasetSettingsFieldId[] => {
+  const excludedFields = new Set<DatasetSettingsFieldId>([
+    ...getFlow3CommonFields(format, errorMode),
+    ...getFlow3bAdvancedFields(format, errorMode),
+  ]);
+
+  return FLOW3_ADVANCED_FIELD_ORDER.filter(
+    (field) =>
+      isFieldVisibleForFormat(field, format) &&
+      isFieldVisibleForErrorMode(field, errorMode) &&
+      !excludedFields.has(field)
+  );
+};
+
+const formatJsonExampleValue = (value: string | undefined): string => {
+  if (value === undefined || value === '') {
+    return '""';
+  }
+
+  return JSON.stringify(value);
+};
+
+export const buildFlow3bSettingsCustomJsonExample = (
+  format: Exclude<DatasetFormatFormValue, ''>,
+  errorMode: DatasetErrorModeFormValue = ''
+): string => {
+  const fieldIds = getFlow3bJsonExampleFieldIds(format, errorMode);
+  const defaults = getDefaultSettingsForFormat(format);
+
+  if (fieldIds.length === 0) {
+    return '{\n\n}';
+  }
+
+  const lines = fieldIds.map(
+    (fieldId) => `  // "${fieldId}": ${formatJsonExampleValue(defaults[fieldId])},`
+  );
+
+  return `{\n${lines.join('\n')}\n}`;
 };

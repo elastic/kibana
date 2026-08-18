@@ -13,12 +13,19 @@ import type { Control } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 
 import type {
-  CreateDatasetFormValues,
   DatasetErrorModeFormValue,
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
+import { DatasetSettingsCustomJsonEditor } from './dataset_settings_custom_json_editor';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
-import { getFlow3AdvancedFields, getFlow3CommonFields } from './dataset_settings_flow3_layout';
+import {
+  getFlow3AdvancedFields,
+  getFlow3CommonFields,
+  getFlow3bAdvancedFields,
+} from './dataset_settings_flow3_layout';
+import type { DatasetWizardFlowVariant } from '../create_dataset_wizard/dataset_wizard_flow_variant';
+import { isDatasetWizardFlow3B } from '../create_dataset_wizard/dataset_wizard_flow_variant';
+import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
 
 const accordionButtonCss = css`
   &:hover {
@@ -27,8 +34,9 @@ const accordionButtonCss = css`
 `;
 
 export interface DatasetSettingsFlow3SettingsPanelProps {
-  control: Control<CreateDatasetFormValues>;
+  control: Control<DatasetWizardFormValues>;
   format: Exclude<DatasetFormatFormValue, ''>;
+  flowVariant: DatasetWizardFlowVariant;
   commonSettingsTitle: string;
   advancedSettingsTitle: string;
   testSubjPrefix?: string;
@@ -39,24 +47,33 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
 > = ({
   control,
   format,
+  flowVariant,
   commonSettingsTitle,
   advancedSettingsTitle,
   testSubjPrefix = 'datasetWizard',
 }) => {
+  const isFlow3b = isDatasetWizardFlow3B(flowVariant);
   const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
 
   const commonFields = useMemo(
     () => getFlow3CommonFields(format, errorMode),
     [errorMode, format]
   );
-  const advancedFields = useMemo(
-    () => getFlow3AdvancedFields(format, errorMode),
-    [errorMode, format]
-  );
+  const advancedFields = useMemo(() => {
+    if (isFlow3b) {
+      return getFlow3bAdvancedFields(format, errorMode);
+    }
+
+    return getFlow3AdvancedFields(format, errorMode);
+  }, [errorMode, format, isFlow3b]);
 
   const advancedSettingsAccordionId = useGeneratedHtmlId({
-    prefix: 'datasetWizardFlow3AdvancedSettingsAccordion',
+    prefix: isFlow3b
+      ? 'datasetWizardFlow3bAdvancedSettingsAccordion'
+      : 'datasetWizardFlow3AdvancedSettingsAccordion',
   });
+
+  const showAdvancedSection = isFlow3b || advancedFields.length > 0;
 
   return (
     <>
@@ -79,7 +96,7 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
         />
       </EuiPanel>
 
-      {advancedFields.length > 0 ? (
+      {showAdvancedSection ? (
         <>
           <EuiSpacer size="l" />
           <EuiAccordion
@@ -92,17 +109,32 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
                 <h3>{advancedSettingsTitle}</h3>
               </EuiTitle>
             }
-            data-test-subj={`${testSubjPrefix}Flow3AdvancedSettingsAccordion`}
+            data-test-subj={
+              isFlow3b
+                ? `${testSubjPrefix}Flow3bAdvancedSettingsAccordion`
+                : `${testSubjPrefix}Flow3AdvancedSettingsAccordion`
+            }
             initialIsOpen={false}
             paddingSize="none"
           >
             <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
-              <DatasetSettingsFieldsLayout
-                control={control}
-                fields={advancedFields}
-                testSubjPrefix={testSubjPrefix}
-                columns={2}
-              />
+              {advancedFields.length > 0 ? (
+                <DatasetSettingsFieldsLayout
+                  control={control}
+                  fields={advancedFields}
+                  testSubjPrefix={testSubjPrefix}
+                  columns={2}
+                />
+              ) : null}
+              {isFlow3b ? (
+                <>
+                  {advancedFields.length > 0 ? <EuiSpacer size="l" /> : null}
+                  <DatasetSettingsCustomJsonEditor
+                    control={control}
+                    testSubjPrefix={testSubjPrefix}
+                  />
+                </>
+              ) : null}
             </EuiPanel>
           </EuiAccordion>
         </>

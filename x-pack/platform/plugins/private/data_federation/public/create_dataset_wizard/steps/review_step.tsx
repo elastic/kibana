@@ -34,6 +34,7 @@ import {
 import {
   buildDatasetPayloadFromWizardValues,
   buildDatasetRequestText,
+  getReviewCustomSettingsJsonDisplay,
   getReviewLogisticsRows,
   getReviewSchemaMappingRows,
   getReviewSettingsRows,
@@ -126,7 +127,11 @@ const SettingsSummarySection = ({ rows }: { rows: ReviewSummaryRow[] }) => {
   );
 };
 
-export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({ values, dataSources }) => {
+export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({
+  values,
+  dataSources,
+  flowVariant,
+}) => {
   const { euiTheme } = useEuiTheme();
 
   const reviewTabContentAreaHeight = useMemo(
@@ -184,9 +189,13 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({ values, da
     () => getReviewSettingsRows(values.settings, values.resource),
     [values.resource, values.settings]
   );
+  const customSettingsJson = useMemo(
+    () => getReviewCustomSettingsJsonDisplay(values, flowVariant),
+    [flowVariant, values]
+  );
   const schemaMappingRows = useMemo(
-    () => getReviewSchemaMappingRows(values, DATASET_WIZARD_FLOW_VARIANT_2),
-    [values]
+    () => getReviewSchemaMappingRows(values, flowVariant),
+    [flowVariant, values]
   );
   const useTwoColumnSettings = settingsRows.length >= REVIEW_SETTINGS_TWO_COLUMN_THRESHOLD;
 
@@ -213,6 +222,23 @@ export const ReviewStepFlow2: FunctionComponent<ReviewStepProps> = ({ values, da
             </EuiTitle>
             <EuiSpacer size="s" />
             <SettingsSummarySection rows={settingsRows} />
+            {customSettingsJson ? (
+              <>
+                <EuiSpacer size="m" />
+                <EuiTitle size="xxs">
+                  <h5>{datasetWizardStrings.reviewCustomSettingsJsonSectionTitle()}</h5>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock
+                  language="json"
+                  paddingSize="s"
+                  isCopyable
+                  data-test-subj="datasetWizardReviewCustomSettingsJson"
+                >
+                  {customSettingsJson}
+                </EuiCodeBlock>
+              </>
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <EuiTitle size="xxs">

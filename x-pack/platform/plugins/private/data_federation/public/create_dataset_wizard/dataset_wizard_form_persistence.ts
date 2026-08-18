@@ -38,6 +38,10 @@ export const isDatasetWizardFormValues = (value: unknown): value is DatasetWizar
     return false;
   }
 
+  if (typeof candidate.settings_custom_json !== 'string') {
+    return false;
+  }
+
   if (
     typeof candidate.glue_database !== 'string' ||
     typeof candidate.glue_table_name !== 'string' ||
@@ -101,6 +105,7 @@ export const mergeWizardFormValues = (
     ...base.settings,
     ...draft.settings,
   },
+  settings_custom_json: draft.settings_custom_json ?? base.settings_custom_json,
 });
 
 export const loadWizardFormDraft = (storageKey: string): DatasetWizardFormValues | undefined => {

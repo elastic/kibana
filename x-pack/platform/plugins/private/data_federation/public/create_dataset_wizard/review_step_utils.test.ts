@@ -9,12 +9,13 @@ import type { DataSource } from '../../common';
 import { getDataSetByIdApiPath } from '../../common';
 import { applySettingsForFormat } from '../create_dataset_flyout/dataset_settings_defaults';
 import { emptyCreateDatasetSettingsFormValues } from '../create_dataset_flyout/create_dataset_flyout_form_state';
-import { DATASET_WIZARD_FLOW_VARIANT_2 } from './dataset_wizard_flow_variant';
+import { DATASET_WIZARD_FLOW_VARIANT_2, DATASET_WIZARD_FLOW_VARIANT_3B } from './dataset_wizard_flow_variant';
 import { emptyDatasetWizardFormValues } from './dataset_wizard_form_state';
 import {
   buildDatasetPayloadFromWizardValues,
   buildDatasetRequestBody,
   buildDatasetRequestText,
+  getReviewCustomSettingsJsonDisplay,
   getReviewLogisticsRows,
   getReviewSchemaMappingRows,
   getReviewSettingsRows,
@@ -51,6 +52,35 @@ describe('review_step_utils', () => {
         late_materialization: true,
       },
     });
+  });
+
+  it('merges flow 3b custom json overrides into the dataset payload', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      name: 'dataset-obs-prod-s3',
+      data_source: 'obs-prod-s3',
+      resource: 's3://obs-logs-prod/**/*.csv',
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+      settings_custom_json: '{ "quote": "|" }',
+    };
+
+    expect(buildDatasetPayloadFromWizardValues(values).settings).toMatchObject({
+      format: 'csv',
+      quote: '|',
+    });
+  });
+
+  it('returns custom json for flow 3b review when overrides are active', () => {
+    const values = {
+      ...emptyDatasetWizardFormValues(),
+      settings: applySettingsForFormat(emptyCreateDatasetSettingsFormValues(), 'csv'),
+      settings_custom_json: '{ "quote": "|" }',
+    };
+
+    expect(getReviewCustomSettingsJsonDisplay(values, DATASET_WIZARD_FLOW_VARIANT_3B)).toBe(
+      '{\n  "quote": "|"\n}'
+    );
+    expect(getReviewCustomSettingsJsonDisplay(values, DATASET_WIZARD_FLOW_VARIANT_2)).toBeUndefined();
   });
 
   it('builds the request body without the dataset name', () => {
