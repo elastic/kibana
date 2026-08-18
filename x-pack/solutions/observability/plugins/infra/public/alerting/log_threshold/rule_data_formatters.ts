@@ -18,7 +18,7 @@ export const createRuleFormatter: (
     const reason = fields[ALERT_REASON] ?? '';
     const alertStartDate = fields[ALERT_START];
     const time = alertStartDate != null ? new Date(alertStartDate).valueOf() : undefined;
-    const url = logsLocator.getRedirectUrl({ time });
+    const url = logsLocator.getRedirectUrl({ timeRange: time });
 
     // the alerts UI already prepends the url to the baseUrl so we need to remove it here
     const link = removeBaseUrl(url);
