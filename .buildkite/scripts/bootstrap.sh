@@ -14,7 +14,17 @@ fi
 # Use the packages that are baked into the agent image, if they exist, as a cache
 # But only for agents not mounting the workspace on a local ssd or in memory
 # It actually ends up being slower to move all of the tiny files between the disks vs extracting archives from the yarn cache
-if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
+if [[ "$(pwd)" == "/dev/shm"* && -d ~/.kibana/node_modules ]]; then
+  echo "--- Mock: compress node_modules archive"
+  tar -cf - -C ~/.kibana node_modules | zstd -T0 -o ~/.kibana/node_modules.tar.zst
+
+  echo "--- Mock: move node_modules"
+  mv ~/.kibana/node_modules ./node_modules
+  rm -rf ./node_modules
+
+  echo "--- Extract node_modules"
+  tar -xf ~/.kibana/node_modules.tar.zst -I "zstd -T0" -C ./
+elif [[ "$(pwd)" != *"/local-ssd/"* ]]; then
   if [[ -d ~/.kibana/node_modules ]]; then
     echo "Using ~/.kibana/node_modules as a starting point"
     mv ~/.kibana/node_modules ./
