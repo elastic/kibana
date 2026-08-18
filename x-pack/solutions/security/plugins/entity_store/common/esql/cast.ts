@@ -59,11 +59,10 @@ export function castFieldByType(fieldName: string, mappingType?: string): string
     case 'float':
     case 'double':
     case 'half_float':
+    case 'scaled_float':
       return `TO_DOUBLE(${fieldName})`;
     case 'ip':
       return `TO_IP(${fieldName})`;
-    case 'scaled_float':
-      return fieldName;
     default:
       return `TO_STRING(${fieldName})`;
   }
