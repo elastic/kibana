@@ -56,7 +56,11 @@ export const TraceWaterfallFlyout = ({
   const titleId = useGeneratedHtmlId({ prefix: 'uxTraceWaterfallTitle' });
   const range = useMemo(() => {
     const resolved = resolveTimeRange(rangeFrom, rangeTo);
-    return rangeAroundTimestamp(target.timestamp ?? undefined, resolved.rangeFrom, resolved.rangeTo);
+    return rangeAroundTimestamp(
+      target.timestamp ?? undefined,
+      resolved.rangeFrom,
+      resolved.rangeTo
+    );
   }, [target.timestamp, rangeFrom, rangeTo]);
 
   const apmHref = observabilityShared.locators.apm.transactionDetailsByTraceId.getRedirectUrl({
