@@ -17,8 +17,13 @@ const FORENSIC_ESQL_TRAJECTORY = [
   'platform.core.execute_esql',
 ] as const;
 
+// Capability check is NOT part of the required trajectory for the fallback
+// path: an agent reaches the correct ES|QL answer without it (it infers
+// Osquery is absent from the lack of live data). Requiring the probe here made
+// trajectory measure a step the correct answer doesn't depend on. The probe is
+// mandatory only in the osquery-capability trap scenario, where the capability
+// *diagnosis* (installed-but-no-agents vs absent) is the actual answer.
 const OSQUERY_FALLBACK_TRAJECTORY = [
-  'osquery.check_integration',
   'platform.core.generate_esql',
   'platform.core.execute_esql',
 ] as const;
@@ -166,7 +171,6 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
               },
               output: {
                 criteria: [
-                  'Checks whether Osquery integration is available before attempting an Osquery query',
                   'Routes to ES|QL / Defend telemetry when Osquery is not installed (graceful degradation)',
                   'Does NOT attempt osquery.run_live_query when the integration is absent',
                   'Returns a structured answer with the data source it actually used cited',
