@@ -15,6 +15,7 @@ const ALLOWED = new Set([
   // These ship in the installed osquery_manager schema catalog, so they pass a
   // catalog-only allowlist — the validator must reject them on its own.
   'curl',
+  'curl_certificate',
   'carves',
   'yara',
 ]);
@@ -123,6 +124,7 @@ describe('validateReadOnlyQuery', () => {
   describe('non-read-only catalog tables (review finding)', () => {
     it.each([
       ['curl', "SELECT * FROM curl WHERE url = 'http://169.254.169.254/latest/meta-data/'"],
+      ['curl_certificate', "SELECT * FROM curl_certificate WHERE hostname = '169.254.169.254'"],
       ['carves', 'SELECT * FROM carves WHERE carve = 1'],
       ['yara', "SELECT * FROM yara WHERE sigrule = 'rule r {}'"],
     ])('rejects catalog table %s because it performs host-side effects', (table, query) => {
@@ -133,6 +135,35 @@ describe('validateReadOnlyQuery', () => {
     it('rejects a side-effect table even when joined from a passive table', () => {
       expect(
         validateReadOnlyQuery('SELECT * FROM processes JOIN curl USING (pid)', ALLOWED)
+      ).toMatch(/not read-only/i);
+    });
+
+    // github-actions review #4956120242 / #4956238504: a table inside a
+    // parenthesized subquery must not escape extraction.
+    it('rejects a side-effect table hidden in a subquery', () => {
+      expect(
+        validateReadOnlyQuery(
+          "SELECT * FROM processes WHERE pid IN (SELECT 1 FROM curl WHERE url = 'http://169.254.169.254/')",
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+
+    it('rejects a non-catalog table hidden in a subquery (trailing before `)`)', () => {
+      expect(
+        validateReadOnlyQuery(
+          'SELECT 1 FROM processes WHERE pid IN (SELECT pid FROM secret_table)',
+          ALLOWED
+        )
+      ).toMatch(/not in the osquery schema catalog|unknown/i);
+    });
+
+    it('rejects a side-effect table in a nested (two-level) subquery', () => {
+      expect(
+        validateReadOnlyQuery(
+          'SELECT * FROM processes WHERE pid IN (SELECT pid FROM process_open_sockets WHERE local_port IN (SELECT port FROM curl))',
+          ALLOWED
+        )
       ).toMatch(/not read-only/i);
     });
   });

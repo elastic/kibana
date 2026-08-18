@@ -20,19 +20,26 @@ const blankStringLiterals = (sql: string): string =>
  * is an availability list, not a read-only list — these entries pass the
  * catalog check but must never be reachable here.
  */
-const NON_READ_ONLY_TABLES = new Set(['curl', 'carves', 'yara']);
+const NON_READ_ONLY_TABLES = new Set(['curl', 'curl_certificate', 'carves', 'yara']);
 
 /**
- * Table references in a FROM/JOIN clause, including comma-separated lists.
+ * Table references in a FROM/JOIN clause, including comma-separated lists and
+ * parenthesized subqueries.
  *
  * `FROM processes, shell` is two table references. Matching only the first
  * identifier after FROM validates `processes` and lets `shell` through
- * unchecked.
+ * unchecked. A table nested in a subquery — `WHERE pid IN (SELECT 1 FROM curl
+ * WHERE ...)` — must also be extracted, or it escapes both the catalog
+ * allowlist and NON_READ_ONLY_TABLES.
  */
 const extractTableRefs = (sql: string): string[] => {
   const refs: string[] = [];
+  // The capture stops at the next clause keyword OR at a paren boundary, but
+  // the lookahead consumes nothing — so the global match resumes inside the
+  // parenthesized group and finds FROM/JOIN at every nesting level. Without
+  // the `[()]` boundary a table immediately before `)` is dropped entirely.
   const clauseRe =
-    /\b(?:FROM|JOIN)\s+([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|JOIN|ON|USING)\b|$)/gi;
+    /\b(?:FROM|JOIN)\s+([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|JOIN|ON|USING)\b|[()]|$)/gi;
 
   for (const clause of sql.matchAll(clauseRe)) {
     for (const item of clause[1].split(',')) {
