@@ -7,14 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react';
 
-import {
-  getRegionFieldName,
-  buildStreamVars,
-  buildPackageInputs,
-  collectDeployResults,
-  buildServiceStatuses,
-  useDeploy,
-} from './use_deploy';
+import { getRegionFieldName, buildStreamVars, buildPackageInputs, useDeploy } from './use_deploy';
+import { collectDeployResults, buildInstanceStatuses } from './deploy_groups';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
@@ -239,41 +233,58 @@ describe('buildPackageInputs', () => {
 
 // ─── collectDeployResults ────────────────────────────────────────────────────
 
+/** Build a minimal DeployGroup for use in collectDeployResults tests. */
+function makeGroup(instanceIds: string[], isDuplicateGroup = false) {
+  const svc = makeService();
+  return {
+    groupId: isDuplicateGroup ? instanceIds[0] : svc.packageName,
+    instanceIds,
+    members: instanceIds.map((id) => ({
+      instance: { instanceId: id, serviceId: id, name: id, isDuplicate: isDuplicateGroup },
+      service: svc,
+    })),
+    isDuplicateGroup,
+  };
+}
+
 describe('collectDeployResults', () => {
   it('extracts policyId from fulfilled result', () => {
     const results = [{ status: 'fulfilled' as const, value: { policyId: 'policy-abc' } }];
-    const { policyIdsByPackage, failedPackages, errorsByPackage } = collectDeployResults(results, [
-      'aws',
-    ]);
-    expect(policyIdsByPackage.aws).toBe('policy-abc');
-    expect(failedPackages).toHaveLength(0);
-    expect(errorsByPackage).not.toHaveProperty('aws');
+    const { policyIdsByInstance, failedInstances, errorsByInstance } = collectDeployResults(
+      results,
+      [makeGroup(['inst-1'])]
+    );
+    expect(policyIdsByInstance['inst-1']).toBe('policy-abc');
+    expect(failedInstances).toHaveLength(0);
+    expect(errorsByInstance).not.toHaveProperty('inst-1');
   });
 
   it('omits policyId when response does not include one', () => {
     const results = [{ status: 'fulfilled' as const, value: {} }];
-    const { policyIdsByPackage, failedPackages, errorsByPackage } = collectDeployResults(results, [
-      'aws',
-    ]);
-    expect(policyIdsByPackage).not.toHaveProperty('aws');
-    expect(failedPackages).toHaveLength(0);
-    expect(errorsByPackage).not.toHaveProperty('aws');
+    const { policyIdsByInstance, failedInstances, errorsByInstance } = collectDeployResults(
+      results,
+      [makeGroup(['inst-1'])]
+    );
+    expect(policyIdsByInstance).not.toHaveProperty('inst-1');
+    expect(failedInstances).toHaveLength(0);
+    expect(errorsByInstance).not.toHaveProperty('inst-1');
   });
 
-  it('adds package to failedPackages on rejection and captures error message', () => {
+  it('adds instance to failedInstances on rejection and captures error message', () => {
     const results = [{ status: 'rejected' as const, reason: new Error('Network failure') }];
-    const { policyIdsByPackage, failedPackages, errorsByPackage } = collectDeployResults(results, [
-      'aws',
-    ]);
-    expect(failedPackages).toContain('aws');
-    expect(policyIdsByPackage).not.toHaveProperty('aws');
-    expect(errorsByPackage.aws).toBe('Network failure');
+    const { policyIdsByInstance, failedInstances, errorsByInstance } = collectDeployResults(
+      results,
+      [makeGroup(['inst-1'])]
+    );
+    expect(failedInstances).toContain('inst-1');
+    expect(policyIdsByInstance).not.toHaveProperty('inst-1');
+    expect(errorsByInstance['inst-1']).toBe('Network failure');
   });
 
   it('captures error message from plain object rejection', () => {
     const results = [{ status: 'rejected' as const, reason: { message: 'Server error' } }];
-    const { errorsByPackage } = collectDeployResults(results, ['aws']);
-    expect(errorsByPackage.aws).toBe('Server error');
+    const { errorsByInstance } = collectDeployResults(results, [makeGroup(['inst-1'])]);
+    expect(errorsByInstance['inst-1']).toBe('Server error');
   });
 
   it('handles mixed fulfilled and rejected results', () => {
@@ -281,60 +292,67 @@ describe('collectDeployResults', () => {
       { status: 'fulfilled' as const, value: { policyId: 'p1' } },
       { status: 'rejected' as const, reason: new Error('fail') },
     ];
-    const { policyIdsByPackage, failedPackages, errorsByPackage } = collectDeployResults(results, [
-      'pkg-a',
-      'pkg-b',
+    const { policyIdsByInstance, failedInstances, errorsByInstance } = collectDeployResults(
+      results,
+      [makeGroup(['inst-a']), makeGroup(['inst-b'])]
+    );
+    expect(policyIdsByInstance['inst-a']).toBe('p1');
+    expect(failedInstances).toContain('inst-b');
+    expect(errorsByInstance['inst-b']).toBe('fail');
+    expect(errorsByInstance).not.toHaveProperty('inst-a');
+  });
+
+  it('fans a bundled group policyId out to all instance ids in the group', () => {
+    const results = [{ status: 'fulfilled' as const, value: { policyId: 'shared-policy' } }];
+    const { policyIdsByInstance, failedInstances } = collectDeployResults(results, [
+      makeGroup(['inst-a', 'inst-b', 'inst-c']),
     ]);
-    expect(policyIdsByPackage['pkg-a']).toBe('p1');
-    expect(failedPackages).toContain('pkg-b');
-    expect(errorsByPackage['pkg-b']).toBe('fail');
-    expect(errorsByPackage).not.toHaveProperty('pkg-a');
+    expect(policyIdsByInstance['inst-a']).toBe('shared-policy');
+    expect(policyIdsByInstance['inst-b']).toBe('shared-policy');
+    expect(policyIdsByInstance['inst-c']).toBe('shared-policy');
+    expect(failedInstances).toHaveLength(0);
+  });
+
+  it('marks all bundled group instance ids as failed when the call is rejected', () => {
+    const results = [{ status: 'rejected' as const, reason: new Error('Bundle failed') }];
+    const { failedInstances, errorsByInstance } = collectDeployResults(results, [
+      makeGroup(['inst-a', 'inst-b']),
+    ]);
+    expect(failedInstances).toContain('inst-a');
+    expect(failedInstances).toContain('inst-b');
+    expect(errorsByInstance['inst-a']).toBe('Bundle failed');
+    expect(errorsByInstance['inst-b']).toBe('Bundle failed');
   });
 });
 
-// ─── buildServiceStatuses ────────────────────────────────────────────────────
+// ─── buildInstanceStatuses ───────────────────────────────────────────────────
 
-describe('buildServiceStatuses', () => {
-  it('sets succeeded package services to "instantiating" by default', () => {
-    const servicesByPackage = new Map([
-      ['aws', [makeService({ id: 'ec2_metrics' }), makeService({ id: 's3_logs' })]],
-    ]);
-    const statuses = buildServiceStatuses(['aws'], [], servicesByPackage);
-    expect(statuses.ec2_metrics).toBe('instantiating');
-    expect(statuses.s3_logs).toBe('instantiating');
+describe('buildInstanceStatuses', () => {
+  it('sets succeeded instance ids to "instantiating" by default', () => {
+    const statuses = buildInstanceStatuses(['inst-a', 'inst-b'], []);
+    expect(statuses['inst-a']).toBe('instantiating');
+    expect(statuses['inst-b']).toBe('instantiating');
   });
 
-  it('sets succeeded package services to the provided succeededState', () => {
-    const servicesByPackage = new Map([['aws', [makeService({ id: 'ec2_metrics' })]]]);
-    const statuses = buildServiceStatuses(['aws'], [], servicesByPackage, 'receiving');
-    expect(statuses.ec2_metrics).toBe('receiving');
+  it('sets succeeded instance ids to the provided succeededState', () => {
+    const statuses = buildInstanceStatuses(['inst-a'], [], 'receiving');
+    expect(statuses['inst-a']).toBe('receiving');
   });
 
-  it('sets failed package services to "error"', () => {
-    const servicesByPackage = new Map([
-      ['aws', [makeService({ id: 'ec2_metrics' }), makeService({ id: 's3_logs' })]],
-    ]);
-    const statuses = buildServiceStatuses(['aws'], ['aws'], servicesByPackage);
-    expect(statuses.ec2_metrics).toBe('error');
-    expect(statuses.s3_logs).toBe('error');
+  it('sets failed instance ids to "error"', () => {
+    const statuses = buildInstanceStatuses(['inst-a', 'inst-b'], ['inst-a', 'inst-b']);
+    expect(statuses['inst-a']).toBe('error');
+    expect(statuses['inst-b']).toBe('error');
   });
 
-  it('handles mixed succeeded and failed packages', () => {
-    const servicesByPackage = new Map([
-      ['aws', [makeService({ id: 'ec2_metrics' })]],
-      ['aws_bedrock', [makeService({ id: 'bedrock_logs', packageName: 'aws_bedrock' })]],
-    ]);
-    const statuses = buildServiceStatuses(
-      ['aws', 'aws_bedrock'],
-      ['aws_bedrock'],
-      servicesByPackage
-    );
-    expect(statuses.ec2_metrics).toBe('instantiating');
-    expect(statuses.bedrock_logs).toBe('error');
+  it('handles mixed succeeded and failed instances', () => {
+    const statuses = buildInstanceStatuses(['inst-a', 'inst-b'], ['inst-b']);
+    expect(statuses['inst-a']).toBe('instantiating');
+    expect(statuses['inst-b']).toBe('error');
   });
 
   it('returns empty object when targets is empty', () => {
-    const statuses = buildServiceStatuses([], [], new Map());
+    const statuses = buildInstanceStatuses([], []);
     expect(statuses).toEqual({});
   });
 });
@@ -348,6 +366,9 @@ function setupMocks({
   globalRegion = 'us-east-1',
   pkgVersion = '2.0.0',
   deployAndDetectStep = {} as Record<string, unknown>,
+  instances = undefined as
+    | Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>
+    | undefined,
 }: {
   selectedServiceIds?: string[];
   connectorId?: string;
@@ -355,6 +376,7 @@ function setupMocks({
   globalRegion?: string;
   pkgVersion?: string;
   deployAndDetectStep?: Record<string, unknown>;
+  instances?: Array<{ instanceId: string; serviceId: string; name: string; isDuplicate: boolean }>;
 } = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     servicesStep: { selectedServiceIds },
@@ -362,17 +384,17 @@ function setupMocks({
     deployAndDetectStep: {
       isDeploying: false,
       serviceStatuses: {},
-      policyIdsByPackage: {},
-      failedPackages: [],
+      policyIdsByInstance: {},
+      failedInstances: [],
       ...deployAndDetectStep,
     },
     updateDeployAndDetectStep: jest.fn(),
-    getLatestFailedPackages: jest.fn().mockReturnValue([]),
+    getLatestFailedInstances: jest.fn().mockReturnValue([]),
     registerDeployHandler: jest.fn(),
     retryDeploy: jest.fn(),
   });
 
-  mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {} }, jest.fn()]);
+  mockUseSessionStorage.mockReturnValue([{ globalRegion, serviceVars: {}, instances }, jest.fn()]);
 
   mockSendGetPackageInfoByKey.mockResolvedValue({
     data: {
@@ -401,7 +423,7 @@ describe('useDeploy', () => {
 
     expect(result.current.namespace).toBe('default');
     expect(result.current.isDeploying).toBe(false);
-    expect(result.current.failedPackages).toEqual([]);
+    expect(result.current.failedInstances).toEqual([]);
   });
 
   it('navigates immediately and completes API call on success', async () => {
@@ -427,7 +449,7 @@ describe('useDeploy', () => {
       await result.current.handleDeploy();
     });
 
-    expect(result.current.failedPackages).toContain('aws');
+    expect(result.current.failedInstances).toContain('ec2_metrics');
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
@@ -442,7 +464,7 @@ describe('useDeploy', () => {
     expect(result.current.isDeploying).toBe(false);
   });
 
-  it('retries only the specified failed packages without navigating again', async () => {
+  it('retries only the specified failed instances without navigating again', async () => {
     setupMocks({ selectedServiceIds: ['ec2_metrics'] });
     mockSendCreateAgentlessPolicy
       .mockRejectedValueOnce(new Error('first fail'))
@@ -453,13 +475,13 @@ describe('useDeploy', () => {
     await act(async () => {
       await result.current.handleDeploy();
     });
-    expect(result.current.failedPackages).toContain('aws');
+    expect(result.current.failedInstances).toContain('ec2_metrics');
     expect(onContinue).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      await result.current.handleDeploy(['aws']);
+      await result.current.handleDeploy(['ec2_metrics']);
     });
-    expect(result.current.failedPackages).toHaveLength(0);
+    expect(result.current.failedInstances).toHaveLength(0);
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
@@ -513,7 +535,7 @@ describe('useDeploy', () => {
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
-  it('adds to failedPackages when package version cannot be resolved', async () => {
+  it('adds to failedInstances when package version cannot be resolved', async () => {
     setupMocks({ selectedServiceIds: ['ec2_metrics'] });
     mockSendGetPackageInfoByKey.mockResolvedValue({ data: { item: { version: undefined } } });
     const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
@@ -522,10 +544,10 @@ describe('useDeploy', () => {
       await result.current.handleDeploy();
     });
 
-    expect(result.current.failedPackages).toContain('aws');
+    expect(result.current.failedInstances).toContain('ec2_metrics');
   });
 
-  it('navigates without resubmitting when all selected services are already deployed', async () => {
+  it('navigates without resubmitting when all selected instances are already deployed', async () => {
     setupMocks({
       selectedServiceIds: ['ec2_metrics'],
       deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
@@ -541,7 +563,7 @@ describe('useDeploy', () => {
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
-  it('navigates without resubmitting when deploy is in progress for all selected services', async () => {
+  it('navigates without resubmitting when deploy is in progress for all selected instances', async () => {
     setupMocks({
       selectedServiceIds: ['ec2_metrics'],
       deployAndDetectStep: { isDeploying: true, serviceStatuses: { ec2_metrics: 'instantiating' } },
@@ -557,8 +579,10 @@ describe('useDeploy', () => {
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
 
-  it('deploys newly selected services even when some are already deployed', async () => {
-    // ec2_metrics already deployed; lambda is a new selection in the same package
+  it('deploys only untracked instances — does not redeploy already-running ones', async () => {
+    // ec2_metrics is already deployed; lambda is a new selection.
+    // Both are in the 'aws' package and are normally bundled, but the bundle must be
+    // trimmed to only the untracked member (lambda) — ec2_metrics must not be re-included.
     setupMocks({
       selectedServiceIds: ['ec2_metrics', 'lambda'],
       deployAndDetectStep: { serviceStatuses: { ec2_metrics: 'instantiating' } },
@@ -570,17 +594,144 @@ describe('useDeploy', () => {
       await result.current.handleDeploy();
     });
 
+    // One API call for the trimmed bundle (lambda only)
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     expect(onContinue).toHaveBeenCalledTimes(1);
-
-    // Only lambda's input should be enabled — ec2_metrics was already deployed and must not
-    // appear as an enabled input (would create a duplicate policy for an already-running service).
-    const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs as Record<
-      string,
-      { enabled: boolean }
-    >;
-    expect(submittedInputs['lambda-aws/metrics']?.enabled).toBe(true);
+    // The already-running ec2_metrics must not appear enabled in the new call.
+    const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
     expect(submittedInputs['ec2-aws/metrics']?.enabled).not.toBe(true);
+    expect(submittedInputs['lambda-aws/metrics'].enabled).toBe(true);
+  });
+
+  it('deploys duplicate instances as separate agentless policy calls', async () => {
+    // Original goes into a bundled group (1 call); duplicate gets its own call (1 call).
+    // Total: 2 sendCreateAgentlessPolicy calls.
+    const instances = [
+      {
+        instanceId: 'ec2_metrics',
+        serviceId: 'ec2_metrics',
+        name: 'Amazon EC2 Metrics',
+        isDuplicate: false,
+      },
+      {
+        instanceId: 'ec2_metrics__dup-1',
+        serviceId: 'ec2_metrics',
+        name: 'Amazon EC2 Metrics [Duplicate]',
+        isDuplicate: true,
+      },
+    ];
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      instances,
+    });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // One API call per instance
+    expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not redeploy an already-running duplicate on a second Deploy click', async () => {
+    // Simulates navigating back to step 3 after a duplicate was already deployed.
+    // The duplicate's instanceId is already in serviceStatuses — it must not get a second policy.
+    const instances = [
+      {
+        instanceId: 'ec2_metrics',
+        serviceId: 'ec2_metrics',
+        name: 'Amazon EC2 Metrics',
+        isDuplicate: false,
+      },
+      {
+        instanceId: 'ec2_metrics__dup-1',
+        serviceId: 'ec2_metrics',
+        name: 'Amazon EC2 Metrics [Duplicate]',
+        isDuplicate: true,
+      },
+    ];
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      instances,
+      deployAndDetectStep: {
+        serviceStatuses: {
+          ec2_metrics: 'receiving',
+          'ec2_metrics__dup-1': 'receiving',
+        },
+      },
+    });
+    const onContinue = jest.fn();
+    const { result } = renderHook(() => useDeploy({ onContinue }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // Both already deployed — no new API calls, just navigate.
+    expect(mockSendCreateAgentlessPolicy).not.toHaveBeenCalled();
+    expect(onContinue).toHaveBeenCalledTimes(1);
+  });
+
+  it('deploys a newly-selected service even when persisted instances do not include it', async () => {
+    // Regression: user selects cloudtrail, configures it (persists instances = ['cloudtrail']),
+    // goes back to step 1, also selects ec2_metrics (no config required), then deploys.
+    // buildDeployGroups must reconcile the stale persisted list against selectedServiceIds so
+    // ec2_metrics is not silently dropped.
+    const instances = [
+      {
+        instanceId: 'cloudtrail',
+        serviceId: 'cloudtrail',
+        name: 'AWS CloudTrail',
+        isDuplicate: false,
+      },
+    ];
+    setupMocks({
+      selectedServiceIds: ['cloudtrail', 'ec2_metrics'],
+      instances,
+    });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // Both services are in the same package — one bundled call covering both.
+    expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
+    const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
+    // ec2_metrics must appear in the call — it must not be silently dropped.
+    expect(submittedInputs['ec2-aws/metrics'].enabled).toBe(true);
+  });
+
+  it('does not deploy a deselected service even when it is still in persisted instances', async () => {
+    // Regression variant: user had cloudtrail selected (persisted), deselects it, selects only
+    // ec2_metrics. buildDeployGroups must drop cloudtrail from the resolved list.
+    const instances = [
+      {
+        instanceId: 'cloudtrail',
+        serviceId: 'cloudtrail',
+        name: 'AWS CloudTrail',
+        isDuplicate: false,
+      },
+    ];
+    setupMocks({
+      selectedServiceIds: ['ec2_metrics'],
+      instances,
+    });
+    const { result } = renderHook(() => useDeploy({ onContinue: jest.fn() }));
+
+    await act(async () => {
+      await result.current.handleDeploy();
+    });
+
+    // One call — only ec2_metrics; cloudtrail must not appear.
+    expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
+    const submittedInputs = mockSendCreateAgentlessPolicy.mock.calls[0][0].inputs;
+    expect(submittedInputs['ec2-aws/metrics'].enabled).toBe(true);
+    // cloudtrail input must not be included (if it were, it would appear as 'cloudtrail-aws-s3'
+    // or similar and would fire a separate call or appear enabled in the single call).
+    const hasCloudtrailInput = Object.keys(submittedInputs).some((k) => k.startsWith('cloudtrail'));
+    expect(hasCloudtrailInput).toBe(false);
   });
 
   it('includes non-agentless services as gray instantiating chips without deploying them', async () => {
@@ -600,7 +751,7 @@ describe('useDeploy', () => {
     // Both services appear in the initial status update
     expect(initialUpdate.serviceStatuses.ec2_metrics).toBe('instantiating');
     expect(initialUpdate.serviceStatuses.ec2_logs).toBe('instantiating');
-    // Agentless API only called once (for the aws package containing ec2_metrics)
+    // Agentless API only called once (for ec2_metrics; ec2_logs is non-agentless)
     expect(mockSendCreateAgentlessPolicy).toHaveBeenCalledTimes(1);
     expect(onContinue).toHaveBeenCalledTimes(1);
   });
