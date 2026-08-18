@@ -150,8 +150,18 @@ export class RebalancePrivateLocationShardsTask {
 
   async start() {
     const {
+      config,
       pluginsStart: { taskManager },
     } = this.serverSetup;
+
+    if (!config.rebalancePrivateLocationShardsTaskEnabled) {
+      // Actively unschedule a previously-scheduled instance (not just skip
+      // scheduling), so flipping the kill-switch off stops the task firing
+      // instead of leaving a zombie that keeps running every cycle.
+      this.debugLog('Rebalance private location shards task disabled by config; unscheduling');
+      await taskManager.removeIfExists(REBALANCE_SHARDS_TASK_ID);
+      return;
+    }
 
     // Read the existing task schedule so ensureScheduled doesn't reset a
     // user-configured interval on every Kibana restart. Falls back to
