@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { css } from '@emotion/react';
 // @ts-expect-error untyped local
@@ -19,7 +19,11 @@ export interface Props {
   initializeWorkpad: () => void;
 }
 
-export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWorkpad }) => {
+export const ExportApp: CanvasFunctionComponent<Props> = ({
+  workpad,
+  selectedPageIndex,
+  initializeWorkpad,
+}) => {
   const { id, pages, height, width } = workpad;
   const activePage = pages[selectedPageIndex];
   const pageElementCount = activePage.elements.length;
@@ -55,7 +59,6 @@ export const ExportApp: FC<Props> = ({ workpad, selectedPageIndex, initializeWor
 };
 
 ExportApp.propTypes = {
-  // @ts-expect-error upgrade typescript v5.9.3
   workpad: PropTypes.shape({
     id: PropTypes.string.isRequired,
     pages: PropTypes.array.isRequired,

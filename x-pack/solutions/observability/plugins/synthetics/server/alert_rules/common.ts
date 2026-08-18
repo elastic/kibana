@@ -43,7 +43,10 @@ import {
   SyntheticsCommonStateCodec,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
-import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
+import {
+  getSyntheticsErrorRouteFromMonitorId,
+  getSyntheticsCertificatesRoute,
+} from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';
 
@@ -136,6 +139,8 @@ export const getRelativeViewInAppUrl = ({
     locationId,
   });
 };
+
+export const getRelativeCertificatesViewInAppUrl = () => getSyntheticsCertificatesRoute();
 
 export const setRecoveredAlertsContext = ({
   alertsClient,
