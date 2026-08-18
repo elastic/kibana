@@ -82,6 +82,7 @@ export {
   extractBucketTargetField,
   extractStatsGroupColumns,
   extractWhereExpression,
+  findOverBroadMatchPredicates,
   getFromSources,
   getStatsQueryHints,
   hasStatsCommand,

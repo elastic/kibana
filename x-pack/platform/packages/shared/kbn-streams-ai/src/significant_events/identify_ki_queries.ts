@@ -10,6 +10,7 @@ import type { QueryType } from '@kbn/significant-events-schema';
 import type { Feature, QueryFeature } from '@kbn/significant-events-schema';
 import {
   deriveQueryType,
+  findOverBroadMatchPredicates,
   getSourcesForStream,
   getStatsQueryHints,
   normalizeEsqlSafe,
@@ -440,6 +441,23 @@ export async function identifyKIQueries({
                     exactDuplicate,
                     error: 'This query already exists for this stream.',
                     hints: undefined,
+                  };
+                }
+
+                // Static over-match: reject before the data probe and force a rewrite.
+                const overBroadPredicates = findOverBroadMatchPredicates(rewritten);
+                if (overBroadPredicates.length > 0) {
+                  hasNonIntentFailures = true;
+                  const rendered = overBroadPredicates
+                    .map((p) => `${p.field} ${p.operator} "${p.value}"`)
+                    .join(', ');
+                  return {
+                    query,
+                    valid: false,
+                    status: 'Failed to add' as const,
+                    failureReason: 'validation_error' as const,
+                    exactDuplicate,
+                    error: `Full-text predicate(s) match ANY word rather than the whole value - a multi-word \`:\` or \`MATCH\` value is ORed term-by-term, which is far too broad: ${rendered}. Rewrite each as all-terms-required (field:"a" AND field:"b") or, when word order is semantic, MATCH_PHRASE(field, "a b").`,
                   };
                 }
 

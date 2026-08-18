@@ -556,6 +556,65 @@ export function getStatsQueryHints(esql: string): string[] {
   return hints;
 }
 
+export interface OverBroadMatchPredicate {
+  field: string;
+  value: string;
+  operator: ':' | 'MATCH';
+}
+
+function getUnquotedLiteral(node: ESQLAstItem | undefined): string | null {
+  if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'literal') return null;
+  const { valueUnquoted } = node as { valueUnquoted?: unknown };
+  return typeof valueUnquoted === 'string' ? valueUnquoted : null;
+}
+
+function matchOptionsForceAndOperator(node: ESQLAstItem | undefined): boolean {
+  if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'map') return false;
+  const { entries } = node as {
+    entries?: Array<{ key?: { valueUnquoted?: unknown }; value?: { valueUnquoted?: unknown } }>;
+  };
+  if (!Array.isArray(entries)) return false;
+  return entries.some(
+    (entry) =>
+      typeof entry.key?.valueUnquoted === 'string' &&
+      entry.key.valueUnquoted.toLowerCase() === 'operator' &&
+      typeof entry.value?.valueUnquoted === 'string' &&
+      entry.value.valueUnquoted.toLowerCase() === 'and'
+  );
+}
+
+function getColumnName(node: ESQLAstItem | undefined): string {
+  if (!node || Array.isArray(node) || !('type' in node) || node.type !== 'column') return '<field>';
+  const { name } = node as { name?: unknown };
+  return typeof name === 'string' ? name : '<field>';
+}
+
+/**
+ * Finds `:` / `MATCH` predicates whose multi-word value the operator ORs term-by-term
+ * (a static over-match); `MATCH_PHRASE` and `MATCH(..., {"operator":"AND"})` are exempt.
+ */
+export function findOverBroadMatchPredicates(esql: string): OverBroadMatchPredicate[] {
+  const { root, parsed } = tryParseEsql(esql);
+  if (!parsed) return [];
+
+  const issues: OverBroadMatchPredicate[] = [];
+  walk(root, {
+    visitFunction: (fn) => {
+      const isColon = fn.name === ':' && fn.subtype === 'binary-expression';
+      const isMatch = fn.name === 'match' && fn.subtype === 'variadic-call';
+      if (!isColon && !isMatch) return;
+
+      const value = getUnquotedLiteral(fn.args[1]);
+      if (value === null) return;
+      if (isMatch && matchOptionsForceAndOperator(fn.args[2])) return;
+      if (!/\s/.test(value.trim())) return;
+
+      issues.push({ field: getColumnName(fn.args[0]), value, operator: isColon ? ':' : 'MATCH' });
+    },
+  });
+  return issues;
+}
+
 type ByArg = ESQLCommand['args'][number];
 
 function findStatsByArgs(esql: string): ByArg[] | null {
