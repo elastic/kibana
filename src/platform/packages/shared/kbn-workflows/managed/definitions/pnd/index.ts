@@ -52,7 +52,7 @@ export const PND_WATCH_FLOOR_WORKFLOW = {
   id: PND_WATCH_FLOOR_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 5,
+  version: 6,
   visibility: VISIBILITY,
   yaml: WATCH_FLOOR_YAML,
 } as const satisfies ManagedWorkflowDefinition;

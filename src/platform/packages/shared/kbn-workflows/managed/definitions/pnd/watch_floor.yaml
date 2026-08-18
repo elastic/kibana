@@ -15,7 +15,7 @@ triggers:
   # only the AD worker (step routing below keys off execution.triggeredBy).
   - type: scheduled
     with:
-      every: "15m"
+      every: "1m"
 consts:
   watch_policy:
     mandate: Frontline triage
