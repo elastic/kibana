@@ -28,10 +28,9 @@ const getResilienceTaskId = (namespace: string): string => `${config.type}:${nam
 async function runTask({
   taskInstance,
   fakeRequest,
-  signal,
   logger,
   core,
-}: Pick<RunContext, 'taskInstance' | 'fakeRequest' | 'signal'> & {
+}: Pick<RunContext, 'taskInstance' | 'fakeRequest'> & {
   logger: Logger;
   core: EntityStoreCoreSetup;
 }): Promise<RunResult> {
@@ -81,7 +80,7 @@ export function registerResilienceTask({
         title: config.title,
         timeout: config.timeout,
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance, fakeRequest, signal }: RunContext) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest }: RunContext) => ({
           run: () =>
             wrapTaskRun({
               spanName: 'entityStore.task.resilience.run',
@@ -93,7 +92,6 @@ export function registerResilienceTask({
                 runTask({
                   taskInstance,
                   fakeRequest,
-                  signal,
                   logger: logger.get(taskInstance.id),
                   core,
                 }),
