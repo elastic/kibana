@@ -412,6 +412,7 @@ describe('DetectionsList', () => {
       expect(showMore).toHaveAttribute('aria-expanded', 'false');
       expect(showMore).toHaveAttribute('data-ebt-action', 'expandDetections');
       expect(showMore).toHaveAttribute('data-ebt-element', 'nightshiftEventFlyoutDetections');
+      expect(showMore.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
 
       fireEvent.click(showMore);
 
@@ -419,6 +420,7 @@ describe('DetectionsList', () => {
       expect(showLess).toHaveAttribute('aria-expanded', 'true');
       expect(showLess).toHaveAttribute('data-ebt-action', 'collapseDetections');
       expect(showLess).toHaveAttribute('data-ebt-element', 'nightshiftEventFlyoutDetections');
+      expect(showLess.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
     });
 
     it('keeps the selected detection visible when it sits past the cap', () => {

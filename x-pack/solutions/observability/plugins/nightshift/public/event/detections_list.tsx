@@ -338,6 +338,8 @@ function DetectionsOverflowToggle({
       aria-expanded={isExpanded}
       data-test-subj={isExpanded ? 'nightshiftDetectionsShowLess' : 'nightshiftDetectionsShowMore'}
       flush="left"
+      iconSide="right"
+      iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
       onClick={onToggle}
       size="xs"
       {...getEbtProps({
