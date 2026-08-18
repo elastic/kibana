@@ -40,6 +40,11 @@ export interface IdentifyComputedFeaturesOptions {
   telemetry?: EbtTelemetryClient;
 }
 
+export interface IdentifyComputedFeaturesResult {
+  features: FeatureUpsert[];
+  errors: Array<{ feature: string; error: string }>;
+}
+
 export async function identifyComputedFeatures({
   stream,
   streamName,
@@ -52,7 +57,7 @@ export async function identifyComputedFeatures({
   agentBuilderTools,
   request,
   telemetry,
-}: IdentifyComputedFeaturesOptions): Promise<FeatureUpsert[]> {
+}: IdentifyComputedFeaturesOptions): Promise<IdentifyComputedFeaturesResult> {
   const providers: Record<string, ComputedFeatureProvider> | undefined =
     agentBuilderTools && request
       ? {
@@ -74,7 +79,7 @@ export async function identifyComputedFeatures({
         }
       : undefined;
 
-  const computedFeatures = await generateAllComputedFeatures({
+  const { features: computedFeatures, errors } = await generateAllComputedFeatures({
     stream,
     start,
     end,
@@ -99,5 +104,5 @@ export async function identifyComputedFeatures({
     );
   }
 
-  return reconciledComputedFeatures;
+  return { features: reconciledComputedFeatures, errors };
 }

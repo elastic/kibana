@@ -46,6 +46,13 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 > => ({
   id: 'custom_content_update_panel',
   type: ToolType.builtin,
+  annotations: {
+    title: 'Update Custom Content Panel',
+    readOnlyHint: false,
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+  },
   tags: ['custom_content'],
   description: `Update the custom content panel's template and/or ES|QL query. Write the full HTML template yourself using LiquidJS — no server-side generation happens here.
 

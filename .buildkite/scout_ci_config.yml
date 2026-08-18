@@ -60,6 +60,7 @@ plugins:
     - monitoring
     - navigation
     - nightshift
+    - notification_center
     - observability
     - observability_onboarding
     - osquery
