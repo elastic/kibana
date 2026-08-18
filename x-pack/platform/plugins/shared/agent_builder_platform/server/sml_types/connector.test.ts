@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { SmlListItem } from '@kbn/agent-builder-sml-plugin/server';
 import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { CONNECTOR_SML_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
+import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { createConnectorSmlType } from './connector';
 
 jest.mock('@kbn/connector-specs', () => ({
@@ -66,7 +66,7 @@ describe('connectorSmlType', () => {
 
   describe('id', () => {
     it('equals CONNECTOR_SML_TYPE', () => {
-      expect(connectorSmlType.id).toBe(CONNECTOR_SML_TYPE);
+      expect(connectorSmlType.id).toBe(CONNECTOR_KI_TYPE);
     });
   });
 
