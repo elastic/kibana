@@ -108,12 +108,12 @@ export const hardCases: RuleCreationExample[] = [
 | WHERE host.os.type == "linux"
   AND event.type == "start"
   AND process.name IN ("kubectl", "docker")
-  AND process.command_line LIKE "%run%"
+  AND process.command_line LIKE "*run*"
   AND (
-    process.command_line LIKE "%bash%"
-    OR process.command_line LIKE "%sh -c%"
-    OR process.command_line LIKE "%wget%"
-    OR process.command_line LIKE "%curl%"
+    process.command_line LIKE "*bash*"
+    OR process.command_line LIKE "*sh -c*"
+    OR process.command_line LIKE "*wget*"
+    OR process.command_line LIKE "*curl*"
   )
 | STATS run_count = COUNT(*) BY host.name, user.name, process.command_line`,
     },
