@@ -102,7 +102,15 @@ const GroupSelectorComponent = ({
         ),
       },
     ];
-  }, [allowedFieldTypes, fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]);
+  }, [
+    allowedFieldTypes,
+    fields,
+    groupsSelected.length,
+    isGroupSelected,
+    maxGroupingLevels,
+    onGroupChange,
+    options,
+  ]);
   const selectedOptions = useMemo(
     () => options.filter((groupOption) => isGroupSelected(groupOption.key)),
     [isGroupSelected, options]

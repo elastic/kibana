@@ -42,11 +42,7 @@ export interface UseGetGroupSelectorArgs {
 interface UseGetGroupSelectorStateless
   extends Pick<
     UseGetGroupSelectorArgs,
-    | 'allowedFieldTypes'
-    | 'defaultGroupingOptions'
-    | 'groupingId'
-    | 'fields'
-    | 'maxGroupingLevels'
+    'allowedFieldTypes' | 'defaultGroupingOptions' | 'groupingId' | 'fields' | 'maxGroupingLevels'
   > {
   onGroupChange: (selectedGroups: string[]) => void;
 }
@@ -225,5 +221,14 @@ export const useGetGroupSelector = ({
         }}
       />
     );
-  }, [allowedFieldTypes, groupingId, fields, maxGroupingLevels, onChange, selectedGroups, options, title]);
+  }, [
+    allowedFieldTypes,
+    groupingId,
+    fields,
+    maxGroupingLevels,
+    onChange,
+    selectedGroups,
+    options,
+    title,
+  ]);
 };
