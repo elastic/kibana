@@ -49,7 +49,7 @@ export const BULK_QUERY_SAMPLE_SIZE = 100;
 /** Maximum length for an Elasticsearch field name (e.g. `host.name`, `service.environment`). */
 export const MAX_FIELD_NAME_LENGTH = 256;
 
-/** Maximum number of fields used to group alerts (rule grouping, action policy groupBy). */
+/** Maximum number of fields used to group alerts (rule grouping, action policy group_by). */
 export const MAX_GROUPING_FIELDS = 16;
 
 /** Maximum number of items processed in a single bulk-action request body. */
@@ -90,7 +90,7 @@ export const VERSION_MAX_LENGTH = 256;
 /** Maximum number of execution-history events returned per page (rule + action policy streams). */
 export const EXECUTION_HISTORY_MAX_PER_PAGE = 100;
 
-/** Default number of execution-history events returned per page when `perPage` is omitted. */
+/** Default number of execution-history events returned per page when `per_page` is omitted. */
 export const EXECUTION_HISTORY_DEFAULT_PER_PAGE = 20;
 
 /**
@@ -103,6 +103,9 @@ export const EXECUTION_HISTORY_MAX_RESULT_WINDOW = 10_000;
  * filter.
  */
 export const EXECUTION_HISTORY_MAX_RULE_ID_FILTER = 50;
+
+/** Maximum number of rule templates returned per page. */
+export const RULE_TEMPLATE_MAX_PER_PAGE = 100;
 
 /**
  * Maximum length of the `episode_data` JSON string snapshotted into an episode
