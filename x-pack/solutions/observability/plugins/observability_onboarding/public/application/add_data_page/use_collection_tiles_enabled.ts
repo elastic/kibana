@@ -21,5 +21,11 @@ export const useCollectionTilesEnabled = (): boolean => {
     services: { fleet },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
-  return fleet?.config?.enableExperimental?.includes(COLLECTION_TILES_FLAG) ?? false;
+  const { enableExperimental, experimentalFeatures } = fleet?.config ?? {};
+  const fromObject = experimentalFeatures?.[COLLECTION_TILES_FLAG];
+  if (typeof fromObject === 'boolean') {
+    return fromObject;
+  }
+
+  return enableExperimental?.includes(COLLECTION_TILES_FLAG) ?? false;
 };

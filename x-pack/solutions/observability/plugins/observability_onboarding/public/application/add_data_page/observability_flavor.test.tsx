@@ -26,6 +26,7 @@ const mockUseAvailablePackages = jest.fn();
 jest.mock('@kbn/fleet-plugin/public', () => ({
   LocalSearchHook: () => Promise.resolve({ useLocalSearch: jest.fn() }),
   AvailablePackagesHook: () => Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
+  useGetSettingsQuery: () => ({ data: undefined }),
 }));
 
 const makeCollectionCard = (groupId: string, memberCount: number) => ({

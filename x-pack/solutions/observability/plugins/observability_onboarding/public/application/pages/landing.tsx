@@ -9,6 +9,7 @@ import { EuiHorizontalRule, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
@@ -33,23 +34,25 @@ const ObservabilityDocsLinksSection = () => {
 const AddDataPageV2 = () => {
   const [searchValue, setSearchValue] = useAddDataSearchUrlSync();
   const searchTerm = searchValue.trim();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
+  const history = useHistory();
   // The url is the only record of which chooser is open, so it survives a refresh
   // and a return from a member's detail page with nothing to fall out of step.
   const openCollection = searchParams.get('collection') ?? undefined;
 
   const setCollectionParam = useCallback(
     (groupId?: string) => {
-      if ((searchParams.get('collection') ?? undefined) === groupId) return;
-      const next = new URLSearchParams(searchParams);
+      const { pathname, search } = history.location;
+      const next = new URLSearchParams(search);
+      if ((next.get('collection') ?? undefined) === groupId) return;
       if (groupId) {
         next.set('collection', groupId);
       } else {
         next.delete('collection');
       }
-      setSearchParams(next, { replace: true });
+      history.replace({ pathname, search: next.toString() });
     },
-    [searchParams, setSearchParams]
+    [history]
   );
 
   const closeCollection = useCallback(() => setCollectionParam(undefined), [setCollectionParam]);

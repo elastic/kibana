@@ -15,16 +15,22 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useLocation } from 'react-router-dom';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   AvailablePackagesHookType,
   IntegrationCardItem,
   UseLocalSearchType,
 } from '@kbn/fleet-plugin/public';
+import type { ObservabilityOnboardingAppServices } from '../..';
+
+type UseGetSettingsQueryType = typeof import('@kbn/fleet-plugin/public')['useGetSettingsQuery'];
 
 interface FleetHooks {
   useAvailablePackages: AvailablePackagesHookType;
   useLocalSearch: UseLocalSearchType;
+  useGetSettingsQuery: UseGetSettingsQueryType;
 }
 
 const fetchFleetHooks = (): Promise<FleetHooks> =>
@@ -33,6 +39,7 @@ const fetchFleetHooks = (): Promise<FleetHooks> =>
       ([availablePackages, localSearch]) => ({
         useAvailablePackages: availablePackages.useAvailablePackages,
         useLocalSearch: localSearch.useLocalSearch,
+        useGetSettingsQuery: module.useGetSettingsQuery,
       })
     )
   );
@@ -69,15 +76,23 @@ export const useFleetCards = (): FleetCardsValue => useContext(FleetCardsContext
 const PackagesPump = memo(
   ({
     fleetHooks,
+    canReadSettings,
+    prereleaseQueryParam,
     onSnapshot,
   }: {
     fleetHooks: FleetHooks;
+    canReadSettings: boolean;
+    prereleaseQueryParam: boolean;
     onSnapshot: (snapshot: PackagesSnapshot) => void;
   }) => {
+    const { data: settings } = fleetHooks.useGetSettingsQuery({ enabled: canReadSettings });
+    const prereleaseIntegrationsEnabled =
+      prereleaseQueryParam || (settings?.item.prerelease_integrations_enabled ?? false);
+
     // `allCards`, not `filteredCards`: the latter is pre-filtered by Fleet's own
     // router-derived category state, which is wrong outside the onboarding route.
     const { allCards, isLoading, eprPackageLoadingError } = fleetHooks.useAvailablePackages({
-      prereleaseIntegrationsEnabled: true,
+      prereleaseIntegrationsEnabled,
     });
 
     useEffect(() => {
@@ -103,6 +118,12 @@ export const FleetCardsProvider = ({
 }) => {
   const hooksRef = useRef<FleetHooks | null>(null);
   const [packages, setPackages] = useState<PackagesSnapshot | null>(null);
+  const { search } = useLocation();
+  const {
+    services: { fleet },
+  } = useKibana<ObservabilityOnboardingAppServices>();
+  const prereleaseQueryParam = new URLSearchParams(search).get('prerelease') === 'true';
+  const canReadSettings = fleet?.authz.fleet.readSettings ?? false;
 
   const {
     error: errorLoading,
@@ -140,7 +161,14 @@ export const FleetCardsProvider = ({
 
   return (
     <FleetCardsContext.Provider value={value}>
-      {fleetHooks && <PackagesPump fleetHooks={fleetHooks} onSnapshot={setPackages} />}
+      {fleetHooks && (
+        <PackagesPump
+          fleetHooks={fleetHooks}
+          canReadSettings={canReadSettings}
+          prereleaseQueryParam={prereleaseQueryParam}
+          onSnapshot={setPackages}
+        />
+      )}
       {children}
     </FleetCardsContext.Provider>
   );

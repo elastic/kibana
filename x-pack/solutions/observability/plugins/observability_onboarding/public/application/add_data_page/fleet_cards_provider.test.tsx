@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render, screen, waitFor } from '@testing-library/react';
 import React, { useEffect } from 'react';
+import { MemoryRouter } from 'react-router-dom';
+import type { ObservabilityOnboardingAppServices } from '../..';
 import { FleetCardsProvider, useFleetCards } from './fleet_cards_provider';
 
 const mockUseAvailablePackages = jest.fn();
 const mockAvailablePackagesHook = jest.fn();
+const mockUseGetSettingsQuery = jest.fn();
 
 // Both hooks are stubbed rather than pulled from the real module: requiring it
 // executes Fleet's whole public bundle, which costs more than Jest's timeout on a
@@ -18,6 +22,7 @@ const mockAvailablePackagesHook = jest.fn();
 jest.mock('@kbn/fleet-plugin/public', () => ({
   LocalSearchHook: () => Promise.resolve({ useLocalSearch: jest.fn() }),
   AvailablePackagesHook: () => mockAvailablePackagesHook(),
+  useGetSettingsQuery: (options: { enabled?: boolean }) => mockUseGetSettingsQuery(options),
 }));
 
 const redisCard = {
@@ -44,12 +49,33 @@ const Consumer = () => {
   return <div data-test-subj="consumerCardCount">{allCards.length}</div>;
 };
 
-const renderProvider = (enabled = true) =>
-  render(
-    <FleetCardsProvider enabled={enabled}>
-      <Consumer />
-    </FleetCardsProvider>
-  );
+interface WrapOptions {
+  path?: string;
+  canReadSettings?: boolean;
+}
+
+const fleetService = (canReadSettings: boolean) =>
+  ({ authz: { fleet: { readSettings: canReadSettings } } } as unknown as NonNullable<
+    ObservabilityOnboardingAppServices['fleet']
+  >);
+
+const wrap = (ui: React.ReactNode, { path = '/', canReadSettings = true }: WrapOptions = {}) => (
+  <KibanaContextProvider services={{ fleet: fleetService(canReadSettings) }}>
+    <MemoryRouter initialEntries={[path]}>{ui}</MemoryRouter>
+  </KibanaContextProvider>
+);
+
+const providerTree = (enabled: boolean) => (
+  <FleetCardsProvider enabled={enabled}>
+    <Consumer />
+  </FleetCardsProvider>
+);
+
+const renderProvider = (enabled = true, options: WrapOptions = {}) =>
+  render(wrap(providerTree(enabled), options));
+
+const prereleaseFlagOf = (call: unknown[]) =>
+  (call[0] as { prereleaseIntegrationsEnabled: boolean }).prereleaseIntegrationsEnabled;
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -59,6 +85,7 @@ beforeEach(() => {
     eprPackageLoadingError: undefined,
     allCards: [redisCard],
   });
+  mockUseGetSettingsQuery.mockReturnValue({ data: undefined });
 });
 
 describe('FleetCardsProvider', () => {
@@ -95,22 +122,57 @@ describe('FleetCardsProvider', () => {
   // A page with no search and no grouping flag has nothing to show for the
   // packages, so it should not reach the registry at all.
   it('loads nothing while disabled, then loads once enabled', async () => {
-    const { rerender } = render(
-      <FleetCardsProvider enabled={false}>
-        <Consumer />
-      </FleetCardsProvider>
-    );
+    const { rerender } = render(wrap(providerTree(false)));
 
     expect(await screen.findByText('0')).toBeInTheDocument();
     expect(mockAvailablePackagesHook).not.toHaveBeenCalled();
 
-    rerender(
-      <FleetCardsProvider enabled={true}>
-        <Consumer />
-      </FleetCardsProvider>
-    );
+    rerender(wrap(providerTree(true)));
 
     expect(await screen.findByText('1')).toBeInTheDocument();
     expect(mockAvailablePackagesHook).toHaveBeenCalled();
+  });
+});
+
+// Fleet dropped its beta toggle, so the catalog is GA only unless the url or the
+// Fleet settings opt in. Asking for prerelease regardless would hand the grid
+// packages the catalog itself will not show.
+describe('FleetCardsProvider prerelease packages', () => {
+  it('asks for GA packages only by default', async () => {
+    renderProvider();
+
+    await screen.findByText('1');
+    expect(prereleaseFlagOf(mockUseAvailablePackages.mock.calls[0])).toBe(false);
+  });
+
+  it('asks for prerelease packages once the Fleet settings opt in', async () => {
+    mockUseGetSettingsQuery.mockReturnValue({
+      data: { item: { prerelease_integrations_enabled: true } },
+    });
+    renderProvider();
+
+    await screen.findByText('1');
+    expect(prereleaseFlagOf(mockUseAvailablePackages.mock.calls[0])).toBe(true);
+  });
+
+  it('asks for prerelease packages when the url opts in', async () => {
+    renderProvider(true, { path: '/?prerelease=true' });
+
+    await screen.findByText('1');
+    expect(prereleaseFlagOf(mockUseAvailablePackages.mock.calls[0])).toBe(true);
+  });
+
+  it('leaves the settings query disabled without the read privilege', async () => {
+    renderProvider(true, { canReadSettings: false });
+
+    await screen.findByText('1');
+    expect(mockUseGetSettingsQuery).toHaveBeenCalledWith({ enabled: false });
+  });
+
+  it('enables the settings query with the read privilege', async () => {
+    renderProvider();
+
+    await screen.findByText('1');
+    expect(mockUseGetSettingsQuery).toHaveBeenCalledWith({ enabled: true });
   });
 });

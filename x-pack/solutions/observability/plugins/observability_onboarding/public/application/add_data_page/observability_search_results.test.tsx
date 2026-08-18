@@ -25,6 +25,7 @@ jest.mock('@kbn/fleet-plugin/public', () => {
   return {
     LocalSearchHook,
     AvailablePackagesHook: () => mockAvailablePackagesHook(),
+    useGetSettingsQuery: () => ({ data: undefined }),
     CardIcon: () => ReactActual.createElement('span', { 'data-test-subj': 'resultCardIconStub' }),
   };
 });

@@ -50,22 +50,27 @@ jest.mock('../shared/use_managed_otlp_service_availability', () => ({
   useManagedOtlpServiceAvailability: () => false,
 }));
 
+const mockOpenCollectionCallbacks: Array<(groupId: string) => void> = [];
+
 jest.mock('../add_data_page/observability_search_results', () => ({
   ObservabilitySearchResults: ({
     onOpenCollection,
   }: {
     onOpenCollection: (groupId: string) => void;
-  }) => (
-    <div data-test-subj="observabilitySearchResultsStub">
-      <button
-        type="button"
-        data-test-subj="stubOpenCollection"
-        onClick={() => onOpenCollection('nginx')}
-      >
-        open chooser
-      </button>
-    </div>
-  ),
+  }) => {
+    mockOpenCollectionCallbacks.push(onOpenCollection);
+    return (
+      <div data-test-subj="observabilitySearchResultsStub">
+        <button
+          type="button"
+          data-test-subj="stubOpenCollection"
+          onClick={() => onOpenCollection('nginx')}
+        >
+          open chooser
+        </button>
+      </div>
+    );
+  },
 }));
 
 // Only Fleet's data hook and icon renderer are stubbed; the provider's module load
@@ -78,6 +83,7 @@ jest.mock('@kbn/fleet-plugin/public', () => {
     ...actual,
     AvailablePackagesHook: () =>
       Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
+    useGetSettingsQuery: () => ({ data: undefined }),
     CardIcon: () => ReactActual.createElement('span', { 'data-test-subj': 'variantRowIconStub' }),
   };
 });
@@ -121,6 +127,7 @@ const memberHrefs = () =>
     .map((row) => row.querySelector('a')?.getAttribute('href') ?? '');
 
 beforeEach(() => {
+  mockOpenCollectionCallbacks.length = 0;
   // Call counts are assertions here, not just plumbing: one test asserts the page
   // never asks for packages.
   mockUseAvailablePackages.mockClear();
@@ -195,6 +202,7 @@ const createPackagesFeed = (initialCards: unknown[]) => {
 const fleetServiceWithGrouping = (enabled: boolean) =>
   ({
     config: { enableExperimental: enabled ? ['enableIntegrationCollectionTiles'] : [] },
+    authz: { fleet: { readSettings: true } },
   } as unknown as NonNullable<ObservabilityOnboardingAppServices['fleet']>);
 
 const createObservabilityServices = (
@@ -476,6 +484,25 @@ describe('LandingPage collection chooser (V2)', () => {
     ]);
 
     await waitFor(() => expect(screen.getAllByTestId(/^collectionVariantRow-/)).toHaveLength(3));
+  });
+
+  // Every curated tile is rebuilt whenever this callback changes identity, so it
+  // has to outlive the url updates that typing produces.
+  it('keeps the open-chooser callback stable while the search term changes', async () => {
+    const user = userEvent.setup();
+    renderLandingAtPathWithSearch('/?search=nginx');
+    await screen.findByTestId('observabilitySearchResultsStub');
+    const [firstCallback] = mockOpenCollectionCallbacks;
+
+    await user.type(
+      screen.getByTestId('observabilityOnboardingIntegrationsSearchFieldSearch'),
+      'x'
+    );
+
+    await waitFor(() =>
+      expect(screen.getByTestId('locationSearch')).toHaveTextContent('search=nginxx')
+    );
+    expect(mockOpenCollectionCallbacks.at(-1)).toBe(firstCallback);
   });
 
   // The grid stays visible during a search, so a tile can be clicked with one running.
