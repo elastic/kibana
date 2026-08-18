@@ -2006,6 +2006,73 @@ describe('client', () => {
         // The configuration must never be persisted without its linked definitions.
         expect(clientArgs.services.caseConfigureService.post).not.toHaveBeenCalled();
       });
+
+      it('leaves an existing configuration untouched when the linked-definition ensure fails (no delete-before-validate)', async () => {
+        // REGRESSION (the bug this guards): create used to delete the existing configuration
+        // BEFORE running the fatal ensureGlobalFieldDefinitions check. A definition-cap,
+        // malformed-link, or definition-write failure then left the caller with no
+        // configuration at all.
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [
+            { id: 'existing-config-id', attributes: { owner: 'securitySolutionFixture' } },
+          ],
+        } as never);
+        clientArgs.services.fieldDefinitionsService.createFieldDefinition.mockRejectedValueOnce(
+          new Error('definition limit reached')
+        );
+
+        await expect(
+          create(
+            {
+              ...baseRequest,
+              customFields: [
+                { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+              ],
+            },
+            clientArgs,
+            casesClientInternal
+          )
+        ).rejects.toThrow('definition limit reached');
+
+        // The pre-existing configuration must survive the failed replacement.
+        expect(clientArgs.services.caseConfigureService.delete).not.toHaveBeenCalled();
+        expect(clientArgs.services.caseConfigureService.post).not.toHaveBeenCalled();
+      });
+
+      it('replaces an existing configuration only after the linked-definition ensure succeeds (ensure → delete → post)', async () => {
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.caseConfigureService.find.mockResolvedValue({
+          saved_objects: [
+            { id: 'existing-config-id', attributes: { owner: 'securitySolutionFixture' } },
+          ],
+        } as never);
+
+        await create(
+          {
+            ...baseRequest,
+            customFields: [
+              { key: 'my_text', label: 'My Text', type: CustomFieldTypes.TEXT, required: false },
+            ],
+          },
+          clientArgs,
+          casesClientInternal
+        );
+
+        // Successful replacement still deletes the old configuration and posts the new one…
+        expect(clientArgs.services.caseConfigureService.delete).toHaveBeenCalledWith(
+          expect.objectContaining({ configurationId: 'existing-config-id' })
+        );
+        expect(clientArgs.services.caseConfigureService.post).toHaveBeenCalled();
+
+        // …and the ensure ran strictly before the destructive delete.
+        const ensureOrder =
+          clientArgs.services.fieldDefinitionsService.createFieldDefinition.mock
+            .invocationCallOrder[0];
+        const deleteOrder =
+          clientArgs.services.caseConfigureService.delete.mock.invocationCallOrder[0];
+        expect(ensureOrder).toBeLessThan(deleteOrder);
+      });
     });
   });
 });

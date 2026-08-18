@@ -502,6 +502,28 @@ export async function create(
       }))
     );
 
+    const savedObjectID = SavedObjectsUtils.generateId();
+
+    await authorization.ensureAuthorized({
+      operation: Operations.createConfiguration,
+      entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
+    });
+
+    // Ensure linked field definitions BEFORE deleting any existing configuration and BEFORE
+    // persisting the new one (addendum A1): a linkage failure (definition cap reached, malformed
+    // link, failed definition write) is fatal to the create, and running it after the deletion
+    // below would destroy the caller's active configuration when the replacement is rejected.
+    // An orphaned inactive definition when a later delete/post fails is an accepted trade-off —
+    // strictly safer than losing the active configuration. Must stay after ensureAuthorized
+    // above (it performs unsecured SO writes). Runs regardless of the templates feature flag.
+    await ensureGlobalFieldDefinitions({
+      owner: validatedConfigurationRequest.owner,
+      spaceId: clientArgs.spaceId,
+      customFields: validatedConfigurationRequest.customFields ?? [],
+      fieldDefinitionsService,
+      logger,
+    });
+
     if (myCaseConfigure.saved_objects.length > 0) {
       const deleteConfigurationMapper = async (c: SavedObject<ConfigurationAttributes>) =>
         caseConfigureService.delete({
@@ -510,18 +532,11 @@ export async function create(
           refresh: false,
         });
 
-      // Ensuring we don't too many concurrent deletions running.
+      // Ensuring we don't have too many concurrent deletions running.
       await pMap(myCaseConfigure.saved_objects, deleteConfigurationMapper, {
         concurrency: MAX_CONCURRENT_SEARCHES,
       });
     }
-
-    const savedObjectID = SavedObjectsUtils.generateId();
-
-    await authorization.ensureAuthorized({
-      operation: Operations.createConfiguration,
-      entities: [{ owner: validatedConfigurationRequest.owner, id: savedObjectID }],
-    });
 
     const creationDate = new Date().toISOString();
     let mappings: ConnectorMappings = [];
@@ -539,16 +554,6 @@ export async function create(
         ? e.output.payload.message
         : `Error creating mapping for ${validatedConfigurationRequest.connector.name}`;
     }
-
-    // Ensure linked field definitions BEFORE persisting the configuration (addendum A1);
-    // a linkage failure fails the create. Runs regardless of the templates feature flag.
-    await ensureGlobalFieldDefinitions({
-      owner: validatedConfigurationRequest.owner,
-      spaceId: clientArgs.spaceId,
-      customFields: validatedConfigurationRequest.customFields ?? [],
-      fieldDefinitionsService,
-      logger,
-    });
 
     const post = await caseConfigureService.post({
       unsecuredSavedObjectsClient,

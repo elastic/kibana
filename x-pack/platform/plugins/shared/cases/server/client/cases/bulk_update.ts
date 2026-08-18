@@ -725,24 +725,29 @@ export const bulkUpdate = async (
       globalFieldsByOwner,
     });
 
-    // Close-time required_on_close check must run against the fully PAIRED extended_fields, not
-    // the raw pre-pair merge — otherwise a required linked field supplied only via customFields
-    // reads as still empty (wrongly blocks a legitimate close), and one cleared only via
-    // customFields still reads as filled from the stale pre-update value (wrongly allows closing
-    // with an actually-empty required field). `patchCasesPayload.cases` is produced by mapping
-    // `casesToUpdate` 1:1 in order, so the two arrays are index-aligned. When pairing left
-    // extended_fields untouched, the original updateReq is already correct as-is.
+    // Close-time required_on_close check must run against the exact extended_fields map that
+    // will be persisted. `updatedAttributes.extended_fields`, when present, is that map: it is
+    // the complete post-merge, post-pairing state (a key deleted by pairing — e.g. a linked
+    // field cleared via customFields or via an empty-string extended_fields entry — is absent
+    // from it and must read as empty). When absent, the update did not touch extended_fields
+    // through either representation, so the persisted state is the original map merged with the
+    // raw request delta (the delta is nil here; the merge keeps the fallback explicit).
+    // `patchCasesPayload.cases` is produced by mapping `casesToUpdate` 1:1 in order, so the two
+    // arrays are index-aligned.
     casesToUpdate.forEach(({ updateReq, originalCase }, index) => {
       const effectiveTemplate = getEffectiveTemplate(updateReq, originalCase);
       const templateKey =
         effectiveTemplate != null ? `${effectiveTemplate.id}@${effectiveTemplate.version}` : null;
-      const pairedExtendedFields = patchCasesPayload.cases[index].updatedAttributes.extended_fields;
+      const finalExtendedFields = patchCasesPayload.cases[index].updatedAttributes
+        .extended_fields ?? {
+        ...(originalCase.attributes.extended_fields ?? {}),
+        ...(updateReq.extended_fields ?? {}),
+      };
       validateExtendedFieldsOnClose({
-        updateReq:
-          pairedExtendedFields != null
-            ? { ...updateReq, extended_fields: pairedExtendedFields }
-            : updateReq,
-        originalCase,
+        caseId: updateReq.id,
+        requestedStatus: updateReq.status,
+        originalStatus: originalCase.attributes.status,
+        finalExtendedFields,
         templateFields: templateKey != null ? templateFieldsByKey.get(templateKey) ?? [] : [],
         globalFields: globalFieldsByOwner.get(originalCase.attributes.owner) ?? [],
       });
