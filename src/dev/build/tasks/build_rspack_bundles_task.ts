@@ -32,8 +32,7 @@ export const BuildRspackBundles: Task = {
     // On PR builds the plugin source rarely changes in bulk, so let rspack
     // reuse its cache. On merge/release builds always compile from scratch.
     const isPrBuild =
-      Boolean(process.env.BUILDKITE_PULL_REQUEST) &&
-      process.env.BUILDKITE_PULL_REQUEST !== 'false';
+      Boolean(process.env.BUILDKITE_PULL_REQUEST) && process.env.BUILDKITE_PULL_REQUEST !== 'false';
     const result = await runBuild({
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),

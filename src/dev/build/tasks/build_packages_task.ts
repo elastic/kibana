@@ -116,8 +116,7 @@ export const BuildPackages: Task = {
     // On PR builds the shared webpack inputs rarely change, so let moon reuse
     // its cached outputs. On merge/release builds always rebuild from scratch.
     const isPrBuild =
-      Boolean(process.env.BUILDKITE_PULL_REQUEST) &&
-      process.env.BUILDKITE_PULL_REQUEST !== 'false';
+      Boolean(process.env.BUILDKITE_PULL_REQUEST) && process.env.BUILDKITE_PULL_REQUEST !== 'false';
     log.info(`Building webpack artifacts which are necessary for the build`);
     await buildWebpackBundles({
       quiet: false,
