@@ -289,7 +289,7 @@ describe('rule template create-rule schema coupling', () => {
                 },
                 Object {
                   "const": "recover",
-                  "description": "Resolves the alert episode to inactive on the first no-data run, regardless of any configured recovery delay.",
+                  "description": "Resolves the alert episode to inactive on the first no-data run.",
                   "type": "string",
                 },
                 Object {

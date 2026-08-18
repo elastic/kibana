@@ -45,8 +45,7 @@ const RECOVER_TITLE = i18n.translate(
 const RECOVER_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.ruleForm.noDataStrategyField.recover.description',
   {
-    defaultMessage:
-      'Resolve the alert episode on the first no-data run, regardless of any configured recovery delay.',
+    defaultMessage: 'Resolve the alert episode on the first no-data run.',
   }
 );
 

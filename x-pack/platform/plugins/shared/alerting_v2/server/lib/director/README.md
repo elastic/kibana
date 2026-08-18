@@ -128,7 +128,7 @@ The director writes one of these episode statuses:
 | `active` | `'recover'` | `inactive` |
 | `recovering` | `'recover'` | `inactive` |
 
-For `'recover'`, the episode resolves directly to `inactive` on the first no-data run, regardless of any configured recovery delay. No prior episode (null) always returns `pending`.
+For `'recover'`, the episode resolves directly to `inactive` on the first no-data run.
 
 ### `CountTimeframeStrategy`
 
