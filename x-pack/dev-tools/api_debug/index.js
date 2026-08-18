@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import globby from 'globby';
+import { globby } from 'globby';
 import { bold } from 'chalk';
 import { argv } from 'yargs';
 import { requestFromApi } from './request_from_api';
