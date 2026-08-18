@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export async function plugin() {
-  const { ExpressionXyPlugin } = await import('./plugin');
-  return new ExpressionXyPlugin();
-}
-
+export { default as cordisPlugin } from './plugin';
 export type { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';

@@ -5,6 +5,7 @@
   },
   "include": ["public/**/*", "server/**/*"],
   "kbn_references": [
+    "@kbn/cordis",
     "@kbn/core",
     "@kbn/i18n",
     "@kbn/agent-builder-server",

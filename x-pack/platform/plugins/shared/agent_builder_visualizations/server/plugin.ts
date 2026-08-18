@@ -5,53 +5,31 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import type {
-  AgentBuilderVisualizationsSetupDependencies,
-  AgentBuilderVisualizationsStartDependencies,
-  AgentBuilderVisualizationsPluginSetup,
-  AgentBuilderVisualizationsPluginStart,
-} from './types';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import { createVisualizationAttachmentType } from './attachment_types';
 import { createVisualizationTool } from './tools/create_visualization';
 import { visualizationCreationSkill } from './skills/visualization_creation_skill';
 import { visualizationSmlType } from './sml_types/visualization';
 
-export class AgentBuilderVisualizationsPlugin
-  implements
-    Plugin<
-      AgentBuilderVisualizationsPluginSetup,
-      AgentBuilderVisualizationsPluginStart,
-      AgentBuilderVisualizationsSetupDependencies,
-      AgentBuilderVisualizationsStartDependencies
-    >
-{
-  constructor(_context: PluginInitializerContext) {}
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class AgentBuilderVisualizationsPlugin extends Service {
+  static readonly inject = ['agentBuilder.setup', 'agentBuilderSml.setup'];
+  static readonly provide = 'agentBuilderVisualizations';
 
-  setup(
-    _coreSetup: CoreSetup<
-      AgentBuilderVisualizationsStartDependencies,
-      AgentBuilderVisualizationsPluginStart
-    >,
-    setupDeps: AgentBuilderVisualizationsSetupDependencies
-  ): AgentBuilderVisualizationsPluginSetup {
+  constructor(ctx: Context) {
+    super(ctx, 'agentBuilderVisualizations');
+    const setupDeps = {
+      agentBuilder: (ctx.get('agentBuilder.setup') as any).contract,
+      agentBuilderSml: (ctx.get('agentBuilderSml.setup') as any).contract,
+    };
     setupDeps.agentBuilder.attachments.registerType(
-      createVisualizationAttachmentType() as Parameters<
-        typeof setupDeps.agentBuilder.attachments.registerType
-      >[0]
-    );
-    setupDeps.agentBuilder.tools.register(createVisualizationTool());
-    setupDeps.agentBuilder.skills.register(visualizationCreationSkill);
-    setupDeps.agentBuilderSml.registerType(visualizationSmlType);
-    return {};
+          createVisualizationAttachmentType() as Parameters<
+            typeof setupDeps.agentBuilder.attachments.registerType
+          >[0]
+        );
+        setupDeps.agentBuilder.tools.register(createVisualizationTool());
+        setupDeps.agentBuilder.skills.register(visualizationCreationSkill);
+        setupDeps.agentBuilderSml.registerType(visualizationSmlType);
   }
-
-  start(
-    _coreStart: CoreStart,
-    _startDeps: AgentBuilderVisualizationsStartDependencies
-  ): AgentBuilderVisualizationsPluginStart {
-    return {};
-  }
-
-  stop() {}
 }

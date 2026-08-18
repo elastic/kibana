@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
-
-import type { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
+import { Service } from '@kbn/cordis';
+import type { Context } from '@kbn/cordis';
 import {
   xyVisFunction,
   legendConfigFunction,
@@ -25,30 +24,29 @@ import {
   layeredXyVisFunction,
   extendedAnnotationLayerFunction,
 } from '../common/expression_functions';
-import type { SetupDeps } from './types';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 
-export class ExpressionXyPlugin
-  implements Plugin<ExpressionXyPluginSetup, ExpressionXyPluginStart>
-{
-  public setup(core: CoreSetup, { expressions }: SetupDeps) {
+// Migrated to native Cordis authoring — Stage 5 of the Cordis migration.
+export default class ExpressionXyPlugin extends Service {
+  static readonly inject = ['expressions.setup'];
+  static readonly provide = 'expressionXY';
+
+  constructor(ctx: Context) {
+    super(ctx, 'expressionXY');
+    const expressions = (ctx.get('expressions.setup') as any).contract;
     expressions.registerFunction(yAxisConfigFunction);
-    expressions.registerFunction(dataDecorationConfigFunction);
-    expressions.registerFunction(xAxisConfigFunction);
-    expressions.registerFunction(referenceLineDecorationConfigFunction);
-    expressions.registerFunction(legendConfigFunction);
-    expressions.registerFunction(extendedDataLayerFunction);
-    expressions.registerFunction(axisExtentConfigFunction);
-    expressions.registerFunction(annotationLayerFunction);
-    expressions.registerFunction(extendedAnnotationLayerFunction);
-    expressions.registerFunction(eventAnnotationsResult);
-    expressions.registerFunction(referenceLineFunction);
-    expressions.registerFunction(referenceLineLayerFunction);
-    expressions.registerFunction(xyVisFunction);
-    expressions.registerFunction(layeredXyVisFunction);
+        expressions.registerFunction(dataDecorationConfigFunction);
+        expressions.registerFunction(xAxisConfigFunction);
+        expressions.registerFunction(referenceLineDecorationConfigFunction);
+        expressions.registerFunction(legendConfigFunction);
+        expressions.registerFunction(extendedDataLayerFunction);
+        expressions.registerFunction(axisExtentConfigFunction);
+        expressions.registerFunction(annotationLayerFunction);
+        expressions.registerFunction(extendedAnnotationLayerFunction);
+        expressions.registerFunction(eventAnnotationsResult);
+        expressions.registerFunction(referenceLineFunction);
+        expressions.registerFunction(referenceLineLayerFunction);
+        expressions.registerFunction(xyVisFunction);
+        expressions.registerFunction(layeredXyVisFunction);
   }
-
-  public start(core: CoreStart) {}
-
-  public stop() {}
 }

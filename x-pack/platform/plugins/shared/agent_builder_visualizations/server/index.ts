@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
-
-export const plugin = async (context: PluginInitializerContext) => {
-  const { AgentBuilderVisualizationsPlugin } = await import('./plugin');
-  return new AgentBuilderVisualizationsPlugin(context);
-};
-
-export type {
-  AgentBuilderVisualizationsPluginSetup,
-  AgentBuilderVisualizationsPluginStart,
-} from './types';
+export { default as cordisPlugin } from './plugin';
