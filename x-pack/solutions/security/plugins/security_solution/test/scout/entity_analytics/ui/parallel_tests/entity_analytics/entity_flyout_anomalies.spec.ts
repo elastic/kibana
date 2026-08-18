@@ -84,6 +84,9 @@ spaceTest.describe(
       // takes several seconds, keeping the section in a loading state that continuously shifts
       // the anomalies section's Y position — preventing Playwright's stability check from
       // passing before the test timeout.
+      // The same endpoint also backs the host-details query, whose consumer dereferences
+      // `hostDetails.endpoint`; include `hostDetails` so it doesn't resolve to `undefined` and
+      // crash the host panel before the anomalies section renders.
       await page.route('**/internal/search/securitySolutionSearchStrategy', async (route) => {
         await route.fulfill({
           status: 200,
@@ -93,6 +96,7 @@ spaceTest.describe(
             isPartial: false,
             totalCount: 0,
             data: [],
+            hostDetails: {},
             rawResponse: {
               took: 0,
               timed_out: false,
