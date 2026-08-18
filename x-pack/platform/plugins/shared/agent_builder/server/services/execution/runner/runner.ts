@@ -98,7 +98,7 @@ export interface CreateScopedRunnerDeps {
   defaultConnectorId?: string;
   /**
    * Optional CPS project routing expression scoping this run's search tools to a set of projects
-   * Origin-only when omitted.
+   * Defaults to space-level routing (all linked projects in the current space) when omitted.
    */
   projectRouting?: string;
   /**
