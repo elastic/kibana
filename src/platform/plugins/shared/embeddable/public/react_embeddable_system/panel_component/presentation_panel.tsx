@@ -173,7 +173,11 @@ export const PresentationPanel = <
     }
   }, [isSharedItem]);
 
-  const sharingAttirbutes = useSharingAttributes(componentApi, onInitialRenderComplete);
+  const sharingAttirbutes = useSharingAttributes(
+    componentApi,
+    onInitialRenderComplete,
+    Boolean(isSharedItem)
+  );
 
   const InnerPanel = useMemo(() => {
     return (
