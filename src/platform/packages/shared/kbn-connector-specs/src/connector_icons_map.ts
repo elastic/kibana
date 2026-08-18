@@ -346,4 +346,13 @@ export const ConnectorIconsMap: Map<
     '.zabbix',
     lazy(() => import(/* webpackChunkName: "connectorIconZabbix" */ './specs/zabbix/icon')),
   ],
+  [
+    '.google_threat_intelligence',
+    lazy(
+      () =>
+        import(
+          /* webpackChunkName: "connectorIconGoogleThreatIntelligence" */ './specs/google_threat_intelligence/icon'
+        )
+    ),
+  ],
 ]);
