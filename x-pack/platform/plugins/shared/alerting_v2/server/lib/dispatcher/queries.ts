@@ -25,9 +25,31 @@ const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 // Rows with a null subject are dropped here: a doc with source "internal" and no rule is
 // schema-valid and reaches the index, but has no series identity. Deriving its subject in
 // TypeScript throws, which would fail the whole tick and drop every other episode in the batch.
-export const getDispatchableAlertEventsQuery = (): EsqlRequest => {
+/**
+ * Row cap of `getDispatchableAlertEventsQuery`. Kept in sync by a unit test —
+ * ES|QL will not accept a bound parameter in a LIMIT clause.
+ */
+export const EPISODE_QUERY_LIMIT = 10_000;
+
+/**
+ * Keys-only episode scan over `.rule-events` ⨝ `.alert-actions`.
+ *
+ * `gte`/`lte` cap **event** rows only. Action rows (`type IS NULL`) are not
+ * window-capped: `StoreActionsStep` stamps `@timestamp` with `now`, which is
+ * after `windowEnd` (`startedAt − SETTLE_BUFFER`). If those rows were dropped
+ * before `INLINE STATS last_fired`, the overlap re-read would reprocess every
+ * already-recorded episode on the next tick.
+ */
+export const getDispatchableAlertEventsQuery = ({
+  gte,
+  lte,
+}: {
+  gte: string;
+  lte: string;
+}): EsqlRequest => {
   return esql`FROM ${ALERT_EVENTS_DATA_STREAM},${ALERT_ACTIONS_DATA_STREAM}
       | WHERE type IS NULL OR type == ${ALERT_EVENT_TYPE}
+      | WHERE type IS NULL OR (@timestamp >= ${gte}::datetime AND @timestamp <= ${lte}::datetime)
       | EVAL
           rule_id = COALESCE(rule.id, rule_id),
           episode_id = COALESCE(episode.id, episode_id),
