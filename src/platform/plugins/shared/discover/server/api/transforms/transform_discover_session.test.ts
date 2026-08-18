@@ -14,7 +14,7 @@ import {
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { UnifiedHistogramSuggestionType } from '@kbn/discover-utils';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
-import type { DiscoverSessionApiData } from '../schema';
+import type { DiscoverSessionApiData, DiscoverSessionApiEsqlTab } from '../schema';
 import { transformDiscoverSessionIn } from './transform_discover_session_in';
 import { transformDiscoverSessionOut } from './transform_discover_session_out';
 import {
@@ -114,6 +114,30 @@ describe('discover session API transforms', () => {
       ]);
 
       expect(transformed.tags).toEqual(['tag-1']);
+    });
+
+    it('maps esqlApproximation to esql_approximation for ES|QL tabs', () => {
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [
+          {
+            ...discoverSessionAttributes.tabs[1],
+            attributes: {
+              ...discoverSessionAttributes.tabs[1].attributes,
+              esqlApproximation: true,
+            },
+          },
+        ],
+      });
+      expect((sessionState.tabs[0] as DiscoverSessionApiEsqlTab).esql_approximation).toBe(true);
+    });
+
+    it('omits esql_approximation when esqlApproximation is absent from an ES|QL tab', () => {
+      const { sessionState } = transformDiscoverSessionOut({
+        ...discoverSessionAttributes,
+        tabs: [discoverSessionAttributes.tabs[1]],
+      });
+      expect(sessionState.tabs[0]).not.toHaveProperty('esql_approximation');
     });
 
     it('converts legacy flat tab sort to API sort objects', () => {
@@ -267,6 +291,27 @@ describe('discover session API transforms', () => {
         ],
       });
       expect(references).toEqual([]);
+    });
+
+    it('maps esql_approximation to esqlApproximation for ES|QL tabs', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({
+        ...apiData,
+        tabs: [{ ...esqlTab, esql_approximation: true } as DiscoverSessionApiEsqlTab],
+      });
+      expect(attributes.tabs[0].attributes.esqlApproximation).toBe(true);
+    });
+
+    it('omits esqlApproximation when esql_approximation is absent from an ES|QL tab', () => {
+      const [, esqlTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({ ...apiData, tabs: [esqlTab] });
+      expect(attributes.tabs[0].attributes).not.toHaveProperty('esqlApproximation');
+    });
+
+    it('does not set esqlApproximation for classic tabs', () => {
+      const [classicTab] = apiData.tabs;
+      const { attributes } = transformDiscoverSessionIn({ ...apiData, tabs: [classicTab] });
+      expect(attributes.tabs[0].attributes).not.toHaveProperty('esqlApproximation');
     });
 
     it('creates unique saved object references for tags', () => {

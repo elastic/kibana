@@ -52,6 +52,9 @@ const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPicker
   visibleProjectIds: [],
   selectedProjects: [],
   ...overrides,
+  defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
+  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
+  originProjectId: overrides.originProjectId,
 });
 
 const renderBody = (stateOverrides: Partial<ProjectPickerState> = {}) => {
