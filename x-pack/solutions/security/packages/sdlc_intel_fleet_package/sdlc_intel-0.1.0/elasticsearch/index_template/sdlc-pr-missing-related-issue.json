@@ -1,0 +1,134 @@
+{
+  "index_patterns": [
+    "sdlc-pr-missing-related-issue"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "sdlc_intel_retention"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "event": {
+          "properties": {
+            "kind": {
+              "type": "keyword"
+            }
+          }
+        },
+        "sync": {
+          "properties": {
+            "run_id": {
+              "type": "keyword"
+            },
+            "source": {
+              "type": "keyword"
+            }
+          }
+        },
+        "org": {
+          "properties": {
+            "login": {
+              "type": "keyword"
+            }
+          }
+        },
+        "entity": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            },
+            "id": {
+              "type": "keyword"
+            },
+            "url": {
+              "type": "keyword"
+            },
+            "number": {
+              "type": "keyword"
+            }
+          }
+        },
+        "repository": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "full_name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "github": {
+          "properties": {
+            "state": {
+              "type": "keyword"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "updated_at": {
+              "type": "date"
+            }
+          }
+        },
+        "people": {
+          "properties": {
+            "author": {
+              "type": "keyword"
+            }
+          }
+        },
+        "pull_request": {
+          "properties": {
+            "title": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 512
+                }
+              }
+            },
+            "draft": {
+              "type": "boolean"
+            }
+          }
+        },
+        "sdlc": {
+          "properties": {
+            "finding": {
+              "properties": {
+                "type": {
+                  "type": "keyword"
+                },
+                "severity": {
+                  "type": "keyword"
+                },
+                "reason": {
+                  "type": "text",
+                  "fields": {
+                    "keyword": {
+                      "type": "keyword",
+                      "ignore_above": 256
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "_meta": {
+    "package": {
+      "name": "sdlc_intel"
+    }
+  }
+}

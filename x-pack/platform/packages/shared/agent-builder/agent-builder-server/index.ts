@@ -152,5 +152,6 @@ export type {
   RuntimeStart,
   ReadOnlyConversationClient,
   ConversationsStart,
+  AgentBuilderManagementSetup,
 } from './plugin_contract';
 export { describeZodSchema, formatSchemaForLlm } from './tools';

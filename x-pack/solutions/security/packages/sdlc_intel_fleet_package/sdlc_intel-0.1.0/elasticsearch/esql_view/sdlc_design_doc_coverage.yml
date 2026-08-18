@@ -1,0 +1,32 @@
+name: sdlc-design-doc-coverage-view
+query: |
+  FROM github-intel-relationships
+  | WHERE relation == "issue_references_design_doc"
+  | EVAL
+      issue_url = from,
+      drive_url = to,
+      issue_target = metadata.issue_target,
+      drive_file_id = metadata.drive_file_id,
+      repo = metadata.repo
+  | LOOKUP JOIN gdrive-intel-documents ON drive_file_id == file.id
+  | EVAL
+      drive_name = file.name,
+      drive_mime_type = file.mime_type,
+      drive_modified_at = file.modified_at,
+      drive_owner_email = file.owner_email,
+      drive_web_view_link = file.web_view_link,
+      catalog_source = links.catalog_source,
+      roadmap_folder_id = links.catalog_folder_id
+  | KEEP
+      @timestamp,
+      issue_url,
+      issue_target,
+      repo,
+      drive_file_id,
+      drive_name,
+      drive_mime_type,
+      drive_modified_at,
+      drive_owner_email,
+      drive_web_view_link,
+      catalog_source,
+      roadmap_folder_id

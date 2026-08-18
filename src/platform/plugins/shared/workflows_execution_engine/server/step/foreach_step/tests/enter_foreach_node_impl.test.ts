@@ -161,12 +161,33 @@ describe('EnterForeachNodeImpl', () => {
         });
       });
 
-      it('should throw an error if expression evaluated to null', async () => {
+      it('should treat null as an empty array and skip the loop', async () => {
         (
           stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
         ).mockReturnValue(null);
-        await expect(underTest.run()).rejects.toThrowError(
-          'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object (null).'
+        await underTest.run();
+
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          total: 0,
+        });
+        expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+        expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(
+          node.exitNodeId
+        );
+      });
+
+      it('should treat undefined as an empty array and skip the loop', async () => {
+        (
+          stepExecutionRuntime.contextManager.evaluateExpressionInContext as jest.Mock
+        ).mockReturnValue(undefined);
+        await underTest.run();
+
+        expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledWith({
+          total: 0,
+        });
+        expect(stepExecutionRuntime.finishStep).toHaveBeenCalled();
+        expect(workflowExecutionRuntimeManager.navigateToNode).toHaveBeenCalledWith(
+          node.exitNodeId
         );
       });
 

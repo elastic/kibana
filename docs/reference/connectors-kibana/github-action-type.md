@@ -22,10 +22,13 @@ GitHub connectors have the following configuration properties:
 MCP Server URL
 :   The URL of the GitHub MCP server. Defaults to `https://api.githubcopilot.com/mcp/`.
 
+GraphQL API URL
+:   The GitHub GraphQL endpoint used by workflow ingest actions. Defaults to `https://api.github.com/graphql`.
+
 Authentication
 :   Choose one of the following authentication methods:
     - **Bearer Token**: A GitHub personal access token. Refer to [Get API credentials](#github-api-credentials) for instructions.
-    - **OAuth Authorization Code**: Connects via GitHub's OAuth flow. Requires a GitHub OAuth App with an authorization URL (`https://github.com/login/oauth/authorize`) and token URL (`https://github.com/login/oauth/access_token`). The default scope is `repo`. Refer to [OAuth credentials](#github-oauth-credentials) for setup instructions.
+    - **OAuth Authorization Code**: Connects via GitHub's OAuth flow. Requires a GitHub OAuth App with an authorization URL (`https://github.com/login/oauth/authorize`) and token URL (`https://github.com/login/oauth/access_token`). The default scope is `read:org read:project repo`. Refer to [OAuth credentials](#github-oauth-credentials) for setup instructions.
 
 ## Test connectors [github-action-configuration]
 
@@ -87,41 +90,14 @@ The GitHub connector exposes the following actions:
 `getIssueComments`
 :   Get comments for a specific issue in a repository.
 
-`createIssue` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Create a new issue in a repository.
+`graphqlQuery`
+:   Execute a read-only GitHub GraphQL query for workflow ingest. Mutations and subscriptions are rejected. Returns `data`, optional `pageInfo`, `rateLimit`, and `shouldBackoff`. Not exposed to agents.
 
-`addIssueComment` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Add a comment to an existing issue or pull request.
+`runQueryTemplate`
+:   Run a named read-only GraphQL query template for workflow ingest. Templates include `orgCatalog.repos`, `orgCatalog.teams`, `orgCatalog.members`, `activity.searchIssues`, `activity.searchPullRequests`, `graph.issueGraph`, and `graph.pullRequestGraph`. Supports `first` and `after` pagination overrides.
 
-`updateIssue` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Update an existing issue (title, body, state, assignees, labels, or milestone). To close an issue, set state to `closed`.
-
-`addLabels` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Add one or more labels to an issue or pull request without removing existing ones.
-
-`addAssignee` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Add one or more assignees to an issue or pull request without removing existing ones.
-
-`createPullRequest` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Create a new pull request. The head branch must already exist and have commits not in the base branch.
-
-`updatePullRequest` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Update an open pull request (title, body, state, base branch, or maintainer permissions). To close a PR, set state to `closed`.
-
-`mergePullRequest` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Merge an open pull request. Fails if the PR is not mergeable.
-
-`requestReviewers` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Request one or more reviewers (individuals or teams) on a pull request without removing existing requests.
-
-`createBranch` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Create a new branch (git ref) in a repository.
-
-`createOrUpdateFile` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Create or update a single file in a repository. The content must be Base64-encoded. To update an existing file, provide the current file blob SHA (retrieved via `getFileContents`).
-
-`triggerWorkflow` {applies_to}`serverless:` {applies_to}`stack: ga 9.6+`
-:   Trigger a `workflow_dispatch` event for a GitHub Actions workflow. The workflow must have a `workflow_dispatch` trigger defined in its YAML.
+`listQueryTemplates`
+:   List available read-only GraphQL query templates for `runQueryTemplate`.
 
 `listTools`
 :   List all tools available on the GitHub MCP server. Use this to discover available capabilities.
@@ -144,10 +120,7 @@ To use the GitHub connector with a personal access token:
    - Set a descriptive name (for example, "Kibana data source").
    - Select an expiration period.
    - Select the repositories you want to grant access to.
-   - Under **Permissions**, grant the access levels the connector requires:
-     - **Read-only actions** (search, list, get): grant read access to **Contents**, **Issues**, **Pull requests**, and **Metadata**.
-     - **Write actions** (createIssue, addIssueComment, updateIssue, createPullRequest, updatePullRequest, mergePullRequest, addLabels, addAssignee, requestReviewers, createBranch, createOrUpdateFile, triggerWorkflow): grant **read and write** access to **Contents**, **Issues**, and **Pull requests**. For `triggerWorkflow`, also grant **read and write** access to **Actions**.
-     - **Metadata** read access is always required.
+   - Under **Permissions**, grant read access to the resources you need (for example, **Contents**, **Issues**, **Pull requests**, **Metadata**).
 5. Select **Generate token**.
 6. Copy the token and store it securely. Use this value as the **Bearer Token** when configuring the GitHub connector in {{kib}}.
 

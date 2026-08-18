@@ -103,6 +103,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
   [KibanaAssetType.workflow]: KibanaSavedObjectType.workflow,
+  [KibanaAssetType.agent]: KibanaSavedObjectType.agent,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -555,7 +556,7 @@ function getKibanaAssetsArchiveIterator(packageInstallContext: PackageInstallCon
       }
 
       const assetType = getPathParts(entry.path).type as KibanaAssetType;
-      if (assetType === KibanaAssetType.workflow) {
+      if (assetType === KibanaAssetType.workflow || assetType === KibanaAssetType.agent) {
         return;
       }
 

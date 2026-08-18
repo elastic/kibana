@@ -1,0 +1,132 @@
+format_version: 1.0.0
+name: sdlc_intel
+title: SDLC Intelligence
+description: >
+  Kibana dashboards for SDLC GitHub intelligence: epic roadmap (sdlc-epic-phases),
+  enriched project item pipeline (ES|QL view), team dimension, and raw sync overview.
+  Installs index templates for all SDLC raw pipeline indices and GitHub/Slack ingest workflows.
+version: 0.1.0
+data_streams: []
+categories:
+  - security
+release: beta
+type: integration
+license: basic
+owner:
+  github: elastic/security-solution
+vars:
+  - name: github_connector_id
+    type: text
+    title: GitHub connector ID
+    description: >
+      Kibana connector ID for the GitHub (.github) connector used by SDLC ingest workflows.
+      Set when adding the integration policy; workflows auto-install with this ID substituted.
+    multi: false
+    required: false
+    show_user: true
+  - name: slack_connector_id
+    type: text
+    title: Slack connector ID
+    description: >
+      Kibana connector ID for the Slack (.slack2) connector used by SDLC ingest workflows.
+    multi: false
+    required: false
+    show_user: true
+  - name: org_login
+    type: text
+    title: GitHub organization login
+    description: GitHub organization to ingest (default elastic).
+    multi: false
+    required: false
+    show_user: true
+    default: elastic
+  - name: salesforce_connector_id
+    type: text
+    title: Salesforce connector ID
+    description: >
+      Kibana connector ID for the Salesforce (.salesforce) connector used by SDLC feedback-loop
+      ingest workflows.
+    multi: false
+    required: false
+    show_user: true
+  - name: salesforce_case_github_field
+    type: text
+    title: Salesforce Case GitHub URL field
+    description: >
+      Salesforce Case custom field API name that stores the linked GitHub issue URL (for example
+      Engineering_Issue_URL__c). Substituted into SOQL and workflow field mappings on install.
+    multi: false
+    required: false
+    show_user: true
+    default: Engineering_Issue_URL__c
+  - name: sdh_repo_pattern
+    type: text
+    title: SDH GitHub repo search pattern
+    description: >
+      GitHub search repo qualifier for SDH repositories (for example sdh-* for elastic/sdh-* repos).
+    multi: false
+    required: false
+    show_user: true
+    default: sdh-*
+  - name: sdh_label
+    type: text
+    title: SDH GitHub label
+    description: >
+      GitHub label used to identify SDH issues in product repositories (for example sdh).
+    multi: false
+    required: false
+    show_user: true
+    default: sdh
+  - name: salesforce_product_area_field
+    type: text
+    title: Salesforce Case product area field
+    description: >
+      Salesforce Case custom field API name for product area / team taxonomy (for example
+      Product_Area__c). Substituted into SOQL on install.
+    multi: false
+    required: false
+    show_user: true
+    default: Product_Area__c
+  - name: google_drive_connector_id
+    type: text
+    title: Google Drive connector ID
+    description: >
+      Kibana connector ID for the Google Drive (.google_drive) connector used by SDLC design-doc
+      enrichment workflows.
+    multi: false
+    required: false
+    show_user: true
+  - name: gdrive_roadmap_folder_ids
+    type: text
+    title: Google Drive roadmap folder IDs
+    description: >
+      Comma-separated shared Drive folder IDs to catalog roadmap documents (PRDs, OKRs, release
+      docs). Use the folder ID from each folder URL. Leave blank to skip folder catalog.
+    multi: true
+    required: false
+    show_user: true
+  - name: ai_connector_id
+    type: text
+    title: AI inference connector ID
+    description: >
+      Kibana connector ID for the inference provider used by SDLC agentic workflows
+      (coverage analysis and scope alignment).
+    multi: false
+    required: false
+    show_user: true
+policy_templates:
+  - name: sdlc_intel
+    title: SDLC Intelligence
+    description: >
+      Kibana-only SDLC Intelligence integration. Configures connector IDs for auto-installed
+      ingest workflows. No Elastic Agent is required.
+    inputs: []
+requirement:
+  elasticsearch:
+    versions: '>7.7.0'
+  kibana:
+    versions: '>7.7.0'
+icons:
+  - src: /img/sdlc_intel.svg
+    size: 32x32
+    type: image/svg+xml

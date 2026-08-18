@@ -20,6 +20,7 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
+import { AgentBuilderManagementApi } from './api/agent_builder_management_api';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
 import type { AgentBuilderHandlerContext } from './request_handler_context';
@@ -222,6 +223,7 @@ export class AgentBuilderPlugin
         },
       },
       topSnippets: this.config.topSnippets,
+      management: new AgentBuilderManagementApi(coreSetup.getStartServices, this.logger.get('management')),
     };
   }
 

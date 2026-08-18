@@ -22,10 +22,15 @@ jest.mock('../../lib/mcp/with_mcp_client', () => ({
   }),
 }));
 
-// Mock HTTP client methods for write actions that call ctx.client directly.
-const mockPost = jest.fn();
-const mockPatch = jest.fn();
-const mockPut = jest.fn();
+const mockExecuteGitHubGraphQL = jest.fn();
+const mockGetGitHubQueryTemplate = jest.fn();
+const mockListGitHubQueryTemplates = jest.fn();
+
+jest.mock('./graphql', () => ({
+  executeGitHubGraphQL: (...args: unknown[]) => mockExecuteGitHubGraphQL(...args),
+  getGitHubQueryTemplate: (...args: unknown[]) => mockGetGitHubQueryTemplate(...args),
+  listGitHubQueryTemplates: (...args: unknown[]) => mockListGitHubQueryTemplates(...args),
+}));
 
 // Helper: parse raw input through the action schema the way the framework does,
 // so Zod defaults are applied before the handler receives the input.
@@ -36,11 +41,7 @@ const parse = <K extends keyof typeof GithubConnector.actions>(
 
 describe('GithubConnector', () => {
   const mockContext = {
-    client: {
-      post: mockPost,
-      patch: mockPatch,
-      put: mockPut,
-    },
+    client: {},
     log: {},
     config: { serverUrl: 'https://api.githubcopilot.com/mcp/' },
   } as unknown as ActionContext;
@@ -48,19 +49,23 @@ describe('GithubConnector', () => {
   const mockJson = { ok: true };
   const mockContent = [{ type: 'text', text: JSON.stringify(mockJson) }];
 
-  const mockWriteResponse = {
-    id: 1,
-    number: 42,
-    html_url: 'https://github.com/elastic/kibana/issues/42',
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockCallTool.mockResolvedValue({ content: mockContent });
     mockListTools.mockResolvedValue({ tools: [{ name: 'get_me' }, { name: 'search_code' }] });
-    mockPost.mockResolvedValue({ data: mockWriteResponse });
-    mockPatch.mockResolvedValue({ data: mockWriteResponse });
-    mockPut.mockResolvedValue({ data: mockWriteResponse });
+    mockExecuteGitHubGraphQL.mockResolvedValue({
+      data: { viewer: { login: 'octocat' } },
+      rateLimit: { limit: 5000, remaining: 4999, resetAt: '2026-06-24T12:00:00Z' },
+      shouldBackoff: false,
+    });
+    mockGetGitHubQueryTemplate.mockReturnValue({
+      id: 'orgCatalog.repos',
+      query: 'query OrgCatalogRepos { organization(login: "elastic") { id } }',
+      pageInfoPath: 'organization.repositories',
+    });
+    mockListGitHubQueryTemplates.mockReturnValue([
+      { id: 'orgCatalog.repos', description: 'List org repos' },
+    ]);
   });
 
   describe('auth', () => {
@@ -95,7 +100,7 @@ describe('GithubConnector', () => {
         defaults: {
           authorizationUrl: 'https://github.com/login/oauth/authorize',
           tokenUrl: 'https://github.com/login/oauth/access_token',
-          scope: 'repo',
+          scope: 'read:org read:project repo',
         },
       });
     });
@@ -210,17 +215,19 @@ describe('GithubConnector', () => {
           owner: 'elastic',
           repo: 'kibana',
           state: 'open',
+          since: undefined,
           first: 10,
           after: undefined,
         },
       });
     });
 
-    it('passes cursor and state overrides', async () => {
+    it('passes cursor, state overrides, and updatedSince', async () => {
       await GithubConnector.actions.listIssues.handler(mockContext, {
         owner: 'elastic',
         repo: 'kibana',
         state: 'closed',
+        updatedSince: '2026-06-01T00:00:00Z',
         first: 5,
         after: 'cursor123',
       });
@@ -231,6 +238,7 @@ describe('GithubConnector', () => {
           owner: 'elastic',
           repo: 'kibana',
           state: 'closed',
+          since: '2026-06-01T00:00:00Z',
           first: 5,
           after: 'cursor123',
         },
@@ -249,6 +257,7 @@ describe('GithubConnector', () => {
           owner: 'elastic',
           repo: 'kibana',
           state: 'open',
+          since: undefined,
           first: 10,
           after: undefined,
         },
@@ -382,6 +391,25 @@ describe('GithubConnector', () => {
         },
       });
     });
+
+    it('passes get_reviews method', async () => {
+      await GithubConnector.actions.pullRequestRead.handler(mockContext, {
+        owner: 'elastic',
+        repo: 'kibana',
+        pullNumber: 42,
+        method: 'get_reviews',
+      });
+
+      expect(mockCallTool).toHaveBeenCalledWith({
+        name: 'pull_request_read',
+        arguments: {
+          owner: 'elastic',
+          repo: 'kibana',
+          pullNumber: 42,
+          method: 'get_reviews',
+        },
+      });
+    });
   });
 
   describe('getFileContents action', () => {
@@ -452,6 +480,72 @@ describe('GithubConnector', () => {
     });
   });
 
+  describe('graphql ingest actions', () => {
+    it('executes read-only graphqlQuery via the GraphQL client', async () => {
+      const query = 'query Viewer { viewer { login } }';
+      await GithubConnector.actions.graphqlQuery.handler(mockContext, { query });
+
+      expect(mockExecuteGitHubGraphQL).toHaveBeenCalledWith({
+        ctx: mockContext,
+        body: { query, variables: undefined, operationName: undefined },
+      });
+    });
+
+    it('runs a named query template with merged pagination variables', async () => {
+      await GithubConnector.actions.runQueryTemplate.handler(mockContext, {
+        templateId: 'orgCatalog.repos',
+        variables: { org: 'elastic' },
+        first: 50,
+        after: 'cursor123',
+      });
+
+      expect(mockGetGitHubQueryTemplate).toHaveBeenCalledWith('orgCatalog.repos');
+      expect(mockExecuteGitHubGraphQL).toHaveBeenCalledWith({
+        ctx: mockContext,
+        body: {
+          query: 'query OrgCatalogRepos { organization(login: "elastic") { id } }',
+          variables: { org: 'elastic', first: 50, after: 'cursor123' },
+        },
+        pageInfoPath: 'organization.repositories',
+        templateId: 'orgCatalog.repos',
+      });
+    });
+
+    it('coerces string first from workflow Liquid templates', () => {
+      const input = parse('runQueryTemplate', {
+        templateId: 'orgCatalog.teams',
+        variables: { org: 'elastic' },
+        first: '100',
+      });
+
+      expect(input.first).toBe(100);
+    });
+
+    it('coerces string number variables for GraphQL Int! templates', async () => {
+      await GithubConnector.actions.runQueryTemplate.handler(mockContext, {
+        templateId: 'graph.issueGraph',
+        variables: { owner: 'elastic', repo: 'kibana', number: '1698' },
+      });
+
+      expect(mockExecuteGitHubGraphQL).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            variables: { owner: 'elastic', repo: 'kibana', number: 1698 },
+          }),
+        })
+      );
+    });
+
+    it('lists available query templates', async () => {
+      const result = await GithubConnector.actions.listQueryTemplates.handler(mockContext, {});
+
+      expect(mockListGitHubQueryTemplates).toHaveBeenCalled();
+      expect(result).toEqual({
+        templates: [{ id: 'orgCatalog.repos', description: 'List org repos' }],
+      });
+    });
+  });
+
   describe('callTool action', () => {
     it('calls the named tool with provided arguments', async () => {
       const result = await GithubConnector.actions.callTool.handler(mockContext, {
@@ -479,395 +573,32 @@ describe('GithubConnector', () => {
   describe('test handler', () => {
     const testSpec = GithubConnector.test;
 
-    it('returns empty object on successful connection', async () => {
+    it('returns ok with MCP and GraphQL connectivity details', async () => {
+      if (!testSpec) {
+        throw new Error('test handler not defined');
+      }
       const result = await testSpec.handler(mockContext);
 
       expect(mockListTools).toHaveBeenCalled();
-      expect(result).toEqual({});
+      expect(mockExecuteGitHubGraphQL).toHaveBeenCalled();
+      expect(result).toEqual({
+        ok: true,
+        message: 'Connected to GitHub MCP (2 tools) and GraphQL API (viewer: octocat).',
+        mcpToolCount: 2,
+        graphqlViewer: 'octocat',
+        rateLimit: { limit: 5000, remaining: 4999, resetAt: '2026-06-24T12:00:00Z' },
+      });
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
       const { withMcpClient } = jest.requireMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
+      if (!testSpec) {
+        throw new Error('test handler not defined');
+      }
+
       await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');
-    });
-  });
-
-  describe('createIssue action', () => {
-    it('POSTs to the issues endpoint with title and optional fields', async () => {
-      const result = await GithubConnector.actions.createIssue.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        title: 'Bug: something broken',
-        body: 'Steps to reproduce...',
-        assignees: ['octocat'],
-        labels: ['bug'],
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/issues',
-        {
-          title: 'Bug: something broken',
-          body: 'Steps to reproduce...',
-          assignees: ['octocat'],
-          labels: ['bug'],
-        },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-
-    it('omits optional fields when not provided', async () => {
-      await GithubConnector.actions.createIssue.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        title: 'Minimal issue',
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/issues',
-        { title: 'Minimal issue' },
-        expect.any(Object)
-      );
-    });
-  });
-
-  describe('addIssueComment action', () => {
-    it('POSTs a comment to the correct endpoint', async () => {
-      const result = await GithubConnector.actions.addIssueComment.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        issueNumber: 123,
-        body: 'This is a comment.',
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/issues/123/comments',
-        { body: 'This is a comment.' },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-  });
-
-  describe('updateIssue action', () => {
-    it('PATCHes the issue with provided fields', async () => {
-      const result = await GithubConnector.actions.updateIssue.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        issueNumber: 99,
-        state: 'closed',
-        title: 'Fixed title',
-      });
-
-      expect(mockPatch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/issues/99',
-        { state: 'closed', title: 'Fixed title' },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-
-    it('rejects when no update fields are provided', () => {
-      expect(() =>
-        GithubConnector.actions.updateIssue.input.parse({
-          owner: 'elastic',
-          repo: 'kibana',
-          issueNumber: 99,
-        })
-      ).toThrow();
-    });
-  });
-
-  describe('createPullRequest action', () => {
-    it('POSTs to the pulls endpoint with required fields', async () => {
-      const result = await GithubConnector.actions.createPullRequest.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        title: 'Add feature X',
-        head: 'feature/x',
-        base: 'main',
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/pulls',
-        { title: 'Add feature X', head: 'feature/x', base: 'main' },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-
-    it('includes optional fields when provided', async () => {
-      await GithubConnector.actions.createPullRequest.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        title: 'Draft PR',
-        head: 'feature/draft',
-        base: 'main',
-        body: 'WIP description',
-        draft: true,
-        maintainerCanModify: true,
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/pulls',
-        {
-          title: 'Draft PR',
-          head: 'feature/draft',
-          base: 'main',
-          body: 'WIP description',
-          draft: true,
-          maintainer_can_modify: true,
-        },
-        expect.any(Object)
-      );
-    });
-  });
-
-  describe('mergePullRequest action', () => {
-    it('PUTs to the merge endpoint with default merge method', async () => {
-      const input = parse('mergePullRequest', {
-        owner: 'elastic',
-        repo: 'kibana',
-        pullNumber: 42,
-      });
-      const result = await GithubConnector.actions.mergePullRequest.handler(mockContext, input);
-
-      expect(mockPut).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/pulls/42/merge',
-        { merge_method: 'merge' },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-
-    it('includes commit title and message when provided', async () => {
-      await GithubConnector.actions.mergePullRequest.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        pullNumber: 42,
-        commitTitle: 'Merge feature X',
-        commitMessage: 'Adds feature X to the codebase',
-        mergeMethod: 'squash',
-      });
-
-      expect(mockPut).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/pulls/42/merge',
-        {
-          merge_method: 'squash',
-          commit_title: 'Merge feature X',
-          commit_message: 'Adds feature X to the codebase',
-        },
-        expect.any(Object)
-      );
-    });
-  });
-
-  describe('addLabels action', () => {
-    it('POSTs labels to the correct endpoint', async () => {
-      const result = await GithubConnector.actions.addLabels.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        issueNumber: 10,
-        labels: ['bug', 'v8.0'],
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/issues/10/labels',
-        { labels: ['bug', 'v8.0'] },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-  });
-
-  describe('addAssignee action', () => {
-    it('POSTs assignees to the correct endpoint', async () => {
-      const result = await GithubConnector.actions.addAssignee.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        issueNumber: 10,
-        assignees: ['octocat', 'monalisa'],
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/issues/10/assignees',
-        { assignees: ['octocat', 'monalisa'] },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-  });
-
-  describe('createBranch action', () => {
-    it('POSTs to the git refs endpoint', async () => {
-      const result = await GithubConnector.actions.createBranch.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        ref: 'refs/heads/feature/new-branch',
-        sha: 'abc123def456',
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/git/refs',
-        { ref: 'refs/heads/feature/new-branch', sha: 'abc123def456' },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-  });
-
-  describe('createOrUpdateFile action', () => {
-    it('PUTs to the contents endpoint with required fields', async () => {
-      const result = await GithubConnector.actions.createOrUpdateFile.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        path: 'src/README.md',
-        message: 'Add README',
-        content: 'SGVsbG8gV29ybGQ=',
-      });
-
-      expect(mockPut).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/contents/src/README.md',
-        { message: 'Add README', content: 'SGVsbG8gV29ybGQ=' },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-
-    it('includes sha and branch when updating an existing file', async () => {
-      await GithubConnector.actions.createOrUpdateFile.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        path: 'src/README.md',
-        message: 'Update README',
-        content: 'VXBkYXRlZA==',
-        sha: 'existingblobsha',
-        branch: 'feature/update-readme',
-      });
-
-      expect(mockPut).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/contents/src/README.md',
-        {
-          message: 'Update README',
-          content: 'VXBkYXRlZA==',
-          sha: 'existingblobsha',
-          branch: 'feature/update-readme',
-        },
-        expect.any(Object)
-      );
-    });
-
-    it('rejects path traversal segments in path', () => {
-      const base = { owner: 'elastic', repo: 'kibana', message: 'x', content: 'SGk=' };
-      expect(() =>
-        GithubConnector.actions.createOrUpdateFile.input.parse({
-          ...base,
-          path: '../../etc/passwd',
-        })
-      ).toThrow();
-      expect(() =>
-        GithubConnector.actions.createOrUpdateFile.input.parse({
-          ...base,
-          path: 'src/../../../secret',
-        })
-      ).toThrow();
-      expect(() =>
-        GithubConnector.actions.createOrUpdateFile.input.parse({ ...base, path: 'src/./README.md' })
-      ).toThrow();
-    });
-  });
-
-  describe('updatePullRequest action', () => {
-    it('PATCHes the pull request with provided fields', async () => {
-      const result = await GithubConnector.actions.updatePullRequest.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        pullNumber: 55,
-        title: 'Updated PR title',
-        state: 'closed',
-      });
-
-      expect(mockPatch).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/pulls/55',
-        { title: 'Updated PR title', state: 'closed' },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-
-    it('rejects when no update fields are provided', () => {
-      expect(() =>
-        GithubConnector.actions.updatePullRequest.input.parse({
-          owner: 'elastic',
-          repo: 'kibana',
-          pullNumber: 55,
-        })
-      ).toThrow();
-    });
-  });
-
-  describe('requestReviewers action', () => {
-    it('POSTs reviewer requests to the correct endpoint', async () => {
-      const result = await GithubConnector.actions.requestReviewers.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        pullNumber: 42,
-        reviewers: ['octocat'],
-        teamReviewers: ['core-team'],
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/pulls/42/requested_reviewers',
-        { reviewers: ['octocat'], team_reviewers: ['core-team'] },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual(mockWriteResponse);
-    });
-
-    it('rejects when neither reviewers nor teamReviewers are provided', () => {
-      expect(() =>
-        GithubConnector.actions.requestReviewers.input.parse({
-          owner: 'elastic',
-          repo: 'kibana',
-          pullNumber: 42,
-        })
-      ).toThrow();
-    });
-  });
-
-  describe('triggerWorkflow action', () => {
-    it('POSTs a workflow dispatch event with ref', async () => {
-      const result = await GithubConnector.actions.triggerWorkflow.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        workflowId: 'ci.yml',
-        ref: 'main',
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/actions/workflows/ci.yml/dispatches',
-        { ref: 'main' },
-        { headers: { 'X-GitHub-Api-Version': '2022-11-28' } }
-      );
-      expect(result).toEqual({ ok: true });
-    });
-
-    it('includes inputs when provided', async () => {
-      await GithubConnector.actions.triggerWorkflow.handler(mockContext, {
-        owner: 'elastic',
-        repo: 'kibana',
-        workflowId: 'ci.yml',
-        ref: 'main',
-        inputs: { environment: 'staging', debug: 'true' },
-      });
-
-      expect(mockPost).toHaveBeenCalledWith(
-        'https://api.github.com/repos/elastic/kibana/actions/workflows/ci.yml/dispatches',
-        { ref: 'main', inputs: { environment: 'staging', debug: 'true' } },
-        expect.any(Object)
-      );
     });
   });
 });
