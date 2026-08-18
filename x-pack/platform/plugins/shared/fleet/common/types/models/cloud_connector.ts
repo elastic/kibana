@@ -61,10 +61,6 @@ export interface CloudConnectorNewSecretVar {
 
 export interface AwsCloudConnectorVars {
   role_arn: CloudConnectorVar;
-  /**
-   * Optional: the aws package's Identity Federation path does not use an
-   * external ID (ingest-dev#9116). CSPM and Cloud Asset Inventory still set it.
-   */
   external_id?: CloudConnectorSecretVar | CloudConnectorNewSecretVar;
 }
 

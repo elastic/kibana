@@ -296,8 +296,6 @@ describe('CloudConnectorService', () => {
     });
 
     it('should create successfully when AWS external_id is absent (identity federation without external ID)', async () => {
-      // The aws package's Identity Federation path does not use an
-      // external_id (ingest-dev#9116) — absence is valid for AWS.
       const requestWithoutExternalId: CreateCloudConnectorRequest = {
         name: 'test-connector',
         cloudProvider: 'aws',
@@ -1182,8 +1180,6 @@ describe('CloudConnectorService', () => {
     });
 
     it('should allow updating vars with role_arn only (identity federation without external ID)', async () => {
-      // The aws package's Identity Federation path does not use an
-      // external_id (ingest-dev#9116) — absence is valid for AWS.
       mockSoClient.get.mockResolvedValue(mockExistingSavedObject);
       mockSoClient.update.mockResolvedValue(mockExistingSavedObject);
 
@@ -1800,8 +1796,6 @@ describe('CloudConnectorService', () => {
       });
 
       it('should validate successfully when external_id is absent (identity federation without external ID)', () => {
-        // The aws package's Identity Federation path does not use an
-        // external_id (ingest-dev#9116) — absence is valid for AWS.
         const validRequest: CreateCloudConnectorRequest = {
           name: 'test-connector',
           cloudProvider: 'aws',

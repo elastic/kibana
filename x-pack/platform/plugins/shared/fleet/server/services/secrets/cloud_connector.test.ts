@@ -59,8 +59,6 @@ describe('extractAndCreateCloudConnectorSecrets', () => {
 
   describe('AWS', () => {
     it('should return role_arn only when external_id is absent (identity federation without external ID)', async () => {
-      // The aws package's Identity Federation path does not use an
-      // external_id (ingest-dev#9116) — absence is valid for AWS.
       const packagePolicy = buildAwsPackagePolicy({
         role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' },
       });

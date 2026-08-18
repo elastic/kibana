@@ -545,9 +545,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
       }
 
-      // external_id is optional for AWS: the aws package's Identity Federation
-      // path does not use one (ingest-dev#9116). When present (CSPM and Cloud
-      // Asset Inventory flows), it must still be a valid secret reference.
+      // external_id is optional for AWS. When present, it must be a valid
+      // secret reference.
       if (awsVars.external_id !== undefined) {
         const externalIdValue = awsVars.external_id?.value;
         const externalId: CloudConnectorSecretReference | undefined =

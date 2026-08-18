@@ -55,8 +55,6 @@ describe('cloud_connector_helpers', () => {
     });
 
     it('should return true for AWS cloud connector vars without external_id (identity federation without external ID)', () => {
-      // The aws package's Identity Federation path does not use an
-      // external_id (ingest-dev#9116) — role_arn alone identifies AWS vars.
       const varsWithoutExternalId = {
         role_arn: mockRoleArn,
       };

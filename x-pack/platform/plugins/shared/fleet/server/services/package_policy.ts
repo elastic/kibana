@@ -398,8 +398,6 @@ const extractPackagePolicyVars = (
           : vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME]
       ) as CloudConnectorSecretVar | undefined;
 
-      // external_id is optional: the aws package's Identity Federation path
-      // does not use one (ingest-dev#9116)
       const awsCloudConnectorVars: AwsCloudConnectorVars = {
         role_arn: { type: 'text', value: roleArn },
         ...(externalId ? { external_id: externalId } : {}),

@@ -3614,8 +3614,6 @@ describe('Agent policy', () => {
     });
 
     it('should omit credentials_external_id when the AWS connector has no external_id', async () => {
-      // The aws package's Identity Federation path does not use an
-      // external_id (ingest-dev#9116)
       const connectorWithoutExternalId = {
         ...baseConnector,
         attributes: {

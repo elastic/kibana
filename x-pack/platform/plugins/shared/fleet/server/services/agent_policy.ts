@@ -2995,7 +2995,6 @@ function buildVerifierCredentialVars(
   if (provider === 'aws') {
     const awsVars = connectorVars as AwsCloudConnectorVars;
     vars.credentials_role_arn = awsVars.role_arn;
-    // external_id is optional (ingest-dev#9116) — only pass it when set
     if (awsVars.external_id) {
       vars.credentials_external_id = awsVars.external_id as CloudConnectorSecretVar;
     }

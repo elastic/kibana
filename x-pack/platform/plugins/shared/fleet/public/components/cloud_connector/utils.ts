@@ -229,8 +229,6 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   if (!iacTemplateUrl) return undefined;
 
   // URLs without substitution tokens need no cloud identifiers — return as-is.
-  // The aws package's Identity Federation template URL has no tokens since the
-  // ExternalId (and with it the RESOURCE_ID pre-fill) was removed.
   if (
     !iacTemplateUrl.includes(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR) &&
     !iacTemplateUrl.includes(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR)
