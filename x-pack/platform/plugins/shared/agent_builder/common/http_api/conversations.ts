@@ -12,7 +12,16 @@ import type {
   Conversation,
   ConversationWithoutRounds,
 } from '@kbn/agent-builder-common';
-import type { WithPermissions } from './permissions';
+
+export interface ConversationPermissions {
+  rename: boolean;
+  delete: boolean;
+  update_access_control: boolean;
+}
+
+export type WithPermissions<T> = T & {
+  permissions: ConversationPermissions;
+};
 
 export type GetConversationResponse = WithPermissions<Conversation>;
 

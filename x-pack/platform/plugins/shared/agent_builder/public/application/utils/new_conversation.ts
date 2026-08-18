@@ -12,7 +12,7 @@ import type {
 } from '@kbn/agent-builder-common';
 import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { WithPermissions } from '../../../common/http_api/permissions';
+import type { WithPermissions } from '../../../common/http_api/conversations';
 
 export const createNewConversation = ({
   id,

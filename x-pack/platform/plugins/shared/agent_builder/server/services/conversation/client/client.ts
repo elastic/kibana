@@ -37,8 +37,10 @@ import type {
   SerializedMetadataValue,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
-import type { UpdateConversationAccessControlRequestBody } from '../../../../common/http_api/conversations';
-import type { WithPermissions } from '../../../../common/http_api/permissions';
+import type {
+  UpdateConversationAccessControlRequestBody,
+  WithPermissions,
+} from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
   buildReadAccessFilter,

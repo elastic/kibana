@@ -10,7 +10,7 @@ import {
   type ConversationRound,
   ConversationRoundStatus,
 } from '@kbn/agent-builder-common';
-import type { WithPermissions } from '../../common/http_api/permissions';
+import type { WithPermissions } from '../../common/http_api/conversations';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
 export type ConversationServiceMock = jest.Mocked<ConversationService> & {

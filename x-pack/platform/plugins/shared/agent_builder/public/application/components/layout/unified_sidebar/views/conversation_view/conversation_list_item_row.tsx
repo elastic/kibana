@@ -27,7 +27,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import type { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 
-import type { ConversationPermissions } from '../../../../../../../common/http_api/permissions';
+import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { appPaths } from '../../../../../utils/app_paths';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { useToasts } from '../../../../../hooks/use_toasts';

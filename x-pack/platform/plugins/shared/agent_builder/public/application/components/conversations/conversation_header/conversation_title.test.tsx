@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { ConversationPermissions } from '../../../../../common/http_api/permissions';
+import type { ConversationPermissions } from '../../../../../common/http_api/conversations';
 import {
   useConversationPermissions,
   useConversationTitle,
