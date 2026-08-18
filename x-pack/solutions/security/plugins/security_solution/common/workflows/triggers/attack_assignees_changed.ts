@@ -22,12 +22,12 @@ import {
   TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION,
 } from './translations';
 
-export const AttackAssigneesChangedTriggerId = 'securitySolution.attackAssigneesChanged' as const;
+export const AttackAssigneesChangedTriggerId = 'security.attackAssigneesChanged' as const;
 
 const documentationExample = `## Run when an attack is assigned
 \`\`\`yaml
 triggers:
-  - type: securitySolution.attackAssigneesChanged
+  - type: security.attackAssigneesChanged
     on:
       condition: 'event.assigneesToAdd: *'
 \`\`\``;

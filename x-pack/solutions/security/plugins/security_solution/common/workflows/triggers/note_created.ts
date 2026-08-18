@@ -17,12 +17,12 @@ import {
   NOTE_CREATED_TRIGGER_TITLE,
 } from './translations';
 
-export const NoteCreatedTriggerId = 'securitySolution.noteCreated' as const;
+export const NoteCreatedTriggerId = 'security.noteCreated' as const;
 
 const documentationExample = `## Run whenever a note is added to a document
 \`\`\`yaml
 triggers:
-  - type: securitySolution.noteCreated
+  - type: security.noteCreated
 \`\`\``;
 
 const noteCreatedEventSchema = z.object({

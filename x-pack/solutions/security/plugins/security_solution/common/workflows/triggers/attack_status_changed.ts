@@ -22,12 +22,12 @@ import {
   TRIGGER_SCHEMA_STATUS_DESCRIPTION,
 } from './translations';
 
-export const AttackStatusChangedTriggerId = 'securitySolution.attackStatusChanged' as const;
+export const AttackStatusChangedTriggerId = 'security.attackStatusChanged' as const;
 
 const documentationExample = `## Run when attacks are acknowledged
 \`\`\`yaml
 triggers:
-  - type: securitySolution.attackStatusChanged
+  - type: security.attackStatusChanged
     on:
       condition: 'event.status: "acknowledged"'
 \`\`\``;

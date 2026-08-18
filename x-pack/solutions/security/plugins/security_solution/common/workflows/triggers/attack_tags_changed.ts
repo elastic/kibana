@@ -22,12 +22,12 @@ import {
   TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION,
 } from './translations';
 
-export const AttackTagsChangedTriggerId = 'securitySolution.attackTagsChanged' as const;
+export const AttackTagsChangedTriggerId = 'security.attackTagsChanged' as const;
 
 const documentationExample = `## Run when a tag is added to attacks
 \`\`\`yaml
 triggers:
-  - type: securitySolution.attackTagsChanged
+  - type: security.attackTagsChanged
     on:
       condition: 'event.tagsToAdd: "escalated"'
 \`\`\``;

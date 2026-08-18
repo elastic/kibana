@@ -22,12 +22,12 @@ import {
   TRIGGER_SCHEMA_TAGS_TO_REMOVE_DESCRIPTION,
 } from './translations';
 
-export const AlertTagsChangedTriggerId = 'securitySolution.alertTagsChanged' as const;
+export const AlertTagsChangedTriggerId = 'security.alertTagsChanged' as const;
 
 const documentationExample = `## Run when a specific tag is added
 \`\`\`yaml
 triggers:
-  - type: securitySolution.alertTagsChanged
+  - type: security.alertTagsChanged
     on:
       condition: 'event.tagsToAdd: "high-priority"'
 \`\`\``;

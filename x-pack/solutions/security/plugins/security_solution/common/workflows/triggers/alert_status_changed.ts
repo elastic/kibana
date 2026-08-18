@@ -23,12 +23,12 @@ import {
   TRIGGER_SCHEMA_STATUS_DESCRIPTION,
 } from './translations';
 
-export const AlertStatusChangedTriggerId = 'securitySolution.alertStatusChanged' as const;
+export const AlertStatusChangedTriggerId = 'security.alertStatusChanged' as const;
 
 const documentationExample1 = `## Run when alerts are acknowledged
 \`\`\`yaml
 triggers:
-  - type: securitySolution.alertStatusChanged
+  - type: security.alertStatusChanged
     on:
       condition: 'event.status: "acknowledged"'
 \`\`\``;
@@ -36,7 +36,7 @@ triggers:
 const documentationExample2 = `## Process each affected alert sequentially
 \`\`\`yaml
 triggers:
-  - type: securitySolution.alertStatusChanged
+  - type: security.alertStatusChanged
 steps:
   - name: process_each_alert
     type: foreach

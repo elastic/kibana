@@ -17,12 +17,12 @@ import {
   NOTE_UPDATED_TRIGGER_TITLE,
 } from './translations';
 
-export const NoteUpdatedTriggerId = 'securitySolution.noteUpdated' as const;
+export const NoteUpdatedTriggerId = 'security.noteUpdated' as const;
 
 const documentationExample = `## Run whenever a note is updated on a document
 \`\`\`yaml
 triggers:
-  - type: securitySolution.noteUpdated
+  - type: security.noteUpdated
 \`\`\``;
 
 const noteUpdatedEventSchema = z.object({

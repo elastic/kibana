@@ -22,12 +22,12 @@ import {
   TRIGGER_SCHEMA_ASSIGNEES_TO_REMOVE_DESCRIPTION,
 } from './translations';
 
-export const AlertAssigneesChangedTriggerId = 'securitySolution.alertAssigneesChanged' as const;
+export const AlertAssigneesChangedTriggerId = 'security.alertAssigneesChanged' as const;
 
 const documentationExample = `## Run when an alert is assigned
 \`\`\`yaml
 triggers:
-  - type: securitySolution.alertAssigneesChanged
+  - type: security.alertAssigneesChanged
     on:
       condition: 'event.assigneesToAdd: *'
 \`\`\``;
