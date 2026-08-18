@@ -14,6 +14,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { ScoutPage } from '@kbn/scout';
 import { spaceTest, testData, DEFAULT_TIME_RANGE, DEFAULT_CONFIG } from '../fixtures';
 
 const ALPHABETICALLY_SORTED_METRICS = [...DEFAULT_CONFIG.metrics].sort((a, b) =>
@@ -33,6 +34,30 @@ const getSortState = (url: string): string => {
   const [, profileState] = url.match(/_p=([^&]*)/) ?? [];
   return profileState ? decodeURIComponent(profileState) : '';
 };
+
+/**
+ * Polls localStorage until the persisted sort direction for the active Discover tab matches
+ * `direction`, or until the poll times out. Necessary because tab state is written on a trailing
+ * throttle, so an immediate reload/navigate could race the write.
+ */
+const waitForPersistedSortDirection = (page: ScoutPage, direction: string) =>
+  expect
+    .poll(() =>
+      page.evaluate(
+        ([storageKey, dir]) => {
+          const raw = window.localStorage.getItem(storageKey);
+          if (!raw) return false;
+          const { openTabs } = JSON.parse(raw) as {
+            openTabs?: Array<{ profileState?: { metricsState?: { sortDirection?: string } } }>;
+          };
+          return Boolean(
+            openTabs?.some((tab) => tab.profileState?.metricsState?.sortDirection === dir)
+          );
+        },
+        [testData.DISCOVER_TABS_LOCAL_STORAGE_KEY, direction]
+      )
+    )
+    .toBe(true);
 
 spaceTest.describe(
   'Metrics in Discover - Sorting',
@@ -105,26 +130,7 @@ spaceTest.describe(
         // Tab state is written to local storage on a trailing throttle, so an
         // immediate reload could race the write. Poll storage until the sort
         // lands to deterministically test "persisted sort survives a reload".
-        // The `metricsState` key mirrors `METRICS_STATE_DEF.key`
-        // (not importable from Scout specs); keep in sync if that key ever changes.
-        await expect
-          .poll(() =>
-            page.evaluate((storageKey) => {
-              const raw = window.localStorage.getItem(storageKey);
-              if (!raw) {
-                return false;
-              }
-              const { openTabs } = JSON.parse(raw) as {
-                openTabs?: Array<{
-                  profileState?: { metricsState?: { sortDirection?: string } };
-                }>;
-              };
-              return Boolean(
-                openTabs?.some((tab) => tab.profileState?.metricsState?.sortDirection === 'desc')
-              );
-            }, testData.DISCOVER_TABS_LOCAL_STORAGE_KEY)
-          )
-          .toBe(true);
+        await waitForPersistedSortDirection(page, 'desc');
       });
 
       await spaceTest.step('the descending sort survives a full page reload', async () => {
@@ -176,6 +182,9 @@ spaceTest.describe(
         await metricsExperience.setSortDirection('asc');
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
         await expect.poll(() => getSortState(page.url())).not.toContain('sortDirection');
+        // Wait for the asc sort to land in local storage before navigating away,
+        // so the storage state is 'asc' (not the earlier 'desc') when the URL loads.
+        await waitForPersistedSortDirection(page, 'asc');
       });
 
       await spaceTest.step('opening the captured URL applies its sort', async () => {
