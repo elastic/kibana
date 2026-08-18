@@ -27,6 +27,22 @@ const durationFormatSuffixSchema = z.string().optional().meta({
   description: 'Suffix appended to the formatted value.',
 });
 
+/**
+ * Number of decimals
+ */
+const durationFormatDecimalsSchema = z.number().optional().meta({
+  description:
+    'Number of decimal places to display. Defaults to `0`. Ignored for `auto-approximate`.',
+});
+
+/**
+ * Whether to use compact unit suffixes
+ */
+const durationFormatCompactSchema = z.boolean().optional().meta({
+  description:
+    'When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.',
+});
+
 export const durationFormatSchema = z
   .object({
     type: z.literal('duration'),
@@ -38,6 +54,8 @@ export const durationFormatSchema = z
       description:
         'Display time unit: `auto` (precise), `auto-approximate`, or a fixed conversion unit.',
     }),
+    decimals: durationFormatDecimalsSchema,
+    compact: durationFormatCompactSchema,
     suffix: durationFormatSuffixSchema,
   })
   .strict()

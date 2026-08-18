@@ -483,7 +483,6 @@ export const Grafana: ConnectorSpec = {
         );
         const count = Array.isArray(response.data) ? response.data.length : 0;
         return {
-          ok: true,
           message: `Successfully connected to Grafana (${count} alert rule(s) visible).`,
         };
       } catch (error) {

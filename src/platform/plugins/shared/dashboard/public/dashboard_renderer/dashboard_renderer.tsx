@@ -33,7 +33,7 @@ import { loadDashboardApi } from '../dashboard_api/load_dashboard_api';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardInternalContext } from '../dashboard_api/use_dashboard_internal_api';
 import type { DashboardRedirect } from '../dashboard_app/types';
-import { coreServices, screenshotModeService, uiActionsService } from '../services/kibana_services';
+import { coreServices, uiActionsService } from '../services/kibana_services';
 
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
@@ -85,17 +85,15 @@ export function DashboardRenderer({
 }: DashboardRendererProps) {
   const dashboardViewport = useRef(null);
   const dashboardContainerRef = useRef<HTMLElement | null>(null);
-  const [dashboardApi, setDashboardApi] = useState<DashboardApi | undefined>();
-  const [dashboardInternalApi, setDashboardInternalApi] = useState<
-    DashboardInternalApi | undefined
+  const [dashboard, setDashboard] = useState<
+    | {
+        api: DashboardApi;
+        internalApi: DashboardInternalApi;
+        showControlGroup: boolean;
+      }
+    | undefined
   >();
   const [error, setError] = useState<Error | undefined>();
-  /** Default showControlGroup to true. This simplifies embedding DashboardRenderer outside of the dashboard app,
-   *  ensuring that DashboardRenderer, by default, will never fail to render a dashboard due to missing controls.
-   *  Other contexts that want to render the control group in a different location in the UI should explicitly set
-   *  `useControlsIntegration` to `false` in their `getCreationOptions` function
-   */
-  const [showControlGroup, setShowControlGroup] = useState<boolean>(true);
 
   const euiPaddingS = useEuiPaddingSize('s');
   const styles = useMemo(
@@ -119,22 +117,21 @@ export function DashboardRenderer({
 
   useEffect(() => {
     /* In case the locator prop changes, we need to reassign the value in the container */
-    if (dashboardApi) dashboardApi.locator = locator;
-  }, [dashboardApi, locator]);
+    if (dashboard?.api) dashboard.api.locator = locator;
+  }, [dashboard?.api, locator]);
 
   useEffect(() => {
     if (
-      dashboardInternalApi &&
-      dashboardInternalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
+      dashboard &&
+      dashboard?.internalApi.dashboardContainerRef$.value !== dashboardContainerRef.current
     ) {
-      dashboardInternalApi.setDashboardContainerRef(dashboardContainerRef.current);
+      dashboard.internalApi.setDashboardContainerRef(dashboardContainerRef.current);
     }
-  }, [dashboardInternalApi]);
+  }, [dashboard]);
 
   useEffect(() => {
     if (error) setError(undefined);
-    if (dashboardApi) setDashboardApi(undefined);
-    if (dashboardInternalApi) setDashboardInternalApi(undefined);
+    if (dashboard) setDashboard(undefined);
 
     let canceled = false;
     let cleanupDashboardApi: (() => void) | undefined;
@@ -147,11 +144,12 @@ export function DashboardRenderer({
         }
 
         cleanupDashboardApi = results.cleanup;
-        setDashboardApi(results.api);
-        setDashboardInternalApi(results.internalApi);
+        setDashboard({
+          api: results.api,
+          internalApi: results.internalApi,
+          showControlGroup: results.useControlsIntegration ?? true,
+        });
         onApiAvailable?.(results.api, results.internalApi);
-        if (typeof results.useControlsIntegration !== 'undefined')
-          setShowControlGroup(results.useControlsIntegration);
       })
       .catch((err) => {
         if (!canceled) {
@@ -172,13 +170,11 @@ export function DashboardRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedObjectId]);
 
-  const isDashboardViewportLoading = !dashboardApi && !error;
+  const isDashboardViewportLoading = !dashboard && !error;
 
-  const viewportClasses = classNames(
-    'dashboardViewport',
-    { 'dashboardViewport--screenshotMode': screenshotModeService.isScreenshotMode() },
-    { 'dashboardViewport--loading': isDashboardViewportLoading }
-  );
+  const viewportClasses = classNames('dashboardViewport', {
+    'dashboardViewport--loading': isDashboardViewportLoading,
+  });
 
   const loadingSpinner = showPlainSpinner ? (
     <EuiLoadingSpinner size="xxl" />
@@ -206,14 +202,13 @@ export function DashboardRenderer({
       );
     }
 
-    return dashboardApi && dashboardInternalApi ? (
+    return dashboard ? (
       <div
-        className="dashboardContainer"
         data-test-subj="dashboardContainer"
         css={styles.renderer}
         ref={(e) => {
-          if (dashboardInternalApi && dashboardInternalApi.dashboardContainerRef$.value !== e) {
-            dashboardInternalApi.setDashboardContainerRef(e);
+          if (dashboard.internalApi.dashboardContainerRef$.value !== e) {
+            dashboard.internalApi.setDashboardContainerRef(e);
           }
           dashboardContainerRef.current = e;
         }}
@@ -223,9 +218,9 @@ export function DashboardRenderer({
           coreStart={{ chrome: coreServices.chrome, customBranding: coreServices.customBranding }}
         >
           <KibanaContextProvider services={{ uiActions: uiActionsService }}>
-            <DashboardContext.Provider value={dashboardApi}>
-              <DashboardInternalContext.Provider value={dashboardInternalApi}>
-                {showControlGroup && <DashboardControlsRenderer />}
+            <DashboardContext.Provider value={dashboard.api}>
+              <DashboardInternalContext.Provider value={dashboard.internalApi}>
+                {dashboard.showControlGroup && <DashboardControlsRenderer />}
                 <DashboardViewport />
               </DashboardInternalContext.Provider>
             </DashboardContext.Provider>
@@ -239,10 +234,10 @@ export function DashboardRenderer({
 
   return (
     <div ref={dashboardViewport} className={viewportClasses} css={styles.renderer}>
-      {dashboardViewport?.current && dashboardApi && (
+      {dashboardViewport?.current && dashboard && (
         <ParentClassController
           viewportRef={dashboardViewport.current}
-          dashboardApi={dashboardApi}
+          dashboardApi={dashboard.api}
         />
       )}
       {renderDashboardContents()}

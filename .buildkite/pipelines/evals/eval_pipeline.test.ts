@@ -8,6 +8,7 @@
  */
 
 import { parse as yamlParse } from 'yaml';
+import { DEFAULT_AGENT_IMAGE_CONFIG } from '../../pipeline-utils/agent_images';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
@@ -237,6 +238,14 @@ describe('eval_pipeline', () => {
       expect(yaml).not.toContain("exit_status: '-1'");
       // A single generic retry is still allowed.
       expect(yaml).toContain("exit_status: '*'");
+    });
+  });
+
+  describe('getEvalPipeline agent disk', () => {
+    it('requests an explicit boot disk so ES stays above its merge disk watermark', () => {
+      const yaml = getEvalPipeline('evals:agent-builder,models:eis/openai-gpt-5.4') as string;
+
+      expect(yaml).toContain(`diskSizeGb: ${DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb}`);
     });
   });
 });

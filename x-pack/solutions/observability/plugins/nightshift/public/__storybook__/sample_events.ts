@@ -13,10 +13,12 @@ import type {
   QueryOccurrencesResponse,
   SignalEntry,
   SignificantEvent,
+  SignificantEventResponse,
 } from '@kbn/significant-events-schema';
 
-export const checkoutEvent: SignificantEvent = {
+export const checkoutEvent: SignificantEventResponse = {
   '@timestamp': '2026-07-24T09:42:00.000Z',
+  created_at: '2026-07-24T09:42:00.000Z',
   event_id: 'checkout-latency',
   event_uuid: 'checkout-latency-v1',
   status: 'open',
@@ -39,6 +41,13 @@ export const checkoutEvent: SignificantEvent = {
       feature_id: 'checkout-api',
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
+    },
+    // Spans a second stream so one event alone can show a partial knowledge-indicator failure.
+    {
+      type: 'entity',
+      feature_id: 'inventory-service',
+      name: 'inventory-service',
+      stream_name: 'logs.inventory-service',
     },
   ],
 };
@@ -113,6 +122,7 @@ export const checkoutDetectionSignal: SignalEntry = {
   stream_name: 'logs.checkout-api',
   description:
     'P95 latency for `checkout-api` rose from 420 ms to 2.8 s immediately after the latest deployment.',
+  verdict: 'confirms',
   evidence: {
     esql_query:
       'FROM logs.checkout-api\n| STATS p95_latency = PERCENTILE(transaction.duration, 95) BY DATE_TRUNC(5 minutes, @timestamp)',
@@ -127,7 +137,7 @@ export const checkoutDetectionSignal: SignalEntry = {
   },
 };
 
-export const checkoutEventWithSignals: SignificantEvent = {
+export const checkoutEventWithSignals: SignificantEventResponse = {
   ...checkoutEvent,
   signals: [checkoutDetectionSignal],
 };

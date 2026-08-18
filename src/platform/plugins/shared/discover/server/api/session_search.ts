@@ -8,6 +8,8 @@
  */
 
 import { getMeta } from '@kbn/as-code-shared-schemas';
+import { toAsCodeTags } from '@kbn/as-code-shared-transforms';
+import { findWithTagFilter } from '@kbn/as-code-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import type { DiscoverSessionAttributes } from '@kbn/saved-search-plugin/server';
@@ -20,15 +22,19 @@ export const searchDiscoverSessions = async (
   const { core } = await requestContext.resolve(['core']);
   const { query, page, per_page: perPage } = params;
 
-  const findResponse = await core.savedObjects.client.find<DiscoverSessionAttributes>({
-    type: SavedSearchType,
-    search: query,
-    searchFields: ['title^3', 'description'],
-    fields: ['title', 'description'],
-    page,
-    perPage,
-    defaultSearchOperator: 'AND',
-  });
+  const findResponse = await findWithTagFilter<DiscoverSessionAttributes>(
+    core.savedObjects.client,
+    {
+      type: SavedSearchType,
+      search: query,
+      searchFields: ['title^3', 'description'],
+      fields: ['title', 'description'],
+      page,
+      perPage,
+      defaultSearchOperator: 'AND',
+    },
+    params
+  );
 
   return {
     data: findResponse.saved_objects.map((savedObject) => ({
@@ -36,6 +42,7 @@ export const searchDiscoverSessions = async (
       data: {
         title: savedObject.attributes.title,
         description: savedObject.attributes.description,
+        tags: toAsCodeTags(savedObject.references).tags,
       },
       meta: getMeta(savedObject),
     })),

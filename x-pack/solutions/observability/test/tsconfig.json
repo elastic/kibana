@@ -70,7 +70,6 @@
     "@kbn/apm-data-view",
     "@kbn/rison",
     "@kbn/dataset-quality-plugin",
-    "@kbn/metrics-data-access-plugin",
     "@kbn/slo-plugin",
     "@kbn/slo-schema",
     "@kbn/cases-plugin",

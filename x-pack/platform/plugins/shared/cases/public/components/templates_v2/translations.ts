@@ -38,9 +38,17 @@ export const TEMPLATE_METADATA_SECTION_DESCRIPTION = i18n.translate(
   'xpack.cases.templates.templateMetadataSectionDescription',
   {
     defaultMessage:
-      'Identifies this template in the templates list. Saved with the template and edited here — these details are not part of the YAML definition and do not change case defaults.',
+      'Describes this template in the templates list. Saved with the template — these details are not part of the YAML definition and do not change case defaults. The template name is edited in the page title.',
   }
 );
+
+export const UNTITLED_TEMPLATE = i18n.translate('xpack.cases.templates.untitledTemplate', {
+  defaultMessage: 'Untitled template',
+});
+
+export const EDIT_TEMPLATE_NAME = i18n.translate('xpack.cases.templates.editTemplateName', {
+  defaultMessage: 'Edit template name',
+});
 
 export const TEMPLATE_NAME_LABEL = i18n.translate('xpack.cases.templates.templateNameLabel', {
   defaultMessage: 'Template name',
@@ -176,10 +184,9 @@ export const FIX_FIELDS_YAML_ERRORS = i18n.translate('xpack.cases.templates.fixF
   defaultMessage: 'Please fix errors in the Fields YAML editor.',
 });
 
-export const PROVIDE_TEMPLATE_NAME_IN_CONFIGURATION = i18n.translate(
-  'xpack.cases.templates.provideTemplateNameInConfiguration',
-  { defaultMessage: 'Please provide a template name in the Configuration tab.' }
-);
+export const PROVIDE_TEMPLATE_NAME = i18n.translate('xpack.cases.templates.provideTemplateName', {
+  defaultMessage: 'Name this template in the page title before saving.',
+});
 
 export const FIX_CONFIGURATION_ERRORS = i18n.translate(
   'xpack.cases.templates.fixConfigurationErrors',
@@ -190,7 +197,7 @@ export const FIX_FIELDS_YAML_AND_TEMPLATE_NAME = i18n.translate(
   'xpack.cases.templates.fixFieldsYamlAndTemplateName',
   {
     defaultMessage:
-      'Please fix errors in the Fields YAML editor and provide a template name in the Configuration tab.',
+      'Name this template in the page title and fix the errors in the Fields YAML editor.',
   }
 );
 
@@ -909,6 +916,16 @@ export const CANCEL_FIELD_EDIT = i18n.translate('xpack.cases.templates.cancelFie
   defaultMessage: 'Cancel field edit',
 });
 
+export const FIELD_VALUE_NOT_SET = i18n.translate('xpack.cases.templates.fieldValueNotSet', {
+  defaultMessage: 'No value',
+});
+
+export const EDIT_FIELD_LABEL = (label: string) =>
+  i18n.translate('xpack.cases.templates.editFieldAriaLabel', {
+    defaultMessage: 'Edit {label}',
+    values: { label },
+  });
+
 export const FIELD_TYPE_TITLE_INPUT_TEXT = i18n.translate(
   'xpack.cases.templates.fieldType.inputText',
   { defaultMessage: 'Text Input' }
@@ -1228,3 +1245,25 @@ export const CONDITION_REQUIRED_WHEN = i18n.translate(
   'xpack.cases.templates.actionsMenu.condition.requiredWhen',
   { defaultMessage: 'Require when…' }
 );
+
+export const UNSAVED_FIELD_CHANGES = (count: number) =>
+  i18n.translate('xpack.cases.templates.unsavedFieldChanges', {
+    values: { count },
+    defaultMessage: '{count, plural, one {# unsaved field} other {# unsaved fields}}',
+  });
+
+export const SECTION_EDIT_CANCEL = i18n.translate('xpack.cases.templates.sectionEditCancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const SECTION_EDIT_SAVE = i18n.translate('xpack.cases.templates.sectionEditSave', {
+  defaultMessage: 'Save',
+});
+
+export const REVERT_FIELD = i18n.translate('xpack.cases.templates.revertField', {
+  defaultMessage: 'Revert',
+});
+
+export const FIELD_MODIFIED = i18n.translate('xpack.cases.templates.fieldModified', {
+  defaultMessage: 'Modified',
+});

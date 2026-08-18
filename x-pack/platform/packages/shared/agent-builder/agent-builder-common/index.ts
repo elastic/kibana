@@ -115,6 +115,7 @@ export { EsResourceType } from './base/resources';
 export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
+  agentBuilderDefaultAiIndexId,
   AgentType,
   chatAgentTypeId,
   AgentAccessControlMode,
@@ -148,12 +149,19 @@ export {
   type AgentDeleteRequest,
 } from './agents';
 export {
+  CONVERSATION_ACCESS_CONTROL_MAX_ENTRIES,
+  CONVERSATION_ACCESS_CONTROL_PRINCIPAL_ID_MAX_LENGTH,
   ConversationAccessControlMode,
+  ConversationAccessControlRole,
   getDefaultConversationAccessControl,
+  isConversationAccessControlRole,
+  normalizeConversationAccessControl,
   type RoundInput,
   type ConverseInput,
   type AssistantResponse,
   type ConversationAccessControl,
+  type ConversationAccessControlEntry,
+  type ConversationAccessControlPrincipalType,
   type ToolCallWithResult,
   type ConversationRound,
   type Conversation,
@@ -260,6 +268,30 @@ export {
   createRelevantSkillsStep,
   isRelevantSkillsStep,
   type ConversationListOptions,
+  CONVERSATION_SCHEMA_VERSION,
+  EventActorType,
+  TimelineTriggerType,
+  TimelineEventType,
+  type EventActor,
+  type BaseTimelineEventInput,
+  type BaseTimelineEvent,
+  type UserMessageEventData,
+  type UserMessageEvent,
+  type PromptResponseEventData,
+  type PromptResponseEvent,
+  type ExecutionStartedEventData,
+  type ExecutionStartedEvent,
+  type PromptRequestedEventData,
+  type PromptRequestedEvent,
+  type ExecutionCompletedEventData,
+  type ExecutionCompletedEvent,
+  type ExecutionFailedEventData,
+  type ExecutionFailedEvent,
+  type ExecutionAbortedEventData,
+  type ExecutionAbortedEvent,
+  type TimelineEvent,
+  type TimelineEventInput,
+  type ActiveExecution,
 } from './chat';
 export {
   type PublicSkillDefinition,
@@ -311,3 +343,10 @@ export {
   OAuthClientType,
 } from './oauth_clients';
 export { MCP_SERVER_PATH } from './mcp';
+export type {
+  ConversationTemplate,
+  ConversationTemplateInputType,
+  ConversationTemplateFieldDefinition,
+  MetadataFieldValue,
+  SerializedMetadataValue,
+} from './templates';

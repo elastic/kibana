@@ -8,18 +8,18 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type {
-  AlertEpisode,
   AlertEpisodeEsqlRow,
   EpisodesFilterState,
   EpisodesSortState,
 } from '@kbn/alerting-v2-common-queries';
+import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
 import type { UseAlertingEpisodesDataViewOptions } from './use_alerting_episodes_data_view';
 import { useAlertingEpisodesDataView } from './use_alerting_episodes_data_view';
 import { fetchAlertingEpisodes } from '../apis/fetch_alerting_episodes';
-import { normalizeTags } from '../utils/normalize_tags';
 
 export interface UseFetchAlertingEpisodesQueryOptions {
   pageSize: number;

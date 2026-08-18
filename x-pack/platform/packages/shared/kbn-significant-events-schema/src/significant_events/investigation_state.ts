@@ -8,7 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { severitySchema } from './common_schemas';
 import { significantEventStatusSchema } from './events';
-import { MAX_TEXT_LENGTH } from './constants';
+import {
+  MAX_MEDIUM_STRING_LENGTH,
+  MAX_SHORT_STRING_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TIMESTAMP_LENGTH,
+} from './constants';
 
 /**
  * Name of the `tool_ui` custom event emitted by the investigation agent's progress-report
@@ -25,6 +30,70 @@ export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const
  */
 export const INVESTIGATE_STEP_ID = 'investigate' as const;
 
+/**
+ * A source file the agent read, recorded as parts rather than a URL so that consumers — not the
+ * model — decide what is safe to link.
+ *
+ * `source` records how the code was reached, for provenance; it deliberately does NOT decide
+ * whether a link can be built.
+ */
+const investigationEvidenceCodeSchema = z.object({
+  /**
+   * How this reference was obtained: `github_connector` for a GitHub connector, `code_search` for
+   * Semantic Code Search. Model-reported, so treat it as advisory — it selects which URL shape a
+   * consumer may build, never as proof of where the code lives.
+   */
+  source: z.enum(['github_connector', 'code_search']),
+  /** Repository in `owner/name` form, e.g. `elastic/kibana`. */
+  repo: z.string().max(MAX_SHORT_STRING_LENGTH),
+  /** Repository-relative file path, e.g. `src/recommendationservice/recommendation_server.py`. */
+  path: z.string().max(MAX_MEDIUM_STRING_LENGTH),
+  /**
+   * Hostname the code can be browsed on, taken from the origin of the URL the tool itself
+   * returned — never inferred from `repo`. Absent when the tool reported no browsable location,
+   * as Semantic Code Search does: it records a bare `owner/repo` with no remote.
+   */
+  host: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  /**
+   * Commit SHA the file was read at. GitHub resolves a branch name to a SHA in the URLs it
+   * returns, so this is normally available without asking the model to look it up. Absent when the
+   * tool reported no revision — in which case no link is built, because a branch-pinned link
+   * drifts away from the code the investigation actually saw.
+   */
+  ref: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+});
+export type InvestigationEvidenceCode = z.infer<typeof investigationEvidenceCodeSchema>;
+
+/**
+ * One observation supporting a claim the investigation makes, together with pointers back to the
+ * concrete artefacts it rests on, so a reader can verify it instead of trusting it.
+ *
+ */
+const investigationEvidenceSchema = z.object({
+  /** What was observed and why it bears on the claim. Doubles as the label for its link. */
+  description: z.string().max(MAX_TEXT_LENGTH),
+  /** The exact ES|QL query executed to gather this evidence, when one was run. */
+  esql_query: z.string().max(MAX_TEXT_LENGTH).optional(),
+  /**
+   * Absolute time window `esql_query` was evaluated over, as ISO 8601 timestamps. Required for
+   * the query to be openable: the agent's queries embed absolute bounds in their WHERE clauses,
+   * so handing Discover the query without its window would apply Discover's own default range on
+   * top and land the reader on zero rows. Without it, consumers show the query but do not link it.
+   */
+  time_range: z
+    .object({
+      from: z.string().max(MAX_TIMESTAMP_LENGTH),
+      to: z.string().max(MAX_TIMESTAMP_LENGTH),
+    })
+    .optional(),
+  /** The source file backing this evidence, when the agent read code. */
+  code: investigationEvidenceCodeSchema.optional(),
+});
+export type InvestigationEvidence = z.infer<typeof investigationEvidenceSchema>;
+
+/** Max evidence entries per hypothesis. Keep in sync with the YAML maxItems. */
+export const MAX_HYPOTHESIS_EVIDENCE = 3;
+
 const investigationHypothesisStatusSchema = z.enum(['investigating', 'dismissed', 'confirmed']);
 
 const investigationHypothesisSchema = z.object({
@@ -35,6 +104,10 @@ const investigationHypothesisSchema = z.object({
   status: investigationHypothesisStatusSchema,
   /** Why this hypothesis was dismissed/confirmed, or the current reasoning while investigating. */
   reason: z.string().max(MAX_TEXT_LENGTH).optional(),
+  /**
+   * What the verdict rests on.
+   */
+  evidence: z.array(investigationEvidenceSchema).max(MAX_HYPOTHESIS_EVIDENCE).optional(),
 });
 export type InvestigationHypothesis = z.infer<typeof investigationHypothesisSchema>;
 
@@ -44,14 +117,6 @@ export const MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE = 10;
 /** Max number of field-change proposals an investigation can emit. Keep in sync with the YAML. */
 export const MAX_SIGNIFICANT_EVENT_UPDATES = 3;
 
-const significantEventUpdateEvidenceSchema = z.object({
-  /** What was observed and why it bears on the proposed change. */
-  description: z.string().max(MAX_TEXT_LENGTH),
-  /** The exact ES|QL query executed to gather this evidence, when one was run. */
-  esql_query: z.string().max(MAX_TEXT_LENGTH).optional(),
-});
-export type SignificantEventUpdateEvidence = z.infer<typeof significantEventUpdateEvidenceSchema>;
-
 /**
  * Shared base fields for every event-update branch. Spread directly into each `z.object` call
  * (never `.extend` a shared base) so `z.toJSONSchema` emits standalone objects without `allOf`
@@ -60,10 +125,7 @@ export type SignificantEventUpdateEvidence = z.infer<typeof significantEventUpda
 const significantEventUpdateBase = {
   /** Why this field should change, referencing the confirmed findings (1–2 sentences). */
   reason: z.string().max(MAX_TEXT_LENGTH),
-  evidence: z
-    .array(significantEventUpdateEvidenceSchema)
-    .min(1)
-    .max(MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE),
+  evidence: z.array(investigationEvidenceSchema).min(1).max(MAX_SIGNIFICANT_EVENT_UPDATE_EVIDENCE),
 };
 
 /**

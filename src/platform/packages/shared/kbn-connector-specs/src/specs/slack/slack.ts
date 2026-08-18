@@ -1107,35 +1107,20 @@ export const Slack: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       ctx.log.debug('Slack test handler');
-
-      try {
-        // Test connection by calling auth.test which validates the token
-        const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
-
-        if (!response.data.ok) {
-          return {
-            ok: false,
-            message: formatSlackApiErrorMessage({
-              action: 'test',
-              responseData: response.data,
-              responseHeaders: response.headers,
-            }),
-          };
-        }
-
-        const teamName = response.data.team || 'Unknown';
-        return {
-          ok: true,
-          message: i18n.translate('core.kibanaConnectorSpecs.slack.test.successMessage', {
-            defaultMessage: 'Successfully connected to Slack workspace: {teamName}',
-            values: { teamName },
-          }),
-        };
-      } catch (error) {
-        const err = error as { message?: string };
-        return { ok: false, message: err.message ?? 'Unknown error' };
+      // Test connection by calling auth.test which validates the token
+      const response = await ctx.client.get(`${SLACK_API_BASE}/auth.test`);
+      if (!response.data.ok) {
+        throw new Error(
+          formatSlackApiErrorMessage({
+            action: 'test',
+            responseData: response.data,
+            responseHeaders: response.headers,
+          })
+        );
       }
+      return {};
     },
+    enabled: true,
   },
 
   skill: [
