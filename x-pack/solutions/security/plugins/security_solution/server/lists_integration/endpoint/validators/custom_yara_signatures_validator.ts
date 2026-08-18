@@ -43,7 +43,10 @@ const YaraEntrySchema = schema.object({
   type: schema.literal('match'),
   value: schema.string({
     minLength: 1,
-    maxLength: MAX_YARA_RULE_CONTENT_BYTE_LENGTH,
+    // maxLength is only set for auditing purposes, the actual validation is done by validateYaraRuleContentByteLength.
+    // We set it to Infinity in order to not mix error messages between the two validatiors: this way we always show the
+    // correct error message mentioning `bytes` instead of `characters` coming from validateYaraRuleContentByteLength.
+    maxLength: Number.POSITIVE_INFINITY,
     validate: validateYaraRuleContentByteLength,
   }),
 });
