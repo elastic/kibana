@@ -113,7 +113,7 @@ const serviceGroupServicesRoute = createApmServerRoute({
   params: routeDefinitions.serviceGroups.services.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<LookupServicesRouteResponse> => {
-    const { params, context } = resources;
+    const { params, context, plugins } = resources;
     const { kuery = '', start, end } = params.query;
     const {
       uiSettings: { client: uiSettingsClient },
@@ -122,12 +122,16 @@ const serviceGroupServicesRoute = createApmServerRoute({
       getApmEventClient(resources),
       uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
+    const apmDataAccessServices = await getApmDataAccessServices({ apmEventClient, plugins });
+    const sources = await apmDataAccessServices.getDocumentSources({ start, end, kuery });
+
     const items = await lookupServices({
       apmEventClient,
       kuery,
       start,
       end,
       maxNumberOfServices,
+      sources,
     });
     return { items };
   },
