@@ -26,6 +26,7 @@ import type {
   User,
   CaseAssignees,
   CaseCustomFields,
+  WorkflowUserAction,
 } from '../../../common/types/domain';
 import type { CasesActivityV2WriterContract } from '../../cases_analytics_v2';
 import type {
@@ -116,6 +117,11 @@ export interface BuilderParameters {
       payload: {
         observables: { actionType: ObservablesActionType; count: number };
       };
+    };
+  };
+  workflow: {
+    parameters: {
+      payload: WorkflowUserAction['payload'];
     };
   };
   extended_fields: {

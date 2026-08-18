@@ -22,6 +22,7 @@ import { NoopUserActionBuilder } from './builders/noop';
 import { CategoryUserActionBuilder } from './builders/category';
 import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
 import { ObservablesUserActionBuilder } from './builders/observables';
+import { WorkflowUserActionBuilder } from './builders/workflow';
 import { ExtendedFieldsUserActionBuilder } from './builders/extended_fields';
 import { TemplateUserActionBuilder } from './builders/template';
 
@@ -41,6 +42,7 @@ const builderMap = {
   delete_case: NoopUserActionBuilder,
   customFields: CustomFieldsUserActionBuilder,
   observables: ObservablesUserActionBuilder,
+  workflow: WorkflowUserActionBuilder,
   extended_fields: ExtendedFieldsUserActionBuilder,
   template: TemplateUserActionBuilder,
 };

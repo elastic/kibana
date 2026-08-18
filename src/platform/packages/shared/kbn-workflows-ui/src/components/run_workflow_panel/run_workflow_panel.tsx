@@ -15,7 +15,11 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ToMountPointParams } from '@kbn/react-kibana-mount';
-import type { RunWorkflowResponseDto, WorkflowListItemDto } from '@kbn/workflows';
+import type {
+  RunWorkflowResponseDto,
+  WorkflowExecutionContext,
+  WorkflowListItemDto,
+} from '@kbn/workflows';
 import {
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
@@ -40,6 +44,8 @@ export type WorkflowRunInputs = RunWorkflowOptions['inputs'];
 export interface RunWorkflowPanelProps {
   /** The inputs payload to pass when executing the workflow. */
   inputs: WorkflowRunInputs;
+  /** Product entity associated with the workflow execution. */
+  executionContext?: WorkflowExecutionContext;
   /**
    * Server-side managed workflow visibility filter. Only managed workflows tagged with a
    * matching managedVisibilityContexts value (selector or solution) are returned by the server.
@@ -71,6 +77,7 @@ interface RunWorkflowPanelServices {
 /** A shared panel that lets users select and execute a workflow with arbitrary inputs. */
 export const RunWorkflowPanel = ({
   inputs,
+  executionContext,
   visibility,
   sortWorkflow,
   filterWorkflow,
@@ -132,6 +139,7 @@ export const RunWorkflowPanel = ({
         {
           id: selectedId,
           inputs: { ...extraInputs, ...inputs },
+          ...(executionContext && { executionContext }),
         },
         {
           onSuccess: (data: RunWorkflowResponseDto) => {
@@ -156,6 +164,11 @@ export const RunWorkflowPanel = ({
                 ),
               }),
             });
+            if (data.followUp?.status === 'failed') {
+              notifications.toasts.addWarning({
+                title: i18n.WORKFLOW_FOLLOW_UP_FAILED_WARNING,
+              });
+            }
           },
           onError: (err) => {
             notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
@@ -169,7 +182,17 @@ export const RunWorkflowPanel = ({
         }
       );
     },
-    [application, selectedId, runWorkflow, inputs, notifications, rendering, onClose, onExecute]
+    [
+      application,
+      selectedId,
+      runWorkflow,
+      inputs,
+      executionContext,
+      notifications,
+      rendering,
+      onClose,
+      onExecute,
+    ]
   );
 
   const handleExecuteClick = useCallback(() => {

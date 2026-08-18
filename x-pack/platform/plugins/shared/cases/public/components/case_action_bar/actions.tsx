@@ -46,6 +46,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
     openModal: openRunWorkflowModal,
     closeModal: closeRunWorkflowModal,
     inputs: workflowInputs,
+    executionContext: workflowExecutionContext,
     sortWorkflow: workflowSortWorkflow,
   } = useRunCaseWorkflow({ caseData });
 
@@ -71,7 +72,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
         ? [
             {
               type: AttachmentActionType.BUTTON as const,
-              iconType: 'playFilled',
+              iconType: 'play',
               label: workflowI18n.RUN_WORKFLOW,
               onClick: openRunWorkflowModal,
             },
@@ -164,6 +165,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
       {isRunWorkflowModalOpen && (
         <RunCaseWorkflowModal
           inputs={workflowInputs}
+          executionContext={workflowExecutionContext}
           sortWorkflow={workflowSortWorkflow}
           onClose={closeRunWorkflowModal}
         />

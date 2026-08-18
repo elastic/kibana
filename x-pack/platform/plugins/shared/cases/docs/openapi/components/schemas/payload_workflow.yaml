@@ -1,0 +1,35 @@
+type: object
+required:
+  - workflow
+  - origin
+properties:
+  workflow:
+    type: object
+    required:
+      - id
+      - name
+      - executionId
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      executionId:
+        type: string
+  origin:
+    type: object
+    required:
+      - type
+      - id
+    properties:
+      type:
+        type: string
+        enum:
+          - cases.case
+          - cases.observable
+          - cases.alert
+          - cases.alerts
+          - cases.comment
+          - cases.attachment
+      id:
+        type: string

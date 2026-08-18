@@ -86,6 +86,30 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     triggeredBy: {
       type: 'keyword',
     },
+    executionContext: {
+      type: 'object',
+      dynamic: false,
+      properties: {
+        type: {
+          type: 'keyword',
+        },
+        id: {
+          type: 'keyword',
+        },
+        parent: {
+          type: 'object',
+          dynamic: false,
+          properties: {
+            type: {
+              type: 'keyword',
+            },
+            id: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
     eventChainDepth: {
       type: 'long',
     },

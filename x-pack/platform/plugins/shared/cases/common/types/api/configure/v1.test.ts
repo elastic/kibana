@@ -27,6 +27,7 @@ import {
   MAX_TEMPLATE_NAME_LENGTH,
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
 } from '../../../constants';
 import { CaseSeverity } from '../../domain';
 import { ConnectorTypes } from '../../domain/connector/v1';
@@ -42,6 +43,7 @@ import {
   NumberCustomFieldConfigurationRt,
   TemplateConfigurationRt,
   ObservableTypesConfigurationRt,
+  WorkflowTagsConfigurationRt,
 } from './v1';
 import {
   CaseConfigureRequestParamsSchema,
@@ -54,6 +56,7 @@ import {
   NumberCustomFieldConfigurationSchema,
   TemplateConfigurationSchema,
   ObservableTypesConfigurationSchema,
+  WorkflowTagsConfigurationSchema,
 } from '../../api_zod/configure/v1';
 
 describe('configure', () => {
@@ -1195,6 +1198,27 @@ describe('configure', () => {
       ]);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual([{ key: 'observable_key_1', label: 'Observable Label 1' }]);
+    });
+  });
+
+  describe('WorkflowTagsConfigurationRt', () => {
+    it('accepts workflow tags and an explicit empty array', () => {
+      expect(WorkflowTagsConfigurationRt.decode(['Cases', 'Operations'])._tag).toBe('Right');
+      expect(WorkflowTagsConfigurationSchema.safeParse([]).success).toBe(true);
+    });
+
+    it('rejects workflow tags that exceed the maximum length', () => {
+      const workflowTags = ['a'.repeat(MAX_LENGTH_PER_TAG + 1)];
+
+      expect(WorkflowTagsConfigurationRt.decode(workflowTags)._tag).toBe('Left');
+      expect(WorkflowTagsConfigurationSchema.safeParse(workflowTags).success).toBe(false);
+    });
+
+    it('rejects too many workflow tags', () => {
+      const workflowTags = new Array(MAX_WORKFLOW_TAGS_PER_CONFIGURATION + 1).fill('Cases');
+
+      expect(WorkflowTagsConfigurationRt.decode(workflowTags)._tag).toBe('Left');
+      expect(WorkflowTagsConfigurationSchema.safeParse(workflowTags).success).toBe(false);
     });
   });
 });

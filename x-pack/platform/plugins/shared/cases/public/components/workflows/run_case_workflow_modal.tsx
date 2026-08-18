@@ -13,6 +13,7 @@ import * as i18n from './translations';
 
 interface RunCaseWorkflowModalProps
   extends Pick<RunWorkflowPanelProps, 'inputs' | 'sortWorkflow' | 'filterWorkflow' | 'onExecute'> {
+  executionContext: NonNullable<RunWorkflowPanelProps['executionContext']>;
   onClose: () => void;
 }
 
@@ -22,19 +23,26 @@ interface RunCaseWorkflowModalProps
  */
 export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
   inputs,
+  executionContext,
   sortWorkflow,
   filterWorkflow,
   onClose,
   onExecute,
 }) => {
   return (
-    <EuiModal onClose={onClose} style={{ width: 400 }} data-test-subj="cases-run-workflow-modal">
+    <EuiModal
+      aria-label={i18n.SELECT_WORKFLOW_TITLE}
+      onClose={onClose}
+      style={{ width: 400 }}
+      data-test-subj="cases-run-workflow-modal"
+    >
       <EuiModalHeader>
         <EuiModalHeaderTitle size="xs">{i18n.SELECT_WORKFLOW_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <RunWorkflowPanel
           inputs={inputs}
+          executionContext={executionContext}
           sortWorkflow={sortWorkflow}
           filterWorkflow={filterWorkflow}
           onClose={onClose}
@@ -44,3 +52,5 @@ export const RunCaseWorkflowModal: React.FC<RunCaseWorkflowModalProps> = ({
     </EuiModal>
   );
 };
+
+RunCaseWorkflowModal.displayName = 'RunCaseWorkflowModal';

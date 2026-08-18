@@ -62,7 +62,7 @@ export const getMenu = ({
           {
             id: 'runWorkflow',
             label: workflowI18n.RUN_WORKFLOW,
-            iconType: 'playFilled' as const,
+            iconType: 'play' as const,
             run: () => runWorkflow.onOpen(),
             testId: 'case-run-workflow-button',
             order: 150,

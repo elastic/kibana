@@ -114,6 +114,9 @@ function transformToWorkflowExecutionDetailDto(
     traceId: workflowExecution.traceId,
     entryTransactionId: workflowExecution.entryTransactionId,
     concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+    ...(workflowExecution.executionContext
+      ? { executionContext: workflowExecution.executionContext }
+      : {}),
     ...pickWorkflowDocumentVersion(workflowExecution),
   };
 }

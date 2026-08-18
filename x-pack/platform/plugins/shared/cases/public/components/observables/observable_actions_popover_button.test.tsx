@@ -22,11 +22,14 @@ import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/wor
 
 jest.mock('../../containers/use_post_observables');
 jest.mock('../../containers/use_delete_observables');
+const mockRunWorkflowPanel = jest.fn((_props: unknown) => (
+  <div data-test-subj="mock-run-workflow-panel" />
+));
 jest.mock('@kbn/workflows-ui', () => ({
   ...jest.requireActual('@kbn/workflows-ui'),
   useWorkflowsCapabilities: jest.fn(() => ({ canExecuteWorkflow: false })),
   useWorkflowsUIEnabledSetting: jest.fn(() => true),
-  RunWorkflowPanel: () => <div data-test-subj="mock-run-workflow-panel" />,
+  RunWorkflowPanel: (props: unknown) => mockRunWorkflowPanel(props),
 }));
 
 describe('ObservableActionsPopoverButton', () => {
@@ -149,7 +152,11 @@ describe('ObservableActionsPopoverButton', () => {
 
   describe('run workflow', () => {
     it('does not show the run workflow button when canExecuteWorkflow is false', async () => {
-      jest.mocked(useWorkflowsCapabilities).mockReturnValue({ canExecuteWorkflow: false } as ReturnType<typeof useWorkflowsCapabilities>);
+      jest
+        .mocked(useWorkflowsCapabilities)
+        .mockReturnValue({ canExecuteWorkflow: false } as ReturnType<
+          typeof useWorkflowsCapabilities
+        >);
 
       renderWithTestingProviders(
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
@@ -163,7 +170,11 @@ describe('ObservableActionsPopoverButton', () => {
     });
 
     it('does not show the run workflow button when workflowUI is disabled', async () => {
-      jest.mocked(useWorkflowsCapabilities).mockReturnValue({ canExecuteWorkflow: true } as ReturnType<typeof useWorkflowsCapabilities>);
+      jest
+        .mocked(useWorkflowsCapabilities)
+        .mockReturnValue({ canExecuteWorkflow: true } as ReturnType<
+          typeof useWorkflowsCapabilities
+        >);
       jest.mocked(useWorkflowsUIEnabledSetting).mockReturnValue(false);
 
       renderWithTestingProviders(
@@ -181,7 +192,11 @@ describe('ObservableActionsPopoverButton', () => {
     });
 
     it('does not show the run workflow button when the user has no update permission', async () => {
-      jest.mocked(useWorkflowsCapabilities).mockReturnValue({ canExecuteWorkflow: true } as ReturnType<typeof useWorkflowsCapabilities>);
+      jest
+        .mocked(useWorkflowsCapabilities)
+        .mockReturnValue({ canExecuteWorkflow: true } as ReturnType<
+          typeof useWorkflowsCapabilities
+        >);
 
       renderWithTestingProviders(
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />,
@@ -196,7 +211,11 @@ describe('ObservableActionsPopoverButton', () => {
     });
 
     it('shows the run workflow button and navigates to the workflow sub-panel when canRunWorkflow is true', async () => {
-      jest.mocked(useWorkflowsCapabilities).mockReturnValue({ canExecuteWorkflow: true } as ReturnType<typeof useWorkflowsCapabilities>);
+      jest
+        .mocked(useWorkflowsCapabilities)
+        .mockReturnValue({ canExecuteWorkflow: true } as ReturnType<
+          typeof useWorkflowsCapabilities
+        >);
 
       renderWithTestingProviders(
         <ObservableActionsPopoverButton caseData={caseData} observable={observable} />
@@ -206,13 +225,24 @@ describe('ObservableActionsPopoverButton', () => {
         await screen.findByTestId(`cases-observables-actions-popover-button-${observable.id}`)
       );
 
-      expect(await screen.findByTestId('cases-observables-run-workflow-button')).toBeInTheDocument();
+      expect(
+        await screen.findByTestId('cases-observables-run-workflow-button')
+      ).toBeInTheDocument();
 
       await userEvent.click(await screen.findByTestId('cases-observables-run-workflow-button'), {
         pointerEventsCheck: 0,
       });
 
       expect(await screen.findByTestId('mock-run-workflow-panel')).toBeInTheDocument();
+      expect(mockRunWorkflowPanel).toHaveBeenCalledWith(
+        expect.objectContaining({
+          executionContext: {
+            type: 'cases.observable',
+            id: observable.id,
+            parent: { type: 'cases.case', id: caseData.id },
+          },
+        })
+      );
     });
   });
 });

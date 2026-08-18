@@ -10,10 +10,12 @@ import { render, renderHook, waitFor } from '@testing-library/react';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
+  AlertWorkflowsPanel,
   useRunAlertWorkflowPanel,
   RUN_WORKFLOW_PANEL_ID,
   type UseRunAlertWorkflowPanelProps,
 } from './use_run_alert_workflow_panel';
+import { AlertWorkflowExecutionContextProvider } from './alert_workflow_execution_context';
 import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import type { AlertTableContextMenuItem } from '../types';
@@ -34,6 +36,14 @@ const mockUseWorkflowsCapabilities = jest.fn(() => ({
 }));
 const mockUseWorkflowsUIEnabledSetting = jest.fn(() => true);
 const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: [] } }));
+const mockRunWorkflowPanel = jest.fn((_props: unknown) => (
+  <div>
+    <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
+    <button data-test-subj="run-workflow-execute-button" type="button">
+      {'Run workflow'}
+    </button>
+  </div>
+));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
@@ -62,14 +72,7 @@ jest.mock('@kbn/workflows-ui', () => ({
   // RunWorkflowPanel now lives in @kbn/workflows-ui.
   // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
   // This stub covers panel-level rendering assertions only.
-  RunWorkflowPanel: () => (
-    <div>
-      <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
-      <button data-test-subj="run-workflow-execute-button" type="button">
-        {'Run workflow'}
-      </button>
-    </div>
-  ),
+  RunWorkflowPanel: (props: unknown) => mockRunWorkflowPanel(props),
 }));
 jest.mock('../../../../common/components/loader', () => ({
   Loader: ({ children }: { children: React.ReactNode }) => (
@@ -241,6 +244,42 @@ describe('useRunAlertWorkflowPanel', () => {
       });
       expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
     });
+  });
+});
+
+describe('AlertWorkflowsPanel execution context', () => {
+  it('resolves context from the embedding surface', () => {
+    const alertIds = [{ _id: 'alert-123', _index: 'alerts-index' }];
+    const executionContext = {
+      type: 'cases.alert',
+      id: 'alert-123',
+      parent: { type: 'cases.case', id: 'case-1' },
+    };
+    const resolveExecutionContext = jest.fn().mockReturnValue(executionContext);
+
+    render(
+      <AlertWorkflowExecutionContextProvider resolveExecutionContext={resolveExecutionContext}>
+        <AlertWorkflowsPanel alertIds={alertIds} onClose={jest.fn()} />
+      </AlertWorkflowExecutionContextProvider>
+    );
+
+    expect(resolveExecutionContext).toHaveBeenCalledWith(alertIds);
+    expect(mockRunWorkflowPanel.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ executionContext })
+    );
+  });
+
+  it('leaves context undefined outside an embedding surface', () => {
+    render(
+      <AlertWorkflowsPanel
+        alertIds={[{ _id: 'alert-123', _index: 'alerts-index' }]}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(mockRunWorkflowPanel.mock.calls.at(-1)?.[0]).toEqual(
+      expect.objectContaining({ executionContext: undefined })
+    );
   });
 });
 // Full RunWorkflowPanel behavior (mutate, toasts, manual inputs) is covered by:

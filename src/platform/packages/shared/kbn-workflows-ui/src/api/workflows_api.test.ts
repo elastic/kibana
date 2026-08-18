@@ -270,13 +270,14 @@ describe('WorkflowApi', () => {
   // ---------------------------------------------------------------------------
 
   describe('runWorkflow', () => {
-    it('should call POST /api/workflows/workflow/{id}/run', async () => {
+    it('should call POST /api/workflows/workflow/{id}/run with execution context', async () => {
       const inputs = { key: 'value' };
       const metadata = { triggerType: 'manual' };
-      await api.runWorkflow('wf-1', { inputs, metadata });
+      const executionContext = { type: 'cases.case', id: 'case-1' };
+      await api.runWorkflow('wf-1', { inputs, metadata, executionContext });
 
       expect(http.post).toHaveBeenCalledWith('/api/workflows/workflow/wf-1/run', {
-        body: JSON.stringify({ inputs, metadata }),
+        body: JSON.stringify({ inputs, metadata, executionContext }),
         version: VERSION,
       });
     });

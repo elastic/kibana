@@ -18,9 +18,13 @@ import {
   EuiTextColor,
   EuiToolTip,
 } from '@elastic/eui';
-import { RunWorkflowPanel } from '@kbn/workflows-ui';
-import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
+import {
+  RunWorkflowPanel,
+  useWorkflowsCapabilities,
+  useWorkflowsUIEnabledSetting,
+} from '@kbn/workflows-ui';
 import { ObservablesAddedTriggerId } from '../../../common/workflows/triggers';
+import { createObservableWorkflowExecutionContext } from '../../../common/workflows/execution_context';
 import type { Observable } from '../../../common/types/domain/observable/v1';
 import * as i18n from './translations';
 
@@ -31,9 +35,12 @@ import { type CaseUI } from '../../containers/types';
 import { EditObservableModal } from './edit_observable_modal';
 import { useDeleteObservable } from '../../containers/use_delete_observables';
 import * as workflowI18n from '../workflows/translations';
+import { createCaseWorkflowComparator } from '../workflows/use_run_case_workflow';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 const RUN_OBSERVABLE_WORKFLOW_PANEL_ID = 'run-observable-workflow-panel';
 const RUN_WORKFLOWS_PANEL_WIDTH = 400;
+const OBSERVABLE_TRIGGER_TYPES = new Set<string>([ObservablesAddedTriggerId]);
 
 export const ObservableActionsPopoverButton: React.FC<{
   caseData: CaseUI;
@@ -44,6 +51,9 @@ export const ObservableActionsPopoverButton: React.FC<{
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
   const canRunWorkflow = permissions.update && workflowUIEnabled && canExecuteWorkflow;
+  const {
+    data: { workflowTags },
+  } = useGetCaseConfiguration();
   const [showEditModal, setShowEditModal] = useState(false);
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
@@ -85,6 +95,14 @@ export const ObservableActionsPopoverButton: React.FC<{
     }),
     [caseData.id, caseData.owner, observable]
   );
+  const workflowExecutionContext = useMemo(
+    () => createObservableWorkflowExecutionContext(observable.id, caseData.id),
+    [caseData.id, observable.id]
+  );
+  const workflowSortWorkflow = useMemo(
+    () => createCaseWorkflowComparator(workflowTags, OBSERVABLE_TRIGGER_TYPES),
+    [workflowTags]
+  );
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -101,7 +119,7 @@ export const ObservableActionsPopoverButton: React.FC<{
       if (canRunWorkflow) {
         mainPanelItems.push({
           name: <EuiTextColor>{workflowI18n.RUN_WORKFLOW}</EuiTextColor>,
-          icon: <EuiIcon type="playFilled" size="m" aria-hidden={true} />,
+          icon: <EuiIcon type="play" size="m" aria-hidden={true} />,
           panel: RUN_OBSERVABLE_WORKFLOW_PANEL_ID,
           'data-test-subj': 'cases-observables-run-workflow-button',
         });
@@ -138,20 +156,8 @@ export const ObservableActionsPopoverButton: React.FC<{
         content: (
           <RunWorkflowPanel
             inputs={workflowInputs}
-            sortWorkflow={(a, b) =>
-              // Cast to string: the @kbn/workflows trigger type union only knows about built-in
-              // types; cases.* trigger types are runtime extensions not reflected there.
-              Number(
-                (b.definition?.triggers ?? []).some(
-                  (t) => (t.type as string) === ObservablesAddedTriggerId
-                )
-              ) -
-              Number(
-                (a.definition?.triggers ?? []).some(
-                  (t) => (t.type as string) === ObservablesAddedTriggerId
-                )
-              )
-            }
+            executionContext={workflowExecutionContext}
+            sortWorkflow={workflowSortWorkflow}
             onClose={closePopover}
           />
         ),
@@ -159,7 +165,16 @@ export const ObservableActionsPopoverButton: React.FC<{
     }
 
     return panelsToBuild;
-  }, [canRunWorkflow, closePopover, isLoading, onDeletionModalOpen, permissions, workflowInputs]);
+  }, [
+    canRunWorkflow,
+    closePopover,
+    isLoading,
+    onDeletionModalOpen,
+    permissions,
+    workflowExecutionContext,
+    workflowInputs,
+    workflowSortWorkflow,
+  ]);
 
   return (
     <>

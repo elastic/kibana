@@ -25,6 +25,7 @@ import { TagsUserActionRt } from './tags/v1';
 import { TitleUserActionRt } from './title/v1';
 import { CustomFieldsUserActionRt } from './custom_fields/v1';
 import { ObservablesUserActionRt } from './observables/v1';
+import { WorkflowUserActionRt } from './workflow/v1';
 import { ExtendedFieldsUserActionRt } from './extended_fields/v1';
 import { TemplateUserActionRt } from './template/v1';
 export { UserActionTypes, UserActionActions } from './action/v1';
@@ -65,6 +66,7 @@ const BasicUserActionsRt = rt.union([
   CategoryUserActionRt,
   CustomFieldsUserActionRt,
   ObservablesUserActionRt,
+  WorkflowUserActionRt,
   ExtendedFieldsUserActionRt,
   TemplateUserActionRt,
 ]);
@@ -162,6 +164,7 @@ export type CreateCaseUserActionWithoutConnectorId = UserActionWithAttributes<
 >;
 export type CustomFieldsUserAction = UserAction<rt.TypeOf<typeof CustomFieldsUserActionRt>>;
 export type ObservablesUserAction = UserAction<rt.TypeOf<typeof ObservablesUserActionRt>>;
+export type WorkflowUserAction = UserAction<rt.TypeOf<typeof WorkflowUserActionRt>>;
 export type ExtendedFieldsUserAction = UserAction<rt.TypeOf<typeof ExtendedFieldsUserActionRt>>;
 export { ExtendedFieldsRt } from './extended_fields/v1';
 export type TemplateUserAction = UserAction<rt.TypeOf<typeof TemplateUserActionRt>>;

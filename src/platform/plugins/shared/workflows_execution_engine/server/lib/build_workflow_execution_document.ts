@@ -13,6 +13,7 @@ import {
   ExecutionStatus,
   pickManagedWorkflowFields,
   pickWorkflowDocumentVersion,
+  WorkflowExecutionContextSchema,
 } from '@kbn/workflows';
 import { normalizeEventChainVisitedWorkflowIds } from './telemetry/utils/extract_execution_metadata';
 import type { WorkflowExecutionForInputRendering } from '../workflow_context_manager/build_workflow_context';
@@ -49,10 +50,13 @@ export const buildWorkflowExecutionDocument = (
     maxEventChainDepth,
     getConcurrencyGroupKey,
   } = params;
-  const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
-  const spaceId = (context.spaceId as string | undefined) || 'default';
-  const metadata = context.metadata as Record<string, unknown> | undefined;
-  const eventPayload = context.event as Record<string, unknown> | undefined;
+  const { executionContext: rawExecutionContext, ...runtimeContext } = context;
+  const triggeredBy = (runtimeContext.triggeredBy as string | undefined) || defaultTriggeredBy;
+  const spaceId = (runtimeContext.spaceId as string | undefined) || 'default';
+  const metadata = runtimeContext.metadata as Record<string, unknown> | undefined;
+  const eventPayload = runtimeContext.event as Record<string, unknown> | undefined;
+  const executionContextResult = WorkflowExecutionContextSchema.safeParse(rawExecutionContext);
+  const executionContext = executionContextResult.success ? executionContextResult.data : undefined;
   let rootEventChainDepth: number | undefined;
   if (eventPayload) {
     const rawDepth = eventPayload.eventChainDepth;
@@ -79,7 +83,8 @@ export const buildWorkflowExecutionDocument = (
     isTestRun: workflow.isTestRun,
     workflowDefinition: workflow.definition,
     yaml: workflow.yaml,
-    context,
+    context: runtimeContext,
+    ...(executionContext ? { executionContext } : {}),
     status: ExecutionStatus.PENDING,
     createdAt: now.toISOString(),
     executedBy: authenticatedUser,

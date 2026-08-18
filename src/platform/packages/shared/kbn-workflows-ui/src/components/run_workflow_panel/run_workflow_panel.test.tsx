@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { RunWorkflowPanel } from './run_workflow_panel';
@@ -19,6 +19,7 @@ const mockUseWorkflows = jest.fn((_params: unknown) => ({ data: { results: mockW
 const mockUseWorkflowsCapabilities = jest.fn(() => ({ canReadManagedWorkflow: true }));
 const mockNavigateToApp = jest.fn();
 const mockAddSuccess = jest.fn();
+const mockAddWarning = jest.fn();
 const mockAddError = jest.fn();
 
 const noInputsWorkflow: WorkflowListItemDto = {
@@ -120,6 +121,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
         notifications: {
           toasts: {
             addSuccess: mockAddSuccess,
+            addWarning: mockAddWarning,
             addError: mockAddError,
           },
         },
@@ -191,6 +193,28 @@ describe('RunWorkflowPanel', () => {
     );
   });
 
+  it('should forward execution context without changing onExecute timing', () => {
+    const onExecute = jest.fn();
+    const executionContext = { type: 'cases.case', id: 'case-1' };
+    renderComponent({ executionContext, onExecute });
+
+    fireEvent.click(screen.getByTestId('select-workflow-option'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+    expect(onExecute).toHaveBeenCalledTimes(1);
+    expect(mockMutate).toHaveBeenCalledWith(
+      {
+        id: 'test-workflow-id',
+        inputs: { alert_ids: ['alert-1'] },
+        executionContext,
+      },
+      expect.any(Object)
+    );
+    expect(onExecute.mock.invocationCallOrder[0]).toBeLessThan(
+      mockMutate.mock.invocationCallOrder[0]
+    );
+  });
+
   it('should not call mutate when clicking execute without a selection', () => {
     renderComponent();
 
@@ -207,7 +231,7 @@ describe('RunWorkflowPanel', () => {
     fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     const { onSettled } = mockMutate.mock.calls[0][1];
-    onSettled();
+    act(() => onSettled());
 
     expect(onClose).toHaveBeenCalled();
   });
@@ -238,7 +262,7 @@ describe('RunWorkflowPanel', () => {
     fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
 
     const { onSettled } = mockMutate.mock.calls[0][1];
-    onSettled();
+    act(() => onSettled());
 
     await waitFor(() => {
       expect(screen.getByTestId('run-workflow-execute-button')).not.toBeDisabled();
@@ -257,6 +281,21 @@ describe('RunWorkflowPanel', () => {
     expect(mockAddSuccess).toHaveBeenCalledWith(
       expect.objectContaining({ title: i18n.WORKFLOW_START_SUCCESS_TOAST })
     );
+  });
+
+  it('should warn when the workflow starts but its follow-up fails', () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByTestId('select-workflow-option'));
+    fireEvent.click(screen.getByTestId('run-workflow-execute-button'));
+
+    const { onSuccess } = mockMutate.mock.calls[0][1];
+    onSuccess({ workflowExecutionId: 'exec-123', followUp: { status: 'failed' } });
+
+    expect(mockAddSuccess).toHaveBeenCalled();
+    expect(mockAddWarning).toHaveBeenCalledWith({
+      title: i18n.WORKFLOW_FOLLOW_UP_FAILED_WARNING,
+    });
   });
 
   it('should show an error toast on failed execution', () => {

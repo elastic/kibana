@@ -1,7 +1,10 @@
 # Run Workflows from Cases — Architecture & Design
 
-**Epic:** [security-team#17213](https://github.com/elastic/security-team/issues/17213)  
+**Epic:** [security-team#17213](https://github.com/elastic/security-team/issues/17213)
+
 **Related:** [kibana#199807](https://github.com/elastic/kibana/issues/199807) (observable-level automation)
+
+**Generic context design:** [Context-aware workflow executions](../../../../../../src/platform/plugins/shared/workflows_management/dev_docs/context_aware_workflow_executions.md)
 
 ---
 
@@ -13,9 +16,12 @@ This change adds three complementary capabilities to the Cases plugin:
 |---|---|---|
 | 1 | **Case-level "Run workflow"** | Case detail header (redesign) + case action bar (legacy) |
 | 2 | **Observable-level "Run workflow"** | Observable row `⋯` context menu → sub-panel |
-| 3 | **`cases.observablesAdded` auto-trigger** | Fires automatically when observables are added to a case |
+| 3 | **Alert-level "Run workflow"** | Alerts tab row or bulk action → sub-panel |
+| 4 | **`cases.observablesAdded` auto-trigger** | Fires automatically when observables are added to a case |
 
-Capabilities 2 and 3 share **one event schema**, so a workflow authored for the auto-trigger runs identically when invoked manually from a row — the event payload is byte-identical in both paths.
+Capabilities 2 and 4 share **one event schema**, so a workflow authored for the auto-trigger runs identically when invoked manually from a row — the event payload is byte-identical in both paths.
+
+Manual runs also use the generic workflow execution-context contract. Case-level entry points use `cases.case`; observable and attachment-owned entry points use a specific origin such as `cases.observable` or `cases.alert` with `cases.case` as parent. This supports both exact origin history and one case-wide execution history.
 
 ---
 
@@ -40,6 +46,8 @@ The `RunWorkflowPanel` component originally lived in `security_solution`. Moving
 
 All callers — in both `security_solution` and `cases` — import `RunWorkflowPanel`, `RunWorkflowInputsModal`, and `requiresUserSuppliedInputs` **directly from `@kbn/workflows-ui`**. The old local files in `security_solution/timeline_actions/` have been deleted.
 
+Context-specific server behavior is registered through `workflowsExtensions`; `workflows_management` does not import Cases. This is the same dependency-inversion pattern used for custom workflow steps and triggers.
+
 ---
 
 ## Component Architecture
@@ -60,8 +68,9 @@ All callers — in both `security_solution` and `cases` — import `RunWorkflowP
 
 | Old | New | Reason |
 |---|---|---|
-| `sortTriggerType: string` | `sortTriggerTypes: string \| readonly string[]` | Cases needs to float *all six* `cases.*` trigger ids |
-| *(absent)* | `tags?: string[]` | Backs the "Available workflow tags" case setting (Phase 4) |
+| `sortTriggerType: string` | `sortWorkflow?: (a, b) => number` | Consumers can rank workflows using domain-specific trigger rules |
+| *(absent)* | `filterWorkflow?: (workflow) => boolean` | Supports case configuration such as available workflow tags |
+| *(absent)* | `executionContext?: WorkflowExecutionContext` | Correlates UI and API runs with the same product entity |
 | `useAppToasts()` | `useKibana().services.notifications.toasts` | Remove security_solution-specific hook dependency |
 
 ### Case-level entry points
@@ -88,8 +97,9 @@ Case detail page
   <EuiModalBody>
     <RunWorkflowPanel
       inputs={{ event: { caseId, owner } }}
-      sortTriggerTypes={CASE_TRIGGER_TYPES}   // all 6 cases.* ids
-      tags={workflowTags}                      // from case config (Phase 4)
+      executionContext={createCaseWorkflowExecutionContext(caseId)}
+      sortWorkflow={sortCaseWorkflows}        // all 6 cases.* ids first
+      filterWorkflow={filterCaseWorkflows}    // optional case config
     />
   </EuiModalBody>
 </EuiModal>
@@ -109,11 +119,103 @@ Observable row  →  ⋯ button  →  EuiPopover
                                    └── Panel "run-observable-workflow-panel"
                                        └── content: <RunWorkflowPanel
                                                inputs={{ event: { caseId, owner, observables: [row] } }}
-                                               sortTriggerTypes={['cases.observablesAdded']}
+                                               executionContext={createObservableWorkflowExecutionContext(row.id, caseId)}
+                                               sortWorkflow={sortObservableWorkflows}
                                            />
 ```
 
 This gives a native slide-in UX — no extra modal — consistent with how alert workflows are surfaced.
+
+### Alert-level entry point
+
+The Security Solution alert attachment owns the alert table shown in a case. It wraps the generic table in an optional `AlertWorkflowExecutionContextProvider` rather than adding Cases behavior to the table itself. When an alert workflow panel renders, the provider combines the selected alert ID with the enclosing case ID:
+
+```ts
+{
+  type: 'cases.alert',
+  id: alertId,
+  parent: { type: 'cases.case', id: caseId },
+}
+```
+
+Alert tables outside Cases have no provider and continue to run without a Cases context. A multi-alert run uses `{ type: 'cases.alerts', id: caseId }` with the case as parent. This identifies the selected collection surface without falsely attributing the run to one alert; the exact alert IDs remain in the workflow inputs.
+
+---
+
+## Modular Execution Context
+
+Cases owns one vertical execution-context module; Workflows owns only the generic registry, storage, query, and dispatch contracts.
+
+```text
+cases/
+├── common/workflows/execution_context/
+│   ├── constants.ts
+│   ├── context.ts
+│   └── index.ts
+└── server/workflows/execution_context/
+│   ├── definition.ts
+│   ├── register.ts
+│   └── definition.test.ts
+```
+
+The common module is the single source of truth for context types and factories:
+
+```ts
+export const CASE_WORKFLOW_EXECUTION_CONTEXT_TYPE = 'cases.case' as const;
+export const OBSERVABLE_WORKFLOW_EXECUTION_CONTEXT_TYPE = 'cases.observable' as const;
+export const ALERT_WORKFLOW_EXECUTION_CONTEXT_TYPE = 'cases.alert' as const;
+export const ALERTS_WORKFLOW_EXECUTION_CONTEXT_TYPE = 'cases.alerts' as const;
+export const COMMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE = 'cases.comment' as const;
+export const ATTACHMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE = 'cases.attachment' as const;
+
+export const createCaseWorkflowExecutionContext = (
+  caseId: string
+): WorkflowExecutionContext & {
+  type: typeof CASE_WORKFLOW_EXECUTION_CONTEXT_TYPE;
+} => ({
+  type: CASE_WORKFLOW_EXECUTION_CONTEXT_TYPE,
+  id: caseId,
+});
+
+export const createObservableWorkflowExecutionContext = (
+  observableId: string,
+  caseId: string
+): WorkflowExecutionContext => ({
+  type: OBSERVABLE_WORKFLOW_EXECUTION_CONTEXT_TYPE,
+  id: observableId,
+  parent: createCaseWorkflowExecutionContext(caseId),
+});
+```
+
+Cases callers use the matching factory rather than repeating string literals. Alert, comment, and generic attachment factories follow the same primary-plus-parent shape. The server registers the same definition behavior for every supported type:
+
+```ts
+for (const type of CASES_WORKFLOW_EXECUTION_CONTEXT_TYPES) {
+  workflowsExtensions.registerExecutionContextDefinition(
+    createWorkflowExecutionContextDefinition({
+      type,
+      onExecutionStarted: handleCaseWorkflowExecutionStarted,
+    })
+  );
+}
+```
+
+The post-start handler resolves the case from either the primary `cases.case` context or the specific origin's parent, then calls a request-scoped `client.userActions.recordWorkflowExecution()`. The client authorizes case updates, resolves the stored owner, enforces the user-action limit, and persists a standalone user action with `type: 'workflow'` plus the exact origin type and ID. It does not create an attachment or comment. The activity names the origin type and links the workflow name to the execution in a new tab.
+
+### Adding another Cases context
+
+A distinct entity receives its own context type when it needs independent execution history:
+
+1. Add a namespaced constant such as `cases.attachment`.
+2. Add `createAttachmentWorkflowExecutionContext(attachmentId, caseId)`.
+3. Add an optional server definition for attachment-specific follow-up.
+4. Register it alongside `cases.case`.
+5. Pass it to `RunWorkflowPanel` or the run API.
+6. Add focused tests in the new context module.
+
+Cases currently provides `cases.observable`, `cases.alert`, `cases.alerts`, `cases.comment`, and `cases.attachment`. Their `cases.case` parent means one case query still returns every run from within that case.
+
+Other plugins follow the same module shape and register their own namespaced context definitions. A context that needs correlation only may omit `onExecutionStarted` entirely.
 
 ---
 
@@ -139,13 +241,33 @@ User selects a workflow and clicks "Run"
 RunWorkflowPanel.executeWorkflow()
         │
         ├─► POST /api/workflows/workflow/{id}/run
-        │       body: { inputs: { event: { caseId, owner, [observables] } } }
+        │       body: {
+        │         inputs: { event: { caseId, owner, [observables] } },
+        │         executionContext: {
+        │           type: 'cases.observable',
+        │           id: observableId,
+        │           parent: { type: 'cases.case', id: caseId }
+        │         }
+        │       }
+        │
+        ├─► Workflows persists the indexed execution context
+        ├─► Cases context handler adds origin-aware case activity
         │
         └─► onSuccess: notifications.toasts.addSuccess("Workflow successfully started")
                        navigate to execution (deep link via application.navigateToApp)
 ```
 
 The browser sends the event payload **inline** — there is no server-side hydration step. Cases follows the **document** flow (`use_run_document_workflow_panel`), not the alert flow (which preprocesses alert data server-side).
+
+Direct API callers send the same `executionContext` and therefore receive the same server-side case activity behavior. The context can be used to list all case executions:
+
+```http
+GET /api/workflows/workflow/executions?contextType=cases.case&contextId={caseId}
+```
+
+The same endpoint can query one exact origin, for example `contextType=cases.observable&contextId={observableId}`. Parent matching makes the case query include both direct case runs and specific child origins.
+
+If the case activity follow-up fails after the workflow starts, the response retains `workflowExecutionId` and reports a failed follow-up status. Callers must not retry the workflow run solely because the activity write failed.
 
 ### Auto-trigger: `cases.observablesAdded`
 
@@ -334,6 +456,16 @@ x-pack/platform/plugins/shared/cases/public/workflows/triggers/
 
 x-pack/platform/plugins/shared/cases/server/client/cases/
   └── observables_trigger_utils.ts    emitObservablesAddedEvent() helper
+
+x-pack/platform/plugins/shared/cases/common/workflows/execution_context/
+  ├── constants.ts                    Stable case, observable, alert, comment, and attachment types
+  ├── context.ts                      Typed primary-plus-parent context factories
+  └── index.ts                        Explicit exports
+
+x-pack/platform/plugins/shared/cases/server/workflows/execution_context/
+  ├── definition.ts                   Cases post-start handler
+  ├── register.ts                     workflowsExtensions registration
+  └── definition.test.ts              Authorization + activity tests
 ```
 
 ### Key modified files
@@ -341,8 +473,9 @@ x-pack/platform/plugins/shared/cases/server/client/cases/
 ```
 @kbn/workflows-ui
   src/components/run_workflow_panel/run_workflow_panel.tsx
-    • sortTriggerTypes: string | readonly string[]   (was string)
-    • tags?: string[]                                (new prop)
+    • sortWorkflow?: (a, b) => number
+    • filterWorkflow?: (workflow) => boolean
+    • executionContext?: WorkflowExecutionContext
     • notifications.toasts instead of useAppToasts  (deps cleanup)
   tsconfig.json → added @kbn/react-kibana-mount
 
@@ -378,8 +511,8 @@ security_solution/.../timeline_actions/
     run_workflow_panel.tsx           → DELETED (import from @kbn/workflows-ui directly)
     run_workflow_inputs_modal.tsx    → DELETED (import from @kbn/workflows-ui directly)
     run_workflow_panel_helpers.ts   → DELETED (import from @kbn/workflows-ui directly)
-    use_run_alert_workflow_panel.tsx → sortTriggerTypes="alert", imports RunWorkflowPanel from @kbn/workflows-ui
-    use_run_document_workflow_panel.tsx → sortTriggerTypes="manual", imports RunWorkflowPanel from @kbn/workflows-ui
+    use_run_alert_workflow_panel.tsx → sortWorkflow/filterWorkflow, imports RunWorkflowPanel from @kbn/workflows-ui
+    use_run_document_workflow_panel.tsx → sortWorkflow/filterWorkflow, imports RunWorkflowPanel from @kbn/workflows-ui
 ```
 
 ---
@@ -416,8 +549,15 @@ security_solution/.../use_run_document_workflow_panel.test.tsx  [TRIMMED — sam
 
 | Phase | Description | Status |
 |---|---|---|
-| Phase 4 | "Available workflow tags" case setting (`workflowTags?: string[]` in case config) | Not started |
-| Phase 5 | Activity log entry (`workflowRun` user action type) — coordinate with @elastic/workflows-eng first | Blocked on sync |
+| Phase 4 | Workflow tag ranking case setting (`workflowTags: string[]` in case config) | Implemented |
+| Phase 5 | Activity log entry (`workflow` user action type) | Implemented |
 | Phase 6 | EBT telemetry (`CASE_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE`) | Not started |
 | — | Compute real `schemaHash` for `cases.observablesAdded` in the approval fixture | Needs server run + @elastic/workflows-eng review |
-| — | Pass `metadata: { caseId, observableId? }` on `runWorkflow` calls | Nice-to-have (future cross-team coordination) |
+| — | Implement generic indexed `executionContext` + modular context registry | Implemented |
+
+The workflow tag setting is owner- and space-scoped and defaults to `Cases`. Workflows that match
+any configured tag are ranked ahead of other workflows; untagged workflows remain available. The
+shared selector applies this ranking before its client-side name search, so matching tagged
+workflows remain first in filtered search results. Tag matching is exact and case-sensitive, and an
+explicitly empty setting disables tag-based ranking while preserving trigger-based ranking.
+| — | Register Cases context types and use specific origin factories from manual entry points | Implemented |

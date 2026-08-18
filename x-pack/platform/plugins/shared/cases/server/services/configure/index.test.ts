@@ -103,6 +103,7 @@ const basicConfigFields = {
       label: 'test observable type',
     },
   ],
+  workflowTags: ['Cases'],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -300,6 +301,9 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "workflowTags": Array [
+              "Cases",
+            ],
           }
         `);
       });
@@ -632,6 +636,9 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "workflowTags": Array [
+              "Cases",
+            ],
           }
         `);
       });
@@ -882,6 +889,16 @@ describe('CaseConfigureService', () => {
         const res = await service.get({ unsecuredSavedObjectsClient, configurationId: '1' });
 
         expect(res.attributes.connector.id).toMatchInlineSnapshot(`"1"`);
+      });
+
+      it('defaults workflow tags for configurations created before the field existed', async () => {
+        const configuration = createConfigSO(createESJiraConnector());
+        delete configuration.attributes.workflowTags;
+        unsecuredSavedObjectsClient.get.mockResolvedValue(configuration);
+
+        const res = await service.get({ unsecuredSavedObjectsClient, configurationId: '1' });
+
+        expect(res.attributes.workflowTags).toEqual(['Cases']);
       });
 
       it('defaults to the none connector when the connector reference cannot be found', async () => {

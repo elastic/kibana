@@ -18,6 +18,7 @@ import type {
 import {
   ExecutionStatusValues,
   ExecutionTypeValues,
+  MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH,
   WorkflowExecutionCollapseFields,
 } from '@kbn/workflows';
 import type { SearchExecutionsViewParams } from '../../workflows_management_service';
@@ -80,6 +81,20 @@ const querySchema = schema.object({
   ),
   concurrencyGroupKey: schema.maybe(
     schema.string({ meta: { description: 'Filter by evaluated concurrency group key.' } })
+  ),
+  contextType: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH,
+      meta: { description: 'Exact execution context type. Must be paired with contextId.' },
+    })
+  ),
+  contextId: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_WORKFLOW_EXECUTION_CONTEXT_VALUE_LENGTH,
+      meta: { description: 'Exact execution context ID. Must be paired with contextType.' },
+    })
   ),
   startedAfter: schema.maybe(
     schema.string({
@@ -169,6 +184,8 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             executionTypes,
             executedBy,
             concurrencyGroupKey,
+            contextType,
+            contextId,
             startedAfter,
             startedBefore,
             finishedAfter,
@@ -180,6 +197,12 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             size,
             trackTotalHits,
           } = request.query;
+
+          if ((contextType === undefined) !== (contextId === undefined)) {
+            return response.badRequest({
+              body: { message: 'contextType and contextId must be supplied together.' },
+            });
+          }
 
           let esQuery;
           if (kql) {
@@ -199,6 +222,8 @@ export function registerSearchExecutionsRoute({ router, api, spaces }: RouteDepe
             executionTypes: parseArray(executionTypes) as ExecutionType[] | undefined,
             executedBy: parseArray(executedBy),
             concurrencyGroupKey,
+            contextType,
+            contextId,
             startedAfter,
             startedBefore,
             finishedAfter,

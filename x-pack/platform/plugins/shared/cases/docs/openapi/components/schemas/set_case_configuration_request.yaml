@@ -36,3 +36,11 @@ properties:
     $ref: 'owner.yaml'
   templates:
     $ref: 'templates.yaml'
+  workflowTags:
+    type: array
+    description: Workflow tags that are prioritized in Cases workflow selectors.
+    maxItems: 100
+    items:
+      type: string
+      minLength: 1
+      maxLength: 256

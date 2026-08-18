@@ -21,6 +21,7 @@ import type {
   WorkflowsClient,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
+import { WorkflowExecutionContextRegistry } from './execution_context_registry';
 import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
@@ -47,6 +48,7 @@ export class WorkflowsExtensionsServerPlugin
   private readonly logger: Logger;
   private readonly stepRegistry: ServerStepRegistry;
   private readonly triggerRegistry: TriggerRegistry;
+  private readonly executionContextRegistry: WorkflowExecutionContextRegistry;
   private readonly managedWorkflowPluginIds = new Set<string>();
   private workflowsClientProvider: WorkflowsClientProvider | undefined;
   private managedWorkflowsSystemApiProvider: ManagedWorkflowsSystemApiProvider | undefined;
@@ -55,6 +57,7 @@ export class WorkflowsExtensionsServerPlugin
     this.logger = initializerContext.logger.get();
     this.stepRegistry = new ServerStepRegistry(this.logger);
     this.triggerRegistry = new TriggerRegistry();
+    this.executionContextRegistry = new WorkflowExecutionContextRegistry();
   }
 
   public setup(
@@ -87,6 +90,9 @@ export class WorkflowsExtensionsServerPlugin
       registerTriggerDefinition: (definition) => {
         this.triggerRegistry.register(definition);
       },
+      registerExecutionContextDefinition: (definition) => {
+        this.executionContextRegistry.register(definition);
+      },
       registerWorkflowsClientProvider: (provider) => {
         if (this.workflowsClientProvider) {
           throw new Error('Workflows client provider already set');
@@ -113,6 +119,7 @@ export class WorkflowsExtensionsServerPlugin
     _plugins: WorkflowsExtensionsServerPluginStartDeps
   ): WorkflowsExtensionsServerPluginStart {
     this.triggerRegistry.freeze();
+    this.executionContextRegistry.freeze();
 
     return {
       getStepDefinition: (stepTypeId: string) => {
@@ -129,6 +136,12 @@ export class WorkflowsExtensionsServerPlugin
       },
       getTriggerDefinition: (triggerId: string) => {
         return this.triggerRegistry.get(triggerId);
+      },
+      getExecutionContextDefinition: (type: string) => {
+        return this.executionContextRegistry.get(type);
+      },
+      getAllExecutionContextDefinitions: () => {
+        return this.executionContextRegistry.list();
       },
       isReady: async () => {
         await this.stepRegistry.whenReady();

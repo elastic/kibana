@@ -48,6 +48,7 @@ export const WORKFLOW_EXECUTION_LIST_SOURCE_INCLUDES = [
   'executedBy',
   'createdBy',
   'concurrencyGroupKey',
+  'executionContext',
   'managed',
   'managedBy',
   'originManagedWorkflowId',
@@ -135,6 +136,7 @@ function transformToWorkflowExecutionListModel(
           triggeredBy: source.triggeredBy,
           executedBy: source.executedBy ?? source.createdBy,
           concurrencyGroupKey: source.concurrencyGroupKey,
+          ...(source.executionContext ? { executionContext: source.executionContext } : {}),
           ...pickWorkflowDocumentVersion(source),
         });
       }

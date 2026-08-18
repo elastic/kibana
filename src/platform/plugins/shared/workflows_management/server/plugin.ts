@@ -77,7 +77,7 @@ export class WorkflowsPlugin
     const workflowsService = new WorkflowsService(core, plugins, this.logger, this.kibanaVersion);
     this.workflowsService = workflowsService;
 
-    const api = new WorkflowsManagementApi(workflowsService, this.config.available);
+    const api = new WorkflowsManagementApi(workflowsService, this.config.available, this.logger);
     this.api = api;
 
     if (plugins.actions) {

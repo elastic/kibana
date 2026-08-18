@@ -65,4 +65,8 @@ describe('getUserActionAriaLabel', () => {
   test('should return correct label for "customFields"', () => {
     expect(getUserActionAriaLabel('customFields')).toBe('Edited "Custom Fields"');
   });
+
+  test('should return correct label for "workflow"', () => {
+    expect(getUserActionAriaLabel('workflow')).toBe('Workflow started');
+  });
 });

@@ -177,6 +177,7 @@ export type CasesConfigurationUI = Pick<
   | 'version'
   | 'owner'
   | 'observableTypes'
+  | 'workflowTags'
 >;
 
 export type CasesConfigurationUICustomField = CasesConfigurationUI['customFields'][number];

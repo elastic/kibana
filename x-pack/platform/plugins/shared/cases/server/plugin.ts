@@ -77,6 +77,7 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { registerCasesWorkflowExecutionContext } from './workflows/execution_context';
 import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
@@ -284,6 +285,7 @@ export class CasePlugin
       () => core.getStartServices()
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
+    registerCasesWorkflowExecutionContext(plugins.workflowsExtensions, getCasesClient('workflow'));
 
     if (plugins.agentBuilder) {
       registerCasesAgentBuilderTools(
