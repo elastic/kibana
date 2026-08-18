@@ -54,12 +54,12 @@ function isExpectedSourcePathPluginChunk(label: string, expectedPlugins: string[
 }
 
 export function evaluateDiscoverBundlePluginAssertion(
-  loadedPluginNamesSorted: string[],
+  loadedPluginNames: string[],
   expectedPlugins: string[],
   sharedBundleLabels: readonly string[]
 ): { ok: true } | { ok: false; detail: string } {
   const allowed = new Set([...expectedPlugins, ...sharedBundleLabels]);
-  const subsetOk = loadedPluginNamesSorted.every(
+  const subsetOk = loadedPluginNames.every(
     (name) =>
       allowed.has(name) ||
       name.startsWith('lazy') ||
@@ -73,7 +73,7 @@ export function evaluateDiscoverBundlePluginAssertion(
   return {
     ok: false,
     detail: `Unexpected labels found. Loaded=${JSON.stringify(
-      loadedPluginNamesSorted
+      loadedPluginNames
     )}, allowed=${JSON.stringify([...allowed])}`,
   };
 }

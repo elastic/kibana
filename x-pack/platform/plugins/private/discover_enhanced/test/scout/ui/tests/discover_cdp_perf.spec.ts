@@ -106,6 +106,7 @@ test.describe(
 
       // Collect and validate stats
       const currentUrl = page.url();
+      expect(currentUrl).toContain('app/discover#/');
       const stats = perfTracker.collectJsBundleStats(currentUrl);
       const loadedPluginNames = stats.plugins.map((p) => p.name).sort((a, b) => a.localeCompare(b));
 

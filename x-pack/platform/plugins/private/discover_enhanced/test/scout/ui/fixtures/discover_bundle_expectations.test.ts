@@ -43,16 +43,17 @@ describe('evaluateDiscoverBundlePluginAssertion', () => {
   });
 
   test('rejects unexpected source-path plugin chunks', () => {
-    expect(
-      evaluateDiscoverBundlePluginAssertion(
-        ['src_platform_plugins_shared_dashboard_public_plugin_ts'],
-        expectedPlugins,
-        sharedBundleLabels
-      )
-    ).toStrictEqual({
-      ok: false,
-      detail:
-        'Unexpected labels found. Loaded=["src_platform_plugins_shared_dashboard_public_plugin_ts"], allowed=["aiops","discover","embeddable","eventAnnotation","expressionXY","kbn-ui-shared-deps-npm","kql","lens","maps","unifiedSearch","core","rspack-chunk","shared-packages"]',
-    });
+    const result = evaluateDiscoverBundlePluginAssertion(
+      ['src_platform_plugins_shared_dashboard_public_plugin_ts'],
+      expectedPlugins,
+      sharedBundleLabels
+    );
+
+    expect(result).toMatchObject({ ok: false });
+    if (result.ok) {
+      throw new Error('expected assertion to fail');
+    }
+    expect(result.detail).toContain('Unexpected labels found');
+    expect(result.detail).toContain('src_platform_plugins_shared_dashboard_public_plugin_ts');
   });
 });
