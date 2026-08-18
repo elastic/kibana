@@ -219,7 +219,11 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         }
         return {
           flyoutDocumentId: targetRow._id,
-          flyoutDocumentIndexName: targetRow.ecs._index ?? null,
+          // `raw._index` is the concrete index carried by the underlying TimelineItem
+          // (see `transformTimelineItemToUnifiedRows`). The ECS `_index` is optional and
+          // frequently absent, and a null index makes `DocumentFlyoutWrapper` skip the
+          // search altogether, leaving the flyout on its loading state forever.
+          flyoutDocumentIndexName: targetRow.raw._index ?? null,
           totalDocumentCount: tableRows.length,
         };
       },
