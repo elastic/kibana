@@ -11,6 +11,7 @@ import {
   buildExtendedFieldsBackfill,
   buildExtendedFieldsDefaults,
   collectNormalizedRefNames,
+  excludeRefFieldsToDefinitions,
   getFieldCamelKey,
   getFieldSnakeKey,
   getV2FieldType,
@@ -97,6 +98,43 @@ describe('template field key utils', () => {
     it('deduplicates refs that only differ in case', () => {
       const fields: Field[] = [{ $ref: 'SLA_Tier' }, { $ref: 'sla_tier' }];
       expect(collectNormalizedRefNames(fields)).toEqual(new Set(['sla_tier']));
+    });
+  });
+
+  describe('excludeRefFieldsToDefinitions', () => {
+    it('returns an empty array for undefined fields', () => {
+      expect(excludeRefFieldsToDefinitions(undefined, new Set(['sla_tier']))).toEqual([]);
+    });
+
+    it('drops only $ref entries targeting an excluded definition', () => {
+      const fields: Field[] = [
+        { $ref: 'sla_tier' },
+        { $ref: 'other_field' },
+        { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' },
+      ];
+      expect(excludeRefFieldsToDefinitions(fields, new Set(['sla_tier']))).toEqual([
+        { $ref: 'other_field' },
+        { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' },
+      ]);
+    });
+
+    it('matches $refs case-insensitively (normalized names)', () => {
+      const fields: Field[] = [{ $ref: '  SLA_Tier ' }];
+      expect(excludeRefFieldsToDefinitions(fields, new Set(['sla_tier']))).toEqual([]);
+    });
+
+    it('keeps an inline field whose name matches an excluded definition', () => {
+      // Inline fields are template-local, not references to the excluded library definition.
+      const fields: Field[] = [{ name: 'sla_tier', control: 'INPUT_TEXT', type: 'keyword' }];
+      expect(excludeRefFieldsToDefinitions(fields, new Set(['sla_tier']))).toEqual(fields);
+    });
+
+    it('returns all fields when the exclusion set is empty', () => {
+      const fields: Field[] = [
+        { $ref: 'sla_tier' },
+        { name: 'hostname', control: 'INPUT_TEXT', type: 'keyword' },
+      ];
+      expect(excludeRefFieldsToDefinitions(fields, new Set())).toEqual(fields);
     });
   });
 

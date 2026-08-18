@@ -50,6 +50,25 @@ export const collectNormalizedRefNames = (
   }, new Set<string>());
 
 /**
+ * Filters out the `$ref` entries of a template's fields array that target one of
+ * `excludedDefinitionNames` (normalized — see {@link normalizeFieldDefinitionName}).
+ *
+ * Used by the create form when a field definition's linked legacy custom field is itself
+ * rendered as an input: the `$ref` to that definition must not produce a second control or a
+ * second submitted value for the same logical field. Only `$ref` entries are dropped by
+ * definition identity — inline template fields are template-local and pass through even when
+ * their names coincide with an excluded definition.
+ */
+export const excludeRefFieldsToDefinitions = (
+  fields: readonly Field[] | undefined,
+  excludedDefinitionNames: ReadonlySet<string>
+): Field[] =>
+  (fields ?? []).filter(
+    (field) =>
+      !isRefField(field) || !excludedDefinitionNames.has(normalizeFieldDefinitionName(field.$ref))
+  );
+
+/**
  * Parses an array of field definitions into resolved inline fields, skipping any
  * definitions that are malformed or describe reference (non-inline) fields.
  */
