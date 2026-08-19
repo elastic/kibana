@@ -48,7 +48,7 @@ export function useSharingAttributes(
     componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
     componentApi.title$ ?? new BehaviorSubject(undefined),
     componentApi.dataLoading$ ?? new BehaviorSubject(false),
-    componentApi.rendered$ ?? new BehaviorSubject(false)
+    componentApi.rendered$ ?? new BehaviorSubject(true)
   );
 
   useEffect(() => {
