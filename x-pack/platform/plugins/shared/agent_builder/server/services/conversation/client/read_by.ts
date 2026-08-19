@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { CurrentUser } from '@kbn/agent-builder-common';
 import { isConversationOwner } from '../access_control/authorization';
 import type { ConversationProperties } from './storage';
 import type { ConversationReadByEntry } from './types';
@@ -20,7 +20,7 @@ export const isReadBy = ({
   user,
 }: {
   source: ConversationProperties;
-  user: UserIdAndName;
+  user: CurrentUser;
 }): boolean => {
   if (source.read_by !== undefined) {
     return source.read_by.some((entry) => entry.userId === user.id);

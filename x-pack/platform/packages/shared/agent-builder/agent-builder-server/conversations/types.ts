@@ -26,6 +26,20 @@ export interface ConversationCreatePublicRequest {
   accessControl?: ConversationAccessControlInput;
 }
 
+export interface ConversationPermissions {
+  rename: boolean;
+  delete: boolean;
+  update_access_control: boolean;
+}
+
+export type ConversationWithPermissions = Conversation & {
+  permissions: ConversationPermissions;
+};
+
+export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
+  permissions: ConversationPermissions;
+};
+
 /**
  * A conversation client exposing get, list, and create operations.
  */
@@ -33,13 +47,13 @@ export interface ConversationPublicClient {
   /**
    * Retrieve a single conversation by its ID, including all rounds.
    */
-  get(conversationId: string): Promise<Conversation>;
+  get(conversationId: string): Promise<ConversationWithPermissions>;
   /**
    * List conversations for the current user, optionally filtered by agent ID.
    */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   /**
    * Create a new empty conversation (without triggering an execution).
    */
-  create(request: ConversationCreatePublicRequest): Promise<Conversation>;
+  create(request: ConversationCreatePublicRequest): Promise<ConversationWithPermissions>;
 }

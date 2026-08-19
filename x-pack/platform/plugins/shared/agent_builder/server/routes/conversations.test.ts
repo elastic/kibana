@@ -469,14 +469,11 @@ describe('POST /conversations', () => {
     agent_id: 'elastic-default-agent',
     title: DEFAULT_CONVERSATION_TITLE,
     rounds: [],
-    access_control: { access_mode: 'private', entries: [] },
+    access_control: { access_mode: 'private' },
     created_at: '2026-08-14T00:00:00.000Z',
     updated_at: '2026-08-14T00:00:00.000Z',
     user: { id: 'user-1', username: 'alice' },
-  };
-  const createdConversationWithPermissions = {
-    ...createdConversation,
-    permissions: { rename: true, delete: true, update_access_control: true },
+    permissions: { canConverse: true, canDelete: true, canRename: true },
   };
 
   beforeEach(() => {
@@ -484,8 +481,8 @@ describe('POST /conversations', () => {
   });
 
   it('creates a conversation with defaults when no body fields are provided', async () => {
-    const mockCreate = jest.fn().mockResolvedValue(createdConversationWithPermissions);
-    const mockGet = jest.fn().mockResolvedValue(createdConversationWithPermissions);
+    const mockCreate = jest.fn().mockResolvedValue(createdConversation);
+    const mockGet = jest.fn().mockResolvedValue(createdConversation);
     const mockExists = jest.fn().mockResolvedValue(false);
     const mockAgentGet = jest.fn().mockResolvedValue({ id: 'elastic-default-agent' });
 
@@ -517,18 +514,14 @@ describe('POST /conversations', () => {
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({ title: DEFAULT_CONVERSATION_TITLE, rounds: [] })
     );
-    expect(mockGet).toHaveBeenCalledWith(createdConversation.id);
+    expect(mockGet).not.toHaveBeenCalled();
     expect(result.status).toBe(200);
-    expect(result.payload).toBe(createdConversationWithPermissions);
+    expect(result.payload).toBe(createdConversation);
   });
 
   it('creates a conversation with the provided title and access_control', async () => {
-    const mockCreate = jest
-      .fn()
-      .mockResolvedValue({ ...createdConversationWithPermissions, title: 'My chat' });
-    const mockGet = jest
-      .fn()
-      .mockResolvedValue({ ...createdConversationWithPermissions, title: 'My chat' });
+    const mockCreate = jest.fn().mockResolvedValue({ ...createdConversation, title: 'My chat' });
+    const mockGet = jest.fn().mockResolvedValue({ ...createdConversation, title: 'My chat' });
     const mockExists = jest.fn().mockResolvedValue(false);
     const mockAgentGet = jest.fn().mockResolvedValue({ id: 'elastic-default-agent' });
 

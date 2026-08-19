@@ -80,9 +80,6 @@ export const createConversationClientMock = (): ConversationClientMock => {
 export const createConversationServiceMock = (): ConversationServiceMock => {
   return {
     getScopedClient: jest.fn().mockImplementation(async () => createConversationClientMock()),
-    getCurrentUser: jest
-      .fn()
-      .mockResolvedValue({ id: 'unknown', username: 'unknown', isAdmin: false }),
     getConversationRoundAuthor: jest.fn().mockResolvedValue(undefined),
   };
 };

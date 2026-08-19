@@ -67,7 +67,7 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
-const convertBaseFromEs = (document: Document, user: UserIdAndName) => {
+const convertBaseFromEs = (document: Document, user: CurrentUser) => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -200,10 +200,7 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const normalizeFromEs = (
-  document: Document,
-  user: UserIdAndName
-): NormalizedConversation => {
+export const normalizeFromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
   const base = convertBaseFromEs(document, user);
   const readBy = { read_by: migrateReadBy(document._source!) };
 
@@ -257,7 +254,7 @@ export const normalizeFromEs = (
 
 export const fromEsWithoutRounds = (
   document: Document,
-  user: UserIdAndName
+  user: CurrentUser
 ): ConversationWithoutRounds => {
   return convertBaseFromEs(document, user);
 };

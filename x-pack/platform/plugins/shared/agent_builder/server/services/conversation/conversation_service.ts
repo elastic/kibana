@@ -22,7 +22,6 @@ import { createClient } from './client';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
-  getCurrentUser(options: { request: KibanaRequest }): Promise<CurrentUser>;
   getConversationRoundAuthor(options: {
     request: KibanaRequest;
     origin?: ExecutionConversationOrigin;
@@ -94,7 +93,7 @@ export class ConversationServiceImpl implements ConversationService {
     return { id: user.id, username: user.username };
   }
 
-  async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
+  private async getCurrentUser({ request }: { request: KibanaRequest }): Promise<CurrentUser> {
     return getUserFromRequest({
       request,
       security: this.security,

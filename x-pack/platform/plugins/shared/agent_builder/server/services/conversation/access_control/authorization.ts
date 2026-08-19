@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ConversationWithoutRounds,
-  CurrentUser,
-  UserIdAndName,
-} from '@kbn/agent-builder-common';
+import type { ConversationWithoutRounds, CurrentUser } from '@kbn/agent-builder-common';
 import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 
 export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete' | 'updateAccessControl';
@@ -24,7 +20,7 @@ export const isConversationOwner = ({
   user,
 }: {
   owner: ConversationOwner;
-  user: UserIdAndName;
+  user: CurrentUser;
 }): boolean => {
   if (owner.userId !== undefined && user.id !== undefined) {
     return owner.userId === user.id;
@@ -50,7 +46,7 @@ export const isConversationMember = ({
   user,
 }: {
   conversation: ConversationWithoutRounds;
-  user: UserIdAndName;
+  user: CurrentUser;
 }): boolean => {
   if (user.id === undefined || conversation.access_control?.entries === undefined) {
     return false;
@@ -66,7 +62,7 @@ export const hasConversationConverseAccess = ({
   user,
 }: {
   conversation: ConversationWithoutRounds;
-  user: UserIdAndName;
+  user: CurrentUser;
 }): boolean => {
   if (
     isConversationOwner({
@@ -85,7 +81,7 @@ export const hasConversationOwnerAccess = ({
   user,
 }: {
   conversation: ConversationWithoutRounds;
-  user: UserIdAndName;
+  user: CurrentUser;
 }): boolean =>
   isConversationOwner({
     owner: { userId: conversation.user.id, username: conversation.user.username },

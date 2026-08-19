@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { UserIdAndName } from '@kbn/agent-builder-common';
+import type { CurrentUser } from '@kbn/agent-builder-common';
 import type { ConversationProperties } from './storage';
 import { updateReadBy, isReadBy, migrateReadBy } from './read_by';
 
 const ownerId = 'owner-id';
 const otherId = 'other-id';
-const owner: UserIdAndName = { id: ownerId, username: 'owner' };
-const other: UserIdAndName = { id: otherId, username: 'other' };
+const owner: CurrentUser = { id: ownerId, username: 'owner', isAdmin: false };
+const other: CurrentUser = { id: otherId, username: 'other', isAdmin: false };
 
 const conversation = (overrides: Partial<ConversationProperties> = {}): ConversationProperties => ({
   agent_id: 'agent-1',

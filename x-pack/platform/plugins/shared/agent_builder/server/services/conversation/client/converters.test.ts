@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Conversation, UserIdAndName } from '@kbn/agent-builder-common';
+import type { Conversation, CurrentUser } from '@kbn/agent-builder-common';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
@@ -48,7 +48,7 @@ const createTestState = () => ({
   ],
 });
 
-const requestingUser: UserIdAndName = { id: 'user_id', username: 'user_name' };
+const requestingUser: CurrentUser = { id: 'user_id', username: 'user_name', isAdmin: false };
 
 describe('conversation model converters', () => {
   const creationDate = '2024-09-04T06:44:17.944Z';
