@@ -7,8 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ToolSelection } from '@kbn/agent-builder-common';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { AgentProfileStorage, AgentProperties } from './client/storage';
+import { createStorage as createAgentStorage } from './client/storage';
 import type { SkillStorage, SkillProperties } from '../../skills/persisted/client/storage';
+import { createStorage as createSkillStorage } from '../../skills/persisted/client/storage';
 import { updateRequestToEs } from './client/converters';
 
 const SEARCH_SIZE = 1000;
@@ -17,6 +20,13 @@ export interface ToolIdMigrationEntry {
   oldId: string;
   newIds: string[];
 }
+
+const TOOL_ID_MIGRATIONS: ToolIdMigrationEntry[] = [
+  {
+    oldId: 'platform.core.cases.attachments',
+    newIds: ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments'],
+  },
+];
 
 /**
  * Replaces an old tool ID with one or more new IDs in a ToolSelection array.
@@ -68,18 +78,12 @@ const getToolsFromAgentSource = (source: AgentProperties): ToolSelection[] => {
  */
 export const migrateAgentToolIds = async ({
   storage,
-  migrations,
   logger,
 }: {
   storage: AgentProfileStorage;
-  migrations: ToolIdMigrationEntry[];
   logger: Logger;
 }): Promise<void> => {
-  if (migrations.length === 0) {
-    return;
-  }
-
-  const oldIdSet = new Set(migrations.map((m) => m.oldId));
+  const oldIdSet = new Set(TOOL_ID_MIGRATIONS.map((m) => m.oldId));
 
   const response = await storage.getClient().search({
     track_total_hits: false,
@@ -107,7 +111,7 @@ export const migrateAgentToolIds = async ({
     if (!hasOldIds) continue;
 
     let newTools = currentTools;
-    for (const { oldId, newIds } of migrations) {
+    for (const { oldId, newIds } of TOOL_ID_MIGRATIONS) {
       newTools = replaceToolIdsInToolSelection(newTools, oldId, newIds);
     }
 
@@ -148,27 +152,14 @@ export const migrateAgentToolIds = async ({
  * renamed or split. Each entry maps an old ID to one or more replacement IDs.
  * The migration runner applies all entries idempotently on every startup.
  */
-export const TOOL_ID_MIGRATIONS: ToolIdMigrationEntry[] = [
-  {
-    oldId: 'platform.core.cases.attachments',
-    newIds: ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments'],
-  },
-];
-
 export const migrateSkillToolIds = async ({
   storage,
-  migrations,
   logger,
 }: {
   storage: SkillStorage;
-  migrations: ToolIdMigrationEntry[];
   logger: Logger;
 }): Promise<void> => {
-  if (migrations.length === 0) {
-    return;
-  }
-
-  const oldIdSet = new Set(migrations.map((m) => m.oldId));
+  const oldIdSet = new Set(TOOL_ID_MIGRATIONS.map((m) => m.oldId));
 
   const response = await storage.getClient().search({
     track_total_hits: false,
@@ -194,7 +185,7 @@ export const migrateSkillToolIds = async ({
     if (!hasOldIds) continue;
 
     let newToolIds = currentToolIds;
-    for (const { oldId, newIds } of migrations) {
+    for (const { oldId, newIds } of TOOL_ID_MIGRATIONS) {
       newToolIds = replaceToolIdsInArray(newToolIds, oldId, newIds);
     }
 
@@ -223,4 +214,24 @@ export const migrateSkillToolIds = async ({
     const message = err instanceof Error ? err.message : String(err);
     logger.error(`Skill tool ID migration: bulk update failed. ${message}`);
   }
+};
+
+/**
+ * Applies all registered tool ID migrations
+ * to persisted agent configs and skill definitions. Idempotent — safe to run
+ * on every startup.
+ */
+export const runToolIdMigrations = async (
+  logger: Logger,
+  esClient: ElasticsearchClient
+): Promise<void> => {
+  await migrateAgentToolIds({
+    storage: createAgentStorage({ logger, esClient }),
+    logger,
+  });
+
+  await migrateSkillToolIds({
+    storage: createSkillStorage({ logger, esClient }),
+    logger,
+  });
 };
