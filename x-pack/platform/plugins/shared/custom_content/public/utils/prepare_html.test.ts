@@ -36,10 +36,10 @@ describe('injectCsp', () => {
     expect(result.startsWith('<meta http-equiv="Content-Security-Policy"')).toBe(true);
   });
 
-  it('is idempotent — does not double-inject', () => {
+  it('always injects — browsers intersect duplicate CSP policies safely', () => {
     const once = injectCsp('<p>hello</p>');
     const twice = injectCsp(once);
-    expect(twice.split('Content-Security-Policy').length).toBe(2);
+    expect(twice.split('Content-Security-Policy').length).toBe(3);
   });
 });
 

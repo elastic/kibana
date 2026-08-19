@@ -10,7 +10,6 @@ import type { EuiThemeColorModeStandard, EuiThemeComputed } from '@elastic/eui';
 import { CUSTOM_CONTENT_CSP_META } from '../../common/constants';
 
 export function injectCsp(html: string, colorMode?: EuiThemeColorModeStandard): string {
-  if (html.includes(CUSTOM_CONTENT_CSP_META)) return html;
   const colorSchemeMeta = `<meta name="color-scheme" content="${
     colorMode === 'DARK' ? 'dark' : 'light'
   }">`;

@@ -89,7 +89,7 @@ export function useCustomContentHtml({
         })
         .catch((err: Error) => {
           if (controller.signal.aborted || err.name === 'AbortError') return;
-          setError(err.message || RENDER_ERROR_MESSAGE);
+          setError(RENDER_ERROR_MESSAGE);
           setIsLoading(false);
         });
 
