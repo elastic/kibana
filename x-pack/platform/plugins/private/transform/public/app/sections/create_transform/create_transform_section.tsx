@@ -11,7 +11,8 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'query-string';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButtonEmpty, EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import { TRANSFORM_FUNCTION, type TransformFunction } from '../../../../common/constants';
 import { useDocumentationLinks } from '../../hooks/use_documentation_links';
@@ -86,12 +87,7 @@ export const CreateTransformSection: FC<Props> = ({ location, match }) => {
       <EuiPageTemplate.Section data-test-subj="transformPageCreateTransform" paddingSize={'none'}>
         {searchItemsError !== undefined && (
           <>
-            <EuiCallOut
-              announceOnMount={false}
-              title={searchItemsError}
-              color="danger"
-              iconType="warning"
-            />
+            <KbnDangerCallout announceOnMount={false} title={searchItemsError} />
             <EuiSpacer size="l" />
           </>
         )}
