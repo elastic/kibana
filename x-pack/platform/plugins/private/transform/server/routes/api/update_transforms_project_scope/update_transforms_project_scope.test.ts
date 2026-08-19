@@ -81,6 +81,31 @@ describe('updateTransformsProjectScope', () => {
     });
   });
 
+  it('updates transforms with ids that match inherited object properties', async () => {
+    const transform = createTransform('constructor');
+    const esClient = createEsClient([transform]);
+
+    const results = await updateTransformsProjectScope(
+      {
+        projectRouting: '_id:linked-project',
+        transformsInfo: [{ id: 'constructor' }],
+      },
+      esClient
+    );
+
+    expect(esClient.transform.updateTransform).toHaveBeenCalledWith({
+      body: {
+        source: {
+          ...transform.source,
+          project_routing: '_id:linked-project',
+        },
+      },
+      transform_id: 'constructor',
+    });
+    expect(Object.prototype.hasOwnProperty.call(results, 'constructor')).toBe(true);
+    expect(results.constructor).toEqual({ success: true });
+  });
+
   it('falls back to per-transform fetches when a batch fetch fails because one transform is missing', async () => {
     const esClient = createEsClient();
     esClient.transform.getTransform

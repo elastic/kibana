@@ -74,6 +74,11 @@ const createMissingSourceError = (transformId: TransformId): ResponseStatus['err
   response: {},
 });
 
+const hasResultForTransform = (
+  results: UpdateTransformsProjectScopeResponseSchema,
+  transformId: TransformId
+): boolean => Object.prototype.hasOwnProperty.call(results, transformId);
+
 const getTransformsIndividually = async ({
   esClient,
   results,
@@ -170,7 +175,7 @@ export async function updateTransformsProjectScope(
   });
 
   for (const transformId of transformIds) {
-    if (results[transformId]) {
+    if (hasResultForTransform(results, transformId)) {
       continue;
     }
 
