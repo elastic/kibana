@@ -1,5 +1,5 @@
 {
-  "sha1": "d627d4eef3bacebd0494896497995f989c8c4b95",
+  "sha1": "db0b82b58cb8e21070a9607a54977fd1b2d5d17b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -742,8 +742,8 @@
       }
     },
     {
-      "id": "bd30a08bd26a48f-c5c5a049bc79180",
-      "title": "Discover field data shows top-level object keys and normalizes legacy source-column URLs",
+      "id": "bd30a08bd26a48f-7dd6b07417dee5c",
+      "title": "Discover field data shows top-level object keys and supports source-column URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
