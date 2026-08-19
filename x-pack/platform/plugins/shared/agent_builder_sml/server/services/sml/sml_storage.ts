@@ -24,9 +24,9 @@ export const smlIndexName = 'ai-index-idx-sml-data';
  *   2 — `permissions.kibana.privileges` becomes `nested`, one element per space carrying
  *       `{ space, name[], count }`. `raw` and the implicit `login:` action are gone.
  *
- * The bump to 2 is load-bearing, not cosmetic: `object` -> `nested` is an illegal mapping merge
- * ("can't merge a non-nested mapping with a nested mapping"), so an existing index cannot be
- * updated in place. The version mismatch drops the index and forces a full re-crawl, which is the
+ * Motivation: `object` -> `nested` is an illegal mapping merge ("can't merge a non-nested mapping
+ * with a nested mapping"), so an existing index cannot be updated in place.
+ * The version mismatch drops the index and forces a full re-crawl, which is the
  * only way this shape change can land.
  */
 export const SML_SCHEMA_VERSION = 2;
