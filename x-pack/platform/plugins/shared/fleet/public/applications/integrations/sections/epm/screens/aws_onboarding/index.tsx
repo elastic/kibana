@@ -520,7 +520,7 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               onClose={() => setIsSchemaModalOpen(false)}
               aria-label="Edit data format"
               data-test-subj="awsOnboardingDataFormatModal"
-              style={{ width: 400 }}
+              style={{ width: euiTheme.breakpoint.s }}
             >
               <EuiModalHeader>
                 <EuiModalHeaderTitle>Edit data format</EuiModalHeaderTitle>
