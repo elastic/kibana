@@ -89,7 +89,7 @@ export const DiscoverDocumentFlyout = memo(
     const documentState = useDataState(dataStateContainer.data$.documents$);
     const rows = useMemo(() => documentState.result ?? [], [documentState.result]);
 
-    const { hasExpandedDoc, requestState, notice } = useExpandedDocSync({
+    const { hasExpandedDoc, requestState, notice, expandedDocRef } = useExpandedDocSync({
       dataView,
       rows,
       fetchStatus: documentState.fetchStatus,
@@ -226,6 +226,7 @@ export const DiscoverDocumentFlyout = memo(
         dataView={dataView}
         hit={expandedDoc}
         requestState={requestState}
+        requestStateMeta={expandedDocRef}
         notice={
           notice === ExpandedDocNotice.None ? undefined : <ExpandedDocNoticeText notice={notice} />
         }

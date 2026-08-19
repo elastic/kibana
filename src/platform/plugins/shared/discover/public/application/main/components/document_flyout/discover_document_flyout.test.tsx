@@ -481,13 +481,15 @@ describe('DiscoverDocumentFlyout', () => {
     expect(await screen.findByTestId('docViewerFlyoutLoading')).toBeVisible();
   });
 
-  it('shows a not found state when the document no longer exists', async () => {
+  it('shows a not found state with the unresolved document reference when the document no longer exists', async () => {
     await setup({ searchResult: Promise.resolve({ rawResponse: { hits: { hits: [] } } }) });
 
     await waitFor(() => {
       expect(screen.getByTestId('docViewerFlyoutNotFound')).toBeVisible();
     });
 
+    expect(screen.getByTestId('docViewerFlyoutNotFound')).toHaveTextContent(expandedDocRef.id);
+    expect(screen.getByTestId('docViewerFlyoutNotFound')).toHaveTextContent(expandedDocRef.index);
     expect(screen.queryByTestId('docViewerFlyoutNotice')).not.toBeInTheDocument();
     expect(screen.queryByTestId('docViewerFlyoutActions')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /share direct link/i })).not.toBeInTheDocument();

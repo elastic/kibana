@@ -14,7 +14,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { hasTransformationalCommand } from '@kbn/esql-utils';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { fetchExpandedDoc } from '../../data_fetching/fetch_expanded_doc';
-import { getExpandedDocRef, matchesExpandedDocRef } from '../../utils/expanded_doc';
+import {
+  getExpandedDocRef,
+  matchesExpandedDocRef,
+  type ExpandedDocRef,
+} from '../../utils/expanded_doc';
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
@@ -43,6 +47,8 @@ export interface ExpandedDocSyncResult {
   /** State of the direct document fetch. */
   requestState: ElasticRequestState;
   notice: ExpandedDocNotice;
+  /** The reference behind the current `requestState`, for display when it can't be resolved. */
+  expandedDocRef: ExpandedDocRef | undefined;
 }
 
 /**
@@ -207,6 +213,7 @@ export const useExpandedDocSync = ({
     hasExpandedDoc: Boolean(expandedDoc) || Boolean(expandedDocRef && isRestorable),
     requestState,
     notice: getExpandedDocNotice({ isOutOfResults: isRefResolved && !rowFromResults, fetchStatus }),
+    expandedDocRef,
   };
 };
 

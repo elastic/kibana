@@ -39,7 +39,7 @@ import { FlyoutHistoryKeyContext } from './flyout_history_key_context';
 import { OriginDocTypeContext } from './origin_doc_type_context';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
 import { useFlyoutA11y } from './use_flyout_a11y';
-import { UnresolvedDocument } from './unresolved_document';
+import { UnresolvedDocument, type RequestStateMeta } from './unresolved_document';
 
 export interface UnifiedDocViewerFlyoutProps
   extends Pick<DocViewerProps, 'initialTabId' | 'onUpdateSelectedTabId'> {
@@ -64,6 +64,8 @@ export interface UnifiedDocViewerFlyoutProps
   hit?: DataTableRecord;
   /** Request state rendered when the document is unavailable. */
   requestState?: ElasticRequestState;
+  /** Identifies the document behind `requestState`, shown when it can't be resolved. */
+  requestStateMeta?: RequestStateMeta;
   /** Replaces pagination when the document is absent from the current results. */
   notice?: ReactNode;
   hits?: DataTableRecord[];
@@ -111,6 +113,7 @@ export function UnifiedDocViewerFlyout({
   columnsMeta,
   hit,
   requestState,
+  requestStateMeta,
   notice,
   hits,
   dataView,
@@ -343,7 +346,10 @@ export function UnifiedDocViewerFlyout({
                   />
                 </>
               ) : (
-                <UnresolvedDocument requestState={requestState} />
+                <UnresolvedDocument
+                  requestState={requestState}
+                  requestStateMeta={requestStateMeta}
+                />
               )}
             </EuiFlyoutBody>
             {renderCustomFooter && docViewRenderProps && (

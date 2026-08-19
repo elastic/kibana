@@ -33,6 +33,7 @@ export interface DiscoverGridFlyoutProps
     | 'onInitialDocViewerStateChange'
     | 'onUpdateSelectedTabId'
     | 'requestState'
+    | 'requestStateMeta'
     | 'notice'
     | 'flyoutMenuTrailingActions'
   > {
@@ -84,6 +85,7 @@ export function DiscoverGridFlyout({
   onUpdateSelectedTabId,
   hideFilteringOnComputedColumns,
   requestState,
+  requestStateMeta,
   notice,
   flyoutMenuTrailingActions,
 }: DiscoverGridFlyoutProps) {
@@ -138,6 +140,7 @@ export function DiscoverGridFlyout({
       isEsqlQuery={isEsqlQuery}
       hit={hit}
       requestState={requestState}
+      requestStateMeta={requestStateMeta}
       notice={notice}
       hits={hits}
       dataView={dataView}

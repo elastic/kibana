@@ -8,13 +8,26 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiDescriptionList, EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 
+/** Identifies the document behind a request state, e.g. for display when it can't be resolved. */
+export interface RequestStateMeta {
+  id: string;
+  index: string;
+}
+
 /** Renders the request state while a linked document resolves. */
-export const UnresolvedDocument = ({ requestState }: { requestState?: ElasticRequestState }) => {
+export const UnresolvedDocument = ({
+  requestState,
+  requestStateMeta,
+}: {
+  requestState?: ElasticRequestState;
+  requestStateMeta?: RequestStateMeta;
+}) => {
   if (requestState === ElasticRequestState.NotFound) {
     return (
       <KbnDangerCallout
@@ -29,7 +42,28 @@ export const UnresolvedDocument = ({ requestState }: { requestState?: ElasticReq
             defaultMessage="It may have been deleted, or you may not have access to it."
           />
         }
-      />
+      >
+        {requestStateMeta && (
+          <EuiDescriptionList
+            compressed
+            data-test-subj="docViewerFlyoutNotFoundMeta"
+            listItems={[
+              {
+                title: i18n.translate('unifiedDocViewer.flyout.notFoundMetaIdLabel', {
+                  defaultMessage: 'ID',
+                }),
+                description: requestStateMeta.id,
+              },
+              {
+                title: i18n.translate('unifiedDocViewer.flyout.notFoundMetaIndexLabel', {
+                  defaultMessage: 'Index',
+                }),
+                description: requestStateMeta.index,
+              },
+            ]}
+          />
+        )}
+      </KbnDangerCallout>
     );
   }
 
