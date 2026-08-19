@@ -1,3 +1,4 @@
+zip-lib
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
 @xterm/xterm
@@ -63,4 +64,3 @@ reselect-v4
 @swc/plugin-emotion
 graphql
 @cfworker/json-schema
-zip-lib
