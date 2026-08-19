@@ -199,6 +199,7 @@ import type {
   PackagePolicyClientListIdsOptions,
   PackagePolicyClientRollbackOptions,
   PackagePolicyService,
+  PartialPackagePolicy,
   RollbackResult,
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
@@ -1368,8 +1369,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
+    options?: Omit<PackagePolicyClientGetByIdsOptions, 'fields'>
+  ): Promise<PackagePolicy[]>;
+  public async getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: PackagePolicyClientGetByIdsOptions & { fields: string[] }
+  ): Promise<PartialPackagePolicy[]>;
+  public async getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
     options: PackagePolicyClientGetByIdsOptions = {}
-  ): Promise<PackagePolicy[]> {
+  ): Promise<PackagePolicy[] | PartialPackagePolicy[]> {
     const logger = this.getLogger('getByIDs');
     const savedObjectType = await getPackagePolicySavedObjectType();
     const isSpacesEnabled = await isSpaceAwarenessEnabled();
@@ -1388,13 +1399,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ids.map((id) => ({
           id,
           type: savedObjectType,
+          ...(options.fields ? { fields: options.fields } : {}),
           namespaces: isSpacesEnabled ? options.spaceIds : undefined,
         }))
       )
       .catch(catchAndSetErrorStackTrace.withMessage('bulkGet of package policies failed'));
 
     const packagePolicies = packagePolicySO.saved_objects
-      .map((so): PackagePolicy | null => {
+      .map((so): PartialPackagePolicy | null => {
         if (isSavedObjectErrorResult(so)) {
           if (options.ignoreMissing && so.error.statusCode === 404) {
             return null;
@@ -1409,7 +1421,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         return mapPackagePolicySavedObjectToPackagePolicy(so);
       })
-      .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
+      .filter((packagePolicy): packagePolicy is PartialPackagePolicy => packagePolicy !== null);
 
     for (const packagePolicy of packagePolicies) {
       auditLoggingService.writeCustomSoAuditLog({
@@ -2277,28 +2289,27 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_10,
     });
 
-    const bumpPromise = this.bumpAgentPoliciesRevision(
-      { soClient, esClient },
-      [...associatedPolicyIds],
-      {
-        user: options?.user,
-        asyncDeploy: options?.asyncDeploy,
-        removeProtectionFn: (agentPolicyId) => {
-          // Check if the agent policy is in both old and updated package policies
-          const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
-          const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
+    const bumpPromise =
+      options?.bumpRevision ?? true
+        ? this.bumpAgentPoliciesRevision({ soClient, esClient }, [...associatedPolicyIds], {
+            user: options?.user,
+            asyncDeploy: options?.asyncDeploy,
+            removeProtectionFn: (agentPolicyId) => {
+              // Check if the agent policy is in both old and updated package policies
+              const assignedInOldPolicies = endpointOldPackagePoliciesIds.has(agentPolicyId);
+              const assignedInUpdatedPolicies = endpointPackagePolicyUpdatesIds.has(agentPolicyId);
 
-          // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
-          const removeProtection =
-            (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
-            (!assignedInOldPolicies && assignedInUpdatedPolicies);
+              // Remove protection if policy is unassigned (in old but not in updated) or policy is assigned (in updated but not in old)
+              const removeProtection =
+                (assignedInOldPolicies && !assignedInUpdatedPolicies) ||
+                (!assignedInOldPolicies && assignedInUpdatedPolicies);
 
-          return removeProtection;
-        },
-      }
-    ).finally(() => {
-      logger.debug(`bumping of revision for associated agent policies done`);
-    });
+              return removeProtection;
+            },
+          }).finally(() => {
+            logger.debug(`bumping of revision for associated agent policies done`);
+          })
+        : Promise.resolve();
 
     const pkgVersions: Record<string, { name: string; version: string }> = {};
     packagePolicyUpdates.forEach(({ package: pkg }) => {
@@ -2602,17 +2613,19 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         return acc;
       }, new Set());
 
-      const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
-
-      await this.bumpAgentPoliciesRevision(
-        { soClient, esClient },
-        agentPolicies.map((p) => p.id),
-        {
-          user: options?.user,
-          asyncDeploy: options?.asyncDeploy,
-          removeProtectionFn: (policyId) => agentPoliciesWithEndpointPackagePolicies.has(policyId),
-        }
-      );
+      if (options?.bumpRevision ?? true) {
+        const agentPolicies = await agentPolicyService.getByIds(soClient, uniquePolicyIdsR);
+        await this.bumpAgentPoliciesRevision(
+          { soClient, esClient },
+          agentPolicies.map((p) => p.id),
+          {
+            user: options?.user,
+            asyncDeploy: options?.asyncDeploy,
+            removeProtectionFn: (policyId) =>
+              agentPoliciesWithEndpointPackagePolicies.has(policyId),
+          }
+        );
+      }
     }
 
     if (secretsToDelete.length > 0) {

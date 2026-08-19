@@ -9,6 +9,8 @@ description: >
 
 **Additive checks for Security Solution Scout tests.**
 
+Run the general `scout-best-practices-reviewer` first, then apply this Security-specific checklist. This skill supplements rather than replaces the general review.
+
 ## Security-specific checklist
 
 ### Page objects — Security-specific placement
@@ -31,8 +33,8 @@ Security Solution tests commonly create resources that require explicit cleanup 
 
 ### Package imports
 
-- Import `spaceTest`, `test`, `tags`, `expect` from `@kbn/scout-security` — not from `@kbn/scout`
-- Import `expect` from `@kbn/scout-security/ui` (not the main entry point)
+- Import `spaceTest`, `test`, and `tags` from `@kbn/scout-security` — not from `@kbn/scout`
+- Import UI assertions from `@kbn/scout-security/ui` and API assertions from `@kbn/scout-security/api` (not the main entry point)
 - Import page objects and API services from `@kbn/scout-security` when they exist there
 
 ### Auth and roles
@@ -52,7 +54,7 @@ Prefer named convenience methods (`loginAsPlatformEngineer`, `loginAsT1Analyst`)
 
 ### Tags
 
-Verify the test is tagged for the correct deployment targets. Tags must reflect what the test actually covers — stateful-only, serverless-only, or both. Flag missing tags or tags that don't match the test's actual scope. Available stateful: `tags.stateful.classic`. Available serverless tiers: `security.complete`, `security.essentials`, `security.ease`, `security.all`.
+Verify the test is tagged for the correct deployment targets. Tags must reflect what the test actually covers — stateful-only, serverless-only, or both. Flag missing tags or tags that don't match the test's actual scope. Security Solution tests currently use `tags.stateful.classic` for stateful execution. A test that needs the Security solution view must also call `scoutSpace.setSolutionView('security')`; deployment tags do not configure a space's solution view. Available serverless tiers: `security.complete`, `security.essentials`, `security.ease`, `security.all`.
 
 **Choosing serverless tiers.** Default to `security.complete` for functionality that is available across tiers — the common case. Use `security.essentials` or `security.ease` only when the test covers behaviour specific to that tier: a feature that is or isn't available there, or that behaves differently. Don't blanket-tag every tier "to be safe" — pick the narrowest set that's still correct, since each extra tier tag spins up another CI run. (See `docs/extend/testing/deployment-tags.md`.)
 
