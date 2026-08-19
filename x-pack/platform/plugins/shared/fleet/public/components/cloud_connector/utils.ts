@@ -202,6 +202,16 @@ export const getCloudConnectorRemoteRoleTemplate = ({
   accountType,
   iacTemplateUrl,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
+  if (!iacTemplateUrl) return undefined;
+
+  // URLs without substitution tokens need no cloud identifiers — return as-is.
+  if (
+    !iacTemplateUrl.includes(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR) &&
+    !iacTemplateUrl.includes(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR)
+  ) {
+    return iacTemplateUrl;
+  }
+
   let elasticResourceId: string | undefined;
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
@@ -214,7 +224,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     elasticResourceId = kibanaComponentId;
   }
 
-  if (!elasticResourceId || !accountType || !iacTemplateUrl) return undefined;
+  if (!elasticResourceId || !accountType) return undefined;
 
   return iacTemplateUrl
     .replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
