@@ -21,18 +21,15 @@ import {
   LENS_BASIC_KBN_ARCHIVE,
   LOGSTASH_FUNCTIONAL_ARCHIVE,
   LOGSTASH_TIME_RANGE,
+  selectSingleComboOption,
 } from '../fixtures';
 
 async function configureSearchDemo(page: ScoutPage, pageObjects: PageObjects): Promise<void> {
-  await page.components.comboBox('dataViewSelector').setSelectedOptions([DATA_VIEW]);
+  await selectSingleComboOption(page, 'dataViewSelector', DATA_VIEW);
   // Field options load after the data view resolves.
   await expect(page.testSubj.locator('searchBucketField')).toBeVisible();
-  await page.components.comboBox('searchBucketField').setSelectedOptions(['geo.src'], {
-    timeout: 10_000,
-  });
-  await page.components.comboBox('searchMetricField').setSelectedOptions(['memory'], {
-    timeout: 10_000,
-  });
+  await selectSingleComboOption(page, 'searchBucketField', 'geo.src');
+  await selectSingleComboOption(page, 'searchMetricField', 'memory');
   await pageObjects.datePicker.setAbsoluteRange(LOGSTASH_TIME_RANGE);
 }
 
