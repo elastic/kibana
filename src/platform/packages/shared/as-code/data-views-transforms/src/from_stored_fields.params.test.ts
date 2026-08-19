@@ -18,9 +18,11 @@ describe('fromStoredRuntimeFields', () => {
         { my_field: params === undefined ? { id } : { id, params } }
       )?.my_field;
 
-      if (!field || !('format' in field)) return undefined;
+      if (!field || !('format' in field) || !field.format || !('params' in field.format)) {
+        return undefined;
+      }
 
-      return field.format?.params;
+      return field.format.params;
     };
 
     describe('when there are no params', () => {

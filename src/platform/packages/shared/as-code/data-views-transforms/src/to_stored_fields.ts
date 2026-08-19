@@ -120,7 +120,7 @@ export function toStoredFieldFormats(
 export function toStoredFieldFormatParams(
   format: AsCodeFieldFormat
 ): NonNullable<DataViewSpec['fieldFormats']>[string]['params'] | undefined {
-  if (!('params' in format)) return undefined;
+  if (!('params' in format) || !format.params) return undefined;
 
   if (isDurationFormat(format)) {
     const outputFormat = camelCase(format.params.output_format);

@@ -28,6 +28,9 @@ import type {
   savedPrimitiveRuntimeFieldSchema,
   savedRuntimeFieldSchema,
 } from './runtime_fields/schema_saved_runtime_fields';
+import type { formatSchema } from './field_settings/formats/format_schema';
+import type { durationFormatSchema } from './field_settings/formats/duration';
+import type { histogramFormatSchema } from './field_settings/formats/histogram';
 
 export type AsCodeFieldSettings = z.output<typeof fieldSettingsSchema>;
 export type AsCodeCompositeRuntimeField = z.output<typeof compositeRuntimeFieldSchema>;
@@ -44,3 +47,8 @@ export type AsCodeSavedCompositeRuntimeField = z.output<typeof savedCompositeRun
 export type AsCodeSavedPrimitiveRuntimeField = z.output<typeof savedPrimitiveRuntimeFieldSchema>;
 export type AsCodeSavedRuntimeField = z.output<typeof savedRuntimeFieldSchema>;
 export type AsCodeSavedDataView = z.output<typeof savedDataViewSpecSchema>;
+
+// Field formats
+export type AsCodeFieldFormat = z.output<typeof formatSchema>;
+export type AsCodeDurationFormat = z.output<typeof durationFormatSchema>;
+export type AsCodeHistogramFormat = z.output<typeof histogramFormatSchema>;
