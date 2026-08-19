@@ -750,7 +750,9 @@ describe('SmlCrawlerImpl', () => {
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('SML schema version mismatch'));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('SML schema version mismatch')
+      );
       // processPage should treat every item as new (integrityResetNeeded = true)
       const createOp = mockStateClient.bulk.mock.calls
         .flatMap((c: unknown[]) => (c[0] as { operations?: unknown[] }).operations ?? [])
@@ -780,7 +782,9 @@ describe('SmlCrawlerImpl', () => {
       await crawler.crawl({ definition, esClient, savedObjectsClient });
 
       expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('SML schema version mismatch'));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('SML schema version mismatch')
+      );
     });
 
     it('sml_schema_version matches: does not drop the index', async () => {
