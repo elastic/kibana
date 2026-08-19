@@ -62,10 +62,15 @@ describe('OWNS_INTEGRATION_RELATIONSHIP_CONFIGS', () => {
     }
   );
 
-  it('entityanalytics_okta: indexPattern points to the entity index', () => {
-    expect(oktaConfig.indexPattern('myns')).toContain('.entities.v2.latest.security_myns');
-    expect(oktaConfig.indexPattern('default')).not.toContain('myns');
-  });
+  // Entra ID is log-based (see entityanalytics_entra_id describe below); only
+  // entity-index sources must resolve to `.entities.v2.latest.*`.
+  it.each(OWNS_INTEGRATION_RELATIONSHIP_CONFIGS.filter((c) => c.id === OKTA_ID))(
+    '$id: indexPattern points to the entity index (not a log index)',
+    (config) => {
+      expect(config.indexPattern('myns')).toContain('.entities.v2.latest.myns');
+      expect(config.indexPattern('default')).not.toContain('myns');
+    }
+  );
 
   it('entityanalytics_okta: override query expands raw host.id before CONCAT (CONCAT is null on multi-valued input)', () => {
     const query = buildTargetsPerActorQuery(oktaConfig, 'default');
