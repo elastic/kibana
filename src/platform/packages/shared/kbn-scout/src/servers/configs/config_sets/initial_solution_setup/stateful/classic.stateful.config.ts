@@ -10,14 +10,19 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { defaultConfig } from '../../default/stateful/base.config';
 
-const disabledArg = '--xpack.spaces.initialSolutionSetup.enabled=false';
-
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
+    // initialSolutionSetup is dev-only. Scout CI runs the production distributable, so this lane must
+    // explicitly use the development environment before enabling initial solution setup.
+    buildArgs: [...defaultConfig.kbnTestServer.buildArgs, '--env.name=development'],
     serverArgs: [
-      ...defaultConfig.kbnTestServer.serverArgs.filter((arg) => arg !== disabledArg),
+      // Default Scout disables this flow to keep existing Spaces tests unchanged. This dedicated lane
+      // replaces that default so a fresh default space is created with setup pending.
+      ...defaultConfig.kbnTestServer.serverArgs.filter(
+        (arg) => arg !== '--xpack.spaces.initialSolutionSetup.enabled=false'
+      ),
       '--xpack.spaces.initialSolutionSetup.enabled=true',
     ],
   },
