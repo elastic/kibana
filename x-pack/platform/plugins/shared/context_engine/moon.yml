@@ -18,6 +18,9 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/context_engine
 dependsOn:
   - '@kbn/actions-plugin'
+  - '@kbn/data-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/llm-trace-waterfall'
   - '@kbn/core'
   - '@kbn/core-http-browser'
   - '@kbn/react-query'
@@ -51,6 +54,17 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/ui-callout'
   - '@kbn/logging-mocks'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/content-list'
+  - '@kbn/content-list-provider'
+  - '@kbn/content-list-provider-client'
+  - '@kbn/content-management-table-list-view-common'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/security-plugin'
+  - '@kbn/zod'
+  - '@kbn/es-types'
+  - '@kbn/task-manager-plugin'
 tags:
   - plugin
   - prod

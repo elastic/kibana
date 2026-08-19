@@ -13,6 +13,7 @@ import {
   UpdateEvaluationDatasetExampleRequestParams,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   ENCRYPTION_NOT_CONFIGURED_MESSAGE,
@@ -29,6 +30,7 @@ export const registerUpdateExampleRoute = ({
   logger,
   canEncrypt,
   getEncryptedSavedObjectsStart,
+  getSpaceId,
 }: RouteDependencies) => {
   router.versioned
     .put({
@@ -86,8 +88,9 @@ export const registerUpdateExampleRoute = ({
 
           const { datasetId, exampleId } = request.params;
           const { input, output, metadata } = request.body;
+          const activeSpaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
           const evalsContext = await context.evals;
-          const datasetClient = evalsContext.datasetService.getClient();
+          const datasetClient = evalsContext.datasetService.getClient({ spaceId: activeSpaceId });
 
           const exists = await datasetClient.datasetExists(datasetId);
           if (!exists) {

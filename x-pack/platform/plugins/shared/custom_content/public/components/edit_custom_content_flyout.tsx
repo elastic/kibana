@@ -28,22 +28,25 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
-import type { TimeRange } from '@kbn/es-query';
-import { getServices } from '../services';
+import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
-import { buildCustomContentContextAttachment } from '../utils/chat_integration';
-import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../../common/constants';
 
 export interface EditCustomContentFlyoutProps {
   embeddableId: string;
   esqlQuery: string | undefined;
   template: string | undefined;
   timeRange: TimeRange | undefined;
+  isApproximate: boolean;
+  projectRouting: ProjectRouting | undefined;
+  query: Query | AggregateQuery | undefined;
+  filters: Filter[] | undefined;
   panelTitle?: string;
   isNewPanel?: boolean;
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
   onClose: () => void;
+  onRunPreview: (html: string) => void;
+  onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
 }
 
 export const EditCustomContentFlyout = ({
@@ -51,13 +54,18 @@ export const EditCustomContentFlyout = ({
   esqlQuery,
   template,
   timeRange,
+  isApproximate,
+  projectRouting,
+  query,
+  filters,
   panelTitle,
   isNewPanel,
   onSave,
   onClose,
+  onRunPreview,
+  onGenerateWithChat,
 }: EditCustomContentFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
-  const { agentBuilder } = getServices();
+  const { euiTheme, colorMode } = useEuiTheme();
 
   const {
     draftEsqlQuery,
@@ -65,27 +73,29 @@ export const EditCustomContentFlyout = ({
     draftTemplate,
     setDraftTemplate,
     isAiAvailable,
-    isPreviewLoading,
-    previewData,
-    previewError,
-    handlePreview,
-  } = useEditFlyoutState({ esqlQuery, template, timeRange });
+    isDataLoading,
+    esqlData,
+    esqlDataError,
+    handleFetchData,
+    isRenderLoading,
+    hasPreviewedCurrentDraft,
+    handleRender,
+  } = useEditFlyoutState({
+    esqlQuery,
+    template,
+    timeRange,
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+    colorMode,
+    euiTheme,
+    onRunPreview,
+  });
 
   const handleGenerateWithChat = useCallback(() => {
-    if (!agentBuilder) return;
-    agentBuilder.openChat({
-      attachments: [
-        buildCustomContentContextAttachment(
-          draftTemplate,
-          draftEsqlQuery || undefined,
-          embeddableId,
-          panelTitle
-        ),
-      ],
-      sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${embeddableId}`,
-    });
-    onClose();
-  }, [agentBuilder, draftTemplate, draftEsqlQuery, embeddableId, panelTitle, onClose]);
+    onGenerateWithChat?.(draftTemplate, draftEsqlQuery || undefined);
+  }, [onGenerateWithChat, draftTemplate, draftEsqlQuery]);
 
   const hasChanges = draftEsqlQuery !== (esqlQuery ?? '') || draftTemplate !== (template ?? '');
 
@@ -105,7 +115,7 @@ export const EditCustomContentFlyout = ({
     position: 'absolute',
     top: euiTheme.size.xs,
     right: euiTheme.size.m,
-    zIndex: 1,
+    zIndex: euiTheme.levels.content,
   });
 
   return (
@@ -178,9 +188,13 @@ export const EditCustomContentFlyout = ({
           {isAiAvailable && (
             <EuiFlexItem grow={false}>
               <AiButton size="s" iconType="sparkles" onClick={handleGenerateWithChat}>
-                {i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
-                  defaultMessage: 'Refine with chat',
-                })}
+                {draftTemplate
+                  ? i18n.translate('xpack.customContent.editFlyout.refineWithChatButton', {
+                      defaultMessage: 'Refine with chat',
+                    })
+                  : i18n.translate('xpack.customContent.editFlyout.generateWithChatButton', {
+                      defaultMessage: 'Generate with chat',
+                    })}
               </AiButton>
             </EuiFlexItem>
           )}
@@ -191,7 +205,8 @@ export const EditCustomContentFlyout = ({
         <EuiFormRow
           fullWidth
           helpText={i18n.translate('xpack.customContent.editFlyout.templateHelpText', {
-            defaultMessage: 'The HTML template uses Liquid syntax filled with live query data.',
+            defaultMessage:
+              'Liquid template filled with ES|QL results. Each column is an object — use row["col"].value for the raw value and row["col"].pct for its share of the column maximum (0–100, useful for bar widths).',
           })}
         >
           <div css={editorContainerCss}>
@@ -200,6 +215,10 @@ export const EditCustomContentFlyout = ({
               value={draftTemplate}
               onChange={setDraftTemplate}
               height={240}
+              placeholder={i18n.translate('xpack.customContent.editFlyout.templatePlaceholder', {
+                defaultMessage:
+                  '<!-- Write your HTML, CSS, and Liquid here, or use "Generate with chat" above. -->',
+              })}
               options={{
                 fontSize: 12,
                 minimap: { enabled: false },
@@ -233,10 +252,10 @@ export const EditCustomContentFlyout = ({
         <EsqlPreviewSection
           esqlQuery={draftEsqlQuery}
           onEsqlQueryChange={setDraftEsqlQuery}
-          isPreviewLoading={isPreviewLoading}
-          previewData={previewData}
-          previewError={previewError}
-          onPreview={handlePreview}
+          isDataLoading={isDataLoading}
+          esqlData={esqlData}
+          esqlDataError={esqlDataError}
+          onFetchData={handleFetchData}
         />
       </EuiFlyoutBody>
 
@@ -250,11 +269,28 @@ export const EditCustomContentFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleSave} disabled={!hasChanges}>
-              {i18n.translate('xpack.customContent.editFlyout.applyButton', {
-                defaultMessage: 'Apply and close',
-              })}
-            </EuiButton>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="success"
+                  iconType="play"
+                  isLoading={isRenderLoading}
+                  disabled={!hasChanges || hasPreviewedCurrentDraft}
+                  onClick={handleRender}
+                >
+                  {i18n.translate('xpack.customContent.editFlyout.runPreviewButton', {
+                    defaultMessage: 'Run Preview',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={handleSave} disabled={!hasChanges}>
+                  {i18n.translate('xpack.customContent.editFlyout.applyButton', {
+                    defaultMessage: 'Apply and close',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

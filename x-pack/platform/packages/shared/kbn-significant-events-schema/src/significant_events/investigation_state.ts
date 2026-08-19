@@ -8,7 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { severitySchema } from './common_schemas';
 import { significantEventStatusSchema } from './events';
-import { MAX_TEXT_LENGTH } from './constants';
+import {
+  MAX_MEDIUM_STRING_LENGTH,
+  MAX_SHORT_STRING_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_TIMESTAMP_LENGTH,
+} from './constants';
 
 /**
  * Name of the `tool_ui` custom event emitted by the investigation agent's progress-report
@@ -25,11 +30,44 @@ export const INVESTIGATION_PROGRESS_UI_EVENT = 'investigation_progress' as const
  */
 export const INVESTIGATE_STEP_ID = 'investigate' as const;
 
-const MAX_TIMESTAMP_LENGTH = 64;
+/**
+ * A source file the agent read, recorded as parts rather than a URL so that consumers — not the
+ * model — decide what is safe to link.
+ *
+ * `source` records how the code was reached, for provenance; it deliberately does NOT decide
+ * whether a link can be built.
+ */
+const investigationEvidenceCodeSchema = z.object({
+  /**
+   * How this reference was obtained: `github_connector` for a GitHub connector, `code_search` for
+   * Semantic Code Search. Model-reported, so treat it as advisory — it selects which URL shape a
+   * consumer may build, never as proof of where the code lives.
+   */
+  source: z.enum(['github_connector', 'code_search']),
+  /** Repository in `owner/name` form, e.g. `elastic/kibana`. */
+  repo: z.string().max(MAX_SHORT_STRING_LENGTH),
+  /** Repository-relative file path, e.g. `src/recommendationservice/recommendation_server.py`. */
+  path: z.string().max(MAX_MEDIUM_STRING_LENGTH),
+  /**
+   * Hostname the code can be browsed on, taken from the origin of the URL the tool itself
+   * returned — never inferred from `repo`. Absent when the tool reported no browsable location,
+   * as Semantic Code Search does: it records a bare `owner/repo` with no remote.
+   */
+  host: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+  /**
+   * Commit SHA the file was read at. GitHub resolves a branch name to a SHA in the URLs it
+   * returns, so this is normally available without asking the model to look it up. Absent when the
+   * tool reported no revision — in which case no link is built, because a branch-pinned link
+   * drifts away from the code the investigation actually saw.
+   */
+  ref: z.string().max(MAX_SHORT_STRING_LENGTH).optional(),
+});
+export type InvestigationEvidenceCode = z.infer<typeof investigationEvidenceCodeSchema>;
 
 /**
- * One observation supporting a claim the investigation makes, together with a pointer back to the
- * concrete artefact it rests on, so a reader can verify it instead of trusting it.
+ * One observation supporting a claim the investigation makes, together with pointers back to the
+ * concrete artefacts it rests on, so a reader can verify it instead of trusting it.
+ *
  */
 const investigationEvidenceSchema = z.object({
   /** What was observed and why it bears on the claim. Doubles as the label for its link. */
@@ -48,6 +86,8 @@ const investigationEvidenceSchema = z.object({
       to: z.string().max(MAX_TIMESTAMP_LENGTH),
     })
     .optional(),
+  /** The source file backing this evidence, when the agent read code. */
+  code: investigationEvidenceCodeSchema.optional(),
 });
 export type InvestigationEvidence = z.infer<typeof investigationEvidenceSchema>;
 

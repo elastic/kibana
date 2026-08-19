@@ -35,6 +35,10 @@ import {
 } from '../lib/execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import {
+  RuleTemplatesClient,
+  RuleTemplateSavedObjectsClientToken,
+} from '../lib/rule_templates_client';
+import {
   createChangeHistoryClient,
   ChangeHistoryClientToken,
   RuleChangesHistoryClient,
@@ -101,6 +105,7 @@ import {
   ACTION_POLICY_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
+import { RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../common/saved_object_types';
 import {
   EncryptedSavedObjectsClientToken,
   WorkflowsManagementApiToken,
@@ -131,6 +136,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .inRequestScope();
   bind(ActionPolicyClient).toSelf().inRequestScope();
   bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
+  bind(RuleTemplatesClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClient).toSelf().inRequestScope();
   bind(ExecutionHistoryClientToken).toService(ExecutionHistoryClient);
   bind(UserService).toSelf().inRequestScope();
@@ -214,6 +220,16 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toResolvedValue(
       (savedObjectsClientFactory) =>
         savedObjectsClientFactory({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  // The `alerting_rule_template` type is hidden and owned by the alerting (v1)
+  // plugin, so it has to be opted into explicitly here.
+  bind(RuleTemplateSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({ includedHiddenTypes: [RULE_TEMPLATE_SAVED_OBJECT_TYPE] }),
       [SavedObjectsClientFactory]
     )
     .inRequestScope();

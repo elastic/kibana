@@ -230,6 +230,106 @@ describe('investigation_workflow.yaml structured-output schema stays in sync wit
     expect(investigationStateSchema.safeParse(observationOnly).success).toBe(true);
   });
 
+  it('accepts evidence carrying a query and a code reference in one entry under both schemas', () => {
+    const withCode = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'A 1ms gRPC timeout in the product validation loop',
+          confidence: 0.95,
+          status: 'confirmed',
+          evidence: [
+            {
+              description: 'Errors spike at 08:40 and the handler re-raises on deadline exceeded.',
+              esql_query: 'FROM logs.otel | STATS count = COUNT(*)',
+              time_range: { from: '2026-08-05T08:00:00Z', to: '2026-08-05T09:10:00Z' },
+              code: {
+                source: 'github_connector',
+                repo: 'elastic/otel-demo-scenario',
+                path: 'src/recommendationservice/recommendation_server.py',
+                host: 'github.com',
+                ref: 'f07c1da942b0c555fab6cf4eab612df1997b1329',
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(withCode)).toBe(true);
+    expect(investigationStateSchema.safeParse(withCode).success).toBe(true);
+  });
+
+  it('accepts a code reference with neither host nor ref, which simply will not be linked', () => {
+    const unlinkable = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'The retry guard is missing.',
+              code: {
+                source: 'code_search',
+                repo: 'open-telemetry/opentelemetry-demo',
+                path: 'src/recommendationservice/recommendation_server.py',
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(unlinkable)).toBe(true);
+    expect(investigationStateSchema.safeParse(unlinkable).success).toBe(true);
+  });
+
+  it('rejects a code reference missing its repo under both schemas', () => {
+    const missingRepo = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'Read the handler.',
+              code: { source: 'github_connector', path: 'src/handler.ts' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(missingRepo)).toBe(false);
+    expect(investigationStateSchema.safeParse(missingRepo).success).toBe(false);
+  });
+
+  it('rejects a code reference with an unknown source under both schemas', () => {
+    const badSource = {
+      summary: 'ok',
+      hypotheses: [
+        {
+          candidate: 'X',
+          confidence: 0.5,
+          status: 'investigating',
+          evidence: [
+            {
+              description: 'Read the handler.',
+              code: { source: 'gitlab', repo: 'acme/foo', path: 'src/handler.ts' },
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(validate(badSource)).toBe(false);
+    expect(investigationStateSchema.safeParse(badSource).success).toBe(false);
+  });
+
   it('rejects hypothesis evidence exceeding MAX_HYPOTHESIS_EVIDENCE under both schemas', () => {
     const tooMuchEvidence = {
       summary: 'ok',

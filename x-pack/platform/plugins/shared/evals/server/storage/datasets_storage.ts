@@ -18,6 +18,7 @@ export const datasetsStorageSettings = {
       tags: types.keyword({}),
       maturity: types.keyword({}),
       examples_count: types.long({}),
+      space_ids: types.keyword({}),
       created_at: types.date({}),
       updated_at: types.date({}),
     },
@@ -30,6 +31,11 @@ export interface DatasetStorageProperties {
   tags?: string[];
   maturity?: DatasetMaturity;
   examples_count?: number;
+  /**
+   * The spaces the dataset is visible in. Absent means the default space, so an
+   * empty array is never stored: it would read back the same way.
+   */
+  space_ids?: string[];
   created_at: string;
   updated_at: string;
 }

@@ -1,5 +1,5 @@
 {
-  "sha1": "5f9bd83d93e74fcc3775ef2970ba6b87976aa27a",
+  "sha1": "c64a5b6c10ca9241cc2b54ba1bf84df76136b8e3",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -318,8 +318,8 @@
       }
     },
     {
-      "id": "3fda587e45f462d-c27798434372751",
-      "title": "GET /api/discover_sessions/{id} returns 500 when the output transform fails to validate the stored Discover session",
+      "id": "3fda587e45f462d-4ef1bcc58b3e093",
+      "title": "GET /api/discover_sessions/{id} returns warnings and preserves valid controls when a stored control is invalid",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

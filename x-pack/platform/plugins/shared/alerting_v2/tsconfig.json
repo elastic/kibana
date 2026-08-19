@@ -131,6 +131,7 @@
     "@kbn/app-header",
     "@kbn/core-chrome-browser-context-mocks",
     "@kbn/change-history",
+    "@kbn/change-history-ui",
     "@kbn/content-list",
     "@kbn/content-list-provider",
     "@kbn/content-list-toolbar",
@@ -138,7 +139,8 @@
     "@kbn/test-es-server",
     "@kbn/security-authorization-core",
     "@kbn/security-plugin-types-server",
-    "@kbn/core-test-helpers-model-versions"
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/content-list-common"
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

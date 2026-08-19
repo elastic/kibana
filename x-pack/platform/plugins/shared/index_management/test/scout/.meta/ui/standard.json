@@ -1,5 +1,5 @@
 {
-  "sha1": "7a1a6903489e5c203cc47a4496d0b95849adfdd3",
+  "sha1": "0f2f1f205fe6a4b3b8a7c613c026da5778ceebd4",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -717,7 +717,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
-        "line": 31,
+        "line": 27,
         "column": 5
       }
     },
@@ -731,7 +731,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
-        "line": 43,
+        "line": 39,
         "column": 95
       }
     },
@@ -745,7 +745,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
-        "line": 59,
+        "line": 55,
         "column": 8
       }
     },
@@ -759,7 +759,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_template_wizard_mappings.spec.ts",
-        "line": 69,
+        "line": 65,
         "column": 11
       }
     },
@@ -807,8 +807,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_creation.spec.ts",
-        "line": 58,
-        "column": 19
+        "line": 66,
+        "column": 21
       }
     },
     {
@@ -821,8 +821,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/ui/tests/index_templates/index_templates_tab_creation.spec.ts",
-        "line": 91,
-        "column": 24
+        "line": 78,
+        "column": 5
       }
     },
     {

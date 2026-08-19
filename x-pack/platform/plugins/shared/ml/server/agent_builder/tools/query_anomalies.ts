@@ -165,7 +165,19 @@ Example (with placeholders — bind every ?name):
 }
 
 Allowed indices (internal user): \`.ml-anomalies-*\`, \`.ml-config\`, \`.ml-notifications-*\`, \`.ml-annotations-*\`.
-For source-data indices use \`platform.core.execute_esql\` instead.`,
+For source-data indices use \`platform.core.execute_esql\` instead.
+
+## API documentation
+- ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
+- Anomaly detection guide: https://www.elastic.co/docs/explore-analyze/machine-learning/anomaly-detection
+- Anomaly detection APIs: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-ml-anomaly`,
+  annotations: {
+    title: 'Query Anomalies',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   experimental: true,
   schema,
   handler: async (
