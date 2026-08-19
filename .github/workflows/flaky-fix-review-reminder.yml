@@ -38,7 +38,7 @@ jobs:
             .github/scripts/flaky_fix_review_reminder.js
           sparse-checkout-cone-mode: false
       - name: Install matcher dependency
-        run: npm install --no-save --no-package-lock ignore@5.3.2
+        run: npm install --no-save --no-package-lock ignore@7.0.5
       - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           DRY_RUN: ${{ inputs.dry_run == true }}

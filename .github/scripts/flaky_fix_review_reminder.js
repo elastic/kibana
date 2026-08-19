@@ -34,7 +34,7 @@ const REMINDER_AFTER_DAYS = 4;
 const MAX_PINGS_PER_RUN = 50;
 // Used when no codeowner can be resolved for the changed files.
 const FALLBACK_OWNER = '@elastic/kibana-qa';
-const CODEOWNERS_PATH = path.resolve(process.cwd(), '.github/CODEOWNERS');
+const DEFAULT_CODEOWNERS_PATH = path.resolve(process.cwd(), '.github/CODEOWNERS');
 const QA_CHANNEL_URL = 'https://elastic.slack.com/archives/CTH3RN2GB';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -174,7 +174,9 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
   const { owner, repo } = context.repo;
   const dryRun = process.env.DRY_RUN === 'true';
 
-  const entries = buildCodeownersEntries(fs.readFileSync(CODEOWNERS_PATH, 'utf8'));
+  const entries = buildCodeownersEntries(
+    fs.readFileSync(process.env.CODEOWNERS_PATH || DEFAULT_CODEOWNERS_PATH, 'utf8')
+  );
 
   // CODEOWNERS is read from the checked-out ref (the default branch), so we only
   // reason about PRs that target it. flaky-test-fixer PRs are opened against the
