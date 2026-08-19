@@ -7,8 +7,9 @@
 
 import React from 'react';
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 export interface WaitingForConnectorStepProps {
   isLoading: boolean;
@@ -25,64 +26,54 @@ export const WaitingForConnectorStep: React.FC<WaitingForConnectorStepProps> = (
   return (
     <>
       <EuiSpacer />
-      <EuiCallOut
-        color="warning"
+      <KbnWarningCallout
         title={i18n.translate(
           'xpack.contentConnectors.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.title',
           {
             defaultMessage: 'Waiting for your connector',
           }
         )}
-        iconType="info"
-      >
-        {i18n.translate(
+        text={i18n.translate(
           'xpack.contentConnectors.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.description',
           {
             defaultMessage:
               'Your connector has not connected to Search. Troubleshoot your configuration and refresh the page.',
           }
         )}
-        <EuiSpacer size="s" />
-        <EuiFlexGroup direction="row" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="warning"
-              fill
-              disabled={isRecheckDisabled}
-              data-test-subj="entSearchContent-connector-waitingForConnector-callout-recheckNow"
-              data-telemetry-id="entSearchContent-connector-waitingForConnector-callout-recheckNow"
-              iconType="refresh"
-              onClick={recheck}
-              isLoading={isLoading}
-            >
-              {i18n.translate(
-                'xpack.contentConnectors.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.button.label',
-                {
-                  defaultMessage: 'Recheck now',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-          {showFinishLaterButton && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                color="warning"
-                data-test-subj="entSearchContent-connector-waitingForConnector-callout-finishLaterButton"
-                data-telemetry-id="entSearchContent-connector-waitingForConnector-callout-finishLaterButton"
-                iconType="save"
-                onClick={() => {}}
-              >
-                {i18n.translate(
+        actionProps={{
+          primary: {
+            disabled: isRecheckDisabled,
+            'data-test-subj': 'entSearchContent-connector-waitingForConnector-callout-recheckNow',
+            'data-telemetry-id':
+              'entSearchContent-connector-waitingForConnector-callout-recheckNow',
+            iconType: 'refresh',
+            onClick: recheck,
+            isLoading,
+            children: i18n.translate(
+              'xpack.contentConnectors.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.button.label',
+              {
+                defaultMessage: 'Recheck now',
+              }
+            ),
+          },
+          secondary: showFinishLaterButton
+            ? {
+                'data-test-subj':
+                  'entSearchContent-connector-waitingForConnector-callout-finishLaterButton',
+                'data-telemetry-id':
+                  'entSearchContent-connector-waitingForConnector-callout-finishLaterButton',
+                iconType: 'save',
+                onClick: () => {},
+                children: i18n.translate(
                   'xpack.contentConnectors.content.connector_detail.configurationConnector.steps.waitingForConnector.callout.finishLaterButton.label',
                   {
                     defaultMessage: 'Finish deployment later',
                   }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiCallOut>
+                ),
+              }
+            : undefined,
+        }}
+      />
     </>
   );
 };
