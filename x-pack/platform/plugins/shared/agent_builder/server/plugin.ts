@@ -342,7 +342,7 @@ export class AgentBuilderPlugin
    * Applies all registered migrations
    */
   private async runMigrations(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
-    const logger = this.logger.get('tool-id-migration');
+    const logger = this.logger.get('migrations');
     const esClient = elasticsearch.client.asInternalUser;
     runToolIdMigrations(logger, esClient);
   }
