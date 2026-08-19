@@ -22,8 +22,10 @@ const REMINDER_MARKER = '<!-- flaky-fix-review-reminder -->';
 const REMINDER_AUTHOR = 'github-actions[bot]';
 // Calendar days (weekends included) before the first ping; also the re-ping cadence.
 const REMINDER_AFTER_DAYS = 4;
-// Keeps a daily sweep from causing a notification storm; raise once proven.
-const MAX_PINGS_PER_RUN = 2;
+// Max reminder comments posted per run. Bounds the noise (and API writes) of a
+// single sweep: with a large unreviewed backlog, at most this many PRs get a
+// codeowner ping per day; the rest are picked up on subsequent daily runs.
+const MAX_PINGS_PER_RUN = 20;
 const FALLBACK_OWNER = '@elastic/appex-qa';
 const DEFAULT_CODEOWNERS_PATH = path.resolve(process.cwd(), '.github/CODEOWNERS');
 const QA_CHANNEL_URL = 'https://elastic.slack.com/archives/CTH3RN2GB';
@@ -263,3 +265,4 @@ module.exports.resolveOwners = resolveOwners;
 module.exports.buildCommentBody = buildCommentBody;
 module.exports.REMINDER_AFTER_DAYS = REMINDER_AFTER_DAYS;
 module.exports.REMINDER_MARKER = REMINDER_MARKER;
+module.exports.MAX_PINGS_PER_RUN = MAX_PINGS_PER_RUN;
