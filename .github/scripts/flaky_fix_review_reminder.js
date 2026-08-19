@@ -27,7 +27,7 @@ const REMINDER_AFTER_DAYS = 4;
 // codeowner ping per day; the rest are picked up on subsequent daily runs.
 const MAX_PINGS_PER_RUN = 20;
 const DEFAULT_CODEOWNERS_PATH = path.resolve(process.cwd(), '.github/CODEOWNERS');
-const QA_CHANNEL_URL = 'https://elastic.slack.com/archives/CTH3RN2GB';
+const QA_CHANNEL_URL = 'https://elastic.slack.com/archives/C04HT4P1YS3';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
