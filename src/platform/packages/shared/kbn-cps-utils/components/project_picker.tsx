@@ -114,14 +114,7 @@ export const ProjectPicker = ({
       return null;
     }
 
-    return (
-      <ProjectPickerButton
-        // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
-        size="xs"
-        onClick={() => {}}
-        isDisabled
-      />
-    );
+    return <ProjectPickerButton size="s" onClick={() => {}} isDisabled />;
   }
 
   if (isLoading) {
@@ -135,11 +128,7 @@ export const ProjectPicker = ({
   const originProject = projects!.origin!;
 
   const projectPickerPopoverTriggerButton = (
-    <ProjectPickerButton
-      // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
-      size="xs"
-      onClick={() => setShowPopover(!showPopover)}
-    />
+    <ProjectPickerButton size="s" onClick={() => setShowPopover(!showPopover)} />
   );
 
   const projectPickerPopover = (
@@ -221,8 +210,7 @@ export const DisabledProjectPicker = ({
 
   return (
     <ProjectPickerButton
-      // @ts-expect-error - EuiButtonProps xs size is supported, types just say otherwise
-      size="xs"
+      size="s"
       onClick={() => {}}
       customTooltipContent={customTooltipContent}
       isDisabled

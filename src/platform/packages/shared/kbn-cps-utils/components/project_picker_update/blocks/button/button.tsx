@@ -10,6 +10,8 @@
 import React, { useContext } from 'react';
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiToolTip,
   type EuiButtonProps,
   useGeneratedHtmlId,
@@ -46,7 +48,7 @@ export const ProjectPickerButton = ({
   if (isDisabled) {
     return (
       <EuiToolTip content={customTooltipContent ?? strings.projectPickerButtonAriaLabel} id={id}>
-        <EuiButton
+        <EuiButtonIcon
           {...sharedButtonProps}
           color="text"
           iconType={CPSIconDisabled}
@@ -70,27 +72,52 @@ export const ProjectPickerButton = ({
 
   return (
     <EuiToolTip content={customTooltipContent ?? strings.projectPickerButtonAriaLabel} id={id}>
-      <EuiButton
-        {...sharedButtonProps}
-        color={shouldWarn ? 'warning' : 'text'}
-        iconType={shouldWarn ? 'warning' : 'crossProjectSearch'}
-        onClick={onClick}
-        data-test-subj="cps-project-picker-button"
-      >
-        <EuiText size="s" css={styles.pickerButtonLabelStyles}>
-          <span data-test-subj="cps-project-picker-button-label">
-            {allProjectsSelected
-              ? strings.allButtonLabel
-              : i18n.translate('cpsUtils.projectPicker.pickerButtonSelectionDifferentiationLabel', {
-                  defaultMessage: '{filterProjectsCount}/{totalProjectsCount}',
-                  values: {
-                    filterProjectsCount: numeral(filteredProjectsCount).format('0a'),
-                    totalProjectsCount: numeral(totalProjectsCount).format('0a'),
-                  },
-                })}
-          </span>
-        </EuiText>
-      </EuiButton>
+      {shouldWarn ? (
+        <EuiButton
+          {...sharedButtonProps}
+          color="warning"
+          iconType="warning"
+          onClick={onClick}
+          data-test-subj="cps-project-picker-button"
+        >
+          <EuiText size="s" css={styles.pickerButtonLabelStyles}>
+            <span data-test-subj="cps-project-picker-button-label">
+              {i18n.translate('cpsUtils.projectPicker.pickerButtonSelectionDifferentiationLabel', {
+                defaultMessage: '{filterProjectsCount}/{totalProjectsCount}',
+                values: {
+                  filterProjectsCount: numeral(filteredProjectsCount).format('0a'),
+                  totalProjectsCount: numeral(totalProjectsCount).format('0a'),
+                },
+              })}
+            </span>
+          </EuiText>
+        </EuiButton>
+      ) : (
+        <EuiButtonEmpty
+          {...sharedButtonProps}
+          color="text"
+          onClick={onClick}
+          iconType="crossProjectSearch"
+          data-test-subj="cps-project-picker-button"
+        >
+          <EuiText size="s" css={styles.pickerButtonLabelStyles}>
+            <span data-test-subj="cps-project-picker-button-label">
+              {allProjectsSelected
+                ? strings.allButtonLabel
+                : i18n.translate(
+                    'cpsUtils.projectPicker.pickerButtonSelectionDifferentiationLabel',
+                    {
+                      defaultMessage: '{filterProjectsCount}/{totalProjectsCount}',
+                      values: {
+                        filterProjectsCount: numeral(filteredProjectsCount).format('0a'),
+                        totalProjectsCount: numeral(totalProjectsCount).format('0a'),
+                      },
+                    }
+                  )}
+            </span>
+          </EuiText>
+        </EuiButtonEmpty>
+      )}
     </EuiToolTip>
   );
 };
