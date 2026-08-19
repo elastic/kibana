@@ -16,4 +16,4 @@ export {
   SESSION_API_PATH,
   SESSION_API_VERSION,
 } from './constants';
-export { deleteAllSearchSessions, saveBackgroundSearch, selectSingleComboOption } from './helpers';
+export { deleteAllSearchSessions, saveBackgroundSearch } from './helpers';

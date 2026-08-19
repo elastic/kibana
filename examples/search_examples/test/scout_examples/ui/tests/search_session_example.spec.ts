@@ -23,7 +23,6 @@ import {
   LOGSTASH_TIME_RANGE,
   deleteAllSearchSessions,
   saveBackgroundSearch,
-  selectSingleComboOption,
 } from '../fixtures';
 
 test.describe('Search session example', { tag: ['@local-stateful-classic'] }, () => {
@@ -56,8 +55,10 @@ test.describe('Search session example', { tag: ['@local-stateful-classic'] }, ()
   test('should start search, save session, restore session using restore button', async ({
     page,
   }) => {
-    await selectSingleComboOption(page, 'dataViewSelector', DATA_VIEW);
-    await selectSingleComboOption(page, 'searchMetricField', 'bytes');
+    await page.components.comboBox('dataViewSelector').setSelectedOptions([DATA_VIEW]);
+    await page.components.comboBox('searchMetricField').setSelectedOptions(['bytes'], {
+      timeout: 10_000,
+    });
 
     await page.testSubj.locator('startSearch').click();
     // Save while the shard_delay search is still in-flight.
