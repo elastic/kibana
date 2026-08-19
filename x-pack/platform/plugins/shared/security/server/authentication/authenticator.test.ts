@@ -3008,10 +3008,75 @@ describe('Authenticator', () => {
       expect(auditLogger.log).not.toHaveBeenCalled();
     });
 
+    it('does not extend session for a minimally authenticated request if no update is needed.', async () => {
+      const user = mockAuthenticatedUser();
+      const request = httpServerMock.createKibanaRequest({
+        kibanaRouteOptions: {
+          xsrfRequired: true,
+          access: 'internal',
+          security: {
+            authc: { enabled: 'minimal', reason: 'test' },
+            authz: { enabled: false, reason: 'test' },
+          },
+        },
+      });
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user)
+      );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user)
+      );
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).not.toHaveBeenCalled();
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
     it('replaces existing session with the one returned by authentication provider', async () => {
       const user = mockAuthenticatedUser();
       const newState = { authorization: 'Basic yyy' };
       const request = httpServerMock.createKibanaRequest();
+
+      mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
+        AuthenticationResult.succeeded(user, { state: newState })
+      );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
+      mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
+
+      await expect(authenticator.reauthenticate(request)).resolves.toEqual(
+        AuthenticationResult.succeeded(user, { state: newState })
+      );
+
+      expect(mockOptions.session.create).not.toHaveBeenCalled();
+      expect(mockOptions.session.update).toHaveBeenCalledTimes(1);
+      expect(mockOptions.session.update).toHaveBeenCalledWith(request, {
+        ...mockSessVal,
+        state: newState,
+      });
+      expect(mockOptions.session.extend).not.toHaveBeenCalled();
+      expect(mockOptions.session.invalidate).not.toHaveBeenCalled();
+      expect(auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    it('replaces existing session for a minimally authenticated request if provider returns new state', async () => {
+      const user = mockAuthenticatedUser();
+      const newState = { authorization: 'Basic yyy' };
+      const request = httpServerMock.createKibanaRequest({
+        kibanaRouteOptions: {
+          xsrfRequired: true,
+          access: 'internal',
+          security: {
+            authc: { enabled: 'minimal', reason: 'test' },
+            authz: { enabled: false, reason: 'test' },
+          },
+        },
+      });
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })

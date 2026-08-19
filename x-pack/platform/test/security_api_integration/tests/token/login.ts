@@ -181,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should support minimal authentication even when access token is expired', async function () {
-      this.timeout(60000);
+      this.timeout(90000);
 
       const loginResponse = await supertest
         .post('/internal/security/login')
@@ -213,6 +213,21 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(minimalResponse.body.principal.username).to.eql('elastic');
       expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'token',
+        name: 'token',
+      });
+
+      // Wait for the refreshed access token to expire. A second successful request with the
+      // original session cookie proves that the refreshed token pair was persisted in the session.
+      await setTimeoutAsync(20000);
+
+      const secondMinimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(secondMinimalResponse.body.principal.username).to.eql('elastic');
+      expect(secondMinimalResponse.body.principal.authentication_provider).to.eql({
         type: 'token',
         name: 'token',
       });
