@@ -171,6 +171,11 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       max-width: none !important;
     }
 
+    ${scope} .euiPageSidebar,
+    ${scope} [class*='css-'][class*='-euiPageSidebar'] {
+      border-inline-end: ${TARGET_HAIRLINE} !important;
+    }
+
     ${scope} h1,
     ${scope} h2,
     ${scope} h3 {
@@ -725,11 +730,27 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${knobVar('radiusPanel')} !important;
     }
 
+    /* Agent Builder sidebar: flush edges so panel fill does not punch through the hairline. */
+    ${scope} [data-test-subj='agentBuilderWrapper'] .euiPageSidebar .euiPanel {
+      border-radius: 0 !important;
+    }
+
+    ${scope} [data-test-subj='agentBuilderWrapper'] .euiPageSidebar a {
+      border-end-end-radius: 0 !important;
+    }
+
     ${scope} [data-test-subj='embeddablePanel'] {
       border: ${TARGET_HAIRLINE} !important;
       outline: none !important;
       box-shadow: none !important;
       background-color: ${targetSurface} !important;
+    }
+
+    ${scope} [data-test-subj='agentBuilderWrapper'] .euiPanel,
+    ${scope} [data-test-subj='agentBuilderWrapper'] .embPanel,
+    ${scope} [data-test-subj='agentBuilderWrapper'] .euiEmptyPrompt,
+    ${scope} [data-test-subj='agentBuilderWrapper'] [data-test-subj='embeddablePanel'] {
+      background-color: transparent !important;
     }
 
     ${scope} .embPanel__hoverActions,
