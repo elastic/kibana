@@ -9,7 +9,8 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiSpacer, EuiLink, EuiFlexGroup, EuiFlexItem, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { i18n } from '@kbn/i18n';
 
@@ -86,35 +87,34 @@ export const NativeConnectorConfigurationConfig: React.FC<
       {connector.status && hasAdvancedFilteringFeature && !isAdvancedSnippetEmpty && (
         <>
           <EuiSpacer size="l" />
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate(
               'xpack.contentConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout',
               { defaultMessage: 'Configuration warning' }
             )}
-            iconType="info"
-            color="warning"
-          >
-            <FormattedMessage
-              id="xpack.contentConnectors..content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
-              defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
-              values={{
-                advancedSyncRulesDocs: (
-                  <EuiLink
-                    data-test-subj="entSearchContent-connector-nativeConnector-advancedSyncRulesDocsLink"
-                    data-telemetry-id="entSearchContent-connector-nativeConnector-advancedSyncRulesDocsLink"
-                    href={docLinks.syncRules}
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.contentConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
-                      { defaultMessage: 'Advanced Sync Rules' }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.contentConnectors..content.connector_detail.configurationConnector.connectorPackage.advancedRulesCallout.description"
+                defaultMessage="{advancedSyncRulesDocs} can override some configuration fields."
+                values={{
+                  advancedSyncRulesDocs: (
+                    <EuiLink
+                      data-test-subj="entSearchContent-connector-nativeConnector-advancedSyncRulesDocsLink"
+                      data-telemetry-id="entSearchContent-connector-nativeConnector-advancedSyncRulesDocsLink"
+                      href={docLinks.syncRules}
+                      target="_blank"
+                    >
+                      {i18n.translate(
+                        'xpack.contentConnectors.content.connector_detail.configurationConnector.connectorPackage.advancedSyncRulesDocs',
+                        { defaultMessage: 'Advanced Sync Rules' }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            }
+          />
         </>
       )}
     </ConnectorConfigurationComponent>

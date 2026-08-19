@@ -30,7 +30,7 @@ import {
   EXAMPLE_PROFILE_STATE_DEFAULTS,
   EXAMPLE_PROFILE_STATE_DEF,
   type ExampleProfileState,
-} from '../profile_state';
+} from '../../../../../common/context_awareness';
 
 const commonColorOptions = [
   {

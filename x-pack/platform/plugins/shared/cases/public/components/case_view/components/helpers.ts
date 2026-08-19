@@ -19,7 +19,10 @@ import {
   isUnifiedReferenceAttachmentRequest,
 } from '../../../../common/utils/attachments';
 import { isSavedObjectAttachment } from '../../attachments/common/saved_object/helpers';
-import { LENS_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import {
+  LENS_ATTACHMENT_TYPE,
+  SECURITY_ENTITY_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 import { FILE_ATTACHMENT_TYPE } from '../../../../common/constants';
 import { resolveUnifiedAttachmentType } from '../../../../common/utils/attachments/migration_utils';
 import { UNKNOWN } from '../../../common/translations';
@@ -123,6 +126,33 @@ const filterUnifiedAttachment = (
   return comment;
 };
 
+/**
+ * Filter security entity attachment by searchable metadata fields.
+ * Entity attachmentId is always a single string.
+ * Duplicates matchesSearchTerm in security_solution/cases/attachments/entity/utils.ts —
+ * cases cannot import from security_solution.
+ */
+const filterSecurityEntityAttachment = (
+  comment: UnifiedReferenceAttachmentPayload,
+  searchTerm: string
+): UnifiedReferenceAttachmentPayload | null => {
+  const meta = (comment.metadata ?? {}) as {
+    entityName?: string;
+    entityType?: string;
+    riskLevel?: string;
+  };
+  const term = searchTerm.toLowerCase();
+  const text = [
+    typeof comment.attachmentId === 'string' ? comment.attachmentId : '',
+    meta.entityName ?? '',
+    meta.entityType ?? '',
+    meta.riskLevel ?? '',
+  ]
+    .join(' ')
+    .toLowerCase();
+  return text.includes(term) ? comment : null;
+};
+
 export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: string): CaseUI => {
   if (!searchTerm) {
     return caseData;
@@ -146,6 +176,14 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         if (resolveUnifiedAttachmentType(comment, owner) === FILE_ATTACHMENT_TYPE) {
           return comment;
         }
+        if (
+          comment.type === SECURITY_ENTITY_ATTACHMENT_TYPE &&
+          isUnifiedReferenceAttachmentRequest(comment)
+        ) {
+          return filterSecurityEntityAttachment(comment, searchTerm);
+        }
+        // Malformed security.entity attachment (no attachmentId) — exclude rather than pass through.
+        if (comment.type === SECURITY_ENTITY_ATTACHMENT_TYPE) return null;
         if (isUnifiedReferenceAttachmentRequest(comment)) {
           return filterUnifiedAttachment(comment, searchTerm);
         }

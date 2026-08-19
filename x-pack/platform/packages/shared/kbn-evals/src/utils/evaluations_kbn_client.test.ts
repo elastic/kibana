@@ -79,7 +79,7 @@ describe('withKbnClientApiKeyAuth', () => {
   });
 });
 describe('getEvaluationsKbnClient', () => {
-  it('returns default kbnClient when EVALUATIONS_KBN_URL is not set', () => {
+  it('returns default kbnClient when EVAL_KBN_URL is not set', () => {
     const defaultKbnClient = createMockKbnClient();
     const createKbnClient = jest.fn();
 
@@ -94,7 +94,7 @@ describe('getEvaluationsKbnClient', () => {
     expect(createKbnClient).not.toHaveBeenCalled();
   });
 
-  it('builds a separate client when EVALUATIONS_KBN_URL is set', async () => {
+  it('builds a separate client when EVAL_KBN_URL is set', async () => {
     const defaultKbnClient = createMockKbnClient();
     const evaluationsKbnClient = createMockKbnClient();
     const createKbnClient = jest.fn().mockReturnValue(evaluationsKbnClient);

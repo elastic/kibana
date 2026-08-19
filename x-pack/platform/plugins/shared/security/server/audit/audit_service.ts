@@ -18,41 +18,17 @@ import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-p
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { httpRequestEvent } from './audit_events';
+import {
+  applyAuditOtelFieldMap,
+  AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+  AUDIT_OTEL_RESOURCE_ATTRIBUTES,
+} from './audit_otel_transform';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
 
 export const ECS_VERSION = '1.6.0';
 export const RECORD_USAGE_INTERVAL = 60 * 60 * 1000; // 1 hour
-
-// OTel-only overrides injected into the appender config when the audit appender is of type 'otel'.
-// These translations/suppressions/defaults bring the output into alignment with Serverless
-// audit log field requirements without touching the upstream AuditEvent type or any non-OTel path.
-
-export const AUDIT_OTEL_FIELD_RENAMES: Record<string, string | string[]> = {
-  'kibana.space_id': 'kibana.space.id',
-  'kibana.session_id': 'kibana.session.id',
-  'kibana.lookup_realm': 'kibana.lookup.realm',
-  'kibana.authentication_type': 'authentication.type',
-  'client.ip': ['source.address', 'source.ip'],
-  'trace.id': 'request.id',
-  // OTel semconv: singular 'header' with per-key attributes (not plural 'headers' object)
-  'http.request.headers.x-forwarded-for': 'http.request.header.x-forwarded-for',
-};
-
-// Both fields are excluded on Serverless; stripped from log record and resource attributes.
-export const AUDIT_OTEL_FIELD_DROPS: string[] = ['service.version', 'host.name'];
-
-// event.type is required on every audit log. Authentication events omit it; default to 'access'.
-// SO/Space events already carry a specific type (e.g. 'creation', 'deletion') so are unaffected.
-export const AUDIT_OTEL_FIELD_DEFAULTS: Record<string, string | string[]> = {
-  'event.type': ['access'],
-};
-
-// OTel semantic conventions require HTTP method to be uppercase (e.g. 'GET' not 'get').
-// Kibana's route method is lowercase; the upstream AuditEvent is left as-is so that
-// non-OTel appenders (file, console) continue to receive the original casing.
-export const AUDIT_OTEL_FIELD_UPPERCASE: string[] = ['http.request.method'];
 
 const normalize = <T>(value: T | T[]): T[] => (Array.isArray(value) ? value : [value]);
 
@@ -61,6 +37,10 @@ interface AuditServiceSetupParams {
   config: ConfigType['audit'];
   logging: Pick<LoggingServiceSetup, 'configure'>;
   http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
+  // The OTel audit field transforms target Serverless log-delivery requirements only. On other
+  // build flavors the OTel appender is left untouched (full resource, raw ECS field names).
+  // Defaults to `false` (no transforms) when omitted; the plugin always passes it explicitly.
+  isServerless?: boolean;
 
   getCurrentUser(
     request: KibanaRequest
@@ -88,6 +68,7 @@ export class AuditService {
     config,
     logging,
     http,
+    isServerless = false,
     getCurrentUser,
     getSID,
     getSpaceId,
@@ -97,7 +78,7 @@ export class AuditService {
     logging.configure(
       license.features$.pipe(
         distinctUntilKeyChanged('allowAuditLogging'),
-        createLoggingConfig(config)
+        createLoggingConfig(config, isServerless)
       )
     );
 
@@ -193,7 +174,7 @@ export class AuditService {
   }
 }
 
-export const createLoggingConfig = (config: ConfigType['audit']) =>
+export const createLoggingConfig = (config: ConfigType['audit'], isServerless = false) =>
   map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => {
     const baseAppender = config.appender ?? {
       type: 'console' as const,
@@ -202,17 +183,30 @@ export const createLoggingConfig = (config: ConfigType['audit']) =>
         highlight: true,
       },
     };
-    // When the configured appender is OTel, inject audit-specific field transforms
-    // (renames, drops, defaults) to satisfy Serverless audit log field requirements at
-    // the output layer — without touching the upstream AuditEvent type.
+    // On Serverless, when the configured appender is OTel, inject the audit-specific attribute
+    // transform callback (renames, drops, defaults, additions) to satisfy Serverless audit log
+    // field requirements at the output layer — without touching the upstream AuditEvent type — and
+    // slim the resource to the minimal audit attributes. These transforms are Serverless-only: on
+    // other build flavors the OTel appender is left untouched (full resource, raw ECS field names).
     const appender =
-      baseAppender.type === 'otel'
+      isServerless && baseAppender.type === 'otel'
         ? {
             ...baseAppender,
-            fieldRenames: { ...baseAppender.fieldRenames, ...AUDIT_OTEL_FIELD_RENAMES },
-            fieldDrops: [...(baseAppender.fieldDrops ?? []), ...AUDIT_OTEL_FIELD_DROPS],
-            fieldDefaults: { ...AUDIT_OTEL_FIELD_DEFAULTS, ...baseAppender.fieldDefaults },
-            fieldUppercase: [...(baseAppender.fieldUppercase ?? []), ...AUDIT_OTEL_FIELD_UPPERCASE],
+            transformAttributes: applyAuditOtelFieldMap,
+            // Slim the resource to the configured attributes — the appender's own `attributes` plus
+            // the audit service.name/service.type — dropping the detectors' host/OS/process/env
+            // fields. The allowlist also keeps the promoted keys (AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            // e.g. project.id): they must survive in the resource because log delivery reads them
+            // there, in addition to being copied into per-record attributes below.
+            includeResources: [
+              ...Object.keys({ ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES }),
+              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            ],
+            promoteResourceAttributes: [
+              ...(baseAppender.promoteResourceAttributes ?? []),
+              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            ],
+            attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
           }
         : baseAppender;
 

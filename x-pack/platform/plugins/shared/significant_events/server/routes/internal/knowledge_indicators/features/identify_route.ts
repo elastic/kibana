@@ -97,7 +97,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
         maxEntityFilters: z.number().optional(),
         maxExcludedFeaturesInPrompt: z.number().optional(),
         maxPreviouslyIdentifiedFeatures: z.number().optional(),
-        diverseOffset: z.number().min(0).optional(),
         samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
       })
       .nullable()
@@ -116,6 +115,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     const scopedClients = await getScopedClients({ request });
     const {
       scopedClusterClient,
+      streamDataEsClient,
       streamsClient,
       inferenceClient,
       soClient,
@@ -140,7 +140,6 @@ const identifyInferredFeaturesRoute = createServerRoute({
       maxEntityFilters = tuningConfig.max_entity_filters,
       maxExcludedFeaturesInPrompt = tuningConfig.max_excluded_features_in_prompt,
       maxPreviouslyIdentifiedFeatures,
-      diverseOffset,
       samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
     } = params.body ?? {};
 
@@ -162,6 +161,7 @@ const identifyInferredFeaturesRoute = createServerRoute({
     try {
       const result = await identifyInferredFeatures({
         esClient: scopedClusterClient.asCurrentUser,
+        samplingEsClient: streamDataEsClient,
         kiClient,
         soClient,
         inferenceClient: inferenceClient.bindTo({
@@ -192,8 +192,12 @@ const identifyInferredFeaturesRoute = createServerRoute({
           maxPreviouslyIdentifiedFeatures,
           sampling_timeout_ms: samplingTimeoutMs,
         },
-        diverseOffset,
         trackFeaturesIdentified: (data) => telemetry.trackFeaturesIdentified(data),
+        // Expose prior Significant Events (read-only search) to feature
+        // extraction when Agent Builder tools are available.
+        ...(server.agentBuilder?.tools
+          ? { agentBuilderTools: server.agentBuilder.tools, request }
+          : {}),
       });
 
       await bootstrapSyncWorkflow({
@@ -273,7 +277,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
   }),
   handler: async ({ params, request, getScopedClients, server, logger, telemetry }) => {
     const scopedClients = await getScopedClients({ request });
-    const { scopedClusterClient, streamsClient, licensing } = scopedClients;
+    const { streamDataEsClient, streamsClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -295,12 +299,12 @@ const identifyComputedFeaturesRoute = createServerRoute({
       (await isSignificantEventsSemanticCodeSearchGroundingEnabled(server.core.featureFlags));
 
     try {
-      const computedFeatures = await identifyComputedFeatures({
+      const { features: computedFeatures, errors } = await identifyComputedFeatures({
         stream,
         streamName,
         start,
         end,
-        esClient: scopedClusterClient.asCurrentUser,
+        esClient: streamDataEsClient,
         kiClient,
         logger: routeLogger,
         runId,
@@ -312,6 +316,7 @@ const identifyComputedFeaturesRoute = createServerRoute({
       return {
         computedFeatures,
         computedFeaturesCount: computedFeatures.length,
+        errors,
       };
     } catch (error) {
       routeLogger.error(

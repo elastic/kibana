@@ -29,7 +29,9 @@ export const Footer = ({ action }: FooterProps) => {
         href={action.href}
         onClick={action.onClick}
         external={action.external}
+        target={action.external ? '_blank' : undefined}
         isDisabled={action.disabled}
+        wrapText
         color="text"
         data-test-subj={action['data-test-subj']}
       />

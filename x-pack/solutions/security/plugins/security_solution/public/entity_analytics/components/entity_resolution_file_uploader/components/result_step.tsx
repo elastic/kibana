@@ -63,7 +63,7 @@ export const EntityResolutionResultStep: React.FC<ResultStepProps> = React.memo(
               />
             }
             color="success"
-            iconType="checkInCircleFilled"
+            iconType="checkCircleFill"
           >
             <ResultStats result={result} />
           </EuiCallOut>

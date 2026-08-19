@@ -8,7 +8,6 @@
  */
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createWorkspaceGlobalContext } from './create_workspace_global_context';
-import { ensureClonedRepo } from './ensure_cloned_repo';
 import type { SourceRepoWorkspace } from './source_repo_workspace';
 import type { WorkspaceSettings } from './types';
 import { WorkspaceController } from './workspace_controller';
@@ -24,8 +23,6 @@ export async function getWorkspaceFromSourceRepo({
     log,
     settings,
   });
-
-  await ensureClonedRepo(context);
 
   const workspaceController = new WorkspaceController(context);
 

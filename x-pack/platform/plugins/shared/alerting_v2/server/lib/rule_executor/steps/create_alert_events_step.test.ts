@@ -13,14 +13,12 @@ import {
   createRuleResponse,
   createRulePipelineState,
 } from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('CreateAlertEventsStep', () => {
   let step: CreateAlertEventsStep;
 
   beforeEach(() => {
-    const { loggerService } = createLoggerService();
-    step = new CreateAlertEventsStep(loggerService);
+    step = new CreateAlertEventsStep();
   });
 
   it('builds alert-typed events for kind: alert rule', async () => {
@@ -57,6 +55,16 @@ describe('CreateAlertEventsStep', () => {
       type: 'alert',
       space_id: 'default',
     });
+  });
+
+  it('captures rule.version from the rule version', async () => {
+    const input = createRuleExecutionInput();
+    const rule = createRuleResponse({ metadata: { version: 5 } });
+    const esqlRowBatch = [{ 'host.name': 'host-a' }];
+
+    const state = createRulePipelineState({ input, rule, esqlRowBatch });
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+    expect(result.state.alertEventsBatch?.[0].rule).toEqual({ id: rule.id, version: 5 });
   });
 
   it('builds signal-typed events for a stateless kind: signal rule', async () => {
