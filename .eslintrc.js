@@ -2083,7 +2083,7 @@ module.exports = {
      */
     {
       files: ['x-pack/platform/plugins/shared/custom_content/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/platform/plugins/shared/custom_content/**/*.{test,mock}.{ts,tsx}'],
+      excludedFiles: [],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
