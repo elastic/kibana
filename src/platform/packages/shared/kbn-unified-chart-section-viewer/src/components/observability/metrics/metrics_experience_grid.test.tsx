@@ -49,6 +49,7 @@ jest.mock('./hooks', () => ({
   ...jest.requireActual('./hooks'),
   useMetricsGridFullScreen: jest.fn(),
   useMetricFieldsFilter: jest.fn(),
+  useDiscoverFieldForBreakdown: jest.fn(),
 }));
 jest.mock('./hooks/use_fetch_metrics_data', () => ({
   useFetchMetricsData: jest.fn(),
@@ -188,6 +189,10 @@ const useMetricFieldsFilterMock = hooks.useMetricFieldsFilter as jest.MockedFunc
   typeof hooks.useMetricFieldsFilter
 >;
 
+const useDiscoverFieldForBreakdownMock = hooks.useDiscoverFieldForBreakdown as jest.MockedFunction<
+  typeof hooks.useDiscoverFieldForBreakdown
+>;
+
 const TestWrapper = ({
   children,
   externalServices,
@@ -312,6 +317,7 @@ describe('MetricsExperienceGrid', () => {
     });
 
     useMetricFieldsFilterMock.mockReturnValue({ filteredMetricItems: metricItems });
+    useDiscoverFieldForBreakdownMock.mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -540,106 +546,10 @@ describe('MetricsExperienceGrid', () => {
     expect(onToggleFullscreen).toHaveBeenCalled();
   });
 
-  describe('seed dimensions from breakdownField on mount', () => {
-    // Backward compatibility only, for links created before `dimensions` became its own
-    // dedicated profile state. The initial value is unvalidated; if it isn't a real dimension
-    // for this stream, `useDimensionsWipe` prunes it once allDimensions loads. Later field list
-    // selections are validated and imported into dimensions by the same hook.
-    it('seeds a single dimension when nothing is selected yet', () => {
-      const onDimensionsChange = jest.fn();
-
-      useMetricsExperienceStateMock.mockReturnValue({
-        currentPage: 0,
-        selectedDimensions: [],
-        onDimensionsChange,
-        onPageChange: jest.fn(),
-        isFullscreen: false,
-        searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
-        profileId: 'test-profile-id',
-        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
-        recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
-      });
-
-      render(<MetricsExperienceGrid {...defaultProps} breakdownField="host.name" />, {
-        wrapper: TestWrapper,
-      });
-
-      expect(onDimensionsChange).toHaveBeenCalledWith([{ name: 'host.name' }]);
-    });
-
-    it('does not seed when a dimension is already selected', () => {
-      const onDimensionsChange = jest.fn();
-
-      useMetricsExperienceStateMock.mockReturnValue({
-        currentPage: 0,
-        selectedDimensions: [dimensions[0]],
-        onDimensionsChange,
-        onPageChange: jest.fn(),
-        isFullscreen: false,
-        searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
-        profileId: 'test-profile-id',
-        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
-        recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
-      });
-
-      render(<MetricsExperienceGrid {...defaultProps} breakdownField="host.name" />, {
-        wrapper: TestWrapper,
-      });
-
-      expect(onDimensionsChange).not.toHaveBeenCalled();
-    });
-
-    it('does not seed when breakdownField is undefined', () => {
-      const onDimensionsChange = jest.fn();
-
-      useMetricsExperienceStateMock.mockReturnValue({
-        currentPage: 0,
-        selectedDimensions: [],
-        onDimensionsChange,
-        onPageChange: jest.fn(),
-        isFullscreen: false,
-        searchTerm: '',
-        onSearchTermChange: jest.fn(),
-        onToggleFullscreen: jest.fn(),
-        flyoutState: undefined,
-        onFlyoutStateChange: jest.fn(),
-        onFlyoutSelectedTabChange: jest.fn(),
-        metricsSort: METRICS_GRID_SORT_DEFAULTS,
-        onMetricsSortChange: jest.fn(),
-        profileId: 'test-profile-id',
-        gridSettings: METRICS_GRID_SETTINGS_DEFAULTS,
-        recentlyExploredMetrics: [],
-        onGridSettingsChange: jest.fn(),
-      });
-
-      render(<MetricsExperienceGrid {...defaultProps} />, { wrapper: TestWrapper });
-
-      expect(onDimensionsChange).not.toHaveBeenCalled();
-    });
-  });
-
   describe('wipe orphan dimensions on stream switch (#264957)', () => {
     // Smoke test only: this asserts the grid wires `useDimensionsWipe`
-    // correctly (the pruned selection reaches Discover). The full matrix of
-    // wipe scenarios lives in `use_dimensions_wipe.test.ts`. Dimensions no
-    // longer sync back to Discover's `breakdownField` -- and the one-time
-    // seed from breakdownField is covered above.
+    // correctly. The full matrix of wipe scenarios lives in
+    // `use_dimensions_wipe.test.ts`.
     const hostName: Dimension = { name: 'host.name' };
     const environment: Dimension = { name: 'environment' };
 

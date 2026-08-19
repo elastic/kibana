@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { METRICS_GRID_SETTINGS_DEFAULTS, type MetricsGridSettings } from '@kbn/discover-utils';
 import {
@@ -25,12 +25,12 @@ import { createFeatureFlagsMock } from '../../../../../test_utils/create_feature
 import type { MetricsSort } from '../../../../../types';
 
 jest.mock('../../../../../restorable_state', () => {
-  const { useState: useActualState, useCallback: useActualCallback } = jest.requireActual('react');
+  const { useState, useCallback } = jest.requireActual('react');
   return {
     useRestorableState: <T,>(_key: string, initialValue: T) => {
-      const [value, _setValue] = useActualState(initialValue);
+      const [value, _setValue] = useState(initialValue);
 
-      const setValue = useActualCallback(
+      const setValue = useCallback(
         (next: T | ((prev: T) => T)) => {
           _setValue(next);
         },
@@ -56,10 +56,10 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const StatefulGridSettingsWrapper = ({ children }: { children: React.ReactNode }) => {
-  const [gridSettings, setGridSettings] = useState<MetricsGridSettings>(
+  const [gridSettings, setGridSettings] = React.useState<MetricsGridSettings>(
     METRICS_GRID_SETTINGS_DEFAULTS
   );
-  const onGridSettingsChange = useCallback((update: Partial<MetricsGridSettings>) => {
+  const onGridSettingsChange = React.useCallback((update: Partial<MetricsGridSettings>) => {
     setGridSettings((prev) => ({ ...prev, ...update }));
   }, []);
 

@@ -11,47 +11,51 @@ import { useEffect, useRef } from 'react';
 import { MAX_DIMENSIONS_SELECTIONS } from '../../../../common/constants';
 import type { Dimension } from '../../../../types';
 
-export const useDiscoverFieldForBreakdown = (
+export function useDiscoverFieldForBreakdown(
   breakdownField: string | undefined,
   dimensions: Dimension[],
   selectedDimensions: Dimension[],
   onDimensionsChange: (dimensions: Dimension[]) => void
-) => {
-  const isFirstRenderRef = useRef(true);
+) {
   const previousBreakdownFieldRef = useRef(breakdownField);
-  const pendingBreakdownFieldRef = useRef<string>();
+  const pendingBreakdownFieldRef = useRef(
+    selectedDimensions.length === 0 ? breakdownField : undefined
+  );
 
   useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-
-      if (selectedDimensions.length === 0 && breakdownField) {
-        onDimensionsChange([{ name: breakdownField }]);
-      }
-
-      return;
-    }
-
     if (previousBreakdownFieldRef.current !== breakdownField) {
       previousBreakdownFieldRef.current = breakdownField;
       pendingBreakdownFieldRef.current = breakdownField;
     }
 
-    const pendingBreakdownField = pendingBreakdownFieldRef.current;
-    const matchingDimension = dimensions.find(({ name }) => name === pendingBreakdownField);
+    const matchingDimension = getMatchingDimension(
+      pendingBreakdownFieldRef.current,
+      dimensions,
+      selectedDimensions
+    );
 
     if (!matchingDimension) {
       return;
     }
 
     pendingBreakdownFieldRef.current = undefined;
-
-    if (selectedDimensions.some(({ name }) => name === matchingDimension.name)) {
-      return;
-    }
-
     onDimensionsChange(
-      [...selectedDimensions, matchingDimension].slice(-MAX_DIMENSIONS_SELECTIONS)
+      [
+        ...selectedDimensions.filter((dimension) => dimension.name !== matchingDimension.name),
+        matchingDimension,
+      ].slice(-MAX_DIMENSIONS_SELECTIONS)
     );
   }, [breakdownField, dimensions, onDimensionsChange, selectedDimensions]);
-};
+}
+
+function getMatchingDimension(
+  breakdownField: string | undefined,
+  dimensions: Dimension[],
+  selectedDimensions: Dimension[]
+): Dimension | undefined {
+  if (!breakdownField || dimensions.length === 0) return;
+  const matchingDimension = dimensions.find((dimension) => dimension.name === breakdownField);
+  return matchingDimension && selectedDimensions.some(({ name }) => name === breakdownField)
+    ? undefined
+    : matchingDimension;
+}

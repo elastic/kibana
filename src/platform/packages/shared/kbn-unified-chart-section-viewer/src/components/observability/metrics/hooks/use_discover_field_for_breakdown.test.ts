@@ -51,10 +51,10 @@ describe('useDiscoverFieldForBreakdown', () => {
   });
 
   describe('when dimensions array is empty', () => {
-    it('seeds the initial breakdown field for legacy links', () => {
+    it('does not call onDimensionsChange', () => {
       renderHook(() => useDiscoverFieldForBreakdown('host.name', [], [], mockOnDimensionsChange));
 
-      expect(mockOnDimensionsChange).toHaveBeenCalledWith([{ name: 'host.name' }]);
+      expect(mockOnDimensionsChange).not.toHaveBeenCalled();
     });
 
     it('calls onDimensionsChange when dimensions become available', async () => {
@@ -63,13 +63,12 @@ describe('useDiscoverFieldForBreakdown', () => {
           useDiscoverFieldForBreakdown(breakdownField, dimensions, [], mockOnDimensionsChange),
         {
           initialProps: {
-            breakdownField: undefined as string | undefined,
+            breakdownField: 'host.name' as string | undefined,
             dimensions: [] as Dimension[],
           },
         }
       );
 
-      rerender({ breakdownField: 'host.name', dimensions: [] });
       expect(mockOnDimensionsChange).not.toHaveBeenCalled();
 
       rerender({
@@ -123,18 +122,14 @@ describe('useDiscoverFieldForBreakdown', () => {
 
   describe('when dimension is not found in dimensions array', () => {
     it('does not call onDimensionsChange', () => {
-      const { rerender } = renderHook(
-        ({ breakdownField }) =>
-          useDiscoverFieldForBreakdown(
-            breakdownField,
-            [hostDimension, serviceDimension],
-            [],
-            mockOnDimensionsChange
-          ),
-        { initialProps: { breakdownField: undefined as string | undefined } }
+      renderHook(() =>
+        useDiscoverFieldForBreakdown(
+          'nonexistent.field',
+          [hostDimension, serviceDimension],
+          [],
+          mockOnDimensionsChange
+        )
       );
-
-      rerender({ breakdownField: 'nonexistent.field' });
 
       expect(mockOnDimensionsChange).not.toHaveBeenCalled();
     });
@@ -313,23 +308,18 @@ describe('useDiscoverFieldForBreakdown', () => {
   describe('when dimensions change', () => {
     it('syncs when dimensions become available for existing breakdownField', async () => {
       const { rerender } = renderHook(
-        ({ breakdownField, dimensions }) =>
-          useDiscoverFieldForBreakdown(breakdownField, dimensions, [], mockOnDimensionsChange),
+        ({ dimensions }) =>
+          useDiscoverFieldForBreakdown('host.name', dimensions, [], mockOnDimensionsChange),
         {
           initialProps: {
-            breakdownField: undefined as string | undefined,
             dimensions: [] as Dimension[],
           },
         }
       );
 
-      rerender({ breakdownField: 'host.name', dimensions: [] });
       expect(mockOnDimensionsChange).not.toHaveBeenCalled();
 
-      rerender({
-        breakdownField: 'host.name',
-        dimensions: [hostDimension, serviceDimension],
-      });
+      rerender({ dimensions: [hostDimension, serviceDimension] });
 
       await waitFor(() => {
         expect(mockOnDimensionsChange).toHaveBeenCalledWith([hostDimension]);
