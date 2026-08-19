@@ -83,8 +83,8 @@
     "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/constants/integration-vendors.ts": "'integration-vendors.ts' should be snake_case"
   },
   "@elastic/core-analysis": {
-    "x-pack/solutions/security/plugins/entity_store/public/hooks/useInstallEntityStoreV2.test.tsx": "'useInstallEntityStoreV2.test.tsx' should be snake_case",
-    "x-pack/solutions/security/plugins/entity_store/public/hooks/useInstallEntityStoreV2.tsx": "'useInstallEntityStoreV2.tsx' should be snake_case"
+    "x-pack/platform/plugins/shared/entity_store/public/hooks/useInstallEntityStoreV2.test.tsx": "'useInstallEntityStoreV2.test.tsx' should be snake_case",
+    "x-pack/platform/plugins/shared/entity_store/public/hooks/useInstallEntityStoreV2.tsx": "'useInstallEntityStoreV2.tsx' should be snake_case"
   },
   "@elastic/experience-docs": {
     "docs/extend/key-concepts/ui/lens-config-api/_snippets": "'_snippets' should be kebab-case",

@@ -13,6 +13,7 @@ import type {
   UnifiedValueAttachmentPayload,
 } from '../../../common/types/domain';
 import type { CaseUI, CaseUser } from '../../containers/types';
+import type { CasesPermissions } from '../../../common/ui/types';
 import { AttachmentActionType } from '../../../common/utils/attachment_actions';
 
 export { AttachmentActionType };
@@ -34,7 +35,7 @@ interface ButtonAttachmentAction extends BaseAttachmentAction {
 
 interface CustomAttachmentAction extends BaseAttachmentAction {
   type: AttachmentActionType.CUSTOM;
-  render: () => JSX.Element;
+  render: () => JSX.Element | null;
 }
 
 export type AttachmentAction = ButtonAttachmentAction | CustomAttachmentAction;
@@ -58,6 +59,7 @@ export interface AttachmentTabViewObject<Props = {}> {
 export interface CommonAttachmentViewProps {
   savedObjectId: string;
   caseData: Pick<CaseUI, 'id' | 'title'>;
+  permissions: CasesPermissions;
 }
 
 /** Props for case-level attachment tabs (Alerts/Events/… table hosts). */
