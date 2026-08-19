@@ -37,6 +37,9 @@ const tileOverrideStyle = css`
 
   .euiCard {
     padding: 12px;
+    /* Positioning context for the optional badge below, passed through
+     * EuiCard's own children slot so it stays a real DOM descendant. */
+    position: relative;
   }
 
   .euiCard__title {
@@ -48,6 +51,12 @@ const tileOverrideStyle = css`
   [class*='euiCard__description'] {
     margin-top: 2px;
   }
+`;
+
+const badgeSlotStyle = css`
+  position: absolute;
+  top: 8px;
+  right: 8px;
 `;
 
 export const CuratedTileCard = ({ tile }: CuratedTileCardProps) => (
@@ -68,6 +77,8 @@ export const CuratedTileCard = ({ tile }: CuratedTileCardProps) => (
       href={tile.href}
       target={tile.target}
       onClick={tile.onClick}
-    />
+    >
+      {tile.badge && <div css={badgeSlotStyle}>{tile.badge}</div>}
+    </EuiCard>
   </div>
 );

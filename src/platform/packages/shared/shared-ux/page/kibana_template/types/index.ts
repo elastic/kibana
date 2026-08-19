@@ -42,9 +42,14 @@ export type KibanaPageTemplateProps = EuiPageTemplateProps & {
    */
   noDataConfig?: NoDataConfig;
   /**
-   * BWC Props from old EUI template
+   * @deprecated For top-level application route headers, use `AppHeader` from
+   * `@kbn/app-header`. For empty states, render `EuiEmptyPrompt` directly or use
+   * `noDataConfig`.
    */
   pageHeader?: EuiPageHeaderProps;
+  /**
+   * BWC Props from old EUI template
+   */
   pageSideBar?: ReactNode;
   pageSideBarProps?: EuiPageSidebarProps;
 };
