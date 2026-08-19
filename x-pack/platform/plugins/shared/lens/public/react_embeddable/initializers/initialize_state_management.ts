@@ -73,6 +73,7 @@ export function initializeStateManagement(
       dataLoading$: internalApi.dataLoading$,
       blockingError$: internalApi.blockingError$,
       rendered$: internalApi.hasRenderCompleted$,
+      renderCount$: internalApi.renderCount$,
     },
     anyStateChange$: merge(
       internalApi.attributes$.pipe(

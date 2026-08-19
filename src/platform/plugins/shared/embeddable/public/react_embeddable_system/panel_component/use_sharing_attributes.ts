@@ -14,9 +14,10 @@ import type { DefaultPresentationPanelApi } from './types';
 
 interface ShareAttributes {
   ['data-shared-item']: boolean;
-  ['data-description']: string;
+  ['data-description']?: string;
   ['data-render-complete']: boolean;
-  ['data-title']: string;
+  ['data-rendering-count']?: number;
+  ['data-title']?: string;
 }
 
 export function useSharingAttributes(
@@ -28,9 +29,7 @@ export function useSharingAttributes(
 
   const [sharingAttributes, setSharingAttributes] = useState<ShareAttributes>({
     ['data-shared-item']: true,
-    ['data-description']: '',
     ['data-render-complete']: false,
-    ['data-title']: '',
   });
 
   const [
@@ -41,6 +40,7 @@ export function useSharingAttributes(
     title,
     dataLoading,
     rendered,
+    renderCount,
   ] = useBatchedPublishingSubjects(
     componentApi.blockingError$ ?? new BehaviorSubject(undefined),
     componentApi.defaultDescription$ ?? new BehaviorSubject(undefined),
@@ -48,20 +48,24 @@ export function useSharingAttributes(
     componentApi.defaultTitle$ ?? new BehaviorSubject(undefined),
     componentApi.title$ ?? new BehaviorSubject(undefined),
     componentApi.dataLoading$ ?? new BehaviorSubject(false),
-    componentApi.rendered$ ?? new BehaviorSubject(true)
+    componentApi.rendered$ ?? new BehaviorSubject(true),
+    componentApi.renderCount$ ?? new BehaviorSubject(undefined)
   );
 
   useEffect(() => {
-    // only update share attribures until initial render is complete
-    if (!isSharedItem || initialRenderCompleteRef.current) {
+    if (!isSharedItem) {
       return;
     }
 
+    const shareTitle = title ?? defaultTitle;
+    const shareDescription = description ?? defaultDescription;
+
     setSharingAttributes({
       ['data-shared-item']: true,
-      ['data-description']: description ?? defaultDescription ?? '',
       ['data-render-complete']: Boolean(blockingError) || (!dataLoading && rendered),
-      ['data-title']: title ?? defaultTitle ?? '',
+      ...(renderCount !== undefined && { ['data-rendering-count']: renderCount }),
+      ...(shareTitle && { ['data-title']: shareTitle }),
+      ...(shareDescription && { ['data-description']: shareDescription }),
     });
   }, [
     blockingError,
@@ -71,6 +75,7 @@ export function useSharingAttributes(
     defaultTitle,
     dataLoading,
     rendered,
+    renderCount,
     isSharedItem,
   ]);
 

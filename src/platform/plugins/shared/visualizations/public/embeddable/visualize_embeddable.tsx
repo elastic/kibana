@@ -79,7 +79,7 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
 
     // Count renders; mostly used for testing.
     const renderCount$ = new BehaviorSubject<number>(0);
-    const hasRendered$ = new BehaviorSubject<boolean>(false);
+    const rendered$ = new BehaviorSubject<boolean>(false);
 
     // Track vis data and initialize it into a vis instance
     const serializedVis$ = new BehaviorSubject<SerializedVis>(runtimeState.serializedVis);
@@ -275,7 +275,8 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       dataViews$,
       projectRoutingOverrides$,
       usesEsql$,
-      rendered$: hasRendered$,
+      rendered$,
+      renderCount$,
       supportedTriggers: () => [
         ON_OPEN_PANEL_MENU,
         ACTION_CONVERT_TO_LENS,
@@ -442,8 +443,8 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
                   `render_agg_based_${telemetryVisTypeName}`
                 );
 
-                if (hasRendered$.getValue() === true) return;
-                hasRendered$.next(true);
+                if (rendered$.getValue() === true) return;
+                rendered$.next(true);
               },
               onEvent: async (event) => {
                 // Visualize doesn't respond to sizing events, so ignore.
@@ -497,7 +498,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
       api,
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
-        const renderCount = useStateFromPublishingSubject(renderCount$);
         const domNode = useRef<HTMLDivElement>(null);
         const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
         const errorTextStyle = useErrorTextStyle();
@@ -515,7 +515,6 @@ export const visualizeEmbeddableFactory: EmbeddablePublicDefinition<
             css={{ width: '100%', height: '100%' }}
             ref={domNode}
             data-test-subj="visualizationLoader"
-            data-rendering-count={renderCount /* Used for functional tests */}
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup css={{ height: '100%' }} justifyContent="center" alignItems="center">

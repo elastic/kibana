@@ -27,8 +27,6 @@ export function LensEmbeddableComponent({
   const [
     // Pick up updated params from the observable
     expressionParams,
-    // used for functional tests
-    renderCount,
     // these are blocking errors that can be shown in a badge
     // without replacing the entire panel
     blockingErrors,
@@ -36,7 +34,6 @@ export function LensEmbeddableComponent({
     panelTitle,
   ] = useBatchedPublishingSubjects(
     internalApi.expressionParams$,
-    internalApi.renderCount$,
     internalApi.validationMessages$,
     api.hideTitle$,
     api.title$,
@@ -57,7 +54,6 @@ export function LensEmbeddableComponent({
   return (
     <div
       css={{ width: '100%', height: '100%', position: 'relative' }}
-      data-rendering-count={renderCount + 1}
     >
       {expressionParams == null || blockingErrors.length ? null : (
         <ExpressionWrapper {...expressionParams} paddingTop={hideTitle || !panelTitle?.length} />
