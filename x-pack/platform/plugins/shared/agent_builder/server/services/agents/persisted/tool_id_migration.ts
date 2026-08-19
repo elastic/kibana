@@ -143,6 +143,18 @@ export const migrateAgentToolIds = async ({
  * Scans all skills in .kibana_ai_infra-skills and replaces old tool IDs with new ones.
  * Operates across all spaces (no space filter). Fire-and-forget safe.
  */
+/**
+ * Registry of tool ID migrations. Add new entries here when tool IDs are
+ * renamed or split. Each entry maps an old ID to one or more replacement IDs.
+ * The migration runner applies all entries idempotently on every startup.
+ */
+export const TOOL_ID_MIGRATIONS: ToolIdMigrationEntry[] = [
+  {
+    oldId: 'platform.core.cases.attachments',
+    newIds: ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments'],
+  },
+];
+
 export const migrateSkillToolIds = async ({
   storage,
   migrations,
