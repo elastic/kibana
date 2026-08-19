@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-set -x
-
 # Pre-populates the pnpm cache that the CI agent image bakes into ~/.kibana, so a
 # fresh checkout on an agent bootstraps from a warm store instead of the network.
 #
@@ -66,5 +64,3 @@ echo "Bake these into the agent image so they land at:"
 echo "  $CACHE_DIR/pnpm-store"
 echo "  $CACHE_DIR/node_modules"
 echo "  $CACHE_DIR/Cypress"
-
-set +x
