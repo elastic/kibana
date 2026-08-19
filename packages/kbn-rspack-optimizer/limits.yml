@@ -36,7 +36,7 @@ pageLoadAssetSize:
   core: 320
   cps: 6032
   crossClusterReplication: 7691
-  customContent: 1591
+  customContent: 2128
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
@@ -137,7 +137,7 @@ pageLoadAssetSize:
   observability: 3614
   observabilityAgentBuilder: 679
   observabilityAIAssistant: 1967
-  observabilityAIAssistantApp: 6377
+  observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
   observabilityOnboarding: 7685
@@ -185,7 +185,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 336241
+  shared-core: 336543
   shared-misc: 114567
   shared-packages: 5007950
   shared-plugins: 13536562

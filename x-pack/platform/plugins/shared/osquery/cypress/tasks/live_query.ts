@@ -203,7 +203,11 @@ export const checkActionItemsInResults = ({
 };
 
 export const takeOsqueryActionWithParams = () => {
-  // Force click due to element sometimes being covered by other flyout elements
+  // Force click due to element sometimes being covered by other flyout elements.
+  // Wait for the flyout's event-details load to finish first: the same test-subj
+  // is shared by the loading placeholder, and clicking it before loading completes
+  // opens nothing (the placeholder is not a popover trigger).
+  cy.getBySel('securitySolutionFlyoutFooterDropdownButton').should('not.contain', 'Loading...');
   cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
   cy.getBySel('osquery-action-item').click();
   selectAllAgents();
