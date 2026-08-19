@@ -5,23 +5,34 @@
  * 2.0.
  */
 
-import type { ConversationTemplateUIDefinition } from '@kbn/agent-builder-browser';
+import type {
+  ConversationTemplateTabDefinition,
+  ConversationTemplateUIDefinition,
+} from '@kbn/agent-builder-browser';
 
 export class ConversationTemplatesService {
-  private readonly registry: Map<string, ConversationTemplateUIDefinition> = new Map();
+  private readonly tabs: Map<string, ConversationTemplateTabDefinition> = new Map();
+  private readonly templates: Map<string, ConversationTemplateUIDefinition> = new Map();
+
+  registerTab(tabId: string, definition: ConversationTemplateTabDefinition): void {
+    if (this.tabs.has(tabId)) {
+      throw new Error(`Conversation template tab "${tabId}" is already registered.`);
+    }
+    this.tabs.set(tabId, definition);
+  }
+
+  getTab(tabId: string): ConversationTemplateTabDefinition | undefined {
+    return this.tabs.get(tabId);
+  }
 
   addTemplateUIDefinition(templateId: string, definition: ConversationTemplateUIDefinition): void {
-    if (this.registry.has(templateId)) {
+    if (this.templates.has(templateId)) {
       throw new Error(`Conversation template "${templateId}" already has a UI definition.`);
     }
-    this.registry.set(templateId, definition);
+    this.templates.set(templateId, definition);
   }
 
   getTemplateUIDefinition(templateId: string): ConversationTemplateUIDefinition | undefined {
-    return this.registry.get(templateId);
-  }
-
-  hasTemplateUIDefinition(templateId: string): boolean {
-    return this.registry.has(templateId);
+    return this.templates.get(templateId);
   }
 }

@@ -31,6 +31,7 @@ import {
   ChatService,
   ConversationsService,
   ConversationTemplatesService,
+  registerBuiltinTabs,
   registerMockTemplateUIDefinitions,
   DocLinksService,
   NavigationService,
@@ -166,6 +167,7 @@ export class AgentBuilderPlugin
     const chatService = new ChatService({ http, events: eventsService });
     const conversationsService = new ConversationsService({ http });
     const conversationTemplatesService = new ConversationTemplatesService();
+    registerBuiltinTabs(conversationTemplatesService);
     // TODO: remove mock template definitions before merge
     registerMockTemplateUIDefinitions(conversationTemplatesService);
     const docLinksService = new DocLinksService(core.docLinks.links);

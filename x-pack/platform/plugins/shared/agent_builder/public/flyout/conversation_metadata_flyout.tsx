@@ -23,6 +23,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
+import { BUILTIN_TAB_IDS } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 
@@ -34,56 +35,26 @@ const ERROR_BODY = i18n.translate('xpack.agentBuilder.conversationMetadataFlyout
   defaultMessage: 'Something went wrong while loading this conversation.',
 });
 
-const TIMELINE_TAB_LABEL = i18n.translate(
-  'xpack.agentBuilder.conversationMetadataFlyout.timelineTabLabel',
-  { defaultMessage: 'Timeline' }
-);
-
-const ATTACHMENTS_TAB_LABEL = i18n.translate(
-  'xpack.agentBuilder.conversationMetadataFlyout.attachmentsTabLabel',
-  { defaultMessage: 'Attachments' }
-);
-
-// Tab ids owned by the flyout itself; registry entries may not claim them.
-const RESERVED_TAB_IDS = ['timeline', 'attachments'];
-
-const TimelinePlaceholder: React.FC = () => (
-  <EuiText size="s" color="subdued">
-    <p>
-      {i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.timelinePlaceholder', {
-        defaultMessage: 'Timeline coming soon.',
-      })}
-    </p>
-  </EuiText>
-);
-
-const AttachmentsPlaceholder: React.FC = () => (
-  <EuiText size="s" color="subdued">
-    <p>
-      {i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.attachmentsPlaceholder', {
-        defaultMessage: 'Attachments coming soon.',
-      })}
-    </p>
-  </EuiText>
-);
+type ResolvedTab = ConversationTemplateTabDefinition & { id: string };
 
 const buildTabs = (
   conversation: Conversation,
   conversationTemplatesService: ConversationTemplatesService
-): ConversationTemplateTabDefinition[] => {
+): ResolvedTab[] => {
   const definition = conversation.template_id
     ? conversationTemplatesService.getTemplateUIDefinition(conversation.template_id)
     : undefined;
 
-  const templateTabs =
-    definition?.tabs.filter((entry) => !RESERVED_TAB_IDS.includes(entry.tab)) ?? [];
+  // Builtin tabs always render after the template's tabs; there is no reordering mechanism yet.
+  const templateTabIds = (definition?.tabs ?? []).filter((id) => !BUILTIN_TAB_IDS.includes(id));
+  const tabIds = [...templateTabIds, ...BUILTIN_TAB_IDS];
 
-  // Note: users should likely be able to define their own attachments tab / or at very least filter attachments to only show relevant ones
-  return [
-    ...templateTabs,
-    { tab: 'attachments', label: ATTACHMENTS_TAB_LABEL, content: AttachmentsPlaceholder },
-    { tab: 'timeline', label: TIMELINE_TAB_LABEL, content: TimelinePlaceholder },
-  ];
+  // Resolve at render time so registration order across plugins does not matter;
+  // ids with no registered tab are skipped.
+  return tabIds.flatMap((id) => {
+    const tab = conversationTemplatesService.getTab(id);
+    return tab ? [{ id, ...tab }] : [];
+  });
 };
 
 const FlyoutFrame: React.FC<{ titleId: string; children: React.ReactNode }> = ({
@@ -120,8 +91,8 @@ export const ConversationMetadataFlyoutContent: React.FC<
     () => buildTabs(conversation, conversationTemplatesService),
     [conversation, conversationTemplatesService]
   );
-  const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.tab;
-  const selectedTab = tabs.find((entry) => entry.tab === effectiveSelectedTabId);
+  const effectiveSelectedTabId = selectedTabId ?? tabs[0]?.id;
+  const selectedTab = tabs.find((entry) => entry.id === effectiveSelectedTabId);
   // Registered tab content may use hooks, so it must render as a component — not be
   // invoked as a plain function inside this component's own render.
   const SelectedTabContent = selectedTab?.content;
@@ -135,9 +106,9 @@ export const ConversationMetadataFlyoutContent: React.FC<
         <EuiTabs>
           {tabs.map((entry) => (
             <EuiTab
-              key={entry.tab}
-              isSelected={entry.tab === effectiveSelectedTabId}
-              onClick={() => setSelectedTabId(entry.tab)}
+              key={entry.id}
+              isSelected={entry.id === effectiveSelectedTabId}
+              onClick={() => setSelectedTabId(entry.id)}
             >
               {entry.label}
             </EuiTab>
@@ -146,7 +117,7 @@ export const ConversationMetadataFlyoutContent: React.FC<
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {SelectedTabContent && (
-          <SelectedTabContent key={selectedTab.tab} conversation={conversation} />
+          <SelectedTabContent key={selectedTab.id} conversation={conversation} />
         )}
       </EuiFlyoutBody>
     </>

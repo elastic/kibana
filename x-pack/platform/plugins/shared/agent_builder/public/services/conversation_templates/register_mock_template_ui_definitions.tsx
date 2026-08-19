@@ -17,39 +17,33 @@ const ConversationJson: React.FC<{ conversation: Conversation }> = ({ conversati
 );
 
 /**
- * Temporary dev/testing registrations exercising the registry end-to-end. To be removed once
- * real consumers (e.g. security solution) register their own template UI definitions.
+ * Temporary dev/testing registrations exercising the registry end-to-end — note the
+ * `mock-overview` tab registered once and reused by both templates. To be removed once
+ * real consumers register their own tabs and template UI definitions.
  */
 export const registerMockTemplateUIDefinitions = (
   conversationTemplatesService: ConversationTemplatesService
 ): void => {
+  conversationTemplatesService.registerTab('mock-overview', {
+    label: 'Overview',
+    content: ConversationJson,
+  });
+
+  conversationTemplatesService.registerTab('mock-custom', {
+    label: 'Custom 1',
+    content: ({ conversation }) => (
+      <>
+        <p>{'Custom content 1. Full conversation is available'}</p>
+        <ConversationJson conversation={conversation} />
+      </>
+    ),
+  });
+
   conversationTemplatesService.addTemplateUIDefinition('security-finding', {
-    tabs: [
-      {
-        tab: 'overview',
-        label: 'Overview',
-        content: ConversationJson,
-      },
-    ],
+    tabs: ['mock-overview'],
   });
 
   conversationTemplatesService.addTemplateUIDefinition('phishing', {
-    tabs: [
-      {
-        tab: 'overview',
-        label: 'Overview',
-        content: ConversationJson,
-      },
-      {
-        tab: 'custom-1',
-        label: 'Custom 1',
-        content: ({ conversation }) => (
-          <>
-            <p>{'Custom content 1. Full conversation is available'}</p>
-            <ConversationJson conversation={conversation} />
-          </>
-        ),
-      },
-    ],
+    tabs: ['mock-overview', 'mock-custom'],
   });
 };

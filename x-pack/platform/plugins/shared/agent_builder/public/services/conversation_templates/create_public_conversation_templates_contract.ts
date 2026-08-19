@@ -14,6 +14,12 @@ export const createPublicConversationTemplatesContract = ({
   conversationTemplatesService: ConversationTemplatesService;
 }): ConversationTemplateServiceStartContract => {
   return {
+    registerTab: (tabId, definition) => {
+      return conversationTemplatesService.registerTab(tabId, definition);
+    },
+    getTab: (tabId) => {
+      return conversationTemplatesService.getTab(tabId);
+    },
     addTemplateUIDefinition: (templateId, definition) => {
       return conversationTemplatesService.addTemplateUIDefinition(templateId, definition);
     },

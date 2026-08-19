@@ -13,6 +13,7 @@ export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
 export {
   ConversationTemplatesService,
+  registerBuiltinTabs,
   registerMockTemplateUIDefinitions,
 } from './conversation_templates';
 export { DocLinksService } from './doc_links';

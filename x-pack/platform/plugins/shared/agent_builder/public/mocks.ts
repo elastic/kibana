@@ -71,6 +71,8 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
     agents: createAgentStartMock(),
     attachments: createAttachmentStartMock(),
     conversationTemplates: {
+      registerTab: jest.fn(),
+      getTab: jest.fn(),
       addTemplateUIDefinition: jest.fn(),
       getTemplateUIDefinition: jest.fn(),
     },

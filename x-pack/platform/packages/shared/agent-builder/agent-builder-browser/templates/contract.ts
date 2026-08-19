@@ -9,11 +9,10 @@ import type { ComponentType } from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
 
 /**
- * A single tab contributed to the conversation metadata flyout for a template.
+ * A reusable conversation flyout tab, registered once and referenced by id from any
+ * number of template UI definitions.
  */
 export interface ConversationTemplateTabDefinition {
-  /** Unique tab id within the template's definition. `timeline` and `attachments` are reserved. */
-  tab: string;
   /** Localized display label for the tab. */
   label: string;
   /** Tab body. Rendered as a component so it may use hooks. */
@@ -21,19 +20,31 @@ export interface ConversationTemplateTabDefinition {
 }
 
 /**
- * UI contributions for a conversation template, keyed by template id at registration.
+ * UI contributions for a conversation template. Tabs are referenced by id and resolved
+ * at render time, so registration order across plugins does not matter.
  */
 export interface ConversationTemplateUIDefinition {
-  /** Tabs rendered in the conversation metadata flyout, in registration order. */
-  tabs: ConversationTemplateTabDefinition[];
+  /** Tab ids rendered in this order. Ids with no registered tab are skipped. */
+  tabs: string[];
 }
 
 /**
- * Public API for registering and resolving conversation template UI definitions.
+ * Public API for registering conversation template UI.
+ *
+ * Tab ids are a global keyspace — prefix them with your plugin or solution name
+ * (e.g. `security.entities`). Duplicate registration of a tab id or template id throws.
  */
 export interface ConversationTemplateServiceStartContract {
   /**
-   * Register the UI definition for a template. Throws if the template id is already registered.
+   * Register a reusable flyout tab under a tab id.
+   */
+  registerTab(tabId: string, definition: ConversationTemplateTabDefinition): void;
+  /**
+   * Resolve a registered tab, if any.
+   */
+  getTab(tabId: string): ConversationTemplateTabDefinition | undefined;
+  /**
+   * Register the UI definition for a template: which tabs it shows, in which order.
    */
   addTemplateUIDefinition(templateId: string, definition: ConversationTemplateUIDefinition): void;
   /**
