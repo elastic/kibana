@@ -17,6 +17,11 @@ test.describe(
     let configId: string;
 
     test.beforeAll(async ({ syntheticsServices }) => {
+      // Without enablement, serverless renders the "Synthetics App is currently
+      // disabled" banner, whose async mount reflows the overview toolbar while
+      // the tests drive it. Sibling suites enable in their own beforeAll, but
+      // this suite must not rely on running after them (retries re-run it alone).
+      await syntheticsServices.enable();
       await syntheticsServices.cleanUp();
       await syntheticsServices.deleteCustomRules();
       configId = await syntheticsServices.addMonitor(
