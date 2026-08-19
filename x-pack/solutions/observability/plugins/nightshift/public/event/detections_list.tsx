@@ -431,8 +431,11 @@ export function DetectionsList({
       .find(({ detection_id: detectionId }) => detectionId === selectedDetectionId);
 
     // Keep the open detection's card visible, otherwise collapsing leaves its child
-    // flyout up with nothing on screen pointing at it.
-    return selectedInOverflow ? [...collapsed, selectedInOverflow] : collapsed;
+    // flyout up with nothing on screen pointing at it. It takes the last visible slot so
+    // the collapsed list stays exactly MAX_VISIBLE_DETECTIONS long.
+    return selectedInOverflow
+      ? [...collapsed.slice(0, MAX_VISIBLE_DETECTIONS - 1), selectedInOverflow]
+      : collapsed;
   }, [detections, hasOverflow, isExpanded, selectedDetectionId]);
   const hiddenCount = detections.length - visibleDetections.length;
 

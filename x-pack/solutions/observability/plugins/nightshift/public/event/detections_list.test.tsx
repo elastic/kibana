@@ -423,14 +423,25 @@ describe('DetectionsList', () => {
       expect(showLess.querySelector('[data-euiicon-type="chevronSingleUp"]')).toBeInTheDocument();
     });
 
-    it('keeps the selected detection visible when it sits past the cap', () => {
+    it('takes the last visible slot for a selected detection past the cap', () => {
       setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 2) });
       renderList({ selectedDetectionId: 'det-4', onDetectionClick: jest.fn() });
 
       const cards = screen.getAllByTestId('nightshiftDetectionCard');
-      expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS + 1);
-      expect(cards[MAX_VISIBLE_DETECTIONS]).toHaveTextContent('detection-4');
-      expect(cards[MAX_VISIBLE_DETECTIONS]).toHaveAttribute('aria-pressed', 'true');
+      expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveTextContent('detection-4');
+      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.queryByText('detection-2')).not.toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+2 more');
+    });
+
+    it('never offers a +0 more toggle when a single overflow detection is selected', () => {
+      setLifecycle({ detections: buildDetectionsNewestFirst(MAX_VISIBLE_DETECTIONS + 1) });
+      renderList({ selectedDetectionId: 'det-3', onDetectionClick: jest.fn() });
+
+      const cards = screen.getAllByTestId('nightshiftDetectionCard');
+      expect(cards).toHaveLength(MAX_VISIBLE_DETECTIONS);
+      expect(cards[MAX_VISIBLE_DETECTIONS - 1]).toHaveTextContent('detection-3');
       expect(screen.getByTestId('nightshiftDetectionsShowMore')).toHaveTextContent('+1 more');
     });
 
