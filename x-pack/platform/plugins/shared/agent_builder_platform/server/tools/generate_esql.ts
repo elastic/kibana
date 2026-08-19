@@ -116,7 +116,6 @@ export const generateEsqlTool = ({
         timeRange,
         includeDatasets: experimentalFeatures.datasets,
         sessionId,
-        cacheControl: { type: 'ephemeral', ttl: '5m' },
         modelProvider,
         esClient: esClient.asCurrentUser,
         logger,

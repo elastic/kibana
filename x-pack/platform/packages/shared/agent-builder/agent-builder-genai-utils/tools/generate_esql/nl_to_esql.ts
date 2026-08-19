@@ -117,10 +117,6 @@ export interface GenerateEsqlOptions {
    * EIS session id for best-effort provider stickiness across calls. Non-EIS connectors ignore it.
    */
   sessionId?: string;
-  /**
-   * Prompt-cache directive. Only honored by EIS-backed connectors.
-   */
-  cacheControl?: ChatCompleteCacheControl;
 }
 
 export type GenerateEsqlParams = GenerateEsqlOptions & GenerateEsqlDeps;
@@ -137,7 +133,6 @@ export const generateEsql = async ({
   disableNamedParams,
   includeDatasets = false,
   sessionId,
-  cacheControl,
   model: inputModel,
   modelProvider,
   esClient,
@@ -151,6 +146,7 @@ export const generateEsql = async ({
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
+  const cacheControl: ChatCompleteCacheControl = { type: 'ephemeral', ttl: '5m' };
 
   const graph = createNlToEsqlGraph({
     model,
