@@ -146,6 +146,15 @@ body[data-state=brownout] .b-only{display:inline}
 .fix-body{padding:.9rem;font-size:.83rem}
 .fix-files{margin-top:.5rem}
 .fix-file{font-family:'Menlo','Consolas',monospace;font-size:.75rem;color:var(--muted);display:block;margin-top:.15rem}
+.fix-risks{margin-top:.8rem;padding-top:.7rem;border-top:1px solid var(--border)}
+.fix-risks-title{font-size:.73rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--red);margin-bottom:.4rem}
+.fix-risks ul{list-style:none;display:flex;flex-direction:column;gap:.35rem;padding:0}
+.fix-risks li{font-size:.8rem;color:var(--muted);line-height:1.5;padding-left:1.1rem;position:relative}
+.fix-risks li::before{content:'⚠';position:absolute;left:0;font-size:.7rem;top:.05rem;color:var(--amber)}
+.fix-interaction{margin-top:1rem;padding:1rem;border:1px solid var(--amber-bd);
+  border-radius:8px;background:var(--amber-bg);font-size:.83rem;line-height:1.6}
+.fix-interaction-title{font-weight:700;font-size:.82rem;margin-bottom:.5rem;color:var(--amber)}
 
 /* node explainer — always-visible plain-English sentence */
 .node-explain{font-size:.78rem;color:var(--muted);padding:.05rem .9rem .55rem 3.2rem;
@@ -634,6 +643,14 @@ body[data-state=healthy] .node-error .node-explain{opacity:.5}
         <span class="fix-file">src/platform/plugins/shared/data_views/common/data_views/data_views.ts</span>
         <span class="fix-file">x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts</span>
       </div>
+      <div class="fix-risks">
+        <div class="fix-risks-title">Risks &amp; open questions</div>
+        <ul>
+          <li><strong>Stale existing data views.</strong> The field is in-memory only and set at creation time. Alert data views already saved on disk won't carry <code>projectRouting</code> until the init flow recreates them on the next Kibana restart. The old fan-out behaviour applies in the window between deployment and restart.</li>
+          <li><strong>Coverage is narrow.</strong> This only fixes the security alert data view. Any other data view backed by origin-local indices (e.g. future plugin data views) remains vulnerable unless its creation code is similarly updated.</li>
+          <li><strong>API surface change.</strong> <code>DataViewSpec</code> gains a new optional field. Any code that copies or clones a spec (serialisers, migration helpers, test fixtures) should be audited to ensure the field is not silently dropped.</li>
+        </ul>
+      </div>
     </div>
   </div>
   <div class="fix-card">
@@ -647,6 +664,14 @@ body[data-state=healthy] .node-error .node-explain{opacity:.5}
       Return local fields with header <code>x-cps-partial-result: remote-cluster-unavailable</code>.
       <div class="fix-files">
         <span class="fix-file">src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts</span>
+      </div>
+      <div class="fix-risks">
+        <div class="fix-risks-title">Risks &amp; open questions</div>
+        <ul>
+          <li><strong>Extra latency on every cross-cluster error.</strong> A failed primary call now costs a full extra ES round-trip before returning. On a brownout this adds ~30s to the wait; on a transient connection error it adds however long the origin retry takes. Any consumer on a cross-project data view pays this penalty.</li>
+          <li><strong>Origin retry can also fail.</strong> If the origin cluster is unavailable (not just the linked one), the retry fails with a second error. The user receives the same opaque 404 with no indication of which cluster failed or why.</li>
+          <li><strong><code>x-cps-partial-result</code> header is currently unread.</strong> No existing client code inspects this header. Until a consumer is added (likely as part of Layer C), the header is informational only — the client treats the partial-result response identically to a full-result response, so users get no degradation warning from this layer alone.</li>
+        </ul>
       </div>
     </div>
   </div>
@@ -662,7 +687,22 @@ body[data-state=healthy] .node-error .node-explain{opacity:.5}
       <div class="fix-files">
         <span class="fix-file">x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts/wrapper.tsx</span>
       </div>
+      <div class="fix-risks">
+        <div class="fix-risks-title">Risks &amp; open questions</div>
+        <ul>
+          <li><strong>Cannot distinguish brownout from legitimately empty indices.</strong> Both produce <code>status==='ready' &amp;&amp; !hasMatchedIndices()</code>. Without Layer B's <code>x-cps-partial-result</code> header flowing through to the component, the warning callout fires in both cases — a healthy deployment with no alert data yet would show a misleading "linked project unavailable" warning.</li>
+          <li><strong>Silent failure risk.</strong> Replacing a full-page error with a subtle callout means analysts may not notice the warning and operate on an empty alerts table, assuming there are simply no alerts rather than that data is missing due to a cluster issue.</li>
+          <li><strong>Warning text needs a clear signal to key off.</strong> Until the partial-result header (from Layer B) or a typed error reaches the component, any warning text is speculative. The component would need to be updated again once Layer B lands to accurately describe what's wrong.</li>
+        </ul>
+      </div>
     </div>
+  </div>
+
+  <div class="fix-interaction">
+    <div class="fix-interaction-title">Layer interaction — how they fit together</div>
+    <p style="margin-bottom:.5rem"><strong>B + C together are more coherent than either alone.</strong> Layer B makes the server return local fields on cross-cluster failure (so the DataView has matched indices and the callout in Layer C never fires spuriously). Layer B also adds the <code>x-cps-partial-result</code> header that Layer C's component can key off to show an accurate "linked project unavailable" message rather than a generic warning. Without B, Layer C's callout fires on both failure and empty-data scenarios. Without C, Layer B's header has no UI consumer.</p>
+    <p style="margin-bottom:.5rem"><strong>Layer A alone is the cleanest fix for this specific data view</strong> but leaves the server error handling unchanged — a brownout still causes a 30-second hang for the retry path, and any other data view that isn't explicitly tagged remains vulnerable.</p>
+    <p><strong>Recommended landing order:</strong> C first (immediate analyst relief, no API change, low risk), then B (server fix, exposes the partial-result signal to C), then A (root fix, eliminates the fan-out entirely for origin-local views and makes B's retry path unreachable for the alert data view).</p>
   </div>
 </div>
 
