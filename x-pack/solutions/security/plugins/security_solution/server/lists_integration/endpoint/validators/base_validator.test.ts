@@ -113,6 +113,65 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
     await expect(initValidator()._validateBasicData(exceptionLikeItem)).resolves.toBeUndefined();
   });
 
+  describe('entry value character validation', () => {
+    it('accepts clean values and ignores non-value-bearing entries', () => {
+      exceptionLikeItem.entries = [
+        {
+          field: 'process.executable.caseless',
+          type: 'match',
+          operator: 'included',
+          value: 'C:\\Program Files\\Elastic\\endpoint.exe',
+        },
+        { field: 'event.category', type: 'exists', operator: 'included' },
+      ] as ExceptionItemLikeOptions['entries'];
+
+      expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).not.toThrow();
+    });
+
+    it('rejects top-level and nested values and aggregates fields and issue categories', () => {
+      exceptionLikeItem.entries = [
+        {
+          field: 'process.executable.caseless',
+          type: 'wildcard',
+          operator: 'included',
+          value: ' C:\\Elastic\\*.exe',
+        },
+        {
+          field: 'process.Ext.code_signature',
+          type: 'nested',
+          entries: [
+            {
+              field: 'subject_name',
+              type: 'match_any',
+              operator: 'included',
+              value: ['Elastic', 'bad\u0085signer'],
+            },
+          ],
+        },
+      ] as ExceptionItemLikeOptions['entries'];
+
+      expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).toThrow(
+        /control characters in fields: subject_name; leading or trailing whitespace in fields: process\.executable\.caseless/
+      );
+    });
+
+    it('does not echo a rejected value', () => {
+      const rejectedValue = 'private-value\u0000';
+      exceptionLikeItem.entries = [
+        {
+          field: 'user.name',
+          type: 'match',
+          operator: 'included',
+          value: rejectedValue,
+        },
+      ] as ExceptionItemLikeOptions['entries'];
+
+      expect(() => initValidator()._validateEntryValueCharacters(exceptionLikeItem)).toThrow(
+        expect.not.stringContaining(rejectedValue)
+      );
+    });
+  });
+
   it.each([
     [
       'name is empty',

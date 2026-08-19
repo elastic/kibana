@@ -21,7 +21,12 @@ import {
   isOperator,
   matchesOperator,
 } from '@kbn/securitysolution-list-utils';
-import { validatePotentialWildcardInput } from '@kbn/securitysolution-utils';
+import {
+  getInputValueCharacterIssue,
+  getInputValueCharacterIssueMessage,
+  validatePotentialWildcardInput,
+} from '@kbn/securitysolution-utils';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
@@ -1179,6 +1184,158 @@ describe('BuilderEntryItem', () => {
     });
 
     expect(mockSetWarningsExists).toHaveBeenCalledWith(true);
+  });
+
+  test.each([
+    ['trusted applications', 'endpoint', ENDPOINT_ARTIFACT_LISTS.trustedApps.id],
+    ['event filters', 'endpoint_events', ENDPOINT_ARTIFACT_LISTS.eventFilters.id],
+    ['blocklists', 'endpoint_blocklists', ENDPOINT_ARTIFACT_LISTS.blocklists.id],
+  ] as const)(
+    'it shows invisible-character feedback for %s match values',
+    (_, listType, listId) => {
+      (getInputValueCharacterIssue as jest.Mock).mockReturnValue('control_character');
+      (getInputValueCharacterIssueMessage as jest.Mock).mockReturnValue(
+        'invisible-character warning'
+      );
+
+      wrapper = mount(
+        <BuilderEntryItem
+          autocompleteService={autocompleteStartMock}
+          entry={{
+            correspondingKeywordField: undefined,
+            entryIndex: 0,
+            field: getField('keyword'),
+            id: '123',
+            nested: undefined,
+            operator: isOperator,
+            parent: undefined,
+            value: 'bad\u0000value',
+          }}
+          httpService={mockKibanaHttpService}
+          indexPattern={{ fields, id: '1234', title: 'logs-endpoint.events.*' }}
+          listId={listId}
+          listType={listType}
+          onChange={jest.fn()}
+          setErrorsExist={jest.fn()}
+          setWarningsExist={jest.fn()}
+          showLabel={false}
+          exceptionItemIndex={0}
+          showValueListModal={MockedShowValueListModal}
+        />
+      );
+
+      expect(wrapper.text()).toContain('invisible-character warning');
+    }
+  );
+
+  test('invisible-character feedback takes precedence over wildcard path feedback', () => {
+    (getInputValueCharacterIssue as jest.Mock).mockReturnValue('edge_whitespace');
+    (getInputValueCharacterIssueMessage as jest.Mock).mockReturnValue(
+      'invisible-character warning'
+    );
+    (validatePotentialWildcardInput as jest.Mock).mockReturnValue('path warning');
+
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('nestedField.nestedChild.doublyNestedChild'),
+          id: '123',
+          nested: undefined,
+          operator: matchesOperator,
+          parent: undefined,
+          value: ' bad* ',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{ fields, id: '1234', title: 'logs-endpoint.events.*' }}
+        listId={ENDPOINT_ARTIFACT_LISTS.eventFilters.id}
+        listType="endpoint_events"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+        exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
+      />
+    );
+
+    expect(wrapper.text()).toContain('invisible-character warning');
+    expect(wrapper.text()).not.toContain('path warning');
+    expect(validatePotentialWildcardInput).not.toHaveBeenCalled();
+  });
+
+  test('it leaves match_any client validation unchanged for Endpoint artifacts', () => {
+    (getInputValueCharacterIssue as jest.Mock).mockReturnValue('control_character');
+
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('keyword'),
+          id: '123',
+          nested: undefined,
+          operator: isOneOfOperator,
+          parent: undefined,
+          value: ['clean', 'bad\u0000value'],
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{ fields, id: '1234', title: 'logs-endpoint.events.*' }}
+        listId={ENDPOINT_ARTIFACT_LISTS.eventFilters.id}
+        listType="endpoint_events"
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+        exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
+      />
+    );
+
+    expect(getInputValueCharacterIssue).not.toHaveBeenCalled();
+  });
+
+  test.each([
+    ['detection', undefined],
+    ['rule_default', undefined],
+    ['endpoint', 'endpoint_list'],
+  ] as const)('it excludes %s exception match values', (listType, listId) => {
+    (getInputValueCharacterIssue as jest.Mock).mockReturnValue('control_character');
+    (getInputValueCharacterIssueMessage as jest.Mock).mockReturnValue(
+      'invisible-character warning'
+    );
+
+    wrapper = mount(
+      <BuilderEntryItem
+        autocompleteService={autocompleteStartMock}
+        entry={{
+          correspondingKeywordField: undefined,
+          entryIndex: 0,
+          field: getField('keyword'),
+          id: '123',
+          nested: undefined,
+          operator: isOperator,
+          parent: undefined,
+          value: 'bad\u0000value',
+        }}
+        httpService={mockKibanaHttpService}
+        indexPattern={{ fields, id: '1234', title: 'logstash-*' }}
+        listId={listId}
+        listType={listType}
+        onChange={jest.fn()}
+        setErrorsExist={jest.fn()}
+        setWarningsExist={jest.fn()}
+        showLabel={false}
+        exceptionItemIndex={0}
+        showValueListModal={MockedShowValueListModal}
+      />
+    );
+
+    expect(wrapper.text()).not.toContain('invisible-character warning');
+    expect(getInputValueCharacterIssue).not.toHaveBeenCalled();
   });
 
   test('it does not invoke "setWarningsExist" when valid value in field value input', async () => {

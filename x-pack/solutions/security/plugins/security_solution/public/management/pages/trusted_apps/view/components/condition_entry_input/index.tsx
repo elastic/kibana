@@ -35,10 +35,24 @@ import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/pa
 const ConditionEntryCell = memo<{
   showLabel: boolean;
   label?: string;
+  errors?: React.ReactNode[];
+  warnings?: React.ReactNode[];
   children: React.ReactElement;
-}>(({ showLabel, label = '', children }) => {
-  return showLabel ? (
-    <EuiFormRow label={label} fullWidth>
+}>(({ showLabel, label = '', errors = [], warnings = [], children }) => {
+  const hasFeedback = errors.length > 0 || warnings.length > 0;
+
+  return showLabel || hasFeedback ? (
+    <EuiFormRow
+      label={showLabel ? label : undefined}
+      fullWidth
+      isInvalid={errors.length > 0}
+      error={errors}
+      helpText={warnings.map((warning, index) => (
+        <EuiText key={index} color="warning" size="xs">
+          {warning}
+        </EuiText>
+      ))}
+    >
       {children}
     </EuiFormRow>
   ) : (
@@ -63,6 +77,12 @@ export interface ConditionEntryInputProps {
    * only one needs user input.
    */
   onVisited?: (entry: TrustedAppConditionEntry) => void;
+  validation?: {
+    errors: React.ReactNode[];
+    warnings: React.ReactNode[];
+    requiredError?: React.ReactNode;
+  };
+  showRequiredError?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -76,7 +96,7 @@ const InputGroup = styled.div`
 
 const InputItem = styled.div<{ gridArea: string }>`
   grid-area: ${({ gridArea }) => gridArea};
-  align-self: center;
+  align-self: start;
   margin-right: ${(props) => props.theme.euiTheme.size.s};
   vertical-align: baseline;
 `;
@@ -98,10 +118,23 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
     onChange,
     isRemoveDisabled = false,
     onVisited,
+    validation,
+    showRequiredError = false,
     'data-test-subj': dataTestSubj,
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const [isVisited, setIsVisited] = useState(false);
+    const visibleErrors = useMemo(
+      () => [
+        ...(validation?.errors ?? []),
+        ...((isVisited || showRequiredError) && validation?.requiredError
+          ? [validation.requiredError]
+          : []),
+      ],
+      [isVisited, showRequiredError, validation]
+    );
+    const warnings = validation?.warnings ?? [];
+    const hasValueFeedback = visibleErrors.length > 0 || warnings.length > 0;
 
     const handleVisited = useCallback(() => {
       onVisited?.(entry);
@@ -191,7 +224,12 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
 
     const handleValueOnBlur = useCallback(() => {
       handleVisited();
-    }, [handleVisited]);
+
+      const trimmedValue = entry.value.trim();
+      if (trimmedValue && trimmedValue !== entry.value) {
+        onChange({ ...entry, value: trimmedValue }, entry);
+      }
+    }, [entry, handleVisited, onChange]);
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>
@@ -227,7 +265,12 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           </ConditionEntryCell>
         </InputItem>
         <InputItem gridArea="value">
-          <ConditionEntryCell showLabel={showLabels} label={ENTRY_PROPERTY_TITLES.value}>
+          <ConditionEntryCell
+            showLabel={showLabels}
+            label={ENTRY_PROPERTY_TITLES.value}
+            errors={visibleErrors}
+            warnings={warnings}
+          >
             <EuiFieldText
               name="value"
               value={entry.value}
@@ -238,6 +281,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               })}
               fullWidth
               required={isVisited}
+              isInvalid={hasValueFeedback}
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
               data-test-subj={getTestId('value')}

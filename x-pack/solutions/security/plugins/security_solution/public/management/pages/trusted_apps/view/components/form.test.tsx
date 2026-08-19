@@ -10,7 +10,12 @@ import { screen, cleanup, act, fireEvent, getByTestId, waitFor } from '@testing-
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { TrustedAppEntryTypes } from '@kbn/securitysolution-utils';
-import { OperatingSystem, ConditionEntryField } from '@kbn/securitysolution-utils';
+import {
+  CONTROL_CHARACTER_ERROR,
+  EDGE_WHITESPACE_WARNING,
+  OperatingSystem,
+  ConditionEntryField,
+} from '@kbn/securitysolution-utils';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
@@ -403,6 +408,71 @@ describe('Trusted apps form', () => {
       });
     });
 
+    describe('invisible character validation', () => {
+      it('shows edge whitespace beside the affected value before path warnings', () => {
+        formProps.item = createItem({
+          entries: [createEntry(ConditionEntryField.PATH, 'match', ' malformed-path ')],
+        });
+        rerender();
+
+        const condition = getCondition();
+        expect(getByTestId(condition, `${condition.dataset.testSubj}-value`)).toHaveAttribute(
+          'aria-invalid',
+          'true'
+        );
+        expect(condition).toContainElement(renderResult.getByText(EDGE_WHITESPACE_WARNING));
+        expect(renderResult.getAllByText(EDGE_WHITESPACE_WARNING)).toHaveLength(1);
+        expect(renderResult.queryByText(INPUT_ERRORS.pathWarning(0))).not.toBeInTheDocument();
+      });
+
+      it('blocks submission for an interior control character', async () => {
+        formProps.item = createItem({
+          name: 'Trusted app',
+          entries: [createEntry(ConditionEntryField.PATH, 'match', 'C:\\Elastic\tEndpoint.exe')],
+        });
+        rerender();
+
+        await userEvent.type(getNameField(), ' ');
+
+        expect(renderResult.getByText(CONTROL_CHARACTER_ERROR)).toBeInTheDocument();
+        expect(formProps.onChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ isValid: false })
+        );
+      });
+
+      it('keeps an edge-whitespace warning submit-eligible', async () => {
+        formProps.item = createItem({
+          name: 'Trusted app',
+          entries: [createEntry(ConditionEntryField.PATH, 'match', ' C:\\Elastic\\Endpoint.exe')],
+        });
+        rerender();
+
+        await userEvent.type(getNameField(), ' ');
+
+        expect(renderResult.getByText(EDGE_WHITESPACE_WARNING)).toBeInTheDocument();
+        expect(formProps.onChange).toHaveBeenLastCalledWith(
+          expect.objectContaining({ isValid: true })
+        );
+      });
+
+      it('trims a non-empty value on blur through the form change path', () => {
+        formProps.item = createItem({
+          entries: [createEntry(ConditionEntryField.PATH, 'match', ' C:\\Elastic\\Endpoint.exe ')],
+        });
+        rerender();
+
+        fireEvent.blur(getConditionValue(getCondition()));
+
+        expect(formProps.onChange).toHaveBeenCalledWith(
+          expect.objectContaining({
+            item: expect.objectContaining({
+              entries: [expect.objectContaining({ value: 'C:\\Elastic\\Endpoint.exe' })],
+            }),
+          })
+        );
+      });
+    });
+
     it('should display the `AND` button', () => {
       const andButton = getConditionBuilderAndButton();
       expect(andButton.textContent).toEqual('AND');
@@ -755,7 +825,9 @@ describe('Trusted apps form', () => {
       setTextFieldValue(getConditionValue(getCondition()), '');
       rerenderWithLatestProps();
 
-      expect(renderResult.getByText(INPUT_ERRORS.noDuplicateField(ConditionEntryField.HASH)));
+      expect(
+        renderResult.getAllByText(INPUT_ERRORS.noDuplicateField(ConditionEntryField.HASH))
+      ).toHaveLength(2);
     });
 
     it('should validate multiple errors in form', async () => {

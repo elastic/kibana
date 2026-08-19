@@ -333,6 +333,7 @@ export class BlocklistValidator extends BaseValidator {
   }
 
   private async validateBlocklistData(item: ExceptionItemLikeOptions): Promise<void> {
+    this.validateEntryValueCharacters(item);
     await this.validateBasicData(item);
 
     try {

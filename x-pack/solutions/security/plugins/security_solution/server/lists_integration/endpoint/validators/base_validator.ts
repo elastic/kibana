@@ -9,7 +9,11 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { OperatingSystem } from '@kbn/securitysolution-utils';
+import {
+  getInputValueCharacterIssue,
+  InputValueCharacterIssue,
+  OperatingSystem,
+} from '@kbn/securitysolution-utils';
 
 import { i18n } from '@kbn/i18n';
 import {} from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client_types';
@@ -91,6 +95,13 @@ const ITEM_CANNOT_BE_MANAGED_IN_CURRENT_SPACE_MESSAGE = (spaceIds: string[]): st
       itemOwnerSpaces: spaceIds.join(', '),
     },
   });
+
+interface EndpointArtifactEntryValue {
+  field: string;
+  type: string;
+  value?: string | string[];
+  entries?: EndpointArtifactEntryValue[];
+}
 
 export const BasicEndpointExceptionDataSchema = schema.object(
   {
@@ -184,6 +195,77 @@ export class BaseValidator {
       BasicEndpointExceptionDataSchema.validate(item);
     } catch (error) {
       throw new EndpointArtifactExceptionValidationError(error.message);
+    }
+  }
+
+  protected validateEntryValueCharacters(item: ExceptionItemLikeOptions): void {
+    const fieldsByIssue = {
+      [InputValueCharacterIssue.CONTROL_CHARACTER]: new Set<string>(),
+      [InputValueCharacterIssue.EDGE_WHITESPACE]: new Set<string>(),
+    };
+
+    const inspectEntries = (entries: EndpointArtifactEntryValue[]): void => {
+      entries.forEach((entry) => {
+        if (entry.type === 'nested') {
+          inspectEntries(entry.entries ?? []);
+          return;
+        }
+
+        if (!['match', 'match_any', 'wildcard'].includes(entry.type)) {
+          return;
+        }
+
+        const values = Array.isArray(entry.value) ? entry.value : [entry.value];
+        values.forEach((value) => {
+          const issue = getInputValueCharacterIssue(value);
+
+          if (issue) {
+            fieldsByIssue[issue].add(entry.field);
+          }
+        });
+      });
+    };
+
+    inspectEntries(item.entries as EndpointArtifactEntryValue[]);
+
+    const issueDescriptions: string[] = [];
+    const controlCharacterFields = [...fieldsByIssue[InputValueCharacterIssue.CONTROL_CHARACTER]];
+    const edgeWhitespaceFields = [...fieldsByIssue[InputValueCharacterIssue.EDGE_WHITESPACE]];
+
+    if (controlCharacterFields.length) {
+      issueDescriptions.push(
+        i18n.translate(
+          'xpack.securitySolution.endpointArtifactValidation.controlCharacterFieldsErrorMessage',
+          {
+            defaultMessage: 'control characters in fields: {fields}',
+            values: { fields: i18n.formatList('unit', controlCharacterFields) },
+          }
+        )
+      );
+    }
+
+    if (edgeWhitespaceFields.length) {
+      issueDescriptions.push(
+        i18n.translate(
+          'xpack.securitySolution.endpointArtifactValidation.edgeWhitespaceFieldsErrorMessage',
+          {
+            defaultMessage: 'leading or trailing whitespace in fields: {fields}',
+            values: { fields: i18n.formatList('unit', edgeWhitespaceFields) },
+          }
+        )
+      );
+    }
+
+    if (issueDescriptions.length) {
+      throw new EndpointArtifactExceptionValidationError(
+        i18n.translate(
+          'xpack.securitySolution.endpointArtifactValidation.invalidEntryValuesErrorMessage',
+          {
+            defaultMessage: 'Invalid entry values: {issues}',
+            values: { issues: issueDescriptions.join('; ') },
+          }
+        )
+      );
     }
   }
 

@@ -6,7 +6,12 @@
  */
 
 import React from 'react';
-import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import {
+  CONTROL_CHARACTER_ERROR,
+  EDGE_WHITESPACE_WARNING,
+  ConditionEntryField,
+  OperatingSystem,
+} from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 
 import type { ConditionEntryInputProps } from '.';
@@ -110,6 +115,52 @@ describe('Condition entry input', () => {
     await fireEvent.blur(value);
     expect(onVisitedMock).toHaveBeenCalledTimes(1);
     expect(onVisitedMock).toHaveBeenCalledWith(baseEntry);
+  });
+
+  it('trims a repairable value on blur through onChange', () => {
+    props = { ...props, entry: { ...baseEntry, value: ' trustedApp\u00A0' } };
+    render();
+
+    fireEvent.blur(renderResult.getByTestId(`${formPrefix}-value`));
+
+    expect(onChangeMock).toHaveBeenCalledWith({ ...baseEntry, value: 'trustedApp' }, props.entry);
+  });
+
+  it.each([
+    ['a clean value', 'trustedApp'],
+    ['an all-whitespace value', ' \t\n'],
+    ['an interior control character', 'trusted\tApp'],
+  ])('does not update %s on blur', (_, value) => {
+    props = { ...props, entry: { ...baseEntry, value } };
+    render();
+
+    fireEvent.blur(renderResult.getByTestId(`${formPrefix}-value`));
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['warning', { errors: [], warnings: [EDGE_WHITESPACE_WARNING] }, EDGE_WHITESPACE_WARNING],
+    ['error', { errors: [CONTROL_CHARACTER_ERROR], warnings: [] }, CONTROL_CHARACTER_ERROR],
+  ])('renders an inline %s and marks the value input invalid', (_, validation, message) => {
+    props = { ...props, validation };
+    render();
+
+    const valueInput = renderResult.getByTestId(`${formPrefix}-value`);
+    expect(renderResult.getByText(message)).toBeInTheDocument();
+    expect(valueInput).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('renders feedback for a repeated row without adding a visible label', () => {
+    props = {
+      ...props,
+      showLabels: false,
+      validation: { errors: [CONTROL_CHARACTER_ERROR], warnings: [] },
+    };
+    render();
+
+    expect(renderResult.getByText(CONTROL_CHARACTER_ERROR)).toBeInTheDocument();
+    expect(renderResult.container.querySelectorAll('.euiFormRow__labelWrapper')).toHaveLength(0);
   });
 
   it('should not call on visited for field change if value is empty', async () => {

@@ -7,6 +7,7 @@
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { CreateExceptionListItemOptions } from '@kbn/lists-plugin/server';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { BlocklistValidator } from './blocklist_validator';
 import { createMockEndpointAppContextService } from '../../../endpoint/mocks';
@@ -128,6 +129,27 @@ describe('Blocklists API validations', () => {
       await expect(
         validator.validatePreCreateItem(buildItem(signerMatchEntry('a'.repeat(4097))))
       ).rejects.toThrow(/maximum length of \[4096\]/);
+    });
+
+    it('rejects an edge-whitespace match_any array member on create', async () => {
+      await expect(
+        validator.validatePreCreateItem(
+          buildItem(filePathEntry(['C:\\Elastic\\endpoint.exe', '\tbad']))
+        )
+      ).rejects.toThrow(/leading or trailing whitespace in fields: file\.path/);
+    });
+
+    it('rejects a nested match_any control character on update', async () => {
+      await expect(
+        validator.validatePreUpdateItem(
+          {
+            ...buildItem(signerEntry(['Elastic', 'bad\rname'])),
+            _version: undefined,
+            id: 'blocklist-id',
+          },
+          {} as ExceptionListItemSchema
+        )
+      ).rejects.toThrow(/control characters in fields: subject_name/);
     });
   });
   // -----------------------------------------------------------------------------
