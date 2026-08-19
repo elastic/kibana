@@ -594,10 +594,10 @@ describe('QueryService', () => {
 
     it('logs debug instead of error when the transport aborts mid-flight', async () => {
       const abortController = new AbortController();
-      mockEsClient.esql.query.mockImplementation((async () => {
+      mockEsClient.esql.query.mockImplementation(async () => {
         abortController.abort();
         throw new errors.RequestAbortedError('Request aborted');
-      }) as typeof mockEsClient.esql.query);
+      });
 
       await expect(async () => {
         for await (const _batch of queryService.executeQueryStream({
