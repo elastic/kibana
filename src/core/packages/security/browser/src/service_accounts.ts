@@ -7,16 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FtrProviderContext } from '../ftr_provider_context';
-
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const browser = getService('browser');
-
-  describe('discover/esql_4', function () {
-    before(async function () {
-      await browser.setWindowSize(1600, 1200);
-    });
-
-    loadTestFile(require.resolve('./_esql_controls'));
-  });
+/**
+ * Core's service accounts service
+ *
+ * @public
+ */
+export interface CoreServiceAccountsService {
+  /**
+   * Check if service accounts are available in the current environment.
+   */
+  isEnabled(): boolean;
 }
