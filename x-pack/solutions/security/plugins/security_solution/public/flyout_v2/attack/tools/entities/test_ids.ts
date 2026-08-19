@@ -9,3 +9,11 @@ export const ATTACK_ENTITIES_TOOL_TEST_ID = 'attack-flyout-v2-entities-tool' as 
 export const ATTACK_ENTITIES_TOOL_LOADING_TEST_ID =
   `${ATTACK_ENTITIES_TOOL_TEST_ID}-loading` as const;
 export const ATTACK_ENTITIES_TOOL_ERROR_TEST_ID = `${ATTACK_ENTITIES_TOOL_TEST_ID}-error` as const;
+export const ATTACK_ENTITIES_TOOL_PERSISTED_ROW_LOADING_TEST_ID =
+  `${ATTACK_ENTITIES_TOOL_TEST_ID}-persisted-row-loading` as const;
+export const ATTACK_ENTITIES_TOOL_SERVICE_ROW_TEST_ID =
+  `${ATTACK_ENTITIES_TOOL_TEST_ID}-service-row` as const;
+export const ATTACK_ENTITIES_TOOL_OBSERVABLES_TEST_ID =
+  `${ATTACK_ENTITIES_TOOL_TEST_ID}-observables` as const;
+export const ATTACK_ENTITIES_TOOL_OBSERVABLE_ROW_TEST_ID =
+  `${ATTACK_ENTITIES_TOOL_TEST_ID}-observable-row` as const;

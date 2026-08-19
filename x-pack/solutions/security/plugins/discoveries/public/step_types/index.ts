@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { correlateEntitiesStepPublicDefinition } from './correlate_entities_step';
 export { defaultAlertRetrievalStepPublicDefinition } from './default_alert_retrieval_step';
 export { defaultValidationStepPublicDefinition } from './default_validation_step';
 export { generateStepPublicDefinition } from './generate_step';

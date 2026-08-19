@@ -99,6 +99,12 @@ jest.mock('../../../../flyout/attack_details/left/components/attack_entity_insig
   },
 }));
 
+jest.mock('./components/persisted_entity_row', () => ({
+  PersistedEntityRow: ({ entityId, entityType }: { entityId: string; entityType: string }) => (
+    <div data-test-subj={`mock-persisted-entity-row-${entityType}`}>{entityId}</div>
+  ),
+}));
+
 const mockUseAttackEntitiesLists = useAttackEntitiesLists as jest.Mock;
 const mockUseEntityFlyoutApi = useEntityFlyoutApi as jest.Mock;
 
@@ -126,10 +132,19 @@ const defaultEntitiesResult = {
   error: false,
 };
 
-const renderTool = ({ alertIds = ['alert-id-1', 'alert-id-2'] }: { alertIds?: string[] } = {}) =>
+const buildHitWithSource = (source: Record<string, unknown>): DataTableRecord =>
+  ({
+    ...mockHit,
+    raw: { ...mockHit.raw, _source: source },
+  } as DataTableRecord);
+
+const renderTool = ({
+  alertIds = ['alert-id-1', 'alert-id-2'],
+  hit = mockHit,
+}: { alertIds?: string[]; hit?: DataTableRecord } = {}) =>
   render(
     <TestProviders>
-      <EntitiesDetails hit={mockHit} alertIds={alertIds} />
+      <EntitiesDetails hit={hit} alertIds={alertIds} />
     </TestProviders>
   );
 
@@ -304,6 +319,86 @@ describe('EntitiesDetails', () => {
       expect(mockOpenEntityAlertsInsights).toHaveBeenCalledWith(
         expect.objectContaining({ value: 'server-1' })
       );
+    });
+
+    it('passes alertIds to the aggregation hook when no persisted entities exist', () => {
+      renderTool({ alertIds: ['alert-id-1', 'alert-id-2'] });
+
+      expect(mockUseAttackEntitiesLists).toHaveBeenCalledWith(['alert-id-1', 'alert-id-2']);
+    });
+  });
+
+  describe('persisted entities path', () => {
+    const hitWithPersistedEntities = buildHitWithSource({
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+      'kibana.alert.attack_discovery.entities': [
+        { id: 'user:jane@acme.com@okta', type: 'user' },
+        { id: 'host:HW-UUID', type: 'host' },
+        { id: 'service:payments@prod', type: 'service' },
+      ],
+      'kibana.alert.attack_discovery.observable_entities': [
+        { type_key: 'observable-type-ipv4', value: '10.0.0.1' },
+        { type_key: 'observable-type-file-hash', value: 'abc123' },
+      ],
+    });
+
+    it('renders persisted rows per entity type instead of the aggregation rows', () => {
+      renderTool({ hit: hitWithPersistedEntities });
+
+      expect(screen.getByTestId('mock-persisted-entity-row-user')).toHaveTextContent(
+        'user:jane@acme.com@okta'
+      );
+      expect(screen.getByTestId('mock-persisted-entity-row-host')).toHaveTextContent(
+        'host:HW-UUID'
+      );
+      expect(screen.getByTestId('mock-persisted-entity-row-service')).toHaveTextContent(
+        'service:payments@prod'
+      );
+      expect(screen.queryByTestId('mock-user-insights-row')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('mock-host-insights-row')).not.toBeInTheDocument();
+    });
+
+    it('skips the aggregation hook by passing empty alertIds', () => {
+      renderTool({ hit: hitWithPersistedEntities, alertIds: ['alert-id-1'] });
+
+      expect(mockUseAttackEntitiesLists).toHaveBeenCalledWith([]);
+    });
+
+    it('renders the observables section with type labels and values', () => {
+      renderTool({ hit: hitWithPersistedEntities });
+
+      expect(screen.getByTestId('attack-flyout-v2-entities-tool-observables')).toBeInTheDocument();
+      expect(screen.getByText('IPv4')).toBeInTheDocument();
+      expect(screen.getByText('File hash')).toBeInTheDocument();
+      expect(screen.getByText('abc123')).toBeInTheDocument();
+    });
+
+    it('shows the no-data message when persisted entities and observables are both empty', () => {
+      renderTool({
+        hit: buildHitWithSource({
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          'kibana.alert.attack_discovery.entities': [],
+        }),
+      });
+
+      expect(
+        screen.getByText('Host and user information are unavailable for this attack.')
+      ).toBeInTheDocument();
+      expect(mockUseAttackEntitiesLists).toHaveBeenCalledWith([]);
+    });
+
+    it('never shows the aggregation loading or error states on the persisted path', () => {
+      mockUseAttackEntitiesLists.mockReturnValue({
+        ...defaultEntitiesResult,
+        loading: true,
+        error: true,
+      });
+
+      renderTool({ hit: hitWithPersistedEntities });
+
+      expect(screen.queryByTestId(ATTACK_ENTITIES_TOOL_LOADING_TEST_ID)).not.toBeInTheDocument();
+      expect(screen.queryByTestId(ATTACK_ENTITIES_TOOL_ERROR_TEST_ID)).not.toBeInTheDocument();
+      expect(screen.getByTestId('mock-persisted-entity-row-user')).toBeInTheDocument();
     });
   });
 });

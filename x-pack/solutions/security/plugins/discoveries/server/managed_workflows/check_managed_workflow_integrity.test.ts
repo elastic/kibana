@@ -76,6 +76,7 @@ const createMockWorkflowsExtensions = ({
   } as unknown as jest.Mocked<WorkflowsExtensionsServerPluginStart>);
 
 const AD_STEP_TYPES = [
+  'security.attack-discovery.correlateEntities',
   'security.attack-discovery.defaultAlertRetrieval',
   'security.attack-discovery.generate',
   'security.attack-discovery.defaultValidation',

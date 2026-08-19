@@ -13,6 +13,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { isWorkflowsEnabled } from '@kbn/discoveries/impl/lib/helpers/is_workflows_enabled';
 import type { DiscoveriesPluginStartDeps } from '../types';
+import { getCorrelateEntitiesStepDefinition } from './steps/correlate_entities_step';
 import { getDefaultAlertRetrievalStepDefinition } from './steps/default_alert_retrieval_step';
 import { getDefaultValidationStepDefinition } from './steps/default_validation_step';
 import { getGenerateStepDefinition } from './steps/generate_step';
@@ -142,6 +143,23 @@ export const registerWorkflowSteps = (
     workflowsExtensions,
   });
 
+  const correlateEntitiesStepDef = withWorkflowsEnabledGuard(
+    getCorrelateEntitiesStepDefinition({
+      getStartServices,
+      logger,
+    }),
+    getStartServices
+  );
+  logger.debug(
+    () => `Registering correlateEntitiesStepDefinition with id: ${correlateEntitiesStepDef.id}`
+  );
+  const correlateEntitiesOutcome = tryRegisterStep({
+    getStartServices,
+    logger,
+    stepDefinition: correlateEntitiesStepDef,
+    workflowsExtensions,
+  });
+
   const persistDiscoveriesStepDef = withWorkflowsEnabledGuard(
     getPersistDiscoveriesStepDefinition({
       adhocAttackDiscoveryDataClient,
@@ -200,6 +218,7 @@ export const registerWorkflowSteps = (
   });
 
   const outcomes = [
+    correlateEntitiesOutcome,
     defaultAlertRetrievalOutcome,
     defaultValidationOutcome,
     generateOutcome,
