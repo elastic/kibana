@@ -338,7 +338,7 @@ export const useImportLifecycleFlyout = ({
           isDisabled: isSaving || !canReadFailureStoreForImport(inspectedStream),
         }}
         type="push"
-        container={getLifecycleFlyoutContainer()}
+        // container={getLifecycleFlyoutContainer()}
         ownFocus={false}
       />
     ) : null;

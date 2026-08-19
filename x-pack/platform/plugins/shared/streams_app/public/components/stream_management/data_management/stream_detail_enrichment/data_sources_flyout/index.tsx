@@ -24,6 +24,7 @@ import { DATA_SOURCES_I18N } from './translations';
 import { AddDataSourcesContextMenu } from './add_data_sources_context_menu';
 import { DataSource } from './data_source';
 import { CompleteSimulationBadge, PartialSimulationBadge } from './data_source_card';
+import { useStreamsPrivileges } from '../../../../../hooks/use_streams_privileges';
 
 interface DataSourcesFlyoutProps {
   onClose: () => void;
@@ -33,11 +34,18 @@ export const DataSourcesFlyout = ({ onClose }: DataSourcesFlyoutProps) => {
   const dataSourcesActorRefs = useStreamEnrichmentSelector(
     (snapshot) => snapshot.context.dataSourcesRefs
   );
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   const flyoutTitleId = useGeneratedHtmlId();
 
   return (
-    <EuiFlyoutResizable onClose={onClose} size="m" aria-labelledby={flyoutTitleId}>
+    <EuiFlyoutResizable
+      onClose={onClose}
+      size={canvas ? 'fill' : 'm'}
+      aria-labelledby={flyoutTitleId}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id={flyoutTitleId}>{DATA_SOURCES_I18N.flyout.title}</h2>

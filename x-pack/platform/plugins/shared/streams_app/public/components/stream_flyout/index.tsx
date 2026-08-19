@@ -286,6 +286,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
       onClose={onClose}
       data-test-subj="streamsCanvasFlyout"
       paddingSize="none"
+      session="start"
       flyoutMenuProps={{
         customActions,
       }}

@@ -39,6 +39,7 @@ import {
 import { DslStepsFlyoutArrayView } from './sections';
 import { useStyles } from './use_styles';
 import type { EditDslStepsFlyoutChangeMeta, EditDslStepsFlyoutProps } from './types';
+import { useStreamsPrivileges } from '../../../../../../hooks/use_streams_privileges';
 
 const FragmentFormWrapper = ({ children }: React.PropsWithChildren) => <>{children}</>;
 
@@ -61,6 +62,9 @@ export const EditDslStepsFlyout = ({
     () => dataTestSubjProp ?? 'streamsEditDslStepsFlyout',
     [dataTestSubjProp]
   );
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   const { footerStyles } = useStyles();
   const { focusProps } = usePushFlyoutFocus();
@@ -271,7 +275,7 @@ export const EditDslStepsFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      size={400}
+      size={canvas ? 'fill' : 400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}

@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { usePushFlyoutFocus } from '@kbn/data-lifecycle-phases';
 import { useDataPhasesFlyoutStyles } from './use_data_phases_flyout_styles';
+import { useStreamsPrivileges } from '../../../../../../hooks/use_streams_privileges';
 
 export interface FlyoutShellProps {
   dataTestSubj: string;
@@ -52,6 +53,9 @@ export const FlyoutShell = ({
   const { headerStyles, footerStyles } = useDataPhasesFlyoutStyles();
   const isSaveDisabled = isSaveDisabledDueToInvalid || isSubmitting;
   const { focusProps } = usePushFlyoutFocus();
+  const {
+    features: { canvas },
+  } = useStreamsPrivileges();
 
   const button = (
     <EuiButton
@@ -82,7 +86,7 @@ export const FlyoutShell = ({
   return (
     <EuiFlyout
       type="push"
-      size={400}
+      size={canvas ? 'fill' : 400}
       paddingSize="none"
       ownFocus={false}
       onClose={onClose}
