@@ -1,25 +1,41 @@
 version: "1"
 # Every 4h: fetch enabled sources, skip known fingerprints (90d), write new reports.
+# Scoped to `workflow.spaceId` plus global (`*`) catalog rows via `space_id`.
 name: Ingest threat feeds
 description: Fetch enabled sources and write new reports to .kibana-threat-reports
 tags:
   - threat-intel
 enabled: true
+settings:
+  concurrency:
+    key: "threat-intel-ingest-{{ workflow.spaceId }}"
+    strategy: drop
+    max: 1
 triggers:
   - type: scheduled
     with:
       every: "4h"
 steps:
+  - name: set_space_context
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
   - name: load_sources
     type: elasticsearch.search
     with:
       index: .kibana-threat-intel-sources
       size: 1000
       query:
-        term:
-          # Workflow schema rejects boolean `enabled: true`; use `{ value: true }`.
-          enabled:
-            value: true
+        bool:
+          filter:
+            - term:
+                enabled:
+                  value: true
+            - terms:
+                space_id:
+                  - "{{ variables.spaceId }}"
+                  - "*"
 
   - name: dispatch_each_source
     type: foreach
@@ -55,6 +71,10 @@ steps:
                     - range:
                         "@timestamp":
                           gte: "now-90d"
+                    - terms:
+                        space_id:
+                          - "{{ variables.spaceId }}"
+                          - "*"
 
           - name: skip_if_seen
             type: loop.continue

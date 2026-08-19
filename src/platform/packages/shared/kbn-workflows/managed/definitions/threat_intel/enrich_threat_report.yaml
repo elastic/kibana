@@ -2,16 +2,27 @@ version: "1"
 # Every 4h: IOC extract, taxonomy, severity, and Diamond for pending reports.
 # Driver `size: 50` caps wall clock and inference load. Each item runs several
 # LLM steps sequentially; partial drain per pass is intentional.
+# Scoped to `workflow.spaceId` plus global (`*`) report rows via `space_id`.
 name: Enrich threat report
 description: Extract IOCs, taxonomy, severity, and Diamond from pending reports
 tags:
   - threat-intel
 enabled: true
+settings:
+  concurrency:
+    key: "threat-intel-enrich-{{ workflow.spaceId }}"
+    strategy: drop
+    max: 1
 triggers:
   - type: scheduled
     with:
       every: "4h"
 steps:
+  - name: set_space_context
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
   - name: load_pending_reports
     type: elasticsearch.search
     with:
@@ -27,6 +38,11 @@ steps:
           must:
             - term:
                 lineage.extraction_method: pending
+          filter:
+            - terms:
+                space_id:
+                  - "{{ variables.spaceId }}"
+                  - "*"
       # Field-name strings sort ascending. Object form `{ "@timestamp": "asc" }` is rejected.
       sort:
         - "@timestamp"
@@ -54,6 +70,11 @@ steps:
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"
+              filter:
+                - terms:
+                    space_id:
+                      - "{{ variables.spaceId }}"
+                      - "*"
       - name: skip_already_extracted
         type: loop.continue
         if: "steps.check_already_extracted.output.hits.total.value > 0"
@@ -73,7 +94,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intel/assess_relevance
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/assess_relevance"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -99,7 +120,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intel/extract_iocs
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/extract_iocs"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -115,7 +136,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intel/enrich_taxonomy
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/enrich_taxonomy"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -130,7 +151,7 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intel/classify_severity
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/classify_severity"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -173,7 +194,7 @@ steps:
         if: "variables.diamond_suitable: true"
         with:
           method: POST
-          path: /internal/threat_intel/extract_diamond
+          path: "/s/{{ variables.spaceId }}/internal/threat_intel/extract_diamond"
           headers:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
@@ -221,6 +242,11 @@ steps:
           query:
             bool:
               minimum_should_match: 1
+              filter:
+                - terms:
+                    space_id:
+                      - "{{ variables.spaceId }}"
+                      - "*"
               must_not:
                 - ids:
                     values:

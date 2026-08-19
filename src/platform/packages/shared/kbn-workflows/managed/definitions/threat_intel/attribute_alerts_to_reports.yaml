@@ -2,16 +2,27 @@ version: "1"
 # Every 1h: count Indicator Match and technique-overlap alerts per report (last 7d).
 # Driver `size: 100` per pass; hourly cadence drains the backlog. Layer 1 counts
 # come from one nested terms agg; layer 2 still needs per-report terms_lookup.
+# Reports and alerts are scoped to `workflow.spaceId`.
 name: Attribute alerts to reports
 description: Count Detection Engine hits per report (indicator match and technique overlap)
 tags:
   - threat-intel
 enabled: true
+settings:
+  concurrency:
+    key: "threat-intel-attribute-{{ workflow.spaceId }}"
+    strategy: drop
+    max: 1
 triggers:
   - type: scheduled
     with:
       every: "1h"
 steps:
+  - name: set_space_context
+    type: data.set
+    with:
+      spaceId: "{{ workflow.spaceId }}"
+
   - name: load_reports_with_extractions
     type: elasticsearch.search
     with:
@@ -23,6 +34,10 @@ steps:
             - range:
                 lineage.extracted_at:
                   gte: "now-30d"
+            - terms:
+                space_id:
+                  - "{{ variables.spaceId }}"
+                  - "*"
           should:
             # nested `exists`; `exists` on the parent path matches nothing.
             - nested:
@@ -51,7 +66,7 @@ steps:
     type: elasticsearch.search
     if: "steps.load_reports_with_extractions.output.hits.total.value > 0"
     with:
-      index: .alerts-security.alerts-*
+      index: .alerts-security.alerts-{{ variables.spaceId }}
       size: 0
       query:
         bool:
@@ -61,6 +76,8 @@ steps:
                   gte: "now-7d"
             - term:
                 kibana.alert.rule.type: threat_match
+            - term:
+                kibana.space_ids: "{{ variables.spaceId }}"
             - nested:
                 path: threat.enrichments
                 query:
@@ -94,7 +111,7 @@ steps:
       - name: layer2_search
         type: elasticsearch.search
         with:
-          index: .alerts-security.alerts-*
+          index: .alerts-security.alerts-{{ variables.spaceId }}
           size: 0
           query:
             bool:
@@ -102,6 +119,8 @@ steps:
                 - range:
                     "@timestamp":
                       gte: "now-7d"
+                - term:
+                    kibana.space_ids: "{{ variables.spaceId }}"
                 - terms:
                     kibana.alert.rule.threat.technique.id:
                       index: "{{ foreach.item._index }}"
