@@ -120,12 +120,13 @@ export const createMockQueryV1 = (
   kind: 'index',
   id: 'mock-v1-query',
   name: 'mock-v1-query',
-  index: 'logs-endpoint.*',
+  index: 'test-index',
   type,
   query: '{"query": {"match_all": {}}}',
   scheduleCron: '5m',
   filterlist: { 'user.name': Action.KEEP },
   enabled: true,
+  size: 100,
   ...overrides,
 });
 

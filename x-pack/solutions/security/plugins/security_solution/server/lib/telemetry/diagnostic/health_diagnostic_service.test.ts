@@ -138,7 +138,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
           name: 'test-query',
           passed: true,
           status: 'success',
-          descriptorVersion: 1,
+          descriptorVersion: 2,
           numDocs: 1,
           fieldNames: expect.arrayContaining(['@timestamp', 'user.name', 'event.action']),
         });
@@ -333,7 +333,7 @@ enabled: true`,
           name: 'test-query',
           passed: false,
           status: 'failed',
-          descriptorVersion: 1,
+          descriptorVersion: 2,
           failure: {
             message: 'Query execution failed',
             reason: undefined,
