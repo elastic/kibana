@@ -105,7 +105,7 @@ export class KibanaPage {
   }) {
     await this.waitForRender({
       expectedItemsCount: count,
-      itemLocator: '[data-rendering-count]',
+      itemLocator: '[data-shared-item]',
       checkAttribute: 'data-render-complete',
       timeout,
     });
