@@ -26,11 +26,20 @@ export const getNonLocalQualifiedIndex = (index: string, documentIndex: string):
  * Origin-only names — including hidden alert backing indices such as `.internal.alerts-*` — are
  * left unchanged. Searching those from the flyout is unauthorized for the request user and surfaces
  * as Analyzer's "this alert from being analyzed" error.
+ *
+ * `indices` is normalized to an array first: callers frequently source it from `getFieldValue`,
+ * which unwraps a single-element field to a scalar string. Spreading such a string would explode it
+ * into single-character index names (`a`, `p`, `m`, ...) and produce a malformed search request.
  */
-export const withDocumentIndex = (indices: string[], documentIndex?: string | null): string[] => {
-  if (!documentIndex || !isNonLocalIndexName(documentIndex) || indices.includes(documentIndex)) {
-    return indices;
+export const withDocumentIndex = (
+  indices: string | string[],
+  documentIndex?: string | null
+): string[] => {
+  const list = Array.isArray(indices) ? indices : [indices];
+
+  if (!documentIndex || !isNonLocalIndexName(documentIndex) || list.includes(documentIndex)) {
+    return list;
   }
 
-  return [documentIndex, ...indices];
+  return [documentIndex, ...list];
 };

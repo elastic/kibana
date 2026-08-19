@@ -103,4 +103,25 @@ describe('withDocumentIndex', () => {
     expect(withDocumentIndex(['logs-*'])).toEqual(['logs-*']);
     expect(withDocumentIndex(['logs-*'], null)).toEqual(['logs-*']);
   });
+
+  it('normalizes a scalar index string instead of spreading it into characters', () => {
+    // getFieldValue unwraps a single-element field to a scalar string; prepending a non-local
+    // document index must not explode it into single-character index names.
+    expect(
+      withDocumentIndex('apm-*-transaction*', 'linked-project:.ds-logs-endpoint.events-default')
+    ).toEqual(['linked-project:.ds-logs-endpoint.events-default', 'apm-*-transaction*']);
+  });
+
+  it('wraps a scalar index string when no document index is provided', () => {
+    expect(withDocumentIndex('apm-*-transaction*')).toEqual(['apm-*-transaction*']);
+  });
+
+  it('does not duplicate a scalar index that already equals the document index', () => {
+    expect(
+      withDocumentIndex(
+        'linked-project:.ds-logs-endpoint.events-default',
+        'linked-project:.ds-logs-endpoint.events-default'
+      )
+    ).toEqual(['linked-project:.ds-logs-endpoint.events-default']);
+  });
 });
