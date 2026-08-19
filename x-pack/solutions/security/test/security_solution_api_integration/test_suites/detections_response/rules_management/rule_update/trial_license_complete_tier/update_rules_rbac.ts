@@ -705,10 +705,7 @@ export default ({ getService }: FtrProviderContext) => {
               tags: [],
               schedule: seedAlerting.schedule,
               actions: [],
-              params: config.setParam(
-                { ...seedAlerting.params, ruleId: uuidV4() },
-                config.value
-              ),
+              params: config.setParam({ ...seedAlerting.params, ruleId: uuidV4() }, config.value),
             })
             .expect(200);
 
