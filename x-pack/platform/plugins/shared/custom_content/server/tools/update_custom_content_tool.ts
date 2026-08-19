@@ -100,6 +100,7 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
           prompt,
           esqlQuery: isQueryChanging ? resolvedQuery : undefined,
           existingTemplate: currentData?.panel_template || undefined,
+          hasExistingQuery: !isQueryChanging && !!resolvedQuery,
         });
       } catch (err) {
         logger.error(`custom_content_update_panel: template resolver failed — ${err}`);

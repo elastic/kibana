@@ -118,10 +118,13 @@ export const createCustomContentTemplateResolver = ({
     prompt,
     esqlQuery,
     existingTemplate,
+    hasExistingQuery,
   }: {
     prompt: string;
     esqlQuery?: string;
     existingTemplate?: string;
+    /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
+    hasExistingQuery?: boolean;
   }): Promise<string> => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
@@ -137,7 +140,8 @@ export const createCustomContentTemplateResolver = ({
       }
     }
 
-    const systemPrompt = esqlQuery ? buildSystemPromptTemplate() : buildSystemPromptStatic();
+    const systemPrompt =
+      esqlQuery || hasExistingQuery ? buildSystemPromptTemplate() : buildSystemPromptStatic();
 
     let userContent: string;
     if (esqlQuery) {
