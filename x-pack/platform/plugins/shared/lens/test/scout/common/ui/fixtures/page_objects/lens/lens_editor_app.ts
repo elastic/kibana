@@ -36,6 +36,11 @@ export class LensEditorApp extends LensApp {
    * (geo, extra drop types, reorder, keyboard DnD, data-panel switch).
    */
   public readonly dragDrop: LensDragDrop;
+  private readonly addToLibraryCheckbox;
+  private readonly addToLibraryCheckboxLabel;
+  private readonly newDashboardOption;
+  private readonly existingDashboardOption;
+  private readonly openDashboardPicker;
 
   constructor(page: ScoutPage) {
     super(page);
@@ -61,5 +66,67 @@ export class LensEditorApp extends LensApp {
       html5DragAndDrop: (from: string, to: string) => this.html5DragAndDrop(from, to),
       waitForVisualization: (chartTestSubj: string) => this.waitForVisualization(chartTestSubj),
     });
+    this.addToLibraryCheckbox = this.page.locator('input#add-to-library-checkbox');
+    this.addToLibraryCheckboxLabel = this.page.locator('label[for="add-to-library-checkbox"]');
+    this.newDashboardOption = this.page.locator('#new-dashboard-option');
+    this.existingDashboardOption = this.page.locator('#existing-dashboard-option');
+    this.openDashboardPicker = this.page.testSubj.locator('open-dashboard-picker');
+  }
+
+  /**
+   * Saves from the Lens editor into a new or existing dashboard, with explicit
+   * by-value / by-reference and save-as-new controls.
+   *
+   * Local until shared `LensApp.save()` grows `saveToLibrary` (after #285654's
+   * `saveAsNew` lands). Do not override `save()`.
+   */
+  async saveToDashboard(
+    title: string,
+    options: (
+      | {
+          addToDashboard: 'existing';
+          dashboardTitle: string;
+        }
+      | {
+          addToDashboard: 'new';
+        }
+    ) & {
+      saveAsNew?: boolean;
+      saveToLibrary?: boolean;
+    }
+  ) {
+    // Dismiss leftover toasts before opening the modal. Clicking a toast close
+    // while the modal is open is an EUI `ownFocus` outside click and closes it.
+    await this.page.components.toast().closeAll();
+    await this.saveButton.click();
+    await this.saveModal.waitFor({ state: 'visible' });
+    await this.savedObjectTitleInput.fill(title);
+
+    // Existing-lens copies must flip this before the dashboard radios (they stay
+    // disabled until save-as-new is on).
+    if (options.saveAsNew) {
+      await this.setEuiSwitch('saveAsNewCheckbox', true);
+    }
+
+    if (options.addToDashboard === 'existing') {
+      await this.existingDashboardOption.check();
+      await this.openDashboardPicker.click();
+      await this.page.testSubj
+        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
+        .click();
+    } else {
+      await this.newDashboardOption.check();
+    }
+
+    if (options.saveToLibrary !== undefined) {
+      await this.addToLibraryCheckbox.waitFor({ state: 'attached' });
+      const isChecked = await this.addToLibraryCheckbox.isChecked();
+      if (isChecked !== options.saveToLibrary) {
+        await this.addToLibraryCheckboxLabel.click();
+      }
+    }
+
+    await this.confirmSaveButton.click();
+    await this.saveModal.waitFor({ state: 'hidden' });
   }
 }
