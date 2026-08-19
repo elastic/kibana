@@ -16,7 +16,8 @@
 one-cycle deferral) with a byte-bounded LRU. The loop node impls lose their pin/evict calls.
 `WorkflowExecutionState.load()` fetches step metadata only — the `output` field is excluded from
 the ES query. `StepIoService` owns only step outputs (LRU cache + on-demand rehydration).
-Step inputs are written directly to state via `setStepInput` — `StepIoService` does not cache them.
+Step inputs are written via `write(id, 'input', value)` — routing to state only, no cache.
+Step outputs are written via `write(id, 'output', value)` — routing to both state and the LRU.
 
 **Out of scope:** Core static analysis logic (`extractReferencedStepIds`,
 `extract_referenced_step_ids.ts`, `extractPropertyPathsFromKql`, `scanForTemplateVariables`).
@@ -46,7 +47,7 @@ entries uniformly. `prepareForRead` still uses static analysis to decide which I
 | `StepIoService.markDeferredAfterLoad` | Resume path becomes: metadata-only load, then on-demand per step |
 | `StepIoService.releaseTransientlyRehydratedOutputs` | No transient tracking |
 | `StepIoService.hasEvictedOutputs` | No evicted set |
-| `StepIoService.inputs` / `evictCompletedStepInputs` | No input cache — `setStepInput` delegates to state; `getStepInput` stays on the service as a thin state proxy (no map) |
+| `StepIoService.inputs` / `evictCompletedStepInputs` | No input cache — `write(id, 'input', v)` delegates to state; `read(id, 'input')` is a thin state proxy (no map) |
 | `dropStaleStepIo` input cleanup | No input map to clean up |
 | `StepIoService.flush` / `flushStepChanges` / `persistMergedStepChanges` / `runDeferredEvictionCycle` / `pendingIoChanges` | Flush moves to runtime manager; `StepIoService` never touches ES |
 | `StepIoService.load` / `markDeferredAfterLoad` | `load()` moves back to `WorkflowExecutionState` where it lived before `StepIoService` was introduced |
@@ -65,18 +66,18 @@ entries uniformly. `prepareForRead` still uses static analysis to decide which I
 ## New StepIoService API
 
 ```ts
+type StepIoType = 'input' | 'output';
+
 // Reader — injected into WorkflowContextManager (no mutation surface)
 interface StepIoReader {
-  getStepOutput(stepExecutionId: string): JsonValue | null | undefined;
-  getStepInput(stepExecutionId: string): JsonValue | undefined;  // thin proxy to state, no cache
+  read(stepExecutionId: string, type: StepIoType): JsonValue | null | undefined;
   // getStepError / getLatestStepIO read from WorkflowExecutionState directly
   // getDataSetVariables() removed — moved to WorkflowContextManager
 }
 
 // Writer — injected into StepExecutionRuntime (no lifecycle surface)
 interface StepIoWriter extends StepIoReader {
-  setStepInput(stepExecutionId: string, input: JsonValue): void;  // delegates to state, no cache
-  setStepOutput(stepExecutionId: string, output: JsonValue | null, sizeBytes?: number): void;
+  write(stepExecutionId: string, type: StepIoType, value: JsonValue | null, sizeBytes?: number): void;
 }
 
 // Lifecycle — used by the execution loop and runtime manager only
@@ -86,9 +87,19 @@ interface StepIoLifecycle {
   // flush() / flushStepChanges() removed — flush is the runtime manager's responsibility
   // load() removed — loading step execution metadata is WorkflowExecutionState's responsibility
   //   (it lived there before StepIoService was introduced; runtime manager calls state.load())
-  getOutputSizeStats(): OutputSizeStats;  // see Gap 1
+  getOutputSizeStats(): OutputSizeStats;
 }
 ```
+
+Routing is internal to `StepIoService`:
+- `write(id, 'output', v)` → updates state **and** inserts into the LRU under key `output_<id>`
+- `write(id, 'input', v)` → updates state only (no LRU entry for now; easy to add later)
+- `read(id, 'output')` → LRU hit or state fallback
+- `read(id, 'input')` → state only (no LRU key exists)
+
+The LRU key scheme `${type}_${stepExecutionId}` (e.g. `output_abc123`, `input_abc123`) prevents
+collision between input and output for the same execution ID, and leaves room to cache inputs
+later without changing the API.
 
 The `StepIoReader` / `StepIoWriter` / `StepIoLifecycle` split is retained so node
 implementations cannot accidentally call `flush()` or drive eviction. The public surface
@@ -99,10 +110,12 @@ shrinks significantly — `getDataSetVariables`, all pin methods, all eviction m
 
 ## Step-by-step implementation
 
-### Step 1 — Introduce a byte-bounded LRU
+### Step 1 — Introduce `ByteLruCache` and `StepIoCache`
 
-Add or pick an existing in-tree LRU implementation (check `src/platform/packages`).
-The LRU maps `stepExecutionId → JsonValue | null` and is keyed by byte size, not count.
+Two new classes with distinct responsibilities:
+
+**`ByteLruCache<K, V>`** — generic, domain-agnostic LRU bounded by byte size (not entry count).
+Add or pick an existing in-tree implementation (check `src/platform/packages`).
 
 ```ts
 // Rough sketch — default budget: 10 MB per execution
@@ -116,7 +129,28 @@ class ByteLruCache<K, V> {
 }
 ```
 
-Replace `StepIoService.outputs` (a plain `Map`) with this LRU.
+**`StepIoCache`** — domain wrapper around `ByteLruCache`. Owns the key scheme
+(`${type}_${stepExecutionId}`) and `StepIoType` routing. `StepIoService` uses this;
+raw key strings never appear outside this class.
+
+```ts
+class StepIoCache {
+  constructor(private readonly lru: ByteLruCache<string, JsonValue | null>) {}
+
+  get(id: string, type: StepIoType): JsonValue | null | undefined {
+    return this.lru.get(`${type}_${id}`);
+  }
+  set(id: string, type: StepIoType, value: JsonValue | null, bytes: number): void {
+    this.lru.set(`${type}_${id}`, value, bytes);
+  }
+  has(id: string, type: StepIoType): boolean {
+    return this.lru.has(`${type}_${id}`);
+  }
+  get totalBytes(): number { return this.lru.totalBytes; }
+}
+```
+
+Replace `StepIoService.outputs` (a plain `Map`) with a `StepIoCache` instance.
 `StepIoService` has no `inputs` map — inputs are owned by `WorkflowExecutionState` with no cache.
 
 **Config change:** Add `eviction.maxCacheSize` (default `10mb`) to drive the LRU budget.
@@ -126,24 +160,32 @@ Pass `config.get('eviction.maxCacheSize')` when constructing the service.
 
 ---
 
-### Step 2 — Rewrite `setStepOutput`
+### Step 2 — Implement unified `write` / `read`
 
-`StepIoService` writes to two independent systems:
+`StepIoService.write` routes to two independent systems based on type:
 
 1. **`ExecutionState`** — canonical write-and-persist owner. Holds the IO pending for the
    next flush, persists it to ES, then clears it from memory after the flush is confirmed.
    This is the only source of truth for ES durability.
-2. **LRU** — independent read cache. Gets a copy of the output for fast synchronous context
+2. **LRU** — independent read cache for outputs. Gets a copy for fast synchronous context
    reads. Manages its own eviction with no coordination with the flush cycle.
 
 ```ts
-setStepOutput(stepExecutionId, output, sizeBytes?) {
-  // 1. Hand off to ExecutionState for persistence (moves pendingIoChanges there).
-  this.state.setStepIo(stepExecutionId, { output });
+write(stepExecutionId, type, value, sizeBytes?) {
+  // Always update state (both input and output go here for persistence).
+  this.state.setStepIo(stepExecutionId, { [type]: value });
 
-  // 2. Populate LRU read cache independently.
-  const bytes = sizeBytes ?? safeOutputSize(output) ?? 0;
-  this.lru.set(stepExecutionId, output, bytes);
+  // Only outputs go into the cache (inputs are served from state directly).
+  if (type === 'output') {
+    const bytes = sizeBytes ?? safeOutputSize(value) ?? 0;
+    this.cache.set(stepExecutionId, 'output', value, bytes);
+  }
+}
+
+read(stepExecutionId, type) {
+  const cached = this.cache.get(stepExecutionId, type);
+  if (cached !== undefined) return cached;
+  return this.state.getStepIo(stepExecutionId, type);
 }
 ```
 
@@ -154,10 +196,11 @@ No dirty-write protection needed. The two systems are fully decoupled: LRU evict
 the next `prepareForRead` runs, `prepareForRead` fetches it from ES — which has it because
 `ExecutionState` flushed it (or will have by the time the next step actually runs).
 
-**Change to `ExecutionState`:** Add `setStepIo(id, { input?, output? })` and a post-flush
-cleanup: after `bulkUpsert` confirms the write, call `ExecutionState.clearFlushedIo(ids)`
-to drop the IO fields from the in-memory step docs. This frees the state's memory — the LRU
-still holds a copy for reads, and ES holds it for durability.
+**Change to `ExecutionState`:** Add `setStepIo(id, { input?, output? })` (called by `write`)
+and `getStepIo(id, type)` (called by `read` for inputs and for output cache misses).
+Add a post-flush cleanup: after `bulkUpsert` confirms the write, call
+`ExecutionState.clearFlushedIo(ids)` to drop the IO fields from the in-memory step docs.
+This frees the state's memory — the LRU still holds a copy for outputs; ES holds the durable copy.
 
 ---
 
@@ -169,19 +212,19 @@ replace the evicted-set check, transient release, and pin orchestration with LRU
 
 ```ts
 async prepareForRead({ node, predecessorsResolver }) {
-  if (this.lru.maxBytes === Infinity) return;  // eviction disabled
+  if (this.cache.totalBytes === Infinity) return;  // eviction disabled
 
   // Static analysis determines which IDs this node needs.
   // Scope-stack entries included, but no step-type-specific foreach/while input reads.
   const neededIds = this.computeRehydrationTargets(node, predecessorsResolver);
 
   // Fetch cache misses from ES. No pins — LRU evicts by recency only.
-  const missing = [...neededIds].filter(id => !this.lru.has(id));
+  const missing = [...neededIds].filter(id => !this.cache.has(id, 'output'));
   if (missing.length > 0) {
     const docs = await this.stepRepository.getStepExecutionsByIds(missing, ['id', 'output']);
     for (const doc of docs) {
       const bytes = safeOutputSize(doc.output) ?? 0;
-      this.lru.set(doc.id, doc.output ?? null, bytes);
+      this.cache.set(doc.id, 'output', doc.output ?? null, bytes);
     }
   }
 }
@@ -197,7 +240,7 @@ and the conservative fallback logic stay exactly as-is.
 - `this.releaseTransientExcept(neededIds)` — no transient tracking
 - `this.readPinnedOutputIdsByConsumer.set(...)` — no pins
 - The `noPriorTransients` early-return guard — no longer needed
-- The `hasEvictedOutputs()` early-return guard — LRU `has()` is an O(1) check instead
+- The `hasEvictedOutputs()` early-return guard — `StepIoCache.has()` is an O(1) check instead
 
 ---
 
@@ -218,7 +261,7 @@ await Promise.all([
 ```
 
 `ExecutionState.flushStepChanges()`:
-1. Drains pending lifecycle partials + pending IO partials (written by `StepIoService.setStepOutput`
+1. Drains pending lifecycle partials + pending IO partials (written by `StepIoService.write`
    via `state.setStepIo`).
 2. Runs `stepRepository.bulkUpsert(merged)`.
 3. After confirmed write, calls `clearFlushedIo(flushedIds)` — drops IO from the in-memory
@@ -260,8 +303,9 @@ and loaded as part of step metadata — callers read them from state directly.
 - Restore `StepExecutionRepository` as a constructor dependency (it was there before the current
   machinery was introduced).
 - Extend `StepExecutionMetadata` to carry `input` (currently `Omit<EsWorkflowStepExecution, 'input' | 'output'>`).
-- Add `setStepInput(id, input)` and `getStepInput(id)` methods.
-- Add `setStepIo(id, { output? })`, `clearFlushedIo(ids)`, `flushStepChanges()` for Step 4.
+- Extend `StepExecutionMetadata` to carry `input` so state can store and serve inputs.
+- Add `setStepIo(id, { input?, output? })` and `getStepIo(id, type)` — called by `StepIoService.write`/`read`.
+- Add `clearFlushedIo(ids)` and `flushStepChanges()` for Step 4.
 
 ---
 
@@ -269,7 +313,7 @@ and loaded as part of step metadata — callers read them from state directly.
 
 `StepIoService` no longer knows about `data.set`. `WorkflowContextManager` builds the
 `variables` context by iterating all `data.set` step executions from state and reading each
-output through the normal `getStepOutput` path (LRU hit or ES fetch via `prepareForRead`).
+output through `stepIoService.read(id, 'output')` (LRU hit or state fallback after `prepareForRead`).
 
 `prepareForRead` / `computeRehydrationTargets` must include all `data.set` step execution IDs
 in `neededIds` so their outputs are pre-warmed in the LRU before the synchronous context build.
@@ -316,10 +360,10 @@ corresponding call sites in `nodes_factory.ts`.
 Consequences:
 - `StepExecutionMetadata` (currently `Omit<EsWorkflowStepExecution, 'input' | 'output'>`) must be
   extended to carry `input` so state can store and serve it.
-- `WorkflowExecutionState` gets `setStepInput(id, input)` and `getStepInput(id)` methods.
+- `WorkflowExecutionState` gets `setStepIo(id, { input?, output? })` and `getStepIo(id, type)`.
 - `evictCompletedStepInputs` and `dropStaleStepIo`'s input cleanup are removed from `StepIoService`;
   if input memory needs bounding, state handles it.
-- `getStepInput` stays on `StepIoReader` as a thin proxy to state (resolved by Gap 4).
+- `read(id, 'input')` on `StepIoReader` proxies to state (resolved by Gap 4).
 
 ---
 
@@ -345,17 +389,15 @@ Move this to **In scope** in the scope boundary section.
 
 ### ~~Gap 4 — `WorkflowContextManager.buildForeachContext` calls `stepIoService.getStepInput`~~ ✅ Resolved
 
-**Decision:** Add `getStepInput` back to `StepIoReader`, but it reads from state — no cache.
-`StepIoService.getStepInput(id)` is a thin proxy: `return this.state.getStepInput(id)`.
-
-API section updated accordingly.
+**Decision:** `read(id, 'input')` is the access point; routing to state (no cache) is internal
+to `StepIoService`. No dedicated `getStepInput` method — callers use the unified `read` API.
 
 ---
 
 ### ~~Gap 5 — `StepExecutionRuntime.getCurrentStepResult` calls `getStepInput`~~ ✅ Resolved
 
-Resolved by Gap 4: `getStepInput` is back on `StepIoReader` as a state proxy. No change needed
-in `getCurrentStepResult` or its callers.
+Resolved by Gap 4: callers use `read(id, 'input')` which proxies to state. No change needed
+in `getCurrentStepResult` or its callers beyond switching to the unified `read` call.
 
 ---
 
