@@ -196,4 +196,18 @@ export class MetricsExperiencePage {
   public getCardTitle(index: number): Locator {
     return this.getCardByIndex(index).locator('[data-test-subj="embeddablePanelTitle"]');
   }
+
+  /**
+   * Returns the highlighted title segments of the card at `index`
+   */
+  public getCardTitleHighlights(index: number): Locator {
+    return this.getCardTitle(index).locator('mark');
+  }
+
+  /**
+   * Returns the highlighted title segment containing `text`
+   */
+  public getCardTitleHighlight(index: number, text: string): Locator {
+    return this.getCardTitleHighlights(index).filter({ hasText: text });
+  }
 }

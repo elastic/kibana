@@ -129,15 +129,21 @@ export interface HealthDiagnosticQueryV2 extends HealthDiagnosticQueryBase {
 }
 
 /**
- * Produced when the parser fails to produce a valid V1 or V2 descriptor —
- * either an unrecognised version number or missing required fields.
- * Carries the raw data for logging and reporting the stats; always results in
- * a skipped execution.
+ * Produced when the parser fails to produce a valid descriptor.
+ *
+ * `unknown_version` — the descriptor carries a version number the current code
+ * does not recognise (future descriptor). Kibana silently drops it: debug log
+ * only, no telemetry stat doc.
+ *
+ * `invalid_descriptor` — the version is known but the descriptor is malformed
+ * (missing required fields, etc.). A warning is logged and a skipped stat doc
+ * is sent so the problem is visible in telemetry.
  */
 export interface ParseFailureQuery {
   id?: string;
   name?: string;
   _raw: unknown;
+  failureReason: 'unknown_version' | 'invalid_descriptor';
 }
 
 /**
