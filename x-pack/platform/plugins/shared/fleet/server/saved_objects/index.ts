@@ -123,6 +123,7 @@ import { backfillOutputPolicyToV7 } from './model_versions/outputs';
 import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/security_solution/v17_advanced_package_policy_fields';
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
 import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_disable_browser_input';
+import { bumpProfilingSymbolizerPolicy } from './model_versions/bump_profiling_symbolizer_policy';
 
 /*
  * Saved object types and mappings
@@ -1159,6 +1160,18 @@ export const getSavedObjectTypes = (
             create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
           },
         },
+        '23': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: bumpProfilingSymbolizerPolicy,
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+          },
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -1305,6 +1318,18 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 package_agent_version_condition: { type: 'keyword' },
               },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+            create: PackagePolicySchemaV22.extends({}, { unknowns: 'ignore' }),
+          },
+        },
+        '9': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: bumpProfilingSymbolizerPolicy,
             },
           ],
           schemas: {
