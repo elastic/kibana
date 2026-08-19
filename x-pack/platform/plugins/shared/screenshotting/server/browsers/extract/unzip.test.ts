@@ -44,7 +44,6 @@ describe('unzip', () => {
   });
 
   it('rejects when an entry path uses ../ to leave the origin directory', async () => {
-    // yauzl validates internally that the extracted entry path doesnt contain ../ when calling eachEntry()
     mockFs({
       '/path_traversal.zip': PATH_TRAVERSAL_ZIP,
       '/output': {},
@@ -58,7 +57,8 @@ describe('unzip', () => {
       '/symlink_escape.zip': SYMLINK_ESCAPE_ZIP,
       '/output': {},
     });
-    const errorMessage = 'Path traversal attempt: "/escaped.txt" escapes "/output"';
+    const errorMessage =
+      'Dangerous link path was refused : "/output", file: "/output/link", target: "../escaped.txt". Set safeSymlinksOnly to false to allow writing through this symlink.';
 
     await expect(unzip('/symlink_escape.zip', '/output')).rejects.toThrowError(
       new ExtractError(new Error(errorMessage))

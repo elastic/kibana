@@ -101,7 +101,7 @@ describe('extract', () => {
         }
 
         expect(thrownException).toBeInstanceOf(ExtractError);
-        expect(thrownException.cause.code).toEqual('EACCES');
+        expect(thrownException.cause.message).toMatch('EACCES');
       });
     }
   });
