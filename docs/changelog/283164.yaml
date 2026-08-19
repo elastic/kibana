@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/283164
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-12
-- product: kibana
-title: Fix rule links for alerts attached to a case
