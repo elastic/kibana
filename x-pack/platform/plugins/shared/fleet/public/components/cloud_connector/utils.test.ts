@@ -771,6 +771,36 @@ describe('getCloudConnectorRemoteRoleTemplate', () => {
       expect(result).toBeUndefined();
     });
   });
+
+  describe('Token-free template URLs', () => {
+    const tokenFreeUrl =
+      'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-federated-identity-aws-9.5.0.yml';
+
+    it('should return the URL as-is when it contains no substitution tokens', () => {
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: mockCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: tokenFreeUrl,
+      });
+
+      expect(result).toBe(tokenFreeUrl);
+    });
+
+    it('should return the URL as-is even when no elastic resource ID can be derived', () => {
+      const noResourceCloudSetup = {
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      } as CloudSetup;
+
+      const result = getCloudConnectorRemoteRoleTemplate({
+        cloud: noResourceCloudSetup,
+        accountType: SINGLE_ACCOUNT,
+        iacTemplateUrl: tokenFreeUrl,
+      });
+
+      expect(result).toBe(tokenFreeUrl);
+    });
+  });
 });
 
 describe('getKibanaComponentId', () => {
