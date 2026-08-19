@@ -20,8 +20,8 @@ export const createPublicConversationTemplatesContract = ({
     getTab: (tabId) => {
       return conversationTemplatesService.getTab(tabId);
     },
-    addTemplateUIDefinition: (templateId, definition) => {
-      return conversationTemplatesService.addTemplateUIDefinition(templateId, definition);
+    registerTemplateUIDefinition: (templateId, definition) => {
+      return conversationTemplatesService.registerTemplateUIDefinition(templateId, definition);
     },
     getTemplateUIDefinition: (templateId) => {
       return conversationTemplatesService.getTemplateUIDefinition(templateId);

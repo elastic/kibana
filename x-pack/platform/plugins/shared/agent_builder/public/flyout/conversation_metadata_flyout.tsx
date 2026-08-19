@@ -21,9 +21,9 @@ import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { ConversationTemplateTabDefinition } from '@kbn/agent-builder-browser';
+import { BUILTIN_TAB_IDS } from '@kbn/agent-builder-browser';
 import type { ConversationsService } from '../services/conversations/conversations_service';
 import type { ConversationTemplatesService } from '../services/conversation_templates';
-import { BUILTIN_TAB_IDS } from '../services/conversation_templates';
 import { useConversation } from '../application/hooks/use_conversation';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 
@@ -46,8 +46,9 @@ const buildTabs = (
     : undefined;
 
   // Builtin tabs always render after the template's tabs; there is no reordering mechanism yet.
-  const templateTabIds = (definition?.tabs ?? []).filter((id) => !BUILTIN_TAB_IDS.includes(id));
-  const tabIds = [...templateTabIds, ...BUILTIN_TAB_IDS];
+  const builtinTabIds: readonly string[] = BUILTIN_TAB_IDS;
+  const templateTabIds = (definition?.tabs ?? []).filter((id) => !builtinTabIds.includes(id));
+  const tabIds = [...templateTabIds, ...builtinTabIds];
 
   // Resolve at render time so registration order across plugins does not matter;
   // ids with no registered tab are skipped.

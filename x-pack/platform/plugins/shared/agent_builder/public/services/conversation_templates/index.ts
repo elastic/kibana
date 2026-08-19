@@ -7,5 +7,4 @@
 
 export { ConversationTemplatesService } from './conversation_templates_service';
 export { createPublicConversationTemplatesContract } from './create_public_conversation_templates_contract';
-export { registerBuiltinTabs, BUILTIN_TAB_IDS } from './register_builtin_tabs';
 export { registerMockTemplateUIDefinitions } from './register_mock_template_ui_definitions';

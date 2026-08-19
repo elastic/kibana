@@ -25,7 +25,10 @@ export class ConversationTemplatesService {
     return this.tabs.get(tabId);
   }
 
-  addTemplateUIDefinition(templateId: string, definition: ConversationTemplateUIDefinition): void {
+  registerTemplateUIDefinition(
+    templateId: string,
+    definition: ConversationTemplateUIDefinition
+  ): void {
     if (this.templates.has(templateId)) {
       throw new Error(`Conversation template "${templateId}" already has a UI definition.`);
     }

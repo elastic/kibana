@@ -39,11 +39,11 @@ export const registerMockTemplateUIDefinitions = (
     ),
   });
 
-  conversationTemplatesService.addTemplateUIDefinition('security-finding', {
+  conversationTemplatesService.registerTemplateUIDefinition('security-finding', {
     tabs: ['mock-overview'],
   });
 
-  conversationTemplatesService.addTemplateUIDefinition('phishing', {
+  conversationTemplatesService.registerTemplateUIDefinition('phishing', {
     tabs: ['mock-overview', 'mock-custom'],
   });
 };

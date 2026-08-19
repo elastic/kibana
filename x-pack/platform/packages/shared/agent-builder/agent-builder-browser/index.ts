@@ -18,6 +18,12 @@ export type { AgentsServiceStartContract } from './agents';
 export type { AttachmentUIDefinition, AttachmentServiceStartContract } from './attachments';
 export type { RendererUIDefinition, RendererServiceStartContract } from './renderers';
 export type {
+  ConversationTemplateTabDefinition,
+  ConversationTemplateUIDefinition,
+  ConversationTemplateServiceStartContract,
+} from './templates';
+export { ATTACHMENTS_TAB_ID, TIMELINE_TAB_ID, BUILTIN_TAB_IDS } from './templates';
+export type {
   EventsServiceStartContract,
   ChatUiEventsContract,
   BrowserChatEvent,
@@ -40,11 +46,6 @@ export type {
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
 } from './plugin_contract';
-export type {
-  ConversationTemplateTabDefinition,
-  ConversationTemplateUIDefinition,
-  ConversationTemplateServiceStartContract,
-} from './templates';
 export { McpClientDetails, McpClientDetailsContent, McpClientLogo } from './oauth_clients';
 export type {
   McpClientDetailsProps,

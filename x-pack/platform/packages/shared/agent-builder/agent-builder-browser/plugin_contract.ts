@@ -197,7 +197,7 @@ export interface AgentBuilderPluginStart {
   renderers: RendererServiceStartContract;
   /**
    * Conversation template service contract, can be used to register and retrieve
-   * per-template UI definitions (e.g. conversation metadata flyout tabs).
+   * per-template UI definitions (reusable tabs, and which tabs each template shows).
    */
   conversationTemplates: ConversationTemplateServiceStartContract;
   /**

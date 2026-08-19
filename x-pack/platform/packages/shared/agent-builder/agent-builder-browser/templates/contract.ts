@@ -31,7 +31,7 @@ export interface ConversationTemplateTabDefinition {
  */
 export interface ConversationTemplateUIDefinition {
   /** Tab ids rendered in this order. Ids with no registered tab are skipped. */
-  tabs: string[];
+  tabs: readonly string[];
 }
 
 /**
@@ -52,7 +52,10 @@ export interface ConversationTemplateServiceStartContract {
   /**
    * Register the UI definition for a template: which tabs it shows, in which order.
    */
-  addTemplateUIDefinition(templateId: string, definition: ConversationTemplateUIDefinition): void;
+  registerTemplateUIDefinition(
+    templateId: string,
+    definition: ConversationTemplateUIDefinition
+  ): void;
   /**
    * Resolve the UI definition for a template, if one has been registered.
    */
