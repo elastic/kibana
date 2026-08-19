@@ -26,7 +26,6 @@ const REMINDER_AFTER_DAYS = 4;
 // single sweep: with a large unreviewed backlog, at most this many PRs get a
 // codeowner ping per day; the rest are picked up on subsequent daily runs.
 const MAX_PINGS_PER_RUN = 20;
-const FALLBACK_OWNER = '@elastic/appex-qa';
 const DEFAULT_CODEOWNERS_PATH = path.resolve(process.cwd(), '.github/CODEOWNERS');
 const QA_CHANNEL_URL = 'https://elastic.slack.com/archives/CTH3RN2GB';
 
@@ -84,7 +83,7 @@ function resolveOwners(entries, files) {
 }
 
 function buildCommentBody(ownerHandles) {
-  const mentions = ownerHandles.length ? ownerHandles.join(' ') : FALLBACK_OWNER;
+  const mentions = ownerHandles.join(' ');
   return [
     `Hey ${mentions} 👋 this flaky test fix has been open for a while and needs an owner decision.`,
     '',
@@ -224,7 +223,11 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
       per_page: 100,
     });
     const owners = resolveOwners(entries, files.map((f) => f.filename));
-    const mentioned = owners.length ? owners.join(' ') : FALLBACK_OWNER;
+    if (owners.length === 0) {
+      core.info(`No codeowners resolved for #${pr.number}, skipping`);
+      continue;
+    }
+    const mentioned = owners.join(' ');
 
     if (dryRun) {
       pinged += 1;

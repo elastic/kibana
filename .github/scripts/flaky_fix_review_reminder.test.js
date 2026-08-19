@@ -85,8 +85,17 @@ test('buildCommentBody mentions the owners and includes the marker', () => {
   assert.ok(body.includes('@copilot'));
 });
 
-test('buildCommentBody falls back to the QA team when no owners resolve', () => {
-  assert.match(reminder.buildCommentBody([]), /@elastic\/appex-qa/);
+test('a PR whose files resolve no codeowners is not pinged', async () => {
+  await withFixtureAndNow(async () => {
+    const state = scenarioState();
+    state.files[1] = ['totally/unowned/path.xyz'];
+    process.env.DRY_RUN = 'false';
+    await reminder({ github: makeGithub(state), context, core: silentCore });
+
+    assert.ok(!state.posted.some((c) => c.issue_number === 1));
+    // Other due PRs are unaffected.
+    assert.ok(state.posted.some((c) => c.issue_number === 5));
+  });
 });
 
 // --- Full sweep integration against a mocked Octokit -----------------------
