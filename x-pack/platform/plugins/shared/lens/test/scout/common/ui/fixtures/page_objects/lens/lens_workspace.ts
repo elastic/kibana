@@ -56,6 +56,8 @@ export class LensWorkspace {
   readonly currentSuggestionError;
   readonly shareButton;
   readonly exportButton;
+  /** Top-nav "Explore in Discover" control (`lnsApp_openInDiscover`). */
+  readonly openInDiscoverButton;
   private readonly shareModal;
   private readonly copyShareUrlButton;
 
@@ -83,6 +85,7 @@ export class LensWorkspace {
     );
     this.shareButton = this.page.testSubj.locator('lnsApp_shareButton');
     this.exportButton = this.page.testSubj.locator('lnsApp_exportButton');
+    this.openInDiscoverButton = this.page.testSubj.locator('lnsApp_openInDiscover');
     this.shareModal = this.page.testSubj.locator('shareContextModal');
     this.copyShareUrlButton = this.page.testSubj.locator('copyShareUrlButton');
   }
