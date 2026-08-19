@@ -29,6 +29,9 @@ const FIRST_CARD_DESC = `${
  * Polls localStorage until the persisted sort direction for the active Discover tab matches
  * `direction`, or until the poll times out. Necessary because tab state is written on a trailing
  * throttle, so an immediate reload/navigate could race the write.
+ *
+ * Only usable for non-default directions — the default ('asc') is stripped from storage, so
+ * polling for it will never match. Use `waitForSortDirectionCleared` after a reset instead.
  */
 const waitForPersistedSortDirection = (page: ScoutPage, direction: string) =>
   expect
@@ -45,6 +48,29 @@ const waitForPersistedSortDirection = (page: ScoutPage, direction: string) =>
           );
         },
         [testData.DISCOVER_TABS_LOCAL_STORAGE_KEY, direction]
+      )
+    )
+    .toBe(true);
+
+/**
+ * Polls localStorage until no open tab carries a `sortDirection` in its profileState.
+ * Use this after resetting to the default ('asc'), because the default is stripped from
+ * storage entirely rather than written, so `waitForPersistedSortDirection(page, 'asc')` never
+ * resolves. Absence of the key confirms the throttled write has settled.
+ */
+const waitForSortDirectionCleared = (page: ScoutPage) =>
+  expect
+    .poll(() =>
+      page.evaluate(
+        ([storageKey]) => {
+          const raw = window.localStorage.getItem(storageKey);
+          if (!raw) return true;
+          const { openTabs } = JSON.parse(raw) as {
+            openTabs?: Array<{ profileState?: { metricsState?: { sortDirection?: string } } }>;
+          };
+          return !openTabs?.some((tab) => tab.profileState?.metricsState?.sortDirection != null);
+        },
+        [testData.DISCOVER_TABS_LOCAL_STORAGE_KEY]
       )
     )
     .toBe(true);
@@ -148,13 +174,17 @@ spaceTest.describe(
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
         // The URL is written through `kbnUrlControls`, which batches asynchronously and so is
         // not settled by the time the grid has re-rendered.
-        await expect.poll(() => metricsExperience.getProfileState(page.url())).toContain('sortDirection:desc');
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .toContain('sortDirection:desc');
       });
 
       await spaceTest.step('restoring the default sort strips it from the URL', async () => {
         await metricsExperience.setSortDirection('asc');
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
-        await expect.poll(() => metricsExperience.getProfileState(page.url())).not.toContain('sortDirection');
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .not.toContain('sortDirection');
       });
     });
 
@@ -163,7 +193,12 @@ spaceTest.describe(
       const { metricsExperience } = pageObjects;
 
       await metricsExperience.setSortDirection('desc');
-      await expect.poll(() => metricsExperience.getProfileState(page.url())).toContain('sortDirection:desc');
+      await expect
+        .poll(() => metricsExperience.getProfileState(page.url()))
+        .toContain('sortDirection:desc');
+      // Wait for 'desc' to land in local storage before capturing the URL and then resetting,
+      // so the subsequent cleared-storage check is meaningful.
+      await waitForPersistedSortDirection(page, 'desc');
       const descendingUrl = page.url();
 
       await spaceTest.step('return the locally persisted sort to the default', async () => {
@@ -171,10 +206,13 @@ spaceTest.describe(
         // below could be explained by local tab storage rather than by the URL.
         await metricsExperience.setSortDirection('asc');
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
-        await expect.poll(() => metricsExperience.getProfileState(page.url())).not.toContain('sortDirection');
-        // Wait for the asc sort to land in local storage before navigating away,
-        // so the storage state is 'asc' (not the earlier 'desc') when the URL loads.
-        await waitForPersistedSortDirection(page, 'asc');
+        await expect
+          .poll(() => metricsExperience.getProfileState(page.url()))
+          .not.toContain('sortDirection');
+        // The default 'asc' is stripped from storage rather than written, so we cannot poll for
+        // its presence. Instead poll until sortDirection is absent, confirming the throttled
+        // tab-state write has settled before we navigate to the captured URL.
+        await waitForSortDirectionCleared(page);
       });
 
       await spaceTest.step('opening the captured URL applies its sort', async () => {

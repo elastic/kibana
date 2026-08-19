@@ -32,7 +32,10 @@ import type { TabsUrlState } from '../../../../common/types';
 export const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 export const RECENTLY_CLOSED_TABS_LIMIT = 50;
 
-export const LOCALLY_PERSISTED_PROFILE_STATE_TYPES = [ProfileStateType.Persistent, ProfileStateType.Url];
+export const LOCALLY_PERSISTED_PROFILE_STATE_TYPES = [
+  ProfileStateType.Persistent,
+  ProfileStateType.Url,
+];
 
 export type TabStateInLocalStorage = Pick<TabState, 'id' | 'label'> & {
   internalState: TabState['initialInternalState'] | undefined;
