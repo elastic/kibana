@@ -65,7 +65,7 @@ import type {
 import { isFailedRunResult, TaskStatus } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { CLAIM_STRATEGY_MGET, type TaskManagerConfig } from '../config';
-import { isUnrecoverableError, isUserError, type DecoratedError } from './errors';
+import { isUnrecoverableError, isUserError } from './errors';
 import { resolveTaskDocumentConflicts } from './resolve_so_conflicts';
 import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
