@@ -19,6 +19,7 @@ import type {
   EventsServiceStartContract,
   ToolServiceStartContract,
 } from '.';
+import type { ConversationTemplateServiceStartContract } from './templates';
 
 /**
  * Props for the embeddable conversation component.
@@ -186,6 +187,11 @@ export interface AgentBuilderPluginStart {
    * Renderer service contract, can be used to register and retrieve renderer UI definitions.
    */
   renderers: RendererServiceStartContract;
+  /**
+   * Conversation template service contract, can be used to register and retrieve
+   * per-template UI definitions (reusable tabs, and which tabs each template shows).
+   */
+  conversationTemplates: ConversationTemplateServiceStartContract;
   /**
    * Tool service contract, can be used to list or execute tools.
    */

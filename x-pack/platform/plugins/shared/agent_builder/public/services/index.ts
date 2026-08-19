@@ -11,6 +11,7 @@ export { AttachmentsService } from './attachments';
 export { RenderersService } from './renderers';
 export { ChatService } from './chat';
 export { ConversationsService } from './conversations';
+export { ConversationTemplatesService } from './conversation_templates';
 export { DocLinksService } from './doc_links';
 export { NavigationService } from './navigation';
 export { ToolsService } from './tools';
