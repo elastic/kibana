@@ -162,19 +162,6 @@ apiTest.describe(
       return { ruleId, dateStart };
     };
 
-    const getExecutionTotal = async (
-      apiServices: SyntheticsApiServicesFixture,
-      ruleId: string,
-      dateStart: Date
-    ) => {
-      const executionLog = (await apiServices.alerting.rules.getExecutionLog(
-        ruleId,
-        undefined,
-        dateStart
-      )) as { total?: number };
-      return executionLog.total ?? 0;
-    };
-
     const runFirstExecution = async (
       apiServices: SyntheticsApiServicesFixture,
       ruleId: string,
@@ -205,15 +192,14 @@ apiTest.describe(
       ruleId: string,
       dateStart: Date
     ) => {
-      const before = await getExecutionTotal(apiServices, ruleId, dateStart);
-      await apiServices.alerting.rules.runSoon(ruleId);
-      await apiServices.alerting.waiting.waitForExecutionCount(
+      const nextExecution = apiServices.alerting.waiting.waitForNextExecution(
         ruleId,
-        before + 1,
         undefined,
         60_000,
         dateStart
       );
+      await apiServices.alerting.rules.runSoon(ruleId);
+      await nextExecution;
     };
 
     apiTest.beforeAll(async ({ requestAuth, apiClient, apiServices, kbnClient }) => {
