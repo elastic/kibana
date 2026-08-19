@@ -65,7 +65,7 @@ spaceTest.describe('Discover field data', { tag: '@local-stateful-classic' }, ()
   });
 
   spaceTest(
-    'shows top-level object keys and normalizes legacy source-column URLs',
+    'shows top-level object keys and supports source-column URLs',
     async ({ page, pageObjects }) => {
       await pageObjects.discover.writeAndSubmitKqlQuery('election');
       const currentUrl = new URL(page.url());

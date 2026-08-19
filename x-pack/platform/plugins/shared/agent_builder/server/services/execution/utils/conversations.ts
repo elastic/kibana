@@ -15,7 +15,10 @@ import type {
   RoundCompleteEvent,
   ConversationAction,
 } from '@kbn/agent-builder-common';
-import { normalizeConversationAccessControl } from '@kbn/agent-builder-common';
+import {
+  normalizeConversationAccessControl,
+  DEFAULT_CONVERSATION_TITLE,
+} from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 
@@ -63,18 +66,21 @@ export const createConversation$ = ({
 };
 
 /**
- * Update an existing conversation and emit the corresponding event
+ * Update an existing conversation and emit the corresponding event.
+ * When `title$` is provided, the generated title is persisted alongside the round upsert.
  */
 export const updateConversation$ = ({
   conversationClient,
   conversation,
   roundCompletedEvents$,
   action,
+  title$,
 }: {
   conversation: Conversation;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
   action?: ConversationAction;
+  title$?: Observable<string>;
 }) => {
   return roundCompletedEvents$.pipe(
     switchMap(async (roundCompletedEvent) => {
@@ -89,6 +95,7 @@ export const updateConversation$ = ({
           : undefined;
 
       const updatedConversation = await conversationClient.upsertRound(
+      const roundUpserted$ = conversationClient.upsertRound(
         {
           id: conversation.id,
           round,
@@ -108,6 +115,20 @@ export const updateConversation$ = ({
       );
 
       return createConversationUpdatedEvent(updatedConversation);
+      if (!title$) {
+        return roundUpserted$;
+      }
+
+      // Persist the generated title if provided
+      return forkJoin({ updated: roundUpserted$, title: title$ }).pipe(
+        switchMap(({ title }) => {
+          // system-driven write of generated title, not a user-initiated rename, so converse access is the right check.
+          return conversationClient.update({ id: conversation.id, title }, { access: 'converse' });
+        })
+      );
+    }),
+    switchMap((updatedConversation) => {
+      return of(createConversationUpdatedEvent(updatedConversation));
     })
   );
 };
@@ -197,7 +218,7 @@ export const placeholderConversation = ({
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
-    title: 'New conversation',
+    title: DEFAULT_CONVERSATION_TITLE,
     agent_id: agentId,
     access_control: normalizeConversationAccessControl(accessControl),
     read_only: readOnly ?? false,

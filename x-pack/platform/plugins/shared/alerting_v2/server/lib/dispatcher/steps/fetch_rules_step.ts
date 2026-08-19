@@ -16,6 +16,7 @@ import type {
   Rule,
   RuleId,
 } from '../types';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 @injectable()
 export class FetchRulesStep implements DispatcherStep {
@@ -26,7 +27,10 @@ export class FetchRulesStep implements DispatcherStep {
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { dispatchable = [] } = state;
 
     const uniqueRuleIds = Array.from(
