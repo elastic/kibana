@@ -237,6 +237,14 @@ export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<Ba
         finalPath = `${path}?${queryString}`;
       }
 
+      // An empty bulk body is a no-op: ES rejects a zero-operation _bulk request
+      // with `parse_exception: request body is required`, but an empty operations
+      // array is a legitimate result of Liquid templates over empty pages (e.g. a
+      // checkpointed pagination loop that has nothing left to index).
+      if (bulkBody !== undefined && (!Array.isArray(bulkBody) || bulkBody.length === 0)) {
+        return { errors: false, items: [] };
+      }
+
       const requestOptions = {
         method,
         path: finalPath,
