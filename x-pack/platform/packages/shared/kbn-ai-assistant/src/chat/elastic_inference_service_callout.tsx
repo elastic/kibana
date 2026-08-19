@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { KbnInfoCallout } from '@kbn/ui-callout';
 import { useLocalStorage } from '../hooks/use_local_storage';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -35,26 +35,26 @@ export function ElasticInferenceServiceCallout() {
   };
 
   return (
-    <EuiCallOut
+    <KbnInfoCallout
       title={i18n.translate('xpack.aiAssistant.eisCallout.title', {
         defaultMessage: 'Elastic Inference Service now available for self-managed clusters',
       })}
-      color="primary"
       size="m"
       onDismiss={onDismiss}
-    >
-      <EuiText size="s">
-        {i18n.translate('xpack.aiAssistant.eisCallout.description', {
-          defaultMessage:
-            'Connect your self-managed cluster to Elastic Cloud and use GPUs for inference tasks through the Elastic Inference Service.',
-        })}
-      </EuiText>
-      <EuiSpacer size="m" />
-      <EuiButton onClick={onConnectClick} iconType="external" iconSide="right" size="m">
-        {i18n.translate('xpack.aiAssistant.eisCallout.connectButtonLabel', {
-          defaultMessage: 'Connect this cluster',
-        })}
-      </EuiButton>
-    </EuiCallOut>
+      text={i18n.translate('xpack.aiAssistant.eisCallout.description', {
+        defaultMessage:
+          'Connect your self-managed cluster to Elastic Cloud and use GPUs for inference tasks through the Elastic Inference Service.',
+      })}
+      actionProps={{
+        primary: {
+          onClick: onConnectClick,
+          iconType: 'external',
+          iconSide: 'right',
+          children: i18n.translate('xpack.aiAssistant.eisCallout.connectButtonLabel', {
+            defaultMessage: 'Connect this cluster',
+          }),
+        },
+      }}
+    />
   );
 }

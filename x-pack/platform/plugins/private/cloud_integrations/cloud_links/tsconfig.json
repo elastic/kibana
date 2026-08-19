@@ -28,6 +28,7 @@
     "@kbn/core-plugins-browser",
     "@kbn/config",
     "@kbn/scout",
+    "@kbn/ui-callout",
   ],
   "exclude": [
     "target/**/*",
