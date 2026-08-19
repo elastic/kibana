@@ -52,10 +52,8 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
 
-# Opt-in per job (via CLEAR_YARN_CACHE) to free disk space on disk-constrained agents
-if [[ "${CLEAR_YARN_CACHE:-}" ]]; then
-  echo "Clearing yarn cache at /opt/buildkite-agent/.cache/yar..."
-  rm -rf /opt/buildkite-agent/.cache/yarn
-  echo "Available disk space after clearing yarn cache:"
-  df -h . || echo "Failed to get disk space"
-fi
+# Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
+echo "--- Clearing yarn cache"
+rm -rf /opt/buildkite-agent/.cache/yarn
+echo "Available disk space after clearing yarn cache:"
+df -h . || echo "Failed to get disk space"
