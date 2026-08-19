@@ -20,6 +20,13 @@ import { Host } from '../../flyout_v2/entity/host/main';
 import type { StartServices } from '../../types';
 import type { SecurityAppStore } from '../../common/store/types';
 import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import { trackFlyoutOpen } from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export const HOST_CELL_RENDERER_FIELDS = new Set(['host.name', 'host.hostname']);
 
@@ -51,7 +58,7 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
       (hostName: string) => {
         if (!hostName) return;
 
-        overlays.openSystemFlyout(
+        const ref = overlays.openSystemFlyout(
           flyoutProviders({
             services,
             store,
@@ -70,6 +77,12 @@ export const HostCellRenderer = React.memo<HostCellRendererProps>(
             session: 'start',
           }
         );
+        trackFlyoutOpen(services.telemetry, ref, {
+          surface: FLYOUT_SURFACE.FLYOUT,
+          flyoutType: FLYOUT_TYPE.HOST,
+          session: FLYOUT_SESSION_KIND.START,
+          origin: FLYOUT_ORIGIN.TABLE_FIELD_LINK,
+        });
       },
       [
         overlays,

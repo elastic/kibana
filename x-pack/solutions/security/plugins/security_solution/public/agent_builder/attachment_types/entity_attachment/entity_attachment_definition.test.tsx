@@ -7,6 +7,7 @@
 
 import type { ReactElement } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ISessionService } from '@kbn/data-plugin/public';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
@@ -37,12 +38,21 @@ const resolveSecurityCanvasContext = jest.fn();
 const buildDefinition = ({
   withCanvas = true,
   searchSession,
-}: { withCanvas?: boolean; searchSession?: ISessionService } = {}) =>
+  newFlyoutEnabled,
+}: {
+  withCanvas?: boolean;
+  searchSession?: ISessionService;
+  newFlyoutEnabled?: boolean;
+} = {}) =>
   createEntityAttachmentDefinition({
     experimentalFeatures,
     application: withCanvas ? application : undefined,
     resolveSecurityCanvasContext: withCanvas ? resolveSecurityCanvasContext : undefined,
     searchSession,
+    uiSettings:
+      newFlyoutEnabled == null
+        ? undefined
+        : ({ get: jest.fn(() => newFlyoutEnabled) } as unknown as IUiSettingsClient),
   });
 
 const attachmentOf = (data: unknown): EntityAttachment =>
@@ -135,7 +145,7 @@ describe('createEntityAttachmentDefinition', () => {
 
       expect(buttons).toHaveLength(1);
       expect(buttons[0].label).toBe('Open in Entity Analytics');
-      expect(buttons[0].icon).toBe('popout');
+      expect(buttons[0].icon).toBe('external');
       expect(buttons[0].type).toBe(ActionButtonType.SECONDARY);
 
       buttons[0].handler();
@@ -187,6 +197,28 @@ describe('createEntityAttachmentDefinition', () => {
       );
       expect(navigateToEntityAnalyticsHomePageInApp).toHaveBeenCalledTimes(1);
       expect(navigateToEntityAnalyticsWithFlyoutInApp).not.toHaveBeenCalled();
+    });
+
+    it('uses the v2 flyout URL contract when the new flyout setting is enabled', () => {
+      (navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock).mockClear();
+      const def = buildDefinition({ newFlyoutEnabled: true });
+      const buttons = def.getActionButtons!({
+        attachment: attachmentOf({
+          identifierType: 'host',
+          identifier: 'alpha',
+          entityStoreId: 'host:alpha@default',
+        }),
+        isSidebar: false,
+        isCanvas: true,
+        updateOrigin: jest.fn(),
+        closeCanvas: jest.fn(),
+      });
+
+      buttons[0].handler();
+
+      expect(navigateToEntityAnalyticsWithFlyoutInApp).toHaveBeenCalledWith(
+        expect.objectContaining({ isNewFlyoutEnabled: true })
+      );
     });
 
     it('returns no buttons in Canvas mode for multi-entity attachments', () => {

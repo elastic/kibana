@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 // Shared with the mock factory below; jest hoisting requires the `mock` prefix.
 const mockEditor = { fake: 'editor' };
@@ -17,14 +18,32 @@ jest.mock('../../templates_v2/components/template_yaml_editor', () => {
   const ReactLocal = require('react');
   return {
     TemplateYamlEditorBase: ({
+      value,
       onEditorMount,
+      onValidationChange,
     }: {
+      value: string;
       onEditorMount?: (isMounted: boolean, editor?: unknown) => void;
+      onValidationChange?: (errors: unknown[]) => void;
     }) => {
       // Simulate Monaco mounting so the wrapper captures the editor handle.
       ReactLocal.useEffect(() => {
         onEditorMount?.(true, mockEditor);
-      }, [onEditorMount]);
+        onValidationChange?.(
+          value === 'name: only_a_name'
+            ? [
+                {
+                  message: 'Missing required properties.',
+                  severity: 'error',
+                  startLineNumber: 1,
+                  startColumn: 1,
+                  endLineNumber: 1,
+                  endColumn: 1,
+                },
+              ]
+            : []
+        );
+      }, [onEditorMount, onValidationChange, value]);
       return <div data-test-subj="mockYamlEditorBase" />;
     },
   };
@@ -47,7 +66,7 @@ describe('FieldDefinitionYamlEditor', () => {
 
   it('mounts the actions menu in fieldDefinition mode once the editor is available', async () => {
     const onChange = jest.fn();
-    render(
+    renderWithTestingProviders(
       <FieldDefinitionYamlEditor
         value="control: INPUT_TEXT"
         onChange={onChange}
@@ -67,7 +86,7 @@ describe('FieldDefinitionYamlEditor', () => {
   });
 
   it('forwards the data-test-subj to the editor container', () => {
-    render(
+    renderWithTestingProviders(
       <FieldDefinitionYamlEditor
         value=""
         onChange={jest.fn()}
@@ -76,5 +95,21 @@ describe('FieldDefinitionYamlEditor', () => {
     );
 
     expect(screen.getByTestId('fieldDefinitionYamlInput')).toBeInTheDocument();
+  });
+
+  it('prefers the editor schema error when the YAML does not describe an inline field', async () => {
+    renderWithTestingProviders(
+      <FieldDefinitionYamlEditor
+        value="name: only_a_name"
+        onChange={jest.fn()}
+        data-test-subj="fieldDefinitionYamlInput"
+      />
+    );
+
+    expect(await screen.findByText('1 error')).toBeInTheDocument();
+    expect(screen.getByText('Missing required properties.')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Complete the required field properties and correct invalid values.')
+    ).not.toBeInTheDocument();
   });
 });

@@ -26,6 +26,7 @@ import type {
 } from '@kbn/agent-builder-server/execution';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
 import { getCurrentSpaceId } from '../../utils/spaces';
+import { isVersionConflictError } from '../../utils/is_version_conflict_error';
 import type { AttachmentServiceStart } from '../attachments';
 import { taskTypes } from './task';
 import { createAgentExecutionClient, type AgentExecutionClient } from './persistence';
@@ -98,7 +99,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         metadata,
       });
     } catch (err) {
-      if (err?.meta?.statusCode === 409) {
+      if (isVersionConflictError(err)) {
         if (metadata?.execution_idempotency_key) {
           this.logger.debug(
             `Duplicate idempotency key detected, returning existing execution ${executionId}`
@@ -111,6 +112,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
           if (existing?.status === ExecutionStatus.scheduled) {
             await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
               request,
+              cloneApiKey: true,
             });
           }
 
@@ -207,7 +209,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }): Promise<ExecuteAgentResult> {
     // ensureScheduled tolerates the task already existing: a concurrent idempotent
     // replay may have re-issued this schedule while repairing a stuck execution.
-    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), { request });
+    await this.deps.taskManager.ensureScheduled(this.buildRunAgentTask(executionId), {
+      request,
+      cloneApiKey: true,
+    });
 
     this.logger.debug(`Scheduled remote agent execution ${executionId} for agent ${agentId}`);
 

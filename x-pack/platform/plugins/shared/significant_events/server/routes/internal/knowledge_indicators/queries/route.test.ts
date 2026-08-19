@@ -72,9 +72,11 @@ const makeServer = () =>
     },
   } as unknown as HandlerParams['server']);
 
+// Handler tests call the route function directly (no Zod transform), so dates
+// must already be `Date` instances — matching `makeIsoDateFromString` output.
 const discoveryBaseQuery = {
-  from: '2024-01-01T00:00:00.000Z',
-  to: '2024-01-02T00:00:00.000Z',
+  from: new Date('2024-01-01T00:00:00.000Z'),
+  to: new Date('2024-01-02T00:00:00.000Z'),
   bucketSize: '1h',
 };
 

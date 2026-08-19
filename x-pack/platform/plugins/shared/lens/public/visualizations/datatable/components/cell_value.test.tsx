@@ -11,7 +11,7 @@ import { DataContext } from './table_basic';
 import { createGridCell } from './cell_value';
 import { getTransposeId } from '@kbn/transpose-utils';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DatatableArgs } from '../../../../common/expressions';
@@ -53,6 +53,8 @@ describe('datatable cell renderer', () => {
     convertToReact: (x: unknown) => `formatted ${x}`,
   } as FieldFormat;
   const defaultFormatters = { a: defaultFormatter } as Record<string, FieldFormat>;
+  const DefaultFieldFormat = FieldFormat.from((value) => `formatted ${value}`);
+  const defaultFieldFormat = new DefaultFieldFormat();
 
   const defaultAlignments = new Map<string, 'left' | 'right' | 'center'>([['a', 'right']]);
   const defaultMinMaxByColumnId = new Map([['a', { min: 12, max: 155 }]]);
@@ -363,24 +365,14 @@ describe('datatable cell renderer', () => {
     });
 
     it.each(['badge', 'cell', 'text'] as const)(
-      'should render null as subdued placeholder regardless of colorMode (%s)',
+      'should not color null placeholders regardless of colorMode (%s)',
       (colorMode) => {
         const columnConfig = makeDatatableArgs();
         columnConfig.columns[0].colorMode = colorMode;
 
         const cellRenderer = makeCellRenderer({
           columnConfig,
-          formatters: {
-            a: {
-              convertToText: () => '(null)',
-              convertToReact: (x: unknown) => {
-                if (x == null) {
-                  return <span className="ffString__emptyValue">(null)</span>;
-                }
-                return `formatted ${x}`;
-              },
-            } as unknown as FieldFormat,
-          },
+          formatters: { a: defaultFieldFormat },
         });
 
         setCellProps.mockClear();
@@ -390,9 +382,10 @@ describe('datatable cell renderer', () => {
           context: { table: makeTable([{ a: null }]) },
         });
 
-        expect(screen.getByText('(null)')).toHaveClass('ffString__emptyValue');
+        expect(screen.getByText('(null)')).toBeInTheDocument();
         expect(setCellProps).not.toHaveBeenCalled();
         expect(screen.queryByTestId('lnsTableCellContentBadge')).not.toBeInTheDocument();
+        expect(screen.getByTestId('lnsTableCellContent')).not.toHaveClass('lnsTableCell--colored');
       }
     );
 
@@ -480,7 +473,7 @@ describe('datatable cell renderer', () => {
             },
             convertToReact: (x: unknown) => {
               if (typeof x === 'number' && Number.isNaN(x)) {
-                return <span className="ffString__emptyValue">(null)</span>;
+                return <span>(null)</span>;
               }
               return `formatted ${x}`;
             },

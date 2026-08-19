@@ -15,7 +15,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { flyoutProviders } from '../components/flyout_provider';
 import { FlyoutLoading } from '../components/flyout_loading';
 import type { FlyoutTelemetryMeta } from './use_flyout_telemetry';
-import { useFlyoutTelemetry } from './use_flyout_telemetry';
+import { trackFlyoutOpen } from './use_flyout_telemetry';
 import { FlyoutSessionContextProvider, useFlyoutSessionContext } from '../../session_context';
 import type { MainFlyoutSession } from '../../session_context';
 
@@ -44,7 +44,6 @@ export const useOpenFlyout = (): OpenFlyout => {
   const { overlays } = services;
   const store = useStore();
   const history = useHistory();
-  const { reportOpened, reportClosed } = useFlyoutTelemetry();
   const { session: mainSession, historyKey } = useFlyoutSessionContext();
 
   return useCallback(
@@ -65,13 +64,11 @@ export const useOpenFlyout = (): OpenFlyout => {
       );
 
       if (meta) {
-        const openedAt = Date.now();
-        reportOpened(meta);
-        ref.onClose.then(() => reportClosed(meta, Date.now() - openedAt)).catch(() => {});
+        trackFlyoutOpen(services.telemetry, ref, meta);
       }
 
       return ref;
     },
-    [overlays, services, store, history, reportOpened, reportClosed, mainSession, historyKey]
+    [overlays, services, store, history, mainSession, historyKey]
   );
 };

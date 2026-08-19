@@ -15,7 +15,6 @@ import {
   type LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
 import { transformType } from '@kbn/embeddable-plugin/server';
-import { AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT } from '@kbn/as-code-shared-schemas';
 import { pinnedControlSchema } from '@kbn/controls-schemas/src/controls_group_schema';
 
 import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
@@ -29,8 +28,7 @@ export type StoredPinnedPanels =
 export function transformPinnedPanelsOut(
   controlGroupInput: DashboardSavedObjectAttributes['controlGroupInput'], // legacy
   pinnedPanels: DashboardSavedObjectAttributes['pinned_panels'],
-  containerReferences: Reference[] = [],
-  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+  containerReferences: Reference[] = []
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   let warnings: Warnings = [];
   let transformedPanels: DashboardPinnedPanelsState = [];
@@ -40,8 +38,7 @@ export function transformPinnedPanelsOut(
      */
     ({ warnings, panels: transformedPanels } = transformPanels(
       flow(transformPinnedPanelsObjectToArray, transformPinnedPanelProperties)(pinnedPanels.panels),
-      containerReferences,
-      useGASchemas
+      containerReferences
     ));
   } else if (controlGroupInput) {
     /**
@@ -124,8 +121,7 @@ export function transformPinnedPanelProperties(
  */
 function transformPanels(
   panels: DashboardPinnedPanelsState,
-  containerReferences: Reference[],
-  useGASchemas: boolean = AS_CODE_USE_GA_SCHEMAS_FEATURE_FLAG_DEFAULT
+  containerReferences: Reference[]
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
@@ -140,17 +136,14 @@ function transformPanels(
           config,
           [],
           containerReferences,
-          panel.id,
-          useGASchemas
+          panel.id
         ) as DashboardPinnedPanel['config'];
       }
       if (schema) {
-        config = schema.validate(config, undefined, undefined, {
-          stripUnknownKeys: true,
-        }) as DashboardPinnedPanel['config'];
+        config = schema.parse(config) as DashboardPinnedPanel['config'];
       }
       transformedPanels.push({
-        ...pinnedControlSchema.validate(rest),
+        ...pinnedControlSchema.parse(rest),
         config,
         type,
       } as DashboardPinnedPanel);

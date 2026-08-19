@@ -40,7 +40,7 @@ const CACHE_CONFIG_FILES = [
   'packages/kbn-rspack-optimizer/src/config/externals.ts',
   'packages/kbn-rspack-optimizer/src/loaders/theme_loader.ts',
   'packages/kbn-rspack-optimizer/src/loaders/require_interop_loader.ts',
-  'packages/kbn-swc-config/src/browser.ts',
+  'packages/kbn-swc-config/src/browser.js',
   'packages/kbn-transpiler-config/src/shared_config.ts',
   'package.json',
   UiSharedDepsNpm.dllManifestPath,

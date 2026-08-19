@@ -14,7 +14,7 @@ import { dataViewSpecSchema } from './schema_embedded_data_view';
 describe('dataViewSpecSchema field_settings', () => {
   it('accepts indexed field overrides', () => {
     expect(
-      dataViewSpecSchema.validate({
+      dataViewSpecSchema.parse({
         type: AS_CODE_DATA_VIEW_SPEC_TYPE,
         index_pattern: 'logs-*',
         field_settings: {
@@ -61,6 +61,36 @@ describe('dataViewSpecSchema field_settings', () => {
       },
     };
 
-    expect(dataViewSpecSchema.validate(input)).toEqual(input);
+    expect(dataViewSpecSchema.parse(input)).toEqual(input);
+  });
+});
+
+describe('dataViewSpecSchema name', () => {
+  it('accepts an inline (adhoc) data view spec with a name', () => {
+    const input = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+      time_field: '@timestamp',
+      name: 'My logs',
+    };
+    expect(dataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('accepts an inline data view spec without a name', () => {
+    const input = {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+    };
+    expect(dataViewSpecSchema.parse(input)).toEqual(input);
+  });
+
+  it('rejects an empty name', () => {
+    expect(() =>
+      dataViewSpecSchema.parse({
+        type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+        index_pattern: 'logs-*',
+        name: '',
+      })
+    ).toThrow();
   });
 });
