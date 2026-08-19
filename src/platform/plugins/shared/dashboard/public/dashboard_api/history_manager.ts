@@ -13,16 +13,16 @@ import {
   debounceTime,
   filter,
   map,
-  withLatestFrom,
   switchMap,
+  withLatestFrom,
+  type Observable,
 } from 'rxjs';
 
 import { startTrackingHistory } from '@kbn/rxjs-history';
 
 import type { DashboardState } from '../../common';
-import type { initializeDataLoadingManager } from './data_loading_manager';
-import type { initializeTrackOverlay } from './track_overlay';
 import type { initializeLayoutManager } from './layout_manager';
+import type { initializeTrackOverlay } from './track_overlay';
 
 export function initializeHistoryManager({
   anyStateChange$,
@@ -30,16 +30,14 @@ export function initializeHistoryManager({
   setState,
   getState,
   initialState,
-  dataLoadingManager: {
-    api: { dataLoading$ },
-  },
+  dataLoading$,
 }: {
   anyStateChange$: ReturnType<typeof initializeLayoutManager>['internalApi']['anyStateChange$'];
   hasOverlays$: ReturnType<typeof initializeTrackOverlay>['hasOverlays$'];
   initialState: DashboardState;
   getState: () => DashboardState;
   setState: (state: DashboardState) => Promise<void>;
-  dataLoadingManager: ReturnType<typeof initializeDataLoadingManager>;
+  dataLoading$: Observable<boolean>;
 }): {
   api: ReturnType<typeof startTrackingHistory<DashboardState>>['api'];
   cleanup: () => void;
@@ -69,7 +67,7 @@ export function initializeHistoryManager({
 
   const onAnyStateChangeSubscription = combineLatest([anyStateChange$, dataLoading$])
     .pipe(
-      debounceTime(200),
+      debounceTime(0), // flatten anyStateChange + dataLoading event updates
       withLatestFrom(hasOverlays$),
       // do not push to history while a child is loading or an editor is open
       filter(([[, loading], hasOverlays]) => !loading && !hasOverlays)

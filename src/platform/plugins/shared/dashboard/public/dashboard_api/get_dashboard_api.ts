@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, concatMap, merge, of, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, concatMap, map, merge, of, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import type { EuiFlyoutProps } from '@elastic/eui';
@@ -209,7 +209,15 @@ export function getDashboardApi({
     setState,
     getState,
     initialState,
-    dataLoadingManager,
+    dataLoading$: combineLatest([
+      layoutManager.internalApi.childrenStateLoading$,
+      layoutManager.internalApi.childrenLoading$,
+      dataLoadingManager.api.dataLoading$,
+    ]).pipe(
+      map(([childStateLoading, childrenLoading, dataLoading]) =>
+        Boolean(childStateLoading || childrenLoading || dataLoading)
+      )
+    ),
   });
 
   const pauseFetchManager = initializePauseFetchManager(filtersManager);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { combineLatest, map, of, switchMap } from 'rxjs';
+import { combineLatest, debounceTime, map, of, switchMap } from 'rxjs';
 import { type HasUniqueId, apiHasUniqueId } from '../../has_uuid';
 import type { PublishingSubject } from '../../../publishing_subject';
 import { apiHasSerializableState, type HasSerializableState } from '../../has_serializable_state';
@@ -39,6 +39,7 @@ export function childrenLatestState$<Api extends unknown = unknown>(
               )
             )
           );
-    })
+    }),
+    debounceTime(0) // batch all children updates
   );
 }
