@@ -35,7 +35,7 @@ const getRulesListMenu = ({
     label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
       defaultMessage: 'Create rule',
     }),
-    iconType: 'plusInCircle',
+    iconType: 'plusCircle',
     run: onCreateRule,
     testId: 'createRuleButton',
     popoverTestId: 'createRulePopoverPanel',
