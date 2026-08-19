@@ -21,6 +21,8 @@ import {
 } from '../../../utils/cps_read_routing';
 import { getResolverClusterClient } from '../utils/scoped_client';
 
+// How many `_id` matches to fetch so we can pick the clicked document when the same id exists in
+// more than one project. A small bound on a wide search, not a product or deployment limit.
 const ENTITY_LOOKUP_SIZE_WHEN_DISAMBIGUATING = 20;
 
 const asIndexArray = (indices: string | string[]): string[] =>
