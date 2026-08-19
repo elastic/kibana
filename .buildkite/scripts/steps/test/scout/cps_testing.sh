@@ -4,11 +4,15 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
 
-CONFIG_PATHS=(
+SECURITY_COMPLETE_CONFIG_PATHS=(
   "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/ui/playwright.config.ts"
   "x-pack/solutions/security/plugins/security_solution/test/scout_cps_local/api/playwright.config.ts"
   "x-pack/platform/plugins/shared/entity_store/test/scout_cps_local/api/playwright.config.ts"
   "x-pack/platform/plugins/private/transform/test/scout_cps_local/api/playwright.config.ts"
+)
+
+OBSERVABILITY_COMPLETE_CONFIG_PATHS=(
+  "x-pack/platform/plugins/shared/significant_events/test/scout_cps_local/api/playwright.config.ts"
 )
 
 SPACES_CPS_CONFIG="x-pack/platform/plugins/shared/spaces/test/scout_cps_local/ui/playwright.config.ts"
@@ -37,8 +41,12 @@ run_cps_tests() {
   fi
 }
 
-for CONFIG_PATH in "${CONFIG_PATHS[@]}"; do
+for CONFIG_PATH in "${SECURITY_COMPLETE_CONFIG_PATHS[@]}"; do
   run_cps_tests "$CONFIG_PATH" "security_complete"
+done
+
+for CONFIG_PATH in "${OBSERVABILITY_COMPLETE_CONFIG_PATHS[@]}"; do
+  run_cps_tests "$CONFIG_PATH" "observability_complete"
 done
 
 # Spaces project-routing visibility/save/capability coverage across eligible and

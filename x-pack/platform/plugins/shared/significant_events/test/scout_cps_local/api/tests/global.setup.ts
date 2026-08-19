@@ -6,10 +6,10 @@
  */
 
 import { globalSetupHook } from '@kbn/scout';
-import { setupSignificantEventsEnvironment } from '../fixtures/setup_environment';
+import { setupSignificantEventsEnvironment } from '../../../scout/api/fixtures/setup_environment';
 
 globalSetupHook(
-  'Setup environment for Significant Events API tests',
+  'Setup environment for Significant Events CPS API tests',
   async ({ apiServices, kbnClient, log }) => {
     await setupSignificantEventsEnvironment({ apiServices, kbnClient, log });
   }
