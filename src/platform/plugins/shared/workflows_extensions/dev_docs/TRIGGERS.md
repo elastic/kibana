@@ -47,6 +47,8 @@ steps:
 The definition drives YAML completion and validation, filters context-specific workflow selectors,
 and validates the event payload before execution. It does not emit or subscribe to events.
 `executionContext` remains a separate correlation reference and is not available to templates.
+See [Typed manual workflow event contracts](TYPED_MANUAL_WORKFLOW_EVENTS.md) for the architecture,
+authoring flow, runtime validation sequence, and compatibility behavior.
 
 ### Trigger ID and naming conventions
 
