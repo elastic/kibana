@@ -6,25 +6,15 @@
  */
 
 /**
- * Configuration collected by the Attack Discovery Worker config flyout. Most fields map 1:1 to the
- * inputs of the `security.attack-discovery.run` workflow step; `run_every` maps to the Watch Floor
- * orchestrator's scheduled trigger cadence, not a run-step input. This POC does not persist it.
+ * Configuration collected by the Attack Discovery Worker config flyout. Fields map to the inputs of
+ * the `security.attack-discovery.run` step; `run_every` maps to the Watch Floor orchestrator's
+ * scheduled trigger cadence. This POC does not persist it.
  */
 export interface AttackDiscoveryWorkerConfig {
-  /** Retrieval strategy for the built-in retrieval workflow. */
-  alert_retrieval_mode: 'custom_query' | 'esql';
-  /** ES|QL query, used only when `alert_retrieval_mode` is `esql`. */
-  esql_query?: string;
-  /** Additional alert-retrieval workflow ids to run alongside the built-in retrieval. */
-  alert_retrieval_workflow_ids: string[];
-  /** Maximum number of alerts to retrieve (Query-builder mode). */
-  size: number;
-  /** Retrieval window start (Elasticsearch date math, Query-builder mode). */
-  start: string;
-  /** Retrieval window end (Elasticsearch date math, Query-builder mode). */
-  end: string;
-  /** Optional Elasticsearch DSL filter applied during retrieval (Query-builder mode). */
-  filter?: Record<string, unknown>;
+  /** Retrieval strategy. The POC surfaces the ES|QL mode only (Query builder is a placeholder). */
+  alert_retrieval_mode: 'esql' | 'custom_query';
+  /** ES|QL query used to retrieve alerts. Pre-populated with a sensible default. */
+  esql_query: string;
   /** LLM connector id; omit to let the server resolve the default AI connector. */
   connector_id?: string;
   /** Orchestrator cadence (Watch Floor scheduled trigger), e.g. "15m". */
@@ -33,12 +23,15 @@ export interface AttackDiscoveryWorkerConfig {
   validation_workflow_id: string;
 }
 
+/** Pre-populated ES|QL query shown in the Alert retrieval step. */
+export const DEFAULT_ESQL_QUERY = `FROM .alerts-security.alerts-default METADATA _id
+| WHERE kibana.alert.workflow_status == "open"
+| SORT @timestamp DESC
+| LIMIT 100`;
+
 export const DEFAULT_AD_WORKER_CONFIG: AttackDiscoveryWorkerConfig = {
-  alert_retrieval_mode: 'custom_query',
-  alert_retrieval_workflow_ids: [],
-  size: 100,
-  start: 'now-24h',
-  end: 'now',
+  alert_retrieval_mode: 'esql',
+  esql_query: DEFAULT_ESQL_QUERY,
   connector_id: undefined,
   run_every: '15m',
   validation_workflow_id: 'default',
