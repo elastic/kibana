@@ -17,14 +17,16 @@ import type { SyntheticsServerSetup } from '../../types';
 // scoped to so we can assert which space a package policy was written into.
 const makeServer = () => {
   const asScopedToNamespace = jest.fn((space: string) => ({ __space: space }));
-  const getUnsafeInternalClient = jest.fn(() => ({ asScopedToNamespace }));
+  const unsafeClient = { asScopedToNamespace };
+  const getUnsafeInternalClient = jest.fn(() => unsafeClient);
   const fleetBulkCreate = jest.fn().mockResolvedValue({ created: [], failed: [] });
+  const fleetGetByIDs = jest.fn().mockResolvedValue([]);
   const getByIds = jest.fn();
 
   const server = {
     logger: loggerMock.create(),
     fleet: {
-      packagePolicyService: { bulkCreate: fleetBulkCreate },
+      packagePolicyService: { bulkCreate: fleetBulkCreate, getByIDs: fleetGetByIDs },
       agentPolicyService: { getByIds },
     },
     coreStart: {
@@ -33,7 +35,15 @@ const makeServer = () => {
     },
   } as unknown as SyntheticsServerSetup;
 
-  return { server, asScopedToNamespace, fleetBulkCreate, getByIds };
+  return {
+    server,
+    unsafeClient,
+    asScopedToNamespace,
+    getUnsafeInternalClient,
+    fleetBulkCreate,
+    fleetGetByIDs,
+    getByIds,
+  };
 };
 
 const policy = (overrides: Partial<NewPackagePolicyWithId> = {}): NewPackagePolicyWithId =>
@@ -41,6 +51,28 @@ const policy = (overrides: Partial<NewPackagePolicyWithId> = {}): NewPackagePoli
 
 const agentPolicy = (spaceIds?: string[]): AgentPolicy =>
   ({ id: 'policyId', space_ids: spaceIds } as AgentPolicy);
+
+describe('PackagePolicyService.getByIds', () => {
+  it('uses one unscoped bulk get across unique spaces and forwards requested fields', async () => {
+    const { server, unsafeClient, asScopedToNamespace, getUnsafeInternalClient, fleetGetByIDs } =
+      makeServer();
+
+    await new PackagePolicyService(server).getByIds({
+      spaceId: 'space-one',
+      packagePolicyIds: ['policy-one', 'policy-two'],
+      additionalSpaceIds: ['space-two', 'space-one'],
+      fields: ['name', 'condition'],
+    });
+
+    expect(getUnsafeInternalClient).toHaveBeenCalledTimes(1);
+    expect(asScopedToNamespace).not.toHaveBeenCalled();
+    expect(fleetGetByIDs).toHaveBeenCalledWith(unsafeClient, ['policy-one', 'policy-two'], {
+      ignoreMissing: true,
+      spaceIds: ['space-one', DEFAULT_SPACE_ID, 'space-two'],
+      fields: ['name', 'condition'],
+    });
+  });
+});
 
 describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate)', () => {
   const clientPassedToFleet = (fleetBulkCreate: jest.Mock) => fleetBulkCreate.mock.calls[0][0];
@@ -55,6 +87,10 @@ describe('PackagePolicyService.getDefaultAndSpacePackagePolicies (via bulkCreate
     });
 
     expect(fleetBulkCreate).toHaveBeenCalledTimes(1);
+    expect(getByIds).toHaveBeenCalledWith(expect.anything(), ['policyId'], {
+      ignoreMissing: true,
+      fields: ['name'],
+    });
     expect(clientPassedToFleet(fleetBulkCreate)).toEqual({ __space: DEFAULT_SPACE_ID });
   });
 

@@ -6,12 +6,29 @@
  */
 
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
+import type { PartialPackagePolicy } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import type { SyntheticsServerSetup } from '../../types';
+
+interface GetByIdsOptions {
+  spaceId: string;
+  packagePolicyIds: string[];
+  /**
+   * Extra spaces to look in alongside `spaceId` (and the default space).
+   * Use this when callers need a cross-space view — e.g. the monitor health
+   * API, which reports on monitors that may live in any space.
+   */
+  additionalSpaceIds?: string[];
+}
+
+interface PackagePolicyWithAgentPolicyIds {
+  id?: string;
+  policy_ids?: string[];
+}
 
 export class PackagePolicyService {
   private readonly server: SyntheticsServerSetup;
@@ -54,33 +71,31 @@ export class PackagePolicyService {
     );
   }
 
+  async getByIds(options: GetByIdsOptions & { fields: string[] }): Promise<PartialPackagePolicy[]>;
+  async getByIds(options: GetByIdsOptions): Promise<PackagePolicy[]>;
   async getByIds({
     spaceId,
     packagePolicyIds,
     additionalSpaceIds,
-  }: {
-    spaceId: string;
-    packagePolicyIds: string[];
-    /**
-     * Extra spaces to look in alongside `spaceId` (and the default space).
-     * Use this when callers need a cross-space view — e.g. the monitor health
-     * API, which reports on monitors that may live in any space.
-     */
-    additionalSpaceIds?: string[];
-  }) {
+    fields,
+  }: GetByIdsOptions & { fields?: string[] }): Promise<PackagePolicy[] | PartialPackagePolicy[]> {
     // For legacy reasons, we always include the default space in addition to
     // the request's space (older package policies were created there).
-    const spaces = new Set<string>([spaceId, DEFAULT_SPACE_ID, ...(additionalSpaceIds ?? [])]);
-    const clients = [...spaces].map((space) => this.getSpaceSoClient(space));
+    const spaceIds = [...new Set([spaceId, DEFAULT_SPACE_ID, ...(additionalSpaceIds ?? [])])];
+    const soClient = this.server.coreStart.savedObjects.getUnsafeInternalClient();
 
-    const ids = await Promise.all(
-      clients.map((soClient) =>
-        this.server.fleet.packagePolicyService.getByIDs(soClient, packagePolicyIds, {
-          ignoreMissing: true,
-        })
-      )
-    );
-    return uniqBy(ids.flat(), 'id');
+    if (fields) {
+      return this.server.fleet.packagePolicyService.getByIDs(soClient, packagePolicyIds, {
+        ignoreMissing: true,
+        spaceIds,
+        fields,
+      });
+    }
+
+    return this.server.fleet.packagePolicyService.getByIDs(soClient, packagePolicyIds, {
+      ignoreMissing: true,
+      spaceIds,
+    });
   }
 
   /**
@@ -234,14 +249,18 @@ export class PackagePolicyService {
 
     const promises = (
       await this.getDefaultAndSpacePackagePolicies({
-        policies: await this.getByIds({ spaceId, packagePolicyIds: policyIdsToDelete }),
+        policies: await this.getByIds({
+          spaceId,
+          packagePolicyIds: policyIdsToDelete,
+          fields: ['name', 'policy_ids'],
+        }),
         spaceId,
       })
     ).map(({ client, policies }) =>
       this.server.fleet.packagePolicyService.delete(
         client,
         this.getInternalEsClient(),
-        policies.map((policy) => policy.id!),
+        policies.map((policy) => policy.id),
         {
           force: true,
           asyncDeploy: true,
@@ -255,7 +274,7 @@ export class PackagePolicyService {
 
   // The agent policies can be in the default space or the spaceId
   // This function returns the package policies that are in the spaceId and the default space and the correct saved objects client to fetch the package policies
-  private async getDefaultAndSpacePackagePolicies<T extends NewPackagePolicyWithId>({
+  private async getDefaultAndSpacePackagePolicies<T extends PackagePolicyWithAgentPolicyIds>({
     policies,
     spaceId,
   }: {
@@ -267,7 +286,7 @@ export class PackagePolicyService {
       policies: T[];
     }[]
   > {
-    const agentPolicyIds = new Set(policies.flatMap((pkgPolicy) => pkgPolicy.policy_ids));
+    const agentPolicyIds = new Set(policies.flatMap((pkgPolicy) => pkgPolicy.policy_ids ?? []));
     const defaultSpaceSoClient = this.getSpaceSoClient(DEFAULT_SPACE_ID);
     const spaceSoClient = this.getSpaceSoClient(spaceId);
     const clients = [spaceSoClient];
@@ -283,6 +302,7 @@ export class PackagePolicyService {
         clients.map((soClient) =>
           this.server.fleet.agentPolicyService.getByIds(soClient, [...agentPolicyIds], {
             ignoreMissing: true,
+            fields: ['name'],
           })
         )
       )
