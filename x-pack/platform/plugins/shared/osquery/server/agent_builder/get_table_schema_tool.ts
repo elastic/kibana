@@ -21,6 +21,7 @@ export const GET_TABLE_SCHEMA_TOOL_ID = osqueryTool('get_table_schema');
 const getTableSchemaSchema = z.object({
   table_name: z
     .string()
+    .max(255)
     .describe(
       'Osquery table name to get the schema for (e.g. "processes", "process_open_sockets", "scheduled_tasks")'
     ),

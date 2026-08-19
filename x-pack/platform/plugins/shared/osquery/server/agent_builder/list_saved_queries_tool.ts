@@ -24,6 +24,7 @@ export const LIST_SAVED_QUERIES_TOOL_ID = osqueryTool('list_saved_queries');
 const listSavedQueriesSchema = z.object({
   search: z
     .string()
+    .max(255)
     .optional()
     .describe('Search term to filter saved queries by name, description, or query text'),
   page: z.number().int().min(1).optional().default(1),

@@ -20,7 +20,11 @@ import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
 export const LIST_PACKS_TOOL_ID = osqueryTool('list_packs');
 
 const listPacksSchema = z.object({
-  search: z.string().optional().describe('Search term to filter packs by name or description'),
+  search: z
+    .string()
+    .max(255)
+    .optional()
+    .describe('Search term to filter packs by name or description'),
   enabled: z
     .boolean()
     .optional()
