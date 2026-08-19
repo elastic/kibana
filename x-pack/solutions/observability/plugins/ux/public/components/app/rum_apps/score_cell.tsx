@@ -95,11 +95,11 @@ function ScoreHoverPopover({
           {button}
         </span>
       }
+      panelStyle={{ cursor: 'pointer' }}
       panelProps={{
         onMouseEnter: openNow,
         onMouseLeave: closeSoon,
         onMouseDown: openFlyout,
-        style: { cursor: 'pointer' },
       }}
     >
       <div style={{ minWidth: 220, maxWidth: 280 }}>
