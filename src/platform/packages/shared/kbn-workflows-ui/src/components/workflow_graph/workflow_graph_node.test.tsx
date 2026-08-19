@@ -198,10 +198,10 @@ describe('WorkflowGraphNode', () => {
       stepType: 'http',
       preview: true,
     });
-    // Preview mode shows both the step name (with a title attribute for truncation
-    // tooltips) and the step-type subtitle.
-    expect(getByTitle('my-step')).not.toBeNull();
-    expect(getByText('my-step')).not.toBeNull();
+    // Preview mode shows both the humanized step name (with a title attribute
+    // for truncation tooltips) and the raw step-type subtitle.
+    expect(getByTitle('My Step')).not.toBeNull();
+    expect(getByText('My Step')).not.toBeNull();
     expect(getByText('http')).not.toBeNull();
   });
 });

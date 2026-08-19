@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Subscription } from 'rxjs';
@@ -34,7 +33,6 @@ import { EuiCallOut } from '@elastic/eui';
 import type { QueryClient } from '@kbn/react-query';
 import { PLUGIN_ID as WORKFLOW_PLUGIN_ID } from '@kbn/workflows-management-plugin/common';
 import type { WorkflowsBaseTelemetry } from '@kbn/workflows-management-plugin/public';
-import { WorkflowInfoStripe } from './workflow_info_stripe';
 
 interface WorkflowYamlData {
   yaml: string;
@@ -390,7 +388,10 @@ const WorkflowYamlInlinePreview: React.FC<{
 
   if (!parsed) {
     return (
+      // Rendered as part of the attachment body, not in response to a user
+      // action, so it must not steal the screen reader on mount.
       <EuiCallOut
+        announceOnMount={false}
         size="s"
         color="warning"
         iconType="warning"
@@ -487,12 +488,6 @@ export const createWorkflowYamlAttachmentUiDefinition = ({
 
       return buttons;
     },
-
-    renderInlineContent: ({ attachment }) => (
-      <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
-        <WorkflowInfoStripe yaml={attachment.data.yaml} showTitle />
-      </EuiPanel>
-    ),
 
     renderCanvasContent: ({ attachment, isSidebar }, { registerActionButtons, updateOrigin }) => (
       <KibanaContextProvider services={core}>
