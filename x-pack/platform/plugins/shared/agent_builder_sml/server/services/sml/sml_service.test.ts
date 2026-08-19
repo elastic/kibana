@@ -102,7 +102,6 @@ const expectedAuthzFilter = (actions: string[], spaceId = 'default') => ({
         },
       },
     ],
-    minimum_should_match: 1,
   },
 });
 

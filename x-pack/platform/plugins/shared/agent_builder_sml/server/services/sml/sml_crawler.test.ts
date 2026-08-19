@@ -814,7 +814,7 @@ describe('SmlCrawlerImpl', () => {
       expect(mockSmlClient.clean).not.toHaveBeenCalled();
     });
 
-    it('stamps sml_schema_version after successful mapping reconcile', async () => {
+    it('stamps sml_schema_version at the end of a crawl', async () => {
       // Default mock: schema version matches, reconcile succeeds
       const definition = createMockDefinition({
         list: jest.fn().mockReturnValue(yieldPages()),
@@ -829,6 +829,96 @@ describe('SmlCrawlerImpl', () => {
           index: '.test-sml-data',
           _meta: expect.objectContaining({ sml_schema_version: SML_SCHEMA_VERSION }),
         })
+      );
+    });
+
+    it('stamps sml_schema_version only after documents have been written', async () => {
+      // The stamp must come after the crawl writes documents, because that write is what creates
+      // the index. `reconcileMappings` does not create it — the storage adapter bails when there
+      // is no write index — so a stamp attempted alongside the reconcile 404s on a fresh install
+      // (or right after a stale-schema drop) and is silently lost. The marker would then never be
+      // written, and every later crawl would drop the index and re-crawl in perpetuity.
+      (esClient.indices.getMapping as jest.Mock).mockRejectedValueOnce({ statusCode: 404 });
+
+      const definition = createMockDefinition({
+        list: jest
+          .fn()
+          .mockReturnValue(yieldPages([{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }])),
+      });
+      mockStateClient.search
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } })
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce({ hits: { hits: [] } })
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _id: 'test-type:a',
+                sort: ['a'],
+                _source: {
+                  origin_id: 'a',
+                  type_id: 'test-type',
+                  spaces: ['default'],
+                  created_at: '2024-01-01',
+                  updated_at: '2024-01-01',
+                  update_action: 'create',
+                  last_crawled_at: '2024-01-01',
+                },
+              },
+            ],
+          },
+        })
+        .mockResolvedValue({ hits: { hits: [] } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      const [stampOrder] = (esClient.indices.putMapping as jest.Mock).mock.invocationCallOrder;
+      const writeOrders = mockIndexer.indexAttachment.mock.invocationCallOrder;
+
+      expect(writeOrders.length).toBeGreaterThan(0);
+      expect(stampOrder).toBeGreaterThan(Math.max(...writeOrders));
+    });
+
+    it('stamps sml_schema_version even when the index was dropped for a stale schema', async () => {
+      (esClient.indices.getMapping as jest.Mock).mockResolvedValueOnce({
+        '.test-sml-data-000001': {
+          mappings: { _meta: { version: EXPECTED_SCHEMA_VERSION, sml_schema_version: 1 } },
+        },
+      });
+
+      const items = [{ id: 'a', updatedAt: '2024-01-01', spaces: ['default'] }];
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages(items)),
+      });
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      expect(mockSmlClient.clean).toHaveBeenCalledTimes(1);
+      expect(esClient.indices.putMapping).toHaveBeenCalledWith(
+        expect.objectContaining({
+          _meta: expect.objectContaining({ sml_schema_version: SML_SCHEMA_VERSION }),
+        })
+      );
+    });
+
+    it('does not warn when the stamp 404s because the crawl wrote nothing', async () => {
+      // A crawl that indexes no documents leaves no index to stamp. Benign — there is no data to
+      // protect, and the marker lands on the first crawl that writes something.
+      (esClient.indices.putMapping as jest.Mock).mockRejectedValueOnce({ statusCode: 404 });
+
+      const definition = createMockDefinition({
+        list: jest.fn().mockReturnValue(yieldPages()),
+      });
+      mockStateClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+
+      const crawler = new SmlCrawlerImpl({ indexer: mockIndexer, logger });
+      await crawler.crawl({ definition, esClient, savedObjectsClient });
+
+      expect(logger.warn).not.toHaveBeenCalledWith(
+        expect.stringContaining('failed to stamp schema version')
       );
     });
   });

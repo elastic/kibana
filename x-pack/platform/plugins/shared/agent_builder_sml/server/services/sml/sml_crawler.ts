@@ -68,7 +68,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
     this.logger.debug(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
     const indexDropped = await this.dropIndexIfSchemaStale({ esClient, storage });
-    const indexRebuilt = indexDropped || (await this.applyMappingsOrRebuild({ storage, esClient }));
+    const mappingsRebuilt = await this.applyMappingsOrRebuild({ storage });
+    const indexRebuilt = indexDropped || mappingsRebuilt;
 
     const integrityResetNeeded =
       indexRebuilt ||
@@ -142,6 +143,9 @@ export class SmlCrawlerImpl implements SmlCrawler {
       savedObjectsClient,
       stateClient,
     });
+
+    // Only now is the index guaranteed to exist — see `stampSchemaVersion`.
+    await this.stampSchemaVersion({ esClient });
   }
 
   /**
@@ -195,33 +199,40 @@ export class SmlCrawlerImpl implements SmlCrawler {
     return true;
   }
 
+  /**
+   * Stamp `SML_SCHEMA_VERSION` into the index `_meta` so future crawls can detect drift.
+   *
+   * Called at the END of a crawl, once `processQueue` has written documents and the index is
+   * therefore known to exist. It cannot be done earlier: `reconcileMappings` returns without
+   * creating anything when there is no write index, so a stamp attempted before the first write
+   * — on a fresh install, or right after a stale-schema drop — 404s and is lost. The marker would
+   * then never be written, and every subsequent crawl would read a missing version, drop the
+   * index, and re-crawl in perpetuity.
+   *
+   * A 404 here means the crawl wrote nothing and the index still does not exist. That is benign:
+   * there is no data to protect, and the stamp lands on the first crawl that writes something.
+   */
+  private async stampSchemaVersion({ esClient }: { esClient: ElasticsearchClient }): Promise<void> {
+    try {
+      await esClient.indices.putMapping({
+        index: smlIndexName,
+        _meta: { sml_schema_version: SML_SCHEMA_VERSION },
+      });
+    } catch (error) {
+      if (!isResponseError(error) || error.statusCode !== 404) {
+        this.logger.warn(
+          `SML crawler: failed to stamp schema version on index '${smlIndexName}': ${
+            (error as Error).message
+          }`
+        );
+      }
+    }
+  }
+
   /** Returns true when the index was dropped due to a mapping update failure. */
-  private async applyMappingsOrRebuild({
-    storage,
-    esClient,
-  }: {
-    storage: SmlStorage;
-    esClient?: ElasticsearchClient;
-  }): Promise<boolean> {
+  private async applyMappingsOrRebuild({ storage }: { storage: SmlStorage }): Promise<boolean> {
     try {
       await storage.getClient().reconcileMappings();
-      // Stamp the current schema version into the index _meta so future crawls can detect drift.
-      if (esClient) {
-        try {
-          await esClient.indices.putMapping({
-            index: smlIndexName,
-            _meta: { sml_schema_version: SML_SCHEMA_VERSION },
-          });
-        } catch (stampError) {
-          if (!isResponseError(stampError) || stampError.statusCode !== 404) {
-            this.logger.warn(
-              `SML crawler: failed to stamp schema version on index '${smlIndexName}': ${
-                (stampError as Error).message
-              }`
-            );
-          }
-        }
-      }
       return false;
     } catch (error) {
       if (!isResponseError(error)) throw error;
