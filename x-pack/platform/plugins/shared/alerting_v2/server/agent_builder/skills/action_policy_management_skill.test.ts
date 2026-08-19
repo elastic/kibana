@@ -62,7 +62,22 @@ describe('createActionPolicyManagementSkill', () => {
 
     expect(skill.content).toContain('Action Policy Discovery');
     expect(skill.content).toContain('Default Notification Setup');
+    expect(skill.content).toContain('action-policy-single-rule.md');
+    expect(skill.content).toContain('action-policy-multi-rule.md');
+    expect(skill.content).not.toContain('## Multi-rule policies');
+    expect(skill.content).not.toContain('Step 2 — Create a Default Action Policy');
     expect(skill.content).toContain('workflow-authoring');
+    expect(skill.content).not.toContain('Building the Workflow YAML');
+  });
+
+  it('inlines the action policy operations schema in skill content and defers concepts to When to Load References', () => {
+    const skill = createActionPolicyManagementSkill(createDeps());
+
+    expect(skill.content).toContain('Action Policy Operations Schema Reference');
+    expect(skill.content).toContain('When to Load References');
+    expect(skill.content).not.toContain('Domain Knowledge');
+    expect(skill.content).not.toContain('Part 1: Action Policies');
+    expect(skill.content).not.toContain('Part 2: Default Notification Setup');
   });
 
   it('exposes the generated workflow dispatch payload schema as referenced content', () => {
@@ -72,6 +87,8 @@ describe('createActionPolicyManagementSkill', () => {
     );
 
     expect(payloadRef?.content).toContain('Action Policy Workflow Dispatch Payload');
+    expect(payloadRef?.content).toContain('### `data`');
+    expect(payloadRef?.content).toContain('## Example');
     expect(payloadRef?.content).toContain('`policyId`');
     expect(payloadRef?.content).toContain('`episodes`');
     expect(payloadRef?.content).toContain('`rules`');
@@ -97,5 +114,14 @@ describe('createActionPolicyManagementSkill', () => {
       '# Throttle / Grouping Compatibility'
     );
     expect(byName['action-policy-throttle-grouping-compatibility']).toContain('`per_episode`');
+
+    expect(byName['workflow-destinations']).toContain('# Workflows');
+    expect(byName['dispatch-flow']).toContain('# Dispatch Flow');
+    expect(byName['action-policy-single-rule']).toContain('# Single-rule Action Policies');
+    expect(byName['action-policy-single-rule']).toContain('action-policy-multi-rule.md');
+    expect(byName['action-policy-multi-rule']).toContain('# Multi-rule Action Policies');
+    expect(byName['action-policy-multi-rule']).toContain('Catch-all');
+    expect(byName['action-policy-schema']).toBeUndefined();
+    expect(byName['action-policy-operations-schema']).toBeUndefined();
   });
 });
