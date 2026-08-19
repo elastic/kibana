@@ -9,8 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { platformStreamsMemoryTools } from './tool_ids';
 import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
@@ -45,7 +45,7 @@ const memoryWriteSchema = z.object({
 export const createMemoryWriteTool = ({
   getMemoryService,
   getSecurity,
-}: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryWriteSchema> => ({
+}: MemoryToolsOptions): BuiltinSkillBoundedTool<typeof memoryWriteSchema> => ({
   id: platformStreamsMemoryTools.memoryWrite,
   type: ToolType.builtin,
   description:
@@ -53,7 +53,6 @@ export const createMemoryWriteTool = ({
     'For surgical edits to existing pages, prefer memory_patch instead. ' +
     'Use this for new pages or full rewrites. Pages can belong to multiple categories.',
   schema: memoryWriteSchema,
-  tags: ['memory'],
   confirmation: { askUser: 'never' },
   handler: async (
     { name, title, content, categories, references, tags, change_summary: changeSummary },
