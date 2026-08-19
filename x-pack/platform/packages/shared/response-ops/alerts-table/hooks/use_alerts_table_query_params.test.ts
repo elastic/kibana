@@ -15,6 +15,7 @@ const mockSetPageIndex = jest.fn();
 const defaultOptions: UseAlertsTableQueryParamsOptions = {
   ruleTypeIds: ['ruleType1'],
   consumers: ['consumer1'],
+  projectRouting: undefined,
   fields: [{ field: 'field1', include_unmapped: false }],
   query: {},
   sort: [],
@@ -29,6 +30,7 @@ const defaultOptions: UseAlertsTableQueryParamsOptions = {
 const changedOptions: Partial<UseAlertsTableQueryParamsOptions> = {
   ruleTypeIds: ['ruleType1', 'ruleType2'],
   consumers: ['consumer1', 'consumer2'],
+  projectRouting: '_alias:_origin',
   fields: [
     { field: 'field1', include_unmapped: false },
     { field: 'field2', include_unmapped: true },
@@ -42,6 +44,7 @@ const changedOptions: Partial<UseAlertsTableQueryParamsOptions> = {
 const optionsTriggeringReset = [
   'ruleTypeIds',
   'consumers',
+  'projectRouting',
   'fields',
   'query',
   'sort',
@@ -101,6 +104,7 @@ describe('useAlertsTableQueryParams', () => {
       ...defaultOptions,
       ruleTypeIds: ['ruleType1'],
       consumers: ['consumer1'],
+      projectRouting: undefined,
       fields: [{ field: 'field1', include_unmapped: false }],
       query: {},
       sort: [],

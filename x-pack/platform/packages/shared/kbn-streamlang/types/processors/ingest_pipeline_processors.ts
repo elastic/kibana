@@ -9,6 +9,7 @@ import type { RenameFieldsAndRemoveAction } from '../utils';
 import type {
   GrokProcessor,
   DissectProcessor,
+  UriPartsProcessor,
   DateProcessor,
   RenameProcessor,
   SetProcessor,
@@ -31,6 +32,8 @@ import type {
   NetworkDirectionProcessor,
   JsonExtractProcessor,
   EnrichProcessor,
+  UserAgentProcessor,
+  RegisteredDomainProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -46,6 +49,12 @@ export type IngestPipelineGrokProcessor = RenameFieldsAndRemoveAction<
 export type IngestPipelineDissectProcessor = RenameFieldsAndRemoveAction<
   DissectProcessor,
   { from: 'field'; where: 'if' }
+>;
+
+// URI parts
+export type IngestPipelineUriPartsProcessor = RenameFieldsAndRemoveAction<
+  UriPartsProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
 // Date
@@ -176,6 +185,18 @@ export type IngestPipelineEnrichProcessor = RenameFieldsAndRemoveAction<
   { to: 'target_field'; where: 'if' }
 >;
 
+// User Agent
+export type IngestPipelineUserAgentProcessor = RenameFieldsAndRemoveAction<
+  UserAgentProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
+// Registered Domain
+export type IngestPipelineRegisteredDomainProcessor = RenameFieldsAndRemoveAction<
+  RegisteredDomainProcessor,
+  { where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -185,6 +206,7 @@ export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveA
 export type IngestPipelineProcessor =
   | IngestPipelineGrokProcessor
   | IngestPipelineDissectProcessor
+  | IngestPipelineUriPartsProcessor
   | IngestPipelineDateProcessor
   | IngestPipelineDropProcessor
   | IngestPipelineMathProcessor
@@ -206,4 +228,6 @@ export type IngestPipelineProcessor =
   | IngestPipelineNetworkDirectionProcessor
   | IngestPipelineJsonExtractProcessor
   | IngestPipelineEnrichProcessor
+  | IngestPipelineUserAgentProcessor
+  | IngestPipelineRegisteredDomainProcessor
   | IngestPipelineManualIngestPipelineProcessor;

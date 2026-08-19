@@ -7,221 +7,231 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Type } from '@kbn/config-schema';
-import type {
-  ObjectResultType,
-  ObjectType,
-  Props,
-  TypeOptions,
-} from '@kbn/config-schema/src/types';
-import type { ObjectUnionType } from './charts/utils/object_union';
-import { objectUnion } from './charts/utils/object_union';
-import type { MetricState, MetricStateESQL, MetricStateNoESQL } from './charts/metric';
-import { esqlMetricState, metricStateSchema, metricStateSchemaNoESQL } from './charts/metric';
-import type { LegacyMetricState, LegacyMetricStateNoESQL } from './charts/legacy_metric';
-import { legacyMetricStateSchema, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
-import type { GaugeState, GaugeStateESQL, GaugeStateNoESQL } from './charts/gauge';
-import { gaugeStateSchema, gaugeStateSchemaESQL, gaugeStateSchemaNoESQL } from './charts/gauge';
-import type { HeatmapState, HeatmapStateESQL, HeatmapStateNoESQL } from './charts/heatmap';
+import { z } from '@kbn/zod';
+import type { ZodType } from '@kbn/zod';
+
+import type { MetricConfig, MetricConfigESQL, MetricConfigNoESQL } from './charts/metric';
 import {
-  heatmapStateSchema,
-  heatmapStateSchemaESQL,
-  heatmapStateSchemaNoESQL,
+  metricConfigSchema,
+  metricConfigSchemaESQL,
+  metricConfigSchemaNoESQL,
+} from './charts/metric';
+import type { LegacyMetricConfig, LegacyMetricConfigNoESQL } from './charts/legacy_metric';
+import { legacyMetricConfigSchema, legacyMetricConfigSchemaNoESQL } from './charts/legacy_metric';
+import type { GaugeConfig, GaugeConfigESQL, GaugeConfigNoESQL } from './charts/gauge';
+import { gaugeConfigSchema, gaugeConfigSchemaESQL, gaugeConfigSchemaNoESQL } from './charts/gauge';
+import type { HeatmapConfig, HeatmapConfigESQL, HeatmapConfigNoESQL } from './charts/heatmap';
+import {
+  heatmapConfigSchema,
+  heatmapConfigSchemaESQL,
+  heatmapConfigSchemaNoESQL,
 } from './charts/heatmap';
-import type { TagcloudState, TagcloudStateESQL, TagcloudStateNoESQL } from './charts/tagcloud';
+import type { TagcloudConfig, TagcloudConfigESQL, TagcloudConfigNoESQL } from './charts/tagcloud';
 import {
-  tagcloudStateSchema,
-  tagcloudStateSchemaESQL,
-  tagcloudStateSchemaNoESQL,
+  tagcloudConfigSchema,
+  tagcloudConfigSchemaESQL,
+  tagcloudConfigSchemaNoESQL,
 } from './charts/tagcloud';
-import type { XYState, XYStateESQL, XYStateNoESQL } from './charts/xy';
-import { xyStateSchema, xyStateSchemaESQL, xyStateSchemaNoESQL } from './charts/xy';
-import type { RegionMapState, RegionMapStateESQL, RegionMapStateNoESQL } from './charts/region_map';
-import {
-  regionMapStateSchema,
-  regionMapStateSchemaESQL,
-  regionMapStateSchemaNoESQL,
+import type {
+  XYConfig,
+  XYConfigESQL,
+  XYConfigNoESQL,
+  XYLegendOutsideHorizontal,
+  XYLegendOutsideVertical,
+  XYLegendInside,
+  XYLegendStatistic,
+  XYLegendSize,
+} from './charts/xy';
+import { xyConfigSchema, xyConfigSchemaESQL, xyConfigSchemaNoESQL } from './charts/xy';
+import type {
+  RegionMapConfig,
+  RegionMapConfigESQL,
+  RegionMapConfigNoESQL,
 } from './charts/region_map';
-import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from './charts/datatable';
 import {
-  datatableStateSchema,
-  datatableStateSchemaESQL,
-  datatableStateSchemaNoESQL,
+  regionMapConfigSchema,
+  regionMapConfigSchemaESQL,
+  regionMapConfigSchemaNoESQL,
+} from './charts/region_map';
+import type {
+  DatatableConfig,
+  DatatableConfigESQL,
+  DatatableConfigNoESQL,
+} from './charts/datatable';
+import {
+  datatableConfigSchema,
+  datatableConfigSchemaESQL,
+  datatableConfigSchemaNoESQL,
 } from './charts/datatable';
 import type {
   LensApiAllMetricOrFormulaOperations,
   LensApiStaticValueOperation,
 } from './metric_ops';
 import type { LensApiBucketOperations } from './bucket_ops';
-import type { MosaicState, MosaicStateESQL, MosaicStateNoESQL } from './charts/mosaic';
-import { mosaicStateSchema, mosaicStateSchemaESQL, mosaicStateSchemaNoESQL } from './charts/mosaic';
-import type { TreemapState, TreemapStateESQL, TreemapStateNoESQL } from './charts/treemap';
+import type { MosaicConfig, MosaicConfigESQL, MosaicConfigNoESQL } from './charts/mosaic';
 import {
-  treemapStateSchema,
-  treemapStateSchemaESQL,
-  treemapStateSchemaNoESQL,
+  mosaicConfigSchema,
+  mosaicConfigSchemaESQL,
+  mosaicConfigSchemaNoESQL,
+} from './charts/mosaic';
+import type { TreemapConfig, TreemapConfigESQL, TreemapConfigNoESQL } from './charts/treemap';
+import {
+  treemapConfigSchema,
+  treemapConfigSchemaESQL,
+  treemapConfigSchemaNoESQL,
 } from './charts/treemap';
-import type { WaffleState, WaffleStateESQL, WaffleStateNoESQL } from './charts/waffle';
-import { waffleStateSchema, waffleStateSchemaESQL, waffleStateSchemaNoESQL } from './charts/waffle';
-import type { PieState, PieStateESQL, PieStateNoESQL } from './charts/pie';
-import { pieStateSchema, pieStateSchemaESQL, pieStateSchemaNoESQL } from './charts/pie';
+import type { WaffleConfig, WaffleConfigESQL, WaffleConfigNoESQL } from './charts/waffle';
+import {
+  waffleConfigSchema,
+  waffleConfigSchemaESQL,
+  waffleConfigSchemaNoESQL,
+} from './charts/waffle';
+import type { PieConfig, PieConfigESQL, PieConfigNoESQL } from './charts/pie';
+import { pieConfigSchema, pieConfigSchemaESQL, pieConfigSchemaNoESQL } from './charts/pie';
 
-/**
+/*
  * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
  *
  * This requires:
  *  - Casting the schema as any
- *  - Defining the `LensApiState` type from the schema types
- *  - Exporting this value as `Type<LensApiState>`
+ *  - Defining the `LensApiConfig` type from the schema types
+ *  - Exporting this value as `Type<LensApiConfig>`
+ *
+ * Applies to:
+ *  - lensApiConfigSchema
+ *  - lensApiConfigSchemaESQL
+ *  - lensApiConfigSchemaNoESQL
  */
-export const _lensApiStateSchema: any = objectUnion(
-  [
-    ...metricStateSchema.getUnionTypes(),
-    ...legacyMetricStateSchema.getUnionTypes(),
-    ...xyStateSchema.getUnionTypes(),
-    ...gaugeStateSchema.getUnionTypes(),
-    ...heatmapStateSchema.getUnionTypes(),
-    ...tagcloudStateSchema.getUnionTypes(),
-    ...regionMapStateSchema.getUnionTypes(),
-    ...datatableStateSchema.getUnionTypes(),
-    ...pieStateSchema.getUnionTypes(),
-    ...mosaicStateSchema.getUnionTypes(),
-    ...treemapStateSchema.getUnionTypes(),
-    ...waffleStateSchema.getUnionTypes(),
-  ],
-  { meta: { id: 'lensApiState', title: 'Visualizations' } }
-);
-
-export type LensApiState =
-  | MetricState
-  | LegacyMetricState
-  | GaugeState
-  | XYState
-  | HeatmapState
-  | TagcloudState
-  | RegionMapState
-  | DatatableState
-  | PieState
-  | MosaicState
-  | TreemapState
-  | WaffleState;
-
-export const lensApiStateSchema: Type<LensApiState> = _lensApiStateSchema;
 
 /**
- * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
- *
- * This requires:
- *  - Casting the schema as any
- *  - Defining the `LensApiState` type from the schema types
- *  - Exporting this value as `Type<LensApiState>`
+ * Schema for Lens API configs
  */
-export const _lensApiStateSchemaNoESQL: any = objectUnion(
-  [
-    metricStateSchemaNoESQL,
-    legacyMetricStateSchemaNoESQL,
-    xyStateSchemaNoESQL,
-    gaugeStateSchemaNoESQL,
-    heatmapStateSchemaNoESQL,
-    tagcloudStateSchemaNoESQL,
-    regionMapStateSchemaNoESQL,
-    datatableStateSchemaNoESQL,
-    pieStateSchemaNoESQL,
-    mosaicStateSchemaNoESQL,
-    treemapStateSchemaNoESQL,
-    waffleStateSchemaNoESQL,
-  ],
-  { meta: { id: 'lensApiStateNoESQL', title: 'Visualizations (DSL)' } }
-);
-
-export type LensApiStateNoESQL =
-  | MetricStateNoESQL
-  | LegacyMetricStateNoESQL
-  | GaugeStateNoESQL
-  | XYStateNoESQL
-  | HeatmapStateNoESQL
-  | TagcloudStateNoESQL
-  | RegionMapStateNoESQL
-  | DatatableStateNoESQL
-  | PieStateNoESQL
-  | MosaicStateNoESQL
-  | TreemapStateNoESQL
-  | WaffleStateNoESQL;
-
-export const lensApiStateSchemaNoESQL: Type<LensApiStateNoESQL> = _lensApiStateSchemaNoESQL;
+export const lensApiConfigSchema: ZodType<LensApiConfig> = z
+  // lazy needed to break the type inference limit
+  .lazy(() =>
+    z.union([
+      metricConfigSchema,
+      legacyMetricConfigSchema,
+      xyConfigSchema,
+      gaugeConfigSchema,
+      heatmapConfigSchema,
+      tagcloudConfigSchema,
+      regionMapConfigSchema,
+      datatableConfigSchema,
+      pieConfigSchema,
+      mosaicConfigSchema,
+      treemapConfigSchema,
+      waffleConfigSchema,
+    ])
+  )
+  .meta({
+    id: 'lensApiConfig',
+    title: 'Visualizations',
+    description:
+      'Visualization configuration. Use the `type` field to specify the chart type. Each chart type has its own set of required and optional fields.',
+  });
 
 /**
- * We need to break the type inference here to avoid exceeding the ts compiler serialization limit.
- *
- * This requires:
- *  - Casting the schema as any
- *  - Defining the `LensApiState` type from the schema types
- *  - Exporting this value as `Type<LensApiState>`
+ * Lens API configs
  */
-export const _lensApiStateSchemaESQL: any = objectUnion(
-  [
-    esqlMetricState,
-    xyStateSchemaESQL,
-    gaugeStateSchemaESQL,
-    heatmapStateSchemaESQL,
-    tagcloudStateSchemaESQL,
-    regionMapStateSchemaESQL,
-    datatableStateSchemaESQL,
-    pieStateSchemaESQL,
-    mosaicStateSchemaESQL,
-    treemapStateSchemaESQL,
-    waffleStateSchemaESQL,
-  ],
-  { meta: { id: 'lensApiStateESQL', title: 'Visualizations (ES|QL)' } }
-);
-
-export type LensApiStateESQL =
-  | MetricStateESQL
-  | GaugeStateESQL
-  | XYStateESQL
-  | HeatmapStateESQL
-  | TagcloudStateESQL
-  | RegionMapStateESQL
-  | DatatableStateESQL
-  | PieStateESQL
-  | MosaicStateESQL
-  | TreemapStateESQL
-  | WaffleStateESQL;
-
-export const lensApiStateSchemaESQL: Type<LensApiStateESQL> = _lensApiStateSchemaESQL;
+export type LensApiConfig =
+  | MetricConfig
+  | LegacyMetricConfig
+  | GaugeConfig
+  | XYConfig
+  | HeatmapConfig
+  | TagcloudConfig
+  | RegionMapConfig
+  | DatatableConfig
+  | PieConfig
+  | MosaicConfig
+  | TreemapConfig
+  | WaffleConfig;
 
 /**
- * Extends `lensApiStateSchema` with extra props and options.
- *
- * This type will be be union of all `LensApiState` intersected with the new props.
+ * Schema for Lens API configs (DSL)
  */
-export function extendLensApiStateSchema<T extends Props>(
-  props: T,
-  options?: TypeOptions<LensApiState & T>
-): Type<LensApiState & ObjectResultType<T>> {
-  // these types are a bit of a hack mainly due to the tsc compiler limit
-  // but baseSchema can extend with any props correctly and return the correct `Type` wrapper
-  const baseSchema = _lensApiStateSchema as ObjectUnionType<[ObjectType<any>], LensApiState & T>;
-  return baseSchema.extends(props, options as any).toType();
-}
+export const lensApiConfigSchemaNoESQL: ZodType<LensApiConfigNoESQL> = z
+  // lazy needed to break the type inference limit
+  .lazy(() =>
+    z.union([
+      metricConfigSchemaNoESQL,
+      legacyMetricConfigSchemaNoESQL,
+      xyConfigSchemaNoESQL,
+      gaugeConfigSchemaNoESQL,
+      heatmapConfigSchemaNoESQL,
+      tagcloudConfigSchemaNoESQL,
+      regionMapConfigSchemaNoESQL,
+      datatableConfigSchemaNoESQL,
+      pieConfigSchemaNoESQL,
+      mosaicConfigSchemaNoESQL,
+      treemapConfigSchemaNoESQL,
+      waffleConfigSchemaNoESQL,
+    ])
+  )
+  .meta({ id: 'lensApiConfigNoESQL', title: 'Visualizations (DSL)' });
 
-export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
-export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';
-export type { XYState, XYStateNoESQL, XYStateESQL, XYLayer } from './charts/xy';
-export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
-export type { HeatmapState, heatmapStateSchemaNoESQL } from './charts/heatmap';
-export type { TagcloudState, TagcloudStateNoESQL, TagcloudStateESQL } from './charts/tagcloud';
-export type { RegionMapState, RegionMapStateNoESQL, RegionMapStateESQL } from './charts/region_map';
-export type { DatatableState, DatatableStateNoESQL, DatatableStateESQL } from './charts/datatable';
-export { tagcloudStateSchema } from './charts/tagcloud';
-export { regionMapStateSchema } from './charts/region_map';
-export { datatableStateSchema } from './charts/datatable';
+/**
+ * Lens API configs (DSL)
+ */
+export type LensApiConfigNoESQL =
+  | MetricConfigNoESQL
+  | LegacyMetricConfigNoESQL
+  | GaugeConfigNoESQL
+  | XYConfigNoESQL
+  | HeatmapConfigNoESQL
+  | TagcloudConfigNoESQL
+  | RegionMapConfigNoESQL
+  | DatatableConfigNoESQL
+  | PieConfigNoESQL
+  | MosaicConfigNoESQL
+  | TreemapConfigNoESQL
+  | WaffleConfigNoESQL;
+
+/**
+ * Schema for Lens API configs (ES|QL)
+ */
+export const lensApiConfigSchemaESQL: ZodType<LensApiConfigESQL> = z
+  // lazy needed to break the type inference limit
+  .lazy(() =>
+    z.union([
+      metricConfigSchemaESQL,
+      xyConfigSchemaESQL,
+      gaugeConfigSchemaESQL,
+      heatmapConfigSchemaESQL,
+      tagcloudConfigSchemaESQL,
+      regionMapConfigSchemaESQL,
+      datatableConfigSchemaESQL,
+      pieConfigSchemaESQL,
+      mosaicConfigSchemaESQL,
+      treemapConfigSchemaESQL,
+      waffleConfigSchemaESQL,
+    ])
+  )
+  .meta({ id: 'lensApiConfigESQL', title: 'Visualizations (ES|QL)' });
+
+/**
+ * Lens API configs (ES|QL)
+ */
+export type LensApiConfigESQL =
+  | MetricConfigESQL
+  | GaugeConfigESQL
+  | XYConfigESQL
+  | HeatmapConfigESQL
+  | TagcloudConfigESQL
+  | RegionMapConfigESQL
+  | DatatableConfigESQL
+  | PieConfigESQL
+  | MosaicConfigESQL
+  | TreemapConfigESQL
+  | WaffleConfigESQL;
 
 export type {
   LensApiFieldMetricOrFormulaOperation,
   LensApiAllMetricOrFormulaOperations,
 } from './metric_ops';
 export type { LensApiBucketOperations } from './bucket_ops';
+export type { XYLayer } from './charts/xy';
 
 export type NarrowByType<T, U> = T extends { type?: U } ? T : never;
 
@@ -229,3 +239,107 @@ export type LensApiAllOperations =
   | LensApiAllMetricOrFormulaOperations
   | LensApiBucketOperations
   | LensApiStaticValueOperation;
+
+/**
+ * Supported chart types in the Lens API
+ *
+ * @note snake cased
+ */
+export type LensApiConfigChartType = LensApiConfig['type'];
+
+/**
+ * Map of Lens API state types to their corresponding config type
+ */
+export type LensApiConfigByType = {
+  [K in LensApiConfig['type']]: Extract<LensApiConfig, { type: K }>;
+};
+
+export { durationFormatSchema } from './duration_units';
+
+export {
+  // Combined schemas
+  metricConfigSchema,
+  legacyMetricConfigSchema,
+  gaugeConfigSchema,
+  tagcloudConfigSchema,
+  xyConfigSchema,
+  regionMapConfigSchema,
+  heatmapConfigSchema,
+  datatableConfigSchema,
+  pieConfigSchema,
+  treemapConfigSchema,
+  waffleConfigSchema,
+  mosaicConfigSchema,
+  // ESQL schemas
+  metricConfigSchemaESQL,
+  gaugeConfigSchemaESQL,
+  tagcloudConfigSchemaESQL,
+  xyConfigSchemaESQL,
+  regionMapConfigSchemaESQL,
+  heatmapConfigSchemaESQL,
+  datatableConfigSchemaESQL,
+  pieConfigSchemaESQL,
+  treemapConfigSchemaESQL,
+  waffleConfigSchemaESQL,
+  mosaicConfigSchemaESQL,
+  // DSL schemas
+  metricConfigSchemaNoESQL,
+  legacyMetricConfigSchemaNoESQL,
+  gaugeConfigSchemaNoESQL,
+  tagcloudConfigSchemaNoESQL,
+  xyConfigSchemaNoESQL,
+  regionMapConfigSchemaNoESQL,
+  heatmapConfigSchemaNoESQL,
+  datatableConfigSchemaNoESQL,
+  pieConfigSchemaNoESQL,
+  treemapConfigSchemaNoESQL,
+  waffleConfigSchemaNoESQL,
+  mosaicConfigSchemaNoESQL,
+};
+
+export type {
+  // Combined schemas
+  MetricConfig,
+  LegacyMetricConfig,
+  GaugeConfig,
+  TagcloudConfig,
+  XYConfig,
+  RegionMapConfig,
+  HeatmapConfig,
+  DatatableConfig,
+  PieConfig,
+  TreemapConfig,
+  WaffleConfig,
+  MosaicConfig,
+  // ESQL schemas
+  MetricConfigESQL,
+  GaugeConfigESQL,
+  TagcloudConfigESQL,
+  XYConfigESQL,
+  RegionMapConfigESQL,
+  HeatmapConfigESQL,
+  DatatableConfigESQL,
+  PieConfigESQL,
+  TreemapConfigESQL,
+  WaffleConfigESQL,
+  MosaicConfigESQL,
+  // DSL schemas
+  MetricConfigNoESQL,
+  LegacyMetricConfigNoESQL,
+  GaugeConfigNoESQL,
+  TagcloudConfigNoESQL,
+  XYConfigNoESQL,
+  RegionMapConfigNoESQL,
+  HeatmapConfigNoESQL,
+  DatatableConfigNoESQL,
+  PieConfigNoESQL,
+  TreemapConfigNoESQL,
+  WaffleConfigNoESQL,
+  MosaicConfigNoESQL,
+  // XY Legend types
+  XYLegendOutsideHorizontal,
+  XYLegendOutsideVertical,
+  XYLegendInside,
+  XYLegendStatistic,
+  XYLegendSize,
+};

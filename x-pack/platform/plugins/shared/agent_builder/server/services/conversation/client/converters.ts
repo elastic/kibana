@@ -13,18 +13,22 @@ import type {
   ConversationWithoutRounds,
   ToolResult,
   UserIdAndName,
+  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
 import {
   ConversationRoundStatus,
   ConversationRoundStepType,
+  ToolOrigin,
   ToolResultType,
+  normalizeConversationAccessControl,
 } from '@kbn/agent-builder-common';
+import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type {
   ConversationCreateRequest,
-  ConversationUpdateRequest,
+  ConversationUpdatableFields,
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
@@ -37,10 +41,10 @@ import {
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
 
-export type Document = Pick<
-  GetResponse<ConversationProperties>,
-  '_source' | '_id' | '_seq_no' | '_primary_term'
->;
+export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
+
+export type VersionedDocument = Document &
+  Required<Pick<GetResponse<ConversationProperties>, '_seq_no' | '_primary_term'>>;
 
 const convertBaseFromEs = (document: Document) => {
   if (!document._source) {
@@ -57,6 +61,18 @@ const convertBaseFromEs = (document: Document) => {
     title: document._source.title,
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
+    status: document._source.status,
+    read: document._source.read,
+    pinned: document._source.pinned,
+    read_only: document._source.read_only ?? false,
+    access_control: normalizeConversationAccessControl(document._source.access_control),
+    ...(document._source.origin ? { origin: document._source.origin } : {}),
+    ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
+    ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
+    ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
+    ...(document._source.template_version !== undefined
+      ? { template_version: document._source.template_version }
+      : {}),
   };
 };
 
@@ -122,6 +138,7 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
               });
             }),
             progression: step.progression ?? [],
+            tool_origin: step.tool_origin ?? inferToolOrigin(step.tool_id),
           };
         } else {
           return step;
@@ -152,6 +169,15 @@ function migrateRoundState(state: RoundState & { agent: LegacyAgentStateFields }
   }
   return state;
 }
+
+const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
+  // Legacy rounds do not reliably differentiate registry vs inline tools.
+  // Only infer internal tools; leave others undefined for UI-side fallback.
+  if (isInternalTool(toolId)) {
+    return ToolOrigin.internal;
+  }
+  return undefined;
+};
 
 export const fromEs = (document: Document): Conversation => {
   const base = convertBaseFromEs(document);
@@ -219,6 +245,23 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
+    status: conversation.status,
+    read: conversation.read,
+    pinned: conversation.pinned,
+    read_only: conversation.read_only,
+    access_control: normalizeConversationAccessControl(conversation.access_control),
+    ...(conversation.origin ? { origin: conversation.origin } : {}),
+    ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    // Cast metadata to storage type — the flattened mapping requires string | string[].
+    // Deserialized domain values (boolean, number) only exist on read; writes always
+    // go through serializeMetadataValue before reaching this converter.
+    ...(conversation.metadata
+      ? { metadata: conversation.metadata as Record<string, SerializedMetadataValue> }
+      : {}),
+    ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
+    ...(conversation.template_version !== undefined
+      ? { template_version: conversation.template_version }
+      : {}),
   };
 };
 
@@ -229,7 +272,7 @@ export const updateConversation = ({
   updateDate,
 }: {
   conversation: Conversation;
-  update: ConversationUpdateRequest;
+  update: ConversationUpdatableFields;
   space: string;
   updateDate: Date;
 }) => {
@@ -265,5 +308,20 @@ export const createRequestToEs = ({
     conversation_rounds: serializeStepResults(conversation.rounds),
     attachments: conversation.attachments ?? [],
     state: conversation.state,
+    status: conversation.status,
+    read: false,
+    pinned: false,
+    read_only: conversation.read_only ?? false,
+    access_control: normalizeConversationAccessControl(conversation.access_control),
+    ...(conversation.origin ? { origin: conversation.origin } : {}),
+    ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    // Cast metadata to storage type — see note in toEs.
+    ...(conversation.metadata
+      ? { metadata: conversation.metadata as Record<string, SerializedMetadataValue> }
+      : {}),
+    ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
+    ...(conversation.template_version !== undefined
+      ? { template_version: conversation.template_version }
+      : {}),
   };
 };

@@ -52,7 +52,6 @@ export { FailedToLoadResponse } from './components/message_panel/failed_to_load_
 
 export { MessageText } from './components/message_panel/message_text';
 
-export { AIAgentTourCallout } from './components/tour_callout/ai_agent_tour_callout';
 export { EisKnowledgeBaseCallout } from './components/tour_callout/eis_knowledge_base_callout';
 
 export {
@@ -145,9 +144,3 @@ export {
 } from './context/observability_ai_assistant_flyout_state_context';
 
 export { useIsAgentBuilderEnabled } from './hooks/use_is_agent_builder_enabled';
-export {
-  useAgentBuilderOptIn,
-  type UseAgentBuilderOptInParams,
-  type UseAgentBuilderOptInResult,
-} from './hooks/use_agent_builder_opt_in';
-export { useAIAgentTourDismissed, AIAgentTourKey } from './hooks/use_ai_agent_tour_dismissed';

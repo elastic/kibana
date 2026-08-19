@@ -29,7 +29,7 @@ export const onboardingLinks: LinkItem = {
       defaultMessage: 'Getting started',
     }),
   ],
-  sideNavIcon: 'launch',
+  sideNavIcon: 'rocket',
   sideNavFooter: true,
   skipUrlState: true,
   hideTimeline: true,
@@ -39,6 +39,7 @@ export const launchPadLinks: LinkItem = {
   id: SecurityPageName.launchpad,
   title: LAUNCHPAD,
   path: ONBOARDING_PATH,
+  globalNavPosition: 12,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.launchpad', {
       defaultMessage: 'Launchpad',
@@ -61,11 +62,11 @@ export const launchPadLinks: LinkItem = {
     },
   ],
   links: [onboardingLinks, aiValueLinks, siemMigrationsLinks, siemReadinessLinks],
-  sideNavIcon: 'launch',
+  sideNavIcon: 'rocket',
   sideNavFooter: true,
   skipUrlState: true,
   hideTimeline: true,
-  visibleIn: ['globalSearch', 'sideNav'],
+  visibleIn: ['globalSearch', 'classicSideNav', 'projectSideNav'],
 };
 
 /**

@@ -19,6 +19,7 @@ import { decodeCommentRequestV2 } from '../utils';
 import { Operations } from '../../authorization';
 import type { UpdateArgs } from './types';
 import { validateMaxUserActions } from '../../common/validators';
+import { validateRegisteredAttachments } from './validators';
 
 /**
  * Update an attachment.
@@ -33,7 +34,6 @@ export async function update(
     services: { attachmentService, userActionService },
     logger,
     authorization,
-    externalReferenceAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
   } = clientArgs;
 
@@ -49,11 +49,15 @@ export async function update(
       userActionsToAdd: 1,
     });
 
-    decodeCommentRequestV2(
-      queryRestAttributes,
-      externalReferenceAttachmentTypeRegistry,
-      unifiedAttachmentTypeRegistry
-    );
+    decodeCommentRequestV2(queryRestAttributes, unifiedAttachmentTypeRegistry);
+
+    // Also enforce registry registration and the unified zod schema for
+    // migrated legacy subtypes (e.g. `.files`); mirrors the add/bulk_create
+    // paths so PATCH stays in sync with POST.
+    validateRegisteredAttachments({
+      query: queryRestAttributes,
+      unifiedAttachmentTypeRegistry,
+    });
 
     const myComment = await attachmentService.getter.get({
       savedObjectId: queryCommentId,

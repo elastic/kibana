@@ -191,7 +191,7 @@ const ConnectorFilterComponent: React.FC<ConnectorFilterProps> = ({
         closePopover={closePopover}
         id={filterGroupPopoverId}
         isOpen={isPopoverOpen}
-        panelPaddingSize="none"
+        panelPaddingSize="s"
       >
         <EuiSelectable
           aria-label={i18n.CONNECTOR}

@@ -5,215 +5,134 @@
  * 2.0.
  */
 
-import { buildEpisodesBaseQuery, buildEpisodesQuery } from './episodes_query';
-import {
-  PAGE_SIZE_ESQL_VARIABLE,
-  ALERT_EVENTS_DATA_STREAM,
-  ALERT_ACTIONS_DATA_STREAM,
-} from '../constants';
+import { buildEpisodesKpisQuery, buildEpisodesHistogramQuery } from './episodes_query';
 
-describe('buildEpisodesBaseQuery', () => {
-  it('should build query with correct structure', () => {
-    const query = buildEpisodesBaseQuery();
-    const queryString = query.print('basic');
+describe('buildEpisodesKpisQuery', () => {
+  const SPACE = 'default';
+  const UID = 'user-abc-123';
 
-    expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
-    expect(queryString).toContain('type == "alert"');
-    expect(queryString).toContain('INLINE STATS');
-    expect(queryString).toContain('first_timestamp = MIN(@timestamp)');
-    expect(queryString).toContain('last_timestamp = MAX(@timestamp)');
-    expect(queryString).toContain('BY episode.id');
-    expect(queryString).toContain('EVAL duration = DATE_DIFF');
-    expect(queryString).toContain('"ms"');
-    expect(queryString).toContain('first_timestamp');
-    expect(queryString).toContain('last_timestamp');
-    expect(queryString).toContain('WHERE @timestamp == last_timestamp');
+  it('produces a STATS command with all six KPI aggregations', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('STATS');
+    expect(output).toContain('alerts_count');
+    expect(output).toContain('firing_rules');
+    expect(output).toContain('assigned_to_me');
+    expect(output).toContain('unassigned');
+    expect(output).toContain('acknowledged');
+    expect(output).toContain('snoozed');
+  });
+
+  it('uses COUNT(*) for alerts_count to capture all matching episodes', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toMatch(/alerts_count\s*=\s*COUNT\(\*\)/);
+  });
+
+  it('uses COUNT_DISTINCT over a nullable rule.id column for firing_rules', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toMatch(/COUNT_DISTINCT\(_active_rule_id\)/);
+  });
+
+  it('embeds the currentUserUid in the assigned_to_me EVAL', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain(UID);
+    expect(output).toMatch(/SUM\(_assigned_to_me\)/);
+  });
+
+  it('sets assigned_to_me to a constant 0 when no currentUserUid is provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, undefined);
+    expect(output).toContain('EVAL _assigned_to_me = 0');
+    expect(output).not.toContain('last_assignee_uid ==');
+    expect(output).toMatch(/SUM\(_assigned_to_me\)/);
+  });
+
+  it('uses IS NULL check for unassigned', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_assignee_uid IS NULL');
+  });
+
+  it('checks last_ack_action for acknowledged', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_ack_action == "ack"');
+  });
+
+  it('counts indefinitely snoozed episodes (snooze_expiry IS NULL) as snoozed', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('last_snooze_action == "snooze"');
+    expect(output).toContain('snooze_expiry IS NULL');
+  });
+
+  it('excludes expired snoozes (snooze_expiry in the past) from the snoozed count', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output).toContain('TO_DATETIME(snooze_expiry) > NOW()');
+  });
+
+  it('applies queryString filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'alert.name: "cpu"' });
+    expect(output).toContain('QSTR(');
+  });
+
+  it('does not include SORT or LIMIT', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID);
+    expect(output.toUpperCase()).not.toContain('SORT');
+    expect(output.toUpperCase()).not.toContain('LIMIT');
+  });
+
+  it('applies status filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { status: ['active'] });
+    expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
+  });
+
+  it('applies ruleId filter when provided', () => {
+    const output = buildEpisodesKpisQuery(SPACE, UID, { ruleId: 'rule-xyz' });
+    expect(output).toContain('WHERE rule.id == "rule-xyz"');
   });
 });
 
-describe('buildEpisodesQuery', () => {
-  it('should join both data streams', () => {
-    const query = buildEpisodesQuery();
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain(`FROM ${ALERT_EVENTS_DATA_STREAM}`);
-    expect(queryString).toContain(ALERT_ACTIONS_DATA_STREAM);
+describe('buildEpisodesHistogramQuery', () => {
+  it('includes first_timestamp, last_timestamp, and episode.status in KEEP', () => {
+    const output = buildEpisodesHistogramQuery('default').print('basic');
+    expect(output).toMatch(/first_timestamp/);
+    expect(output).toMatch(/last_timestamp/);
+    expect(output).toMatch(/episode\.status/);
   });
 
-  it('should compute effective_status from deactivation actions', () => {
-    const query = buildEpisodesQuery();
-    const queryString = query.print('basic');
+  it('includes LIMIT 10000', () => {
+    const output = buildEpisodesHistogramQuery('default').print('basic');
+    expect(output).toContain('10000');
+  });
 
-    expect(queryString).toContain(
-      'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
+  it('does not include a SORT command', () => {
+    const output = buildEpisodesHistogramQuery('default').print('basic');
+    expect(output.toUpperCase()).not.toContain('SORT');
+  });
+
+  it('includes the breakdown field in the output when provided', () => {
+    const output = buildEpisodesHistogramQuery('default', undefined, 'rule.id').print('basic');
+    expect(output).toMatch(/rule\.id/);
+  });
+
+  it('includes the status filter when filterState.status is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { status: ['active'] }).print('basic');
+    expect(output).toMatch(/\| WHERE `episode\.status` == "active"/);
+  });
+
+  it('includes the ruleId filter when filterState.ruleId is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { ruleId: 'rule-abc' }).print('basic');
+    expect(output).toContain('rule-abc');
+  });
+
+  it('includes the tags filter when filterState.tags is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { tags: ['critical', 'prod'] }).print(
+      'basic'
     );
-    expect(queryString).toContain(
-      'last_tags = LAST(tags, @timestamp) WHERE (action_type IN ("tag"))'
+    expect(output).toMatch(/critical/);
+    expect(output).toMatch(/prod/);
+  });
+
+  it('includes the assigneeUid filter when filterState.assigneeUid is provided', () => {
+    const output = buildEpisodesHistogramQuery('default', { assigneeUid: 'user-xyz' }).print(
+      'basic'
     );
-    expect(queryString).toContain('BY group_hash');
-    expect(queryString).toContain('EVAL effective_status = CASE');
-    expect(queryString).toContain('last_deactivate_action == "deactivate"');
-  });
-
-  it('should build query with default sort', () => {
-    const query = buildEpisodesQuery();
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('SORT @timestamp DESC');
-    expect(queryString).toContain(`LIMIT ?${PAGE_SIZE_ESQL_VARIABLE}`);
-  });
-
-  it('should correctly sanitize and apply custom sort', () => {
-    const query = buildEpisodesQuery({
-      sortField: 'episode.id',
-      sortDirection: 'asc',
-    });
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('episode.id');
-    expect(queryString).toContain('SORT `episode.id` ASC');
-  });
-
-  it('should sanitize invalid sort fields to @timestamp', () => {
-    const query = buildEpisodesQuery({
-      sortField: 'invalid.field',
-      sortDirection: 'desc',
-    });
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('SORT @timestamp DESC');
-    expect(queryString).not.toContain('invalid.field');
-  });
-
-  it('should handle all allowlisted sort fields', () => {
-    const allowlistedFields = ['@timestamp', 'episode.id', 'episode.status', 'rule.id', 'duration'];
-
-    allowlistedFields.forEach((field) => {
-      const query = buildEpisodesQuery({
-        sortField: field,
-        sortDirection: 'asc',
-      });
-      const queryString = query.print('basic');
-
-      expect(queryString).toMatch(new RegExp(`SORT \`?${field.replace('.', '\\.')}\`? ASC`));
-    });
-  });
-
-  it('should filter on effective_status when status filter is set', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { status: 'active' }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('WHERE effective_status == "active"');
-  });
-
-  it('should not filter on effective_status when no status filter is set', () => {
-    const query = buildEpisodesQuery({ sortField: '@timestamp', sortDirection: 'desc' }, {});
-    const queryString = query.print('basic');
-
-    expect(queryString).not.toContain('WHERE effective_status ==');
-  });
-
-  it('should apply ruleId filter', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { ruleId: 'rule-123' }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('WHERE rule.id == "rule-123"');
-  });
-
-  it('should apply queryString filter with QSTR', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: 'alert.name: "test"' }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
-  });
-
-  it('should apply multiple filters together', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      {
-        queryString: 'alert.name: "test"',
-        status: 'active',
-        ruleId: 'rule-123',
-      }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
-    expect(queryString).toContain('WHERE effective_status == "active"');
-    expect(queryString).toContain('WHERE rule.id == "rule-123"');
-  });
-
-  it('should apply single tag filter with MV_CONTAINS', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { tags: ['prod'] }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('MV_CONTAINS(last_tags, "prod")');
-  });
-
-  it('should apply multiple tags as OR of MV_CONTAINS', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { tags: ['a', 'b'] }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('MV_CONTAINS(last_tags, "a")');
-    expect(queryString).toContain('OR');
-    expect(queryString).toContain('MV_CONTAINS(last_tags, "b")');
-  });
-
-  it('should ignore empty tag strings when filtering', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { tags: ['  ', ''] }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).not.toContain('MV_CONTAINS(last_tags');
-  });
-
-  it('should trim queryString before applying', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: '  alert.name: "test"  ' }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).toContain('QSTR("alert.name: \\"test\\"")');
-  });
-
-  it('should not apply filters when they are null or undefined', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: null, status: null, ruleId: undefined, tags: null }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).not.toContain('QSTR');
-    expect(queryString).not.toContain('WHERE effective_status ==');
-    expect(queryString).not.toContain('WHERE rule.id ==');
-    expect(queryString).not.toContain('MV_CONTAINS(last_tags');
-  });
-
-  it('should not apply queryString filter when it is empty or whitespace', () => {
-    const query = buildEpisodesQuery(
-      { sortField: '@timestamp', sortDirection: 'desc' },
-      { queryString: '   ' }
-    );
-    const queryString = query.print('basic');
-
-    expect(queryString).not.toContain('QSTR');
+    expect(output).toContain('user-xyz');
   });
 });

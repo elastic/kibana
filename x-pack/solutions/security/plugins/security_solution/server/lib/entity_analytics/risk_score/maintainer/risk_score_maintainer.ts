@@ -41,11 +41,17 @@ import type { MaintainerErrorKind } from './telemetry_reporter';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
 import { fetchWatchlistConfigs } from './utils/fetch_watchlist_configs';
 import { withLogContext } from './utils/with_log_context';
-import { ensureLookupIndex } from './lookup/lookup_index';
+import { ensureLookupIndex, getLookupIndexName } from './lookup/lookup_index';
 import { pruneLookupIndex } from './lookup/prune_lookup_index';
 import { runResolutionScoringStep } from './steps/run_resolution_scoring_step';
 import { createRunMetricsTracker } from './utils/run_metrics_tracker';
-
+import { buildLookupIndex } from './steps/build_lookup_index';
+import {
+  buildRiskScoreEntityMaintainerRunSummary,
+  buildRiskScorePhase0EntityMaintainerRunSummary,
+  buildRiskScoreSkipEntityMaintainerRunSummary,
+  type RiskScoreFrameworkStageSummary,
+} from './entity_maintainer_run_summary';
 export interface RiskScoreMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   entityAnalyticsConfig: EntityAnalyticsConfig;
@@ -57,12 +63,20 @@ export interface RiskScoreMaintainerDeps {
 }
 
 type RiskScoreMaintainerConfig = Pick<RegisterEntityMaintainerConfig, 'setup' | 'run'>;
+type FrameworkTelemetry = Parameters<NonNullable<RiskScoreMaintainerConfig['run']>>[0]['telemetry'];
 type StartServices = Awaited<ReturnType<RiskScoreMaintainerDeps['getStartServices']>>;
 type CoreStart = StartServices[0];
 type PluginsStart = StartServices[1];
 type RunMetricsTracker = ReturnType<typeof createRunMetricsTracker>;
 type TelemetryReporter = ReturnType<typeof createRiskScoreMaintainerTelemetryReporter>;
 const toRunTag = (calculationRunId: string) => calculationRunId.slice(0, 8);
+
+type LookupIndexReadinessStatus = 'ready' | 'mapping_upgrade_failed';
+
+interface LookupIndexReadiness {
+  lookupIndex: string;
+  status: LookupIndexReadinessStatus;
+}
 
 interface InitializedRunContext {
   namespace: string;
@@ -116,13 +130,18 @@ export const createRiskScoreMaintainer = ({
       });
 
       logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-      await initSavedObjects({ savedObjectsClient: soClient, namespace });
+      await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
       await riskScoreDataClient.init();
-      await ensureLookupIndex({ esClient, namespace });
+      await ensureLookupIndexReady({
+        esClient,
+        namespace,
+        logger,
+        lifecycle: 'setup',
+      });
       logger.info(`Risk score maintainer setup completed for namespace "${namespace}"`);
       return status.state;
     },
-    run: async ({ status, crudClient }) => {
+    run: async ({ status, crudClient, signal, telemetry: frameworkTelemetry }) => {
       const runContext = await initializeRunContext({
         getStartServices,
         namespace: status.metadata.namespace,
@@ -132,6 +151,7 @@ export const createRiskScoreMaintainer = ({
       });
       const canRun = await checkRunPrerequisites({
         telemetryReporter,
+        frameworkTelemetry,
         productFeaturesService,
         pluginsStart: runContext.pluginsStart,
         namespace: runContext.namespace,
@@ -152,20 +172,84 @@ export const createRiskScoreMaintainer = ({
         entityAnalyticsConfig,
       });
 
+      const calculationRunId = uuidv4();
+      const runNow = new Date().toISOString();
       const maintainerRunStartedAtMs = Date.now();
       const metricsTracker = createRunMetricsTracker();
       telemetryReporter.clearGlobalSkipReason();
-      for (const entityType of runConfig.entityTypes) {
-        await executeEntityTypeRun({
-          entityType,
+      const phase0LookupStage = telemetryReporter.startPhase0LookupBuildStage({
+        namespace: runContext.namespace,
+        idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+      });
+      const phase0StartedAtMs = Date.now();
+      try {
+        const phase0Summary = await buildLookupIndex({
+          esClient: runContext.esClient,
           crudClient,
           logger,
-          telemetryReporter,
-          metricsTracker,
-          runContext,
-          runConfig,
+          lookupIndex: runContext.lookupIndex,
+          entityTypes: runConfig.entityTypes,
+          calculationRunId,
+          now: runNow,
+          abortSignal: signal,
         });
+        phase0LookupStage.success({
+          lookupRowsWritten: phase0Summary.lookupRowsWritten,
+          entitiesIterated: phase0Summary.entitiesIterated,
+          pagesProcessed: phase0Summary.pagesProcessed,
+          bulkBatches: phase0Summary.bulkBatches,
+          lookupRowsFailed: phase0Summary.lookupRowsFailed,
+        });
+        frameworkTelemetry.report(
+          buildRiskScorePhase0EntityMaintainerRunSummary({
+            status: 'success',
+            durationMs: Date.now() - phase0StartedAtMs,
+            summary: phase0Summary,
+          })
+        );
+      } catch (error) {
+        phase0LookupStage.error({ errorKind: 'unexpected' });
+        frameworkTelemetry.report(
+          buildRiskScorePhase0EntityMaintainerRunSummary({
+            status: 'error',
+            durationMs: Date.now() - phase0StartedAtMs,
+            errorKind: 'unexpected',
+          })
+        );
+        throw error;
       }
+      // Entity types are scored in parallel: each run reads alerts independently
+      // and writes to the same risk-score data stream and entity store, with no
+      // shared per-run state in this maintainer. A failure in one entity type
+      // is logged and isolated so the remaining types still complete.
+      await Promise.all(
+        runConfig.entityTypes.map(async (entityType) => {
+          if (signal.aborted) {
+            logger.info(
+              `Risk score maintainer run aborted before processing entity type "${entityType}"`
+            );
+            return;
+          }
+          try {
+            await executeEntityTypeRun({
+              entityType,
+              crudClient,
+              logger,
+              abortSignal: signal,
+              telemetryReporter,
+              frameworkTelemetry,
+              metricsTracker,
+              runContext,
+              runConfig,
+              calculationRunId,
+              runNow,
+            });
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            logger.error(`Entity type "${entityType}" run failed: ${errorMessage}`);
+          }
+        })
+      );
 
       const maintainerRunDurationMs = Date.now() - maintainerRunStartedAtMs;
       logger.info(
@@ -210,9 +294,14 @@ const initializeRunContext = async ({
   });
 
   logger.debug(`Ensuring risk score resources exist for namespace "${namespace}"`);
-  await initSavedObjects({ savedObjectsClient: soClient, namespace });
+  await initSavedObjects({ savedObjectsClient: soClient, logger, namespace });
   await riskScoreDataClient.init();
-  const lookupIndex = await ensureLookupIndex({ esClient, namespace });
+  const { lookupIndex } = await ensureLookupIndexReady({
+    esClient,
+    namespace,
+    logger,
+    lifecycle: 'run',
+  });
 
   return {
     namespace,
@@ -226,14 +315,49 @@ const initializeRunContext = async ({
   };
 };
 
+const ensureLookupIndexReady = async ({
+  esClient,
+  namespace,
+  logger,
+  lifecycle,
+}: {
+  esClient: CoreStart['elasticsearch']['client']['asInternalUser'];
+  namespace: string;
+  logger: Logger;
+  lifecycle: 'setup' | 'run';
+}): Promise<LookupIndexReadiness> => {
+  try {
+    return {
+      lookupIndex: await ensureLookupIndex({ esClient, namespace }),
+      status: 'ready',
+    };
+  } catch (error) {
+    logger.error(
+      `There was an error upgrading the lookup index mapping. Continuing with maintainer ${lifecycle}. ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+
+    return {
+      lookupIndex: getLookupIndexName(namespace),
+      status: 'mapping_upgrade_failed',
+    };
+  }
+};
+
 const checkRunPrerequisites = async ({
   telemetryReporter,
+  frameworkTelemetry,
   productFeaturesService,
   pluginsStart,
   namespace,
   logger,
 }: {
+  // Dual telemetry: Entity Maintainers framework (`frameworkTelemetry`) plus the
+  // legacy risk-score reporter (`telemetryReporter`). Goal is to migrate all
+  // events onto the framework and retire the risk-score-specific reporter.
   telemetryReporter: TelemetryReporter;
+  frameworkTelemetry: FrameworkTelemetry;
   productFeaturesService: ProductFeaturesService;
   pluginsStart: PluginsStart;
   namespace: string;
@@ -253,6 +377,7 @@ const checkRunPrerequisites = async ({
     skipReason,
     idBasedRiskScoringEnabled: false,
   });
+  frameworkTelemetry.report(buildRiskScoreSkipEntityMaintainerRunSummary({ skipReason }));
   logger.debug('Risk score maintainer run skipped due to insufficient license or feature disabled');
   return false;
 };
@@ -277,7 +402,7 @@ const loadRunConfiguration = async ({
   entityAnalyticsConfig: EntityAnalyticsConfig;
 }): Promise<LoadedRunConfig> => {
   const configuration: RiskEngineConfiguration =
-    (await getConfiguration({ savedObjectsClient: soClient })) ??
+    (await getConfiguration({ savedObjectsClient: soClient, logger, namespace })) ??
     getDefaultRiskEngineConfiguration({ namespace });
   const dataViewId = configuration.dataViewId ?? getAlertsIndex(namespace);
   const { index: alertsIndex } = await riskScoreDataClient.getRiskInputsIndex({ dataViewId });
@@ -315,38 +440,68 @@ const executeEntityTypeRun = async ({
   entityType,
   crudClient,
   logger,
+  abortSignal,
   telemetryReporter,
+  frameworkTelemetry,
   metricsTracker,
   runContext,
   runConfig,
+  calculationRunId,
+  runNow,
 }: {
   entityType: EntityType;
   crudClient: Parameters<NonNullable<RiskScoreMaintainerConfig['run']>>[0]['crudClient'];
   logger: Logger;
+  abortSignal?: AbortSignal;
+  // Dual telemetry: Entity Maintainers framework (`frameworkTelemetry`) plus the
+  // legacy risk-score reporter (`telemetryReporter`). Goal is to migrate all
+  // events onto the framework and retire the risk-score-specific reporter.
   telemetryReporter: TelemetryReporter;
+  frameworkTelemetry: FrameworkTelemetry;
   metricsTracker: RunMetricsTracker;
   runContext: InitializedRunContext;
   runConfig: LoadedRunConfig;
+  calculationRunId: string;
+  runNow: string;
 }) => {
   const entityRunStartedAtMs = Date.now();
-  const calculationRunId = uuidv4();
-  const runNow = new Date().toISOString();
   const runTag = toRunTag(calculationRunId);
   const runLogger = withLogContext(logger, `[risk_score_maintainer][${entityType}][run:${runTag}]`);
-  let runStatus: 'success' | 'error' = 'success';
+  let runStatus: 'success' | 'error' | 'aborted' = 'success';
   let runErrorKind: MaintainerErrorKind | undefined;
   const runMetrics = metricsTracker.newRun();
+  const frameworkTelemetryStages: RiskScoreFrameworkStageSummary[] = [];
   const runTelemetry = telemetryReporter.forRun({
     namespace: runContext.namespace,
     entityType,
     idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
   });
+  let skipRemainingStages = false;
+  const checkAbortBetweenStages = () => {
+    if (abortSignal?.aborted) {
+      runLogger.info('Risk score maintainer run aborted between stages');
+      if (runStatus === 'success') {
+        runStatus = 'aborted';
+      }
+      skipRemainingStages = true;
+    }
+  };
+
+  const alertsIndexExists = await runContext.esClient.indices.exists({
+    index: runConfig.alertsIndex,
+  });
+  if (!alertsIndexExists) {
+    runLogger.warn(
+      `Skipping risk scoring run: alerts index "${runConfig.alertsIndex}" does not exist yet.`
+    );
+    return;
+  }
 
   runLogger.debug('starting base scoring/reset pass');
   // Stage 1: score base entity risk and update lookup docs.
   const alertFilters = buildAlertFilters(runConfig.configuration, entityType, runLogger);
   const baseStage = runTelemetry.startBaseStage();
-  const lookupStage = runTelemetry.startLookupSyncStage();
+  const baseStartedAtMs = Date.now();
 
   try {
     const baseSummary = await scoreBaseEntities({
@@ -355,13 +510,13 @@ const executeEntityTypeRun = async ({
       crudClient,
       entityType,
       esClient: runContext.esClient,
-      lookupIndex: runContext.lookupIndex,
       logger: runLogger,
       now: runNow,
       calculationRunId,
       pageSize: runConfig.pageSize,
       sampleSize: runConfig.sampleSize,
       watchlistConfigs: runConfig.watchlistConfigs,
+      abortSignal,
       idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
       writer: runConfig.writer,
     });
@@ -369,13 +524,13 @@ const executeEntityTypeRun = async ({
     metricsTracker.recordBase(runMetrics, baseSummary);
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
-      scoresWritten: baseSummary.scoresWritten,
-      deferToPhase2Count: baseSummary.deferToPhase2Count,
-      notInStoreCount: baseSummary.notInStoreCount,
+      scoresWritten: baseSummary.scoresWrittenRiskIndex,
     });
-    lookupStage.success({
-      lookupDocsUpserted: baseSummary.lookupDocsUpserted,
-      lookupDocsDeleted: baseSummary.lookupDocsDeleted,
+    frameworkTelemetryStages.push({
+      name: 'base',
+      status: 'success',
+      durationMs: Date.now() - baseStartedAtMs,
+      applied: baseSummary.scoresWrittenEntityStore,
     });
   } catch (error) {
     const errorMessage = telemetryReporter.getErrorMessage(error);
@@ -383,119 +538,209 @@ const executeEntityTypeRun = async ({
     runErrorKind = 'unexpected';
     runLogger.error(`base scoring failed: ${errorMessage}`);
     baseStage.error({ errorKind: 'unexpected' });
-    lookupStage.error({ errorKind: 'unexpected' });
     runTelemetry.errorSummary({ errorKind: 'unexpected' });
+
+    frameworkTelemetryStages.push({
+      name: 'base',
+      status: 'error',
+      durationMs: Date.now() - baseStartedAtMs,
+      errorKind: 'unexpected',
+    });
+    frameworkTelemetry.report(
+      buildRiskScoreEntityMaintainerRunSummary({
+        entityType,
+        metrics: runMetrics,
+        stages: frameworkTelemetryStages,
+      })
+    );
+
     throw error;
   }
 
-  if (runMetrics.lookupDocsUpserted > 0) {
-    // Refresh so stage 2 can read the latest lookup docs.
-    await runContext.esClient.indices.refresh({ index: runContext.lookupIndex });
-    runLogger.debug(`refreshed lookup index after ${runMetrics.lookupDocsUpserted} upserts`);
-  }
+  checkAbortBetweenStages();
 
-  // Stage 2: score resolution targets (group scores).
-  const resolutionStage = runTelemetry.startResolutionStage();
-  try {
-    const resolutionResult = await runResolutionScoringStep({
-      esClient: runContext.esClient,
-      crudClient,
-      logger: runLogger,
-      entityType,
-      alertsIndex: runConfig.alertsIndex,
-      lookupIndex: runContext.lookupIndex,
-      pageSize: runConfig.pageSize,
-      sampleSize: runConfig.sampleSize,
-      now: runNow,
-      calculationRunId,
-      watchlistConfigs: runConfig.watchlistConfigs,
-      idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
-      writer: runConfig.writer,
-    });
-    metricsTracker.recordResolution(runMetrics, resolutionResult);
-    if (resolutionResult.skippedReason) {
-      resolutionStage.skipped(resolutionResult.skippedReason);
-    } else {
-      resolutionStage.success({
-        pagesProcessed: resolutionResult.pagesProcessed,
-        scoresWritten: resolutionResult.scoresWritten,
-      });
-    }
-  } catch (error) {
-    const errorMessage = telemetryReporter.getErrorMessage(error);
-    runStatus = 'error';
-    runErrorKind = 'unexpected';
-    runLogger.error(`resolution scoring failed: ${errorMessage}`);
-    resolutionStage.error({ errorKind: 'unexpected' });
-  }
-
-  // Refresh the risk score data stream so reset-to-zero can see scores written in phases 1 & 2.
-  // Without this, the ES|QL query in reset may not see the new documents and could incorrectly
-  // zero out scores that were just written in this run.
-  const { alias: riskScoreAlias } = getIndexPatternDataStream(runContext.namespace);
-  await runContext.esClient.indices.refresh({ index: riskScoreAlias });
-
-  // Stage 3: reset stale positive scores not touched in this run.
-  if (runConfig.configuration.enableResetToZero !== false) {
-    const resetStage = runTelemetry.startResetStage();
+  if (!skipRemainingStages) {
+    // Stage 2: score resolution targets (group scores).
+    const resolutionStage = runTelemetry.startResolutionStage();
+    const resolutionStartedAtMs = Date.now();
     try {
-      const resetResult = await resetToZero({
+      const resolutionResult = await runResolutionScoringStep({
         esClient: runContext.esClient,
-        writer: runConfig.writer,
-        spaceId: runContext.namespace,
-        entityType,
-        logger: runLogger,
-        idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
         crudClient,
-        watchlistConfigs: runConfig.watchlistConfigs,
-        calculationRunId,
+        logger: runLogger,
+        entityType,
+        alertsIndex: runConfig.alertsIndex,
+        lookupIndex: runContext.lookupIndex,
+        pageSize: runConfig.pageSize,
+        sampleSize: runConfig.sampleSize,
         now: runNow,
+        calculationRunId,
+        watchlistConfigs: runConfig.watchlistConfigs,
+        abortSignal,
+        idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+        writer: runConfig.writer,
       });
-      metricsTracker.recordResetToZero(runMetrics, resetResult);
-      if (resetResult.scoresWritten > 0) {
-        runLogger.info(`reset ${resetResult.scoresWritten} stale risk scores to zero`);
+      metricsTracker.recordResolution(runMetrics, resolutionResult);
+      if (resolutionResult.skippedReason) {
+        resolutionStage.skipped(resolutionResult.skippedReason);
+        frameworkTelemetryStages.push({
+          name: 'resolution',
+          status: 'skipped',
+          durationMs: Date.now() - resolutionStartedAtMs,
+          skipReason: resolutionResult.skippedReason,
+          applied: resolutionResult.scoresWrittenEntityStore,
+        });
       } else {
-        runLogger.debug('reset_to_zero found no stale scores');
+        resolutionStage.success({
+          pagesProcessed: resolutionResult.pagesProcessed,
+          scoresWritten: resolutionResult.scoresWrittenRiskIndex,
+        });
+        frameworkTelemetryStages.push({
+          name: 'resolution',
+          status: 'success',
+          durationMs: Date.now() - resolutionStartedAtMs,
+          applied: resolutionResult.scoresWrittenEntityStore,
+        });
       }
-      resetStage.success({
-        scoresWritten: resetResult.scoresWritten,
-        resetBatchLimitHit: resetResult.resetBatchLimitHit,
-      });
     } catch (error) {
       const errorMessage = telemetryReporter.getErrorMessage(error);
       runStatus = 'error';
       runErrorKind = 'unexpected';
-      resetStage.error({ errorKind: 'unexpected' });
-      runLogger.error(`error resetting risk scores to zero: ${errorMessage}`);
+      runLogger.error(`resolution scoring failed: ${errorMessage}`);
+      resolutionStage.error({ errorKind: 'unexpected' });
+      frameworkTelemetryStages.push({
+        name: 'resolution',
+        status: 'error',
+        durationMs: Date.now() - resolutionStartedAtMs,
+        errorKind: 'unexpected',
+      });
     }
   } else {
-    runLogger.debug('reset_to_zero disabled in configuration');
-    runTelemetry.startResetStage().skipped();
-  }
-
-  // Final cleanup: remove old lookup docs outside the current risk window.
-  const riskWindowStart = runConfig.configuration.range?.start ?? 'now-30d';
-  try {
-    const prunedDocs = await pruneLookupIndex({
-      esClient: runContext.esClient,
-      index: runContext.lookupIndex,
-      riskWindowStart,
+    frameworkTelemetryStages.push({
+      name: 'resolution',
+      status: 'skipped',
+      durationMs: 0,
+      skipReason: 'aborted',
     });
-    metricsTracker.recordPrune(runMetrics, prunedDocs);
-    if (prunedDocs > 0) {
-      runLogger.debug(`pruned ${prunedDocs} stale lookup documents`);
-    }
-  } catch (error) {
-    runStatus = 'error';
-    runErrorKind = 'unexpected';
-    runLogger.error(`error pruning lookup index: ${telemetryReporter.getErrorMessage(error)}`);
   }
 
+  checkAbortBetweenStages();
+
+  if (!skipRemainingStages) {
+    // Refresh the risk score data stream so reset-to-zero can see scores written in phases 1 & 2.
+    // Without this, the ES|QL query in reset may not see the new documents and could incorrectly
+    // zero out scores that were just written in this run.
+    const { alias: riskScoreAlias } = getIndexPatternDataStream(runContext.namespace);
+    await runContext.esClient.indices.refresh({ index: riskScoreAlias });
+
+    // Stage 3: reset stale positive scores not touched in this run.
+    if (runConfig.configuration.enableResetToZero !== false) {
+      const resetStage = runTelemetry.startResetStage();
+      const resetStartedAtMs = Date.now();
+      try {
+        const resetResult = await resetToZero({
+          esClient: runContext.esClient,
+          writer: runConfig.writer,
+          spaceId: runContext.namespace,
+          entityType,
+          logger: runLogger,
+          idBasedRiskScoringEnabled: runConfig.idBasedRiskScoringEnabled,
+          crudClient,
+          watchlistConfigs: runConfig.watchlistConfigs,
+          calculationRunId,
+          now: runNow,
+        });
+        metricsTracker.recordResetToZero(runMetrics, resetResult);
+        if (resetResult.scoresWrittenRiskIndex > 0) {
+          runLogger.info(`reset ${resetResult.scoresWrittenRiskIndex} stale risk scores to zero`);
+        } else {
+          runLogger.debug('reset_to_zero found no stale scores');
+        }
+        resetStage.success({
+          scoresWritten: resetResult.scoresWrittenRiskIndex,
+          resetBatchLimitHit: resetResult.resetBatchLimitHit,
+        });
+        frameworkTelemetryStages.push({
+          name: 'reset_to_zero',
+          status: 'success',
+          durationMs: Date.now() - resetStartedAtMs,
+          applied: resetResult.scoresWrittenEntityStore,
+        });
+      } catch (error) {
+        const errorMessage = telemetryReporter.getErrorMessage(error);
+        runStatus = 'error';
+        runErrorKind = 'unexpected';
+        resetStage.error({ errorKind: 'unexpected' });
+        frameworkTelemetryStages.push({
+          name: 'reset_to_zero',
+          status: 'error',
+          durationMs: Date.now() - resetStartedAtMs,
+          errorKind: 'unexpected',
+        });
+        runLogger.error(`error resetting risk scores to zero: ${errorMessage}`);
+      }
+    } else {
+      runLogger.debug('reset_to_zero disabled in configuration');
+      runTelemetry.startResetStage().skipped();
+      frameworkTelemetryStages.push({
+        name: 'reset_to_zero',
+        status: 'skipped',
+        durationMs: 0,
+        skipReason: 'reset_to_zero_disabled',
+      });
+    }
+  } else {
+    frameworkTelemetryStages.push({
+      name: 'reset_to_zero',
+      status: 'skipped',
+      durationMs: 0,
+      skipReason: 'aborted',
+    });
+  }
+
+  checkAbortBetweenStages();
+
+  if (!skipRemainingStages) {
+    // Final cleanup: remove old lookup docs outside the current risk window.
+    const riskWindowStart = runConfig.configuration.range?.start ?? 'now-30d';
+    try {
+      const prunedDocs = await pruneLookupIndex({
+        esClient: runContext.esClient,
+        index: runContext.lookupIndex,
+        riskWindowStart,
+        calculationRunId,
+      });
+      metricsTracker.recordPrune(runMetrics, prunedDocs);
+      if (prunedDocs > 0) {
+        runLogger.debug(`pruned ${prunedDocs} stale lookup documents`);
+      }
+    } catch (error) {
+      runStatus = 'error';
+      runErrorKind = 'unexpected';
+      runLogger.error(`error pruning lookup index: ${telemetryReporter.getErrorMessage(error)}`);
+    }
+  }
+
+  // Keep risk-score-specific reporter event fields explicit so framework-only counters
+  // are not leaked into risk_score_maintainer_run_summary
   runTelemetry.completionSummary({
     runStatus,
     runErrorKind,
-    ...runMetrics,
+    scoresWrittenBase: runMetrics.scoresWrittenRiskIndexBase,
+    scoresWrittenResolution: runMetrics.scoresWrittenRiskIndexResolution,
+    scoresWrittenResetToZero: runMetrics.scoresWrittenRiskIndexResetToZero,
+    pagesProcessed: runMetrics.pagesProcessed,
+    lookupPrunedDocs: runMetrics.lookupPrunedDocs,
   });
+
+  frameworkTelemetry.report(
+    buildRiskScoreEntityMaintainerRunSummary({
+      entityType,
+      metrics: runMetrics,
+      stages: frameworkTelemetryStages,
+    })
+  );
+
   const entityRunDurationMs = Date.now() - entityRunStartedAtMs;
   const runSummary = metricsTracker.toRunSummary(runMetrics, {
     entityType,

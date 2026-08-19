@@ -6,7 +6,12 @@
  */
 
 import type { ObltWorkerFixtures } from '@kbn/scout-oblt';
+import { faker } from '@faker-js/faker';
 import { APM_ALERTS_INDEX_PATTERN } from './constants';
+
+const SERVICE_NAME = 'opbeans-java';
+const TRANSACTION_TYPE = 'request';
+const ENVIRONMENT = 'production';
 
 interface ApmAlertDocumentParams {
   alertUuid: string;
@@ -21,7 +26,84 @@ interface ApmAlertDocumentParams {
   environment: string;
   processorEvent: string;
   transactionType?: string;
+  alertSeverity?: string;
+  anomalyDetectorType?: string;
 }
+
+export interface AlertTestConfig {
+  ruleTypeId: string;
+  ruleNamePrefix: string;
+  ruleParams: Record<string, unknown>;
+  ruleCategory: string;
+  reason: string;
+  evaluationThreshold: number;
+  evaluationValue: number;
+  primaryChartTitle: string;
+  secondaryChartTitles: [string, string];
+  alertSeverity?: string;
+  anomalyDetectorType?: string;
+}
+
+export const LATENCY_THRESHOLD_CONFIG: AlertTestConfig = {
+  ruleTypeId: 'apm.transaction_duration',
+  ruleNamePrefix: 'Latency threshold',
+  ruleParams: {
+    serviceName: SERVICE_NAME,
+    transactionType: TRANSACTION_TYPE,
+    environment: ENVIRONMENT,
+    aggregationType: 'avg',
+    threshold: 1500,
+    windowSize: 5,
+    windowUnit: 'm',
+  },
+  ruleCategory: 'Latency threshold',
+  reason: `Avg. latency is 2,000 ms in the last 5 mins for service: ${SERVICE_NAME}, env: ${ENVIRONMENT}, type: ${TRANSACTION_TYPE}. Alert when > 1,500 ms.`,
+  evaluationThreshold: 1500000,
+  evaluationValue: 2000000,
+  primaryChartTitle: 'Latency',
+  secondaryChartTitles: ['Throughput', 'Failed transaction rate'],
+};
+
+export const FAILED_TRANSACTION_RATE_CONFIG: AlertTestConfig = {
+  ruleTypeId: 'apm.transaction_error_rate',
+  ruleNamePrefix: 'Failed transaction rate threshold',
+  ruleParams: {
+    serviceName: SERVICE_NAME,
+    transactionType: TRANSACTION_TYPE,
+    environment: ENVIRONMENT,
+    threshold: 30,
+    windowSize: 5,
+    windowUnit: 'm',
+  },
+  ruleCategory: 'Failed transaction rate threshold',
+  reason: `Failed transaction rate is 45% in the last 5 mins for service: ${SERVICE_NAME}, env: ${ENVIRONMENT}, type: ${TRANSACTION_TYPE}. Alert when > 30%.`,
+  evaluationThreshold: 30,
+  evaluationValue: 45,
+  primaryChartTitle: 'Failed transaction rate',
+  secondaryChartTitles: ['Throughput', 'Latency'],
+};
+
+export const ANOMALY_LATENCY_CONFIG: AlertTestConfig = {
+  ruleTypeId: 'apm.anomaly',
+  ruleNamePrefix: 'APM Anomaly',
+  ruleParams: {
+    serviceName: SERVICE_NAME,
+    transactionType: TRANSACTION_TYPE,
+    environment: ENVIRONMENT,
+    anomalySeverityType: 'critical',
+    windowSize: 30,
+    windowUnit: 'm',
+    anomalyDetectorTypes: ['txLatency'],
+  },
+  ruleCategory: 'APM Anomaly',
+  reason: `critical latency anomaly with a score of 82, was detected in the last 30 minutes for ${SERVICE_NAME}.`,
+  evaluationThreshold: 75,
+  evaluationValue: 82,
+  primaryChartTitle: 'Latency',
+  secondaryChartTitles: ['Throughput', 'Failed transaction rate'],
+  alertSeverity: 'critical',
+  anomalyDetectorType: 'txLatency',
+};
 
 export function createApmAlertDocument({
   alertUuid,
@@ -36,6 +118,8 @@ export function createApmAlertDocument({
   environment,
   processorEvent,
   transactionType,
+  alertSeverity,
+  anomalyDetectorType,
 }: ApmAlertDocumentParams) {
   const now = new Date().toISOString();
 
@@ -53,6 +137,8 @@ export function createApmAlertDocument({
     'kibana.alert.reason': reason,
     'kibana.alert.evaluation.threshold': evaluationThreshold,
     'kibana.alert.evaluation.value': evaluationValue,
+    ...(alertSeverity && { 'kibana.alert.severity': alertSeverity }),
+    ...(anomalyDetectorType && { 'anomaly.detector_type': anomalyDetectorType }),
     'kibana.alert.duration.us': 0,
     'kibana.alert.time_range': { gte: now },
     'kibana.alert.instance.id': '*',
@@ -99,4 +185,51 @@ export async function cleanupApmAlerts({
       // Continue cleanup even if rule deletion fails
     }
   }
+}
+
+export async function setupAlertForTest({
+  apiServices,
+  esClient,
+  alertIndex,
+  config,
+}: Pick<ObltWorkerFixtures, 'apiServices' | 'esClient'> & {
+  alertIndex: string;
+  config: AlertTestConfig;
+}) {
+  const ruleName = `${config.ruleNamePrefix} ${faker.string.uuid()} ${Date.now()}`;
+  const alertUuid = faker.string.uuid();
+
+  const ruleResponse = await apiServices.alerting.rules.create({
+    ruleTypeId: config.ruleTypeId,
+    name: ruleName,
+    consumer: 'apm',
+    schedule: { interval: '1m' },
+    enabled: false,
+    params: config.ruleParams,
+    tags: ['apm'],
+  });
+
+  const indexResponse = await esClient.index({
+    index: alertIndex,
+    op_type: 'create',
+    refresh: 'wait_for',
+    document: createApmAlertDocument({
+      alertUuid,
+      ruleId: ruleResponse.data.id,
+      ruleName,
+      ruleTypeId: config.ruleTypeId,
+      ruleCategory: config.ruleCategory,
+      reason: config.reason,
+      evaluationThreshold: config.evaluationThreshold,
+      evaluationValue: config.evaluationValue,
+      serviceName: SERVICE_NAME,
+      environment: ENVIRONMENT,
+      processorEvent: 'transaction',
+      transactionType: TRANSACTION_TYPE,
+      alertSeverity: config.alertSeverity,
+      anomalyDetectorType: config.anomalyDetectorType,
+    }),
+  });
+
+  return { ruleName, alertDocId: indexResponse._id };
 }

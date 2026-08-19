@@ -14,6 +14,7 @@ import { fetchLastSuccessfulCheck } from '../../../state';
 import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
 import type { ScreenshotImageSize } from '../../common/screenshot/screenshot_size';
+import { useGetUrlParams } from '../../../hooks';
 
 export const LastSuccessfulScreenshot = ({
   step,
@@ -28,17 +29,20 @@ export const LastSuccessfulScreenshot = ({
 }) => {
   const { stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
+  const { remoteName } = useGetUrlParams();
+
   const { data, loading } = useFetcher(() => {
     return fetchLastSuccessfulCheck({
       timestamp: step['@timestamp'],
       monitorId: step.monitor.id,
       stepIndex: Number(stepIndex ?? stepInd),
       location: step.observer?.geo?.name,
+      remoteName,
     });
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Synthetics folks can fix it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step._id, step['@timestamp']]);
+  }, [step._id, step['@timestamp'], remoteName]);
 
   return (
     <>

@@ -519,6 +519,31 @@ describe('formatHeartbeatRequest', () => {
       fields_under_root: true,
     });
   });
+
+  it('includes kibanaUrl in fields when provided', () => {
+    const monitorId = 'test-monitor-id';
+    const actual = formatHeartbeatRequest({
+      monitor: testBrowserConfig as SyntheticsMonitor,
+      configId: monitorId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+      kibanaUrl: 'https://my-kibana.example.com',
+    });
+
+    expect(actual.fields?.kibanaUrl).toBe('https://my-kibana.example.com');
+  });
+
+  it('omits kibanaUrl from fields when not provided', () => {
+    const monitorId = 'test-monitor-id';
+    const actual = formatHeartbeatRequest({
+      monitor: testBrowserConfig as SyntheticsMonitor,
+      configId: monitorId,
+      heartbeatId: monitorId,
+      spaceId: 'test-space-id',
+    });
+
+    expect(actual.fields?.kibanaUrl).toBeUndefined();
+  });
 });
 
 describe('mixParamsWithGlobalParams', () => {

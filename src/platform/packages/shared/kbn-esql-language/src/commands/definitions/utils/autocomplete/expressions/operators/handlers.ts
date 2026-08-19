@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isColumn, isList } from '@elastic/esql';
+import { isColumn, isList, isSubQuery } from '@elastic/esql';
 import type { ESQLColumn, ESQLFunction, ESQLSingleAstItem } from '@elastic/esql/types';
 import type { ISuggestionItem } from '../../../../../registry/types';
 import {
   listCompleteItem,
   commaCompleteItem,
+  buildSubqueryCompleteItems,
   likePatternItems,
   rlikePatternItems,
 } from '../../../../../registry/complete_items';
 import { getBinaryExpressionOperand, getExpressionType } from '../../../expressions';
+import { buildExpressionFunctionParameterContext } from '../utils';
 import type { ExpressionContext } from '../types';
 import {
   getLogicalContinuationSuggestions,
   isOperandMissing,
-  shouldSuggestOpenListForOperand,
+  shouldSuggestRightOperandStart,
 } from './utils';
 import { shouldSuggestComma } from '../comma_decision_engine';
 import { SuggestionBuilder } from '../suggestion_builder';
@@ -31,7 +33,7 @@ import { withAutoSuggest } from '../../helpers';
 // eg. IN / NOT IN Operators
 // ============================================================================
 
-/** Handles IN and NOT IN operators with list syntax (e.g., field IN (1, 2, 3)) */
+/** Handles IN and NOT IN operators with list syntax or subquery syntax. */
 export async function handleListOperator(ctx: ExpressionContext): Promise<ISuggestionItem[]> {
   const { expressionRoot, innerText } = ctx;
 
@@ -39,18 +41,37 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
 
   // For IN/NOT IN, args are never arrays because the parser builds a single ESQLList node
   // containing the values, not a JS array of values.
-  const list = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
+  const rightOperand = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
   const leftOperand = getBinaryExpressionOperand(fn, 'left') as ESQLSingleAstItem | undefined;
+  const allowSubqueryOperand = ctx.options.allowSubquery === true;
 
   // No list yet: suggest opening parenthesis
-  if (shouldSuggestOpenListForOperand(list)) {
+  if (shouldSuggestRightOperandStart(rightOperand)) {
+    if (allowSubqueryOperand) {
+      return [
+        listCompleteItem,
+        ...buildSubqueryCompleteItems({ previewCommands: ['from', 'row', 'ts'] }),
+      ];
+    }
+
     return [listCompleteItem];
   }
 
+  // A subquery operand is already present; only suggest continuations after it.
+  if (isSubQuery(rightOperand)) {
+    const cursorAfterSubquery = innerText.length > rightOperand.location.max;
+
+    if (cursorAfterSubquery) {
+      return getLogicalContinuationSuggestions();
+    }
+
+    return [];
+  }
+
   // List exists
-  if (isList(list)) {
+  if (isList(rightOperand)) {
     // Cursor after closed list: suggest logical operators
-    if (innerText.length > list.location.max) {
+    if (innerText.length > rightOperand.location.max) {
       return getLogicalContinuationSuggestions();
     }
 
@@ -73,19 +94,21 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
       shouldSuggestComma({
         position: 'inside_list',
         innerText,
-        listHasValues: list.values && list.values.length > 0,
+        listHasValues: rightOperand.values && rightOperand.values.length > 0,
       })
     ) {
       return [withAutoSuggest({ ...commaCompleteItem, text: ',' })];
     }
 
     // After comma or empty list: suggest values
-    const isEmptyList = !list.values || list.values.length === 0;
+    const isEmptyList = !rightOperand.values || rightOperand.values.length === 0;
     const ignoredColumns = isEmptyList
       ? []
       : [
           ...(columnForType ? [columnForType.parts.join('.')] : []),
-          ...(list.values || []).filter(isColumn).map((col: ESQLColumn) => col.parts.join('.')),
+          ...(rightOperand.values || [])
+            .filter(isColumn)
+            .map((col: ESQLColumn) => col.parts.join('.')),
         ].filter(Boolean);
 
     return getListValueSuggestions(ctx, columnForType, ignoredColumns);
@@ -191,4 +214,46 @@ export async function handleStringListOperator(
 /** Returns pattern suggestions for LIKE/RLIKE operators */
 function getStringPatternSuggestions(operator: string): ISuggestionItem[] {
   return operator.includes('rlike') ? rlikePatternItems : likePatternItems;
+}
+
+// ============================================================================
+// eg. : (match operator)
+// ============================================================================
+
+/** Handles the match operator (:) whose right operand accepts only constant values */
+export async function handleMatchOperator(
+  ctx: ExpressionContext
+): Promise<ISuggestionItem[] | null> {
+  const fn = ctx.expressionRoot as ESQLFunction | undefined;
+
+  if (!fn) {
+    return null;
+  }
+
+  const rightOperand = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
+
+  if (!isOperandMissing(rightOperand)) {
+    return null;
+  }
+
+  const parameterContext = buildExpressionFunctionParameterContext(fn, ctx.context, true);
+
+  if (!parameterContext) {
+    return null;
+  }
+
+  const suggestions = new SuggestionBuilder(ctx)
+    .addConstants({
+      paramDefinitions: parameterContext.paramDefinitions,
+      shouldAddComma: false,
+      hasMoreMandatoryArgs: parameterContext.hasMoreMandatoryArgs,
+      preferredPlaceholderType: parameterContext.firstArgumentType,
+      includeValuesControl: true,
+      // The match operator grammar accepts only literal constants as the right operand,
+      // not constant-generating functions (e.g. `field : E()` is a parse error).
+      includeConstantFunctions: false,
+    })
+    .build();
+
+  return suggestions.length > 0 ? suggestions : null;
 }

@@ -18,7 +18,7 @@ export {
   createTemporalStateModule,
   createBehavioralAnalysisModule,
 } from './observation_modules';
-export { entityRecordToLeadEntity, fetchAllLeadEntities } from './entity_conversion';
+export { entityRecordToLeadEntity, fetchCandidateEntities } from './entity_conversion';
 export { createLeadGenerationService } from './services/lead_generation_service';
 export type {
   Lead,
@@ -36,6 +36,10 @@ export {
   type RunPipelineParams,
   type RunPipelineResult,
 } from './run_pipeline';
+export {
+  runLeadGenerationInBackground,
+  type RunLeadGenerationInBackgroundArgs,
+} from './run_background_pipeline';
 export {
   registerLeadGenerationTask,
   startLeadGenerationTask,

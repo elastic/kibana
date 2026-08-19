@@ -17,14 +17,18 @@ import { FilterStateStore } from '@kbn/es-query-constants';
 import styled from '@emotion/styled';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
 import type { DataControlApi } from '@kbn/controls-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CPSPluginStart } from '@kbn/cps/public';
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
-import { Subscription } from 'rxjs';
+import { Subscription, of } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import {
   DATASTREAM_DATASET,
   findInventoryModel,
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
 import { NOT_AVAILABLE_LABEL } from '@kbn/observability-plugin/common';
+import { DEFAULT_SCHEMA } from '../../../../../../common/constants';
 import { useTimeRangeMetadataContext } from '../../../../../hooks/use_time_range_metadata';
 import { SchemaSelector } from '../../../../../components/schema_selector';
 import { getControlPanelConfigs } from './control_panels_config';
@@ -88,6 +92,15 @@ export const ControlsContent = ({
   const { status } = useTimeRangeMetadataContext();
 
   const isLoading = isPending(status);
+
+  // Forward the active CPS (cross-project search) scope so options list suggestions
+  // query the same projects as the wrapped infra HTTP client (`x-project-routing`).
+  const { services } = useKibana<{ cps?: CPSPluginStart }>();
+  const cpsManager = services.cps?.cpsManager;
+  const projectRouting = useObservable(
+    useMemo(() => cpsManager?.getProjectRouting$() ?? of(undefined), [cpsManager]),
+    cpsManager?.getProjectRouting()
+  );
 
   const getInitialInput = useCallback(async () => {
     const initialInput: ControlGroupRuntimeState = {
@@ -155,12 +168,12 @@ export const ControlsContent = ({
         timeRange={timeRange}
         query={query}
         filters={[...filters, ...schemaFilters]}
+        projectRouting={projectRouting}
       />
       <SchemaSelector
-        isHostsView
         onChange={onPreferredSchemaChange}
         schemas={schemas}
-        value={schema ?? 'semconv'}
+        value={schema ?? DEFAULT_SCHEMA}
         isLoading={isLoading}
       />
     </ControlGroupContainer>
@@ -168,9 +181,14 @@ export const ControlsContent = ({
 };
 
 const ControlGroupContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  gap: ${(props) => props.theme.euiTheme.size.s};
+  flex-wrap: wrap;
+  min-height: ${(props) => props.theme.euiTheme.size.xxl};
+
   .controlGroup {
-    min-height: ${(props) => props.theme.euiTheme.size.xxl};
-    align-items: start;
-    margin-bottom: ${(props) => props.theme.euiTheme.size.s};
+    display: contents;
   }
 `;

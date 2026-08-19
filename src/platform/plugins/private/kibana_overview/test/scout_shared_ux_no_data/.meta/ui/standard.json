@@ -1,0 +1,44 @@
+{
+  "sha1": "9db1ad4f1cd8e0a8ba6706f332646ab4ddeac9a8",
+  "tests": [
+    {
+      "id": "775389bb0760dc1-51693a79d13259b",
+      "title": "Kibana Overview - No Data displays no data page when no data exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout_shared_ux_no_data/ui/tests/no_data.spec.ts",
+        "line": 14,
+        "column": 7
+      }
+    },
+    {
+      "id": "775389bb0760dc1-c91a936fb854e19",
+      "title": "Kibana Overview - No Data click on add integrations opens integrations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout_shared_ux_no_data/ui/tests/no_data.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "12e21c0339a0c2c-4448399c4624167",
+      "title": "Kibana Overview - Accessibility (No Data) overview no-data page has no accessibility violations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/private/kibana_overview/test/scout_shared_ux_no_data/ui/tests/overview_a11y.spec.ts",
+        "line": 17,
+        "column": 9
+      }
+    }
+  ]
+}

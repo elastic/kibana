@@ -12,6 +12,7 @@ import { useContext, useEffect, useMemo } from 'react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 import { DataViewContext } from '..';
+import { hasActiveTopLevelBoolClauses } from '../utils';
 import type { EntitiesBaseURLQuery } from './use_entity_url_state';
 
 interface EntitiesBaseESQueryConfig {
@@ -48,6 +49,9 @@ export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: Entiti
     uiSettings,
   } = useKibana().services;
   const { dataView } = useContext(DataViewContext);
+  // The Entity Analytics home page intentionally hides the global date picker;
+  // the entities table shows all entities in the latest index regardless of
+  // time range. KQL and pinned filters from the global filter bar still apply.
   const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
   const allowLeadingWildcards = uiSettings.get('query:allowLeadingWildcards');
   const config: EsQueryConfig = useMemo(() => ({ allowLeadingWildcards }), [allowLeadingWildcards]);
@@ -59,7 +63,8 @@ export const useBaseEsQuery = ({ filters = [], query, pageFilters = [] }: Entiti
       query,
       config,
     });
-    if (result.query && globalFilterQuery) {
+    // Only append when the global filter bar contributes active clauses.
+    if (result.query && hasActiveTopLevelBoolClauses(globalFilterQuery)) {
       result.query.bool.filter = [...(result.query.bool.filter ?? []), globalFilterQuery];
     }
     return result;

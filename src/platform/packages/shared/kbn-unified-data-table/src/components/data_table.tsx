@@ -77,8 +77,14 @@ import type {
   CustomGridColumnsConfiguration,
   DataGridPaginationMode,
   CustomBulkActions,
+  DocMap,
 } from '../types';
-import { getDisplayedColumns } from '../utils/columns';
+import {
+  getDisplayedColumns,
+  getShowSummaryColumn,
+  isSummaryOnlyColumn as getIsSummaryOnlyColumn,
+  SOURCE_COLUMN,
+} from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
@@ -116,6 +122,7 @@ import {
 } from './custom_control_columns';
 import { useSorting } from '../hooks/use_sorting';
 import { withRestorableState, useRestorableState, useRestorableRef } from '../restorable_state';
+import { ColumnControlWithSummary } from './column_control_with_summary';
 
 const CONTROL_COLUMN_IDS_DEFAULT = [SELECT_ROW, OPEN_DETAILS];
 const VIRTUALIZATION_OPTIONS: EuiDataGridProps['virtualizationOptions'] = {
@@ -213,7 +220,7 @@ interface InternalUnifiedDataTableProps {
   /**
    * function to change sorting of the documents, skipped when isSortEnabled is set to false
    */
-  onSort?: (sort: string[][]) => void;
+  onSort?: (sort: SortOrder[]) => void;
   /**
    * Array of documents provided by Elasticsearch
    */
@@ -250,6 +257,13 @@ interface InternalUnifiedDataTableProps {
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
+  /**
+   * Only for ES|QL mode for now.
+   * When false, disables in-memory (client-side) row sorting. Use this when sorting is performed
+   * server-side (e.g. via a SORT clause in ES|QL) so the table displays the already-sorted rows
+   * verbatim instead of reordering them again. Defaults to true.
+   */
+  isInMemorySortEnabled?: boolean;
   /**
    * Current sort setting
    */
@@ -406,6 +420,10 @@ interface InternalUnifiedDataTableProps {
    */
   renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
   /**
+   * Whether to include the Summary column toggle in the custom toolbar's column control.
+   */
+  showSummaryColumnToggle?: boolean;
+  /**
    * Optional triggerId to retrieve the column cell actions that will override the default ones
    */
   cellActionsTriggerId?: string;
@@ -423,6 +441,14 @@ interface InternalUnifiedDataTableProps {
    * An optional value for a custom number of the visible cell actions in the table. By default is up to 3.
    **/
   visibleCellActions?: number;
+  /**
+   * Total number of visible slots in the actions column, including the overflow
+   * menu button when it appears. Defaults to 2 (one inline control + one overflow menu).
+   *
+   * When the total number of controls is `visibleRowLeadingControls` or fewer,
+   * all render inline with no overflow menu.
+   */
+  visibleRowLeadingControls?: number;
   /**
    * Disable cell actions for the table.
    */
@@ -485,6 +511,12 @@ interface InternalUnifiedDataTableProps {
   customBulkActions?: CustomBulkActions;
 
   /**
+   * When true, hides the built-in copy (as text/markdown/JSON) and show-selected bulk actions,
+   * leaving only custom bulk actions and selection management controls.
+   */
+  hideDefaultBulkActions?: boolean;
+
+  /**
    * When editing fields, it will create a new ad-hoc data view instead of modifying the existing one.
    */
   shouldKeepAdHocDataViewImmutable?: boolean;
@@ -521,6 +553,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onUpdateHeaderRowHeight,
       controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
       dataView,
       loadingState,
       onFilter,
@@ -536,6 +569,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       showFullScreenButton = true,
       sort,
       isSortEnabled = true,
+      isInMemorySortEnabled = true,
       isPaginationEnabled = true,
       paginationMode = DEFAULT_PAGINATION_MODE,
       cellActionsTriggerId,
@@ -555,6 +589,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       services,
       renderCustomGridBody,
       renderCustomToolbar,
+      showSummaryColumnToggle = false,
       externalControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
       trailingControlColumns, // TODO: deprecate in favor of rowAdditionalLeadingControls
       totalHits,
@@ -585,6 +620,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       disableCellActions = false,
       disableCellPopover = false,
       customBulkActions,
+      hideDefaultBulkActions,
       shouldKeepAdHocDataViewImmutable,
       onFullScreenChange,
       hideFilteringOnComputedColumns,
@@ -601,15 +637,12 @@ const InternalUnifiedDataTable = React.forwardRef<
     const [isCompareActive, setIsCompareActive] = useRestorableState('isCompareActive', false);
     const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
     const displayedColumns = getDisplayedColumns(columns, dataView);
-    const defaultColumns = displayedColumns.includes('_source');
-    const docMap = useMemo(
-      () =>
-        new Map<string, { doc: DataTableRecord; docIndex: number }>(
-          rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []
-        ),
+    const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
+    const showSummaryColumn = getShowSummaryColumn(displayedColumns);
+    const docMap = useMemo<DocMap>(
+      () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
       [rows]
     );
-    const getDocById = useCallback((id: string) => docMap.get(id)?.doc, [docMap]);
     const selectedDocsState = useSelectedDocs(docMap);
     const {
       isDocSelected,
@@ -666,7 +699,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       dataView,
       isPlainRecord,
       isSortEnabled,
-      defaultColumns,
+      isInMemorySortEnabled,
+      isSummaryOnlyColumn,
       onSort,
     });
 
@@ -702,6 +736,16 @@ const InternalUnifiedDataTable = React.forwardRef<
         });
       },
       [displayedRows, dataView, fieldFormats, columnsMeta]
+    );
+
+    const onChangeShowSummaryColumn = useCallback(
+      (show: boolean) => {
+        const withoutSource = visibleColumns.filter((column) => column !== SOURCE_COLUMN);
+        const nextColumns = show ? [...withoutSource, SOURCE_COLUMN] : withoutSource;
+
+        onSetColumns(nextColumns, !shouldPrependTimeFieldColumn(nextColumns));
+      },
+      [onSetColumns, shouldPrependTimeFieldColumn, visibleColumns]
     );
 
     /**
@@ -1029,7 +1073,7 @@ const InternalUnifiedDataTable = React.forwardRef<
           rowsCount: displayedRows.length,
           settings,
           dataView,
-          defaultColumns,
+          isSummaryOnlyColumn,
           isSortEnabled,
           isPlainRecord,
           services: {
@@ -1059,7 +1103,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         customGridColumnsConfiguration,
         dataView,
         dataViewFieldEditor,
-        defaultColumns,
+        isSummaryOnlyColumn,
         displayedRows.length,
         editField,
         headerRowHeightLines,
@@ -1083,7 +1127,7 @@ const InternalUnifiedDataTable = React.forwardRef<
     const schemaDetectors = useMemo(() => getSchemaDetectors(), []);
     const columnsVisibility = useMemo(
       () => ({
-        canDragAndDropColumns: defaultColumns ? false : canDragAndDropColumns,
+        canDragAndDropColumns: isSummaryOnlyColumn ? false : canDragAndDropColumns,
         visibleColumns,
         setVisibleColumns: (newColumns: string[]) => {
           const dontModifyColumns = !shouldPrependTimeFieldColumn(newColumns);
@@ -1095,7 +1139,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         onSetColumns,
         shouldPrependTimeFieldColumn,
         canDragAndDropColumns,
-        defaultColumns,
+        isSummaryOnlyColumn,
       ]
     );
 
@@ -1122,6 +1166,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         baseColumns: leadColumnsExtraContent,
         rowAdditionalLeadingControls,
         externalControlColumns,
+        visibleRowLeadingControls,
       });
       if (actionsColumn) {
         filteredLeadColumns.push(actionsColumn);
@@ -1135,8 +1180,11 @@ const InternalUnifiedDataTable = React.forwardRef<
       externalControlColumns,
       getRowIndicator,
       rowAdditionalLeadingControls,
+      visibleRowLeadingControls,
     ]);
 
+    // When a custom toolbar is used, in-table search is passed via
+    // gridProps.inTableSearchControl. Otherwise it goes on EUI's right controls.
     const additionalControls = useMemo(() => {
       if (!externalAdditionalControls && !selectedDocsCount && !inTableSearchControl) {
         return null;
@@ -1149,7 +1197,7 @@ const InternalUnifiedDataTable = React.forwardRef<
               <DataTableDocumentToolbarBtn
                 isPlainRecord={isPlainRecord}
                 isFilterActive={isFilterActive}
-                rows={rows!}
+                rows={displayedRows}
                 setIsFilterActive={setIsFilterActive}
                 selectedDocsState={selectedDocsState}
                 enableComparisonMode={enableComparisonMode}
@@ -1160,14 +1208,13 @@ const InternalUnifiedDataTable = React.forwardRef<
                 toastNotifications={toastNotifications}
                 columns={visibleColumns}
                 customBulkActions={customBulkActions}
+                hideDefaultBulkActions={hideDefaultBulkActions}
               />
             </EuiFlexItem>
           )}
-          <>
-            {externalAdditionalControls && (
-              <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
-            )}
-          </>
+          {externalAdditionalControls && (
+            <EuiFlexItem grow={false}>{externalAdditionalControls}</EuiFlexItem>
+          )}
         </EuiFlexGroup>
       );
 
@@ -1185,7 +1232,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       inTableSearchControl,
       isPlainRecord,
       isFilterActive,
-      rows,
+      displayedRows,
       selectedDocsState,
       enableComparisonMode,
       setIsFilterActive,
@@ -1197,14 +1244,30 @@ const InternalUnifiedDataTable = React.forwardRef<
       visibleColumns,
       renderCustomToolbar,
       customBulkActions,
+      hideDefaultBulkActions,
     ]);
 
     const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
       () =>
         renderCustomToolbar
-          ? (toolbarProps) =>
-              renderCustomToolbar({
-                toolbarProps,
+          ? (toolbarProps) => {
+              const columnControl =
+                showSummaryColumnToggle && toolbarProps.columnControl ? (
+                  <ColumnControlWithSummary
+                    columnControl={toolbarProps.columnControl}
+                    showSummaryColumn={showSummaryColumn}
+                    isSummaryColumnToggleDisabled={isSummaryOnlyColumn}
+                    onChangeShowSummaryColumn={onChangeShowSummaryColumn}
+                  />
+                ) : (
+                  toolbarProps.columnControl
+                );
+
+              return renderCustomToolbar({
+                toolbarProps: {
+                  ...toolbarProps,
+                  columnControl,
+                },
                 gridProps: {
                   additionalControls:
                     additionalControls && 'left' in additionalControls
@@ -1212,9 +1275,18 @@ const InternalUnifiedDataTable = React.forwardRef<
                       : additionalControls,
                   inTableSearchControl,
                 },
-              })
+              });
+            }
           : undefined,
-      [renderCustomToolbar, additionalControls, inTableSearchControl]
+      [
+        renderCustomToolbar,
+        showSummaryColumnToggle,
+        additionalControls,
+        inTableSearchControl,
+        showSummaryColumn,
+        isSummaryOnlyColumn,
+        onChangeShowSummaryColumn,
+      ]
     );
 
     const showDisplaySelector = useMemo(():
@@ -1270,27 +1342,15 @@ const InternalUnifiedDataTable = React.forwardRef<
     ]);
 
     const toolbarVisibility = useMemo(
-      () =>
-        defaultColumns
-          ? {
-              ...toolbarVisibilityDefaults,
-              showColumnSelector: false,
-              showSortSelector: isSortEnabled,
-              additionalControls,
-              showDisplaySelector,
-              showKeyboardShortcuts,
-              showFullScreenSelector: showFullScreenButton,
-            }
-          : {
-              ...toolbarVisibilityDefaults,
-              showSortSelector: isSortEnabled,
-              additionalControls,
-              showDisplaySelector,
-              showKeyboardShortcuts,
-              showFullScreenSelector: showFullScreenButton,
-            },
+      () => ({
+        ...toolbarVisibilityDefaults,
+        showSortSelector: isSortEnabled,
+        additionalControls,
+        showDisplaySelector,
+        showKeyboardShortcuts,
+        showFullScreenSelector: showFullScreenButton,
+      }),
       [
-        defaultColumns,
         isSortEnabled,
         additionalControls,
         showDisplaySelector,
@@ -1346,7 +1406,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
       // Don't use row "overscan" when showing Summary column since
       // rendering so much DOM content in each cell impacts performance
-      if (defaultColumns) {
+      if (showSummaryColumn) {
         return options;
       }
 
@@ -1354,7 +1414,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         ...VIRTUALIZATION_OPTIONS,
         ...options,
       };
-    }, [defaultColumns, paginationMode, throttledHandleOnScroll]);
+    }, [showSummaryColumn, paginationMode, throttledHandleOnScroll]);
 
     const isRenderComplete = loadingState !== DataLoadingState.loading;
 
@@ -1425,14 +1485,15 @@ const InternalUnifiedDataTable = React.forwardRef<
                 ariaDescribedBy={randomId}
                 ariaLabelledBy={ariaLabelledBy}
                 dataView={dataView}
+                columnsMeta={columnsMeta}
                 isPlainRecord={isPlainRecord}
                 selectedFieldNames={visibleColumns}
                 selectedDocIds={docIdsInSelectionOrder}
                 schemaDetectors={schemaDetectors}
-                forceShowAllFields={defaultColumns}
+                forceShowAllFields={isSummaryOnlyColumn}
                 showFullScreenButton={showFullScreenButton}
                 fieldFormats={fieldFormats}
-                getDocById={getDocById}
+                docMap={docMap}
                 replaceSelectedDocs={replaceSelectedDocs}
                 setIsCompareActive={setIsCompareActive}
               />

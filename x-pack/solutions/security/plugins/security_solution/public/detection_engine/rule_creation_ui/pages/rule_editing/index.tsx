@@ -22,8 +22,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
-
-import { ProjectRoutingAccess, useRouteBasedCpsPickerAccess } from '@kbn/cps-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in';
@@ -51,7 +49,7 @@ import { StepDefineRule } from '../../components/step_define_rule';
 import { useExperimentalFeatureFieldsTransform } from '../../components/step_define_rule/use_experimental_feature_fields_transform';
 import { StepScheduleRule } from '../../components/step_schedule_rule';
 import { StepRuleActions } from '../../../rule_creation/components/step_rule_actions';
-import { formatRule } from '../rule_creation/helpers';
+import { formatRule, getApiOnlyThreatMatchFields } from '../rule_creation/helpers';
 import {
   getActionMessageParams,
   getStepsData,
@@ -82,12 +80,12 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
 import { useAgentBuilderRuleCreation } from '../rule_creation/hooks/use_agent_builder_rule_creation';
+import { RuleCreationEventTypes } from '../../../../common/lib/telemetry/types';
 
 const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   const { addSuccess } = useAppToasts();
-  const { application, triggersActionsUi, cps } = useKibana().services;
+  const { application, triggersActionsUi, telemetry, aiRuleCreation } = useKibana().services;
   const { navigateToApp } = application;
-  useRouteBasedCpsPickerAccess(ProjectRoutingAccess.READONLY, { application, cps });
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
@@ -159,7 +157,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     actionsStepDefault: ruleActionsData,
   });
 
-  useAgentBuilderRuleCreation({
+  const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
@@ -169,6 +167,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepData,
     actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+    // From the URL, not `rule?.id` — available synchronously at mount, before the rule loads.
+    pageRuleId: ruleId,
   });
 
   const { modal: confirmSavingWithWarningModal, confirmValidationErrors } =
@@ -407,17 +407,38 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     const localDefineStepData: DefineStepRule = defineFieldsTransform({
       ...defineStepData,
     });
+    const formattedRule = formatRule<RuleUpdateProps>(
+      localDefineStepData,
+      aboutStepData,
+      scheduleStepData,
+      actionsStepData,
+      triggersActionsUi.actionTypeRegistry,
+      rule?.exceptions_list
+    );
+
+    if (rule?.meta) {
+      formattedRule.meta = { ...rule.meta, ...formattedRule.meta };
+    }
+
     const updatedRule = await updateRule({
-      ...formatRule<RuleUpdateProps>(
-        localDefineStepData,
-        aboutStepData,
-        scheduleStepData,
-        actionsStepData,
-        triggersActionsUi.actionTypeRegistry,
-        rule?.exceptions_list
-      ),
+      ...formattedRule,
+      ...getApiOnlyThreatMatchFields(rule),
       ...(ruleId ? { id: ruleId } : {}),
+    } as RuleUpdateProps);
+
+    const aiSession = aiRuleCreation.getSession();
+    const isAiEdited = isAiRuleUpdateRef.current;
+    telemetry.reportEvent(RuleCreationEventTypes.RuleEdited, {
+      creationSource: isAiEdited ? 'ai' : 'manual',
+      sessionId: aiSession?.sessionId ?? '',
+      ruleType: updatedRule.type,
+      enabled: updatedRule.enabled,
+      numberOfAiEdits: aiSession?.applyCount ?? 0,
+      durationSinceSessionStartMs: aiSession ? Date.now() - aiSession.startTimestamp : 0,
     });
+    if (isAiEdited) {
+      aiRuleCreation.clearSession();
+    }
 
     addSuccess(i18n.SUCCESSFULLY_SAVED_RULE(updatedRule?.name ?? ''));
     navigateToApp(APP_UI_ID, {
@@ -427,14 +448,17 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   }, [
     aboutStepData,
     actionsStepData,
+    aiRuleCreation,
     defineStepData,
     defineFieldsTransform,
     addSuccess,
+    isAiRuleUpdateRef,
     navigateToApp,
-    rule?.exceptions_list,
+    rule,
     ruleId,
     scheduleStepData,
     startTransaction,
+    telemetry,
     triggersActionsUi.actionTypeRegistry,
     updateRule,
   ]);
@@ -543,6 +567,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
           scheduleStepData={scheduleStepData}
           actionsStepData={actionsStepData}
           actionTypeRegistry={triggersActionsUi.actionTypeRegistry}
+          existingRuleId={rule?.id}
           pathway="rule_editing"
         />
       ) : null,
@@ -553,6 +578,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       scheduleStepData,
       actionsStepData,
       triggersActionsUi.actionTypeRegistry,
+      rule?.id,
     ]
   );
 

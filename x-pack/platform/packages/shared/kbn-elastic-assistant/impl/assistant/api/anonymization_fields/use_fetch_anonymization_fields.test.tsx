@@ -12,7 +12,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { DEFAULTS, useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { useAssistantContext } from '../../../assistant_context';
+import { useMaybeAssistantContext } from '../../../assistant_context';
 import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {
@@ -30,7 +30,7 @@ const createWrapper = () => {
 };
 
 describe('useFetchAnonymizationFields', () => {
-  (useAssistantContext as jest.Mock).mockReturnValue({
+  (useMaybeAssistantContext as jest.Mock).mockReturnValue({
     http,
     assistantAvailability: {
       isAssistantEnabled: true,

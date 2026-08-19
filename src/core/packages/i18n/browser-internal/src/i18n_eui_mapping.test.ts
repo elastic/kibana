@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import i18ntokens from '@elastic/eui/i18ntokens.json';
 import { getEuiContextMapping } from './i18n_eui_mapping';
 
+const TYPE_ANNOTATIONS_REGEX = /(?<=})\s*:\s*{[\s\S]*?}(?=\s*\))/;
 /** Regexp to find {values} usage */
 const VALUES_REGEXP = /\{\w+\}/;
 type I18nTranslateCall = [
@@ -89,6 +90,8 @@ describe('@elastic/eui i18n tokens', () => {
           .replace(/\n/g, '')
           // Should trim extra spaces
           .replace(/\s{2,}/g, ' ')
+          // Should not include type annotations
+          .replace(TYPE_ANNOTATIONS_REGEX, '')
           .trim();
 
         if (!isDefFunction) {
@@ -96,8 +99,9 @@ describe('@elastic/eui i18n tokens', () => {
         } else {
           // Certain EUI defStrings are actually functions (that currently primarily handle
           // pluralization). To check EUI's pluralization against Kibana's pluralization, we
-          // need to eval the defString and then actually i18n.translate & compare the 2 outputs
-          const defFunction = eval(defString); // eslint-disable-line no-eval
+          // need to eval the defString and then actually i18n.translate & compare the 2 outputs.
+          const defStringWithoutTypeAnnotations = defString.replace(TYPE_ANNOTATIONS_REGEX, '');
+          const defFunction = eval(defStringWithoutTypeAnnotations); // eslint-disable-line no-eval
           const defFunctionArg = normalizedDefString.split('({ ')[1].split('})')[0]; // TODO: All EUI pluralization fns currently only pass 1 arg. If this changes in the future and 2 args are passed, we'll need to do some extra splitting by ','
 
           if (isPluralizationDefFunction) {

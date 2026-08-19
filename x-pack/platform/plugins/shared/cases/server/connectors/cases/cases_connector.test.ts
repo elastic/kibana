@@ -50,6 +50,7 @@ describe('CasesConnector', () => {
   const reopenClosedCases = false;
   const maximumCasesToOpen = 5;
   const templateId = null;
+  const templateVersion = null;
   const autoPushCase = null;
 
   const mockExecute = jest.fn();
@@ -69,10 +70,13 @@ describe('CasesConnector', () => {
 
   const casesParams = {
     getCasesClient,
+    getActionsClient: jest.fn().mockResolvedValue({}),
     getSpaceId,
     getUnsecuredSavedObjectsClient,
     getUiSettingsClient,
     isCasesAttachmentsEnabled: false,
+    isTemplatesEnabled: false,
+    isAtLeastPlatinum: jest.fn().mockResolvedValue(true),
   };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
@@ -119,17 +123,73 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
     expect(CasesConnectorExecutorMock).toBeCalledWith({
       logger,
       casesClient: { foo: 'bar' },
+      actionsClient: {},
       casesOracleService: expect.any(CasesOracleService),
       casesService: expect.any(CasesService),
       spaceId: 'default',
-      isCasesAttachmentsEnabled: false,
+      isTemplatesEnabled: false,
+      isAtLeastPlatinum: casesParams.isAtLeastPlatinum,
     });
+  });
+
+  it('threads isTemplatesEnabled through to the CasesConnectorExecutor', async () => {
+    const connectorWithTemplatesEnabled = new CasesConnector({
+      casesParams: { ...casesParams, isTemplatesEnabled: true },
+      connectorParams,
+    });
+
+    await connectorWithTemplatesEnabled.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(CasesConnectorExecutorMock).toBeCalledWith(
+      expect.objectContaining({ isTemplatesEnabled: true })
+    );
+  });
+
+  it('threads isAtLeastPlatinum through to the CasesConnectorExecutor', async () => {
+    const isAtLeastPlatinum = jest.fn().mockResolvedValue(false);
+    const connectorWithLicenseCheck = new CasesConnector({
+      casesParams: { ...casesParams, isAtLeastPlatinum },
+      connectorParams,
+    });
+
+    await connectorWithLicenseCheck.run({
+      alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
+      groupedAlerts,
+      groupingBy,
+      owner,
+      rule,
+      timeWindow,
+      internallyManagedAlerts,
+      reopenClosedCases,
+      maximumCasesToOpen,
+      templateId,
+      templateVersion,
+      autoPushCase,
+    });
+
+    expect(CasesConnectorExecutorMock).toBeCalledWith(
+      expect.objectContaining({ isAtLeastPlatinum })
+    );
   });
 
   it('executes the CasesConnectorExecutor correctly', async () => {
@@ -144,6 +204,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -158,6 +219,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
   });
@@ -174,6 +236,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -195,6 +258,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen: 11,
         templateId,
+        templateVersion,
         autoPushCase,
       })
     ).rejects.toMatchObject({
@@ -221,6 +285,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -247,6 +312,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen: 10,
         templateId,
+        templateVersion,
         autoPushCase,
       })
     ).rejects.toMatchObject({
@@ -266,6 +332,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -286,6 +353,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (error) {
@@ -314,6 +382,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (error) {
@@ -342,6 +411,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
@@ -368,6 +438,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (err) {
@@ -399,6 +470,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 
@@ -423,6 +495,7 @@ describe('CasesConnector', () => {
         reopenClosedCases,
         maximumCasesToOpen,
         templateId,
+        templateVersion,
         autoPushCase,
       });
     } catch (err) {
@@ -452,6 +525,7 @@ describe('CasesConnector', () => {
       reopenClosedCases,
       maximumCasesToOpen,
       templateId,
+      templateVersion,
       autoPushCase,
     });
 

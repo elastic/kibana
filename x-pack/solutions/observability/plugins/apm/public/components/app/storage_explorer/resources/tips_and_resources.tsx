@@ -125,7 +125,7 @@ export function TipsAndResources() {
           {cards.map(({ icon, title, description, href }) => (
             <EuiFlexItem key={icon}>
               <EuiCard
-                icon={<EuiIcon size="xl" type={icon} />}
+                icon={<EuiIcon size="xl" type={icon} aria-hidden={true} />}
                 title={title}
                 description={description}
                 footer={
@@ -150,7 +150,7 @@ export function TipsAndResources() {
                 })}
               </h3>
             </EuiTitle>
-            <EuiListGroup listItems={resourcesListItems} color="primary" size="s" />
+            <EuiListGroup listItems={resourcesListItems} color="primary" />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiAccordion>

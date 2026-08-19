@@ -5,81 +5,42 @@
  * 2.0.
  */
 
-import {
-  savedObjectsClientMock,
-  loggingSystemMock,
-  savedObjectsRepositoryMock,
-  uiSettingsServiceMock,
-  coreFeatureFlagsMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
-import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import type { RuleDomain } from '../../types';
-import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
+import { getRulesClientMockParams } from '../../../../test_utils';
 import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
-import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { validateScheduleLimit } from '../get_schedule_frequency';
+
+jest.mock('../get_schedule_frequency', () => ({
+  validateScheduleLimit: jest.fn(),
+}));
 
 describe('clone', () => {
-  const taskManager = taskManagerMock.createStart();
-  const ruleTypeRegistry = ruleTypeRegistryMock.create();
-  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-  const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-  const authorization = alertingAuthorizationMock.create();
-  const actionsAuthorization = actionsAuthorizationMock.create();
-  const auditLogger = auditLoggerMock.create();
-  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
-  const backfillClient = backfillClientMock.create();
-
   const kibanaVersion = 'v8.2.0';
   const createAPIKeyMock = jest.fn();
   const isAuthenticationTypeApiKeyMock = jest.fn();
   const getAuthenticationApiKeyMock = jest.fn();
 
-  const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  const {
+    rulesClientParams,
     taskManager,
     ruleTypeRegistry,
     unsecuredSavedObjectsClient,
-    authorization: authorization as unknown as AlertingAuthorization,
-    actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
-    spaceId: 'default',
-    namespace: 'default',
-    getUserName: jest.fn(),
-    createAPIKey: createAPIKeyMock,
-    logger: loggingSystemMock.create().get(),
-    internalSavedObjectsRepository,
-    encryptedSavedObjectsClient: encryptedSavedObjects,
-    getActionsClient: jest.fn(),
-    getEventLogClient: jest.fn(),
+    encryptedSavedObjects,
+  } = getRulesClientMockParams({
     kibanaVersion,
-    auditLogger,
-    maxScheduledPerMinute: 10000,
-    minimumScheduleInterval: { value: '1m', enforce: false },
+    createAPIKey: createAPIKeyMock,
     isAuthenticationTypeAPIKey: isAuthenticationTypeApiKeyMock,
     getAuthenticationAPIKey: getAuthenticationApiKeyMock,
-    connectorAdapterRegistry: new ConnectorAdapterRegistry(),
-    isSystemAction: jest.fn(),
-    backfillClient,
-    getAlertIndicesAlias: jest.fn(),
-    alertsService: null,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    featureFlags: coreFeatureFlagsMock.createStart(),
-    isServerless: false,
-  };
+  });
 
   let rulesClient: RulesClient;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (validateScheduleLimit as jest.Mock).mockResolvedValue(null);
     getBeforeSetup(rulesClientParams, taskManager, ruleTypeRegistry);
     rulesClient = new RulesClient(rulesClientParams);
   });
@@ -113,7 +74,10 @@ describe('clone', () => {
       encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(disabledRule);
       unsecuredSavedObjectsClient.create.mockResolvedValue(disabledRule);
 
-      await rulesClient.clone({ id: 'test-rule', newId: 'cloned-rule' });
+      await rulesClient.clone({
+        id: disabledRule.id,
+        newId: 'cloned-rule',
+      });
 
       const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
       expect(createdAttributes.apiKey).toBeNull();
@@ -170,13 +134,115 @@ describe('clone', () => {
         enabled: true,
       });
 
-      await rulesClient.clone({ id: 'test-rule', newId: 'cloned-rule' });
+      await rulesClient.clone({
+        id: enabledRule.id,
+        newId: 'cloned-rule',
+      });
 
       const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
       expect(createdAttributes.apiKey).toBe(freshApiKey);
       expect(createdAttributes.apiKeyOwner).toBe('elastic');
       expect(createdAttributes.apiKeyCreatedByUser).toBe(false);
       expect(createdAttributes.uiamApiKey).not.toBe(sourceUiamApiKey);
+    });
+  });
+
+  describe('schedule limit', () => {
+    const baseRule = {
+      id: 'test-rule',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        name: 'My rule',
+        alertTypeId: '123',
+        schedule: { interval: '10s' },
+        params: { bar: true },
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        actions: [],
+        executionStatus: {},
+        apiKey: null,
+      },
+      references: [],
+    };
+
+    taskManager.schedule.mockResolvedValue({
+      id: 'task-123',
+      taskType: 'alerting:123',
+      scheduledAt: new Date(),
+      attempts: 1,
+      status: TaskStatus.Idle,
+      runAt: new Date(),
+      startedAt: null,
+      retryAt: null,
+      state: {},
+      params: {},
+      ownerId: null,
+    });
+
+    it('does not call validateScheduleLimit when the rule is disabled', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...baseRule,
+        attributes: { ...baseRule.attributes, enabled: false },
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValue(baseRule);
+
+      await rulesClient.clone({
+        id: baseRule.id,
+        newId: 'cloned-rule',
+      });
+
+      expect(validateScheduleLimit).not.toHaveBeenCalled();
+    });
+
+    it('calls validateScheduleLimit with the correct interval when the rule is enabled', async () => {
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...baseRule,
+        attributes: { ...baseRule.attributes, enabled: true },
+      });
+      unsecuredSavedObjectsClient.create.mockResolvedValue(baseRule);
+      taskManager.schedule.mockResolvedValueOnce({
+        id: 'scheduled-task-id',
+        taskType: 'alerting:123',
+        scheduledAt: new Date(),
+        attempts: 1,
+        status: TaskStatus.Idle,
+        runAt: new Date(),
+        startedAt: null,
+        retryAt: null,
+        state: {},
+        params: {},
+        ownerId: null,
+        enabled: true,
+      });
+
+      await rulesClient.clone({
+        id: baseRule.id,
+        newId: 'cloned-rule',
+      });
+
+      expect(validateScheduleLimit).toHaveBeenCalledWith(
+        expect.objectContaining({ updatedInterval: '10s' })
+      );
+    });
+
+    it('throws a circuit breaker error when the schedule limit is exceeded', async () => {
+      (validateScheduleLimit as jest.Mock).mockResolvedValue({
+        interval: 100,
+        intervalAvailable: 50,
+      });
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
+        ...baseRule,
+        attributes: { ...baseRule.attributes, enabled: true },
+      });
+
+      await expect(
+        rulesClient.clone({
+          id: baseRule.id,
+          newId: 'cloned-rule',
+        })
+      ).rejects.toThrow(/Error validating circuit breaker/i);
+
+      expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     });
   });
 

@@ -160,6 +160,29 @@ describe('hierarchy', () => {
       });
     });
 
+    describe('user-created root hierarchies', () => {
+      it('should return undefined for single-segment user-created roots', () => {
+        expect(getParentId('test')).toBeUndefined();
+        expect(getParentId('custom')).toBeUndefined();
+      });
+
+      it('should return immediate parent for direct children', () => {
+        expect(getParentId('test.child')).toBe('test');
+        expect(getParentId('custom.app')).toBe('custom');
+      });
+
+      it('should return immediate parent for grandchildren', () => {
+        expect(getParentId('test.child.grandchild')).toBe('test.child');
+        expect(getParentId('custom.app.sub')).toBe('custom.app');
+      });
+
+      it('should return immediate parent for deeply nested streams', () => {
+        expect(getParentId('test.a.b.c')).toBe('test.a.b');
+        expect(getParentId('test.a.b.c.d')).toBe('test.a.b.c');
+        expect(getParentId('test.a.b.c.d.e')).toBe('test.a.b.c.d');
+      });
+    });
+
     describe('edge cases', () => {
       it('should handle streams with similar names to roots', () => {
         expect(getParentId('logs.ecsh')).toBe('logs');
@@ -208,6 +231,25 @@ describe('hierarchy', () => {
         // Verify order is from root to immediate parent
         expect(ancestors[0]).toBe('logs.ecs');
         expect(ancestors[ancestors.length - 1]).toBe('logs.ecs.a.b');
+      });
+    });
+
+    describe('user-created root hierarchies', () => {
+      it('should return empty array for user-created roots', () => {
+        expect(getAncestors('test')).toEqual([]);
+        expect(getAncestors('custom')).toEqual([]);
+      });
+
+      it('should return single ancestor for direct children', () => {
+        expect(getAncestors('test.child')).toEqual(['test']);
+      });
+
+      it('should return full ancestor chain for grandchildren', () => {
+        expect(getAncestors('test.child.grandchild')).toEqual(['test', 'test.child']);
+      });
+
+      it('should return full ancestor chain for deeply nested streams', () => {
+        expect(getAncestors('test.a.b.c.d')).toEqual(['test', 'test.a', 'test.a.b', 'test.a.b.c']);
       });
     });
   });
@@ -439,6 +481,46 @@ describe('hierarchy', () => {
         expect(getParentId('logs.ecs.child')).toBe('logs.ecs');
         expect(getParentId('logs.otel.child')).toBe('logs.otel');
         expect(getParentId('logs.child')).toBe('logs');
+      });
+    });
+
+    describe('user-created query stream nesting', () => {
+      it('should correctly resolve hierarchy for nested query streams', () => {
+        // Scenario: test -> test.child -> test.child.grandchild
+        expect(getParentId('test.child')).toBe('test');
+        expect(getParentId('test.child.grandchild')).toBe('test.child');
+
+        expect(isChildOf('test', 'test.child')).toBe(true);
+        expect(isChildOf('test.child', 'test.child.grandchild')).toBe(true);
+        expect(isChildOf('test', 'test.child.grandchild')).toBe(false);
+
+        expect(isParentName('test', 'test.child')).toBe(true);
+        expect(isParentName('test.child', 'test.child.grandchild')).toBe(true);
+        expect(isParentName('test', 'test.child.grandchild')).toBe(false);
+
+        expect(getAncestorsAndSelf('test.child.grandchild')).toEqual([
+          'test',
+          'test.child',
+          'test.child.grandchild',
+        ]);
+      });
+
+      it('should handle deeply nested user-created streams', () => {
+        // Scenario: myapp -> myapp.svc -> myapp.svc.api -> myapp.svc.api.errors
+        expect(getParentId('myapp.svc')).toBe('myapp');
+        expect(getParentId('myapp.svc.api')).toBe('myapp.svc');
+        expect(getParentId('myapp.svc.api.errors')).toBe('myapp.svc.api');
+
+        expect(getAncestorsAndSelf('myapp.svc.api.errors')).toEqual([
+          'myapp',
+          'myapp.svc',
+          'myapp.svc.api',
+          'myapp.svc.api.errors',
+        ]);
+
+        expect(isDescendantOf('myapp', 'myapp.svc.api.errors')).toBe(true);
+        expect(isChildOf('myapp.svc.api', 'myapp.svc.api.errors')).toBe(true);
+        expect(isChildOf('myapp', 'myapp.svc.api.errors')).toBe(false);
       });
     });
   });

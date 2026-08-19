@@ -15,6 +15,8 @@ import {
   ATTRIBUTE_HTTP_SCHEME,
   ATTRIBUTE_HTTP_STATUS_CODE,
   DURATION,
+  GEN_AI_USAGE_INPUT_TOKENS,
+  GEN_AI_USAGE_OUTPUT_TOKENS,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
   KIND,
@@ -30,6 +32,7 @@ import {
   SPAN_ID,
   SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
   SPAN_SYNC,
   SPAN_TYPE,
@@ -41,7 +44,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_RESULT,
 } from '../../../common/es_fields/apm';
-import { isRumAgentName } from '../../../common/agent_name';
+import { isOpenTelemetryAgentName, isRumAgentName } from '../../../common/agent_name';
 import type {
   CompressionStrategy,
   TraceItem,
@@ -136,6 +139,7 @@ export async function getUnifiedTraceItems({
 
   const errorsByDocId = getErrorsByDocId(unifiedTraceErrors);
   const agentMarks: Record<string, number> = {};
+  const noDestinationTraceItems = new Set<TraceItem>();
   const traceItems = compactMap(unifiedTraceItems.hits, (hit) => {
     const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
     const isTransactionDocument = event[PROCESSOR_EVENT] === ProcessorEvent.transaction;
@@ -157,7 +161,7 @@ export async function getUnifiedTraceItems({
       return undefined;
     }
 
-    return {
+    const item = {
       id,
       name,
       timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
@@ -192,8 +196,29 @@ export async function getUnifiedTraceItems({
         event[SPAN_COMPOSITE_COMPRESSION_STRATEGY]
       ),
       docType: event[PROCESSOR_EVENT] === ProcessorEvent.transaction ? 'transaction' : 'span',
+      inputTokens: event[GEN_AI_USAGE_INPUT_TOKENS],
+      outputTokens: event[GEN_AI_USAGE_OUTPUT_TOKENS],
     } satisfies TraceItem;
+    if (!event[SPAN_DESTINATION_SERVICE_RESOURCE]) {
+      noDestinationTraceItems.add(item);
+    }
+    return item;
   });
+
+  const traceItemById = new Map<string, TraceItem>(traceItems.map((item) => [item.id, item]));
+  for (const item of traceItems) {
+    if (item.docType === 'transaction' && item.parentId) {
+      const parent = traceItemById.get(item.parentId);
+      if (
+        parent &&
+        parent.docType === 'span' &&
+        isOpenTelemetryAgentName(parent.agentName ?? '') &&
+        noDestinationTraceItems.has(parent)
+      ) {
+        parent.missingDestination = true;
+      }
+    }
+  }
 
   return {
     traceItems,

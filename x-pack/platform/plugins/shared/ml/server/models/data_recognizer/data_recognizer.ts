@@ -18,11 +18,9 @@ import { merge, intersection } from 'lodash';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
-import type { CompatibleModule } from '../../../common/constants/app';
-import type { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
-import type { MlClient } from '../../lib/ml_client';
-import type { RecognizeModuleResultDataView } from '../../../common/types/modules';
-import { ML_MODULE_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import type { AnalysisLimits } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
+import type { RecognizeModuleResultDataView } from '@kbn/ml-common-types/modules';
+import { ML_MODULE_SAVED_OBJECT_TYPE } from '@kbn/ml-common-types/saved_objects';
 import type {
   KibanaObjects,
   KibanaObjectConfig,
@@ -41,8 +39,12 @@ import type {
   GeneralDatafeedsOverride,
   JobSpecificOverride,
   RecognizeResult,
-} from '../../../common/types/modules';
-import { isGeneralJobOverride } from '../../../common/types/modules';
+} from '@kbn/ml-common-types/modules';
+import { isGeneralJobOverride } from '@kbn/ml-common-types/modules';
+import type { JobExistResult, JobStat } from '@kbn/ml-common-types/data_recognizer';
+import type { Datafeed } from '@kbn/ml-common-types/anomaly_detection_jobs/datafeed';
+import type { CompatibleModule } from '../../../common/constants/app';
+import type { MlClient } from '../../lib/ml_client';
 import {
   getLatestDataOrBucketTimestamp,
   prefixDatafeedId,
@@ -53,9 +55,8 @@ import { calculateModelMemoryLimitProvider } from '../calculate_model_memory_lim
 import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
-import type { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
-import type { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import type { MLSavedObjectService } from '../../saved_objects';
+import type { ServerlessInfo } from '../../types';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -140,7 +141,8 @@ export class DataRecognizer {
     dataViewsService: DataViewsService,
     mlSavedObjectService: MLSavedObjectService,
     request: KibanaRequest,
-    compatibleModuleType: CompatibleModule | null
+    compatibleModuleType: CompatibleModule | null,
+    serverless: ServerlessInfo
   ) {
     this._client = mlClusterClient;
     this._mlClient = mlClient;
@@ -148,7 +150,7 @@ export class DataRecognizer {
     this._dataViewsService = dataViewsService;
     this._mlSavedObjectService = mlSavedObjectService;
     this._request = request;
-    this._jobsService = jobServiceProvider(mlClusterClient, mlClient);
+    this._jobsService = jobServiceProvider(mlClusterClient, mlClient, serverless);
     this._resultsService = resultsServiceProvider(mlClient);
     this._calculateModelMemoryLimit = calculateModelMemoryLimitProvider(mlClusterClient, mlClient);
     this._compatibleModuleType = compatibleModuleType;
@@ -553,7 +555,8 @@ export class DataRecognizer {
     jobOverrides?: JobOverride | JobOverride[],
     datafeedOverrides?: DatafeedOverride | DatafeedOverride[],
     estimateModelMemory?: boolean,
-    applyToAllSpaces: boolean = false
+    applyToAllSpaces: boolean = false,
+    projectRouting?: string
   ) {
     // load the config from disk
     const moduleConfig = await this.getModule(moduleId, undefined, jobPrefix);
@@ -627,6 +630,13 @@ export class DataRecognizer {
           df.config.query = query;
         });
       }
+
+      if (projectRouting !== undefined) {
+        moduleConfig.datafeeds.forEach((df) => {
+          df.config.project_routing = projectRouting;
+        });
+      }
+
       saveResults.datafeeds = await this._saveDatafeeds(moduleConfig.datafeeds);
 
       if (startDatafeed) {
@@ -1499,7 +1509,8 @@ export function dataRecognizerFactory(
   dataViewsService: DataViewsService,
   mlSavedObjectService: MLSavedObjectService,
   request: KibanaRequest,
-  compatibleModuleType: CompatibleModule | null
+  compatibleModuleType: CompatibleModule | null,
+  serverless: ServerlessInfo
 ) {
   return new DataRecognizer(
     client,
@@ -1508,7 +1519,8 @@ export function dataRecognizerFactory(
     dataViewsService,
     mlSavedObjectService,
     request,
-    compatibleModuleType
+    compatibleModuleType,
+    serverless
   );
 }
 

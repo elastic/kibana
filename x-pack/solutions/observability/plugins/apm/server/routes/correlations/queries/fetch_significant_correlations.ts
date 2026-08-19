@@ -8,8 +8,9 @@
 import { range } from 'lodash';
 
 import { termQuery } from '@kbn/observability-plugin/server';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
-import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
+import { isNonLocalIndexName } from '@kbn/es-query';
+import type { LatencyCorrelation } from '@kbn/apm-types';
+import type { SignificantCorrelationsResponse } from '@kbn/apm-api-shared';
 import type {
   CommonCorrelationsQueryParams,
   EntityType,
@@ -28,13 +29,6 @@ import { fetchDurationHistogramRangeSteps } from './fetch_duration_histogram_ran
 import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventTypeFromEntityType } from '../utils';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-
-export interface SignificantCorrelationsResponse {
-  latencyCorrelations: LatencyCorrelation[];
-  ccsWarning: boolean;
-  totalDocCount: number;
-  fallbackResult?: LatencyCorrelation;
-}
 
 function isSignificantLatencyCorrelation(
   d: unknown,
@@ -196,7 +190,7 @@ export const fetchSignificantCorrelations = async ({
 
   const index = apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
-  const ccsWarning = rejected.length > 0 && isCCSRemoteIndexName(index);
+  const ccsWarning = rejected.length > 0 && isNonLocalIndexName(index);
 
   return {
     latencyCorrelations,

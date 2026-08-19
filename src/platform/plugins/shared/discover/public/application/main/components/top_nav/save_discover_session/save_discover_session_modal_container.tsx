@@ -11,6 +11,10 @@ import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import {
+  DiscoverInDashboardEventDataKeys,
+  DiscoverInDashboardEventName,
+} from '../../../../../ebt_manager/discover_in_dashboard_event_definition';
 import type { DiscoverServices } from '../../../../../build_services';
 import { TransferAction } from '../../../../../plugin_imports/embeddable_editor_service';
 import {
@@ -20,6 +24,7 @@ import {
   selectPersistedDiscoverSession,
   selectSavedDataViews,
   selectTabRuntimeState,
+  useCurrentTabRuntimeState,
   useInternalStateDispatch,
   useInternalStateSelector,
   useRuntimeStateManager,
@@ -44,6 +49,7 @@ export const DiscoverSessionSaveModalContainer = ({
 }: DiscoverSessionSaveModalContainerProps) => {
   const dispatch = useInternalStateDispatch();
   const runtimeStateManager = useRuntimeStateManager();
+  const scopedEbtManager = useCurrentTabRuntimeState((tab) => tab.scopedEbtManager$);
   const allTabs = useInternalStateSelector(selectAllTabs);
   const persistedDiscoverSession = useInternalStateSelector(selectPersistedDiscoverSession);
   const savedDataViews = useInternalStateSelector(selectSavedDataViews);
@@ -80,13 +86,11 @@ export const DiscoverSessionSaveModalContainer = ({
   }, []);
 
   const executeSave = async ({
-    isTitleDuplicateConfirmed,
     newCopyOnSave,
     newDescription,
     newTags,
     newTimeRestore,
     newTitle,
-    onTitleDuplicate,
   }: OnSaveProps & {
     newTags: string[];
     newTimeRestore: boolean;
@@ -104,8 +108,6 @@ export const DiscoverSessionSaveModalContainer = ({
         newCopyOnSave: effectiveCopyOnSave,
         newDescription,
         newTags,
-        isTitleDuplicateConfirmed,
-        onTitleDuplicate,
       })
     ).unwrap();
   };
@@ -116,10 +118,21 @@ export const DiscoverSessionSaveModalContainer = ({
 
       if (!response.discoverSession) return;
 
+      const userWantsCopy = initialCopyOnSave || props.newCopyOnSave;
+      const shouldNavigateToSavedSession =
+        (isEmbeddedEditor && userWantsCopy) ||
+        (!isEmbeddedEditor && response.discoverSession.id !== persistedDiscoverSession?.id);
+
       if (props.dashboardId) {
+        scopedEbtManager.trackDiscoverToDashboardEvent({
+          [DiscoverInDashboardEventDataKeys.EVENT_NAME]: DiscoverInDashboardEventName.savedSession,
+          [DiscoverInDashboardEventDataKeys.SAVED_SESSION_ID]: response.discoverSession.id,
+          [DiscoverInDashboardEventDataKeys.DASHBOARD_ID]: props.dashboardId,
+        });
         services.embeddableEditor.transferBackToEditor(TransferAction.SaveByReference, {
           app: 'dashboards',
           path: props.dashboardId === 'new' ? '#/create' : `#/view/${props.dashboardId}`,
+          newPanel: isEmbeddedEditor && userWantsCopy,
           state: {
             savedObjectId: response.discoverSession.id,
           },
@@ -138,11 +151,6 @@ export const DiscoverSessionSaveModalContainer = ({
       if (onSaveCb) {
         onSaveCb();
       } else {
-        const userWantsCopy = initialCopyOnSave || props.newCopyOnSave;
-        const shouldNavigateToSavedSession =
-          (isEmbeddedEditor && userWantsCopy) ||
-          (!isEmbeddedEditor && response.discoverSession.id !== persistedDiscoverSession?.id);
-
         if (shouldNavigateToSavedSession) {
           services.embeddableEditor.clearEditorState();
           services.locator.navigate({
@@ -169,6 +177,7 @@ export const DiscoverSessionSaveModalContainer = ({
   return (
     <DiscoverSessionSaveDashboardModal
       description={persistedDiscoverSession?.description}
+      hasLibraryItemWithTitle={services.savedSearch.hasLibraryItemWithTitle}
       hideDashboardOptions={!showDashboardOptions}
       initialTags={persistedDiscoverSession?.tags ?? []}
       initialTimeRestore={timeRestore}

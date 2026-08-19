@@ -126,7 +126,6 @@ export class EmbeddedLensExamplePlugin
           label: 'README',
           href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/third_party_lens_navigation_prompt',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],

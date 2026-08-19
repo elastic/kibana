@@ -25,6 +25,7 @@ export enum RuleAuditAction {
   DISABLE = 'rule_disable',
   DELETE = 'rule_delete',
   FIND = 'rule_find',
+  FIND_MUTED_ALERTS = 'rule_find_muted_alerts',
   MUTE = 'rule_mute',
   UNMUTE = 'rule_unmute',
   BULK_MUTE_ALERTS = 'rule_alert_bulk_mute',
@@ -39,6 +40,7 @@ export enum RuleAuditAction {
   GET_GLOBAL_EXECUTION_KPI = 'rule_get_global_execution_kpi',
   GET_GLOBAL_EXECUTION_SUMMARY = 'rule_get_global_execution_summary',
   GET_ACTION_ERROR_LOG = 'rule_get_action_error_log',
+  GET_HISTORY = 'rule_get_history',
   GET_RULE_EXECUTION_KPI = 'rule_get_execution_kpi',
   SNOOZE = 'rule_snooze',
   UNSNOOZE = 'rule_unsnooze',
@@ -51,6 +53,7 @@ export enum RuleAuditAction {
   FILL_GAPS = 'rule_fill_gaps',
   GET_RULES_WITH_GAPS = 'rule_get_rules_with_gaps',
   GET_GAPS_SUMMARY_BY_RULE_IDS = 'rule_get_gaps_summary_by_rule_ids',
+  BULK_CREATE = 'rule_bulk_create',
 }
 
 export enum AdHocRunAuditAction {
@@ -90,6 +93,11 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   rule_disable: ['disable', 'disabling', 'disabled'],
   rule_delete: ['delete', 'deleting', 'deleted'],
   rule_find: ['access', 'accessing', 'accessed'],
+  rule_find_muted_alerts: [
+    'access muted alerts for',
+    'accessing muted alerts for',
+    'accessed muted alerts for',
+  ],
   rule_mute: ['mute', 'muting', 'muted'],
   rule_unmute: ['unmute', 'unmuting', 'unmuted'],
   rule_alert_bulk_mute: ['bulk mute', 'bulk muting', 'bulk muted'],
@@ -111,6 +119,11 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'access action error log for',
     'accessing action error log for',
     'accessed action error log for',
+  ],
+  rule_get_history: [
+    'access change history for',
+    'accessing change history for',
+    'accessed change history for',
   ],
   rule_snooze: ['snooze', 'snoozing', 'snoozed'],
   rule_unsnooze: ['unsnooze', 'unsnoozing', 'unsnoozed'],
@@ -158,6 +171,7 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'getting gaps summary by rule ids',
     'got gaps summary by rule ids',
   ],
+  rule_bulk_create: ['bulk create', 'bulk creating', 'bulk created'],
 };
 
 const adHocRunEventVerbs: Record<AdHocRunAuditAction, VerbsTuple> = {
@@ -180,6 +194,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_disable: 'change',
   rule_delete: 'deletion',
   rule_find: 'access',
+  rule_find_muted_alerts: 'access',
   rule_mute: 'change',
   rule_unmute: 'change',
   rule_alert_bulk_mute: 'change',
@@ -190,6 +205,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_get_execution_log: 'access',
   rule_get_global_execution_log: 'access',
   rule_get_action_error_log: 'access',
+  rule_get_history: 'access',
   rule_snooze: 'change',
   rule_unsnooze: 'change',
   rule_run_soon: 'access',
@@ -204,6 +220,7 @@ const ruleEventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = 
   rule_fill_gaps: 'change',
   rule_get_rules_with_gaps: 'access',
   rule_get_gaps_summary_by_rule_ids: 'access',
+  rule_bulk_create: 'creation',
 };
 
 const adHocRunEventTypes: Record<AdHocRunAuditAction, ArrayElement<EcsEvent['type']>> = {

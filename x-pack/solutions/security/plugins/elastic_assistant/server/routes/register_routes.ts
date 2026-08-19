@@ -53,6 +53,9 @@ import { deleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedule
 import { findAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/get/find';
 import { disableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/disable';
 import { enableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/enable';
+import { bulkDeleteAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/bulk_delete';
+import { bulkDisableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/bulk_disable';
+import { bulkEnableAttackDiscoverySchedulesRoute } from './attack_discovery/schedules/public/post/bulk_enable';
 import type { ConfigSchema } from '../config_schema';
 import { deleteAllConversationsRoute } from './user_conversations/delete_all_route';
 import { suggestUsersRoute } from './users/suggest';
@@ -149,6 +152,12 @@ export const registerRoutes = (
   disableAttackDiscoverySchedulesRoute(router);
 
   enableAttackDiscoverySchedulesRoute(router);
+
+  bulkDeleteAttackDiscoverySchedulesRoute(router);
+
+  bulkDisableAttackDiscoverySchedulesRoute(router);
+
+  bulkEnableAttackDiscoverySchedulesRoute(router);
 
   // Alert Summary
   bulkAlertSummaryRoute(router, logger);

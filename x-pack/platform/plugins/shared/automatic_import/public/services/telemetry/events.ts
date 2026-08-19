@@ -214,6 +214,23 @@ export const telemetryEventsSchemas: Partial<
       },
     },
   },
+  [AutomaticImportTelemetryEventType.ApproveModalApproveWithAutoInstallClicked]: {
+    integrationId: {
+      type: 'keyword',
+      _meta: { description: 'Integration ID', optional: true },
+    },
+    version: {
+      type: 'keyword',
+      _meta: { description: 'Integration version being approved', optional: true },
+    },
+    dataStreamCount: {
+      type: 'long',
+      _meta: {
+        description: 'Total number of data streams in the integration at the time of approval',
+        optional: false,
+      },
+    },
+  },
   [AutomaticImportTelemetryEventType.DataStreamDeleteConfirmed]: {
     sessionId: {
       type: 'keyword',

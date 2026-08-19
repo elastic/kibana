@@ -15,6 +15,40 @@ import {
 
 describe('cli_processing', () => {
   describe('stripRunCommand', () => {
+    it(`should return the correct run command when started with 'node scripts/playwright'`, () => {
+      const argv = [
+        '/usr/local/bin/node',
+        'scripts/playwright',
+        'test',
+        '--config',
+        'path/to/config',
+        '--project',
+        'local',
+        '--grep=@local-serverless-search',
+      ];
+
+      expect(stripRunCommand(argv)).toBe(
+        'node scripts/playwright test --config path/to/config --project local --grep=@local-serverless-search'
+      );
+    });
+
+    it(`should return the correct run command when started with 'node' and node_modules path`, () => {
+      const argv = [
+        '/usr/local/bin/node',
+        'node_modules/.bin/playwright',
+        'test',
+        '--config',
+        'path/to/config',
+        '--project',
+        'local',
+        '--grep=serverless-search',
+      ];
+
+      expect(stripRunCommand(argv)).toBe(
+        'node scripts/playwright test --config path/to/config --project local --grep=serverless-search'
+      );
+    });
+
     it(`should return the correct run command when started with 'npx'`, () => {
       const argv = [
         'npx',
@@ -28,34 +62,14 @@ describe('cli_processing', () => {
       ];
 
       expect(stripRunCommand(argv)).toBe(
-        'npx playwright test --config path/to/config --project local --grep=@local-serverless-search'
-      );
-    });
-
-    it(`should return the correct run command when started with 'node'`, () => {
-      const argv = [
-        '/Users/user/.nvm/versions/node/v20.15.1/bin/node',
-        'node_modules/.bin/playwright',
-        'test',
-        '--config',
-        'path/to/config',
-        '--project',
-        'local',
-        '--grep=serverless-search',
-      ];
-
-      expect(stripRunCommand(argv)).toBe(
-        'npx playwright test --config path/to/config --project local --grep=serverless-search'
+        'node scripts/playwright test --config path/to/config --project local --grep=@local-serverless-search'
       );
     });
 
     it(`should throw error if command has less than 3 arguments`, () => {
-      const argv = [
-        '/Users/user/.nvm/versions/node/v20.15.1/bin/node',
-        'node_modules/.bin/playwright',
-      ];
+      const argv = ['/usr/local/bin/node', 'node_modules/.bin/playwright'];
       expect(() => stripRunCommand(argv)).toThrow(
-        /Invalid command arguments: must include at least 'npx playwright test'/
+        /Invalid command arguments: must include at least 'node scripts\/playwright test'/
       );
     });
 

@@ -9,13 +9,17 @@ import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { ModelSettings } from './components/settings/model_settings';
+import { useBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useKibana } from './hooks/use_kibana';
 import { InferenceEndpointsProvider } from './providers/inference_endpoints_provider';
+import { MODEL_SETTINGS_BREADCRUMB } from './translations';
 
 export const ModelSettingsOverview: React.FC = () => {
   const {
     services: { console: consolePlugin },
   } = useKibana();
+
+  useBreadcrumbs(MODEL_SETTINGS_BREADCRUMB);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),

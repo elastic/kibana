@@ -8,10 +8,10 @@
 import { resolve } from 'path';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Cookie } from 'tough-cookie';
-import { parse as parseCookie } from 'tough-cookie';
 import url from 'url';
 
 import expect from '@kbn/expect';
+import { findSessionCookie } from '@kbn/security-api-integration-helpers';
 import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import { adminTestUser } from '@kbn/test';
 
@@ -43,12 +43,10 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       const cookies = response.headers['set-cookie'];
-      expect(cookies).to.have.length(1);
-
       const { body: user } = await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Cookie', parseCookie(cookies[0])!.cookieString())
+        .set('Cookie', findSessionCookie(cookies).cookieString())
         .expect(200);
 
       expect(user.username).to.eql(adminTestUser.username);
@@ -77,9 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const handshakeCookie = parseCookie(cookies[0])!;
+        const handshakeCookie = findSessionCookie(cookies);
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -107,9 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const handshakeCookie = parseCookie(cookies[0])!;
+        const handshakeCookie = findSessionCookie(cookies);
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -137,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
@@ -166,7 +160,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
@@ -207,9 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');
@@ -246,7 +238,7 @@ export default function ({ getService }: FtrProviderContext) {
         const handshakeResponse = await supertest
           .get('/api/security/oidc/initiate_login?iss=https://test-op.elastic.co')
           .expect(302);
-        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
 
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
@@ -261,9 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', handshakeCookie.cookieString())
           .expect(302);
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
         expect(sessionCookie.key).to.be('sid');
         expect(sessionCookie.value).to.not.be.empty();
         expect(sessionCookie.path).to.be('/');
@@ -306,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        sessionCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        sessionCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
@@ -320,7 +310,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        sessionCookie = parseCookie(oidcAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = findSessionCookie(oidcAuthenticationResponse.headers['set-cookie']);
       });
 
       it('should extend cookie on every successful non-system API call', async () => {
@@ -331,7 +321,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0])!;
+        const sessionCookieOne = findSessionCookie(apiResponseOne.headers['set-cookie']);
 
         expect(sessionCookieOne.value).to.not.be.empty();
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
@@ -343,7 +333,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0])!;
+        const sessionCookieTwo = findSessionCookie(apiResponseTwo.headers['set-cookie']);
 
         expect(sessionCookieTwo.value).to.not.be.empty();
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
@@ -382,7 +372,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
@@ -397,9 +387,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        sessionCookie = parseCookie(cookies[0])!;
+        sessionCookie = findSessionCookie(cookies);
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
@@ -416,9 +404,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = logoutResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const logoutCookie = parseCookie(cookies[0])!;
+        const logoutCookie = findSessionCookie(cookies);
         expect(logoutCookie.key).to.be('sid');
         expect(logoutCookie.value).to.be.empty();
         expect(logoutCookie.path).to.be('/');
@@ -465,7 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
@@ -480,9 +466,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        sessionCookie = parseCookie(cookies[0])!;
+        sessionCookie = findSessionCookie(cookies);
       });
 
       const expectNewSessionCookie = (cookie: Cookie) => {
@@ -509,9 +493,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const firstResponseCookies = firstResponse.headers['set-cookie'];
-        expect(firstResponseCookies).to.have.length(1);
-
-        const firstNewCookie = parseCookie(firstResponseCookies[0])!;
+        const firstNewCookie = findSessionCookie(firstResponseCookies);
         expectNewSessionCookie(firstNewCookie);
 
         // Request with old cookie should reuse the same refresh token if within 60 seconds.
@@ -523,9 +505,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         const secondResponseCookies = secondResponse.headers['set-cookie'];
-        expect(secondResponseCookies).to.have.length(1);
-
-        const secondNewCookie = parseCookie(secondResponseCookies[0])!;
+        const secondNewCookie = findSessionCookie(secondResponseCookies);
         expectNewSessionCookie(secondNewCookie);
 
         expect(firstNewCookie.value).not.to.eql(secondNewCookie.value);
@@ -561,9 +541,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200);
 
             const newSessionCookies = response.headers['set-cookie'];
-            expect(newSessionCookies).to.have.length(1);
-
-            const newSessionCookie = parseCookie(newSessionCookies[0])!;
+            const newSessionCookie = findSessionCookie(newSessionCookies);
             expectNewSessionCookie(newSessionCookie);
 
             // The second new cookie with fresh pair of access and refresh tokens should work.
@@ -603,7 +581,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
         await supertest
@@ -618,9 +596,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        sessionCookie = parseCookie(cookies[0])!;
+        sessionCookie = findSessionCookie(cookies);
       });
 
       it('should properly set cookie and start new OIDC handshake', async function () {
@@ -645,9 +621,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = handshakeResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-
-        const handshakeCookie = parseCookie(cookies[0])!;
+        const handshakeCookie = findSessionCookie(cookies);
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -685,7 +659,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
         const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
 
         // Set the nonce in our mock OIDC Provider so that it can generate the ID Tokens
@@ -702,8 +676,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(302);
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
-        expect(cookies).to.have.length(1);
-        const sessionCookie = parseCookie(cookies[0])!;
+        const sessionCookie = findSessionCookie(cookies);
 
         // Accessing Kibana again using the same session should not create another `user_login` event.
         await supertest
@@ -760,7 +733,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get('/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad')
         .expect(302);
 
-      const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+      const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
       const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
 
       // Set the nonce in the mock OIDC Provider.
@@ -777,9 +750,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(302);
 
       const cookies = oidcAuthenticationResponse.headers['set-cookie'];
-      expect(cookies).to.have.length(1);
-
-      const sessionCookie = parseCookie(cookies[0])!;
+      const sessionCookie = findSessionCookie(cookies);
 
       // Access the minimal and default auth endpoint with the session cookie.
       const minimalResponse = await supertest
@@ -806,6 +777,98 @@ export default function ({ getService }: FtrProviderContext) {
       // so we don't have `authentication_realm` information available.
       expect(minimalResponse.body.principal).to.not.have.property('authentication_realm');
       expect(defaultResponse.body).to.have.property('authentication_realm');
+    });
+
+    it('should support minimal authentication even when access token is expired', async function () {
+      this.timeout(60000);
+
+      // Initiate OIDC handshake.
+      const handshakeResponse = await supertest
+        .get('/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad')
+        .expect(302);
+
+      const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
+      const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
+
+      // Set the nonce in the mock OIDC Provider.
+      await supertest
+        .post('/api/oidc_provider/setup')
+        .set('kbn-xsrf', 'xxx')
+        .send({ nonce: stateAndNonce.nonce })
+        .expect(200);
+
+      // Complete the OIDC callback.
+      const oidcAuthenticationResponse = await supertest
+        .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
+        .set('Cookie', handshakeCookie.cookieString())
+        .expect(302);
+
+      const sessionCookie = findSessionCookie(oidcAuthenticationResponse.headers['set-cookie']);
+
+      // Access token expiration is set to 15s for API integration tests.
+      // Let's wait for 20s to make sure token expires.
+      await setTimeoutAsync(20000);
+
+      // Access the minimal auth endpoint with the session cookie. The minimal route relies on
+      // Elasticsearch for credentials validation (e.g., via `_has_privileges` call), so the
+      // expired access token must be transparently refreshed via the re-authentication flow.
+      const minimalResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .expect(200);
+
+      expect(minimalResponse.body.principal.username).to.eql('user1');
+      expect(minimalResponse.body.principal.authentication_provider).to.eql({
+        type: 'oidc',
+        name: 'oidc',
+      });
+    });
+
+    it('should support minimal authentication with `kbn-auth-full` header forcing full authentication', async () => {
+      // Initiate OIDC handshake.
+      const handshakeResponse = await supertest
+        .get('/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad')
+        .expect(302);
+
+      const handshakeCookie = findSessionCookie(handshakeResponse.headers['set-cookie']);
+      const stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
+
+      // Set the nonce in the mock OIDC Provider.
+      await supertest
+        .post('/api/oidc_provider/setup')
+        .set('kbn-xsrf', 'xxx')
+        .send({ nonce: stateAndNonce.nonce })
+        .expect(200);
+
+      // Complete the OIDC callback.
+      const oidcAuthenticationResponse = await supertest
+        .get(`/api/security/oidc/callback?code=code1&state=${stateAndNonce.state}`)
+        .set('Cookie', handshakeCookie.cookieString())
+        .expect(302);
+
+      const sessionCookie = findSessionCookie(oidcAuthenticationResponse.headers['set-cookie']);
+
+      // Access the minimal auth endpoint with the `kbn-auth-full` header set to `true` to force
+      // full authentication even on a route that otherwise supports the minimal authentication mode.
+      const fullAuthResponse = await supertest
+        .get('/authentication/fast/me')
+        .set('Cookie', sessionCookie.cookieString())
+        .set('kbn-auth-full', 'true')
+        .expect(200);
+
+      expect(fullAuthResponse.body.principal.username).to.eql('user1');
+      expect(fullAuthResponse.body.principal.authentication_provider).to.eql({
+        type: 'oidc',
+        name: 'oidc',
+      });
+
+      // When `kbn-auth-full` header is set, Kibana calls ES `_authenticate` API, so full user
+      // information (including `authentication_realm`) should be available.
+      expect(fullAuthResponse.body.principal).to.have.property('authentication_realm');
+      expect(fullAuthResponse.body.principal.authentication_realm).to.eql({
+        name: 'oidc1',
+        type: 'oidc',
+      });
     });
   });
 }

@@ -11,12 +11,13 @@ import yaml, { type Pair } from 'yaml';
 
 import {
   getNormalizedInputs,
-  isIntegrationPolicyTemplate,
+  getPolicyTemplateDataStreamPaths,
   createYamlKeysSorter,
 } from '../../../../common/services';
 
 import {
   getStreamsForInputType,
+  getInputEffectiveName,
   packageToPackagePolicy,
 } from '../../../../common/services/package_to_package_policy';
 import { _compilePackagePolicyInputs } from '../../package_policy';
@@ -87,14 +88,18 @@ export const templatePackagePolicyToFullInputStreams = (
   packagePolicyInputs.forEach((input) => {
     const streamsIdsMap = new Map();
 
+    const inputEffectiveName = getInputEffectiveName(input);
     const inputId = input.policy_template
-      ? `${input.policy_template}-${input.type}`
-      : `${input.type}`;
+      ? `${input.policy_template}-${inputEffectiveName}`
+      : inputEffectiveName;
     const fullInputStream = {
       // @ts-ignore-next-line the following id is actually one level above the one in fullInputStream, but the linter thinks it gets overwritten
       id: inputId,
       type: input.type,
-      ...getFullInputStreams(input, true, streamsIdsMap),
+      ...getFullInputStreams(input, {
+        allStreamEnabled: true,
+        streamsOriginalIdsMap: streamsIdsMap,
+      }),
     };
 
     inputAndStreamsIdsMap?.set(fullInputStream.id, {
@@ -165,9 +170,10 @@ export async function getTemplateInputs(
   if (format === 'yml') {
     // Add a placeholder <VAR_NAME> to all variables without default value
     for (const inputWithStreamIds of inputsWithStreamIds) {
+      const inputEffectiveName = getInputEffectiveName(inputWithStreamIds);
       const inputId = inputWithStreamIds.policy_template
-        ? `${inputWithStreamIds.policy_template}-${inputWithStreamIds.type}`
-        : inputWithStreamIds.type;
+        ? `${inputWithStreamIds.policy_template}-${inputEffectiveName}`
+        : inputEffectiveName;
 
       const packageInput = indexedInputsAndStreams[inputId];
       if (!packageInput) {
@@ -262,6 +268,13 @@ export async function getTemplateInputs(
       sortMapEntries: _sortYamlKeys as (a: Pair, b: Pair) => number,
       strict: false,
     });
+    yaml.visit(doc, {
+      Scalar(_key, node) {
+        if (typeof node.value === 'string' && node.value.includes('\n')) {
+          node.type = 'BLOCK_LITERAL';
+        }
+      },
+    });
     const yamlStr = doc.toString({ singleQuote: true });
     return addCommentsToYaml(yamlStr, buildIndexedPackage(packageInfo), inputIdsDestinationMap);
   }
@@ -292,14 +305,13 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
         const inputs = getNormalizedInputs(policyTemplate);
 
         inputs.forEach((packageInput) => {
-          const inputId = `${policyTemplate.name}-${packageInput.type}`;
+          const inputEffectiveName = getInputEffectiveName(packageInput);
+          const inputId = `${policyTemplate.name}-${inputEffectiveName}`;
 
           const streams = getStreamsForInputType(
-            packageInput.type,
+            inputEffectiveName,
             packageInfo,
-            isIntegrationPolicyTemplate(policyTemplate) && policyTemplate.data_streams
-              ? policyTemplate.data_streams
-              : []
+            getPolicyTemplateDataStreamPaths(packageInfo, policyTemplate)
           ).reduce<
             Record<
               string,
@@ -308,7 +320,7 @@ function buildIndexedPackage(packageInfo: PackageInfo): PackageWithInputAndStrea
               }
             >
           >((acc, stream) => {
-            const streamId = `${packageInput.type}-${stream.data_stream.dataset}`;
+            const streamId = `${inputEffectiveName}-${stream.data_stream.dataset}`;
             acc[streamId] = {
               ...stream,
             };
@@ -382,6 +394,13 @@ function addCommentsToYaml(
     });
   }
 
+  yaml.visit(doc, {
+    Scalar(_key, node) {
+      if (typeof node.value === 'string' && node.value.includes('\n')) {
+        node.type = 'BLOCK_LITERAL';
+      }
+    },
+  });
   return doc.toString({ singleQuote: true });
 }
 

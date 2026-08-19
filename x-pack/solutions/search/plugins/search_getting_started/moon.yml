@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/search-getting-started'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/search-kibana'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/search-getting-started'
   description: Moon project for @kbn/search-getting-started
   channel: ''
-  owner: '@elastic/search-kibana'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/solutions/search/plugins/search_getting_started
 dependsOn:
   - '@kbn/core'
@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/search-code-examples'
   - '@kbn/search-navigation'
   - '@kbn/cloud-plugin'
+  - '@kbn/shared-components'
   - '@kbn/serverless'
   - '@kbn/analytics'
   - '@kbn/config-schema'
@@ -40,10 +41,17 @@ dependsOn:
   - '@kbn/react-query'
   - '@kbn/doc-links'
   - '@kbn/cloud'
-  - '@kbn/agent-builder-plugin'
+  - '@kbn/agent-builder-browser'
+  - '@kbn/agent-builder-server'
   - '@kbn/scout-search'
   - '@kbn/search-agent'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/custom-icons'
+  - '@kbn/agent-builder-plugin'
+  - '@kbn/spaces-plugin'
+  - '@kbn/core-spaces-common'
+  - '@kbn/deeplinks-agent-builder'
+  - '@kbn/agent-builder-common'
 tags:
   - plugin
   - prod

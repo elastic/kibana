@@ -6,15 +6,16 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type { NotificationPolicySavedObjectServiceContract } from '../../services/notification_policy_saved_object_service/notification_policy_saved_object_service';
-import { NotificationPolicySavedObjectServiceInternalToken } from '../../services/notification_policy_saved_object_service/tokens';
+import type { ActionPolicySavedObjectServiceContract } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
+import { ActionPolicySavedObjectServiceInternalToken } from '../../services/action_policy_saved_object_service/tokens';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import type {
+  ActionPolicy,
+  ActionPolicyId,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  NotificationPolicy,
-  NotificationPolicyId,
 } from '../types';
 
 @injectable()
@@ -22,16 +23,19 @@ export class FetchPoliciesStep implements DispatcherStep {
   public readonly name = 'fetch_policies';
 
   constructor(
-    @inject(NotificationPolicySavedObjectServiceInternalToken)
-    private readonly notificationPolicySavedObjectService: NotificationPolicySavedObjectServiceContract
+    @inject(ActionPolicySavedObjectServiceInternalToken)
+    private readonly actionPolicySavedObjectService: ActionPolicySavedObjectServiceContract
   ) {}
 
-  public async execute(_state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const result = await this.notificationPolicySavedObjectService.findAllDecrypted({
+  public async execute(
+    _state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const result = await this.actionPolicySavedObjectService.findAllDecrypted({
       filter: { enabled: true },
     });
 
-    const policies = new Map<NotificationPolicyId, NotificationPolicy>();
+    const policies = new Map<ActionPolicyId, ActionPolicy>();
 
     for (const doc of result) {
       if ('error' in doc) {
@@ -50,7 +54,7 @@ export class FetchPoliciesStep implements DispatcherStep {
         groupingMode: doc.attributes.groupingMode ?? undefined,
         throttle: doc.attributes.throttle ?? undefined,
         snoozedUntil: doc.attributes.snoozedUntil ?? null,
-        apiKey: doc.attributes.auth.apiKey,
+        apiKey: doc.attributes.apiKey,
       });
     }
 

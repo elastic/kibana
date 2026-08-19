@@ -10,6 +10,7 @@ import { isMissingApiKey, isRevokedApiKey } from '@kbn/core-security-server';
 import type { ApiKeyIdAndSOId, UiamApiKeyAndSOId } from './get_api_key_ids_to_invalidate';
 import { invalidateAPIKeys, invalidateUiamAPIKeys } from './invalidate_api_keys';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '../invalidate_api_keys_task';
+import { UIAM_LOGS_INVALIDATE_TAGS } from '../../constants';
 
 const MAX_MISSING_KEY_RETRIES = 5;
 
@@ -74,7 +75,8 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
         if (isRevokedApiKey(response.result)) {
           logger.warn(
             `UIAM APIKey is already revoked, removing pending invalidation. ` +
-              `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
+              `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`,
+            { tags: UIAM_LOGS_INVALIDATE_TAGS }
           );
         } else if (isMissingApiKey(response.result)) {
           const retryCount = (missingApiKeyRetries[id] ?? 0) + 1;
@@ -82,19 +84,22 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
           if (retryCount < MAX_MISSING_KEY_RETRIES) {
             logger.warn(
               `UIAM APIKey not found, will retry (${retryCount}/${MAX_MISSING_KEY_RETRIES}). ` +
-                `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
+                `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`,
+              { tags: UIAM_LOGS_INVALIDATE_TAGS }
             );
             continue;
           }
           logger.warn(
             `UIAM APIKey not found after ${MAX_MISSING_KEY_RETRIES} attempts, removing pending invalidation. ` +
-              `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`
+              `Error: ${response.result.error_details?.map((d) => d.reason).join('; ')}`,
+            { tags: UIAM_LOGS_INVALIDATE_TAGS }
           );
         } else {
           logger.error(
             `Failed to invalidate UIAM APIKey: ${response.result.error_details
               ?.map((d) => d.reason)
-              .join('; ')}`
+              .join('; ')}`,
+            { tags: UIAM_LOGS_INVALIDATE_TAGS }
           );
           continue;
         }
@@ -105,7 +110,9 @@ export async function invalidateApiKeysAndDeletePendingApiKeySavedObject({
         delete missingApiKeyRetries[id];
         totalInvalidated++;
       } catch (err) {
-        logger.error(`Failed to delete invalidated UIAM API key. Error: ${err.message}`);
+        logger.error(`Failed to delete invalidated UIAM API key. Error: ${err.message}`, {
+          tags: UIAM_LOGS_INVALIDATE_TAGS,
+        });
       }
     }
   }

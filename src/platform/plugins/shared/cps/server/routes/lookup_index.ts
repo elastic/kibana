@@ -10,6 +10,11 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
+// 2x the current caller's worst-case chunk (kbn-index-editor flattens 500
+// action/source pairs to 1000 entries). Independent of the client chunker by
+// design: this is a server-side input contract, not a mirror of one consumer.
+export const BULK_OPERATIONS_MAX_SIZE = 2000;
+
 export const registerLookupIndexRoutes = (
   router: IRouter,
   { logger }: PluginInitializerContext
@@ -19,10 +24,12 @@ export const registerLookupIndexRoutes = (
       path: '/internal/esql/lookup_index/{indexName}/update',
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
         body: schema.object({
-          operations: schema.arrayOf(schema.any()),
+          // ES bulk payload: heterogeneous action/source pairs, so per-element
+          // stays `schema.any()`. Cap bounds the request before it hits ES.
+          operations: schema.arrayOf(schema.any(), { maxSize: BULK_OPERATIONS_MAX_SIZE }),
         }),
       },
       security: {
@@ -62,7 +69,7 @@ export const registerLookupIndexRoutes = (
       path: '/internal/esql/lookup_index/{indexName}',
       validate: {
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
       security: {
@@ -103,7 +110,7 @@ export const registerLookupIndexRoutes = (
     {
       path: '/internal/esql/lookup_index/privileges',
       validate: {
-        query: schema.object({ indexName: schema.maybe(schema.string()) }),
+        query: schema.object({ indexName: schema.maybe(schema.string({ maxLength: 1024 })) }),
       },
       security: {
         authz: {

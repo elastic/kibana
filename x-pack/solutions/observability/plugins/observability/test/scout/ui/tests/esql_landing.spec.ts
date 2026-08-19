@@ -6,15 +6,14 @@
  */
 
 /**
- * NOTE: This suite runs sequentially (not alongside `parallel_tests/`) because it
- * toggles the `discover.isEsqlDefault` feature flag, which is server-wide. Placing
- * it in `parallel_tests/` would cause the flag change to spill into the other parallel
- * workers running `landing.spec.ts` and break their assertions that assume the flag is
- * off by default.
+ * NOTE: This suite runs sequentially (in `tests/`, not alongside `parallel_tests/`) because
+ * it toggles the `discover.isEsqlDefault` feature flag, which is server-wide. Placing it in
+ * `parallel_tests/` would cause the flag change to spill into other parallel workers and
+ * break assertions that assume the flag is off by default.
  *
  * TODO: Once `discover.isEsqlDefault` is enabled by default and the feature flag is
- * removed, merge these tests into the existing parallel suite at:
- *   parallel_tests/landing.spec.ts
+ * removed, merge these tests into the existing suite at:
+ *   tests/landing.spec.ts
  * and update the classic-mode redirect assertion there to expect an ES|QL Discover URL.
  */
 
@@ -24,7 +23,8 @@ import { test } from '../fixtures';
 import { generateLogsData, TEST_START_DATE, TEST_END_DATE } from '../fixtures/generators';
 import { BIGGER_TIMEOUT } from '../fixtures/constants';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/268022
+test.describe.skip(
   'Observability Landing Page (discover.isEsqlDefault enabled)',
   { tag: [...tags.stateful.classic] },
   () => {
@@ -36,12 +36,16 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, logsSynthtraceEsClient }) => {
+    // Clean both APM and logs data: the landing redirect prefers logs > apm > onboarding,
+    // so APM data left over from another suite would short-circuit the onboarding redirect.
+    test.beforeEach(async ({ browserAuth, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
       await browserAuth.loginAsAdmin();
+      await apmSynthtraceEsClient.clean();
       await logsSynthtraceEsClient.clean();
     });
 
-    test.afterAll(async ({ apiServices, logsSynthtraceEsClient }) => {
+    test.afterAll(async ({ apiServices, apmSynthtraceEsClient, logsSynthtraceEsClient }) => {
+      await apmSynthtraceEsClient.clean();
       await logsSynthtraceEsClient.clean();
       await apiServices.core.settings({
         'feature_flags.overrides': {

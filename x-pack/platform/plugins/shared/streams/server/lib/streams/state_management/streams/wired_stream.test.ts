@@ -419,7 +419,7 @@ describe('WiredStream', () => {
 
       expect(viewAction).toBeDefined();
       expect(viewAction?.request.name).toBe('$.logs.otel');
-      expect(viewAction?.request.query).toBe('FROM logs.otel');
+      expect(viewAction?.request.query).toBe('FROM logs.otel METADATA _source');
     });
 
     it('uses the stream name to build the view query', async () => {
@@ -450,7 +450,7 @@ describe('WiredStream', () => {
       ) as Extract<ElasticsearchAction, { type: 'upsert_esql_view' }> | undefined;
 
       expect(viewAction?.request.name).toBe('$.logs.otel.nginx');
-      expect(viewAction?.request.query).toBe('FROM logs.otel.nginx');
+      expect(viewAction?.request.query).toBe('FROM logs.otel.nginx METADATA _source');
     });
 
     it('does not emit upsert_esql_view when isWiredStreamViewsEnabled is false', async () => {
@@ -714,7 +714,7 @@ describe('WiredStream', () => {
         );
         expect(upsertViewAction).toBeDefined();
         expect(upsertViewAction?.request.name).toBe('$.logs.test');
-        expect(upsertViewAction?.request.query).toBe('FROM logs.test');
+        expect(upsertViewAction?.request.query).toBe('FROM logs.test METADATA _source');
       });
 
       it('creates a view referencing child views when the stream has children', async () => {
@@ -755,7 +755,7 @@ describe('WiredStream', () => {
         expect(upsertViewAction).toBeDefined();
         expect(upsertViewAction?.request.name).toBe('$.logs.test');
         expect(upsertViewAction?.request.query).toBe(
-          'FROM logs.test, $.logs.test.child1, $.logs.test.child2'
+          'FROM logs.test, $.logs.test.child1, $.logs.test.child2 METADATA _source'
         );
       });
     });

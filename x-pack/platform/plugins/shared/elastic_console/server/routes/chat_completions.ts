@@ -60,7 +60,9 @@ export const registerChatCompletionsRoute = ({
                 content: schema.nullable(
                   schema.oneOf([
                     schema.string(),
-                    schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
+                    schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
+                      maxSize: 100,
+                    }),
                   ])
                 ),
                 tool_calls: schema.maybe(
@@ -72,13 +74,14 @@ export const registerChatCompletionsRoute = ({
                         name: schema.string(),
                         arguments: schema.string(),
                       }),
-                    })
+                    }),
+                    { maxSize: 128 }
                   )
                 ),
                 tool_call_id: schema.maybe(schema.string()),
                 name: schema.maybe(schema.string()),
               }),
-              { minSize: 1 }
+              { minSize: 1, maxSize: 1000 }
             ),
             stream: schema.boolean({ defaultValue: false }),
             temperature: schema.maybe(schema.number()),
@@ -92,7 +95,8 @@ export const registerChatCompletionsRoute = ({
                     description: schema.maybe(schema.string()),
                     parameters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
                   }),
-                })
+                }),
+                { maxSize: 256 }
               )
             ),
             tool_choice: schema.maybe(

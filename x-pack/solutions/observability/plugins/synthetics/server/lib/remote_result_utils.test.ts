@@ -44,5 +44,29 @@ describe('remote_result_utils', () => {
         remoteName: 'my-remote-cluster',
       });
     });
+
+    it('includes kibanaUrl when provided for a remote cluster', () => {
+      expect(
+        getRemoteMonitorInfo(
+          'cluster1:synthetics-browser-default',
+          'https://remote-kibana.example.com'
+        )
+      ).toEqual({
+        remoteName: 'cluster1',
+        kibanaUrl: 'https://remote-kibana.example.com',
+      });
+    });
+
+    it('ignores kibanaUrl for a local index', () => {
+      expect(
+        getRemoteMonitorInfo('synthetics-browser-default', 'https://local-kibana.example.com')
+      ).toBeUndefined();
+    });
+
+    it('omits kibanaUrl when it is undefined', () => {
+      const result = getRemoteMonitorInfo('cluster1:synthetics-browser-default', undefined);
+      expect(result).toEqual({ remoteName: 'cluster1' });
+      expect(result).not.toHaveProperty('kibanaUrl');
+    });
   });
 });

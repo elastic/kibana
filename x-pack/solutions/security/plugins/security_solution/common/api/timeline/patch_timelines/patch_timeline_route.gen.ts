@@ -14,26 +14,28 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { SavedTimeline, PersistTimelineResponse } from '../model/components.gen';
 
+export const PatchTimelineRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * The `savedObjectId` of the Timeline or Timeline template that you’re updating.
+     */
+    timelineId: z.string().nullable(),
+    /**
+     * The version of the Timeline or Timeline template that you’re updating.
+     */
+    version: z.string().nullable(),
+    /**
+     * The timeline object of the Timeline or Timeline template that you’re updating.
+     */
+    timeline: SavedTimeline,
+  })
+);
 export type PatchTimelineRequestBody = z.infer<typeof PatchTimelineRequestBody>;
-export const PatchTimelineRequestBody = z.object({
-  /**
-   * The `savedObjectId` of the Timeline or Timeline template that you’re updating.
-   */
-  timelineId: z.string().nullable(),
-  /**
-   * The version of the Timeline or Timeline template that you’re updating.
-   */
-  version: z.string().nullable(),
-  /**
-   * The timeline object of the Timeline or Timeline template that you’re updating.
-   */
-  timeline: SavedTimeline,
-});
 export type PatchTimelineRequestBodyInput = z.input<typeof PatchTimelineRequestBody>;
 
+export const PatchTimelineResponse = lazySchema(() => PersistTimelineResponse);
 export type PatchTimelineResponse = z.infer<typeof PatchTimelineResponse>;
-export const PatchTimelineResponse = PersistTimelineResponse;

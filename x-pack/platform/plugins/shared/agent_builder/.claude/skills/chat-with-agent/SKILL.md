@@ -31,13 +31,16 @@ Otherwise, use the default prompt:
 
 ## Step 3: Send the Message
 
-Run the chat script:
+Run the chat script. If the agent uses OAuth connectors or you need to act as a
+browser user (see "Session Auth" below), prefix with `KIBANA_USE_SESSION=true`:
 
 ```bash
-x-pack/platform/plugins/shared/agent_builder/.claude/skills/chat-with-agent/scripts/chat.sh \
+KIBANA_USE_SESSION=true x-pack/platform/plugins/shared/agent_builder/.claude/skills/chat-with-agent/scripts/chat.sh \
   --agent-id "<agent_id>" \
   --prompt "<message>"
 ```
+
+If you're unsure whether session auth is needed, it's safe to always include it.
 
 This will stream SSE events from the agent and print formatted output showing:
 - `[Reasoning]` — the agent's thinking process
@@ -61,3 +64,19 @@ Relay the agent's response to the user. Highlight:
 - **The agent must already exist** — use `/create-agent` first if needed
 - **Data source tools must be activated** — use `/activate-data-source` first if the agent needs data source access
 - To override auto-detection, pass `--kibana-url` to the chat script
+
+## Session Auth (Acting as a Browser User)
+
+By default, `kibana_api_common.sh` authenticates via HTTP Basic auth, which uses the `__http__` auth provider. 
+This is a different auth realm than the browser, which uses the `basic` provider.
+Any per-user state tied to a browser session (e.g. OAuth tokens, user-specific settings) will not be visible to API calls made with HTTP Basic auth.
+
+To authenticate in the same auth realm as a browser user, set `KIBANA_USE_SESSION=true` before sourcing `kibana_api_common.sh`.
+This logs in via the `basic` auth provider and uses a session cookie for all subsequent `kibana_curl` calls:
+
+```bash
+export KIBANA_USE_SESSION=true
+source "$REPO_ROOT/scripts/kibana_api_common.sh"
+```
+
+Any script that sources `kibana_api_common.sh` with this variable set will automatically use session auth — no changes needed in downstream scripts.

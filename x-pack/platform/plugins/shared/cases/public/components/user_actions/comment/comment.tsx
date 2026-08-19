@@ -9,22 +9,19 @@ import type { EuiCommentProps } from '@elastic/eui';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
-import { UserActionActions, AttachmentType } from '../../../../common/types/domain';
+import { UserActionActions } from '../../../../common/types/domain';
 import { type AttachmentTypeRegistry } from '../../../../common/registry';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import * as i18n from './translations';
 import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
-import { createAlertAttachmentUserActionBuilder } from '../../attachments/alert/alert';
-import { createActionAttachmentUserActionBuilder } from '../../attachments/host_isolation/actions';
-import { createExternalReferenceAttachmentUserActionBuilder } from './external_reference';
-import { createPersistableStateAttachmentUserActionBuilder } from './persistable_state';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import {
+  getReferenceAttachmentId,
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
-  isUnifiedReferenceAttachmentRequest,
+  resolveUnifiedAttachmentType,
   toUnifiedAttachmentType,
 } from '../../../../common/utils/attachments';
 
@@ -33,68 +30,28 @@ const getUpdateLabelTitle = () => `${i18n.EDITED_FIELD} ${i18n.COMMENT.toLowerCa
 interface DeleteLabelTitle {
   userAction: SnakeToCamelCase<CommentUserAction>;
   caseData: UserActionBuilderArgs['caseData'];
-  externalReferenceAttachmentTypeRegistry: UserActionBuilderArgs['externalReferenceAttachmentTypeRegistry'];
-  persistableStateAttachmentTypeRegistry: UserActionBuilderArgs['persistableStateAttachmentTypeRegistry'];
   unifiedAttachmentTypeRegistry: UserActionBuilderArgs['unifiedAttachmentTypeRegistry'];
 }
 
 const getDeleteLabelTitle = ({
   userAction,
   caseData,
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
 }: DeleteLabelTitle) => {
   const { comment } = userAction.payload;
   const owner = Array.isArray(caseData.owner) ? caseData.owner[0] : caseData.owner;
-  if (isLegacyAttachmentRequest(comment)) {
-    if (comment.type === AttachmentType.alert) {
-      const totalAlerts = Array.isArray(comment.alertId) ? comment.alertId.length : 1;
-      const alertLabel = i18n.MULTIPLE_ALERTS(totalAlerts);
-
-      return `${i18n.REMOVED_FIELD} ${alertLabel}`;
-    }
-
-    if (comment.type === AttachmentType.externalReference) {
-      return getDeleteLabelFromRegistry({
-        caseData,
-        registry: externalReferenceAttachmentTypeRegistry,
-        getId: () => comment.externalReferenceAttachmentTypeId,
-        getAttachmentProps: () => ({
-          externalReferenceId: comment.externalReferenceId,
-          externalReferenceMetadata: comment.externalReferenceMetadata,
-        }),
-      });
-    }
-
-    if (comment.type === AttachmentType.persistableState) {
-      return getDeleteLabelFromRegistry({
-        caseData,
-        registry: persistableStateAttachmentTypeRegistry,
-        getId: () => comment.persistableStateAttachmentTypeId,
-        getAttachmentProps: () => ({
-          persistableStateAttachmentTypeId: comment.persistableStateAttachmentTypeId,
-          persistableStateAttachmentState: comment.persistableStateAttachmentState,
-        }),
-      });
-    }
-  }
-  if (isUnifiedReferenceAttachmentRequest(comment)) {
-    return getDeleteLabelFromRegistry({
-      caseData,
-      registry: unifiedAttachmentTypeRegistry,
-      getId: () => toUnifiedAttachmentType(comment.type, owner),
-      getAttachmentProps: () => ({
-        attachmentId: comment.attachmentId,
-        metadata: comment.metadata,
-      }),
-    });
-  }
-
-  return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
+  return getDeleteLabelFromRegistry({
+    caseData,
+    registry: unifiedAttachmentTypeRegistry,
+    getId: () => resolveUnifiedAttachmentType(comment, owner),
+    getAttachmentProps: () => ({
+      attachmentId: getReferenceAttachmentId(comment),
+      metadata: 'metadata' in comment ? comment.metadata : undefined,
+    }),
+  });
 };
 
-interface GetDeleteLabelFromRegistryArgs<R> {
+interface GetDeleteLabelFromRegistryArgs {
   caseData: UserActionBuilderArgs['caseData'];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   registry: AttachmentTypeRegistry<AttachmentFrameworkAttachmentType<any>>;
@@ -102,12 +59,12 @@ interface GetDeleteLabelFromRegistryArgs<R> {
   getAttachmentProps: () => object;
 }
 
-const getDeleteLabelFromRegistry = <R,>({
+const getDeleteLabelFromRegistry = ({
   caseData,
   registry,
   getId,
   getAttachmentProps,
-}: GetDeleteLabelFromRegistryArgs<R>) => {
+}: GetDeleteLabelFromRegistryArgs) => {
   const registeredAttachmentCommonLabel = `${i18n.REMOVED_FIELD} ${i18n.ATTACHMENT.toLowerCase()}`;
   const attachmentTypeId: string = getId();
   const isTypeRegistered = registry.has(attachmentTypeId);
@@ -131,26 +88,17 @@ const getDeleteCommentUserAction = ({
   userAction,
   userProfiles,
   caseData,
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
   handleOutlineComment,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
 } & Pick<
   UserActionBuilderArgs,
-  | 'handleOutlineComment'
-  | 'userProfiles'
-  | 'externalReferenceAttachmentTypeRegistry'
-  | 'persistableStateAttachmentTypeRegistry'
-  | 'unifiedAttachmentTypeRegistry'
-  | 'caseData'
+  'handleOutlineComment' | 'userProfiles' | 'unifiedAttachmentTypeRegistry' | 'caseData'
 >): EuiCommentProps[] => {
   const label = getDeleteLabelTitle({
     userAction,
     caseData,
-    externalReferenceAttachmentTypeRegistry,
-    persistableStateAttachmentTypeRegistry,
     unifiedAttachmentTypeRegistry,
   });
 
@@ -170,21 +118,14 @@ const getCreateCommentUserAction = ({
   userAction,
   userProfiles,
   caseData,
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
+  permissions,
   attachment,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
   euiTheme,
   handleDeleteComment,
-  getRuleDetailsHref,
-  loadingAlertData,
-  onRuleDetailsClick,
-  alertData,
-  onShowAlertDetails,
-  actionsNavigation,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
   attachment: AttachmentUIV2;
@@ -192,63 +133,11 @@ const getCreateCommentUserAction = ({
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
+  // Migrated external-reference / `actions` attachments are projected to their unified
+  // shape by the cases server before reaching the client (UI reads always use
+  // `mode: 'unified'`), so legacy-shaped attachments have no client-side renderer.
   if (isLegacyAttachmentRequest(attachment)) {
-    switch (attachment.type) {
-      case AttachmentType.alert:
-        const alertBuilder = createAlertAttachmentUserActionBuilder({
-          userProfiles,
-          alertData,
-          attachment,
-          userAction,
-          getRuleDetailsHref,
-          loadingAlertData,
-          onRuleDetailsClick,
-          onShowAlertDetails,
-          handleDeleteComment,
-          loadingCommentIds,
-        });
-
-        return alertBuilder.build();
-
-      case AttachmentType.actions:
-        const actionBuilder = createActionAttachmentUserActionBuilder({
-          userProfiles,
-          userAction,
-          attachment,
-          actionsNavigation,
-        });
-
-        return actionBuilder.build();
-
-      case AttachmentType.externalReference:
-        const externalReferenceBuilder = createExternalReferenceAttachmentUserActionBuilder({
-          userAction,
-          userProfiles,
-          attachment,
-          externalReferenceAttachmentTypeRegistry,
-          caseData,
-          isLoading: loadingCommentIds.includes(attachment.id),
-          handleDeleteComment,
-        });
-
-        return externalReferenceBuilder.build();
-
-      case AttachmentType.persistableState:
-        const persistableBuilder = createPersistableStateAttachmentUserActionBuilder({
-          userAction,
-          userProfiles,
-          attachment,
-          persistableStateAttachmentTypeRegistry,
-          caseData,
-          isLoading: loadingCommentIds.includes(attachment.id),
-          handleDeleteComment,
-        });
-
-        return persistableBuilder.build();
-
-      default:
-        return [];
-    }
+    return [];
   }
 
   const type = toUnifiedAttachmentType(
@@ -264,6 +153,7 @@ const getCreateCommentUserAction = ({
       userProfiles,
       attachment,
       unifiedAttachmentTypeRegistry,
+      permissions,
       caseData,
       isLoading: loadingCommentIds.includes(attachment.id),
       handleDeleteComment,
@@ -285,22 +175,15 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   caseData,
   casesConfiguration,
   userProfiles,
-  externalReferenceAttachmentTypeRegistry,
-  persistableStateAttachmentTypeRegistry,
   unifiedAttachmentTypeRegistry,
+  permissions,
   userAction,
   manageMarkdownEditIds,
   selectedOutlineCommentId,
   loadingCommentIds,
-  loadingAlertData,
-  alertData,
   euiTheme,
-  getRuleDetailsHref,
-  onRuleDetailsClick,
-  onShowAlertDetails,
   handleDeleteComment,
   handleOutlineComment,
-  actionsNavigation,
   caseConnectors,
   attachments,
 }) => ({
@@ -313,8 +196,6 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         caseData,
         handleOutlineComment,
         userProfiles,
-        externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
       });
     }
@@ -331,21 +212,14 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         casesConfiguration,
         userProfiles,
         userAction: attachmentUserAction,
-        externalReferenceAttachmentTypeRegistry,
-        persistableStateAttachmentTypeRegistry,
         unifiedAttachmentTypeRegistry,
+        permissions,
         attachment,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
         loadingCommentIds,
-        loadingAlertData,
-        alertData,
         euiTheme,
-        getRuleDetailsHref,
-        onRuleDetailsClick,
-        onShowAlertDetails,
         handleDeleteComment,
-        actionsNavigation,
         caseConnectors,
         attachments,
       });

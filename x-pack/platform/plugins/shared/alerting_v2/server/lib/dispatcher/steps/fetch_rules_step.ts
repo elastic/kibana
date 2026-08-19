@@ -16,6 +16,7 @@ import type {
   Rule,
   RuleId,
 } from '../types';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 @injectable()
 export class FetchRulesStep implements DispatcherStep {
@@ -26,10 +27,15 @@ export class FetchRulesStep implements DispatcherStep {
     private readonly rulesSavedObjectService: RulesSavedObjectServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { dispatchable = [] } = state;
 
-    const uniqueRuleIds = Array.from(new Set(dispatchable.map((ep) => ep.rule_id)));
+    const uniqueRuleIds = Array.from(
+      new Set(dispatchable.map((ep) => ep.rule_id).filter((id): id is string => id !== null))
+    );
     if (uniqueRuleIds.length === 0) {
       return { type: 'continue', data: { rules: new Map() } };
     }
@@ -42,11 +48,7 @@ export class FetchRulesStep implements DispatcherStep {
         id: doc.id,
         spaceId: savedObjectNamespacesToSpaceId(doc.namespaces),
         name: doc.attributes.metadata.name,
-        description: doc.attributes.metadata.owner ?? '',
         tags: doc.attributes.metadata.tags ?? [],
-        enabled: doc.attributes.enabled,
-        createdAt: doc.attributes.createdAt,
-        updatedAt: doc.attributes.updatedAt,
       });
     }
 

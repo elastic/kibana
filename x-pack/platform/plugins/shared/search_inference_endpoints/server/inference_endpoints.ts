@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
@@ -27,7 +27,7 @@ import type { ResolvedInferenceEndpoints } from './types';
  */
 export const getForFeature = async (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   getConnectorById: (id: string) => Promise<InferenceConnector>,
   featureId: string,
   logger: Logger
@@ -196,7 +196,7 @@ export const resolveFeatureEndpointIds = (
 
 const resolveEndpointIds = async (
   registry: InferenceFeatureRegistry,
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   featureId: string,
   logger: Logger
 ): Promise<ResolvedEndpointIds> => {
@@ -206,7 +206,7 @@ const resolveEndpointIds = async (
 };
 
 const readSettingsFeatures = async (
-  soClient: ISavedObjectsRepository,
+  soClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<InferenceSettingsAttributes['features']> => {
   try {

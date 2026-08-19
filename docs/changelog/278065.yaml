@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/278065
+issues:
+- https://github.com/elastic/search-team/issues/15091
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.6.0
+title: Drop `skill.id` from the UI and use `skill.name` instead

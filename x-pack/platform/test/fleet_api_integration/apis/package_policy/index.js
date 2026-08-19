@@ -22,5 +22,6 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./input_package_rollback'));
     loadTestFile(require.resolve('./deployment_modes'));
     loadTestFile(require.resolve('./reusable_policies'));
+    loadTestFile(require.resolve('./conditions'));
   });
 }

@@ -422,7 +422,7 @@ export const useRenderCellValue = (
       }
 
       if (fieldFormat !== undefined) {
-        return fieldFormat.convert(cellValue, 'text');
+        return fieldFormat.convertToText(cellValue);
       }
 
       if (typeof cellValue === 'string' || cellValue === null) {

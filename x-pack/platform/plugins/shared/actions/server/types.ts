@@ -100,6 +100,7 @@ export interface ActionTypeExecutorOptions<
   signal?: AbortSignal;
   authMode?: AuthMode;
   profileUid?: string;
+  connectorVersion?: string;
 }
 
 export type ActionResult = Connector;
@@ -242,6 +243,18 @@ export interface ActionTypeCoreFields<
    * Only applies to system actions (isSystemActionType: true).
    */
   allowMultipleSystemActions?: boolean;
+  /**
+   * Description of this connector type.
+   */
+  description?: string;
+  /**
+   * When true, the connector type supports testing.
+   */
+  isTestable?: boolean;
+  /**
+   * When true, the connector type is shown as technical preview in the UI.
+   */
+  isExperimental?: boolean;
   /**
    * Additional Kibana privileges to be checked by the actions framework.
    * Use it if you want to perform extra authorization checks based on a Kibana feature.

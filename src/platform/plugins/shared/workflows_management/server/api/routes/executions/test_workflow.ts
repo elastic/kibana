@@ -14,7 +14,7 @@ import type { RouteDependencies } from '../types';
 import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from '../utils/route_security';
-import { withLicenseCheck } from '../utils/with_license_check';
+import { withAvailabilityCheck } from '../utils/with_availability_check';
 
 export function registerTestWorkflowRoute(deps: RouteDependencies) {
   const { router, api, logger, spaces, audit } = deps;
@@ -53,7 +53,7 @@ export function registerTestWorkflowRoute(deps: RouteDependencies) {
           },
         },
       },
-      withLicenseCheck(async (context, request, response) => {
+      withAvailabilityCheck(async (context, request, response) => {
         try {
           const { workflowId, workflowYaml, inputs: rawInputs } = request.body;
 

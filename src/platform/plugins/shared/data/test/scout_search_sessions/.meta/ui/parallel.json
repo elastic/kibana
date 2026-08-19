@@ -1,0 +1,61 @@
+{
+  "sha1": "eca40d9e3beab916950c1d36db4e3c8972900a1d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "c0abc74cf61ff3c-6b1093d7d0c4ec0",
+      "title": "Ingest ES data for Background Search UI tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/global.setup.ts",
+        "line": 22,
+        "column": 16
+      }
+    },
+    {
+      "id": "42c36eb222a9c69-d56fcb76a2cca72",
+      "title": "Background Search management UI saves a background search from a dashboard, verifies it in management",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_management.spec.ts",
+        "line": 107,
+        "column": 12
+      }
+    },
+    {
+      "id": "9090798c9002ad7-ab2ee5dae588899",
+      "title": "Background Search management — permissions management is NOT accessible to users without store_search_session privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_permissions.spec.ts",
+        "line": 54,
+        "column": 14
+      }
+    },
+    {
+      "id": "9090798c9002ad7-9f9c256625e9d96",
+      "title": "Background Search management — permissions management IS accessible to users with store_search_session privilege",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data/test/scout_search_sessions/ui/parallel_tests/background_search_permissions.spec.ts",
+        "line": 63,
+        "column": 14
+      }
+    }
+  ]
+}

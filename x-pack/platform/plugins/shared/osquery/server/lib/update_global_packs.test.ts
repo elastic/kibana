@@ -242,9 +242,14 @@ describe('updateGlobalPacksCreateCallback', () => {
       mockOsqueryContext
     );
 
+    // `default_space_id` is emitted at the pack level, and `space_id` is set on
+    // each query — osquerybeat stamps scheduled responses from the per-query
+    // value, so it must be present (see https://github.com/elastic/kibana/issues/272253).
     expect(result.inputs[0].config?.osquery?.value?.packs?.['default--embedded-pack']).toEqual({
       shard: 100,
       pack_id: 'pack-so-id-4',
+      pack_name: 'embedded-pack',
+      default_space_id: 'default',
       queries: {
         query1: {
           name: 'test-query',
@@ -254,5 +259,51 @@ describe('updateGlobalPacksCreateCallback', () => {
         },
       },
     });
+  });
+
+  it('should NOT attach a disabled global pack to a newly created package policy', async () => {
+    // Regression for #279224: a disabled global pack must not be re-scheduled
+    // onto a new agent when the osquery integration is added.
+    const disabledGlobalPack: PackSavedObject = {
+      name: 'disabled-global-pack',
+      description: 'A disabled global pack',
+      enabled: false,
+      queries: [
+        {
+          id: 'query1',
+          name: 'query1',
+          query: 'SELECT * FROM processes;',
+          interval: 3600,
+        },
+      ],
+      shards: [{ key: '*', value: 100 }],
+      saved_object_id: 'pack-so-id-disabled',
+      created_at: '2024-01-01T00:00:00.000Z',
+      created_by: 'test-user',
+      updated_at: '2024-01-01T00:00:00.000Z',
+      updated_by: 'test-user',
+      references: [],
+    };
+
+    const newPackagePolicy: NewPackagePolicy = {
+      name: 'osquery-integration',
+      namespace: 'default',
+      description: '',
+      package: { name: 'osquery_manager', title: 'Osquery Manager', version: '1.0.0' },
+      enabled: true,
+      policy_ids: ['policy-1'],
+      inputs: [],
+    };
+
+    const result = await updateGlobalPacksCreateCallback(
+      newPackagePolicy,
+      mockPacksClient,
+      [disabledGlobalPack],
+      mockOsqueryContext
+    );
+
+    expect(mockPacksClient.update).not.toHaveBeenCalled();
+    expect(result).toEqual(newPackagePolicy);
+    expect(result.inputs[0]?.config?.osquery?.value?.packs).toBeUndefined();
   });
 });

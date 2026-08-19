@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { spaceTest as spaceBase, mergeTests } from '@kbn/scout';
+import { spaceTest as spaceBase } from '@kbn/scout';
 import { extendPageObjects } from '../page_objects';
-import { profilingSetupFixture } from './worker';
 
 import type { ObltParallelTestFixtures, ObltParallelWorkerFixtures } from './types';
 
-const baseFixture = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
+/**
+ * Does not merge `profilingSetupFixture`: it extends non-space `test`; `mergeTests`
+ * would overwrite the space-scoped `page` and break `scoutSpace` isolation.
+ * Profiling stays on single-thread `test` / `apiTest` / global setup.
+ */
+export const spaceTest = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
@@ -34,8 +38,3 @@ const baseFixture = spaceBase.extend<ObltParallelTestFixtures, ObltParallelWorke
     { scope: 'worker' },
   ],
 });
-
-/**
- * Should be used test spec files, running in parallel in isolated spaces against the same Kibana instance.
- */
-export const spaceTest = mergeTests(baseFixture, profilingSetupFixture);

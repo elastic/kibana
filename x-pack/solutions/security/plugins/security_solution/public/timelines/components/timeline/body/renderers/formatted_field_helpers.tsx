@@ -10,7 +10,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elasti
 import { isEmpty, isString } from 'lodash/fp';
 import type { SyntheticEvent } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
-import styled from 'styled-components';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
@@ -27,10 +26,14 @@ import { GenericLinkButton } from '../../../../../common/components/links/helper
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-
-const EventModuleFlexItem = styled(EuiFlexItem)`
-  width: 100%;
-`;
+import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
+import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
+import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
+import type { FlyoutOrigin } from '../../../../../common/lib/telemetry';
+import {
+  formatFlyoutTitle,
+  RULE_TITLE,
+} from '../../../../../flyout_v2/shared/constants/flyout_titles';
 
 interface RenderRuleNameProps {
   children?: React.ReactNode;
@@ -43,6 +46,12 @@ interface RenderRuleNameProps {
   truncate?: boolean;
   title?: string;
   value: string | number | null | undefined;
+  /**
+   * Which UI surface this is rendered in, for telemetry. Defaults to `table_field_link` (a
+   * standalone table/grid, e.g. the alerts table's rule name column); callers rendering this
+   * inside an already-open flyout should pass `field_link` instead.
+   */
+  origin?: FlyoutOrigin;
 }
 
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
@@ -56,14 +65,19 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   truncate,
   title,
   value,
+  origin = FLYOUT_ORIGIN.TABLE_FIELD_LINK,
 }) => {
   const { openFlyout } = useExpandableFlyoutApi();
+  const { services } = useKibana();
+  const { application } = services;
   const eventContext = useContext(StatefulEventContext);
+  const enableNewFlyout = useIsNewFlyoutEnabled();
+  const { openRuleFlyout } = useFlyoutApi();
 
   const ruleName = `${value}`;
   const ruleId = linkValue;
   const { search } = useFormatUrl(SecurityPageName.rules);
-  const { navigateToApp, getUrlForApp } = useKibana().services.application;
+  const { navigateToApp, getUrlForApp } = application;
   const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
 
   const isInTimelineContext =
@@ -82,6 +96,11 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         return;
       }
 
+      if (enableNewFlyout && ruleId) {
+        openRuleFlyout({ ruleId, origin, title: formatFlyoutTitle(RULE_TITLE, ruleName) });
+        return;
+      }
+
       openFlyout({
         right: {
           id: RulePanelKey,
@@ -91,7 +110,19 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
         },
       });
     },
-    [navigateToApp, ruleId, search, openInNewTab, openFlyout, eventContext, isInTimelineContext]
+    [
+      navigateToApp,
+      ruleId,
+      search,
+      openInNewTab,
+      openFlyout,
+      eventContext,
+      origin,
+      isInTimelineContext,
+      enableNewFlyout,
+      openRuleFlyout,
+      ruleName,
+    ]
   );
 
   const href = useMemo(
@@ -207,7 +238,7 @@ export const renderEventModule = ({
         endpointRefUrl != null && !isEmpty(endpointRefUrl) ? 'flexStart' : 'spaceBetween'
       }
     >
-      <EventModuleFlexItem>{content}</EventModuleFlexItem>
+      <EuiFlexItem css={{ width: '100%' }}>{content}</EuiFlexItem>
       {endpointRefUrl != null && canYouAddEndpointLogo(moduleName, endpointRefUrl) && (
         <EuiFlexItem grow={false}>
           <EuiToolTip
@@ -220,7 +251,7 @@ export const renderEventModule = ({
             }
           >
             <EuiLink href={endpointRefUrl} target="_blank">
-              <EuiIcon type={endPointSvg} size="m" />
+              <EuiIcon type={endPointSvg} size="m" aria-hidden={true} />
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>

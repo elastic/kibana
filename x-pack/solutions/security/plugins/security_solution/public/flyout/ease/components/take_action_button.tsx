@@ -93,12 +93,13 @@ export const TakeActionButton = memo(() => {
 
   return (
     <EuiPopover
+      aria-label={TAKE_ACTION_BUTTON}
       button={button}
       closePopover={togglePopover}
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 });

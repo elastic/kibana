@@ -56,10 +56,9 @@ export interface LensAppProps {
 }
 
 export type RunSave = (
-  saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+  saveProps: Omit<OnSaveProps, 'newDescription'> & {
     returnToOrigin: boolean;
     dashboardId?: string | null;
-    onTitleDuplicate: OnSaveProps['onTitleDuplicate'];
     newDescription?: string;
     newTags?: string[];
     panelTimeRange?: TimeRange;

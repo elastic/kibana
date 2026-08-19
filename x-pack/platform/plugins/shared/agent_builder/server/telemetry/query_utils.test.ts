@@ -8,85 +8,9 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { QueryUtils, isIndexNotFoundError } from './query_utils';
+import { QueryUtils } from './query_utils';
 
 describe('query_utils', () => {
-  describe('isIndexNotFoundError', () => {
-    it('returns true for error with caused_by.type = index_not_found_exception', () => {
-      const error = {
-        attributes: {
-          caused_by: {
-            type: 'index_not_found_exception',
-          },
-        },
-      };
-      expect(isIndexNotFoundError(error)).toBe(true);
-    });
-
-    it('returns true for error with error.caused_by.type = index_not_found_exception', () => {
-      const error = {
-        attributes: {
-          error: {
-            caused_by: {
-              type: 'index_not_found_exception',
-            },
-          },
-        },
-      };
-      expect(isIndexNotFoundError(error)).toBe(true);
-    });
-
-    it('returns false for other error types', () => {
-      const error = {
-        attributes: {
-          caused_by: {
-            type: 'some_other_exception',
-          },
-        },
-      };
-      expect(isIndexNotFoundError(error)).toBe(false);
-    });
-
-    it('returns false for error without attributes', () => {
-      const error = new Error('Regular error');
-      expect(isIndexNotFoundError(error)).toBe(false);
-    });
-
-    it('returns false for null', () => {
-      expect(isIndexNotFoundError(null)).toBe(false);
-    });
-
-    it('returns false for undefined', () => {
-      expect(isIndexNotFoundError(undefined)).toBe(false);
-    });
-
-    it('returns true for error with meta.body.error.type = index_not_found_exception', () => {
-      const error = {
-        meta: {
-          body: {
-            error: {
-              type: 'index_not_found_exception',
-            },
-          },
-        },
-      };
-      expect(isIndexNotFoundError(error)).toBe(true);
-    });
-
-    it('returns true for error with message containing index_not_found_exception', () => {
-      const error = {
-        message: 'index_not_found_exception: no such index [.chat-tools]',
-      };
-      expect(isIndexNotFoundError(error)).toBe(true);
-    });
-
-    it('returns false for primitive values', () => {
-      expect(isIndexNotFoundError('string')).toBe(false);
-      expect(isIndexNotFoundError(123)).toBe(false);
-      expect(isIndexNotFoundError(true)).toBe(false);
-    });
-  });
-
   describe('QueryUtils', () => {
     let esClient: jest.Mocked<ElasticsearchClient>;
     let soClient: jest.Mocked<SavedObjectsClientContract>;
@@ -435,6 +359,176 @@ describe('query_utils', () => {
 
         expect(result).toBe(0);
         expect(logger.warn).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('getSkillsMetrics', () => {
+      it('returns total, custom, and plugin counts from ES', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: {
+            total: { value: 42, relation: 'eq' },
+            hits: [],
+          },
+          aggregations: {
+            custom: { doc_count: 30 },
+            plugin: { doc_count: 12 },
+          },
+        });
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result).toEqual({
+          total: 42,
+          custom: 30,
+          plugin: 12,
+        });
+      });
+
+      it('handles hits.total as a number', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: 7, hits: [] },
+          aggregations: {
+            custom: { doc_count: 5 },
+            plugin: { doc_count: 2 },
+          },
+        });
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result.total).toBe(7);
+        expect(result.custom).toBe(5);
+        expect(result.plugin).toBe(2);
+      });
+
+      it('queries the skills index with track_total_hits and filter aggs', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          aggregations: {
+            custom: { doc_count: 0 },
+            plugin: { doc_count: 0 },
+          },
+        });
+
+        await queryUtils.getSkillsMetrics();
+
+        expect(esClient.search).toHaveBeenCalledWith({
+          index: '.chat-skills',
+          size: 0,
+          track_total_hits: true,
+          aggs: {
+            custom: {
+              filter: {
+                bool: {
+                  must_not: { exists: { field: 'plugin_id' } },
+                },
+              },
+            },
+            plugin: {
+              filter: {
+                exists: { field: 'plugin_id' },
+              },
+            },
+          },
+        });
+      });
+
+      it('defaults custom and plugin to 0 when aggregations are missing', async () => {
+        esClient.search.mockResolvedValue({
+          took: 1,
+          timed_out: false,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          hits: { total: { value: 0, relation: 'eq' }, hits: [] },
+          aggregations: {},
+        });
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result.custom).toBe(0);
+        expect(result.plugin).toBe(0);
+      });
+
+      it('returns zeros on index_not_found_exception', async () => {
+        const error = {
+          message: 'index_not_found_exception: no such index [.chat-skills]',
+        };
+        esClient.search.mockRejectedValue(error);
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result).toEqual({
+          total: 0,
+          custom: 0,
+          plugin: 0,
+        });
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('logs warning and returns zeros on other errors', async () => {
+        esClient.search.mockRejectedValue(new Error('ES error'));
+
+        const result = await queryUtils.getSkillsMetrics();
+
+        expect(result).toEqual({
+          total: 0,
+          custom: 0,
+          plugin: 0,
+        });
+        expect(logger.warn).toHaveBeenCalledWith('Failed to fetch skills metrics: ES error');
+      });
+    });
+
+    describe('getPluginsCount', () => {
+      it('returns plugins count from ES', async () => {
+        esClient.count.mockResolvedValue({
+          count: 9,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        });
+
+        const result = await queryUtils.getPluginsCount();
+
+        expect(result).toBe(9);
+        expect(esClient.count).toHaveBeenCalledWith({ index: '.chat-plugins' });
+      });
+
+      it('returns 0 when count is undefined', async () => {
+        esClient.count.mockResolvedValue({
+          count: undefined as any,
+          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+        });
+
+        const result = await queryUtils.getPluginsCount();
+
+        expect(result).toBe(0);
+      });
+
+      it('returns 0 and does not log warning for index_not_found_exception', async () => {
+        const error = {
+          message: 'index_not_found_exception: no such index [.chat-plugins]',
+        };
+        esClient.count.mockRejectedValue(error);
+
+        const result = await queryUtils.getPluginsCount();
+
+        expect(result).toBe(0);
+        expect(logger.warn).not.toHaveBeenCalled();
+      });
+
+      it('returns 0 and logs warning on other errors', async () => {
+        esClient.count.mockRejectedValue(new Error('ES error'));
+
+        const result = await queryUtils.getPluginsCount();
+
+        expect(result).toBe(0);
+        expect(logger.warn).toHaveBeenCalledWith('Failed to fetch plugins count: ES error');
       });
     });
 

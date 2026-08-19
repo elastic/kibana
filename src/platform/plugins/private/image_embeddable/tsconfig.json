@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
@@ -23,8 +23,8 @@
     "@kbn/presentation-publishing",
     "@kbn/presentation-publishing-schemas",
     "@kbn/presentation-util",
-    "@kbn/config-schema",
-    "@kbn/content-management-utils"
+    "@kbn/content-management-utils",
+    "@kbn/zod"
   ],
   "exclude": ["target/**/*"]
 }

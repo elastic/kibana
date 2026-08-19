@@ -179,16 +179,30 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           isSameFieldsType ? fields[0] : 'noType'
         );
 
-        return {
+        const result: FlyoutThresholdData = {
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
           pctAboveThreshold: getPctAboveThreshold(
             threshold,
             convertToBuiltInComparators(comparator),
-            observedValue
+            observedValue,
+            criteria.warningThreshold !== undefined && criteria.warningComparator !== undefined
+              ? true
+              : false
           ),
         } as unknown as FlyoutThresholdData;
+
+        if (criteria.warningThreshold && criteria.warningComparator) {
+          const warningThresholdFormattedAsString = formatThresholdValues(
+            criteria.warningThreshold,
+            isSameFieldsType ? fields[0] : 'noType'
+          );
+          result.warningThreshold = warningThresholdFormattedAsString;
+          result.warningComparator = criteria.warningComparator;
+        }
+
+        return result;
       });
 
     case METRIC_THRESHOLD_ALERT_TYPE_ID:

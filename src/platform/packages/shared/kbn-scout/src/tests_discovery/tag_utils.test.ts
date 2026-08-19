@@ -119,13 +119,12 @@ describe('getServerRunFlagsFromTags', () => {
     expect(result).toContain('--arch stateful --domain classic');
   });
 
-  it('returns one flag per tag when multiple tags map to same arch/domain', () => {
+  it('dedupes flags when multiple tag aliases map to the same arch/domain', () => {
     const result = getServerRunFlagsFromTags([
       '@local-stateful-classic',
       '@cloud-stateful-classic',
     ]);
-    expect(result).toContain('--arch stateful --domain classic');
-    expect(result).toHaveLength(2);
+    expect(result).toEqual(['--arch stateful --domain classic']);
   });
 
   it('returns only flags for supported arch/domain combinations', () => {

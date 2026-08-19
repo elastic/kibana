@@ -7,15 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: merge with src/platform/plugins/shared/discover/test/scout/data_grid/ui/parallel_tests/doc_viewer_flyout_accessibility.spec.ts. There should be one test to check that flyout accessibliity is behaving.
+ */
+
 import expect from '@kbn/expect';
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { openDiscoverSearchThresholdRuleFlyout } from '../open_search_threshold_rule_flyout';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -37,10 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
-      );
-      // and load a set of makelogs data
-      await esArchiver.loadIfNeeded(
-        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('discover');
@@ -96,24 +96,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ));
 
       it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
-        await testSubjects.click('app-menu-overflow-button');
-        await testSubjects.existOrFail('discoverAlertsButton');
-        await testSubjects.click('discoverAlertsButton');
-        await testSubjects.existOrFail('discoverCreateAlertButton');
-        await testSubjects.click('discoverCreateAlertButton');
-        await testSubjects.existOrFail('addRuleFlyoutTitle');
+        await openDiscoverSearchThresholdRuleFlyout({ testSubjects, retry });
+        await testSubjects.existOrFail('euiFlyoutCloseButton');
+        await testSubjects.click('euiFlyoutCloseButton');
+        await testSubjects.missingOrFail('euiFlyoutCloseButton');
+        await testSubjects.existOrFail('app-menu-overflow-button');
+
         await retry.try(async () => {
-          await browser.pressKeys(browser.keys.ESCAPE);
-          // A bug exists with the create rule flyout where sometimes the confirm modal
-          // shows even though the form hasn't been touched, so this works around it
-          if (await testSubjects.exists('confirmRuleCloseModal', { timeout: 0 })) {
-            await focusAndPressButton(
-              await testSubjects.findDescendant(
-                'confirmModalConfirmButton',
-                await testSubjects.find('confirmRuleCloseModal')
-              )
-            );
-          }
           expect(await hasFocus('app-menu-overflow-button')).to.be(true);
         });
       });

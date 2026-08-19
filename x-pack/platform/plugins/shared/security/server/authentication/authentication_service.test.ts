@@ -45,6 +45,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AuthenticationResult } from './authentication_result';
 import { AuthenticationService } from './authentication_service';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
+import { KIBANA_AUTH_FULL_HEADER } from '../../common/constants';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { auditServiceMock } from '../audit/mocks';
@@ -590,7 +591,7 @@ describe('AuthenticationService', () => {
         expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
       });
 
-      it('filters out and recovers `Authorization` header when provider cannot handle error.', async () => {
+      it('filters out and recovers `Authorization` header and enforces full authentication when provider cannot handle error.', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({
             statusCode: 401,
@@ -615,12 +616,12 @@ describe('AuthenticationService', () => {
 
         expect(reauthenticate).toHaveBeenCalledTimes(1);
         expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
-        expect(modifiedHeaders).toEqual({ Random: 'random' });
+        expect(modifiedHeaders).toEqual({ Random: 'random', [KIBANA_AUTH_FULL_HEADER]: 'true' });
 
         expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
       });
 
-      it('filters out and recovers `Authorization` header when provider can handle error.', async () => {
+      it('filters out and recovers `Authorization` header and enforces full authentication when provider can handle error.', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({
             statusCode: 401,
@@ -649,12 +650,12 @@ describe('AuthenticationService', () => {
 
         expect(reauthenticate).toHaveBeenCalledTimes(1);
         expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
-        expect(modifiedHeaders).toEqual({ Random: 'random' });
+        expect(modifiedHeaders).toEqual({ Random: 'random', [KIBANA_AUTH_FULL_HEADER]: 'true' });
 
         expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
       });
 
-      it('filters out and recovers `Authorization` header when provider fails with unexpected error.', async () => {
+      it('filters out and recovers `Authorization` header and enforces full authentication when provider fails with unexpected error.', async () => {
         const failureReason = new errors.ResponseError(
           securityMock.createApiResponse({
             statusCode: 401,
@@ -681,7 +682,7 @@ describe('AuthenticationService', () => {
 
         expect(reauthenticate).toHaveBeenCalledTimes(1);
         expect(reauthenticate).toHaveBeenCalledWith(mockRequest);
-        expect(modifiedHeaders).toEqual({ Random: 'random' });
+        expect(modifiedHeaders).toEqual({ Random: 'random', [KIBANA_AUTH_FULL_HEADER]: 'true' });
 
         expect(mockRequest.headers).toEqual({ Authorization: 'Basic xxx', Random: 'random' });
       });

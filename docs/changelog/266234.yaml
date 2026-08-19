@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/266234
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- AI and machine Learning
+title: Fix ARM ELSER model selection during product doc installation
+description: Kibana no longer defaults to the Linux-based ELSER model when the inference ID contains `elser` on ARM deployments.

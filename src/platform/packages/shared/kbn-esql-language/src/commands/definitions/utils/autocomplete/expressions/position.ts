@@ -10,8 +10,9 @@
 import { isColumn, isFunctionExpression, isInlineCast, isLiteral, within } from '@elastic/esql';
 import type { ESQLSingleAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ESQLColumnData } from '../../../../registry/types';
-import { getIncompleteOperatorReason, isNullCheckOperator } from './utils';
+import { getIncompleteOperatorReason, getRightmostOperator, isNullCheckOperator } from './utils';
 import { getExpressionType } from '../../expressions';
+import { escapeRegExp } from '../../regex';
 
 export type ExpressionPosition =
   | 'in_function'
@@ -23,8 +24,6 @@ export type ExpressionPosition =
 
 /** Matches " not" at end of string (case insensitive) */
 const NOT_PATTERN = / not$/i;
-/** Matches all regex special characters: . * + ? ^ $ { } ( ) | [ ] \ */
-const REGEX_SPECIAL_CHARS = /[.*+?^${}()|[\]\\]/g;
 /** Matches "::" or "::bool" at end of string */
 const INLINE_CAST_PATTERN = /::\s*([\w]*)$/;
 
@@ -54,7 +53,7 @@ export function getPosition(
   }
 
   if (isColumn(expressionRoot)) {
-    const escapedColumn = expressionRoot.parts.join('.').replace(REGEX_SPECIAL_CHARS, '\\$&');
+    const escapedColumn = escapeRegExp(expressionRoot.parts.join('.'));
     const endsWithColumnName = new RegExp(`${escapedColumn}$`).test(innerText);
 
     // If cursor is after column but text continues, suggest operators
@@ -69,10 +68,17 @@ export function getPosition(
 
   // Function expression (operators or variadic functions like CONCAT)
   if (isFunctionExpression(expressionRoot)) {
-    if (expressionRoot.subtype === 'variadic-call') {
-      const cursorIsInside = within(innerText.length, expressionRoot);
+    const rightmostExpression = getRightmostOperator(expressionRoot);
 
-      return cursorIsInside ? 'in_function' : 'after_complete';
+    if (
+      rightmostExpression.subtype === 'variadic-call' &&
+      within(innerText.length, rightmostExpression)
+    ) {
+      return 'in_function';
+    }
+
+    if (expressionRoot.subtype === 'variadic-call') {
+      return 'after_complete';
     }
 
     // Postfix unary operators (IS NULL, IS NOT NULL) are complete when not marked incomplete

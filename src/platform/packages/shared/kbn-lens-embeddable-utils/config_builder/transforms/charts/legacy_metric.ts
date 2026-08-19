@@ -14,8 +14,10 @@ import type {
   TextBasedLayer,
   TypedLensSerializedState,
 } from '@kbn/lens-common';
+import { LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../constants';
 import {
@@ -28,13 +30,13 @@ import {
   operationFromColumn,
 } from '../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
-import type { LensApiState, LegacyMetricState } from '../../schema';
+import type { LensApiConfig, LegacyMetricConfig } from '../../schema';
 import { fromMetricAPItoLensState } from '../columns/metric';
 import type { DeepMutable, DeepPartial } from '../utils';
 import { generateLayer } from '../utils';
 import type {
-  LegacyMetricStateESQL,
-  LegacyMetricStateNoESQL,
+  LegacyMetricConfigESQL,
+  LegacyMetricConfigNoESQL,
 } from '../../schema/charts/legacy_metric';
 import {
   getSharedChartLensStateToAPI,
@@ -48,28 +50,35 @@ import {
   fromColorByValueLensStateToAPI,
   isAutoColor,
   isColorByValueAbsolute,
+  isColorByValuePalette,
 } from '../coloring';
 import { isEsqlTableTypeDataSource } from '../../utils';
 import { stripUndefined } from './utils';
 
 const ACCESSOR = 'legacy_metric_accessor';
 
-function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisualizationState {
+function buildVisualizationState(config: LegacyMetricConfig): LegacyMetricVisualizationState {
   const layer = config;
 
   return {
     layerId: DEFAULT_LAYER_ID,
     layerType: 'data',
     accessor: ACCESSOR,
-    size: layer.metric.size,
-    titlePosition: layer.metric.labels?.alignment,
-    textAlign: layer.metric.values?.alignment,
+    ...(layer.metric.size ? { size: layer.metric.size } : {}),
+    ...(layer.metric.labels?.alignment ? { titlePosition: layer.metric.labels?.alignment } : {}),
+    ...(layer.metric.values?.alignment ? { textAlign: layer.metric.values?.alignment } : {}),
     ...(layer.metric.apply_color_to
       ? stripUndefined({
           colorMode: layer.metric.apply_color_to === 'background' ? 'Background' : 'Labels',
           palette:
             layer.metric.color && !isAutoColor(layer.metric.color)
-              ? fromColorByValueAPIToLensState(layer.metric.color)
+              ? // Legacy metric is always a single value with no data range, so a named
+                // palette colors it across an absolute range (useNumericRange = true).
+                fromColorByValueAPIToLensState(
+                  layer.metric.color,
+                  LENS_LEGACY_METRIC_DEFAULT_COLOR_STEPS,
+                  true
+                )
               : undefined,
         })
       : { colorMode: 'None' }),
@@ -83,7 +92,7 @@ function reverseBuildVisualizationState(
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
-): LegacyMetricState {
+): LegacyMetricConfig {
   if (visualization.accessor == null) {
     throw new Error('Metric accessor is missing in the visualization state');
   }
@@ -100,16 +109,16 @@ function reverseBuildVisualizationState(
     throw new Error('Unsupported DataSource type');
   }
 
-  const props: DeepPartial<DeepMutable<LegacyMetricState>> = {
+  const props: DeepPartial<DeepMutable<LegacyMetricConfig>> = {
     ...generateApiLayer(layer),
     metric: isEsqlTableTypeDataSource(dataSource)
       ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
       : operationFromColumn(visualization.accessor, layer as FormBasedLayer),
-  } as LegacyMetricState;
+  } as LegacyMetricConfig;
 
   if (props.metric) {
     if (visualization.size) {
-      props.metric.size = visualization.size as LegacyMetricState['metric']['size'];
+      props.metric.size = visualization.size as LegacyMetricConfig['metric']['size'];
     }
 
     if (visualization.titlePosition || visualization.textAlign) {
@@ -130,7 +139,7 @@ function reverseBuildVisualizationState(
         visualization.colorMode === 'Background' ? 'background' : 'value';
 
       const color = fromColorByValueLensStateToAPI(visualization.palette) ?? AUTO_COLOR;
-      if (isColorByValueAbsolute(color) || isAutoColor(color)) {
+      if (isColorByValueAbsolute(color) || isAutoColor(color) || isColorByValuePalette(color)) {
         props.metric.color = color;
       }
     }
@@ -138,12 +147,12 @@ function reverseBuildVisualizationState(
 
   return {
     type: 'legacy_metric',
-    data_source: dataSource satisfies LegacyMetricState['data_source'],
+    data_source: dataSource satisfies LegacyMetricConfig['data_source'],
     ...props,
-  } as LegacyMetricState;
+  } as LegacyMetricConfig;
 }
 
-function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: LegacyMetricConfigNoESQL): FormBasedPersistedState['layers'] {
   const columns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -154,7 +163,7 @@ function buildFormBasedLayer(layer: LegacyMetricStateNoESQL): FormBasedPersisted
   return layers;
 }
 
-function getValueColumns(layer: LegacyMetricStateESQL) {
+function getValueColumns(layer: LegacyMetricConfigESQL) {
   return [getValueColumn(ACCESSOR, layer.metric, 'number')];
 }
 
@@ -168,10 +177,10 @@ type LegacyMetricAttributesWithoutFiltersAndQuery = Omit<LegacyMetricAttributes,
 };
 
 export function fromAPItoLensState(
-  config: LegacyMetricState
+  config: LegacyMetricConfig
 ): LegacyMetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
-    buildFormBasedLayer(cfg as LegacyMetricStateNoESQL);
+    buildFormBasedLayer(cfg as LegacyMetricConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -189,6 +198,7 @@ export function fromAPItoLensState(
     visualizationType: 'lnsLegacyMetric',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,
@@ -200,7 +210,7 @@ export function fromAPItoLensState(
 
 export function fromLensStateToAPI(
   config: LensAttributes
-): Extract<LensApiState, { type: 'legacy_metric' }> {
+): Extract<LensApiConfig, { type: 'legacy_metric' }> {
   const { state } = config;
   const visualization = state.visualization as LegacyMetricVisualizationState;
   const layers = getDatasourceLayers(state);

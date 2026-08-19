@@ -57,7 +57,7 @@ describe('CommentActions', () => {
     const { container } = render(<CommentActions message={message} />, { wrapper: Wrapper });
 
     fireEvent.click(
-      container.querySelector('[aria-label="Add message content as a timeline note"]')!
+      container.querySelector('[aria-label="Add message content as a Timeline note"]')!
     );
 
     expect(updateAndAssociateNode).toHaveBeenCalledWith(
@@ -94,7 +94,7 @@ describe('CommentActions', () => {
 
     const attachments = args.getAttachments();
     expect(attachments).toHaveLength(1);
-    expect(attachments[0].comment).toBe('Only this should be copied!');
+    expect(attachments[0].data.content).toBe('Only this should be copied!');
   });
   it('renders timeline and case actions when not EASE', () => {
     const message: ClientMessage = {

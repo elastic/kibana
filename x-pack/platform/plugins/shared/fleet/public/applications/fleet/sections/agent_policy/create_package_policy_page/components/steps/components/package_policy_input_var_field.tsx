@@ -13,7 +13,6 @@ import {
   EuiSwitch,
   EuiFieldText,
   EuiText,
-  EuiTitle,
   EuiFieldPassword,
   EuiCodeBlock,
   EuiTextArea,
@@ -34,10 +33,60 @@ import { useFleetStatus, useStartServices } from '../../../../../../../../hooks'
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
+import type {
+  DataStream,
+  RegistryVarsEntry,
+  RegistryVarsMigrateFrom,
+} from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
 import { DatasetComponent } from './dataset_component';
+
+const VarMigrationTooltip = ({
+  migrateFrom: migrateFromProp,
+}: {
+  migrateFrom: RegistryVarsMigrateFrom | string;
+}) => {
+  const migrateFrom: RegistryVarsMigrateFrom =
+    typeof migrateFromProp === 'string' ? { name: migrateFromProp } : migrateFromProp;
+  const { name, scope } = migrateFrom;
+  let content: string;
+  if (name && scope) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedNameAndScopeTooltip',
+      {
+        defaultMessage:
+          'This variable was previously named {name} at {scope} level. Its value was carried over from the previous package version.',
+        values: { name, scope },
+      }
+    );
+  } else if (scope) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedScopeTooltip',
+      {
+        defaultMessage:
+          'This variable was previously at {scope} level. Its value was carried over from the previous package version.',
+        values: { scope },
+      }
+    );
+  } else if (name) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedNameTooltip',
+      {
+        defaultMessage:
+          'This variable was previously named {name}. Its value was carried over from the previous package version.',
+        values: { name },
+      }
+    );
+  } else {
+    return null;
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiIconTip type="info" color="subdued" content={content} />
+    </EuiFlexItem>
+  );
+};
 
 const FixedHeightDiv = styled.div`
   height: 300px;
@@ -65,6 +114,7 @@ export interface InputFieldProps {
   datastreams?: DataStream[];
   isEditPage?: boolean;
   isRequiredByVarGroup?: boolean;
+  isUpgrade?: boolean;
 }
 
 type InputComponentProps = InputFieldProps & {
@@ -89,6 +139,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     datastreams = [],
     isEditPage = false,
     isRequiredByVarGroup = false,
+    isUpgrade = false,
   }) => {
     const fleetStatus = useFleetStatus();
     const [isDirty, setIsDirty] = useState<boolean>(false);
@@ -113,22 +164,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       return null;
     }
 
-    if (type === 'section_header') {
-      return (
-        <>
-          <EuiTitle size="xxs">
-            <h4>{title || name}</h4>
-          </EuiTitle>
-          {description && (
-            <EuiText size="s" color="subdued">
-              <ReactMarkdown children={description} />
-            </EuiText>
-          )}
-        </>
-      );
-    }
-
-    if (name === DATASET_VAR_NAME && packageType === 'input') {
+    if (name === DATASET_VAR_NAME) {
       return (
         <DatasetComponent
           pkgName={packageName}
@@ -197,6 +233,10 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     const deprecatedIcon = isDeprecated ? (
       <EuiIconTip type="warning" color="warning" position="top" content={deprecationTooltip} />
     ) : undefined;
+    const migrationTooltip =
+      isUpgrade && varDef.migrate_from ? (
+        <VarMigrationTooltip migrateFrom={varDef.migrate_from} />
+      ) : undefined;
     const labelAppend = isOptional ? (
       <EuiText size="xs" color="subdued">
         <FormattedMessage
@@ -215,6 +255,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
         labelAppend={
           <>
             {deprecatedIcon}&nbsp;
+            {migrationTooltip}&nbsp;
             {labelAppend}
           </>
         }
@@ -249,6 +290,7 @@ function getInputComponent({
         onChange={onChange}
         onBlur={() => setIsDirty(true)}
         isDisabled={frozen}
+        isSecret={varDef.secret}
         data-test-subj={`multiTextInput-${fieldTestSelector}`}
       />
     );

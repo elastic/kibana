@@ -35,7 +35,7 @@ export const extractSchemaCore = (schema: z.ZodType, meta: ResolvedMetaFunctions
   let isOptional = false;
 
   while (isUnwrappable(current)) {
-    if (current instanceof z.ZodDefault) {
+    if (current instanceof z.ZodDefault && defaultValue === undefined) {
       defaultValue = current.parse(undefined);
     }
 

@@ -9,8 +9,8 @@ import type {
   AgentHandlerContext,
   ScopedRunnerRunAgentParams,
   RunAgentReturn,
-  ExperimentalFeatures,
 } from '@kbn/agent-builder-server';
+import { getConnectorProvider } from '@kbn/inference-common';
 import { getCurrentSpaceId } from '../../../utils/spaces';
 import { withAgentSpan } from '../../../tracing';
 import { createAgentHandler } from '../run_agent/create_handler';
@@ -20,6 +20,7 @@ import {
   createAttachmentsService,
   createToolProvider,
   createSkillsService,
+  createFilesystemServices,
 } from './utils';
 import { createPluginsService } from './utils/plugins';
 import type { RunnerManager } from './runner';
@@ -36,36 +37,53 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     request,
     spaces,
     elasticsearch,
+    http,
     savedObjects,
     modelProvider,
     toolsService,
     attachmentsService,
+    renderersService,
     resultStore,
     skillsStore,
     attachmentStateManager,
+    todoStateManager,
     logger,
     promptManager,
     stateManager,
-    filestore,
     skillServiceStart,
     pluginsServiceStart,
     toolManager,
+    analyticsService,
+    trackingService,
+    experimentalFeatures,
+    projectRouting,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
   const toolRegistry = await toolsService.getRegistry({ request });
 
-  const experimentalFeatures: ExperimentalFeatures = {
-    filestore: true,
-    skills: true,
-  };
+  const { filesystemService, bashService } = await createFilesystemServices({
+    manager,
+    experimentalFeatures,
+    workspaceId: agentExecutionParams.agentParams?.conversation?.workspace_id,
+    spaceId,
+  });
 
   return {
     request,
     spaceId,
+    defaultConnectorId: manager.deps.defaultConnectorId,
     logger,
     modelProvider,
-    esClient: elasticsearch.client.asScoped(request),
+    esClient: elasticsearch.client.asScoped(
+      request,
+      projectRouting
+        ? { projectRouting: 'expression', value: projectRouting }
+        : {
+            projectRouting: 'space',
+          }
+    ),
+    selfClient: http.selfClient,
     savedObjectsClient: savedObjects.getScopedClient(request),
     runner: manager.getRunner(),
     toolRegistry,
@@ -77,7 +95,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
-    filestore,
+    todoStateManager,
     stateManager,
     promptManager,
     attachments: createAttachmentsService({
@@ -94,11 +112,18 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
       spaceId,
       runner: manager.getRunner(),
     }),
+    renderers: renderersService,
     plugins: createPluginsService({ pluginsServiceStart, request }),
     toolManager,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
     hooks: manager.deps.hooks,
     experimentalFeatures,
+    executionMode: manager.deps.executionMode,
+    subAgentExecutor: manager.deps.subAgentExecutor,
+    analyticsService,
+    trackingService,
+    filesystemService,
+    bashService,
   };
 };
 
@@ -121,20 +146,43 @@ export const runAgent = async ({
 
   const { agentsService, request } = manager.deps;
   const agentRegistry = await agentsService.getRegistry({ request });
-  const agent = await agentRegistry.get(agentId);
+  const agent = await agentRegistry.get(agentId, { access: 'use' });
 
-  const agentResult = await withAgentSpan({ agent }, async () => {
-    const agentHandler = createAgentHandler({ agent });
-    const agentHandlerContext = await createAgentHandlerContext({ agentExecutionParams, manager });
-    return await agentHandler(
-      {
-        runId: manager.context.runId,
-        agentParams,
-        abortSignal: manager.deps.abortSignal,
-      },
-      agentHandlerContext
-    );
+  // Layer runtime overrides onto the agent's own config first, then merge with the type base.
+  const agentWithOverrides = {
+    ...agent,
+    configuration: {
+      ...agent.configuration,
+      ...(agentParams.configurationOverrides || {}),
+    },
+  };
+  const effectiveConfiguration = await agentsService.resolveAgentConfiguration({
+    agent: agentWithOverrides,
+    request,
   });
+  manager.deps.agentConfiguration = effectiveConfiguration;
+
+  const chatModel = (await manager.deps.modelProvider.getDefaultModel()).chatModel;
+  const providerName = getConnectorProvider(chatModel.getConnector());
+
+  const agentResult = await withAgentSpan(
+    { agent, conversationId: agentParams.conversation?.id, providerName },
+    async () => {
+      const agentHandler = createAgentHandler({ agent, effectiveConfiguration });
+      const agentHandlerContext = await createAgentHandlerContext({
+        agentExecutionParams,
+        manager,
+      });
+      return await agentHandler(
+        {
+          runId: manager.context.runId,
+          agentParams,
+          abortSignal: manager.deps.abortSignal,
+        },
+        agentHandlerContext
+      );
+    }
+  );
 
   return {
     result: agentResult.result,

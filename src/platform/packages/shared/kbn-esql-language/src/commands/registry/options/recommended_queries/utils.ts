@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const prettifyQuery = (src: string): string => {
-  // Split by pipes and format each command on its own line with indentation
-  const parts = src.split('|').map((part) => part.trim());
+import { Parser, WrappingPrettyPrinter } from '@elastic/esql';
 
-  return parts
-    .map((part, index) => {
-      if (index === 0) {
-        // First part (FROM command) - no leading pipe or indentation
-        return part;
-      } else {
-        // All subsequent commands start with pipe and have 2-space indentation
-        return `  | ${part}`;
-      }
-    })
-    .join('\n');
+/**
+ * Prettifies an ES|QL query using the @elastic/esql parser and multiline pretty printer.
+ */
+export const prettifyQuery = (src: string): string => {
+  const { root } = Parser.parse(src, { withFormatting: true });
+  return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
 export const prettifyQueryTemplate = (query: string) => {

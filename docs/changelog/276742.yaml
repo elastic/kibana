@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/276742
+issues:
+- https://github.com/elastic/kibana/issues/273838
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Search and data
+title: "Fix Fleet preconfigured policy reset aborting with 404 on legacy deployments"
+description: "On deployments where space awareness is disabled, `POST /internal/fleet/reset_preconfigured_agent_policies/{id}` no longer aborts with a 404 before Fleet setup can rebuild the preconfigured policy."

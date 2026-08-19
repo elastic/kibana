@@ -1,0 +1,7 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266115
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+title: 'Fix the "Take Action" bulk menu that allowed changing to the same Attach Discovery status'

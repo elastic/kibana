@@ -55,6 +55,9 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     enableFilters: filtersEnabled = true,
   } = props.displayOptions ?? {};
 
+  const latestColumnsRef = useRef(columns);
+  latestColumnsRef.current = columns;
+
   useEffect(() => {
     // Ensure we get a stabilised set of initial state incase dependencies change, as
     // the data view creation process is async.
@@ -81,7 +84,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
             kibanaSavedObjectMeta: {
               searchSourceJSON,
             },
-            columns,
+            columns: latestColumnsRef.current,
             sort:
               sort ?? getDefaultSort(dataView, undefined, undefined, isOfAggregateQueryType(query)),
             grid,
@@ -113,8 +116,9 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
     return () => {
       abortController.abort();
     };
+    // columns is synced after mount via syncColumns; omitting it here avoids remounting
+    // the embeddable when columns change.
   }, [
-    columns,
     sort,
     grid,
     rowHeight,
@@ -160,23 +164,27 @@ const SavedSearchComponentTable: React.FC<
     dependencies: { dataViews },
     initialSerializedState,
     filters,
+    nonHighlightingFilters,
     query,
     timeRange,
     timestampField,
     index,
     columns,
     onTableConfigChange,
+    resolveColumnsOnChange,
   } = props;
   const embeddableApi = useRef<SearchEmbeddableApi | undefined>(undefined);
   const [isEmbeddableApiAvailable, setIsEmbeddableApiAvailable] = useState(false);
 
+  const { executionContext } = props;
   const parentApi = useMemo(() => {
     return {
+      ...(executionContext ? { executionContext } : {}),
       getSerializedStateForChild: () => {
         return initialSerializedState;
       },
     };
-  }, [initialSerializedState]);
+  }, [initialSerializedState, executionContext]);
 
   useEffect(
     function syncIndex() {
@@ -221,6 +229,26 @@ const SavedSearchComponentTable: React.FC<
   );
 
   useEffect(
+    function syncNonHighlightingFilters() {
+      if (!embeddableApi.current) return;
+
+      const applyNonHighlightingFilters = (savedSearch: SavedSearch) => {
+        savedSearch.searchSource.setField('nonHighlightingFilters', nonHighlightingFilters);
+      };
+
+      applyNonHighlightingFilters(embeddableApi.current.savedSearch$.getValue());
+      const subscription = embeddableApi.current.savedSearch$.subscribe(
+        applyNonHighlightingFilters
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [nonHighlightingFilters, isEmbeddableApiAvailable]
+  );
+
+  useEffect(
     function syncTimeRange() {
       if (!embeddableApi.current) return;
       embeddableApi.current.setTimeRange(timeRange);
@@ -233,7 +261,31 @@ const SavedSearchComponentTable: React.FC<
       if (!embeddableApi.current) return;
       embeddableApi.current.setColumns(columns);
     },
-    [columns]
+    [columns, isEmbeddableApiAvailable]
+  );
+
+  useEffect(
+    function reconcileColumnsOnEmbeddableChange() {
+      if (!embeddableApi.current || !resolveColumnsOnChange) return;
+
+      const subscription = embeddableApi.current.savedSearch$
+        .pipe(
+          map((savedSearch) => savedSearch.columns),
+          distinctUntilChanged((prev, curr) => isEqual(prev, curr))
+        )
+        .subscribe((emittedColumns) => {
+          const resolvedColumns = resolveColumnsOnChange(emittedColumns);
+
+          if (resolvedColumns && !isEqual(resolvedColumns, emittedColumns)) {
+            embeddableApi.current?.setColumns(resolvedColumns);
+          }
+        });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    },
+    [resolveColumnsOnChange, isEmbeddableApiAvailable]
   );
 
   // Subscribe to table config changes and notify parent via callback

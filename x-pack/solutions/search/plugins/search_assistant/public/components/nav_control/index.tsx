@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiErrorBoundary, EuiShowFor, EuiToolTip } from '@elastic/eui';
+import { EuiErrorBoundary, EuiShowFor, EuiToolTip, type EuiToolTipRef } from '@elastic/eui';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
@@ -95,11 +95,7 @@ export function NavControl() {
     title: undefined,
   };
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const tooltipRef = useRef<EuiToolTip>(null);
-
-  const handleTooltipMouseOut = useCallback(() => {
-    tooltipRef.current?.hideToolTip();
-  }, []);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
 
   const handleClick = () => {
     tooltipRef.current?.hideToolTip();
@@ -115,7 +111,7 @@ export function NavControl() {
   return (
     <>
       <EuiShowFor sizes={['m', 'l', 'xl']}>
-        <EuiToolTip content={shortcutLabel} ref={tooltipRef} onMouseOut={handleTooltipMouseOut}>
+        <EuiToolTip content={shortcutLabel} ref={tooltipRef}>
           <AiButton
             buttonRef={buttonRef}
             variant={variant}
@@ -131,11 +127,7 @@ export function NavControl() {
       </EuiShowFor>
 
       <EuiShowFor sizes={['xs', 's']}>
-        <EuiToolTip
-          content={fullTooltipContent}
-          ref={tooltipRef}
-          onMouseOut={handleTooltipMouseOut}
-        >
+        <EuiToolTip content={fullTooltipContent} ref={tooltipRef}>
           <AiButton
             buttonRef={buttonRef}
             iconOnly

@@ -149,6 +149,12 @@ const startDependencies = {
 const datasourceMap = mockDatasourceMap();
 const visualizationMap = mockVisualizationMap();
 
+const expectToBeEUIAriaDisabledButton = (element: HTMLElement) => {
+  expect(element).toHaveClass('euiButton');
+  expect(element).toHaveAttribute('type', 'button');
+  expect(element).toHaveAttribute('aria-disabled', 'true');
+};
+
 describe('LensEditConfigurationFlyout', () => {
   async function renderConfigFlyout(
     propsOverrides: Partial<EditConfigPanelProps> = {},
@@ -224,6 +230,35 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('lns-layerPanel-0')).toBeInTheDocument();
     await userEvent.click(screen.getByTestId('cancelFlyoutButton'));
     expect(closeFlyoutSpy).toHaveBeenCalled();
+  });
+
+  it('should cancel editing when the header close button is clicked', async () => {
+    const closeFlyoutSpy = jest.fn();
+    const onCancelSpy = jest.fn();
+
+    await renderConfigFlyout({
+      closeFlyout: closeFlyoutSpy,
+      onCancel: onCancelSpy,
+      displayFlyoutHeader: true,
+    });
+    await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+    expect(closeFlyoutSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('should cancel editing when Escape is pressed', async () => {
+    const closeFlyoutSpy = jest.fn();
+    const onCancelSpy = jest.fn();
+
+    await renderConfigFlyout({
+      closeFlyout: closeFlyoutSpy,
+      onCancel: onCancelSpy,
+    });
+    await userEvent.keyboard('{Escape}');
+
+    expect(onCancelSpy).toHaveBeenCalledTimes(1);
+    expect(closeFlyoutSpy).toHaveBeenCalledTimes(1);
   });
 
   it('should call the updatePanelState callback if cancel button is clicked', async () => {
@@ -364,7 +399,7 @@ describe('LensEditConfigurationFlyout', () => {
     // Set formBased to match the preloaded Redux state so no changes are detected
     newProps.attributes.state.datasourceStates.formBased = mockFormBasedState;
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+    expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
   });
 
   it('save button should be disabled if expression cannot be generated', async () => {
@@ -385,7 +420,7 @@ describe('LensEditConfigurationFlyout', () => {
     };
 
     await renderConfigFlyout(newProps);
-    expect(screen.getByRole('button', { name: /apply and close/i })).toBeDisabled();
+    expectToBeEUIAriaDisabledButton(screen.getByRole('button', { name: /apply and close/i }));
   });
 
   it('should use correct activeVisualization', async () => {

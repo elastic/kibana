@@ -11,25 +11,22 @@ import { useEffect, useRef, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ESQLEditorDeps } from '../types';
 
-export const NL_TO_ESQL_FLAG = 'esql.nlToEsqlEnabled';
-
 export const useNlToEsqlCheck = (): boolean => {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { core, esql } = kibana.services;
+  const { esql } = kibana.services;
   const getLicense = esql?.getLicense;
-  const isNlToEsqlFlagEnabled = core.featureFlags.getBooleanValue(NL_TO_ESQL_FLAG, false);
   const [hasValidLicense, setHasValidLicense] = useState(false);
   const licenseCheckRef = useRef(false);
 
   useEffect(() => {
-    if (!isNlToEsqlFlagEnabled || !getLicense || licenseCheckRef.current) return;
+    if (!getLicense || licenseCheckRef.current) return;
     licenseCheckRef.current = true;
     getLicense().then((license) => {
       setHasValidLicense(
         Boolean(license && license.status === 'active' && license.hasAtLeast('enterprise'))
       );
     });
-  }, [isNlToEsqlFlagEnabled, getLicense]);
+  }, [getLicense]);
 
-  return isNlToEsqlFlagEnabled && hasValidLicense;
+  return hasValidLicense;
 };

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
@@ -100,6 +101,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
     jest.resetAllMocks();
 
     rulesClient = new RulesClient({
+      request: httpServerMock.createKibanaRequest(),
       taskManager,
       ruleTypeRegistry,
       unsecuredSavedObjectsClient,
@@ -109,6 +111,7 @@ describe('findGapAutoFillSchedulerLogs()', () => {
       namespace: 'default',
       getUserName: jest.fn(),
       createAPIKey: jest.fn(),
+      cloneAPIKey: jest.fn(),
       logger: loggingSystemMock.create().get(),
       internalSavedObjectsRepository,
       encryptedSavedObjectsClient: encryptedSavedObjects,

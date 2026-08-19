@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useContext, useCallback, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,7 +28,6 @@ import {
   useEuiTheme,
   EuiText,
 } from '@elastic/eui';
-import type { ReactNode } from 'react-markdown';
 import type { Cluster, ClusterPayload } from '../../../../../../common/lib';
 import { extractHostAndPort } from '../../../../../../common/lib';
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';

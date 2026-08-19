@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -36,6 +37,7 @@ const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 
 const kibanaVersion = 'v8.0.0';
 const rulesClientParams: jest.Mocked<RulesClientContext> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -53,9 +55,10 @@ const rulesClientParams: jest.Mocked<RulesClientContext> = {
   maxScheduledPerMinute: 10000,
   minimumScheduleInterval: { value: '1m', enforce: false },
   minimumScheduleIntervalInMs: 1,
-  fieldsToExcludeFromPublicApi: [],
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  cloneAPIKey: jest.fn(),
+  cloneApiKeysOnCreate: false,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
@@ -114,7 +117,7 @@ describe('createNewAPIKeySet', () => {
     });
     expect(apiKey).toEqual({
       apiKey: 'MTIzOmFiYw==',
-      apiKeyCreatedByUser: undefined,
+      apiKeyCreatedByUser: false,
       apiKeyOwner: 'test',
     });
     expect(rulesClientParams.createAPIKey).toHaveBeenCalledTimes(1);

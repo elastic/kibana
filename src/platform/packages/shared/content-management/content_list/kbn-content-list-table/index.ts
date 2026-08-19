@@ -24,6 +24,7 @@ export {
 
 // Column components.
 export {
+  createColumn,
   NameColumn,
   NameCell,
   NameCellTags,
@@ -55,13 +56,12 @@ export type { ColumnNamespace, ColumnProps } from './src/column';
 export {
   EditAction,
   DeleteAction,
+  ContentEditorAction,
   type EditActionProps,
   type DeleteActionProps,
+  type ContentEditorActionProps,
 } from './src/action';
 export type { ActionNamespace, ActionProps } from './src/action';
 
 // Selection hook.
 export { useSelection, type UseSelectionReturn } from './src/hooks';
-
-// Empty state.
-export { EmptyState, type EmptyStateProps } from './src/empty_state';

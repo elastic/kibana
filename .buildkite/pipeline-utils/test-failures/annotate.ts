@@ -65,8 +65,9 @@ export const getAnnotation = (
             : '';
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
+        const issueLink = failure.githubIssue ? ` [[issue]](${failure.githubIssue})` : '';
 
-        return `[[job]](${jobUrl})${logsLink} ${failure.jobName} / ${failure.name}`;
+        return `[[job]](${jobUrl})${logsLink}${issueLink} ${failure.jobName} / ${failure.name}`;
       })
       .join('<br />\n')
   );
@@ -172,8 +173,8 @@ export const annotateTestFailures = async () => {
   buildkite.setAnnotation('test_failures', 'error', getAnnotation(failures, failureHtmlArtifacts));
 
   if (
-    process.env.PR_COMMENTS_ENABLED === 'true' ||
-    process.env.ELASTIC_PR_COMMENTS_ENABLED === 'true'
+    process.env.ELASTIC_PR_COMMENTS_ENABLED === 'true' ||
+    process.env.KIBANA_PR_COMMENTS_ENABLED === 'true'
   ) {
     buildkite.setMetadata(
       'pr_comment:test_failures:body',
@@ -181,7 +182,10 @@ export const annotateTestFailures = async () => {
     );
   }
 
-  if (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true') {
+  if (
+    process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED === 'true' ||
+    process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED === 'true'
+  ) {
     buildkite.setMetadata(
       'slack:test_failures:body',
       getSlackMessage(failures, failureHtmlArtifacts)

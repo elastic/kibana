@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 export const unifiedHistoryResponseSchema = schema.object({
-  data: schema.arrayOf(schema.any()),
+  data: schema.arrayOf(schema.any(), { maxSize: 10000 }),
   nextPage: schema.maybe(schema.nullable(schema.string())),
   hasMore: schema.boolean(),
 });

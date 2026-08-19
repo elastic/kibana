@@ -9,7 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getCasesByAlertIdStepCommonDefinition } from '../../../common/workflows/steps/get_cases_by_alert_id';
 import type { CasesClient } from '../../client';
-import { getCasesClientFromStepsContext } from './utils';
+import { getCasesClientFromStepsContext, safeParseCaseForWorkflowOutput } from './utils';
 
 export const getCasesByAlertIdStepDefinition = (
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>
@@ -17,18 +17,23 @@ export const getCasesByAlertIdStepDefinition = (
   createServerStepDefinition({
     ...getCasesByAlertIdStepCommonDefinition,
     handler: async (context) => {
-      const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
-      const relatedCases = await casesClient.cases.getCasesByAlertID({
-        alertID: context.input.alert_id,
-        options: {
-          owner: context.input.owner,
-        },
-      });
+      try {
+        const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
+        const relatedCases = await casesClient.cases.getCasesByAlertID({
+          alertID: context.input.alert_id,
+          options: {
+            owner: context.input.owner,
+          },
+        });
 
-      const output = getCasesByAlertIdStepCommonDefinition.outputSchema.parse({
-        cases: relatedCases,
-      });
+        const output = safeParseCaseForWorkflowOutput(
+          getCasesByAlertIdStepCommonDefinition.outputSchema,
+          { cases: relatedCases }
+        );
 
-      return { output };
+        return { output };
+      } catch (error) {
+        return { error };
+      }
     },
   });

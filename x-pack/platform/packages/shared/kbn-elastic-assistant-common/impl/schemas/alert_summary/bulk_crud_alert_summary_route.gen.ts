@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   BulkActionBase,
@@ -25,99 +25,196 @@ import {
 } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 
+/**
+ * The reason an alert summary was skipped during a bulk action.
+ */
+export const AlertSummaryBulkActionSkipReason = lazySchema(() =>
+  z.literal('ALERT_SUMMARY_NOT_MODIFIED')
+);
 export type AlertSummaryBulkActionSkipReason = z.infer<typeof AlertSummaryBulkActionSkipReason>;
-export const AlertSummaryBulkActionSkipReason = z.literal('ALERT_SUMMARY_NOT_MODIFIED');
 
+/**
+ * Details about an alert summary that was skipped during a bulk action.
+ */
+export const AlertSummaryBulkActionSkipResult = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the skipped alert summary.
+     */
+    id: z.string(),
+    /**
+     * The ID of the alert associated with the skipped summary.
+     */
+    alertId: z.string().optional(),
+    skip_reason: AlertSummaryBulkActionSkipReason,
+  })
+);
 export type AlertSummaryBulkActionSkipResult = z.infer<typeof AlertSummaryBulkActionSkipResult>;
-export const AlertSummaryBulkActionSkipResult = z.object({
-  id: z.string(),
-  alertId: z.string().optional(),
-  skip_reason: AlertSummaryBulkActionSkipReason,
-});
 
+/**
+ * Details about an alert summary that encountered an error during a bulk action.
+ */
+export const AlertSummaryDetailsInError = lazySchema(() =>
+  z.object({
+    /**
+     * The ID of the alert associated with the errored summary.
+     */
+    alertId: z.string().optional(),
+    /**
+     * The ID of the alert summary that encountered an error.
+     */
+    id: z.string(),
+  })
+);
 export type AlertSummaryDetailsInError = z.infer<typeof AlertSummaryDetailsInError>;
-export const AlertSummaryDetailsInError = z.object({
-  alertId: z.string().optional(),
-  id: z.string(),
-});
 
+/**
+ * A normalized error object returned when one or more alert summaries fail during a bulk action.
+ */
+export const NormalizedAlertSummaryError = lazySchema(() =>
+  z.object({
+    /**
+     * A human-readable description of the error.
+     */
+    message: z.string(),
+    /**
+     * The HTTP status code associated with the error.
+     */
+    status_code: z.number().int(),
+    /**
+     * A machine-readable error code.
+     */
+    err_code: z.string().optional(),
+    /**
+     * The alert summaries that encountered this error.
+     */
+    alert_summaries: z.array(AlertSummaryDetailsInError),
+  })
+);
 export type NormalizedAlertSummaryError = z.infer<typeof NormalizedAlertSummaryError>;
-export const NormalizedAlertSummaryError = z.object({
-  message: z.string(),
-  status_code: z.number().int(),
-  err_code: z.string().optional(),
-  alert_summaries: z.array(AlertSummaryDetailsInError),
-});
 
+/**
+ * An alert summary created by the Elastic Assistant for a specific security alert.
+ */
+export const AlertSummaryResponse = lazySchema(() =>
+  z.object({
+    id: NonEmptyString,
+    alertId: NonEmptyString,
+    timestamp: NonEmptyTimestamp.optional(),
+    /**
+     * The AI-generated summary of the alert.
+     */
+    summary: z.string(),
+    /**
+     * AI-generated recommended actions for responding to the alert.
+     */
+    recommendedActions: z.string().optional(),
+    replacements: Replacements,
+    /**
+     * The timestamp when the alert summary was last updated.
+     */
+    updatedAt: z.string().optional(),
+    /**
+     * The user who last updated the alert summary.
+     */
+    updatedBy: z.string().optional(),
+    /**
+     * The timestamp when the alert summary was created.
+     */
+    createdAt: z.string().optional(),
+    /**
+     * The user who created the alert summary.
+     */
+    createdBy: z.string().optional(),
+    /**
+     * The users associated with this alert summary.
+     */
+    users: z.array(User).optional(),
+    /**
+     * Kibana space
+     */
+    namespace: z.string().optional(),
+  })
+);
 export type AlertSummaryResponse = z.infer<typeof AlertSummaryResponse>;
-export const AlertSummaryResponse = z.object({
-  id: NonEmptyString,
-  alertId: NonEmptyString,
-  timestamp: NonEmptyTimestamp.optional(),
-  summary: z.string(),
-  recommendedActions: z.string().optional(),
-  replacements: Replacements,
-  updatedAt: z.string().optional(),
-  updatedBy: z.string().optional(),
-  createdAt: z.string().optional(),
-  createdBy: z.string().optional(),
-  users: z.array(User).optional(),
-  /**
-   * Kibana space
-   */
-  namespace: z.string().optional(),
-});
 
+/**
+ * The results of a bulk action on alert summaries.
+ */
+export const AlertSummaryBulkCrudActionResults = lazySchema(() =>
+  z.object({
+    /**
+     * Alert summaries that were successfully updated.
+     */
+    updated: z.array(AlertSummaryResponse),
+    /**
+     * Alert summaries that were successfully created.
+     */
+    created: z.array(AlertSummaryResponse),
+    /**
+     * IDs of alert summaries that were successfully deleted.
+     */
+    deleted: z.array(z.string()),
+    /**
+     * Alert summaries that were skipped because no changes were needed.
+     */
+    skipped: z.array(AlertSummaryBulkActionSkipResult),
+  })
+);
 export type AlertSummaryBulkCrudActionResults = z.infer<typeof AlertSummaryBulkCrudActionResults>;
-export const AlertSummaryBulkCrudActionResults = z.object({
-  updated: z.array(AlertSummaryResponse),
-  created: z.array(AlertSummaryResponse),
-  deleted: z.array(z.string()),
-  skipped: z.array(AlertSummaryBulkActionSkipResult),
-});
 
+export const AlertSummaryBulkCrudActionResponse = lazySchema(() =>
+  z.object({
+    success: z.boolean().optional(),
+    status_code: z.number().int().optional(),
+    message: z.string().optional(),
+    alert_summaries_count: z.number().int().optional(),
+    attributes: z.object({
+      results: AlertSummaryBulkCrudActionResults,
+      summary: BulkCrudActionSummary,
+      errors: z.array(NormalizedAlertSummaryError).optional(),
+    }),
+  })
+);
 export type AlertSummaryBulkCrudActionResponse = z.infer<typeof AlertSummaryBulkCrudActionResponse>;
-export const AlertSummaryBulkCrudActionResponse = z.object({
-  success: z.boolean().optional(),
-  status_code: z.number().int().optional(),
-  message: z.string().optional(),
-  alert_summaries_count: z.number().int().optional(),
-  attributes: z.object({
-    results: AlertSummaryBulkCrudActionResults,
-    summary: BulkCrudActionSummary,
-    errors: z.array(NormalizedAlertSummaryError).optional(),
-  }),
-});
 
+export const AlertSummaryCreateProps = lazySchema(() =>
+  z.object({
+    alertId: z.string(),
+    summary: z.string(),
+    recommendedActions: z.string().optional(),
+    replacements: Replacements,
+  })
+);
 export type AlertSummaryCreateProps = z.infer<typeof AlertSummaryCreateProps>;
-export const AlertSummaryCreateProps = z.object({
-  alertId: z.string(),
-  summary: z.string(),
-  recommendedActions: z.string().optional(),
-  replacements: Replacements,
-});
 
+export const AlertSummaryUpdateProps = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    summary: z.string().optional(),
+    recommendedActions: z.string().optional(),
+    replacements: Replacements.optional(),
+  })
+);
 export type AlertSummaryUpdateProps = z.infer<typeof AlertSummaryUpdateProps>;
-export const AlertSummaryUpdateProps = z.object({
-  id: z.string(),
-  summary: z.string().optional(),
-  recommendedActions: z.string().optional(),
-  replacements: Replacements.optional(),
-});
 
+export const PerformAlertSummaryBulkActionRequestBody = lazySchema(() =>
+  z.object({
+    delete: BulkActionBase.optional(),
+    create: z.array(AlertSummaryCreateProps).optional(),
+    update: z.array(AlertSummaryUpdateProps).optional(),
+  })
+);
 export type PerformAlertSummaryBulkActionRequestBody = z.infer<
   typeof PerformAlertSummaryBulkActionRequestBody
 >;
-export const PerformAlertSummaryBulkActionRequestBody = z.object({
-  delete: BulkActionBase.optional(),
-  create: z.array(AlertSummaryCreateProps).optional(),
-  update: z.array(AlertSummaryUpdateProps).optional(),
-});
 export type PerformAlertSummaryBulkActionRequestBodyInput = z.input<
   typeof PerformAlertSummaryBulkActionRequestBody
 >;
 
+export const PerformAlertSummaryBulkActionResponse = lazySchema(
+  () => AlertSummaryBulkCrudActionResponse
+);
 export type PerformAlertSummaryBulkActionResponse = z.infer<
   typeof PerformAlertSummaryBulkActionResponse
 >;
-export const PerformAlertSummaryBulkActionResponse = AlertSummaryBulkCrudActionResponse;

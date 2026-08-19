@@ -17,6 +17,6 @@
     "@kbn/inference-prompt-utils",
     "@kbn/std",
     "@kbn/traced-es-client",
-    "@kbn/zod"
+    "@kbn/zod",
   ]
 }

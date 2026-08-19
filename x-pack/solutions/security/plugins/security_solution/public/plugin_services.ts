@@ -6,8 +6,8 @@
  */
 
 import type { AppMountParameters, CoreSetup, CoreStart, PackageInfo } from '@kbn/core/public';
-import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import type { DataPublicPluginStart, QueryStart } from '@kbn/data-plugin/public';
+import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { initTelemetry, TelemetryService } from './common/lib/telemetry';
@@ -47,10 +47,10 @@ export class PluginServices {
    * or if running from a dev environment or -SNAPSHOT build, the latest pre-release package
    * will be used (if fleet is available or not within an airgapped environment).
    *
-   * Note: This is for `upgrade only`, which occurs by means of the `useUpgradeSecurityPackages`
-   * hook when navigating to a Security Solution page. The package version specified in
-   * `fleet_packages.json` in project root will always be installed first on Kibana start if
-   * the package is not already installed.
+   * Note: This is for `upgrade only`, triggered by the `init-prebuilt-rules` flow of
+   * `POST /api/security_solution/initialize` when navigating to a Security Solution page.
+   * The package version specified in `fleet_packages.json` in project root will always be
+   * installed first on Kibana start if the package is not already installed.
    */
   private readonly prebuiltRulesPackageVersion: string | undefined;
 

@@ -42,6 +42,9 @@ export function Warnings({
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('charts.warning.warningPopoverAriaLabel', {
+          defaultMessage: 'Visualization warnings',
+        })}
         isOpen={open}
         panelPaddingSize="none"
         closePopover={() => setOpen(false)}

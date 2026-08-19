@@ -34,6 +34,7 @@
       "contentManagement"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "dataVisualizer",
       "home",
       "share",
@@ -51,13 +52,13 @@
       "apmSourcesAccess",
       "fileUpload",
       "cps",
-      "alertingVTwo"
+      "alertingVTwo",
+      "feedback"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "presentationPanel",
       "presentationUtil",
       "esql"
     ],

@@ -17,73 +17,92 @@ const entry = (overrides: Partial<ImpactEntry> = {}): ImpactEntry => ({
   path: '/api/spaces/space',
   method: 'GET',
   reason: 'Endpoint removed',
-  terraformResource: 'elasticstack_kibana_space',
-  owners: ['@elastic/kibana-security'],
+  tier: 'stable',
   ...overrides,
 });
 
 describe('buildCommentBody', () => {
-  it('renders a markdown table with one entry', () => {
+  it('renders a stable section with a tier heading and table header', () => {
     const body = buildCommentBody([entry()]);
 
     expect(body).toContain('## API Contract Breaking Changes');
-    expect(body).toContain('| `/api/spaces/space` `GET`');
-    expect(body).toContain('elasticstack_kibana_space');
-    expect(body).toContain('@elastic/kibana-security');
+    expect(body).toContain('### Stable (GA) (1)');
+    expect(body).toContain('| Endpoint | Reason | oasdiffId | Source |');
+    expect(body).toContain('| `/api/spaces/space` `GET` |');
   });
 
-  it('deduplicates owners in the cc line', () => {
-    const entries = [
-      entry({ owners: ['@elastic/kibana-security'] }),
-      entry({ path: '/api/spaces/space/{id}', owners: ['@elastic/kibana-security'] }),
-    ];
-    const body = buildCommentBody(entries);
+  it('groups changes into separate availability sections', () => {
+    const body = buildCommentBody([
+      entry({ path: '/api/spaces/space' }),
+      entry({ path: '/api/fleet/agent_policies', method: 'POST', tier: 'tech_preview' }),
+      entry({ path: '/api/features', tier: 'experimental' }),
+    ]);
 
-    const ccLine = body.split('\n').find((l) => l.startsWith('cc '))!;
-    const mentions = ccLine.replace('cc ', '').trim().split(' ');
-    expect(mentions).toEqual(['@elastic/kibana-security']);
+    expect(body).toContain('### Stable (GA) (1)');
+    expect(body).toContain('### Technical Preview (1)');
+    // stable section rendered before tech_preview
+    expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Technical Preview'));
   });
 
-  it('aggregates multiple distinct owners', () => {
-    const entries = [
-      entry({ owners: ['@elastic/kibana-security'] }),
-      entry({
-        path: '/api/fleet/agent_policies',
-        method: 'POST',
-        terraformResource: 'elasticstack_fleet_agent_policy',
-        owners: ['@elastic/fleet'],
-      }),
-    ];
-    const body = buildCommentBody(entries);
+  it('omits a tier section entirely when it has no entries', () => {
+    const body = buildCommentBody([entry({ tier: 'tech_preview' })]);
 
-    expect(body).toContain('@elastic/kibana-security');
-    expect(body).toContain('@elastic/fleet');
+    expect(body).toContain('### Technical Preview (1)');
+    expect(body).not.toContain('### Stable (GA)');
   });
 
-  it('shows _unknown_ when no owners exist', () => {
-    const body = buildCommentBody([entry({ owners: [] })]);
+  it('renders experimental changes in a clearly non-blocking section after the gating tiers', () => {
+    const body = buildCommentBody([
+      entry({ path: '/api/spaces/space', tier: 'stable' }),
+      entry({ path: '/api/exp', tier: 'experimental' }),
+    ]);
 
-    expect(body).toContain('cc _unknown_');
+    expect(body).toContain('### Experimental — informational, not blocking merge (1)');
+    expect(body).toContain('do not fail this check');
+    expect(body).toContain('| `/api/exp` `GET` |');
+    // gating tier rendered before the experimental section
+    expect(body.indexOf('### Stable (GA)')).toBeLessThan(body.indexOf('### Experimental'));
   });
 
-  it('escapes pipe characters in the reason field', () => {
-    const body = buildCommentBody([entry({ reason: 'field|was|removed' })]);
+  it('posts an experimental-only comment with no gating section', () => {
+    const body = buildCommentBody([entry({ path: '/api/exp', tier: 'experimental' })]);
 
-    expect(body).toContain('field\\|was\\|removed');
-    expect(body).not.toContain('field|was|removed');
+    expect(body).toContain('### Experimental — informational, not blocking merge (1)');
+    expect(body).not.toContain('### Stable (GA)');
+    expect(body).not.toContain('### Technical Preview');
   });
 
-  it('escapes newlines in the reason field', () => {
-    const body = buildCommentBody([entry({ reason: 'line1\nline2' })]);
+  it('escapes pipe characters and newlines in the reason field', () => {
+    const body = buildCommentBody([entry({ reason: 'a|b\nc' })]);
 
-    expect(body).toContain('line1 line2');
-    expect(body).not.toContain('line1\nline2');
+    expect(body).toContain('a\\|b c');
+    expect(body).not.toContain('a|b');
   });
 
-  it('omits method badge when method is undefined', () => {
+  it('omits the method badge when method is undefined', () => {
     const body = buildCommentBody([entry({ method: undefined })]);
 
     expect(body).toContain('| `/api/spaces/space` |');
     expect(body).not.toMatch(/`GET`|`POST`|`PUT`|`DELETE`/);
+  });
+
+  it('renders oasdiffId and source when present', () => {
+    const body = buildCommentBody([
+      entry({
+        oasdiffId: 'request-property-removed',
+        source: '/components/schemas/Output/properties/name',
+      }),
+    ]);
+
+    expect(body).toContain('`request-property-removed`');
+    expect(body).toContain('`/components/schemas/Output/properties/name`');
+  });
+
+  it('includes granular suppression guidance in the what-to-do section', () => {
+    const body = buildCommentBody([entry()]);
+
+    expect(body).toContain('`oasdiffId`');
+    expect(body).toContain('`source`');
+    expect(body).toContain('scope the allowlist entry');
   });
 });

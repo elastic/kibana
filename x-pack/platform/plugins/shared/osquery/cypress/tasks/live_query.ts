@@ -151,10 +151,27 @@ export const loadRuleAlerts = (ruleName: string) => {
     });
 };
 
-export const addToCase = (caseId: string) => {
-  cy.contains('Add to Case').click();
+// Pack results page header renders `AddToCaseButton` as a direct `EuiButtonEmpty`
+// with `aria-label="Add to Case"` — used for single-query results.
+const ADD_TO_CASE_HEADER_BUTTON = '[aria-label="Add to Case"]';
+// Per-row kebab menu (queryHistoryRework pack_queries_status_table and history details flyout)
+// renders `AddToCaseButton` as an `EuiContextMenuItem` inside a popover opened by the kebab.
+const ADD_TO_CASE_ROW_KEBAB = '[data-test-subj^="packQueriesTableKebab-"]';
+
+const selectCaseRow = (caseId: string) => {
   cy.contains('Select case');
   cy.getBySelContains(`cases-table-row-select-${caseId}`).click();
+};
+
+export const addToCaseFromResultsHeader = (caseId: string) => {
+  cy.get(ADD_TO_CASE_HEADER_BUTTON).first().click();
+  selectCaseRow(caseId);
+};
+
+export const addToCaseFromRowKebab = (caseId: string) => {
+  cy.get(ADD_TO_CASE_ROW_KEBAB).first().click();
+  cy.get('.euiContextMenuPanel').contains('Add to Case').click();
+  selectCaseRow(caseId);
 };
 
 export const addLiveQueryToCase = (actionId: string, caseId: string) => {
@@ -162,7 +179,7 @@ export const addLiveQueryToCase = (actionId: string, caseId: string) => {
     cy.get('[aria-label="Details"]').click();
   });
   cy.contains('View history');
-  addToCase(caseId);
+  addToCaseFromRowKebab(caseId);
 };
 
 const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/;
@@ -180,11 +197,17 @@ export const checkActionItemsInResults = ({
   timeline?: boolean;
 }) => {
   checkResults();
-  cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
+  cy.get(`${ADD_TO_CASE_HEADER_BUTTON}, ${ADD_TO_CASE_ROW_KEBAB}`).should(
+    cases ? 'exist' : 'not.exist'
+  );
 };
 
 export const takeOsqueryActionWithParams = () => {
-  // Force click due to element sometimes being covered by other flyout elements
+  // Force click due to element sometimes being covered by other flyout elements.
+  // Wait for the flyout's event-details load to finish first: the same test-subj
+  // is shared by the loading placeholder, and clicking it before loading completes
+  // opens nothing (the placeholder is not a popover trigger).
+  cy.getBySel('securitySolutionFlyoutFooterDropdownButton').should('not.contain', 'Loading...');
   cy.getBySel('securitySolutionFlyoutFooterDropdownButton').click({ force: true });
   cy.getBySel('osquery-action-item').click();
   selectAllAgents();
@@ -195,12 +218,10 @@ export const takeOsqueryActionWithParams = () => {
   typeInECSFieldInput('tags{downArrow}{enter}');
   cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
   submitQuery();
-  cy.getBySel('dataGridHeader', { timeout: 120000 }).then(($header) => {
-    if (!$header.text().includes('tags')) {
-      submitQuery();
-    }
+  checkResults();
+  cy.getBySel(RESULTS_TABLE).within(() => {
+    cy.getBySel('dataGridHeader').should('contain', 'tags');
   });
-  cy.getBySel('dataGridHeader', { timeout: 120000 }).should('contain', 'tags');
 };
 
 export const clickRuleName = (ruleName: string) => {

@@ -17,7 +17,7 @@ export const LegendActionItem = memo(
     label: string;
     onClick: () => Promise<void> | void;
     dataTestSubj: string;
-  }) => <EuiListGroupItem label={label} onClick={onClick} data-test-subj={dataTestSubj} size="s" />
+  }) => <EuiListGroupItem label={label} onClick={onClick} data-test-subj={dataTestSubj} />
 );
 
 LegendActionItem.displayName = 'LegendActionItem';

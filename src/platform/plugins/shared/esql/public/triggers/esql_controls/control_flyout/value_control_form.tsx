@@ -41,6 +41,7 @@ import { isEqual } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { reportEsqlError } from '@kbn/esql-editor';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ServiceDeps } from '../../../kibana_services';
 import { ChooseColumnPopover } from './choose_column_popover';
@@ -53,6 +54,7 @@ interface ValueControlFormProps {
   controlFlyoutType: EsqlControlType;
   queryString: string;
   setControlState: (state: OptionsListESQLControlState) => void;
+  setIsValid: (isValid: boolean) => void;
   initialState?: OptionsListESQLControlState;
   valuesRetrieval?: string;
   timeRange?: TimeRange;
@@ -61,8 +63,8 @@ interface ValueControlFormProps {
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
 const INITIAL_EMPTY_STATE_QUERY = `/** Example
-To get the agent field values use: 
-FROM logs-* 
+To get the agent field values use:
+FROM logs-*
 |  WHERE @timestamp <=?_tend and @timestamp >?_tstart
 | STATS BY agent
 */`;
@@ -75,6 +77,7 @@ export function ValueControlForm({
   controlFlyoutType,
   search,
   setControlState,
+  setIsValid,
   valuesRetrieval,
   timeRange,
   esqlVariables,
@@ -212,26 +215,31 @@ export function ValueControlForm({
           setSelectedValues(options);
           setAvailableValuesOptions(options);
           setEsqlQueryErrors([]);
+          setIsValid(true);
+        } else {
+          setIsValid(false);
         }
+
         setValuesQuery(query);
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') {
           return;
         }
+        setIsValid(false);
         setEsqlQueryErrors([e]);
       }
     },
-    [isMounted, search, timeRange, esqlVariables, core.uiSettings]
+    [isMounted, search, timeRange, esqlVariables, core.uiSettings, setIsValid]
   );
 
   const setSuggestedQuery = useCallback(async () => {
     const indexPattern = getIndexPatternFromESQLQuery(queryString);
-    const encodedQuery = encodeURIComponent(`FROM ${indexPattern}`);
-    const response = (await core.http?.get(`${TIMEFIELD_ROUTE}${encodedQuery}`).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('Failed to fetch the timefield', error);
-      return undefined;
-    })) as { timeField?: string } | undefined;
+    const response = (await core.http
+      ?.post(TIMEFIELD_ROUTE, { body: JSON.stringify({ query: `FROM ${indexPattern}` }) })
+      .catch((error) => {
+        reportEsqlError(error, { errorType: 'ControlFlyoutTimefieldFetch' });
+        return undefined;
+      })) as { timeField?: string } | undefined;
 
     const timeField = response?.timeField;
     const timeFilter = Boolean(timeField)
@@ -319,6 +327,7 @@ export function ValueControlForm({
           <ESQLLangEditor
             query={{ esql: valuesQuery }}
             onTextLangQueryChange={(q) => {
+              setIsValid(false);
               setValuesQuery(q.esql);
             }}
             disableAutoFocus={true}

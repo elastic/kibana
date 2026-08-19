@@ -8,8 +8,13 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: GetAttackDiscoveryMissingPrivilegesInternal
-      description: Identifies the privileges required for Attack discovery and returns the missing privileges
-      summary: Retrieves the missing privileges for Attack discovery
+      description: |
+        DEPRECATED. Identifies Elasticsearch index privileges required for Attack discovery and returns any that are missing for the current user.
+
+        Do not use this endpoint for new integrations; it remains only for backward compatibility and may be removed in a future release. Prefer ensuring the appropriate index privileges through your deployment’s standard security and index access configuration.
+
+        WARNING: Do not rely on this internal API for long-term automation.
+      summary: '[Deprecated] Missing index privileges for Attack discovery (internal)'
       deprecated: true
       tags:
         - attack_discovery
@@ -20,12 +25,24 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                description: The missing index privileges required for Attack discovery
-                items:
-                  $ref: '#/components/schemas/AttackDiscoveryMissingPrivileges'
+                type: object
+                description: The missing privileges required for Attack discovery
+                required:
+                  - index_privileges
+                  - feature_privileges
+                properties:
+                  index_privileges:
+                    type: array
+                    description: The missing index privileges required for Attack discovery
+                    items:
+                      $ref: '#/components/schemas/AttackDiscoveryMissingPrivileges'
+                  feature_privileges:
+                    type: array
+                    description: The missing Kibana feature privileges required for Attack discovery
+                    items:
+                      $ref: '#/components/schemas/AttackDiscoveryMissingFeaturePrivileges'
         400:
-          description: Generic Error
+          description: Bad Request response.
           content:
             application/json:
               schema:
@@ -54,3 +71,17 @@ components:
           items:
             type: string
           description: The index privileges level missing
+    AttackDiscoveryMissingFeaturePrivileges:
+      type: object
+      required:
+        - feature_id
+        - privileges
+      properties:
+        feature_id:
+          type: string
+          description: The Kibana feature id of the missing privileges
+        privileges:
+          type: array
+          items:
+            type: string
+          description: The Kibana feature privileges that are missing

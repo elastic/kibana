@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/data-quality-plugin'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-onboarding-team'
+  defaultOwner: '@elastic/kibana-management'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/data-quality-plugin'
   description: Moon project for @kbn/data-quality-plugin
   channel: ''
-  owner: '@elastic/obs-onboarding-team'
+  owner: '@elastic/kibana-management'
   sourceRoot: x-pack/platform/plugins/shared/data_quality
 dependsOn:
   - '@kbn/core'

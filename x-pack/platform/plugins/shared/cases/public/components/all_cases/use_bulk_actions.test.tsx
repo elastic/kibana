@@ -75,6 +75,7 @@ describe('useBulkActions', () => {
                   "data-test-subj": "cases-bulk-action-tags",
                   "disabled": false,
                   "icon": <EuiIcon
+                    aria-hidden={true}
                     size="m"
                     type="tag"
                   />,
@@ -86,6 +87,7 @@ describe('useBulkActions', () => {
                   "data-test-subj": "cases-bulk-action-assignees",
                   "disabled": false,
                   "icon": <EuiIcon
+                    aria-hidden={true}
                     size="m"
                     type="user"
                   />,
@@ -97,6 +99,7 @@ describe('useBulkActions', () => {
                   "data-test-subj": "cases-bulk-action-delete",
                   "disabled": false,
                   "icon": <EuiIcon
+                    aria-hidden={true}
                     color="danger"
                     size="m"
                     type="trash"

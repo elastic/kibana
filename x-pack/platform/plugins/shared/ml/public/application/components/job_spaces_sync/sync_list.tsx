@@ -18,7 +18,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
+import type { SyncSavedObjectResponse, SyncResult } from '@kbn/ml-common-types/saved_objects';
 import { useEnabledFeatures } from '../../contexts/ml';
 
 export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {

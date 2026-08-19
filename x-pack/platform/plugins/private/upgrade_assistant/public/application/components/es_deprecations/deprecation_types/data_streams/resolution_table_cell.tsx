@@ -154,7 +154,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="checkCircleFill" color="success" />
+            <EuiIcon type="checkCircleFill" color="success" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.resolutionCompleteText}</EuiText>
@@ -165,7 +165,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warningFill" color="danger" />
+            <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.resolutionFailedText}</EuiText>
@@ -176,7 +176,7 @@ export const DataStreamReindexResolutionCell: React.FunctionComponent<{
       return (
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="warningFill" color="danger" />
+            <EuiIcon type="warningFill" color="danger" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.resolutionFetchFailedText}</EuiText>

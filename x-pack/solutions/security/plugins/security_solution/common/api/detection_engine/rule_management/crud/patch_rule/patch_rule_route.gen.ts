@@ -15,12 +15,13 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { lazySchema } from '@kbn/zod/v4';
 
 import { RulePatchProps, RuleResponse } from '../../../model/rule_schema/rule_schemas.gen';
 
+export const PatchRuleRequestBody = lazySchema(() => RulePatchProps);
 export type PatchRuleRequestBody = z.infer<typeof PatchRuleRequestBody>;
-export const PatchRuleRequestBody = RulePatchProps;
 export type PatchRuleRequestBodyInput = z.input<typeof PatchRuleRequestBody>;
 
+export const PatchRuleResponse = lazySchema(() => RuleResponse);
 export type PatchRuleResponse = z.infer<typeof PatchRuleResponse>;
-export const PatchRuleResponse = RuleResponse;

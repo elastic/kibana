@@ -11,7 +11,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState } from 'react';
 import { fieldConstants, getFieldValue } from '@kbn/discover-utils';
 import type { DocViewerComponent } from '@kbn/unified-doc-viewer/types';
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import {
   EuiAccordion,
   EuiButton,
@@ -95,7 +95,7 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
     // If the url is not populated, we fall back opening Timeline, but this will not work for remote indices as
     // Timeline should not read from linked project (at least during Tech Preview)
     const index = getFieldValue(hit, '_index') as string | undefined;
-    if (isCCSRemoteIndexName(index ?? '')) return undefined;
+    if (isNonLocalIndexName(index ?? '')) return undefined;
 
     // This will only be reached for local alerts that don't have the `kibana.alert.url` or all local events.
     return getSecurityTimelineRedirectUrl({

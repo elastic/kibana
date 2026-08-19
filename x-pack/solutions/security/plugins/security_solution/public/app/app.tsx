@@ -8,8 +8,8 @@
 import type { History } from 'history';
 import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
-import type { Store, Action } from 'redux';
-import { Provider as ReduxStoreProvider } from 'react-redux';
+import type { Store, Action } from 'redux-v4';
+import { Provider as ReduxStoreProvider } from 'react-redux-v7';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { useDarkMode } from '@kbn/kibana-react-plugin/public';
@@ -35,6 +35,10 @@ import { DiscoverInTimelineContextProvider } from '../common/components/discover
 import { InitializationProvider } from '../common/components/initialization';
 import { AssistantProvider } from '../assistant/provider';
 import { TrialCompanion } from '../trial_companion/trial_companion';
+import {
+  consumePreserveAgentBuilderSessionGate,
+  readLastAgentBuilderAgentIdForSecuritySession,
+} from '../../common/agent_builder_navigation_gate';
 
 interface StartAppComponent {
   children: React.ReactNode;
@@ -114,21 +118,29 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
 
   useInstallEntityStoreV2(services);
 
-  // Set conversation flyout active config on mount, clear on unmount
+  // Set conversation flyout active config on mount, clear on unmount.
+  // Skip if the sidebar is already open (e.g. navigating from Agent Builder
+  // with an active conversation) to avoid clobbering its props.
   useEffect(() => {
-    if (services.agentBuilder?.setChatConfig) {
+    if (services.agentBuilder?.setChatConfig && !services.chrome.sidebar.isOpen()) {
       services.agentBuilder.setChatConfig({
         sessionTag: 'security',
         newConversation: false,
+        agentId: readLastAgentBuilderAgentIdForSecuritySession(),
       });
     }
 
     return () => {
-      if (services.agentBuilder?.clearChatConfig) {
+      if (consumePreserveAgentBuilderSessionGate()) {
+        return;
+      }
+      // Re-read at teardown time: the Agent Builder panel may have opened after this effect
+      // ran; using a stale `isOpen` from mount would incorrectly clear chat config mid-session.
+      if (services.agentBuilder?.clearChatConfig && !services.chrome.sidebar.isOpen()) {
         services.agentBuilder.clearChatConfig();
       }
     };
-  }, [services.agentBuilder, services.uiSettings]);
+  }, [services.agentBuilder, services.chrome.sidebar, services.uiSettings]);
 
   return (
     <KibanaContextProvider

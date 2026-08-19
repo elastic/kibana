@@ -46,6 +46,7 @@ export const OverviewPageFooter: FC<Props> = ({
   const defaultRouteButton = defaultRoute.includes(path) ? (
     <EuiButtonEmpty
       className="kbnOverviewPageFooter__button"
+      data-test-subj="kbnOverviewPageFooterButton"
       flush="both"
       iconType="home"
       size="s"
@@ -66,6 +67,7 @@ export const OverviewPageFooter: FC<Props> = ({
   ) : (
     <EuiButtonEmpty
       className="kbnOverviewPageFooter__button"
+      data-test-subj="kbnOverviewPageFooterButton"
       flush="both"
       iconType="home"
       onClick={(event: MouseEvent) => {

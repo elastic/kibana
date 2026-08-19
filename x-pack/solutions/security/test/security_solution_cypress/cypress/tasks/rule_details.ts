@@ -7,7 +7,6 @@
 
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
-import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
@@ -24,7 +23,6 @@ import {
   DETAILS_TITLE,
   EDIT_EXCEPTION_BTN,
   EDIT_RULE_SETTINGS_LINK,
-  ENDPOINT_EXCEPTIONS_TAB,
   EXCEPTION_ITEM_ACTIONS_BUTTON,
   EXCEPTIONS_TAB,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
@@ -63,6 +61,7 @@ import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_br
 import { visit } from './navigation';
 import { LOCAL_DATE_PICKER_APPLY_BUTTON_TIMELINE } from '../screens/date_picker';
 import { GAP_AUTO_FILL_LOGS_TABLE } from '../screens/rule_gaps';
+import { ENDPOINT_EXCEPTIONS_URL } from '../urls/navigation';
 
 interface VisitRuleDetailsPageOptions {
   tab?: RuleDetailsTabs;
@@ -143,8 +142,8 @@ export const viewExpiredExceptionItems = () => {
   cy.get(EXCEPTIONS_TAB_ACTIVE_FILTER).click();
 };
 
-export const goToEndpointExceptionsTab = () => {
-  cy.get(ENDPOINT_EXCEPTIONS_TAB).click();
+export const navigateToEndpointExceptions = () => {
+  cy.visit(ENDPOINT_EXCEPTIONS_URL);
 };
 
 export const openEditException = (index = 0) => {
@@ -179,10 +178,6 @@ export const waitForTheRuleToBeExecuted = () => {
       .invoke('text')
       .then((ruleStatus) => ruleStatus === 'succeeded');
   });
-};
-
-export const goBackToRulesTable = () => {
-  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

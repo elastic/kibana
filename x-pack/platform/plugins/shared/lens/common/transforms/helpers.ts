@@ -8,7 +8,7 @@
 import type { SerializedDrilldowns } from '@kbn/embeddable-plugin/server';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { LensSerializedState } from '@kbn/lens-common';
-import { stripUndefined } from '@kbn/lens-embeddable-utils/config_builder/transforms/charts/utils';
+import { stripUndefined } from '@kbn/lens-embeddable-utils';
 
 /**
  * Keys that should be persisted at the panel level.

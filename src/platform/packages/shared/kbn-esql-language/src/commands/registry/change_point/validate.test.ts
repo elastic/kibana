@@ -81,5 +81,17 @@ describe('CHANGE_POINT Validation', () => {
         );
       });
     });
+
+    describe('... BY <groupings> ...', () => {
+      test('accepts a scalar function as grouping expression', () => {
+        changePointExpectErrors('FROM index | CHANGE_POINT doubleField BY ABS(doubleField)', []);
+      });
+
+      test('raises error on unknown grouping column', () => {
+        changePointExpectErrors('FROM index | CHANGE_POINT doubleField BY notExistingField', [
+          'Unknown column "notExistingField"',
+        ]);
+      });
+    });
   });
 });

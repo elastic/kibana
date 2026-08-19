@@ -49,6 +49,9 @@ describe('SyntheticsMonitorClient', () => {
       bulkUpdate: jest.fn(),
       get: jest.fn(),
     },
+    basePath: {
+      publicBaseUrl: 'https://localhost:5601',
+    },
     config: {
       service: {
         username: 'dev',
@@ -187,6 +190,7 @@ describe('SyntheticsMonitorClient', () => {
         {
           monitor,
           configId: id,
+          kibanaUrl: 'https://localhost:5601',
           params: {
             username: 'elastic',
           },

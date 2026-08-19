@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import type {
-  Conversation,
-  ConversationRound,
-  ConversationRoundStep,
-} from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { ConversationRound, ConversationRoundStep } from '@kbn/agent-builder-common';
+import { ConversationRoundStatus } from '@kbn/agent-builder-common';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
+import type { ConversationWithPermissions } from '../../../common/http_api/conversations';
 
-export const newConversationId = 'new';
-export const createNewConversation = (): Conversation => {
+export const createNewConversation = ({
+  id,
+  agentId,
+}: {
+  id: string;
+  agentId: string;
+}): ConversationWithPermissions => {
   const now = new Date().toISOString();
   return {
-    id: newConversationId,
-    agent_id: agentBuilderDefaultAgentId,
+    id,
+    agent_id: agentId,
     user: { id: '', username: '' },
     title: '',
     created_at: now,
     updated_at: now,
     rounds: [],
+    permissions: { rename: true, delete: true, update_access_control: true },
   };
 };
 

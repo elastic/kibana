@@ -6,10 +6,9 @@
  */
 
 import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
-import { getCore, getCoreOverlays } from '../kibana_services';
+import { getCore } from '../kibana_services';
 import type { MapAttributes } from '../../server';
-import { checkForDuplicateTitle, getMapClient } from '../content_management';
-import { MAP_EMBEDDABLE_NAME } from '../../common/constants';
+import { hasLibraryItemWithTitle, getMapClient } from '../content_management';
 import type { MapByValueState, MapByReferenceState, MapEmbeddableState } from '../../common';
 
 export function getByReferenceState(state: MapEmbeddableState | undefined, savedObjectId: string) {
@@ -55,24 +54,6 @@ export function initializeLibraryTransforms(
     },
     getSerializedStateByReference: serializeByReference,
     getSerializedStateByValue: serializeByValue,
-    checkForDuplicateTitle: async (
-      newTitle: string,
-      isTitleDuplicateConfirmed: boolean,
-      onTitleDuplicate: () => void
-    ) => {
-      await checkForDuplicateTitle(
-        {
-          title: newTitle,
-          copyOnSave: false,
-          lastSavedTitle: '',
-          isTitleDuplicateConfirmed,
-          getDisplayName: () => MAP_EMBEDDABLE_NAME,
-          onTitleDuplicate,
-        },
-        {
-          overlays: getCoreOverlays(),
-        }
-      );
-    },
+    hasLibraryItemWithTitle,
   };
 }

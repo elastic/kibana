@@ -18,6 +18,7 @@ project:
   sourceRoot: src/platform/plugins/shared/console
 dependsOn:
   - '@kbn/scout'
+  - '@kbn/test-es-server'
   - '@kbn/core'
   - '@kbn/dev-tools-plugin'
   - '@kbn/es-ui-shared-plugin'
@@ -56,7 +57,7 @@ dependsOn:
   - '@kbn/core-analytics-browser-internal'
   - '@kbn/core-theme-browser-internal'
   - '@kbn/core-i18n-browser-internal'
-  - '@kbn/babel-register'
+  - '@kbn/swc-register'
   - '@kbn/core-injected-metadata-browser-internal'
   - '@kbn/node-libs-browser-webpack-plugin'
   - '@kbn/esql-types'
@@ -75,6 +76,7 @@ fileGroups:
     - server/**/*
     - packaging/**/*
     - test/**/*
+    - server/lib/spec_definitions/kibana_api_doc_links/*.json
     - '!target/**/*'
   jest-config:
     - jest.config.js

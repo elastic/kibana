@@ -14,10 +14,13 @@ import { where } from '@kbn/esql-composer';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { merge } from 'lodash';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils';
+
+const NULLIFY_HEADER = 'SET unmapped_fields="NULLIFY";';
 
 const mockUseDataSourcesContext = jest.fn(() => ({
   indexes: { logs: 'logs-*', apm: {} },
+  profileId: 'test-profile',
 }));
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
@@ -65,7 +68,7 @@ setUnifiedDocViewerServices(
   })
 );
 
-jest.mock('@kbn/lens-embeddable-utils/config_builder', () => {
+jest.mock('@kbn/lens-embeddable-utils', () => {
   return {
     LensConfigBuilder: jest.fn().mockImplementation(() => ({
       build: mockBuild,
@@ -81,6 +84,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
     capturedGetParentApi = undefined;
     mockUseDataSourcesContext.mockReturnValue({
       indexes: { logs: 'logs-*', apm: {} },
+      profileId: 'test-profile',
     });
     mockBuild.mockResolvedValue({
       visualizationType: 'lnsXY',
@@ -104,6 +108,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
     const lensConfig = buildCall[0];
     const esqlQuery = lensConfig.dataset.esql;
 
+    expect(esqlQuery.startsWith(NULLIFY_HEADER)).toBe(true);
     expect(esqlQuery).toContain('FROM logs-*');
     expect(esqlQuery).toContain('STATS');
     expect(esqlQuery).toContain('occurrences = COUNT(*)');
@@ -152,6 +157,7 @@ describe('SimilarErrorsOccurrencesChart', () => {
   it('does not build chart when indexes.logs is undefined', async () => {
     mockUseDataSourcesContext.mockReturnValueOnce({
       indexes: { logs: undefined, apm: {} } as any,
+      profileId: 'test-profile',
     });
     const baseQuery = where('service.name == ?serviceName', { serviceName: 'test-service' });
     render(<SimilarErrorsOccurrencesChart baseEsqlQuery={baseQuery} />);

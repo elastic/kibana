@@ -14,61 +14,71 @@
  *   version: 1.0.0
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const QRadarMitreMappingTechnique = lazySchema(() =>
+  z.object({
+    confidence: z.string().optional(),
+    enabled: z.boolean(),
+    id: z.string(),
+  })
+);
 export type QRadarMitreMappingTechnique = z.infer<typeof QRadarMitreMappingTechnique>;
-export const QRadarMitreMappingTechnique = z.object({
-  confidence: z.string().optional(),
-  enabled: z.boolean(),
-  id: z.string(),
-});
 
+export const QRadarMitreMappingTactic = lazySchema(() =>
+  z.object({
+    confidence: z.string().optional(),
+    user_override: z.boolean().optional(),
+    enabled: z.boolean(),
+    ibm_default: z.boolean().optional(),
+    name: z.string(),
+    techniques: z.object({}).catchall(QRadarMitreMappingTechnique).optional(),
+  })
+);
 export type QRadarMitreMappingTactic = z.infer<typeof QRadarMitreMappingTactic>;
-export const QRadarMitreMappingTactic = z.object({
-  confidence: z.string().optional(),
-  user_override: z.boolean().optional(),
-  enabled: z.boolean(),
-  ibm_default: z.boolean().optional(),
-  name: z.string(),
-  techniques: z.object({}).catchall(QRadarMitreMappingTechnique).optional(),
-});
 
+export const QRadarMitreMappingRule = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    has_ibm_default: z.boolean().optional(),
+    last_updated: z.number().optional(),
+    mapping: z.object({}).catchall(QRadarMitreMappingTactic),
+    'min-mitre-version': z.number().optional(),
+  })
+);
 export type QRadarMitreMappingRule = z.infer<typeof QRadarMitreMappingRule>;
-export const QRadarMitreMappingRule = z.object({
-  id: z.string(),
-  has_ibm_default: z.boolean().optional(),
-  last_updated: z.number().optional(),
-  mapping: z.object({}).catchall(QRadarMitreMappingTactic),
-  'min-mitre-version': z.number().optional(),
-});
 
 /**
  * QRadar MITRE mappings data keyed by rule name
  */
+export const QRadarMitreMappingsData = lazySchema(() =>
+  z.object({}).catchall(QRadarMitreMappingRule)
+);
 export type QRadarMitreMappingsData = z.infer<typeof QRadarMitreMappingsData>;
-export const QRadarMitreMappingsData = z.object({}).catchall(QRadarMitreMappingRule);
 
 /**
  * Request to enhance rules with QRadar MITRE mappings
  */
+export const QRadarMitreRequest = lazySchema(() =>
+  z.object({
+    /**
+     * The vendor identifier
+     */
+    vendor: z.literal('qradar'),
+    /**
+     * The type of enhancement data
+     */
+    type: z.literal('mitre'),
+    /**
+     * QRadar MITRE mappings data keyed by rule name
+     */
+    data: QRadarMitreMappingsData,
+  })
+);
 export type QRadarMitreRequest = z.infer<typeof QRadarMitreRequest>;
-export const QRadarMitreRequest = z.object({
-  /**
-   * The vendor identifier
-   */
-  vendor: z.literal('qradar'),
-  /**
-   * The type of enhancement data
-   */
-  type: z.literal('mitre'),
-  /**
-   * QRadar MITRE mappings data keyed by rule name
-   */
-  data: QRadarMitreMappingsData,
-});
 
 /**
  * Union type for QRadar rule enhancements
  */
+export const EnhanceQRadarRule = lazySchema(() => QRadarMitreRequest);
 export type EnhanceQRadarRule = z.infer<typeof EnhanceQRadarRule>;
-export const EnhanceQRadarRule = QRadarMitreRequest;

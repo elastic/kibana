@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 import type {
@@ -27,8 +27,8 @@ const mockFetchFailedEventsCorrelationPValues =
   fetchFailedEventsCorrelationPValues as jest.MockedFunction<
     typeof fetchFailedEventsCorrelationPValues
   >;
-const mockIsCCSRemoteIndexName = isCCSRemoteIndexName as jest.MockedFunction<
-  typeof isCCSRemoteIndexName
+const mockisNonLocalIndexName = isNonLocalIndexName as jest.MockedFunction<
+  typeof isNonLocalIndexName
 >;
 
 describe('fetchPValues', () => {
@@ -65,7 +65,7 @@ describe('fetchPValues', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    mockIsCCSRemoteIndexName.mockReturnValue(false);
+    mockisNonLocalIndexName.mockReturnValue(false);
   });
 
   it('should return failed transactions correlations when pValues are below threshold', async () => {
@@ -321,7 +321,7 @@ describe('fetchPValues', () => {
       durationMax: 200,
     });
 
-    mockIsCCSRemoteIndexName.mockReturnValue(true);
+    mockisNonLocalIndexName.mockReturnValue(true);
 
     const correlation: FailedTransactionsCorrelation = {
       fieldName: 'service.version',
@@ -344,7 +344,7 @@ describe('fetchPValues', () => {
 
     expect(result.ccsWarning).toBe(true);
     expect(result.failedTransactionsCorrelations).toHaveLength(1);
-    expect(mockIsCCSRemoteIndexName).toHaveBeenCalledWith('apm-*-transaction-*');
+    expect(mockisNonLocalIndexName).toHaveBeenCalledWith('apm-*-transaction-*');
   });
 
   it('should set ccsWarning to false when there are rejected promises but index is not remote', async () => {
@@ -355,7 +355,7 @@ describe('fetchPValues', () => {
       durationMax: 200,
     });
 
-    mockIsCCSRemoteIndexName.mockReturnValue(false);
+    mockisNonLocalIndexName.mockReturnValue(false);
 
     const correlation: FailedTransactionsCorrelation = {
       fieldName: 'service.version',

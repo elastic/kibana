@@ -12,14 +12,30 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
-import { SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
-import type { GetRuleMigrationResourcesMissingResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH,
+  SIEM_RULE_MIGRATION_RESOURCES_PATH,
+} from '@kbn/security-solution-plugin/common/siem_migrations/constants';
+import type {
+  GetRuleMigrationResourcesMissingResponse,
+  UpsertRuleMigrationResourcesRequestBodyInput,
+  UpsertRuleMigrationResourcesResponse,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import { assertStatusCode } from './asserts';
 
 export interface GetRuleMigrationMissingResourcesParams {
   /** `id` of the migration to get missing resources for */
   migrationId: string;
+  /** Optional expected status code parameter */
+  expectStatusCode?: number;
+}
+
+export interface UpsertRuleMigrationResourcesParams {
+  /** `id` of the migration to upsert resources for */
+  migrationId: string;
+  /** Resources to upsert */
+  body: UpsertRuleMigrationResourcesRequestBodyInput;
   /** Optional expected status code parameter */
   expectStatusCode?: number;
 }
@@ -40,6 +56,24 @@ export const ruleMigrationResourcesRouteHelpersFactory = (supertest: SuperTest.A
         .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send();
+
+      assertStatusCode(expectStatusCode, response);
+
+      return response;
+    },
+    upsert: async ({
+      migrationId,
+      body,
+      expectStatusCode = 200,
+    }: UpsertRuleMigrationResourcesParams): Promise<{
+      body: UpsertRuleMigrationResourcesResponse;
+    }> => {
+      const response = await supertest
+        .post(replaceParams(SIEM_RULE_MIGRATION_RESOURCES_PATH, { migration_id: migrationId }))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(body);
 
       assertStatusCode(expectStatusCode, response);
 

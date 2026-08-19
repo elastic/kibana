@@ -26,8 +26,10 @@ import type {
 } from '../../../common/components/matrix_histogram/types';
 import { getAuthenticationLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/authentication';
 
-export const getHostDetailsAuthenticationColumns = (): AuthTableColumns => [
-  USER_COLUMN,
+export const getHostDetailsAuthenticationColumns = (
+  openUserFlyout: (userName: string) => void
+): AuthTableColumns => [
+  getUserColumn(openUserFlyout),
   SUCCESS_COLUMN,
   FAILURES_COLUMN,
   LAST_SUCCESSFUL_TIME_COLUMN,
@@ -36,23 +38,30 @@ export const getHostDetailsAuthenticationColumns = (): AuthTableColumns => [
   LAST_FAILED_SOURCE_COLUMN,
 ];
 
-export const getHostsPageAuthenticationColumns = (): AuthTableColumns => [
-  USER_COLUMN,
+export const getHostsPageAuthenticationColumns = (
+  openUserFlyout: (userName: string) => void,
+  openHostFlyout: (hostName: string) => void
+): AuthTableColumns => [
+  getUserColumn(openUserFlyout),
   SUCCESS_COLUMN,
   FAILURES_COLUMN,
   LAST_SUCCESSFUL_TIME_COLUMN,
   LAST_SUCCESSFUL_SOURCE_COLUMN,
-  LAST_SUCCESSFUL_DESTINATION_COLUMN,
+  getLastSuccessfulDestinationColumn(openHostFlyout),
   LAST_FAILED_TIME_COLUMN,
   LAST_FAILED_SOURCE_COLUMN,
-  LAST_FAILED_DESTINATION_COLUMN,
+  getLastFailedDestinationColumn(openHostFlyout),
 ];
 
-export const getUsersPageAuthenticationColumns = (): AuthTableColumns =>
-  getHostsPageAuthenticationColumns();
+export const getUsersPageAuthenticationColumns = (
+  openUserFlyout: (userName: string) => void,
+  openHostFlyout: (hostName: string) => void
+): AuthTableColumns => getHostsPageAuthenticationColumns(openUserFlyout, openHostFlyout);
 
-export const getUserDetailsAuthenticationColumns = (): AuthTableColumns => [
-  HOST_COLUMN,
+export const getUserDetailsAuthenticationColumns = (
+  openHostFlyout: (hostName: string) => void
+): AuthTableColumns => [
+  getHostColumn(openHostFlyout),
   SUCCESS_COLUMN,
   FAILURES_COLUMN,
   LAST_SUCCESSFUL_TIME_COLUMN,
@@ -102,7 +111,9 @@ const LAST_SUCCESSFUL_SOURCE_COLUMN: Columns<AuthenticationsEdges, Authenticatio
       render: (item) => <NetworkDetailsLink ip={item} />,
     }),
 };
-const LAST_SUCCESSFUL_DESTINATION_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
+const getLastSuccessfulDestinationColumn = (
+  openHostFlyout: (hostName: string) => void
+): Columns<AuthenticationsEdges, AuthenticationsEdges> => ({
   name: i18n.LAST_SUCCESSFUL_DESTINATION,
   truncateText: false,
   mobileOptions: { show: true },
@@ -111,9 +122,17 @@ const LAST_SUCCESSFUL_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenti
       values: node.lastSuccess?.host?.name ?? null,
       fieldName: 'host.name',
       idPrefix: `authentications-table-${node._id}-lastSuccessfulDestination`,
-      render: (item) => <HostDetailsLink hostName={item} />,
+      render: (item) => (
+        <HostDetailsLink
+          hostName={item}
+          onClick={(e: React.SyntheticEvent) => {
+            e.preventDefault();
+            openHostFlyout(item);
+          }}
+        />
+      ),
     }),
-};
+});
 const LAST_FAILED_TIME_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.LAST_FAILED_TIME,
   truncateText: false,
@@ -137,7 +156,9 @@ const LAST_FAILED_SOURCE_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEd
       render: (item) => <NetworkDetailsLink ip={item} />,
     }),
 };
-const LAST_FAILED_DESTINATION_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
+const getLastFailedDestinationColumn = (
+  openHostFlyout: (hostName: string) => void
+): Columns<AuthenticationsEdges, AuthenticationsEdges> => ({
   name: i18n.LAST_FAILED_DESTINATION,
   truncateText: false,
   mobileOptions: { show: true },
@@ -146,11 +167,21 @@ const LAST_FAILED_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenticati
       values: node.lastFailure?.host?.name || null,
       fieldName: 'host.name',
       idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
-      render: (item) => <HostDetailsLink hostName={item} />,
+      render: (item) => (
+        <HostDetailsLink
+          hostName={item}
+          onClick={(e: React.SyntheticEvent) => {
+            e.preventDefault();
+            openHostFlyout(item);
+          }}
+        />
+      ),
     }),
-};
+});
 
-const USER_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
+const getUserColumn = (
+  openUserFlyout: (userName: string) => void
+): Columns<AuthenticationsEdges, AuthenticationsEdges> => ({
   name: i18n.USER,
   truncateText: false,
   mobileOptions: { show: true },
@@ -159,11 +190,21 @@ const USER_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
       values: node.stackedValue,
       fieldName: 'user.name',
       idPrefix: `authentications-table-${node._id}-userName`,
-      render: (item) => <UserDetailsLink userName={item} />,
+      render: (item) => (
+        <UserDetailsLink
+          userName={item}
+          onClick={(e: React.SyntheticEvent) => {
+            e.preventDefault();
+            openUserFlyout(item);
+          }}
+        />
+      ),
     }),
-};
+});
 
-const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
+const getHostColumn = (
+  openHostFlyout: (hostName: string) => void
+): Columns<AuthenticationsEdges, AuthenticationsEdges> => ({
   name: i18n.HOST,
   truncateText: false,
   mobileOptions: { show: true },
@@ -172,9 +213,17 @@ const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
       values: node.stackedValue,
       fieldName: 'host.name',
       idPrefix: `authentications-table-${node._id}-hostName`,
-      render: (item) => <HostDetailsLink hostName={item} />,
+      render: (item) => (
+        <HostDetailsLink
+          hostName={item}
+          onClick={(e: React.SyntheticEvent) => {
+            e.preventDefault();
+            openHostFlyout(item);
+          }}
+        />
+      ),
     }),
-};
+});
 
 const SUCCESS_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.SUCCESSES,

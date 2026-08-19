@@ -7,6 +7,8 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
+import { getSeverityType } from '@kbn/ml-anomaly-utils/get_severity_type';
 import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import type { ObservabilityAgentBuilderDataRegistry } from '../../data_registry/data_registry';
 import type { ServicesItemsItem } from '../../data_registry/data_registry_types';
@@ -128,7 +130,7 @@ export async function getToolHandler({
   logger,
   start,
   end,
-  healthStatus,
+  anomalySeverities,
   kqlFilter,
 }: {
   core: ObservabilityAgentBuilderCoreSetup;
@@ -139,7 +141,7 @@ export async function getToolHandler({
   logger: Logger;
   start: string;
   end: string;
-  healthStatus?: string[];
+  anomalySeverities?: ML_ANOMALY_SEVERITY[];
   kqlFilter?: string;
 }): Promise<{
   services: ServicesItemsItem[];
@@ -174,25 +176,28 @@ export async function getToolHandler({
 
   const apmServices = apmResponse?.items ?? [];
 
-  // Filter APM services by health status (if provided) and convert latency to milliseconds
-  const normalizedApmServices = apmServices.flatMap((service) => {
-    if (healthStatus && !healthStatus.includes(service.healthStatus ?? 'unknown')) {
-      return [];
-    }
-
-    return [
-      {
-        ...service,
-        latency: toMilliseconds(service.latency ?? null),
-      },
-    ];
-  });
+  const normalizedApmServices = apmServices
+    .filter((service) => {
+      if (!anomalySeverities?.length) return true;
+      const severity =
+        service.anomalyScore === undefined
+          ? ML_ANOMALY_SEVERITY.UNKNOWN
+          : getSeverityType(service.anomalyScore);
+      return anomalySeverities.includes(severity);
+    })
+    .map((service) => ({
+      ...service,
+      anomalySeverity:
+        service.anomalyScore !== undefined
+          ? getSeverityType(service.anomalyScore)
+          : ML_ANOMALY_SEVERITY.UNKNOWN,
+      latency: toMilliseconds(service.latency ?? null),
+    }));
 
   // Merge all services from different sources
-  // When filtering by health status, exclude logs/metrics-only services since they don't have health data
   const services = mergeServices({
     apmServices: normalizedApmServices,
-    logsAndMetricsServices: healthStatus ? [] : logsAndMetricsServices,
+    logsAndMetricsServices: anomalySeverities?.length ? [] : logsAndMetricsServices,
   });
 
   return {

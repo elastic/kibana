@@ -118,6 +118,7 @@ function createScenarioTest(scenario: AlertScenario) {
         esClient.deleteByQuery({
           index: scenario.alertRule.alertsIndex,
           query: { match_all: {} },
+          conflicts: 'proceed',
           refresh: true,
         }),
         ...(ruleId

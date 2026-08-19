@@ -34,9 +34,7 @@ export const CreateJobButton: React.FunctionComponent<
   return hasSetupCapabilities ? (
     button
   ) : (
-    <MissingSetupPrivilegesToolTip position="bottom" delay="regular">
-      {button}
-    </MissingSetupPrivilegesToolTip>
+    <MissingSetupPrivilegesToolTip position="bottom">{button}</MissingSetupPrivilegesToolTip>
   );
 };
 

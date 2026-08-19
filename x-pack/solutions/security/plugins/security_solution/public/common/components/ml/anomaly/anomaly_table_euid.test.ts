@@ -7,6 +7,7 @@
 
 import type { EntityStoreEuid } from '@kbn/entity-store/public';
 
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { Anomaly } from '../types';
 import {
   anomalyMatchesMlEntityField,
@@ -81,6 +82,28 @@ describe('anomaly_table_euid', () => {
       });
       expect(q).toEqual(scopedDsl);
     });
+
+    test('scoped path passes entityRecord directly when provided', () => {
+      const scopedDsl = { bool: { filter: [{ term: { 'user.name': 'alice' } }] } };
+      const getEuidFilterBasedOnDocument = jest.fn().mockReturnValue(scopedDsl);
+      const euid = {
+        dsl: { getEuidFilterBasedOnDocument },
+        getEuidSourceFields: () => ({
+          requiresOneOf: ['user.name'],
+          identitySourceFields: ['user.name'],
+        }),
+      } as unknown as EntityStoreEuid;
+      const entityRecord = { 'user.name': 'alice' } as unknown as EntityStoreRecord;
+
+      const q = buildAnomaliesTableInfluencersFilterQuery({
+        euid,
+        entityType: 'user',
+        entityRecord,
+        isScopedToEntity: true,
+      });
+      expect(getEuidFilterBasedOnDocument).toHaveBeenCalledWith('user', entityRecord);
+      expect(q).toEqual(scopedDsl);
+    });
   });
 
   describe('getCriteriaFieldsForAnomaliesTable', () => {
@@ -124,6 +147,27 @@ describe('anomaly_table_euid', () => {
         { fieldName: 'user.id', fieldValue: 'uid-9' },
         { fieldName: 'user.name', fieldValue: 'bob' },
       ]);
+    });
+
+    test('passes entityRecord directly when provided', () => {
+      const getEuidFilterBasedOnDocument = jest.fn().mockReturnValue(undefined);
+      const getEntityIdentifiersFromDocument = jest.fn().mockReturnValue({ 'user.name': 'carol' });
+      const euid = {
+        dsl: { getEuidFilterBasedOnDocument },
+        getEntityIdentifiersFromDocument,
+      } as unknown as EntityStoreEuid;
+      const entityRecord = { 'user.name': 'carol' } as unknown as EntityStoreRecord;
+
+      const result = getCriteriaFieldsForAnomaliesTable({
+        euid,
+        entityType: 'user',
+        entityRecord,
+        isScopedToEntity: true,
+        fallbackDisplayName: 'carol',
+      });
+      expect(getEuidFilterBasedOnDocument).toHaveBeenCalledWith('user', entityRecord);
+      expect(getEntityIdentifiersFromDocument).toHaveBeenCalledWith('user', entityRecord);
+      expect(result).toEqual([{ fieldName: 'user.name', fieldValue: 'carol' }]);
     });
   });
 

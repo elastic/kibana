@@ -110,7 +110,6 @@ export function MarkerDecorationPosition<Icon extends string = string>({
             })}
             condition={!hasIcon(currentConfig?.icon) && !currentConfig?.textVisibility}
             position="top"
-            delay="regular"
             display="block"
           >
             <EuiButtonGroup

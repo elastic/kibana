@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { evaluateCondition } from './evaluate_conditions';
+import { evaluateCondition } from '../../../../common/types/domain/template/evaluate_conditions';
 
 const typeMap = {
   status: 'keyword',

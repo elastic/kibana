@@ -265,7 +265,7 @@ export class ExplorerChartDistribution extends React.Component {
         .append('text')
         .text((d) => {
           if (fieldFormat !== undefined) {
-            return fieldFormat.convert(d, 'text');
+            return fieldFormat.convertToText(d);
           } else {
             if (chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
               return lineChartYScale.tickFormat()(d);
@@ -417,7 +417,7 @@ export class ExplorerChartDistribution extends React.Component {
         .tickFormat((d) => (d === SCHEDULE_EVENT_MARKER_ENTITY ? null : d));
 
       if (fieldFormat !== undefined) {
-        yAxis.tickFormat((d) => fieldFormat.convert(d, 'text'));
+        yAxis.tickFormat((d) => fieldFormat.convertToText(d));
       }
 
       const axes = lineChartGroup.append('g');
@@ -791,6 +791,12 @@ export class ExplorerChartDistribution extends React.Component {
             }}
           >
             <EuiPopover
+              aria-label={i18n.translate(
+                'xpack.ml.explorer.distributionChart.anomalyActionsPopoverAriaLabel',
+                {
+                  defaultMessage: 'Anomaly actions',
+                }
+              )}
               isOpen={true}
               closePopover={() => this.closePopover()}
               panelPaddingSize="none"

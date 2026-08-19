@@ -15,12 +15,13 @@ import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 jest.mock('./rule_migrations_telemetry_client');
 
 const mockRetrieverInitialize = jest.fn().mockResolvedValue(undefined);
+const mockGetResources = jest.fn().mockResolvedValue({});
 jest.mock('./retrievers', () => ({
   ...jest.requireActual('./retrievers'),
   RuleMigrationsRetriever: jest.fn().mockImplementation(() => ({
     initialize: mockRetrieverInitialize,
     resources: {
-      getResources: jest.fn(() => ({})),
+      getResources: mockGetResources,
     },
   })),
 }));
@@ -70,6 +71,7 @@ describe('RuleMigrationTaskRunner', () => {
 
   beforeEach(() => {
     mockRetrieverInitialize.mockResolvedValue(undefined); // Reset the mock
+    mockGetResources.mockResolvedValue({}); // Reset the mock
     mockInvoke.mockResolvedValue({}); // Reset the mock
     mockRuleMigrationsDataClient = createRuleMigrationsDataClientMock();
     jest.clearAllMocks();
@@ -105,6 +107,77 @@ describe('RuleMigrationTaskRunner', () => {
       });
 
       await expect(taskRunner.setup('test-connector-id')).rejects.toThrowError(errorMessage);
+    });
+  });
+
+  describe('prepareTaskInput', () => {
+    it('should enrich relevant lookup resources with runtime mapping fields', async () => {
+      const migrationRule = {
+        id: 'rule-1',
+        original_rule: { vendor: 'splunk' },
+      };
+      mockGetResources.mockResolvedValue({
+        macro: [{ type: 'macro', name: 'macro1', content: 'search index=main' }],
+        lookup: [
+          { type: 'lookup', name: 'threat_intel_ip', content: 'lookup_default_threat_intel_ip' },
+        ],
+      });
+      mockRuleMigrationsDataClient.resources.getMapping.mockResolvedValue({
+        lookup_default_threat_intel_ip: {
+          mappings: {
+            runtime: {
+              ip: { type: 'ip' },
+              threat_category: { type: 'keyword' },
+            },
+          },
+        },
+      });
+
+      await expect(
+        // @ts-expect-error checking protected method
+        taskRunner.prepareTaskInput(migrationRule)
+      ).resolves.toEqual({
+        id: 'rule-1',
+        original_rule: { vendor: 'splunk' },
+        resources: {
+          macro: [{ type: 'macro', name: 'macro1', content: 'search index=main' }],
+          lookup: [
+            {
+              type: 'lookup',
+              name: 'threat_intel_ip',
+              content: 'lookup_default_threat_intel_ip',
+              fields: [
+                { path: 'ip', type: 'ip' },
+                { path: 'threat_category', type: 'keyword' },
+              ],
+            },
+          ],
+        },
+      });
+      expect(mockGetResources).toHaveBeenCalledWith(migrationRule.original_rule);
+      expect(mockRuleMigrationsDataClient.resources.getMapping).toHaveBeenCalledWith({
+        index: ['lookup_default_threat_intel_ip'],
+        allow_no_indices: true,
+        ignore_unavailable: true,
+      });
+    });
+
+    it('should not fetch resources for unsupported vendors', async () => {
+      const migrationRule = {
+        id: 'rule-1',
+        original_rule: { vendor: 'elastic' },
+      };
+
+      await expect(
+        // @ts-expect-error checking protected method
+        taskRunner.prepareTaskInput(migrationRule)
+      ).resolves.toEqual({
+        id: 'rule-1',
+        original_rule: { vendor: 'elastic' },
+        resources: {},
+      });
+      expect(mockGetResources).not.toHaveBeenCalled();
+      expect(mockRuleMigrationsDataClient.resources.getMapping).not.toHaveBeenCalled();
     });
   });
 });

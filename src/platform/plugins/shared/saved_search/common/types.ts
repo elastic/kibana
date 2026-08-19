@@ -44,7 +44,7 @@ export type VisContextUnmapped =
     }
   | {}; // cleared value
 
-/** @internal **/
+/** @deprecated Use DiscoverSessionAttributes instead **/
 export interface SavedSearchAttributes {
   title: string;
   sort: SortOrder[];
@@ -122,6 +122,7 @@ export interface DiscoverSessionTab {
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
   headerRowHeight?: number;
+  esqlApproximation?: boolean;
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;

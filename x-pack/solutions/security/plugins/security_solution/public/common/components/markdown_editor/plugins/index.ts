@@ -14,9 +14,12 @@ import * as timelineMarkdownPlugin from './timeline';
 import * as osqueryMarkdownPlugin from './osquery';
 import * as insightMarkdownPlugin from './insight';
 
-export const nonStatefulUiPlugins = getDefaultEuiMarkdownUiPlugins();
-export const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-export const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+export const nonStatefulUiPlugins: ReturnType<typeof getDefaultEuiMarkdownUiPlugins> =
+  getDefaultEuiMarkdownUiPlugins();
+export const parsingPlugins: ReturnType<typeof getDefaultEuiMarkdownParsingPlugins> =
+  getDefaultEuiMarkdownParsingPlugins();
+export const processingPlugins: ReturnType<typeof getDefaultEuiMarkdownProcessingPlugins> =
+  getDefaultEuiMarkdownProcessingPlugins();
 
 export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 

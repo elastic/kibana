@@ -9,6 +9,7 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { AuthzDisabled } from '@kbn/core-security-server';
 import { NpreClient } from '../npre/npre_client';
 
 export const registerGetNpreValueRoute = (
@@ -24,12 +25,7 @@ export const registerGetNpreValueRoute = (
         }),
       },
       security: {
-        authz: {
-          requiredPrivileges: [
-            // this will end up being just read_project_routing but it is not implemented yet.
-            'cluster:monitor/project_routing/get',
-          ],
-        },
+        authz: AuthzDisabled.delegateToESClient,
       },
     },
     async (requestHandlerContext, request, response) => {

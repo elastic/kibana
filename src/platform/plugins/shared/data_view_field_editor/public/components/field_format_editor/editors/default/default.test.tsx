@@ -7,22 +7,53 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
-import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-
 import type { SampleInput } from '../../types';
-import { DefaultFormatEditor, convertSampleInput } from './default';
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { convertSampleInput, DefaultFormatEditor, defaultState } from './default';
+import { createFieldFormatMock } from '../test_utils';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 const fieldType = 'number';
-const format = {
-  getConverterFor: jest.fn().mockImplementation(() => () => {}),
-};
+
+const format = createFieldFormatMock({
+  convertToReact: jest.fn().mockImplementation(() => null),
+});
+
 const formatParams = {};
+
 const onChange = jest.fn();
 const onError = jest.fn();
 
+class TestDefaultFormatEditor extends DefaultFormatEditor {
+  state = {
+    ...defaultState,
+    sampleInputs: [1],
+  };
+
+  render() {
+    return <button onClick={() => this.onChange()}>Update format</button>;
+  }
+}
+
+const renderDefaultFormatEditor = () =>
+  renderWithI18n(
+    <DefaultFormatEditor
+      fieldType={fieldType}
+      format={format}
+      formatParams={formatParams}
+      onChange={onChange}
+      onError={onError}
+    />
+  );
+
 describe('DefaultFormatEditor', () => {
+  beforeEach(() => {
+    onChange.mockClear();
+    onError.mockClear();
+  });
+
   describe('convertSampleInput', () => {
     const converter = (input: SampleInput) => {
       if (typeof input !== 'number') {
@@ -57,54 +88,50 @@ describe('DefaultFormatEditor', () => {
     });
   });
 
-  it('should render nothing', async () => {
-    const component = shallow(
-      <DefaultFormatEditor
-        fieldType={fieldType}
-        format={format as unknown as FieldFormat}
-        formatParams={formatParams}
-        onChange={onChange}
-        onError={onError}
-      />
-    );
+  it('should render nothing', () => {
+    const { container } = renderDefaultFormatEditor();
 
-    expect(format.getConverterFor).toBeCalled();
     expect(onError).toBeCalled();
-    expect(component).toMatchSnapshot();
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('should call prop onChange()', async () => {
-    const component = shallow(
-      <DefaultFormatEditor
+    const user = userEvent.setup();
+
+    renderWithI18n(
+      <TestDefaultFormatEditor
         fieldType={fieldType}
-        format={format as unknown as FieldFormat}
+        format={format}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
       />
     );
 
-    (component.instance() as DefaultFormatEditor).onChange();
-    expect(onChange).toBeCalled();
+    await user.click(screen.getByText('Update format'));
+
+    expect(onChange).toHaveBeenCalledWith(formatParams);
   });
 
-  it('should call prop onError() if converter throws an error', async () => {
-    const newFormat = {
-      getConverterFor: jest.fn().mockImplementation(() => () => {
+  it('should call prop onError() if converter throws an error', () => {
+    const newFormat = createFieldFormatMock({
+      convertToReact: jest.fn().mockImplementation(() => {
         throw new Error('Test error message');
       }),
-    };
+    });
 
-    shallow(
-      <DefaultFormatEditor
+    renderWithI18n(
+      <TestDefaultFormatEditor
         fieldType={fieldType}
-        format={newFormat as unknown as FieldFormat}
+        format={newFormat}
         formatParams={formatParams}
         onChange={onChange}
         onError={onError}
       />
     );
 
-    expect(onError).toBeCalled();
+    expect(onError).toHaveBeenCalledWith(
+      'An error occurred while trying to use this format configuration: Test error message'
+    );
   });
 });

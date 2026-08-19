@@ -6,13 +6,16 @@
  */
 
 import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import { CHAT_COMPLETION_TASK_TYPE } from './constants';
 import type {
+  CspRegion,
+  EisInferenceEndpoint,
   InferenceEndpointWithMetadata,
   InferenceEndpointWithDisplayNameMetadata,
   InferenceEndpointWithDisplayCreatorMetadata,
+  ReasoningEffortLevel,
 } from './types';
 
-const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 const KIBANA_CONNECTOR_HEURISTIC = 'kibana-connector';
 
 /**
@@ -31,6 +34,9 @@ export function isInferenceEndpointWithKibanaConnectorHeuristic(
   const properties = endpoint.metadata?.heuristics?.properties;
   return Array.isArray(properties) && properties.includes(KIBANA_CONNECTOR_HEURISTIC);
 }
+
+export const isEisEndpoint = (ep: InferenceInferenceEndpointInfo): ep is EisInferenceEndpoint =>
+  ep.service === 'elastic';
 
 export function isInferenceEndpointWithMetadata(
   endpoint: InferenceInferenceEndpointInfo
@@ -66,4 +72,27 @@ export function isInferenceEndpointWithDisplayCreatorMetadata(
     typeof metadata.display.model_creator === 'string' &&
     metadata.display.model_creator.length > 0
   );
+}
+
+export const isCspRegion = (value: unknown): value is CspRegion => {
+  if (!value || typeof value !== 'object') return false;
+  return (
+    'csp' in value &&
+    'region' in value &&
+    typeof value.csp === 'string' &&
+    typeof value.region === 'string'
+  );
+};
+
+const REASONING_EFFORT_LEVELS: readonly string[] = [
+  'none',
+  'minimal',
+  'low',
+  'medium',
+  'high',
+  'xhigh',
+];
+
+export function isReasoningEffortLevel(value: unknown): value is ReasoningEffortLevel {
+  return typeof value === 'string' && REASONING_EFFORT_LEVELS.includes(value);
 }

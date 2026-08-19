@@ -18,16 +18,20 @@ function createMockAnomalyTimeseries({
   type,
   environment = PROD,
   version = 3,
+  jobId = uuidv4(),
+  anomalies = [],
 }: {
   type: AnomalyDetectorType;
   environment?: Environment;
   version?: number;
+  jobId?: string;
+  anomalies?: ServiceAnomalyTimeseries['anomalies'];
 }): ServiceAnomalyTimeseries {
   return {
-    anomalies: [],
+    anomalies,
     bounds: [],
     environment,
-    jobId: uuidv4(),
+    jobId,
     type,
     serviceName: 'opbeans-java',
     transactionType: 'request',

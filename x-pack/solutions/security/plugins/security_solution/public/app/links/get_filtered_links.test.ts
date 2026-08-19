@@ -48,13 +48,13 @@ describe('getFilteredLinks', () => {
     mockCore.uiSettings.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
   });
 
-  it('returns filtered links including AI Value links', async () => {
+  it('returns filtered links including launchpad', async () => {
     mockGetManagementFilteredLinks.mockResolvedValue(mockManagementLinks);
 
     const result = await getFilteredLinks(mockCore, mockPlugins, mockExperimentalFeatures);
 
-    expect(result).toContainEqual(expect.objectContaining({ id: SecurityPageName.aiValue }));
     expect(result).toContainEqual(mockManagementLinks);
+    expect(result).toContainEqual(expect.objectContaining({ id: SecurityPageName.launchpad }));
     expect(mockGetManagementFilteredLinks).toHaveBeenCalledWith(
       mockCore,
       mockPlugins,
@@ -76,7 +76,7 @@ describe('getFilteredLinks', () => {
     expect(resultIds).toContain('alerts');
     expect(resultIds).toContain('cases');
     expect(resultIds).toContain('configurations');
-    expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+    expect(resultIds).toContain('launchpad');
   });
 
   it('returns a frozen array', async () => {
@@ -117,7 +117,7 @@ describe('getFilteredLinks', () => {
       expect(resultIds).toContain('attack_discovery');
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
-      expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+      expect(resultIds).toContain('launchpad');
     });
 
     it('includes all base links in the result when setting is enabled', async () => {
@@ -133,10 +133,13 @@ describe('getFilteredLinks', () => {
       const resultIds = result.map((link) => link.id);
       expect(resultIds).toContain('dashboards');
       expect(resultIds).toContain('alert_detections');
+      // Attack Discovery stays a normal top-level link even when alignment is enabled.
       expect(resultIds).toContain('attack_discovery');
+      const attackDiscoveryLink = result.find((link) => link.id === 'attack_discovery');
+      expect(attackDiscoveryLink?.sideNavDisabled).toBeUndefined();
       expect(resultIds).toContain('cases');
       expect(resultIds).toContain('configurations');
-      expect(resultIds).toContain('ai_value'); // AI Value is now included statically
+      expect(resultIds).toContain('launchpad');
     });
   });
 });

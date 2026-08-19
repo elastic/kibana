@@ -9,12 +9,13 @@ import type { ScoutPage } from '@kbn/scout-oblt';
 import { EXTENDED_TIMEOUT } from './constants';
 
 /**
- * Waits for the APM settings header link to be visible.
- * This is commonly used to ensure the APM page has fully loaded.
+ * Waits for a stable app-menu signal so the APM page is considered loaded.
+ * Prefer Add data (primary action) — same role Settings played before it moved into More.
+ * Alerts is privilege-gated and is not a reliable ready signal for all roles.
  */
-export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<void> {
+export async function waitForApmAppMenuReady(page: ScoutPage): Promise<void> {
   await page
-    .getByTestId('apmSettingsHeaderLink')
+    .getByTestId('apmAddDataHeaderLink')
     .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
 }
 
@@ -24,4 +25,25 @@ export async function waitForApmSettingsHeaderLink(page: ScoutPage): Promise<voi
  */
 export async function waitForApmMainContainer(page: ScoutPage): Promise<void> {
   await page.testSubj.waitForSelector('apmMainContainer', { timeout: EXTENDED_TIMEOUT });
+}
+
+/**
+ * Waits for the unified search bar's date picker to mount, regardless of which
+ * variant (legacy EuiSuperDatePicker or new DateRangePicker) is rendered. The
+ * variant depends on the `enableDateRangePicker` flag and may flip across
+ * environments.
+ */
+export async function waitForSearchBarReady(page: ScoutPage): Promise<void> {
+  await page
+    .getByTestId('dateRangePickerControlButton')
+    .or(page.getByTestId('superDatePickerToggleQuickMenuButton'))
+    .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
+}
+
+/**
+ * Close global EUI toasts when present — they intercept pointer events and break
+ * interactions (e.g. Investigate menu) while still visible (#246662 CI flakes).
+ */
+export async function dismissGlobalToastsIfPresent(page: ScoutPage): Promise<void> {
+  await page.components.toast().closeAll();
 }

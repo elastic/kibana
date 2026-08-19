@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WorkflowDisabledError } from './workflow_disabled_error';
 import { WorkflowExecutionInvalidStatusError } from './workflow_execution_invalid_status_error';
 import { WorkflowExecutionNotFoundError } from './workflow_execution_not_found_error';
 import { WorkflowNotFoundError } from './workflow_not_found_error';
@@ -28,6 +29,11 @@ describe('workflow error classes', () => {
       expectedName: 'WorkflowExecutionInvalidStatusError',
       expectedMessage: 'Workflow execution "exec-1" is in status "running" but expected "pending".',
     },
+    {
+      create: () => new WorkflowDisabledError('wf-123'),
+      expectedName: 'WorkflowDisabledError',
+      expectedMessage: 'Workflow is disabled: wf-123. Enable the workflow to run it.',
+    },
   ])(
     '$expectedName sets name, message, and extends Error',
     ({ create, expectedName, expectedMessage }) => {
@@ -36,6 +42,13 @@ describe('workflow error classes', () => {
       expect(error).toBeInstanceOf(Error);
       expect(error.name).toBe(expectedName);
       expect(error.message).toBe(expectedMessage);
+    }
+  );
+
+  it.each([new WorkflowDisabledError('wf-123'), new WorkflowNotFoundError('wf-123')])(
+    '%s is marked as a user error',
+    (error) => {
+      expect(error).toHaveProperty('isUserError', true);
     }
   );
 });

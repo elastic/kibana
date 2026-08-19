@@ -21,7 +21,11 @@ import { addLog } from '../../../../../utils/add_log';
 import { selectTab } from './tabs';
 import { selectTabRuntimeState, type RuntimeStateManager } from '../runtime_state';
 import type { DiscoverInternalState } from '../types';
-import { fromSavedObjectTabToTabState, fromTabStateToSavedObjectTab } from '../tab_mapping_utils';
+import {
+  fromSavedObjectTabToAppState,
+  fromSavedObjectTabToTabState,
+  fromTabStateToSavedObjectTab,
+} from '../tab_mapping_utils';
 import type { DiscoverServices } from '../../../../../build_services';
 import { getInitialAppState } from '../../utils/get_initial_app_state';
 import { getSerializedSearchSourceDataViewDetails } from '../utils';
@@ -76,7 +80,7 @@ export const selectHasUnsavedChanges = (
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
         initialAppState: getInitialAppState({
-          initialUrlState: undefined,
+          initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
           persistedTab,
           dataView: getSerializedSearchSourceDataViewDetails(
             persistedTab.serializedSearchSource,
@@ -228,6 +232,7 @@ const TAB_COMPARATORS: TabComparators = {
   chartInterval: fieldComparator('chartInterval', 'auto'),
   breakdownField: fieldComparator('breakdownField', ''),
   density: fieldComparator('density', DataGridDensity.COMPACT),
+  esqlApproximation: fieldComparator('esqlApproximation', false),
   visContext: visContextComparator,
   controlGroupJson: (a, b) => {
     // ignore the order of keys when comparing JSON strings

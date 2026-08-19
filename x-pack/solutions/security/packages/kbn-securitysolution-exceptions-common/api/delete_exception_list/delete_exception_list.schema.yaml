@@ -9,7 +9,12 @@ paths:
       operationId: DeleteExceptionList
       x-codegen-enabled: true
       summary: Delete an exception list
-      description: Delete an exception list using the `id` or `list_id` field.
+      description: |
+        Delete an exception list using the `id` or `list_id` field.
+
+        Before deleting an exception list that is linked to detection rules, remove or unlink the
+        exception list from those rules. Deleting a linked exception list can leave rules referencing
+        an exception list that no longer exists.
       parameters:
         - name: id
           in: query
@@ -31,6 +36,9 @@ paths:
         - name: namespace_type
           in: query
           required: false
+          description: |
+            `single` deletes the list in the current Kibana space; `agnostic` deletes a global list. Must match the
+            list you are removing when using `list_id` or `id`.
           schema:
             $ref: '../model/exception_list_common.schema.yaml#/components/schemas/ExceptionNamespaceType'
             default: single

@@ -14,13 +14,8 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, dashboardControls } = getPageObjects([
-    'dashboard',
-    'timePicker',
-    'common',
-    'dashboardControls',
-    'header',
-  ]);
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const { dashboard, timePicker } = getPageObjects(['dashboard', 'timePicker']);
   const testSubjects = getService('testSubjects');
   const esql = getService('esql');
 
@@ -46,10 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.switchToEditMode();
       const panelCountBefore = await dashboard.getPanelCount();
 
-      await dashboardControls.openControlsMenu();
-      const createESQLControlBtn = await testSubjects.find('esql-control-create-button');
-      await createESQLControlBtn.click();
-
+      await dashboardAddPanel.clickAddVariableControlPanel();
       // Flyout is open
       await esql.waitESQLEditorLoaded('ESQLEditor');
       await esql.setEsqlEditorQuery('FROM logstash-* | STATS BY geo.dest');
@@ -60,7 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('saveEsqlControlsFlyoutButton');
 
       await dashboard.waitForRenderComplete();
-
       await retry.try(async () => {
         // Creating a control from the dropdown adds it directly to the pinned control group, not as a panel
         // Expect control group to be visible, and no additional panels to be created

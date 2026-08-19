@@ -8,7 +8,7 @@
  */
 
 import { Parser, isSource } from '@elastic/esql';
-import type { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/code-editor';
 import type { CommandRange, SourceCommandContext, LocatedSourceItem } from './types';
 import { IndicesBrowserOpenMode } from './types';
 import { SUPPORTED_COMMANDS } from './constants';

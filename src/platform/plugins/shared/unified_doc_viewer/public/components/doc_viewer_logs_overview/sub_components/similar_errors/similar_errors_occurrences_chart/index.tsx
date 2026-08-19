@@ -12,11 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { from, stats, sort } from '@kbn/esql-composer';
 import {
   LensConfigBuilder,
-  type LensXYConfig,
-  type LensSeriesLayer,
   type LensAnnotationLayer,
-} from '@kbn/lens-embeddable-utils/config_builder';
-import type { LensAttributes } from '@kbn/lens-embeddable-utils/config_builder';
+  type LensAttributes,
+  type LensSeriesLayer,
+  type LensXYConfig,
+} from '@kbn/lens-embeddable-utils';
 import { EuiCallOut, EuiLoadingChart, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { fieldConstants } from '@kbn/discover-utils';
@@ -24,6 +24,7 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
+import { withUnmappedFields } from '../../../../../hooks/use_discover_link_and_esql_query';
 
 const chartTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.occurrences.title',
@@ -89,7 +90,7 @@ export function SimilarErrorsOccurrencesChart({
 }: SimilarErrorsOccurrencesChartProps) {
   const { data } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
-  const { indexes } = useDataSourcesContext();
+  const { indexes, profileId } = useDataSourcesContext();
   const [lensAttributes, setLensAttributes] = useState<LensAttributes | undefined>(undefined);
   const [hasError, setHasError] = useState<boolean>(false);
   const timeRange = useMemo(
@@ -117,7 +118,7 @@ export function SimilarErrorsOccurrencesChart({
       return undefined;
     }
 
-    return from(indexes.logs)
+    const query = from(indexes.logs)
       .pipe(
         baseEsqlQuery,
         stats(
@@ -126,10 +127,15 @@ export function SimilarErrorsOccurrencesChart({
         sort(fieldConstants.TIMESTAMP_FIELD)
       )
       .toString();
+
+    return withUnmappedFields(query);
   }, [baseEsqlQuery, indexes.logs]);
 
   const getParentApi = useCallback(() => {
     return {
+      executionContext: {
+        meta: { profile_id: profileId, metric_id: 'similarErrors' },
+      },
       getSerializedStateForChild: () => ({
         attributes: lensAttributes,
         viewMode: 'view',
@@ -137,7 +143,7 @@ export function SimilarErrorsOccurrencesChart({
       }),
       noPadding: true,
     };
-  }, [lensAttributes, timeRange]);
+  }, [lensAttributes, timeRange, profileId]);
 
   useEffect(() => {
     if (!chartEsqlQuery || !data.dataViews) {

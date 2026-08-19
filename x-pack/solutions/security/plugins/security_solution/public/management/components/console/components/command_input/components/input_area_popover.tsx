@@ -8,6 +8,7 @@
 import type { CSSProperties, ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo } from 'react';
 import { EuiFocusTrap, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { CommandInputHistory } from './command_input_history';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
@@ -66,6 +67,9 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width =
       focusTrapProps={focusTrapProps}
       ownFocus={false}
       data-test-subj={getTestId('inputPopover')}
+      aria-label={i18n.translate('xpack.securitySolution.console.inputAreaPopover.ariaLabel', {
+        defaultMessage: 'Command input history',
+      })}
     >
       {show && (
         <EuiFocusTrap clickOutsideDisables={true}>

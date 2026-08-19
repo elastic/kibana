@@ -21,6 +21,7 @@ import type {
   Logger,
   CoreStart,
 } from '@kbn/core/server';
+import type { FakeRequestEnricher } from '@kbn/core-security-server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -31,6 +32,7 @@ import {
   scheduleDeleteInactiveNodesTaskDefinition,
 } from './kibana_discovery_service/delete_inactive_nodes_task';
 import { KibanaDiscoveryService } from './kibana_discovery_service';
+import { TaskExecutionControlService } from './execution_control';
 import { TaskPollingLifecycle } from './polling_lifecycle';
 import type { TaskManagerConfig } from './config';
 import type { Middleware } from './lib/middleware';
@@ -41,13 +43,19 @@ import {
   BACKGROUND_TASK_NODE_SO_NAME,
   TASK_SO_NAME,
   INVALIDATE_API_KEY_SO_NAME,
+  TASK_EXECUTION_CONTROL_SO_NAME,
 } from './saved_objects';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
 import { TaskStore } from './task_store';
 import { TaskScheduling } from './task_scheduling';
-import { backgroundTaskUtilizationRoute, healthRoute, metricsRoute } from './routes';
+import {
+  backgroundTaskUtilizationRoute,
+  healthRoute,
+  metricsRoute,
+  executionControlRoutes,
+} from './routes';
 import type { MonitoringStats } from './monitoring';
 import { createMonitoringStats } from './monitoring';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
@@ -67,11 +75,19 @@ import {
 } from './removed_tasks/mark_removed_tasks_as_unrecognized';
 import { getElasticsearchAndSOAvailability } from './lib/get_es_and_so_availability';
 import { LicenseSubscriber } from './license_subscriber';
-import type { ApiKeyInvalidationFn } from './invalidate_api_keys/invalidate_api_keys_task';
+import type {
+  ApiKeyInvalidationFn,
+  UiamApiKeyInvalidationFn,
+} from './invalidate_api_keys/invalidate_api_keys_task';
 import {
   registerInvalidateApiKeyTask,
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
+import { createApiKeyStrategy } from './api_key_strategy';
+import {
+  UiamApiKeyProvisioningTask,
+  taskManagerUiamProvisioningEvents,
+} from './uiam_api_key_provisioning';
 
 export interface TaskManagerSetupContract {
   /**
@@ -105,6 +121,7 @@ export type TaskManagerStartContract = Pick<
     getRegisteredTypes: () => string[];
     registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
     registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => void;
+    registerUiamApiKeyInvalidateFn: (fn?: UiamApiKeyInvalidationFn) => void;
   };
 
 export interface TaskManagerPluginsStart {
@@ -146,12 +163,18 @@ export class TaskManagerPlugin
   private taskManagerMetricsCollector?: TaskManagerMetricsCollector;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private kibanaDiscoveryService?: KibanaDiscoveryService;
+  private executionControlService?: TaskExecutionControlService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
   private canEncryptSavedObjects: boolean;
   private licenseSubscriber?: PublicMethodsOf<LicenseSubscriber>;
   private invalidateApiKeyFn?: ApiKeyInvalidationFn;
   private taskEventLogger?: TaskEventLogger;
+  private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
+  private taskStore?: TaskStore;
+  private startContract?: TaskManagerStartContract;
+  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
+  private enrichFakeRequest?: FakeRequestEnricher;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -174,6 +197,10 @@ export class TaskManagerPlugin
     if (this.invalidateApiKeyFn) {
       return this.invalidateApiKeyFn(params);
     }
+  }
+
+  private get invalidateUiamApiKey(): UiamApiKeyInvalidationFn | undefined {
+    return this.invalidateUiamApiKeyFn;
   }
 
   public setup(
@@ -247,6 +274,16 @@ export class TaskManagerPlugin
       resetMetrics$: this.resetMetrics$,
       taskManagerId: this.taskManagerId,
     });
+    executionControlRoutes({
+      router,
+      logger: this.logger,
+      // getStartServices resolves after start(), by which point the service and
+      // the full task-type dictionary are available on every node.
+      getSecurity: () => core.getStartServices().then(([coreStart]) => coreStart.security),
+      getExecutionControlService: () =>
+        core.getStartServices().then(() => this.executionControlService!),
+      getDefinitions: () => this.definitions,
+    });
 
     core.status.derivedStatus$.subscribe((status) =>
       this.logger.debug(`status core.status.derivedStatus now set to ${status.level}`)
@@ -278,7 +315,9 @@ export class TaskManagerPlugin
     registerInvalidateApiKeyTask({
       configInterval: this.config.invalidate_api_key_task.interval,
       coreStartServices: core.getStartServices,
+      getEncryptedSavedObjectsClient: () => this.taskStore?.getEncryptedSavedObjectsClient(),
       invalidateApiKeyFn: this.invalidateApiKey.bind(this),
+      invalidateUiamApiKeyFn: () => this.invalidateUiamApiKey,
       logger: this.logger,
       removalDelay: this.config.invalidate_api_key_task.removalDelay,
       taskTypeDictionary: this.definitions,
@@ -288,6 +327,20 @@ export class TaskManagerPlugin
       core.getStartServices,
       this.definitions
     );
+
+    taskManagerUiamProvisioningEvents.forEach((eventConfig) =>
+      core.analytics.registerEventType(eventConfig)
+    );
+
+    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
+      logger: this.logger,
+      isServerless,
+      analytics: core.analytics,
+    });
+    this.uiamApiKeyProvisioningTask.register({
+      coreSetup: core,
+      taskTypeDictionary: this.definitions,
+    });
 
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
@@ -303,6 +356,8 @@ export class TaskManagerPlugin
     if (this.isNodeBackgroundTasksOnly()) {
       setupIntervalLogging(monitoredHealth$, this.logger, LogHealthForBackgroundTasksOnlyMinutes);
     }
+
+    this.enrichFakeRequest = core.security.acquireFakeRequestEnricher();
 
     return {
       index: TASK_MANAGER_INDEX,
@@ -322,15 +377,18 @@ export class TaskManagerPlugin
   }
 
   public start(
-    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    core: CoreStart,
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
+    const { savedObjects, elasticsearch, executionContext, security } = core;
+    const enrichFakeRequest = this.enrichFakeRequest;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
       INVALIDATE_API_KEY_SO_NAME,
+      TASK_EXECUTION_CONTROL_SO_NAME,
     ]);
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
@@ -345,7 +403,23 @@ export class TaskManagerPlugin
       this.kibanaDiscoveryService.start().catch(() => {});
     }
 
+    // Runs on every node (including UI-only nodes) so the pause/resume API and
+    // health output are consistent everywhere; enforcement only happens where a
+    // TaskPollingLifecycle exists (background-task nodes).
+    this.executionControlService = new TaskExecutionControlService({
+      savedObjectsRepository,
+      logger: this.logger,
+      config: this.config.execution_control,
+    });
+    this.executionControlService.start().catch(() => {});
+
     const serializer = savedObjects.createSerializer();
+    const apiKeyStrategy = createApiKeyStrategy(
+      this.config.api_key_type,
+      this.config.grant_uiam_api_keys,
+      security,
+      this.logger
+    );
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
@@ -357,13 +431,13 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
-      requestTimeouts: this.config.request_timeouts,
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
       getIsSecurityEnabled: this.licenseSubscriber?.getIsSecurityEnabled,
-      basePath: http.basePath,
       executionContext,
+      apiKeyStrategy,
     });
+    this.taskStore = taskStore;
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
 
@@ -407,7 +481,6 @@ export class TaskManagerPlugin
       });
 
       this.taskPollingLifecycle = new TaskPollingLifecycle({
-        basePathService: http.basePath,
         config: this.config!,
         definitions: this.definitions,
         logger: this.logger,
@@ -416,9 +489,12 @@ export class TaskManagerPlugin
         usageCounter: this.usageCounter,
         middleware: this.middleware,
         elasticsearchAndSOAvailability$: this.elasticsearchAndSOAvailability$!,
+        executionControlService: this.executionControlService,
         taskPartitioner,
         startingCapacity,
+        apiKeyStrategy,
         eventLogger: this.taskEventLogger!,
+        enrichFakeRequest,
       });
     }
 
@@ -430,6 +506,7 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       taskDefinitions: this.definitions,
       taskPollingLifecycle: this.taskPollingLifecycle,
+      executionControlService: this.executionControlService,
       startingCapacity,
     }).subscribe((stat) => this.monitoringStats$.next(stat));
 
@@ -457,7 +534,7 @@ export class TaskManagerPlugin
     ).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
 
-    return {
+    this.startContract = {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
         taskStore.aggregate(opts),
@@ -481,16 +558,32 @@ export class TaskManagerPlugin
       registerApiKeyInvalidateFn: (fn?: ApiKeyInvalidationFn) => {
         this.invalidateApiKeyFn = fn;
       },
+      registerUiamApiKeyInvalidateFn: (fn?: UiamApiKeyInvalidationFn) => {
+        this.invalidateUiamApiKeyFn = fn;
+      },
     };
+
+    this.uiamApiKeyProvisioningTask
+      ?.start({
+        core,
+        taskScheduling,
+        removeIfExists: (id: string) => removeIfExists(taskStore, id),
+      })
+      .catch(() => {});
+
+    return this.startContract;
   }
 
   public async stop() {
     this.licenseSubscriber?.cleanup();
+    this.uiamApiKeyProvisioningTask?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
       this.taskPollingLifecycle.stop();
     }
+
+    this.executionControlService?.stop();
 
     if (this.kibanaDiscoveryService?.isStarted()) {
       this.kibanaDiscoveryService.stop();

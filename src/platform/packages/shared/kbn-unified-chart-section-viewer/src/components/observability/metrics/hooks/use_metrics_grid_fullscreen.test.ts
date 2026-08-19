@@ -8,31 +8,23 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useEuiTheme, useGeneratedHtmlId, useMutationObserver } from '@elastic/eui';
+import { useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import fs from 'fs';
 import path from 'path';
 import {
+  FULLSCREEN_BODY_STYLES_CLASS,
   useMetricsGridFullScreen,
-  toggleMetricsGridFullScreen,
 } from './use_metrics_grid_fullscreen';
-import {
-  METRICS_GRID_FULL_SCREEN_CLASS,
-  METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS,
-} from '../../../../common/constants';
 
 // Mock only what's needed for the hook test
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useEuiTheme: jest.fn(),
   useGeneratedHtmlId: jest.fn(),
-  useMutationObserver: jest.fn(),
 }));
 
 const mockUseEuiTheme = useEuiTheme as jest.MockedFunction<typeof useEuiTheme>;
 const mockUseGeneratedHtmlId = useGeneratedHtmlId as jest.MockedFunction<typeof useGeneratedHtmlId>;
-const mockUseMutationObserver = useMutationObserver as jest.MockedFunction<
-  typeof useMutationObserver
->;
 
 describe('useMetricsGridFullScreen', () => {
   beforeEach(() => {
@@ -44,52 +36,33 @@ describe('useMetricsGridFullScreen', () => {
     } as any);
 
     mockUseGeneratedHtmlId.mockReturnValue('test-metrics-grid-id');
-    mockUseMutationObserver.mockImplementation(() => {});
-
-    Object.defineProperty(document.body, 'classList', {
-      writable: true,
-      value: {
-        add: jest.fn(),
-        remove: jest.fn(),
-        contains: jest.fn(),
-      },
-    });
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('calls useMutationObserver with correct parameters two times', () => {
-    renderHook(() => useMetricsGridFullScreen({ prefix: 'test-metrics-grid-id' }));
-
-    expect(mockUseMutationObserver).toHaveBeenCalledTimes(2);
-    expect(mockUseMutationObserver).toHaveBeenNthCalledWith(1, null, expect.any(Function), {
-      childList: true,
-      subtree: true,
-    });
-    expect(mockUseMutationObserver).toHaveBeenNthCalledWith(2, null, expect.any(Function), {
-      attributes: true,
-      attributeFilter: ['class'],
-    });
-  });
-
-  it('toggleMetricsGridFullScreen adds classes when element has fullscreen class', () => {
-    const metricsGrid = document.createElement('div');
-    metricsGrid.classList.add(METRICS_GRID_FULL_SCREEN_CLASS);
-    toggleMetricsGridFullScreen(metricsGrid);
-    expect(document.body.classList.add).toHaveBeenCalledWith(
-      expect.any(String),
-      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
+  it('returns the generated metrics grid id and styles', () => {
+    const { result } = renderHook(() =>
+      useMetricsGridFullScreen({ prefix: 'test-metrics-grid-id' })
     );
+
+    expect(result.current.metricsGridId).toBe('test-metrics-grid-id');
+    expect(result.current.styles).toHaveProperty('metricsGrid--fullScreen');
+    expect(result.current.styles).toHaveProperty('metricsGrid--restrictBody');
   });
 
-  it('toggleMetricsGridFullScreen removes classes when element does not have fullscreen class', () => {
-    const metricsGrid = document.createElement('div');
-    toggleMetricsGridFullScreen(metricsGrid);
-    expect(document.body.classList.remove).toHaveBeenCalledWith(
-      expect.any(String),
-      METRICS_GRID_WRAPPER_FULL_SCREEN_CLASS
+  it('exports the fullscreen body styles helper class bound to the z-index reset block', () => {
+    expect(FULLSCREEN_BODY_STYLES_CLASS).toEqual(expect.any(String));
+    expect(FULLSCREEN_BODY_STYLES_CLASS).not.toHaveLength(0);
+
+    const sourceCode = fs.readFileSync(
+      path.join(__dirname, 'use_metrics_grid_fullscreen.ts'),
+      'utf-8'
+    );
+
+    expect(sourceCode).toMatch(
+      /export const FULLSCREEN_BODY_STYLES_CLASS\s*=\s*css`[^`]*z-index:\s*unset/
     );
   });
 

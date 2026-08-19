@@ -10,6 +10,7 @@ import type { CRUDClient } from '@kbn/entity-store/server/domain/crud/crud_clien
 import type { MonitoringEntitySource } from '../../../../../../common/api/entity_analytics/watchlists/data_source/common.gen';
 import type { WatchlistBulkEntity } from '../types';
 import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+import { buildWatchlistDocId } from '../../entities/utils';
 import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
 
 export const UPDATE_SCRIPT_SOURCE = `
@@ -68,26 +69,20 @@ export const bulkUpsertOperationsFactory =
     const ops: object[] = [];
     logger.debug(`[WatchlistSync] Building bulk operations for ${entities.length} entities`);
     for (const entity of entities) {
-      if (entity.existingEntityId) {
-        ops.push(
-          { update: { _index: targetIndex, _id: entity.existingEntityId } },
-          {
-            script: {
-              source: UPDATE_SCRIPT_SOURCE,
-              params: {
-                now: new Date().toISOString(),
-                source_id: entity.sourceId,
-                source_type: sourceLabel,
-              },
+      ops.push(
+        { update: { _index: targetIndex, _id: buildWatchlistDocId(watchlist.id, entity.euid) } },
+        {
+          script: {
+            source: UPDATE_SCRIPT_SOURCE,
+            params: {
+              now: new Date().toISOString(),
+              source_id: entity.sourceId,
+              source_type: sourceLabel,
             },
-          }
-        );
-      } else {
-        ops.push(
-          { index: { _index: targetIndex, _id: entity.euid } },
-          buildCreateDoc(entity, sourceLabel, watchlist)
-        );
-      }
+          },
+          upsert: buildCreateDoc(entity, sourceLabel, watchlist),
+        }
+      );
     }
     return ops;
   };

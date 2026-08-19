@@ -22,6 +22,7 @@ Array [
     "order": 300,
   },
   Any<Object>,
+  Any<Object>,
 ]
 `;
 
@@ -46,6 +47,7 @@ Array [
     "label": "Organization",
     "order": 300,
   },
+  Any<Object>,
   Any<Object>,
 ]
 `;

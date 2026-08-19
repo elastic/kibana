@@ -27,6 +27,8 @@ import type {
   StreamlangStepWithUIAttributes,
   TrimProcessor,
   EnrichProcessor,
+  UserAgentProcessor,
+  RegisteredDomainProcessor,
 } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
@@ -77,6 +79,8 @@ import type {
   TrimFormState,
   UppercaseFormState,
   EnrichFormState,
+  UserAgentFormState,
+  RegisteredDomainFormState,
 } from './types';
 
 /**
@@ -102,6 +106,8 @@ export const SPECIALISED_TYPES = [
   'json_extract',
   'network_direction',
   'enrich',
+  'user_agent',
+  'registered_domain',
 ];
 
 interface FormStateDependencies {
@@ -126,6 +132,8 @@ const PRIORITIZED_DATE_FIELDS = [
   'custom.timestamp',
   'attributes.custom.timestamp',
 ];
+
+const PRIORITIZED_USER_AGENT_FIELDS = ['user_agent.original'];
 
 /**
  * Checks if the sample documents have valid message fields with actual content
@@ -314,6 +322,15 @@ const defaultJsonExtractProcessorFormState = (
   where: ALWAYS_CONDITION,
 });
 
+const defaultUserAgentProcessorFormState = (sampleDocs: FlattenRecord[]): UserAgentFormState => ({
+  action: 'user_agent' as const,
+  from: getDefaultTextField(sampleDocs, PRIORITIZED_USER_AGENT_FIELDS),
+  to: 'user_agent',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultNetworkDirectionProcessorFormState = (): NetworkDirectionFormState => ({
   action: 'network_direction' as const,
   source_ip: '',
@@ -332,6 +349,15 @@ const defaultEnrichProcessorFormState = (): EnrichFormState => ({
   ignore_failure: true,
   ignore_missing: true,
   override: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultRegisteredDomainProcessorFormState = (): RegisteredDomainFormState => ({
+  action: 'registered_domain' as const,
+  prefix: 'domain',
+  expression: '',
+  ignore_failure: true,
+  ignore_missing: true,
   where: ALWAYS_CONDITION,
 });
 
@@ -366,6 +392,8 @@ const defaultProcessorFormStateByType: Record<
   json_extract: defaultJsonExtractProcessorFormState,
   network_direction: defaultNetworkDirectionProcessorFormState,
   enrich: defaultEnrichProcessorFormState,
+  user_agent: defaultUserAgentProcessorFormState,
+  registered_domain: defaultRegisteredDomainProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
 
@@ -435,7 +463,9 @@ export const getFormStateFromActionStep = (
     step.action === 'sort' ||
     step.action === 'concat' ||
     step.action === 'json_extract' ||
-    step.action === 'enrich'
+    step.action === 'enrich' ||
+    step.action === 'user_agent' ||
+    step.action === 'registered_domain'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -837,6 +867,47 @@ export const convertFormStateToProcessor = (
           description,
           where: 'where' in formState ? formState.where : undefined,
         } as EnrichProcessor,
+      };
+    }
+
+    if (formState.action === 'user_agent') {
+      const {
+        from,
+        to,
+        regex_file,
+        properties,
+        extract_device_type,
+        ignore_failure,
+        ignore_missing,
+      } = formState;
+      return {
+        processorDefinition: {
+          action: 'user_agent',
+          from,
+          to: isEmpty(to) ? undefined : to,
+          regex_file: isEmpty(regex_file) ? undefined : regex_file,
+          properties: isEmpty(properties) ? undefined : properties,
+          extract_device_type,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as UserAgentProcessor,
+      };
+    }
+
+    if (formState.action === 'registered_domain') {
+      const { expression, prefix, ignore_failure, ignore_missing } = formState;
+      return {
+        processorDefinition: {
+          action: 'registered_domain',
+          expression,
+          prefix,
+          ignore_failure,
+          ignore_missing,
+          description,
+          where: 'where' in formState ? formState.where : undefined,
+        } as RegisteredDomainProcessor,
       };
     }
 

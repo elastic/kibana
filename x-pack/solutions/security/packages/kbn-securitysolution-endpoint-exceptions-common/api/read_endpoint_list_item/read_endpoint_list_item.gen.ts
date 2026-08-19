@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import {
   ExceptionListItemId,
@@ -22,20 +22,22 @@ import {
 } from '@kbn/securitysolution-exceptions-common/api/model/exception_list_common.gen';
 import { EndpointListItem } from '../model/endpoint_list_common.gen';
 
+export const ReadEndpointListItemRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Either `id` or `item_id` must be specified
+     */
+    id: ExceptionListItemId.optional(),
+    /**
+     * Either `id` or `item_id` must be specified
+     */
+    item_id: ExceptionListItemHumanId.optional(),
+  })
+);
 export type ReadEndpointListItemRequestQuery = z.infer<typeof ReadEndpointListItemRequestQuery>;
-export const ReadEndpointListItemRequestQuery = z.object({
-  /**
-   * Either `id` or `item_id` must be specified
-   */
-  id: ExceptionListItemId.optional(),
-  /**
-   * Either `id` or `item_id` must be specified
-   */
-  item_id: ExceptionListItemHumanId.optional(),
-});
 export type ReadEndpointListItemRequestQueryInput = z.input<
   typeof ReadEndpointListItemRequestQuery
 >;
 
+export const ReadEndpointListItemResponse = lazySchema(() => EndpointListItem);
 export type ReadEndpointListItemResponse = z.infer<typeof ReadEndpointListItemResponse>;
-export const ReadEndpointListItemResponse = EndpointListItem;

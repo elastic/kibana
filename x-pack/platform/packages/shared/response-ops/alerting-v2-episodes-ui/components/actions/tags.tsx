@@ -11,11 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 
 export function AlertEpisodeTags({
-  tags,
+  tags = [],
   size = 3,
   oneLine = false,
 }: {
-  tags: string[];
+  tags?: string[];
   size?: number;
   oneLine?: boolean;
 }) {

@@ -18,13 +18,20 @@ import {
   type GetWorkflowsConnectorTypeArgs,
   resolveAlertStates,
 } from '.';
+import type { WorkflowsManagementApi } from '../../api/workflows_management_api';
+
+const mockWorkflowsManagementApi = {
+  getWorkflow: jest.fn(),
+  runWorkflow: jest.fn(),
+  scheduleWorkflow: jest.fn(),
+} as unknown as WorkflowsManagementApi;
 
 describe('Workflows Connector', () => {
   const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
   describe('getConnectorType', () => {
     it('should return correct connector type configuration', () => {
-      const connectorType = getConnectorType();
+      const connectorType = getConnectorType(mockWorkflowsManagementApi);
 
       expect(connectorType.id).toBe('.workflows');
       expect(connectorType.minimumLicenseRequired).toBe('gold');
@@ -37,7 +44,7 @@ describe('Workflows Connector', () => {
     });
 
     it('should have correct validation schemas', () => {
-      const connectorType = getConnectorType();
+      const connectorType = getConnectorType(mockWorkflowsManagementApi);
 
       expect(connectorType.validate).toBeDefined();
       expect(connectorType.validate.config).toBeDefined();

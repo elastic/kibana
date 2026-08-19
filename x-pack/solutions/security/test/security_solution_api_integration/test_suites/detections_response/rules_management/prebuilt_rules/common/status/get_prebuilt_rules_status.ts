@@ -14,6 +14,7 @@ import {
   getSimpleRule,
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
+  createDeprecatedPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
   performUpgradePrebuiltRules,
   createHistoricalPrebuiltRuleAssetSavedObjects,
@@ -284,6 +285,96 @@ export default ({ getService }: FtrProviderContext): void => {
             // is made available after deleting the previous versions
             num_prebuilt_rules_total_in_package: 1,
           });
+        });
+      });
+
+      describe('num_prebuilt_rules_deprecated', () => {
+        it('returns zero when no deprecated rule assets exist', async () => {
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
+          expect(stats.num_prebuilt_rules_deprecated).toBe(0);
+        });
+
+        it('returns zero when deprecated assets exist but no matching rules are installed', async () => {
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'deprecated-rule-1', version: 2 },
+            { rule_id: 'deprecated-rule-2', version: 1 },
+          ]);
+
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
+          expect(stats.num_prebuilt_rules_deprecated).toBe(0);
+        });
+
+        it('returns correct count of installed deprecated rules', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1 }),
+            createRuleAssetSavedObject({ rule_id: 'rule-3', version: 1 }),
+          ]);
+          await installPrebuiltRules(es, supertest);
+
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'rule-1', version: 2 },
+            { rule_id: 'rule-2', version: 2 },
+          ]);
+
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
+          expect(stats.num_prebuilt_rules_deprecated).toBe(2);
+        });
+
+        it('does not count deprecated assets for rules that are not installed', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
+          ]);
+          await installPrebuiltRules(es, supertest);
+
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'rule-1', version: 2 },
+            { rule_id: 'rule-2', version: 1 },
+          ]);
+
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
+          expect(stats.num_prebuilt_rules_deprecated).toBe(1);
+        });
+
+        it('deprecated count decreases when a deprecated rule is deleted', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1 }),
+          ]);
+          await installPrebuiltRules(es, supertest);
+
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'rule-1', version: 2 },
+            { rule_id: 'rule-2', version: 2 },
+          ]);
+
+          const { stats: statsBefore } = await getPrebuiltRulesStatus(es, supertest);
+          expect(statsBefore.num_prebuilt_rules_deprecated).toBe(2);
+
+          await deleteRule(supertest, 'rule-1');
+
+          const { stats: statsAfter } = await getPrebuiltRulesStatus(es, supertest);
+          expect(statsAfter.num_prebuilt_rules_deprecated).toBe(1);
+        });
+
+        it('deprecated rules do not appear in install or upgrade counts', async () => {
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1 }),
+          ]);
+          await installPrebuiltRules(es, supertest);
+
+          await deleteAllPrebuiltRuleAssets(es, log);
+          await createPrebuiltRuleAssetSavedObjects(es, [
+            createRuleAssetSavedObject({ rule_id: 'rule-2', version: 1 }),
+          ]);
+          await createDeprecatedPrebuiltRuleAssetSavedObjects(es, [
+            { rule_id: 'rule-1', version: 2 },
+          ]);
+
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
+          expect(stats.num_prebuilt_rules_deprecated).toBe(1);
+          expect(stats.num_prebuilt_rules_to_install).toBe(1);
+          expect(stats.num_prebuilt_rules_to_upgrade).toBe(0);
         });
       });
     });

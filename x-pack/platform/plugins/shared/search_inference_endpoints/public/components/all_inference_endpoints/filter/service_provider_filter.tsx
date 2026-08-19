@@ -7,12 +7,12 @@
 
 import React, { useMemo } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
 import type { FilterOptions } from '../../../types';
 import type { MultiSelectFilterOption } from '../../filter/multi_select_filter';
 import { MultiSelectFilter } from '../../filter/multi_select_filter';
-import * as i18n from './translations';
 
 interface Props {
   optionKeys: ServiceProviderKeys[];
@@ -44,8 +44,12 @@ export const ServiceProviderFilter: React.FC<Props> = ({
   return (
     <EuiFilterGroup>
       <MultiSelectFilter
-        buttonLabel={i18n.SERVICE_PROVIDER}
-        ariaLabel={i18n.SERVICE_PROVIDER_ARIA_LABEL}
+        buttonLabel={i18n.translate('xpack.searchInferenceEndpoints.serviceProvider', {
+          defaultMessage: 'Service',
+        })}
+        ariaLabel={i18n.translate('xpack.searchInferenceEndpoints.serviceProvider.ariaLabel', {
+          defaultMessage: 'Service Provider Options',
+        })}
         onChange={onSystemFilterChange}
         options={filteredOptions}
         renderOption={(option) => option.label}

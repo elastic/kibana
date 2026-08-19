@@ -14,31 +14,33 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { ListItemId, ListId } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
 
+export const DeleteListItemRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Value list item's identifier. Required if `list_id` and `value` are not specified.
+     */
+    id: ListItemId.optional(),
+    /**
+     * Value list's identifier. Required if `id` is not specified.
+     */
+    list_id: ListId.optional(),
+    /**
+     * The value used to evaluate exceptions. Required if `id` is not specified.
+     */
+    value: z.string().optional(),
+    /**
+     * Determines when changes made by the request are made visible to search.
+     */
+    refresh: z.enum(['true', 'false', 'wait_for']).optional().default('false'),
+  })
+);
 export type DeleteListItemRequestQuery = z.infer<typeof DeleteListItemRequestQuery>;
-export const DeleteListItemRequestQuery = z.object({
-  /**
-   * Value list item's identifier. Required if `list_id` and `value` are not specified.
-   */
-  id: ListItemId.optional(),
-  /**
-   * Value list's identifier. Required if `id` is not specified.
-   */
-  list_id: ListId.optional(),
-  /**
-   * The value used to evaluate exceptions. Required if `id` is not specified.
-   */
-  value: z.string().optional(),
-  /**
-   * Determines when changes made by the request are made visible to search.
-   */
-  refresh: z.enum(['true', 'false', 'wait_for']).optional().default('false'),
-});
 export type DeleteListItemRequestQueryInput = z.input<typeof DeleteListItemRequestQuery>;
 
+export const DeleteListItemResponse = lazySchema(() => z.union([ListItem, z.array(ListItem)]));
 export type DeleteListItemResponse = z.infer<typeof DeleteListItemResponse>;
-export const DeleteListItemResponse = z.union([ListItem, z.array(ListItem)]);

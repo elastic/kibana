@@ -17,14 +17,17 @@ import { API_VERSIONS } from '../../../../../common/entity_analytics/constants';
 import { APP_ID } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
-import { fetchAllLeadEntities } from '../entity_conversion';
-import { runLeadGenerationPipeline } from '../run_pipeline';
+import { fetchCandidateEntities } from '../entity_conversion';
+import { upsertLeadGenerationConfig } from '../saved_object';
+import { resolveChatModel } from '../utils';
+import { runLeadGenerationInBackground } from '../run_background_pipeline';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
 export const generateLeadsRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
   logger: Logger,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  ml: EntityAnalyticsRoutesDeps['ml']
 ) => {
   router.versioned
     .post({
@@ -46,39 +49,50 @@ export const generateLeadsRoute = (
         },
       },
 
-      withMinimumLicense(async (context, _request, response): Promise<IKibanaResponse> => {
+      withMinimumLicense(async (context, request, response): Promise<IKibanaResponse> => {
         const siemResponse = buildSiemResponse(response);
 
         try {
           const secSol = await context.securitySolution;
           const spaceId = secSol.getSpaceId();
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const coreCtx = await context.core;
+          const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const soClient = coreCtx.savedObjects.client;
           const executionUuid = uuidv4();
           const riskScoreDataClient = secSol.getRiskScoreDataClient();
 
-          const [, startPlugins] = await getStartServices();
+          const [coreStart, startPlugins] = await getStartServices();
           const crudClient = startPlugins.entityStore.createCRUDClient(esClient, spaceId);
+          const { connectorId } = request.body;
 
-          void (async () => {
-            try {
-              await runLeadGenerationPipeline({
-                listEntities: () => fetchAllLeadEntities(crudClient, logger),
-                esClient,
-                logger,
-                spaceId,
-                riskScoreDataClient,
-                executionId: executionUuid,
-                sourceType: 'adhoc',
-              });
-              logger.info(
-                `[LeadGeneration] Background generation completed (executionUuid=${executionUuid})`
-              );
-            } catch (pipelineError) {
-              logger.error(
-                `[LeadGeneration] Background generation failed (executionUuid=${executionUuid}): ${pipelineError}`
-              );
-            }
-          })();
+          await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
+          logger.info(
+            `[LeadGeneration] Resolving connector (connectorId=${connectorId}, executionUuid=${executionUuid})`
+          );
+          const chatModel = await resolveChatModel(startPlugins.inference, request, connectorId);
+          logger.info(
+            `[LeadGeneration] Connector resolved successfully (connectorId=${connectorId}, executionUuid=${executionUuid})`
+          );
+
+          runLeadGenerationInBackground({
+            savedObjectsClient: soClient,
+            connectorId,
+            executionUuid,
+            pipelineArgs: {
+              listEntities: () => fetchCandidateEntities(crudClient, logger),
+              esClient,
+              logger,
+              spaceId,
+              riskScoreDataClient,
+              executionId: executionUuid,
+              sourceType: 'adhoc',
+              analytics: coreStart.analytics,
+              chatModel,
+              ml,
+              request,
+              soClient,
+            },
+          });
 
           return response.ok({ body: { executionUuid } });
         } catch (e) {

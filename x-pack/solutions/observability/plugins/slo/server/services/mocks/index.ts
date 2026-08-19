@@ -7,7 +7,7 @@
 
 import type { ResourceInstaller } from '../resource_installer';
 import type { BurnRatesClient } from '../burn_rates_client';
-import type { CompositeSLORepository } from '../composite_slo_repository';
+import type { CompositeSLORepository } from '../composites/composite_slo_repository';
 import type { SLODefinitionRepository } from '../slo_definition_repository';
 import type { SLOTemplateRepository } from '../slo_template_repository';
 import type { SummaryClient } from '../summary_client';
@@ -82,7 +82,6 @@ const createCompositeSLORepositoryMock = (): jest.Mocked<CompositeSLORepository>
     findById: jest.fn(),
     findAllByIds: jest.fn(),
     deleteById: jest.fn(),
-    search: jest.fn(),
   };
 };
 

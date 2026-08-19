@@ -7,11 +7,20 @@
 
 import type { KibanaUrl, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { waitForApmSettingsHeaderLink } from '../page_helpers';
+import {
+  dismissGlobalToastsIfPresent,
+  waitForApmAppMenuReady,
+  waitForSearchBarReady,
+} from '../page_helpers';
 import { EXTENDED_TIMEOUT } from '../constants';
+import { type TraceWaterfallFlyout, createTraceWaterfallFlyout } from './trace_waterfall_flyout';
 
 export class TransactionDetailsPage {
-  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
+  public readonly traceWaterfallFlyout: TraceWaterfallFlyout;
+
+  constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {
+    this.traceWaterfallFlyout = createTraceWaterfallFlyout(page);
+  }
 
   async goToTransactionDetails(params: {
     serviceName: string;
@@ -31,7 +40,7 @@ export class TransactionDetailsPage {
         }
       )}`
     );
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   /**
@@ -58,7 +67,7 @@ export class TransactionDetailsPage {
         }
       )}`
     );
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   /**
@@ -71,7 +80,7 @@ export class TransactionDetailsPage {
     const url = new URL(this.page.url());
     url.searchParams.delete('transactionName');
     await this.page.goto(url.toString());
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   /**
@@ -82,7 +91,7 @@ export class TransactionDetailsPage {
     await this.page
       .getByRole('heading', { name: 'Transactions', exact: true })
       .waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
-    await expect(this.page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText(serviceName);
+    await expect(this.page.getByTestId('appHeaderTitle')).toHaveText(serviceName);
     await expect(this.page.getByTestId('appNotFoundPageContent')).toBeHidden();
   }
 
@@ -112,7 +121,7 @@ export class TransactionDetailsPage {
 
   async reload() {
     await this.page.reload();
-    await waitForApmSettingsHeaderLink(this.page);
+    await waitForApmAppMenuReady(this.page);
   }
 
   async fillApmUnifiedSearchBar(query: string) {
@@ -122,9 +131,7 @@ export class TransactionDetailsPage {
   }
 
   async waitForPageToLoad(page: ScoutPage) {
-    await page
-      .getByTestId('superDatePickerToggleQuickMenuButton')
-      .waitFor({ timeout: EXTENDED_TIMEOUT });
+    await waitForSearchBarReady(page);
   }
 
   // Span links methods
@@ -167,6 +174,7 @@ export class TransactionDetailsPage {
    * Open the transaction action menu by clicking the "Investigate" button
    */
   async openActionMenu() {
+    await dismissGlobalToastsIfPresent(this.page);
     const investigateButton = this.page.getByTestId('apmActionMenuButtonInvestigateButton');
     await investigateButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     await investigateButton.scrollIntoViewIfNeeded();
@@ -177,10 +185,32 @@ export class TransactionDetailsPage {
   }
 
   /**
+   * Locate a custom link by its label, expanding the "Show all" overflow when the link
+   * sits past the first few entries the Investigate menu renders directly (on a shared
+   * deployment sibling suites can push a link into the collapsed overflow).
+   */
+  async revealCustomLink(label: string) {
+    const link = this.page.getByRole('link', { name: label });
+    const showAllButton = this.page.getByTestId('apmBottomSectionButton');
+    // Wait for either the target link or the overflow toggle — whichever appears first
+    // once the custom-links API responds. Using separate locators (instead of .or() which
+    // would require .first() and trigger the no-nth-methods lint rule) avoids strict-mode
+    // violations while still short-circuiting as soon as either element is visible.
+    await Promise.race([
+      link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
+      showAllButton.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT }),
+    ]);
+    if (!(await link.isVisible()) && (await showAllButton.isVisible())) {
+      await showAllButton.click();
+    }
+    return link;
+  }
+
+  /**
    * Get the href attribute of a custom link by its label
    */
   async getCustomLinkHref(label: string): Promise<string | null> {
-    const link = this.page.getByRole('link', { name: label });
+    const link = await this.revealCustomLink(label);
     await link.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     return await link.getAttribute('href');
   }

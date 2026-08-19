@@ -9,25 +9,17 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { MarkerType } from '@xyflow/react';
 import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_TYPE, SPAN_SUBTYPE } from '@kbn/apm-types';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { PopoverContent } from './popover_content';
 import type { ServiceMapNode, ServiceMapEdge } from '../../../../../common/service_map';
 
-const routePath = '/service-map?rangeFrom=now-15m&rangeTo=now';
 const noop = () => {};
-
-const decorators: Meta['decorators'] = [
-  (Story) => (
-    <MockApmPluginStorybook routePath={routePath}>
-      <Story />
-    </MockApmPluginStorybook>
-  ),
-];
 
 const meta: Meta<typeof PopoverContent> = {
   title: 'app/ServiceMap/Popover',
   component: PopoverContent,
-  decorators,
+  parameters: {
+    routePath: '/service-map?rangeFrom=now-15m&rangeTo=now',
+  },
 };
 
 export default meta;
@@ -132,6 +124,90 @@ export const Service: Story = {
   render: () => (
     <PopoverContent
       selectedNode={serviceNode}
+      selectedEdge={null}
+      environment="ENVIRONMENT_ALL"
+      kuery=""
+      start="now-15m"
+      end="now"
+      onFocusClick={noop}
+    />
+  ),
+};
+
+const serviceNodeWithAlerts: ServiceMapNode = {
+  id: 'alerting-service',
+  type: 'service',
+  position: { x: 0, y: 0 },
+  data: {
+    id: 'alerting-service',
+    label: 'alerting-service',
+    isService: true,
+    agentName: 'java',
+    alertsCount: 3,
+  },
+};
+
+export const ServiceWithAlerts: Story = {
+  render: () => (
+    <PopoverContent
+      selectedNode={serviceNodeWithAlerts}
+      selectedEdge={null}
+      environment="ENVIRONMENT_ALL"
+      kuery=""
+      start="now-15m"
+      end="now"
+      onFocusClick={noop}
+    />
+  ),
+};
+
+const serviceNodeWithSlo: ServiceMapNode = {
+  id: 'slo-service',
+  type: 'service',
+  position: { x: 0, y: 0 },
+  data: {
+    id: 'slo-service',
+    label: 'slo-service',
+    isService: true,
+    agentName: 'nodejs',
+    sloStatus: 'violated',
+    sloCount: 2,
+  },
+};
+
+export const ServiceWithSlo: Story = {
+  render: () => (
+    <PopoverContent
+      selectedNode={serviceNodeWithSlo}
+      selectedEdge={null}
+      environment="ENVIRONMENT_ALL"
+      kuery=""
+      start="now-15m"
+      end="now"
+      onFocusClick={noop}
+    />
+  ),
+};
+
+const serviceNodeWithAllBadges: ServiceMapNode = {
+  id: 'full-badges-service',
+  type: 'service',
+  position: { x: 0, y: 0 },
+  data: {
+    id: 'full-badges-service',
+    label: 'full-badges-service',
+    isService: true,
+    agentName: 'python',
+    alertsCount: 5,
+    sloStatus: 'degrading',
+    sloCount: 3,
+  },
+};
+
+export const ServiceWithAllBadges: Story = {
+  render: () => (
+    <PopoverContent
+      selectedNode={serviceNodeWithAllBadges}
       selectedEdge={null}
       environment="ENVIRONMENT_ALL"
       kuery=""

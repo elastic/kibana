@@ -9,9 +9,7 @@
 
 import { setTimeout } from 'timers/promises';
 
-import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
 import type { ToolingLog } from '@kbn/tooling-log';
-import Axios from 'axios';
 
 import type { TestFailure } from './get_failures';
 import type { GithubIssueMini } from './github_api';
@@ -141,35 +139,40 @@ export class ExistingFailedTestIssues {
     while (true) {
       attempt += 1;
 
+      let response: Response;
       try {
-        const resp = await Axios.request<FindFailedTestIssuesResponse>({
+        response = await fetch(`${BASE_URL}/v1/find_failed_test_issues`, {
           method: 'POST',
-          baseURL: BASE_URL,
-          allowAbsoluteUrls: false,
-          url: '/v1/find_failed_test_issues',
-          data: {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
             failures: failures.map((f) => ({
               classname: f.classname,
               name: f.name,
             })),
-          },
+          }),
         });
-
-        return resp.data.existingIssues;
       } catch (error: unknown) {
-        if (
-          attempt < maxAttempts &&
-          ((isAxiosResponseError(error) && error.response.status >= 500) ||
-            isAxiosRequestError(error))
-        ) {
-          this.log.error(error);
+        // Network-level error (fetch throws TypeError for DNS/connection failures).
+        if (attempt < maxAttempts) {
+          this.log.error(error as Error);
           this.log.warning(`Failure talking to ci-stats, waiting ${attempt} before retrying`);
           await setTimeout(attempt * 1000);
           continue;
         }
-
         throw error;
       }
+
+      if (!response.ok) {
+        // Server error: retry on 5xx, throw immediately on 4xx.
+        if (attempt < maxAttempts && response.status >= 500) {
+          this.log.warning(`Failure talking to ci-stats, waiting ${attempt} before retrying`);
+          await setTimeout(attempt * 1000);
+          continue;
+        }
+        throw new Error(`${response.status}:${await response.text()}`);
+      }
+
+      return ((await response.json()) as FindFailedTestIssuesResponse).existingIssues;
     }
   }
 

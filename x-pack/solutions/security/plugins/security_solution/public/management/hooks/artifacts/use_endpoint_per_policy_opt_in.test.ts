@@ -11,41 +11,89 @@ import {
 } from '../../../common/mock/endpoint';
 import { waitFor } from '@testing-library/dom';
 import { useGetEndpointExceptionsPerPolicyOptIn } from './use_endpoint_per_policy_opt_in';
-import { ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE } from '../../../../common/endpoint/constants';
+import { endpointExceptionsPerPolicyOptInAllHttpMocks } from '../../mocks/endpoint_per_policy_opt_in_http_mocks';
 
 describe('useGetEndpointExceptionsPerPolicyOptIn()', () => {
   let testContext: AppContextTestRender;
+  let getOptInHttpMock: ReturnType<
+    typeof endpointExceptionsPerPolicyOptInAllHttpMocks
+  >['responseProvider']['optInGet'];
 
   beforeEach(() => {
     testContext = createAppRootMockRenderer();
-    testContext.coreStart.http.get.mockResolvedValue({ isOptedIn: false });
+    getOptInHttpMock = endpointExceptionsPerPolicyOptInAllHttpMocks(testContext.coreStart.http)
+      .responseProvider.optInGet;
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should call the API when the experimental feature is enabled', async () => {
-    testContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+  describe('when feature flag is disabled', () => {
+    beforeEach(() => {
+      testContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+    });
 
-    const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn());
+    it('should not call the API when no params are passed', () => {
+      const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn());
 
-    await waitFor(() => {
-      expect(result.current.data).toEqual({ isOptedIn: false });
-      expect(testContext.coreStart.http.get).toHaveBeenCalledWith(
-        ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-        { version: '1' }
+      expect(result.current.data).toBeUndefined();
+      expect(getOptInHttpMock).not.toHaveBeenCalled();
+    });
+
+    it('should not call the API even when enabled is true', () => {
+      const { result } = testContext.renderHook(() =>
+        useGetEndpointExceptionsPerPolicyOptIn({ enabled: true })
       );
+
+      expect(result.current.data).toBeUndefined();
+      expect(getOptInHttpMock).not.toHaveBeenCalled();
     });
   });
 
-  it('should not call the API when the experimental feature is disabled', () => {
-    const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn());
+  describe('when feature flag is enabled', () => {
+    beforeEach(() => {
+      testContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
+    });
 
-    expect(result.current.data).toBeUndefined();
-    expect(testContext.coreStart.http.get).not.toHaveBeenCalledWith(
-      ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE,
-      expect.anything()
-    );
+    it('should call the API when no params are passed', async () => {
+      const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn());
+
+      await waitFor(() => {
+        expect(result.current.data).toEqual({ status: false });
+        expect(getOptInHttpMock).toHaveBeenCalled();
+      });
+    });
+
+    it('should call the API when empty object is passed', async () => {
+      const { result } = testContext.renderHook(() => useGetEndpointExceptionsPerPolicyOptIn({}));
+
+      await waitFor(() => {
+        expect(result.current.data).toEqual({ status: false });
+        expect(getOptInHttpMock).toHaveBeenCalled();
+      });
+    });
+
+    it('should call the API when enabled is true', async () => {
+      const { result } = testContext.renderHook(() =>
+        useGetEndpointExceptionsPerPolicyOptIn({ enabled: true })
+      );
+
+      await waitFor(() => {
+        expect(result.current.data).toEqual({ status: false });
+        expect(getOptInHttpMock).toHaveBeenCalled();
+      });
+    });
+
+    it('should not call the API when enabled is false', async () => {
+      const { result } = testContext.renderHook(() =>
+        useGetEndpointExceptionsPerPolicyOptIn({ enabled: false })
+      );
+
+      await waitFor(() => {
+        expect(result.current.data).toBeUndefined();
+        expect(getOptInHttpMock).not.toHaveBeenCalled();
+      });
+    });
   });
 });

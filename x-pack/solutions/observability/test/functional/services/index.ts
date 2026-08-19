@@ -7,7 +7,6 @@
 
 import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { services as obltApiServices } from '../../api_integration/services';
-import { SloUiServiceProvider } from './slo';
 import { UptimeProvider } from './uptime';
 import { InfraSourceConfigurationFormProvider } from './infra_source_configuration_form';
 import { LogsUiProvider } from './logs_ui';
@@ -19,6 +18,5 @@ export const services = {
   infraSourceConfigurationForm: InfraSourceConfigurationFormProvider,
   logsUi: LogsUiProvider,
   observability: ObservabilityProvider,
-  sloUi: SloUiServiceProvider,
   uptime: UptimeProvider,
 };

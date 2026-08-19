@@ -8,18 +8,25 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_models_page';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
-import type { EisInferenceEndpoint } from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_eis_models');
-jest.mock('../../hooks/use_kibana', () => ({
-  useKibana: () => ({
-    services: {
-      notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+jest.mock('../../hooks/use_kibana');
+
+const { useKibana } = jest.requireMock('../../hooks/use_kibana');
+const mockUseKibana = useKibana as jest.Mock;
+
+const mockKibanaReturn = ({ manage = true }: { manage?: boolean } = {}) => ({
+  services: {
+    notifications: { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } },
+    application: {
+      capabilities: { searchInferenceEndpoints: { show: true, manage } },
     },
-  }),
-}));
+  },
+});
+
 jest.mock('@kbn/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
@@ -31,6 +38,7 @@ const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
 describe('ElasticInferenceServiceModelsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseKibana.mockReturnValue(mockKibanaReturn());
   });
 
   it('renders a loading spinner when data is loading', () => {
@@ -62,7 +70,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
     mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
     const { getByLabelText, queryByTestId } = render(<ElasticInferenceServiceModelsPage />);
 
-    const searchInput = getByLabelText('Find Elastic Inference Service models');
+    const searchInput = getByLabelText('Search Elastic Inference Service models');
     fireEvent.change(searchInput, { target: { value: 'Jina Reranker v2' } });
 
     expect(queryByTestId('eisModelCard-Jina Reranker v2')).toBeInTheDocument();
@@ -97,7 +105,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
     mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
     const { getByLabelText, getByText } = render(<ElasticInferenceServiceModelsPage />);
 
-    const searchInput = getByLabelText('Find Elastic Inference Service models');
+    const searchInput = getByLabelText('Search Elastic Inference Service models');
     fireEvent.change(searchInput, { target: { value: 'nonexistent-model-xyz-999' } });
 
     expect(getByText('No models found')).toBeInTheDocument();
@@ -134,6 +142,22 @@ describe('ElasticInferenceServiceModelsPage', () => {
     fireEvent.click(getByTestId('eisModelCard-Jina Reranker v2'));
 
     expect(queryByTestId('modelDetailFlyout')).toBeInTheDocument();
+  });
+
+  describe('read-only mode (manage: false)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue(mockKibanaReturn({ manage: false }));
+    });
+
+    it('does not render the Add endpoint button inside the model detail flyout', () => {
+      mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
+      const { getByTestId, queryByTestId } = render(<ElasticInferenceServiceModelsPage />);
+
+      fireEvent.click(getByTestId('eisModelCard-Jina Reranker v2'));
+
+      expect(queryByTestId('modelDetailFlyout')).toBeInTheDocument();
+      expect(queryByTestId('modelDetailFlyoutAddEndpointButton')).not.toBeInTheDocument();
+    });
   });
 
   it('does not open model detail flyout when endpoint has empty model_id', () => {

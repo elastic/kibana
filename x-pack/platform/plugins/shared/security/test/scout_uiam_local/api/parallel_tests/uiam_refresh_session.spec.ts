@@ -20,14 +20,13 @@ apiTest.describe('[NON-MKI] Refresh UIAM session', { tag: tags.serverless.all },
     lifetime: { accessToken: number; refreshToken?: number };
   }) => Promise<string>;
 
-  apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
+  apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
     userSessionCookieFactory = async ({ lifetime: { accessToken, refreshToken } }) =>
       parseCookie(
         (
           await apiClient.post('api/security/saml/callback', {
             body: `SAMLResponse=${encodeURIComponent(
               await createSAMLResponse({
-                kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
                 username: '1234567890',
                 email: 'elastic_viewer@elastic.co',
                 roles: ['viewer'],

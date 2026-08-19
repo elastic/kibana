@@ -30,6 +30,7 @@ export interface ProcessorFields {
   test_run_id: string;
   run_once: boolean;
   space_id: string;
+  kibanaUrl?: string;
 }
 
 export const formatSyntheticsPolicy = (
@@ -127,6 +128,14 @@ export const formatSyntheticsPolicy = (
   const throttling = dataStream?.vars?.[LegacyConfigKey.THROTTLING_CONFIG];
   if (throttling) {
     throttling.value = throttlingFormatter?.(config, ConfigKey.THROTTLING_CONFIG);
+  }
+
+  // Drop disabled inputs so we persist only the single active input. Disabled inputs never
+  // contribute to the compiled agent policy and only bloat the saved object. A guard in Fleet's
+  // `updatePackageInputs` keeps them from being re-added on package upgrade. Only strip once the
+  // active input is resolved, so an unknown monitor type still yields the template.
+  if (currentInput && dataStream) {
+    formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
   }
 
   return { formattedPolicy, hasDataStream: Boolean(dataStream), hasInput: Boolean(currentInput) };

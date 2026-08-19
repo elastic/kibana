@@ -21,7 +21,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   SearchInputSchema,
@@ -52,25 +52,14 @@ export const ServicenowSearch: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
       {
-        type: 'oauth_client_credentials',
-        defaults: {},
-        overrides: {
-          meta: {
-            tokenUrl: {
-              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
-            },
-            scope: { hidden: true },
-          },
-        },
-      },
-      {
         type: 'oauth_authorization_code',
+        isRecommended: true,
         defaults: {},
         overrides: {
           meta: {
@@ -84,20 +73,34 @@ export const ServicenowSearch: ConnectorSpec = {
           },
         },
       },
+      {
+        type: 'oauth_client_credentials',
+        defaults: {},
+        overrides: {
+          meta: {
+            tokenUrl: {
+              placeholder: 'https://your-instance.service-now.com/oauth_token.do',
+            },
+            scope: { hidden: true },
+          },
+        },
+      },
     ],
   },
 
-  schema: z.object({
-    instanceUrl: z
-      .string()
-      .url()
-      .describe('ServiceNow instance URL (e.g., https://your-instance.service-now.com)')
-      .meta({
-        label: 'Instance URL',
-        widget: 'text',
-        placeholder: 'https://your-instance.service-now.com',
-      }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      instanceUrl: z
+        .string()
+        .url()
+        .describe('ServiceNow instance URL (e.g., https://your-instance.service-now.com)')
+        .meta({
+          label: 'Instance URL',
+          widget: 'text',
+          placeholder: 'https://your-instance.service-now.com',
+        }),
+    })
+  ),
 
   actions: {
     search: {
@@ -255,11 +258,13 @@ export const ServicenowSearch: ConnectorSpec = {
         'Attachment sys_ids can be found by querying the sys_attachment table: ' +
         'use listRecords with table=sys_attachment and encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>.',
       input: GetAttachmentInputSchema,
-      output: z.object({
-        fileName: z.string().describe('Name of the attachment file'),
-        contentType: z.string().describe('MIME type of the attachment'),
-        base64: z.string().describe('Base64-encoded attachment content'),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          fileName: z.string().describe('Name of the attachment file'),
+          contentType: z.string().describe('MIME type of the attachment'),
+          base64: z.string().describe('Base64-encoded attachment content'),
+        })
+      ),
       handler: async (ctx, input: GetAttachmentInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
 
@@ -329,32 +334,24 @@ export const ServicenowSearch: ConnectorSpec = {
       defaultMessage: 'Verifies ServiceNow connection by fetching the current user record',
     }),
     handler: async (ctx) => {
-      try {
-        const { instanceUrl } = ctx.config as { instanceUrl: string };
-        // Fetch the authenticated user's own record — readable by any authenticated user
-        // regardless of role. Avoids relying on admin-only tables like sys_properties.
-        const response = await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
-          params: {
-            sysparm_query: 'sys_created_on!=NULL',
-            sysparm_limit: 1,
-            sysparm_fields: 'sys_id',
-          },
-        });
-        const results = response.data?.result ?? [];
-        if (results.length > 0) {
-          return {
-            ok: true,
-            message: 'Successfully connected to ServiceNow',
-          };
-        }
-        return {
-          ok: true,
-          message: 'Successfully connected to ServiceNow (no user records visible)',
-        };
-      } catch (error: unknown) {
-        const message = error instanceof Error ? error.message : 'Unknown error';
-        return { ok: false, message };
+      const { instanceUrl } = ctx.config as { instanceUrl: string };
+      // Fetch a minimal record from sys_user — readable by any authenticated user
+      // regardless of role. Avoids relying on admin-only tables like sys_properties.
+      const response = await ctx.client.get(`${instanceUrl}/api/now/table/sys_user`, {
+        params: {
+          sysparm_query: 'sys_created_on!=NULL',
+          sysparm_limit: 1,
+          sysparm_fields: 'sys_id',
+        },
+      });
+      const results = response.data?.result ?? [];
+      if (results.length === 0) {
+        throw new Error(
+          'Connected to ServiceNow but no user records are visible — verify that the connector has the required role permissions.'
+        );
       }
+      return {};
     },
+    enabled: true,
   },
 };

@@ -16,7 +16,9 @@ test.describe(
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects: { nodeDetailsPage } }) => {
       await browserAuth.loginAsViewer();
-      await nodeDetailsPage.goToPage(HOST7_NAME, 'host', { name: HOST7_NAME });
+      await nodeDetailsPage.goToPage(HOST7_NAME, 'host', {
+        name: HOST7_NAME,
+      });
     });
 
     test('Overview Tab - KPI tiles show N/A', async ({ pageObjects: { nodeDetailsPage } }) => {

@@ -1,7 +1,7 @@
 {
   "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": [
     "__mocks__/**/*",
@@ -37,7 +37,6 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/object-utils",
     "@kbn/react-query",
-    "@kbn/search-api-panels",
     "@kbn/cloud-plugin",
     "@kbn/core-http-router-server-mocks",
     "@kbn/logging-mocks",
@@ -47,9 +46,16 @@
     "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/management-settings-ids",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/search-api-panels",
+    "@kbn/usage-collection-plugin",
+    "@kbn/analytics",
+    "@kbn/datemath",
+    "@kbn/core-http-browser",
+    "@kbn/es-errors",
+    "@kbn/app-header",
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/ui-callout"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

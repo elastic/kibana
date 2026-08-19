@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -33,10 +34,12 @@ import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import {
   DATA_FRAME_TASK_STATE,
   type DataFrameAnalyticsConfig,
+  type DfAnalyticsExplainResponse,
   type UpdateDataFrameAnalyticsConfig,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { MemoryInputValidatorResult } from '@kbn/ml-validators';
 import { memoryInputValidator } from '@kbn/ml-validators';
+import { omit } from 'lodash';
 
 import { useMlKibana, useMlApi } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
@@ -63,6 +66,10 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
   const [activeTabId, setActiveTabId] = useState<string>('job-details');
   const [customUrls, setCustomUrls] = useState<MlUrlConfig[]>([]);
   const [analyticsJob, setAnalyticsJob] = useState<DataFrameAnalyticsConfig | undefined>();
+  const [explainResult, setExplainResult] = useState<DfAnalyticsExplainResponse | undefined>();
+  const [explainFetchState, setExplainFetchState] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
 
   const {
     services: { notifications },
@@ -71,7 +78,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
 
   const mlApi = useMlApi();
   const {
-    dataFrameAnalytics: { getDataFrameAnalytics },
+    dataFrameAnalytics: { explainDataFrameAnalytics, getDataFrameAnalytics },
   } = mlApi;
 
   const toastNotificationService = useToastNotificationService();
@@ -118,6 +125,37 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       });
     },
     [jobId, getDataFrameAnalytics]
+  );
+
+  useEffect(
+    function fetchExplainDataFrameAnalytics() {
+      let cancelled = false;
+      setExplainFetchState('loading');
+      const configForExplain = omit(config, [
+        'id',
+        'create_time',
+        'version',
+        'authorization',
+        'allow_lazy_start',
+      ]);
+      explainDataFrameAnalytics(configForExplain)
+        .then((resp) => {
+          if (!cancelled) {
+            setExplainResult(resp as DfAnalyticsExplainResponse);
+            setExplainFetchState('success');
+          }
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setExplainResult(undefined);
+            setExplainFetchState('error');
+          }
+        });
+      return () => {
+        cancelled = true;
+      };
+    },
+    [config, explainDataFrameAnalytics]
   );
 
   const updateDataFrameAnalytics = async (updateConfig: UpdateDataFrameAnalyticsConfig) => {
@@ -168,6 +206,44 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
       await updateDataFrameAnalytics(updateConfig);
     }
   };
+
+  const estimatedMml = explainResult?.memory_estimation?.expected_memory_without_disk ?? '';
+
+  const canShowMmlEstimationHelp =
+    state === DATA_FRAME_TASK_STATE.STOPPED &&
+    explainFetchState !== 'error' &&
+    (explainFetchState === 'loading' ||
+      (estimatedMml !== '' && modelMemoryLimit?.toUpperCase() !== estimatedMml?.toUpperCase()));
+
+  let mmlEstimationHelpText: React.ReactNode = null;
+  if (canShowMmlEstimationHelp) {
+    mmlEstimationHelpText =
+      explainFetchState === 'loading' ? (
+        <FormattedMessage
+          id="xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryLimitEstimatingLabel"
+          defaultMessage="Model memory limit is being estimated..."
+        />
+      ) : (
+        <span>
+          <FormattedMessage
+            id="xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryLimitEstimatedLabel"
+            defaultMessage="Estimated model memory limit: {modelMemoryLimit} "
+            values={{ modelMemoryLimit: estimatedMml }}
+          />
+          <EuiButtonEmpty
+            size="xs"
+            flush="left"
+            onClick={() => setModelMemoryLimit(estimatedMml)}
+            style={{ verticalAlign: 'initial' }}
+          >
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsList.editFlyout.applyModelMemoryLimitEstimateLabel"
+              defaultMessage="Apply"
+            />
+          </EuiButtonEmpty>
+        </span>
+      );
+  }
 
   const jobDetailsContent = (
     <>
@@ -231,10 +307,19 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
         </EuiFormRow>
         <EuiFormRow
           helpText={
-            state !== DATA_FRAME_TASK_STATE.STOPPED &&
-            i18n.translate('xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryHelpText', {
-              defaultMessage: 'Model memory limit cannot be edited until the job has stopped.',
-            })
+            <>
+              {state !== DATA_FRAME_TASK_STATE.STOPPED
+                ? i18n.translate(
+                    'xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryHelpText',
+                    {
+                      defaultMessage:
+                        'Model memory limit cannot be edited until the job has stopped.',
+                    }
+                  )
+                : null}
+              {state !== DATA_FRAME_TASK_STATE.STOPPED && canShowMmlEstimationHelp ? ' ' : null}
+              {mmlEstimationHelpText}
+            </>
           }
           label={i18n.translate(
             'xpack.ml.dataframe.analyticsList.editFlyout.modelMemoryLimitLabel',

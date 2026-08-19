@@ -15,6 +15,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const dashboardPage = getPageObject('dashboard');
+  const common = getPageObject('common');
   const cases = getService('cases');
 
   type RandomSamplerOption =
@@ -31,7 +32,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
 
     async navigateToDataViewSelection() {
       await testSubjects.click('mlMainTab logCategorization');
-      await testSubjects.existOrFail('mlPageSourceSelection');
+      await testSubjects.existOrFail('mlDataSourceSelectorButton');
     },
 
     async clickUseFullDataButton(expectedDocCount: number) {
@@ -81,8 +82,8 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
 
     async assertTotalCategoriesFoundDiscover(expectedMinimumCategoryCount: number) {
       await retry.tryForTime(5000, async () => {
-        const actualText = await testSubjects.getVisibleText('dscViewModePatternAnalysisButton');
-        const actualCount = Number(actualText.match(/Patterns \((.+)\)/)![1]);
+        const actualText = await testSubjects.getVisibleText('dscViewModePatternCount');
+        const actualCount = Number(actualText.match(/(\d+)/)![1]);
         expect(actualCount + 1).to.greaterThan(
           expectedMinimumCategoryCount,
           `Expected patterns found count to be >= '${expectedMinimumCategoryCount}' (got '${actualCount}')`
@@ -185,7 +186,11 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
     },
 
     async clickPatternsTab() {
-      await testSubjects.click('dscViewModePatternAnalysisButton');
+      await retry.try(async () => {
+        await testSubjects.click('dscViewModeToggleButton');
+        await testSubjects.existOrFail('dscViewModeToggleSelectable');
+      });
+      await testSubjects.clickWhenNotDisabledWithoutRetry('dscViewModePatternAnalysisOption');
     },
 
     async assertLogPatternAnalysisFlyoutExists() {
@@ -279,12 +284,7 @@ export function LogPatternAnalysisPageProvider({ getService, getPageObject }: Ft
       }
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
-        testSubjects
-          .missingOrFail('confirmSaveSavedObjectButton')
-          .then(() => true)
-          .catch(() => false)
-      );
+      await common.waitForSaveModalToClose();
 
       // make sure the dashboard page actually loaded
       const dashboardItemCount = await dashboardPage.getSharedItemsCount();

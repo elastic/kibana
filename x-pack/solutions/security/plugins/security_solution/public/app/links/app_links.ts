@@ -29,7 +29,7 @@ import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
-import { entityAnalyticsLinks } from '../../entity_analytics/links';
+import { entityAnalyticsLinks, entityAnalyticsV2Links } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
@@ -65,18 +65,22 @@ export const getFilteredLinks = async (
 
   const chatExperience$ = core.uiSettings.get$<AIChatExperience>(
     AI_CHAT_EXPERIENCE_TYPE,
-    AIChatExperience.Classic
+    AIChatExperience.Agent
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
+  const enableAlertsAndAttacksAlignment = core.uiSettings.get(
+    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+    experimentalFeatures.enableAlertsAndAttacksAlignment
+  );
 
-  const isClassicNavUpdateEnabled = experimentalFeatures?.securityClassicNavUpdate ?? false;
   return Object.freeze([
     dashboardsLinks,
-    core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
-      ? alertDetectionsLinks
-      : alertsLink,
+    enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
     alertSummaryLink,
+    // Attack Discovery remains a permanent top-level page and stays visible in the side
+    // navigation, global navigation, and global search regardless of the alerts-and-attacks
+    // alignment setting.
     attackDiscoveryLinks,
     findingsLinks,
     casesLinks,
@@ -84,14 +88,13 @@ export const getFilteredLinks = async (
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,
-    entityAnalyticsLinks,
+    experimentalFeatures.entityAnalyticsNewHomePageEnabled
+      ? entityAnalyticsV2Links
+      : entityAnalyticsLinks,
     assetInventoryLinks,
     rulesLinks,
     siemMigrationsLinks,
-    onboardingLinks,
+    launchPadLinks,
     managementFilteredLinks,
-    siemReadinessLinks,
-    aiValueLinks,
-    ...(isClassicNavUpdateEnabled ? [launchPadLinks] : []),
   ]);
 };

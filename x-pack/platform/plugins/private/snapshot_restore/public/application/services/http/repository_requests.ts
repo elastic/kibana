@@ -30,7 +30,9 @@ export const useLoadRepositories = () => {
   return useRequest({
     path: `${API_BASE_PATH}repositories`,
     method: 'get',
-    initialData: [],
+    initialData: {
+      repositories: [],
+    },
   });
 };
 
@@ -103,3 +105,13 @@ export const deleteRepositories = async (names: Array<Repository['name']>) => {
   );
   return result;
 };
+
+export const getDefaultRepository = () =>
+  sendRequest({ path: `${API_BASE_PATH}default_repository`, method: 'get' });
+
+export const setDefaultRepository = (name: string) =>
+  sendRequest({
+    path: `${API_BASE_PATH}default_repository`,
+    method: 'put',
+    query: { name },
+  });

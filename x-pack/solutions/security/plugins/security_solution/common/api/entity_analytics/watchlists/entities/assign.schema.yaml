@@ -1,0 +1,122 @@
+openapi: 3.0.0
+info:
+  title: Watchlist Entities Assign Schema
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/watchlists/{watchlist_id}/entities/assign:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      x-state: Technical Preview; added in 9.4.0
+      operationId: AssignWatchlistEntities
+      summary: Manually assign entities to a watchlist
+      description: |
+        Assigns the provided entities to the specified watchlist using a "manual" source label.
+        The entities must already exist in the entity store.
+
+        If an entity is already on the watchlist, no new document is created — the "manual" label
+        is added to its existing source labels instead.
+
+      parameters:
+        - name: watchlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the watchlist to add entities to
+          example: 'high-risk-vendors'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                euids:
+                  type: array
+                  items:
+                    type: string
+                  description: The EUIDs of the entities to assign
+                  example: ["user:john.doe", "host:web-01"]
+              required:
+                - euids
+            examples:
+              assignEntities:
+                summary: Assign two entities to a watchlist
+                value:
+                  euids: ["user:john.doe", "host:web-01"]
+      responses:
+        "200":
+          description: Assignment successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successful:
+                    type: integer
+                    description: Number of entities successfully assigned
+                    example: 1
+                  failed:
+                    type: integer
+                    description: Number of entities that failed to process
+                    example: 0
+                  not_found:
+                    type: integer
+                    description: Number of entities not found in the entity store
+                    example: 1
+                  total:
+                    type: integer
+                    description: Total number of entities processed
+                    example: 2
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WatchlistEntityAssignResponseItem"
+                required:
+                  - successful
+                  - failed
+                  - not_found
+                  - total
+                  - items
+              examples:
+                assignEntitiesResponse:
+                  summary: Successful assignment of two entities
+                  value:
+                    successful: 1
+                    failed: 0
+                    not_found: 1
+                    total: 2
+                    items:
+                      - euid: "user:john.doe"
+                        status: "success"
+                      - euid: "host:web-01"
+                        status: "not_found"
+
+components:
+  schemas:
+    WatchlistEntityAssignResponseItem:
+      type: object
+      example:
+        euid: "user:john.doe"
+        status: "success"
+      properties:
+        euid:
+          type: string
+          description: The EUID of the entity
+          example: "user:john.doe"
+        status:
+          type: string
+          enum:
+            - success
+            - failure
+            - not_found
+          example: "success"
+        error:
+          type: string
+          description: Error message if the entity failed to process
+          example: "Invalid entity type"
+      required:
+        - euid
+        - status

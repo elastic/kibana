@@ -9,7 +9,7 @@ import fetch from 'node-fetch';
 import { schema } from '@kbn/config-schema';
 import { API_VERSIONS, INTERNAL_API_ACCESS } from '@kbn/evals-common';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { PLUGIN_ID } from '../../../common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   EVALS_REMOTE_KIBANA_CONFIG_SAVED_OBJECT_TYPE,
   type EvalsRemoteKibanaConfigAttributes,
@@ -21,29 +21,32 @@ const REMOTES_URL = '/internal/evals/remotes' as const;
 const REMOTE_URL = '/internal/evals/remotes/{remoteId}' as const;
 const REMOTES_TEST_URL = '/internal/evals/remotes/_test' as const;
 
-const RemoteIdParamSchema = schema.object({ remoteId: schema.string({ minLength: 1 }) });
+const RemoteIdParamSchema = schema.object({
+  remoteId: schema.string({ minLength: 1, maxLength: 256 }),
+});
 
 const elasticCloudUrlSchema = schema.string({
   minLength: 1,
+  maxLength: 2048,
   validate: (value) => validateElasticCloudUrl(value),
 });
 
 const CreateRemoteBodySchema = schema.object({
-  displayName: schema.string({ minLength: 1 }),
+  displayName: schema.string({ minLength: 1, maxLength: 256 }),
   url: elasticCloudUrlSchema,
-  apiKey: schema.string({ minLength: 1 }),
+  apiKey: schema.string({ minLength: 1, maxLength: 256 }),
 });
 
 const UpdateRemoteBodySchema = schema.object({
-  displayName: schema.maybe(schema.string({ minLength: 1 })),
+  displayName: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
   url: schema.maybe(elasticCloudUrlSchema),
-  apiKey: schema.maybe(schema.string({ minLength: 1 })),
+  apiKey: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
 });
 
 const TestRemoteBodySchema = schema.object({
   url: schema.maybe(elasticCloudUrlSchema),
-  apiKey: schema.maybe(schema.string({ minLength: 1 })),
-  remoteId: schema.maybe(schema.string({ minLength: 1 })),
+  apiKey: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
+  remoteId: schema.maybe(schema.string({ minLength: 1, maxLength: 256 })),
 });
 
 const TEST_TIMEOUT_MS = 15_000;
@@ -60,7 +63,7 @@ export const registerRemoteConfigsRoutes = ({
       path: REMOTES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'List remote dataset management Kibana configurations',
     })
@@ -102,7 +105,7 @@ export const registerRemoteConfigsRoutes = ({
       path: REMOTES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Create remote dataset management Kibana configuration',
     })
@@ -163,7 +166,7 @@ export const registerRemoteConfigsRoutes = ({
       path: REMOTE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Update remote dataset management Kibana configuration',
     })
@@ -277,7 +280,7 @@ export const registerRemoteConfigsRoutes = ({
       path: REMOTE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Delete remote dataset management Kibana configuration',
     })
@@ -318,7 +321,7 @@ export const registerRemoteConfigsRoutes = ({
       path: REMOTES_TEST_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.manage] },
       },
       summary: 'Test connection to a remote Kibana instance',
     })

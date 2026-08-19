@@ -47,7 +47,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' some-object_src-value"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' some-object_src-value; form-action 'report-sample' 'self'"`
       );
     });
 
@@ -58,8 +58,8 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeadersByDisposition()).toMatchInlineSnapshot(`
         Object {
-          "enforceHeader": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; img-src 'self' img-src-value",
-          "reportOnlyHeader": "form-action 'report-sample' 'self'; default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co img-src-value; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co; script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
+          "enforceHeader": "script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; img-src 'self' img-src-value",
+          "reportOnlyHeader": "default-src 'report-sample' 'none'; font-src 'report-sample' 'self'; img-src 'report-sample' 'self' data: tiles.maps.elastic.co img-src-value; connect-src 'report-sample' 'self' telemetry.elastic.co telemetry-staging.elastic.co feeds.elastic.co tiles.maps.elastic.co vector.maps.elastic.co; script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'",
         }
       `);
     });
@@ -102,7 +102,7 @@ describe('CspDirectives', () => {
       const config = cspConfig.schema.validate({});
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'"`
       );
     });
 
@@ -115,7 +115,7 @@ describe('CspDirectives', () => {
       const directives = CspDirectives.fromConfig(config);
 
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self' baz; worker-src 'report-sample' 'self' blob: foo; style-src 'report-sample' 'self' 'unsafe-inline' bar dolly; object-src 'report-sample' 'none'"`
+        `"script-src 'report-sample' 'self' baz; worker-src 'report-sample' 'self' blob: foo; style-src 'report-sample' 'self' 'unsafe-inline' bar dolly; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'"`
       );
     });
 
@@ -132,7 +132,7 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
+        `"script-src 'report-sample' 'self'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; connect-src 'self' connect-src; default-src 'self' default-src; font-src 'self' font-src; frame-src 'self' frame-src; img-src 'self' img-src; frame-ancestors 'self' frame-ancestors; report-uri report-uri; report-to report-to"`
       );
     });
 
@@ -142,8 +142,69 @@ describe('CspDirectives', () => {
       });
       const directives = CspDirectives.fromConfig(config);
       expect(directives.getCspHeader()).toMatchInlineSnapshot(
-        `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'"`
+        `"script-src 'report-sample' 'self' 'unsafe-hashes'; worker-src 'report-sample' 'self' blob:; style-src 'report-sample' 'self' 'unsafe-inline'; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'"`
       );
+    });
+
+    describe('report_only.connect_src', () => {
+      it('adds values only to the report-only connect-src directive, not the enforced one', () => {
+        const config = cspConfig.schema.validate({
+          report_only: { connect_src: ['https://report-only-connect.test'] },
+        });
+        const directives = CspDirectives.fromConfig(config);
+        const { enforceHeader, reportOnlyHeader } = directives.getCspHeadersByDisposition();
+
+        expect(enforceHeader).not.toContain('connect-src');
+        expect(reportOnlyHeader).toContain('https://report-only-connect.test');
+      });
+
+      it('does not affect the enforced header when report_only.connect_src is set', () => {
+        const config = cspConfig.schema.validate({
+          report_only: {
+            connect_src: [
+              'https://report-only-connect-a.test',
+              'https://report-only-connect-b.test',
+            ],
+          },
+        });
+        const directives = CspDirectives.fromConfig(config);
+        const { enforceHeader } = directives.getCspHeadersByDisposition();
+
+        expect(enforceHeader).not.toContain('report-only-connect');
+      });
+
+      it('appends to the existing report-only connect-src defaults', () => {
+        const config = cspConfig.schema.validate({
+          report_only: { connect_src: ['https://report-only-connect.test'] },
+        });
+        const directives = CspDirectives.fromConfig(config);
+        const { reportOnlyHeader } = directives.getCspHeadersByDisposition();
+
+        // Default report-only connect-src entries must still be present
+        expect(reportOnlyHeader).toContain("'self'");
+        expect(reportOnlyHeader).toContain('telemetry.elastic.co');
+        // And the user-supplied value is appended
+        expect(reportOnlyHeader).toContain('https://report-only-connect.test');
+      });
+
+      it('can be combined with top-level connect_src in the enforced header independently', () => {
+        const config = cspConfig.schema.validate({
+          connect_src: ['https://enforced-connect.test'],
+          report_only: { connect_src: ['https://report-only-connect.test'] },
+        });
+        const directives = CspDirectives.fromConfig(config);
+        const { enforceHeader, reportOnlyHeader } = directives.getCspHeadersByDisposition();
+
+        // enforced-connect.test appears only in the enforced header
+        expect(enforceHeader).toContain('https://enforced-connect.test');
+        expect(enforceHeader).not.toContain('https://report-only-connect.test');
+        // report-only-connect.test appears only in the report-only header
+        expect(reportOnlyHeader).toContain('https://report-only-connect.test');
+        // enforced-connect.test is also mirrored into report-only: because default-src 'none'
+        // is always present in the report-only rules, addDirectiveValue() automatically copies
+        // every enforced child-of-default-src value into the report-only policy.
+        expect(reportOnlyHeader).toContain('https://enforced-connect.test');
+      });
     });
 
     it('merges additional CSP configs as expected', () => {
@@ -165,7 +226,7 @@ describe('CspDirectives', () => {
       };
       const directives = CspDirectives.fromConfig(config, additionalConfig1, additionalConfig2);
       expect(directives.getCspHeader()).toEqual(
-        `script-src 'report-sample' 'self' cdn.host.test; worker-src 'report-sample' 'self' blob: cdn.host.test; style-src 'report-sample' 'self' 'unsafe-inline' cdn.host.test; object-src 'report-sample' 'none'; connect-src 'self' *.foo.bar cdn.host.test; font-src 'self' cdn.host.test; frame-src 'self' cdn.host.test; img-src 'self' *.foo.bar cdn.host.test`
+        `script-src 'report-sample' 'self' cdn.host.test; worker-src 'report-sample' 'self' blob: cdn.host.test; style-src 'report-sample' 'self' 'unsafe-inline' cdn.host.test; object-src 'report-sample' 'none'; form-action 'report-sample' 'self'; connect-src 'self' *.foo.bar cdn.host.test; font-src 'self' cdn.host.test; frame-src 'self' cdn.host.test; img-src 'self' *.foo.bar cdn.host.test`
       );
     });
   });

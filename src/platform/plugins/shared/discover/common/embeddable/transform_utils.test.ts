@@ -18,7 +18,7 @@ import {
   fromStoredSearchEmbeddableByRef,
   fromStoredSearchEmbeddableByValue,
   fromStoredGrid,
-  fromStoredHeight,
+  fromStoredRowHeight,
   toDiscoverSessionPanelOverrides,
   fromStoredSort,
   fromStoredTab,
@@ -289,14 +289,11 @@ describe('search embeddable transform utils', () => {
                 },
                 data_view_id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
                 disabled: false,
-                negate: false,
               },
             ],
             sort: [{ name: '@timestamp', direction: 'desc' }],
             column_order: ['message'],
             view_mode: VIEW_MODE.DOCUMENT_LEVEL,
-            density: DataGridDensity.COMPACT,
-            header_row_height: 3,
             data_source: {
               type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
               ref_id: 'c7d7a1f5-19da-4ba9-af15-5919e8cd2528',
@@ -308,6 +305,15 @@ describe('search embeddable transform utils', () => {
       const result = fromStoredSearchEmbeddableByValue(storedState);
 
       expect(result).toEqual(expected);
+      const { state: roundTripped } = toStoredSearchEmbeddableByValue(result);
+      const [roundTrippedTab] = roundTripped.attributes.tabs ?? [];
+
+      if (!roundTrippedTab) {
+        throw new Error('Expected a round-tripped tab');
+      }
+
+      expect(roundTrippedTab.attributes.density).toBeUndefined();
+      expect(roundTrippedTab.attributes.headerRowHeight).toBeUndefined();
     });
   });
 
@@ -412,10 +418,10 @@ describe('search embeddable transform utils', () => {
       expect(result.ref_id).toBe('session-without-ref-array');
     });
 
-    it('prefers savedObjectId on state over the matching saved search reference', () => {
+    it('prefers the saved search reference over a stale savedObjectId on state', () => {
       const storedSearch: SearchEmbeddableByReferenceState = {
         title: 'Panel',
-        savedObjectId: 'id-from-state',
+        savedObjectId: 'stale-id-from-source-space',
       };
       const references: SavedObjectReference[] = [
         {
@@ -425,7 +431,7 @@ describe('search embeddable transform utils', () => {
         },
       ];
       const result = fromStoredSearchEmbeddableByRef(storedSearch, references);
-      expect(result.ref_id).toBe('id-from-state');
+      expect(result.ref_id).toBe('id-from-reference');
     });
   });
 
@@ -530,14 +536,13 @@ describe('search embeddable transform utils', () => {
               type: AS_CODE_DATA_VIEW_SPEC_TYPE,
               index_pattern: 'my-*',
               time_field: '@timestamp',
-              runtime_fields: [
-                {
-                  name: 'rt',
+              field_settings: {
+                rt: {
                   type: 'keyword',
                   script: 'emit("x")',
                   format: { type: 'string' },
                 },
-              ],
+              },
             },
           },
         ],
@@ -551,9 +556,6 @@ describe('search embeddable transform utils', () => {
         timeFieldName: '@timestamp',
         fieldFormats: {
           rt: { id: 'string' },
-        },
-        fieldAttrs: {
-          rt: {},
         },
         runtimeFieldMap: {
           rt: {
@@ -910,6 +912,11 @@ describe('search embeddable transform utils', () => {
       const result = fromStoredSort(sort);
       expect(result).toEqual([{ name: 'field', direction: 'desc' }]);
     });
+
+    it('converts legacy flat sort [field, direction] to a single sort entry', () => {
+      const result = fromStoredSort(['@timestamp', 'desc']);
+      expect(result).toEqual([{ name: '@timestamp', direction: 'desc' }]);
+    });
   });
 
   describe('toStoredSort', () => {
@@ -934,18 +941,14 @@ describe('search embeddable transform utils', () => {
     });
   });
 
-  describe('fromStoredHeight', () => {
+  describe('fromStoredRowHeight', () => {
     it('returns numeric height as-is', () => {
-      expect(fromStoredHeight(3)).toBe(3);
-      expect(fromStoredHeight(5)).toBe(5);
+      expect(fromStoredRowHeight(3)).toBe(3);
+      expect(fromStoredRowHeight(5)).toBe(5);
     });
 
     it('returns "auto" when height is -1', () => {
-      expect(fromStoredHeight(-1)).toBe('auto');
-    });
-
-    it('defaults to 3 when height is undefined', () => {
-      expect(fromStoredHeight(undefined as unknown as number)).toBe(3);
+      expect(fromStoredRowHeight(-1)).toBe('auto');
     });
   });
 
@@ -978,7 +981,12 @@ describe('search embeddable transform utils', () => {
           searchSourceJSON: JSON.stringify({
             query: { language: 'kuery', query: '' },
             index: 'data-view-1',
-            filter: [],
+            filter: [
+              {
+                meta: { index: 'data-view-1', alias: null, negate: false, disabled: false },
+                query: { match_phrase: { 'log.level': 'error' } },
+              },
+            ],
           }),
         },
       };
@@ -1004,6 +1012,7 @@ describe('search embeddable transform utils', () => {
         ref_id: 'data-view-1',
       });
       expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+      expect('filters' in result && result.filters).toHaveLength(1);
       expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
     });
 
@@ -1044,8 +1053,19 @@ describe('search embeddable transform utils', () => {
         density: DataGridDensity.COMPACT,
         header_row_height: 'auto',
         row_height: 'auto',
+        filters: [
+          {
+            type: ASCODE_FILTER_TYPE.CONDITION,
+            condition: {
+              field: 'log.level',
+              operator: ASCODE_FILTER_OPERATOR.IS,
+              value: 'error',
+            },
+            disabled: false,
+            negate: false,
+          },
+        ],
         query: { language: 'kql', expression: '' },
-        filters: [],
         rows_per_page: 100,
         sample_size: 500,
         data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'data-view-1' },
@@ -1067,7 +1087,42 @@ describe('search embeddable transform utils', () => {
       expect(searchSource.indexRefName).toBe('kibanaSavedObjectMeta.searchSourceJSON.index');
       expect(searchSource.index).toBeUndefined();
       expect(searchSource.query).toEqual({ language: 'kuery', query: '' });
-      expect(searchSource.filter).toEqual([]);
+      expect(searchSource.filter).toHaveLength(1);
+    });
+
+    it('round-trips all fields through toStoredTab → fromStoredTab', () => {
+      const references: SavedObjectReference[] = [
+        { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', type: 'index-pattern', id: 'dv-1' },
+      ];
+      const apiTab: DiscoverSessionEmbeddableByValueState['tabs'][0] = {
+        column_order: [],
+        sort: [],
+        view_mode: VIEW_MODE.DOCUMENT_LEVEL,
+        density: DataGridDensity.COMPACT,
+        header_row_height: 3,
+        row_height: 3,
+        query: { language: 'kql', expression: '' },
+        filters: [
+          {
+            type: ASCODE_FILTER_TYPE.CONDITION,
+            condition: { field: 'log.level', operator: ASCODE_FILTER_OPERATOR.IS, value: 'error' },
+            disabled: false,
+            negate: false,
+          },
+        ],
+        data_source: { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: 'dv-1' },
+      };
+
+      const { state } = toStoredTab(apiTab);
+      const result = fromStoredTab(state, references);
+
+      expect('data_source' in result && result.data_source).toEqual({
+        type: AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+        ref_id: 'dv-1',
+      });
+      expect('view_mode' in result && result.view_mode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+      expect('query' in result && result.query).toEqual({ language: 'kql', expression: '' });
+      expect('filters' in result && result.filters).toHaveLength(1);
     });
 
     it('converts API tab with index-pattern data_source (no refs) when inline', () => {

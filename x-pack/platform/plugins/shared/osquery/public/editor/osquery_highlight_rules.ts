@@ -107,32 +107,11 @@ interface Range {
   endColumn: number;
 }
 
-const theme = {
-  base: 'vs' as const,
-  inherit: false,
-  rules: [
-    { token: 'osquery' },
-    { token: 'support.function', foreground: '4271AE' },
-    { token: 'keyword', foreground: '8959A8' },
-    { token: 'storage.type', foreground: '8959A8' },
-    { token: 'constant.language', foreground: 'F5871F' },
-    { token: 'comment', foreground: '8E908C' },
-    { token: 'string', foreground: '718C00' },
-    { token: 'constant.numeric', foreground: 'F5871F' },
-    { token: 'keyword.operator', foreground: '3E999F' },
-  ],
-  colors: {
-    'editorGutter.background': '#F6F6F6',
-  },
-};
-
 export const initializeOsqueryEditor = (
   tableNames: string[] = [],
   tablesRecord: Record<string, { columns: Array<{ name: string }> }> = {}
 ) => {
   if (!monaco) return;
-
-  monaco.editor.defineTheme('osquery', theme);
 
   const tokenDisposable = monaco.languages.setMonarchTokensProvider('sql', {
     ignoreCase: true,

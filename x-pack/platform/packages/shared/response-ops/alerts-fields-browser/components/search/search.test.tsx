@@ -5,51 +5,42 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Search } from './search';
 
 describe('Search', () => {
   test('it renders the field search input with the expected placeholder text when the searchInput prop is empty', () => {
-    const wrapper = mount(
-      <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />
-    );
+    render(<Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />);
 
-    expect(wrapper.find('[data-test-subj="field-search"]').first().props().placeholder).toEqual(
-      'Field name'
-    );
+    expect(screen.getByRole('searchbox').getAttribute('placeholder')).toEqual('Field name');
   });
 
   test('it renders the "current" search value in the input when searchInput is not empty', () => {
     const searchInput = 'aFieldName';
 
-    const wrapper = mount(
+    render(
       <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput={searchInput} />
     );
 
-    expect(wrapper.find('input').props().value).toEqual(searchInput);
+    expect(screen.getByRole('searchbox')).toHaveValue(searchInput);
   });
 
   test('it renders the field search input with a spinner when isSearching is true', () => {
-    const wrapper = mount(
+    const { container } = render(
       <Search isSearching={true} onSearchInputChange={jest.fn()} searchInput="" />
     );
 
-    expect(wrapper.find('.euiLoadingSpinner').first().exists()).toBe(true);
+    expect(container.querySelector('.euiLoadingSpinner')).toBeInTheDocument();
   });
 
-  test('it invokes onSearchInputChange when the user types in the search field', () => {
+  test('it invokes onSearchInputChange when the user types in the search field', async () => {
     const onSearchInputChange = jest.fn();
 
-    const wrapper = mount(
-      <Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />
-    );
+    render(<Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />);
 
-    wrapper
-      .find('input')
-      .first()
-      .simulate('change', { target: { value: 'timestamp' } });
-    wrapper.update();
+    await userEvent.type(screen.getByRole('searchbox'), 'timestamp');
 
     expect(onSearchInputChange).toBeCalled();
   });

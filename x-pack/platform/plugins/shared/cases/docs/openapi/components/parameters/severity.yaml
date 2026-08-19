@@ -8,3 +8,4 @@ schema:
     - high
     - low
     - medium
+example: low

@@ -9,7 +9,7 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 export const registerGetTimeseriesIndicesRoute = (
   router: IRouter,

@@ -33,11 +33,8 @@ export const SearchHomepageBody = () => {
       css={css({ padding: `0 ${euiTheme.size.l}` })}
     >
       <EuiFlexGroup gutterSize="l" direction="column">
-        <EuiFlexItem>
-          <EuiSpacer size="l" />
-          <MetricPanels />
-        </EuiFlexItem>
-        {cloud?.isServerlessEnabled && (!isAdmin || !isBillingAdmin) ? null : (
+        <MetricPanels />
+        {cloud?.isCloudEnabled && (!isAdmin || !isBillingAdmin) ? null : (
           <EuiFlexItem>
             <EuiSpacer size="l" />
             <CloudResources />

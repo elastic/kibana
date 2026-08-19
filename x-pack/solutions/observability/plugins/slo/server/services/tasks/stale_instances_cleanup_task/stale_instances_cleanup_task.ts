@@ -47,14 +47,14 @@ export class StaleInstancesCleanupTask {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, core, abortController);
+              return this.runTask(taskInstance, core, signal);
             },
           };
         },
@@ -102,11 +102,7 @@ export class StaleInstancesCleanupTask {
     }
   }
 
-  public async runTask(
-    taskInstance: ConcreteTaskInstance,
-    core: CoreSetup,
-    abortController: AbortController
-  ) {
+  public async runTask(taskInstance: ConcreteTaskInstance, core: CoreSetup, signal: AbortSignal) {
     if (!this.wasStarted) {
       this.logger.debug('runTask Aborted. Task not started yet');
       return;
@@ -133,7 +129,7 @@ export class StaleInstancesCleanupTask {
       esClient,
       soClient: internalSoClient,
       logger: this.logger,
-      abortController,
+      signal,
     });
 
     return { state: result.nextState };

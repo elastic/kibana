@@ -8,6 +8,7 @@
  */
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
 import { registerGetNpreValueRoute } from './get_npre_value';
 import { NpreClient } from '../npre/npre_client';
@@ -27,13 +28,11 @@ describe('get_npre_value route', () => {
     return { handler, routeConfig };
   };
 
-  it('registers route with required privileges', () => {
+  it('registers route with authz delegated to the scoped Elasticsearch client', () => {
     const { routeConfig } = createHandler();
 
     expect(routeConfig.path).toBe('/internal/cps/project_routing/{projectRoutingName}');
-    expect(routeConfig.security?.authz).toEqual({
-      requiredPrivileges: ['cluster:monitor/project_routing/get'],
-    });
+    expect(routeConfig.security?.authz).toEqual(AuthzDisabled.delegateToESClient);
   });
 
   it('returns the raw npre value', async () => {

@@ -13,8 +13,9 @@ import type {
   EsWorkflowStepExecution,
   WorkflowExecutionDto,
 } from '@kbn/workflows';
+import { pickWorkflowDocumentVersion } from '@kbn/workflows';
 import { getStepExecutionsByWorkflowExecution } from '@kbn/workflows/server';
-import { stringifyWorkflowDefinition } from '../../../common/lib/yaml';
+import { stringifyWorkflowDefinition } from '@kbn/workflows-yaml';
 
 interface GetWorkflowExecutionParams {
   esClient: ElasticsearchClient;
@@ -90,6 +91,7 @@ function transformToWorkflowExecutionDetailDto(
   stepExecutions: EsWorkflowStepExecution[],
   logger: Logger
 ): WorkflowExecutionDto {
+  const { billable: _billable, ...workflowExecutionDtoFields } = workflowExecution;
   let yaml = workflowExecution.yaml;
   // backward compatibility for workflow executions created before yaml was added to the workflow execution object
   try {
@@ -101,7 +103,7 @@ function transformToWorkflowExecutionDetailDto(
     yaml = '';
   }
   return {
-    ...workflowExecution,
+    ...workflowExecutionDtoFields,
     id,
     isTestRun: workflowExecution.isTestRun ?? false,
     stepId: workflowExecution.stepId,
@@ -111,5 +113,7 @@ function transformToWorkflowExecutionDetailDto(
     yaml,
     traceId: workflowExecution.traceId,
     entryTransactionId: workflowExecution.entryTransactionId,
+    concurrencyGroupKey: workflowExecution.concurrencyGroupKey,
+    ...pickWorkflowDocumentVersion(workflowExecution),
   };
 }

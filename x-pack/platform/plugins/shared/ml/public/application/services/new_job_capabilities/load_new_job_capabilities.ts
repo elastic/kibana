@@ -7,10 +7,10 @@
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { JobType } from '@kbn/ml-common-types/saved_objects';
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { getDataViewAndSavedSearchCallback } from '../../util/index_utils';
-import type { JobType } from '../../../../common/types/saved_objects';
 import type { MlApi } from '../ml_api_service';
 import { mlJobCapsServiceAnalyticsFactory } from './new_job_capabilities_service_analytics';
 import { mlJobCapsServiceFactory } from './new_job_capabilities_service';

@@ -26,8 +26,9 @@ export const InputPopoverButton: React.FC<
     disabled: boolean;
     iconType: IconType;
     onClick: () => void;
-    'aria-labelledby'?: string;
+    'aria-label'?: string;
     'data-test-subj'?: string;
+    ebtProps?: Record<string, string>;
   }>
 > = ({
   open,
@@ -35,8 +36,9 @@ export const InputPopoverButton: React.FC<
   iconType,
   onClick,
   children,
-  'aria-labelledby': ariaLabelledBy,
+  'aria-label': ariaLabel,
   'data-test-subj': dataTestSubj,
+  ebtProps,
 }) => {
   const openStyles = css`
     text-decoration: underline;
@@ -45,6 +47,7 @@ export const InputPopoverButton: React.FC<
     <EuiButtonEmpty
       css={[truncateStyles, open && openStyles]}
       color="text"
+      size="xs"
       iconSide="left"
       flush="both"
       iconType={iconType}
@@ -55,8 +58,9 @@ export const InputPopoverButton: React.FC<
       }}
       disabled={disabled}
       aria-haspopup="menu"
-      aria-labelledby={ariaLabelledBy}
+      aria-label={ariaLabel}
       data-test-subj={dataTestSubj}
+      {...ebtProps}
     >
       {children}
     </EuiButtonEmpty>

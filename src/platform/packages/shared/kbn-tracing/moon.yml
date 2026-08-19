@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/tracing-config'
   - '@kbn/cleanup-before-exit'
+  - '@kbn/core-elasticsearch-server'
 tags:
   - shared-server
   - package

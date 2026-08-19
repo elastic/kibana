@@ -21,6 +21,7 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, updatePrivateLocationMonitors } from './helpers';
 import type { PrivateLocation } from '../../../../common/runtime_types';
 import { parseArrayFilters } from '../../common';
+import { syntheticsMonitorSOTypes } from '../../../../common/types/saved_objects';
 
 const EditPrivateLocationSchema = schema.object({
   label: schema.maybe(
@@ -29,6 +30,7 @@ const EditPrivateLocationSchema = schema.object({
     })
   ),
   tags: schema.maybe(schema.arrayOf(schema.string())),
+  isAgentSharding: schema.maybe(schema.boolean()),
 });
 
 const EditPrivateLocationQuery = schema.object({
@@ -60,8 +62,11 @@ const isPrivateLocationChanged = ({
     (!privateLocation.attributes.tags ||
       (privateLocation.attributes.tags &&
         !isEqual(privateLocation.attributes.tags, newParams.tags)));
+  const isShardingChanged =
+    typeof newParams.isAgentSharding === 'boolean' &&
+    newParams.isAgentSharding !== Boolean(privateLocation.attributes.isAgentSharding);
 
-  return isLabelChanged || areTagsChanged;
+  return isLabelChanged || areTagsChanged || isShardingChanged;
 };
 
 const checkPrivileges = async ({
@@ -76,10 +81,13 @@ const checkPrivileges = async ({
   const checkSavedObjectsPrivileges =
     server.security.authz.checkSavedObjectsPrivilegesWithRequest(request);
 
-  const { hasAllRequested } = await checkSavedObjectsPrivileges(
-    'saved_object:synthetics-monitor/bulk_update',
-    monitorsSpaces
+  const results = await Promise.all(
+    syntheticsMonitorSOTypes.map((soType) =>
+      checkSavedObjectsPrivileges(`saved_object:${soType}/bulk_update`, monitorsSpaces)
+    )
   );
+
+  const hasAllRequested = results.every((result) => result.hasAllRequested);
 
   if (!hasAllRequested) {
     return response.forbidden({
@@ -112,7 +120,11 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
   handler: async (routeContext) => {
     const { response, request, savedObjectsClient } = routeContext;
     const { locationId } = request.params;
-    const { label: newLocationLabel, tags: newTags } = request.body;
+    const {
+      label: newLocationLabel,
+      tags: newTags,
+      isAgentSharding: newIsAgentSharding,
+    } = request.body;
 
     const repo = new PrivateLocationRepository(routeContext);
 
@@ -138,15 +150,23 @@ export const editPrivateLocationRoute: SyntheticsRestApiRouteFactory<
           isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel) &&
           monitorsInLocation.length
         ) {
-          await checkPrivileges({
+          const privilegeResponse = await checkPrivileges({
             routeContext,
-            monitorsSpaces: monitorsInLocation.map(({ namespaces }) => namespaces![0]),
+            monitorsSpaces: [
+              ...new Set(monitorsInLocation.flatMap(({ namespaces }) => namespaces ?? [])),
+            ],
           });
+          if (privilegeResponse) {
+            return privilegeResponse;
+          }
         }
 
         newLocation = await repo.editPrivateLocation(locationId, {
           label: newLocationLabel || existingLocation.attributes.label,
           tags: newTags || existingLocation.attributes.tags,
+          ...(typeof newIsAgentSharding === 'boolean'
+            ? { isAgentSharding: newIsAgentSharding }
+            : {}),
         });
 
         if (isPrivateLocationLabelChanged(existingLocation.attributes.label, newLocationLabel)) {

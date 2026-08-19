@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/268620
+issues:
+- https://github.com/elastic/kibana/issues/265786
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-20
+areas:
+- Dashboards and visualizations
+title: Fix custom rank by count operation for terms bucket
+description: 'Fixed an issue where the Lens Visualization API rejected `rank_by` with `operation: "count"` on terms buckets when no `field` was specified. `Count` can now rank by all documents without requiring a field.'

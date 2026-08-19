@@ -461,6 +461,58 @@ describe('Common authentication routes', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[params.password]: value has length [0] but it must have a minimum length of [1]."`
       );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'a'.repeat(1025),
+          providerName: 'saml1',
+          currentURL: '/some-url',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[providerType]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'a'.repeat(1025),
+          currentURL: '/some-url',
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[providerName]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'saml',
+          providerName: 'saml1',
+          currentURL: 'a'.repeat(8193),
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[currentURL]: value has length [8193] but it must have a maximum length of [8192]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/some-url',
+          params: { username: 'a'.repeat(1025), password: 'some-password' },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[params.username]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
+
+      expect(() =>
+        bodyValidator.validate({
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/some-url',
+          params: { username: 'some-user', password: 'a'.repeat(1025) },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[params.password]: value has length [1025] but it must have a maximum length of [1024]."`
+      );
     });
 
     it('returns 500 if login throws unhandled exception.', async () => {
@@ -507,6 +559,23 @@ describe('Common authentication routes', () => {
         payload: 'Unauthorized',
         options: {},
       });
+    });
+
+    it('returns 401 when providerType or providerName is an empty string.', async () => {
+      authc.login.mockResolvedValue(AuthenticationResult.notHandled());
+
+      for (const body of [
+        { providerType: '', providerName: 'saml1', currentURL: '/some-url' },
+        { providerType: 'saml', providerName: '', currentURL: '/some-url' },
+      ]) {
+        const request = httpServerMock.createKibanaRequest({ body });
+
+        await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+          status: 401,
+          payload: 'Unauthorized',
+          options: {},
+        });
+      }
     });
 
     it('returns redirect location from authentication result if any.', async () => {

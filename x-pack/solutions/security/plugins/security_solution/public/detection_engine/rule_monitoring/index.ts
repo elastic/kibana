@@ -12,5 +12,4 @@ export * from './components/basic/filters/execution_run_type_filter';
 export * from './components/basic/indicators/execution_status_indicator';
 export * from './components/execution_results_table/use_read_execution_results';
 
-export * from './logic/detection_engine_health/use_setup_detection_engine_health_api';
 export * from './logic/execution_settings/use_execution_settings';

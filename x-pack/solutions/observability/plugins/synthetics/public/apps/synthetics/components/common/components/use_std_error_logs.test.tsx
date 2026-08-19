@@ -53,7 +53,7 @@ describe('useStdErrorLogs', () => {
           },
         },
       },
-      ['test-check-group'],
+      ['test-check-group', undefined],
       { name: 'getStdErrLogs' }
     );
   });
@@ -63,7 +63,51 @@ describe('useStdErrorLogs', () => {
 
     expect(searchHookSpy).toHaveBeenCalledWith(
       expect.objectContaining({ index: '' }),
-      [undefined],
+      [undefined, undefined],
+      { name: 'getStdErrLogs' }
+    );
+  });
+
+  it('prefixes the index pattern with the remote cluster alias when remoteName is provided', () => {
+    renderHook(() =>
+      useStdErrorLogs({ checkGroup: 'test-check-group', remoteName: 'remote_cluster' })
+    );
+
+    expect(searchHookSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ index: `remote_cluster:${SYNTHETICS_INDEX_PATTERN}` }),
+      ['test-check-group', 'remote_cluster'],
+      { name: 'getStdErrLogs' }
+    );
+  });
+
+  it('falls back to the local index pattern when remoteName is omitted', () => {
+    renderHook(() => useStdErrorLogs({ checkGroup: 'test-check-group' }));
+
+    expect(searchHookSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ index: SYNTHETICS_INDEX_PATTERN }),
+      ['test-check-group', undefined],
+      { name: 'getStdErrLogs' }
+    );
+  });
+
+  it('re-fetches when remoteName changes', () => {
+    const { rerender } = renderHook(
+      ({ remoteName }: { remoteName: string | undefined }) =>
+        useStdErrorLogs({ checkGroup: 'group-1', remoteName }),
+      { initialProps: { remoteName: undefined as string | undefined } }
+    );
+
+    expect(searchHookSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ index: SYNTHETICS_INDEX_PATTERN }),
+      ['group-1', undefined],
+      { name: 'getStdErrLogs' }
+    );
+
+    rerender({ remoteName: 'cluster-east' });
+
+    expect(searchHookSpy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ index: `cluster-east:${SYNTHETICS_INDEX_PATTERN}` }),
+      ['group-1', 'cluster-east'],
       { name: 'getStdErrLogs' }
     );
   });
@@ -122,7 +166,7 @@ describe('useStdErrorLogs', () => {
           }),
         }),
       }),
-      ['group-1'],
+      ['group-1', undefined],
       { name: 'getStdErrLogs' }
     );
 
@@ -136,7 +180,7 @@ describe('useStdErrorLogs', () => {
           }),
         }),
       }),
-      ['group-2'],
+      ['group-2', undefined],
       { name: 'getStdErrLogs' }
     );
   });

@@ -15,6 +15,8 @@ import {
   ATTRIBUTE_HTTP_SCHEME,
   ATTRIBUTE_HTTP_STATUS_CODE,
   DURATION,
+  GEN_AI_USAGE_INPUT_TOKENS,
+  GEN_AI_USAGE_OUTPUT_TOKENS,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
   KIND,
@@ -30,6 +32,7 @@ import {
   SPAN_ID,
   SPAN_LINKS_TRACE_ID,
   SPAN_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_SUBTYPE,
   SPAN_SYNC,
   SPAN_TYPE,
@@ -43,7 +46,7 @@ import {
   TRANSACTION_RESULT,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { MAX_ITEMS_PER_PAGE } from './get_trace_items';
+import { MAX_ITEMS_PER_PAGE } from './trace_constants';
 
 export const fields = asMutableArray(['@timestamp', 'trace.id', 'service.name'] as const);
 
@@ -68,7 +71,10 @@ export const ecsOnlyOptionalFields = asMutableArray([
   SPAN_COMPOSITE_COUNT,
   SPAN_COMPOSITE_SUM,
   SPAN_COMPOSITE_COMPRESSION_STRATEGY,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
   SERVICE_ENVIRONMENT,
+  GEN_AI_USAGE_INPUT_TOKENS,
+  GEN_AI_USAGE_OUTPUT_TOKENS,
 ] as const);
 
 export const optionalFields = asMutableArray([

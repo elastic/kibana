@@ -85,7 +85,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
         content: fileContent,
       });
 
-      // initiate get file action and wait for the API to complete
+      // initiate get file action and wait for the API to complete.
       cy.intercept('api/endpoint/action/get_file').as('getFileAction');
       openResponseConsoleFromEndpointList();
       inputConsoleCommand(`get-file --path ${filePath}`);

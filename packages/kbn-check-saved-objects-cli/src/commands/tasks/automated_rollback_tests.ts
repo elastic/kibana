@@ -8,13 +8,11 @@
  */
 
 import type { ListrTask } from 'listr2';
-import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import type { MigrationAlgorithm, Task, TaskContext } from '../types';
 import { createBaseline } from './create_baseline';
 import { testUpgrade } from './test_upgrade';
 import { testRollback } from './test_rollback';
-import { fileToJson, getFileFromKibanaRepo } from '../../util';
-import { BASELINE_MAPPINGS_TEST } from '../test';
+import { extractMappingsFromSnapshot } from '../../snapshots';
 
 const rollbackTestsForAlgorithm = (algorithm: MigrationAlgorithm): ListrTask<TaskContext> => ({
   title: `Rollback tests (${algorithm})`,
@@ -22,7 +20,7 @@ const rollbackTestsForAlgorithm = (algorithm: MigrationAlgorithm): ListrTask<Tas
     ctx.migrationAlgorithm = algorithm;
     ctx.migrationKibanaIndex = `.kibana_migrator_${algorithm}_${Date.now()}`;
 
-    ctx.migrationTypes = ctx.updatedTypes.map((type) => ({
+    ctx.migrationTypes = ctx.typesWithNewModelVersions.map((type) => ({
       ...type,
       indexPattern: ctx.migrationKibanaIndex,
     }));
@@ -51,22 +49,10 @@ const rollbackTestsForAlgorithm = (algorithm: MigrationAlgorithm): ListrTask<Tas
 export const automatedRollbackTests: Task = (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
     {
-      title: 'Fetch baseline mappings',
-      task: async () =>
-        (ctx.baselineMappings = await getFileFromKibanaRepo({
-          path: 'packages/kbn-check-saved-objects-cli/current_mappings.json',
-          ref: ctx.gitRev,
-        })),
-      retry: { tries: 5, delay: 2_000 },
-      enabled: () => !ctx.test,
-    },
-    {
-      title: 'Fetch baseline mappings (test mode)',
-      task: async () =>
-        (ctx.baselineMappings = (await fileToJson(
-          BASELINE_MAPPINGS_TEST
-        )) as SavedObjectsTypeMappingDefinitions),
-      enabled: () => ctx.test,
+      title: 'Extract baseline mappings from snapshot',
+      task: () => {
+        ctx.baselineMappings = extractMappingsFromSnapshot(ctx.from!);
+      },
     },
     ...ctx.migrationAlgorithms.map(rollbackTestsForAlgorithm),
   ];

@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
-import { UpdateCaseRequest as UpdateCaseRequestSchema } from '../../bundled-types.gen';
+import { Owner, UpdateCaseRequest as UpdateCaseRequestSchema } from '../../bundled-types.gen';
 import { CasesStepBaseConfigSchema, CasesStepSingleCaseOutputSchema } from './shared';
 import * as i18n from '../translations';
 
@@ -20,6 +20,7 @@ const OverwritesSchema = UpdateCaseRequestSchema.shape.cases.element.omit({
 });
 
 const InputSchema = z.object({
+  owner: Owner,
   case_template_id: z.string().min(1, 'case_template_id is required'),
   overwrites: OverwritesSchema.optional(),
 });
@@ -51,6 +52,7 @@ export const createCaseFromTemplateStepCommonDefinition: CommonStepDefinition<
 - name: create_case_from_template
   type: ${CreateCaseFromTemplateStepTypeId}
   with:
+    owner: securitySolution
     case_template_id: "triage_template"
 \`\`\``,
       `## Create case from template with overwrites
@@ -58,6 +60,7 @@ export const createCaseFromTemplateStepCommonDefinition: CommonStepDefinition<
 - name: create_case_from_template_with_overwrites
   type: ${CreateCaseFromTemplateStepTypeId}
   with:
+    owner: securitySolution
     case_template_id: "triage_template"
     overwrites:
       title: "Template based case title"

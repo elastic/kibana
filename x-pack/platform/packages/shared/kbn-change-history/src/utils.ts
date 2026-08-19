@@ -7,160 +7,83 @@
 
 import crypto from 'node:crypto';
 import { flattenObject as flatten, unflattenObject as unflatten } from '@kbn/object-utils';
-import type {
-  ChangeHistoryFieldsToHash,
-  ChangeHistoryDiff,
-  ChangeHistoryDiffOptions,
-} from './types';
+import type { ChangeHistoryFieldsToMask } from './types';
 
 export const sha256 = (text: string) => crypto.createHash('sha256').update(text).digest('hex');
 
-/**
- * Returns a filtered diff of two JSON-equivalent objects (enumerable properties, no cyclical structures)
- * The output contains a structure that helps navigate between a JSON object and its previous structure.
- *
- * @param opts - The arguments for the diff calculation.
- * @param opts.a - The first JSON object.
- * @param opts.b - The second JSON object.
- * @param opts.fieldsToIgnore - The fields to ignore in the diff calculation.
- * @returns a [Diff] that helps convert one object into the other.
- * @example
- *   const a = { user: { email: 'bob@example.com' }, status: 'active' };
- *   const b = { user: { email: 'bobby@example.com' }, status: 'inactive' };
- *   const fieldsToIgnore = { status: true };
- *   const result = defaultDiffCalculation({ a, b, fieldsToIgnore });
- *   console.log(result);
- *   // {
- *   //  stats: { total: 1, additions: 0, deletions: 0, updates: 1 },
- *   //  ignored: ['status'],
- *   //  fields: ['user.email'],
- *   //  before: { user: { email: 'bob@example.com' } },
- *   //  after: { user: { email: 'bobby@example.com' } }
- *   // }
- */
-export function defaultDiffCalculation(opts: ChangeHistoryDiffOptions): ChangeHistoryDiff {
-  const result: ChangeHistoryDiff = {
-    stats: {
-      total: 0,
-      additions: 0,
-      deletions: 0,
-      updates: 0,
-    },
-    type: 'default',
-    fields: [],
-    ignored: [],
-    before: {},
-    after: {},
-  };
+/** Placeholder stored in place of a redacted value. */
+export const REDACTED = '[redacted]';
 
-  // Flatten both objects and work out diff
-  const { a, b, fieldsToIgnore } = opts;
-  const stats = result.stats;
-  const flatA = flatten(a ?? {});
-  const flatB = flatten(b ?? {});
-  const allKeys = new Set([...Object.keys(flatA), ...Object.keys(flatB)]);
-  const flatFilter = (fieldsToIgnore && flatten(fieldsToIgnore)) || undefined;
-  // TODO: Might need better array comparison here though this works for now
-  const arrayDeepEquals = (a1: any[] | ArrayBufferView, a2: any[] | ArrayBufferView) =>
-    JSON.stringify(a1) === JSON.stringify(a2);
-  // ElasticSearch source objects are JSON-equivalent data.
-  // Object nesting is taken care of during flattening.
-  // We need to take care of Arrays, TypedArrays and primitives
-  // and ignore things deliberately excluded by JSON like functions and bigint
-  const normalize = (v: any) => {
-    switch (typeof v) {
-      // eslint-disable-next-line prettier/prettier
-      case 'number': case 'string': case 'boolean': return v;
-      // eslint-disable-next-line prettier/prettier
-      case 'object': return v; // -> Arrays, TypedArrays, Date, null
-      // eslint-disable-next-line prettier/prettier
-      case 'function': case 'symbol': case 'undefined': return undefined;
-      // eslint-disable-next-line prettier/prettier
-      case 'bigint': default: throw new TypeError('Please use JSON-compatible types');
-    }
-  };
-  // We ignore fields when the key (or an ancestor) is in fieldsToIgnore with a truthy value.
-  // I.e. fieldsToIgnore = { type: true, status: true } ignores type and status from the diff.
-  const ignore = (key: string) =>
-    !!flatFilter &&
-    // TODO: should be tested for performance with a set of v large objects and a lot of ignored fields
-    Object.entries(flatFilter).some(([k, v]) => !!v && (key === k || key.startsWith(k + '.')));
-  for (const key of allKeys) {
-    if (ignore(key)) result.ignored.push(key);
-    else {
-      const valA = normalize(flatA[key]);
-      const valB = normalize(flatB[key]);
-
-      if (Array.isArray(valB) || ArrayBuffer.isView(valB)) {
-        if (!arrayDeepEquals(valA, valB)) {
-          if (valA === undefined) stats.additions++;
-          else stats.updates++;
-          result.before[key] = valA;
-          result.after[key] = valB;
-        } else {
-          // Array has not changed
-          // So we're good.
-        }
-      } else if (valA !== valB) {
-        // Remaining types are primitives, Date and `null`
-        // all of which can be compared directly (as in valA === valB)
-        if (valA === undefined) stats.additions++;
-        else if (valB === undefined) stats.deletions++;
-        else stats.updates++;
-        result.before[key] = valA;
-        result.after[key] = valB;
-      }
-    }
-  }
-
-  // Gather stats, list of changed fields and return.
-  result.stats.total = stats.additions + stats.deletions + stats.updates;
-  result.fields = Object.keys(result.after); // <-- We do not need both. Keys are available for `undefined` items.
-  result.after = unflatten(result.after);
-  result.before = unflatten(result.before);
-  return result;
+export interface SanitizeFieldsOpts {
+  fieldsToHash?: ChangeHistoryFieldsToMask;
+  fieldsToRedact?: ChangeHistoryFieldsToMask;
+  salt?: string;
 }
 
+const hasFields = (fields?: ChangeHistoryFieldsToMask) =>
+  !!fields && Object.keys(fields).length > 0;
+
+const matcher = (fields: ChangeHistoryFieldsToMask) => {
+  const flat = flatten(fields);
+  return (key: string) =>
+    Object.entries(flat).some(([k, v]) => Boolean(v) && (key === k || key.startsWith(`${k}.`)));
+};
+
 /**
- * Hashes certain key fields in a snapshot of an object (Sensitive data etc)
- * @param snapshot - The snapshot to process (a new updated object is returned when hashing applies).
- * @param fieldsToHash - Nested map of field paths to hash.
- * @returns The list of flattened paths that were hashed and the snapshot with those string values replaced.
+ * Masks sensitive string fields in a snapshot, by hashing or redacting. Redaction wins when a
+ * field matches both maps. Returns a new snapshot when anything changes.
+ *
+ * @param snapshot - The snapshot to process.
+ * @param opts.fieldsToHash - Field paths to replace with a salted SHA-256 digest (high-entropy secrets only).
+ * @param opts.fieldsToRedact - Field paths to replace with a `[redacted]` placeholder (low-entropy data).
+ * @param opts.salt - Salt for the hash, use the object.id. Required only when hashing.
+ * @returns The flattened paths that were hashed/redacted and the masked snapshot.
  * @example
- *   const snapshot = { user: { name: 'bob', email: 'bob@example.com' } };
- *   const pathsToHash = { user: { email: true } };
- *   const result = hashFields(snapshot, pathsToHash);
+ *   const snapshot = { api: { key: 'sk-9f8a7b6c5d4e' }, owner: { email: 'bob@example.com' } };
+ *   const result = sanitizeFields(snapshot, {
+ *     fieldsToHash: { api: { key: true } },
+ *     fieldsToRedact: { owner: { email: true } },
+ *     salt: 'rule-id-123',
+ *   });
  *   // {
- *   //  fields: ['user.email'],
- *   //  snapshot: { user: { name: 'bob', email: '5ff860bf1190596c7188ab851db691f0f3169c453936e9e1eba2f9a47f7a0018' } }
+ *   //  fields: { hashed: ['api.key'], redacted: ['owner.email'] },
+ *   //  snapshot: { api: { key: '2da53d7f04d1' }, owner: { email: '[redacted]' } }
  *   // }
  */
-export function hashFields(
+export function sanitizeFields(
   snapshot: Record<string, any>,
-  fieldsToHash?: ChangeHistoryFieldsToHash
-): { fields: Array<string>; snapshot: Record<string, any> } {
-  const fields: string[] = [];
-  if (!fieldsToHash || Object.keys(fieldsToHash).length === 0) {
-    return { fields, snapshot };
+  { fieldsToHash, fieldsToRedact, salt }: SanitizeFieldsOpts = {}
+): { fields: { hashed: string[]; redacted: string[] }; snapshot: Record<string, any> } {
+  const hashed: string[] = [];
+  const redacted: string[] = [];
+  const shouldHash = hasFields(fieldsToHash);
+  const shouldRedact = hasFields(fieldsToRedact);
+  if (!shouldHash && !shouldRedact) {
+    return { fields: { hashed, redacted }, snapshot };
+  }
+  if (shouldHash && !salt) {
+    throw new Error('sanitizeFields: salt missing when hashing fields, please use the object.id');
   }
   const flatSnapshot = flatten(snapshot);
-  const flatFieldsToHash = flatten(fieldsToHash);
-  const shouldBeHashed = (key: string) =>
-    Object.entries(flatFieldsToHash).some(
-      ([k, v]) => !!v && (key === k || key.startsWith(k + '.'))
-    );
+  const matchHash = fieldsToHash ? matcher(fieldsToHash) : () => false;
+  const matchRedact = fieldsToRedact ? matcher(fieldsToRedact) : () => false;
 
   for (const key of Object.keys(flatSnapshot)) {
     const value = flatSnapshot[key];
-    // TODO: We might need to expand this for binary blobs.
-    if (typeof value === 'string' && shouldBeHashed(key)) {
-      fields.push(key);
-      flatSnapshot[key] = sha256(value);
+    if (typeof value !== 'string') {
+      continue;
+    }
+    if (matchRedact(key)) {
+      redacted.push(key);
+      flatSnapshot[key] = REDACTED;
+    } else if (matchHash(key)) {
+      hashed.push(key);
+      flatSnapshot[key] = sha256(salt + value).slice(-12);
     }
   }
 
   return {
-    fields,
+    fields: { hashed, redacted },
     snapshot: unflatten(flatSnapshot),
   };
 }

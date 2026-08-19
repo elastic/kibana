@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. Important edge case.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -39,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   async function addFromLibrary() {
     await appMenu.clickMenuItem('dashboardAddTopNavButton');
-    await testSubjects.click('dashboardAddFromLibraryButton');
+    await testSubjects.click('addToDashboardTab-library');
     await testSubjects.setValue('savedObjectFinderSearchInput', 'Unsaved dashboard slow query');
     await testSubjects.click('savedObjectTitleUnsaved-dashboard-slow-query');
   }

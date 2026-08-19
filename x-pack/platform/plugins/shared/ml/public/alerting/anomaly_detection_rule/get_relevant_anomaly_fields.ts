@@ -15,7 +15,7 @@ import {
   NESTED_ACTUAL_TYPICAL_FIELDS,
   DETECTOR_FILTER_FIELDS,
 } from '@kbn/ml-anomaly-utils/alerting/filter_field_constants';
-import type { CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJobWithStats } from '@kbn/ml-common-types/anomaly_detection_jobs/combined_job';
 
 /**
  * Get relevant fields for filtering anomalies based on job configuration and result type.

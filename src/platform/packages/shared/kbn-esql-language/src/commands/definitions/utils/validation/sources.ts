@@ -9,12 +9,28 @@
 
 import type { ESQLSource } from '@elastic/esql/types';
 import type { ICommandContext } from '../../../registry/types';
-import { sourceExists } from '../sources';
+import { cleanIndex, removeSourceNameQuotes, sourceExists } from '../sources';
 import { errors } from '../errors';
 import type { ESQLMessage } from '../../types';
 
 function hasWildcard(name: string) {
   return /\*/.test(name);
+}
+
+/**
+ * Returns true when every comma-separated part of `sourceName` starts with a dot.
+ * Covers backing indices like `.ds-logs-default-000001` that are hidden in Elasticsearch
+ * but are never surfaced as individual entries in the sources list.
+ */
+export function isDotPrefixedSource(sourceName: string): boolean {
+  return sourceName.split(',').every((part) => {
+    const cleaned = removeSourceNameQuotes(cleanIndex(part.trim()));
+    // Strip optional CCS cluster prefix (cluster:indexName → indexName)
+    let localName = cleaned.includes(':') ? cleaned.slice(cleaned.indexOf(':') + 1) : cleaned;
+    // Clean quotes that may appear after CCS prefix extraction
+    localName = removeSourceNameQuotes(localName);
+    return localName.startsWith('.');
+  });
 }
 
 export interface ValidateSourcesOptions {
@@ -31,6 +47,7 @@ export function validateSources(
   const sourcesMap = new Set<string>([
     ...(context?.sources?.map((source) => source.name) ?? []),
     ...(context?.views?.map((view) => view.name) ?? []),
+    ...(context?.datasets?.map((dataset) => dataset.name) ?? []),
   ]);
   const useGenericDataSourceError = options?.useGenericDataSourceError ?? false;
 
@@ -44,7 +61,11 @@ export function validateSources(
       const sourceName = source.prefix ? source.name : index?.valueUnquoted;
       if (!sourceName) continue;
 
-      if (!sourceExists(sourceName, sourcesMap) && !hasWildcard(sourceName)) {
+      if (
+        !sourceExists(sourceName, sourcesMap) &&
+        !hasWildcard(sourceName) &&
+        !isDotPrefixedSource(sourceName)
+      ) {
         messages.push(
           useGenericDataSourceError ? errors.unknownDataSource(source) : errors.unknownIndex(source)
         );

@@ -51,6 +51,12 @@ export interface SentinelOneAgentEsDoc {
       agent: {
         id: string;
       };
+      uuid: string;
+      last_active_date: string;
+      network_status: string;
+      is_active: boolean;
+      is_pending_uninstall: boolean;
+      is_uninstalled: boolean;
     };
   };
 }

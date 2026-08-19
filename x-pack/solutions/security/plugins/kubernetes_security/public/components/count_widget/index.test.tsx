@@ -89,7 +89,7 @@ describe('CountWidget component', () => {
         render();
 
         expect(renderResult.getByText(TITLE)).toBeVisible();
-        expect(renderResult.getByText('5K')).toBeVisible();
+        expect(renderResult.getByText('5k')).toBeVisible();
       });
     });
 
@@ -102,7 +102,7 @@ describe('CountWidget component', () => {
         render();
 
         expect(renderResult.getByText(TITLE)).toBeVisible();
-        expect(renderResult.getByText('1.2M')).toBeVisible();
+        expect(renderResult.getByText('1.2m')).toBeVisible();
       });
     });
 
@@ -115,7 +115,7 @@ describe('CountWidget component', () => {
         render();
 
         expect(renderResult.getByText(TITLE)).toBeVisible();
-        expect(renderResult.getByText('999K')).toBeVisible();
+        expect(renderResult.getByText('999k')).toBeVisible();
       });
     });
 

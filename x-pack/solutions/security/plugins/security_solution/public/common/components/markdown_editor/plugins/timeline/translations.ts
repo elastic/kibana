@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const INSERT_TIMELINE = i18n.translate(
   'xpack.securitySolution.markdownEditor.plugins.timeline.insertTimelineButtonLabel',
   {
-    defaultMessage: 'Insert timeline link',
+    defaultMessage: 'Insert Timeline link',
   }
 );
 
@@ -25,14 +25,14 @@ export const TIMELINE_ID = (timelineId: string) =>
 export const NO_TIMELINE_NAME_FOUND = i18n.translate(
   'xpack.securitySolution.markdownEditor.plugins.timeline.noTimelineNameFoundErrorMsg',
   {
-    defaultMessage: 'No timeline name found',
+    defaultMessage: 'No Timeline name found',
   }
 );
 
 export const NO_TIMELINE_ID_FOUND = i18n.translate(
   'xpack.securitySolution.markdownEditor.plugins.timeline.noTimelineIdFoundErrorMsg',
   {
-    defaultMessage: 'No timeline id found',
+    defaultMessage: 'No Timeline id found',
   }
 );
 
@@ -58,7 +58,7 @@ export const FAILED_TO_RETRIEVE_TIMELINE = (timelineId: string) =>
   i18n.translate(
     'xpack.securitySolution.markdownEditor.plugins.timeline.failedRetrieveTimelineErrorMsg',
     {
-      defaultMessage: 'Failed to retrieve timeline id: { timelineId }',
+      defaultMessage: 'Failed to retrieve Timeline id: { timelineId }',
       values: { timelineId },
     }
   );

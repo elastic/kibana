@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MosaicState } from '../../schema/charts/mosaic';
-import type { PieState } from '../../schema/charts/pie';
-import type { TreemapState } from '../../schema/charts/treemap';
-import type { WaffleState } from '../../schema/charts/waffle';
+import type { MosaicConfig } from '../../schema/charts/mosaic';
+import type { PieConfig } from '../../schema/charts/pie';
+import type { TreemapConfig } from '../../schema/charts/treemap';
+import type { WaffleConfig } from '../../schema/charts/waffle';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE } from '@kbn/as-code-data-views-schema';
-type PartitionConfig = PieState | MosaicState | TreemapState | WaffleState;
+type PartitionConfig = PieConfig | MosaicConfig | TreemapConfig | WaffleConfig;
 
 export const esqlCharts: Array<PartitionConfig> = [
   {

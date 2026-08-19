@@ -37,7 +37,16 @@ export type {
   LensBaseLayer,
   LensXYConfigBase,
   LensBreakdownConfig,
+  LensLegendConfig,
+  LensYBoundsConfig,
 } from './types';
 
-export { lensApiStateSchema, lensApiStateSchemaNoESQL } from './schema';
-export type { LensApiState as LensApiSchemaType } from './schema';
+export {
+  isLensESQLConfig,
+  isLensDSLConfig,
+  isLensAPIFormat,
+  isLensLegacyFormat,
+  isLensLegacyAttributes,
+} from './utils';
+
+export * from './schema';

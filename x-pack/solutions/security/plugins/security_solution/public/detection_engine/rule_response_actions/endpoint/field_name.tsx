@@ -19,6 +19,7 @@ import { EuiComboBox, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import ECSSchema from './v.8.10.0_process.json';
 
 interface FieldNameFieldProps {
+  basePath: string;
   path: string;
   disabled: boolean;
   readDefaultValueOnForm: boolean;
@@ -41,16 +42,18 @@ const REQUIRED_ERROR = i18n.translate(
   }
 );
 const FieldNameFieldComponent = ({
+  basePath,
   path,
   disabled,
   readDefaultValueOnForm,
   isRequired,
 }: FieldNameFieldProps) => {
   const [data] = useFormData();
-  const fieldValue = get(data, path);
   const context = useFormContext();
-
+  const fieldValue = get(data, path);
+  const overwriteFieldPath = `${basePath}.config.overwrite`;
   const currentFieldNameField = context.getFields()[path];
+  const currentOverwriteField = context.getFields()[overwriteFieldPath];
 
   useEffect(() => {
     // hackish way to clear errors on this field - because we base this validation on the value of overwrite toggle
@@ -63,6 +66,14 @@ const FieldNameFieldComponent = ({
       currentFieldNameField?.setErrors([{ message: REQUIRED_ERROR }]);
     }
   }, [currentFieldNameField, isRequired]);
+
+  // If the `overwrite` field is true (switch toggle on the UI), then reset the custom configuration field
+  // to an empty string, since the API does not allow both to be set at the same time.
+  useEffect(() => {
+    if (currentOverwriteField?.value && fieldValue) {
+      currentFieldNameField?.setValue('');
+    }
+  }, [currentFieldNameField, currentOverwriteField?.value, fieldValue]);
 
   const renderEntityIdNote = useMemo(() => {
     const contains = fieldValue?.includes('entity_id');
@@ -116,8 +127,8 @@ const FieldNameFieldComponent = ({
         {(field) => {
           const { value, setValue } = field;
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
-
           const valueInList = !!optionsAsComboBoxOptions.find((option) => option.label === value);
+
           return (
             <EuiFormRow
               label={field.label}

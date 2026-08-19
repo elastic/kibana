@@ -140,7 +140,9 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.rule.tags': schemaStringArray,
   'kibana.alert.scheduled_action.date': schemaString,
   'kibana.alert.scheduled_action.group': schemaString,
+  'kibana.alert.severity': schemaString,
   'kibana.alert.severity_improving': schemaBoolean,
+  'kibana.alert.snoozed': schemaBoolean,
   'kibana.alert.start': schemaDate,
   'kibana.alert.time_range': schemaDateRange,
   'kibana.alert.updated_at': schemaDate,
@@ -151,6 +153,8 @@ const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'kibana.alert.workflow_status': schemaString,
   'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
+  'kibana.cps_scope.expression': schemaString,
+  'kibana.cps_scope.linked_projects': schemaUnknownArray,
   'kibana.version': schemaString,
   tags: schemaStringArray,
 });

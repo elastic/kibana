@@ -13,7 +13,11 @@ import type {
   ColumnState,
 } from '@kbn/lens-common';
 import type { PaletteOutput } from '@kbn/coloring';
-import type { DatatableState, DatatableStateESQL, DatatableStateNoESQL } from '../../../../schema';
+import type {
+  DatatableConfig,
+  DatatableConfigESQL,
+  DatatableConfigNoESQL,
+} from '../../../../schema';
 import { isFormBasedLayer, operationFromColumn } from '../../../utils';
 import { getValueApiColumn } from '../../../columns/esql_column';
 import {
@@ -26,8 +30,20 @@ import { isMetricColumnESQL, isMetricColumnNoESQL, colorModeToApplyColorTo } fro
 import { stripUndefined } from '../../utils';
 
 type APIMetricRowCommonProps = Partial<
-  Pick<NonNullable<DatatableState['metrics']>[number], 'visible' | 'alignment' | 'width'>
+  Pick<NonNullable<DatatableConfig['metrics']>[number], 'visible' | 'alignment' | 'width'>
 >;
+
+type NonProgressColorMode = Exclude<NonNullable<ColumnState['colorMode']>, 'progress'>;
+
+function assertNoUnsupportedProgressDecoration(
+  column: ColumnState
+): asserts column is ColumnState & { colorMode?: NonProgressColorMode } {
+  if (column.colorMode === 'progress') {
+    throw new Error(
+      `Datatable column ${column.columnId} uses the unsupported 'progress' cell decoration in Lens as code export`
+    );
+  }
+}
 
 function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps {
   return stripUndefined<APIMetricRowCommonProps>({
@@ -42,9 +58,11 @@ function buildCommonMetricRowProps(column: ColumnState): APIMetricRowCommonProps
  * - If colorMapping is present → output colorMapping
  * - If palette is present → output colorByValue
  */
-function buildColorProps(
+export function buildColorProps(
   column: ColumnState
-): Partial<Pick<NonNullable<DatatableState['metrics']>[number], 'apply_color_to' | 'color'>> {
+): Partial<Pick<NonNullable<DatatableConfig['metrics']>[number], 'apply_color_to' | 'color'>> {
+  assertNoUnsupportedProgressDecoration(column);
+
   const { colorMode, palette, colorMapping } = column;
   if (!colorMode || colorMode === 'none') return {};
 
@@ -63,7 +81,8 @@ function buildColorProps(
       apply_color_to: applyColorTo,
       color: palette.params
         ? fromColorByValueLensStateToAPI(palette)
-        : fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
+        : // Intentional `as PaletteOutput` type assertion as the legacy palette export bridge accepts palettes with opaque params.
+          fromColorMappingLensStateToAPI(undefined, palette as PaletteOutput), // support for legacy palettes
     };
   }
 
@@ -72,7 +91,7 @@ function buildColorProps(
 
 type APIMetricProps = APIMetricRowCommonProps &
   Partial<
-    Pick<NonNullable<DatatableState['metrics']>[number], 'apply_color_to' | 'color' | 'summary'>
+    Pick<NonNullable<DatatableConfig['metrics']>[number], 'apply_color_to' | 'color' | 'summary'>
   >;
 
 function buildMetricsAPI(column: ColumnState): APIMetricProps {
@@ -81,14 +100,14 @@ function buildMetricsAPI(column: ColumnState): APIMetricProps {
     ...buildCommonMetricRowProps(column),
     ...buildColorProps(column),
     ...(summaryRow && summaryRow !== 'none'
-      ? { summary: { type: summaryRow, ...(summaryLabel ? { label: summaryLabel } : {}) } }
+      ? { summary: { type: summaryRow, ...(summaryLabel != null ? { label: summaryLabel } : {}) } }
       : {}),
   };
 }
 
 function buildRowCommonProps(
   column: ColumnState
-): Pick<NonNullable<DatatableState['rows']>[number], 'collapse_by' | 'click_filter'> {
+): Pick<NonNullable<DatatableConfig['rows']>[number], 'collapse_by' | 'click_filter'> {
   const { collapseFn, oneClickFilter } = column;
   return {
     ...buildCommonMetricRowProps(column),
@@ -100,12 +119,14 @@ function buildRowCommonProps(
 type APIRowPropsNoESQL = APIMetricRowCommonProps &
   Partial<
     Pick<
-      NonNullable<DatatableStateNoESQL['rows']>[number],
+      NonNullable<DatatableConfigNoESQL['rows']>[number],
       'apply_color_to' | 'color' | 'collapse_by' | 'click_filter'
     >
   >;
 
 function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
+  assertNoUnsupportedProgressDecoration(column);
+
   const { colorMode, colorMapping, palette } = column;
   return {
     ...buildRowCommonProps(column),
@@ -114,7 +135,8 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
           apply_color_to: colorModeToApplyColorTo(colorMode),
           color:
             colorMapping || palette
-              ? fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
+              ? // Intentional `as PaletteOutput` type assertion as the legacy palette export bridge accepts palettes with opaque params.
+                fromColorMappingLensStateToAPI(colorMapping, palette as PaletteOutput)
               : AUTO_COLOR,
         }
       : {}),
@@ -124,7 +146,7 @@ function buildRowsAPINoESQL(column: ColumnState): APIRowPropsNoESQL {
 type APIRowPropsESQL = APIMetricRowCommonProps &
   Partial<
     Pick<
-      NonNullable<DatatableStateESQL['rows']>[number],
+      NonNullable<DatatableConfigESQL['rows']>[number],
       'apply_color_to' | 'color' | 'collapse_by' | 'click_filter'
     >
   >;
@@ -137,11 +159,11 @@ function buildRowsAPIESQL(column: ColumnState): APIRowPropsESQL {
 }
 
 type DatatableColumnsNoESQLAndMapping = Pick<
-  DatatableStateNoESQL,
+  DatatableConfigNoESQL,
   'metrics' | 'rows' | 'split_metrics_by'
 > & { columnIdMapping: ColumnIdMapping };
 type DatatableColumnsESQLAndMapping = Pick<
-  DatatableStateESQL,
+  DatatableConfigESQL,
   'metrics' | 'rows' | 'split_metrics_by'
 > & { columnIdMapping: ColumnIdMapping };
 
@@ -180,9 +202,9 @@ export function convertDatatableColumnsToAPI(
   const columnStateMap = new Map(columns.map((col) => [col.columnId, col]));
 
   if (isFormBasedLayer(layer)) {
-    const metrics: DatatableStateNoESQL['metrics'] = [];
-    const rows: NonNullable<DatatableStateNoESQL['rows']> = [];
-    const splitMetricsBy: NonNullable<DatatableStateNoESQL['split_metrics_by']> = [];
+    const metrics: DatatableConfigNoESQL['metrics'] = [];
+    const rows: NonNullable<DatatableConfigNoESQL['rows']> = [];
+    const splitMetricsBy: NonNullable<DatatableConfigNoESQL['split_metrics_by']> = [];
 
     // Use columnOrder from the layer to preserve the correct row ordering/ aggregation nesting
     const orderedColumnIds = layer.columnOrder;
@@ -239,9 +261,9 @@ export function convertDatatableColumnsToAPI(
     };
   }
 
-  const metrics: DatatableStateESQL['metrics'] = [];
-  const rows: NonNullable<DatatableStateESQL['rows']> = [];
-  const splitMetricsBy: NonNullable<DatatableStateESQL['split_metrics_by']> = [];
+  const metrics: DatatableConfigESQL['metrics'] = [];
+  const rows: NonNullable<DatatableConfigESQL['rows']> = [];
+  const splitMetricsBy: NonNullable<DatatableConfigESQL['split_metrics_by']> = [];
 
   // Preserve ES|QL column order based on the datasource layer columns
   const orderedColumnIds = layer.columns.map(({ columnId }) => columnId);

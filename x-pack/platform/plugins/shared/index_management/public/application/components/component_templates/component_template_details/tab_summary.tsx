@@ -17,10 +17,16 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiLink,
+  EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
-import { getLifecycleValue } from '../../../lib/data_streams';
+import { formatDlmLifecycleSummary } from '../../../lib/data_streams';
+import { getFailedDataLifecycleSummary } from '../../../lib/failed_data_lifecycle_summary';
+import { useLoadFailureStoreSettings } from '../../../services/api';
 import type { ComponentTemplateDeserialized } from '../shared_imports';
+import { useAppContext } from '../../../app_context';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
 interface Props {
@@ -28,18 +34,30 @@ interface Props {
   showCallToAction?: boolean;
 }
 
-const INFINITE_AS_ICON = true;
-
 export const TabSummary: React.FunctionComponent<Props> = ({
   componentTemplateDetails,
   showCallToAction,
 }) => {
   const { getUrlForApp } = useComponentTemplatesContext();
+  const {
+    config: { isServerless },
+  } = useAppContext();
+  const dlmTiersLayoutEnabled = !isServerless;
+  const { data: failureStoreSettings, error: failureStoreSettingsError } =
+    useLoadFailureStoreSettings();
 
   const { version, _meta, _kbnMeta, template } = componentTemplateDetails;
 
   const { usedBy } = _kbnMeta;
   const templateIsInUse = usedBy.length > 0;
+
+  const failureStoreSummary = getFailedDataLifecycleSummary({
+    templateType: 'component_template',
+    failureStore: template.data_stream_options?.failure_store,
+    failureStoreSettings: failureStoreSettings ?? undefined,
+    hasSettingsError: Boolean(failureStoreSettingsError),
+    showPhaseCounts: dlmTiersLayoutEnabled,
+  });
 
   return (
     <>
@@ -124,14 +142,51 @@ export const TabSummary: React.FunctionComponent<Props> = ({
 
         {template.lifecycle && (
           <>
-            <EuiDescriptionListTitle data-test-subj="dataRetentionTitle">
+            <EuiDescriptionListTitle data-test-subj="dataLifecycleTitle">
               <FormattedMessage
-                id="xpack.idxMgmt.componentTemplateDetails.summaryTab.dataRetentionDescriptionListTitle"
-                defaultMessage="Data retention"
+                id="xpack.idxMgmt.componentTemplateDetails.summaryTab.dataLifecycleDescriptionListTitle"
+                defaultMessage="Data lifecycle"
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {getLifecycleValue(template.lifecycle, INFINITE_AS_ICON)}
+              {formatDlmLifecycleSummary(template.lifecycle, {
+                includePhaseCount: dlmTiersLayoutEnabled,
+              })}
+            </EuiDescriptionListDescription>
+          </>
+        )}
+
+        {failureStoreSummary && (
+          <>
+            <EuiDescriptionListTitle data-test-subj="failedDataLifecycleTitle">
+              <FormattedMessage
+                id="xpack.idxMgmt.templateDetails.summaryTab.failedDataLifecycleTitle"
+                defaultMessage="Failed data lifecycle"
+              />
+            </EuiDescriptionListTitle>
+            <EuiDescriptionListDescription data-test-subj="failedDataLifecycleDetail">
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>{failureStoreSummary.detailsText}</EuiFlexItem>
+                {failureStoreSummary.defaultRetentionTooltip && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      content={failureStoreSummary.defaultRetentionTooltip}
+                      position="right"
+                      type="info"
+                    />
+                  </EuiFlexItem>
+                )}
+                {failureStoreSummary.settingsErrorTooltip && (
+                  <EuiFlexItem grow={false}>
+                    <EuiIconTip
+                      content={failureStoreSummary.settingsErrorTooltip}
+                      position="right"
+                      type="warning"
+                      color="warning"
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiDescriptionListDescription>
           </>
         )}

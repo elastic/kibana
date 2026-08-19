@@ -19,6 +19,7 @@ import { getPersistedPageSize } from '../features/pagination';
 import type { PaginationConfig } from '../features/pagination';
 import { reducer, DEFAULT_SELECTION } from './state_reducer';
 import { useContentListItemsQuery } from '../query';
+import { ContentListUrlSync } from '../features/url_sync';
 
 /**
  * Props for `ContentListStateProvider`.
@@ -108,6 +109,9 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
     isLoading,
     isFetching,
     error,
+    hasNoItems,
+    hasNoResults,
+    hasActiveQuery,
     refetch: queryRefetch,
     requery: queryRequery,
   } = useContentListItemsQuery(clientState);
@@ -130,16 +134,33 @@ export const ContentListStateProvider = ({ children }: ContentListStateProviderP
         isLoading,
         isFetching,
         error,
+        hasNoItems,
+        hasNoResults,
+        hasActiveQuery,
       },
       dispatch,
       refetch,
       refresh,
     }),
-    [clientState, items, totalItems, isLoading, isFetching, error, dispatch, refetch, refresh]
+    [
+      clientState,
+      items,
+      totalItems,
+      isLoading,
+      isFetching,
+      error,
+      hasNoItems,
+      hasNoResults,
+      hasActiveQuery,
+      dispatch,
+      refetch,
+      refresh,
+    ]
   );
 
   return (
     <ContentListStateContext.Provider value={contextValue}>
+      <ContentListUrlSync />
       {children}
     </ContentListStateContext.Provider>
   );

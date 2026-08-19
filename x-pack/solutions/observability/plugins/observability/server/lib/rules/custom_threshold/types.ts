@@ -15,6 +15,7 @@ import type {
 import type { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import type {
   ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_TIME_RANGE,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
   ALERT_GROUPING,
@@ -26,8 +27,10 @@ import type {
 } from '../../../../common/custom_threshold_rule/types';
 import type {
   FIRED_ACTIONS_ID,
+  WARNING_ACTIONS_ID,
   NO_DATA_ACTIONS_ID,
   FIRED_ACTION,
+  WARNING_ACTION,
   NO_DATA_ACTION,
 } from './constants';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
@@ -35,6 +38,7 @@ import type { MissingGroupsRecord } from './lib/check_missing_group';
 export enum AlertStates {
   OK,
   ALERT,
+  WARNING,
   NO_DATA,
   ERROR,
 }
@@ -67,10 +71,11 @@ export type CustomThresholdAlertContext = AlertContext & {
   value?: Array<number | string | null>;
 };
 export type CustomThresholdSpecificActionGroups = ActionGroupIdsOf<
-  typeof FIRED_ACTION | typeof NO_DATA_ACTION
+  typeof FIRED_ACTION | typeof WARNING_ACTION | typeof NO_DATA_ACTION
 >;
 export type CustomThresholdActionGroup =
   | typeof FIRED_ACTIONS_ID
+  | typeof WARNING_ACTIONS_ID
   | typeof NO_DATA_ACTIONS_ID
   | typeof RecoveredActionGroup.id;
 
@@ -86,6 +91,7 @@ export type CustomThresholdAlert = Omit<
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
   [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_EVALUATION_TIME_RANGE]?: { gte: string; lte: string };
   [ALERT_GROUP]?: Group[];
   [ALERT_GROUPING]?: Record<string, string>;
 };

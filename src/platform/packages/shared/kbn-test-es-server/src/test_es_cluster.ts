@@ -11,7 +11,7 @@ import Path from 'path';
 import { format } from 'url';
 import del from 'del';
 import { v4 as uuidv4 } from 'uuid';
-import globby from 'globby';
+import { glob } from 'fast-glob';
 import createArchiver from 'archiver';
 import Fs from 'fs';
 import { pipeline } from 'stream/promises';
@@ -76,15 +76,7 @@ export interface CreateTestEsClusterOptions {
   esFrom?: string;
   esServerlessOptions?: Pick<
     ServerlessOptions,
-    | 'image'
-    | 'tag'
-    | 'resources'
-    | 'host'
-    | 'kibanaUrl'
-    | 'projectType'
-    | 'dataPath'
-    | 'uiam'
-    | 'uiamOAuth'
+    'image' | 'tag' | 'resources' | 'host' | 'projectType' | 'dataPath' | 'uiam' | 'uiamOAuth'
   >;
   esJavaOpts?: string;
   /**
@@ -170,6 +162,12 @@ export interface CreateTestEsClusterOptions {
    */
   serverless?: boolean;
   /**
+   * Clean existing serverless object store data before startup.
+   *
+   * Defaults to `true` for backwards compatibility.
+   */
+  clean?: boolean;
+  /**
    * Files to mount inside ES containers
    */
   files?: string[];
@@ -218,6 +216,7 @@ export function createTestEsCluster<
     onEarlyExit,
     files,
     secureFiles,
+    clean = true,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -315,7 +314,7 @@ export function createTestEsCluster<
           dataPath: `stateless-${clusterName}`,
           ...esServerlessOptions,
           port,
-          clean: true,
+          clean,
           background: true,
           files,
           ssl,
@@ -409,7 +408,7 @@ export function createTestEsCluster<
     }
 
     async captureDebugFiles() {
-      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
+      const debugFiles = await glob([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
         cwd: config.installPath,
         absolute: true,
       });

@@ -14,13 +14,15 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const SuggestUserProfilesRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email
+     */
+    searchTerm: z.string().optional(),
+  })
+);
 export type SuggestUserProfilesRequestQuery = z.infer<typeof SuggestUserProfilesRequestQuery>;
-export const SuggestUserProfilesRequestQuery = z.object({
-  /**
-   * Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email
-   */
-  searchTerm: z.string().optional(),
-});
 export type SuggestUserProfilesRequestQueryInput = z.input<typeof SuggestUserProfilesRequestQuery>;

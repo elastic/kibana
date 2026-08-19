@@ -257,7 +257,7 @@ describe('createFiltersFromClickEvent', () => {
         expect(filter).toEqual([]);
       });
 
-      test('should create phrase filter for string value', async () => {
+      test('should create phrase filter for string value using sourceField for index field name', async () => {
         const mockFilterableField = {
           name: 'message',
           filterable: true,
@@ -266,30 +266,78 @@ describe('createFiltersFromClickEvent', () => {
 
         const filter = await createFilterESQL(table, 0, 0);
 
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
         expect(filter).toHaveLength(1);
         expect(filter[0]).toEqual(
           expect.objectContaining({
             query: expect.objectContaining({
               match_phrase: expect.objectContaining({
-                '1-1': 'test message',
+                message: 'test message',
               }),
             }),
           })
         );
       });
 
-      test('should create phrases filter for array value', async () => {
+      test('returns no filters when a computed column name matches sourceField and an index field with that name exists', async () => {
+        table.columns[0].isComputedColumn = true;
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledTimes(1);
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([]);
+      });
+
+      test('returns no filters for that same computed column even after it is given a custom Lens label', async () => {
+        // Renaming the dimension via the Appearance section only changes column.name/label; it
+        // must not make an EVAL-computed column look like a genuine RENAME of the real field.
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].name = 'My Custom Label';
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(mockFieldByName).toHaveBeenCalledWith('message');
+        expect(filter).toEqual([]);
+      });
+
+      test('still creates a filter for a genuinely RENAMEd column, even with a custom Lens label', async () => {
+        table.columns[0].isComputedColumn = true;
+        table.columns[0].name = 'My Custom Label';
+        (table.columns[0].meta!.sourceParams as Record<string, unknown>)!.isSourceFieldFilterable =
+          true;
+        mockFieldByName.mockReturnValue({
+          name: 'message',
+          filterable: true,
+        });
+
+        const filter = await createFilterESQL(table, 0, 0);
+
+        expect(filter).toHaveLength(1);
+      });
+
+      test('should create phrases filter for array value using sourceField for index field name', async () => {
         const mockFilterableField = {
           name: 'tags',
           filterable: true,
         };
         mockFieldByName.mockReturnValue(mockFilterableField);
         table.columns[0].name = 'tags';
+        (table.columns[0].meta!.sourceParams as Record<string, unknown>)!.sourceField = 'tags';
         table.columns[0].meta.type = 'string';
         table.rows[0]['1-1'] = ['tag1', 'tag2', 'tag3'];
 
         const filter = await createFilterESQL(table, 0, 0);
 
+        expect(mockFieldByName).toHaveBeenCalledWith('tags');
         expect(filter).toHaveLength(1);
         expect(filter[0]).toEqual(
           expect.objectContaining({
@@ -298,17 +346,17 @@ describe('createFiltersFromClickEvent', () => {
                 should: expect.arrayContaining([
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      '1-1': 'tag1',
+                      tags: 'tag1',
                     }),
                   }),
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      '1-1': 'tag2',
+                      tags: 'tag2',
                     }),
                   }),
                   expect.objectContaining({
                     match_phrase: expect.objectContaining({
-                      '1-1': 'tag3',
+                      tags: 'tag3',
                     }),
                   }),
                 ]),

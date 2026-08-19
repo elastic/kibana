@@ -15,12 +15,14 @@ import type { CreateWatchlistRequestBodyInput } from '../../../../../common/api/
 const mockUpdateWatchlist = jest.fn().mockResolvedValue({ id: 'wl-1', name: 'Updated' });
 const mockUpdateWatchlistEntitySource = jest.fn().mockResolvedValue({});
 const mockCreateWatchlistEntitySource = jest.fn().mockResolvedValue({});
+const mockDeleteWatchlistEntitySource = jest.fn().mockResolvedValue({});
 
 jest.mock('../../../../entity_analytics/api/api', () => ({
   useEntityAnalyticsRoutes: () => ({
     updateWatchlist: mockUpdateWatchlist,
     updateWatchlistEntitySource: mockUpdateWatchlistEntitySource,
     createWatchlistEntitySource: mockCreateWatchlistEntitySource,
+    deleteWatchlistEntitySource: mockDeleteWatchlistEntitySource,
   }),
 }));
 
@@ -171,9 +173,9 @@ describe('useUpdateWatchlist', () => {
     expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
   });
 
-  it('handles mixed create and update for multiple sources', async () => {
+  it('deletes old source and creates new one when type changes', async () => {
+    // User switched from store to index — old store source is deleted, new index source created
     const watchlist = makeWatchlist([
-      { type: 'store', name: 'WL-store', queryRule: 'risk > 50' },
       {
         type: 'index',
         name: 'WL-logs-*',
@@ -195,17 +197,18 @@ describe('useUpdateWatchlist', () => {
       await result.current.mutateAsync();
     });
 
-    // Store should be updated
-    expect(mockUpdateWatchlistEntitySource).toHaveBeenCalledWith(
-      expect.objectContaining({ entitySourceId: 'es-store-1' })
-    );
-
-    // Index should be created
+    // Old store source should be deleted
+    expect(mockDeleteWatchlistEntitySource).toHaveBeenCalledWith({
+      watchlistId: 'wl-1',
+      entitySourceId: 'es-store-1',
+    });
+    // New index source should be created
     expect(mockCreateWatchlistEntitySource).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({ type: 'index', indexPattern: 'logs-*' }),
       })
     );
+    expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
   });
 
   it('does not process sources when entitySources is empty', async () => {
@@ -219,6 +222,51 @@ describe('useUpdateWatchlist', () => {
     });
 
     expect(mockUpdateWatchlist).toHaveBeenCalled();
+    expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
+    expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
+  });
+
+  it('deletes existing sources when "None" is selected (entitySources is empty array)', async () => {
+    const watchlist = makeWatchlist([]);
+    const opts: UseUpdateWatchlistOptions = {
+      ...baseOpts,
+      ruleBasedSourceIds: { store: 'es-1' },
+      watchlist,
+    };
+
+    const { result } = renderHook(() => useUpdateWatchlist(opts), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync();
+    });
+
+    expect(mockDeleteWatchlistEntitySource).toHaveBeenCalledWith({
+      watchlistId: 'wl-1',
+      entitySourceId: 'es-1',
+    });
+    expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
+    expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
+  });
+
+  it('does not delete existing sources when entitySources is undefined (not modified)', async () => {
+    const watchlist = makeWatchlist(undefined);
+    const opts: UseUpdateWatchlistOptions = {
+      ...baseOpts,
+      ruleBasedSourceIds: { store: 'es-1', index: 'es-2' },
+      watchlist,
+    };
+
+    const { result } = renderHook(() => useUpdateWatchlist(opts), {
+      wrapper: createWrapper(),
+    });
+
+    await act(async () => {
+      await result.current.mutateAsync();
+    });
+
+    expect(mockDeleteWatchlistEntitySource).not.toHaveBeenCalled();
     expect(mockCreateWatchlistEntitySource).not.toHaveBeenCalled();
     expect(mockUpdateWatchlistEntitySource).not.toHaveBeenCalled();
   });

@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
@@ -21,7 +21,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import type { CellActionRenderer } from '../../../flyout_v2/shared/components/cell_actions';
-import { EventKind } from '../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../flyout_v2/document/main/constants/event_kinds';
 import { StyledTitle } from './styles';
 import * as selectors from '../../store/selectors';
 import * as eventModel from '../../../../common/endpoint/models/event';

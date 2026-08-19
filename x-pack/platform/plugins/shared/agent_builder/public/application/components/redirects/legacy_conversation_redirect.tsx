@@ -6,8 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Navigate, useNavigate } from 'react-router-dom-v5-compat';
+import { Redirect, useHistory, useParams } from 'react-router-dom';
 
 import { EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useQuery } from '@kbn/react-query';
@@ -15,15 +14,14 @@ import { useQuery } from '@kbn/react-query';
 import { useLastAgentId } from '../../hooks/use_last_agent_id';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
 import { appPaths } from '../../utils/app_paths';
-import { newConversationId } from '../../utils/new_conversation';
 
 export const LegacyConversationRedirect: React.FC = () => {
   const { conversationId } = useParams<{ conversationId?: string }>();
-  const navigate = useNavigate();
+  const history = useHistory();
   const lastAgentId = useLastAgentId();
   const { conversationsService } = useAgentBuilderServices();
 
-  const isNewConversation = !conversationId || conversationId === newConversationId;
+  const isNewConversation = !conversationId || conversationId === 'new';
 
   const {
     data: conversation,
@@ -38,22 +36,19 @@ export const LegacyConversationRedirect: React.FC = () => {
 
   useEffect(() => {
     if (conversation?.agent_id && conversationId) {
-      navigate(
+      history.replace(
         appPaths.agent.conversations.byId({
           agentId: conversation.agent_id,
           conversationId,
-        }),
-        { replace: true }
+        })
       );
     } else if (isError && conversationId) {
-      navigate(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }), {
-        replace: true,
-      });
+      history.replace(appPaths.agent.conversations.byId({ agentId: lastAgentId, conversationId }));
     }
-  }, [conversation, conversationId, isError, lastAgentId, navigate]);
+  }, [conversation, conversationId, isError, lastAgentId, history]);
 
   if (isNewConversation) {
-    return <Navigate to={appPaths.agent.root({ agentId: lastAgentId })} replace />;
+    return <Redirect to={appPaths.agent.root({ agentId: lastAgentId })} />;
   }
 
   if (isLoading) {

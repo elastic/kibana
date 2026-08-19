@@ -26,7 +26,7 @@ import { RunnerManager } from './runner';
 import { forkContextForAgentRun } from './utils';
 import { runTool, runInternalTool } from './run_tool';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import { HookLifecycle } from '@kbn/agent-builder-common';
+import { HookLifecycle, AgentExecutionMode } from '@kbn/agent-builder-common';
 
 jest.mock('@kbn/agent-builder-server/tools/utils', () => ({
   ...jest.requireActual('@kbn/agent-builder-server/tools/utils'),
@@ -161,6 +161,61 @@ describe('runTool', () => {
         },
       ],
     });
+  });
+
+  it('caps an oversized tool result before it is returned or stored', async () => {
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    // Handler returns a result whose serialized size far exceeds the 2 MB storage limit.
+    toolHandler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: { text: 'x'.repeat(3 * 1024 * 1024) } }],
+    });
+
+    const result = await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    // Returned results are replaced with a single `other` carrying the truncation notice.
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.other);
+    expect((result.results![0].data as { content: string }).content).toContain(
+      'Tool result truncated'
+    );
+
+    // resultStore received the capped result, never the original oversized data.
+    const resultStoreAdd = runnerDeps.resultStore.add as jest.MockedFunction<
+      typeof runnerDeps.resultStore.add
+    >;
+    expect(resultStoreAdd).toHaveBeenCalledTimes(1);
+    const stored = resultStoreAdd.mock.calls[0][0];
+    expect(stored.results).toHaveLength(1);
+    expect((stored.results[0].data as { content: string }).content).toContain(
+      'Tool result truncated'
+    );
+  });
+
+  it('does not cap oversized results for MCP-initiated calls', async () => {
+    const bigData = { text: 'x'.repeat(3 * 1024 * 1024) };
+    toolHandler.mockReturnValue({
+      results: [{ type: ToolResultType.other, data: bigData }],
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        source: 'mcp',
+      } as ScopedRunnerRunInternalToolParams,
+      parentManager: runnerManager,
+    });
+
+    // MCP is exempt: the original oversized result passes through unchanged.
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].data).toEqual(bigData);
   });
 
   it('exposes a context with the expected shape to the tool handler', async () => {
@@ -325,6 +380,40 @@ describe('runTool', () => {
         toolHandlerContext: expect.any(Object),
       })
     );
+  });
+
+  it('scopes the ES client to the run project routing expression when one is provided', async () => {
+    const managerWithRouting = new RunnerManager({ ...runnerDeps, projectRouting: '_alias:*' });
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: managerWithRouting,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'expression',
+      value: '_alias:*',
+    });
+  });
+
+  it('defaults the ES client to space routing when no project routing is provided', async () => {
+    const params: ScopedRunnerRunToolsParams = {
+      toolId: 'test-tool',
+      toolParams: { foo: 'bar' },
+    };
+
+    await runTool({
+      toolExecutionParams: params,
+      parentManager: runnerManager,
+    });
+
+    expect(runnerDeps.elasticsearch.client.asScoped).toHaveBeenCalledWith(runnerDeps.request, {
+      projectRouting: 'space',
+    });
   });
 });
 
@@ -860,5 +949,111 @@ describe('runInternalTool - telemetry', () => {
     const { duration } = analyticsService.reportToolCallSuccess.mock.calls[0][0];
     expect(typeof duration).toBe('number');
     expect(duration).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('runInternalTool - sub-agent HITL blocking', () => {
+  let runnerDeps: CreateScopedRunnerDepsMock;
+  let tool: MockedTool;
+  let toolHandler: jest.MockedFunction<ToolHandlerFn>;
+
+  beforeEach(() => {
+    runnerDeps = createScopedRunnerDepsMock();
+
+    (getToolResultId as jest.Mock).mockReturnValue('some-result-id');
+
+    toolHandler = jest.fn().mockReturnValue({ results: [] });
+
+    tool = createMockedTool({});
+    tool.getSchema.mockReturnValue(
+      z.object({
+        foo: z.string(),
+      })
+    );
+    tool.getHandler.mockReturnValue(toolHandler);
+  });
+
+  it('returns error result instead of confirmation prompt when executionMode is standalone', async () => {
+    runnerDeps.executionMode = AgentExecutionMode.standalone;
+    const runnerManager = new RunnerManager(runnerDeps);
+
+    tool.confirmation = { askUser: 'always' };
+    runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+      status: ConfirmationStatus.unprompted,
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-1',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('results');
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.error);
+    expect(result.results![0].data).toEqual(
+      expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
+    );
+    expect(toolHandler).not.toHaveBeenCalled();
+  });
+
+  it('returns error result instead of on-demand prompt when executionMode is standalone', async () => {
+    runnerDeps.executionMode = AgentExecutionMode.standalone;
+    const runnerManager = new RunnerManager(runnerDeps);
+
+    toolHandler.mockReturnValue({
+      prompt: {
+        type: AgentPromptType.confirmation,
+        id: 'some-prompt-id',
+        message: 'please confirm',
+      },
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-2',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('results');
+    expect(result.results).toHaveLength(1);
+    expect(result.results![0].type).toBe(ToolResultType.error);
+    expect(result.results![0].data).toEqual(
+      expect.objectContaining({ message: expect.stringContaining('non-interactive mode') })
+    );
+  });
+
+  it('allows HITL prompts when executionMode is undefined', async () => {
+    const runnerManager = new RunnerManager(runnerDeps);
+
+    tool.confirmation = { askUser: 'always' };
+    runnerDeps.promptManager.getConfirmationStatus.mockReturnValue({
+      status: ConfirmationStatus.unprompted,
+    });
+
+    const result = await runInternalTool({
+      toolExecutionParams: {
+        tool,
+        toolParams: { foo: 'bar' },
+        toolCallId: 'call-3',
+        source: 'agent',
+      },
+      parentManager: runnerManager,
+    });
+
+    expect(result).toHaveProperty('prompt');
+    expect(result.prompt).toEqual(
+      expect.objectContaining({
+        type: AgentPromptType.confirmation,
+      })
+    );
   });
 });

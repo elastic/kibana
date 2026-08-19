@@ -79,8 +79,11 @@ export const StepNav = ({ stepIndex, totalSteps, handleStepHref }: Props) => {
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downLeft"
+      aria-label={i18n.translate('xpack.synthetics.stepNav.popoverAriaLabel', {
+        defaultMessage: 'Step navigation menu',
+      })}
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

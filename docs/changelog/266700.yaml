@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/266700
+issues:
+- https://github.com/elastic/kibana/issues/267835
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+areas:
+- Dashboards and visualizations
+title: "Enable access control mode configuration in dashboard API"
+description: "Allows setting `access_control.access_mode` when updating dashboards via PUT requests, providing more flexible dashboard sharing options."

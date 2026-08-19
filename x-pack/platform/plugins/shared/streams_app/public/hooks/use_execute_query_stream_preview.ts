@@ -35,7 +35,12 @@ import { useTimefilter } from './use_timefilter';
  * ```
  */
 export function useExecuteQueryStreamPreview() {
-  const { data } = useKibana().dependencies.start;
+  const {
+    dependencies: {
+      start: { data },
+    },
+    core: { uiSettings },
+  } = useKibana();
   const { timeState } = useTimefilter();
 
   const [{ value: documents, error, loading: isLoading }, executeQuery] = useAsyncFn(
@@ -46,11 +51,12 @@ export function useExecuteQueryStreamPreview() {
         search: data.search.search,
         start: timeState.start,
         end: timeState.end,
+        uiSettings,
       });
 
       return esqlResultToPlainObjects<SampleDocument>(result);
     },
-    [data.search.search, timeState.start, timeState.end]
+    [data.search.search, timeState.start, timeState.end, uiSettings]
   );
 
   return {

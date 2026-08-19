@@ -7,9 +7,12 @@
 
 import { ToolManager, createToolManager } from './tool_manager';
 import type { StructuredTool } from '@langchain/core/tools';
-import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manager';
-import type { ExecutableTool } from '@kbn/agent-builder-server';
-import type { BrowserApiToolMetadata } from '@kbn/agent-builder-common';
+import {
+  ToolManagerToolType,
+  type BrowserToolWithOrigin,
+  type ExecutableToolWithOrigin,
+} from '@kbn/agent-builder-server/runner/tool_manager';
+import { ToolOrigin } from '@kbn/agent-builder-common';
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod/v4';
 
@@ -29,6 +32,9 @@ jest.mock('@kbn/agent-builder-genai-utils/langchain', () => ({
       invoke: jest.fn(),
     } as unknown as StructuredTool;
   }),
+  sanitizeToolId: jest.fn((toolId: string) =>
+    toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '')
+  ),
 }));
 
 jest.mock('@kbn/agent-builder-genai-utils/langchain/tools', () => ({
@@ -71,28 +77,33 @@ describe('ToolManager', () => {
 
   const createMockExecutableTool = (
     id: string,
-    description: string = 'Test tool'
-  ): ExecutableTool => ({
+    description: string = 'Test tool',
+    origin: ToolOrigin = ToolOrigin.registry
+  ): ExecutableToolWithOrigin => ({
     id,
     type: 'builtin' as any,
     description,
     tags: [],
     readonly: false,
+    experimental: false,
     configuration: {},
     getSchema: async () => z.object({}),
     execute: jest.fn(),
+    origin,
   });
 
   const createMockBrowserTool = (
     id: string,
-    description: string = 'Browser tool'
-  ): BrowserApiToolMetadata => ({
+    description: string = 'Browser tool',
+    origin: ToolOrigin = ToolOrigin.internal
+  ): BrowserToolWithOrigin => ({
     id,
     description,
     schema: {
       type: 'object',
       properties: {},
     },
+    origin,
   });
 
   describe('constructor', () => {
@@ -639,6 +650,38 @@ describe('ToolManager', () => {
     });
   });
 
+  describe('tool origin metadata', () => {
+    it('stores and retrieves origin entries by internal tool id', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: [
+          createMockExecutableTool('registry.tool', 'registry tool', ToolOrigin.registry),
+          createMockExecutableTool('inline.tool', 'inline tool', ToolOrigin.inline),
+        ],
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getToolMeta('registry.tool').origin).toBe(ToolOrigin.registry);
+      expect(toolManager.getToolMeta('inline.tool').origin).toBe(ToolOrigin.inline);
+      expect(toolManager.getToolMeta('missing.tool').origin).toBeUndefined();
+    });
+
+    it('overwrites existing entries when a newer origin is provided', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('tool.id', 'tool', ToolOrigin.inline),
+        logger: mockLogger,
+      });
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: createMockExecutableTool('tool.id', 'tool', ToolOrigin.registry),
+        logger: mockLogger,
+      });
+
+      expect(toolManager.getToolMeta('tool.id').origin).toBe(ToolOrigin.registry);
+    });
+  });
+
   describe('LRU eviction', () => {
     it('evicts least recently used tool when capacity is exceeded', async () => {
       const capacity = 3;
@@ -777,7 +820,7 @@ describe('ToolManager', () => {
 
     it('returns the summarizer for a tool with summarizeToolReturn', async () => {
       const summarizer = jest.fn();
-      const tool: ExecutableTool = {
+      const tool: ExecutableToolWithOrigin = {
         ...createMockExecutableTool('tool-with-summarizer'),
         summarizeToolReturn: summarizer,
       };
@@ -805,11 +848,11 @@ describe('ToolManager', () => {
     it('returns the latest summarizer when a tool is re-added', async () => {
       const summarizer1 = jest.fn();
       const summarizer2 = jest.fn();
-      const tool1: ExecutableTool = {
+      const tool1: ExecutableToolWithOrigin = {
         ...createMockExecutableTool('tool-1'),
         summarizeToolReturn: summarizer1,
       };
-      const tool2: ExecutableTool = {
+      const tool2: ExecutableToolWithOrigin = {
         ...createMockExecutableTool('tool-1'),
         summarizeToolReturn: summarizer2,
       };
@@ -827,6 +870,134 @@ describe('ToolManager', () => {
       });
 
       expect(toolManager.getSummarizer('tool-1')).toBe(summarizer2);
+    });
+  });
+
+  describe('setMaxToolResultTokens', () => {
+    const hugeResults = [
+      { tool_result_id: 'r-1', type: 'other', data: { text: 'x'.repeat(100_000) } },
+    ];
+
+    const getBuildContent = () => {
+      const { toolToLangchain } = jest.requireMock('@kbn/agent-builder-genai-utils/langchain') as {
+        toolToLangchain: jest.Mock;
+      };
+      const lastCall = toolToLangchain.mock.calls[toolToLangchain.mock.calls.length - 1][0];
+      return lastCall.buildContent as (params: {
+        results: unknown[];
+        toolId: string;
+        toolCallId: string;
+      }) => string;
+    };
+
+    it('uses the default budget when setMaxToolResultTokens is never called', async () => {
+      const tool = createMockExecutableTool('tool-1');
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      // Asserts on the resolved budget (maxTokens), not the fixture's own token estimate —
+      // this test is about which budget got used, not exactly how large hugeResults is.
+      expect(content).toContain('Preview (first 20000 tokens):');
+    });
+
+    it('uses the configured budget for tools without their own override', async () => {
+      const tool = createMockExecutableTool('tool-1');
+
+      toolManager.setMaxToolResultTokens(10);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      expect(content).toContain('Preview (first 10 tokens):');
+    });
+
+    it('uses the tool-level maxResultTokens override instead of the configured default', async () => {
+      const tool = {
+        ...createMockExecutableTool('tool-1'),
+        maxResultTokens: 5,
+      };
+
+      toolManager.setMaxToolResultTokens(10_000);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      expect(content).toContain('Preview (first 5 tokens):');
+    });
+
+    it('never truncates a tool with maxResultTokens: Infinity, regardless of the configured default', async () => {
+      const tool = {
+        ...createMockExecutableTool('tool-1'),
+        maxResultTokens: Infinity,
+      };
+
+      toolManager.setMaxToolResultTokens(10);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      expect(content).toEqual(JSON.stringify({ results: hugeResults }));
+    });
+
+    it('resolves maxResultTokens independently of summarizeToolReturn', async () => {
+      const tool = {
+        ...createMockExecutableTool('tool-1'),
+        summarizeToolReturn: jest.fn(),
+      };
+
+      toolManager.setMaxToolResultTokens(10);
+
+      await toolManager.addTools({
+        type: ToolManagerToolType.executable,
+        tools: tool,
+        logger: mockLogger,
+      });
+
+      const content = getBuildContent()({
+        results: hugeResults,
+        toolId: 'tool-1',
+        toolCallId: 'call-1',
+      });
+
+      // summarizeToolReturn being set has no bearing on the guardrail: it still applies.
+      expect(content).toContain('Preview (first 10 tokens):');
     });
   });
 });

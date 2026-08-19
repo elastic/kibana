@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
 import { getEndpointRule } from '../../../../../../objects/rule';
 import { createRule } from '../../../../../../tasks/api_calls/rules';
 import {
@@ -38,8 +37,7 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
   const ADDITIONAL_ENTRY = 'host.hostname';
 
   beforeEach(() => {
-    cy.task('esArchiverUnload', { archiveName: 'endpoint_2' });
-    cy.task('esArchiverLoad', { archiveName: 'endpoint_2' });
+    cy.task('esArchiverLoad', { archiveName: 'endpoint' });
     login();
     createRule(getEndpointRule()).then((rule) =>
       visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
@@ -48,7 +46,6 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
     waitForAlertsToPopulate();
   });
   after(() => {
-    cy.task('esArchiverUnload', { archiveName: 'endpoint' });
     deleteAlertsAndRules();
   });
   afterEach(() => {
@@ -56,7 +53,6 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
   });
 
   it('Should create a Rule exception item from alert actions overflow menu and auto populate the conditions using alert Highlighted fields', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
     addExceptionFromFirstAlert();
 
     cy.intercept('POST', '/api/detection_engine/rules/*/exceptions').as('exception_creation');
@@ -72,6 +68,12 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
           operator: 'included',
           type: 'match',
           value: 'siem-kibana',
+        },
+        {
+          field: 'agent.id',
+          operator: 'included',
+          type: 'match',
+          value: '0ebd469b-c164-4734-00e6-96d018098dc7',
         },
         {
           field: 'user.name',
@@ -104,16 +106,10 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
           value: ['-zsh'],
         },
       ]);
-      cy.wrap(response?.body[0].comments[0].comment).should(
-        'contain',
-        'Exception conditions are pre-filled with relevant data from an alert with the alert id (_id):'
-      );
     });
   });
 
   it('Should create a Rule exception from Alerts take action button and change multiple exception items without resetting to initial auto-prefilled entries', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
-
     // Open first Alert Summary
     expandFirstAlert();
 
@@ -145,6 +141,12 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
           value: 'siem-kibana',
         },
         {
+          field: 'agent.id',
+          operator: 'included',
+          type: 'match',
+          value: '0ebd469b-c164-4734-00e6-96d018098dc7',
+        },
+        {
           field: 'user.name',
           operator: 'included',
           type: 'match',
@@ -163,16 +165,16 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
           value: '123',
         },
         {
-          field: 'process.name',
-          operator: 'included',
-          type: 'match',
-          value: 'zsh',
-        },
-        {
           field: 'host.hostname',
           operator: 'included',
           type: 'match',
           value: 'foo',
+        },
+        {
+          field: 'process.args',
+          operator: 'included',
+          type: 'match_any',
+          value: ['-zsh'],
         },
       ]);
       cy.wrap(response?.body[0].comments[0].comment).should(
@@ -190,8 +192,6 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
   });
 
   it('Should delete all prefilled exception entries when creating a Rule exception from Alerts take action button without resetting to initial auto-prefilled entries', () => {
-    cy.get(LOADING_INDICATOR).should('not.exist');
-
     // Open first Alert Summary
     expandFirstAlert();
 
@@ -206,6 +206,7 @@ describe('Auto populate exception with Alert data', { tags: ['@ess', '@serverles
       'user.name',
       'process.executable',
       'file.path',
+      'process.name',
     ];
 
     /**

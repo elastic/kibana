@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/265526
+issues:
+- https://github.com/elastic/kibana/issues/245774
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-09
+areas:
+- Dashboards and visualizations
+title: Introduce density style config for the Metric chart
+description: 'Adds a density option to Lens Metric charts, with a new default preset used by default for newly created charts. Existing charts keep their current compact spacing.'

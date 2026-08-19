@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/276693
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Discover and ES|QL
+title: "Fix error saving text fields that contain JSON-like content"
+description: "Saving a text field whose value looks like a JSON object no longer fails because the value was incorrectly parsed as an object."

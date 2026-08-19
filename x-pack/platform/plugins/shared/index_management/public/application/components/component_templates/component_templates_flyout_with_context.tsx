@@ -101,8 +101,8 @@ export const ComponentTemplatesFlyoutWithContext: React.FC<
         <ComponentTemplateDetailsFlyoutContent
           componentTemplateName={componentTemplateName}
           onClose={onClose}
-          actions={actions}
-          showSummaryCallToAction
+          actions={dependencies.privs.manageIndexTemplates ? actions : []}
+          showSummaryCallToAction={dependencies.privs.manageIndexTemplates}
         />
       </EuiFlyout>
     </IndexManagementAppContext>

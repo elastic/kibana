@@ -10,7 +10,7 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 
-import { EsqlService } from '../services/esql_service';
+import { EsqlService } from '@kbn/esql-server-utils';
 
 export const registerGetJoinIndicesRoute = (
   router: IRouter,
@@ -21,7 +21,8 @@ export const registerGetJoinIndicesRoute = (
       path: '/internal/esql/autocomplete/join/indices',
       validate: {
         query: schema.object({
-          remoteClusters: schema.maybe(schema.string()),
+          // remoteClusters may hold a comma-separated list of cluster names.
+          remoteClusters: schema.maybe(schema.string({ maxLength: 1000 })),
         }),
       },
       security: {

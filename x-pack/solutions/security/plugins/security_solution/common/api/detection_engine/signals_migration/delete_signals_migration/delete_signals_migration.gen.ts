@@ -14,34 +14,38 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const MigrationCleanupResult = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    destinationIndex: z.string(),
+    status: z.enum(['success', 'failure', 'pending']),
+    sourceIndex: z.string(),
+    version: z.string(),
+    updated: z.string().datetime(),
+    error: z
+      .object({
+        message: z.string(),
+        status_code: z.number().int(),
+      })
+      .optional(),
+  })
+);
 export type MigrationCleanupResult = z.infer<typeof MigrationCleanupResult>;
-export const MigrationCleanupResult = z.object({
-  id: z.string(),
-  destinationIndex: z.string(),
-  status: z.enum(['success', 'failure', 'pending']),
-  sourceIndex: z.string(),
-  version: z.string(),
-  updated: z.string().datetime(),
-  error: z
-    .object({
-      message: z.string(),
-      status_code: z.number().int(),
-    })
-    .optional(),
-});
 
+export const AlertsMigrationCleanupRequestBody = lazySchema(() =>
+  z.object({
+    /**
+     * Array of `migration_id`s to cleanup.
+     */
+    migration_ids: z.array(z.string()).min(1),
+  })
+);
 export type AlertsMigrationCleanupRequestBody = z.infer<typeof AlertsMigrationCleanupRequestBody>;
-export const AlertsMigrationCleanupRequestBody = z.object({
-  /**
-   * Array of `migration_id`s to cleanup.
-   */
-  migration_ids: z.array(z.string()).min(1),
-});
 export type AlertsMigrationCleanupRequestBodyInput = z.input<
   typeof AlertsMigrationCleanupRequestBody
 >;
 
+export const AlertsMigrationCleanupResponse = lazySchema(() => z.array(MigrationCleanupResult));
 export type AlertsMigrationCleanupResponse = z.infer<typeof AlertsMigrationCleanupResponse>;
-export const AlertsMigrationCleanupResponse = z.array(MigrationCleanupResult);

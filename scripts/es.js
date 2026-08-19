@@ -15,11 +15,11 @@ var kbnEs = require('@kbn/es');
 
 kbnEs
   .run({
-    license: 'basic',
+    license: 'trial',
     password: 'changeme',
     version: pkg.version,
     'source-path': resolve(__dirname, '../../elasticsearch'),
-    'base-path': resolve(__dirname, '../.es'),
+    'base-path': process.env.KBN_ES_BASE_PATH || resolve(__dirname, '../.es'),
     ssl: false,
   })
   .catch(function (e) {

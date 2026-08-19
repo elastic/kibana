@@ -6,10 +6,11 @@
  */
 
 import Boom from '@hapi/boom';
-import type { ServiceParams } from '@kbn/actions-plugin/server';
+import type { ServiceParams, ActionsClient } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import type { CasesConnectorConfig, CasesConnectorRunParams, CasesConnectorSecrets } from './types';
 import { ZCasesConnectorRunParamsSchema } from './schema';
@@ -37,6 +38,7 @@ interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
   casesParams: {
     getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+    getActionsClient: (request: KibanaRequest) => Promise<PublicMethodsOf<ActionsClient>>;
     getSpaceId: (request?: KibanaRequest) => string;
     getUnsecuredSavedObjectsClient: (
       request: KibanaRequest,
@@ -44,6 +46,8 @@ interface CasesConnectorParams {
     ) => Promise<SavedObjectsClientContract>;
     getUiSettingsClient: (request: KibanaRequest) => Promise<IUiSettingsClient>;
     isCasesAttachmentsEnabled: boolean;
+    isTemplatesEnabled: boolean;
+    isAtLeastPlatinum: () => Promise<boolean>;
   };
 }
 
@@ -117,6 +121,7 @@ export class CasesConnector extends SubActionConnector<
       const uiSettingsClient = await this.casesParams.getUiSettingsClient(kibanaRequest);
       const validatedParams = await this.getValidatedRunParams(params, uiSettingsClient);
       const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
+      const actionsClient = await this.casesParams.getActionsClient(kibanaRequest);
       const savedObjectsClient = await this.casesParams.getUnsecuredSavedObjectsClient(
         kibanaRequest,
         [...getSavedObjectsTypes(), CASE_RULES_SAVED_OBJECT]
@@ -134,8 +139,10 @@ export class CasesConnector extends SubActionConnector<
         casesOracleService,
         casesService: this.casesService,
         casesClient,
+        actionsClient,
         spaceId,
-        isCasesAttachmentsEnabled: this.casesParams.isCasesAttachmentsEnabled,
+        isTemplatesEnabled: this.casesParams.isTemplatesEnabled,
+        isAtLeastPlatinum: this.casesParams.isAtLeastPlatinum,
       });
 
       this.logDebugCurrentState(

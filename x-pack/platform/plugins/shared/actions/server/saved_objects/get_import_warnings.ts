@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SavedObject, SavedObjectsImportWarning } from '@kbn/core/server';
-import { isValidSlugIdentifier } from '@kbn/std';
+import { isValidId } from '@kbn/human-readable-id';
 import { CONNECTOR_ID_MAX_LENGTH } from '../../common';
 import type { InMemoryConnector, RawAction } from '../types';
 
@@ -78,9 +78,7 @@ export function getConnectorsWithInvalidIds(
   connectors: Array<SavedObject<RawAction> & { destinationId?: string }>
 ) {
   return connectors.filter(
-    ({ id, destinationId }) =>
-      !destinationId &&
-      (id.length === 0 || id.length > CONNECTOR_ID_MAX_LENGTH || !isValidSlugIdentifier(id))
+    ({ id, destinationId }) => !destinationId && !isValidId(id, CONNECTOR_ID_MAX_LENGTH, 1)
   );
 }
 

@@ -98,7 +98,9 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
     if (definition && !attachmentsFetch.loading) {
       const streamType = getStreamTypeFromDefinition(definition.stream);
       const processingStepsCount = Streams.ingest.all.Definition.is(definition.stream)
-        ? definition.stream.ingest.processing.steps.length
+        ? 'processors' in definition.stream.ingest.processing
+          ? definition.stream.ingest.processing.processors.length
+          : definition.stream.ingest.processing.steps.length
         : 0;
       onPageReady({
         meta: {
@@ -284,6 +286,10 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
               {selectedAttachments.length > 0 && (
                 <EuiFlexItem grow={false}>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.streams.streamDetailAttachments.selectionActionsPopoverAriaLabel',
+                      { defaultMessage: 'Selected attachments actions' }
+                    )}
                     id={selectionPopoverId}
                     button={
                       <EuiLink
@@ -306,6 +312,7 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                                 isSelectionPopoverOpen ? 'chevronSingleUp' : 'chevronSingleDown'
                               }
                               size="s"
+                              aria-hidden={true}
                             />
                           </EuiFlexItem>
                         </EuiFlexGroup>
@@ -317,7 +324,6 @@ export function StreamDetailAttachments({ definition }: { definition: Streams.al
                     anchorPosition="downLeft"
                   >
                     <EuiContextMenuPanel
-                      size="s"
                       items={[
                         <EuiContextMenuItem
                           key="unlink"

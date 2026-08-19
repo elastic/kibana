@@ -44,7 +44,8 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - Don't make API calls from page objects (use `apiServices`/`kbnClient` in hooks instead).
 - Register plugin page objects by extending the `pageObjects` fixture in `test/scout*/ui/fixtures/index.ts`.
 - **Use `readonly` class fields for static locators** — assign them in the constructor, not as getter methods. Use methods only for parameterized locators/actions. See `DashboardApp` in `kbn-scout` for the reference pattern.
-- Scout provides EUI component wrappers for stable interactions with common EUI widgets: `EuiComboBoxWrapper`, `EuiDataGridWrapper`, `EuiSelectableWrapper`, `EuiCheckBoxWrapper`, `EuiFieldTextWrapper`, `EuiCodeBlockWrapper`, `EuiSuperSelectWrapper`, `EuiToastWrapper`. Import them from `@kbn/scout` and use them as class members in page objects.
+- **EUI components — use the published helpers, not raw selectors or the old wrappers.** Drive EUI widgets through `page.components.*` (e.g. `page.components.comboBox(testSubj)`) — Scout's factories over `@elastic/eui-test-helpers`. They're intentionally minimal, so when migrating off the old `@kbn/scout` `EuiXxxWrapper`s don't 1:1-map the old API — judge what the test actually needs, express it with the helper's methods, and push data-correctness checks to API/unit tests.
+- **Don't extend the helpers yourself.** If one is genuinely missing a capability, request the addition from the DevEx team (an issue on `elastic/eui` → `packages/test-helpers`, or Slack) — no local subclasses or one-off methods.
 - **Avoid `.first()`, `.nth()`, `.last()`** — the `playwright/no-nth-methods` lint rule flags these. Instead, use `data-test-subj` attributes or other targeted selectors. If the component lacks a `data-test-subj`, add one rather than disabling the rule.
 - **Do not disable eslint rules** — avoid `eslint-disable` comments in test files. Fix the underlying issue (e.g., use targeted selectors instead of positional ones, add `data-test-subj` to the components) rather than suppressing the lint rule.
 
@@ -53,6 +54,7 @@ description: Use when creating, updating, debugging, or reviewing Scout UI tests
 - Use `spaceTest` so you can access `scoutSpace` for worker-isolated saved objects + UI settings.
 - Pre-ingest shared ES data in `parallel_tests/global.setup.ts` via `globalSetupHook(...)`.
   - Only **worker** fixtures are available there (no `page`, `browserAuth`, `pageObjects`).
+- Reset Elasticsearch/Kibana state once after the suite via `globalTeardownHook(...)` in `parallel_tests/global.teardown.ts` (optional, opt-in by file presence). For state that does need resetting, use `esClient`/`kbnClient`/`apiServices`. See `references/scout-ui-parallelism.md`.
 - Cleanup space-scoped mutations in `afterAll` (`scoutSpace.savedObjects.cleanStandardList()`, unset UI settings you set).
 
 ## Extending fixtures
@@ -99,6 +101,7 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 ## Waiting + flake control
 
 - Don’t use `page.waitForTimeout`. Wait on a page-ready signal (loading indicator hidden, container visible, `expect.poll` on element counts).
+- When an explicit wait is needed, prefer `locator.waitFor({ state: 'visible' })` over a bare `locator.waitFor()`. The two are equivalent (`visible` is the default state), but stating it keeps the intent explicit and consistent with RTL-style readiness checks.
 - If selectors aren’t stable, add `data-test-subj` (Scout uses it as the `testIdAttribute`).
 - Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`). Don’t use them in tests or page objects for app loading state management; rely on Playwright auto-waiting and page-ready signals instead.
 
@@ -112,10 +115,10 @@ test('creates and verifies a dashboard', async ({ pageObjects, page }) => {
 - Use either `--config` or `--testFiles` (they are mutually exclusive).
 - Run by config: `node scripts/scout.js run-tests --arch stateful --domain classic --config <module-root>/test/scout*/ui/playwright.config.ts` (or `.../ui/parallel.playwright.config.ts` for parallel UI)
 - Run by file/dir (Scout derives the right `playwright.config.ts` vs `parallel.playwright.config.ts`): `node scripts/scout.js run-tests --arch stateful --domain classic --testFiles <module-root>/test/scout*/ui/tests/my.spec.ts`
-- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `npx playwright test --config <...> --project local --grep <tag> --headed`.
+- For faster iteration, start servers once in another terminal: `node scripts/scout.js start-server --arch stateful --domain classic [--serverConfigSet <configSet>]`, then run Playwright directly: `node scripts/playwright test --config <...> --project local --grep <tag> --headed`.
 - `run-tests` auto-detects custom config sets from `.../test/scout_<name>/...` paths.
 - `start-server` has no Playwright config to inspect, so pass `--serverConfigSet <name>` when your tests require a custom config set.
-- Debug: `SCOUT_LOG_LEVEL=debug`, or `npx playwright test --config <...> --project local --ui`
+- Debug: `SCOUT_LOG_LEVEL=debug`, or `node scripts/playwright test --config <...> --project local --ui`
 
 ## CI enablement
 

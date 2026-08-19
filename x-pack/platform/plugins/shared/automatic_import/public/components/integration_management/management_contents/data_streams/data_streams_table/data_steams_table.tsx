@@ -26,9 +26,14 @@ import { useTelemetry } from '../../../../telemetry_context';
 interface DataStreamsTableProps {
   integrationId: string;
   items: DataStreamResponse[];
+  onReanalyzeSuccess?: () => void;
 }
 
-export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps) => {
+export const DataStreamsTable = ({
+  integrationId,
+  items,
+  onReanalyzeSuccess,
+}: DataStreamsTableProps) => {
   const { euiTheme } = useEuiTheme();
   const { deleteDataStreamMutation } = useDeleteDataStream();
   const { reanalyzeDataStreamMutation } = useReanalyzeDataStream();
@@ -89,19 +94,25 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
 
   const isDeleting = (item: DataStreamResponse) => item.status === 'deleting';
 
-  const handleReAnalyzeConfirm = () => {
+  const handleReAnalyzeConfirm = async () => {
     if (!formData?.connectorId || !dataStreamReanalyzeTarget) return;
 
+    const target = dataStreamReanalyzeTarget;
     reportDataStreamRefreshConfirmed({
       integrationId,
-      dataStreamId: dataStreamReanalyzeTarget.dataStreamId,
+      dataStreamId: target.dataStreamId,
     });
     setDataStreamReanalyzeTarget(null);
-    reanalyzeDataStreamMutation.mutate({
-      integrationId,
-      dataStreamId: dataStreamReanalyzeTarget.dataStreamId,
-      connectorId: formData.connectorId,
-    });
+    try {
+      await reanalyzeDataStreamMutation.mutateAsync({
+        integrationId,
+        dataStreamId: target.dataStreamId,
+        connectorId: formData.connectorId,
+      });
+      onReanalyzeSuccess?.();
+    } catch {
+      // Error toast is shown by useReanalyzeDataStream
+    }
   };
 
   const handleReanalyzeCancel = () => {
@@ -182,9 +193,9 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
         name: i18n.TABLE_COLUMN_HEADERS.status,
         sortable: true,
         render: (status: DataStreamResponse['status'], item: DataStreamResponse) => (
-          <Status status={status} isDeleting={isDeleting(item)} />
+          <Status status={status} phase={item.phase} isDeleting={isDeleting(item)} />
         ),
-        width: '120px',
+        width: '220px',
       },
       {
         name: i18n.TABLE_COLUMN_HEADERS.actions,
@@ -227,7 +238,7 @@ export const DataStreamsTable = ({ integrationId, items }: DataStreamsTableProps
       <EuiBasicTable<DataStreamResponse>
         items={sortedItems}
         columns={dataStreamColumns}
-        tableLayout="auto"
+        tableLayout="fixed"
         tableCaption={i18n.DATA_STREAMS_TITLE}
         sorting={sorting}
         onChange={onTableChange}

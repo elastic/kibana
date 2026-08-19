@@ -6,13 +6,13 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { CRUDClient } from '@kbn/entity-store/server/domain/crud';
 import pMap from 'p-map';
+import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import type { WatchlistCsvUploadResponseItem } from '../../../../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import { bulkUpsertOperationsFactory } from '../bulk/upsert';
 import { addWatchlistAttributeToStore } from '../sync/entity_store_sync';
-import { getExistingEntitiesMap, getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
-import { CSV_SOURCE_ID } from './constants';
+import { getErrorFromBulkResponse, errorsMsg } from '../sync/utils';
+import { MANUAL_SOURCE_ID } from '../manual/constants';
 import type { MatchedEntity, Watchlist } from './types';
 import { lookupEntitiesForRow } from './lookup';
 
@@ -28,7 +28,7 @@ const toRowResult = (
 const lookupRows = async (
   batch: Array<Record<string, unknown>>,
   startIndex: number,
-  entityStoreClient: CRUDClient,
+  entityStoreClient: EntityStoreCRUDClient,
   logger: Logger
 ) =>
   pMap(
@@ -64,23 +64,16 @@ const upsertToWatchlistIndex = async (
   const entities = matched.map((m) => ({
     euid: m.euid,
     type: m.type,
-    sourceId: CSV_SOURCE_ID,
+    sourceId: MANUAL_SOURCE_ID,
     currentWatchlists: m.currentWatchlists,
   }));
-
-  const existingMap = await getExistingEntitiesMap(
-    esClient,
-    watchlist,
-    entities.map((e) => e.euid)
-  );
-  const enriched = entities.map((e) => ({ ...e, existingEntityId: existingMap.get(e.euid) }));
 
   const operations = bulkUpsertOperationsFactory(
     logger,
     watchlist
   )({
-    entities: enriched,
-    sourceLabel: CSV_SOURCE_ID,
+    entities,
+    sourceLabel: MANUAL_SOURCE_ID,
     targetIndex: watchlist.index,
   });
 
@@ -94,7 +87,7 @@ const upsertToWatchlistIndex = async (
 };
 
 const syncEntityStoreAttributes = async (
-  crudClient: CRUDClient,
+  crudClient: EntityStoreCRUDClient,
   logger: Logger,
   matched: MatchedEntity[],
   watchlistId: string
@@ -143,7 +136,7 @@ export const processBatch = async ({
   watchlist,
 }: {
   batch: Array<Record<string, unknown>>;
-  entityStoreClient: CRUDClient;
+  entityStoreClient: EntityStoreCRUDClient;
   esClient: ElasticsearchClient;
   logger: Logger;
   results: WatchlistCsvUploadResponseItem[];

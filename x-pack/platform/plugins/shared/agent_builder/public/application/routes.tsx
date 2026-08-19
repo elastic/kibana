@@ -15,17 +15,17 @@ import { AppLayout } from './components/layout/app_layout';
 import { RootRedirect } from './components/redirects/root_redirect';
 import { LegacyConversationRedirect } from './components/redirects/legacy_conversation_redirect';
 import { getEnabledRoutes, getViewIdForPathname } from './route_config';
-import { useFeatureFlags } from './hooks/use_feature_flags';
+import { useRouteAccessConfig } from './hooks/use_route_access_config';
 import { useKibana } from './hooks/use_kibana';
 
 export const AgentBuilderRoutes: React.FC<{}> = () => {
-  const featureFlags = useFeatureFlags();
+  const routeAccessConfig = useRouteAccessConfig();
   const { pathname } = useLocation();
   const {
     services: { executionContext },
   } = useKibana();
 
-  const enabledRoutes = useMemo(() => getEnabledRoutes(featureFlags), [featureFlags]);
+  const enabledRoutes = useMemo(() => getEnabledRoutes(routeAccessConfig), [routeAccessConfig]);
 
   const viewId = useMemo(
     () => getViewIdForPathname(pathname, enabledRoutes),

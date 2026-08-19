@@ -1,0 +1,89 @@
+{
+  "sha1": "a3ed0971e382f4cf63c2a1e58b2d6c36fd71dc81",
+  "tests": [
+    {
+      "id": "76379db0c46059d-e670d220d72679e",
+      "title": "GET /api/logstash/cluster should return the ES cluster info",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/cluster.spec.ts",
+        "line": 24,
+        "column": 10
+      }
+    },
+    {
+      "id": "1eebe4b2965bde6-9d395183abc5b1e",
+      "title": "/api/logstash/pipeline/{id} GET should return the specified pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipeline.spec.ts",
+        "line": 41,
+        "column": 10
+      }
+    },
+    {
+      "id": "1eebe4b2965bde6-5afe4c87ab675d8",
+      "title": "/api/logstash/pipeline/{id} GET should return 404 for a non-existing pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipeline.spec.ts",
+        "line": 54,
+        "column": 10
+      }
+    },
+    {
+      "id": "1eebe4b2965bde6-0a1794947f214a3",
+      "title": "/api/logstash/pipeline/{id} PUT should create the specified pipeline and DELETE should remove it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipeline.spec.ts",
+        "line": 63,
+        "column": 10
+      }
+    },
+    {
+      "id": "bcab58e40383a95-714038ed4de06fe",
+      "title": "POST /api/logstash/pipelines/delete should delete the specified pipelines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipelines_delete.spec.ts",
+        "line": 31,
+        "column": 10
+      }
+    },
+    {
+      "id": "077ecdb16df4090-5ad3b1d2f91a525",
+      "title": "GET /api/logstash/pipelines should return all the pipelines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/private/logstash/test/scout/api/tests/pipelines_list.spec.ts",
+        "line": 47,
+        "column": 10
+      }
+    }
+  ]
+}

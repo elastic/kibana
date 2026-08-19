@@ -71,23 +71,25 @@ export const getKBVectorSearchQuery = ({
 
   const userFilter = {
     should: [
-      {
-        nested: {
-          path: 'users',
-          query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                {
-                  match: user.profile_uid
-                    ? { 'users.id': user.profile_uid }
-                    : { 'users.name': user.username },
+      ...(user.profile_uid
+        ? [
+            {
+              nested: {
+                path: 'users',
+                query: {
+                  bool: {
+                    minimum_should_match: 1,
+                    should: [
+                      {
+                        match: { 'users.id': user.profile_uid },
+                      },
+                    ],
+                  },
                 },
-              ],
+              },
             },
-          },
-        },
-      },
+          ]
+        : []),
       {
         bool: {
           must_not: [
@@ -160,7 +162,7 @@ export const getStructuredToolForIndexEntry = ({
         ? z.number()
         : input.fieldType === 'boolean'
         ? z.boolean()
-        : z.any();
+        : z.any().optional();
     return { ...prev, [input.fieldName]: fieldType.describe(input.description) };
   }, {});
 

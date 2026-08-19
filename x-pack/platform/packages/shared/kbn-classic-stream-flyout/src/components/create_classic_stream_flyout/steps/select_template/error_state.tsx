@@ -24,7 +24,7 @@ export const ErrorState = ({ onRetryLoadTemplates }: { onRetryLoadTemplates: () 
       })}
     >
       <EuiEmptyPrompt
-        icon={<EuiIcon type="warning" color="warning" size="l" />}
+        icon={<EuiIcon type="warning" color="warning" size="l" aria-hidden={true} />}
         color="warning"
         data-test-subj="errorLoadingTemplates"
         title={

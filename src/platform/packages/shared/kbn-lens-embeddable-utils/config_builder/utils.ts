@@ -37,7 +37,7 @@ import type {
   LensDataviewDataset,
   LensESQLDataset,
 } from './types';
-import type { LensApiState, LensApiStateESQL, LensApiStateNoESQL } from './schema';
+import type { LensApiConfig, LensApiConfigESQL, LensApiConfigNoESQL } from './schema';
 import type { DataSourceType } from './schema/data_source';
 
 type DataSourceStateLayer =
@@ -243,7 +243,9 @@ function buildDatasourceStatesLayer(
   return [LENS_DATASOURCE_ID.FORM_BASED, buildFormulaLayers(layer, i, dataView!)];
 }
 export const buildDatasourceStates = async (
-  config: (LensBaseConfig & { layers: LensBaseXYLayer[] }) | (LensBaseLayer & LensBaseConfig),
+  config:
+    | (LensBaseConfig & { layers: Array<LensBaseXYLayer | LensAnnotationLayer> })
+    | (LensBaseLayer & LensBaseConfig),
   dataviews: Record<string, DataView>,
   buildFormulaLayers: (
     config: unknown,
@@ -260,47 +262,50 @@ export const buildDatasourceStates = async (
   for (let i = 0; i < configLayers.length; i++) {
     const layer = configLayers[i];
     const layerId = `layer_${i}`;
+
+    if ('type' in layer && (layer as LensAnnotationLayer).type === 'annotation') {
+      continue; // manual annotations need no data view
+    }
+
     const dataset = layer.dataset ?? mainDataset;
 
-    if (!dataset && 'type' in layer && (layer as LensAnnotationLayer).type !== 'annotation') {
+    if (!dataset) {
       throw Error('dataset must be defined');
     }
-    if (dataset) {
-      const index = getDatasetIndex(dataset);
 
-      const dataView = index
-        ? await getDataView(
-            index,
-            dataViewsAPI,
-            isESQLDataset(dataset) ? JSON.stringify(index) : undefined
-          )
-        : undefined;
+    const index = getDatasetIndex(dataset);
+    const dataView = index
+      ? await getDataView(
+          index,
+          dataViewsAPI,
+          isESQLDataset(dataset) ? JSON.stringify(index) : undefined
+        )
+      : undefined;
 
-      const [type, layerConfig] = buildDatasourceStatesLayer(
-        layer,
-        i,
-        dataset,
-        dataView,
-        buildFormulaLayers,
-        getValueColumns
-      );
-      if (layerConfig) {
-        layers = {
-          ...layers,
-          [type]: {
-            layers: isSingleLayer(layerConfig)
-              ? { ...layers[type]?.layers, [layerId]: layerConfig }
-              : // metric chart can return 2 layers (one for the metric and one for the trendline)
-                { ...layerConfig },
-          },
-        };
-      }
+    const [type, layerConfig] = buildDatasourceStatesLayer(
+      layer,
+      i,
+      dataset,
+      dataView,
+      buildFormulaLayers,
+      getValueColumns
+    );
+    if (layerConfig) {
+      layers = {
+        ...layers,
+        [type]: {
+          layers: isSingleLayer(layerConfig)
+            ? { ...layers[type]?.layers, [layerId]: layerConfig }
+            : // metric chart can return 2 layers (one for the metric and one for the trendline)
+              { ...layerConfig },
+        },
+      };
+    }
 
-      if (dataView) {
-        Object.keys(layers[type]?.layers ?? []).forEach((id) => {
-          dataviews[id] = dataView;
-        });
-      }
+    if (dataView) {
+      Object.keys(layers[type]?.layers ?? []).forEach((id) => {
+        dataviews[id] = dataView;
+      });
     }
   }
 
@@ -350,7 +355,7 @@ export function isDataViewDataset(dataset: LensDataset): dataset is LensDataview
   return 'index' in dataset;
 }
 
-export function isLensAPIFormat(config: unknown): config is LensApiState {
+export function isLensAPIFormat(config: unknown): config is LensApiConfig {
   return typeof config === 'object' && config !== null && 'type' in config;
 }
 
@@ -376,7 +381,7 @@ export function groupIsNotCollapsed(def: {
   return def.collapse_by == null;
 }
 
-export function isLensESQLConfig(config: LensApiState): config is LensApiStateESQL {
+export function isLensESQLConfig(config: LensApiConfig): config is LensApiConfigESQL {
   if (config.type === 'xy')
     return config.layers.some(
       (layer) => 'data_source' in layer && layer.data_source?.type === 'esql'
@@ -384,6 +389,6 @@ export function isLensESQLConfig(config: LensApiState): config is LensApiStateES
   return config.data_source?.type === 'esql';
 }
 
-export function isLensDSLConfig(config: LensApiState): config is LensApiStateNoESQL {
+export function isLensDSLConfig(config: LensApiConfig): config is LensApiConfigNoESQL {
   return !isLensESQLConfig(config);
 }

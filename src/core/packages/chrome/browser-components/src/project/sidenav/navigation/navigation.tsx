@@ -9,12 +9,13 @@
 
 import React, { useMemo } from 'react';
 import { map } from 'rxjs';
-import { Navigation as NavigationComponent } from '@kbn/core-chrome-navigation';
+import { Navigation as NavigationComponent } from '@kbn/ui-side-navigation';
 import classnames from 'classnames';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 import { useObservable } from '@kbn/use-observable';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
+import { useIsNextChrome } from '@kbn/core-chrome-browser-hooks';
 import { useBasePath } from '../../../shared/chrome_hooks';
 import type { NavigationItems } from './to_navigation_items';
 import { toNavigationItems } from './to_navigation_items';
@@ -28,6 +29,8 @@ export interface ChromeNavigationProps {
 
 export const Navigation = (props: ChromeNavigationProps) => {
   const state = useNavigationItems();
+  const isNextChrome = useIsNextChrome();
+  const onCustomizeNavigation = useCustomizeNavigation();
 
   if (!state) {
     return null;
@@ -43,7 +46,9 @@ export const Navigation = (props: ChromeNavigationProps) => {
         isCollapsed={props.isCollapsed}
         setWidth={props.setWidth}
         onToggleCollapsed={props.onToggleCollapsed}
+        onCustomizeNavigation={onCustomizeNavigation}
         activeItemId={activeItemId}
+        showTopSeparator={isNextChrome}
         data-test-subj={classnames(`${solutionId}SideNav`, 'projectSideNav', 'projectSideNavV2')}
       />
     </KibanaSectionErrorBoundary>
@@ -57,16 +62,30 @@ export default Navigation;
 const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
+  const isNextChrome = useIsNextChrome();
 
   const items$ = useMemo(() => {
     const panelStateManager = new PanelStateManager(basePath.get());
     return chrome.project.getNavigation$().pipe(
       map((nav) => ({
-        ...toNavigationItems(nav.navigationTree, nav.activeNodes, panelStateManager),
+        ...toNavigationItems(
+          nav.navigationTree,
+          nav.activeNodes,
+          nav.overflowItemIds,
+          panelStateManager,
+          isNextChrome
+        ),
         solutionId: nav.solutionId,
       }))
     );
-  }, [chrome, basePath]);
+  }, [chrome, basePath, isNextChrome]);
 
   return useObservable(items$, null);
+};
+
+const useCustomizeNavigation = (): (() => void) | undefined => {
+  const chrome = useChromeService();
+  const handler$ = useMemo(() => chrome.project.getCustomizeNavigationHandler$(), [chrome]);
+  const handler = useObservable(handler$, null);
+  return handler ?? undefined;
 };

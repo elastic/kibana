@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const AssetsRequestQuery = lazySchema(() => z.object({}));
 export type AssetsRequestQuery = z.infer<typeof AssetsRequestQuery>;
-export const AssetsRequestQuery = z.object({});

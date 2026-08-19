@@ -7,7 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
-import { EuiText, EuiLink } from '@elastic/eui';
+import { EuiText, EuiLink, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import type { Attribution } from '../../../../common/descriptor_types';
 import type { ILayer } from '../../../classes/layers/layer';
@@ -20,6 +20,34 @@ export interface Props {
 
 interface State {
   uniqueAttributions: Attribution[];
+}
+
+/**
+ * Reactive wrapper for the attribution overlay. Reads the color mode through
+ * `useEuiTheme` so the background follows reload-less light/dark theme switches
+ * (static SCSS colors do not update without a page reload).
+ */
+function AttributionContainer({
+  isFullScreen,
+  children,
+}: {
+  isFullScreen: boolean;
+  children: React.ReactNode;
+}) {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <div
+      className={classNames('mapAttributionControl', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        mapAttributionControl__fullScreen: isFullScreen,
+      })}
+      css={{ backgroundColor: euiTheme.colors.body }}
+    >
+      <EuiText size="xs">
+        <small>{children}</small>
+      </EuiText>
+    </div>
+  );
 }
 
 export class AttributionControl extends Component<Props, State> {
@@ -100,16 +128,9 @@ export class AttributionControl extends Component<Props, State> {
       return null;
     }
     return (
-      <div
-        className={classNames('mapAttributionControl', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          mapAttributionControl__fullScreen: this.props.isFullScreen,
-        })}
-      >
-        <EuiText size="xs">
-          <small>{this._renderAttributions()}</small>
-        </EuiText>
-      </div>
+      <AttributionContainer isFullScreen={this.props.isFullScreen}>
+        {this._renderAttributions()}
+      </AttributionContainer>
     );
   }
 }

@@ -15,13 +15,12 @@ import {
   ADD_QUERY_BUTTON,
   customActionEditSavedQuerySelector,
   customActionRunSavedQuerySelector,
-  EDIT_PACK_HEADER_BUTTON,
   rowActionsMenuSelector,
   SAVED_QUERY_DROPDOWN_SELECT,
 } from '../../screens/packs';
 import { preparePack } from '../../tasks/packs';
 import {
-  addToCase,
+  addToCaseFromResultsHeader,
   BIG_QUERY,
   checkResults,
   deleteAndConfirm,
@@ -44,7 +43,8 @@ import {
 import { ServerlessRoleName } from '../../support/roles';
 import { getAdvancedButton } from '../../screens/integrations';
 
-describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/249946
+describe.skip('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {
@@ -193,46 +193,13 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     }
   );
 
-  describe('checks that user cant add a saved query with an ID that already exists', () => {
-    const duplicateTestQueryId = 'duplicate-test-query';
-    let duplicateTestSavedQueryId: string;
+  // Removed: 'shows ID must be unique error'
+  // Migrated to Jest component test: public/form/query_id_field.test.tsx
+  // Phase 2 migration — ID uniqueness validation is a form-field-level assertion
 
-    before(() => {
-      loadSavedQuery({
-        id: duplicateTestQueryId,
-        query: 'select * from uptime;',
-        interval: '3600',
-      }).then((data) => {
-        duplicateTestSavedQueryId = data.saved_object_id;
-      });
-    });
-
-    after(() => {
-      cleanupSavedQuery(duplicateTestSavedQueryId);
-    });
-
-    it('shows ID must be unique error', () => {
-      cy.contains('Queries').click();
-      cy.contains('Create query').click();
-      cy.get('input[name="id"]').type(`${duplicateTestQueryId}{downArrow}{enter}`);
-
-      cy.contains('ID must be unique').should('not.exist');
-      inputQuery('test');
-      // The "Save query" button is disabled while saved query IDs are loading.
-      // Wait for it to become enabled so the ID uniqueness validation has data.
-      cy.contains('Save query').should('not.be.disabled').click();
-      cy.contains('ID must be unique').should('exist');
-    });
-  });
-
-  it('checks default values on new saved query', () => {
-    cy.contains('Queries').click();
-    cy.contains('Create query').click();
-    // ADD MORE FIELDS HERE
-    cy.getBySel('resultsTypeField').within(() => {
-      cy.contains('Snapshot');
-    });
-  });
+  // Removed: 'checks default values on new saved query'
+  // Migrated to Jest component test: public/form/results_type_field.test.tsx
+  // Phase 2 migration — form field default values are UI-only assertions
 
   describe('prebuilt', () => {
     let packName: string;
@@ -269,15 +236,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cleanupSavedQuery(savedQueryId);
     });
 
-    it('checks result type on prebuilt saved query', () => {
-      // Navigate to page 2 where users_elastic is located
-      cy.getBySel('pagination-button-1').click();
-      cy.get(rowActionsMenuSelector('users_elastic')).click();
-      cy.contains('Edit query').click();
-      cy.getBySel('resultsTypeField').within(() => {
-        cy.contains('Snapshot');
-      });
-    });
+    // Removed: 'checks result type on prebuilt saved query'
+    // Migrated to Jest component test: public/form/results_type_field.test.tsx
+    // Phase 2 migration — result type field rendering is a UI-only assertion
 
     it('user can run prebuilt saved query and add to case', () => {
       // Navigate to page 2 where users_elastic is located
@@ -287,7 +248,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       selectAllAgents();
       submitQuery();
       checkResults();
-      addToCase(caseId);
+      addToCaseFromResultsHeader(caseId);
       viewRecentCaseAndCheckResults();
     });
 
@@ -304,7 +265,6 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
     it('user can edit prebuilt saved query under pack', () => {
       preparePack(packName);
-      cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
       cy.contains(`Edit ${packName}`);
       cy.getBySel(ADD_QUERY_BUTTON).click();
 

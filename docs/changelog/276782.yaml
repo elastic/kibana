@@ -1,0 +1,13 @@
+prs:
+- https://github.com/elastic/kibana/pull/276782
+issues:
+- https://github.com/elastic/kibana/issues/226285
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Kibana platform
+- Alerting and reporting
+title: "Fix unhelpful error messages for Task Manager and connector failures"
+description: "Task Manager and the Slack/Webhook connectors now log a meaningful error message when a task or connector fails with a non-`Error` value, instead of `[object Object]` or `undefined`."

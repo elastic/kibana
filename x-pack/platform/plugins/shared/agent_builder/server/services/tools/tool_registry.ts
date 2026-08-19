@@ -45,6 +45,7 @@ interface CreateToolRegistryParams {
   savedObjects: SavedObjectsServiceStart;
   healthClient: ToolHealthClient;
   healthTrackedToolTypes: Set<ToolType>;
+  experimentalFeaturesEnabled: boolean;
 }
 
 export const createToolRegistry = (params: CreateToolRegistryParams): ToolRegistry => {
@@ -67,6 +68,7 @@ class ToolRegistryImpl implements ToolRegistry {
   private readonly getRunner: () => Runner;
   private readonly healthClient: ToolHealthClient;
   private readonly healthTrackedToolTypes: Set<ToolType>;
+  private readonly experimentalFeaturesEnabled: boolean;
   private _scopedClients?: ToolRegistryScopedClients;
 
   constructor({
@@ -80,6 +82,7 @@ class ToolRegistryImpl implements ToolRegistry {
     savedObjects,
     healthClient,
     healthTrackedToolTypes,
+    experimentalFeaturesEnabled,
   }: CreateToolRegistryParams) {
     this.logger = logger;
     this.persistedProvider = persistedProvider;
@@ -91,10 +94,15 @@ class ToolRegistryImpl implements ToolRegistry {
     this.getRunner = getRunner;
     this.healthClient = healthClient;
     this.healthTrackedToolTypes = healthTrackedToolTypes;
+    this.experimentalFeaturesEnabled = experimentalFeaturesEnabled;
   }
 
   private get orderedProviders(): ToolProvider[] {
     return [this.builtinProvider, this.persistedProvider];
+  }
+
+  private isVisible(tool: InternalToolDefinition): boolean {
+    return !tool.experimental || this.experimentalFeaturesEnabled;
   }
 
   async execute<
@@ -121,7 +129,8 @@ class ToolRegistryImpl implements ToolRegistry {
   async has(toolId: string) {
     for (const provider of this.orderedProviders) {
       if (await provider.has(toolId)) {
-        return true;
+        const tool = await provider.get(toolId);
+        return this.isVisible(tool);
       }
     }
     return false;
@@ -131,6 +140,9 @@ class ToolRegistryImpl implements ToolRegistry {
     for (const provider of this.orderedProviders) {
       if (await provider.has(toolId)) {
         const tool = await provider.get(toolId);
+        if (!this.isVisible(tool)) {
+          throw createToolNotFoundError({ toolId });
+        }
         if (!(await this.isAvailable(tool))) {
           throw createBadRequestError(`Tool ${toolId} is not available`);
         }
@@ -149,10 +161,11 @@ class ToolRegistryImpl implements ToolRegistry {
     const allTools: InternalToolDefinition[] = [];
     for (const provider of this.orderedProviders) {
       const toolsFromType = await provider.list(providerFilters);
+      const visibleTools = toolsFromType.filter((tool) => this.isVisible(tool));
       const availabilityResults = await Promise.all(
-        toolsFromType.map((tool) => this.isAvailable(tool))
+        visibleTools.map((tool) => this.isAvailable(tool))
       );
-      toolsFromType.forEach((tool, index) => {
+      visibleTools.forEach((tool, index) => {
         if (availabilityResults[index]) {
           allTools.push(tool);
         }

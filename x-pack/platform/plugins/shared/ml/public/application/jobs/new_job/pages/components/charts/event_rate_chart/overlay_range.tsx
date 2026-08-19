@@ -53,7 +53,7 @@ export const OverlayRange: FC<Props> = ({ overlayKey, start, end, color, showMar
         }}
         markerPosition={Position.Bottom}
         hideTooltips
-        marker={showMarker ? <EuiIcon type="chevronSingleUp" /> : undefined}
+        marker={showMarker ? <EuiIcon type="chevronSingleUp" aria-hidden={true} /> : undefined}
         markerBody={
           showMarker ? (
             <div style={{ fontWeight: 'normal', color: euiTheme.colors.textParagraph }}>

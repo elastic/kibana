@@ -69,7 +69,6 @@ import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { NavigationPublicPluginStart, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
@@ -78,8 +77,8 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { InspectorOptions } from '@kbn/inspector-plugin/public';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
 import type { CPSPluginStart } from '@kbn/cps/public';
+import type { HasLibraryTransforms } from '@kbn/presentation-publishing';
 import type { NavigateToLensContext } from './convert_to_lens_types';
 import type { LensAppLocator, MainHistoryLocationState } from './locator_types';
 import type { LensSavedObjectAttributes, StructuredDatasourceStates } from './embeddable/types';
@@ -102,22 +101,6 @@ export interface LensInspector {
   closeInspector: () => Promise<void | undefined>;
 }
 
-export interface CheckDuplicateTitleOptions {
-  id?: string;
-  title: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-  isTitleDuplicateConfirmed: boolean;
-}
-
-export type CheckDuplicateTitleProps = OnSaveProps & {
-  id?: string;
-  displayName: string;
-  lastSavedTitle: string;
-  copyOnSave: boolean;
-};
-
 export interface LensSaveResult {
   savedObjectId: string;
 }
@@ -125,10 +108,7 @@ export interface LensSaveResult {
 export interface ILensDocumentService {
   save: (vis: LensDocument) => Promise<LensSaveResult>;
   load: (savedObjectId: string) => Promise<unknown>;
-  checkForDuplicateTitle: (
-    options: CheckDuplicateTitleOptions,
-    onTitleDuplicate: () => void
-  ) => Promise<boolean>;
+  hasLibraryItemWithTitle: HasLibraryTransforms['hasLibraryItemWithTitle'];
 }
 
 export interface LensAttributesService {
@@ -142,7 +122,7 @@ export interface LensAttributesService {
     references: Reference[],
     savedObjectId?: string
   ) => Promise<string>;
-  checkForDuplicateTitle: (props: CheckDuplicateTitleProps) => Promise<{ isDuplicate: boolean }>;
+  hasLibraryItemWithTitle: HasLibraryTransforms['hasLibraryItemWithTitle'];
 }
 
 export interface LensAppServices extends StartServices {
@@ -167,7 +147,6 @@ export interface LensAppServices extends StartServices {
   contentManagement: ContentManagementPublicStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
   getOriginatingAppName: () => string | undefined;
-  presentationUtil: PresentationUtilPluginStart;
   spaces?: SpacesApi;
   charts: ChartsPluginSetup;
   share?: SharePluginStart;
@@ -631,7 +610,7 @@ export interface InitializationOptions {
 export type VisualizeEditorContext<T extends LensConfiguration = LensConfiguration> = {
   savedObjectId?: string;
   embeddableId?: string;
-  vizEditorOriginatingAppUrl?: string;
+  visEditorOriginatingAppUrl?: string;
   legacyEditorOriginatingApp?: string;
   originatingApp?: string;
   originatingPath?: string;
@@ -719,6 +698,8 @@ export interface Datasource<T = unknown, P = unknown, Q = Query | AggregateQuery
       visualizationGroups: VisualizationDimensionGroupConfig[];
       staticValue?: unknown;
       autoTimeField?: boolean;
+      /** Subtype-aware type id of the active visualization being initialized. */
+      activeVisualizationTypeId?: string;
     }
   ) => T;
 
@@ -1005,6 +986,8 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
       forceRender?: boolean;
     }
   >;
+  /** Subtype-aware type id of the visualization that owns this dimension. */
+  activeVisualizationTypeId?: string;
   core: Pick<
     CoreStart,
     | 'http'
@@ -1019,6 +1002,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   >;
   dateRange: DateRange;
   esqlVariables?: ESQLControlVariable[] | undefined;
+  isApproximate?: boolean | undefined;
   dimensionGroups: VisualizationDimensionGroupConfig[];
   toggleFullscreen: () => void;
   isFullscreen: boolean;
@@ -1063,6 +1047,8 @@ export interface DatasourceDimensionDropHandlerProps<T> {
   source: DragDropIdentifier;
   dropType: DropType;
   indexPatterns: IndexPatternMap;
+  /** Subtype-aware type id of the active visualization receiving the drop. */
+  activeVisualizationTypeId?: string;
 }
 
 export interface VisualizationConfigProps<T = unknown> {
@@ -1350,7 +1336,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
 
 export interface LensCellValueAction {
   id: string;
-  iconType: string;
+  iconType: IconType;
   type?: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;

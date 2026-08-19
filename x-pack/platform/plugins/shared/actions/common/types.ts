@@ -33,6 +33,9 @@ export interface ActionType {
   validate?: {
     params: PublicValidatorType;
   };
+  description?: string;
+  isExperimental?: boolean;
+  isTestable?: boolean;
 }
 
 export enum InvalidEmailReason {
@@ -58,6 +61,8 @@ export interface ActionTypeExecutorResult<Data> {
   data?: Data;
   retry?: null | boolean | Date;
   errorSource?: TaskErrorSource;
+  errorName?: string;
+  errorMeta?: Record<string, unknown>;
 }
 
 export type ActionTypeExecutorRawResult<Data> = ActionTypeExecutorResult<Data> & {

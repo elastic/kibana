@@ -145,6 +145,7 @@ const TShirtSelector = ({ actionGroup, setTShirtThreshold }: TShirtSelectorProps
   return (
     <EuiPopover
       panelPaddingSize="s"
+      aria-label="Set threshold"
       button={
         <EuiExpression
           description={'Is Above'}

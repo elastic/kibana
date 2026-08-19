@@ -225,12 +225,31 @@ export const readRiskScores = async (
   size: number = 1000,
   query?: Record<string, any>
 ): Promise<EcsRiskScore[]> => {
+  try {
+    await es.indices.refresh({ index: index.join(',') });
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn(`readRiskScores: index refresh failed (non-fatal): ${e}`);
+  }
   const results = await es.search({
     index,
     size,
     ...(query ? { query } : {}),
   });
   return results.hits.hits.map((hit) => hit._source as EcsRiskScore);
+};
+
+const isRetryableRiskScoreReadError = (error: unknown): boolean => {
+  const err = error as { meta?: { statusCode?: number }; message?: string };
+  if (err?.meta?.statusCode === 404) {
+    return true;
+  }
+
+  const message = String(err?.message ?? '').toLowerCase();
+  return (
+    message.includes('no_shard_available_action_exception') ||
+    message.includes('search_phase_execution_exception')
+  );
 };
 
 /**
@@ -269,7 +288,7 @@ export const waitForRiskScoresToBePresent = async ({
         const riskScores = await readRiskScores(es, index, scoreCount + 10);
         return riskScores.length >= scoreCount;
       } catch (e) {
-        if (e?.meta?.statusCode === 404) {
+        if (isRetryableRiskScoreReadError(e)) {
           return false;
         }
         throw e;
@@ -356,7 +375,7 @@ export const waitForRiskScoreForId = async ({
         }
         return true;
       } catch (e) {
-        if (e?.meta?.statusCode === 404) {
+        if (isRetryableRiskScoreReadError(e)) {
           return false;
         }
         throw e;

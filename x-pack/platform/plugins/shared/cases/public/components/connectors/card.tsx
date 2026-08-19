@@ -93,7 +93,11 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIcon size="xl" type={getConnectorIcon(triggersActionsUi, connectorType)} />
+            <EuiIcon
+              size="xl"
+              type={getConnectorIcon(triggersActionsUi, connectorType)}
+              aria-hidden={true}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem data-test-subj="connector-card-details">

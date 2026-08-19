@@ -12,11 +12,11 @@ import type {
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import { UploadFileButton } from '../../../../../../../common/components';
+import { FILE_UPLOAD_ERROR } from '../../../../../../../common/translations/file_upload_error';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
-import * as i18n from './translations';
-import { RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_DESCRIPTION } from '../check_resources/translations';
 import { useParseFileInput } from '../../../../../../../common/hooks/use_parse_file_input';
 import { MigrationSource } from '../../../../../../../common/types';
+import { useRuleMigrationVendorCopy } from '../../../../../../hooks/use_rule_migration_vendor_copy';
 
 export interface RulesXMLFileUploadProps {
   createMigration: CreateMigration;
@@ -31,6 +31,7 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
   ({ createMigration, migrationName, apiError, isLoading, isCreated, onRulesFileChanged }) => {
     const [rulesToUpload, setRulesToUpload] = useState<string>();
     const filePickerRef = useRef<EuiFilePickerClass>(null);
+    const { rulesFileUpload } = useRuleMigrationVendorCopy(MigrationSource.QRADAR);
 
     const createRules = useCallback(() => {
       if (migrationName && rulesToUpload) {
@@ -44,6 +45,11 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
     }, [createMigration, migrationName, rulesToUpload]);
 
     const onXMLFileParsed = useCallback((content: string) => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(content, 'application/xml');
+      if (doc.getElementsByTagName('parsererror').length > 0) {
+        throw new Error(FILE_UPLOAD_ERROR.INVALID_XML);
+      }
       setRulesToUpload(content);
     }, []);
 
@@ -72,7 +78,7 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiText size="s">{RULES_DATA_INPUT_CHECK_RESOURCES_QRADAR_DESCRIPTION}</EuiText>
+          <EuiText size="s">{rulesFileUpload.description}</EuiText>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFormRow isInvalid={validationError != null} fullWidth error={validationError}>
@@ -83,7 +89,7 @@ export const RulesXMLFileUpload = React.memo<RulesXMLFileUploadProps>(
               fullWidth
               initialPromptText={
                 <EuiText size="s" textAlign="center">
-                  {i18n.RULES_DATA_INPUT_FILE_UPLOAD_PROMPT_QRADAR}
+                  {rulesFileUpload.prompt}
                 </EuiText>
               }
               accept={'.xml'}

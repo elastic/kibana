@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import type { HuntingLead } from './types';
-import { MAX_VISIBLE_TAGS } from './utils';
-import { renderTextWithEntities, TagsPopover } from './shared_lead_components';
+import { renderTextWithEntities } from './shared_lead_components';
+import { THREAT_HUNTING_LEADS_SCOPE_ID } from './utils';
 
 interface LeadCardProps {
   lead: HuntingLead;
@@ -19,47 +19,46 @@ interface LeadCardProps {
 export const LeadCard: React.FC<LeadCardProps> = ({ lead, onClick }) => {
   const handleClick = useCallback(() => onClick(lead), [onClick, lead]);
   const renderedByline = useMemo(
-    () => renderTextWithEntities(lead.byline, lead.entities),
+    () => renderTextWithEntities(lead.byline, lead.entities, THREAT_HUNTING_LEADS_SCOPE_ID),
     [lead.byline, lead.entities]
   );
+
   return (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
+    <EuiCard
+      title={
+        <EuiToolTip content={lead.title} anchorClassName="eui-textTruncate" display="block">
+          <span tabIndex={0}>{lead.title}</span>
+        </EuiToolTip>
+      }
+      titleElement="h5"
+      titleSize="xs"
+      textAlign="left"
+      hasBorder={false}
       paddingSize="m"
       onClick={handleClick}
       data-test-subj={`leadCard-${lead.id}`}
+      css={{
+        minWidth: 0,
+        maxWidth: 480,
+        '.euiCard__titleButton': { maxWidth: '100%' },
+      }}
     >
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGroup direction="column" gutterSize="none">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h5>{lead.title}</h5>
-          </EuiTitle>
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
+          <EuiText
+            size="xs"
+            css={{
+              overflowWrap: 'anywhere',
+              display: '-webkit-box',
+              WebkitLineClamp: 4,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}
+          >
             {renderedByline}
           </EuiText>
         </EuiFlexItem>
-
-        {lead.tags.length > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" responsive={false} wrap alignItems="center">
-              {lead.tags.slice(0, MAX_VISIBLE_TAGS).map((tag) => (
-                <EuiFlexItem grow={false} key={tag}>
-                  <EuiBadge color="hollow">{tag}</EuiBadge>
-                </EuiFlexItem>
-              ))}
-              {lead.tags.length > MAX_VISIBLE_TAGS && (
-                <EuiFlexItem grow={false}>
-                  <TagsPopover tags={lead.tags} />
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
-    </EuiPanel>
+    </EuiCard>
   );
 };

@@ -23,7 +23,7 @@ export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2404',
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-  diskSizeGb: 105,
+  diskSizeGb: 130,
 };
 
 const getFIPSImage = () => {
@@ -82,10 +82,11 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
 
 const expandAgentQueue = (queueName: string = 'n2-4-spot', diskSizeGb?: number) => {
   const [kind, cores, addition] = queueName.split('-');
-  const zonesToUse = 'southamerica-east1-c,asia-south2-a,us-central1-f';
+  const zonesToUse =
+    'asia-south2-a,asia-south2-b,asia-south2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c';
   const additionalProps =
     {
-      spot: { preemptible: true, zones: zonesToUse },
+      spot: { preemptible: true, spotZones: zonesToUse },
       virt: { enableNestedVirtualization: true, spotZones: zonesToUse },
     }[addition] || {};
 

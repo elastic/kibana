@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { isCCSRemoteIndexName } from '@kbn/es-query';
+import { isNonLocalIndexName } from '@kbn/es-query';
 import pLimit from 'p-limit';
+import type { PValuesResponse } from '@kbn/apm-api-shared';
 import { ERROR_CORRELATION_THRESHOLD } from '../../../../common/correlations/constants';
 import type { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
 
@@ -21,12 +22,6 @@ import { fetchFailedEventsCorrelationPValues } from './fetch_failed_events_corre
 
 // This helps avoid circuit breaker exceptions and HTTP 429 errors
 const limiter = pLimit(10);
-
-export interface PValuesResponse {
-  failedTransactionsCorrelations: FailedTransactionsCorrelation[];
-  ccsWarning: boolean;
-  fallbackResult?: FailedTransactionsCorrelation;
-}
 
 export const fetchPValues = async ({
   apmEventClient,
@@ -112,7 +107,7 @@ export const fetchPValues = async ({
 
   const index = apmEventClient.indices[eventType as keyof typeof apmEventClient.indices];
 
-  const ccsWarning = rejected.length > 0 && isCCSRemoteIndexName(index);
+  const ccsWarning = rejected.length > 0 && isNonLocalIndexName(index);
 
   return { failedTransactionsCorrelations, ccsWarning, fallbackResult };
 };

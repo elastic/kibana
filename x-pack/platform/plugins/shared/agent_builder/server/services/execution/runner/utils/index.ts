@@ -13,7 +13,9 @@ export {
 export { createToolEventEmitter, createAgentEventEmitter } from './events';
 export { createAttachmentsService } from './attachments';
 export { createSkillsService } from './skills';
+export { createFilesystemServices } from './filesystem';
 export { createToolManager } from './tool_manager';
 export { createToolProvider } from './tools';
 export { createPromptManager } from './prompts';
 export { createConversationStateManager } from './state_manager';
+export { createSubAgentExecutor } from './sub_agent_executor';

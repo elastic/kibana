@@ -9,7 +9,14 @@ import { cloneDeep, isEqual } from 'lodash';
 import { validateQuery } from '@kbn/esql-language';
 import { Parser } from '@elastic/esql';
 import type { ESQLSource, ESQLCommand } from '@elastic/esql/types';
-import { Streams, getEsqlViewName, getParentId, isChildOf } from '@kbn/streams-schema';
+import {
+  LOGS_ROOT_STREAM_NAME,
+  Streams,
+  getEsqlViewName,
+  getParentId,
+  isChildOf,
+  validateStreamName,
+} from '@kbn/streams-schema';
 import { getErrorMessage } from '../../errors/parse_error';
 import { StatusError } from '../../errors/status_error';
 import { getEsqlView } from '../../esql_views/manage_esql_views';
@@ -177,9 +184,26 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
   ): Promise<ValidationResult> {
     const errors: Error[] = [];
 
-    // Validate that stream name is not empty
-    if (!this._definition.name || this._definition.name.trim() === '') {
-      errors.push(new Error('Stream name cannot be empty'));
+    const nameValidation = validateStreamName(this._definition.name);
+    if (!nameValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(nameValidation.message)],
+      };
+    }
+
+    // validateStreamName's prefix/reserved-name rules only check the start of the full name,
+    // so validate the partition segment separately to catch e.g. "-x" under "logs.ecs".
+    const parent = getParentId(this._definition.name);
+    const partition = parent
+      ? this._definition.name.slice(parent.length + 1)
+      : this._definition.name;
+    const partitionValidation = validateStreamName(partition);
+    if (!partitionValidation.valid) {
+      return {
+        isValid: false,
+        errors: [new Error(partitionValidation.message)],
+      };
     }
 
     // Validate that query is defined
@@ -293,6 +317,14 @@ export class QueryStream extends StreamActiveRecord<Streams.QueryStream.Definiti
     }
 
     // Check for conflicts with existing streams
+    if (this._definition.name === LOGS_ROOT_STREAM_NAME) {
+      errors.push(
+        new Error(
+          `Cannot create query stream: a stream with name "${this._definition.name}" is reserved for the legacy root stream`
+        )
+      );
+    }
+
     if (existingStream && !Streams.QueryStream.Definition.is(existingStream.definition)) {
       errors.push(
         new Error(

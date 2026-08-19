@@ -6,8 +6,8 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../../rule_executor/task_definition';
-import { DISPATCHER_TASK_TYPE } from '../../dispatcher/task_definition';
+import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../../rule_executor/constants';
+import { DISPATCHER_TASK_TYPE } from '../../dispatcher/constants';
 import { bucketsToRecord } from './constants';
 import type { ExecutionStatsAggregations, ExecutionStatsResults } from './types';
 

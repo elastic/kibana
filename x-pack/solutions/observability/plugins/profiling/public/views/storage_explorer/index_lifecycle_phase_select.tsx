@@ -114,7 +114,6 @@ export function IndexLifecyclePhaseSelect() {
           query: { ...query, indexLifecyclePhase: value },
         });
       }}
-      hasDividers
       style={{ minWidth: 200 }}
     />
   );

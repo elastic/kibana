@@ -14,7 +14,7 @@ import { WorkflowRunFixture } from '../workflow_run_fixture';
 describe('when cancellation requested', () => {
   let workflowRunFixture: WorkflowRunFixture;
   let outerArray = ['outer1', 'outer2', 'outer3', 'outer4'];
-  let runWorkflowPromise: Promise<void>;
+  let runWorkflowPromise: ReturnType<WorkflowRunFixture['runWorkflow']>;
   let requestCancellationPromise: Promise<void>;
 
   beforeAll(async () => {

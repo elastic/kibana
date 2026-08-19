@@ -3,15 +3,24 @@
 Suggest ingest pipelines that normalize logs to the target schema. Work in an **eval/dev loop**: design → **`simulate_pipeline`** → fix → repeat until validation passes, then **`commit_pipeline`**.
 
 ## Ground rules
-
-- **Human in the loop:** The **whole pipeline you return** is what gets reviewed. Users **approve or reject** that proposal before it runs in production—so nothing you suggest is "instant" data loss. Include all useful processors. Do not leave them out on the assumption that a human reviewer will add them later. **`remove`**, **`rename`**, **`date`**, etc. belong in your answer whenever they genuinely improve the document; defaulting to `{ "steps": [] }` **to avoid** suggesting cleanup is wrong.
+- **Human in the loop:** The **whole pipeline you return** is what gets reviewed. Users **approve or reject** that proposal before it runs in production—so nothing you suggest is "instant" data loss. **Do not** use review as a reason to **omit** useful steps. **`remove`**, **`rename`**, **`date`**, etc. belong in your answer whenever they genuinely improve the document; defaulting to `{ "steps": [] }` **to avoid** suggesting cleanup is wrong.
 - **Processors:** Only types in **Pipeline schema** (below). No no-op extractions (e.g. grok/dissect that copy an entire field unchanged **when those types are allowed**). Do not parse **unstructured** message text as if it were a structured log line when parse processors are available.
 
-**Empty pipeline** `{ "steps": [] }` only after you have checked **Time** (below, including **`custom.*` / other extracted time**) **and** sensible **hygiene** (e.g. grok noise). "Core ECS/OTel fields look fine" is **not** enough if event time or sprawl still needs work.
+## Inspection checklist (run before committing empty)
 
-**When data truly needs no pipeline:** After those checks, nothing left to fix—types and canonical fields are right, no redundant captures worth removing, **`@timestamp`** is correct per **Time**.
+Before committing `{ "steps": [] }`, verify **every** item below. If any check fails, add the appropriate processor:
 
-**Time (`@timestamp`):** Use **`date`** to parse string timestamps into **`@timestamp`**. Upstream grok/dissect often leaves event time in **`custom.*`**, capture-group names, or other **non-`@timestamp`** keys. **Do not assume** current **`@timestamp`** is the log's event time just because it is valid ISO—**compare** to extracted time strings. If the **message-derived** (or pattern-derived) time is clearly the **real event time** and **`@timestamp`** looks like ingest/agent skew, **`date`** from that field into **`@timestamp`** and drop or keep extras as **Clean** (below). Skip overwrite only when samples show the extracted time is unreliable.
+1. **`@timestamp` correctness** — Compare `@timestamp` values to any date/time strings found in other fields (e.g. `custom.timestamp`, message content). If they differ and the non-`@timestamp` one looks like the real event time, add a **`date`** processor.
+2. **Temporary / intermediate fields** — Check for `custom.*` or `attributes.custom.*` fields left over from upstream parsing. If present, add **`remove`** processors. The `temporary_fields` list in simulation output tells you which ones remain.
+3. **Unmapped fields that need typing** — Fields typed as `unmapped` may contain date strings, numeric strings, or other values that should be converted. Use **`convert`** or **`date`** as appropriate.
+4. **Value semantics** — Inspect sample values: are date-like strings stored as text? Are numbers stored as strings? If so, add **`convert`** or **`date`** processors.
+5. **Redundant or noisy fields** — After date conversion or type fixes, are the source fields still present? Remove them with **`remove`**.
+
+Only commit an empty pipeline when **all five checks pass**.
+
+## Time (`@timestamp`)
+
+Use **`date`** to parse string timestamps into **`@timestamp`**. Upstream grok/dissect often leaves event time in **`custom.*`**, capture-group names, or other **non-`@timestamp`** keys. **Do not assume** current **`@timestamp`** is the log's event time just because it is valid ISO—**compare** to extracted time strings. If the **message-derived** (or pattern-derived) time is clearly the **real event time** and **`@timestamp`** looks like ingest/agent skew, **`date`** from that field into **`@timestamp`** and drop or keep extras as **Clean** (below). Skip overwrite only when samples show the extracted time is unreliable.
 
 **If the task includes "Upstream extraction":** That grok/dissect **already ran**; it is **not** in your schema—do **not** add it again. Expect **`custom.*`** (and similar) **noise**: **propose `remove`** (and other allowed steps) so simulation passes; that is exactly what reviewers expect to see—not an empty pipeline that leaves clutter "because they can review drops later." These extracted fields are now available in the documents—consider them when designing downstream processors (e.g., rename, type-convert, or clean up fields that were extracted without re-extracting from raw text).
 
@@ -23,12 +32,22 @@ The sample-structure JSON lists each field with a type from **field caps** again
 
 **When simulation errors:** Simplify; remove failing processors; trust the error text.
 
+## Simulation response shape
+
+**`simulate_pipeline`** returns:
+
+- **`valid`** — `true` when all per-processor failure rates are below 20%; `false` otherwise. `temporary_fields` does not affect `valid`.
+- **`errors`** — List of error strings, prefixed with the processor identifier (e.g. `root.steps[0]: ...`).
+- **`metrics`** — `{ sampled, fields, parse_rate }`. `parse_rate` is informational only (no hard gate).
+- **`processors`** — Per-processor breakdown keyed by `customIdentifier`: `{ failure_rate, top_errors }`.
+- **`temporary_fields`** — Fields matching `custom.*` or `attributes.custom.*` that remain in output. These are leftover artifacts from upstream parsing and should **always** be cleaned up with **`remove`** processors before committing. A pipeline that leaves temporary fields behind is incomplete.
+
 ## Workflow
 
 1. Read the task (stream, description, field overview, optional upstream block).
-2. Decide whether any steps are needed; if not, commit an empty pipeline.
+2. Run through the **Inspection checklist** above to identify needed processors.
 3. Propose only allowed processors; simulate; iterate on metrics and errors.
-4. Commit the final pipeline (possibly empty).
+4. When simulation returns `valid: true`, commit. If `temporary_fields` is non-empty, add `remove` processors first and re-simulate.
 
 ## Schema compliance
 
@@ -45,9 +64,9 @@ Match **ECS** or **OTel** as given in the task.
 
 - ≥99% documents with valid `@timestamp` (per **Time**).
 - Correct field types; resilient processors; PII handled sensibly.
+- No `custom.*` / `attributes.custom.*` fields remaining in output.
 
 ## Pipeline schema
-
 Only processor types and shapes defined here:
 
 ```

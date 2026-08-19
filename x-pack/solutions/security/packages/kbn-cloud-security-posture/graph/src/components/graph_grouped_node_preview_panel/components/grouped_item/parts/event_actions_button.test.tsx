@@ -11,14 +11,6 @@ import { EventActionsButton } from './event_actions_button';
 import type { EventItem, AlertItem } from '../types';
 import { GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID } from '../../../test_ids';
 
-// Mock useExpandableFlyoutApi
-const mockOpenPreviewPanel = jest.fn();
-jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutApi: jest.fn(() => ({
-    openPreviewPanel: mockOpenPreviewPanel,
-  })),
-}));
-
 describe('EventActionsButton', () => {
   const mockEventItem: EventItem = {
     id: 'event-123',
@@ -37,19 +29,32 @@ describe('EventActionsButton', () => {
   };
 
   const scopeId = 'test-scope-id';
+  const mockOnShowDocument = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render the actions button', () => {
-    render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
+    render(
+      <EventActionsButton
+        item={mockEventItem}
+        scopeId={scopeId}
+        onShowDocument={mockOnShowDocument}
+      />
+    );
 
     expect(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should have correct aria-label', () => {
-    render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
+    render(
+      <EventActionsButton
+        item={mockEventItem}
+        scopeId={scopeId}
+        onShowDocument={mockOnShowDocument}
+      />
+    );
 
     const button = screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID);
     expect(button).toHaveAttribute('aria-label', 'Actions');
@@ -57,7 +62,13 @@ describe('EventActionsButton', () => {
 
   describe('when popover is open with event item', () => {
     it('should render event details item with correct label for events', () => {
-      render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
+      render(
+        <EventActionsButton
+          item={mockEventItem}
+          scopeId={scopeId}
+          onShowDocument={mockOnShowDocument}
+        />
+      );
 
       // Click the button to open the popover
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
@@ -66,7 +77,13 @@ describe('EventActionsButton', () => {
     });
 
     it('should render show related events item', () => {
-      render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
+      render(
+        <EventActionsButton
+          item={mockEventItem}
+          scopeId={scopeId}
+          onShowDocument={mockOnShowDocument}
+        />
+      );
 
       // Click the button to open the popover
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
@@ -74,8 +91,14 @@ describe('EventActionsButton', () => {
       expect(screen.getByText('Show related events')).toBeInTheDocument();
     });
 
-    it('should open preview panel when event details is clicked', () => {
-      render(<EventActionsButton item={mockEventItem} scopeId={scopeId} />);
+    it('should call onShowDocument when event details is clicked', () => {
+      render(
+        <EventActionsButton
+          item={mockEventItem}
+          scopeId={scopeId}
+          onShowDocument={mockOnShowDocument}
+        />
+      );
 
       // Click the button to open the popover
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
@@ -83,19 +106,23 @@ describe('EventActionsButton', () => {
       const eventDetailsButton = screen.getByText('Show event details');
       fireEvent.click(eventDetailsButton);
 
-      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            id: mockEventItem.docId,
-          }),
-        })
+      expect(mockOnShowDocument).toHaveBeenCalledWith(
+        mockEventItem.docId,
+        mockEventItem.index,
+        true
       );
     });
   });
 
   describe('when popover is open with alert item', () => {
     it('should render alert details item with correct label for alerts', () => {
-      render(<EventActionsButton item={mockAlertItem} scopeId={scopeId} />);
+      render(
+        <EventActionsButton
+          item={mockAlertItem}
+          scopeId={scopeId}
+          onShowDocument={mockOnShowDocument}
+        />
+      );
 
       // Click the button to open the popover
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
@@ -103,8 +130,14 @@ describe('EventActionsButton', () => {
       expect(screen.getByText('Show alert details')).toBeInTheDocument();
     });
 
-    it('should open preview panel when alert details is clicked', () => {
-      render(<EventActionsButton item={mockAlertItem} scopeId={scopeId} />);
+    it('should call onShowDocument when alert details is clicked', () => {
+      render(
+        <EventActionsButton
+          item={mockAlertItem}
+          scopeId={scopeId}
+          onShowDocument={mockOnShowDocument}
+        />
+      );
 
       // Click the button to open the popover
       fireEvent.click(screen.getByTestId(GROUPED_ITEM_ACTIONS_BUTTON_TEST_ID));
@@ -112,12 +145,10 @@ describe('EventActionsButton', () => {
       const alertDetailsButton = screen.getByText('Show alert details');
       fireEvent.click(alertDetailsButton);
 
-      expect(mockOpenPreviewPanel).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            id: mockAlertItem.docId,
-          }),
-        })
+      expect(mockOnShowDocument).toHaveBeenCalledWith(
+        mockAlertItem.docId,
+        mockAlertItem.index,
+        false
       );
     });
   });

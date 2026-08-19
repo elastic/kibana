@@ -17,6 +17,9 @@ export type ValueFontMode = Exclude<MetricStyle['valueFontSize'], number>;
 export type PrimaryMetricFontSize = ValueFontMode;
 
 export type PrimaryMetricPosition = MetricStyle['valuePosition'];
+export type MetricDensity = 'compact' | 'default';
+export type MetricStyleTemplateId = 'top' | 'middle' | 'bottom' | 'custom';
+export type MetricStyleTemplatePresetId = Exclude<MetricStyleTemplateId, 'custom'>;
 
 export type SecondaryTrendType = 'none' | 'static' | 'dynamic';
 
@@ -61,6 +64,7 @@ export interface MetricVisualizationState {
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
   valueFontMode?: ValueFontMode;
+  density?: MetricDensity;
   /**
    * legacy state property
    * @deprecated
@@ -95,6 +99,7 @@ export type MetricStateOptinalsWithDefault = Pick<
   | 'secondaryAlign'
   | 'iconAlign'
   | 'valueFontMode'
+  | 'density'
   | 'primaryPosition'
   | 'secondaryLabelPosition'
   | 'applyColorTo'
@@ -103,9 +108,8 @@ export type MetricStateOptinalsWithDefault = Pick<
 export type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
 
 export type MetricLayoutWithDefault = Required<
-  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign'>
+  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'primaryAlign' | 'primaryPosition'>
 > & {
-  iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
   secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
 };
 

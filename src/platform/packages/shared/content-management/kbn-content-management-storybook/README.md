@@ -159,10 +159,10 @@ All exports from `@kbn/content-list-mock-data` are available from this package:
 | `mockFindMaps` | Pre-configured `findItems` for map content. |
 | `mockFindFiles` | Pre-configured `findItems` for file content. |
 | `mockFindVisualizations` | Pre-configured `findItems` for visualization content. |
-| `MOCK_DASHBOARDS` | Array of 8 dashboard mock items. |
-| `MOCK_VISUALIZATIONS` | Array of 8 visualization mock items. |
-| `MOCK_MAPS` | Array of 5 map mock items. |
-| `MOCK_FILES` | Array of 6 file mock items. |
+| `MOCK_DASHBOARDS` | Array of 10 dashboard mock items spanning the name-cell `title × description × tag count` permutation matrix. |
+| `MOCK_VISUALIZATIONS` | Array of 8 visualization mock items spanning the name-cell permutation matrix and a variety of `visType`s. |
+| `MOCK_MAPS` | Array of 5 map mock items spanning the name-cell permutation matrix within a 5-item budget. |
+| `MOCK_FILES` | Array of 6 file mock items spanning the name-cell `title × description` matrix (no inline tags in the Files story). |
 | `MOCK_TAGS` | Array of 8 tag items. |
 | `MOCK_USER_PROFILES` | Array of user profile objects. |
 | `MOCK_USER_PROFILES_MAP` | Map of user UIDs to profile objects. |

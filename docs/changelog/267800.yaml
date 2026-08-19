@@ -1,0 +1,7 @@
+prs:
+- https://github.com/elastic/kibana/pull/267800
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-05-19
+title: Add UI for exporting Osquery results

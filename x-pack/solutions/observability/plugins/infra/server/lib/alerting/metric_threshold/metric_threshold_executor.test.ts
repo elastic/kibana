@@ -33,8 +33,12 @@ import {
   ALERT_GROUP,
   ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
+  ALERT_SEVERITY,
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_WARNING,
 } from '@kbn/rule-data-utils';
 import { type Group } from '@kbn/alerting-rule-utils';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type {
   AssetDetailsLocatorParams,
@@ -84,7 +88,7 @@ const mockOptions = {
   startedAtOverridden: false,
   previousStartedAt: null,
   state: {},
-  spaceId: '',
+  spaceId: DEFAULT_SPACE_ID,
   rule: {
     id: '',
     name: '',
@@ -315,6 +319,95 @@ describe('The metric threshold rule type', () => {
     test('should not report any alerts with the outside range comparator when condition is not met', async () => {
       setResults(COMPARATORS.NOT_BETWEEN, [0, 1.5], false);
       await execute(COMPARATORS.NOT_BETWEEN, [0, 1.5]);
+      testNAlertsReported(0);
+    });
+
+    test('should report alert with the between (inclusive) comparator when condition is met', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 1.5]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0, 1.5], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 0 and 1.5.',
+        tags: [],
+      });
+    });
+
+    test('should not report any alerts with the between (inclusive) comparator when condition is not met', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75], false);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0, 0.75]);
+      testNAlertsReported(0);
+    });
+
+    test('should report alert with the between (inclusive) comparator when value equals lower bound', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [1, 1.5], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [1, 1.5]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [1, 1.5], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 1 and 1.5.',
+        tags: [],
+      });
+    });
+
+    test('should report alert with the between (inclusive) comparator when value equals upper bound', async () => {
+      setResults(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1], true);
+      await execute(COMPARATORS.BETWEEN_INCLUSIVE, [0.5, 1]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0.5, 1], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason: 'test.metric.1 is 1 in the last 1 min. Alert when between (inclusive) 0.5 and 1.',
+        tags: [],
+      });
+    });
+
+    test('should report alert with the not between (inclusive) comparator when condition is met', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75], true);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 0.75]);
+      testNAlertsReported(1);
+      testAlertReported(1, {
+        id: '*',
+        conditions: [
+          { metric: 'test.metric.1', threshold: [0, 0.75], value: '1', evaluation_value: 1 },
+        ],
+        actionGroup: FIRED_ACTIONS.id,
+        alertState: 'ALERT',
+        reason:
+          'test.metric.1 is 1 in the last 1 min. Alert when not between (inclusive) 0 and 0.75.',
+        tags: [],
+      });
+    });
+
+    test('should not report any alerts with the not between (inclusive) comparator when condition is not met', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0, 1.5]);
+      testNAlertsReported(0);
+    });
+
+    test('should not report alert with the not between (inclusive) comparator when value equals lower bound', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1, 1.5], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [1, 1.5]);
+      testNAlertsReported(0);
+    });
+
+    test('should not report alert with the not between (inclusive) comparator when value equals upper bound', async () => {
+      setResults(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1], false);
+      await execute(COMPARATORS.NOT_BETWEEN_INCLUSIVE, [0.5, 1]);
       testNAlertsReported(0);
     });
   });
@@ -3494,6 +3587,11 @@ describe('The metric threshold rule type', () => {
           : {}),
         [ALERT_REASON]: reason,
         [ALERT_INDEX_PATTERN]: 'metrics-*,metricbeat-*',
+        ...(actionGroup === FIRED_ACTIONS.id
+          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_CRITICAL }
+          : actionGroup === WARNING_ACTIONS.id
+          ? { [ALERT_SEVERITY]: ALERT_SEVERITY_WARNING }
+          : {}),
         ...(tags ? { tags } : {}),
         ...(ecsGroups ? ecsGroups : {}),
         ...(grouping ? { [ALERT_GROUPING]: grouping } : {}),

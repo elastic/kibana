@@ -64,6 +64,42 @@ export const RULE_FILTER_NO_MATCH = i18n.translate(
   }
 );
 
+/** --- Assignee filter --- */
+export const ASSIGNEE_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.ariaLabel',
+  {
+    defaultMessage: 'Assignee filter',
+  }
+);
+
+export const ASSIGNEE_FILTER_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.label',
+  {
+    defaultMessage: 'Assignee',
+  }
+);
+
+export const ASSIGNEE_FILTER_SEARCH_PLACEHOLDER = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.searchPlaceholder',
+  {
+    defaultMessage: 'Search users...',
+  }
+);
+
+export const ASSIGNEE_FILTER_NO_MATCH = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.noMatch',
+  {
+    defaultMessage: 'No matching users',
+  }
+);
+
+export const ASSIGNEE_FILTER_BULK_GET_ERROR_TITLE = i18n.translate(
+  'xpack.alertingV2EpisodesUi.assigneeFilter.bulkGetErrorTitle',
+  {
+    defaultMessage: 'Failed to load assignee profiles',
+  }
+);
+
 /** --- Status filter --- */
 export const STATUS_FILTER_ACTIVE_LABEL = i18n.translate(
   'xpack.alertingV2EpisodesUi.statusFilter.activeLabel',
@@ -108,5 +144,34 @@ export const STATUS_FILTER_NO_MATCH = i18n.translate(
   'xpack.alertingV2EpisodesUi.statusFilter.noMatch',
   {
     defaultMessage: 'No matching statuses',
+  }
+);
+
+/** --- Severity filter --- */
+export const SEVERITY_FILTER_ARIA_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severityFilter.ariaLabel',
+  {
+    defaultMessage: 'Severity filter',
+  }
+);
+
+export const SEVERITY_FILTER_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severityFilter.label',
+  {
+    defaultMessage: 'Severity',
+  }
+);
+
+export const SEVERITY_FILTER_NONE_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severityFilter.noneLabel',
+  {
+    defaultMessage: 'No severity',
+  }
+);
+
+export const SEVERITY_FILTER_NO_MATCH = i18n.translate(
+  'xpack.alertingV2EpisodesUi.severityFilter.noMatch',
+  {
+    defaultMessage: 'No matching severities',
   }
 );

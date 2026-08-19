@@ -31,7 +31,9 @@ async function renderWait(count: number, page: ScoutPage) {
     .and(page.locator('data-title'));
   const loadingLocator = page.locator(DATA_LOADING_SELECTOR);
 
-  await renderCompleteLocator.waitFor({ timeout: 1000 });
+  // `.count()`, not `.waitFor()`: each panel can match 2 elements (wrapper + inner
+  // viz), which would violate Playwright's strict mode. `expect(...).toPass()` above
+  // already retries until `count()` reaches the expected total.
   const completedElementsCount = await renderCompleteLocator.count();
 
   if (completedElementsCount < count)

@@ -1,0 +1,11 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266823
+issues:
+- https://github.com/elastic/kibana/issues/266608
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+areas:
+- Search and data
+title: Use password field for multi-value secret variables in integration policy forms

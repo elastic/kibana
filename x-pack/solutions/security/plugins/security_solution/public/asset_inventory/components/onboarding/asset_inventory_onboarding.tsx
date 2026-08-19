@@ -10,6 +10,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { GetStarted } from './get_started';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import { useAssetInventoryStatus } from '../../hooks/use_asset_inventory_status';
+import { EntityStoreV2Disabled } from './entity_store_v2_disabled';
 import { Initializing } from './initializing';
 import { NoDataFound } from './no_data_found';
 import { PermissionDenied } from './permission_denied';
@@ -31,6 +32,8 @@ export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) =>
     case 'inactive_feature':
     case 'disabled': // The user has not yet started the onboarding process.
       return <GetStarted />;
+    case 'entity_store_v2_disabled': // Entity Store v2 prerequisites are not enabled.
+      return <EntityStoreV2Disabled />;
     case 'initializing': // The onboarding process is currently initializing.
       return <Initializing />;
     case 'empty': // Onboarding cannot proceed because no relevant data was found.

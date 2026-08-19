@@ -7,14 +7,24 @@
 
 import type { ChatCompletionTokenCount } from '@kbn/inference-common';
 
-export function sumTokens(
-  a: ChatCompletionTokenCount,
-  b?: ChatCompletionTokenCount
-): ChatCompletionTokenCount {
+export const EMPTY_TOKENS: ChatCompletionTokenCount = {
+  prompt: 0,
+  completion: 0,
+  total: 0,
+  cached: 0,
+};
+
+export function sumTokens({
+  accumulated = EMPTY_TOKENS,
+  added,
+}: {
+  accumulated?: ChatCompletionTokenCount;
+  added?: ChatCompletionTokenCount;
+}): ChatCompletionTokenCount {
   return {
-    completion: a.completion + (b?.completion ?? 0),
-    prompt: a.prompt + (b?.prompt ?? 0),
-    total: a.total + (b?.total ?? 0),
-    cached: (a.cached ?? 0) + (b?.cached ?? 0),
+    completion: accumulated.completion + (added?.completion ?? 0),
+    prompt: accumulated.prompt + (added?.prompt ?? 0),
+    total: accumulated.total + (added?.total ?? 0),
+    cached: (accumulated.cached ?? 0) + (added?.cached ?? 0),
   };
 }

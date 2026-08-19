@@ -25,6 +25,7 @@ test.describe(
       await hostsPage.goToPage({
         from: DATE_WITH_HOSTS_DATA_FROM,
         to: DATE_WITH_HOSTS_DATA_TO,
+        preferredSchema: 'ecs',
       });
     });
 

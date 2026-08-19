@@ -1,0 +1,9 @@
+spec_id: .tavily_mcp
+name: "Tavily (testing)"
+auth_type: bearer
+config:
+  serverUrl: "https://mcp.tavily.com/mcp/"
+secrets:
+  token:
+    vault: secret/ent-search-team/connectors-sources/tavily
+    field: api_key

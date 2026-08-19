@@ -10,21 +10,17 @@ import styled from 'styled-components';
 import {
   EuiCallOut,
   EuiFlexGroup,
-  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
   EuiHorizontalRule,
-  EuiLink,
 } from '@elastic/eui';
 import { WorkflowInsightType } from '../../../../../../../../common/endpoint/types/workflow_insights';
 
 import type { SecurityWorkflowInsight } from '../../../../../../../../common/endpoint/types/workflow_insights';
-import { WORKFLOW_INSIGHTS_SURVEY_URL } from '../../../../constants';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { WorkflowInsightsIncompatibleAntivirusResult } from './results/incompatible_antivirus';
 import { WorkflowInsightsPolicyResponseFailureResult } from './results/policy_response_failure';
-import { useKibana } from '../../../../../../../common/lib/kibana';
 interface WorkflowInsightsResultsProps {
   results?: SecurityWorkflowInsight[];
   scanCompleted: boolean;
@@ -48,10 +44,8 @@ export const WorkflowInsightsResults = ({
   scanCompleted,
   endpointId,
 }: WorkflowInsightsResultsProps) => {
-  const { notifications } = useKibana().services;
   const [showEmptyResultsCallout, setShowEmptyResultsCallout] = useState(false);
   const hideEmptyStateCallout = () => setShowEmptyResultsCallout(false);
-  const isFeedbackEnabled = notifications?.feedback?.isEnabled() ?? true;
 
   useEffect(() => {
     setShowEmptyResultsCallout(results?.length === 0 && scanCompleted);
@@ -89,33 +83,6 @@ export const WorkflowInsightsResults = ({
     return null;
   }, [endpointId, results, showEmptyResultsCallout]);
 
-  const surveyLink = useMemo(() => {
-    if (!results?.length || !isFeedbackEnabled) {
-      return null;
-    }
-
-    return (
-      <>
-        <EuiSpacer size={'xs'} />
-        <EuiFlexGroup
-          gutterSize={'xs'}
-          alignItems={'center'}
-          data-test-subj={'workflowInsightsSurveySection'}
-        >
-          <EuiIcon type="comment" size="m" />
-          <EuiText size={'xs'} data-test-subj={'workflowInsightsSurveyLink'}>
-            <p>
-              {WORKFLOW_INSIGHTS.issues.survey.description}
-              <EuiLink target="_blank" href={WORKFLOW_INSIGHTS_SURVEY_URL}>
-                {WORKFLOW_INSIGHTS.issues.survey.callToAction}
-              </EuiLink>
-            </p>
-          </EuiText>
-        </EuiFlexGroup>
-      </>
-    );
-  }, [results, isFeedbackEnabled]);
-
   const showInsights = !!(showEmptyResultsCallout || results?.length);
 
   return (
@@ -125,7 +92,6 @@ export const WorkflowInsightsResults = ({
           <EuiText size={'s'}>
             <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
           </EuiText>
-          {surveyLink}
           <EuiSpacer size={'s'} />
         </>
       )}

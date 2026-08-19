@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
+import apm from 'elastic-apm-node';
 import type { Rule, SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
@@ -41,6 +43,7 @@ import {
 } from '@kbn/task-manager-plugin/server/task_running/errors';
 import { get, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   ALERT_ACTION,
   ALERT_ACTION_ID,
@@ -74,6 +77,16 @@ import type {
   BurnRateRuleParams,
 } from './types';
 import { AlertStates } from './types';
+
+jest.mock('@kbn/apm-utils', () => ({
+  addTransactionLabels: jest.fn(),
+  withSpan: jest.fn((_opts: unknown, cb: () => unknown) => cb()),
+}));
+
+jest.mock('elastic-apm-node', () => ({
+  default: { setCustomContext: jest.fn() },
+  __esModule: true,
+}));
 
 const commonEsResponse = {
   took: 100,
@@ -214,7 +227,7 @@ describe('BurnRateRuleExecutor', () => {
             id: '123-456',
             name: 'an slo rule',
           } as SanitizedRuleConfig,
-          spaceId: 'irrelevant',
+          spaceId: asSpaceId('irrelevant'),
           state: {},
           flappingSettings: DEFAULT_FLAPPING_SETTINGS,
           getTimeRange,
@@ -243,7 +256,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -294,7 +307,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -342,7 +355,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -408,7 +421,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -575,7 +588,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -714,7 +727,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -848,7 +861,7 @@ describe('BurnRateRuleExecutor', () => {
         logger: loggerMock,
         previousStartedAt: null,
         rule: {} as SanitizedRuleConfig,
-        spaceId: 'irrelevant',
+        spaceId: asSpaceId('irrelevant'),
         state: {},
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange,
@@ -871,6 +884,126 @@ describe('BurnRateRuleExecutor', () => {
           'transaction.type': 'request',
         }),
       });
+    });
+  });
+
+  describe('APM instrumentation', () => {
+    const addTransactionLabelsMock = addTransactionLabels as jest.MockedFunction<
+      typeof addTransactionLabels
+    >;
+    const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+    const setCustomContextMock = apm.setCustomContext as jest.MockedFunction<
+      typeof apm.setCustomContext
+    >;
+
+    beforeEach(() => {
+      addTransactionLabelsMock.mockClear();
+      withSpanMock.mockClear();
+      setCustomContextMock.mockClear();
+    });
+
+    it('sets SLO-shape labels and custom context after loading the SLO definition', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      const ruleId = 'rule-123';
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: '*' })
+      );
+      const executor = getRuleExecutor(basePathMock);
+
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: { id: ruleId, name: 'test rule' } as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          slo_indicator_type: slo.indicator.type,
+          slo_budgeting_method: slo.budgetingMethod,
+        })
+      );
+      expect(setCustomContextMock).toHaveBeenCalledWith({ slo_id: slo.id });
+    });
+
+    it('sets executor_outcome: skipped when the SLO is disabled', async () => {
+      const slo = createSLO({ objective: { target: 0.9 }, enabled: false });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      const executor = getRuleExecutor(basePathMock);
+
+      await executor({
+        params: someRuleParamsWithWindows({ sloId: slo.id }),
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: { id: 'abc', name: 'test' } as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({ executor_outcome: 'skipped' });
+      expect(addTransactionLabelsMock).not.toHaveBeenCalledWith({ executor_outcome: 'success' });
+    });
+
+    it('sets executor_outcome: success and creates named spans for all pipeline stages', async () => {
+      const slo = createSLO({ objective: { target: 0.9 } });
+      const ruleParams = someRuleParamsWithWindows({ sloId: slo.id });
+      soClientMock.find.mockResolvedValueOnce(createFindResponse([slo]));
+      esClientMock.search.mockResolvedValueOnce(
+        generateEsResponse(ruleParams, [], { instanceId: '*' })
+      );
+      const executor = getRuleExecutor(basePathMock);
+
+      await executor({
+        params: ruleParams,
+        startedAt: new Date(),
+        startedAtOverridden: false,
+        services: servicesMock,
+        executionId: 'irrelevant',
+        logger: loggerMock,
+        previousStartedAt: null,
+        rule: { id: 'abc', name: 'test' } as SanitizedRuleConfig,
+        spaceId: asSpaceId('irrelevant'),
+        state: {},
+        flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+        getTimeRange,
+        isServerless: false,
+      });
+
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({ executor_outcome: 'success' });
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:load_definition', type: 'rule' },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:eval', type: 'rule' },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:es_query', type: 'rule' },
+        expect.any(Function)
+      );
+      expect(withSpanMock).toHaveBeenCalledWith(
+        { name: 'slo_burn_rate_executor:action_dispatch', type: 'rule' },
+        expect.any(Function)
+      );
     });
   });
 });

@@ -14,17 +14,17 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ArrayFromString } from '@kbn/zod-helpers/v4';
 
 import { ExceptionNamespaceType, ExceptionList } from '../model/exception_list_common.gen';
 
+export const FindExceptionListsFilter = lazySchema(() => z.string());
 export type FindExceptionListsFilter = z.infer<typeof FindExceptionListsFilter>;
-export const FindExceptionListsFilter = z.string();
 
-export type FindExceptionListsRequestQuery = z.infer<typeof FindExceptionListsRequestQuery>;
-export const FindExceptionListsRequestQuery = z.object({
-  /**
+export const FindExceptionListsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
       * Filters the returned results according to the value of the specified field.
 
 Uses the `so type.field name:field` value syntax, where `so type` can be:
@@ -33,36 +33,40 @@ Uses the `so type.field name:field` value syntax, where `so type` can be:
 - `exception-list-agnostic`: Specify an exception list that is shared across spaces.
 
       */
-  filter: FindExceptionListsFilter.optional(),
-  /**
+    filter: FindExceptionListsFilter.optional(),
+    /**
       * Determines whether the returned containers are Kibana associated with a Kibana space
 or available in all spaces (`agnostic` or `single`)
 
       */
-  namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
-  /**
-   * The page number to return
-   */
-  page: z.coerce.number().int().min(1).optional(),
-  /**
-   * The number of exception lists to return per page
-   */
-  per_page: z.coerce.number().int().min(1).optional(),
-  /**
-   * Determines which field is used to sort the results.
-   */
-  sort_field: z.string().optional(),
-  /**
-   * Determines the sort order, which can be `desc` or `asc`.
-   */
-  sort_order: z.enum(['desc', 'asc']).optional(),
-});
+    namespace_type: ArrayFromString(ExceptionNamespaceType).optional().default(['single']),
+    /**
+     * The page number to return
+     */
+    page: z.coerce.number().int().min(1).optional(),
+    /**
+     * The number of exception lists to return per page
+     */
+    per_page: z.coerce.number().int().min(1).optional(),
+    /**
+     * Determines which field is used to sort the results.
+     */
+    sort_field: z.string().optional(),
+    /**
+     * Determines the sort order, which can be `desc` or `asc`.
+     */
+    sort_order: z.enum(['desc', 'asc']).optional(),
+  })
+);
+export type FindExceptionListsRequestQuery = z.infer<typeof FindExceptionListsRequestQuery>;
 export type FindExceptionListsRequestQueryInput = z.input<typeof FindExceptionListsRequestQuery>;
 
+export const FindExceptionListsResponse = lazySchema(() =>
+  z.object({
+    data: z.array(ExceptionList),
+    page: z.number().int().min(1),
+    per_page: z.number().int().min(1),
+    total: z.number().int().min(0),
+  })
+);
 export type FindExceptionListsResponse = z.infer<typeof FindExceptionListsResponse>;
-export const FindExceptionListsResponse = z.object({
-  data: z.array(ExceptionList),
-  page: z.number().int().min(1),
-  per_page: z.number().int().min(1),
-  total: z.number().int().min(0),
-});

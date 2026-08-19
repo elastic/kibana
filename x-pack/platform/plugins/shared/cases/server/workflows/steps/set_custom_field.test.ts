@@ -16,6 +16,7 @@ const createContext = (input: unknown, config: Record<string, unknown> = {}) =>
 describe('setCustomFieldStepDefinition', () => {
   const input = {
     case_id: 'case-1',
+    owner: 'securitySolution',
     field_name: 'first_key',
     value: 'updated value',
   };

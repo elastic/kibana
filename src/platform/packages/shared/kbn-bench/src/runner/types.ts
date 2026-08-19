@@ -9,8 +9,8 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { IWorkspace } from '@kbn/workspaces';
-import type { Benchmark, LoadedBenchConfig } from '../config/types';
-import type { ProcStats } from './monitor/types';
+import type { Benchmark, LoadedBenchConfig, PairedComparisonResult } from '../config/types';
+import type { ForcedGcHeapStats, ProcStatSample, ProcStats } from './monitor/types';
 import type { MetricFormat } from '../report/types';
 
 export interface BenchmarkMetric {
@@ -22,6 +22,8 @@ export interface BenchmarkMetric {
 interface BenchmarkRunResultBase {
   status: string;
   stats: ProcStats[];
+  samples?: readonly ProcStatSample[][];
+  forcedGcHeapStats?: readonly ForcedGcHeapStats[];
 }
 
 export interface BenchmarkRunReturn {
@@ -50,14 +52,19 @@ export interface BenchmarkResult {
 export interface ConfigResult {
   config: LoadedBenchConfig;
   benchmarks: BenchmarkResult[];
+  pairedComparison?: PairedComparisonResult;
 }
 
 export interface BenchmarkRunContext {
   log: ToolingLog;
   workspace: IWorkspace;
+  buildDir?: string;
 }
 
 export interface BenchmarkRunnable {
+  monitoring?: {
+    readonly collectForcedGcHeapStatsOnStop?: boolean;
+  };
   beforeAll?: (ctx: BenchmarkRunContext) => Promise<void>;
   afterAll?: (ctx: BenchmarkRunContext) => Promise<void>;
   before?: (ctx: BenchmarkRunContext) => Promise<void>;

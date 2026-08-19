@@ -4,43 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
+import { z } from '@kbn/zod';
 import {
-  occurrencesBudgetingMethodSchema,
-  rollingTimeWindowSchema,
-  targetSchema,
-} from '../../../schema';
-import { sloIdSchema, tagsSchema } from '../../../schema/slo';
-import {
-  compositeSloMemberSchema,
+  compositeSloIdSchema,
+  compositeTagsSchema,
+  compositeTargetSchema,
+  compositeOccurrencesBudgetingMethodSchema,
+  compositeRollingTimeWindowSchema,
+  compositeSloMembersSchema,
   compositeMethodSchema,
-  compositeSloDefinitionSchema,
 } from '../../../schema/composite_slo';
 
-const createCompositeSLOParamsSchema = t.type({
-  body: t.intersection([
-    t.type({
-      name: t.string,
-      description: t.string,
-      members: t.array(compositeSloMemberSchema),
-      compositeMethod: compositeMethodSchema,
-      timeWindow: rollingTimeWindowSchema,
-      budgetingMethod: occurrencesBudgetingMethodSchema,
-      objective: targetSchema,
-    }),
-    t.partial({
-      id: sloIdSchema,
-      tags: tagsSchema,
-      enabled: t.boolean,
-    }),
-  ]),
+const createCompositeSLOBodySchema = z.object({
+  name: z.string(),
+  description: z.string(),
+  members: compositeSloMembersSchema,
+  compositeMethod: compositeMethodSchema,
+  timeWindow: compositeRollingTimeWindowSchema,
+  budgetingMethod: compositeOccurrencesBudgetingMethodSchema,
+  objective: compositeTargetSchema,
+  id: compositeSloIdSchema.optional(),
+  tags: compositeTagsSchema.optional(),
+  enabled: z.boolean().optional(),
 });
 
-const createCompositeSLOResponseSchema = compositeSloDefinitionSchema;
+const createCompositeSLOParamsSchema = z.object({
+  body: createCompositeSLOBodySchema,
+});
 
-type CreateCompositeSLOInput = t.OutputOf<typeof createCompositeSLOParamsSchema.props.body>;
-type CreateCompositeSLOParams = t.TypeOf<typeof createCompositeSLOParamsSchema.props.body>;
-type CreateCompositeSLOResponse = t.OutputOf<typeof createCompositeSLOResponseSchema>;
+type CreateCompositeSLOInput = z.input<typeof createCompositeSLOBodySchema>;
 
-export { createCompositeSLOParamsSchema, createCompositeSLOResponseSchema };
-export type { CreateCompositeSLOInput, CreateCompositeSLOParams, CreateCompositeSLOResponse };
+export { createCompositeSLOParamsSchema };
+export type { CreateCompositeSLOInput };

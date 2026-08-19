@@ -14,7 +14,7 @@
 import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
 
-import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiCode, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
 import type {
   AttachmentType,
@@ -36,10 +36,12 @@ import {
 import { UserActionContentToolbar } from '../content_toolbar';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { RegisteredAttachmentsPropertyActions } from '../property_actions/registered_attachments_property_actions';
+import { AttachmentErrorCallout } from './attachment_error_callout';
+import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundary';
 
 type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
-  'userAction' | 'caseData' | 'handleDeleteComment' | 'userProfiles'
+  'userAction' | 'caseData' | 'permissions' | 'handleDeleteComment' | 'userProfiles'
 > & {
   attachment: SnakeToCamelCase<C>;
   registry: R;
@@ -69,7 +71,11 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
       AttachmentElement = React.cloneElement(AttachmentElement, props);
     }
 
-    return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
+    return (
+      <AttachmentRenderErrorBoundary>
+        <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>
+      </AttachmentRenderErrorBoundary>
+    );
   };
 
   return renderCallback;
@@ -85,6 +91,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
   attachment,
   registry,
   caseData,
+  permissions,
   isLoading,
   getId,
   getAttachmentViewProps,
@@ -112,14 +119,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
           className: `comment-${attachment.type}-not-found`,
           'data-test-subj': `comment-${attachment.type}-not-found`,
           timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-          children: (
-            <EuiCallOut
-              announceOnMount={false}
-              title={ATTACHMENT_NOT_REGISTERED_ERROR}
-              color="danger"
-              iconType="warning"
-            />
-          ),
+          children: <AttachmentErrorCallout title={ATTACHMENT_NOT_REGISTERED_ERROR} />,
         },
       ];
     }
@@ -130,6 +130,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
       ...getAttachmentViewProps(),
       savedObjectId: attachment.id,
       caseData: { id: caseData.id, title: caseData.title },
+      permissions,
     };
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
@@ -155,6 +156,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
         className,
         css: attachmentViewObject.css,
         event: attachmentViewObject.event,
+        eventColor: attachmentViewObject.eventColor,
         'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: attachmentViewObject.timelineAvatar,
@@ -168,14 +170,16 @@ export const createRegisteredAttachmentUserActionBuilder = <
                     data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}`}
                     key={`attachment-${attachmentTypeId}-${attachment.id}`}
                   >
-                    <EuiButtonIcon
-                      aria-label={action.label}
-                      iconType={action.iconType}
-                      color={action.color ?? 'text'}
-                      onClick={action.onClick}
-                      data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                      key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                    />
+                    <EuiToolTip content={action.label} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        aria-label={action.label}
+                        iconType={action.iconType}
+                        color={action.color ?? 'text'}
+                        onClick={action.onClick}
+                        data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
+                        key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )) ||
                 (action.type === AttachmentActionType.CUSTOM && action.render())

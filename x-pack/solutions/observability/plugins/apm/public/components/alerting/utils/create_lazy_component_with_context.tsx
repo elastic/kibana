@@ -10,37 +10,50 @@ import type { PropsOf } from '@elastic/eui';
 import type { CoreSetup } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { ApmPluginStart, ApmPluginStartDeps } from '../../../plugin';
+import type { EmbeddableDeps } from '../../../embeddable/types';
+import { ApmEmbeddableDepsContext } from '../context/apm_embeddable_deps_context';
 
 export type ApmCoreSetup = CoreSetup<ApmPluginStartDeps, ApmPluginStart>;
 
+/** Setup-time deps captured by APM and threaded into rule-type lazy components. */
+export type ApmAlertingSetupDeps = Omit<EmbeddableDeps, 'coreStart' | 'pluginsStart'>;
+
 /**
- * Wraps a lazy-loaded component with a KibanaContextProvider that resolves
- * APM's own start services. This is necessary for APM components that are
- * rendered outside APM's app context (e.g. alert detail sections rendered
- * by the observability plugin) so that useKibana() resolves APM's deps
- * (like apmSourcesAccess) instead of the host plugin's deps.
- *
- * This follows the same pattern used by the infra plugin
- * (see infra/public/hooks/use_kibana.tsx → createLazyComponentWithKibanaContext).
+ * Wraps a lazy-loaded APM component with APM's `KibanaContextProvider` and exposes
+ * `EmbeddableDeps` via `ApmEmbeddableDepsContext`. Mirrors infra's
+ * `createLazyComponentWithKibanaContext`.
  */
 export const createLazyApmComponentWithContext = <T extends React.ComponentType<any>>(
   coreSetup: ApmCoreSetup,
-  lazyComponentFactory: () => Promise<{ default: T }>
+  lazyComponentFactory: () => Promise<{ default: T }>,
+  setupDeps?: ApmAlertingSetupDeps
 ) =>
   React.lazy(() =>
     Promise.all([lazyComponentFactory(), coreSetup.getStartServices()]).then(
-      ([{ default: LazilyLoadedComponent }, [core, plugins, pluginStart]]) => ({
-        default: (props: PropsOf<T>) => (
-          <KibanaContextProvider
-            services={{
-              ...core,
-              ...plugins,
-              ...(pluginStart ?? {}),
-            }}
-          >
-            <LazilyLoadedComponent {...props} />
-          </KibanaContextProvider>
-        ),
-      })
+      ([{ default: LazilyLoadedComponent }, [core, plugins, pluginStart]]) => {
+        const embeddableDeps: EmbeddableDeps | undefined = setupDeps
+          ? {
+              ...setupDeps,
+              coreStart: core,
+              pluginsStart: plugins,
+            }
+          : undefined;
+
+        return {
+          default: (props: PropsOf<T>) => (
+            <KibanaContextProvider
+              services={{
+                ...core,
+                ...plugins,
+                ...(pluginStart ?? {}),
+              }}
+            >
+              <ApmEmbeddableDepsContext.Provider value={embeddableDeps ?? null}>
+                <LazilyLoadedComponent {...props} />
+              </ApmEmbeddableDepsContext.Provider>
+            </KibanaContextProvider>
+          ),
+        };
+      }
     )
   );

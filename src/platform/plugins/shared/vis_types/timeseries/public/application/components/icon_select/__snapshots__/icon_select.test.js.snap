@@ -90,6 +90,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_sele
 exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js <IconView /> should render and match a snapshot 1`] = `
 <span>
   <EuiIcon
+    aria-hidden={true}
     type="editorComment"
   />
    Comment

@@ -10,13 +10,14 @@ import React, { useState } from 'react';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
-  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -65,9 +66,6 @@ export const GeoipList: React.FunctionComponent = () => {
   );
   const tableProps: EuiInMemoryTableProps<GeoipDatabase> = {
     'data-test-subj': 'geoipDatabaseList',
-    tableCaption: i18n.translate('xpack.ingestPipelines.manageProcessors.geoip.list.tableCaption', {
-      defaultMessage: 'List of geoIP databases',
-    }),
     rowProps: () => ({
       'data-test-subj': 'geoipDatabaseListRow',
     }),
@@ -107,19 +105,29 @@ export const GeoipList: React.FunctionComponent = () => {
           }
 
           return (
-            <EuiButtonIcon
-              name="Delete"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.ingestPipelines.manageProcessors.geoip.list.actionIconLabel',
                 {
                   defaultMessage: 'Delete this database',
                 }
               )}
-              iconType="trash"
-              color="danger"
-              onClick={() => onDatabaseDelete(item)}
-              data-test-subj="deleteGeoipDatabaseButton"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                name="Delete"
+                aria-label={i18n.translate(
+                  'xpack.ingestPipelines.manageProcessors.geoip.list.actionIconLabel',
+                  {
+                    defaultMessage: 'Delete this database',
+                  }
+                )}
+                iconType="trash"
+                color="danger"
+                onClick={() => onDatabaseDelete(item)}
+                data-test-subj="deleteGeoipDatabaseButton"
+              />
+            </EuiToolTip>
           );
         },
       },
@@ -179,7 +187,16 @@ export const GeoipList: React.FunctionComponent = () => {
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
-        <EuiInMemoryTable css={styles.table} {...tableProps} />
+        <EuiInMemoryTable
+          css={styles.table}
+          tableCaption={i18n.translate(
+            'xpack.ingestPipelines.manageProcessors.geoip.list.tableCaption',
+            {
+              defaultMessage: 'List of geoIP databases',
+            }
+          )}
+          {...tableProps}
+        />
       </>
     );
   }

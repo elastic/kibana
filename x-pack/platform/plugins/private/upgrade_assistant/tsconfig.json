@@ -9,6 +9,8 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "test/scout/**/*",
+    "test/scout_upgrade_assistant_integration/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json",
     "server/**/*.json"
@@ -43,7 +45,8 @@
     "@kbn/upgrade-assistant-pkg-server",
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/reindex-service-plugin",
-    "@kbn/core-doc-links-browser-mocks"
+    "@kbn/core-doc-links-browser-mocks",
+    "@kbn/scout"
   ],
   "exclude": [
     "target/**/*",

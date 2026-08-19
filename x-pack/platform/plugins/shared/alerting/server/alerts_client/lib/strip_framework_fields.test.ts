@@ -25,7 +25,12 @@ describe('stripFrameworkFields', () => {
     const payload = {
       field1: 'test',
       kibana: {
-        alert: { not_a_framework_field: 2, reason: 'because i said so', workflow_status: 'custom' },
+        alert: {
+          not_a_framework_field: 2,
+          reason: 'because i said so',
+          severity: 'high',
+          workflow_status: 'custom',
+        },
       },
       tags: ['taggity-tag'],
     };
@@ -37,6 +42,7 @@ describe('stripFrameworkFields', () => {
       field1: 'test',
       'kibana.alert.not_a_framework_field': 2,
       'kibana.alert.reason': 'because i said so',
+      'kibana.alert.severity': 'high',
       'kibana.alert.workflow_status': 'custom',
       tags: ['taggity-tag'],
     };

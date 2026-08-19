@@ -26,9 +26,14 @@ interface RunResolutionScoringParams {
   sampleSize: number;
   now: string;
   calculationRunId: string;
+  abortSignal?: AbortSignal;
   watchlistConfigs: Map<string, WatchlistObject>;
   idBasedRiskScoringEnabled: boolean;
   writer: Awaited<ReturnType<RiskScoreDataClient['getWriter']>>;
+  targetEntityIds?: string[];
+  refresh?: Parameters<typeof persistScoresToRiskIndex>[0]['refresh'];
+  /** When true, populate `scores` in the result. Omit for full-population runs. */
+  collectScores?: boolean;
 }
 
 export const runResolutionScoringStep = async ({
@@ -42,15 +47,23 @@ export const runResolutionScoringStep = async ({
   sampleSize,
   now,
   calculationRunId,
+  abortSignal,
   watchlistConfigs,
   idBasedRiskScoringEnabled,
   writer,
+  targetEntityIds,
+  refresh,
+  collectScores,
 }: RunResolutionScoringParams): Promise<ResolutionStepResult> => {
   runLogger.debug(
     `starting phase 2 resolution scoring: page_size=${pageSize}, sample_size=${sampleSize}`
   );
   let pagesProcessed = 0;
-  let scoresWrittenResolution = 0;
+  let scoresWrittenRiskIndex = 0;
+  let scoresWrittenEntityStore = 0;
+  let scoresFailed = 0;
+  let abortedBetweenPages = false;
+  const newScores: Record<string, number> = {};
 
   for await (const pageScores of calculateResolutionEntityScores({
     esClient,
@@ -64,43 +77,71 @@ export const runResolutionScoringStep = async ({
     now,
     calculationRunId,
     watchlistConfigs,
+    abortSignal,
+    targetEntityIds,
   })) {
+    if (abortSignal?.aborted) {
+      runLogger.info('Resolution scoring aborted between pages');
+      abortedBetweenPages = true;
+      break;
+    }
     pagesProcessed += 1;
     if (pageScores.length > 0) {
-      scoresWrittenResolution += await persistScoresToRiskIndex({
+      scoresWrittenRiskIndex += await persistScoresToRiskIndex({
         writer,
         entityType,
         scores: pageScores,
         logger: runLogger,
+        refresh,
       });
-      await persistScoresToEntityStore({
+      const { docsWritten, errorsCount } = await persistScoresToEntityStore({
         crudClient,
         logger: runLogger,
         entityType,
         scores: pageScores,
         enabled: idBasedRiskScoringEnabled,
       });
+      scoresWrittenEntityStore += docsWritten;
+      scoresFailed += errorsCount;
+
+      if (collectScores) {
+        for (const score of pageScores) {
+          if ((score.related_entities?.length ?? 0) > 0) {
+            newScores[score.id_value] = score.calculated_score_norm;
+          }
+        }
+      }
     }
   }
 
-  if (scoresWrittenResolution === 0) {
-    const skipReason = pagesProcessed === 0 ? 'lookup_empty' : 'no_matching_alerts';
+  if (scoresWrittenRiskIndex === 0) {
+    const skipReason = abortedBetweenPages
+      ? 'aborted'
+      : pagesProcessed === 0
+      ? 'lookup_empty'
+      : 'no_matching_alerts';
     runLogger.debug(
       `phase 2 resolution scoring produced no writes: reason=${skipReason}, pages=${pagesProcessed}`
     );
     return {
-      scoresWritten: 0,
+      scoresWrittenRiskIndex: 0,
+      scoresWrittenEntityStore,
+      scoresFailed,
       pagesProcessed,
-      skippedReason: pagesProcessed === 0 ? 'lookup_empty' : undefined,
+      skippedReason: !abortedBetweenPages && pagesProcessed === 0 ? 'lookup_empty' : undefined,
+      scores: newScores,
     };
   }
 
   runLogger.debug(
-    `phase 2 resolution scoring wrote ${scoresWrittenResolution} docs across ${pagesProcessed} page(s)`
+    `phase 2 resolution scoring wrote ${scoresWrittenRiskIndex} docs across ${pagesProcessed} page(s)`
   );
 
   return {
-    scoresWritten: scoresWrittenResolution,
+    scoresWrittenRiskIndex,
+    scoresWrittenEntityStore,
+    scoresFailed,
     pagesProcessed,
+    scores: newScores,
   };
 };

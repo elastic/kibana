@@ -107,7 +107,7 @@ describe('KubernetesAssetImage', () => {
   });
 
   describe('default type', () => {
-    it('defaults to ecs type when no type is provided', async () => {
+    it('defaults to semconv type when no type is provided', async () => {
       useEuiThemeMock.mockReturnValue({
         colorMode: 'LIGHT',
       } as ReturnType<typeof useEuiTheme>);
@@ -119,7 +119,7 @@ describe('KubernetesAssetImage', () => {
       await waitFor(() => {
         const image = screen.getByRole('img');
         expect(image).toBeInTheDocument();
-        expect(image).toHaveAttribute('alt', 'ECS Kubernetes Dashboard image');
+        expect(image).toHaveAttribute('alt', 'OpenTelemetry Kubernetes Dashboard image');
       });
     });
   });

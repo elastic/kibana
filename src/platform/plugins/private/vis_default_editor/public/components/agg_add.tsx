@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiPopoverTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -42,6 +43,7 @@ function DefaultEditorAggAdd({
   stats,
 }: DefaultEditorAggAddProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const popoverTitleId = useGeneratedHtmlId();
   const onSelectSchema = (schema: Schema) => {
     setIsPopoverOpen(false);
     addSchema(schema);
@@ -84,13 +86,14 @@ function DefaultEditorAggAdd({
       <EuiFlexItem grow={false}>
         <EuiPopover
           id={`addGroupButtonPopover_${groupName}`}
+          aria-labelledby={popoverTitleId}
           button={addButton}
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
           repositionOnScroll={true}
           closePopover={() => setIsPopoverOpen(false)}
         >
-          <EuiPopoverTitle paddingSize="s">
+          <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
             {(groupName !== AggGroupNames.Buckets || !stats.count) && (
               <FormattedMessage
                 id="visDefaultEditor.aggAdd.addGroupButtonLabel"
