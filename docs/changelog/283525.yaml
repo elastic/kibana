@@ -9,4 +9,4 @@ products:
 - product: kibana
 areas:
 - Kibana platform
-title: Prevent nagivating away from roles management with unsaved changes
+title: Fix losing unsaved changes when leaving role management

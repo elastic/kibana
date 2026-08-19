@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: Restore legacy workflow inputs in tool schemas
+title: Fix missing legacy workflow inputs in Agent Builder tool schemas

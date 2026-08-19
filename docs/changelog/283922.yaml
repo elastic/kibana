@@ -7,4 +7,4 @@ products:
 - product: kibana
 areas:
 - Alerting and reporting
-title: Dedupe required-on-close errors for global fields referenced by templates
+title: Fix duplicate required-on-close errors when closing Cases

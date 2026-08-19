@@ -7,4 +7,4 @@ products:
 - product: kibana
 areas:
 - Discover and ES|QL
-title: Sort by timestamp by default
+title: Sort ES|QL queries by timestamp by default

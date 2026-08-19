@@ -9,5 +9,5 @@ products:
 - product: kibana
 areas:
 - Discover and ES|QL
-title: Prevent deletion of quick ranges configured in Stack Management
-description: Presets in the time range selector that come from the Quick ranges setting (Stack Management → Advanced Settings) can no longer be deleted. Only user-created presets are  deletable.
+title: Fix deletion of Stack Management quick ranges in the time picker
+description: "Fixes time picker presets from the \"Quick ranges\" setting in Stack Management so they can no longer be deleted. Only user-created presets can be deleted."

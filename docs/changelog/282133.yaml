@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: Fix Device Control enabled by default on non-Enterprise licenses
+title: 'Fix Device Control enabled by default on non-Enterprise licenses'

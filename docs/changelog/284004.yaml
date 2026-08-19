@@ -10,4 +10,4 @@ products:
 areas:
 - Alerting and reporting
 - Dashboards and visualizations
-title: defer panel loading when panels are not visible
+title: Fix dashboard panels fetching data before they are visible

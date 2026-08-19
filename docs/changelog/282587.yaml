@@ -10,4 +10,4 @@ products:
 areas:
 - Search and data
 - Discover and ES|QL
-title: Add {{risonValue}} URL template variable for rison-safe Kibana links
+title: 'Add `{{risonValue}}` URL template variable for rison-safe Kibana links'

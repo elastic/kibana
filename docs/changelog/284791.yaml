@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: Retry transient ES errors when scheduling risk score transform
+title: Fix risk score transform scheduling failing on transient Elasticsearch timeouts

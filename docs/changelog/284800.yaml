@@ -9,5 +9,5 @@ products:
 - product: kibana
 areas:
 - AI and machine Learning
-title: Keep answers to clarifying questions in research agent context during execution
+title: Fix Agent Builder research agent re-asking answered questions
 description: Fixes an issue where the Agent Builder research agent could repeatedly re-ask clarifying questions the user had already answered.

@@ -5,4 +5,5 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: Fix special tokens in prompt throws error & text content blocks must be non-empty for Claude models
+title: Fix Agent Builder chat errors with special tokens and empty Claude blocks
+description: "Fixes chat streams failing when prompts contain GPT special tokens such as `<|endoftext|>`, and fixes Claude models rejecting empty text content blocks."

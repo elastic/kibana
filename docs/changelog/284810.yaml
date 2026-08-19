@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: Sanitize tool schemas for Google Vertex AI inference endpoints
+title: Fix Agent Builder chat failing with Google Vertex AI inference endpoints

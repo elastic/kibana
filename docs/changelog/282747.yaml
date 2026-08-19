@@ -9,4 +9,4 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: Track token usage on completion retries
+title: Fix token usage reported for retried chat completions

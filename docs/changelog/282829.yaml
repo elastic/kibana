@@ -9,4 +9,4 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: Send resolved version in bulk upgrade request (#281543)
+title: Fix Fleet bulk upgrade installing the bundled version instead of latest

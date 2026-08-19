@@ -7,4 +7,5 @@ products:
 - product: kibana
 areas:
 - AI and machine Learning
-title: Changing permissions for trained model testing
+title: Restrict trained model testing to machine learning admins
+description: "Restricts \"Test trained models\" to machine learning admins. Pipeline simulation now runs as the signed-in user instead of Kibana's internal user, so tests cannot access data the user is not allowed to read."

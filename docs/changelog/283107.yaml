@@ -9,4 +9,4 @@ products:
 - product: kibana
 areas:
 - Search and data
-title: Support integration collection tiles
+title: Add collection tiles for grouped integrations in Fleet

@@ -7,4 +7,4 @@ products:
 - product: kibana
 areas:
 - Alerting and reporting
-title: Show Field Library toggle filters in All Cases More Filters
+title: 'Fix Field Library toggle filters missing from "All Cases More Filters"'

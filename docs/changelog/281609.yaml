@@ -7,5 +7,5 @@ products:
 - product: kibana
 areas:
 - AI and machine Learning
-title: Fix CCS patterns crashing resolveResourceForEsql on ESQL 9.4
-description: Fixes an issue where Agent Builder queries fail with a security exception on Elasticsearch 9.4 when cross-cluster search (CCS) index patterns are configured but the cluster does not have the remote cluster client role enabled.
+title: Fix Agent Builder queries failing on cross-cluster search patterns
+description: Fixes an issue where Agent Builder queries fail with a security exception on Elasticsearch 9.4 when cross-cluster search index patterns are configured but the cluster does not have the remote cluster client role enabled.

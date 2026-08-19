@@ -7,4 +7,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: Do not require `read` to execute a workflow
+title: Allow running workflows without the `read` privilege

@@ -9,5 +9,5 @@ products:
 - product: kibana
 areas:
 - Kibana platform
-title: Prevent nagivating away from spaces management with unsaved changes
-description: Prevents navigating away from the Create/Edit Spaces screens with unsaved changes.
+title: Fix losing unsaved changes when leaving Spaces management
+description: Fixes navigation away from the Create and Edit Spaces screens so Kibana warns when unsaved changes would be lost.

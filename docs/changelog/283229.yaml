@@ -5,4 +5,4 @@ products:
 - product: cloud-serverless
   target: 2026-08-18
 - product: kibana
-title: New risk score history tool
+title: Add entity risk score history to Agent Builder
