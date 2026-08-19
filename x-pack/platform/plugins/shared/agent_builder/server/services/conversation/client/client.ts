@@ -77,6 +77,7 @@ import {
   fromEsWithoutRounds,
   withPermissions,
   toEs,
+  updateConversation,
   fromNormalized,
   createRequestToEs,
   isConversationDocument,
@@ -780,13 +781,16 @@ class ConversationClientImpl implements ConversationClient {
     try {
       const { document } = await writer.readModifyWrite({
         id: conversationId,
-        mutate: (current) => ({
-          ...current,
-          ...fields(current),
-          id: conversationId,
-          space: this.space,
-          updated_at: new Date().toISOString(),
-        }),
+        mutate: (current) =>
+          updateConversation({
+            conversation: current,
+            update: {
+              ...fields(current),
+              id: conversationId,
+            },
+            space: this.space,
+            updateDate: new Date(),
+          }),
       });
 
       return fromNormalized(document);

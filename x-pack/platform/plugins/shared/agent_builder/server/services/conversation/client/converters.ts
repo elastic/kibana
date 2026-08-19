@@ -35,6 +35,7 @@ import {
 } from '../access_control';
 import type {
   ConversationCreateRequest,
+  ConversationUpdatableFields,
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
@@ -321,6 +322,25 @@ export const toEs = (
     ...(conversation.template_version !== undefined
       ? { template_version: conversation.template_version }
       : {}),
+  };
+};
+
+export const updateConversation = ({
+  conversation,
+  update,
+  space,
+  updateDate,
+}: {
+  conversation: NormalizedConversation;
+  update: ConversationUpdatableFields;
+  space: string;
+  updateDate: Date;
+}) => {
+  return {
+    ...conversation,
+    ...update,
+    space,
+    updated_at: updateDate.toISOString(),
   };
 };
 
