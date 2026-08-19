@@ -542,21 +542,22 @@ export const getAgentVersionMatchingCurrentStack = async (
     { maxTimeout: 10000 }
   );
 
-  let version =
-    semver.maxSatisfying(
-      map(agentVersions, (agentVersion) => agentVersion.split('-SNAPSHOT')[0]),
-      `<=${kbnStatus.version.number}`
-    ) ?? kbnStatus.version.number;
+  const useSnapshot =
+    kbnStatus.version.build_snapshot || kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX');
+  const suffix = useSnapshot ? '-SNAPSHOT' : '';
+  const matchingAgentVersions = agentVersions.filter(
+    (version) => version.endsWith('-SNAPSHOT') === useSnapshot
+  );
+  const version = semver.maxSatisfying(
+    map(matchingAgentVersions, (agentVersion) => agentVersion.split('-SNAPSHOT')[0]),
+    `<=${kbnStatus.version.number}`
+  );
 
-  const snapshotVersion = `${version}-SNAPSHOT`;
-  if (
-    agentVersions.includes(snapshotVersion) &&
-    (kbnStatus.version.build_snapshot || kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX'))
-  ) {
-    version = snapshotVersion;
+  if (!version) {
+    throw new Error(`Unable to find an Agent version compatible with ${kbnStatus.version.number}`);
   }
 
-  return version;
+  return `${version}${suffix}`;
 };
 
 // Generates a file name using system arch and an agent version.
