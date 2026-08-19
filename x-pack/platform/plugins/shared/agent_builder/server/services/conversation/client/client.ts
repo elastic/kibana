@@ -75,6 +75,8 @@ import {
   type Document,
   type VersionedDocument,
 } from './converters';
+import { roundsToEvents } from './rounds_to_events';
+import { eventsToRounds } from './events_to_rounds';
 
 /** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
 const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
@@ -104,6 +106,24 @@ const buildMetadataFromTemplate = (
     },
     {}
   );
+
+/**
+ * Read-path round-trip verification. When on, a conversation's rounds are replaced by
+ * `eventsToRounds(roundsToEvents(...))` so every test suite that reads a conversation asserts the
+ * rounds<->events conversion is an identity — a fidelity regression fails CI. Applied at the
+ * response boundary only (never `fromEs`, which also feeds the OCC write path), so writes always
+ * persist the real rounds.
+ *
+ * On automatically in CI (every suite that reads a conversation exercises it), and opt-in locally
+ * via `AGENT_BUILDER_ROUNDTRIP_VERIFY=true`. Always OFF in production: a deployed Kibana never sets
+ * `CI`, so real reads return the stored rounds untouched.
+ */
+const ROUNDTRIP_VERIFY = process.env.CI === 'true';
+
+const verifyRoundTrip = (conversation: Conversation): Conversation =>
+  ROUNDTRIP_VERIFY
+    ? { ...conversation, rounds: eventsToRounds(roundsToEvents(conversation)) }
+    : conversation;
 
 export interface ConversationClient {
   get(conversationId: string): Promise<ConversationWithPermissions>;
@@ -268,7 +288,9 @@ class ConversationClientImpl implements ConversationClient {
 
     try {
       return withDeserializedMetadata(
-        fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
+        verifyRoundTrip(
+          fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
+        )
       );
     } catch (error) {
       if (isConversationNotFoundError(error)) {
@@ -548,7 +570,7 @@ class ConversationClientImpl implements ConversationClient {
 
   private toResponseConversation(document: Document): ConversationWithPermissions {
     return withDeserializedMetadata({
-      ...fromEs(document),
+      ...verifyRoundTrip(fromEs(document)),
       permissions: getConversationPermissions({
         conversation: document._source!,
         user: this.user,
