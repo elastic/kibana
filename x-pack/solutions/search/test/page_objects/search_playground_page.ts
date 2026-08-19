@@ -472,7 +472,7 @@ export function SearchPlaygroundPageProvider({ getService }: FtrProviderContext)
         );
         // The fixed embedded console bar intercepts Selenium clicks on badges near the
         // bottom of the viewport. Use a JS click to bypass the overlay check.
-        await browser.execute((el: HTMLElement) => el.click(), removeFieldButton);
+        await browser.execute((el: HTMLElement) => el.click(), removeFieldButton as any);
         expect(
           await comboBox.getComboBoxSelectedOptions(`contextFieldsSelectable-${indexName}`)
         ).to.eql(['bar', 'baz', 'baz.keyword', 'foo', 'nestedField']);
