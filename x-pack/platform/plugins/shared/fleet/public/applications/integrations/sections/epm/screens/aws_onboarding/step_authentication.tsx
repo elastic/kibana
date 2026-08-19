@@ -1549,7 +1549,7 @@ export const StepAuthentication: React.FunctionComponent<{
           onClose={() => setIsEditModalOpen(false)}
           aria-label="Edit deployment method"
           data-test-subj="awsOnboardingDeploymentMethodModal"
-          style={{ width: 400 }}
+          style={{ width: euiTheme.breakpoint.s }}
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>Edit deployment method</EuiModalHeaderTitle>
