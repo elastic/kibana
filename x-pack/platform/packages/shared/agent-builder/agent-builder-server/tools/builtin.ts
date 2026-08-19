@@ -21,7 +21,7 @@ import type { WorkflowToolDefinition } from '@kbn/agent-builder-common/tools/typ
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents';
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
-import type { ToolHandlerFn } from './handler';
+import type { ToolHandlerContext, ToolHandlerFn } from './handler';
 
 /**
  * MCP tool annotations for builtin tools exposed via the Agent Builder MCP server.
@@ -113,15 +113,22 @@ export interface ToolAvailabilityConfig {
 
 export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
 
+export interface BuiltInToolConfirmationContext<
+  TParams extends Record<string, unknown> = Record<string, unknown>
+> {
+  toolParams: TParams;
+  context: ToolHandlerContext;
+}
+
 export interface BuiltInToolConfirmationPolicy<
   TParams extends Record<string, unknown> = Record<string, unknown>
 > extends ToolConfirmationPolicy {
   /**
    * If set, will be used to get the confirmation
    */
-  getConfirmation?: (opts: {
-    toolParams: TParams;
-  }) => MaybePromise<ToolPolicyConfirmationDefinition>;
+  getConfirmation?: (
+    context: BuiltInToolConfirmationContext<TParams>
+  ) => MaybePromise<ToolPolicyConfirmationDefinition>;
 }
 
 export interface BuiltInToolSpecificConfig<
