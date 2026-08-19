@@ -80,26 +80,34 @@ steps:
         with:
           duration: 60s
 
-      - name: index_projects
-        type: foreach
-        foreach: '{{ steps.fetch_projects.output.data.organization.projectsV2.nodes | json }}'
-        steps:
-          - name: upsert_project
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.projectsIndex }}'
-              id: '{{ foreach.item.id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                project:
-                  id: '{{ foreach.item.id }}'
-                  number: '{{ foreach.item.number }}'
-                  title: '{{ foreach.item.title }}'
-                  url: '{{ foreach.item.url }}'
-                payload: '${{ foreach.item }}'
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_projects.output.data.organization.projectsV2.nodes %}
+            [
+            {%- for node in items -%}
+              {
+                "id": "{{ node.id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "project": {
+                  "id": "{{ node.id }}",
+                  "number": "{{ node.number }}",
+                  "title": "{{ node.title }}",
+                  "url": "{{ node.url }}"
+                },
+                "payload": {{ node | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
+
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.projectsIndex }}'
+          id_field: id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
 
       - name: advance_cursor
         type: data.set

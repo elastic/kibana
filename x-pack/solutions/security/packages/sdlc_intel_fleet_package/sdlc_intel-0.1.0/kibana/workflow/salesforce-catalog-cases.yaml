@@ -88,41 +88,48 @@ steps:
           soql: '${{ variables.nextRecordsUrl == null || variables.nextRecordsUrl == "" ? variables.baseSoql : "" }}'
           nextRecordsUrl: '${{ variables.nextRecordsUrl }}'
 
-      - name: index_cases
-        type: foreach
-        foreach: '${{ steps.fetch_cases.output.records | json }}'
-        steps:
-          - name: upsert_case
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.casesIndex }}'
-              id: '${{ foreach.item.Id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                case:
-                  id: '${{ foreach.item.Id }}'
-                  number: '${{ foreach.item.CaseNumber }}'
-                  subject: '${{ foreach.item.Subject }}'
-                  status: '${{ foreach.item.Status }}'
-                  priority: '${{ foreach.item.Priority }}'
-                  created_at: '${{ foreach.item.CreatedDate }}'
-                  closed_at: '${{ foreach.item.ClosedDate }}'
-                  last_modified_at: '${{ foreach.item.LastModifiedDate }}'
-                account:
-                  id: '${{ foreach.item.AccountId }}'
-                  name: '${{ foreach.item.Account?.Name ?? "" }}'
-                product:
-                  area: '${{ foreach.item.REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD ?? "" }}'
-                links:
-                  github_issue_url: '${{ foreach.item.REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD ?? "" }}'
-                  link_source: salesforce_field
-                feedback:
-                  is_escalated: false
-                  linked_to_sdh: false
-                payload: '${{ foreach.item }}'
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_cases.output.records %}
+            [
+            {%- for node in items -%}
+              {
+                "Id": "${{ node.Id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "case": {
+                  "id": "${{ node.Id }}",
+                  "number": "${{ node.CaseNumber }}",
+                  "subject": "${{ node.Subject }}",
+                  "status": "${{ node.Status }}",
+                  "priority": "${{ node.Priority }}",
+                  "created_at": "${{ node.CreatedDate }}",
+                  "closed_at": "${{ node.ClosedDate }}",
+                  "last_modified_at": "${{ node.LastModifiedDate }}"
+                },
+                "account": {
+                  "id": "${{ node.AccountId }}",
+                  "name": "${{ node.Account?.Name ?? "" }}"
+                },
+                "product": {"area": "${{ node.REPLACE_WITH_SALESFORCE_PRODUCT_AREA_FIELD ?? "" }}"},
+                "links": {
+                  "github_issue_url": "${{ node.REPLACE_WITH_SALESFORCE_CASE_GITHUB_FIELD ?? "" }}",
+                  "link_source": "salesforce_field"
+                },
+                "feedback": {"is_escalated": false, "linked_to_sdh": false},
+                "payload": {{ node | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
+
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.casesIndex }}'
+          id_field: Id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
 
       - name: advance_pagination
         type: data.set

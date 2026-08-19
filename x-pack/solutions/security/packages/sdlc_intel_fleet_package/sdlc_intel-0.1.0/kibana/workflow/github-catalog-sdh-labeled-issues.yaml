@@ -100,79 +100,36 @@ steps:
         with:
           duration: 60s
 
-      - name: index_sdh_labeled_issues
-        type: foreach
-        foreach: '${{ steps.fetch_sdh_labeled_issues.output.data.search.nodes | json }}'
-        steps:
-          - name: upsert_sdh_labeled_issue
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.issuesIndex }}'
-              id: '${{ foreach.item.id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                entity:
-                  type: sdh_issue
-                  id: '${{ foreach.item.id }}'
-                  url: '${{ foreach.item.url }}'
-                  number: '${{ foreach.item.number }}'
-                org:
-                  login: '{{ consts.orgLogin }}'
-                repository:
-                  name: '${{ foreach.item.repository.name }}'
-                  full_name: '${{ foreach.item.repository.nameWithOwner }}'
-                github:
-                  created_at: '${{ foreach.item.createdAt }}'
-                  updated_at: '${{ foreach.item.updatedAt }}'
-                  closed_at: '${{ foreach.item.closedAt }}'
-                  state: '${{ foreach.item.state }}'
-                labels: '${{ foreach.item.labels.nodes | json }}'
-                people:
-                  author: '${{ foreach.item.author.login }}'
-                content:
-                  title: '${{ foreach.item.title }}'
-                  body: '${{ foreach.item.body }}'
-                  searchable: '{{ foreach.item.title }} {{ foreach.item.body }}'
-                feedback:
-                  is_sdh: true
-                  sdh_catalog_source: sdh_label
-                  linked_salesforce_case_id: ''
-                  linked_salesforce_case_number: ''
-                  link_source: ''
-                payload: '${{ foreach.item }}'
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_sdh_labeled_issues.output.data.search.nodes %}
+            [
+            {%- for node in items -%}
+              {
+                "id": "${{ node.id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "entity": {"type": "sdh_issue", "id": "${{ node.id }}", "url": "${{ node.url }}", "number": "${{ node.number }}"},
+                "org": {"login": "{{ consts.orgLogin }}"},
+                "repository": {"name": "${{ node.repository.name }}", "full_name": "${{ node.repository.nameWithOwner }}"},
+                "github": {"created_at": "${{ node.createdAt }}", "updated_at": "${{ node.updatedAt }}", "closed_at": "${{ node.closedAt }}", "state": "${{ node.state }}"},
+                "people": {"author": "${{ node.author.login }}"},
+                "content": {"title": "${{ node.title }}", "body": "${{ node.body }}", "searchable": "{{ node.title }} {{ node.body }}"},
+                "feedback": {"is_sdh": true, "sdh_catalog_source": "sdh_label", "linked_salesforce_case_id": "", "linked_salesforce_case_number": "", "link_source": ""},
+                "payload": {{ node | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
 
-          - name: track_last_updated
-            type: data.set
-            if: '${{ foreach.item.updatedAt != null and foreach.item.updatedAt != "" }}'
-            with:
-              lastIssueUpdatedAt: '${{ foreach.item.updatedAt }}'
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.issuesIndex }}'
+          id_field: id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
 
-          - name: checkpoint_page
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.syncStateIndex }}'
-              id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                entity_type: '{{ consts.entityType }}'
-                org:
-                  login: '{{ consts.orgLogin }}'
-                cursor: '${{ variables.checkpointCursor }}'
-                watermark: '{{ variables.checkpointWatermark }}'
-                last_run_at: '{{ execution.startedAt }}'
-                last_run_status: in_progress
-                stats:
-                  pages_fetched: '${{ variables.pagesFetched }}'
-                  has_next_page: '${{ variables.continuePaging }}'
-                  issue_count: '${{ steps.fetch_sdh_labeled_issues.output.data.search.issueCount ?? 0 }}'
-                  search_query: '{{ variables.searchQuery }}'
-                  sdh_label: '{{ consts.sdhLabel }}'
       - name: advance_cursor
         type: data.set
         with:

@@ -80,26 +80,34 @@ steps:
         with:
           duration: 60s
 
-      - name: index_teams
-        type: foreach
-        foreach: '{{ steps.fetch_teams.output.data.organization.teams.nodes | json }}'
-        steps:
-          - name: upsert_team
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.teamsIndex }}'
-              id: '{{ foreach.item.id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                team:
-                  slug: '{{ foreach.item.slug }}'
-                  name: '{{ foreach.item.name }}'
-                  org: '{{ consts.orgLogin }}'
-                  members_count: '{{ foreach.item.members.totalCount }}'
-                payload: '${{ foreach.item }}'
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_teams.output.data.organization.teams.nodes %}
+            [
+            {%- for node in items -%}
+              {
+                "id": "{{ node.id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "team": {
+                  "slug": "{{ node.slug }}",
+                  "name": "{{ node.name }}",
+                  "org": "{{ consts.orgLogin }}",
+                  "members_count": "{{ node.members.totalCount }}"
+                },
+                "payload": {{ node | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
+
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.teamsIndex }}'
+          id_field: id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
 
       - name: advance_cursor
         type: data.set

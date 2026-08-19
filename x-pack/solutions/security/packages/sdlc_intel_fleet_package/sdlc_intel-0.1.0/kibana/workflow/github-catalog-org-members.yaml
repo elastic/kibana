@@ -80,25 +80,33 @@ steps:
         with:
           duration: 60s
 
-      - name: index_members
-        type: foreach
-        foreach: '{{ steps.fetch_members.output.data.organization.membersWithRole.edges | json }}'
-        steps:
-          - name: upsert_member
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.peopleIndex }}'
-              id: '{{ foreach.item.node.id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                person:
-                  login: '{{ foreach.item.node.login }}'
-                  name: '{{ foreach.item.node.name }}'
-                  id: '{{ foreach.item.node.id }}'
-                payload: '${{ foreach.item }}'
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_members.output.data.organization.membersWithRole.edges %}
+            [
+            {%- for edge in items -%}
+              {
+                "id": "{{ edge.node.id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "person": {
+                  "login": "{{ edge.node.login }}",
+                  "name": "{{ edge.node.name }}",
+                  "id": "{{ edge.node.id }}"
+                },
+                "payload": {{ edge | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
+
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.peopleIndex }}'
+          id_field: id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
 
       - name: advance_cursor
         type: data.set
