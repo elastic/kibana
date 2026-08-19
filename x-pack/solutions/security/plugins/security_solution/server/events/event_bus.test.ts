@@ -95,12 +95,14 @@ describe('SecuritySolutionEventBus', () => {
           attackIds: ['a'],
           status: 'closed' as const,
           previousStatuses: [],
+          truncated: false,
         }),
       on: (b: SecuritySolutionEventBus, cb: jest.Mock) => b.onAttackStatusChanged(cb),
       expectedPayload: {
         attackIds: ['a'],
         status: 'closed',
         previousStatuses: [],
+        truncated: false,
       },
       otherEmit: (b: SecuritySolutionEventBus) =>
         b.emitAlertTagsChanged(mockRequest, {

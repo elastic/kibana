@@ -328,6 +328,31 @@ describe('set unified alerts workflow status', () => {
       expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
     });
 
+    test('emits attackStatusChanged when _index is the concrete RAC backing index (.internal.* prefix)', async () => {
+      context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
+        docs: [
+          {
+            found: true,
+            _id: 'somefakeid1',
+            _index: '.internal.alerts-security.attack.discovery.alerts-default-000001',
+            _source: { 'kibana.alert.workflow_status': 'open' },
+          },
+        ],
+      });
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_SET_UNIFIED_ALERTS_WORKFLOW_STATUS_URL,
+        body: typicalSetStatusSignalByIdsPayload(),
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ attackIds: ['somefakeid1'], status: 'closed' })
+      );
+      expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+    });
+
     test('emits both triggers when IDs span detection alerts and attack discovery documents', async () => {
       context.core.elasticsearch.client.asCurrentUser.mget.mockResponse({
         docs: [

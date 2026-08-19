@@ -106,11 +106,13 @@ describe('registerSecurityWorkflowEventBridge', () => {
           attackIds: ['a'],
           status: 'closed' as const,
           previousStatuses: [],
+          truncated: false,
         }),
       expectedPayload: {
         attackIds: ['a'],
         status: 'closed',
         previousStatuses: [],
+        truncated: false,
       },
     },
     {

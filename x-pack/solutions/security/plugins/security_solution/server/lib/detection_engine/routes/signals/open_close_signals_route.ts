@@ -37,6 +37,7 @@ import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   prefetchPreviousStatusesByIds,
   prefetchPreviousStatusesByQuery,
+  type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 
@@ -120,7 +121,7 @@ export const setSignalsStatusRoute = (
         try {
           if ('signal_ids' in request.body) {
             const signalIds = request.body.signal_ids;
-            const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
+            const previousStatuses: PreviousStatus[] = [];
             if (eventBus) {
               try {
                 const { previousStatuses: fetched } = await prefetchPreviousStatusesByIds(
@@ -181,7 +182,7 @@ export const setSignalsStatusRoute = (
             const runtimeMappings = buildRuntimeMappingsFromFieldTypes(runtimeFields);
 
             let prefetchedAlertIds: string[] = [];
-            let previousStatuses: Array<{ id: string; previousStatus: string }> = [];
+            let previousStatuses: PreviousStatus[] = [];
             let truncated = false;
             if (eventBus) {
               try {

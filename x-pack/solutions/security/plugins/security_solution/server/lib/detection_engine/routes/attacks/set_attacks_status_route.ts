@@ -22,6 +22,7 @@ import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 import {
   prefetchPreviousStatusesByIds,
   extractWorkflowStatus,
+  type PreviousStatus,
 } from '../common/operations/prefetch_previous_statuses';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 import { INSIGHTS_CHANNEL } from '../../../telemetry/constants';
@@ -112,7 +113,7 @@ export const setAttacksStatusRoute = (
         const attackIndex = await getAttackAlertsIndex({ context });
 
         if (!updateRelatedAlerts) {
-          const attackPreviousStatuses: Array<{ id: string; previousStatus: string }> = [];
+          const attackPreviousStatuses: PreviousStatus[] = [];
           if (eventBus) {
             try {
               const esClient = core.elasticsearch.client.asCurrentUser;
@@ -188,7 +189,7 @@ export const setAttacksStatusRoute = (
             // the target to the unified index pattern for the cascade update.
             const index = await getUnifiedAlertsIndex({ context, ruleDataClient });
 
-            const relatedAlertPreviousStatuses: Array<{ id: string; previousStatus: string }> = [];
+            const relatedAlertPreviousStatuses: PreviousStatus[] = [];
             if (eventBus && relatedAlertIds.length > 0) {
               try {
                 const esClient = core.elasticsearch.client.asCurrentUser;

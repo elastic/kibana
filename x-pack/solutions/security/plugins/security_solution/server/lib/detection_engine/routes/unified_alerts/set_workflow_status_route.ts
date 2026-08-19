@@ -32,9 +32,15 @@ import {
 } from '../common/operations/prefetch_previous_statuses';
 import { MAX_ALERTS_PER_TRIGGER } from '../../../../../common/workflows/triggers';
 
-const isAttackDiscoveryIndex = (index: string): boolean =>
-  index.startsWith(ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX) ||
-  index.startsWith(ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX);
+const isAttackDiscoveryIndex = (index: string): boolean => {
+  // ES returns the concrete backing index for RAC alerts (`.internal.alerts-security.*`),
+  // not the read alias, so normalise the prefix before matching.
+  const normalized = index.startsWith('.internal.') ? index.replace('.internal.', '.') : index;
+  return (
+    normalized.startsWith(ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX) ||
+    normalized.startsWith(ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX)
+  );
+};
 
 export const setUnifiedAlertsWorkflowStatusRoute = (
   router: SecuritySolutionPluginRouter,
