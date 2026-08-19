@@ -8,7 +8,8 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration',
-  rootDir: '../../..',
-  roots: ['<rootDir>/src/core/public'],
+  preset: '@kbn/test',
+  rootDir: '../../../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/shared-ux/link/redirect_app'],
+  verbose: true,
 };
