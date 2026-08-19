@@ -174,7 +174,9 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(wafRow.getByText('us-east-1')).toBeVisible();
 
     // cloudtrail has per-service override
-    const cloudtrailRow = page.getByRole('row', { name: /CloudTrail/ });
+    const cloudtrailRow = page.locator('tr', {
+      has: page.testSubj.locator('serviceSettingsStep-serviceLink-cloudtrail'),
+    });
     await expect(cloudtrailRow.getByText('eu-west-1')).toBeVisible();
   });
 
