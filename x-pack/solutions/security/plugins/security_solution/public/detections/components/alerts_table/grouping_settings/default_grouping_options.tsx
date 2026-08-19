@@ -24,6 +24,10 @@ const SOURCE_IP = i18n.translate('xpack.securitySolution.alertsTable.groups.sour
   defaultMessage: 'Source IP',
 });
 
+const DESTINATION_IP = i18n.translate('xpack.securitySolution.alertsTable.groups.destinationIP', {
+  defaultMessage: 'Destination IP',
+});
+
 /**
  * Returns a list of fields for the default grouping options. These are displayed in the `Group alerts by` dropdown button.
  *
@@ -45,5 +49,9 @@ export const defaultGroupingOptions: GroupOption[] = [
   {
     label: SOURCE_IP,
     key: 'source.ip',
+  },
+  {
+    label: DESTINATION_IP,
+    key: 'destination.ip',
   },
 ];

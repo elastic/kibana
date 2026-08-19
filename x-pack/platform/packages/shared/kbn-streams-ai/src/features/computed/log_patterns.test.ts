@@ -13,6 +13,7 @@ import { logPatternsGenerator, selectLogPatternsForLlm } from './log_patterns';
 
 jest.mock('@kbn/ai-tools', () => ({
   getSigEventsLogPatternsEsql: jest.fn(),
+  DEFAULT_ESQL_QUERY_TIMEOUT_MS: 30_000,
 }));
 
 jest.mock('@kbn/traced-es-client', () => ({
@@ -50,14 +51,14 @@ describe('logPatternsGenerator', () => {
       client: esClient,
       logger,
       plugin: 'streams',
+      abortSignal: expect.any(AbortSignal),
     });
     expect(getSigEventsLogPatternsEsqlMock).toHaveBeenCalledWith({
       esClient: tracedClient,
-      index: stream.name,
+      samplingSource: stream.name,
       start: 100,
       end: 200,
       fields: ['message', 'body.text'],
-      logger,
     });
     expect(result).toEqual({
       patterns: [{ field: 'message', pattern: 'common', count: 10, sample: 'common sample' }],

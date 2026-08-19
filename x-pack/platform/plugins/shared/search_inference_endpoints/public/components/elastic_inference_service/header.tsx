@@ -5,22 +5,30 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-
-import { EuiButton, EuiButtonEmpty, EuiPageTemplate } from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AppHeader } from '@kbn/app-header';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
-import { isInferencePreferencesEnabled } from '../../feature_flag';
+import { useInferenceCapabilities } from '../../hooks/use_inference_capabilities';
 
-export const ElasticInferenceServiceModelsHeader = () => {
+interface ElasticInferenceServiceModelsHeaderProps {
+  onManageRegions: () => void;
+}
+
+export const ElasticInferenceServiceModelsHeader = ({
+  onManageRegions,
+}: ElasticInferenceServiceModelsHeaderProps) => {
   const {
-    services: { cloud, uiSettings },
+    services: { cloud },
   } = useKibana();
+  const { canManage } = useInferenceCapabilities();
 
-  const showManageRegions = isInferencePreferencesEnabled(uiSettings);
+  const showManageRegions = canManage;
 
   const [billingUrl, setBillingUrl] = useState<string>();
+
   useEffect(() => {
     if (cloud?.isCloudEnabled && cloud?.getPrivilegedUrls) {
       cloud.getPrivilegedUrls().then((urls) => {
@@ -31,70 +39,55 @@ export const ElasticInferenceServiceModelsHeader = () => {
     }
   }, [cloud]);
 
+  const menu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        ...(cloud?.isCloudEnabled && billingUrl
+          ? [
+              {
+                id: 'viewCloudUsage',
+                label: i18n.translate(
+                  'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button',
+                  { defaultMessage: 'View Cloud usage' }
+                ),
+                iconType: 'external' as const,
+                href: billingUrl,
+                target: '_blank',
+                testId:
+                  'searchInferenceEndpointsElasticInferenceServiceModelsHeaderViewCloudUsageButton',
+              },
+            ]
+          : []),
+        ...(showManageRegions
+          ? [
+              {
+                id: 'manageRegions',
+                label: i18n.translate(
+                  'xpack.searchInferenceEndpoints.eisModelsPage.manageRegionsButton',
+                  { defaultMessage: 'Region preferences' }
+                ),
+                iconType: 'gear' as const,
+                run: onManageRegions,
+                testId: 'eisManageRegionsButton',
+              },
+            ]
+          : []),
+      ],
+    }),
+    [billingUrl, cloud?.isCloudEnabled, onManageRegions, showManageRegions]
+  );
+
   return (
-    <EuiPageTemplate.Header
-      data-test-subj="eisModelsPageHeader"
-      pageTitle={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.header', {
+    <AppHeader
+      title={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.header', {
         defaultMessage: 'Elastic Inference Service',
       })}
       description={i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.description', {
         defaultMessage: 'Manage models and endpoints for Elastic Inference Service',
       })}
-      paddingSize="none"
-      bottomBorder={true}
-      rightSideItems={[
-        ...(cloud?.isCloudEnabled && billingUrl
-          ? [
-              <EuiButton
-                data-test-subj="searchInferenceEndpointsElasticInferenceServiceModelsHeaderViewCloudUsageButton"
-                href={billingUrl}
-                target="_blank"
-                iconType="external"
-                aria-label={i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.ariaLabel',
-                  {
-                    defaultMessage: 'Click to go Cloud usage details',
-                  }
-                )}
-              >
-                {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.cloudUsage.button', {
-                  defaultMessage: 'View Cloud usage',
-                })}
-              </EuiButton>,
-            ]
-          : []),
-        <EuiButtonEmpty
-          iconType="documentation"
-          aria-label={i18n.translate(
-            'xpack.searchInferenceEndpoints.eisModelsPage.header.documentation.ariaLabel',
-            {
-              defaultMessage: 'Click to go Elastic Inference Service documentation',
-            }
-          )}
-          href={docLinks.elasticInferenceService}
-          iconSide="left"
-          target="_blank"
-          data-test-subj="eis_documentation"
-        >
-          {i18n.translate('xpack.searchInferenceEndpoints.eisModelsPage.documentationButton', {
-            defaultMessage: 'Documentation',
-          })}
-        </EuiButtonEmpty>,
-        ...(showManageRegions
-          ? [
-              <EuiButton
-                data-test-subj="eisManageRegionsButton"
-                iconType="plusInCircle"
-                onClick={() => {}}
-              >
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.eisModelsPage.manageRegions.button',
-                  { defaultMessage: 'Manage regions' }
-                )}
-              </EuiButton>,
-            ]
-          : []),
-      ]}
+      menu={menu}
+      docLink={docLinks.elasticInferenceService}
+      spacing="bleed"
     />
   );
 };

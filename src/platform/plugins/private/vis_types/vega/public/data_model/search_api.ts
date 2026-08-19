@@ -56,7 +56,9 @@ export class SearchAPI {
     public readonly inspectorAdapters?: VegaInspectorAdapters,
     private readonly searchSessionId?: string,
     private readonly executionContext?: KibanaExecutionContext,
-    public readonly projectRouting?: ProjectRouting
+    public readonly projectRouting?: ProjectRouting,
+    /** Only applies to ES|QL requests, see {@link searchEsql} */
+    private readonly isApproximate: boolean = false
   ) {}
 
   search(searchRequests: SearchRequest[]) {
@@ -153,7 +155,11 @@ export class SearchAPI {
                 ...request,
                 searchSessionId: this.searchSessionId,
               });
-              requestResponders[requestId].json(restRequest);
+              requestResponders[requestId].json({
+                ...restRequest,
+                projectRouting: this.projectRouting,
+                approximation: this.isApproximate,
+              });
             }
           }),
           switchMap(() => {
@@ -166,6 +172,7 @@ export class SearchAPI {
                   sessionId: this.searchSessionId,
                   executionContext: this.executionContext,
                   projectRouting: this.projectRouting,
+                  approximation: this.isApproximate,
                 }
               )
               .pipe(

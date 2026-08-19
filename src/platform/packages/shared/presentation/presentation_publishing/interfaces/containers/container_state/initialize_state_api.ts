@@ -16,7 +16,7 @@ import { apiHasLastSavedChildState } from '../last_saved_child_state';
 import type { PresentationContainer } from '../presentation_container';
 import type { HasUniqueId } from '../../has_uuid';
 import type { HasParentApi } from '../../has_parent_api';
-const UNSAVED_CHANGES_DEBOUNCE = 100;
+export const UNSAVED_CHANGES_DEBOUNCE = 100;
 
 export const initializeStateApi = <StateType extends object = object>({
   uuid,

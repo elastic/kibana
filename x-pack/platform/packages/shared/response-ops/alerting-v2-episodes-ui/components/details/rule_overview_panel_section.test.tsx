@@ -103,6 +103,38 @@ describe('AlertEpisodeRuleOverviewPanelSection', () => {
     ).toBeInTheDocument();
   });
 
+  it('renders nothing when the rule returns 403 (insufficient privileges)', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [
+        { name: '@timestamp', type: 'date' },
+        { name: 'episode.status', type: 'keyword' },
+        { name: 'rule.id', type: 'keyword' },
+        { name: 'group_hash', type: 'keyword' },
+      ],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
+    });
+    mockHttp.get.mockRejectedValueOnce({
+      response: { status: 403 },
+      body: { code: 'FORBIDDEN', error: 'Forbidden', message: 'Forbidden' },
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodeRuleOverviewPanelSection episodeId="ep-1" services={mockServices} />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId('alertingV2EpisodeRuleOverviewPanelSectionError')
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('alertingV2EpisodeDetailsRuleOverviewPanel')
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it('renders nothing when the rule returns 404', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({
       columns: [

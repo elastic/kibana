@@ -34,9 +34,11 @@ dependsOn:
   - '@kbn/deeplinks-management'
   - '@kbn/management-settings-ids'
   - '@kbn/alerting-v2-utils'
+  - '@kbn/deeplinks-workflows'
   - '@kbn/ai-assistant-common'
   - '@kbn/ai-assistant-icon'
   - '@kbn/shared-ux-page-kibana-template'
+  - '@kbn/shared-ux-ai-components'
 tags:
   - plugin
   - prod

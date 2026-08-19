@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { expectPrettyError } from '@kbn/zod-helpers/v4';
+import { durationFormatSchema } from './duration_units';
 import { formatTypeSchema, formatSchema } from './format';
 
 describe('Format Schemas', () => {
@@ -20,7 +21,7 @@ describe('Format Schemas', () => {
         compact: true,
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -32,7 +33,7 @@ describe('Format Schemas', () => {
         compact: false,
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -41,7 +42,7 @@ describe('Format Schemas', () => {
         type: 'number' as const,
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual({
         type: 'number',
         decimals: 2,
@@ -58,7 +59,7 @@ describe('Format Schemas', () => {
         suffix: '/s',
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -69,7 +70,7 @@ describe('Format Schemas', () => {
         suffix: '/sec',
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -78,13 +79,13 @@ describe('Format Schemas', () => {
         type: 'bytes' as const,
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toHaveProperty('type', input.type);
     });
   });
 
-  describe('durationFormat', () => {
-    it('validates a valid duration format configuration', () => {
+  describe('durationFormat — GA enum values', () => {
+    it('validates a valid duration format configuration with short units', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
@@ -92,28 +93,104 @@ describe('Format Schemas', () => {
         suffix: ' duration',
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
-    it('validates duration format without suffix', () => {
+    it('validates duration format with `min` for minutes', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
         to: 'min',
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
-    it('throws on missing required fields', () => {
+    it('validates `auto-approximate` output (precise auto-select)', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 's',
+        to: 'auto-approximate',
+      };
+
+      const validated = formatTypeSchema.parse(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates `auto` output (approximate auto-select)', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'ms',
+        to: 'auto',
+      };
+
+      const validated = formatTypeSchema.parse(input);
+      expect(validated).toEqual(input);
+    });
+
+    it('validates fine-grained input units', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'us',
+        to: 'ms',
+      };
+
+      const validated = formatTypeSchema.parse(input);
+      expect(validated).toEqual(input);
+    });
+  });
+
+  describe('durationFormat — legacy unit names are rejected', () => {
+    it('rejects legacy `m` for minutes', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'm',
+        to: 'humanize',
+      };
+
+      expect(() => formatTypeSchema.parse(input)).toThrow();
+    });
+
+    it('rejects legacy `humanizePrecise` output name', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'ms',
+        to: 'humanizePrecise',
+      };
+
+      expect(() => formatTypeSchema.parse(input)).toThrow();
+    });
+
+    it('rejects verbose long-form unit names in the GA duration schema', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'seconds',
+        to: 'humanize',
+      };
+
+      expect(() => durationFormatSchema.parse(input)).toThrow();
+    });
+
+    it('rejects Lens state output names like `asMinutes` in the GA duration schema', () => {
+      const input = {
+        type: 'duration' as const,
+        from: 'ms',
+        to: 'asMinutes',
+      };
+
+      expect(() => durationFormatSchema.parse(input)).toThrow();
+    });
+
+    it('throws on missing required `to` field', () => {
       const input = {
         type: 'duration' as const,
         from: 'ms',
       };
 
-      expect(() => formatTypeSchema.validate(input)).toThrow(/\[2.to\]: expected value of type/);
+      const result = formatTypeSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 
@@ -124,7 +201,7 @@ describe('Format Schemas', () => {
         pattern: '0,0.00',
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -133,9 +210,8 @@ describe('Format Schemas', () => {
         type: 'custom' as const,
       };
 
-      expect(() => formatTypeSchema.validate(input)).toThrow(
-        /\[3.pattern\]: expected value of type/
-      );
+      const result = formatTypeSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
     });
   });
 
@@ -149,14 +225,14 @@ describe('Format Schemas', () => {
         },
       };
 
-      const validated = schema.object(formatSchema).validate(input);
+      const validated = formatSchema.parse(input);
       expect(validated).toEqual({ ...input, format: { ...input.format, compact: false } });
     });
 
     it('validates without format configuration', () => {
       const input = {};
 
-      const validated = schema.object(formatSchema).validate(input);
+      const validated = formatSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -167,7 +243,11 @@ describe('Format Schemas', () => {
         },
       };
 
-      expect(() => schema.object(formatSchema).validate(input)).toThrow();
+      const result = formatSchema.safeParse(input);
+      expectPrettyError(result).toMatchInlineSnapshot(`
+        "✖ Invalid input
+          → at format"
+      `);
     });
   });
 
@@ -180,7 +260,7 @@ describe('Format Schemas', () => {
         compact: true,
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
 
@@ -191,7 +271,7 @@ describe('Format Schemas', () => {
         suffix: '',
       };
 
-      const validated = formatTypeSchema.validate(input);
+      const validated = formatTypeSchema.parse(input);
       expect(validated).toEqual(input);
     });
   });

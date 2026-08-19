@@ -6,7 +6,11 @@
  */
 
 import { SYNTHETICS_INDEX_PATTERN } from './constants';
-import { getSyntheticsCcsIndex, getSyntheticsIndices } from './get_synthetics_indices';
+import {
+  getSyntheticsCcsIndex,
+  getSyntheticsIndices,
+  getSyntheticsScopedIndex,
+} from './get_synthetics_indices';
 
 describe('getSyntheticsCcsIndex', () => {
   it('defaults to the local synthetics index pattern when no remoteName is provided', () => {
@@ -31,6 +35,28 @@ describe('getSyntheticsCcsIndex', () => {
     expect(getSyntheticsCcsIndex(undefined, '.alerts-observability*')).toBe(
       '.alerts-observability*'
     );
+  });
+});
+
+describe('getSyntheticsScopedIndex', () => {
+  it('queries the heartbeatIndices unchanged for a local monitor', () => {
+    expect(
+      getSyntheticsScopedIndex(
+        undefined,
+        `${SYNTHETICS_INDEX_PATTERN},*:${SYNTHETICS_INDEX_PATTERN}`
+      )
+    ).toBe(`${SYNTHETICS_INDEX_PATTERN},*:${SYNTHETICS_INDEX_PATTERN}`);
+  });
+
+  it('scopes a remote monitor to that single cluster, ignoring a multi-cluster heartbeatIndices', () => {
+    // Prefixing the multi-cluster value directly would leave a trailing
+    // `*:synthetics-*` that fans back out to every remote cluster.
+    expect(
+      getSyntheticsScopedIndex(
+        'cluster1',
+        `${SYNTHETICS_INDEX_PATTERN},*:${SYNTHETICS_INDEX_PATTERN}`
+      )
+    ).toBe(`cluster1:${SYNTHETICS_INDEX_PATTERN}`);
   });
 });
 

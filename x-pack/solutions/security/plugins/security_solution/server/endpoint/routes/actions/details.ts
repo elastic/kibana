@@ -64,12 +64,15 @@ export const getActionDetailsRequestHandler = (
   return async (context, req, res) => {
     try {
       const activeSpaceId = (await context.securitySolution).getSpaceId();
+      const scoped = endpointContext.service.asScoped(req);
+
       return res.ok({
         body: {
           data: await getActionDetailsById(
             endpointContext.service,
             activeSpaceId,
-            req.params.action_id
+            req.params.action_id,
+            { scoped }
           ),
         },
       });

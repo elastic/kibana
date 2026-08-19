@@ -1,0 +1,158 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import { createTraceAccessor } from '../trace_accessor';
+import { createEvaluatorRegistry } from '../registry';
+import { correctnessEvaluator } from '.';
+
+describe('correctness evaluator', () => {
+  const traceId = '0af7651916cd43dd8448eb211c80319c';
+
+  const createEsClient = () => {
+    const searchMock = jest.fn();
+    const esClient = {
+      search: searchMock,
+    } as unknown as ElasticsearchClient;
+
+    return { esClient, searchMock };
+  };
+
+  it('uses one prompt call to produce factuality, relevance, and sequence_accuracy scores', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient, searchMock } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    const promptMock = jest.fn().mockResolvedValue({
+      toolCalls: [
+        {
+          function: {
+            arguments: {
+              summary: {
+                factual_accuracy_summary: 'ACCURATE',
+                relevance_summary: 'RELEVANT',
+                sequence_accuracy_summary: 'MATCH',
+              },
+              analysis: [
+                {
+                  claim: 'Payment service is healthy.',
+                  centrality: 'central',
+                  centrality_reason: 'Answers the user question.',
+                  verdict: 'FULLY_SUPPORTED',
+                  sequence_match: 'MATCH',
+                  justification_snippet: 'Payment service is healthy.',
+                  explanation: 'Claim matches expected output.',
+                },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    const result = await correctnessEvaluator.evaluate({
+      trace: traceAccessor,
+      round: {
+        input: { message: 'What is the payment status?' },
+        response: { message: 'Payment service is healthy.' },
+        steps: [],
+      },
+      referenceData: { expected: 'Payment service is healthy.' },
+      inferenceClient: { prompt: promptMock } as unknown as BoundInferenceClient,
+      log: logger,
+    });
+
+    expect(promptMock).toHaveBeenCalledTimes(1);
+    expect(promptMock.mock.calls[0][0]?.input).toEqual({
+      user_query: 'What is the payment status?',
+      agent_response: 'Payment service is healthy.',
+      ground_truth_response: 'Payment service is healthy.',
+    });
+    expect(searchMock).not.toHaveBeenCalled();
+    expect(result.scores.map((score) => score.name)).toEqual([
+      'factuality',
+      'relevance',
+      'sequence_accuracy',
+    ]);
+  });
+
+  it('throws when inferenceClient is not provided', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const { esClient } = createEsClient();
+    const traceAccessor = createTraceAccessor({ traceId, esClient });
+
+    await expect(
+      correctnessEvaluator.evaluate({
+        trace: traceAccessor,
+        round: {
+          input: { message: '' },
+          response: { message: '' },
+          steps: [],
+        },
+        referenceData: { expected: 'Payment service is healthy.' },
+        log: logger,
+      })
+    ).rejects.toThrow('Inference client is required for correctness evaluator');
+  });
+
+  describe('referenceDataSchema', () => {
+    const { referenceDataSchema } = correctnessEvaluator;
+
+    it('accepts a valid expected string', () => {
+      const result = referenceDataSchema!.safeParse({ expected: 'some expected output' });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects missing expected field', () => {
+      const result = referenceDataSchema!.safeParse({});
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects empty or whitespace-only expected', () => {
+      expect(referenceDataSchema!.safeParse({ expected: '' }).success).toBe(false);
+      expect(referenceDataSchema!.safeParse({ expected: '   ' }).success).toBe(false);
+    });
+
+    it('strips extra fields from the payload', () => {
+      const result = referenceDataSchema!.safeParse({
+        expected: 'answer',
+        unrelated: 'extra field',
+      });
+      expect(result.success).toBe(true);
+      expect(result.data).toEqual({ expected: 'answer' });
+    });
+  });
+
+  describe('evidenceSchema', () => {
+    const { evidenceSchema } = correctnessEvaluator;
+
+    it('accepts populated input and response messages', () => {
+      const result = evidenceSchema!.safeParse({
+        input: { message: 'How many failed payments?' },
+        response: { message: 'There were 12 failed payments.' },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects empty response message', () => {
+      const result = evidenceSchema!.safeParse({
+        input: { message: 'How many failed payments?' },
+        response: { message: '' },
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  it('registers correctness in the evaluator registry', () => {
+    const registry = createEvaluatorRegistry();
+
+    expect(registry.get('correctness')).toBeDefined();
+    expect(registry.list()).toHaveLength(6);
+  });
+});

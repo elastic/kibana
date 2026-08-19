@@ -8,19 +8,21 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
-import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
+import { fetchEvents } from './fetch_events_graph';
+import { fetchEntityRelationships, fetchEntities } from './fetch_entity_relationships_graph';
 import {
-  fetchEntityRelationships,
-  fetchEntities,
+  regroupEvents,
+  enrichEventDocData,
   regroupRelationships,
   enrichRelationshipDocData,
   enrichEntityRecords,
-} from './fetch_entity_relationships_graph';
+} from './parse_records';
 import { fetchEntityEnrichment } from './fetch_entity_enrichment';
 import type { EventEdge, RelationshipEdge, EntityRecord } from './types';
 
 jest.mock('./fetch_events_graph');
 jest.mock('./fetch_entity_relationships_graph');
+jest.mock('./parse_records');
 jest.mock('./fetch_entity_enrichment');
 
 const mockedFetchEvents = fetchEvents as jest.MockedFunction<typeof fetchEvents>;

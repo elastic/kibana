@@ -311,6 +311,15 @@ describe('autocomplete', () => {
       await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM index_d' });
     });
+    it('should send the columns query for the current subquery', async () => {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const statement =
+        'from outer_index | sort dateField desc | where coalesce(keywordField in (from inner_index | keep ';
+
+      await suggest(statement, statement.length, callbackMocks);
+
+      expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'FROM inner_index' });
+    });
     it.each([
       ['EVAL incomplete assignment', 'FROM marker_eval_assignment | EVAL foo = 1, bar = '],
       ['EVAL function argument', 'FROM marker_eval_function | EVAL result = ROUND(doubleField, '],
@@ -556,9 +565,9 @@ describe('autocomplete', () => {
     ]);
 
     // WHERE argument comparison
-    testSuggestions(
-      'FROM index1 | WHERE keywordField i/',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM index1 | WHERE keywordField i/', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'boolean',
         {
@@ -567,13 +576,13 @@ describe('autocomplete', () => {
         },
         ['keyword'],
         ['and', 'or', 'not']
-      )
-    );
+      ),
+    ]);
 
     // WHERE function <suggest>
-    testSuggestions(
-      'FROM index1 | WHERE ABS(integerField) i/',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM index1 | WHERE ABS(integerField) i/', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'any',
         {
@@ -582,8 +591,8 @@ describe('autocomplete', () => {
         },
         ['integer'],
         ['and', 'or', 'not']
-      )
-    );
+      ),
+    ]);
   });
 
   describe('advancing the cursor and opening the suggestion menu automatically ✨', () => {
@@ -620,7 +629,7 @@ describe('autocomplete', () => {
       // literalSuggestions parameter
       const dateDiffFirstParamSuggestions =
         scalarFunctionDefinitions.find(({ name }) => name === 'date_diff')?.signatures[0]
-          .params?.[0].suggestedValues ?? [];
+          .params?.[0].hint?.allowedValues ?? [];
       testSuggestions(
         'FROM a | EVAL DATE_DIFF(/)',
         dateDiffFirstParamSuggestions.map((s) => `"${s}", `).map(attachTriggerCommand)
@@ -994,9 +1003,9 @@ describe('autocomplete', () => {
     ]);
 
     // WHERE argument comparison (keyword fields get only string operators)
-    testSuggestions(
-      'FROM a | WHERE keywordField /',
-      getFunctionSignaturesByReturnType(
+    testSuggestions('FROM a | WHERE keywordField /', [
+      ': $0',
+      ...getFunctionSignaturesByReturnType(
         Location.WHERE,
         'boolean',
         {
@@ -1004,8 +1013,8 @@ describe('autocomplete', () => {
           skipAssign: true,
         },
         ['keyword']
-      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))
-    );
+      ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s))),
+    ]);
 
     describe('field lists', () => {
       describe('METADATA <field>', () => {
@@ -1192,6 +1201,48 @@ describe('autocomplete', () => {
       'FROM kibana_sample_data_logs | WHERE agent NOT IN (FROM kibana_sample_data_logs)/',
       ['\n', 'AND $0', 'OR $0', '| ']
     );
+
+    it.each([
+      ['CASE', 'FROM index | WHERE CASE(doubleField IN /'],
+      ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN /'],
+    ])('suggests subqueries inside %s', async (_, query) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestedTexts = (await suggestFn(query)).map(({ text }) => text);
+
+      expect(suggestedTexts).toEqual(expect.arrayContaining(['(FROM $0)', '(ROW $0)', '(TS $0)']));
+    });
+
+    it.each([
+      ['CASE', 'FROM index | WHERE CASE(doubleField IN (FROM /), true, false)'],
+      ['COALESCE', 'FROM index | WHERE COALESCE(doubleField IN (FROM /), false)'],
+      [
+        'nested CASE and COALESCE',
+        'FROM index | WHERE CASE(COALESCE(doubleField IN (FROM /), false), true, false)',
+      ],
+      [
+        'nested COALESCE calls',
+        'FROM index | WHERE COALESCE(COALESCE(doubleField IN (FROM /), false), false)',
+      ],
+      [
+        'a non-condition CASE argument',
+        'FROM index | WHERE CASE(booleanField, doubleField IN (FROM /), false)',
+      ],
+      [
+        'a non-first COALESCE argument',
+        'FROM index | WHERE COALESCE(false, doubleField IN (FROM /))',
+      ],
+      [
+        'COALESCE inside a FROM subquery',
+        'FROM index, (TS timeseries_index | WHERE COALESCE(doubleField IN (FROM /)))',
+      ],
+    ])('suggests sources inside an IN subquery nested in %s', async (_, query) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(query);
+      const suggestedTexts = suggestions.map(({ text }) => text);
+
+      expect(suggestedTexts).toEqual(expect.arrayContaining(['index', 'otherIndex']));
+      expect(suggestedTexts.some((text) => text.trim() === 'doubleField')).toBe(false);
+    });
   });
 
   describe('ROW operator expressions', () => {
@@ -1238,6 +1289,33 @@ describe('autocomplete', () => {
         [{ text: 'field.name.foo', rangeToReplace: { start: 20, end: 32 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double', userDefined: false }]]
+      );
+      testSuggestions(
+        'FROM numeric_index | KEEP /',
+        [{ text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM numeric_index | EVAL system.cpu.load_average.`1` < 0 | KEEP /',
+        [{ text: '`system.cpu.load_average.``1`` < 0`' }, { text: 'system.cpu.load_average.`1`' }],
+        undefined,
+        [
+          [{ name: 'system.cpu.load_average.1', type: 'double', userDefined: false }],
+          [{ name: 'numeric_index', hidden: false }],
+        ]
+      );
+      testSuggestions(
+        'FROM index_a | EVAL field.name > 0 | KEEP /',
+        [{ text: '`field.name > 0`' }, { text: 'field.name' }],
+        undefined,
+        [
+          [{ name: 'field.name', type: 'double', userDefined: false }],
+          [{ name: 'index_a', hidden: false }],
+        ]
       );
       // whitespace — we can't support this case yet because
       // we are relying on string checking instead of the AST :(

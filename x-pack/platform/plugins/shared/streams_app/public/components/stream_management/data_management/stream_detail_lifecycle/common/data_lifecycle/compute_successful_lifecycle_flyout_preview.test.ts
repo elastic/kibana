@@ -10,6 +10,7 @@ import { computeSuccessfulLifecycleFlyoutPreview } from './compute_successful_li
 describe('computeSuccessfulLifecycleFlyoutPreview', () => {
   const ilmPhases = {
     hot: { color: '#000', description: 'hot' },
+    frozen: { color: '#00f', description: 'frozen' },
     delete: { color: '#000', description: 'delete' },
   };
 
@@ -36,7 +37,6 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
     isServerless: false,
     ilmPhases,
     hotColor: '#000',
-    stats: undefined,
     ...overrides,
   });
 
@@ -93,6 +93,59 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
     }
   });
 
+  it('includes the frozen phase when inheriting a DSL lifecycle with frozen_after', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        inheritLifecycle: true,
+        inheritedEffectiveLifecycle: {
+          dsl: { data_retention: '30d', frozen_after: '10d' },
+        },
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      expect(preview.retentionPeriod).toBe('30d');
+      // hot + frozen + delete
+      expect(preview.dataPhasesCount).toBe(3);
+      const frozen = preview.timelineModel.phases.find((p) => p.min_age === '10d');
+      expect(frozen).toBeDefined();
+    }
+  });
+
+  it('includes the frozen phase in the DLM preview when frozen_after is set', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        method: 'dlm',
+        effectiveLifecycle: { dsl: { data_retention: '30d', frozen_after: '7d' } },
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      // hot + frozen + delete
+      expect(preview.dataPhasesCount).toBe(3);
+      const frozen = preview.timelineModel.phases.find((p) => p.min_age === '7d');
+      expect(frozen).toBeDefined();
+    }
+  });
+
+  it('omits the frozen phase on serverless even when frozen_after is set', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        method: 'dlm',
+        isServerless: true,
+        effectiveLifecycle: { dsl: { data_retention: '30d', frozen_after: '7d' } },
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      // hot + delete only (no frozen tier on serverless)
+      expect(preview.dataPhasesCount).toBe(2);
+    }
+  });
+
   it('clears when ILM is selected but selected policy details are missing', () => {
     const preview = computeSuccessfulLifecycleFlyoutPreview(
       buildArgs({
@@ -146,6 +199,93 @@ describe('computeSuccessfulLifecycleFlyoutPreview', () => {
     expect(preview.action).toBe('apply');
     if (preview.action === 'apply') {
       expect(preview.suppressUnsavedChanges).toBe(true);
+    }
+  });
+
+  it('omits per-phase size and docs from the preview (DLM)', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        method: 'dlm',
+        effectiveLifecycle: { dsl: { data_retention: '30d', frozen_after: '7d' } },
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      for (const phase of preview.timelineModel.phases) {
+        expect('size' in phase ? phase.size : undefined).toBeUndefined();
+        expect(phase.sizeInBytes).toBeUndefined();
+        expect(phase.docsCount).toBeUndefined();
+      }
+    }
+  });
+
+  it('omits per-phase size and docs when inheriting a DSL lifecycle', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        inheritLifecycle: true,
+        inheritedEffectiveLifecycle: { dsl: { data_retention: '30d', frozen_after: '7d' } },
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      for (const phase of preview.timelineModel.phases) {
+        expect('size' in phase ? phase.size : undefined).toBeUndefined();
+        expect(phase.sizeInBytes).toBeUndefined();
+        expect(phase.docsCount).toBeUndefined();
+      }
+    }
+  });
+
+  it('omits per-phase size and docs from the ILM preview, even when previewing the applied policy', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        method: 'ilm',
+        selectedIlmPolicyName: 'my-policy',
+        effectiveLifecycle: { ilm: { policy: 'my-policy' } },
+        ilmPolicies: [
+          {
+            name: 'my-policy',
+            phases: ilmSerializedPolicy.phases,
+            serializedPolicy: ilmSerializedPolicy,
+          },
+        ],
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      for (const phase of preview.timelineModel.phases) {
+        expect('size' in phase ? phase.size : undefined).toBeUndefined();
+        expect(phase.sizeInBytes).toBeUndefined();
+        expect(phase.docsCount).toBeUndefined();
+      }
+    }
+  });
+
+  it('omits per-phase size and docs when inheriting an ILM policy', () => {
+    const preview = computeSuccessfulLifecycleFlyoutPreview(
+      buildArgs({
+        inheritLifecycle: true,
+        inheritedEffectiveLifecycle: { ilm: { policy: 'my-policy' } },
+        ilmPolicies: [
+          {
+            name: 'my-policy',
+            phases: ilmSerializedPolicy.phases,
+            serializedPolicy: ilmSerializedPolicy,
+          },
+        ],
+      })
+    );
+
+    expect(preview.action).toBe('apply');
+    if (preview.action === 'apply') {
+      for (const phase of preview.timelineModel.phases) {
+        expect('size' in phase ? phase.size : undefined).toBeUndefined();
+        expect(phase.sizeInBytes).toBeUndefined();
+        expect(phase.docsCount).toBeUndefined();
+      }
     }
   });
 

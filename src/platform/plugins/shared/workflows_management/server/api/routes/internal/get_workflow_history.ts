@@ -15,13 +15,20 @@ import { WORKFLOW_READ_SECURITY } from '../utils/route_security';
 import { idParamSchema } from '../utils/schemas';
 import { withAvailabilityCheck } from '../utils/with_availability_check';
 
-const querySchema = schema.object({
-  page: schema.maybe(schema.number({ min: 1, meta: { description: 'Page number (1-based).' } })),
+export const workflowHistoryQuerySchema = schema.object({
+  page: schema.maybe(
+    schema.number({
+      min: 1,
+      meta: { description: 'Page number (1-based).' },
+      validate: (value) => (Number.isInteger(value) ? undefined : 'page must be an integer'),
+    })
+  ),
   per_page: schema.maybe(
     schema.number({
       min: 1,
       max: MAX_PAGE_SIZE,
       meta: { description: 'Items per page.' },
+      validate: (value) => (Number.isInteger(value) ? undefined : 'per_page must be an integer'),
     })
   ),
 });
@@ -42,7 +49,7 @@ export function registerGetWorkflowHistoryRoute(deps: RouteDependencies) {
         validate: {
           request: {
             params: idParamSchema,
-            query: querySchema,
+            query: workflowHistoryQuerySchema,
           },
         },
       },

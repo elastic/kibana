@@ -84,4 +84,56 @@ describe('FrozenDefaultRepositoryRequiredCallout', () => {
     fireEvent.click(refreshButton);
     expect(onRefresh).not.toHaveBeenCalled();
   });
+
+  it('links to create a default repository when there are no existing repositories', () => {
+    renderWithI18n(
+      <FrozenDefaultRepositoryRequiredCallout
+        createDefaultRepositoryHref="/app/management/data/snapshot_restore/add_repository"
+        manageRepositoriesUrl="/app/management/data/snapshot_restore/repositories"
+        hasExistingRepositories={false}
+        createButtonTestSubj="create"
+        manageRepositoriesButtonTestSubj="manage"
+      />
+    );
+
+    expect(screen.getByTestId('create')).toHaveAttribute(
+      'href',
+      '/app/management/data/snapshot_restore/add_repository'
+    );
+    expect(screen.queryByTestId('manage')).not.toBeInTheDocument();
+  });
+
+  it('links to the repositories list when the user already has repositories', () => {
+    renderWithI18n(
+      <FrozenDefaultRepositoryRequiredCallout
+        createDefaultRepositoryHref="/app/management/data/snapshot_restore/add_repository"
+        manageRepositoriesUrl="/app/management/data/snapshot_restore/repositories"
+        hasExistingRepositories={true}
+        createButtonTestSubj="create"
+        manageRepositoriesButtonTestSubj="manage"
+      />
+    );
+
+    expect(screen.getByTestId('manage')).toHaveAttribute(
+      'href',
+      '/app/management/data/snapshot_restore/repositories'
+    );
+    expect(screen.queryByTestId('create')).not.toBeInTheDocument();
+  });
+
+  it('links to create a default repository when there are existing repositories but no manage URL', () => {
+    renderWithI18n(
+      <FrozenDefaultRepositoryRequiredCallout
+        createDefaultRepositoryHref="/app/management/data/snapshot_restore/add_repository"
+        hasExistingRepositories={true}
+        createButtonTestSubj="create"
+        manageRepositoriesButtonTestSubj="manage"
+      />
+    );
+
+    expect(screen.getByTestId('create')).toHaveAttribute(
+      'href',
+      '/app/management/data/snapshot_restore/add_repository'
+    );
+  });
 });

@@ -23,8 +23,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
-import type { ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
+import type { Agent, ComponentHealth, OTelCollectorConfig } from '../../../../../common/types';
+import { OPAMP_NON_REPORTING_STATUSES } from '../../../../../common/constants';
 
 import type { OTelComponentType } from '../constants';
 import { COMPONENT_TYPE_LABELS } from '../constants';
@@ -41,6 +43,7 @@ import {
 interface CollectorDetailHealthProps {
   health?: ComponentHealth;
   config?: OTelCollectorConfig;
+  agentStatus?: Agent['status'];
   onComponentClick?: (
     componentId: string,
     componentType: OTelComponentType,
@@ -319,6 +322,7 @@ const resolveComponentType = (
 export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
   health,
   config,
+  agentStatus,
   onComponentClick,
   selectedComponentId,
 }) => {
@@ -362,6 +366,23 @@ export const CollectorDetailHealth: React.FC<CollectorDetailHealthProps> = ({
   }, [config, health]);
 
   const { euiTheme } = useEuiTheme();
+
+  if (agentStatus && OPAMP_NON_REPORTING_STATUSES.includes(agentStatus)) {
+    return (
+      <KbnWarningCallout
+        announceOnMount={false}
+        title={i18n.translate('xpack.fleet.otelUi.collectorDetail.health.offlineTitle', {
+          defaultMessage: 'Collector is not active',
+        })}
+        data-test-subj="collectorDetailHealthOffline"
+        text={i18n.translate('xpack.fleet.otelUi.collectorDetail.health.offlineBody', {
+          defaultMessage:
+            'This collector is currently {status}. Health data is only available while the collector is running.',
+          values: { status: agentStatus },
+        })}
+      />
+    );
+  }
 
   if (!health) {
     return (

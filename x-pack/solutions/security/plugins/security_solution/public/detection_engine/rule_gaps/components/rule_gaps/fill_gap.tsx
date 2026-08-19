@@ -62,7 +62,7 @@ export const FillGap = ({
     <>
       <EuiToolTip
         position="top"
-        content={isRuleEnabled ? '' : i18n.GAP_FILL_DISABLED_MESSAGE}
+        content={isRuleEnabled ? undefined : i18n.GAP_FILL_DISABLED_MESSAGE}
         display="block"
         data-test-subj="rule-gaps-fill-gap-tooltip"
       >

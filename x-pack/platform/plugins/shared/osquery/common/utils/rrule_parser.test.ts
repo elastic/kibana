@@ -127,6 +127,42 @@ describe('parseRRule', () => {
     });
   });
 
+  describe('ordinal BYDAY passthrough', () => {
+    it('parses FREQ=MONTHLY;BYDAY=1MO without throwing, preserving raw BYDAY and no byweekday', () => {
+      const parsed = parseRRule('FREQ=MONTHLY;BYDAY=1MO');
+      expect(parsed).toEqual({
+        freq: Frequency.MONTHLY,
+        _unknown: { BYDAY: '1MO' },
+      });
+      expect(parsed.byweekday).toBeUndefined();
+    });
+
+    it('parses FREQ=YEARLY;BYDAY=-1FR without throwing, preserving raw BYDAY and no byweekday', () => {
+      const parsed = parseRRule('FREQ=YEARLY;BYDAY=-1FR');
+      expect(parsed).toEqual({
+        freq: Frequency.YEARLY,
+        _unknown: { BYDAY: '-1FR' },
+      });
+      expect(parsed.byweekday).toBeUndefined();
+    });
+
+    it('treats a mixed bare/ordinal BYDAY list as whole-unknown', () => {
+      const parsed = parseRRule('FREQ=MONTHLY;BYDAY=MO,1TU');
+      expect(parsed).toEqual({
+        freq: Frequency.MONTHLY,
+        _unknown: { BYDAY: 'MO,1TU' },
+      });
+      expect(parsed.byweekday).toBeUndefined();
+    });
+
+    it('still parses a pure bare-weekday BYDAY list into byweekday', () => {
+      expect(parseRRule('FREQ=WEEKLY;BYDAY=MO,WE')).toEqual({
+        freq: Frequency.WEEKLY,
+        byweekday: [Weekday.MO, Weekday.WE],
+      });
+    });
+  });
+
   describe('error handling', () => {
     it('throws when the string is empty', () => {
       expect(() => parseRRule('')).toThrowError(/empty/);

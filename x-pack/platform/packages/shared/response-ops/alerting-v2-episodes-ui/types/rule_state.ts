@@ -8,11 +8,13 @@
 import type { UseQueryResult } from '@kbn/react-query';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { isRuleNotFoundError } from '../utils/is_rule_not_found_error';
+import { isRuleForbiddenError } from '../utils/is_rule_forbidden_error';
 
 export enum RuleStateStatus {
   idle = 'idle',
   loading = 'loading',
   not_found = 'not_found',
+  forbidden = 'forbidden',
   error = 'error',
   loaded = 'loaded',
 }
@@ -26,6 +28,10 @@ export interface LoadingRuleState {
 }
 export interface NotFoundRuleState {
   status: RuleStateStatus.not_found;
+  ruleId: string;
+}
+export interface ForbiddenRuleState {
+  status: RuleStateStatus.forbidden;
   ruleId: string;
 }
 export interface ErrorRuleState {
@@ -43,6 +49,7 @@ export type RuleState =
   | IdleRuleState
   | LoadingRuleState
   | NotFoundRuleState
+  | ForbiddenRuleState
   | ErrorRuleState
   | LoadedRuleState;
 
@@ -69,6 +76,10 @@ export const toRuleState = (
       return { status: RuleStateStatus.not_found, ruleId: id };
     }
 
+    if (isRuleForbiddenError(query.error)) {
+      return { status: RuleStateStatus.forbidden, ruleId: id };
+    }
+
     return { status: RuleStateStatus.error, ruleId: id, error: toError(query.error) };
   }
 
@@ -90,6 +101,9 @@ export const isRuleLoading = (state: RuleState): state is LoadingRuleState =>
 
 export const isRuleNotFound = (state: RuleState): state is NotFoundRuleState =>
   state.status === RuleStateStatus.not_found;
+
+export const isRuleForbidden = (state: RuleState): state is ForbiddenRuleState =>
+  state.status === RuleStateStatus.forbidden;
 
 export const isRuleError = (state: RuleState): state is ErrorRuleState =>
   state.status === RuleStateStatus.error;

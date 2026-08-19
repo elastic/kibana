@@ -31,11 +31,13 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 interface Props {
   onClose: () => void;
   agents: Agent[] | string;
+  agentCount: number;
 }
 
 export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   onClose,
   agents,
+  agentCount,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
 
@@ -113,7 +115,10 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       title={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutTitle"
-          defaultMessage="Assign new agent policy"
+          defaultMessage="Assign new policy to {count, plural, one {agent} other {# agents}}"
+          values={{
+            count: agentCount,
+          }}
         />
       }
       onCancel={onClose}
@@ -133,7 +138,10 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       confirmButtonText={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.continueButtonLabel"
-          defaultMessage="Assign policy"
+          defaultMessage="Assign policy to {count, plural, one {agent} other {# agents}}"
+          values={{
+            count: agentCount,
+          }}
         />
       }
       buttonColor="primary"
@@ -143,9 +151,9 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
       <p>
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutDescription"
-          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {agents}} to."
+          defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {# agents}} to."
           values={{
-            count: isSingleAgent ? 1 : 0,
+            count: agentCount,
           }}
         />
       </p>

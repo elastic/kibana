@@ -12,10 +12,7 @@ export type {
 } from './src/agent_configuration/configuration_types';
 
 // Constants
-export {
-  AgentConfigurationPageStep,
-  agentConfigurationPageStepRt,
-} from './src/agent_configuration/constants';
+export { AgentConfigurationPageStep } from './src/agent_configuration/constants';
 
 // All option
 export {
@@ -34,22 +31,22 @@ export {
 
 // Runtime types
 export {
-  serviceRt,
-  settingsRt,
-  agentConfigurationIntakeRt,
+  serviceSchema,
+  settingsSchema,
+  agentConfigurationIntakeSchema,
 } from './src/agent_configuration/runtime_types/agent_configuration_intake_rt';
-export { booleanRt } from './src/agent_configuration/runtime_types/boolean_rt';
-export { captureBodyRt } from './src/agent_configuration/runtime_types/capture_body_rt';
-export { logLevelRt } from './src/agent_configuration/runtime_types/log_level_rt';
-export { logEcsReformattingRt } from './src/agent_configuration/runtime_types/log_ecs_reformatting_rt';
-export { traceContinuationStrategyRt } from './src/agent_configuration/runtime_types/trace_continuation_strategy_rt';
-export { loggingLevelRt } from './src/agent_configuration/runtime_types/logging_level_rt';
-export { floatThreeDecimalPlacesRt } from './src/agent_configuration/runtime_types/float_three_decimal_places_rt';
-export { floatFourDecimalPlacesRt } from './src/agent_configuration/runtime_types/float_four_decimal_places_rt';
-export { getIntegerRt } from './src/agent_configuration/runtime_types/integer_rt';
-export { getDurationRt } from './src/agent_configuration/runtime_types/duration_rt';
-export { getBytesRt } from './src/agent_configuration/runtime_types/bytes_rt';
-export { getStorageSizeRt } from './src/agent_configuration/runtime_types/storage_size_rt';
+export { booleanSchema } from './src/agent_configuration/runtime_types/boolean_rt';
+export { captureBodySchema } from './src/agent_configuration/runtime_types/capture_body_rt';
+export { logLevelSchema } from './src/agent_configuration/runtime_types/log_level_rt';
+export { logEcsReformattingSchema } from './src/agent_configuration/runtime_types/log_ecs_reformatting_rt';
+export { traceContinuationStrategySchema } from './src/agent_configuration/runtime_types/trace_continuation_strategy_rt';
+export { loggingLevelSchema } from './src/agent_configuration/runtime_types/logging_level_rt';
+export { floatThreeDecimalPlacesSchema } from './src/agent_configuration/runtime_types/float_three_decimal_places_rt';
+export { floatFourDecimalPlacesSchema } from './src/agent_configuration/runtime_types/float_four_decimal_places_rt';
+export { getIntegerSchema } from './src/agent_configuration/runtime_types/integer_rt';
+export { getDurationSchema } from './src/agent_configuration/runtime_types/duration_rt';
+export { getBytesSchema } from './src/agent_configuration/runtime_types/bytes_rt';
+export { getStorageSizeSchema } from './src/agent_configuration/runtime_types/storage_size_rt';
 export { getRangeTypeMessage } from './src/agent_configuration/runtime_types/get_range_type_message';
 
 // Setting definitions
@@ -63,3 +60,9 @@ export type {
   RawSettingDefinition,
   SettingDefinition,
 } from './src/agent_configuration/setting_definitions/types';
+
+export { truncate, unit } from './src/utils/style';
+export { NOT_AVAILABLE_LABEL } from './src/utils/i18n';
+export * from './src/utils/formatters';
+export { isFiniteNumber } from './src/utils/is_finite_number';
+export { getTimestampUs } from './src/utils/get_timestamp_us';

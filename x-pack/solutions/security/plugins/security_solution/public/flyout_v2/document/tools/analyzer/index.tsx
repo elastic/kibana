@@ -8,15 +8,16 @@
 import React, { memo, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { DocumentToolsFlyoutHeader } from '../../../shared/components/document_tools_flyout_header';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { Resolver } from '../../../../resolver/view';
+import { ANALYZER_TITLE } from '../../../shared/constants/flyout_titles';
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
 
@@ -37,10 +38,6 @@ export interface AnalyzerGraphProps {
 
 const RESOLVER_COMPONENT_INSTANCE_ID = 'flyout_v2_analyzer_graph';
 
-const TITLE = i18n.translate('xpack.securitySolution.flyout.analyzer.title', {
-  defaultMessage: 'Analyzer',
-});
-
 /**
  * Analyzer graph view displayed in the analyzer tools flyout
  */
@@ -52,7 +49,8 @@ export const AnalyzerGraph = memo(
     const { from, to, shouldUpdate } = useTimelineDataFilters(false);
     const filters = useMemo(() => ({ from, to }), [from, to]);
 
-    const selectedPatterns = useSelectedPatterns(PageScope.analyzer);
+    const { dataView } = useDataView(PageScope.analyzer);
+    const selectedPatterns = useSelectedPatterns(dataView);
 
     if (!eventId) {
       return null;
@@ -67,7 +65,7 @@ export const AnalyzerGraph = memo(
           `}
         >
           <DocumentToolsFlyoutHeader
-            title={TITLE}
+            title={ANALYZER_TITLE}
             hit={hit}
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}

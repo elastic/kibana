@@ -15,7 +15,10 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen } from '@testing-library/react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { getServiceNameCell } from './service_name_cell';
-import type { ContextAwarenessToolkit } from '../../../context_awareness';
+import {
+  EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+  type ContextAwarenessToolkit,
+} from '../../../context_awareness';
 
 const core = {
   application: {
@@ -44,7 +47,9 @@ const renderCell = (
   fieldFormats: FieldFormatsStart = fieldFormatsMock
 ) => {
   const toolkit: ContextAwarenessToolkit = {
+    ...EMPTY_CONTEXT_AWARENESS_TOOLKIT,
     actions: {
+      ...EMPTY_CONTEXT_AWARENESS_TOOLKIT.actions,
       addFilter: jest.fn(),
     },
   };
@@ -103,7 +108,7 @@ describe('getServiceNameCell', () => {
       getDefaultInstance: jest.fn().mockReturnValue({
         convertToReact: jest.fn().mockImplementation((value, options) => {
           if (options?.hit?.highlight?.bytes) {
-            return <mark className="ffSearch__highlight">{value}</mark>;
+            return <mark>{value}</mark>;
           }
           return value;
         }),
@@ -120,13 +125,13 @@ describe('getServiceNameCell', () => {
 
     it('renders search highlights', () => {
       renderCell('bytes', record, mockFieldFormats);
-      expect(screen.getByText('12345').closest('mark')).toHaveClass('ffSearch__highlight');
+      expect(screen.getByText('12345').closest('mark')).toBeInTheDocument();
     });
 
     it('sets textValue to plain text extracted from the formatted value', () => {
       renderCell('bytes', record, mockFieldFormats);
       // highlights are rendered
-      expect(screen.getByText('12345').closest('mark')).toHaveClass('ffSearch__highlight');
+      expect(screen.getByText('12345').closest('mark')).toBeInTheDocument();
       // textValue is plain text extracted from the <mark> React element
       expect(screen.getByTestId('dataTableCellActionsPopover_bytes')).toHaveAttribute(
         'title',

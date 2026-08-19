@@ -9,7 +9,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { useKibana } from '../../../../../common/lib/kibana';
 import type { ImmutableArray } from '../../../../../../common/endpoint/types';
 import type { TransformStats } from '../../types';

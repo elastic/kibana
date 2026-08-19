@@ -120,21 +120,29 @@ describe('SecuritySideNav', () => {
     useKibana().services.serverless = undefined;
   });
 
-  it('should render main items', () => {
+  it('should render main items with external links', () => {
     mockUseNavLinks.mockReturnValue([alertsNavLink]);
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         selectedId: SecurityPageName.alerts,
         items: [
-          {
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkDiscover,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkWorkflows,
+            label: 'Workflows',
+            position: 'top',
+          }),
+          expect.objectContaining({
+            href: '/alerts',
             id: SecurityPageName.alerts,
             label: 'alerts',
-            href: '/alerts',
             position: 'top',
-          },
+          }),
         ],
-        categories: getNavCategories(AIChatExperience.Classic, false, false, false, false),
+        categories: getNavCategories(AIChatExperience.Classic, false, false, false),
         tracker: track,
       })
     );
@@ -339,7 +347,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, true, false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, true, false, false),
         })
       );
     });
@@ -349,7 +357,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
         })
       );
     });
@@ -363,7 +371,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, true, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, true, false),
         })
       );
     });
@@ -373,158 +381,122 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(AIChatExperience.Classic, false, false, false, false),
+          categories: getNavCategories(AIChatExperience.Classic, false, false, false),
         })
       );
     });
   });
 
-  describe('with securityClassicNavExternalLinks enabled', () => {
-    beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockImplementation(
-        (feature: string) => feature === 'securityClassicNavExternalLinks'
-      );
-    });
+  it('should render agentBuilder external link when chat experience is Agent', () => {
+    (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
+      new BehaviorSubject(AIChatExperience.Agent).asObservable()
+    );
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: [
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkDiscover,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkWorkflows,
+            label: 'Workflows',
+            position: 'top',
+          }),
+          expect.objectContaining({
+            href: '/alerts',
+            id: SecurityPageName.alerts,
+            label: 'alerts',
+            position: 'top',
+          }),
+        ],
+        categories: getNavCategories(AIChatExperience.Classic, false, false, false),
+      })
+    );
+  });
 
-    it('should render main items with external links', () => {
-      mockUseNavLinks.mockReturnValue([alertsNavLink]);
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          selectedId: SecurityPageName.alerts,
-          items: [
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkDiscover,
-            }),
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkWorkflows,
-              label: 'Workflows',
-              position: 'top',
-            }),
-            expect.objectContaining({
-              href: '/alerts',
-              id: SecurityPageName.alerts,
-              label: 'alerts',
-              position: 'top',
-            }),
-          ],
-          categories: getNavCategories(AIChatExperience.Classic, false, false, true, false),
-          tracker: track,
-        })
-      );
-    });
+  it('should render agentBuilder external link at top when chat experience is Agent and isAgentBuilderNavAtTop is true', () => {
+    (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
+      new BehaviorSubject(AIChatExperience.Agent).asObservable()
+    );
+    (useKibana().services.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
+      (flag: string) => flag === AGENT_BUILDER_NAV_AT_TOP_FLAG
+    );
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        selectedId: SecurityPageName.alerts,
+        items: [
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAgentBuilder,
+            label: 'Agents',
+            position: 'top',
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkDiscover,
+            label: 'Discover',
+            position: 'top',
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkWorkflows,
+            label: 'Workflows',
+            position: 'top',
+          }),
+          expect.objectContaining({
+            href: '/alerts',
+            id: SecurityPageName.alerts,
+            label: 'alerts',
+            position: 'top',
+          }),
+        ],
+        categories: getNavCategories(AIChatExperience.Agent, false, false, true),
+      })
+    );
+  });
 
-    it('should render agentBuilder external link when chat experience is Agent', () => {
-      (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
-        new BehaviorSubject(AIChatExperience.Agent).asObservable()
-      );
-      mockUseNavLinks.mockReturnValue([alertsNavLink]);
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          items: [
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkDiscover,
-            }),
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkWorkflows,
-              label: 'Workflows',
-              position: 'top',
-            }),
-            expect.objectContaining({
-              href: '/alerts',
-              id: SecurityPageName.alerts,
-              label: 'alerts',
-              position: 'top',
-            }),
-          ],
-          categories: getNavCategories(AIChatExperience.Classic, false, false, true, false),
-        })
-      );
-    });
+  it('should build external links using `getUrlForApp` so basePath and space are applied', () => {
+    (useKibana().services.application.getUrlForApp as jest.Mock).mockImplementation(
+      (appId: string, options?: { path?: string }) =>
+        `/test-basepath/s/my-space/app/${appId}${options?.path ?? ''}`
+    );
+    (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
+      new BehaviorSubject(AIChatExperience.Agent).asObservable()
+    );
+    mockUseNavLinks.mockReturnValue([alertsNavLink]);
+    renderNav();
 
-    it('should render agentBuilder external link at top when chat experience is Agent and isAgentBuilderNavAtTop is true', () => {
-      (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
-        new BehaviorSubject(AIChatExperience.Agent).asObservable()
-      );
-      (useKibana().services.featureFlags.getBooleanValue as jest.Mock).mockImplementation(
-        (flag: string) => flag === AGENT_BUILDER_NAV_AT_TOP_FLAG
-      );
-      mockUseNavLinks.mockReturnValue([alertsNavLink]);
-      renderNav();
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          selectedId: SecurityPageName.alerts,
-          items: [
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkAgentBuilder,
-              label: 'Agents',
-              position: 'top',
-            }),
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkDiscover,
-              label: 'Discover',
-              position: 'top',
-            }),
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkWorkflows,
-              label: 'Workflows',
-              position: 'top',
-            }),
-            expect.objectContaining({
-              href: '/alerts',
-              id: SecurityPageName.alerts,
-              label: 'alerts',
-              position: 'top',
-            }),
-          ],
-          categories: getNavCategories(AIChatExperience.Agent, false, false, true, true),
-        })
-      );
-    });
+    expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
+      'agent_builder',
+      {
+        path: '/agents',
+      }
+    );
+    expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
+      'discover'
+    );
+    expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
+      'workflows'
+    );
 
-    it('should build external links using `getUrlForApp` so basePath and space are applied', () => {
-      (useKibana().services.application.getUrlForApp as jest.Mock).mockImplementation(
-        (appId: string, options?: { path?: string }) =>
-          `/test-basepath/s/my-space/app/${appId}${options?.path ?? ''}`
-      );
-      (useKibana().services.settings.client.get$ as jest.Mock).mockImplementation(() =>
-        new BehaviorSubject(AIChatExperience.Agent).asObservable()
-      );
-      mockUseNavLinks.mockReturnValue([alertsNavLink]);
-      renderNav();
-
-      expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
-        'agent_builder',
-        {
-          path: '/agents',
-        }
-      );
-      expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
-        'discover'
-      );
-      expect(useKibana().services.application.getUrlForApp as jest.Mock).toHaveBeenCalledWith(
-        'workflows'
-      );
-
-      expect(mockSolutionSideNav).toHaveBeenCalledWith(
-        expect.objectContaining({
-          items: expect.arrayContaining([
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkAgentBuilder,
-              href: '/test-basepath/s/my-space/app/agent_builder/agents',
-            }),
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkDiscover,
-              href: '/test-basepath/s/my-space/app/discover',
-            }),
-            expect.objectContaining({
-              id: SecurityPageName.externalLinkWorkflows,
-              href: '/test-basepath/s/my-space/app/workflows',
-            }),
-          ]),
-        })
-      );
-    });
+    expect(mockSolutionSideNav).toHaveBeenCalledWith(
+      expect.objectContaining({
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAgentBuilder,
+            href: '/test-basepath/s/my-space/app/agent_builder/agents',
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkDiscover,
+            href: '/test-basepath/s/my-space/app/discover',
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkWorkflows,
+            href: '/test-basepath/s/my-space/app/workflows',
+          }),
+        ]),
+      })
+    );
   });
 });

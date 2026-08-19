@@ -36,11 +36,11 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       notValidAfter: schema.maybe(schema.string({ maxLength: 256 })),
       // Comma-separated filters (e.g. `http,browser`) sent as strings to avoid
       // query-array serialization edge cases. `monitorTypes` scopes by monitor
-      // type; `browserResourceTypes` and `party` are browser-only quick filters;
-      // `tags` scopes by monitor tag.
+      // type; `browserResourceTypes` and `certOrigin` are browser-only quick
+      // filters; `tags` scopes by monitor tag.
       monitorTypes: schema.maybe(schema.string({ maxLength: 1024 })),
       browserResourceTypes: schema.maybe(schema.string({ maxLength: 1024 })),
-      party: schema.maybe(schema.string({ maxLength: 256 })),
+      certOrigin: schema.maybe(schema.string({ maxLength: 256 })),
       tags: schema.maybe(schema.string({ maxLength: 1024 })),
       // Comma-separated issuer (certificate authority) common names; scopes the
       // list to certs signed by the selected CA(s).
@@ -61,7 +61,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
     const {
       monitorTypes,
       browserResourceTypes,
-      party,
+      certOrigin,
       tags,
       issuers,
       remoteNames,
@@ -109,7 +109,7 @@ export const getSyntheticsCertsRoute: SyntheticsRestApiRouteFactory<
       ...queryParams,
       monitorTypes: toList(monitorTypes),
       browserResourceTypes: toList(browserResourceTypes),
-      party: toList(party),
+      certOrigin: toList(certOrigin),
       tags: toList(tags),
       issuers: toList(issuers),
       syntheticsEsClient,

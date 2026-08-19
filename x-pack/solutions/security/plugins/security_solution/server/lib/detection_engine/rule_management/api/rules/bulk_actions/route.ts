@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from '@kbn/core/server';
+import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -34,9 +36,10 @@ import { initPromisePool } from '../../../../../../utils/promise_pool';
 import { routeLimitedConcurrencyTag } from '../../../../../../utils/route_limited_concurrency_tag';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { buildSiemResponse } from '../../../../routes/utils';
-import type { RuleAlertType } from '../../../../rule_schema';
+import type { RuleAlertType, RuleParams } from '../../../../rule_schema';
 import { duplicateExceptions } from '../../../logic/actions/duplicate_exceptions';
 import { duplicateRule } from '../../../logic/actions/duplicate_rule';
+import { sendRuleDuplicateTelemetryEvent } from '../../../logic/detection_rules_client/rule_lifecycle_telemetry';
 import { bulkEditRules } from '../../../logic/bulk_actions/bulk_edit_rules';
 import {
   dryRunValidateBulkEditRule,
@@ -140,6 +143,36 @@ const prepareGapParams = ({
   };
 };
 
+const deleteOrphanedExceptions = async ({
+  exceptions,
+  exceptionsClient,
+  logger,
+}: {
+  exceptions: RuleParams['exceptionsList'];
+  exceptionsClient: ExceptionListClient | undefined;
+  logger: Logger;
+}): Promise<void> => {
+  if (exceptionsClient == null) {
+    return;
+  }
+
+  const orphaned = exceptions.filter(({ type }) => type === ExceptionListTypeEnum.RULE_DEFAULT);
+
+  await Promise.all(
+    orphaned.map(async ({ id, namespace_type: namespaceType, list_id: listId }) => {
+      try {
+        await exceptionsClient.deleteExceptionList({ id, listId: undefined, namespaceType });
+      } catch (cleanupError) {
+        logger.warn(
+          `Failed to delete orphaned exception list "${listId}" after rule duplication error: ${
+            transformError(cleanupError).message
+          }`
+        );
+      }
+    })
+  );
+};
+
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml']
@@ -218,6 +251,8 @@ export const performBulkActionRoute = (
           const endpointAuthz = await ctx.securitySolution.getEndpointAuthz();
           const endpointService = ctx.securitySolution.getEndpointService();
           const spaceId = ctx.securitySolution.getSpaceId();
+          const logger = ctx.securitySolution.getLogger();
+          const analytics = ctx.securitySolution.getAnalytics();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -328,26 +363,8 @@ export const performBulkActionRoute = (
                     shouldDuplicateExpiredExceptions = body.duplicate.include_expired_exceptions;
                   }
 
-                  const duplicateRuleToCreate = await duplicateRule({
-                    rule,
-                  });
-
-                  const createdRule = await rulesClient.create({
-                    data: duplicateRuleToCreate,
-                    changeTracking: {
-                      action: SecurityRuleChangeTrackingAction.ruleDuplicate,
-                      metadata: {
-                        bulkCount: rules.length,
-                        originalRuleSoId: rule.id,
-                      },
-                    },
-                  });
-
-                  if (!shouldDuplicateExceptions) {
-                    return createdRule;
-                  }
-
-                  // we try to create exceptions after rule created, and then update rule
+                  // Clone exceptions first so the rule can be created with them already
+                  // attached, avoiding a follow-up update. If this throws, no rule is created.
                   const exceptions = shouldDuplicateExceptions
                     ? await duplicateExceptions({
                         ruleId: rule.params.ruleId,
@@ -357,25 +374,39 @@ export const performBulkActionRoute = (
                       })
                     : [];
 
-                  const updatedRule = await rulesClient.update({
-                    id: createdRule.id,
-                    data: {
-                      ...duplicateRuleToCreate,
-                      params: {
-                        ...duplicateRuleToCreate.params,
-                        exceptionsList: exceptions,
-                      },
-                    },
-                    changeTracking: {
-                      metadata: {
-                        bulkCount: rules.length,
-                      },
-                    },
-                    shouldIncrementRevision: () => false,
+                  const duplicateRuleToCreate = await duplicateRule({
+                    rule,
                   });
 
-                  // TODO: figureout why types can't return just updatedRule
-                  return { ...createdRule, ...updatedRule };
+                  const createdRule = await rulesClient
+                    .create({
+                      data: {
+                        ...duplicateRuleToCreate,
+                        params: {
+                          ...duplicateRuleToCreate.params,
+                          exceptionsList: exceptions,
+                        },
+                      },
+                      changeTracking: {
+                        action: SecurityRuleChangeTrackingAction.ruleDuplicate,
+                        metadata: {
+                          bulkCount: rules.length,
+                          originalRuleSoId: rule.id,
+                        },
+                      },
+                    })
+                    .catch(async (createError) => {
+                      await deleteOrphanedExceptions({ exceptions, exceptionsClient, logger });
+                      throw createError;
+                    });
+
+                  sendRuleDuplicateTelemetryEvent(
+                    analytics,
+                    { createdRule, sourceRule: rule },
+                    logger
+                  );
+
+                  return createdRule;
                 },
                 abortSignal: abortController.signal,
               });

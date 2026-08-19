@@ -36,6 +36,18 @@ const customRecoveryDescription = i18n.translate(
   { defaultMessage: 'Define a custom recovery condition.' }
 );
 
+const noRecoveryLabel = i18n.translate(
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDropDownOptionLabel',
+  { defaultMessage: 'No recovery' }
+);
+
+const noRecoveryDescription = i18n.translate(
+  'xpack.alertingV2.composeDiscover.recoveryCondition.noRecoveryDescription',
+  {
+    defaultMessage: 'Alerts will stay active even when the alert condition is no longer met.',
+  }
+);
+
 const RECOVERY_TYPE_OPTIONS: Array<{
   value: RecoveryType;
   inputDisplay: string;
@@ -61,6 +73,18 @@ const RECOVERY_TYPE_OPTIONS: Array<{
         <strong>{customRecoveryLabel}</strong>
         <EuiText size="s" color="subdued">
           <p>{customRecoveryDescription}</p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'none',
+    inputDisplay: noRecoveryLabel,
+    dropdownDisplay: (
+      <>
+        <strong>{noRecoveryLabel}</strong>
+        <EuiText size="s" color="subdued">
+          <p>{noRecoveryDescription}</p>
         </EuiText>
       </>
     ),
@@ -118,7 +142,7 @@ export function RecoveryConditionStep({
           <EuiSpacer size="l" />
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="m" />
-          {renderCustomRecovery({ state, dispatch })}
+          {React.createElement(renderCustomRecovery, { state, dispatch })}
         </>
       )}
 

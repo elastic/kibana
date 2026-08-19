@@ -41,7 +41,9 @@ export const SimilarCasesBadge = ({
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <EuiNotificationBadge
+    size="m"
     css={css`
+      border-radius: 999px;
       margin-left: ${euiTheme.size.xs};
     `}
     data-test-subj="case-view-similar-cases-badge"
@@ -62,7 +64,9 @@ export const AttachmentsBadge = ({
   euiTheme: EuiThemeComputed<{}>;
 }) => (
   <EuiNotificationBadge
+    size="m"
     css={css`
+      border-radius: 999px;
       margin-left: ${euiTheme.size.xs};
     `}
     data-test-subj="case-view-attachments-badge"
@@ -75,20 +79,14 @@ AttachmentsBadge.displayName = 'AttachmentsBadge';
 
 /**
  * Computes the total count shown on the top-level "Attachments" tab badge.
- * Reflects the active search filter so the badge tracks what the user actually
- * sees: comments matching a registered type with a tab view, plus files (from
- * `fileStatsData`) and — if licensed — observables.
+ * Always the case-wide total (comments matching a registered type with a tab
+ * view, plus files and — if licensed — observables). Deliberately ignores the
+ * search term and filters so the badge stays a stable total.
  */
-export const useCaseAttachmentsTotal = ({
-  caseData,
-  searchTerm,
-}: {
-  caseData: CaseUI;
-  searchTerm?: string;
-}): number => {
+export const useCaseAttachmentsTotal = ({ caseData }: { caseData: CaseUI }): number => {
   const { unifiedAttachmentTypeRegistry } = useCasesContext();
-  const { data: fileStatsData } = useGetCaseFileStats({ caseId: caseData.id, searchTerm });
-  const { observables } = useCaseObservables(caseData, searchTerm);
+  const { data: fileStatsData } = useGetCaseFileStats({ caseId: caseData.id });
+  const { observables } = useCaseObservables(caseData);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 

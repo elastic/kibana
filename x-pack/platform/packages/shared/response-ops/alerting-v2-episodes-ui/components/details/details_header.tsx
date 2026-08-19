@@ -7,10 +7,9 @@
 
 import React from 'react';
 import type { EuiTitleSize } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
 import { AlertEpisodeStatusBadges } from '../status/status_badges';
-import { AlertEpisodeTags } from '../actions/tags';
 import { AlertEpisodeSeverityBadge } from '../severity/episode_severity_badge';
 import { isSupportedEpisodeSeverity } from '../severity/severity_utils';
 import type { EpisodeActionState, AlertEpisodeGroupAction } from '../../types/action';
@@ -20,22 +19,22 @@ import * as i18n from './translations';
 export interface AlertEpisodeDetailsHeaderProps {
   isLoadingEpisode: boolean;
   ruleState: RuleState;
-  tags: string[];
   status: AlertEpisodeStatus | undefined;
   severity: string | undefined | null;
   episodeAction: EpisodeActionState | undefined;
   groupAction: AlertEpisodeGroupAction | undefined;
+  isFlapping?: boolean;
   titleSize?: EuiTitleSize;
 }
 
 export const AlertEpisodeDetailsHeader = ({
   isLoadingEpisode,
   ruleState,
-  tags,
   status,
   severity,
   episodeAction,
   groupAction,
+  isFlapping = false,
   titleSize = 'l',
 }: AlertEpisodeDetailsHeaderProps) => {
   const isLoading = isLoadingEpisode || isRuleLoading(ruleState);
@@ -44,48 +43,43 @@ export const AlertEpisodeDetailsHeader = ({
     : isRuleLoaded(ruleState)
     ? ruleState.rule.metadata.name
     : i18n.HEADER_EPISODE_TITLE_FALLBACK;
-  const description = isRuleLoaded(ruleState) ? ruleState.rule.metadata.description : undefined;
-  const showTags = tags.length > 0;
+  const showBadgeRow = Boolean(status) || isSupportedEpisodeSeverity(severity);
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      {/* Single wrapping row (not a fixed title-row + badges-row split) so the badges naturally
+          drop to a second line only when the title doesn't leave room for them, instead of
+          always reserving a dedicated row for badges even when they'd fit next to the title.
+          The badges are grouped into one flex item (wrap={false} inside) so they jump down
+          together as a unit rather than wrapping individually mid-cluster. */}
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
         <EuiFlexItem grow={false}>
           <EuiTitle size={titleSize}>
-            <h1 data-test-subj="alertingV2EpisodeDetailsHeaderTitle">{titleContent}</h1>
+            <h2 data-test-subj="alertingV2EpisodeDetailsHeaderTitle">{titleContent}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        {status ? (
+        {showBadgeRow ? (
           <EuiFlexItem grow={false}>
-            <AlertEpisodeStatusBadges
-              status={status}
-              episodeAction={episodeAction}
-              groupAction={groupAction}
-            />
-          </EuiFlexItem>
-        ) : null}
-        {isSupportedEpisodeSeverity(severity) ? (
-          <EuiFlexItem grow={false}>
-            <AlertEpisodeSeverityBadge severity={severity} />
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+              {status ? (
+                <EuiFlexItem grow={false}>
+                  <AlertEpisodeStatusBadges
+                    status={status}
+                    episodeAction={episodeAction}
+                    groupAction={groupAction}
+                    isFlapping={isFlapping}
+                  />
+                </EuiFlexItem>
+              ) : null}
+              {isSupportedEpisodeSeverity(severity) ? (
+                <EuiFlexItem grow={false}>
+                  <AlertEpisodeSeverityBadge severity={severity} />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-      {description ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            {description}
-          </EuiText>
-        </>
-      ) : null}
-      {showTags ? (
-        <>
-          <EuiSpacer size="s" />
-          <div data-test-subj="alertingV2EpisodeDetailsHeaderTags">
-            <AlertEpisodeTags tags={tags} />
-          </div>
-        </>
-      ) : null}
     </>
   );
 };

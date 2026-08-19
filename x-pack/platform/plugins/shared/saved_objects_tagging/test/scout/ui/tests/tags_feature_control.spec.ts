@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRole, ScoutPage } from '@kbn/scout';
+import type { KibanaRole } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 import { KBN_ARCHIVES, test } from '../fixtures';
+import type { TaggingPageObjects } from '../fixtures/page_objects';
 import type { TagsTable } from '../fixtures/page_objects/tags_table';
 import {
   getDefaultSpaceWriteRole,
@@ -126,19 +127,14 @@ const selectSomeTagsIfPossible = async (tagsTable: TagsTable) => {
 const loginAndOpenTagsPage = async ({
   role,
   browserAuth,
-  page,
-  kbnUrl,
-  tagsTable,
+  pageObjects,
 }: {
   role: KibanaRole;
   browserAuth: { loginWithCustomRole: (role: KibanaRole) => Promise<void> };
-  page: ScoutPage;
-  kbnUrl: { app: (path: string) => string };
-  tagsTable: TagsTable;
+  pageObjects: TaggingPageObjects;
 }) => {
   await browserAuth.loginWithCustomRole(role);
-  await page.goto(kbnUrl.app('management/kibana/tags'));
-  await tagsTable.waitForLoaded();
+  await pageObjects.tagManagement.goto();
 };
 
 // custom-role login is not supported in ECH yet, so this suite runs on local
@@ -164,27 +160,15 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
   });
 
   for (const suite of FEATURE_CONTROL_ROLE_SUITES) {
-    test(suite.titles.view, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
-      await loginAndOpenTagsPage({
-        role: suite.role,
-        browserAuth,
-        page,
-        kbnUrl,
-        tagsTable: pageObjects.tagManagement.tagsTable,
-      });
+    test(suite.titles.view, async ({ browserAuth, pageObjects }) => {
+      await loginAndOpenTagsPage({ role: suite.role, browserAuth, pageObjects });
 
       const tagNames = await pageObjects.tagManagement.tagsTable.getDisplayedTagNames();
       expect(tagNames).toHaveLength(suite.privileges.view ? 5 : 0);
     });
 
-    test(suite.titles.delete, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
-      await loginAndOpenTagsPage({
-        role: suite.role,
-        browserAuth,
-        page,
-        kbnUrl,
-        tagsTable: pageObjects.tagManagement.tagsTable,
-      });
+    test(suite.titles.delete, async ({ browserAuth, pageObjects }) => {
+      await loginAndOpenTagsPage({ role: suite.role, browserAuth, pageObjects });
 
       const canDelete = await pageObjects.tagManagement.tagsTable.isRowActionAvailable(
         'delete',
@@ -193,14 +177,8 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
       expect(canDelete).toBe(suite.privileges.delete);
     });
 
-    test(suite.titles.bulkDelete, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
-      await loginAndOpenTagsPage({
-        role: suite.role,
-        browserAuth,
-        page,
-        kbnUrl,
-        tagsTable: pageObjects.tagManagement.tagsTable,
-      });
+    test(suite.titles.bulkDelete, async ({ browserAuth, pageObjects }) => {
+      await loginAndOpenTagsPage({ role: suite.role, browserAuth, pageObjects });
 
       const { tagsTable } = pageObjects.tagManagement;
       await selectSomeTagsIfPossible(tagsTable);
@@ -209,28 +187,16 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
       expect(canBulkDelete).toBe(suite.privileges.delete);
     });
 
-    test(suite.titles.create, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
-      await loginAndOpenTagsPage({
-        role: suite.role,
-        browserAuth,
-        page,
-        kbnUrl,
-        tagsTable: pageObjects.tagManagement.tagsTable,
-      });
+    test(suite.titles.create, async ({ browserAuth, page, pageObjects }) => {
+      await loginAndOpenTagsPage({ role: suite.role, browserAuth, pageObjects });
 
       await expect(page.testSubj.locator('createTagButton')).toHaveCount(
         suite.privileges.create ? 1 : 0
       );
     });
 
-    test(suite.titles.edit, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
-      await loginAndOpenTagsPage({
-        role: suite.role,
-        browserAuth,
-        page,
-        kbnUrl,
-        tagsTable: pageObjects.tagManagement.tagsTable,
-      });
+    test(suite.titles.edit, async ({ browserAuth, pageObjects }) => {
+      await loginAndOpenTagsPage({ role: suite.role, browserAuth, pageObjects });
 
       const canEdit = await pageObjects.tagManagement.tagsTable.isRowActionAvailable(
         'edit',
@@ -239,14 +205,8 @@ test.describe('Tags management feature controls', { tag: '@local-stateful-classi
       expect(canEdit).toBe(suite.privileges.edit);
     });
 
-    test(suite.titles.viewRelations, async ({ browserAuth, page, kbnUrl, pageObjects }) => {
-      await loginAndOpenTagsPage({
-        role: suite.role,
-        browserAuth,
-        page,
-        kbnUrl,
-        tagsTable: pageObjects.tagManagement.tagsTable,
-      });
+    test(suite.titles.viewRelations, async ({ browserAuth, pageObjects }) => {
+      await loginAndOpenTagsPage({ role: suite.role, browserAuth, pageObjects });
 
       const tagInfo = await pageObjects.tagManagement.tagsTable.getDisplayedTagInfo('tag-1');
       const hasRelationsLink = tagInfo?.connectionCount !== undefined;

@@ -68,13 +68,26 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
     targetEntityType: 'host',
     bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
-    esqlWhereClause: `event.category IN ("authentication", "session")
+    // Host-scoped EUID is `user:<user.name>@<host.id>@local`, so `user.name` is
+    // the only actor field Step 2 reads. Listing anything else (`user.email`,
+    // `user.id`) only inflates the composite agg: extra sources multiply buckets
+    // — the same username appears with dozens of distinct Unix UIDs / Windows
+    // SIDs across hosts — so Step 1 pages and Step 2 ES|QL queries grow for
+    // actors Step 2 then discards.
+    customActor: { fields: ['user.name'] },
+    // `event.category` is multivalued in ECS (Elastic Agent's syslog SSH events
+    // emit `["authentication", "session"]`). ES|QL `IN` returns NULL for a
+    // multivalued left-hand side, so `event.category IN (...)` silently drops
+    // those events. Use MV_CONTAINS (same idiom as communicates_with/system_auth)
+    // so multivalued categories match.
+    esqlWhereClause: `(MV_CONTAINS(TO_STRING(event.category), "authentication") OR MV_CONTAINS(TO_STRING(event.category), "session"))
     AND event.action == "ssh_login"
     AND event.outcome == "success"`,
     compositeAggAdditionalFilters: [
       { term: { 'event.action': 'ssh_login' } },
       SUCCESSFUL_OUTCOME_FILTER,
     ],
+    hostScopedUsersOnly: true,
   },
   {
     kind: 'bucketed',
@@ -84,6 +97,12 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
     targetEntityType: 'host',
     bucketTargetByThreshold: ACCESSES_BUCKETING,
     requireTargetEntityIdExists: true,
+    // Windows logon events carry `user.name`, which is the only actor field the
+    // host-scoped EUID (`user:<user.name>@<host.id>@local`) reads. A doc with
+    // `user.email` but no `user.name` is an IDP user that extraction indexed
+    // under a different EUID, so bucketing on it would surface actors Step 2
+    // cannot build an id for.
+    customActor: { fields: ['user.name'] },
     esqlWhereClause: `event.action IN ("logged-in", "logged-in-explicit")
     AND event.code IN ("4624", "4648")
     AND winlog.logon.type IN ("Interactive", "RemoteInteractive", "CachedInteractive")
@@ -93,5 +112,6 @@ export const ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationC
       { terms: { 'event.action': ['logged-in', 'logged-in-explicit'] } },
       SUCCESSFUL_OUTCOME_FILTER,
     ],
+    hostScopedUsersOnly: true,
   },
 ];

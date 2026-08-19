@@ -73,6 +73,12 @@ buildkite-agent artifact upload "$CODE_CHANGES_FILE"
 # this artifact.
 buildkite-agent artifact upload "$TESTING_SCOPE_FILE"
 
+# Moon shadow-mode comparison (observational only); upload if present.
+CODE_CHANGES_MOON_SHADOW_FILE=".scout/code_changes.moon_shadow.json"
+if [[ -f "$CODE_CHANGES_MOON_SHADOW_FILE" ]]; then
+  buildkite-agent artifact upload "$CODE_CHANGES_MOON_SHADOW_FILE"
+fi
+
 SCOUT_TEST_DISTRIBUTION_STRATEGY="${SCOUT_TEST_DISTRIBUTION_STRATEGY:-configs}"
 
 if [[ "$SCOUT_TEST_DISTRIBUTION_STRATEGY" == "lanes" ]]; then

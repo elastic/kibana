@@ -43,9 +43,13 @@ export function toStoredDataView(
   return {
     title: dataView.index_pattern,
     ...(dataView.time_field !== undefined && { timeFieldName: dataView.time_field }),
+    ...(dataView.allow_hidden_indices !== undefined && {
+      allowHidden: dataView.allow_hidden_indices,
+    }),
     ...(runtimeFieldMap && Object.keys(runtimeFieldMap).length > 0 && { runtimeFieldMap }),
     ...(fieldFormats && Object.keys(fieldFormats).length > 0 && { fieldFormats }),
     ...(fieldAttrs && Object.keys(fieldAttrs).length > 0 && { fieldAttrs }),
+    ...(dataView.name && { name: dataView.name }),
     ...getSavedDataViewFields(dataView),
   };
 }
@@ -53,20 +57,13 @@ export function toStoredDataView(
 function isSavedDataView(
   dataView: AsCodeDataView | AsCodeSavedDataView
 ): dataView is AsCodeSavedDataView {
-  return (
-    'id' in dataView ||
-    'name' in dataView ||
-    'allow_hidden_indices' in dataView ||
-    'field_filters' in dataView
-  );
+  return 'id' in dataView || 'field_filters' in dataView;
 }
 
 function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataViewSpec> {
   if (!isSavedDataView(dataView)) return {};
   return {
     id: dataView.id,
-    name: dataView.name,
-    allowHidden: dataView.allow_hidden_indices,
     sourceFilters: dataView.field_filters?.map((filter) => ({ value: filter })),
   };
 }

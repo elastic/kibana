@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem, EuiImage, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { AddComment } from '../../add_comment';
@@ -13,6 +13,7 @@ import { useCaseViewParams } from '../../../common/navigation';
 import type { UserActionTreeProps } from '../../user_actions/types';
 import { useUserActionsHandler } from '../../user_actions/use_user_actions_handler';
 import { NEW_COMMENT_ID } from '../../user_actions/constants';
+import { hasActiveUserActivityFilter } from '../../user_actions_activity_bar/utils';
 import { UserActionsList } from './user_actions_list';
 import { useUserActionsPagination } from './hooks/use_user_actions_pagination';
 import { useLastPageUserActions } from '../../user_actions/use_user_actions_last_page';
@@ -21,20 +22,37 @@ import { useUserPermissions } from '../../user_actions/use_user_permissions';
 import { useBuildUserActions } from './hooks/use_build_user_actions';
 import { useBuilderContext } from './hooks/use_builder_context';
 import { useCommentsList } from './hooks/use_comments_list';
+import noResultsIllustration from '../../../assets/illustration_product_no_results_magnifying_glass.svg';
+import { NO_SEARCH_RESULTS_BODY, NO_SEARCH_RESULTS_TITLE } from './translations';
+import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
+import { useGetCaseUsers } from '../../../containers/use_get_case_users';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { parseCaseUsers } from '../../utils';
 
-export const UserActions = React.memo((props: UserActionTreeProps) => {
+export type UserActionsProps = Omit<
+  UserActionTreeProps,
+  'currentUserProfile' | 'caseConnectors' | 'userProfiles' | 'casesConfiguration'
+>;
+
+export const UserActions = React.memo((props: UserActionsProps) => {
   const {
-    currentUserProfile,
     data: caseData,
     statusActionButton,
     attachActionButton,
     userActivityQueryParams,
     userActionsStats,
-    caseConnectors,
-    userProfiles,
-    casesConfiguration,
   } = props;
   const { detailName: caseId } = useCaseViewParams();
+
+  const { data: caseConnectors = {} } = useGetCaseConnectors(caseData.id);
+  const { data: caseUsers } = useGetCaseUsers(caseData.id);
+  const { data: casesConfiguration } = useGetCaseConfiguration();
+  const { data: currentUserProfile } = useGetCurrentUserProfile();
+  const { userProfiles } = useMemo(
+    () => parseCaseUsers({ caseUsers, createdBy: caseData.createdBy }),
+    [caseUsers, caseData.createdBy]
+  );
 
   const { lastPage } = useLastPage({ userActivityQueryParams, userActionsStats });
 
@@ -46,10 +64,17 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     fetchNextPage,
     isFetchingNextPage,
     remainingActionCount,
+    total: totalFilteredUserActions,
   } = useUserActionsPagination({
     userActivityQueryParams,
     caseId: caseData.id,
   });
+
+  const hasActiveFilter = hasActiveUserActivityFilter(userActivityQueryParams);
+  const showNoResults =
+    hasActiveFilter && !isLoadingInfiniteUserActions && totalFilteredUserActions === 0;
+
+  const { euiTheme } = useEuiTheme();
 
   const { isLoadingLastPageUserActions, lastPageUserActions, lastPageAttachments } =
     useLastPageUserActions({
@@ -146,6 +171,30 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       }
     >
       <EuiFlexItem>
+        {showNoResults && (
+          <EuiEmptyPrompt
+            data-test-subj="user-actions-no-search-results"
+            layout="horizontal"
+            color="transparent"
+            css={{ paddingBlockStart: euiTheme.size.xxl }}
+            icon={
+              <EuiImage
+                css={{ width: 200, height: 148 }}
+                size="200"
+                alt=""
+                url={noResultsIllustration}
+              />
+            }
+            title={<h2>{NO_SEARCH_RESULTS_TITLE}</h2>}
+            body={<p>{NO_SEARCH_RESULTS_BODY}</p>}
+          />
+        )}
+        {/*
+          Rendered regardless of `showNoResults`: when filtered out, the
+          infinite/last-page action lists are empty, so this only contributes
+          the "add comment" editor entry (when allowed), keeping it usable
+          even when the current filters match no user actions.
+        */}
         <UserActionsList
           comments={allComments}
           caseData={caseData}

@@ -23,6 +23,7 @@ import {
   CASE_COMMENT_SAVED_OBJECT,
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
+import { V2_NOOP_ACTIVITY_WRITER } from '../../cases_analytics_v2';
 import { createSOFindResponse } from '../test_utils';
 import {
   casePayload,
@@ -107,6 +108,7 @@ describe('CaseUserActionService', () => {
         log: mockLogger,
         auditLogger: mockAuditLogger,
         savedObjectsSerializer: soSerializerMock,
+        analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
       });
     });
 
@@ -200,31 +202,7 @@ describe('CaseUserActionService', () => {
         },
       } as unknown as SavedObjectsFindResponse;
 
-      it('does not count unified comment type when attachments flag is off', async () => {
-        unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
-
-        const stats = await service.getCaseUserActionStats({ caseId: '123' });
-
-        expect(stats).toEqual({
-          total: 20,
-          total_deletions: 4,
-          total_comments: 4,
-          total_comment_deletions: 1,
-          total_comment_creations: 2,
-          total_hidden_comment_updates: 2,
-          total_other_actions: 16,
-          total_other_action_deletions: 3,
-        });
-      });
-
-      it('counts unified comment type when attachments flag is on', async () => {
-        service = new CaseUserActionService({
-          unsecuredSavedObjectsClient,
-          log: mockLogger,
-          auditLogger: mockAuditLogger,
-          savedObjectsSerializer: soSerializerMock,
-          isCasesAttachmentsEnabled: true,
-        });
+      it('counts both legacy `user` and unified `comment` types as comments', async () => {
         unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
 
         const stats = await service.getCaseUserActionStats({ caseId: '123' });

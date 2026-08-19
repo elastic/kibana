@@ -25,6 +25,7 @@ import type {
 } from './types';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query';
+import { DateRangePickerPresetsService } from './date_range_picker_presets';
 import {
   setHttp,
   setIndexPatterns,
@@ -159,6 +160,11 @@ export class DataPublicPlugin
       uiSettings,
     });
 
+    const dateRangePickerPresets = new DateRangePickerPresetsService({
+      userStorage: core.userStorage,
+      uiSettings,
+    });
+
     const search = this.searchService.start(core, {
       fieldFormats,
       dataViews,
@@ -219,6 +225,7 @@ export class DataPublicPlugin
       dataViews,
       query,
       search,
+      dateRangePickerPresets,
       nowProvider: this.nowProvider,
     };
 

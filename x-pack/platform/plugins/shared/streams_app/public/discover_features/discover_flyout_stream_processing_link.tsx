@@ -26,6 +26,11 @@ import {
   adaptDocToResolverInputs,
   useResolvedDefinitionName,
 } from './use_resolved_definition_name';
+import {
+  getRemoteSearchType,
+  REMOTE_SEARCH_TYPE,
+  type RemoteSearchType,
+} from './stream_link_content';
 import { useCcsHasRemoteClusters } from './use_ccs_has_remote_clusters';
 
 export interface DiscoverFlyoutStreamProcessingLinkProps {
@@ -57,7 +62,7 @@ export function DiscoverFlyoutStreamProcessingLink({
     ccsHasRemoteClusters,
   });
 
-  const remoteSearchType = cpsHasLinkedProjects ? 'cps' : ccsHasRemoteClusters ? 'ccs' : undefined;
+  const remoteSearchType = getRemoteSearchType({ cpsHasLinkedProjects, ccsHasRemoteClusters });
 
   if (loading) return <EuiLoadingSpinner size="s" />;
 
@@ -105,15 +110,21 @@ export function DiscoverFlyoutStreamProcessingLink({
   );
 }
 
-const PROCESSING_WARNING_MESSAGES: Record<'cps' | 'ccs', string> = {
-  cps: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning', {
-    defaultMessage:
-      'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
-  }),
-  ccs: i18n.translate('xpack.streams.discoverFlyoutStreamProcessingLink.ccsWarning', {
-    defaultMessage:
-      'Cross-cluster search is active. This document may come from a remote cluster and might not be available in Streams.',
-  }),
+const PROCESSING_WARNING_MESSAGES: Record<RemoteSearchType, string> = {
+  [REMOTE_SEARCH_TYPE.CPS]: i18n.translate(
+    'xpack.streams.discoverFlyoutStreamProcessingLink.cpsWarning',
+    {
+      defaultMessage:
+        'Cross-project search is active. This document may come from a linked project and might not be available in Streams.',
+    }
+  ),
+  [REMOTE_SEARCH_TYPE.CCS]: i18n.translate(
+    'xpack.streams.discoverFlyoutStreamProcessingLink.ccsWarning',
+    {
+      defaultMessage:
+        'Cross-cluster search is active. This document may come from a remote cluster and might not be available in Streams.',
+    }
+  ),
 };
 
 const getTargetDataSource = (doc: DataTableRecord, streamName: string) => {

@@ -31,7 +31,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { useColumns } from '@kbn/unified-data-table';
+import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -59,6 +59,7 @@ import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useRegisterDiscoverEsqlFeedback } from '../../hooks/use_register_discover_esql_feedback';
 import {
   internalStateActions,
   useCurrentDataView,
@@ -118,6 +119,7 @@ export function DiscoverLayout() {
     state.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
+  useRegisterDiscoverEsqlFeedback();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
@@ -173,6 +175,11 @@ export function DiscoverLayout() {
     sort,
     settings: grid,
   });
+
+  const sidebarColumns = useMemo(
+    () => currentColumns.filter((column) => column !== SOURCE_COLUMN),
+    [currentColumns]
+  );
 
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
@@ -309,7 +316,6 @@ export function DiscoverLayout() {
           onAddFilter={onAddFilter}
           onFieldEdited={onFieldEdited}
           onDropFieldToTable={onDropFieldToTable}
-          sidebarToggleState$={sidebarToggleState$}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -322,7 +328,6 @@ export function DiscoverLayout() {
     onAddFilter,
     onFieldEdited,
     onDropFieldToTable,
-    sidebarToggleState$,
     dataStateContainer,
   ]);
 
@@ -411,7 +416,7 @@ export function DiscoverLayout() {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                columns={currentColumns}
+                columns={sidebarColumns}
                 documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}
@@ -430,12 +435,7 @@ export function DiscoverLayout() {
                 {resultState === 'none' ? (
                   <>
                     <div css={styles.mainPanel}>
-                      <PanelsToggle
-                        sidebarToggleState$={sidebarToggleState$}
-                        omitChartButton
-                        omitTableButton
-                        dataTestSubjSuffix="InPage"
-                      />
+                      <PanelsToggle omitChartButton omitTableButton dataTestSubjSuffix="InPage" />
                     </div>
                     {dataState.error ? (
                       <ErrorCallout

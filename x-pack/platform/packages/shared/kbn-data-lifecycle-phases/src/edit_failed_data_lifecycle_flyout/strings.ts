@@ -7,17 +7,24 @@
 
 import { i18n } from '@kbn/i18n';
 
-const PREFIX = 'xpack.dataLifecyclePhases.editFailedDataLifecycleFlyout';
-
 export const editFailedDataLifecycleFlyoutStrings = {
-  inheritLabel: i18n.translate(`${PREFIX}.inheritLabel`, {
-    defaultMessage: 'Inherit lifecycle',
-  }),
-  enableFailureStoreLabel: i18n.translate(`${PREFIX}.enableFailureStoreLabel`, {
-    defaultMessage: 'Enable failure store',
-  }),
-  enableFailureStoreHelpText: i18n.translate(`${PREFIX}.enableFailureStoreHelpText`, {
-    defaultMessage:
-      'Disabling this feature will not delete existing data within your failure store.',
-  }),
+  inheritLabel: i18n.translate(
+    'xpack.dataLifecyclePhases.editFailedDataLifecycleFlyout.inheritLabel',
+    {
+      defaultMessage: 'Inherit lifecycle',
+    }
+  ),
+  enableFailureStoreLabel: i18n.translate(
+    'xpack.dataLifecyclePhases.editFailedDataLifecycleFlyout.enableFailureStoreLabel',
+    {
+      defaultMessage: 'Enable failure store',
+    }
+  ),
+  enableFailureStoreHelpText: i18n.translate(
+    'xpack.dataLifecyclePhases.editFailedDataLifecycleFlyout.enableFailureStoreHelpText',
+    {
+      defaultMessage:
+        'Disabling this feature will not delete existing data within your failure store.',
+    }
+  ),
 };

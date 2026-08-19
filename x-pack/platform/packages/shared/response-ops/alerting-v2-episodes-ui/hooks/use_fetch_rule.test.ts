@@ -70,7 +70,27 @@ describe('useFetchRule', () => {
     });
   });
 
-  it('shows a toast for non-404 rule fetch failures', async () => {
+  it('does not show a toast when the rule is forbidden (403)', async () => {
+    const http = httpServiceMock.createStartContract();
+    const notifications = notificationServiceMock.createStartContract();
+    http.get.mockRejectedValueOnce({
+      response: { status: 403 },
+      body: { code: 'FORBIDDEN', error: 'Forbidden', message: 'Forbidden' },
+    });
+
+    const { result } = renderHook(() => useFetchRule({ id: 'r1', http, notifications }), {
+      wrapper,
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+    expect(result.current.ruleState).toEqual({
+      status: RuleStateStatus.forbidden,
+      ruleId: 'r1',
+    });
+  });
+
+  it('shows a toast for non-403/404 rule fetch failures', async () => {
     const http = httpServiceMock.createStartContract();
     const notifications = notificationServiceMock.createStartContract();
     http.get.mockRejectedValueOnce({

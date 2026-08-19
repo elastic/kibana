@@ -162,11 +162,27 @@ export function buildAddValuePlaceholder(
   });
 }
 
-/** Finds the placeholder type that matches the given ES|QL types */
+/** Finds the placeholder type that matches the given ES|QL types, preferring the one matching `preferredType` when accepted */
 export function findConstantPlaceholderType(
-  types: readonly string[]
+  types: readonly string[],
+  preferredType?: string
 ): ConstantPlaceholderType | undefined {
-  for (const placeholderType of Object.keys(PLACEHOLDER_CONFIG) as ConstantPlaceholderType[]) {
+  const placeholderTypes = Object.keys(PLACEHOLDER_CONFIG) as ConstantPlaceholderType[];
+
+  if (preferredType) {
+    const preferredPlaceholder = placeholderTypes.find((placeholderType) =>
+      PLACEHOLDER_CONFIG[placeholderType].matchTypes.includes(preferredType)
+    );
+
+    if (
+      preferredPlaceholder &&
+      types.some((type) => PLACEHOLDER_CONFIG[preferredPlaceholder].matchTypes.includes(type))
+    ) {
+      return preferredPlaceholder;
+    }
+  }
+
+  for (const placeholderType of placeholderTypes) {
     const { matchTypes } = PLACEHOLDER_CONFIG[placeholderType];
 
     if (types.some((type) => matchTypes.includes(type))) {
@@ -376,31 +392,37 @@ export interface MapKeySuggestionOptions {
   replacementRangeStrategy?: ISuggestionItem['replacementRangeStrategy'];
 }
 
-function buildSubqueryCompleteItem(sourceCommand: string): ISuggestionItem {
+function buildSubqueryCompleteItem(sourceCommand: string, preview = false): ISuggestionItem {
   const commandName = sourceCommand.toUpperCase();
+  const detailText = i18n.translate('kbn-esql-language.esql.autocomplete.subquerySourceDoc', {
+    defaultMessage: 'Adds a nested ES|QL query to your current query',
+  });
+  const declaration = `(${commandName} ...)`;
+  const documentationDetail = preview ? `**[${techPreviewLabel}]** ${detailText}` : detailText;
 
   return withAutoSuggest({
-    label: `(${commandName} ...)`,
+    label: declaration,
     text: `(${commandName} $0)`,
     asSnippet: true,
     kind: 'Method',
-    detail: i18n.translate('kbn-esql-language.esql.autocomplete.subquerySourceDoc', {
-      defaultMessage: 'Adds a nested ES|QL query to your current query',
-    }),
+    documentation: {
+      value: buildDocumentation(documentationDetail, declaration),
+    },
     category: SuggestionCategory.SUBQUERY,
   });
 }
 
-export function buildSubqueryCompleteItems(): ISuggestionItem[] {
+export function buildSubqueryCompleteItems(options?: {
+  previewCommands?: readonly string[];
+}): ISuggestionItem[] {
+  const previewCommands = options?.previewCommands?.map((command) => command.toLowerCase());
+
   return esqlCommandRegistry
     .getAllCommands()
-    .filter(
-      ({ metadata }) =>
-        metadata.subquerySource === true &&
-        metadata.hidden !== true &&
-        !metadata.subquerySourceHidden
-    )
-    .map(({ name }) => buildSubqueryCompleteItem(name));
+    .filter(({ metadata }) => metadata.subquerySource === true && metadata.hidden !== true)
+    .map(({ name }) =>
+      buildSubqueryCompleteItem(name, previewCommands?.includes(name.toLowerCase()) ?? false)
+    );
 }
 
 export const minMaxValueCompleteItem: ISuggestionItem = {

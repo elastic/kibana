@@ -50,6 +50,15 @@ describe('Connectors', () => {
     expect(screen.getByTestId('case-connectors-form-group')).toBeInTheDocument();
   });
 
+  it('hides the described form group title when hideTitle is true', () => {
+    renderWithTestingProviders(<Connectors {...props} hideTitle />);
+
+    expect(screen.getByTestId('case-connectors-form-group')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'External incident management system' })
+    ).not.toBeInTheDocument();
+  });
+
   it('shows the connectors form row', () => {
     renderWithTestingProviders(<Connectors {...props} />);
 

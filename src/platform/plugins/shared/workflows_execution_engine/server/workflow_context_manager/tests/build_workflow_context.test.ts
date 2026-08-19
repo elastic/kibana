@@ -134,7 +134,7 @@ describe('buildWorkflowContext', () => {
     it('should expose accumulated token usage so it is queryable via {{ execution.usage }}', () => {
       const execution: EsWorkflowExecution = {
         ...baseExecution,
-        usage: { inputTokens: 45305, outputTokens: 289, totalTokens: 45594 },
+        usage: { inputTokens: 45305, outputTokens: 289, cachedTokens: 12000, totalTokens: 45594 },
       };
 
       const context = buildWorkflowContext(execution, undefined, dependencies);
@@ -142,6 +142,7 @@ describe('buildWorkflowContext', () => {
       expect(context.execution.usage).toEqual({
         inputTokens: 45305,
         outputTokens: 289,
+        cachedTokens: 12000,
         totalTokens: 45594,
       });
     });
@@ -155,6 +156,41 @@ describe('buildWorkflowContext', () => {
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.execution.usage).toBeUndefined();
+    });
+
+    it('should include workflow document version in workflow context when present on execution', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        version: 7,
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.workflow.version).toBe(7);
+    });
+
+    it('should omit workflow document version from workflow context when absent on execution', () => {
+      const context = buildWorkflowContext(baseExecution, undefined, dependencies);
+
+      expect(context.workflow).not.toHaveProperty('version');
+    });
+
+    it('should not expose context.hitl links from persisted execution context', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {
+          hitl: {
+            externalFormLink:
+              'http://localhost:5601/api/workflows/executions/ex-1/steps/step-1/resume/external/form?token=abc',
+            externalQueryLink:
+              'http://localhost:5601/api/workflows/executions/ex-1/steps/step-1/resume/external?token=abc',
+          },
+        },
+      };
+
+      const context = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(context.context?.hitl).toBeUndefined();
     });
   });
 

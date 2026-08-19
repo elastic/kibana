@@ -180,7 +180,7 @@ export const getCertsRequestBody = (
     filters,
     monitorTypes,
     browserResourceTypes,
-    party,
+    certOrigin,
     tags,
     issuers,
     includeBrowserCerts = false,
@@ -207,8 +207,8 @@ export const getCertsRequestBody = (
   // maps the indexed `http.response.mime_type` onto the shared mime categories
   // (the browser engine's own `synthetics.payload.type` is stored unindexed, so
   // it is not queryable — see common/constants/mime_types.ts).
-  const wantsFirstParty = party?.includes(FIRST_PARTY);
-  const wantsThirdParty = party?.includes(THIRD_PARTY);
+  const wantsFirstParty = certOrigin?.includes(FIRST_PARTY);
+  const wantsThirdParty = certOrigin?.includes(THIRD_PARTY);
   const partyFilter =
     wantsFirstParty && !wantsThirdParty
       ? [partyQuery(FIRST_PARTY)]

@@ -48,6 +48,7 @@ describe('useHuntingLeads', () => {
     });
     mockUseQueryClient.mockReturnValue({
       invalidateQueries: mockInvalidateQueries,
+      setQueryData: jest.fn(),
     });
     mockUseQuery.mockReturnValue({
       data: undefined,
@@ -90,7 +91,7 @@ describe('useHuntingLeads', () => {
       signal: mockSignal,
       params: {
         page: 1,
-        perPage: 10,
+        perPage: 20,
         sortField: 'priority',
         sortOrder: 'desc',
         status: 'active',
@@ -156,6 +157,18 @@ describe('useHuntingLeads', () => {
       sourceType: 'adhoc',
     });
     expect(result.current.totalCount).toBe(1);
+  });
+
+  it('clamps totalCount to the max recent leads cap even when the raw total exceeds it', () => {
+    mockUseQuery.mockReturnValue({
+      data: { leads: [], total: 150 },
+      isLoading: false,
+      refetch: jest.fn(),
+    });
+
+    const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+    expect(result.current.totalCount).toBe(20);
   });
 
   it('generate function triggers mutation when called', () => {
@@ -230,5 +243,104 @@ describe('useHuntingLeads', () => {
 
     expect(result.current.writePermissionError).toBe(true);
     expect(result.current.readPermissionError).toBe(false);
+  });
+
+  describe('reload-resume', () => {
+    const IN_FLIGHT_KEY = 'securitySolution.entityAnalytics.leadGeneration.inFlight.default';
+
+    const mockStatusQuery = (lastExecutionUuid: string) => {
+      mockUseQuery.mockImplementation((config: { queryKey?: string[] }) => {
+        if (config.queryKey?.[0] === 'lead-generation-status') {
+          return {
+            data: { isEnabled: false, lastExecutionUuid },
+            isLoading: false,
+            refetch: jest.fn(),
+          };
+        }
+        return { data: undefined, isLoading: false, refetch: jest.fn() };
+      });
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      localStorage.clear();
+    });
+
+    afterEach(() => {
+      jest.clearAllTimers();
+      jest.useRealTimers();
+      localStorage.clear();
+    });
+
+    it('does not resume when there is no stored in-flight execution', () => {
+      mockStatusQuery('some-uuid');
+
+      const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+      expect(result.current.isGenerating).toBe(false);
+    });
+
+    it('sets isGenerating and polls when the stored executionUuid does not match the persisted status', async () => {
+      localStorage.setItem(
+        IN_FLIGHT_KEY,
+        JSON.stringify({ executionUuid: 'uuid-in-progress', startedAt: Date.now() })
+      );
+      const mockFetchStatus = jest
+        .fn()
+        .mockResolvedValue({ isEnabled: false, lastExecutionUuid: 'uuid-in-progress' });
+      mockUseEntityAnalyticsRoutes.mockReturnValue({
+        fetchLeads: mockFetchLeads.mockResolvedValue({ leads: [], total: 0 }),
+        generateLeads: mockGenerateLeads,
+        fetchLeadGenerationStatus: mockFetchStatus,
+        enableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
+        disableLeadGeneration: jest.fn().mockResolvedValue({ success: true }),
+        fetchLeadGenerationPrivileges: jest
+          .fn()
+          .mockResolvedValue({ has_read_permissions: true, has_write_permissions: true }),
+      });
+      mockStatusQuery('uuid-different');
+
+      const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+      // The mismatch is detected synchronously on mount, before the poll's
+      // delay resolves.
+      expect(result.current.isGenerating).toBe(true);
+
+      // Let the poll's delay elapse so it observes the now-matching status
+      // and resolves, clearing the stored execution.
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(2_000);
+      });
+
+      expect(result.current.isGenerating).toBe(false);
+      expect(result.current.hasGenerated).toBe(true);
+      expect(localStorage.getItem(IN_FLIGHT_KEY)).toBeNull();
+    });
+
+    it('clears the stored in-flight execution without resuming when its executionUuid matches the persisted status', () => {
+      localStorage.setItem(
+        IN_FLIGHT_KEY,
+        JSON.stringify({ executionUuid: 'uuid-done', startedAt: Date.now() })
+      );
+      mockStatusQuery('uuid-done');
+
+      const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+      expect(result.current.isGenerating).toBe(false);
+      expect(localStorage.getItem(IN_FLIGHT_KEY)).toBeNull();
+    });
+
+    it('clears a stale stored in-flight execution without resuming', () => {
+      localStorage.setItem(
+        IN_FLIGHT_KEY,
+        JSON.stringify({ executionUuid: 'uuid-stale', startedAt: Date.now() - 10 * 60 * 1000 })
+      );
+      mockStatusQuery('uuid-different');
+
+      const { result } = renderHook(() => useHuntingLeads('test-connector-id'));
+
+      expect(result.current.isGenerating).toBe(false);
+      expect(localStorage.getItem(IN_FLIGHT_KEY)).toBeNull();
+    });
   });
 });

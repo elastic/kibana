@@ -14,6 +14,7 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
+import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 
 import { AiNavigationIcon } from './icon';
 
@@ -88,7 +89,7 @@ export const createAiNavigationTree = (
       children: [
         {
           link: 'inbox' as AppDeepLinkId,
-          icon: 'email',
+          icon: 'mail',
         },
         {
           link: 'discover' as AppDeepLinkId,
@@ -103,13 +104,7 @@ export const createAiNavigationTree = (
               },
             ]
           : []),
-        ...(workflowsUiEnabled
-          ? [
-              {
-                link: 'workflows' as AppDeepLinkId,
-              },
-            ]
-          : []),
+        ...(workflowsUiEnabled ? getWorkflowsNavPanel(core) : []),
         {
           id: SecurityPageName.aiValue,
           link: securityLink(SecurityPageName.aiValue),

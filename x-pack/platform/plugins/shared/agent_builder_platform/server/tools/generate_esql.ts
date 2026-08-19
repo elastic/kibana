@@ -7,11 +7,22 @@
 
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import { generateEsql, GenerateEsqlNoDataError } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
+
+const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
+  try {
+    return { response: await generateEsql(params), noDataError: undefined };
+  } catch (err) {
+    if (err instanceof GenerateEsqlNoDataError) {
+      return { response: undefined, noDataError: err };
+    }
+    throw err;
+  }
+};
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),
@@ -60,7 +71,15 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
-    description: 'Generate an ES|QL query from a natural language query.',
+    description:
+      'Generate an ES|QL query from a natural language query. ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql',
+    annotations: {
+      title: 'Generate ES|QL',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: nlToEsqlToolSchema,
     handler: async (
       {
@@ -71,22 +90,28 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
         disable_named_params: disableNamedParams = false,
         time_range: explicitTimeRange,
       },
-      { esClient, modelProvider, logger, events, attachments }
+      { esClient, experimentalFeatures, modelProvider, logger, events, attachments }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
-      const esqlResponse = await generateEsql({
+      const { response: esqlResponse, noDataError } = await callGenerateEsql({
         nlQuery,
         index,
         additionalContext: context,
         executeQuery,
         disableNamedParams,
         timeRange,
+        includeDatasets: experimentalFeatures.datasets,
         modelProvider,
         esClient: esClient.asCurrentUser,
         logger,
         events,
       });
+      if (noDataError) {
+        return {
+          results: [{ type: ToolResultType.error, data: { message: noDataError.message } }],
+        };
+      }
 
       const toolResults: ToolHandlerResult[] = [];
 

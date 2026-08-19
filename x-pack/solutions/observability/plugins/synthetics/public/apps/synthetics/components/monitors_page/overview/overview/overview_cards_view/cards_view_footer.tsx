@@ -8,7 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useOverviewStatusState } from '../../../hooks/use_overview_status';
 import { selectOverviewGroupBy, selectOverviewPageState } from '../../../../../state';
 import type { OverviewStatusMetaData } from '../../types';

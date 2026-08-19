@@ -10,10 +10,12 @@
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useShowManagedWorkflowsSetting, useWorkflows } from '@kbn/workflows-ui';
 import { WorkflowsPage } from '.';
+import { PLUGIN_ID } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
 import { TestWrapper } from '../../shared/test_utils/test_wrapper';
 
@@ -22,6 +24,13 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+
+// Force the app menu to render at the xl breakpoint so the primary action button
+// (create) renders inline instead of collapsing into the overflow popover.
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+}));
 
 jest.mock('@kbn/workflows-ui', () => {
   const actual = jest.requireActual('@kbn/workflows-ui');
@@ -44,6 +53,14 @@ jest.mock('../../features/workflow_list', () => ({
   WorkflowList: () => <div data-test-subj="mockWorkflowListForAuthzTest" />,
 }));
 
+jest.mock('../../widgets/workflow_search_field/ui/workflow_search_field', () => ({
+  WorkflowSearchField: ({ onSearch }: { onSearch: (query: string) => void }) => (
+    <button type="button" data-test-subj="workflowSearchField" onClick={() => onSearch('security')}>
+      {'Search workflows'}
+    </button>
+  ),
+}));
+
 const mockUseWorkflows = useWorkflows as jest.MockedFunction<typeof useWorkflows>;
 const mockUseShowManagedWorkflowsSetting = useShowManagedWorkflowsSetting as jest.MockedFunction<
   typeof useShowManagedWorkflowsSetting
@@ -51,6 +68,7 @@ const mockUseShowManagedWorkflowsSetting = useShowManagedWorkflowsSetting as jes
 const mockUseWorkflowFiltersOptions = useWorkflowFiltersOptions as jest.MockedFunction<
   typeof useWorkflowFiltersOptions
 >;
+let mockNavigateToApp: jest.Mock;
 
 const emptyWorkflowsResult = {
   data: { results: [], total: 0 },
@@ -59,9 +77,15 @@ const emptyWorkflowsResult = {
   refetch: jest.fn(),
 };
 
-const renderPage = () =>
+const filtersData = {
+  enabled: [{ label: 'false', key: 'false' }],
+  createdBy: [{ label: 'alice', key: 'alice' }],
+  tags: [{ label: 'prod', key: 'prod' }],
+};
+
+const renderPage = (routerHistory?: React.ComponentProps<typeof TestWrapper>['routerHistory']) =>
   render(
-    <TestWrapper>
+    <TestWrapper routerHistory={routerHistory}>
       <I18nProvider>
         <EuiProvider colorMode="light">
           <WorkflowsPage />
@@ -76,11 +100,14 @@ function mockCapabilities(
   {
     readWorkflow = true,
     readManagedWorkflow = true,
+    manageConnectors = true,
   }: {
     readWorkflow?: boolean;
     readManagedWorkflow?: boolean;
+    manageConnectors?: boolean;
   } = {}
 ): void {
+  mockNavigateToApp = jest.fn();
   mockUseKibana.mockReturnValue({
     services: {
       application: {
@@ -91,8 +118,19 @@ function mockCapabilities(
             readManagedWorkflow,
             updateWorkflow,
           },
+          management: {
+            insightsAndAlerting: {
+              triggersActionsConnectors: manageConnectors,
+            },
+          },
         },
-        navigateToApp: jest.fn(),
+        getUrlForApp: jest.fn((appId: string, options?: { deepLinkId?: string; path?: string }) => {
+          const deepLinkPath = options?.deepLinkId
+            ? `/insightsAndAlerting/${options.deepLinkId}`
+            : '';
+          return `/app/${appId}${deepLinkPath}${options?.path ?? ''}`;
+        }),
+        navigateToApp: mockNavigateToApp,
       },
       featureFlags: {
         getBooleanValue: () => false,
@@ -107,11 +145,7 @@ describe('WorkflowsPage authorization', () => {
     mockUseWorkflows.mockReturnValue(emptyWorkflowsResult as any);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(false);
     mockUseWorkflowFiltersOptions.mockReturnValue({
-      data: {
-        enabled: [],
-        createdBy: [],
-        tags: [],
-      },
+      data: filtersData,
     } as unknown as ReturnType<typeof useWorkflowFiltersOptions>);
   });
 
@@ -146,24 +180,68 @@ describe('WorkflowsPage authorization', () => {
     },
   ])(
     'header: $label — Create=$expectCreate, Import=$expectImport',
-    ({ createWorkflow, updateWorkflow, expectCreate, expectImport }) => {
+    async ({ createWorkflow, updateWorkflow, expectCreate, expectImport }) => {
       mockCapabilities(createWorkflow, updateWorkflow);
 
       renderPage();
 
+      // The app menu renders through a React.lazy boundary, so wait for it to resolve.
+      await screen.findByTestId('appHeader');
+
       if (expectCreate) {
-        expect(screen.getByTestId('createWorkflowButton')).toBeInTheDocument();
+        expect(await screen.findByTestId('createWorkflowButton')).toBeInTheDocument();
       } else {
         expect(screen.queryByTestId('createWorkflowButton')).not.toBeInTheDocument();
       }
 
       if (expectImport) {
-        expect(screen.getByTestId('importWorkflowsButton')).toBeInTheDocument();
+        // Import is an overflow menu item; open the overflow popover to reveal it.
+        await openAppMenuOverflow();
+        expect(await screen.findByTestId('importWorkflowsButton')).toBeInTheDocument();
       } else {
         expect(screen.queryByTestId('importWorkflowsButton')).not.toBeInTheDocument();
       }
     }
   );
+
+  it('resets page to 1 when the query changes', () => {
+    mockCapabilities(true, true);
+    mockUseWorkflows.mockReturnValue({
+      ...emptyWorkflowsResult,
+      data: { results: [{}], total: 1 },
+    } as any);
+
+    renderPage(['/?page=3']);
+
+    fireEvent.click(screen.getByTestId('workflowSearchField'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+      path: '?query=security',
+      replace: true,
+    });
+  });
+
+  it('links to connector management from the overflow menu', async () => {
+    mockCapabilities(true, true);
+
+    renderPage();
+
+    await openAppMenuOverflow();
+    expect(await screen.findByTestId('workflowAddConnectorsLink')).toHaveAttribute(
+      'href',
+      '/app/management/insightsAndAlerting/triggersActionsConnectors/connectors'
+    );
+    expect(screen.queryByText('Add integrations')).not.toBeInTheDocument();
+  });
+
+  it('hides connector management when the capability is missing', async () => {
+    mockCapabilities(true, true, { manageConnectors: false });
+
+    renderPage();
+
+    await openAppMenuOverflow();
+    expect(screen.queryByTestId('workflowAddConnectorsLink')).not.toBeInTheDocument();
+  });
 
   it('hides the managed filter when the setting is disabled', () => {
     mockCapabilities(true, true);
@@ -230,7 +308,7 @@ describe('WorkflowsPage authorization', () => {
     expect(screen.getByTestId('managed-filter-popover-button')).toBeInTheDocument();
   });
 
-  it('requests all workflows when custom and managed workflow types are selected', async () => {
+  it('updates the URL to request all workflows when custom and managed workflow types are selected', () => {
     mockCapabilities(true, true);
     mockUseShowManagedWorkflowsSetting.mockReturnValue(true);
     mockUseWorkflows.mockReturnValue({
@@ -243,10 +321,9 @@ describe('WorkflowsPage authorization', () => {
     fireEvent.click(screen.getByTestId('managed-filter-popover-button'));
     fireEvent.click(screen.getByText('Managed'));
 
-    await waitFor(() => {
-      expect(mockUseWorkflows).toHaveBeenLastCalledWith(
-        expect.objectContaining({ managed: 'all' })
-      );
+    expect(mockNavigateToApp).toHaveBeenCalledWith(PLUGIN_ID, {
+      path: '?managed=all',
+      replace: true,
     });
   });
 

@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import type { LeadGenerationMode } from '../../../../../common/entity_analytics/lead_generation/constants';
 import { getLeadsIndexName } from '../../../../../common/entity_analytics/lead_generation/constants';
-import { getAlertsIndex } from '../../../../../common/entity_analytics/utils';
 import { createLeadGenerationEngine } from '../engine/lead_generation_engine';
-import { createRiskScoreModule } from '../observation_modules/risk_score_module';
-import { createTemporalStateModule } from '../observation_modules/temporal_state_module';
-import { createBehavioralAnalysisModule } from '../observation_modules/behavioral_analysis_module';
+import { registerObservationModules } from '../observation_modules/register_modules';
 import type { Lead, LeadEntity } from '../types';
 
 interface LeadGenerationServiceDeps {
@@ -24,6 +27,9 @@ interface LeadGenerationServiceDeps {
   readonly fetchEntities: () => Promise<LeadEntity[]>;
   readonly riskScoreDataClient: RiskScoreDataClient;
   readonly chatModel: InferenceChatModel;
+  readonly ml?: MlPluginSetup;
+  readonly request?: KibanaRequest;
+  readonly soClient?: SavedObjectsClientContract;
 }
 
 export interface GenerateResult {
@@ -38,6 +44,9 @@ export const createLeadGenerationService = ({
   fetchEntities,
   riskScoreDataClient,
   chatModel,
+  ml,
+  request,
+  soClient,
 }: LeadGenerationServiceDeps) => ({
   async generate(mode: LeadGenerationMode, executionId: string): Promise<GenerateResult> {
     const routeStart = Date.now();
@@ -55,15 +64,15 @@ export const createLeadGenerationService = ({
     }
 
     const engine = createLeadGenerationEngine({ logger });
-    engine.registerModule(createRiskScoreModule({ riskScoreDataClient, logger }));
-    engine.registerModule(createTemporalStateModule({ esClient, logger, spaceId }));
-    engine.registerModule(
-      createBehavioralAnalysisModule({
-        esClient,
-        logger,
-        alertsIndexPattern: getAlertsIndex(spaceId),
-      })
-    );
+    registerObservationModules(engine, {
+      logger,
+      esClient,
+      spaceId,
+      riskScoreDataClient,
+      ml,
+      request,
+      soClient,
+    });
 
     const generateStart = Date.now();
     const leads = await engine.generateLeads(leadEntities, { chatModel });
@@ -92,7 +101,7 @@ export const formatLeadForResponse = (lead: Lead, executionId: string) => ({
   title: lead.title,
   byline: lead.byline,
   description: lead.description,
-  entities: lead.entities.map(({ type, name }) => ({ type, name })),
+  entities: lead.entities.map(({ type, name, id }) => ({ type, name, id })),
   tags: lead.tags,
   priority: lead.priority,
   staleness: lead.staleness,

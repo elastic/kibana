@@ -27,7 +27,7 @@ export class EndpointMeteringService {
     taskId,
     cloudSetup,
     esClient,
-    abortController,
+    signal,
     lastSuccessfulReport,
     config,
     logger,
@@ -41,7 +41,7 @@ export class EndpointMeteringService {
 
     const heartbeatsResponse = await this.getHeartbeatsSince(
       esClient,
-      abortController,
+      signal,
       lastSuccessfulReport
     );
 
@@ -79,7 +79,7 @@ export class EndpointMeteringService {
 
   private async getHeartbeatsSince(
     esClient: ElasticsearchClient,
-    abortController: AbortController,
+    signal: AbortSignal,
     since: Date
   ): Promise<SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>> {
     return esClient.search<EndpointHeartbeat>(
@@ -119,7 +119,7 @@ export class EndpointMeteringService {
         },
       },
       {
-        signal: abortController.signal,
+        signal,
         ignore: [404],
       }
     );

@@ -10,7 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiTitle, EuiSpacer } from 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useAttackDetailsContext } from '../../context';
 import { useHeaderData } from '../../hooks/use_header_data';
-import { useAttackEntitiesLists } from '../../hooks/use_attack_entities_lists';
+import { useOriginalAlertIds } from '../../hooks/use_original_alert_ids';
+import { useAttackEntitiesLists } from '../../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists';
 import { AttackHostInsightsRow, AttackUserInsightsRow } from './attack_entity_insight_rows';
 
 const ATTACK_ENTITIES_DETAILS_TEST_ID = 'attack-entities-details';
@@ -23,7 +24,9 @@ const ATTACK_ENTITIES_DETAILS_TEST_ID = 'attack-entities-details';
 export const AttackEntitiesDetails: React.FC = memo(() => {
   const { scopeId } = useAttackDetailsContext();
   const { timestamp } = useHeaderData();
-  const { userEntityEntries, hostEntityEntries, loading, error } = useAttackEntitiesLists();
+  const originalAlertIds = useOriginalAlertIds();
+  const { userEntityEntries, hostEntityEntries, loading, error } =
+    useAttackEntitiesLists(originalAlertIds);
 
   const timestampOrFallback = timestamp ?? '';
 

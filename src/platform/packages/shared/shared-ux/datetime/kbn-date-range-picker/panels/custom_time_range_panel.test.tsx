@@ -284,7 +284,7 @@ describe('CustomTimeRangePanel', () => {
       fireEvent.change(countInput, { target: { value: '30' } });
 
       const dialog = screen.getByRole('dialog');
-      fireEvent.click(within(dialog).getByText('Custom time range'));
+      fireEvent.click(within(dialog).getByText('Custom range'));
 
       expect(screen.getByTestId('currentDateRangeText')).toHaveTextContent('-15m');
     });

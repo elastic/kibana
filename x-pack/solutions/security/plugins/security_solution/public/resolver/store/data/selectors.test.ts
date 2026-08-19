@@ -7,9 +7,9 @@
 
 import * as selectors from './selectors';
 import type { DataState, AnalyzerById } from '../../types';
-import type { Reducer, AnyAction } from 'redux';
+import type { Reducer, AnyAction } from 'redux-v4';
 import { dataReducer } from './reducer';
-import { createStore } from 'redux';
+import { createStore } from 'redux-v4';
 import {
   mockTreeWithNoAncestorsAnd2Children,
   mockTreeWith2AncestorsAndNoChildren,

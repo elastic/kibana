@@ -14,9 +14,10 @@ import { generateEsql } from './generate_esql';
 
 export interface NaturalLanguageSearchResponse {
   /**
-   * The ES|QL query which was generated based on the provided NL query, index and context
+   * The ES|QL query which was generated based on the provided NL query, index and context.
+   * May be undefined if the LLM failed to produce a query.
    */
-  generatedQuery: string;
+  generatedQuery: string | undefined;
   /**
    * The ES|QL data which was returned by executing the query.
    */
@@ -37,6 +38,7 @@ export const naturalLanguageSearch = async ({
   rowLimit,
   customInstructions,
   timeRange,
+  includeDatasets = false,
 }: {
   nlQuery: string;
   target: string;
@@ -47,6 +49,7 @@ export const naturalLanguageSearch = async ({
   rowLimit?: number;
   customInstructions?: string;
   timeRange?: TimeRange;
+  includeDatasets?: boolean;
 }): Promise<NaturalLanguageSearchResponse> => {
   const queryGenResponse = await generateEsql({
     nlQuery,
@@ -59,6 +62,7 @@ export const naturalLanguageSearch = async ({
     rowLimit,
     additionalInstructions: customInstructions,
     timeRange,
+    includeDatasets,
   });
 
   return {

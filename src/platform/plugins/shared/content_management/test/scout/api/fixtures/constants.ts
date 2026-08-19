@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** Dashboard API base path (no leading slash — for use with apiClient). */
-export const DASHBOARD_API_PATH = 'api/dashboards';
-export const DASHBOARD_API_VERSION = '2023-10-31';
+import { DASHBOARD_API_VERSION } from '@kbn/scout/constants';
+
+export { DASHBOARD_API_PATH, DASHBOARD_API_VERSION } from '@kbn/scout/constants';
 
 /** Favorites API base path (no leading slash — for use with apiClient). */
 export const FAVORITES_API_PATH = 'internal/content_management/favorites';

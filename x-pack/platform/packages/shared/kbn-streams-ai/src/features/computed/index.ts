@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BaseFeature } from '@kbn/streams-schema';
+import type { BaseFeature } from '@kbn/significant-events-schema';
 import { codeAnalysisGenerator } from './code_analysis';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 import { errorLogsGenerator } from './error_logs';
@@ -54,10 +54,14 @@ generators.forEach((generator) => registry.register(generator));
 /**
  * Returns formatted LLM instructions for all computed feature types.
  * This is automatically included in prompts so the LLM knows how to use each feature type.
+ *
+ * `excludedTypes` skips types a consumer never receives, so the prompt won't
+ * describe a feature type that never appears in tool results.
  */
-export function getComputedFeatureInstructions(): string {
+export function getComputedFeatureInstructions(excludedTypes: readonly string[] = []): string {
   return registry
     .getAll()
+    .filter((generator) => !excludedTypes.includes(generator.type))
     .map((generator) => `**${generator.type}**: ${generator.llmInstructions}`)
     .join('\n\n');
 }
@@ -80,24 +84,46 @@ function toComputedFeature(
   };
 }
 
+export interface ComputedFeatureGenerationResult {
+  features: BaseFeature[];
+  errors: Array<{ feature: string; error: string }>;
+}
+
 /**
- * Generates all computed features by running all registered generators in parallel.
+ * Generates all computed features by running every registered generator.
  *
- * Generators that return `undefined` (e.g. an externally-backed generator whose
- * provider is absent or that found no match) are skipped.
+ * Best-effort: a rejected generator is logged and skipped so one failure doesn't
+ * lose the others; `undefined` results (skips) are dropped too. Throws only when
+ * failures leave zero features — a skip is not a failure.
  */
 export async function generateAllComputedFeatures(
   options: ComputedFeatureGeneratorOptions
-): Promise<BaseFeature[]> {
-  const results = await Promise.all(
-    registry.getAll().map(async (generator) => {
-      const value = await generator.generate(options);
-      if (value === undefined) {
-        return undefined;
-      }
-      return toComputedFeature(generator, value, options.stream.name);
-    })
+): Promise<ComputedFeatureGenerationResult> {
+  const allGenerators = registry.getAll();
+  const results = await Promise.allSettled(
+    allGenerators.map((generator) => generator.generate(options))
   );
 
-  return results.filter((feature): feature is BaseFeature => feature !== undefined);
+  const errors: Array<{ feature: string; error: string }> = [];
+  const features: BaseFeature[] = [];
+
+  for (const [index, result] of results.entries()) {
+    const generator = allGenerators[index];
+    if (result.status === 'rejected') {
+      const message =
+        result.reason instanceof Error ? result.reason.message : String(result.reason);
+      options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
+      errors.push({ feature: generator.type, error: message });
+    } else if (result.value !== undefined) {
+      features.push(toComputedFeature(generator, result.value, options.stream.name));
+    }
+  }
+
+  if (features.length === 0 && errors.length > 0) {
+    throw new Error(
+      `All computed feature generators failed: ${errors.map((e) => e.error).join('; ')}`
+    );
+  }
+
+  return { features, errors };
 }

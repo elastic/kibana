@@ -137,12 +137,10 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [data, theme, uiSettings, notifications?.toasts, dataViewFieldEditor, fieldFormats, storage]);
 
   const onValueChange = useCallback(
-    (docId: string, update: any) => {
-      // make a call to update the doc with the new value
-      indexUpdateService.updateDoc(docId, update);
-      // update rows to reflect the change
+    (docId: string, update: Record<string, unknown>) => {
+      indexUpdateService.updateDoc(docId, update, columnsMeta);
     },
-    [indexUpdateService]
+    [indexUpdateService, columnsMeta]
   );
 
   const onSort = useCallback(

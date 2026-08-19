@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/test'
   - '@kbn/object-utils'
+  - '@kbn/apm-utils'
 tags:
   - shared-common
   - package

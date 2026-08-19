@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import type { TemplateMetadataPreviewProps } from './template_metadata_preview';
 import { TemplateMetadataPreview } from './template_metadata_preview';
 
@@ -16,9 +17,14 @@ jest.mock('../../severity/config', () => ({
   ),
 }));
 
+const mockUseCasesFeatures = jest.fn(() => ({ isSyncAlertsEnabled: true }));
+jest.mock('../../../common/use_cases_features', () => ({
+  useCasesFeatures: () => mockUseCasesFeatures(),
+}));
+
 const defaultProps: TemplateMetadataPreviewProps = {
   parsedTemplate: {
-    name: 'Test Template',
+    name: 'Test case title',
     fields: [],
   },
 };
@@ -27,100 +33,102 @@ const renderComponent = (props: Partial<TemplateMetadataPreviewProps> = {}) =>
   render(<TemplateMetadataPreview {...defaultProps} {...props} />);
 
 describe('TemplateMetadataPreview', () => {
-  it('renders the template name', () => {
+  beforeEach(() => {
+    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: true });
+  });
+
+  it('renders the case default title', () => {
     renderComponent();
 
     expect(screen.getByText('Name')).toBeInTheDocument();
-    expect(screen.getByText('Test Template')).toBeInTheDocument();
+    expect(screen.getByText('Test case title')).toBeInTheDocument();
   });
 
-  it('renders description when provided', () => {
+  it('renders case defaults metadata when provided', () => {
     renderComponent({
       parsedTemplate: {
-        name: 'Test',
+        name: 'Default title',
         description: 'A test description',
+        severity: 'high',
+        category: 'Security',
+        tags: ['tag-one', 'tag-two'],
+        assignees: [{ uid: 'analyst-1' }, { uid: 'analyst-2' }],
         fields: [],
       },
     });
 
+    expect(screen.getByText('Name')).toBeInTheDocument();
+    expect(screen.getByText('Default title')).toBeInTheDocument();
     expect(screen.getByText('Description')).toBeInTheDocument();
     expect(screen.getByText('A test description')).toBeInTheDocument();
-  });
-
-  it('does not render description when not provided', () => {
-    renderComponent();
-
-    expect(screen.queryByText('Description')).not.toBeInTheDocument();
-  });
-
-  it('renders severity when provided', () => {
-    renderComponent({
-      parsedTemplate: {
-        name: 'Test',
-        severity: 'high',
-        fields: [],
-      },
-    });
-
     expect(screen.getByText('Severity')).toBeInTheDocument();
     expect(screen.getByTestId('severity-health')).toHaveTextContent('high');
-  });
-
-  it('does not render severity when not provided', () => {
-    renderComponent();
-
-    expect(screen.queryByText('Severity')).not.toBeInTheDocument();
-  });
-
-  it('renders category when provided', () => {
-    renderComponent({
-      parsedTemplate: {
-        name: 'Test',
-        category: 'Security',
-        fields: [],
-      },
-    });
-
     expect(screen.getByText('Category')).toBeInTheDocument();
     expect(screen.getByText('Security')).toBeInTheDocument();
-  });
-
-  it('does not render category when not provided', () => {
-    renderComponent();
-
-    expect(screen.queryByText('Category')).not.toBeInTheDocument();
-  });
-
-  it('renders tags when provided', () => {
-    renderComponent({
-      parsedTemplate: {
-        name: 'Test',
-        tags: ['tag-one', 'tag-two'],
-        fields: [],
-      },
-    });
-
     expect(screen.getByText('Tags')).toBeInTheDocument();
     expect(screen.getByTestId('template-column-tag-tag-one')).toHaveTextContent('tag-one');
     expect(screen.getByTestId('template-column-tag-tag-two')).toHaveTextContent('tag-two');
+    expect(screen.getByText('Assignees')).toBeInTheDocument();
+    expect(screen.getByText('analyst-1, analyst-2')).toBeInTheDocument();
   });
 
-  it('does not render tags when the array is empty', () => {
+  it('renders sync alerts setting when provided', () => {
     renderComponent({
       parsedTemplate: {
-        name: 'Test',
-        tags: [],
+        name: 'Title',
+        settings: { syncAlerts: true },
         fields: [],
       },
     });
 
-    expect(screen.queryByText('Tags')).not.toBeInTheDocument();
+    expect(screen.getByText('Sync alerts')).toBeInTheDocument();
+    expect(screen.getByText('On')).toBeInTheDocument();
   });
 
-  it('does not render tags when not provided', () => {
+  it('does not render the sync alerts setting when alert syncing is disabled (e.g. Observability)', () => {
+    mockUseCasesFeatures.mockReturnValue({ isSyncAlertsEnabled: false });
+
+    renderComponent({
+      parsedTemplate: {
+        name: 'Title',
+        settings: { syncAlerts: true },
+        fields: [],
+      },
+    });
+
+    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
+  });
+
+  it('renders extract observables setting when provided', () => {
+    renderComponent({
+      parsedTemplate: {
+        name: 'Title',
+        settings: { extractObservables: false },
+        fields: [],
+      },
+    });
+
+    expect(screen.getByText('Extract observables')).toBeInTheDocument();
+    expect(screen.getByText('Off')).toBeInTheDocument();
+  });
+
+  it('does not render settings rows when settings are not provided', () => {
     renderComponent();
 
-    expect(screen.queryByText('Tags')).not.toBeInTheDocument();
+    expect(screen.queryByText('Sync alerts')).not.toBeInTheDocument();
+    expect(screen.queryByText('Extract observables')).not.toBeInTheDocument();
+  });
+
+  it('does not render the connector preview for the none connector', () => {
+    renderComponent({
+      parsedTemplate: {
+        name: 'Title',
+        connector: { type: ConnectorTypes.none, id: 'none', fields: null },
+        fields: [],
+      },
+    });
+
+    expect(screen.queryByText('Connector')).not.toBeInTheDocument();
   });
 
   it('renders all metadata fields together', () => {

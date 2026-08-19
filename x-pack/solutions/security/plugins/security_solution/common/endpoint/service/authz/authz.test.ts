@@ -76,6 +76,64 @@ describe('Endpoint Authz service', () => {
       ).toBe(false);
     });
 
+    describe('Actions Log Management', () => {
+      it('should set `canWriteActionsLogManagement` to true if enterprise license and privilege granted', () => {
+        licenseService.isEnterprise.mockReturnValue(true);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canWriteActionsLogManagement
+        ).toBe(true);
+      });
+
+      it('should set `canWriteActionsLogManagement` to false if not enterprise license', () => {
+        licenseService.isEnterprise.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canWriteActionsLogManagement
+        ).toBe(false);
+      });
+
+      it('should set `canWriteActionsLogManagement` to false if privilege not granted', () => {
+        fleetAuthz.packagePrivileges!.endpoint.actions.writeActionsLogManagement.executePackageAction =
+          false;
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canWriteActionsLogManagement
+        ).toBe(false);
+      });
+
+      it('should set `canReadActionsLogManagement` to true if enterprise license and privilege granted', () => {
+        licenseService.isEnterprise.mockReturnValue(true);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canReadActionsLogManagement
+        ).toBe(true);
+      });
+
+      it('should set `canReadActionsLogManagement` to false if not enterprise license', () => {
+        licenseService.isEnterprise.mockReturnValue(false);
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canReadActionsLogManagement
+        ).toBe(false);
+      });
+
+      it('should set `canReadActionsLogManagement` to false if privilege not granted', () => {
+        fleetAuthz.packagePrivileges!.endpoint.actions.readActionsLogManagement.executePackageAction =
+          false;
+
+        expect(
+          calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, false)
+            .canReadActionsLogManagement
+        ).toBe(false);
+      });
+    });
+
     it('should set `canUnIsolateHost` to true even if not proper license', () => {
       licenseService.isPlatinumPlus.mockReturnValue(false);
 

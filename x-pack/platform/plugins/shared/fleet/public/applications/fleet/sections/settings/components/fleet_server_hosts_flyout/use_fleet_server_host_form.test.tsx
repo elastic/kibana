@@ -191,6 +191,153 @@ describe('useFleetServerHostsForm', () => {
     });
   });
 
+  describe('preconfigured host with allow_edit', () => {
+    it('should have is_default switch enabled when allow_edit includes is_default', async () => {
+      const testRenderer = createFleetTestRendererMock();
+      const onSuccess = jest.fn();
+      const { result } = testRenderer.renderHook(() =>
+        useFleetServerHostsForm(
+          {
+            id: 'private-fleet-server',
+            name: 'Private Fleet Server',
+            host_urls: ['https://private.fleet.example.com'],
+            is_default: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default'],
+          },
+          onSuccess
+        )
+      );
+
+      // is_default switch should not be disabled because allow_edit includes 'is_default'
+      expect(result.current.inputs.isDefaultInput.props.disabled).toBeFalsy();
+    });
+
+    it('should have host_urls disabled for preconfigured host even with allow_edit', async () => {
+      const testRenderer = createFleetTestRendererMock();
+      const onSuccess = jest.fn();
+      const { result } = testRenderer.renderHook(() =>
+        useFleetServerHostsForm(
+          {
+            id: 'private-fleet-server',
+            name: 'Private Fleet Server',
+            host_urls: ['https://private.fleet.example.com'],
+            is_default: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default'],
+          },
+          onSuccess
+        )
+      );
+
+      expect(result.current.inputs.hostUrlsInput.props.disabled).toBeTruthy();
+    });
+
+    it('should be disabled before is_default is changed', async () => {
+      const testRenderer = createFleetTestRendererMock();
+      const onSuccess = jest.fn();
+      const { result } = testRenderer.renderHook(() =>
+        useFleetServerHostsForm(
+          {
+            id: 'private-fleet-server',
+            name: 'Private Fleet Server',
+            host_urls: ['https://private.fleet.example.com'],
+            is_default: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default'],
+          },
+          onSuccess
+        )
+      );
+
+      expect(result.current.isDisabled).toBeTruthy();
+    });
+
+    it('should become enabled after toggling is_default', async () => {
+      const testRenderer = createFleetTestRendererMock();
+      const onSuccess = jest.fn();
+      const { result } = testRenderer.renderHook(() =>
+        useFleetServerHostsForm(
+          {
+            id: 'private-fleet-server',
+            name: 'Private Fleet Server',
+            host_urls: ['https://private.fleet.example.com'],
+            is_default: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default'],
+          },
+          onSuccess
+        )
+      );
+
+      act(() => result.current.inputs.isDefaultInput.setValue(true));
+
+      expect(result.current.isDisabled).toBeFalsy();
+    });
+
+    it('should submit only is_default for a preconfigured host', async () => {
+      const testRenderer = createFleetTestRendererMock();
+      const onSuccess = jest.fn();
+      testRenderer.startServices.http.put.mockResolvedValue({});
+      const { result } = testRenderer.renderHook(() =>
+        useFleetServerHostsForm(
+          {
+            id: 'private-fleet-server',
+            name: 'Private Fleet Server',
+            host_urls: ['https://private.fleet.example.com'],
+            is_default: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default'],
+          },
+          onSuccess
+        )
+      );
+
+      act(() => result.current.inputs.isDefaultInput.setValue(true));
+      await act(() => result.current.submit());
+
+      await testRenderer.waitFor(() => {
+        expect(testRenderer.startServices.http.put).toHaveBeenCalledWith(
+          expect.stringContaining('private-fleet-server'),
+          expect.objectContaining({
+            body: JSON.stringify({ is_default: true }),
+          })
+        );
+        expect(onSuccess).toBeCalled();
+      });
+    });
+
+    it('should show the host own URLs when editing an existing preconfigured host', async () => {
+      const testRenderer = createFleetTestRendererMock();
+      const onSuccess = jest.fn();
+      const { result } = testRenderer.renderHook(() =>
+        useFleetServerHostsForm(
+          {
+            id: 'private-fleet-server',
+            name: 'Private Fleet Server',
+            host_urls: ['https://private.fleet.example.com'],
+            is_default: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default'],
+          },
+          onSuccess,
+          {
+            id: 'default-fleet-server',
+            name: 'Default Fleet Server',
+            host_urls: ['https://public.fleet.example.com'],
+            is_default: true,
+            is_preconfigured: true,
+          }
+        )
+      );
+
+      // Should show the private host's own URL, not the default host's URL
+      expect(result.current.inputs.hostUrlsInput.value).toEqual([
+        'https://private.fleet.example.com',
+      ]);
+    });
+  });
+
   it('should allow the user to correct and submit an invalid form', async () => {
     const testRenderer = createFleetTestRendererMock();
     const onSuccess = jest.fn();
@@ -224,5 +371,81 @@ describe('useFleetServerHostsForm', () => {
 
     await act(() => result.current.submit());
     await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+  });
+
+  it('should send explicit null when clearing an existing ssl secret key', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.put.mockResolvedValue({});
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: ['https://test.fr'],
+          is_default: false,
+          is_preconfigured: false,
+          secrets: {
+            ssl: {
+              key: { id: 'secret-key-id-123' },
+            },
+          },
+        },
+        onSuccess
+      )
+    );
+
+    act(() => result.current.inputs.sslKeySecretInput.setValue(''));
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(onSuccess).toBeCalled();
+      const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
+        string,
+        { body: string }
+      ];
+      const body = JSON.parse(putOptions.body);
+      expect(body.secrets?.ssl?.key).toBeNull();
+    });
+  });
+
+  it('should preserve an untouched secret when clearing a different one', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.put.mockResolvedValue({});
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: ['https://test.fr'],
+          is_default: false,
+          is_preconfigured: false,
+          secrets: {
+            ssl: {
+              key: { id: 'secret-key-id-123' },
+              es_key: { id: 'secret-es-key-id-456' },
+            },
+          },
+        },
+        onSuccess
+      )
+    );
+
+    act(() => result.current.inputs.sslKeySecretInput.setValue(''));
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => {
+      expect(onSuccess).toBeCalled();
+      const [, putOptions] = testRenderer.startServices.http.put.mock.calls[0] as unknown as [
+        string,
+        { body: string }
+      ];
+      const body = JSON.parse(putOptions.body);
+      expect(body.secrets?.ssl?.key).toBeNull();
+      expect(body.secrets?.ssl?.es_key).toEqual({ id: 'secret-es-key-id-456' });
+    });
   });
 });

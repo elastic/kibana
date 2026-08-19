@@ -13,6 +13,10 @@ import {
   ALERT_GROUPING,
   ALERT_INDEX_PATTERN,
   ALERT_REASON,
+  ALERT_SEVERITY,
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_WARNING,
+  type AlertSeverity,
 } from '@kbn/rule-data-utils';
 import { castArray, isEqual } from 'lodash';
 import type {
@@ -180,6 +184,7 @@ export const createMetricThresholdExecutor =
           [ALERT_GROUP]: groups,
           [ALERT_GROUPING]: grouping?.unflatten,
           [ALERT_INDEX_PATTERN]: metricAlias,
+          [ALERT_SEVERITY]: ACTION_GROUP_TO_SEVERITY[actionGroup],
           ...flattenAdditionalContext(additionalContext),
           ...getEcsGroupsFromFlattenGrouping(grouping?.flatten),
         },
@@ -571,6 +576,13 @@ export const NO_DATA_ACTIONS = {
   name: i18n.translate('xpack.infra.metrics.alerting.threshold.nodata', {
     defaultMessage: 'No Data',
   }),
+};
+
+// No_Data has no entry: it's an availability state, not a severity tier, so
+// `kibana.alert.severity` is left unset for those alerts.
+const ACTION_GROUP_TO_SEVERITY: Record<string, AlertSeverity | undefined> = {
+  [FIRED_ACTIONS.id]: ALERT_SEVERITY_CRITICAL,
+  [WARNING_ACTIONS.id]: ALERT_SEVERITY_WARNING,
 };
 
 const translateActionGroupToAlertState = (

@@ -451,6 +451,7 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     } as unknown as WorkflowYaml;
     const mockTriggerDefinition = {
       id: 'example.custom_trigger',
+      stability: 'tech_preview' as const,
       title: 'Example custom trigger',
       description: 'Test trigger for event schema merge',
       eventSchema: customEventSchema,
@@ -476,5 +477,25 @@ describe('getWorkflowContextSchema - Dynamic event schema based on triggers', ()
     } finally {
       getTriggerDefinitionSpy.mockRestore();
     }
+  });
+});
+
+describe('getWorkflowContextSchema - HITL template context', () => {
+  it('should expose context.hitl.externalFormLink for channel message validation', () => {
+    const workflow: WorkflowYaml = {
+      version: '1',
+      name: 'HITL Workflow',
+      description: undefined,
+      settings: undefined,
+      enabled: true,
+      tags: undefined,
+      triggers: [{ type: 'manual' }],
+      steps: [],
+    };
+
+    const contextSchema = getWorkflowContextSchema(workflow);
+
+    expect(getSchemaAtPath(contextSchema, 'context.hitl.externalFormLink').schema).toBeDefined();
+    expect(getSchemaAtPath(contextSchema, 'context.hitl.externalQueryLink').schema).toBeDefined();
   });
 });

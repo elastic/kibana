@@ -115,5 +115,37 @@ describe('PackQueriesTable', () => {
 
       expect(screen.getByText('Daily')).toBeInTheDocument();
     });
+
+    // Regression for elastic/kibana#277700: a legacy pack upgraded from 9.4.3
+    // has queries with their own real interval and no `schedule_type`, while the
+    // pack itself has no pack-level schedule — the client synthesizes an
+    // interval packSchedule defaulting to 3600. The row must show the query's
+    // own interval (80s), not the synthesized pack default (3600s).
+    it('renders the query own interval for a legacy row under an interval pack schedule', () => {
+      renderTable({
+        data: [baseQuery({ interval: 80 })],
+        packSchedule: {
+          schedule_type: 'interval',
+          interval: 3600,
+        },
+      });
+
+      expect(screen.getByText('80s')).toBeInTheDocument();
+      expect(screen.queryByText('3600s')).not.toBeInTheDocument();
+    });
+
+    it('renders the pack interval for a non-override row when the pack schedule is explicit', () => {
+      renderTable({
+        data: [baseQuery({ interval: 80 })],
+        packSchedule: {
+          schedule_type: 'interval',
+          interval: 3600,
+          hasExplicitSchedule: true,
+        },
+      });
+
+      expect(screen.getByText('3600s')).toBeInTheDocument();
+      expect(screen.queryByText('80s')).not.toBeInTheDocument();
+    });
   });
 });

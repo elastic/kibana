@@ -16,10 +16,16 @@ import {
   type CreateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 import { BaseAlertingRoute } from '../base_alerting_route';
+import { upsertActionPolicyOasExamples } from './upsert_action_policy_oas_example';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
+import {
+  ACTION_POLICY_NOT_FOUND_DESCRIPTION,
+  ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
+} from './action_policy_route_descriptions';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 
 const actionPolicyIdParamsSchema = z.object({
   id: z.string().describe('The identifier for the action policy.'),
@@ -41,6 +47,7 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
     summary: 'Create or replace an action policy',
     description:
       'Creates an action policy with the given identifier, or fully replaces it if one already exists.',
+    oasOperationObject: upsertActionPolicyOasExamples,
   } as const;
 
   static schemas = {
@@ -59,16 +66,15 @@ export class UpsertActionPolicyRoute extends BaseAlertingRoute {
       },
       400: {
         body: () => errorResponseSchema,
-        description: 'Indicates invalid request parameters or body.',
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,
-        description: 'Indicates the action policy with the given ID does not exist.',
+        description: ACTION_POLICY_NOT_FOUND_DESCRIPTION,
       },
       409: {
         body: () => errorResponseSchema,
-        description:
-          'Indicates the action policy was created or updated concurrently by another caller.',
+        description: ACTION_POLICY_UPSERT_CONFLICT_DESCRIPTION,
       },
     },
   };
