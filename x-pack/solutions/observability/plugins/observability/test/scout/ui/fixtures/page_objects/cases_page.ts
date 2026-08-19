@@ -50,6 +50,7 @@ export class CasesPage {
     // once, so take the first match rather than requiring a unique one.
     this.readOnlyBadge = this.page
       .locator('[data-test-subj="headerBadge"],[data-test-subj="appHeaderBadge"]')
+      // eslint-disable-next-line playwright/no-nth-methods -- the two badges are equivalent; either one proves the read-only state
       .first();
     this.noPrivilegesPrompt = this.page.getByRole('heading', { name: 'Privileges required' });
     this.caseViewTitle = this.page.locator(
