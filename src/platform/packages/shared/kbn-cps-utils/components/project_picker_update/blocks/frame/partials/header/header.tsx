@@ -184,13 +184,13 @@ export function ProjectPickerFrameHeader({
   customHeaderText,
 }: ProjectPickerFrameHeaderProps) {
   return (
-    <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
       <EuiFlexItem grow>
         {customHeaderText ?? (
           <EuiTitle size="xxs">
             <h3>
               {i18n.translate('cpsUtils.projectPicker.frameHeader.title', {
-                defaultMessage: 'Cross-project search',
+                defaultMessage: 'Change project scope',
               })}
             </h3>
           </EuiTitle>
