@@ -38,8 +38,8 @@ export interface SmlPermissionsInput {
 /**
  * One space's slice of an SML document's access requirements.
  *
- * `name` holds bare Kibana action strings (no space prefix); `space` is the single space this
- * group applies to; `count` is how many actions THIS space requires, used as the
+ * `name` holds bare Kibana action strings; `space` is the single space this group
+ * applies to; `count` is how many actions THIS space requires, used as the
  * `minimum_should_match_field` of the ES-side `terms_set` clause.
  */
 export interface SmlKibanaPrivilegeGroup {
@@ -61,9 +61,7 @@ export interface SmlKibanaPrivilegeGroup {
  * Mirrors the Elasticsearch-side contract in `AiIndexImplicitPrivilegesProvider`.
  */
 export interface SmlPermissions {
-  kibana: {
-    privileges: SmlKibanaPrivilegeGroup[];
-  };
+  kibana: { privileges: SmlKibanaPrivilegeGroup[] };
 }
 
 /**
@@ -305,7 +303,7 @@ export interface SmlAutocompleteResult {
   type: string;
   title: string;
   origin: { uri: string };
-  /** Stored permissions for the entry; not exposed in the HTTP response. */
+  /** Used server-side for permission filtering; not exposed in the HTTP response. */
   permissions: SmlPermissions;
   /**
    * The specific `discovery_labels` entries that matched the typed prefix.

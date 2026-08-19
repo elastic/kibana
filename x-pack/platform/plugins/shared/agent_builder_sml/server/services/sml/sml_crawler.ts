@@ -67,9 +67,8 @@ export class SmlCrawlerImpl implements SmlCrawler {
     const crawlStartTime = new Date().toISOString();
     this.logger.debug(`SML crawler: starting crawl for type '${definition.id}' across all spaces`);
 
-    const schemaDropped = await this.checkSchemaVersionOrDrop({ esClient, storage });
-    const indexRebuilt =
-      schemaDropped || (await this.applyMappingsOrRebuild({ storage, esClient }));
+    const indexDropped = await this.dropIndexIfSchemaStale({ esClient, storage });
+    const indexRebuilt = indexDropped || (await this.applyMappingsOrRebuild({ storage, esClient }));
 
     const integrityResetNeeded =
       indexRebuilt ||
@@ -148,12 +147,12 @@ export class SmlCrawlerImpl implements SmlCrawler {
   /**
    * Check if the live index's `_meta.sml_schema_version` matches `SML_SCHEMA_VERSION`.
    * If the version is missing or stale, drops the index so it will be recreated with the
-   * correct shape on the next write.  Returns true when the index was dropped.
+   * correct shape on the next write. Returns true when the index was dropped.
    *
    * A 404 from `getMapping` means the index doesn't exist yet — no action needed.
    * All other errors are re-thrown.
    */
-  private async checkSchemaVersionOrDrop({
+  private async dropIndexIfSchemaStale({
     esClient,
     storage,
   }: {

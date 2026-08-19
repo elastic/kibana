@@ -367,8 +367,7 @@ interface AuthorizedUniverse {
  * Pre-aggregation pass: enumerate the actions the corpus requires in this space (or globally), then
  * resolve which of them the caller holds via a single `_has_privileges` call.
  *
- * Enumerated values are bare action names now that `.name` carries no space prefix, so they feed
- * `getAuthorizedPrivileges` directly — there is no prefix to strip.
+ * If the corpus uses no Kibana privileges, the privilege check is skipped entirely.
  */
 const resolveAuthorizedUniverse = async ({
   esClient,
@@ -385,23 +384,22 @@ const resolveAuthorizedUniverse = async ({
 }): Promise<AuthorizedUniverse> => {
   const actions = await enumerateActionsInSpace({ spaceId, esClient, logger });
 
-  const authorizedPerms = await getAuthorizedPrivileges({
+  const authorizedActionsSet = await getAuthorizedPrivileges({
     permissions: actions,
     request,
     securityAuthz,
     logger,
   });
 
-  return { authorizedActions: [...authorizedPerms].sort(), spaceId };
+  return { authorizedActions: [...authorizedActionsSet].sort(), spaceId };
 };
 
 /**
  * The authorization filter, as Query DSL.
  *
  * Mirrors the Elasticsearch-side implicit DLS query: a document is visible when it carries no
- * privilege elements at all (public), or when at least one element scoped to this space (or to the
- * global wildcard) has ALL of its actions covered by what the caller holds. `nested` makes the
- * "at least one whole element" part structural — matches cannot accumulate across spaces.
+ * privilege elements at all (public), OR when at least one element scoped to this requested space
+ * (or to the global wildcard) has ALL of its actions covered by what the caller holds.
  *
  * The public-document branch must be `must_not nested(match_all)`, not `must_not exists`: the
  * values live on child documents, so a root-level `exists` on a nested leaf matches everything and
@@ -443,12 +441,11 @@ const buildAuthzFilter = (authz: AuthorizedUniverse): Record<string, unknown> =>
         },
       },
     ],
-    minimum_should_match: 1,
   },
 });
 
 /**
- * The action sets an item requires in a given space: one entry per privilege group scoped to that
+ * The action-sets an item requires in a given space: one entry per privilege group scoped to that
  * space or to the global wildcard. Mirrors the ES-side DLS clause — a caller must hold ALL actions
  * within a single group, and groups for other spaces are irrelevant.
  */
@@ -1078,9 +1075,7 @@ const buildSmlAutocompleteQuery = (query: string): Record<string, unknown> => {
 /**
  * Autocomplete the SML index. Prefix-only, with per-row provenance for the @ menu.
  *
- * Authorization is enforced in-query via a `terms_set` filter — the same
- * composite `space|action` token semantics used by the search path. When the
- * security plugin is absent (dev / test), the filter is skipped and all docs
+ * When the security plugin is absent (dev / test), the filter is skipped and all docs
  * are returned.
  */
 const autocompleteSml = async ({
