@@ -13,8 +13,6 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiForm,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -24,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { AlertRetrievalSection } from './alert_retrieval_section';
 import { GenerationSection } from './generation_section';
 import { ValidationSection } from './validation_section';
+import { PipelineIndicator } from './vendored/pipeline_indicator';
+import { StepAccordion } from './vendored/step_accordion';
 import type { AttackDiscoveryWorkerConfig } from './types';
 import { DEFAULT_AD_WORKER_CONFIG } from './types';
 
@@ -32,9 +32,10 @@ interface Props {
 }
 
 /**
- * POC flyout that renders the Attack Discovery Worker configuration controls (alert retrieval,
- * generation, validation). State is local and NOT persisted — the "Resulting worker inputs" panel
- * shows that the collected config equals a valid `security.attack-discovery.run` inputs object.
+ * POC flyout that renders the Attack Discovery Worker configuration as a numbered steps timeline
+ * (Alert retrieval → Generation → Validation), reusing the AD flyout's StepAccordion / PipelineIndicator
+ * / QueryModeSelector (vendored for the spike). State is local and NOT persisted — the "Resulting
+ * worker inputs" panel shows the collected config.
  */
 export const AdWorkerConfigFlyout: React.FC<Props> = ({ onClose }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'adWorkerConfigFlyoutTitle' });
@@ -59,16 +60,52 @@ export const AdWorkerConfigFlyout: React.FC<Props> = ({ onClose }) => {
             })}
           </h2>
         </EuiTitle>
+        <EuiSpacer size="m" />
+        <PipelineIndicator />
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiForm component="form">
+        <StepAccordion
+          stepNumber="1"
+          isLast={false}
+          data-test-subj="adWorkerStepRetrieval"
+          title={i18n.translate('xpack.pnd.adWorkerConfig.step.retrievalTitle', {
+            defaultMessage: 'Alert retrieval method',
+          })}
+          description={i18n.translate('xpack.pnd.adWorkerConfig.step.retrievalDescription', {
+            defaultMessage: 'Choose how alerts are retrieved before generation.',
+          })}
+        >
           <AlertRetrievalSection value={config} onChange={onChange} />
-          <EuiHorizontalRule />
+        </StepAccordion>
+
+        <StepAccordion
+          stepNumber="2"
+          isLast={false}
+          data-test-subj="adWorkerStepGeneration"
+          title={i18n.translate('xpack.pnd.adWorkerConfig.step.generationTitle', {
+            defaultMessage: 'Generation',
+          })}
+          description={i18n.translate('xpack.pnd.adWorkerConfig.step.generationDescription', {
+            defaultMessage: 'Select the connector and cadence for generating attack discoveries.',
+          })}
+        >
           <GenerationSection value={config} onChange={onChange} />
-          <EuiHorizontalRule />
+        </StepAccordion>
+
+        <StepAccordion
+          stepNumber="3"
+          isLast={true}
+          data-test-subj="adWorkerStepValidation"
+          title={i18n.translate('xpack.pnd.adWorkerConfig.step.validationTitle', {
+            defaultMessage: 'Validation',
+          })}
+          description={i18n.translate('xpack.pnd.adWorkerConfig.step.validationDescription', {
+            defaultMessage: 'Choose the workflow that validates generated discoveries.',
+          })}
+        >
           <ValidationSection value={config} onChange={onChange} />
-        </EuiForm>
+        </StepAccordion>
 
         <EuiSpacer size="l" />
 
@@ -83,7 +120,7 @@ export const AdWorkerConfigFlyout: React.FC<Props> = ({ onClose }) => {
           <p>
             {i18n.translate('xpack.pnd.adWorkerConfig.previewNote', {
               defaultMessage:
-                'Passed as inputs to the security.attack-discovery.run step. Not persisted in this preview.',
+                'Passed as inputs to the security.attack-discovery.run step (run_every drives the orchestrator schedule). Not persisted in this preview.',
             })}
           </p>
         </EuiText>

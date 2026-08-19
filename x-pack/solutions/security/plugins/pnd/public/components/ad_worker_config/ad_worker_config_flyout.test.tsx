@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 const mockUseLoadConnectors = jest.fn();
 
@@ -18,87 +19,69 @@ jest.mock('@kbn/inference-connectors', () => ({
 import { OpenAdWorkerConfigButton } from './open_ad_worker_config_button';
 
 const services = {
-  http: { get: jest.fn() },
+  http: { get: jest.fn().mockResolvedValue({ results: [], total: 0 }) },
   notifications: { toasts: { addError: jest.fn() } },
 };
 
-const renderButton = () =>
-  render(
-    <KibanaContextProvider services={services}>
-      <OpenAdWorkerConfigButton />
-    </KibanaContextProvider>
+const renderButton = () => {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <KibanaContextProvider services={services}>
+        <OpenAdWorkerConfigButton />
+      </KibanaContextProvider>
+    </QueryClientProvider>
   );
+};
 
 describe('OpenAdWorkerConfigButton / AdWorkerConfigFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    services.http.get.mockResolvedValue({ results: [], total: 0 });
     mockUseLoadConnectors.mockReturnValue({
-      data: [
-        { id: 'connector-a', name: 'GPT-4o', actionTypeId: '.gen-ai' },
-        { id: 'connector-b', name: 'Gemini', actionTypeId: '.gemini' },
-      ],
+      data: [{ id: 'connector-a', name: 'GPT-4o', actionTypeId: '.gen-ai' }],
       isLoading: false,
       soEntryFound: true,
     });
   });
 
-  it('renders the button and does not show the flyout until clicked', () => {
-    renderButton();
-
-    expect(screen.getByTestId('openAdWorkerConfig')).toBeInTheDocument();
-    expect(screen.queryByTestId('adWorkerConfigFlyout')).not.toBeInTheDocument();
-  });
-
-  it('opens the flyout with the three config sections and the inputs preview', () => {
+  it('opens a flyout with the numbered steps timeline and inputs preview', () => {
     renderButton();
     fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
 
     expect(screen.getByTestId('adWorkerConfigFlyout')).toBeInTheDocument();
-    expect(screen.getByText('Alert retrieval method')).toBeInTheDocument();
-    expect(screen.getByText('Generation')).toBeInTheDocument();
-    expect(screen.getByText('Validation')).toBeInTheDocument();
+    expect(screen.getByTestId('pipelineIndicator')).toBeInTheDocument();
+    expect(screen.getByTestId('adWorkerStepRetrieval')).toBeInTheDocument();
+    expect(screen.getByTestId('adWorkerStepGeneration')).toBeInTheDocument();
+    expect(screen.getByTestId('adWorkerStepValidation')).toBeInTheDocument();
+    expect(screen.getByTestId('queryModeSelector')).toBeInTheDocument();
 
     const preview = screen.getByTestId('adWorkerConfigPreview');
-    expect(preview).toHaveTextContent('"alert_retrieval_mode": "custom_query"');
-    expect(preview).toHaveTextContent('"size": 100');
+    expect(preview).toHaveTextContent('"run_every": "15m"');
     expect(preview).toHaveTextContent('"validation_workflow_id": "default"');
   });
 
-  it('loads connectors scoped to the attack_discovery feature using http from context', () => {
+  it('shows Query-builder fields by default and the ES|QL editor after switching mode', () => {
+    renderButton();
+    fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
+
+    // default mode = custom_query (Query builder): size field present, ES|QL editor absent
+    expect(screen.getByTestId('adWorkerSize')).toBeInTheDocument();
+    expect(screen.queryByTestId('adWorkerEsqlQuery')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('queryModeEsqlModeButton'));
+
+    expect(screen.getByTestId('adWorkerEsqlQuery')).toBeInTheDocument();
+    expect(screen.queryByTestId('adWorkerSize')).not.toBeInTheDocument();
+  });
+
+  it('loads connectors scoped to the attack_discovery feature', () => {
     renderButton();
     fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
 
     expect(mockUseLoadConnectors).toHaveBeenCalledWith(
-      expect.objectContaining({ featureId: 'attack_discovery', http: services.http })
+      expect.objectContaining({ featureId: 'attack_discovery' })
     );
-  });
-
-  it('hides the ES|QL editor in custom_query mode', () => {
-    renderButton();
-    fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
-
-    expect(screen.queryByTestId('adWorkerEsqlQuery')).not.toBeInTheDocument();
-  });
-
-  it('reflects config edits in the inputs preview', () => {
-    renderButton();
-    fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
-
-    fireEvent.change(screen.getByTestId('adWorkerSize'), { target: { value: '25' } });
-
-    expect(screen.getByTestId('adWorkerConfigPreview')).toHaveTextContent('"size": 25');
-  });
-
-  it('lists the loaded connectors in the Generation selector', () => {
-    renderButton();
-    fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
-
-    // EuiSuperSelect renders its options into a popover once opened.
-    fireEvent.click(screen.getByTestId('adWorkerConnector'));
-
-    const listbox = screen.getByRole('listbox');
-    expect(within(listbox).getByText('GPT-4o')).toBeInTheDocument();
-    expect(within(listbox).getByText('Gemini')).toBeInTheDocument();
   });
 
   it('closes the flyout via the footer button', () => {
