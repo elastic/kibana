@@ -162,8 +162,13 @@ export interface PackagePolicyClient {
   getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
-    options?: PackagePolicyClientGetByIdsOptions
+    options?: Omit<PackagePolicyClientGetByIdsOptions, 'fields'>
   ): Promise<PackagePolicy[]>;
+  getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: PackagePolicyClientGetByIdsOptions & { fields: string[] }
+  ): Promise<PartialPackagePolicy[]>;
 
   list(
     soClient: SavedObjectsClientContract,
@@ -335,8 +340,11 @@ export type PackagePolicyClientFetchAllItemsOptions = Pick<
 > &
   WithSpaceIdsOption;
 
+export type PartialPackagePolicy = Pick<PackagePolicy, 'id'> & Partial<PackagePolicy>;
+
 export interface PackagePolicyClientGetByIdsOptions extends WithSpaceIdsOption {
   ignoreMissing?: boolean;
+  fields?: string[];
 }
 
 export interface PackagePolicyClientDeleteOptions extends WithSpaceIdsOption {

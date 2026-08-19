@@ -199,6 +199,7 @@ import type {
   PackagePolicyClientListIdsOptions,
   PackagePolicyClientRollbackOptions,
   PackagePolicyService,
+  PartialPackagePolicy,
   RollbackResult,
   RunExternalCallbacksPackagePolicyArgument,
   RunExternalCallbacksPackagePolicyResponse,
@@ -1368,8 +1369,18 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   public async getByIDs(
     soClient: SavedObjectsClientContract,
     ids: string[],
+    options?: Omit<PackagePolicyClientGetByIdsOptions, 'fields'>
+  ): Promise<PackagePolicy[]>;
+  public async getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
+    options: PackagePolicyClientGetByIdsOptions & { fields: string[] }
+  ): Promise<PartialPackagePolicy[]>;
+  public async getByIDs(
+    soClient: SavedObjectsClientContract,
+    ids: string[],
     options: PackagePolicyClientGetByIdsOptions = {}
-  ): Promise<PackagePolicy[]> {
+  ): Promise<PackagePolicy[] | PartialPackagePolicy[]> {
     const logger = this.getLogger('getByIDs');
     const savedObjectType = await getPackagePolicySavedObjectType();
     const isSpacesEnabled = await isSpaceAwarenessEnabled();
@@ -1388,13 +1399,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         ids.map((id) => ({
           id,
           type: savedObjectType,
+          ...(options.fields ? { fields: options.fields } : {}),
           namespaces: isSpacesEnabled ? options.spaceIds : undefined,
         }))
       )
       .catch(catchAndSetErrorStackTrace.withMessage('bulkGet of package policies failed'));
 
     const packagePolicies = packagePolicySO.saved_objects
-      .map((so): PackagePolicy | null => {
+      .map((so): PartialPackagePolicy | null => {
         if (isSavedObjectErrorResult(so)) {
           if (options.ignoreMissing && so.error.statusCode === 404) {
             return null;
@@ -1409,7 +1421,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
         return mapPackagePolicySavedObjectToPackagePolicy(so);
       })
-      .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
+      .filter((packagePolicy): packagePolicy is PartialPackagePolicy => packagePolicy !== null);
 
     for (const packagePolicy of packagePolicies) {
       auditLoggingService.writeCustomSoAuditLog({

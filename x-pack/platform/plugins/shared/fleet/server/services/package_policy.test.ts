@@ -2142,6 +2142,49 @@ describe('Package policy service', () => {
   });
 
   describe('getByIDs', () => {
+    it('should request only the specified package policy fields', async () => {
+      const soClient = createSavedObjectClientMock();
+      soClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: 'test-package-policy',
+            version: 'WzEsMV0=',
+            attributes: {
+              condition: "'agent.id' == 'agent-1'",
+              policy_ids: ['agent-policy-1'],
+              revision: 2,
+            },
+            references: [],
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        ],
+      });
+
+      const fields = ['condition', 'policy_ids', 'revision'];
+      const result = await packagePolicyService.getByIDs(soClient, ['test-package-policy'], {
+        fields,
+      });
+
+      expect(soClient.bulkGet).toHaveBeenCalledWith([
+        {
+          id: 'test-package-policy',
+          type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          fields,
+          namespaces: undefined,
+        },
+      ]);
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: 'test-package-policy',
+          version: 'WzEsMV0=',
+          condition: "'agent.id' == 'agent-1'",
+          policy_ids: ['agent-policy-1'],
+          revision: 2,
+        }),
+      ]);
+      expect(result[0]).not.toHaveProperty('name');
+    });
+
     it('should call audit logger', async () => {
       const soClient = createSavedObjectClientMock();
       soClient.bulkGet.mockResolvedValueOnce({
