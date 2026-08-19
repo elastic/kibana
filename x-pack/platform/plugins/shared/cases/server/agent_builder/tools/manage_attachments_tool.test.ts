@@ -10,7 +10,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools';
 import { createCasesClientMock, type CasesClientMock } from '../../client/mocks';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
-import { attachmentsTool } from './attachment_tools';
+import { manageAttachmentsTool } from './manage_attachments_tool';
 
 const buildMockAttachments = () => ({
   add: jest.fn().mockResolvedValue({ id: 'att-1' }),
@@ -33,15 +33,13 @@ const buildRegistry = (
 ): UnifiedAttachmentTypeRegistry =>
   ({ list: () => entries } as unknown as UnifiedAttachmentTypeRegistry);
 
-// A minimal authorable attachment schema: discriminated by `type`, with an
-// `owner` key the step strips before composing the union.
 const commentSchema = z.object({
   type: z.literal('comment'),
   owner: z.string(),
   data: z.object({ content: z.string() }),
 });
 
-describe('attachmentsTool — add_attachments mode', () => {
+describe('manageAttachmentsTool', () => {
   let casesClient: CasesClientMock;
 
   beforeEach(() => {
@@ -49,7 +47,29 @@ describe('attachmentsTool — add_attachments mode', () => {
   });
 
   const buildTool = (registry: UnifiedAttachmentTypeRegistry, enabled: boolean) =>
-    attachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, enabled);
+    manageAttachmentsTool(jest.fn().mockResolvedValue(casesClient), registry, enabled);
+
+  it('has the correct tool id', () => {
+    const tool = buildTool(buildRegistry([]), true);
+    expect(tool.id).toBe('platform.core.cases.manage_attachments');
+  });
+
+  it('has write (non-destructive) annotations', () => {
+    const tool = buildTool(buildRegistry([]), true);
+    expect(tool.annotations).toEqual({
+      title: 'Manage Case Attachments',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: false,
+    });
+  });
+
+  it('does not include get_all in mode enum', () => {
+    const tool = buildTool(buildRegistry([]), true);
+    const modeDescription = tool.schema.shape.mode.description ?? '';
+    expect(modeDescription).not.toContain('get_all');
+  });
 
   it('surfaces registered authorable type ids in the attachments field description', () => {
     const dashboardSchema = z.object({ type: z.literal('dashboard'), owner: z.string() });
@@ -65,7 +85,7 @@ describe('attachmentsTool — add_attachments mode', () => {
     expect(description).toContain('dashboard');
   });
 
-  it('throws when attachments are disabled', async () => {
+  it('throws when add_attachments is called with attachments disabled', async () => {
     const tool = buildTool(buildRegistry([{ id: 'comment', schema: commentSchema }]), false);
     await expect(
       tool.handler(
