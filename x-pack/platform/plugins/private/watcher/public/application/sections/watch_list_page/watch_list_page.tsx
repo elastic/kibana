@@ -11,7 +11,6 @@ import type { CriteriaWithPagination, EuiSearchBarOnChangeArgs } from '@elastic/
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiInMemoryTable,
   EuiIcon,
   EuiLink,
@@ -27,6 +26,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Moment } from 'moment';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -547,11 +547,9 @@ export const WatchListPage = () => {
           childrenBetween={
             queryError && (
               <>
-                <EuiCallOut
+                <KbnDangerCallout
                   announceOnMount
                   data-test-subj="watcherListSearchError"
-                  iconType="warning"
-                  color="danger"
                   title={
                     <FormattedMessage
                       id="xpack.watcher.sections.watchList.watchTable.errorOnSearch"
