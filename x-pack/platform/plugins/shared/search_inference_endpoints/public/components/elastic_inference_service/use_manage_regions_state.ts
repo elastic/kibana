@@ -120,8 +120,7 @@ export const useManageRegionsState = (onClose: () => void) => {
 
   const handleConfirmSave = useCallback(
     (force?: boolean) => {
-      const shouldForce = force === true;
-      const forceFields = shouldForce ? { force: true } : {};
+      const forceFields = force === true ? { force: true } : {};
       const saveOptions = {
         onSuccess: () => {
           setConflictArtifacts(undefined);

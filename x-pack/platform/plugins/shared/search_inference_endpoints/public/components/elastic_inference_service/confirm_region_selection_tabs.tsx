@@ -47,11 +47,7 @@ export const ConfirmRegionSelectionTabs: React.FC<ConfirmRegionSelectionTabsProp
   const selectedCount = isGeoMode ? selectedGeos.length : selectedRegions.length;
 
   useEffect(() => {
-    if (hasConflict) {
-      setSelectedTabId(TAB_IDS.issues);
-      return;
-    }
-    setSelectedTabId(TAB_IDS.selected);
+    setSelectedTabId(hasConflict ? TAB_IDS.issues : TAB_IDS.selected);
   }, [hasConflict]);
 
   const tabs = useMemo((): EuiTabbedContentTab[] => {
