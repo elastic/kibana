@@ -50,7 +50,7 @@ export interface MarkPinnedConversationResponse {
   pinned: boolean;
 }
 
-export type CreateConversationResponse = ConversationWithPermissions;
+export type CreateConversationResponse = WithPermissions<Conversation>;
 
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;
