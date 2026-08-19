@@ -181,6 +181,39 @@ export class PackagePolicyService {
     return res.flatMap((r) => r.failedPolicies);
   }
 
+  /**
+   * Updates package policies that are already known to live in `spaceId`,
+   * scoping the SO client straight to that space. Unlike {@link bulkUpdate},
+   * this skips the agent-policy-derived space routing in
+   * {@link getDefaultAndSpacePackagePolicies}: that routing is meant for the
+   * create/edit flow (deciding where a policy *should* live based on its agent
+   * policy) and misroutes an existing policy whose recorded space has diverged
+   * from its agent policy's spaces — silently dropping the write.
+   */
+  async bulkUpdateInSpace({
+    policiesToUpdate,
+    spaceId,
+  }: {
+    policiesToUpdate: UpdatePackagePolicyWithId[];
+    spaceId: string;
+  }) {
+    if (policiesToUpdate.length === 0) {
+      return [];
+    }
+
+    const soClient = this.getSpaceSoClient(spaceId === ALL_SPACES_ID ? DEFAULT_SPACE_ID : spaceId);
+    const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
+      soClient,
+      this.getInternalEsClient(),
+      policiesToUpdate,
+      {
+        force: true,
+        asyncDeploy: true,
+      }
+    );
+    return failedPolicies;
+  }
+
   async bulkDelete({
     policyIdsToDelete,
     spaceId,

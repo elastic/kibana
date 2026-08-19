@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { AgentPolicy, UpdatePackagePolicyWithId } from '@kbn/fleet-plugin/common';
 import type { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { PackagePolicyService } from './package_policy_service';
 import type { SyntheticsServerSetup } from '../../types';
@@ -148,5 +148,63 @@ describe('PackagePolicyService.listByAgentPolicy', () => {
 
     expect(result).toHaveLength(1001);
     expect(list).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('PackagePolicyService.bulkUpdateInSpace', () => {
+  const makeUpdateServer = () => {
+    const asScopedToNamespace = jest.fn((space: string) => ({ __space: space }));
+    const bulkUpdate = jest.fn().mockResolvedValue({ failedPolicies: [] });
+    const getByIds = jest.fn();
+    const server = {
+      logger: loggerMock.create(),
+      fleet: { packagePolicyService: { bulkUpdate }, agentPolicyService: { getByIds } },
+      coreStart: {
+        savedObjects: { getUnsafeInternalClient: () => ({ asScopedToNamespace }) },
+        elasticsearch: { client: { asInternalUser: { __es: true } } },
+      },
+    } as unknown as SyntheticsServerSetup;
+    return { server, bulkUpdate, getByIds, asScopedToNamespace };
+  };
+
+  const update = (id: string): UpdatePackagePolicyWithId =>
+    ({ id, policy_ids: ['ap-1'] } as UpdatePackagePolicyWithId);
+
+  it('writes directly to the policy own space without deriving routing from the agent policy', async () => {
+    const { server, bulkUpdate, getByIds } = makeUpdateServer();
+
+    await new PackagePolicyService(server).bulkUpdateInSpace({
+      policiesToUpdate: [update('m1-loc')],
+      spaceId: 'team-x',
+    });
+
+    // No agent-policy lookup (the create/edit routing is bypassed).
+    expect(getByIds).not.toHaveBeenCalled();
+    // Client scoped straight to the policy's own space.
+    expect(bulkUpdate.mock.calls[0][0]).toEqual({ __space: 'team-x' });
+    expect(bulkUpdate.mock.calls[0][2]).toEqual([update('m1-loc')]);
+  });
+
+  it('maps ALL_SPACES to the default space (a valid namespace for an all-spaces policy)', async () => {
+    const { server, bulkUpdate } = makeUpdateServer();
+
+    await new PackagePolicyService(server).bulkUpdateInSpace({
+      policiesToUpdate: [update('m1-loc')],
+      spaceId: ALL_SPACES_ID,
+    });
+
+    expect(bulkUpdate.mock.calls[0][0]).toEqual({ __space: DEFAULT_SPACE_ID });
+  });
+
+  it('is a no-op for an empty update list', async () => {
+    const { server, bulkUpdate } = makeUpdateServer();
+
+    const failed = await new PackagePolicyService(server).bulkUpdateInSpace({
+      policiesToUpdate: [],
+      spaceId: 'team-x',
+    });
+
+    expect(failed).toEqual([]);
+    expect(bulkUpdate).not.toHaveBeenCalled();
   });
 });

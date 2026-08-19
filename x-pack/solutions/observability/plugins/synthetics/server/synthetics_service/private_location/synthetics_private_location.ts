@@ -798,7 +798,12 @@ export class SyntheticsPrivateLocation {
 
     let moved = 0;
     for (const [spaceId, policiesToUpdate] of updatesBySpace) {
-      const failed = await this.packagePolicyService.bulkUpdate({ policiesToUpdate, spaceId });
+      // Update in the policy's own recorded space (grouped in toConditionUpdates),
+      // not via the agent-policy-derived routing — see bulkUpdateInSpace.
+      const failed = await this.packagePolicyService.bulkUpdateInSpace({
+        policiesToUpdate,
+        spaceId,
+      });
       // Count only successful moves (a failed bulkUpdate leaves the old pin).
       moved += policiesToUpdate.length - failed.length;
       if (failed.length > 0) {
