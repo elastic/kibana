@@ -40,6 +40,7 @@ import { ViewInDiscoverButton } from './discover_button';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { StreamFlyoutOverview } from './stream_flyout_overview';
 import { StreamDeleteModal } from '../stream_delete_modal';
+import { StreamProcessing } from './stream_processing';
 import {
   useCanvasEvents,
   useCanvasUrlRef,
@@ -65,18 +66,76 @@ const TABS = [
     }),
   },
   {
+    id: 'processing',
+    label: i18n.translate('xpack.streams.flyout.tab.processing', {
+      defaultMessage: 'Processing',
+    }),
+  },
+  {
     id: 'attachments',
     label: i18n.translate('xpack.streams.flyout.tab.attachments', {
       defaultMessage: 'Attachments',
     }),
   },
-];
+] as const;
 
-const TAB_PAGES: Record<string, (props: StreamFlyoutProps) => React.JSX.Element> = {
-  overview: (props) => <StreamFlyoutOverview {...props} />,
-  quality: (props) => <StreamQuality {...props} />,
-  attachments: (props) => <StreamAttachments {...props} />,
-  retention: (props) => <StreamRetention {...props} />,
+export type StreamFlyoutTabId = (typeof TABS)[number]['id'];
+
+const DEFAULT_TAB: StreamFlyoutTabId = 'overview';
+
+const isStreamFlyoutTabId = (tab: string | null): tab is StreamFlyoutTabId => {
+  return TABS.some(({ id }) => id === tab);
+};
+
+interface StreamFlyoutPageProps extends StreamFlyoutProps {
+  loading: boolean;
+}
+
+function StandardStreamFlyoutPage({
+  loading,
+  children,
+}: React.PropsWithChildren<{ loading: boolean }>) {
+  return (
+    <EuiFlyoutBody data-test-subj="streamsCanvasFlyoutBody">
+      <div
+        css={css`
+          padding: 25px;
+        `}
+      >
+        {loading ? (
+          <EuiFlexGroup justifyContent="center" alignItems="center">
+            <EuiLoadingSpinner data-test-subj="streamsCanvasFlyout-loading" size="xxl" />
+          </EuiFlexGroup>
+        ) : (
+          children
+        )}
+      </div>
+    </EuiFlyoutBody>
+  );
+}
+
+const TAB_PAGES: Record<StreamFlyoutTabId, (props: StreamFlyoutPageProps) => React.JSX.Element> = {
+  overview: (props) => (
+    <StandardStreamFlyoutPage loading={props.loading}>
+      <StreamFlyoutOverview {...props} />
+    </StandardStreamFlyoutPage>
+  ),
+  quality: (props) => (
+    <StandardStreamFlyoutPage loading={props.loading}>
+      <StreamQuality {...props} />
+    </StandardStreamFlyoutPage>
+  ),
+  processing: (props) => <StreamProcessing {...props} />,
+  attachments: (props) => (
+    <StandardStreamFlyoutPage loading={props.loading}>
+      <StreamAttachments {...props} />
+    </StandardStreamFlyoutPage>
+  ),
+  retention: (props) => (
+    <StandardStreamFlyoutPage loading={props.loading}>
+      <StreamRetention {...props} />
+    </StandardStreamFlyoutPage>
+  ),
 };
 
 function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
@@ -86,6 +145,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
   const { flyoutTab } = useCanvasUrlRef();
   const { selectTab } = useCanvasEvents();
   const { quality, isQualityLoading } = useDataSetQuality(name, definition);
+  const selectedTab = isStreamFlyoutTabId(flyoutTab) ? flyoutTab : DEFAULT_TAB;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const headerId = useGeneratedHtmlId();
   const abortController = useAbortController();
@@ -121,7 +181,7 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
     () =>
       TABS.map(({ id, label }) => (
         <EuiTab
-          isSelected={id === flyoutTab}
+          isSelected={id === selectedTab}
           key={id}
           onClick={() => selectTab(id)}
           data-test-subj={`streamsCanvasFlyoutTab-${id}`}
@@ -129,13 +189,13 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
           {label}
         </EuiTab>
       )),
-    [selectTab, flyoutTab]
+    [selectTab, selectedTab]
   );
 
-  const page = useCallback(() => {
-    const tab = (flyoutTab != null && TAB_PAGES[flyoutTab]) || TAB_PAGES.overview;
-    return tab({ name, onClose });
-  }, [name, flyoutTab, onClose]);
+  const page = useMemo(
+    () => TAB_PAGES[selectedTab]({ name, onClose, loading }),
+    [loading, name, selectedTab, onClose]
+  );
   const badges = [];
 
   if (loading) {
@@ -268,29 +328,15 @@ function StreamFlyoutContent({ name, onClose }: StreamFlyoutProps) {
           {renderTabs}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="streamsCanvasFlyoutBody">
-        <div
-          css={css`
-            padding: 25px;
-          `}
-        >
-          {loading ? (
-            <EuiFlexGroup justifyContent="center" alignItems="center">
-              <EuiLoadingSpinner data-test-subj="streamsCanvasFlyout-loading" size="xxl" />
-            </EuiFlexGroup>
-          ) : (
-            page()
-          )}
-        </div>
-        {showDeleteModal && Streams.ingest.all.GetResponse.is(definition) && (
-          <StreamDeleteModal
-            name={definition.stream.name}
-            onClose={() => setShowDeleteModal(false)}
-            onCancel={() => setShowDeleteModal(false)}
-            onDelete={deleteStream}
-          />
-        )}
-      </EuiFlyoutBody>
+      {page}
+      {showDeleteModal && Streams.ingest.all.GetResponse.is(definition) && (
+        <StreamDeleteModal
+          name={definition.stream.name}
+          onClose={() => setShowDeleteModal(false)}
+          onCancel={() => setShowDeleteModal(false)}
+          onDelete={deleteStream}
+        />
+      )}
     </EuiFlyout>
   );
 }

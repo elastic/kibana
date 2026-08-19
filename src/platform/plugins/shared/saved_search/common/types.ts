@@ -124,6 +124,7 @@ export interface DiscoverSessionTab {
   hideAggregatedPreview?: boolean;
   rowHeight?: number;
   headerRowHeight?: number;
+  esqlApproximation?: boolean;
   timeRestore?: boolean;
   timeRange?: Pick<TimeRange, 'from' | 'to'>;
   refreshInterval?: RefreshInterval;

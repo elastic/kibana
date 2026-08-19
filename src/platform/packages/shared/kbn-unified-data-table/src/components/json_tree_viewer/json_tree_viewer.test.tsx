@@ -128,6 +128,20 @@ describe('JsonTreeViewer', () => {
       expect(screen.getByTestId(moreTestId())).toHaveFocus();
     });
 
+    it('activates the pager first button with Enter', async () => {
+      const doc = Object.fromEntries(
+        Array.from({ length: 12 }, (_, i) => [`field_${i}`, `value_${i}`])
+      );
+      render(<JsonTreeViewer json={doc} />);
+
+      expect(screen.queryByTestId(rowTestId('field_11'))).not.toBeInTheDocument();
+
+      screen.getByTestId(pagerTestId()).focus();
+      await userEvent.keyboard('{Enter}');
+
+      expect(screen.getByTestId(rowTestId('field_11'))).toBeVisible();
+    });
+
     it('moves between the two pager buttons with the Right and Left arrows', async () => {
       // 25 fields: after one reveal the pager row shows both "Show 5 more" and "Show fewer".
       const doc = Object.fromEntries(Array.from({ length: 25 }, (_, i) => [`field_${i}`, i]));

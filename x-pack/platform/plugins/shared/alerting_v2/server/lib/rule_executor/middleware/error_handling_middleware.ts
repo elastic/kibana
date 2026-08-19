@@ -7,12 +7,13 @@
 
 import { inject, injectable } from 'inversify';
 import type { RuleExecutionMiddlewareContext, RuleExecutionMiddleware } from './types';
-import type { PipelineStateStream } from '../types';
+import type { PipelineStateStream, RulePipelineState } from '../types';
 import {
   LoggerServiceToken,
   type LoggerServiceContract,
 } from '../../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import { isEsqlUserError } from '../../errors/esql_user_error';
 
 /**
  * Middleware that provides centralized error handling for all steps.
@@ -32,15 +33,23 @@ export class ErrorHandlingMiddleware implements RuleExecutionMiddleware {
     input: PipelineStateStream
   ): PipelineStateStream {
     const stream = next(input);
-    const self = this;
+    const fallbackLogger = this.logger;
 
     return (async function* () {
+      let latestState: RulePipelineState | undefined;
+
       try {
         for await (const result of stream) {
+          latestState = result.state;
           yield result;
         }
       } catch (error) {
-        self.logger.error({
+        const logger = (latestState?.logger ?? fallbackLogger).withLabels({
+          step: ctx.step.name,
+        });
+
+        logger.error({
+          message: isEsqlUserError(error) ? 'Rule query failed to parse or verify' : undefined,
           error,
           code: ALERTING_LOG_CODES.RULE_EXECUTION_STEP_FAILED,
           labels: { step: ctx.step.name },

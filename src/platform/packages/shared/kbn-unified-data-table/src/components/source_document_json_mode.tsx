@@ -39,6 +39,8 @@ export interface SourceDocumentJsonModeProps {
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   fieldFormats: FieldFormatsStart;
   jsonModeSettings?: JsonModeSettings;
+  /** When set, the JSON tree is filtered to these fields; empty = whole document. */
+  selectedColumns?: string[];
 }
 
 export const SourceDocumentJsonMode = ({
@@ -48,6 +50,7 @@ export const SourceDocumentJsonMode = ({
   shouldShowFieldHandler,
   fieldFormats,
   jsonModeSettings,
+  selectedColumns,
 }: SourceDocumentJsonModeProps) => {
   const { inTableSearchTerm, isCounting: isInTableSearchCounting } =
     useContext(InTableSearchCellContext);
@@ -69,6 +72,7 @@ export const SourceDocumentJsonMode = ({
     columnsMeta,
     shouldShowFieldHandler,
     hideNulls,
+    selectedColumns,
   });
 
   // We just add the highlight formatter, the values are shown raw.
@@ -100,7 +104,7 @@ export const SourceDocumentJsonMode = ({
           iconProps={{ 'data-test-subj': 'sourceDocumentTruncatedWarning' }}
           content={i18n.translate('unifiedDataTable.sourceDocumentJsonMode.truncatedWarning', {
             defaultMessage:
-              'This document is too large to display in full. Only the first {maxValues} values are displayed.',
+              'JSON is too large to display in full. Only the first {maxValues} values are displayed.',
             values: {
               maxValues: MAX_TREE_VALUES,
             },

@@ -66,4 +66,16 @@ describe('collectSearchMatches', () => {
     expect(matches.reveals.get(logsId)).toBe(13);
     expect(matches.reveals.has(ROOT_ID)).toBe(false);
   });
+
+  it('treats a nested leaf key as a match and expands its parent', () => {
+    const nodes = buildNodes({ geo: { city: 'Berlin' }, other: 'x' });
+    const matches = collectSearchMatches(nodes, 'city');
+
+    expect([...matches.containers]).toEqual([getNodeId(['geo'])]);
+  });
+
+  it('does not treat array indexes as searchable keys', () => {
+    const nodes = buildNodes({ tags: ['error', 'warn'] });
+    expect(collectSearchMatches(nodes, '0').containers.size).toBe(0);
+  });
 });

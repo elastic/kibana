@@ -47,6 +47,90 @@ describe('flattenedToNestedDocument', () => {
     });
   });
 
+  describe('selectedColumns filter', () => {
+    const treeFrom = (flattened: Record<string, unknown>, selectedColumns?: string[]): JsonValue =>
+      flattenedToNestedDocument({
+        row: { id: '1', raw: { _id: '1', _index: 'test' }, flattened },
+        dataView: dataViewMock,
+        columnsMeta: undefined,
+        shouldShowFieldHandler: () => true,
+        selectedColumns,
+      }).tree;
+
+    it('shows the whole document when no columns are selected', () => {
+      expect(treeFrom({ bytes: 100, extension: '.gz' })).toEqual({ bytes: 100, extension: '.gz' });
+      expect(treeFrom({ bytes: 100, extension: '.gz' }, [])).toEqual({
+        bytes: 100,
+        extension: '.gz',
+      });
+    });
+
+    it('keeps only the selected leaf fields', () => {
+      expect(treeFrom({ bytes: 100, extension: '.gz' }, ['bytes'])).toEqual({ bytes: 100 });
+    });
+
+    it('keeps every descendant of a selected object parent', () => {
+      expect(
+        treeFrom({ 'user.name': 'Alice', 'user.city': 'Berlin', bytes: 100 }, ['user'])
+      ).toEqual({ user: { name: 'Alice', city: 'Berlin' } });
+    });
+
+    it('shows an explicitly selected multi-field even though it is hidden by default', () => {
+      const tree = flattenedToNestedDocument({
+        row: {
+          id: '1',
+          raw: { _id: '1', _index: 'test' },
+          flattened: { name: 'Alice', 'name.keyword': 'Alice' },
+        },
+        dataView: dataViewMock,
+        columnsMeta: undefined,
+        // `name.keyword` is a multi-field, hidden by the shared handler.
+        shouldShowFieldHandler: (fieldName) => fieldName !== 'name.keyword',
+        selectedColumns: ['name.keyword'],
+      }).tree;
+
+      expect(tree).toEqual({ name: { keyword: 'Alice' } });
+    });
+
+    it('does not reveal a hidden multi-field when only its parent is selected', () => {
+      const tree = flattenedToNestedDocument({
+        row: {
+          id: '1',
+          raw: { _id: '1', _index: 'test' },
+          flattened: { name: 'Alice', 'name.keyword': 'Alice' },
+        },
+        dataView: dataViewMock,
+        columnsMeta: undefined,
+        shouldShowFieldHandler: (fieldName) => fieldName !== 'name.keyword',
+        selectedColumns: ['name'],
+      }).tree;
+
+      expect(tree).toEqual({ name: 'Alice' });
+    });
+
+    it('caches per filter, so changing the selection is not served a stale tree', () => {
+      // Same row object across builds: proves the cache keys on the filter, not just row.raw.
+      const row: DataTableRecord = {
+        id: '1',
+        raw: { _id: '1', _index: 'test' },
+        flattened: { bytes: 100, extension: '.gz' },
+      };
+      const build = (selectedColumns?: string[]): JsonValue =>
+        flattenedToNestedDocument({
+          row,
+          dataView: dataViewMock,
+          columnsMeta: undefined,
+          shouldShowFieldHandler: () => true,
+          selectedColumns,
+        }).tree;
+
+      expect(build(['bytes'])).toEqual({ bytes: 100 });
+      expect(build(['extension'])).toEqual({ extension: '.gz' });
+      expect(build()).toEqual({ bytes: 100, extension: '.gz' });
+      expect(build(['bytes'])).toEqual({ bytes: 100 });
+    });
+  });
+
   it('preserves number and boolean types (so the tree still colours them by type)', () => {
     const tree = buildTree({
       _id: '1',
@@ -164,10 +248,10 @@ describe('flattenedToNestedDocument', () => {
     expect(tree).toEqual({ message: 'hello world', count: 5 });
   });
 
-  it('decodes ES|QL complex columns delivered as JSON strings into structure (via esType)', () => {
+  it('decodes ES|QL complex columns delivered as JSON strings into structure', () => {
     // In ES|QL mode `flattened` is the raw columnar row (no array wrapping), and `histogram` /
     // `aggregate_metric_double` arrive as JSON strings rather than the objects the fields API
-    // returns. `columnsMeta` carries the ES type that marks them for decoding.
+    // returns. Any string that is perfect JSON is expanded the same way.
     const row: DataTableRecord = {
       id: '1',
       raw: { _id: '1', _index: 'test' },
@@ -193,13 +277,11 @@ describe('flattenedToNestedDocument', () => {
     });
   });
 
-  it('leaves a JSON-looking ES|QL keyword string untouched (only known complex types decode)', () => {
-    // The decode is gated on the ES type: a genuine keyword whose value merely looks like JSON
-    // must stay a raw string.
+  it('expands a string field whose entire value is perfect JSON', () => {
     const row: DataTableRecord = {
       id: '1',
       raw: { _id: '1', _index: 'test' },
-      flattened: { note: '{"looks":"like json"}' },
+      flattened: { note: '{"looks":"like json","n":2}' },
     };
 
     const { tree } = flattenedToNestedDocument({
@@ -209,7 +291,7 @@ describe('flattenedToNestedDocument', () => {
       shouldShowFieldHandler: () => true,
     });
 
-    expect(tree).toEqual({ note: '{"looks":"like json"}' });
+    expect(tree).toEqual({ note: { looks: 'like json', n: 2 } });
   });
 
   it('drops multi-fields (agent.keyword), keeping the parent scalar', () => {

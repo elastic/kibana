@@ -140,6 +140,7 @@ describe('model_versions', () => {
               timeRestore: false,
               sourceDisplayMode: 'json',
               jsonModeSettings: { hideNulls: true, wrapLines: false },
+              esqlApproximation: true,
             },
           },
         ],

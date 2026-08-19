@@ -170,6 +170,7 @@ const SCHEMA_TAB_ATTRIBUTES_V14 = SCHEMA_TAB_ATTRIBUTES_V13.extends({
       wrapLines: schema.maybe(schema.boolean()),
     })
   ),
+  esqlApproximation: schema.maybe(schema.boolean()),
 });
 
 const SCHEMA_TAB_V14 = SCHEMA_TAB_V13.extends({

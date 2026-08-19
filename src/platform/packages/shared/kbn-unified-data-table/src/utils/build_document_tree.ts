@@ -14,20 +14,17 @@ import type {
   EsHitRecord,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/types';
-import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import type { JsonValue } from '../components/json_tree_viewer/json_tree_viewer';
-
-// ES types that ES|QL delivers as a JSON string instead of a structured value.
-const ESQL_JSON_STRUCTURED_ES_TYPES = new Set([
-  ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE,
-  ES_FIELD_TYPES.HISTOGRAM,
-]);
 
 // Max number of values the document will show. The rest will be truncated.
 // Applies before search, so truncated values do not participate in it.
 // Prevents blocking the main thread on massive documents.
 export const MAX_TREE_VALUES = 10_000;
+
+// Skip JSON.parse on field values this long or longer. The raw string is shown instead.
+export const MAX_JSON_PARSE_LENGTH = 5_000;
+
 interface ValueBudget {
   remaining: number;
   truncated: boolean;
@@ -35,7 +32,6 @@ interface ValueBudget {
 
 interface FormatContext {
   dataView: DataView;
-  columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   hideNulls: boolean;
 }
@@ -49,8 +45,9 @@ export interface NestedDocument {
   truncated: boolean;
 }
 
-// Cached per raw hit and per `hideNulls` mode, since the two modes produce different documents.
-const documentTreeCache = new WeakMap<EsHitRecord, Map<boolean, NestedDocument>>();
+// Cached per raw hit and per (hideNulls, field-filter) signature, since each combination
+// produces a different document.
+const documentTreeCache = new WeakMap<EsHitRecord, Map<string, NestedDocument>>();
 
 /**
  * Receives flattened fields (in ES|QL or DSL format) and builds a raw nested JSON document.
@@ -58,23 +55,26 @@ const documentTreeCache = new WeakMap<EsHitRecord, Map<boolean, NestedDocument>>
 export const flattenedToNestedDocument = ({
   row,
   dataView,
-  columnsMeta,
   shouldShowFieldHandler,
   hideNulls = false,
+  selectedColumns,
 }: {
   row: DataTableRecord;
   dataView: DataView;
   columnsMeta: DataTableColumnsMeta | undefined;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   hideNulls?: boolean;
+  selectedColumns?: string[];
 }): NestedDocument => {
-  const cachedByMode = documentTreeCache.get(row.raw);
-  const cached = cachedByMode?.get(hideNulls);
+  // The tree depends on hideNulls and the active field filter, so cache per row and per signature.
+  const filterSignature = selectedColumns?.length ? [...selectedColumns].sort().join('\n') : '';
+  const cacheKey = `${hideNulls ? '1' : '0'}:${filterSignature}`;
+  let rowCache = documentTreeCache.get(row.raw);
+  const cached = rowCache?.get(cacheKey);
   if (cached) return cached;
 
   const ctx: FormatContext = {
     dataView,
-    columnsMeta,
     shouldShowFieldHandler,
     hideNulls,
   };
@@ -82,14 +82,19 @@ export const flattenedToNestedDocument = ({
   const metaFields = new Set(dataView.metaFields);
   const documentFlat: Record<string, unknown> = {};
 
-  // Step 1. Process field values. Histograms / Nested fields / unwrapp scalar values.
+  // Step 1. Process field values. Nested fields / unwrap scalar values / expand JSON strings.
   // The result is still a flat object.
   for (const fieldName of Object.keys(row.flattened)) {
     // Discard meta fields (_id, _index, etc.)
     if (metaFields.has(fieldName)) continue;
 
-    // Discard multifields (i.e: field.keyword)
-    if (!shouldShowFieldHandler(fieldName)) continue;
+    const isExplicitlySelected = selectedColumns?.includes(fieldName) ?? false;
+
+    // Discard multifields (i.e: field.keyword) unless the user explicitly selected them.
+    if (!isExplicitlySelected && !shouldShowFieldHandler(fieldName)) continue;
+
+    // When the user selects columns, the JSON is filtered to those fields.
+    if (selectedColumns?.length && !isFieldSelected(fieldName, selectedColumns)) continue;
 
     // Stop once the budget is spent, leaving the remaining fields out of the document.
     if (budget.remaining <= 0) {
@@ -107,11 +112,11 @@ export const flattenedToNestedDocument = ({
   const documentTree = unflattenKeys(documentFlat);
 
   const result: NestedDocument = { tree: documentTree, truncated: budget.truncated };
-  if (cachedByMode) {
-    cachedByMode.set(hideNulls, result);
-  } else {
-    documentTreeCache.set(row.raw, new Map([[hideNulls, result]]));
+  if (!rowCache) {
+    rowCache = new Map<string, NestedDocument>();
+    documentTreeCache.set(row.raw, rowCache);
   }
+  rowCache.set(cacheKey, result);
   return result;
 };
 
@@ -124,6 +129,7 @@ export const sourceDocumentToJsonString = (
     dataView: DataView;
     columnsMeta: DataTableColumnsMeta | undefined;
     shouldShowFieldHandler: ShouldShowFieldInTableHandler;
+    selectedColumns?: string[];
   },
   { multiline }: { multiline: boolean }
 ): string => {
@@ -137,18 +143,10 @@ const processFieldValue = (
   ctx: FormatContext,
   budget: ValueBudget
 ): unknown => {
-  // CASE 1: a ES|QL complex column (histogram, aggregate_metric_double) arrives as a JSON string.
-  // We parse it back into an object so it can be explored. Consumes only 1 value from the budget.
-  const structured = parseEsqlStructuredValue(rawValue, ctx.columnsMeta?.[fieldName]?.esType);
-  if (structured !== undefined) {
-    budget.remaining -= 1;
-    return structured;
-  }
-
   // Normalise the value, in Classic we get every value wrapped in an array, in ES|QL we get the value directly.
   const values: unknown[] = Array.isArray(rawValue) ? rawValue : [rawValue];
 
-  // CASE 2: a `nested` field. We need to recurse into the sub-objects.
+  // CASE 1: a `nested` field. We need to recurse into the sub-objects.
   // The container may be absent from the data view (`!field`). ES|QL do not support them.
   const field = ctx.dataView.fields.getByName(fieldName);
   const isNestedContainer = !field || field.type === 'nested';
@@ -180,7 +178,7 @@ const processFieldValue = (
     return nested;
   }
 
-  // CASE 3: a scalar value (or a genuine multi-value array). Each element is one value, so a single
+  // CASE 2: a scalar value (or a genuine multi-value array). Each element is one value, so a single
   // huge field is sliced down to the remaining budget rather than materialised in full.
   // With `hideNulls`, null entries are dropped up front so they never reach the budget;
   // a field left without any value is omitted entirely.
@@ -188,28 +186,53 @@ const processFieldValue = (
   if (ctx.hideNulls && visibleValues.length === 0) {
     return OMIT_FIELD;
   }
-  const take = Math.min(visibleValues.length, budget.remaining);
-  if (take < visibleValues.length) budget.truncated = true;
-  budget.remaining -= take;
-  const leaves = visibleValues.slice(0, take).map((value) => value ?? null);
+  // String values that are perfect JSON (an object or array) are expanded; inner nodes count
+  // against the same budget.
+  const leaves: unknown[] = [];
+  for (const value of visibleValues) {
+    if (budget.remaining <= 0) {
+      budget.truncated = true;
+      break;
+    }
+
+    const parsedJson = tryParsePerfectJson(value, budget);
+    if (parsedJson !== undefined) {
+      leaves.push(parsedJson);
+      continue;
+    }
+
+    budget.remaining -= 1;
+    leaves.push(value ?? null);
+  }
   return leaves.length === 1 ? leaves[0] : leaves;
 };
 
-// Decode a complex ES|QL column that arrived as a JSON string back into its object/array value.
-const parseEsqlStructuredValue = (value: unknown, esType: string | undefined): unknown => {
-  if (
-    typeof value !== 'string' ||
-    !esType ||
-    !ESQL_JSON_STRUCTURED_ES_TYPES.has(esType as ES_FIELD_TYPES)
-  ) {
+// Parse a string that is entirely a JSON object or array. Length / delimiter checks
+// run first so JSON.parse is not attempted on large or obviously non-JSON values.
+// The reviver counts inner nodes against the document budget (not a precise trim).
+const tryParsePerfectJson = (value: unknown, budget: ValueBudget): unknown => {
+  if (typeof value !== 'string' || value.length >= MAX_JSON_PARSE_LENGTH) {
     return undefined;
   }
+  const first = value.trimStart()[0];
+  if (first !== '{' && first !== '[') {
+    return undefined;
+  }
+
+  const remainingBefore = budget.remaining;
+  const truncatedBefore = budget.truncated;
   try {
-    const parsed = JSON.parse(value);
-    return isPlainObject(parsed) || Array.isArray(parsed) ? parsed : undefined;
+    return JSON.parse(value, (_key, nested) => {
+      budget.remaining -= 1;
+      if (budget.remaining < 0) budget.truncated = true;
+      return nested;
+    });
   } catch {
-    return undefined;
+    // A failed parse must not spend budget.
   }
+  budget.remaining = remainingBefore;
+  budget.truncated = truncatedBefore;
+  return undefined;
 };
 
 // Build the nested document from the flat, dotted-key map.
@@ -220,6 +243,11 @@ const unflattenKeys = (source: Record<string, unknown>): Record<string, unknown>
   }
   return target;
 };
+
+// A flattened field is kept when it is a selected column, or a descendant of a selected object
+// parent (which keeps its `.*` children).
+const isFieldSelected = (fieldName: string, selectedColumns: string[]): boolean =>
+  selectedColumns.some((column) => fieldName === column || fieldName.startsWith(`${column}.`));
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);

@@ -132,6 +132,19 @@ export class DataGrid {
   }
 
   /**
+   * Returns all cells for a given column at a specific visible row index across all embedded grids
+   * on the page (e.g. two saved-search panels on a dashboard). Use this instead of inlining the
+   * multi-attribute selector when you need to count or compare cells across multiple grid instances.
+   */
+  getCellsAtVisibleRowIndex(columnId: string, visibleRowIndex: number): Locator {
+    return this.page.testSubj
+      .locator('euiDataGridBody')
+      .locator(
+        `[data-test-subj="dataGridRowCell"][data-gridcell-column-id="${columnId}"][data-gridcell-visible-row-index="${visibleRowIndex}"]`
+      );
+  }
+
+  /**
    * Returns the leaf value node of a data-grid cell. Prefer this over
    * `getCell` when asserting on the rendered value: the gridcell wrapper's
    * text content concatenates child nodes (adding stray newlines), whereas the
@@ -376,6 +389,113 @@ export class DataGrid {
     return selectedMode.trim() as DataGridComparisonDiffMode;
   }
 
+  /**
+   * The rendered field-name cells of the comparison table. Exposed as a `Locator` so callers
+   * can assert on it with auto-retry (e.g. `expect(cells).toHaveText([...])`) while the table
+   * is still catching up with newly selected columns.
+   */
+  getComparisonFieldNameCells(): Locator {
+    return this.page.testSubj
+      .locator('unifiedDataTableCompareDocuments')
+      .locator('[data-test-subj="unifiedDataTableComparisonFieldName"]');
+  }
+
+  async getComparisonFieldNames(): Promise<string[]> {
+    return this.getComparisonFieldNameCells().allInnerTexts();
+  }
+
+  async getComparisonFieldCount(): Promise<number> {
+    const grid = this.page.testSubj
+      .locator('unifiedDataTableCompareDocuments')
+      .locator('[role="grid"]');
+    const rowCount = await grid.getAttribute('aria-rowcount');
+    return rowCount ? parseInt(rowCount, 10) : 0;
+  }
+
+  async compareSelectedButtonExists(): Promise<boolean> {
+    const isMenuVisible = await this.isSelectedRowsMenuVisible();
+    if (!isMenuVisible) return false;
+    await this.openSelectedRowsMenu();
+    const exists = await this.page.testSubj
+      .locator('unifiedDataTableCompareSelectedDocuments')
+      .waitFor({ state: 'visible', timeout: 1_000 })
+      .then(() => true)
+      .catch(() => false);
+    await this.page.keyboard.press('Escape');
+    return exists;
+  }
+
+  async getComparisonRow(rowIndex: number): Promise<{ fieldName: string; values: string[] }> {
+    const comparisonGrid = this.page.testSubj.locator('unifiedDataTableCompareDocuments');
+    const row = comparisonGrid.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    const fieldName = (
+      await row.locator('[data-test-subj="unifiedDataTableComparisonFieldName"]').innerText()
+    ).trim();
+    const valueCells = row.locator('.unifiedDataTable__cellValue');
+    const values = await valueCells.evaluateAll((cells) => cells.map((cell) => cell.innerHTML));
+    return { fieldName, values };
+  }
+
+  async getComparisonDiffSegments(
+    rowIndex: number,
+    colIndex: number
+  ): Promise<Array<{ decoration: 'removed' | 'added' | undefined; value: string }>> {
+    const comparisonGrid = this.page.testSubj.locator('unifiedDataTableCompareDocuments');
+    const row = comparisonGrid.locator(`[data-grid-visible-row-index="${rowIndex}"]`);
+    // showDiffDecorations controls CSS text-decoration only (not DOM classes),
+    // so we read computed style to detect decoration state faithfully.
+    return row.evaluate((rowEl, colIdx) => {
+      const cell = rowEl.querySelectorAll('.unifiedDataTable__cellValue')[colIdx];
+      if (!cell) return [];
+      return Array.from(cell.querySelectorAll('.unifiedDataTable__comparisonSegment')).map((el) => {
+        const textDecoration = window.getComputedStyle(el).textDecoration;
+        const decoration = textDecoration.includes('line-through')
+          ? ('removed' as const)
+          : textDecoration.includes('underline')
+          ? ('added' as const)
+          : undefined;
+        return { decoration, value: (el as HTMLElement).innerText.trim() };
+      });
+    }, colIndex - 1);
+  }
+
+  private async toggleComparisonSwitch(testSubj: string) {
+    await this.openComparisonSettings();
+    const switchEl = this.page.testSubj.locator(testSubj);
+    const prevChecked = await switchEl.getAttribute('aria-checked');
+    await switchEl.click();
+    const expectedChecked = prevChecked === 'true' ? 'false' : 'true';
+    await expect(switchEl).toHaveAttribute('aria-checked', expectedChecked);
+    const menu = this.page.testSubj.locator('unifiedDataTableComparisonSettingsMenu');
+    if (await menu.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await menu.waitFor({ state: 'hidden' });
+    }
+  }
+
+  async toggleShowDiffSwitch() {
+    await this.toggleComparisonSwitch('unifiedDataTableShowDiffSwitch');
+  }
+
+  async toggleShowAllFieldsSwitch() {
+    await this.toggleComparisonSwitch('unifiedDataTableDiffOptionSwitch-showAllFields');
+  }
+
+  async toggleShowMatchingValuesSwitch() {
+    await this.toggleComparisonSwitch('unifiedDataTableDiffOptionSwitch-showMatchingValues');
+  }
+
+  async toggleShowDiffDecorationsSwitch() {
+    await this.toggleComparisonSwitch('unifiedDataTableDiffOptionSwitch-showDiffDecorations');
+  }
+
+  async exitComparisonMode() {
+    await this.page.testSubj.click('unifiedDataTableExitDocumentComparison');
+    await this.page.testSubj
+      .locator('unifiedDataTableCompareDocuments')
+      .waitFor({ state: 'hidden' });
+  }
+
   async openColumnMenuByField(field: string) {
     await expect(async () => {
       await this.page.testSubj.hover(`dataGridHeaderCell-${field}`);
@@ -480,8 +600,6 @@ export class DataGrid {
 
   async waitForDocTableRendered() {
     const table = this.page.testSubj.locator('discoverDocTable');
-    const minDurationMs = 2_000;
-    const pollIntervalMs = 100;
     const totalTimeoutMs = 30_000;
 
     // Gate on the data fetch first so the visibility budget below isn't spent
@@ -490,31 +608,15 @@ export class DataGrid {
 
     await table.waitFor({ state: 'visible', timeout: totalTimeoutMs });
 
-    let stableSince: number | null = null;
+    await expect(table).toHaveAttribute('data-render-complete', 'true', {
+      timeout: totalTimeoutMs,
+    });
+  }
 
-    await expect
-      .poll(
-        async () => {
-          const attr = await table.getAttribute('data-render-complete');
-          const now = Date.now();
-
-          if (attr === 'true') {
-            if (!stableSince) {
-              stableSince = now;
-            }
-            return now - stableSince >= minDurationMs;
-          }
-
-          stableSince = null;
-          return false;
-        },
-        {
-          message: `data-render-complete did not stay 'true' for ${minDurationMs}ms`,
-          timeout: totalTimeoutMs,
-          intervals: [pollIntervalMs],
-        }
-      )
-      .toBe(true);
+  async getRowActions(): Promise<Locator[]> {
+    const flyout = this.page.testSubj.locator('docViewerFlyout');
+    await flyout.waitFor({ state: 'visible' });
+    return flyout.locator('[data-test-subj~="docTableRowAction"]').all();
   }
 
   async waitForLoad() {
@@ -530,5 +632,16 @@ export class DataGrid {
       state: 'hidden',
       timeout: 30_000,
     });
+  }
+
+  /**
+   * Sorts a column via its header menu. The direction is carried entirely by
+   * `sortOption`, which is the menu entry's label and varies by field type:
+   * `Sort A-Z` / `Sort Z-A` for strings, `Sort Old-New` / `Sort New-Old` for
+   * dates, `Sort Low-High` / `Sort High-Low` for numbers.
+   */
+  async sortColumn(field: string, sortOption: string) {
+    await this.openColumnMenuByField(field);
+    await this.page.getByRole('button', { name: sortOption }).click();
   }
 }

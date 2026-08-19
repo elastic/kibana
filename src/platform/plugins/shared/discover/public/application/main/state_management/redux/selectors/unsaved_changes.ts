@@ -234,6 +234,7 @@ const TAB_COMPARATORS: TabComparators = {
   density: fieldComparator('density', DataGridDensity.COMPACT),
   sourceDisplayMode: fieldComparator('sourceDisplayMode', 'summary'),
   jsonModeSettings: fieldComparator('jsonModeSettings', {}),
+  esqlApproximation: fieldComparator('esqlApproximation', false),
   visContext: visContextComparator,
   controlGroupJson: (a, b) => {
     // ignore the order of keys when comparing JSON strings

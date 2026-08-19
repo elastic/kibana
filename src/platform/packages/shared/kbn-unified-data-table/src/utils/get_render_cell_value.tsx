@@ -46,6 +46,7 @@ export const getRenderCellValueFn = ({
   columnsMeta,
   sourceDisplayMode,
   jsonModeSettings,
+  selectedColumns,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -59,6 +60,7 @@ export const getRenderCellValueFn = ({
   columnsMeta: DataTableColumnsMeta | undefined;
   sourceDisplayMode: SourceDisplayMode;
   jsonModeSettings?: JsonModeSettings;
+  selectedColumns?: string[];
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -145,6 +147,7 @@ export const getRenderCellValueFn = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           fieldFormats={fieldFormats}
           jsonModeSettings={jsonModeSettings}
+          selectedColumns={selectedColumns}
         />
       );
     }
