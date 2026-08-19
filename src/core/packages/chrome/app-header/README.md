@@ -35,6 +35,20 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
 
+## Migrating route headers
+
+Use `AppHeader` instead of `EuiPageHeader`, `EuiPageTemplate.Header`, or
+`KibanaPageTemplate.Header` for top-level application route headers. `EuiPageHeader` and
+`EuiPageTemplate.Header` remain appropriate for nested content and other UI that is not the route
+header. `KibanaPageTemplate.Header` and the `KibanaPageTemplate` `pageHeader` prop are deprecated;
+do not add new consumers.
+
+See the [AppHeader migration guide](https://github.com/elastic/kibana/issues/283673) for migration
+steps, examples, and tracking.
+
+Keep title and back visible at the top while route content scrolls. They replace always-visible
+breadcrumbs. Scroll to verify; see [Sticky positioning](#sticky-positioning) if they move away.
+
 ## Back navigation
 
 Pass the destination as `back`. Kibana handles same-origin `href` values as SPA navigation, so an
@@ -47,8 +61,9 @@ Pass the destination as `back`. Kibana handles same-origin `href` values as SPA 
 Use the object form when the back button needs a destination label or click behavior that differs
 from following `href`. If the handler replaces navigation, call `event.preventDefault()`.
 
-If a page already owns an in-page back (for example `EuiPageHeader` breadcrumbs or a custom back
-control) and would also get a Chrome Next compatibility back from breadcrumbs, mount:
+As a temporary compatibility fix, if an unmigrated page already owns an in-page back (for example
+`EuiPageHeader` breadcrumbs or a custom back control) and would also get a Chrome Next compatibility
+back from breadcrumbs, mount:
 
 ```tsx
 <>
@@ -229,10 +244,23 @@ standard modes and 48px in `'compact'`.
 
 ## Sticky positioning
 
-`sticky` defaults to `true` and should normally be omitted. Use `sticky={false}` only when the
-full-page layout has its own mechanism that keeps the app header sticky within the correct scrolling
-container. Rendering an inline or full-width header is not by itself a reason to disable sticky
-positioning.
+In Chrome Next project layout, title and back replace always-visible breadcrumbs and must remain at
+the top while the page scrolls.
+
+- Inline `AppHeader`: omit `sticky` (defaults to `true`) to use CSS `position: sticky`.
+- `ChromeAppHeaderRegistration`: Chrome pins the header in the layout top-bar and renders the view
+  with `sticky={false}`.
+- Set `sticky={false}` only when the surrounding layout already pins the header in the correct
+  scroll container.
+
+`sticky={false}` does not make the header full-width. `flush` and bleed modes control inset.
+
+CSS sticky fails when:
+
+- A wrapper is only as tall as the header, so sticky is confined to that containing block.
+- An `overflow: hidden`, `auto`, or `scroll` ancestor sits between the header and the page scroller.
+
+Scroll the page. If title or back moves away, the migration is not done.
 
 ## Testing
 
