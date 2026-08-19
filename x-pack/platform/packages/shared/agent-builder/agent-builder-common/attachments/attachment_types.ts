@@ -135,9 +135,9 @@ export const AGENT_BUILDER_IMAGE_FILE_KIND = 'agentBuilderImages';
 export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 
 export const imageAttachmentDataSchema = z.object({
-  file_id: z.string(),
-  name: z.string(),
-  mime_type: z.string(),
+  file_id: z.string().max(1024),
+  name: z.string().max(1024),
+  mime_type: z.enum(SUPPORTED_IMAGE_MIME_TYPES),
 });
 
 /**
@@ -149,5 +149,5 @@ export interface ImageAttachmentData {
   /** original filename */
   name: string;
   /** mime type of the image */
-  mime_type: string;
+  mime_type: SupportedImageMimeType;
 }
