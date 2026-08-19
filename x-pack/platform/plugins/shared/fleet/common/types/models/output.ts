@@ -95,7 +95,6 @@ interface OtlpExporterTlsConfig {
   insecure_skip_verify?: boolean;
   ca_pem?: string | null;
   cert_pem?: string | null;
-  key_pem?: string | null;
   ca_file?: string | null;
   cert_file?: string | null;
   key_file?: string | null;
@@ -110,8 +109,6 @@ interface OtlpExporterTlsConfig {
   tpm?: {
     enabled?: boolean;
     path?: string | null;
-    owner_auth?: string | null;
-    auth?: string | null;
   } | null;
 }
 

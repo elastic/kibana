@@ -355,14 +355,13 @@ const KafkaUpdateSchema = {
 // Validated against otelcol v0.155.0:
 //   gRPC: exporter/otlpexporter/config.go + go.opentelemetry.io/collector/config/configgrpc
 //   HTTP: exporter/otlphttpexporter/config.go + go.opentelemetry.io/collector/config/confighttp
-// Deliberate exclusions: auth/middlewares (extension refs), ca_file/cert_file/key_file (inline PEM
-// only), tls.tpm (hardware credential, revisit on demand), sending_queue.storage (agent-managed).
+// Deliberate exclusions: auth/middlewares (extension refs), sending_queue.storage (agent-managed).
+// TLS credentials (key_pem, tpm.owner_auth, tpm.auth) are accepted only via secrets.otlp_exporter.tls.*.
 const OtlpExporterTlsSchema = schema.object({
   insecure: schema.maybe(schema.boolean()),
   insecure_skip_verify: schema.maybe(schema.boolean()),
   ca_pem: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 65536 })])),
   cert_pem: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 65536 })])),
-  key_pem: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 65536 })])),
   ca_file: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 4096 })])),
   cert_file: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 4096 })])),
   key_file: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 4096 })])),
@@ -404,10 +403,6 @@ const OtlpExporterTlsSchema = schema.object({
         path: schema.maybe(
           schema.oneOf([schema.literal(null), schema.string({ maxLength: 4096 })])
         ),
-        owner_auth: schema.maybe(
-          schema.oneOf([schema.literal(null), schema.string({ maxLength: 256 })])
-        ),
-        auth: schema.maybe(schema.oneOf([schema.literal(null), schema.string({ maxLength: 256 })])),
       }),
     ])
   ),
