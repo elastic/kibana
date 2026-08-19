@@ -39414,7 +39414,6 @@
     "xpack.searchInferenceEndpoints.actions.copyIDSuccess": "推論エンドポイント ID {inferenceId}がコピーされました",
     "xpack.searchInferenceEndpoints.actions.deleteEndpoint": "エンドポイントを削除",
     "xpack.searchInferenceEndpoints.actions.deleteSingleEndpoint": "エンドポイントを削除",
-    "xpack.searchInferenceEndpoints.actions.viewEndpooint": "エンドポイントを表示",
     "xpack.searchInferenceEndpoints.addConnectorButtonLabel": "エンドポイントを追加",
     "xpack.searchInferenceEndpoints.addEndpointModal.cancelButton": "キャンセル",
     "xpack.searchInferenceEndpoints.addEndpointModal.closeButton": "閉じる",
