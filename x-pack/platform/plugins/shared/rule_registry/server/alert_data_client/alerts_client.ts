@@ -973,8 +973,12 @@ export class AlertsClient {
       index,
     });
 
+    const spacesFilter = getSpacesFilter(this.spaceId);
+    const idsQuery: estypes.QueryDslQueryContainer = { ids: { values: alertIds } };
+    const updateQuery = spacesFilter ? { bool: { filter: [idsQuery, spacesFilter] } } : idsQuery;
+
     const bulkUpdateResponse = await this.esClient.updateByQuery({
-      query: { ids: { values: alertIds } },
+      query: updateQuery,
       index,
       script,
       refresh: true,
@@ -997,12 +1001,14 @@ export class AlertsClient {
         WriteOperations.Update
       )) as Filter;
 
-      const finalQuery = buildEsQuery(
+      const spacesFilter = getSpacesFilter(this.spaceId);
+      const baseQuery = buildEsQuery(
         undefined,
         { query, language: 'kuery' },
         [authzFilter],
         config
       );
+      const finalQuery = spacesFilter ? { bool: { filter: [baseQuery, spacesFilter] } } : baseQuery;
 
       const auditEvent = alertAuditEvent({
         action: operationAlertAuditActionMap[WriteOperations.Update],
