@@ -10,6 +10,15 @@ import { getPackViewDateWindow } from './pack_view_date_window';
 describe('getPackViewDateWindow', () => {
   const timestamp = '2026-08-10T09:00:00.000Z';
   const lastResultTime = ['2026-08-10T09:48:47.000Z'];
+  const now = '2026-08-10T10:00:00.000Z';
+
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date(now));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
 
   describe('scheduled execution', () => {
     it('returns an hour either side of the execution timestamp', () => {
@@ -49,11 +58,13 @@ describe('getPackViewDateWindow', () => {
       expect(startDate).not.toEqual(endDate);
     });
 
-    it('spans from the action timestamp to now when no results have been indexed yet', () => {
+    it('leaves the window open when no results have been indexed yet', () => {
       expect(getPackViewDateWindow({ isScheduled: false, timestamp })).toEqual({
         startDate: '2026-08-10T09:00:00.000Z',
         endDate: 'now',
-        mode: 'absolute',
+        // `mode` describes the pair of bounds, so an open-ended window stays
+        // relative even though it starts at a fixed instant.
+        mode: 'relative',
       });
     });
 
@@ -75,6 +86,99 @@ describe('getPackViewDateWindow', () => {
         endDate: undefined,
         mode: undefined,
       });
+    });
+  });
+
+  describe('expiration bound', () => {
+    // The toolbar "View in Discover" button ends its window at the action's
+    // expiration, so the row action has to respect the same bound for the two
+    // entry points to agree. https://github.com/elastic/kibana/issues/249984
+    it('clamps the end to the action expiration', () => {
+      expect(
+        getPackViewDateWindow({
+          isScheduled: false,
+          timestamp,
+          lastResultTime,
+          expirationDate: '2026-08-10T09:05:00.000Z',
+        })
+      ).toEqual({
+        startDate: '2026-08-10T09:00:00.000Z',
+        endDate: '2026-08-10T09:05:00.000Z',
+        mode: 'absolute',
+      });
+    });
+
+    it('keeps the last result when it falls inside the expiration window', () => {
+      expect(
+        getPackViewDateWindow({
+          isScheduled: false,
+          timestamp,
+          lastResultTime,
+          expirationDate: '2026-08-10T09:55:00.000Z',
+        })
+      ).toEqual({
+        startDate: '2026-08-10T09:00:00.000Z',
+        endDate: '2026-08-10T09:48:47.000Z',
+        mode: 'absolute',
+      });
+    });
+
+    it('ends at now while the action is still running and no results have landed', () => {
+      expect(
+        getPackViewDateWindow({
+          isScheduled: false,
+          timestamp,
+          expirationDate: '2026-08-10T10:30:00.000Z',
+        })
+      ).toEqual({
+        startDate: '2026-08-10T09:00:00.000Z',
+        endDate: now,
+        mode: 'absolute',
+      });
+    });
+
+    it('ends at the expiration once the action has expired without results', () => {
+      expect(
+        getPackViewDateWindow({
+          isScheduled: false,
+          timestamp,
+          expirationDate: '2026-08-10T09:05:00.000Z',
+        })
+      ).toEqual({
+        startDate: '2026-08-10T09:00:00.000Z',
+        endDate: '2026-08-10T09:05:00.000Z',
+        mode: 'absolute',
+      });
+    });
+  });
+
+  describe('clock skew', () => {
+    // `timestamp` is stamped by Kibana, the end bound by the agent's documents.
+    // An inverted range makes Elasticsearch return zero hits with no error.
+    it('orders the bounds when the last result predates the action timestamp', () => {
+      const { startDate, endDate, mode } = getPackViewDateWindow({
+        isScheduled: false,
+        timestamp,
+        lastResultTime: ['2026-08-10T08:59:30.000Z'],
+      });
+
+      expect({ startDate, endDate, mode }).toEqual({
+        startDate: '2026-08-10T08:59:30.000Z',
+        endDate: '2026-08-10T09:00:00.000Z',
+        mode: 'absolute',
+      });
+      expect(new Date(startDate!).getTime()).toBeLessThan(new Date(endDate!).getTime());
+    });
+
+    it('orders the bounds when the expiration predates the action timestamp', () => {
+      const { startDate, endDate } = getPackViewDateWindow({
+        isScheduled: false,
+        timestamp,
+        lastResultTime,
+        expirationDate: '2026-08-10T08:58:00.000Z',
+      });
+
+      expect(new Date(startDate!).getTime()).toBeLessThan(new Date(endDate!).getTime());
     });
   });
 

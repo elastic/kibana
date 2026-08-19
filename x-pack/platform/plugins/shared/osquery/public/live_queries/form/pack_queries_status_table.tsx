@@ -149,12 +149,12 @@ const AgentsColumnResults: React.FC<AgentsColumnResultsProps> = ({
   </EuiFlexGroup>
 );
 
-type PackQueryStatusItem = Partial<{
+export type PackQueryStatusItem = Partial<{
   action_id: string;
   id: string;
   query: string;
   agents: string[];
-  interval?: number;
+  interval: number;
   ecs_mapping?: ECSMapping;
   version?: string;
   platform?: string;
@@ -316,9 +316,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         scheduleId={scheduleId}
         executionCount={executionCount}
         timestamp={startDate}
+        expirationDate={expirationDate}
       />
     ),
-    [scheduleId, executionCount, startDate]
+    [scheduleId, executionCount, startDate, expirationDate]
   );
 
   const renderLensResultsAction = useCallback(
@@ -328,9 +329,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         scheduleId={scheduleId}
         executionCount={executionCount}
         timestamp={startDate}
+        expirationDate={expirationDate}
       />
     ),
-    [scheduleId, executionCount, startDate]
+    [scheduleId, executionCount, startDate, expirationDate]
   );
 
   const getHandleErrorsToggle = useCallback(
