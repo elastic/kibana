@@ -33,7 +33,6 @@ export class GisPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
   private readonly queryBar = this.ctx.getService('queryBar');
   private readonly comboBox = this.ctx.getService('comboBox');
-  private readonly renderable = this.ctx.getService('renderable');
   private readonly browser = this.ctx.getService('browser');
   private readonly contentList = this.ctx.getService('contentList');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
@@ -178,7 +177,7 @@ export class GisPageObject extends FtrService {
     // Navigate directly because we don't need to go through the map listing
     // page. The listing page is skipped if there are no saved objects
     await this.common.navigateToUrlWithBrowserHistory(APP_ID, '/map');
-    await this.renderable.waitForRender();
+    await this.waitForLayersToLoad();
   }
 
   async saveMap(name: string, redirectToOrigin = true, saveAsNew = true, tags?: string[]) {
