@@ -31,7 +31,7 @@ import {
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
-import { useColumns } from '@kbn/unified-data-table';
+import { SOURCE_COLUMN, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
@@ -175,6 +175,11 @@ export function DiscoverLayout() {
     sort,
     settings: grid,
   });
+
+  const sidebarColumns = useMemo(
+    () => currentColumns.filter((column) => column !== SOURCE_COLUMN),
+    [currentColumns]
+  );
 
   const onAddColumnWithTracking = useCallback(
     (columnName: string) => {
@@ -411,7 +416,7 @@ export function DiscoverLayout() {
             sidebarToggleState$={sidebarToggleState$}
             sidebarPanel={
               <SidebarMemoized
-                columns={currentColumns}
+                columns={sidebarColumns}
                 documents$={dataStateContainer.data$.documents$}
                 onAddBreakdownField={canSetBreakdownField ? onAddBreakdownField : undefined}
                 onAddField={onAddColumnWithTracking}

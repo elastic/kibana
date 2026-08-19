@@ -743,13 +743,13 @@
     }
   },
   {
-    "id": "security-data-analytics",
-    "name": "Security Data Analytics",
+    "id": "security-data-engineering",
+    "name": "Security Data Engineering",
     "areas": [
       "security"
     ],
     "github": {
-      "team": "elastic/security-data-analytics",
+      "team": "elastic/security-data-engineering",
       "label": "Team: SecuritySolution"
     },
     "responsibilities": [
