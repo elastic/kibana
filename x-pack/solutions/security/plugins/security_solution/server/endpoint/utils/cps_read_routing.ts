@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { isNonLocalIndexName } from '@kbn/es-query';
+
 /**
  * Index owner classifiers used to decide which client a Defend read uses under CPS: Defend-owned
  * indices are read as the request user and fan out, everything else stays on the internal client.
@@ -41,21 +43,16 @@ export const shouldUseInternalSearchClient = (indices: string[], cpsRead: boolea
 
 /**
  * Elasticsearch prefixes the index of a hit that came from a linked project with its alias, so a
- * colon in a hit's `_index` is the only signal that the document did not come from this project.
+ * non-local `_index` is the only signal that the document did not come from this project.
  * Verified against a live fanned-in document rather than assumed; the same prefix is what
  * `expandIndexPatternsForCps` relies on for Lens.
  *
  * Read it off a hit only. Whether a *query* on `_index` sees the prefix is a different question and
- * is not relied on anywhere.
+ * is not relied on anywhere. Delegates to `isNonLocalIndexName` so the CCS/CPS colon-prefix rule
+ * has a single definition shared with the rest of Kibana.
  */
-export const isFannedInHit = (hitIndex?: string): boolean => Boolean(hitIndex?.includes(':'));
-
-/**
- * CCS remote patterns (`cluster:index`) and CPS project-qualified names (`alias:index`) both use a
- * colon prefix. A fanned-out search must not also send those expressions: the two topologies are
- * not verified to combine, matching Defend's `ccsEnabled && !cpsRead` suppression.
- */
-export const isRemoteOrProjectPrefixed = (index: string): boolean => index.includes(':');
+export const isFannedInHit = (hitIndex?: string): boolean =>
+  Boolean(hitIndex && isNonLocalIndexName(hitIndex));
 
 /** Strip a CCS/project prefix, leaving the local index or pattern. */
 export const toLocalIndexName = (index: string): string => {
@@ -67,13 +64,17 @@ export const toLocalIndexName = (index: string): string => {
  * When project routing is active, drop remote/project-prefixed expressions so the request only
  * names local patterns. If every entry was prefixed, fall back to the local names so the search
  * still has an index list.
+ *
+ * CCS remote patterns (`cluster:index`) and CPS project-qualified names (`alias:index`) both use a
+ * colon prefix. A fanned-out search must not also send those expressions: the two topologies are
+ * not verified to combine, matching Defend's `ccsEnabled && !cpsRead` suppression.
  */
 export const stripRemoteIndexPatterns = (indices: string[], cpsRead: boolean): string[] => {
   if (!cpsRead) {
     return indices;
   }
 
-  const local = indices.filter((index) => !isRemoteOrProjectPrefixed(index));
+  const local = indices.filter((index) => !isNonLocalIndexName(index));
   if (local.length > 0) {
     return local;
   }
@@ -91,4 +92,4 @@ export const firstConcreteIndex = (indices: string[]): string | undefined =>
  * lookup; treating them as a preferred index changes Analyzer on ordinary flyout alerts.
  */
 export const firstProjectQualifiedConcreteIndex = (indices: string[]): string | undefined =>
-  firstConcreteIndex(indices.filter(isRemoteOrProjectPrefixed));
+  firstConcreteIndex(indices.filter(isNonLocalIndexName));
