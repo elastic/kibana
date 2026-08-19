@@ -114,6 +114,26 @@ vars:
     multi: false
     required: false
     show_user: true
+workflows:
+  default_enabled: false
+  dependencies:
+    # Tier-2 depends on Tier-1 catalogs being installed first
+    github-activity-issues: [github-catalog-repos]
+    github-activity-pull-quests: [github-catalog-repos]
+    github-normalize-project-items: [github-catalog-project-items]
+    github-project-epic-phases: [github-normalize-project-items]
+    github-build-team-dimension: [github-catalog-teams]
+    github-build-release-calendar: [github-project-epic-phases]
+    # Tier-3 depends on Tier-2 projections
+    github-enrich-epic-phases: [github-project-epic-phases]
+    github-enrich-issues-graph: [github-activity-issues]
+    github-enrich-pull-requests-graph: [github-activity-pull-requests]
+    github-cross-link-entities: [github-activity-issues, github-activity-pull-requests]
+    github-extract-drive-links: [github-catalog-sdh-issues]
+    cross-link-feedback-loop: [salesforce-catalog-cases, github-catalog-sdh-issues]
+    cross-link-sdh-product: [github-catalog-sdh-labeled-issues]
+    slack-thread-replies: [slack-channel-history]
+
 policy_templates:
   - name: sdlc_intel
     title: SDLC Intelligence

@@ -251,6 +251,25 @@ steps:
             with:
               itemsProcessed: '${{ variables.itemsProcessed | plus: 1 }}'
 
+          - name: checkpoint_page
+            type: elasticsearch.index
+            with:
+              index: '{{ consts.syncStateIndex }}'
+              id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+              document:
+                '@timestamp': '{{ execution.startedAt }}'
+                sync:
+                  run_id: '{{ execution.id }}'
+                  source: '{{ consts.syncSource }}'
+                entity_type: '{{ consts.entityType }}'
+                org:
+                  login: '{{ consts.orgLogin }}'
+                last_run_at: '{{ execution.startedAt }}'
+                last_run_status: in_progress
+                stats:
+                  items_processed: '${{ variables.itemsProcessed }}'
+                  batch_size: '${{ steps.load_items_batch.output.hits.hits.size }}'
+                  has_next_page: '${{ variables.continuePaging }}'
       - name: stop_if_last_batch
         type: data.set
         if: '${{ steps.load_items_batch.output.hits.hits.size < 200 }}'

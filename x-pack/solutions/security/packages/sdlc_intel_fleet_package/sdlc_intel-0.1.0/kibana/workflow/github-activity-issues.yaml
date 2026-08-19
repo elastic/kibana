@@ -184,6 +184,29 @@ steps:
               last_issue_updated_at: '${{ variables.statsLastUpdatedAt }}'
               rate_limit_remaining: '{{ steps.fetch_issues.output.rateLimit.remaining }}'
 
+      - name: checkpoint_page
+        type: elasticsearch.index
+        with:
+          index: '{{ consts.syncStateIndex }}'
+          id: '{{ consts.syncSource }}-{{ consts.orgLogin }}-{{ consts.entityType }}'
+          document:
+            '@timestamp': '{{ execution.startedAt }}'
+            sync:
+              run_id: '{{ execution.id }}'
+              source: '{{ consts.syncSource }}'
+            entity_type: '{{ consts.entityType }}'
+            org:
+              login: '{{ consts.orgLogin }}'
+            cursor: '{{ variables.cursor }}'
+            watermark: '{{ variables.watermark }}'
+            last_run_at: '{{ execution.startedAt }}'
+            last_run_status: in_progress
+            stats:
+              pages_fetched: '{{ variables.pagesFetched }}'
+              has_next_page: '{{ steps.fetch_issues.output.pageInfo.hasNextPage }}'
+              search_query: '{{ variables.searchQuery }}'
+              last_issue_updated_at: '${{ variables.statsLastUpdatedAt }}'
+              rate_limit_remaining: '{{ steps.fetch_issues.output.rateLimit.remaining }}'
   - name: finalize_window
     type: if
     condition: 'variables.pagesFetched : {{ consts.pagesPerRun }}'
