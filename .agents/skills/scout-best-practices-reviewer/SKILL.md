@@ -9,7 +9,7 @@ description: Review Scout UI/API tests (including Scout test migrations) for bes
 
 Perform a static PR review of Scout UI and API test files (`*.spec.ts`) against Scout best practices and existing Scout abstractions (fixtures, page objects, API helpers). Produce actionable, PR-review-ready feedback that pushes for reuse over one-off implementations.
 
-**Solution-specific skills may extend this skill** with additional review criteria. Check if one exists for your solution (e.g., Security Solution has one at `<plugin>/.agents/skills/scout-best-practices-reviewer/`). Run the general review first, then apply solution-specific checks.
+**Solution-specific skills may extend this skill** with additional review criteria. Check if one exists for your solution (e.g., Security Solution has one at `<security_solution plugin>/.agents/skills/security-scout-best-practices-reviewer/`). Run the general review first, then apply solution-specific checks.
 
 Important: Do not post GitHub comments unless explicitly stated.
 
@@ -66,8 +66,8 @@ Open only the docs relevant to the test type(s) under review.
 - **[api]** **Fixture boundaries**: `apiClient` for the endpoint under test; `apiServices`/`kbnClient` for setup/teardown only; correct auth + common headers.
 - **[api]** **Correctness**: guardrail assertions before dereferencing response fields; validate contract + side effects; stable error assertions.
 - **[ui]** **UI scope**: keep UI specs focused on user interactions and rendering; for data-correctness assertions and choosing the right layer, see **Critical check 3 (right test type)**.
-- **[ui]** **Page objects**: Encapsulate multi-step interactions and reused sequences in page objects — specs should primarily hold assertions (`expect`), test flow (`test.step`), and page-object method calls. Short inline locator calls for simple one-off assertions (e.g. a single label or nav-link check) are acceptable. Flag raw locators when the interaction is complex enough to benefit from abstraction or is duplicated across specs. Extract all locators as `readonly` properties in the constructor; no inline locator creation inside methods.
-- **[general]** **Isolation**: parallel-safe data; resilient cleanup in `afterAll`/`afterEach`; defensive cleanup in `beforeAll` for failed-run leftovers; `scoutSpace.savedObjects.cleanStandardList()` as catch-all after domain-specific cleanup; no reliance on file ordering or shared mutable state.
+- **[ui]** **Page objects**: Encapsulate multi-step interactions and reused sequences in page objects — specs should primarily hold assertions (`expect`), test flow (`test.step`), and page-object method calls. Short inline locator calls for simple one-off assertions (e.g. a single label or nav-link check) are acceptable. Flag raw locators when the interaction is complex enough to benefit from abstraction or is duplicated across specs. Use `readonly` constructor fields for static locators and named methods for parameterized locators; avoid repeatedly constructing static locators inside action methods.
+- **[general]** **Isolation**: parallel-safe data; resilient primary cleanup in `afterAll`/`afterEach`; targeted idempotent cleanup in `beforeAll` only for deterministic leftovers from interrupted runs; no broad `cleanStandardList()` in `beforeAll`; `scoutSpace.savedObjects.cleanStandardList()` as an `afterAll` catch-all after domain-specific cleanup; no reliance on file ordering or shared mutable state.
 - **[general]** **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
 - **[ui]** **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
 - **[general]** **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
@@ -121,7 +121,7 @@ These EUI/Kibana component behaviours are non-obvious and cannot be inferred fro
 - **EUI disabled button tooltip**: hover the `span:has([data-test-subj="..."])` wrapper, not the button itself.
 - **EUI CSS class selectors** (`.euiTableRow`, `.euiToolTipAnchor`, etc.): internal to EUI, change between versions — use `data-test-subj` or ARIA roles.
 - **DOM instability from app bugs**: use `dispatchEvent('click')` over `{ force: true }`; document the bug location in a comment.
-- **EUI Component Objects (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` (via `page.components.*`) over raw selectors or the old `EuiXxxWrapper`s; flag self-extension (local subclasses / one-off helper methods) — missing capabilities belong in the published helper via DevEx. See the `scout-ui-testing` skill for details.
+- **EUI Test Objects (`page.components.*`)**: prefer the published `@elastic/eui-test-helpers` via `page.components.*` over raw selectors. Flag new or suite-local wrapper/helper extensions; missing capabilities should follow the shared contribution workflow. See the `docs/extend/testing/eui-test-helpers.md` for details.
 
 ## Output
 

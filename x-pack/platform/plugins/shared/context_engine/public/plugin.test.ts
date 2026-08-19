@@ -31,10 +31,20 @@ describe('ContextEnginePlugin', () => {
     expect(() => plugin.setup(coreSetup)).not.toThrow();
   });
 
-  it('returns an empty start contract', () => {
+  it('exposes registerAgentBuilderIntegration on start', () => {
     const plugin = new ContextEnginePlugin(coreMock.createPluginInitializerContext());
     const coreStart = coreMock.createStart();
+    const integration = {
+      suggestAutomation: {
+        canSuggest: () => false,
+        suggestAutomation: jest.fn(),
+        subscribeToAutomationSaved: () => () => {},
+      },
+    };
 
-    expect(plugin.start(coreStart)).toEqual({});
+    const start = plugin.start(coreStart);
+    start.registerAgentBuilderIntegration(integration);
+
+    expect(start.registerAgentBuilderIntegration).toEqual(expect.any(Function));
   });
 });
