@@ -22,7 +22,15 @@ import type {
 import { InvestigationNotFoundError } from './errors';
 export { InvestigationNotFoundError };
 
-function toInvestigationStatus(status: ExecutionStatus): InvestigationStatus {
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return v != null && typeof v === 'object' && !Array.isArray(v);
+}
+
+function asString(v: unknown): string | undefined {
+  return typeof v === 'string' ? v || undefined : undefined;
+}
+
+function toInvestigationStatus(status: ExecutionStatus, logger: Logger): InvestigationStatus {
   switch (status) {
     case ExecutionStatus.PENDING:
     case ExecutionStatus.QUEUED:
@@ -40,21 +48,25 @@ function toInvestigationStatus(status: ExecutionStatus): InvestigationStatus {
     case ExecutionStatus.CANCELLED:
     case ExecutionStatus.SKIPPED:
       return 'cancelled';
-    default:
+    default: {
+      // TypeScript will error here if a new ExecutionStatus value is added without a case above.
+      const _exhaustiveCheck: never = status;
+      logger.warn(`Unknown workflow ExecutionStatus "${_exhaustiveCheck}" for investigation, treating as running`);
       return 'running';
+    }
   }
 }
 
 function recoverSubjectFromInput(
   input: Record<string, unknown> | undefined
 ): InvestigationSubject | undefined {
-  const ctx = input?.context as Record<string, string> | undefined;
-  if (ctx?.source === 'significant_event' || ctx?.source === 'alert') {
-    const idKey = `${ctx.source}_id`;
-    return {
-      type: ctx.source as InvestigationSubject['type'],
-      id: String(ctx[idKey] ?? ''),
-    };
+  const ctx = input?.context;
+  if (!isPlainObject(ctx)) return undefined;
+  if (ctx.source === 'significant_event') {
+    return { type: 'significant_event', id: String(ctx.significant_event_id ?? '') };
+  }
+  if (ctx.source === 'alert') {
+    return { type: 'alert', id: String(ctx.alert_id ?? '') };
   }
   return undefined;
 }
@@ -145,31 +157,32 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationNotFoundError(investigationId);
     }
 
-    const knownStatuses = new Set<string>(Object.values(ExecutionStatus));
-    if (!knownStatuses.has(execution.status)) {
-      this.logger.warn(
-        `Unknown workflow ExecutionStatus "${execution.status}" for investigation "${investigationId}", treating as running`
-      );
-    }
-    const status = toInvestigationStatus(execution.status);
+    const status = toInvestigationStatus(execution.status, this.logger);
     const isTerminal = status === 'completed' || status === 'failed' || status === 'cancelled';
 
     // runWorkflow stores inputs at context.inputs in the execution document.
-    const rawInput = execution.context?.inputs as Record<string, unknown> | undefined;
+    const executionInputs = execution.context?.inputs;
+    const rawInput = isPlainObject(executionInputs) ? executionInputs : undefined;
 
     // Step-level output is populated when includeOutput: true. Search in reverse for
-    // the last step that produced a conclusion or summary field.
+    // the last ai.agent step that produced a conclusion or summary. The workflow engine
+    // wraps the agent's structured schema output in a `structured_output` envelope, so
+    // conclusion/summary live at output.structured_output.{conclusion,summary}, not at
+    // the top-level output object. Confirmed by investigation_workflow.yaml line references
+    // to `steps.investigate.output.structured_output.*`.
     const conclusionStep = execution.stepExecutions
       ?.slice()
       .reverse()
-      .find(
-        (s) =>
-          s.output != null &&
-          typeof s.output === 'object' &&
-          !Array.isArray(s.output) &&
-          ('conclusion' in s.output || 'summary' in s.output)
-      );
-    const rawOutput = conclusionStep?.output as Record<string, unknown> | undefined;
+      .find((s) => {
+        if (!isPlainObject(s.output)) return false;
+        const structured = s.output.structured_output;
+        return isPlainObject(structured) && ('conclusion' in structured || 'summary' in structured);
+      });
+    const rawOutput = (() => {
+      if (!isPlainObject(conclusionStep?.output)) return undefined;
+      const structured = conclusionStep.output.structured_output;
+      return isPlainObject(structured) ? structured : undefined;
+    })();
 
     const subject = recoverSubjectFromInput(rawInput);
 
@@ -181,7 +194,7 @@ export class NightshiftInvestigationsClient {
       completed_at: isTerminal ? execution.finishedAt : undefined,
       conclusions:
         status === 'completed'
-          ? (rawOutput?.conclusion ?? rawOutput?.summary ?? undefined)?.toString() || undefined
+          ? (asString(rawOutput?.conclusion) ?? asString(rawOutput?.summary))
           : undefined,
       error: (() => {
         if (status !== 'failed') return undefined;

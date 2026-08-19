@@ -27,8 +27,6 @@ const inputSchema = z.object({
     .describe('Additional context to pass to the investigation workflow'),
 });
 
-type TriggerInvestigationInput = z.infer<typeof inputSchema>;
-
 export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient
 ) =>
@@ -50,7 +48,7 @@ export const triggerInvestigationStepDefinition = (
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       const client = getInvestigationsClient(request, spaceId);
-      const input = context.input as TriggerInvestigationInput;
+      const input = inputSchema.parse(context.input);
       const result = await client.start({
         subject: {
           type: input.subject_type,

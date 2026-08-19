@@ -158,33 +158,78 @@ describe('NightshiftInvestigationsClient.get()', () => {
   });
 
   describe('conclusions', () => {
-    it('returns conclusion from the last step with a conclusion field', async () => {
+    // The workflow engine wraps ai.agent structured output in a `structured_output` envelope.
+    // Real shape: stepExecution.output = { structured_output: { conclusion: '...', summary: '...' } }
+    // Confirmed by investigation_workflow.yaml: steps.investigate.output.structured_output.*
+
+    it('returns conclusion from the last step whose structured_output has a conclusion field', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           status: ExecutionStatus.COMPLETED,
-          stepExecutions: [{ output: { conclusion: 'All clear.' } }, { output: { other: 'data' } }],
+          stepExecutions: [
+            { output: { structured_output: { conclusion: 'All clear.', summary: 'Summary.' } } },
+            { output: { other: 'data' } }, // non-agent step — no structured_output
+          ],
         })
       );
       const result = await makeClient().get('inv-1');
       expect(result.conclusions).toBe('All clear.');
     });
 
-    it('falls back to summary field when no conclusion field', async () => {
+    it('prefers the last step with structured_output when multiple steps have it', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           status: ExecutionStatus.COMPLETED,
-          stepExecutions: [{ output: { summary: 'Summary text.' } }],
+          stepExecutions: [
+            { output: { structured_output: { conclusion: 'First conclusion.' } } },
+            { output: { structured_output: { conclusion: 'Last conclusion.' } } },
+          ],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.conclusions).toBe('Last conclusion.');
+    });
+
+    it('falls back to summary when structured_output has summary but no conclusion', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [{ output: { structured_output: { summary: 'Summary text.' } } }],
         })
       );
       const result = await makeClient().get('inv-1');
       expect(result.conclusions).toBe('Summary text.');
     });
 
+    it('does not match steps whose output has conclusion at the top level (old/wrong shape)', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [{ output: { conclusion: 'Flat — should not match.' } }],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.conclusions).toBeUndefined();
+    });
+
+    it('returns undefined when no step has structured_output', async () => {
+      mockManagement.getWorkflowExecution.mockResolvedValue(
+        makeExecution({
+          status: ExecutionStatus.COMPLETED,
+          stepExecutions: [{ output: { other: 'data' } }],
+        })
+      );
+      const result = await makeClient().get('inv-1');
+      expect(result.conclusions).toBeUndefined();
+    });
+
     it('does not return conclusions when status is not completed', async () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           status: ExecutionStatus.RUNNING,
-          stepExecutions: [{ output: { conclusion: 'Should be ignored.' } }],
+          stepExecutions: [
+            { output: { structured_output: { conclusion: 'Should be ignored.' } } },
+          ],
         })
       );
       const result = await makeClient().get('inv-1');
