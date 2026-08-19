@@ -11,6 +11,8 @@ import type {
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { isEmpty } from 'lodash';
 
+export const DEFAULT_PENDING_THRESHOLD = 2;
+
 export const getConditionType = (condition?: StatusRuleCondition) => {
   let numberOfChecks = 1;
   let timeWindow: TimeWindow = { unit: 'm', size: 1 };
@@ -23,6 +25,7 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
       numberOfChecks,
       downThreshold: 1,
       locationsThreshold: 1,
+      pendingThreshold: condition?.pendingThreshold ?? DEFAULT_PENDING_THRESHOLD,
       isDefaultRule: true,
     };
   }
@@ -46,6 +49,7 @@ export const getConditionType = (condition?: StatusRuleCondition) => {
     numberOfChecks,
     locationsThreshold: condition?.locationsThreshold ?? 1,
     downThreshold: condition?.downThreshold ?? 1,
+    pendingThreshold: condition?.pendingThreshold ?? DEFAULT_PENDING_THRESHOLD,
     isDefaultRule: isEmpty(condition),
   };
 };

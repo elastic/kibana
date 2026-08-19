@@ -148,6 +148,34 @@ export const getPendingConfigs = ({
   return pendingConfigs;
 };
 
+export const applyPendingCounts = (
+  pendingConfigs: AlertPendingStatusConfigs,
+  prevPendingConfigs: AlertPendingStatusConfigs = {}
+): AlertPendingStatusConfigs => {
+  const next: AlertPendingStatusConfigs = {};
+  for (const [key, config] of Object.entries(pendingConfigs)) {
+    const prev = prevPendingConfigs[key];
+    // Persisted state from before pendingCount existed is treated as 1 prior evaluation.
+    const prevCount = prev ? prev.pendingCount ?? 1 : 0;
+    next[key] = {
+      ...config,
+      pendingCount: prevCount + 1,
+    };
+  }
+  return next;
+};
+
+export const filterPendingConfigsByThreshold = (
+  pendingConfigs: AlertPendingStatusConfigs,
+  pendingThreshold: number
+): AlertPendingStatusConfigs => {
+  return Object.fromEntries(
+    Object.entries(pendingConfigs).filter(
+      ([, config]) => (config.pendingCount ?? 1) >= pendingThreshold
+    )
+  );
+};
+
 export const getConfigStats = ({
   monitorQueryIds,
   upConfigs,

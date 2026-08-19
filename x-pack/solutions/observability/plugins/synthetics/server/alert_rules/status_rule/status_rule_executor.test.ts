@@ -984,29 +984,134 @@ describe('StatusRuleExecutor', () => {
     });
 
     it('should call schedulePendingAlertPerConfigId when alertOnNoData is true and groupBy is not locationId', async () => {
-      // Set up params with alertOnNoData=true and groupBy='monitor'
       statusRule.params = {
         condition: {
           alertOnNoData: true,
           groupBy: 'monitor',
+          pendingThreshold: 1,
         } as any,
       };
 
-      // Call the method
       await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
-      // Verify schedulePendingAlertPerConfigId was called with the correct arguments
       expect(schedulePendingAlertPerConfigIdSpy).toHaveBeenCalledTimes(1);
       expect(schedulePendingAlertPerConfigIdSpy).toHaveBeenCalledWith({
         pendingConfigs: mockPendingConfigs,
       });
 
-      // Verify schedulePendingAlertPerConfigIdPerLocation was not called
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).not.toHaveBeenCalled();
     });
 
     it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is locationId', async () => {
-      // Set up params with alertOnNoData=true and groupBy='locationId'
+      statusRule.params = {
+        condition: {
+          alertOnNoData: true,
+          groupBy: 'locationId',
+          pendingThreshold: 1,
+        } as any,
+      };
+
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledWith({
+        pendingConfigs: mockPendingConfigs,
+      });
+
+      expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
+    });
+
+    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is undefined', async () => {
+      statusRule.params = {
+        condition: {
+          alertOnNoData: true,
+          pendingThreshold: 1,
+        } as any,
+      };
+
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledWith({
+        pendingConfigs: mockPendingConfigs,
+      });
+
+      expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not call any scheduling methods when alertOnNoData is false', async () => {
+      statusRule.params = {
+        condition: {
+          alertOnNoData: false,
+          groupBy: 'locationId',
+        } as any,
+      };
+
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+
+      expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).not.toHaveBeenCalled();
+    });
+
+    it('does not schedule on the first pending evaluation when pendingThreshold is 2', async () => {
+      statusRule.params = {
+        condition: {
+          alertOnNoData: true,
+          groupBy: 'locationId',
+          pendingThreshold: 2,
+        } as any,
+      };
+
+      const firstPending = {
+        [FIRST_CONFIG_ID]: { ...mockPendingConfigs[FIRST_CONFIG_ID], pendingCount: 1 },
+      };
+
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: firstPending });
+
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).not.toHaveBeenCalled();
+      expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
+    });
+
+    it('schedules on the second consecutive pending evaluation when pendingThreshold is 2', async () => {
+      statusRule.params = {
+        condition: {
+          alertOnNoData: true,
+          groupBy: 'locationId',
+          pendingThreshold: 2,
+        } as any,
+      };
+
+      const secondPending = {
+        [FIRST_CONFIG_ID]: { ...mockPendingConfigs[FIRST_CONFIG_ID], pendingCount: 2 },
+      };
+
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: secondPending });
+
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledWith({
+        pendingConfigs: secondPending,
+      });
+    });
+
+    it('schedules on the first pending evaluation when pendingThreshold is 1', async () => {
+      statusRule.params = {
+        condition: {
+          alertOnNoData: true,
+          groupBy: 'locationId',
+          pendingThreshold: 1,
+        } as any,
+      };
+
+      const firstPending = {
+        [FIRST_CONFIG_ID]: { ...mockPendingConfigs[FIRST_CONFIG_ID], pendingCount: 1 },
+      };
+
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: firstPending });
+
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not schedule by default when pendingCount is missing (treated as 1, default threshold 2)', async () => {
       statusRule.params = {
         condition: {
           alertOnNoData: true,
@@ -1014,55 +1119,34 @@ describe('StatusRuleExecutor', () => {
         } as any,
       };
 
-      // Call the method
       await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
 
-      // Verify schedulePendingAlertPerConfigIdPerLocation was called with the correct arguments
-      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
-      expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledWith({
-        pendingConfigs: mockPendingConfigs,
-      });
-
-      // Verify schedulePendingAlertPerConfigId was not called
+      expect(schedulePendingAlertPerConfigIdPerLocationSpy).not.toHaveBeenCalled();
       expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
     });
 
-    it('should call schedulePendingAlertPerConfigIdPerLocation when alertOnNoData is true and groupBy is undefined', async () => {
-      // Set up params with alertOnNoData=true and groupBy undefined
+    it('only schedules locations that meet pendingThreshold', async () => {
       statusRule.params = {
         condition: {
           alertOnNoData: true,
+          groupBy: 'locationId',
+          pendingThreshold: 2,
         } as any,
       };
 
-      // Call the method
-      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
+      const mixedPending = {
+        [FIRST_CONFIG_ID]: { ...mockPendingConfigs[FIRST_CONFIG_ID], pendingCount: 1 },
+        [SECOND_CONFIG_ID]: { ...mockPendingConfigs[SECOND_CONFIG_ID], pendingCount: 2 },
+      };
 
-      // Verify schedulePendingAlertPerConfigIdPerLocation was called with the correct arguments
+      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mixedPending });
+
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledTimes(1);
       expect(schedulePendingAlertPerConfigIdPerLocationSpy).toHaveBeenCalledWith({
-        pendingConfigs: mockPendingConfigs,
+        pendingConfigs: {
+          [SECOND_CONFIG_ID]: mixedPending[SECOND_CONFIG_ID],
+        },
       });
-
-      // Verify schedulePendingAlertPerConfigId was not called
-      expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
-    });
-
-    it('should not call any scheduling methods when alertOnNoData is false', async () => {
-      // Set up params with alertOnNoData=false
-      statusRule.params = {
-        condition: {
-          alertOnNoData: false,
-          groupBy: 'locationId', // This shouldn't matter since alertOnNoData is false
-        } as any,
-      };
-
-      // Call the method
-      await statusRule.handlePendingMonitorAlert({ pendingConfigs: mockPendingConfigs });
-
-      // Verify neither method was called
-      expect(schedulePendingAlertPerConfigIdSpy).not.toHaveBeenCalled();
-      expect(schedulePendingAlertPerConfigIdPerLocationSpy).not.toHaveBeenCalled();
     });
 
     describe('schedulePendingAlertPerConfigIdPerLocation', () => {

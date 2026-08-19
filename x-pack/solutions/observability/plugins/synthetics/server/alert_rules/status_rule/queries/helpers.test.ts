@@ -7,7 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AlertStatusConfigs } from '../../../../common/runtime_types/alert_rules/common';
-import { calculateIsValidPing, getPendingConfigs } from './helpers';
+import { calculateIsValidPing, getPendingConfigs, applyPendingCounts } from './helpers';
 
 describe('helpers', () => {
   describe('getPendingConfigs', () => {
@@ -116,6 +116,52 @@ describe('helpers', () => {
 
       expect(result[`${monitorId}-${locationId}`]).toBeDefined();
       expect(result[`${monitorId}-${locationId}`].configId).toBe(monitorId);
+    });
+  });
+
+  describe('applyPendingCounts', () => {
+    const pendingConfig = {
+      status: 'pending',
+      configId: 'mon-1',
+      monitorQueryId: 'mon-1',
+      locationId: 'loc-1',
+      monitorInfo: {
+        monitor: { name: 'Mon 1', id: 'mon-1', type: 'http' },
+        observer: { geo: { name: 'Loc 1' } },
+        tags: [],
+      },
+    };
+
+    it('starts the count at 1 for a newly pending location', () => {
+      const result = applyPendingCounts({ 'mon-1-loc-1': pendingConfig }, {});
+      expect(result['mon-1-loc-1'].pendingCount).toBe(1);
+    });
+
+    it('increments consecutive pending evaluations', () => {
+      const result = applyPendingCounts(
+        { 'mon-1-loc-1': pendingConfig },
+        { 'mon-1-loc-1': { ...pendingConfig, pendingCount: 2 } }
+      );
+      expect(result['mon-1-loc-1'].pendingCount).toBe(3);
+    });
+
+    it('treats persisted state without pendingCount as 1 prior evaluation', () => {
+      const result = applyPendingCounts(
+        { 'mon-1-loc-1': pendingConfig },
+        { 'mon-1-loc-1': pendingConfig }
+      );
+      expect(result['mon-1-loc-1'].pendingCount).toBe(2);
+    });
+
+    it('resets the count when a location leaves pending and returns later', () => {
+      const first = applyPendingCounts({ 'mon-1-loc-1': pendingConfig }, {});
+      expect(first['mon-1-loc-1'].pendingCount).toBe(1);
+
+      const afterUp = applyPendingCounts({}, first);
+      expect(afterUp).toEqual({});
+
+      const secondPending = applyPendingCounts({ 'mon-1-loc-1': pendingConfig }, afterUp);
+      expect(secondPending['mon-1-loc-1'].pendingCount).toBe(1);
     });
   });
 

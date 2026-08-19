@@ -23,6 +23,7 @@ import { WindowValueExpression } from './common/condition_window_value';
 import { DEFAULT_CONDITION, ForTheLastExpression } from './common/for_the_last_expression';
 import type { StatusRuleParamsProps } from './status_rule_ui';
 import { LocationsValueExpression } from './common/condition_locations_value';
+import { DEFAULT_PENDING_THRESHOLD } from '../../../../../common/rules/status_rule';
 
 interface Props {
   ruleParams: StatusRuleParamsProps['ruleParams'];
@@ -32,6 +33,8 @@ interface Props {
 export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParams }) => {
   const condition = ruleParams.condition ?? DEFAULT_CONDITION;
   const downThreshold = condition?.downThreshold ?? DEFAULT_CONDITION.downThreshold;
+  const pendingThreshold = condition?.pendingThreshold ?? DEFAULT_PENDING_THRESHOLD;
+  const isAlertOnNoData = ruleParams.condition?.alertOnNoData !== undefined;
 
   const locationsThreshold = condition?.locationsThreshold ?? DEFAULT_CONDITION.locationsThreshold;
 
@@ -63,9 +66,10 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         newCondition = {
           ...newCondition,
           alertOnNoData: true,
+          pendingThreshold: newCondition.pendingThreshold ?? DEFAULT_PENDING_THRESHOLD,
         };
       } else if ('alertOnNoData' in newCondition) {
-        const { alertOnNoData, ...rest } = newCondition;
+        const { alertOnNoData, pendingThreshold: _pendingThreshold, ...rest } = newCondition;
         newCondition = rest;
       } else {
         throw new Error(
@@ -75,6 +79,17 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
       setRuleParams('condition', newCondition);
     },
     [ruleParams?.condition, setRuleParams]
+  );
+
+  const onPendingThresholdChange = useCallback(
+    (value: number) => {
+      const prevCondition = ruleParams.condition ?? DEFAULT_CONDITION;
+      setRuleParams('condition', {
+        ...prevCondition,
+        pendingThreshold: value,
+      });
+    },
+    [ruleParams.condition, setRuleParams]
   );
 
   const onFirstUpRecoveryStrategyChange = useCallback(
@@ -166,10 +181,31 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         <EuiSwitch
           compressed
           label={ALERT_ON_NO_DATA_SWITCH_LABEL}
-          checked={ruleParams.condition?.alertOnNoData !== undefined}
+          checked={isAlertOnNoData}
           onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
         />
       </EuiFlexItem>
+      {isAlertOnNoData && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexItem grow={false}>
+            <ValueExpression
+              value={pendingThreshold}
+              valueLabel={i18n.translate(
+                'xpack.synthetics.rules.status.pendingThresholdValueLabel',
+                {
+                  defaultMessage:
+                    '{threshold} {threshold, plural, one {consecutive check} other {consecutive checks}}',
+                  values: { threshold: pendingThreshold },
+                }
+              )}
+              onChangeSelectedValue={onPendingThresholdChange}
+              description={PENDING_THRESHOLD_DESCRIPTION}
+              errors={[]}
+            />
+          </EuiFlexItem>
+        </>
+      )}
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -218,6 +254,13 @@ const ALERT_ON_NO_DATA_SWITCH_LABEL = i18n.translate(
   'xpack.synthetics.statusRule.euiSwitch.alertOnNoData',
   {
     defaultMessage: "Alert me if there's no data",
+  }
+);
+
+const PENDING_THRESHOLD_DESCRIPTION = i18n.translate(
+  'xpack.synthetics.statusRule.pendingThreshold.description',
+  {
+    defaultMessage: 'Alert when pending for at least',
   }
 );
 
