@@ -106,8 +106,8 @@ function* columnEvaluators(
   const datasetSet = column.examplePrefixes
     ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
     : column.datasetIds
-      ? new Set(column.datasetIds)
-      : undefined;
+    ? new Set(column.datasetIds)
+    : undefined;
 
   for (const suite of modelScores.suites) {
     if (!suiteSet.has(suite.suiteId)) {

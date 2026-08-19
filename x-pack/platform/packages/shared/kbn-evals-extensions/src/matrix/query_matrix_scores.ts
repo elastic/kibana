@@ -179,13 +179,7 @@ export const experimentStatsToDatasets = (stats: ExperimentStats): AggregatedDat
 export const queryMatrixScores = async (
   evalsClient: EvalsClient,
   log: SomeDevLog,
-  {
-    suiteIds,
-    modelIds,
-    branch,
-    lookbackDays,
-    examplePrefixes = [],
-  }: QueryMatrixScoresOptions
+  { suiteIds, modelIds, branch, lookbackDays, examplePrefixes = [] }: QueryMatrixScoresOptions
 ): Promise<AggregatedModelScores[]> => {
   const byModel = new Map<string, AggregatedModelScores>();
 
@@ -247,7 +241,9 @@ export const queryMatrixScores = async (
           datasets.push(...scoresByPrefixToDatasets(scores, examplePrefixes));
         } catch (error) {
           log.warning(
-            `Per-prefix scores unavailable for experiment ${latest.experiment_id} (suite ${suiteId}, model ${modelId}): ${
+            `Per-prefix scores unavailable for experiment ${
+              latest.experiment_id
+            } (suite ${suiteId}, model ${modelId}): ${
               error instanceof Error ? error.message : String(error)
             }`
           );

@@ -160,9 +160,7 @@ export const matrixCmd: Command<void> = {
       branch,
       lookbackDays,
       examplePrefixes: [
-        ...new Set(
-          config.columns.flatMap((column) => column.examplePrefixes ?? [])
-        ),
+        ...new Set(config.columns.flatMap((column) => column.examplePrefixes ?? [])),
       ],
     });
 

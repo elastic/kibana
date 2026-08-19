@@ -236,7 +236,7 @@ describe('scoresByPrefixToDatasets', () => {
       task: { model: { id: 'm1' }, trace_id: 't' },
       evaluator: { name: evaluatorName, score: s },
       metadata: {},
-    }) as unknown as EvaluationScoreDocument;
+    } as unknown as EvaluationScoreDocument);
 
   it('buckets docs by example.id prefix and computes per-evaluator means', () => {
     const datasets = scoresByPrefixToDatasets(
@@ -273,7 +273,12 @@ describe('scoresByPrefixToDatasets', () => {
 
   it('skips docs without evaluator score', () => {
     const datasets = scoresByPrefixToDatasets(
-      [{ ...score('alert-analysis-a', 'correctness', 1), evaluator: { name: 'x' } } as EvaluationScoreDocument],
+      [
+        {
+          ...score('alert-analysis-a', 'correctness', 1),
+          evaluator: { name: 'x' },
+        } as EvaluationScoreDocument,
+      ],
       ['alert-analysis']
     );
     expect(datasets).toEqual([]);
@@ -315,7 +320,11 @@ describe('queryMatrixScores with examplePrefixes', () => {
         metadata: {},
       },
     ]);
-    const client = { listExperiments, getExperimentStats, getExperimentScores } as unknown as EvalsClient;
+    const client = {
+      listExperiments,
+      getExperimentStats,
+      getExperimentScores,
+    } as unknown as EvalsClient;
     return { client, getExperimentScores };
   };
 
@@ -353,7 +362,11 @@ describe('queryMatrixScores with examplePrefixes', () => {
     ]);
     const getExperimentStats = jest.fn().mockResolvedValue(stats);
     const getExperimentScores = jest.fn().mockRejectedValue(new Error('route down'));
-    const client = { listExperiments, getExperimentStats, getExperimentScores } as unknown as EvalsClient;
+    const client = {
+      listExperiments,
+      getExperimentStats,
+      getExperimentScores,
+    } as unknown as EvalsClient;
 
     const result = await queryMatrixScores(client, log, {
       suiteIds: ['suite-a'],
