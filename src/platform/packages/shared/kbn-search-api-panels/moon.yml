@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/kibana-react-plugin'
   - '@kbn/core'
   - '@kbn/i18n-react'
+  - '@kbn/announcement-banner'
 tags:
   - shared-browser
   - package
