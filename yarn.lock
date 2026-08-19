@@ -6076,6 +6076,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/custom-content-server@link:x-pack/platform/packages/shared/custom-content/custom-content-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/custom-icons@link:src/platform/packages/shared/kbn-custom-icons":
   version "0.0.0"
   uid ""
