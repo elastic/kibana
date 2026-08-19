@@ -8,6 +8,7 @@
 import type { EsClient } from '@kbn/scout';
 import type { RuleCreationExample } from '../datasets/rule_creation_golden';
 import type { RuleCreationResult } from './rule_creation_client';
+import { draftRuleSchema } from './types';
 import {
   createFieldCoverageEvaluator,
   createIntervalFormatEvaluator,
@@ -48,6 +49,27 @@ const makeRule = (overrides: Record<string, unknown> = {}) => ({
 });
 
 const noRule = makeArgs(undefined);
+
+// Invalid values must survive schema parsing so evaluators can score them 0 —
+// a strict schema would fail the parse and turn every evaluator into N/A.
+describe('draftRuleSchema', () => {
+  it('parses a rule with invalid enum-like values instead of rejecting it', () => {
+    const parsed = draftRuleSchema.safeParse(
+      makeRule({ severity: 'urgent', type: 'query', language: 'kql', risk_score: '50' })
+    );
+    expect(parsed.success).toBe(true);
+  });
+
+  it('invalid values that survive parsing score 0 in their evaluators', async () => {
+    const parsed = draftRuleSchema.parse(
+      makeRule({ severity: 'urgent', type: 'query', risk_score: '50' })
+    );
+    const args = makeArgs(parsed as RuleCreationResult['rule']);
+    expect((await createSeverityValidityEvaluator().evaluate(args)).score).toBe(0);
+    expect((await createRuleTypeLanguageEvaluator().evaluate(args)).score).toBe(0);
+    expect((await createRiskScoreValidityEvaluator().evaluate(args)).score).toBe(0);
+  });
+});
 
 describe('createQuerySyntaxValidityEvaluator', () => {
   const evaluator = createQuerySyntaxValidityEvaluator();

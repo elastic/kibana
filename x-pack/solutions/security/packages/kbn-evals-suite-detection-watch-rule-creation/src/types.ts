@@ -10,7 +10,11 @@ import { z } from '@kbn/zod';
 /**
  * Zod schema for the rule object returned by the draft_creation ai.agent step.
  * All fields are optional — the agent may omit any of them.
- * Evaluators score missing fields as failures rather than throwing.
+ *
+ * Fields the evaluators judge (language, type, severity, risk_score, interval, from) are
+ * deliberately loose: a strict type here would fail the whole parse on an invalid value, the
+ * rule would extract as undefined, and every evaluator would return N/A — the invalid value
+ * must survive parsing so the responsible evaluator can score it 0.
  *
  * Verify the actual shape by inspecting a real workflow execution:
  *   GET /api/workflows/executions/{id}?includeOutput=true
@@ -20,12 +24,12 @@ export const draftRuleSchema = z
     name: z.string(),
     description: z.string(),
     query: z.string(),
-    language: z.literal('esql'),
-    type: z.literal('esql'),
-    severity: z.enum(['low', 'medium', 'high', 'critical']),
-    risk_score: z.number(),
-    interval: z.string(),
-    from: z.string(),
+    language: z.string(),
+    type: z.string(),
+    severity: z.string(),
+    risk_score: z.unknown(),
+    interval: z.unknown(),
+    from: z.unknown(),
     tags: z.array(z.string()),
     threat: z.array(
       z.object({
