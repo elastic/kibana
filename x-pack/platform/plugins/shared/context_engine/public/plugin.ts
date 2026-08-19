@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import {
   AppStatus,
   DEFAULT_APP_CATEGORIES,
@@ -46,10 +47,15 @@ export class ContextEnginePlugin
       ContextEngineStartDependencies
     >
 {
+  private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> =
+    Promise.resolve(undefined);
+
   constructor(_context: PluginInitializerContext) {}
 
   setup(core: CoreSetup<ContextEngineStartDependencies>): ContextEnginePluginSetup {
+    this.setupAgentBuilderStart(core);
     const startServices = core.getStartServices();
+    const getAgentBuilder = () => this.agentBuilderPromise;
 
     core.application.register({
       id: CONTEXT_ENGINE_APP_ID,
@@ -77,19 +83,36 @@ export class ContextEnginePlugin
       ),
       defaultPath: '/',
       async mount(params: AppMountParameters) {
-        const { mountApp } = await import('./application');
+        const [{ mountApp }, { createAnalyzeChatOpener }] = await Promise.all([
+          import('./application'),
+          import('./analyze_chat_opener'),
+        ]);
         const [coreStart, pluginsStart] = await core.getStartServices();
+        const agentBuilder = await getAgentBuilder();
+        const chatOpener = createAnalyzeChatOpener({ coreStart, agentBuilder });
         coreStart.chrome.docTitle.change(APP_TITLE);
         return mountApp({
           core: coreStart,
           plugins: pluginsStart,
           element: params.element,
           history: params.history,
+          getChatOpener: () => chatOpener,
         });
       },
     });
 
     return {};
+  }
+
+  private setupAgentBuilderStart(core: CoreSetup<ContextEngineStartDependencies>): void {
+    try {
+      this.agentBuilderPromise = core.plugins
+        .onStart<{ agentBuilder: AgentBuilderPluginStart }>('agentBuilder')
+        .then(({ agentBuilder }) => (agentBuilder.found ? agentBuilder.contract : undefined))
+        .catch(() => undefined);
+    } catch {
+      this.agentBuilderPromise = Promise.resolve(undefined);
+    }
   }
 
   start(_core: CoreStart): ContextEnginePluginStart {

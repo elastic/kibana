@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getSigEventsLogPatternsEsql, type LogPatternEsqlEntry } from '@kbn/ai-tools';
+import {
+  getSigEventsLogPatternsEsql,
+  DEFAULT_ESQL_QUERY_TIMEOUT_MS,
+  type LogPatternEsqlEntry,
+} from '@kbn/ai-tools';
 import { getStreamSamplingSource } from '@kbn/streams-schema';
 import { LOG_PATTERNS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
@@ -51,6 +55,7 @@ This is useful for understanding the types of logs in the stream and identifying
       client: esClient,
       logger,
       plugin: 'streams',
+      abortSignal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
     });
 
     const patterns = await getSigEventsLogPatternsEsql({

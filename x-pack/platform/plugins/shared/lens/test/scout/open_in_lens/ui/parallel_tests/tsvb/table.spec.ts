@@ -151,7 +151,7 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
       'Top 10 values of clientip',
     ]);
 
-    await lens.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger', 0, 1);
+    await lens.dimensions.openDimensionEditor('lnsDatatable_rows > lns-dimensionTrigger', 0, 1);
     await expect(page.testSubj.locator('indexPattern-collapse-by')).toHaveValue('sum');
   });
 
@@ -185,14 +185,14 @@ spaceTest.describe('TSVB Table - Open in Lens', { tag: tags.deploymentAgnostic }
     // Open the metric dimension editor and verify converted palette color stops
     await dimensions.locator('nth=0').click();
     await lens.openPalettePanelFlyout();
-    const colorStops = await lens.getPaletteColorStops(3);
+    const colorStops = await lens.style.getPaletteColorStops(3);
     expect(colorStops).toStrictEqual([
       { stop: '10', color: 'rgba(84, 179, 153, 1)' },
       { stop: '100', color: 'rgba(84, 160, 0, 1)' },
       { stop: '', color: undefined },
     ]);
     await lens.closePalettePanelFlyout();
-    await lens.closeDimensionEditorPanel();
+    await lens.dimensions.closeDimensionEditorPanel();
   });
 
   spaceTest(

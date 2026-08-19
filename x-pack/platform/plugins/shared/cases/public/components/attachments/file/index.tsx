@@ -54,21 +54,34 @@ function getFileDeleteButton(caseId: string, fileId: string) {
   );
 }
 
-const getFileAttachmentActions = ({ caseId, fileId }: { caseId: string; fileId: string }) => [
+const getFileAttachmentActions = ({
+  caseId,
+  fileId,
+  canDelete,
+}: {
+  caseId: string;
+  fileId: string;
+  canDelete: boolean;
+}) => [
   {
     type: AttachmentActionType.CUSTOM as const,
     render: () => getFileDownloadButton(fileId),
     isPrimary: false,
   },
-  {
-    type: AttachmentActionType.CUSTOM as const,
-    render: () => getFileDeleteButton(caseId, fileId),
-    isPrimary: false,
-  },
+  ...(canDelete
+    ? [
+        {
+          type: AttachmentActionType.CUSTOM as const,
+          render: () => getFileDeleteButton(caseId, fileId),
+          isPrimary: false,
+        },
+      ]
+    : []),
 ];
 
 const getFileAttachmentViewObject = (props: FileViewProps) => {
   const caseId = props.caseData.id;
+  const canDelete = props.permissions.delete;
   // The framework view-prop type still allows `string | string[]`; the schema
   // narrows it to `string` for `file`, but the broad output keeps the union.
   const fileId = Array.isArray(props.attachmentId) ? props.attachmentId[0] : props.attachmentId;
@@ -77,13 +90,16 @@ const getFileAttachmentViewObject = (props: FileViewProps) => {
     return {
       event: i18n.ADDED_UNKNOWN_FILE,
       timelineAvatar: 'document',
-      getActions: () => [
-        {
-          type: AttachmentActionType.CUSTOM as const,
-          render: () => getFileDeleteButton(caseId, fileId),
-          isPrimary: false,
-        },
-      ],
+      getActions: () =>
+        canDelete
+          ? [
+              {
+                type: AttachmentActionType.CUSTOM as const,
+                render: () => getFileDeleteButton(caseId, fileId),
+                isPrimary: false,
+              },
+            ]
+          : [],
       hideDefaultActions: true,
     };
   }
@@ -100,7 +116,7 @@ const getFileAttachmentViewObject = (props: FileViewProps) => {
       </Suspense>
     ),
     timelineAvatar: isImage(file) ? 'image' : 'document',
-    getActions: () => getFileAttachmentActions({ caseId, fileId }),
+    getActions: () => getFileAttachmentActions({ caseId, fileId, canDelete }),
     hideDefaultActions: true,
     children: isImage(file) ? FileThumbnail : undefined,
   };
