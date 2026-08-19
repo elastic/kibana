@@ -13,6 +13,7 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServicesStep } from './use_services_step';
+import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { AWS_SERVICES_STATIC, buildAwsServiceMatrix } from '../../aws_service_matrix';
 
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -163,5 +164,60 @@ describe('useServicesStep — categoryStats signal-filter consistency', () => {
     const stats = result2.current.categoryStats.get(firstCat);
     expect(stats?.selected).toBe(metricsInCat.length);
     expect(stats?.total).toBe(metricsInCat.length);
+  });
+});
+
+describe('useServicesStep — categories hidden when signal has no matching services', () => {
+  // One logs-only category (compute), one metrics-only category (databases).
+  // Validates that switching the signal filter drops the non-matching category entirely.
+  const SPLIT_MATRIX: AwsServiceMatrixEntry[] = [
+    {
+      id: 'svc_logs',
+      name: 'Logs Service',
+      category: 'compute',
+      signalType: 'logs',
+      deploymentMethods: [{ method: 'ecf', preferred: true }],
+      showInUI: true,
+      defaultEnabled: true,
+      packageName: 'aws',
+    },
+    {
+      id: 'svc_metrics',
+      name: 'Metrics Service',
+      category: 'databases',
+      signalType: 'metrics',
+      deploymentMethods: [{ method: 'ecf', preferred: true }],
+      showInUI: true,
+      defaultEnabled: true,
+      packageName: 'aws',
+    },
+  ] as AwsServiceMatrixEntry[];
+
+  beforeEach(() => {
+    mockUseOnboardingFlow.mockImplementation(() => ({
+      servicesStep: { selectedServiceIds: [] },
+      setSelectedServiceIds: jest.fn(),
+      awsServiceMatrix: SPLIT_MATRIX,
+    }));
+  });
+
+  it('shows both categories when signal filter is all', () => {
+    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    expect(result.current.categories).toContain('compute');
+    expect(result.current.categories).toContain('databases');
+  });
+
+  it('hides metrics-only category when filtering for logs', () => {
+    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    act(() => result.current.setSignalFilter('logs'));
+    expect(result.current.categories).toContain('compute');
+    expect(result.current.categories).not.toContain('databases');
+  });
+
+  it('hides logs-only category when filtering for metrics', () => {
+    const { result } = renderHook(() => useServicesStep({ onContinue: jest.fn() }));
+    act(() => result.current.setSignalFilter('metrics'));
+    expect(result.current.categories).not.toContain('compute');
+    expect(result.current.categories).toContain('databases');
   });
 });
