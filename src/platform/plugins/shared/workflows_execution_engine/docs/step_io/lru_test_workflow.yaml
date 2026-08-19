@@ -1,0 +1,106 @@
+# Test workflow for the LRU-based StepIoService
+#
+# Exercises every code path changed in the LRU simplification:
+#   1. Linear output passing — write(output) → LRU cache → read(output)
+#   2. data.set variables — new inline getVariables() in WorkflowContextManager
+#   3. foreach loop — multiple iterations read the loop-source output (scope-stack entry)
+#   4. while loop — condition re-evaluated each iteration using preceding step output
+#   5. on-failure: continue — failed step produces null output; null != cache miss
+#   6. wait (pause/resume) — on resume load() skips outputs, prepareForRead rehydrates from ES
+#
+# How to run:
+#   - Import as a new workflow in Kibana (Observability → Alerts → Workflows)
+#   - Trigger manually; inspect each step's output in the execution detail view
+#   - After the pause step fires (it waits 1 second for test convenience), the resume
+#     is automatic. Verify the final `summary` step renders all values correctly.
+
+name: lru-implementation-test
+enabled: false
+triggers:
+  - type: manual
+
+steps:
+  # ── 1. data.set ────────────────────────────────────────────────────────────
+  # Exercises the new inline getVariables() loop in WorkflowContextManager.
+  # The old implementation used StepIoService.getDataSetVariables(); the new one
+  # iterates getAllStepExecutions() and calls read(step.id, 'output') directly.
+  - name: init_vars
+    type: data.set
+    with:
+      env: production
+      threshold: 100
+
+  # ── 2. Action step — output written to LRU cache ───────────────────────────
+  # write(id, 'output', value, bytes) routes to both LRU cache and state.
+  # read(id, 'output') returns the cached value without touching state or ES.
+  - name: fetch_data
+    type: slack
+    connector-id: your-slack-connector-id
+    with:
+      message: 'env={{variables.env}} threshold={{variables.threshold}}'
+
+  # ── 3. foreach — scope-stack entries are rehydrated uniformly ──────────────
+  # Old code had foreach-specific pin/unpin calls.
+  # New code: computeRehydrationTargets treats all scope-stack entries uniformly.
+  # Each iteration reads the loop-source output via the scope-stack path.
+  - name: process_items
+    type: foreach
+    foreach: '["alpha", "beta", "gamma"]'
+    steps:
+      - name: handle_item
+        type: console
+        with:
+          message: 'item={{foreach.item}} env={{variables.env}} prev={{steps.fetch_data.output}}'
+
+  # ── 4. while — condition uses preceding step output each iteration ──────────
+  # Old code had while-specific pin/re-pin calls and evictStaleLoopOutputs.
+  # New code: the LRU evicts stale iteration outputs by recency automatically.
+  - name: counter_init
+    type: data.set
+    with:
+      count: 0
+
+  - name: count_loop
+    type: while
+    condition: '{{variables.count | lt: 3}}'
+    max-iterations: 5
+    steps:
+      - name: increment
+        type: data.set
+        with:
+          count: '{{variables.count | plus: 1}}'
+
+  # ── 5. on-failure: continue — null output stored in LRU, not confused with miss ──
+  # write(id, 'output', null, 0) stores CacheEntry{ value: null } in the LRU.
+  # read returns null (not undefined), so downstream templates see null explicitly.
+  - name: optional_step
+    type: slack
+    connector-id: non-existent-connector-id
+    on-failure:
+      continue: true
+    with:
+      message: 'This step is expected to fail'
+
+  # ── 6. pause — forces cold-cache resume scenario ───────────────────────────
+  # On resume, WorkflowExecutionState.load() fetches step docs with
+  # excludeFields: ['output']. The LRU cache is empty (new StepIoService instance).
+  # prepareForRead detects cache misses and calls stepRepository.getStepExecutionsByIds
+  # to rehydrate the outputs needed by `summary` below.
+  - name: pause
+    type: wait
+    with:
+      duration: 1s
+
+  # ── 7. final step — reads across all prior steps after cold-cache resume ────
+  # Exercises prepareForRead rehydrating fetch_data and increment outputs from ES.
+  # Also reads variables (data.set) and the null output from optional_step.
+  - name: summary
+    type: console
+    with:
+      message: >
+        env={{variables.env}}
+        threshold={{variables.threshold}}
+        fetch_data_output={{steps.fetch_data.output}}
+        count={{variables.count}}
+        optional_output={{steps.optional_step.output}}
+        foreach_done=true
