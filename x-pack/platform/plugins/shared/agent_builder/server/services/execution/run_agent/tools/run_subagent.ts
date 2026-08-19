@@ -29,10 +29,10 @@ const schema = z.object({
   description: z.string().describe('A short (3-5 word) description of the task'),
   prompt: z.string().describe('The task for the agent to perform'),
   mode: z
-    .enum([SubagentMode.oneshot, SubagentMode.persistent])
+    .enum([SubagentMode.transient, SubagentMode.persistent])
     .optional()
     .describe(
-      '"oneshot" (default) to create a one-off sub-agent or "persistent" to create a named session you can address later via send_message.'
+      '"transient" (default) to create a one-off sub-agent or "persistent" to create a named session you can address later via send_message.'
     ),
   name: z
     .string()
@@ -224,7 +224,7 @@ export const createSubagentTool = ({
           };
         }
 
-        // Oneshot path — unchanged behavior.
+        // Transient path — unchanged behavior.
         const { executionId, events$ } = await subAgentExecutor.executeSubAgent({
           agentId,
           connectorId: selectedConnectorId,

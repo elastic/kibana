@@ -347,20 +347,17 @@ export const createAgentGraph = ({
  * SubagentRosterUpdatedStep across previous rounds.
  */
 const getPriorPurposes = (processedConversation: ProcessedConversation): Record<string, string> => {
-  for (let i = processedConversation.previousRounds.length - 1; i >= 0; i--) {
-    const step = processedConversation.previousRounds[i].steps
-      .slice()
-      .reverse()
-      .find(isSubagentRosterUpdatedStep);
-    if (step) {
-      return Object.fromEntries(
-        step.roster
-          .filter((e: SubagentRosterEntry) => e.purpose !== undefined)
-          .map((e: SubagentRosterEntry) => [e.name, e.purpose as string])
-      );
-    }
-  }
-  return {};
+  const step = processedConversation.previousRounds
+    .flatMap((round) => round.steps)
+    .findLast(isSubagentRosterUpdatedStep);
+
+  if (!step) return {};
+
+  return Object.fromEntries(
+    step.roster
+      .filter((e: SubagentRosterEntry) => e.purpose !== undefined)
+      .map((e: SubagentRosterEntry) => [e.name, e.purpose as string])
+  );
 };
 
 const invalidState = (message: string) => {
