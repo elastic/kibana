@@ -34,7 +34,7 @@ export type ConversationCreateRequest = Omit<
   'id' | 'created_at' | 'updated_at' | 'user' | 'access_control'
 > & {
   id?: string;
-  access_control?: Pick<ConversationAccessControl, 'access_mode'>;
+  access_control?: ConversationAccessControl;
 };
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
@@ -49,6 +49,7 @@ export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
       | 'read'
       | 'pinned'
       | 'workspace_id'
+      | 'access_control'
       | 'metadata'
       | 'template_id'
       | 'template_version'
