@@ -803,7 +803,7 @@ groups:
       - setting: "cases:maxOpenCasesPerRuleRun"
         id: cases-max-open-cases-per-rule-run
         description: |
-          Sets the upper limit for how many new cases the [Cases connector](kibana://reference/connectors-kibana/cases-action-type.md) can open during a single detection rule run. It applies when the rule has a Cases action. Values must be between 1 and 1000. Very high values can add load on {{kib}} and {{es}}.
+          Sets the upper limit for how many new cases the [Cases connector](/reference/connectors-kibana/cases-action-type.md) can open during a single detection rule run. It applies when the rule has a Cases action. Values must be between 1 and 1000. Very high values can add load on {{kib}} and {{es}}.
         datatype: int
         default: 20
         applies_to:
