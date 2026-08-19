@@ -120,7 +120,7 @@ export const PND_RULE_CREATION_WORKFLOW = {
   id: PND_RULE_CREATION_WORKFLOW_ID,
   management: MANAGEMENT,
   pluginId: PLUGIN_ID,
-  version: 7,
+  version: 8,
   visibility: WORKER_VISIBILITY,
   yaml: RULE_CREATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
