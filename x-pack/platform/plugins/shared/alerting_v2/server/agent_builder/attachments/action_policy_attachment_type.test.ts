@@ -15,6 +15,7 @@ import {
 } from '@kbn/alerting-v2-schemas';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 import { createLoggerService } from '../../lib/services/logger_service/logger_service.mock';
 import { createActionPolicyAttachmentType } from './action_policy_attachment_type';
 
@@ -72,6 +73,12 @@ describe('createActionPolicyAttachmentType', () => {
     ActionPolicyAttachmentData
   >;
 
+  const createPrivilegeCheckerMock = (canReadResult: boolean = true) =>
+    ({
+      canRead: jest.fn().mockResolvedValue(canReadResult),
+      canWrite: jest.fn().mockResolvedValue(true),
+    }) as unknown as PrivilegeChecker;
+
   beforeEach(() => {
     ({ loggerService, mockLogger } = createLoggerService());
     getActionPolicy = jest.fn();
@@ -79,6 +86,7 @@ describe('createActionPolicyAttachmentType', () => {
     definition = createActionPolicyAttachmentType({
       logger: loggerService,
       getActionPolicyClient: () => actionPolicyClient,
+      getPrivilegeChecker: () => createPrivilegeCheckerMock(true),
     });
   });
 
@@ -153,6 +161,28 @@ describe('createActionPolicyAttachmentType', () => {
             type: 'Error',
           }),
         })
+      );
+    });
+  });
+
+  describe('authorization', () => {
+    it('returns undefined when user lacks Action Policies: Read on resolve', async () => {
+      const actionPolicyClient = { getActionPolicy } as unknown as ActionPolicyClient;
+      const unauthorizedDefinition = createActionPolicyAttachmentType({
+        logger: loggerService,
+        getActionPolicyClient: () => actionPolicyClient,
+        getPrivilegeChecker: () => createPrivilegeCheckerMock(false),
+      });
+
+      const result = await unauthorizedDefinition.resolve!(
+        'policy-1',
+        agentBuilderMocks.attachments.createResolveContextMock()
+      );
+
+      expect(result).toBeUndefined();
+      expect(getActionPolicy).not.toHaveBeenCalled();
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Unauthorized to resolve action policy attachment "policy-1"')
       );
     });
   });

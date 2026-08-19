@@ -72,6 +72,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
         logger: loggerService.forSubsystem('agentBuilder'),
         getActionPolicyClient: (context) =>
           resolveRequestScoped(injection, context.request, ActionPolicyClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
       }) as AttachmentTypeDefinition,
     [LoggerServiceToken, CoreStart('injection')]
   );

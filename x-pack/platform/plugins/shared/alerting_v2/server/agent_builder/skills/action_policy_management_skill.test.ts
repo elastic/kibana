@@ -20,6 +20,7 @@ const createDeps = (): ManageActionPolicyToolDeps => ({
   } as unknown as LoggerServiceContract,
   getWorkflow: jest.fn(async () => null),
   getAvailableConnectors: jest.fn(async () => ({ connectorTypes: {} })),
+  getPrivilegeChecker: jest.fn() as any,
 });
 
 describe('createActionPolicyManagementSkill', () => {

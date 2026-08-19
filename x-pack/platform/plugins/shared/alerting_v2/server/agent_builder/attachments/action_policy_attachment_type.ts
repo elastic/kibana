@@ -19,10 +19,12 @@ import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { ActionPolicyClient } from '../../lib/action_policy_client/action_policy_client';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 
 interface CreateActionPolicyAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getActionPolicyClient: (context: AttachmentResolveContext) => ActionPolicyClient;
+  getPrivilegeChecker: (context: { request: AttachmentResolveContext['request'] }) => PrivilegeChecker;
 }
 
 const formatActionPolicyDescription = (
@@ -53,6 +55,7 @@ ${data.tags?.length ? `Tags: ${data.tags.join(', ')}` : ''}`.trim();
 export const createActionPolicyAttachmentType = ({
   logger,
   getActionPolicyClient,
+  getPrivilegeChecker,
 }: CreateActionPolicyAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof ACTION_POLICY_ATTACHMENT_TYPE,
   ActionPolicyAttachmentData
@@ -72,6 +75,15 @@ export const createActionPolicyAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<ActionPolicyAttachmentData | undefined> => {
     try {
+      const privilegeChecker = getPrivilegeChecker({ request: context.request });
+      const canRead = await privilegeChecker.canRead('actionPolicies');
+      if (!canRead) {
+        logger.debug({
+          message: `Unauthorized to resolve action policy attachment "${origin}": missing Action Policies: Read`,
+        });
+        return undefined;
+      }
+
       const client = getActionPolicyClient(context);
       const policy = await client.getActionPolicy({ id: origin });
       return actionPolicyAttachmentDataSchema.parse(policy);

@@ -13,9 +13,16 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import type { ToolHandlerContextMock } from '@kbn/agent-builder-plugin/server/mocks';
 import { ALERTING_LOG_CODES } from '../../../lib/errors/error_codes';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import type { LoggerServiceContract } from '../../../lib/services/logger_service/logger_service';
 import { manageActionPolicyTool, type ManageActionPolicyToolDeps } from './manage_action_policy';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
+
+const createPrivilegeCheckerMock = (canWriteResult: boolean) =>
+  ({
+    canRead: jest.fn().mockResolvedValue(true),
+    canWrite: jest.fn().mockResolvedValue(canWriteResult),
+  }) as unknown as PrivilegeChecker;
 
 const createLogger = (): jest.Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>
@@ -27,12 +34,17 @@ const createLogger = (): jest.Mocked<
   forSubsystem: jest.fn(),
 });
 
-const createDeps = (
-  logger: LoggerServiceContract = createLogger() as unknown as LoggerServiceContract
-): ManageActionPolicyToolDeps => ({
+const createDeps = ({
+  canWrite = true,
+  logger = createLogger() as unknown as LoggerServiceContract,
+}: {
+  canWrite?: boolean;
+  logger?: LoggerServiceContract;
+} = {}): ManageActionPolicyToolDeps => ({
   logger,
   getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
   getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
+  getPrivilegeChecker: () => createPrivilegeCheckerMock(canWrite),
 });
 
 const createContext = (): ToolHandlerContextMock => {
@@ -246,7 +258,7 @@ describe('manageActionPolicyTool', () => {
   describe('logger severity', () => {
     it('logs validation errors at debug level', async () => {
       const logger = createLogger();
-      const deps = createDeps(logger as unknown as LoggerServiceContract);
+      const deps = createDeps({ logger: logger as unknown as LoggerServiceContract });
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
 
@@ -272,7 +284,7 @@ describe('manageActionPolicyTool', () => {
 
     it('logs unexpected errors at warn level', async () => {
       const logger = createLogger();
-      const deps = createDeps(logger as unknown as LoggerServiceContract);
+      const deps = createDeps({ logger: logger as unknown as LoggerServiceContract });
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.add.mockRejectedValueOnce(new Error('ES exploded'));
@@ -301,7 +313,7 @@ describe('manageActionPolicyTool', () => {
 
     it('includes policy_id on unexpected errors when the policy is already persisted', async () => {
       const logger = createLogger();
-      const deps = createDeps(logger as unknown as LoggerServiceContract);
+      const deps = createDeps({ logger: logger as unknown as LoggerServiceContract });
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
@@ -336,7 +348,7 @@ describe('manageActionPolicyTool', () => {
 
     it('includes policy_id on unexpected errors when the policy is only in memory', async () => {
       const logger = createLogger();
-      const deps = createDeps(logger as unknown as LoggerServiceContract);
+      const deps = createDeps({ logger: logger as unknown as LoggerServiceContract });
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
       ctx.attachments.getAttachmentRecord.mockReturnValue({
@@ -368,4 +380,92 @@ describe('manageActionPolicyTool', () => {
       });
     });
   });
+
+  describe('authorization', () => {
+    it('rejects with an error result when the user lacks Action Policies: All', async () => {
+      const deps = createDeps({ canWrite: false });
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Should Fail' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data: { message: string; metadata?: { missingPrivileges?: string[] } };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data.message).toContain('Action Policies: All');
+      expect(results[0].data.message).toContain('Unauthorized');
+      expect(results[0].data.metadata?.missingPrivileges).toEqual(['Action Policies: All']);
+      expect(ctx.attachments.add).not.toHaveBeenCalled();
+      expect(ctx.attachments.update).not.toHaveBeenCalled();
+    });
+
+    it('does not execute operations or external lookups when unauthorized', async () => {
+      const deps = createDeps({ canWrite: false });
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Should Not Execute' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      expect(deps.getWorkflow).not.toHaveBeenCalled();
+      expect(deps.getAvailableConnectors).not.toHaveBeenCalled();
+      expect(ctx.attachments.getAttachmentRecord).not.toHaveBeenCalled();
+    });
+
+    it('resolves the PrivilegeChecker with the handler request', async () => {
+      const checkerMock = createPrivilegeCheckerMock(true);
+      const getPrivilegeChecker = jest.fn().mockReturnValue(checkerMock);
+      const deps: ManageActionPolicyToolDeps = {
+        logger: createLogger() as unknown as LoggerServiceContract,
+        getWorkflow: jest.fn().mockResolvedValue({ id: 'wf-1', name: 'My Workflow' }),
+        getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {} }),
+        getPrivilegeChecker,
+      };
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Privilege Check Test' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+          ],
+        },
+        ctx
+      );
+
+      expect(getPrivilegeChecker).toHaveBeenCalledWith({ request: ctx.request });
+      expect(checkerMock.canWrite).toHaveBeenCalledWith('actionPolicies');
+      expect(ctx.attachments.add).toHaveBeenCalledTimes(1);
+    });
+  });
 });
+
