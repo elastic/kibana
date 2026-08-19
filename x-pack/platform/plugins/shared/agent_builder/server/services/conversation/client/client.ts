@@ -14,7 +14,6 @@ import {
   type Conversation,
   type ConversationAccessControl,
   type ConversationAccessControlEntry,
-  type ConversationWithoutRounds,
   type TimelineEvent,
   type TimelineEventInput,
   type EventActor,
@@ -39,8 +38,9 @@ import type {
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
 import type {
+  ConversationWithPermissions,
+  ConversationWithoutRoundsWithPermissions,
   UpdateConversationAccessControlRequestBody,
-  WithPermissions,
 } from '../../../../common/http_api/conversations';
 import type { AgentRegistry } from '../../agents/agent_registry';
 import {
@@ -73,7 +73,9 @@ import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import {
   fromEs,
   fromEsWithoutRounds,
+  withPermissions,
   toEs,
+  updateConversation,
   createRequestToEs,
   isConversationDocument,
   type Document,
@@ -111,10 +113,10 @@ const buildMetadataFromTemplate = (
 const EVENTS_APPEND_RETRY_ON_CONFLICT = 5;
 
 export interface ConversationClient {
-  get(conversationId: string): Promise<WithPermissions<Conversation>>;
+  get(conversationId: string): Promise<ConversationWithPermissions>;
   exists(conversationId: string): Promise<boolean>;
   getByOrigin(origin: ConversationOrigin): Promise<Conversation | undefined>;
-  create(conversation: ConversationCreateRequest): Promise<WithPermissions<Conversation>>;
+  create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions>;
   update(
     conversation: ConversationUpdateRequest,
     options?: { access: ConversationAccess; retryOnConflict?: boolean }
@@ -127,9 +129,7 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
-  list(
-    options?: ConversationListOptions
-  ): Promise<Array<WithPermissions<ConversationWithoutRounds>>>;
+  list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
     conversationId: string,
@@ -200,7 +200,7 @@ class ConversationClientImpl implements ConversationClient {
 
   async list(
     options: ConversationListOptions = {}
-  ): Promise<Array<WithPermissions<ConversationWithoutRounds>>> {
+  ): Promise<ConversationWithoutRoundsWithPermissions[]> {
     const { agentId } = options;
     const accessibleAgentIds = await this.agentRegistry.getIds();
 
@@ -246,14 +246,20 @@ class ConversationClientImpl implements ConversationClient {
         throw createInternalError('Conversation list search returned an incomplete hit');
       }
 
-      return this.withPermissions(withDeserializedMetadata(fromEsWithoutRounds(hit)));
+      return withPermissions({
+        conversation: withDeserializedMetadata(fromEsWithoutRounds(hit)),
+        user: this.user,
+      });
     });
   }
 
-  async get(conversationId: string): Promise<WithPermissions<Conversation>> {
+  async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
 
-    return this.withPermissions(withDeserializedMetadata(fromEs(document)));
+    return withPermissions({
+      conversation: withDeserializedMetadata(fromEs(document)),
+      user: this.user,
+    });
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -300,7 +306,7 @@ class ConversationClientImpl implements ConversationClient {
     }
   }
 
-  async create(conversation: ConversationCreateRequest): Promise<WithPermissions<Conversation>> {
+  async create(conversation: ConversationCreateRequest): Promise<ConversationWithPermissions> {
     const now = new Date();
     const id = conversation.id ?? uuidv4();
 
@@ -753,13 +759,16 @@ class ConversationClientImpl implements ConversationClient {
     try {
       const { document } = await writer.readModifyWrite({
         id: conversationId,
-        mutate: (current) => ({
-          ...current,
-          ...fields(current),
-          id: conversationId,
-          space: this.space,
-          updated_at: new Date().toISOString(),
-        }),
+        mutate: (current) =>
+          updateConversation({
+            conversation: current,
+            update: {
+              ...fields(current),
+              id: conversationId,
+            },
+            space: this.space,
+            updateDate: new Date(),
+          }),
       });
 
       return document;
@@ -845,22 +854,6 @@ class ConversationClientImpl implements ConversationClient {
     return {
       access_mode: accessMode,
       entries: validateAccessControlEntries({ entries, ownerId, addedAtById }),
-    };
-  }
-
-  private withPermissions<T extends ConversationWithoutRounds>(
-    conversation: T
-  ): WithPermissions<T> {
-    return {
-      ...conversation,
-      permissions: {
-        rename: hasConversationRenameAccess({ conversation, user: this.user }),
-        delete: hasConversationDeleteAccess({ conversation, user: this.user }),
-        update_access_control: hasConversationUpdateAccessControlAccess({
-          conversation,
-          user: this.user,
-        }),
-      },
     };
   }
 }

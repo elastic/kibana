@@ -11,6 +11,7 @@ import type {
   ConversationRound,
   ConversationRoundStep,
   ConversationWithoutRounds,
+  CurrentUser,
   ToolResult,
   UserIdAndName,
   SerializedMetadataValue,
@@ -26,8 +27,15 @@ import {
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import type { ConversationPermissions } from '../../../../common/http_api/conversations';
+import {
+  hasConversationDeleteAccess,
+  hasConversationRenameAccess,
+  hasConversationUpdateAccessControlAccess,
+} from '../access_control';
 import type {
   ConversationCreateRequest,
+  ConversationUpdatableFields,
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
@@ -243,6 +251,26 @@ export const fromEsWithoutRounds = (document: Document): ConversationWithoutRoun
   return convertBaseFromEs(document);
 };
 
+export const withPermissions = <T extends ConversationWithoutRounds>({
+  conversation,
+  user,
+}: {
+  conversation: T;
+  user: CurrentUser;
+}): T & { permissions: ConversationPermissions } => {
+  return {
+    ...conversation,
+    permissions: {
+      rename: hasConversationRenameAccess({ conversation, user }),
+      delete: hasConversationDeleteAccess({ conversation, user }),
+      update_access_control: hasConversationUpdateAccessControlAccess({
+        conversation,
+        user,
+      }),
+    },
+  };
+};
+
 export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
   return {
     agent_id: conversation.agent_id,
@@ -275,6 +303,27 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
       ? { template_version: conversation.template_version }
       : {}),
   };
+};
+
+export const updateConversation = ({
+  conversation,
+  update,
+  space,
+  updateDate,
+}: {
+  conversation: Conversation;
+  update: ConversationUpdatableFields;
+  space: string;
+  updateDate: Date;
+}) => {
+  const updated = {
+    ...conversation,
+    ...update,
+    space,
+    updated_at: updateDate.toISOString(),
+  };
+
+  return updated;
 };
 
 export const createRequestToEs = ({

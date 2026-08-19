@@ -6,12 +6,11 @@
  */
 
 import {
-  type Conversation,
   type ConversationRound,
   ConversationRoundStatus,
   DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
-import type { WithPermissions } from '../../common/http_api/conversations';
+import type { ConversationWithPermissions } from '../../common/http_api/conversations';
 import type { ConversationService, ConversationClient } from '../services/conversation';
 
 export type ConversationServiceMock = jest.Mocked<ConversationService> & {
@@ -20,8 +19,8 @@ export type ConversationServiceMock = jest.Mocked<ConversationService> & {
 export type ConversationClientMock = jest.Mocked<ConversationClient>;
 
 export const createEmptyConversation = (
-  parts: Partial<WithPermissions<Conversation>> = {}
-): WithPermissions<Conversation> => {
+  parts: Partial<ConversationWithPermissions> = {}
+): ConversationWithPermissions => {
   return {
     id: 'id',
     title: DEFAULT_CONVERSATION_TITLE,

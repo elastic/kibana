@@ -19,13 +19,17 @@ export interface ConversationPermissions {
   update_access_control: boolean;
 }
 
-export type WithPermissions<T> = T & {
+export type ConversationWithPermissions = Conversation & {
   permissions: ConversationPermissions;
 };
 
-export type GetConversationResponse = WithPermissions<Conversation>;
+export type ConversationWithoutRoundsWithPermissions = ConversationWithoutRounds & {
+  permissions: ConversationPermissions;
+};
 
-export type ListConversationsResponseItem = WithPermissions<ConversationWithoutRounds>;
+export type GetConversationResponse = ConversationWithPermissions;
+
+export type ListConversationsResponseItem = ConversationWithoutRoundsWithPermissions;
 
 export interface ListConversationsResponse {
   results: ListConversationsResponseItem[];
@@ -50,7 +54,7 @@ export interface MarkPinnedConversationResponse {
   pinned: boolean;
 }
 
-export type CreateConversationResponse = WithPermissions<Conversation>;
+export type CreateConversationResponse = ConversationWithPermissions;
 
 export interface UpdateConversationAccessControlRequestBody {
   access_mode: ConversationAccessControlMode;
