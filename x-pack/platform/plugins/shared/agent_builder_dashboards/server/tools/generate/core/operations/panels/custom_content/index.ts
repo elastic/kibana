@@ -11,6 +11,7 @@ import {
   CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   customContentStateSchema,
+  customContentUpdateSchema,
 } from '@kbn/custom-content-common';
 import { z } from '@kbn/zod/v4';
 import { definePanelType } from '../panel_type';
@@ -36,24 +37,7 @@ export const customContentPanelConfigSchema = customContentStateSchema
   });
 
 /** Edit schema: prompt and esqlQuery only — template is generated server-side. */
-const customContentEditConfigSchema = z.object({
-  prompt: z
-    .string()
-    .min(1)
-    .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-    .optional()
-    .describe(
-      'Updated natural language description of what to display. Omit to keep the existing prompt.'
-    ),
-  esqlQuery: z
-    .string()
-    .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-    .nullable()
-    .optional()
-    .describe(
-      'Updated ES|QL query. Omit to keep the existing query. Pass null to remove the query entirely.'
-    ),
-});
+const customContentEditConfigSchema = customContentUpdateSchema;
 
 /**
  * The custom_content variant of a `config`-source panel input, discriminated by
