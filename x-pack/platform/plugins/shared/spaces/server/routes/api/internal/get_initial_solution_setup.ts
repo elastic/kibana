@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { AuthzDisabled } from '@kbn/core-security-server';
-
 import type { InitialSolutionSetupRouteDeps } from '.';
 import type { GetInitialSolutionSetupResponse } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
@@ -21,7 +19,9 @@ export function initGetInitialSolutionSetupApi({
     {
       path: '/internal/spaces/_initial_solution_setup',
       security: {
-        authz: AuthzDisabled.delegateToSOClient,
+        authz: {
+          requiredPrivileges: ['manage_spaces'],
+        },
       },
       validate: false,
     },

@@ -36,12 +36,19 @@ describe('GET /internal/spaces/_initial_solution_setup', () => {
     } as InitialSolutionSetupRouteDeps);
 
     return {
+      routeConfig: router.get.mock.calls[0][0],
       routeHandler: router.get.mock.calls[0][1],
       initialSolutionSetup,
       spacesClient,
       getSpacesService,
     };
   };
+
+  it('requires the manage_spaces privilege', () => {
+    const { routeConfig } = setup();
+
+    expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['manage_spaces'] });
+  });
 
   it('returns http/200 with required true when setup is pending', async () => {
     const { routeHandler, initialSolutionSetup, spacesClient, getSpacesService } = setup(true);

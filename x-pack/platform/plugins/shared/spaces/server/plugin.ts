@@ -158,7 +158,7 @@ export class SpacesPlugin
 
     const solution = plugins.cloud?.onboarding?.defaultSolution || defaultSolution;
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-    const eligible = initialSolutionSetupEnabled && !solution && !isServerless;
+    const eligible = initialSolutionSetupEnabled && !solution;
     const initialSolutionSetup = new InitialSolutionSetupService(eligible);
     const getSavedObjects = async () => (await core.getStartServices())[0].savedObjects;
     this.defaultSpaceService = new DefaultSpaceService();

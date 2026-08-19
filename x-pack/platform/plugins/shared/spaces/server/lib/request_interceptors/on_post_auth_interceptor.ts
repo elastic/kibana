@@ -54,16 +54,28 @@ export function initSpacesOnPostAuthRequestInterceptor({
     const isRequestingApplication = path.startsWith('/app');
     const isEnteringSpace = path === '/spaces/enter';
 
-    const setupRedirect = await maybeRedirectForInitialSolutionSetup({
-      request,
-      response,
-      spacesService,
-      initialSolutionSetup,
-      serverBasePath,
-      log,
-    });
-    if (setupRedirect) {
-      return setupRedirect;
+    const shouldCheckInitialSolutionSetup =
+      initialSolutionSetup.isEligible() &&
+      request.auth.isAuthenticated &&
+      spaceId === DEFAULT_SPACE_ID &&
+      (isRequestingKibanaRoot || isRequestingApplication || isEnteringSpace);
+
+    if (shouldCheckInitialSolutionSetup) {
+      const next = isRequestingApplication
+        ? `${request.url.pathname}${request.url.search}`
+        : request.url.searchParams.get('next') ?? undefined;
+      const setupRedirect = await maybeRedirectForInitialSolutionSetup({
+        request,
+        response,
+        spacesService,
+        initialSolutionSetup,
+        serverBasePath,
+        log,
+        next,
+      });
+      if (setupRedirect) {
+        return setupRedirect;
+      }
     }
 
     // When the user deliberately selects a space from any entry point, they all navigate to /spaces/enter within

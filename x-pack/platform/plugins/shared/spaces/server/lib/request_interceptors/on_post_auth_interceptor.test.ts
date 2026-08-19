@@ -489,6 +489,38 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
       expect(isRequired).toHaveBeenCalledWith(spacesClient);
     });
 
+    it.each([
+      {
+        label: 'the request is unauthenticated',
+        path: ENTER_SPACE_PATH,
+        spaceId: DEFAULT_SPACE_ID,
+        isAuthenticated: false,
+      },
+      {
+        label: 'the request targets a named space',
+        path: '/',
+        spaceId: 'foo',
+        isAuthenticated: true,
+      },
+      {
+        label: 'the request does not target an entry route',
+        path: '/api/status',
+        spaceId: DEFAULT_SPACE_ID,
+        isAuthenticated: true,
+      },
+    ])('skips setup checks when $label', async ({ path, spaceId, isAuthenticated }) => {
+      getSpaceId.mockReturnValue(spaceId);
+
+      const request = httpServerMock.createKibanaRequest({
+        path,
+        auth: { isAuthenticated },
+      });
+
+      await postAuthHandler(request, response, toolkit);
+
+      expect(isRequired).not.toHaveBeenCalled();
+    });
+
     it('skips setup checks when not eligible', async () => {
       setup({ eligible: false });
       getSpaceId.mockReturnValue(DEFAULT_SPACE_ID);

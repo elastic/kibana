@@ -123,15 +123,13 @@ describe('Spaces plugin', () => {
     });
 
     it.each`
-      label                                                                | config                                                          | buildFlavor      | solutionSetupRequired
-      ${'initial solution setup is disabled'}                              | ${{ maxSpaces: 1000 }}                                          | ${'traditional'} | ${false}
-      ${'build flavor is serverless'}                                      | ${{ maxSpaces: 1000, initialSolutionSetup: { enabled: true } }} | ${'serverless'}  | ${false}
-      ${'initial solution setup is enabled without a configured solution'} | ${{ maxSpaces: 1000, initialSolutionSetup: { enabled: true } }} | ${'traditional'} | ${true}
+      label                                                                | config                                                          | solutionSetupRequired
+      ${'initial solution setup is disabled'}                              | ${{ maxSpaces: 1000 }}                                          | ${false}
+      ${'initial solution setup is enabled without a configured solution'} | ${{ maxSpaces: 1000, initialSolutionSetup: { enabled: true } }} | ${true}
     `(
       'when $label, passes solutionSetupRequired=$solutionSetupRequired',
-      ({ config, buildFlavor, solutionSetupRequired }) => {
+      ({ config, solutionSetupRequired }) => {
         const initializerContext = coreMock.createPluginInitializerContext(config);
-        (initializerContext.env.packageInfo as { buildFlavor: string }).buildFlavor = buildFlavor;
         const core = coreMock.createSetup() as CoreSetup<SpacesPluginStartDeps>;
         const features = featuresPluginMock.createSetup();
         const licensing = licensingMock.createSetup();

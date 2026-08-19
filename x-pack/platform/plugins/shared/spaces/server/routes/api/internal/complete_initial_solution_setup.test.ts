@@ -36,12 +36,19 @@ describe('POST /internal/spaces/_complete_initial_solution_setup', () => {
     } as InitialSolutionSetupRouteDeps);
 
     return {
+      routeConfig: router.post.mock.calls[0][0],
       routeHandler: router.post.mock.calls[0][1],
       initialSolutionSetup,
       spacesClient,
       getSpacesService,
     };
   };
+
+  it('requires the manage_spaces privilege', () => {
+    const { routeConfig } = setup();
+
+    expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['manage_spaces'] });
+  });
 
   it.each([
     ['classic', SOLUTION_VIEW_CLASSIC],

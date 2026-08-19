@@ -9,7 +9,6 @@ import Boom from '@hapi/boom';
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { AuthzDisabled } from '@kbn/core-security-server';
 
 import type { InitialSolutionSetupRouteDeps } from '.';
 import type { CompleteInitialSolutionSetupResponse } from '../../../../common';
@@ -26,7 +25,9 @@ export function initCompleteInitialSolutionSetupApi({
     {
       path: '/internal/spaces/_complete_initial_solution_setup',
       security: {
-        authz: AuthzDisabled.delegateToSOClient,
+        authz: {
+          requiredPrivileges: ['manage_spaces'],
+        },
       },
       validate: {
         body: schema.object({
