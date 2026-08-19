@@ -82,8 +82,9 @@ describe('events_write tool', () => {
     const signal = {
       type: 'detection' as const,
       stream_name: 'logs.test',
-      description: 'Found: error. Impact: requests failed. Verdict: confirms.',
-      confirmed: true,
+      description: 'Found: error. Impact: requests failed.',
+      verdict: 'confirms',
+      evidence: { esql_query: 'FROM logs.test', result: 'found' },
       metadata: {
         rule_uuid: 'rule-1',
         detection_id: 'detection-1',
