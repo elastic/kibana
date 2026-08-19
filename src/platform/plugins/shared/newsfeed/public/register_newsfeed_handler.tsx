@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shareReplay, map, tap } from 'rxjs';
-import React from 'react';
+import { shareReplay, tap, map } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { FetchResult } from './types';
-import { NewsfeedContainer } from './components/flyout_list';
 import type { NewsfeedApi } from './lib/api';
+import { openNewsfeedSidebar } from './sidebar/open';
 
 export const registerNewsfeedHandler = ({
   core,
@@ -34,20 +33,7 @@ export const registerNewsfeedHandler = ({
 
   return core.chrome.next.registerNewsfeedHandler({
     open: () => {
-      if (lastFetchResult) {
-        handlerApi.markAsRead(lastFetchResult.feedItems.map((item) => item.hash));
-      }
-      const flyoutRef = core.overlays.openSystemFlyout(
-        <NewsfeedContainer
-          newsfeedApi={handlerApi}
-          onClose={() => flyoutRef.close()}
-          showPlainSpinner={false}
-          isServerless={isServerless}
-        />,
-        {
-          size: 's',
-        }
-      );
+      openNewsfeedSidebar(core.chrome.sidebar, handlerApi, lastFetchResult);
     },
     hasNew$: handlerResults$.pipe(map((result) => result?.hasNew ?? false)),
   });

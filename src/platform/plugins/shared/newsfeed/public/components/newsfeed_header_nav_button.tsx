@@ -7,38 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps } from 'react';
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
+import { EuiHeaderSectionItemButton, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Observable } from 'rxjs';
-import useObservable from 'react-use/lib/useObservable';
+import type { SidebarStart } from '@kbn/core-chrome-sidebar';
 import type { NewsfeedApi } from '../lib/api';
-import { NewsfeedFlyout } from './flyout_list';
 import type { FetchResult } from '../types';
+import { toggleNewsfeedSidebar } from '../sidebar/open';
 
-export interface INewsfeedContext {
-  setFlyoutVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  newsFetchResult: FetchResult | void | null;
-}
+const whatsNewLabel = i18n.translate('newsfeed.headerButton.whatsNewLabel', {
+  defaultMessage: "What's new",
+});
 
-export const NewsfeedContext = React.createContext({} as INewsfeedContext);
-
-export interface Props extends Pick<ComponentProps<typeof NewsfeedFlyout>, 'isServerless'> {
+export interface Props {
   newsfeedApi: NewsfeedApi;
-  hasCustomBranding$: Observable<boolean>;
+  isServerless: boolean;
+  sidebar: SidebarStart;
 }
 
-export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerless }: Props) => {
-  const [flyoutVisible, setFlyoutVisible] = useState<boolean>(false);
+export const NewsfeedNavButton = ({ newsfeedApi, sidebar }: Props) => {
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
-  const hasCustomBranding = useObservable(hasCustomBranding$, false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+
   const hasNew = useMemo(() => {
     return newsFetchResult ? newsFetchResult.hasNew : false;
   }, [newsFetchResult]);
 
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const setButtonRef = (node: HTMLButtonElement | null) => (buttonRef.current = node);
+  useEffect(() => {
+    const sub = sidebar.getCurrentAppId$().subscribe((appId) => {
+      const open = appId === 'newsfeed';
+      setSidebarOpen((prev) => {
+        // Restore focus to this button when the sidebar closes while focus was inside
+        if (prev && !open) {
+          if (document.activeElement?.matches(':focus-visible')) {
+            buttonRef.current?.focus();
+          }
+        }
+        return open;
+      });
+    });
+    return () => sub.unsubscribe();
+  }, [sidebar]);
 
   useEffect(() => {
     const subscription = newsfeedApi.fetchResults$.subscribe((results) => {
@@ -47,45 +57,41 @@ export const NewsfeedNavButton = ({ newsfeedApi, hasCustomBranding$, isServerles
     return () => subscription.unsubscribe();
   }, [newsfeedApi]);
 
-  const showFlyout = useCallback(() => {
-    if (newsFetchResult) {
-      newsfeedApi.markAsRead(newsFetchResult.feedItems.map((item) => item.hash));
-    }
-    setFlyoutVisible(!flyoutVisible);
-  }, [newsfeedApi, newsFetchResult, flyoutVisible]);
+  const handleClick = useCallback(() => {
+    toggleNewsfeedSidebar(sidebar, newsfeedApi, newsFetchResult);
+  }, [sidebar, newsfeedApi, newsFetchResult]);
+
+  const button = (
+    <EuiHeaderSectionItemButton
+      ref={(node: HTMLButtonElement | null) => {
+        buttonRef.current = node;
+      }}
+      data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
+      aria-expanded={sidebarOpen}
+      aria-haspopup="true"
+      aria-label={
+        hasNew
+          ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
+              defaultMessage: 'Newsfeed menu - unread items available',
+            })
+          : i18n.translate('newsfeed.headerButton.readAriaLabel', {
+              defaultMessage: 'Newsfeed menu - all items read',
+            })
+      }
+      notification={hasNew ? true : null}
+      onClick={handleClick}
+    >
+      <EuiIcon type="popper" size="m" aria-hidden={true} />
+    </EuiHeaderSectionItemButton>
+  );
+
+  if (sidebarOpen) {
+    return button;
+  }
 
   return (
-    <NewsfeedContext.Provider value={{ setFlyoutVisible, newsFetchResult }}>
-      <>
-        <EuiHeaderSectionItemButton
-          ref={setButtonRef}
-          data-test-subj={hasNew ? 'newsfeedHasUnread' : 'newsfeedAllRead'}
-          aria-controls="keyPadMenu"
-          aria-expanded={flyoutVisible}
-          aria-haspopup="true"
-          aria-label={
-            hasNew
-              ? i18n.translate('newsfeed.headerButton.unreadAriaLabel', {
-                  defaultMessage: 'Newsfeed menu - unread items available',
-                })
-              : i18n.translate('newsfeed.headerButton.readAriaLabel', {
-                  defaultMessage: 'Newsfeed menu - all items read',
-                })
-          }
-          notification={hasNew ? true : null}
-          onClick={showFlyout}
-        >
-          <EuiIcon type="popper" size="m" aria-hidden={true} />
-        </EuiHeaderSectionItemButton>
-        {flyoutVisible ? (
-          <NewsfeedFlyout
-            newsfeedApi={newsfeedApi}
-            isServerless={isServerless}
-            focusTrapProps={{ shards: [buttonRef] }}
-            showPlainSpinner={hasCustomBranding}
-          />
-        ) : null}
-      </>
-    </NewsfeedContext.Provider>
+    <EuiToolTip content={whatsNewLabel} disableScreenReaderOutput>
+      {button}
+    </EuiToolTip>
   );
 };

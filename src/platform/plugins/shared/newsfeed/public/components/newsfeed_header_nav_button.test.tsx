@@ -10,12 +10,13 @@
 import React from 'react';
 import { render, screen, act } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NewsfeedNavButton } from './newsfeed_header_nav_button';
 import type { NewsfeedApi } from '../lib/api';
 import type { FetchResult, NewsfeedItem } from '../types';
+import type { SidebarStart } from '@kbn/core-chrome-sidebar';
 
 const createMockItem = (overrides: Partial<NewsfeedItem> = {}): NewsfeedItem => ({
   title: 'Test news item',
@@ -37,22 +38,37 @@ const createFetchResult = (overrides: Partial<FetchResult> = {}): FetchResult =>
   ...overrides,
 });
 
+const createMockSidebar = (currentAppId: string | null = null) => {
+  const currentAppId$ = new BehaviorSubject<string | null>(currentAppId);
+  const openFn = jest.fn();
+  const closeFn = jest.fn();
+
+  const sidebar = {
+    getCurrentAppId$: () => currentAppId$,
+    getCurrentAppId: () => currentAppId$.getValue(),
+    getApp: jest.fn().mockReturnValue({ open: openFn, close: closeFn }),
+  } as unknown as SidebarStart;
+
+  return { sidebar, currentAppId$, openFn, closeFn };
+};
+
 const renderComponent = (fetchResult: FetchResult | null = createFetchResult()) => {
   const fetchResults$ = new BehaviorSubject<FetchResult | void | null>(fetchResult);
   const markAsRead = jest.fn();
   const newsfeedApi: NewsfeedApi = { fetchResults$, markAsRead };
+  const { sidebar, currentAppId$, openFn, closeFn } = createMockSidebar();
 
   const result = render(
     <I18nProvider>
       <NewsfeedNavButton
         newsfeedApi={newsfeedApi}
-        hasCustomBranding$={of(false)}
         isServerless={false}
+        sidebar={sidebar}
       />
     </I18nProvider>
   );
 
-  return { ...result, newsfeedApi, fetchResults$, markAsRead };
+  return { ...result, newsfeedApi, fetchResults$, markAsRead, sidebar, currentAppId$, openFn, closeFn };
 };
 
 describe('NewsfeedNavButton', () => {
@@ -68,10 +84,10 @@ describe('NewsfeedNavButton', () => {
     expect(screen.getByTestId('newsfeedAllRead')).toBeInTheDocument();
   });
 
-  test('opens the flyout when clicked', async () => {
-    renderComponent();
+  test('opens the sidebar when clicked', async () => {
+    const { openFn } = renderComponent();
     await user.click(screen.getByTestId('newsfeedHasUnread'));
-    expect(screen.getByTestId('NewsfeedFlyout')).toBeInTheDocument();
+    expect(openFn).toHaveBeenCalledTimes(1);
   });
 
   test('calls markAsRead with item hashes when opened', async () => {
@@ -80,20 +96,16 @@ describe('NewsfeedNavButton', () => {
     expect(markAsRead).toHaveBeenCalledWith(['test-hash-1', 'test-hash-2']);
   });
 
-  test('shows news items in the flyout', async () => {
-    renderComponent();
+  test('closes the sidebar when clicked while it is open', async () => {
+    const { closeFn, currentAppId$ } = renderComponent();
+
+    // Simulate sidebar opened for newsfeed
+    act(() => {
+      currentAppId$.next('newsfeed');
+    });
+
     await user.click(screen.getByTestId('newsfeedHasUnread'));
-    expect(screen.getAllByTestId('newsHeadAlert')).toHaveLength(2);
-  });
-
-  test('closes the flyout when clicked again', async () => {
-    renderComponent();
-    const button = screen.getByTestId('newsfeedHasUnread');
-    await user.click(button);
-    expect(screen.getByTestId('NewsfeedFlyout')).toBeInTheDocument();
-
-    await user.click(button);
-    expect(screen.queryByTestId('NewsfeedFlyout')).not.toBeInTheDocument();
+    expect(closeFn).toHaveBeenCalledTimes(1);
   });
 
   test('updates unread state when fetch results change', () => {

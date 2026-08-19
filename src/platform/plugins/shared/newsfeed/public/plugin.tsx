@@ -8,10 +8,11 @@
  */
 
 import * as Rx from 'rxjs';
-import { catchError, takeUntil } from 'rxjs';
+import { catchError, shareReplay, takeUntil } from 'rxjs';
 import React from 'react';
 import moment from 'moment';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import type { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import type { NewsfeedApi } from './lib/api';
@@ -28,6 +29,7 @@ export class NewsfeedPublicPlugin
   private readonly kibanaVersion: string;
   private readonly config: NewsfeedPluginBrowserConfig;
   private readonly stop$ = new Rx.ReplaySubject<void>(1);
+  private newsfeedApi?: NewsfeedApi;
 
   constructor(initializerContext: PluginInitializerContext<NewsfeedPluginBrowserConfig>) {
     this.isServerless = initializerContext.env.packageInfo.buildFlavor === 'serverless';
@@ -41,7 +43,36 @@ export class NewsfeedPublicPlugin
     });
   }
 
-  public setup(_core: CoreSetup) {
+  public setup(core: CoreSetup) {
+    // loadComponent is defined once here so its identity is stable — core uses it as a WeakMap
+    // key for the lazy-component cache.
+    const loadComponent = async () => {
+      const [{ NewsfeedSidebar }, [coreStart]] = await Promise.all([
+        import('./sidebar/newsfeed_sidebar'),
+        core.getStartServices(),
+      ]);
+
+      // getStartServices() resolves only after start() returns, so the API is assigned by now.
+      const newsfeedApi = this.newsfeedApi!;
+      const { isServerless } = this;
+      const { hasCustomBranding$ } = coreStart.customBranding;
+
+      return (props: SidebarComponentProps) => (
+        <NewsfeedSidebar
+          {...props}
+          newsfeedApi={newsfeedApi}
+          isServerless={isServerless}
+          hasCustomBranding$={hasCustomBranding$}
+        />
+      );
+    };
+
+    core.chrome.sidebar.registerApp({
+      appId: 'newsfeed',
+      restoreOnReload: false,
+      loadComponent,
+    });
+
     return {};
   }
 
@@ -50,15 +81,24 @@ export class NewsfeedPublicPlugin
 
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
 
-    registerNewsfeedHandler({ core, api, isServerless: this.isServerless });
+    // The source fetches at most once per fetchInterval, so a second cold subscription would
+    // never emit. The nav button, help menu, and sidebar share one subscription instead, and
+    // late subscribers replay the last result.
+    const sharedApi: NewsfeedApi = {
+      ...api,
+      fetchResults$: api.fetchResults$.pipe(shareReplay({ bufferSize: 1, refCount: false })),
+    };
+    this.newsfeedApi = sharedApi;
+
+    registerNewsfeedHandler({ core, api: sharedApi, isServerless: this.isServerless });
 
     core.chrome.navControls.registerRight({
       order: 1000,
       content: (
         <NewsfeedNavButton
-          newsfeedApi={api}
-          hasCustomBranding$={core.customBranding.hasCustomBranding$}
+          newsfeedApi={sharedApi}
           isServerless={this.isServerless}
+          sidebar={core.chrome.sidebar}
         />
       ),
     });

@@ -10,6 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import type { CoreStart } from '@kbn/core/public';
+import type { SidebarStart } from '@kbn/core-chrome-sidebar';
 import { registerNewsfeedHandler } from './register_newsfeed_handler';
 import type { NewsfeedApi } from './lib/api';
 import type { FetchResult } from './types';
@@ -36,18 +37,23 @@ describe('registerNewsfeedHandler', () => {
   it('registers a chrome newsfeed handler and returns its cleanup callback', () => {
     const unregister = jest.fn();
     const registerNewsfeedHandlerMock = jest.fn().mockReturnValue(unregister);
-    const openSystemFlyout = jest.fn().mockReturnValue({ close: jest.fn() });
+    const sidebarOpen = jest.fn();
     const fetchResults$ = new BehaviorSubject<FetchResult | null | void>(createFetchResult());
     const markAsRead = jest.fn();
     const api: NewsfeedApi = { fetchResults$, markAsRead };
+
+    const sidebar = {
+      getCurrentAppId: () => null,
+      getCurrentAppId$: () => new BehaviorSubject(null),
+      getApp: jest.fn().mockReturnValue({ open: sidebarOpen, close: jest.fn() }),
+    } as unknown as SidebarStart;
+
     const core = {
       chrome: {
         next: {
           registerNewsfeedHandler: registerNewsfeedHandlerMock,
         },
-      },
-      overlays: {
-        openSystemFlyout,
+        sidebar,
       },
     } as unknown as CoreStart;
 
@@ -65,7 +71,7 @@ describe('registerNewsfeedHandler', () => {
     open();
 
     expect(markAsRead).toHaveBeenCalledWith(['test-hash-1']);
-    expect(openSystemFlyout).toHaveBeenCalledWith(expect.anything(), { size: 's' });
+    expect(sidebarOpen).toHaveBeenCalledTimes(1);
 
     subscription.unsubscribe();
   });

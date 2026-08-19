@@ -11,6 +11,8 @@
     "@kbn/i18n",
     "@kbn/utility-types",
     "@kbn/config-schema",
+    "@kbn/core-chrome-sidebar",
+    "@kbn/core-chrome-sidebar-components",
   ],
   "exclude": [
     "target/**/*",
