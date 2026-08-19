@@ -233,7 +233,49 @@ describe('eventsWriteHandler', () => {
         expect(result.skipped).toBe(true);
       }
       expect(eventClient.bulkCreate).not.toHaveBeenCalled();
-      expect(eventClient.findByEventId).not.toHaveBeenCalled();
+      expect(eventClient.findByEventId).toHaveBeenCalledWith('checkout-stable');
+    });
+
+    it('writes when an unchanged snapshot adds a detection rule not present in its history', async () => {
+      const ruleOne: SignalEntry = {
+        type: 'detection',
+        stream_name: 'logs.checkout',
+        description: 'Rule one detected an issue',
+        verdict: 'confirms',
+        metadata: { detection_id: 'det-rule-1', rule_uuid: 'rule-1' },
+      };
+      const ruleTwo: SignalEntry = {
+        type: 'detection',
+        stream_name: 'logs.checkout',
+        description: 'Rule two detected an issue',
+        verdict: 'confirms',
+        metadata: { detection_id: 'det-rule-2', rule_uuid: 'rule-2' },
+      };
+      const stored = makeStoredEvent('checkout-stable', {
+        signals: [ruleOne],
+      });
+      const eventClient = makeEventClient({
+        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', stored]])),
+        findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
+        bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
+      });
+
+      const result = await eventsWriteHandler({
+        eventClient,
+        input: {
+          ...baseInput,
+          event_id: 'checkout-stable',
+          status: 'open',
+          severity: '60-high',
+          signals: [ruleTwo],
+        },
+      });
+
+      expect(result.written).toBe(true);
+      expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(eventClient.bulkCreate.mock.calls[0][0][0].signals).toEqual(
+        expect.arrayContaining([ruleOne, ruleTwo])
+      );
     });
 
     it('throws when the bulk result is existing_active_event (wrapper does not swallow skips)', async () => {
@@ -962,7 +1004,7 @@ describe('eventsWriteBulkHandler — continuation status', () => {
       event_id: 'checkout-stable',
     });
     expect(eventClient.bulkCreate).not.toHaveBeenCalled();
-    expect(eventClient.findByEventId).not.toHaveBeenCalled();
+    expect(eventClient.findByEventId).toHaveBeenCalledWith('checkout-stable');
   });
 
   it.each<[string, Partial<EventsWriteInput>, SignificantEvent['status']]>([

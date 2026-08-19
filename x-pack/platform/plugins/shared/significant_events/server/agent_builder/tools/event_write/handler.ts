@@ -137,17 +137,26 @@ export const makeIdentity = ({
 
 /**
  * Returns true when the latest stored version for this event_id has the same severity and status
- * as the candidate — indicating this snapshot would produce a pure-churn duplicate.
+ * as the candidate and the candidate introduces no new detection rules — indicating this snapshot
+ * would produce a pure-churn duplicate.
  * Must not call any esClient or eventClient method.
  */
 const shouldSkipAsNoOp = (
   latestEvent: SignificantEvent | undefined,
-  candidate: WriteCandidate
+  candidate: WriteCandidate,
+  priorDocs: SignificantEvent[]
 ): boolean => {
   if (latestEvent === undefined) return false;
+
+  const priorRuleUuids = new Set(priorDocs.flatMap((event) => extractRuleUuids(event.signals)));
+  const addsRule = extractRuleUuids(candidate.input.signals).some(
+    (ruleUuid) => !priorRuleUuids.has(ruleUuid)
+  );
+
   return (
     latestEvent.status === candidate.input.status &&
-    latestEvent.severity === candidate.input.severity
+    latestEvent.severity === candidate.input.severity &&
+    !addsRule
   );
 };
 
@@ -429,7 +438,7 @@ const fetchLatestByEventId = async (
   return eventClient.findLatestByEventIds(explicitIds);
 };
 
-/** Full history for remaining continuation writes (lineage merge). */
+/** Full history for continuation no-op evaluation and lineage merge. */
 const fetchPriorDocsByEventId = async (
   eventClient: EventClient,
   candidates: WriteCandidate[]
@@ -554,11 +563,15 @@ export async function eventsWriteBulkHandler({
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
   const latestByEventId = await fetchLatestByEventId(eventClient, toWrite);
-  // No-op filter uses latest + input only — skip full-history reads for unchanged snapshots.
+  const priorDocsByEventId = await fetchPriorDocsByEventId(eventClient, toWrite);
   const remaining = toWrite.filter((candidate) => {
     if (
       candidate.mode === 'snapshot' &&
-      shouldSkipAsNoOp(latestByEventId.get(candidate.eventId), candidate)
+      shouldSkipAsNoOp(
+        latestByEventId.get(candidate.eventId),
+        candidate,
+        priorDocsByEventId.get(candidate.eventId) ?? []
+      )
     ) {
       results[candidate.index] = {
         index: candidate.index,
@@ -577,7 +590,6 @@ export async function eventsWriteBulkHandler({
     return alignResults(results, 'Event bulk results were not aligned');
   }
 
-  const priorDocsByEventId = await fetchPriorDocsByEventId(eventClient, remaining);
   const pendingToWrite = remaining.map((candidate) =>
     buildPendingWrite(candidate, timestamp, latestByEventId, priorDocsByEventId)
   );
