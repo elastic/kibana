@@ -13,8 +13,11 @@ import {
   createDispatcherPipelineInput,
   createDispatcherPipelineState,
   createRule,
+  createStepLogger,
 } from '../fixtures/test_utils';
 import type { ActiveMaintenanceWindow } from '../../services/maintenance_window_service/types';
+
+const logger = createStepLogger();
 
 const buildMw = (overrides: Partial<ActiveMaintenanceWindow> = {}): ActiveMaintenanceWindow => ({
   id: 'mw-1',
@@ -40,7 +43,7 @@ describe('ApplyMaintenanceWindowStep', () => {
   it('returns continue with no data when there are no dispatchable episodes', async () => {
     const state = createDispatcherPipelineState({ dispatchable: [] });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
     expect(service.getEnabledMaintenanceWindows).not.toHaveBeenCalled();
@@ -54,7 +57,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       rules: new Map([['rule-1', createRule()]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
   });
@@ -68,7 +71,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
   });
@@ -83,7 +86,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
     expect(result.data?.dispatchable).toHaveLength(0);
@@ -102,7 +105,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
   });
@@ -124,7 +127,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
     expect(result.data?.suppressed).toHaveLength(1);
@@ -147,7 +150,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       rules: new Map([[ep.rule_id!, createRule({ id: ep.rule_id!, spaceId: 'default' })]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'continue' });
   });
@@ -171,7 +174,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
     expect(result.data?.suppressed?.[0]).toEqual(
@@ -192,7 +195,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     // Internal episodes with a deleted rule bypass MW; evaluate_matchers will skip them.
     expect(result).toEqual({ type: 'continue' });
@@ -212,7 +215,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       suppressed: [previouslySuppressed],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
     expect(result.data?.suppressed).toHaveLength(2);
@@ -232,7 +235,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       suppressed: [],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     if (result.type !== 'continue') throw new Error('expected continue');
     expect(result.data?.suppressed).toHaveLength(1);
@@ -250,7 +253,7 @@ describe('ApplyMaintenanceWindowStep', () => {
       rules: new Map([['rule-1', createRule()]]),
     });
 
-    await step.execute(state);
+    await step.execute(state, logger);
 
     expect(service.getEnabledMaintenanceWindows).toHaveBeenCalledWith();
   });
@@ -271,7 +274,7 @@ describe('ApplyMaintenanceWindowStep', () => {
         suppressed: [],
       });
 
-      const result = await step.execute(state);
+      const result = await step.execute(state, logger);
 
       if (result.type !== 'continue') throw new Error('expected continue');
       expect(result.data?.dispatchable).toHaveLength(0);
@@ -295,7 +298,7 @@ describe('ApplyMaintenanceWindowStep', () => {
         rules: new Map(),
       });
 
-      const result = await step.execute(state);
+      const result = await step.execute(state, logger);
 
       expect(result).toEqual({ type: 'continue' });
     });
@@ -321,7 +324,7 @@ describe('ApplyMaintenanceWindowStep', () => {
         suppressed: [],
       });
 
-      const result = await step.execute(state);
+      const result = await step.execute(state, logger);
 
       if (result.type !== 'continue') throw new Error('expected continue');
       expect(result.data?.dispatchable).toHaveLength(0);
@@ -351,7 +354,7 @@ describe('ApplyMaintenanceWindowStep', () => {
         rules: new Map(),
       });
 
-      const result = await step.execute(state);
+      const result = await step.execute(state, logger);
 
       expect(result).toEqual({ type: 'continue' });
     });

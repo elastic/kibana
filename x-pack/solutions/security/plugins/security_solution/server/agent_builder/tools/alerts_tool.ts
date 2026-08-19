@@ -119,5 +119,12 @@ export const alertsTool = (
       return { results };
     },
     tags: ['security', 'alerts'],
+    annotations: {
+      title: 'Get Security Alerts',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
   };
 };
