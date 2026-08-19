@@ -25,7 +25,7 @@ import { ValidationSection } from './validation_section';
 import { PipelineIndicator } from './vendored/pipeline_indicator';
 import { StepAccordion } from './vendored/step_accordion';
 import type { AttackDiscoveryWorkerConfig } from './types';
-import { DEFAULT_AD_WORKER_CONFIG } from './types';
+import { DEFAULT_AD_WORKER_CONFIG, toWorkerInputs } from './types';
 
 interface Props {
   onClose: () => void;
@@ -126,7 +126,7 @@ export const AdWorkerConfigFlyout: React.FC<Props> = ({ onClose }) => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiCodeBlock language="json" isCopyable data-test-subj="adWorkerConfigPreview">
-          {JSON.stringify(config, null, 2)}
+          {JSON.stringify(toWorkerInputs(config), null, 2)}
         </EuiCodeBlock>
       </EuiFlyoutBody>
 

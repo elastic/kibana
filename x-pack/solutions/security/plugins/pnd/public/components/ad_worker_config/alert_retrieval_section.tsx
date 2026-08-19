@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import {
-  EuiCallOut,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,12 +14,12 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiSwitch,
-  EuiTextArea,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
+import { ESQL_LANG_ID } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import type { AttackDiscoveryWorkerConfig } from './types';
-import { QueryModeSelector } from './vendored/query_mode_selector';
 import { useAdWorkflows } from './use_ad_workflows';
 
 interface Props {
@@ -52,62 +51,51 @@ export const AlertRetrievalSection: React.FC<Props> = ({ value, onChange }) => {
 
   return (
     <>
-      {/* "Alert retrieval method" — switch button that can be enabled/disabled, with an info icon. */}
+      {/* "ES|QL query" switch (enable/disable) with an info icon. */}
       <EuiSwitch
-        data-test-subj="adWorkerDefaultRetrievalSwitch"
-        checked={value.default_retrieval_enabled}
-        onChange={(e) => onChange({ default_retrieval_enabled: e.target.checked })}
+        data-test-subj="adWorkerEsqlSwitch"
+        checked={value.esql_enabled}
+        onChange={(e) => onChange({ esql_enabled: e.target.checked })}
         label={
           <SwitchLabel
-            label={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.methodLabel', {
-              defaultMessage: 'Alert retrieval method',
+            label={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.esqlSwitchLabel', {
+              defaultMessage: 'ES|QL query',
             })}
-            tooltip={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.methodInfo', {
-              defaultMessage: 'Run the built-in alert retrieval. This POC uses ES|QL mode.',
+            tooltip={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.esqlSwitchInfo', {
+              defaultMessage: 'Retrieve alerts using the ES|QL query below.',
             })}
           />
         }
       />
 
-      {value.default_retrieval_enabled && (
+      {value.esql_enabled && (
         <>
           <EuiSpacer size="s" />
-          <QueryModeSelector
-            mode={value.alert_retrieval_mode}
-            onModeChange={(mode) => onChange({ alert_retrieval_mode: mode })}
-          />
-          {value.alert_retrieval_mode === 'esql' ? (
-            <EuiFormRow
-              label={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.esqlLabel', {
-                defaultMessage: 'ES|QL query',
-              })}
-              fullWidth
-            >
-              <EuiTextArea
-                fullWidth
-                rows={5}
-                data-test-subj="adWorkerEsqlQuery"
+          <EuiFormRow
+            label={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.esqlLabel', {
+              defaultMessage: 'ES|QL query',
+            })}
+            fullWidth
+          >
+            <div data-test-subj="adWorkerEsqlQuery">
+              <CodeEditor
+                languageId={ESQL_LANG_ID}
                 value={value.esql_query}
-                onChange={(event) => onChange({ esql_query: event.target.value })}
+                height={140}
+                onChange={(next) => onChange({ esql_query: next })}
+                options={{ lineNumbers: 'off', minimap: { enabled: false }, wordWrap: 'on' }}
+                aria-label={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.esqlAriaLabel', {
+                  defaultMessage: 'ES|QL query editor',
+                })}
               />
-            </EuiFormRow>
-          ) : (
-            <EuiCallOut
-              announceOnMount
-              size="s"
-              data-test-subj="adWorkerQueryBuilderPlaceholder"
-              title={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.queryBuilderPlaceholder', {
-                defaultMessage: 'Query builder mode is not included in this POC — use ES|QL mode.',
-              })}
-              iconType="info"
-            />
-          )}
+            </div>
+          </EuiFormRow>
         </>
       )}
 
       <EuiSpacer size="l" />
 
-      {/* "Alert retrieval workflows" — switch button, with an info icon. */}
+      {/* "Alert retrieval workflows" switch with an info icon. */}
       <EuiSwitch
         data-test-subj="adWorkerRetrievalWorkflowsSwitch"
         checked={value.alert_retrieval_workflows_enabled}
@@ -118,7 +106,7 @@ export const AlertRetrievalSection: React.FC<Props> = ({ value, onChange }) => {
               defaultMessage: 'Alert retrieval workflows',
             })}
             tooltip={i18n.translate('xpack.pnd.adWorkerConfig.retrieval.workflowsInfo', {
-              defaultMessage: 'Run custom retrieval workflows alongside the built-in retrieval.',
+              defaultMessage: 'Run custom retrieval workflows alongside the ES|QL retrieval.',
             })}
           />
         }

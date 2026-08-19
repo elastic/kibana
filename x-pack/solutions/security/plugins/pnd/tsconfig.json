@@ -29,6 +29,8 @@
     "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/inference-connectors",
+    "@kbn/code-editor",
+    "@kbn/monaco",
     "@kbn/logging-mocks"
   ]
 }
