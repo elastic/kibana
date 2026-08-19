@@ -62,6 +62,7 @@ jest.mock('../../app_context', () => {
       getInternalUserSOClientForSpaceId: jest.fn(),
       getExperimentalFeatures: jest.fn(),
       getCloud: jest.fn(),
+      getKibanaVersion: jest.fn(() => '1.0.0'),
     },
   };
 });
@@ -162,6 +163,44 @@ describe('createInstallation', () => {
         id: 'test-package',
         name: 'test-package',
         savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
+      });
+    });
+  });
+
+  describe('es_index_patterns', () => {
+    beforeEach(() => {
+      (appContextService.getExperimentalFeatures as jest.Mock).mockReturnValue({
+        enableOtelIntegrations: true,
+      });
+      soClient.create.mockClear();
+    });
+
+    it('stores an .otel pattern for an OTel data stream', async () => {
+      const otelPackageInfo: InstallablePackage = {
+        ...packageInfo,
+        policy_templates: [{ name: 'test-package', inputs: [{ type: 'otelcol' }] } as any],
+        data_streams: [
+          {
+            type: 'metrics',
+            dataset: 'test-package.metrics',
+            path: 'metrics',
+            title: 'metrics',
+            release: 'ga',
+            streams: [{ input: 'otelcol' } as any],
+          } as any,
+        ],
+      };
+
+      await createInstallation({
+        savedObjectsClient: soClient,
+        packageInfo: otelPackageInfo,
+        installSource: 'registry',
+        spaceId: DEFAULT_SPACE_ID,
+      });
+
+      const [, savedObject] = soClient.create.mock.calls[0];
+      expect((savedObject as Installation).es_index_patterns).toEqual({
+        metrics: 'metrics-test-package.metrics.otel-*',
       });
     });
   });

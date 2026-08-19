@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
@@ -483,6 +484,7 @@ function getAuthorizationRuleType(core: CoreSetup<FixtureStartDeps>) {
 function getValidationRuleType() {
   const paramsSchema = schema.object({
     param1: schema.string(),
+    param2: schema.maybe(schema.boolean()),
   });
   type ParamsType = TypeOf<typeof paramsSchema>;
   const result: RuleType<ParamsType, never, {}, {}, {}, 'default'> = {
@@ -502,6 +504,17 @@ function getValidationRuleType() {
     defaultActionGroupId: 'default',
     validate: {
       params: paramsSchema,
+    },
+    authorize: {
+      params: {
+        // Exercises the framework's params authorization hook: schema validation
+        // passes, but setting `param2` makes authorization throw.
+        authorize: async (params) => {
+          if (params.param2) {
+            throw Boom.forbidden('Not authorized to set param2');
+          }
+        },
+      },
     },
     async executor() {
       return { state: {} };

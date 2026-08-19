@@ -63,7 +63,11 @@ export function registerCRUDUpdate(router: EntityStorePluginRouter) {
           oasOperationObject: () => path.join(__dirname, '../examples/entities_update.yaml'),
         },
       },
-      wrapMiddlewares(async (ctx, req, res): Promise<IKibanaResponse> => {
+      wrapMiddlewares<
+        z.infer<typeof paramsSchema>,
+        z.infer<typeof querySchema>,
+        z.infer<typeof Entity>
+      >(async (ctx, req, res): Promise<IKibanaResponse> => {
         const entityStoreCtx = await ctx.entityStore;
         const { logger, crudClient } = entityStoreCtx;
 

@@ -14,6 +14,7 @@ import {
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { ToolType, isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-genai-utils/tools/utils/workflows';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -54,6 +55,12 @@ export function registerInternalToolsRoutes({
   pluginsSetup: { workflowsManagement },
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+
+  // Resolves the security plugin start contract, used by the workflow privilege helpers.
+  const getSecurity = async () => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return startDeps.security;
+  };
 
   // bulk delete tools
   router.post(
@@ -308,9 +315,19 @@ export function registerInternalToolsRoutes({
 
       const toolTypes = tools.getToolDefinitions();
 
+      // Only advertise the workflow tool type as creatable to users who can reference workflows.
+      const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+      const workflowToolsCreatable = workflowsManagement
+        ? await hasWorkflowReadPrivilege({
+            security: await getSecurity(),
+            request,
+            spaceId,
+          })
+        : false;
+
       return response.ok<GetToolTypeInfoResponse>({
         body: {
-          toolTypes: getToolTypeInfo(toolTypes),
+          toolTypes: getToolTypeInfo(toolTypes, { workflowToolsCreatable }),
         },
       });
     })
@@ -339,6 +356,16 @@ export function registerInternalToolsRoutes({
       }
 
       const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
+
+      // Listing workflows requires `workflowsManagement:read`; without it, return an empty set
+      const canRead = await hasWorkflowReadPrivilege({
+        security: await getSecurity(),
+        request,
+        spaceId: currentSpace,
+      });
+      if (!canRead) {
+        return response.ok<ListWorkflowsResponse>({ body: { results: [] } });
+      }
 
       const { results } = await workflowsManagement.management.getWorkflows(
         { page: request.query.page, size: request.query.limit, enabled: [true] },
@@ -381,6 +408,20 @@ export function registerInternalToolsRoutes({
       }
 
       const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
+
+      // Reading a workflow definition requires `workflowsManagement:read`.
+      const canRead = await hasWorkflowReadPrivilege({
+        security: await getSecurity(),
+        request,
+        spaceId: currentSpace,
+      });
+      if (!canRead) {
+        return response.forbidden({
+          body: {
+            message: `Unauthorized to read workflow '${request.params.id}'. The 'workflowsManagement' read privilege is required.`,
+          },
+        });
+      }
 
       const workflow = await workflowsManagement.management.getWorkflow(
         request.params.id,

@@ -57,7 +57,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         inputDisplay: (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={model.icon} aria-hidden={true} />
+              <EuiIcon type={model.icon} aria-hidden />
             </EuiFlexItem>
             <EuiFlexGroup
               justifyContent="spaceBetween"
@@ -83,7 +83,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         dropdownDisplay: (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={model.icon} aria-hidden={true} />
+              <EuiIcon type={model.icon} aria-hidden />
             </EuiFlexItem>
             <EuiFlexGroup
               gutterSize="xs"

@@ -134,7 +134,7 @@ export class ApmSystem {
      */
     start.application.currentAppId$.subscribe((appId) => {
       if (appId && this.apm) {
-        this.closePageLoadTransaction();
+        this.closePageLoadTransaction(appId);
         this.apm.startTransaction(appId, 'app-change', {
           managed: true,
           canReuse: true,
@@ -157,7 +157,7 @@ export class ApmSystem {
   }
 
   /* Close and clear the page load transaction */
-  private closePageLoadTransaction() {
+  private closePageLoadTransaction(appId: string) {
     if (this.pageLoadTransaction) {
       const loadCounts = this.resourceObserver.getCounts();
       this.pageLoadTransaction.addLabels({
@@ -165,6 +165,7 @@ export class ApmSystem {
         'cached-resources': loadCounts.memory,
       });
       this.resourceObserver.destroy();
+      this.pageLoadTransaction.name = `/app/${appId}`;
       this.pageLoadTransaction.end();
       this.pageLoadTransaction = undefined;
     }

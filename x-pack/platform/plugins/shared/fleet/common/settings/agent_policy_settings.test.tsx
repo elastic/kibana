@@ -33,17 +33,15 @@ describe('agent_policy_settings', () => {
   });
 
   describe('zodStringWithYamlValidation', () => {
-    it('should accept valid YAML string', () => {
-      const result = zodStringWithYamlValidation.safeParse(
+    it('should accept valid YAML string', async () => {
+      const result = await zodStringWithYamlValidation.safeParseAsync(
         'nested:\n  key1: value1\n  key2: value2'
       );
       expect(result.success).toBe(true);
     });
 
-    it('should reject invalid YAML string', () => {
-      const result = zodStringWithYamlValidation.safeParse(
-        'nested:\n  key1: value1\n  key1: value2'
-      );
+    it('should reject invalid YAML string', async () => {
+      const result = await zodStringWithYamlValidation.safeParseAsync('invalidyaml: [unclosed');
       expect(result.success).toBe(false);
     });
   });

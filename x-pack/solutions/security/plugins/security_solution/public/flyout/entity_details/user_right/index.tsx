@@ -17,11 +17,8 @@ import { buildEuidCspPreviewOptions } from '../../../cloud_security_posture/util
 import { buildUserNamesFilter, type RiskSeverity } from '../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../common/lib/kibana';
 import { useNonClosedAlerts } from '../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { useRefetchQueryById } from '../../../entity_analytics/api/hooks/use_refetch_query_by_id';
-import type { Refetch } from '../../../common/types';
-import { RISK_INPUTS_TAB_QUERY_ID } from '../../../entity_analytics/components/entity_details_flyout/tabs/risk_inputs/risk_inputs_tab';
-import { useCalculateEntityRiskScore } from '../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
+import { useEntityRiskScoreRecalculation } from '../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
 import { ManagedUserDatasetKey } from '../../../../common/search_strategy/security_solution/users/managed_details';
 import { useManagedUser } from '../shared/hooks/use_managed_user';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
@@ -149,26 +146,28 @@ export const UserPanel = memo(function UserPanel({
     skip: entityStoreV2Enabled && !!observedUser?.entityRecord,
   });
 
-  const { inspect, refetch, loading } = riskScoreState;
+  const { inspect, loading } = riskScoreState;
   const managedUser = useManagedUser();
 
   const { data: userRisk } = riskScoreState;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
 
-  const refetchRiskInputsTab = useRefetchQueryById(RISK_INPUTS_TAB_QUERY_ID);
-  const refetchRiskScore = useCallback(() => {
-    refetch();
-    (refetchRiskInputsTab as Refetch | null)?.();
-  }, [refetch, refetchRiskInputsTab]);
+  const { entityRiskScores, recalculatingScore, calculateEntityRiskScore } =
+    useEntityRiskScoreRecalculation({
+      entityType: EntityType.user,
+      identifier: userName,
+      entityId: entityStoreV2Enabled ? observedUser.entityRecord?.entity?.id : undefined,
+      entityStoreV2Enabled,
+      entityFromStoreResult,
+      riskScoreState,
+    });
 
-  const { isLoading: recalculatingScore, calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    EntityType.user,
-    userName,
-    { onSuccess: refetchRiskScore }
-  );
+  const onAssetCriticalityChanged = useCallback(() => {
+    calculateEntityRiskScore();
+  }, [calculateEntityRiskScore]);
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
-    onSuccess: calculateEntityRiskScore,
+    onSuccess: onAssetCriticalityChanged,
   });
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(
@@ -195,7 +194,9 @@ export const UserPanel = memo(function UserPanel({
     inspect: useEntityStoreInspectForRisk ? entityFromStoreResult?.inspect ?? null : inspect,
     loading: useEntityStoreInspectForRisk ? entityFromStoreResult?.isLoading ?? false : loading,
     queryId: USER_PANEL_RISK_SCORE_QUERY_ID,
-    refetch: useEntityStoreInspectForRisk ? entityFromStoreResult?.refetch ?? (() => {}) : refetch,
+    refetch: useEntityStoreInspectForRisk
+      ? entityFromStoreResult?.refetch ?? (() => {})
+      : riskScoreState.refetch,
     setQuery,
   });
 
@@ -326,8 +327,9 @@ export const UserPanel = memo(function UserPanel({
           <UserPanelContent
             observedUser={observedUser}
             riskScoreState={effectiveRiskScoreState}
+            entityRiskScores={entityRiskScores}
             recalculatingScore={recalculatingScore}
-            onAssetCriticalityChange={calculateEntityRiskScore}
+            onAssetCriticalityChange={onAssetCriticalityChanged}
             contextID={safeContextID}
             scopeId={scopeId}
             openDetailsPanel={openDetailsPanel}

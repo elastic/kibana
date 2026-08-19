@@ -32,6 +32,7 @@ import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities
 import { topNavStrings } from '../_dashboard_app_strings';
 import { ShowShareModal } from './share/show_share_modal';
 import { useDashboardAddItems } from './add_menu/use_dashboard_add_items';
+import { useShareOptions } from './share/use_share_options';
 
 export const useDashboardMenuItems = ({
   isLabsShown,
@@ -52,9 +53,8 @@ export const useDashboardMenuItems = ({
 
   const dashboardApi = useDashboardApi();
 
-  const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
+  const [hasOverlays, hasUnsavedChanges, lastSavedId, viewMode, accessControl] =
     useBatchedPublishingSubjects(
-      dashboardApi.title$,
       dashboardApi.hasOverlays$,
       dashboardApi.hasUnsavedChanges$,
       dashboardApi.savedObjectId$,
@@ -159,12 +159,9 @@ export const useDashboardMenuItems = ({
 
   const addMenuItems = useDashboardAddItems({ dashboardApi });
 
-  const exportItems = useDashboardExportItems({
-    dashboardApi,
-    objectId: lastSavedId,
-    isDirty: Boolean(hasUnsavedChanges),
-    dashboardTitle,
-  });
+  const shareOptions = useShareOptions();
+
+  const exportItems = useDashboardExportItems(shareOptions);
 
   const hasExportMenuItems = exportItems.length > 0;
 
@@ -173,9 +170,7 @@ export const useDashboardMenuItems = ({
    */
   const showShare = useCallback(() => {
     ShowShareModal({
-      dashboardTitle,
-      savedObjectId: lastSavedId,
-      isDirty: Boolean(hasUnsavedChanges) && viewMode === 'edit',
+      shareOptions,
       canSave: (canManageAccessControl || isInEditAccessMode) && Boolean(hasUnsavedChanges),
       accessControl,
       createdBy: dashboardApi.createdBy,
@@ -185,9 +180,7 @@ export const useDashboardMenuItems = ({
       changeAccessMode: dashboardApi.changeAccessMode,
     });
   }, [
-    dashboardTitle,
     hasUnsavedChanges,
-    lastSavedId,
     isInEditAccessMode,
     canManageAccessControl,
     accessControl,
@@ -196,7 +189,7 @@ export const useDashboardMenuItems = ({
     dashboardApi.createdBy,
     accessControlClient,
     dashboardApi.isManaged,
-    viewMode,
+    shareOptions,
   ]);
 
   const getEditTooltip = useCallback(() => {

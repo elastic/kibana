@@ -82,3 +82,5 @@ export {
   type PipelineEditedPayload,
   type AutomaticImportTelemetryEventPayload,
 } from './telemetry/types';
+
+export { MAX_STRING_LENGTH } from './constants';

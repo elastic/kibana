@@ -12,6 +12,36 @@ require('@kbn/babel-register').install();
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
+/**
+ * FTR / Jest / Cypress test-infrastructure modules that Scout tests must never import.
+ * Keeps Scout tests decoupled from FTR core (which is being deprecated) and makes the
+ * selective-testing skip-list safe (see .buildkite/scripts/steps/test/scout/scout_ftr_modules.ts).
+ */
+const SCOUT_RESTRICTED_FTR_MODULES = [
+  '@kbn/test',
+  '@kbn/test-jest-helpers',
+  '@kbn/test-eui-helpers',
+  '@kbn/ftr-common-functional-services',
+  '@kbn/ftr-common-functional-ui-services',
+  '@kbn/ftr-screenshot-filename',
+  '@kbn/ftr-benchmarks',
+  '@kbn/cypress-test-helper',
+  '@kbn/journeys',
+  '@kbn/migrator-test-kit',
+  '@kbn/detections-response-ftr-services',
+];
+
+const scoutRestrictedFtrPaths = SCOUT_RESTRICTED_FTR_MODULES.map((name) => ({
+  name,
+  message: `Scout tests must not import '${name}' (FTR/Cypress/Jest test infrastructure). The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.`,
+}));
+
+const scoutRestrictedFtrPatterns = {
+  group: SCOUT_RESTRICTED_FTR_MODULES.map((name) => `${name}/**`),
+  message:
+    "Scout tests must not import FTR/Cypress/Jest test infrastructure. The '@kbn/scout*' packages expose all supported types and utilities that Scout tests need.",
+};
+
 const APACHE_2_0_LICENSE_HEADER = `
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -447,7 +477,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
   'x-pack/platform/test/fleet_cypress/fleet_server.ts',
   'x-pack/platform/test/fleet_multi_cluster/**/*.{js,mjs,ts,tsx}',
-  'x-pack/platform/test/ui_capabilities/common/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/packages/alerting-test-data/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/observability/packages/kbn-synthetics-forge/**/*.{js,mjs,ts,tsx}',
@@ -462,7 +491,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/security/packages/kbn-securitysolution-utils/src/axios/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/data_loaders/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
-  'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
@@ -2757,6 +2785,7 @@ module.exports = {
                 name: 'playwright',
                 message: "Platform tests should import only from '@kbn/scout'.",
               },
+              ...scoutRestrictedFtrPaths,
             ],
             patterns: [
               {
@@ -2779,6 +2808,7 @@ module.exports = {
                 message:
                   "Platform tests should import from '@kbn/scout' (and '@kbn/scout-synthtrace' if you need synthtrace).",
               },
+              scoutRestrictedFtrPatterns,
             ],
           },
         ],
@@ -2806,6 +2836,7 @@ module.exports = {
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
+              ...scoutRestrictedFtrPaths,
             ],
             patterns: [
               {
@@ -2813,6 +2844,7 @@ module.exports = {
                 message:
                   "Observability solution tests should import from '@kbn/scout-oblt' instead.",
               },
+              scoutRestrictedFtrPatterns,
             ],
           },
         ],
@@ -2837,12 +2869,14 @@ module.exports = {
                 name: 'playwright',
                 message: "Search solution tests should import from '@kbn/scout-search' instead.",
               },
+              ...scoutRestrictedFtrPaths,
             ],
             patterns: [
               {
                 group: ['@kbn/scout/**', '@playwright/test/**', 'playwright/**'],
                 message: "Search solution tests should import from '@kbn/scout-search' instead.",
               },
+              scoutRestrictedFtrPatterns,
             ],
           },
         ],
@@ -2870,6 +2904,7 @@ module.exports = {
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
+              ...scoutRestrictedFtrPaths,
             ],
             patterns: [
               {
@@ -2877,6 +2912,7 @@ module.exports = {
                 message:
                   "Security solution tests should import from '@kbn/scout-security' instead.",
               },
+              scoutRestrictedFtrPatterns,
             ],
           },
         ],
@@ -2897,6 +2933,7 @@ module.exports = {
         '@kbn/eslint/scout_test_file_naming': 'error',
         '@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests': 'error',
         '@kbn/eslint/scout_no_es_archiver_in_parallel_tests': 'error',
+        '@kbn/eslint/scout_no_core_settings_in_space_test': 'warn',
         '@kbn/eslint/scout_no_cross_boundary_imports': 'error',
         '@kbn/eslint/scout_expect_import': 'error',
         '@kbn/eslint/scout_no_deprecated_tags': 'error',
@@ -2908,9 +2945,9 @@ module.exports = {
     {
       // Platform & Solutions API Tests
       files: [
-        'src/platform/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
-        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/api/**/*.ts',
+        'src/platform/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/platform/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
+        'x-pack/solutions/**/plugins/**/test/{scout,scout_*}/**/api/**/*.ts',
       ],
       rules: {
         '@kbn/eslint/scout_require_api_client_in_api_test': [
@@ -2979,10 +3016,14 @@ module.exports = {
       // globally by RESTRICTED_IMPORTS; this allowlist should only ever shrink
       // as consumers migrate to the native `fetch` API. Placed last so it wins
       // over any earlier override that re-applies RESTRICTED_IMPORTS (e.g. the
-      // security_solution and workflows_management blocks). The trade-off: the
-      // 35 allowlisted files that overlap with those blocks lose their
-      // `*legacy*` pattern check; verified that none of them currently import
-      // any path matching `*legacy*`.
+      // security_solution block). The trade-off: the allowlisted files that
+      // overlap with that block lose their `*legacy*` pattern check; verified
+      // that none of them currently import any path matching `*legacy*`. The
+      // workflows_management overlap is gone, and this comment can be dropped
+      // entirely once the remaining security_solution consumers migrate. The
+      // js-yaml freeze is handled separately via
+      // @kbn/eslint/module_migration in packages/kbn-eslint-config/.eslintrc.js
+      // so it does not interact with this override.
       files: AXIOS_LEGACY_CONSUMERS,
       rules: {
         'no-restricted-imports': [

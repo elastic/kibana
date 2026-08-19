@@ -30,10 +30,14 @@ import type {
   IndexTemplateEntry,
   IndexTemplate,
   IndexTemplateMappings,
+  PackageInfo,
   RegistryElasticsearch,
 } from '../../../../types';
 import { appContextService } from '../../..';
-import { getRegistryDataStreamAssetBaseName } from '../../../../../common/services';
+import {
+  getRegistryDataStreamAssetBaseName,
+  dataStreamUsesOtelInput,
+} from '../../../../../common/services';
 import type { FleetConfigType } from '../../../../../common/types';
 import {
   STACK_COMPONENT_TEMPLATE_ECS_MAPPINGS,
@@ -859,6 +863,43 @@ export function generateTemplateIndexPattern(
   }
 }
 
+/**
+ * Same as `generateTemplateIndexPattern`, but pins the namespace segment to an exact match
+ * (no trailing wildcard) instead of `-*`. Used by the identity-free agentless OTel incoming-data
+ * check, which has no `agent.id` to narrow the match once the identity filter is dropped, so the
+ * pattern itself must not resolve to any namespace other than the caller's own.
+ */
+export function generateNamespaceTemplateIndexPattern(
+  dataStream: RegistryDataStream,
+  namespace: string,
+  isOtelInputType?: boolean
+): string {
+  // undefined or explicitly set to false
+  // See also https://github.com/elastic/package-spec/pull/102
+  if (!dataStream.dataset_is_prefix) {
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '-' + namespace;
+  } else {
+    return getRegistryDataStreamAssetBaseName(dataStream, isOtelInputType) + '.*-' + namespace;
+  }
+}
+
+/**
+ * Returns true if the given data stream should use the `.otel` dataset suffix: it effectively
+ * uses the OTel collector input (`dataStreamUsesOtelInput`) and the `enableOtelIntegrations`
+ * experimental feature is enabled. All pattern-producing call sites (template installation, the
+ * live incoming-data handler, and stored `es_index_patterns`) must use this same decision so they
+ * cannot diverge.
+ */
+export function isOtelDataStream(
+  dataStream: RegistryDataStream,
+  packageInfo: Pick<PackageInfo, 'policy_templates'>
+): boolean {
+  return (
+    !!appContextService.getExperimentalFeatures()?.enableOtelIntegrations &&
+    dataStreamUsesOtelInput(packageInfo, dataStream)
+  );
+}
+
 // Template priorities are discussed in https://github.com/elastic/kibana/issues/88307
 // See also https://www.elastic.co/guide/en/elasticsearch/reference/current/index-templates.html
 //
@@ -881,9 +922,12 @@ export function getTemplatePriority(dataStream: RegistryDataStream): number {
 /**
  * Returns a map of the data stream path fields to elasticsearch index pattern.
  * @param dataStreams an array of RegistryDataStream objects
+ * @param packageInfo package context used to detect OTel input data streams, which carry a
+ * `.otel` dataset suffix. Callers that omit it get unsuffixed patterns.
  */
 export function generateESIndexPatterns(
-  dataStreams: RegistryDataStream[] | undefined
+  dataStreams: RegistryDataStream[] | undefined,
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>
 ): Record<string, string> {
   if (!dataStreams) {
     return {};
@@ -891,7 +935,10 @@ export function generateESIndexPatterns(
 
   const patterns: Record<string, string> = {};
   for (const dataStream of dataStreams) {
-    patterns[dataStream.path] = generateTemplateIndexPattern(dataStream);
+    patterns[dataStream.path] = generateTemplateIndexPattern(
+      dataStream,
+      packageInfo ? isOtelDataStream(dataStream, packageInfo) : undefined
+    );
   }
   return patterns;
 }

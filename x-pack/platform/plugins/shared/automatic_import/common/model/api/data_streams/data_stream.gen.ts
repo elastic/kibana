@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { SafeIdentifier, NonEmptyString } from '../../primitive.gen';
+import { SafeIdentifier, NonEmptyIngestPipeline, NonEmptyString } from '../../primitive.gen';
 import { OriginalSource, LangSmithOptions } from '../../common_attributes.gen';
 
 export const DeleteDataStreamRequestParams = lazySchema(() =>
@@ -55,9 +55,9 @@ export const GetDataStreamResultsResponse = lazySchema(() =>
   z
     .object({
       /**
-       * The ingest pipeline as a JSON string.
+       * The ingest pipeline as a string up to 10MiB.
        */
-      ingest_pipeline: NonEmptyString,
+      ingest_pipeline: NonEmptyIngestPipeline,
       /**
        * Results array as JSON objects.
        */
@@ -208,7 +208,7 @@ export const UploadSamplesToDataStreamRequestBody = lazySchema(() =>
       /**
        * Log lines to upload when the source is a file (omit when using sourceIndex).
        */
-      samples: z.array(z.string()).max(1000).optional(),
+      samples: z.array(z.string().max(10000)).max(1000).optional(),
       /**
        * Index name to pick samples from.
        */

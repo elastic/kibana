@@ -1,5 +1,5 @@
 {
-  "sha1": "9bc13e904388c5b1310d722b6b4881ceccdc81d6",
+  "sha1": "a247337bdc6dd1ae39758cab92ce1c3f661c47df",
   "tests": [
     {
       "id": "a8dc0a71dd65d42-65fd9c357892a20",
@@ -338,7 +338,7 @@
     {
       "id": "3ff6decf4c25127-1e36b15992c9e68",
       "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -349,14 +349,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 11
       }
     },
     {
       "id": "3ff6decf4c25127-bb6c00e207d6b96",
       "title": "Workflow editor: validation performance [large_perf (87 steps, 431 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -367,14 +367,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 225,
+        "line": 224,
         "column": 11
       }
     },
     {
       "id": "3ff6decf4c25127-b92795356361dc9",
       "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] setModelMarkers cascade completes within frame budget after edit",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -385,14 +385,14 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 66,
+        "line": 65,
         "column": 11
       }
     },
     {
       "id": "3ff6decf4c25127-c189381fa89f5ce",
       "title": "Workflow editor: validation performance [infosec_demo (150 steps, 361 vars)] frame rate stays above threshold during rapid edits",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -403,7 +403,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflow_editor_perf.spec.ts",
-        "line": 225,
+        "line": 224,
         "column": 11
       }
     },
@@ -1019,8 +1019,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 50,
+        "column": 13
       }
     },
     {
@@ -1033,8 +1033,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 70,
-        "column": 7
+        "line": 73,
+        "column": 25
       }
     },
     {
@@ -1047,8 +1047,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 104,
-        "column": 7
+        "line": 108,
+        "column": 26
       }
     },
     {
@@ -1061,8 +1061,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 126,
-        "column": 7
+        "line": 130,
+        "column": 26
       }
     },
     {
@@ -1075,8 +1075,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 154,
-        "column": 7
+        "line": 158,
+        "column": 26
       }
     },
     {
@@ -1089,8 +1089,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 183,
-        "column": 7
+        "line": 185,
+        "column": 13
       }
     },
     {
@@ -1103,8 +1103,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 198,
-        "column": 7
+        "line": 202,
+        "column": 9
       }
     },
     {
@@ -1117,8 +1117,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 226,
-        "column": 7
+        "line": 228,
+        "column": 23
       }
     },
     {
@@ -1131,8 +1131,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/parallel_tests/workflows_list/import_export.spec.ts",
-        "line": 247,
-        "column": 7
+        "line": 251,
+        "column": 23
       }
     },
     {

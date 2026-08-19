@@ -33,6 +33,14 @@ export const EnrollmentAPIKeySchema = schema.object(
       })
     ),
     created_at: schema.string(),
+    expire_at: schema.maybe(
+      schema.string({
+        meta: {
+          description:
+            'The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.',
+        },
+      })
+    ),
     hidden: schema.maybe(schema.boolean()),
   },
   { meta: { id: 'enrollment_api_key' } }

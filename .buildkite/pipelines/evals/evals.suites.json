@@ -95,8 +95,13 @@
       "name": "Security AI Rules",
       "slackChannel": "#security-detection-engine-alerts",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/playwright.config.ts",
-      "tags": ["security", "ai-rules"],
-      "ciLabels": ["evals:security-ai-rules"]
+      "tags": [
+        "security",
+        "ai-rules"
+      ],
+      "ciLabels": [
+        "evals:security-ai-rules"
+      ]
     },
     {
       "id": "endpoint",
@@ -155,8 +160,13 @@
       "id": "workflows",
       "name": "Workflows Authoring",
       "configPath": "src/platform/packages/shared/kbn-evals-suite-workflows/playwright.config.ts",
-      "tags": ["platform", "workflows"],
-      "ciLabels": ["evals:workflows"],
+      "tags": [
+        "platform",
+        "workflows"
+      ],
+      "ciLabels": [
+        "evals:workflows"
+      ],
       "serverConfigSet": "evals_workflows"
     }
   ]

@@ -64,6 +64,7 @@ steps:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
       SCOUT_CONFIGS_DEPS: 'build_scout_tests,build'
       SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
         - exit_status: '*'
@@ -110,7 +111,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 110
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -435,7 +436,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 110
+      diskSizeGb: 120
       preemptible: true
     depends_on:
       - build
@@ -484,6 +485,8 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
+    env:
+      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -502,6 +505,8 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: 'Defend Workflows Cypress Tests on Serverless'
+    env:
+      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod

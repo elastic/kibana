@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import yaml from 'js-yaml';
+import { parse as yamlParse } from 'yaml';
 import { CreateTemplateInputSchema } from '../../../../common/types/domain/template/v1';
 import { INTERNAL_TEMPLATES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -34,7 +34,7 @@ export const postTemplateRoute = createCasesRoute({
 
       // Validate YAML definition can be parsed
       try {
-        yaml.load(input.definition);
+        yamlParse(input.definition);
       } catch (yamlError) {
         return response.badRequest({
           body: { message: `Invalid YAML definition: ${yamlError}` },

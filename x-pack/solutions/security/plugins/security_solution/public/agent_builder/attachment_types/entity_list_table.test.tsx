@@ -84,6 +84,41 @@ describe('EntityListTable', () => {
     expect(screen.getByText('bob')).toBeInTheDocument();
   });
 
+  describe('Source column', () => {
+    // `entity.source` is a `keyword` field: Elasticsearch returns a bare string
+    // for a single value and an array only for multiple. Before normalization a
+    // single-value source would flow into the badge list as a raw string and
+    // could crash the render, so cover both shapes here.
+    it('renders a single data source when entity.source is a bare string', () => {
+      renderTable([
+        {
+          entity_type: 'host',
+          entity_id: 'host:web-01@default',
+          entity_name: 'web-01',
+          source: 'crowdstrike',
+        },
+      ]);
+
+      expect(screen.getByText('Crowdstrike')).toBeInTheDocument();
+      // Only one value, so no `+N` overflow badge.
+      expect(screen.queryByText('+1')).not.toBeInTheDocument();
+    });
+
+    it('renders the first data source inline and collapses the rest into an overflow badge when entity.source is an array', () => {
+      renderTable([
+        {
+          entity_type: 'host',
+          entity_id: 'host:web-01@default',
+          entity_name: 'web-01',
+          source: ['crowdstrike', 'island_browser'],
+        },
+      ]);
+
+      expect(screen.getByText('Crowdstrike')).toBeInTheDocument();
+      expect(screen.getByText('+1')).toBeInTheDocument();
+    });
+  });
+
   describe('Name-column Open entity in Entity Analytics button', () => {
     it('opens the flyout with the HostPanelKey payload for host rows with an entity id', () => {
       const { application } = renderTable([

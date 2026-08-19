@@ -50,6 +50,7 @@ import { EndpointExceptionsForm } from './endpoint_exceptions_form';
 import { EndpointExceptionsApiClient } from '../../service/api_client';
 import { ENDPOINT_EXCEPTIONS_PAGE_LABELS, getCreationErrorMessage } from '../../translations';
 import { useAlertsPrivileges } from '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { prepareEndpointExceptionItemsForBulkClose } from '../utils/prepare_endpoint_exception_items_for_bulk_close';
 
 export type EndpointExceptionsFlyoutProps = Pick<
   AddExceptionFlyoutProps,
@@ -147,7 +148,8 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
       });
 
       if (closeAlerts != null && shouldCloseAlerts && addedExceptions) {
-        await closeAlerts(ruleStaticIds, addedExceptions, alertIdToClose, bulkCloseIndex);
+        const exceptionsForBulkClose = prepareEndpointExceptionItemsForBulkClose(addedExceptions);
+        await closeAlerts(ruleStaticIds, exceptionsForBulkClose, alertIdToClose, bulkCloseIndex);
       }
 
       toasts.addSuccess(
