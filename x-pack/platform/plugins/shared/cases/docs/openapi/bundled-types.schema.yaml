@@ -370,7 +370,7 @@ paths:
                       $ref: '#/components/schemas/templates'
                     workflowTags:
                       type: array
-                      description: Workflow tags that are prioritized in Cases workflow selectors.
+                      description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
                       maxItems: 100
                       items:
                         type: string
@@ -563,7 +563,7 @@ paths:
                     $ref: '#/components/schemas/templates'
                   workflowTags:
                     type: array
-                    description: Workflow tags that are prioritized in Cases workflow selectors.
+                    description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
                     maxItems: 100
                     items:
                       type: string
@@ -758,7 +758,7 @@ paths:
                     $ref: '#/components/schemas/templates'
                   workflowTags:
                     type: array
-                    description: Workflow tags that are prioritized in Cases workflow selectors.
+                    description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
                     maxItems: 100
                     items:
                       type: string
@@ -3416,7 +3416,7 @@ components:
           $ref: '#/components/schemas/templates'
         workflowTags:
           type: array
-          description: Workflow tags that are prioritized in Cases workflow selectors.
+          description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
           maxItems: 100
           items:
             type: string
@@ -3497,7 +3497,7 @@ components:
           $ref: '#/components/schemas/templates'
         workflowTags:
           type: array
-          description: Workflow tags that are prioritized in Cases workflow selectors.
+          description: Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
           maxItems: 100
           items:
             type: string

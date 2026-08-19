@@ -1048,7 +1048,7 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
     owner: Owner,
     templates: Templates.optional(),
     /**
-     * Workflow tags that are prioritized in Cases workflow selectors.
+     * Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
      */
     workflowTags: z.array(z.string().min(1).max(256)).max(100).optional(),
   })
@@ -1116,7 +1116,7 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       .optional(),
     templates: Templates.optional(),
     /**
-     * Workflow tags that are prioritized in Cases workflow selectors.
+     * Workflow tags used to filter Cases workflow selectors. An empty array shows all workflows.
      */
     workflowTags: z.array(z.string().min(1).max(256)).max(100).optional(),
     /**

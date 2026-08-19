@@ -47,6 +47,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
     closeModal: closeRunWorkflowModal,
     inputs: workflowInputs,
     executionContext: workflowExecutionContext,
+    filterWorkflow: workflowFilterWorkflow,
     sortWorkflow: workflowSortWorkflow,
   } = useRunCaseWorkflow({ caseData });
 
@@ -166,6 +167,7 @@ const ActionsComponent: React.FC<CaseViewActions> = ({ caseData, currentExternal
         <RunCaseWorkflowModal
           inputs={workflowInputs}
           executionContext={workflowExecutionContext}
+          filterWorkflow={workflowFilterWorkflow}
           sortWorkflow={workflowSortWorkflow}
           onClose={closeRunWorkflowModal}
         />

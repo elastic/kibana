@@ -90,7 +90,7 @@ export const WORKFLOW_TAGS_DESCRIPTION = i18n.translate(
   'xpack.cases.configureCases.workflowTags.description',
   {
     defaultMessage:
-      'Workflows with any of these exact, case-sensitive tags appear first when selecting a workflow from Cases.',
+      'Only workflows with any of these exact, case-sensitive tags are shown when selecting a workflow from Cases. Leave empty to show all workflows.',
   }
 );
 

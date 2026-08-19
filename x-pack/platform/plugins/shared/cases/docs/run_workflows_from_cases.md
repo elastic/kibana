@@ -549,15 +549,14 @@ security_solution/.../use_run_document_workflow_panel.test.tsx  [TRIMMED — sam
 
 | Phase | Description | Status |
 |---|---|---|
-| Phase 4 | Workflow tag ranking case setting (`workflowTags: string[]` in case config) | Implemented |
+| Phase 4 | Workflow tag filtering case setting (`workflowTags: string[]` in case config) | Implemented |
 | Phase 5 | Activity log entry (`workflow` user action type) | Implemented |
 | Phase 6 | EBT telemetry (`CASE_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE`) | Not started |
 | — | Compute real `schemaHash` for `cases.observablesAdded` in the approval fixture | Needs server run + @elastic/workflows-eng review |
 | — | Implement generic indexed `executionContext` + modular context registry | Implemented |
 
 The workflow tag setting is owner- and space-scoped and defaults to `Cases`. Workflows that match
-any configured tag are ranked ahead of other workflows; untagged workflows remain available. The
-shared selector applies this ranking before its client-side name search, so matching tagged
-workflows remain first in filtered search results. Tag matching is exact and case-sensitive, and an
-explicitly empty setting disables tag-based ranking while preserving trigger-based ranking.
+any configured tag are available in the top-level case workflow selector; workflows without a
+matching tag are hidden. Tag matching is exact and case-sensitive. An explicitly empty setting
+disables tag filtering and shows all workflows.
 | — | Register Cases context types and use specific origin factories from manual entry points | Implemented |

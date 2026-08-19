@@ -131,7 +131,7 @@ export const ConfigurationBasicWithoutOwnerRt = rt.strict({
    */
   observableTypes: ObservableTypesConfigurationRt,
   /**
-   * Tags used to prioritize workflows in Cases
+   * Tags used to filter workflows in Cases
    */
   workflowTags: WorkflowTagsConfigurationRt,
 });

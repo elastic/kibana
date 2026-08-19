@@ -7,7 +7,7 @@
 
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { CaseCreatedTriggerId } from '../../../common/workflows/triggers';
-import { createCaseWorkflowComparator } from './use_run_case_workflow';
+import { createCaseWorkflowComparator, createCaseWorkflowFilter } from './use_run_case_workflow';
 
 const createWorkflow = ({
   id,
@@ -34,6 +34,41 @@ const createWorkflow = ({
     steps: [],
     triggers: triggerTypes.map((type) => ({ type })),
   } as WorkflowListItemDto['definition'],
+});
+
+describe('createCaseWorkflowFilter', () => {
+  it('only includes workflows matching any configured tag', () => {
+    const workflows = [
+      createWorkflow({ id: 'untagged' }),
+      createWorkflow({ id: 'cases', tags: ['Cases'] }),
+      createWorkflow({ id: 'operations', tags: ['Operations'] }),
+      createWorkflow({ id: 'other', tags: ['Other'] }),
+    ];
+
+    expect(
+      workflows.filter(createCaseWorkflowFilter(['Cases', 'Operations'])).map(({ id }) => id)
+    ).toEqual(['cases', 'operations']);
+  });
+
+  it('matches configured tags exactly and case-sensitively', () => {
+    const workflows = [
+      createWorkflow({ id: 'exact', tags: ['Cases'] }),
+      createWorkflow({ id: 'different-case', tags: ['cases'] }),
+    ];
+
+    expect(workflows.filter(createCaseWorkflowFilter(['Cases'])).map(({ id }) => id)).toEqual([
+      'exact',
+    ]);
+  });
+
+  it('includes all workflows when no tags are configured', () => {
+    const workflows = [
+      createWorkflow({ id: 'untagged' }),
+      createWorkflow({ id: 'tagged', tags: ['Cases'] }),
+    ];
+
+    expect(workflows.filter(createCaseWorkflowFilter([]))).toEqual(workflows);
+  });
 });
 
 describe('createCaseWorkflowComparator', () => {

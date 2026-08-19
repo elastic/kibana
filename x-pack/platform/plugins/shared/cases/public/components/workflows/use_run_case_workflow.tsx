@@ -37,6 +37,15 @@ const CASE_TRIGGER_TYPES = new Set([
   ObservablesAddedTriggerId,
 ]);
 
+/** Creates a predicate that keeps workflows matching any configured tag. */
+export const createCaseWorkflowFilter = (workflowTags: readonly string[]) => {
+  const configuredTags = new Set(workflowTags);
+
+  return (workflow: WorkflowListItemDto): boolean =>
+    configuredTags.size === 0 ||
+    (workflow.definition?.tags ?? []).some((tag) => configuredTags.has(tag));
+};
+
 /** Creates a comparator that prioritizes configured tags, then context-relevant triggers. */
 export const createCaseWorkflowComparator = (
   workflowTags: readonly string[],
@@ -83,6 +92,8 @@ interface UseRunCaseWorkflowResult {
   inputs: Record<string, unknown>;
   /** Stable correlation context shared by every workflow run from this case. */
   executionContext: CaseWorkflowExecutionContext;
+  /** Predicate that limits the selector to workflows matching the configured tags. */
+  filterWorkflow: (workflow: WorkflowListItemDto) => boolean;
   /** Comparator that floats configured tags, then `cases.*` workflows, to the top. */
   sortWorkflow: (a: WorkflowListItemDto, b: WorkflowListItemDto) => number;
   workflowTags: string[];
@@ -122,6 +133,7 @@ export const useRunCaseWorkflow = ({
     () => createCaseWorkflowExecutionContext(caseData.id),
     [caseData.id]
   );
+  const filterWorkflow = useMemo(() => createCaseWorkflowFilter(workflowTags), [workflowTags]);
   const sortWorkflow = useMemo(() => createCaseWorkflowComparator(workflowTags), [workflowTags]);
 
   return {
@@ -131,6 +143,7 @@ export const useRunCaseWorkflow = ({
     closeModal,
     inputs,
     executionContext,
+    filterWorkflow,
     sortWorkflow,
     workflowTags,
   };
