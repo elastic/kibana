@@ -266,4 +266,35 @@ describe('computePairedTTestResults', () => {
 
     expect(result.higherIsBetter).toBe(false);
   });
+
+  it('uses metadata over the name heuristic for Error handling quality', () => {
+    // Legacy regex matches "Error" and would treat this as lower-is-better.
+    const scoresA = [
+      createMockScore({
+        evaluatorName: 'Error handling quality',
+        score: 0.4,
+        higherIsBetter: true,
+      }),
+    ];
+    const scoresB = [
+      createMockScore({
+        evaluatorName: 'Error handling quality',
+        score: 0.8,
+        higherIsBetter: true,
+      }),
+    ];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.higherIsBetter).toBe(true);
+  });
+
+  it('legacy name heuristic misclassifies Error handling quality when metadata is absent', () => {
+    const [result] = computePairedTTestResults(
+      [createMockScore({ evaluatorName: 'Error handling quality', score: 0.4 })],
+      [createMockScore({ evaluatorName: 'Error handling quality', score: 0.8 })]
+    );
+
+    expect(result.higherIsBetter).toBe(false);
+  });
 });

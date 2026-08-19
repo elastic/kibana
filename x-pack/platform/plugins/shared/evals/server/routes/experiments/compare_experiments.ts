@@ -29,6 +29,7 @@ const COMPARE_SOURCE_FIELDS = [
   'example.id',
   'evaluator.name',
   'evaluator.score',
+  'evaluator.higher_is_better',
   'task.repetition_index',
 ];
 

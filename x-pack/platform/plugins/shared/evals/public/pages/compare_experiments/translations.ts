@@ -35,11 +35,11 @@ export const COLUMN_SAMPLE_SIZE = i18n.translate(
 );
 
 export const COLUMN_MEAN_A = i18n.translate('xpack.evals.compareExperiments.columns.meanA', {
-  defaultMessage: 'Mean A',
+  defaultMessage: 'Mean baseline',
 });
 
 export const COLUMN_MEAN_B = i18n.translate('xpack.evals.compareExperiments.columns.meanB', {
-  defaultMessage: 'Mean B',
+  defaultMessage: 'Mean target',
 });
 
 export const COLUMN_DIFF = i18n.translate('xpack.evals.compareExperiments.columns.diff', {
@@ -152,14 +152,14 @@ export const FLYOUT_COLUMN_EXAMPLE = i18n.translate(
 export const FLYOUT_COLUMN_SCORE_A = i18n.translate(
   'xpack.evals.compareExperiments.flyout.columnScoreA',
   {
-    defaultMessage: 'Score A',
+    defaultMessage: 'Score baseline',
   }
 );
 
 export const FLYOUT_COLUMN_SCORE_B = i18n.translate(
   'xpack.evals.compareExperiments.flyout.columnScoreB',
   {
-    defaultMessage: 'Score B',
+    defaultMessage: 'Score target',
   }
 );
 

@@ -116,6 +116,15 @@ describe('GET /internal/evals/experiments/compare', () => {
     await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(evaluationScoreService.search).toHaveBeenCalledTimes(2);
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        _source: expect.arrayContaining([
+          'evaluator.name',
+          'evaluator.score',
+          'evaluator.higher_is_better',
+        ]),
+      })
+    );
   });
 
   it('returns 400 without querying when baseline and target are the same', async () => {
@@ -263,6 +272,36 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.results).toHaveLength(1);
     expect(response.payload.results[0].evaluatorName).toBe('Latency');
     expect(response.payload.results[0].higherIsBetter).toBe(false);
+  });
+
+  it('uses metadata over name heuristic for Error handling quality', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const sharedDataset = {
+      datasetId: 'ds-shared',
+      datasetName: 'Shared',
+      evaluatorName: 'Error handling quality',
+      higherIsBetter: true as const,
+    };
+    evaluationScoreService.search
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 0.4 }) }],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [{ _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 0.8 }) }],
+          total: { value: 1, relation: 'eq' },
+        },
+      } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results[0].evaluatorName).toBe('Error handling quality');
+    // Name regex would treat "Error" as lower-is-better; metadata must win.
+    expect(response.payload.results[0].higherIsBetter).toBe(true);
   });
 
   it('filters out hits with no _source', async () => {
