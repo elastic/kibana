@@ -154,11 +154,8 @@ export type ExecutionStartedEvent = BaseTimelineEvent<
   ExecutionStartedEventData
 >;
 
-/**
- * The agent paused to ask a human. Terminal for the paused run, the same as
- * `execution_completed`.
- */
-export interface PromptRequestedEventData {
+/** The agent paused to ask a human. Terminal for the paused run, the same as `execution_completed`.*/
+export interface PromptRequestedEventData extends ExecutionCompletedEventData {
   /** The open questions the run is waiting on. */
   prompts: PromptRequest[];
 }

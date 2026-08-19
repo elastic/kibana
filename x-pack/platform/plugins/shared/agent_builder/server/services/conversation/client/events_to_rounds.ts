@@ -11,7 +11,6 @@ import type {
   ExecutionCompletedEvent,
   PromptRequestedEvent,
   RoundInput,
-  RoundModelUsageStats,
   TimelineEvent,
   UserMessageEvent,
 } from '@kbn/agent-builder-common';
@@ -22,13 +21,6 @@ import {
 } from '@kbn/agent-builder-common';
 
 const EXECUTION_ID_SUFFIX = '::execution';
-
-const EMPTY_MODEL_USAGE: RoundModelUsageStats = {
-  connector_id: '',
-  llm_calls: 0,
-  input_tokens: 0,
-  output_tokens: 0,
-};
 
 /**
  * Reconstructs rounds from a timeline: the inverse of `roundToEvents`. Groups lifecycle events by
@@ -89,7 +81,7 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
       ...authorAndOrigin(userMessage),
       ...(completed
         ? completedRoundFields(completed.data)
-        : awaitingPromptRoundFields(promptRequested!.data.prompts)),
+        : awaitingPromptRoundFields(promptRequested!.data)),
     });
   }
 
@@ -127,6 +119,20 @@ const authorAndOrigin = (
   return { author, ...(actor.origin ? { origin: actor.origin } : {}) };
 };
 
+const runSummaryFields = (
+  data: ExecutionCompletedEvent['data']
+): Pick<
+  ConversationRound,
+  'response' | 'steps' | 'model_usage' | 'time_to_first_token' | 'time_to_last_token' | 'trace_id'
+> => ({
+  response: data.response,
+  steps: data.steps,
+  model_usage: data.model_usage,
+  time_to_first_token: data.time_to_first_token,
+  time_to_last_token: data.time_to_last_token,
+  ...(data.trace_id ? { trace_id: data.trace_id } : {}),
+});
+
 const completedRoundFields = (
   data: ExecutionCompletedEvent['data']
 ): Pick<
@@ -140,16 +146,11 @@ const completedRoundFields = (
   | 'trace_id'
 > => ({
   status: ConversationRoundStatus.completed,
-  response: data.response,
-  steps: data.steps,
-  model_usage: data.model_usage,
-  time_to_first_token: data.time_to_first_token,
-  time_to_last_token: data.time_to_last_token,
-  ...(data.trace_id ? { trace_id: data.trace_id } : {}),
+  ...runSummaryFields(data),
 });
 
 const awaitingPromptRoundFields = (
-  prompts: PromptRequestedEvent['data']['prompts']
+  data: PromptRequestedEvent['data']
 ): Pick<
   ConversationRound,
   | 'status'
@@ -159,12 +160,9 @@ const awaitingPromptRoundFields = (
   | 'model_usage'
   | 'time_to_first_token'
   | 'time_to_last_token'
+  | 'trace_id'
 > => ({
   status: ConversationRoundStatus.awaitingPrompt,
-  pending_prompts: prompts,
-  response: { message: '' },
-  steps: [],
-  model_usage: EMPTY_MODEL_USAGE,
-  time_to_first_token: 0,
-  time_to_last_token: 0,
+  pending_prompts: data.prompts,
+  ...runSummaryFields(data),
 });

@@ -102,7 +102,12 @@ describe('roundsToEvents', () => {
       id: 'round-1::prompt_requested',
       type: TimelineEventType.promptRequested,
       trigger_event_id: 'round-1::user_message',
-      data: { prompts },
+      data: {
+        prompts,
+        model_usage: { input_tokens: 5, output_tokens: 7 },
+        time_to_first_token: 10,
+        time_to_last_token: 20,
+      },
     });
   });
 

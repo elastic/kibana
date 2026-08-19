@@ -73,7 +73,7 @@ export const roundToEvents = (
       ...lifecycle,
       id: `${round.id}::prompt_requested`,
       type: TimelineEventType.promptRequested,
-      data: { prompts: round.pending_prompts ?? [] },
+      data: { ...executionCompletedData(round), prompts: round.pending_prompts ?? [] },
     });
   }
 

@@ -48,23 +48,14 @@ describe('eventsToRounds', () => {
     expect(eventsToRounds(roundsToEvents(conversation))).toEqual(rounds);
   });
 
-  it('reconstructs an awaiting-prompt round with its pending prompts', () => {
+  it('round-trips an awaiting-prompt round, preserving its prompts and run metrics', () => {
     const prompts = [{ id: 'p1' }] as unknown as PromptRequest[];
     const round = baseRound({
       status: ConversationRoundStatus.awaitingPrompt,
       pending_prompts: prompts,
     });
 
-    const [reconstructed] = eventsToRounds(roundsToEvents(baseConversation([round])));
-
-    expect(reconstructed).toMatchObject({
-      id: 'round-1',
-      status: ConversationRoundStatus.awaitingPrompt,
-      pending_prompts: prompts,
-      input: { message: 'hello' },
-      response: { message: '' },
-      steps: [],
-    });
+    expect(eventsToRounds(roundsToEvents(baseConversation([round])))).toEqual([round]);
   });
 
   it('recovers an external author and origin from the user_message actor', () => {
