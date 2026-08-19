@@ -86,11 +86,13 @@ function resolveOwners(entries, files) {
 function buildCommentBody(ownerHandles) {
   const mentions = ownerHandles.length ? ownerHandles.join(' ') : FALLBACK_OWNER;
   return [
-    `Hey ${mentions} 👋 this flaky test fix has been open for a while and needs an owner decision. Any of these helps:`,
+    `Hey ${mentions} 👋 this flaky test fix has been open for a while and needs an owner decision.`,
     '',
-    '* ✅ Review and merge if it looks good',
-    '* ✏️ Need to make changes or resolve merge conflicts? Ask `@copilot`',
-    '* ❌ Not worth shipping? Just close it (drop a comment to help our workflow improve)',
+    '**Hints:**',
+    '',
+    '- ✅ Review and merge if it looks good',
+    '- ✏️ Need to make changes to or resolve merge conflicts? Ask `@copilot`',
+    '- ❌ Not worth shipping? Just close it (drop a comment to help our workflow improve)',
     '',
     `Questions? Find the Applications DX team in [#kibana-qa](${QA_CHANNEL_URL}).`,
     '',
