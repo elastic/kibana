@@ -30,37 +30,38 @@ apiTest.describe(
   '[NON-MKI] Rule operations with an organization-level UIAM API key',
   { tag: tags.serverless.all },
   () => {
-    let createdRuleId: string | undefined;
+    const createdRuleIds: string[] = [];
 
     apiTest.afterAll(async ({ apiClient }) => {
-      if (!createdRuleId) return;
-      await apiClient.delete(`api/alerting/rule/${createdRuleId}`, {
-        headers: ORG_KEY_HEADERS,
-      });
+      for (const ruleId of createdRuleIds) {
+        await apiClient.delete(`api/alerting/rule/${ruleId}`, {
+          headers: ORG_KEY_HEADERS,
+        });
+      }
     });
 
     apiTest(
-      'creating an enabled rule fails with a clear 400 instead of a parse error',
+      'creating an enabled rule reuses the raw key as a user-managed key',
       async ({ apiClient }) => {
-        // An organization-level key is presented as the raw `essu_` secret. It carries no key id,
-        // so the "reuse the caller's key" path cannot persist it on the rule and must reject it
-        // with an actionable message.
+        // A user-created Cloud API key is presented as the raw `essu_` secret with no key id.
+        // It is stored on the rule as-is and marked user-managed: alerting mints no new keys
+        // and never invalidates it — lifecycle management remains the user's responsibility.
         const response = await apiClient.post('api/alerting/rule', {
           headers: ORG_KEY_HEADERS,
           responseType: 'json',
           body: getRuleBody('org-level-key-enabled-rule', true),
         });
 
-        expect(response).toHaveStatusCode(400);
-        expect(response.body.message).toContain(
-          'Organization-level API keys are not supported for rule operations'
-        );
+        expect(response).toHaveStatusCode(200);
+        createdRuleIds.push(response.body.id);
+        expect(response.body.api_key_created_by_user).toBe(true);
       }
     );
 
     apiTest(
-      'creating a disabled rule succeeds (no rule API key is resolved for disabled rules)',
+      'creating a disabled rule and enabling it afterwards succeeds',
       async ({ apiClient }) => {
+        // No rule API key is resolved for disabled rules; the key is captured on enable.
         const createResponse = await apiClient.post('api/alerting/rule', {
           headers: ORG_KEY_HEADERS,
           responseType: 'json',
@@ -68,18 +69,25 @@ apiTest.describe(
         });
 
         expect(createResponse).toHaveStatusCode(200);
-        createdRuleId = createResponse.body.id;
+        const ruleId = createResponse.body.id;
+        createdRuleIds.push(ruleId);
 
-        // Enabling the rule afterwards resolves an API key and must fail with the same clear 400.
-        const enableResponse = await apiClient.post(`api/alerting/rule/${createdRuleId}/_enable`, {
+        const enableResponse = await apiClient.post(`api/alerting/rule/${ruleId}/_enable`, {
           headers: ORG_KEY_HEADERS,
           responseType: 'json',
         });
 
-        expect(enableResponse).toHaveStatusCode(400);
-        expect(enableResponse.body.message).toContain(
-          'Organization-level API keys are not supported for rule operations'
-        );
+        expect(enableResponse).toHaveStatusCode(204);
+
+        // The enable path reuses the caller's raw key and marks the rule user-managed.
+        const getResponse = await apiClient.get(`api/alerting/rule/${ruleId}`, {
+          headers: ORG_KEY_HEADERS,
+          responseType: 'json',
+        });
+
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body.enabled).toBe(true);
+        expect(getResponse.body.api_key_created_by_user).toBe(true);
       }
     );
   }

@@ -116,6 +116,7 @@ describe('checking changes on all registered encrypted SO types', () => {
       Array [
         "action|2",
         "action|1",
+        "action_task_params|3",
         "action_task_params|2",
         "action_task_params|1",
         "ad_hoc_run_params|4",
@@ -130,6 +131,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "alert|4",
         "alert|3",
         "alert|2",
+        "alert|15",
         "alert|14",
         "alert|13",
         "alert|12",
@@ -172,6 +174,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "task|4",
         "task|3",
         "task|2",
+        "task|13",
         "task|12",
         "task|11",
         "task|10",
