@@ -35,6 +35,7 @@ import type {
   AppMenuSwitch,
 } from './types';
 import { APP_MENU_EBT_ELEMENT, APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';
+import { asOptionalPlainText, asPlainText } from './as_plain_text';
 import { APP_MENU_TEST_SUBJECTS, getAppMenuItemTestSubj } from './test_subjects';
 
 /**
@@ -54,10 +55,12 @@ export const getAppMenuEbtDomProps = (
     return undefined;
   }
 
+  const detail = asOptionalPlainText(ebt.detail);
+
   return {
-    'data-ebt-action': ebt.action,
+    'data-ebt-action': asPlainText(ebt.action),
     'data-ebt-element': APP_MENU_EBT_ELEMENT,
-    ...(ebt.detail ? { 'data-ebt-detail': ebt.detail } : {}),
+    ...(detail ? { 'data-ebt-detail': detail } : {}),
   };
 };
 
@@ -212,8 +215,8 @@ export const getTooltip = ({
   const title = isFunction(tooltipTitle) ? tooltipTitle() : tooltipTitle;
 
   return {
-    title,
-    content,
+    title: asOptionalPlainText(title),
+    content: asOptionalPlainText(content),
   };
 };
 
@@ -278,22 +281,26 @@ export const mapAppMenuItemToPanelItem = (
 
   const showAsSelected = Boolean(item.isSelected);
 
-  const labelNode = item.labelBadgeText ? (
+  const label = asPlainText(item.label);
+  const description = asOptionalPlainText(item.description);
+  const labelBadgeText = asOptionalPlainText(item.labelBadgeText);
+
+  const labelNode = labelBadgeText ? (
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>{upperFirst(item.label)}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{upperFirst(label)}</EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <AppMenuBadge text={item.labelBadgeText} data-test-subj={`${itemTestSubj}-badge`} />
+        <AppMenuBadge text={labelBadgeText} data-test-subj={`${itemTestSubj}-badge`} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    upperFirst(item.label)
+    upperFirst(label)
   );
 
-  const itemLabel = item.description ? (
+  const itemLabel = description ? (
     <AppMenuItemLabel
-      label={upperFirst(item.label)}
-      description={item.description}
-      labelBadgeText={item.labelBadgeText}
+      label={upperFirst(label)}
+      description={description}
+      labelBadgeText={labelBadgeText}
       iconType={item.iconType}
       isDisabled={itemDisabled}
       isLoading={loading}
@@ -306,7 +313,7 @@ export const mapAppMenuItemToPanelItem = (
   return {
     key: item.id,
     name: itemLabel,
-    icon: item.description ? undefined : loading ? (
+    icon: description ? undefined : loading ? (
       <EuiLoadingSpinner size="m" data-test-subj={`${itemTestSubj}-loading`} />
     ) : (
       item?.iconType
@@ -405,7 +412,7 @@ export const getPopoverSwitchItems = ({
         const switchElement = (
           <EuiSwitch
             id={switchConfig.id}
-            label={switchConfig.label}
+            label={asPlainText(switchConfig.label)}
             labelProps={switchConfig.labelProps}
             checked={switchConfig.checked}
             onChange={(e) => switchConfig.onChange(e.target.checked)}
@@ -490,7 +497,7 @@ export const getPopoverPanels = ({
         processItems({
           itemsToProcess: item.items,
           panelId: childPanelId,
-          parentTitle: item.label,
+          parentTitle: asPlainText(item.label),
           parentPopoverTestId: item.popoverTestId,
           parentPopoverWidth: itemPopoverWidth ?? DEFAULT_POPOVER_WIDTH,
         });
