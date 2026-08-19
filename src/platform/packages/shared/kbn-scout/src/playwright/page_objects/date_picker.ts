@@ -171,11 +171,7 @@ export class DatePicker {
     // its own Update button; a query-bar-embedded picker commits through the
     // shared submit button. Mirrors FTR's time_picker.ts.
     const applyTimeButton = getTestSubjLocator('superDatePickerApplyTimeButton');
-    const hasApplyTimeButton = await applyTimeButton
-      .waitFor({ state: 'visible', timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (hasApplyTimeButton) {
+    if ((await applyTimeButton.count()) > 0) {
       await applyTimeButton.click();
     } else {
       await getTestSubjLocator('querySubmitButton').click();
