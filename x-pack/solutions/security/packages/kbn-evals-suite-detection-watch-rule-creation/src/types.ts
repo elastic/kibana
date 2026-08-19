@@ -16,8 +16,6 @@ import { z } from '@kbn/zod';
  * rule would extract as undefined, and every evaluator would return N/A — the invalid value
  * must survive parsing so the responsible evaluator can score it 0.
  *
- * Verify the actual shape by inspecting a real workflow execution:
- *   GET /api/workflows/executions/{id}?includeOutput=true
  */
 export const draftRuleSchema = z
   .object({
