@@ -116,7 +116,7 @@ const EntityAnalyticsHomePageContent = () => {
   const history = useHistory();
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
-  /** v.2 / v.3 AppHeader Management → Entity Risk Score tab. */
+  /** v.2+ AppHeader Management → Entity Risk Score tab. */
   const managementHref = useMemo(
     () =>
       getSecuritySolutionUrl({
@@ -172,7 +172,7 @@ const EntityAnalyticsHomePageContent = () => {
       },
     ];
 
-    // Save view is v.2 only — v.3 drops the primary header action.
+    // Save view is v.2 only — v.3+ drops the primary header action.
     if (faceliftVersion === 'v2') {
       return {
         primaryActionItem: {

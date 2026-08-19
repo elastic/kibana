@@ -8,13 +8,13 @@
 /**
  * Active EA Facelift prototype version.
  *
- * Home UI lives in `./v1`, `./v2`, and `./v3` as independent code snapshots.
- * Flyout / table mock bridges read this module so external hooks follow the
- * selected version. To ship a single final version later: keep that folder,
- * delete the others, drop the switcher, and point the thin root bridges at the
- * survivor (or move its files up one level and delete the bridges).
+ * Home UI lives in `./v1`, `./v2`, `./v3`, and `./v4` as independent code
+ * snapshots. Flyout / table mock bridges read this module so external hooks
+ * follow the selected version. To ship a single final version later: keep that
+ * folder, delete the others, drop the switcher, and point the thin root bridges
+ * at the survivor (or move its files up one level and delete the bridges).
  *
- * Mock corpora are shared across v.2 / v.3 via re-exports from `./v2/data`
+ * Mock corpora are shared across v.2 / v.3 / v.4 via re-exports from `./v2/data`
  * (and related mock modules) so entity fixtures stay single-sourced.
  *
  * The Kibana chrome header dropdown and the home page both read/write this
@@ -23,11 +23,12 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-export type FaceliftVersion = 'v1' | 'v2' | 'v3';
+export type FaceliftVersion = 'v1' | 'v2' | 'v3' | 'v4';
 
-export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v3';
+export const DEFAULT_FACELIFT_VERSION: FaceliftVersion = 'v4';
 
 export const FACELIFT_VERSION_OPTIONS: Array<{ key: FaceliftVersion; label: string }> = [
+  { key: 'v4', label: 'v.4' },
   { key: 'v3', label: 'v.3' },
   { key: 'v2', label: 'v.2' },
   { key: 'v1', label: 'v.1' },
@@ -73,6 +74,6 @@ export const useActiveFaceliftVersion = (): [
   return [version, setFaceliftVersion];
 };
 
-/** v.2 / v.3 share the AppHeader chrome and in-page search layout. */
+/** v.2+ share the AppHeader chrome and in-page search layout. */
 export const isFaceliftAppHeaderVersion = (version: FaceliftVersion): boolean =>
-  version === 'v2' || version === 'v3';
+  version === 'v2' || version === 'v3' || version === 'v4';

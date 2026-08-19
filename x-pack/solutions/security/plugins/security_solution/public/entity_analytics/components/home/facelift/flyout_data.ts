@@ -7,7 +7,7 @@
 
 /**
  * Stable import path for facelift flyout mocks.
- * Routes to the active version snapshot under `./v1`, `./v2`, or `./v3`.
+ * Routes to the active version snapshot under `./v1`–`./v4`.
  */
 
 import type { EntityType } from '../../../../../common/entity_analytics/types';
@@ -16,6 +16,7 @@ import { getActiveFaceliftVersion } from './active_version';
 import * as v1 from './v1/flyout_data';
 import * as v2 from './v2/flyout_data';
 import * as v3 from './v3/flyout_data';
+import * as v4 from './v4/flyout_data';
 
 const impl = () => {
   switch (getActiveFaceliftVersion()) {
@@ -25,6 +26,8 @@ const impl = () => {
       return v2;
     case 'v3':
       return v3;
+    case 'v4':
+      return v4;
   }
 };
 

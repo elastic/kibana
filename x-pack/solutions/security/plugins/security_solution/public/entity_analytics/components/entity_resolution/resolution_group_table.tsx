@@ -63,7 +63,7 @@ export interface ResolutionGroupTableProps {
   currentEntityId?: string;
   /**
    * When true, only raw-record aliases are listed (flyout Resolution section,
-   * and the v.3 Resolution Group subflyout). Older facelift versions keep the
+   * and the v.3+ Resolution Group subflyout). Older facelift versions keep the
    * resolved/target entity row in the full Resolution tab.
    */
   aliasesOnly?: boolean;

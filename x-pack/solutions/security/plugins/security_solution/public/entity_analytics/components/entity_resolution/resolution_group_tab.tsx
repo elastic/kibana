@@ -93,9 +93,12 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
     ? getResolutionRiskScore(group.target) ?? getEntityRiskScore(group.target)
     : undefined;
   const [faceliftVersion] = useActiveFaceliftVersion();
-  /** v.3 matches the flyout Resolution overview: raw records only, no primary row. */
-  const isFaceliftV3 = faceliftVersion === 'v3';
-  const riskScoreLabel = isFaceliftV3 ? RESOLVED_ENTITY_RISK_SCORE_LABEL : GROUP_RISK_SCORE_LABEL;
+  /** v.3+ matches the flyout Resolution overview: raw records only, no primary row. */
+  const isFaceliftAliasesOnly =
+    faceliftVersion === 'v3' || faceliftVersion === 'v4';
+  const riskScoreLabel = isFaceliftAliasesOnly
+    ? RESOLVED_ENTITY_RISK_SCORE_LABEL
+    : GROUP_RISK_SCORE_LABEL;
 
   const excludeEntityIds = useMemo(() => {
     if (!group) return [entityId];
@@ -254,7 +257,7 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
           removingEntityId={removingEntityId}
           onEntityNameClick={handleEntityNameClick}
           currentEntityId={entityId}
-          aliasesOnly={isFaceliftV3}
+          aliasesOnly={isFaceliftAliasesOnly}
         />
         <EuiSpacer size="l" />
         <AddEntitiesSection
