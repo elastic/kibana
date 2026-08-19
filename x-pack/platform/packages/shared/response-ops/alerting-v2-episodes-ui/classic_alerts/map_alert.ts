@@ -9,6 +9,7 @@ import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -53,6 +54,7 @@ export const CLASSIC_ALERT_EPISODE_SOURCE_FIELDS = [
   ALERT_DURATION,
   ALERT_STATUS,
   ALERT_RULE_UUID,
+  ALERT_RULE_NAME,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_CONSUMER,
@@ -82,6 +84,7 @@ export interface ClassicAlertSource {
   [ALERT_DURATION]?: number;
   [ALERT_STATUS]?: string;
   [ALERT_RULE_UUID]?: string;
+  [ALERT_RULE_NAME]?: string;
   [ALERT_RULE_TAGS]?: string | string[];
   [ALERT_SEVERITY]?: string;
   [ALERT_WORKFLOW_STATUS]?: string;
@@ -127,6 +130,7 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
     'episode.id': uuid,
     'episode.status': mapClassicStatusToEpisodeStatus(source[ALERT_STATUS]),
     'rule.id': source[ALERT_RULE_UUID] ?? '',
+    'rule.name': source[ALERT_RULE_NAME],
     group_hash: uuid,
     first_timestamp: start ?? timestamp,
     last_timestamp: lastTimestamp,

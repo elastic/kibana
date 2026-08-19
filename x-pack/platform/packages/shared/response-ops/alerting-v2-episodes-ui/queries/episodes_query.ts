@@ -34,6 +34,12 @@ export interface AlertEpisode extends BaseAlertEpisode {
    * v2 episodes default to `true`.
    */
   supports_timeline?: boolean;
+  /**
+   * Rule name embedded from the v1 alert document. Used as a display fallback
+   * when the rules API cannot resolve the name (e.g. due to RBAC restrictions).
+   * V2 episodes never set this — they always resolve via the rules cache.
+   */
+  'rule.name'?: string;
 }
 
 /** V2 episodes leave `supports_actions` unset; classic rows set it to `false`. */

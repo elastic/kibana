@@ -48,6 +48,7 @@ describe('mapClassicAlertToEpisode', () => {
       'episode.id': 'alert-uuid-1',
       'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
       'rule.id': 'rule-uuid-1',
+      'rule.name': 'My Rule',
       group_hash: 'alert-uuid-1',
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T02:00:00.000Z',
@@ -78,6 +79,7 @@ describe('mapClassicAlertToEpisode', () => {
 
     expect(episode['episode.id']).toBe('uuid-minimal');
     expect(episode['episode.status']).toBe(ALERT_EPISODE_STATUS.INACTIVE);
+    expect(episode['rule.name']).toBeUndefined();
     expect(episode.severity).toBeNull();
     expect(episode.last_tags).toEqual([]);
     expect(episode.last_assignee_uid).toBeNull();

@@ -233,14 +233,20 @@ export const AlertEpisodesListPage = () => {
     http: services.http,
   });
 
-  const ruleOptions = useMemo(
-    () =>
-      Object.entries(rulesCache).map(([id, rule]) => ({
-        label: rule.metadata?.name ?? id,
-        value: id,
-      })),
-    [rulesCache]
-  );
+  const ruleOptions = useMemo(() => {
+    const options = Object.entries(rulesCache).map(([id, rule]) => ({
+      label: rule.metadata?.name ?? id,
+      value: id,
+    }));
+    const cachedIds = new Set(Object.keys(rulesCache));
+    for (const ep of episodesData ?? []) {
+      if (!cachedIds.has(ep['rule.id']) && ep['rule.name']) {
+        cachedIds.add(ep['rule.id']);
+        options.push({ label: ep['rule.name'], value: ep['rule.id'] });
+      }
+    }
+    return options;
+  }, [rulesCache, episodesData]);
 
   const rows = useMemo(() => episodesData?.map(alertEpisodeToDataTableRecord), [episodesData]);
 
