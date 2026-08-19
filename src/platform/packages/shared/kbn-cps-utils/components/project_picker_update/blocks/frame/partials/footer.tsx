@@ -17,21 +17,25 @@ export function ProjectPickerFrameFooter() {
   const state = useProjectPickerState();
 
   const { includedCount, excludedCount } = useMemo(() => {
-    const selected = new Set(state.selectedProjects);
+    const selected = new Set(state.selectedProjectIds);
     const included = state.visibleProjectIds.filter((id) => selected.has(id)).length;
     return {
       includedCount: included,
       excludedCount: state.visibleProjectIds.length - included,
     };
-  }, [state.visibleProjectIds, state.selectedProjects]);
+  }, [state.visibleProjectIds, state.selectedProjectIds]);
 
   const includeAllVisibleProjects = useCallback(() => {
     actions.includeAllVisibleProjects();
   }, [actions]);
 
   const isActionBtnDisabled = useMemo(() => {
-    return state.visibleProjectIds.length === 0 || includedCount === state.visibleProjectIds.length;
-  }, [state.visibleProjectIds.length, includedCount]);
+    return (
+      state.visibleProjectIds.length === 0 ||
+      includedCount === state.visibleProjectIds.length ||
+      state.controlsState !== 'enabled'
+    );
+  }, [state.visibleProjectIds.length, includedCount, state.controlsState]);
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>

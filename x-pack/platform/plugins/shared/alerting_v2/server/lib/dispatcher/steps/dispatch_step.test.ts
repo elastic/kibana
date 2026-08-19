@@ -8,18 +8,17 @@
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
-import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import {
-  createDispatcherPipelineInput,
-  createDispatcherPipelineState,
   createActionGroup,
   createActionPolicy,
   createAlertEpisode,
+  createDispatcherPipelineInput,
+  createDispatcherPipelineState,
 } from '../fixtures/test_utils';
-import type { DispatcherPipelineState, DispatchFailure } from '../types';
-import { DispatchStep } from './dispatch_step';
+import type { DispatchFailure } from '../types';
 import { DISPATCH_FAILURE_REASONS } from './constants';
+import { DispatchStep } from './dispatch_step';
 
 const getFailures = (result: Awaited<ReturnType<DispatchStep['execute']>>): DispatchFailure[] =>
   result.type === 'continue' ? result.data?.dispatchFailures ?? [] : [];
@@ -47,22 +46,14 @@ const createWorkflowDetailDto = (
   ...overrides,
 });
 
-function createState(
-  logger: LoggerServiceContract,
-  overrides: Partial<DispatcherPipelineState> = {}
-): DispatcherPipelineState {
-  return createDispatcherPipelineState({
-    ...overrides,
-    logger,
-    input: createDispatcherPipelineInput({ logger }),
-  });
-}
-
 describe('DispatchStep', () => {
   let mockWfm: jest.Mocked<WorkflowsServerPluginSetup['management']>;
+  let loggerService: ReturnType<typeof createLoggerService>['loggerService'];
+  let mockLogger: ReturnType<typeof createLoggerService>['mockLogger'];
 
   beforeEach(() => {
     mockWfm = createMockWorkflowsManagement();
+    ({ loggerService, mockLogger } = createLoggerService());
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -88,7 +79,7 @@ describe('DispatchStep', () => {
       policies: new Map([['p1', policy]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(result.type === 'continue' && result.data?.dispatchedExecutions).toEqual(
@@ -116,18 +107,17 @@ describe('DispatchStep', () => {
   });
 
   it('skips dispatch when policy has no API key', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
     const step = new DispatchStep(mockWfm);
 
     const group = createActionGroup({ id: 'g1', policyId: 'p1' });
     const policy = createActionPolicy({ id: 'p1' });
 
-    const state = createState(loggerService, {
+    const state = createDispatcherPipelineState({
       dispatch: [group],
       policies: new Map([['p1', policy]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
@@ -136,7 +126,6 @@ describe('DispatchStep', () => {
   });
 
   it('skips dispatch when workflow is not found', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
     const step = new DispatchStep(mockWfm);
 
     mockWfm.getWorkflow.mockResolvedValue(null);
@@ -151,12 +140,12 @@ describe('DispatchStep', () => {
       apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
-    const state = createState(loggerService, {
+    const state = createDispatcherPipelineState({
       dispatch: [group],
       policies: new Map([['p1', policy]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);
@@ -187,36 +176,33 @@ describe('DispatchStep', () => {
       policies: new Map([['p1', policy]]),
     });
 
-    await step.execute(state);
+    await step.execute(state, loggerService);
 
     expect(mockWfm.getWorkflow).toHaveBeenCalledTimes(2);
     expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(2);
   });
 
   it('continues with no-op when dispatch is empty', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
     const step = new DispatchStep(mockWfm);
 
-    const state = createState(loggerService, { dispatch: [] });
-    const result = await step.execute(state);
+    const state = createDispatcherPipelineState({ dispatch: [] });
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockLogger.debug).not.toHaveBeenCalled();
   });
 
   it('continues when dispatch is undefined', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
     const step = new DispatchStep(mockWfm);
 
-    const state = createState(loggerService, {});
-    const result = await step.execute(state);
+    const state = createDispatcherPipelineState({});
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockLogger.debug).not.toHaveBeenCalled();
   });
 
   it('continues dispatching remaining groups when one group fails', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
     const step = new DispatchStep(mockWfm);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
@@ -238,12 +224,12 @@ describe('DispatchStep', () => {
       })
     );
 
-    const state = createState(loggerService, {
+    const state = createDispatcherPipelineState({
       dispatch: groups,
       policies: new Map([['p1', policy]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockWfm.getWorkflow).toHaveBeenCalledTimes(3);
@@ -253,7 +239,6 @@ describe('DispatchStep', () => {
   });
 
   it('logs error when scheduleWorkflow throws', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
     const step = new DispatchStep(mockWfm);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
@@ -269,12 +254,12 @@ describe('DispatchStep', () => {
       apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
-    const state = createState(loggerService, {
+    const state = createDispatcherPipelineState({
       dispatch: [group],
       policies: new Map([['p1', policy]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockLogger.error).toHaveBeenCalledTimes(1);
@@ -284,7 +269,6 @@ describe('DispatchStep', () => {
         policy_id: 'p1',
         workflow_id: 'workflow-1',
         space_id: 'default',
-        step: 'dispatch',
         code: ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
       },
       error: expect.objectContaining({ message: 'service unavailable' }),
@@ -292,7 +276,6 @@ describe('DispatchStep', () => {
   });
 
   it('continues dispatching remaining destinations when one destination fails', async () => {
-    const { loggerService, mockLogger } = createLoggerService();
     const step = new DispatchStep(mockWfm);
 
     mockWfm.getWorkflow.mockResolvedValue(createWorkflowDetailDto());
@@ -313,12 +296,12 @@ describe('DispatchStep', () => {
       apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==',
     });
 
-    const state = createState(loggerService, {
+    const state = createDispatcherPipelineState({
       dispatch: [group],
       policies: new Map([['p1', policy]]),
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, loggerService);
 
     expect(result.type).toBe('continue');
     expect(mockWfm.scheduleWorkflow).toHaveBeenCalledTimes(2);
@@ -346,7 +329,7 @@ describe('DispatchStep', () => {
       policies: new Map([['p1', policy]]),
     });
 
-    await step.execute(state);
+    await step.execute(state, loggerService);
 
     expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
       expect.anything(),
@@ -383,7 +366,7 @@ describe('DispatchStep', () => {
       rules: new Map(), // rule-unknown not present
     });
 
-    await step.execute(state);
+    await step.execute(state, loggerService);
 
     expect(mockWfm.scheduleWorkflow).toHaveBeenCalledWith(
       expect.anything(),
@@ -432,7 +415,7 @@ describe('DispatchStep', () => {
       policies: new Map([['p1', policy]]),
     });
 
-    const executePromise = step.execute(state);
+    const executePromise = step.execute(state, loggerService);
 
     await jest.advanceTimersByTimeAsync(100);
 
@@ -459,7 +442,8 @@ describe('DispatchStep', () => {
     const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
-      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) })
+      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
+      loggerService
     );
 
     expect(getFailures(result)).toEqual([]);
@@ -482,7 +466,8 @@ describe('DispatchStep', () => {
     const policy = createActionPolicy({ id: 'p1' });
 
     const result = await step.execute(
-      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) })
+      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
+      loggerService
     );
 
     const failures = getFailures(result);
@@ -521,7 +506,8 @@ describe('DispatchStep', () => {
     const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
-      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) })
+      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
+      loggerService
     );
 
     const failures = getFailures(result);
@@ -546,7 +532,8 @@ describe('DispatchStep', () => {
     const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
-      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) })
+      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
+      loggerService
     );
 
     const failures = getFailures(result);
@@ -573,7 +560,8 @@ describe('DispatchStep', () => {
     const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
-      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) })
+      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
+      loggerService
     );
 
     const failures = getFailures(result);
@@ -605,7 +593,8 @@ describe('DispatchStep', () => {
     const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
 
     const result = await step.execute(
-      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) })
+      createDispatcherPipelineState({ dispatch: [group], policies: new Map([['p1', policy]]) }),
+      loggerService
     );
 
     expect(result.type === 'continue' && result.data?.dispatchedExecutions).toEqual(
@@ -617,5 +606,36 @@ describe('DispatchStep', () => {
       workflowId: 'workflow-2',
       reason: DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
     });
+  });
+
+  it('skips all groups when signal is already aborted, records no executions and no failures', async () => {
+    const step = new DispatchStep(mockWfm);
+    const controller = new AbortController();
+    controller.abort();
+
+    const policy = createActionPolicy({ id: 'p1', apiKey: 'dGVzdC1pZDp0ZXN0LWtleQ==' });
+
+    const group1 = createActionGroup({ id: 'g1', policyId: 'p1' });
+    const group2 = createActionGroup({ id: 'g2', policyId: 'p1' });
+
+    const result = await step.execute(
+      createDispatcherPipelineState({
+        dispatch: [group1, group2],
+        policies: new Map([['p1', policy]]),
+        input: createDispatcherPipelineInput({ signal: controller.signal }),
+      }),
+      loggerService
+    );
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+
+    // no executions dispatched
+    const executionIds = result.data?.dispatchedExecutions;
+    expect(executionIds?.get('g1')).toBeUndefined();
+    expect(executionIds?.get('g2')).toBeUndefined();
+    // no failures — groups were silently skipped
+    expect(result.data?.dispatchFailures).toHaveLength(0);
+    expect(mockWfm.scheduleWorkflow).not.toHaveBeenCalled();
   });
 });

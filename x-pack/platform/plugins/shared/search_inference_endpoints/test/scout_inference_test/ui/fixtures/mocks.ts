@@ -50,9 +50,14 @@ const endpointsAsConnectors = (endpoints: MockEndpoint[]) =>
       type: '.inference',
       config: {
         inferenceId: ep.inference_id,
+        providerConfig: {
+          model_id:
+            typeof ep.service_settings?.model_id === 'string'
+              ? ep.service_settings.model_id
+              : undefined,
+        },
         taskType: ep.task_type,
         service: ep.service,
-        serviceSettings: ep.service_settings,
         modelCreator: ep.metadata?.display?.model_creator,
       },
       capabilities: {},

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Headers, FakeRawRequest } from '@kbn/core-http-server';
+import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
@@ -13,17 +13,17 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { inject, injectable } from 'inversify';
 import { isError } from 'lodash';
 import pLimit from 'p-limit';
-import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type {
+  ActionGroup,
+  ActionGroupId,
+  ActionPolicy,
+  ActionPolicyId,
+  ActionPolicyWorkflowPayload,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
-  ActionGroup,
-  ActionGroupId,
-  ActionPolicyId,
-  ActionPolicy,
-  ActionPolicyWorkflowPayload,
   DispatchFailure,
 } from '../types';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
@@ -51,14 +51,25 @@ export class DispatchStep implements DispatcherStep {
     private readonly workflowsManagement: WorkflowsServerPluginSetup['management']
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { dispatch = [], policies } = state;
-    const logger = state.logger.withLabels({ step: this.name });
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { dispatch = [], policies = new Map<ActionPolicyId, ActionPolicy>() } = state;
 
     const limiter = pLimit(MAX_CONCURRENT_DISPATCHES);
 
+    const { signal } = state.input;
+
     const groupResults = await Promise.allSettled(
-      dispatch.map((group) => limiter(() => this.dispatchGroup(group, policies, logger)))
+      dispatch.map((group) =>
+        limiter(async () => {
+          if (signal.aborted) {
+            return { groupId: group.id, executionIds: [], failures: [] };
+          }
+          return this.dispatchGroup(group, policies, logger, signal);
+        })
+      )
     );
 
     const dispatchedExecutions = new Map<ActionGroupId, string[]>();
@@ -79,8 +90,9 @@ export class DispatchStep implements DispatcherStep {
 
   private async dispatchGroup(
     group: ActionGroup,
-    policies: Map<ActionPolicyId, ActionPolicy> | undefined,
-    parentLogger: LoggerServiceContract
+    policies: Map<ActionPolicyId, ActionPolicy>,
+    parentLogger: LoggerServiceContract,
+    signal: AbortSignal
   ): Promise<DispatchGroupResult> {
     const logger = parentLogger.withLabels({
       group_id: group.id,
@@ -90,7 +102,7 @@ export class DispatchStep implements DispatcherStep {
     const executionIds: string[] = [];
     const failures: DispatchFailure[] = [];
     try {
-      const policy = policies?.get(group.policyId);
+      const policy = policies.get(group.policyId);
       const apiKey = policy?.apiKey;
 
       if (!apiKey) {
@@ -108,6 +120,9 @@ export class DispatchStep implements DispatcherStep {
       const fakeRequest = this.craftFakeRequest(apiKey);
 
       for (const destination of group.destinations) {
+        // Stop dispatching new destinations once the tick signal fires to avoid
+        // overrunning the TM timeout with in-progress scheduleWorkflow calls.
+        if (signal?.aborted) break;
         if (destination.type !== 'workflow') {
           continue;
         }

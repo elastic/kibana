@@ -25,9 +25,9 @@ import {
   EuiFormRow,
   EuiSwitch,
   EuiComboBox,
-  EuiCallOut,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { MultiRowInput } from '../multi_row_input';
 import { MAX_FLYOUT_WIDTH } from '../../../../constants';
@@ -147,23 +147,22 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {fleetServerHost && (
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             size="m"
-            color="warning"
-            iconType="warning"
             title={
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutTitle"
                 defaultMessage="Changing these settings can break your agent connections"
               />
             }
-          >
-            <FormattedMessage
-              id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutDescription"
-              defaultMessage="Invalid settings can break the connection between Elastic Agent and Fleet Server. If this happens, you will need to re-enroll your agents."
-            />
-          </EuiCallOut>
+            text={
+              <FormattedMessage
+                id="xpack.fleet.settings.fleetServerHostsFlyout.warningCalloutDescription"
+                defaultMessage="Invalid settings can break the connection between Elastic Agent and Fleet Server. If this happens, you will need to re-enroll your agents."
+              />
+            }
+          />
         )}
         <EuiSpacer size="m" />
         <EuiForm onSubmit={form.submit}>
