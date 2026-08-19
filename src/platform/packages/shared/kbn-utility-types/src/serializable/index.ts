@@ -38,12 +38,19 @@ export type SerializableRecord<AllowedKeys extends string | number | symbol = st
  *
  * // Invalid example with tslint error:
  * // "Type 'MySerializableRecord' recursively references itself as a base type."
- * interface MySerializableRecord extends SerializableRecord<keyof MySerializableRecord> = {
+ * // Invalid example with TypeScript error:
+ * // "Type 'MySerializableRecord' recursively references itself as a base type."
+ * interface MySerializableRecord extends SerializableRecord<keyof MySerializableRecord> {
+ *   foo: string;
+ * }
  *   foo: string;
  * }
  *
  * // Example without recursive references
- * interface MySerializableRecord = AsSerializableRecord<{
+ * // Example without recursive references
+ * type MySerializableRecord = AsSerializableRecord<{
+ *   foo: string;
+ * }>;
  *   foo: string;
  * }>;
  */
