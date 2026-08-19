@@ -27,6 +27,7 @@ describe('attackStatusChanged trigger', () => {
         attackIds: ['a'],
         status: 'closed',
         previousStatuses: [{ id: 'a', previousStatus: 'open' }],
+        truncated: false,
         spaceId: 'default',
       })
     ).not.toThrow();
