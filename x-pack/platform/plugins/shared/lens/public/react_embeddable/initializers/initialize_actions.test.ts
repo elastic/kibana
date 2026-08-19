@@ -130,5 +130,15 @@ describe('Dashboard actions', () => {
       api.loadViewUnderlyingData();
       expect(api.canViewUnderlyingData$.getValue()).toBe(true);
     });
+
+    it('should pass the authoritative ES|QL layer query to the underlying data args', async () => {
+      const esql = 'FROM index | LIMIT 10';
+      const api = setupActionsApi(
+        getTextBasedLensSerializedStateMock(esql),
+        visualizationContextMockOverrides
+      );
+      api.loadViewUnderlyingData();
+      expect(api.getViewUnderlyingDataArgs()).toEqual(expect.objectContaining({ query: { esql } }));
+    });
   });
 });
