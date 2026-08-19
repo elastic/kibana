@@ -1,0 +1,113 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * A background search saved from a dashboard that was never saved must restore both while the
+ * draft is still live and after the draft has been discarded.
+ */
+
+import { expect } from '@kbn/scout/ui';
+import { spaceTest, deleteAllBackgroundSearches, FLIGHTS_SAMPLE_DATA_SET } from '../fixtures';
+
+const SAVED_SEARCH_TITLE = 'Unsaved dashboard slow query';
+const SLOW_ESQL_QUERY = 'FROM kibana_sample_data_flights | LIMIT 1 | WHERE DELAY(1500ms)';
+
+spaceTest.describe(
+  'Background search from an unsaved dashboard',
+  { tag: '@local-stateful-classic' },
+  () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
+      await scoutSpace.uiSettings.set({ enableESQL: true });
+    });
+
+    spaceTest.beforeEach(async ({ apiServices, browserAuth, pageObjects, scoutSpace }) => {
+      // Installed per test, not in `beforeAll`: the `cleanStandardList()` in `afterEach` also
+      // deletes the data view the sample data ships, leaving the next dashboard without one.
+      await apiServices.sampleData.install(FLIGHTS_SAMPLE_DATA_SET, scoutSpace.id);
+
+      await browserAuth.loginAsPrivilegedUser();
+
+      // Every test needs the same Discover session on an unsaved dashboard, so build it here.
+      await pageObjects.discover.goto({ queryMode: 'esql' });
+      // Let the initial search finish so the Monaco editor has a model to write to, otherwise
+      // setCodeEditorValue fails with "No Monaco editor models found".
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
+      await pageObjects.discover.submitQuery();
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.saveSearch(SAVED_SEARCH_TITLE);
+
+      await pageObjects.dashboard.openNewDashboard();
+      await pageObjects.dashboard.addPanelFromLibrary(SAVED_SEARCH_TITLE);
+      // Re-submit so a search is genuinely in flight when we send it to the background.
+      await pageObjects.backgroundSearch.sendToBackground({ isSubmitButton: true });
+      await pageObjects.dashboard.waitForRenderComplete();
+    });
+
+    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+      // The leftover "New Dashboard" draft would be restored by the next openNewDashboard(). It has
+      // to be discarded from the listing: while the dashboard is mounted its unsaved-changes
+      // manager keeps rewriting the session storage key, so clearing it in place is undone.
+      await page.gotoApp('dashboards');
+      const discardDraftButton = page.testSubj.locator('discard-unsaved-New-Dashboard');
+      // A test that failed before creating the draft has nothing to discard, and the rest of this
+      // hook still has to run.
+      if (await discardDraftButton.isVisible()) {
+        await discardDraftButton.click();
+        await page.testSubj.click('confirmModalConfirmButton');
+        await discardDraftButton.waitFor({ state: 'hidden' });
+      }
+
+      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
+    spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
+      await apiServices.sampleData.remove(FLIGHTS_SAMPLE_DATA_SET, scoutSpace.id);
+      await scoutSpace.uiSettings.unset('enableESQL');
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
+    spaceTest(
+      'restores the unsaved dashboard from the background search toast',
+      async ({ page, pageObjects }) => {
+        // The in-app flyout has no refresh button and does not auto-refresh, so completion is
+        // polled from the management page instead.
+        await pageObjects.backgroundSearch.openFlyoutFromToast();
+        await pageObjects.backgroundSearch.closeFlyout();
+
+        await pageObjects.backgroundSearchManagement.goTo();
+        await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
+        await pageObjects.backgroundSearchManagement.viewRow();
+
+        await pageObjects.dashboard.waitForRenderComplete();
+        await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+        await expect(pageObjects.backgroundSearch.errorOrWarningToasts).toHaveCount(0);
+      }
+    );
+
+    spaceTest(
+      'restores the unsaved dashboard after its draft has been discarded',
+      async ({ page, pageObjects }) => {
+        await page.gotoApp('dashboards');
+        await page.testSubj.click('discard-unsaved-New-Dashboard');
+        await page.testSubj.click('confirmModalConfirmButton');
+
+        await pageObjects.backgroundSearchManagement.goTo();
+        await pageObjects.backgroundSearchManagement.waitForRowStatus('complete');
+        await pageObjects.backgroundSearchManagement.viewRow();
+
+        await pageObjects.dashboard.waitForRenderComplete();
+        await expect(page.testSubj.locator('embeddableError')).toHaveCount(0);
+        await expect(pageObjects.backgroundSearch.errorOrWarningToasts).toHaveCount(0);
+      }
+    );
+  }
+);

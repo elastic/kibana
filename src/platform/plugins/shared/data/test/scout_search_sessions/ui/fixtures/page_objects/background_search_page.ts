@@ -108,6 +108,12 @@ export class BackgroundSearchPage {
     await this.managementTable.waitFor({ state: 'hidden' });
   }
 
+  /** Open the flyout via the link in the "Background search saved" toast. */
+  async openFlyoutFromToast() {
+    await this.savedToastLink.click();
+    await this.waitForFlyout();
+  }
+
   /**
    * Restore the completed background search via the link in the completion toast. The wait is
    * raised above the default because the toast only appears once Elasticsearch has finished the
