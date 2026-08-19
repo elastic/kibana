@@ -21,21 +21,16 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiNotificationBadge,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiStepsHorizontal,
+  EuiSuperSelect,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import type { EuiStepsHorizontalProps } from '@elastic/eui';
+import type { EuiStepsHorizontalProps, EuiSuperSelectOption } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import {
@@ -57,6 +52,24 @@ const DATA_TYPE_OPTIONS = [
   { id: 'logs', label: 'Logs' },
   { id: 'metrics', label: 'Metrics' },
 ];
+
+// Each option shows its full description in the dropdown (not just once
+// selected) since the choice has real downstream effects and isn't a plain
+// filter — same idiom as e.g. ILM's phase picker.
+const DATA_FORMAT_OPTIONS: Array<EuiSuperSelectOption<AwsSchema>> = (['otel', 'ecs'] as const).map(
+  (value) => ({
+    value,
+    inputDisplay: AWS_SCHEMA_META[value].label,
+    dropdownDisplay: (
+      <>
+        <strong>{AWS_SCHEMA_META[value].label}</strong>
+        <EuiText size="s" color="subdued">
+          <p>{AWS_SCHEMA_META[value].description}</p>
+        </EuiText>
+      </>
+    ),
+  })
+);
 
 function serviceMatches(
   service: AwsServiceEntry,
@@ -204,9 +217,11 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   const [triggerSources, setTriggerSources] = useState<Record<string, string>>({});
   // Data format: hidden-by-default choice made once here and applied
   // everywhere downstream (see aws_services_data.ts for the full rationale).
-  const [schema, setSchema] = useState<AwsSchema>('ecs');
-  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
-  const [pendingSchema, setPendingSchema] = useState<AwsSchema>(schema);
+  // OTel-native by default.
+  const [schema, setSchema] = useState<AwsSchema>('otel');
+  // Switching format after services are already selected resets that
+  // configuration — not additive — so flag it inline rather than silently.
+  const [showSchemaResetWarning, setShowSchemaResetWarning] = useState(false);
 
   // Deploy/detect state is lifted here (rather than owned by the Deploy step)
   // so it survives navigating to the separate Detect & Review step.
@@ -344,9 +359,11 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
     setDeploymentMethod(method);
   };
 
-  const openSchemaModal = () => {
-    setPendingSchema(schema);
-    setIsSchemaModalOpen(true);
+  const onSchemaChange = (value: AwsSchema) => {
+    if (value !== schema && selected.size > 0) {
+      setShowSchemaResetWarning(true);
+    }
+    setSchema(value);
   };
 
   return (
@@ -401,51 +418,12 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           </EuiText>
           <EuiSpacer size="m" />
 
-          {/* A real decision with downstream effects, not something that
-              just changes what's visible in the list — styled like a
-              settings card (same pattern as "Deployment method" on step 3)
-              rather than a plain filter control, and edited through a
-              confirm-to-change modal rather than an immediate select. */}
-          <EuiPanel
-            hasBorder
-            paddingSize="l"
-            style={{ overflow: 'hidden' }}
-            data-test-subj="awsOnboardingDataFormatPanel"
-          >
-            <div
-              style={{
-                margin: `-${euiTheme.size.l} -${euiTheme.size.l}`,
-                padding: euiTheme.size.l,
-                background: euiTheme.colors.backgroundBaseSubdued,
-              }}
-            >
-              <EuiFlexGroup alignItems="flexStart" responsive={false}>
-                <EuiFlexItem grow={false} style={{ paddingTop: 2 }}>
-                  <EuiIcon type="tableDensityNormal" size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h3>Data format</h3>
-                  </EuiTitle>
-                  <EuiSpacer size="s" />
-                  <EuiText size="s">
-                    <strong>{AWS_SCHEMA_META[schema].label}</strong>{' '}
-                    <EuiText size="s" color="subdued" component="span">
-                      {AWS_SCHEMA_META[schema].description}
-                    </EuiText>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiLink onClick={openSchemaModal} data-test-subj="awsOnboardingEditSchema">
-                    Edit
-                  </EuiLink>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          </EuiPanel>
-          <EuiSpacer size="m" />
-
-          {/* gutterSize="s" = 8px, per design. */}
+          {/* gutterSize="s" = 8px, per design. Data format sits inline with
+              the other task controls — it's still a real decision with
+              downstream effects, but per design feedback it reads better as
+              a compact select right in this row than as a separate settings
+              card. Each option shows its description in the dropdown so the
+              tradeoff is visible before picking. */}
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>
               <EuiFieldSearch
@@ -456,6 +434,18 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 isClearable
                 data-test-subj="awsOnboardingSearch"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ width: 240 }}>
+              <EuiSuperSelect
+                compressed
+                fullWidth
+                prepend="Data format"
+                options={DATA_FORMAT_OPTIONS}
+                valueOfSelected={schema}
+                onChange={onSchemaChange}
+                aria-label="Data format"
+                data-test-subj="awsOnboardingEditSchema"
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -472,6 +462,24 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          {showSchemaResetWarning && (
+            <>
+              <EuiSpacer size="m" />
+              <KbnWarningCallout
+                announceOnMount
+                title="This will reset your progress"
+                onDismiss={() => setShowSchemaResetWarning(false)}
+                data-test-subj="awsOnboardingSchemaResetWarning"
+              >
+                <p>
+                  Changing the data format clears your selected services and any configuration
+                  entered so far — it isn&apos;t an additive change.
+                </p>
+              </KbnWarningCallout>
+            </>
+          )}
+
           <EuiSpacer size="l" />
           <EuiFlexGroup gutterSize="l" alignItems="flexStart">
             <EuiFlexItem grow={1} style={{ minWidth: 0 }}>
@@ -516,64 +524,6 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
-
-          {isSchemaModalOpen && (
-            <EuiModal
-              onClose={() => setIsSchemaModalOpen(false)}
-              aria-label="Edit data format"
-              data-test-subj="awsOnboardingDataFormatModal"
-              style={{ width: euiTheme.breakpoint.s }}
-            >
-              <EuiModalHeader>
-                <EuiModalHeaderTitle>Edit data format</EuiModalHeaderTitle>
-              </EuiModalHeader>
-              <EuiModalBody>
-                <EuiText size="s">
-                  <p>
-                    The data format determines the field mappings used for the data Elastic
-                    collects from your AWS services.
-                  </p>
-                </EuiText>
-                <EuiSpacer size="m" />
-                <EuiSelect
-                  fullWidth
-                  options={[
-                    { value: 'ecs', text: AWS_SCHEMA_META.ecs.label },
-                    { value: 'otel', text: AWS_SCHEMA_META.otel.label },
-                  ]}
-                  value={pendingSchema}
-                  onChange={(e) => setPendingSchema(e.target.value as AwsSchema)}
-                  aria-label="Data format"
-                />
-                {pendingSchema !== schema && (
-                  <>
-                    <EuiSpacer size="m" />
-                    <KbnWarningCallout announceOnMount title="This will reset your progress">
-                      <p>
-                        Changing the data format clears your selected services and any
-                        configuration entered so far — it isn&apos;t an additive change.
-                      </p>
-                    </KbnWarningCallout>
-                  </>
-                )}
-              </EuiModalBody>
-              <EuiModalFooter>
-                <EuiButtonEmpty onClick={() => setIsSchemaModalOpen(false)}>
-                  Cancel
-                </EuiButtonEmpty>
-                <EuiButton
-                  fill
-                  onClick={() => {
-                    setSchema(pendingSchema);
-                    setIsSchemaModalOpen(false);
-                  }}
-                  data-test-subj="awsOnboardingSaveSchema"
-                >
-                  {pendingSchema !== schema ? 'Change format' : 'Save'}
-                </EuiButton>
-              </EuiModalFooter>
-            </EuiModal>
-          )}
         </>
       )}
 
