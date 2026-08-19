@@ -1,0 +1,49 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type {
+  AsCodeDurationFormat,
+  AsCodeFieldFormat,
+  AsCodeHistogramFormat,
+} from '@kbn/as-code-data-views-schema/src/types';
+import { camelCase, snakeCase } from 'lodash';
+
+export function isDurationFormat(format: AsCodeFieldFormat): format is AsCodeDurationFormat {
+  return format.type === 'duration';
+}
+
+export function isHistogramFormat(format: AsCodeFieldFormat): format is AsCodeHistogramFormat {
+  return format.type === 'histogram';
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function snakeCaseKeys(obj: Record<string, any>): Record<string, any> {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => {
+      if (isRecord(value)) {
+        return [snakeCase(key), snakeCaseKeys(value)];
+      }
+      return [snakeCase(key), value];
+    })
+  );
+}
+
+export function camelCaseKeys(obj: Record<string, any>): Record<string, any> {
+  return Object.fromEntries(
+    Object.entries(obj).map(([key, value]) => {
+      if (isRecord(value)) {
+        return [camelCase(key), camelCaseKeys(value)];
+      }
+      return [camelCase(key), value];
+    })
+  );
+}

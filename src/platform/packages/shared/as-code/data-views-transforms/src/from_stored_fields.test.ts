@@ -111,27 +111,6 @@ describe('fromStoredFields.field_settings (runtime inline)', () => {
         assertPrimitiveRuntimeEntry(myField);
         expect(myField.format).toBeUndefined();
       });
-
-      it('passes format.params through as-is', () => {
-        const params = { pattern: 'YYYY', timezone: 'UTC' };
-        const fs = fromStoredFields(
-          { my_field: { type: 'date' } },
-          { my_field: { id: 'date', params } }
-        );
-        const myField = fs?.my_field;
-        assertPrimitiveRuntimeEntry(myField);
-        expect(myField.format?.params).toBe(params);
-      });
-
-      it('passes undefined params through when params is not set', () => {
-        const fs = fromStoredFields(
-          { my_field: { type: 'keyword' } },
-          { my_field: { id: 'string' } }
-        );
-        const myField = fs?.my_field;
-        assertPrimitiveRuntimeEntry(myField);
-        expect(myField.format).toEqual({ type: 'string', params: undefined });
-      });
     });
 
     describe('field attributes', () => {

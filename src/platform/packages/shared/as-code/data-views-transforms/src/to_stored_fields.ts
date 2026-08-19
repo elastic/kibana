@@ -31,6 +31,9 @@ import {
   type AsCodeSavedFieldSettings,
   type AsCodeSavedRuntimeField,
 } from '@kbn/as-code-data-views-schema';
+import type { AsCodeFieldFormat } from '@kbn/as-code-data-views-schema/src/types';
+import { camelCase } from 'lodash';
+import { isDurationFormat, isHistogramFormat, camelCaseKeys } from './utils';
 
 export function isRuntimeField(
   field: AsCodeFieldSettings | AsCodeSavedFieldSettings
@@ -94,7 +97,9 @@ export function toStoredFieldFormats(
     if ('format' in field && field.format) {
       fieldFormats[name] = {
         id: field.format.type,
-        ...(field.format.params ? { params: field.format.params } : {}),
+        ...(toStoredFieldFormatParams(field.format)
+          ? { params: toStoredFieldFormatParams(field.format) }
+          : {}),
       };
     }
     if (!isCompositeRuntimeField(field)) continue;
@@ -102,12 +107,40 @@ export function toStoredFieldFormats(
       if ('format' in subField && subField.format) {
         fieldFormats[`${name}.${subName}`] = {
           id: subField.format.type,
-          ...(subField.format.params ? { params: subField.format.params } : {}),
+          ...(toStoredFieldFormatParams(subField.format)
+            ? { params: toStoredFieldFormatParams(subField.format) }
+            : {}),
         };
       }
     }
   }
   return fieldFormats;
+}
+
+export function toStoredFieldFormatParams(
+  format: AsCodeFieldFormat
+): NonNullable<DataViewSpec['fieldFormats']>[string]['params'] | undefined {
+  if (!('params' in format)) return undefined;
+
+  if (isDurationFormat(format)) {
+    const outputFormat = camelCase(format.params.output_format);
+
+    return {
+      ...camelCaseKeys(format.params),
+      outputFormat,
+    };
+  }
+
+  if (isHistogramFormat(format)) {
+    return {
+      id: format.params.format,
+      params: {
+        pattern: format.params.pattern,
+      },
+    };
+  }
+
+  return camelCaseKeys(format.params);
 }
 
 /**

@@ -27,6 +27,9 @@ import {
   type AsCodeSavedDataView,
   type AsCodeSavedFieldSettings,
 } from '@kbn/as-code-data-views-schema';
+import { snakeCase } from 'lodash';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { snakeCaseKeys } from './utils';
 
 /**
  * Convert stored field metadata maps from DataViewSpec to as-code field representations.
@@ -96,10 +99,32 @@ function getCommonProperties(
     ...(fieldAttr && 'customLabel' in fieldAttr && { custom_label: fieldAttr.customLabel }),
     ...(fieldAttr &&
       'customDescription' in fieldAttr && { custom_description: fieldAttr.customDescription }),
-    ...(format?.id && { format: { type: format.id, params: format.params } }),
+    ...(format?.id && { format: { type: format.id, params: fromStoredFieldFormatParams(format) } }),
     ...(includePopularity &&
       fieldAttr &&
       'count' in fieldAttr &&
       fieldAttr.count !== undefined && { popularity: fieldAttr.count }),
   };
+}
+
+function fromStoredFieldFormatParams(format: NonNullable<DataViewSpec['fieldFormats']>[string]) {
+  if (!format.params) return undefined;
+
+  if (format.id === 'duration') {
+    const outputFormat = snakeCase(format.params.outputFormat?.toString());
+
+    return {
+      ...snakeCaseKeys(format.params),
+      output_format: outputFormat,
+    };
+  }
+
+  if (format.id === 'histogram') {
+    return {
+      format: format.params.id,
+      pattern: (format.params.params as SerializableRecord)?.pattern,
+    };
+  }
+
+  return snakeCaseKeys(format.params);
 }
