@@ -10,7 +10,6 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/core-security-server",
-    "@kbn/core-http-server",
     "@kbn/screenshotting-plugin",
     "@kbn/screenshot-mode-plugin",
     "@kbn/logging",
