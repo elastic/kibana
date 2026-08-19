@@ -35309,7 +35309,7 @@ yoga-layout@~3.2.1:
   resolved "https://registry.yarnpkg.com/yoga-layout/-/yoga-layout-3.2.1.tgz#d2d1ba06f0e81c2eb650c3e5ad8b0b4adde1e843"
   integrity sha512-0LPOt3AxKqMdFBZA3HBAt/t/8vIKq7VaQYbuA8WxCgung+p9TVyKRYdpvCb80HcdTN2NkbIKbhNwKUfm3tQywQ==
 
-zip-lib@^1.4.0:
+zip-lib@1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/zip-lib/-/zip-lib-1.4.0.tgz#a79d997c424112237d24478164ba262b3c5e5ebf"
   integrity sha512-ZRdZqCUW/f9PmQXEYJZL5aI1ElWpOUG3J7TpJc4FqliT3mEUVw6lNRFZGym85+N35tTheO2B/WN/+oAY1QVyrA==
