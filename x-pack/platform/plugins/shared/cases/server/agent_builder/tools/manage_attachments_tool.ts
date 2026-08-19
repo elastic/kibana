@@ -15,7 +15,6 @@ import { addEventsStepCommonDefinition } from '../../../common/workflows/steps/a
 import { addCommentStepDefinition } from '../../workflows/steps/add_comment';
 import { addAlertsStepDefinition } from '../../workflows/steps/add_alerts';
 import { addEventsStepDefinition } from '../../workflows/steps/add_events';
-import { getAllAttachmentsStepDefinition } from '../../workflows/steps/get_all_attachments';
 import { addAttachmentsStepDefinition } from '../../workflows/steps/add_attachments';
 import type { UnifiedAttachmentTypeRegistry } from '../../attachment_framework/unified_attachment_registry';
 import { MAX_BULK_CREATE_ATTACHMENTS } from '../../../common/constants';
@@ -29,12 +28,6 @@ import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_att
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
-/**
- * The `type` values `add_attachments` accepts are whatever authorable
- * attachment types the registry holds — not just comments and alerts. Listing
- * them in the schema description stops the model from assuming the two example
- * shapes below are the only supported types.
- */
 const describeAttachmentsField = (authorableTypeIds: string[]): string => {
   const lines = [
     'For add_attachments: generic bulk attachment payloads (NOT limited to comments and alerts).',
@@ -55,22 +48,20 @@ const describeAttachmentsField = (authorableTypeIds: string[]): string => {
   return lines.join('\n');
 };
 
-const buildAttachmentsSchema = (authorableTypeIds: string[]) =>
+const buildManageAttachmentsSchema = (authorableTypeIds: string[]) =>
   z.object({
     mode: z
-      .enum(['add_comment', 'add_alerts', 'add_events', 'add_attachments', 'get_all'])
+      .enum(['add_comment', 'add_alerts', 'add_events', 'add_attachments'])
       .describe(
         'Required fields per mode:\n' +
           '- add_comment: case_id, comment\n' +
           '- add_alerts: case_id, alerts ({alertId, index, rule?}[])\n' +
           '- add_events: case_id, events ({eventId, index}[])\n' +
-          '- add_attachments: case_id, attachments (generic bulk; supports comments, alerts, and saved-object types like dashboards — see the `attachments` field)\n' +
-          '- get_all: case_id'
+          '- add_attachments: case_id, attachments (generic bulk; supports comments, alerts, and saved-object types like dashboards — see the `attachments` field)'
       ),
     ...addCommentStepCommonDefinition.inputSchema.partial().shape,
     ...addAlertsStepCommonDefinition.inputSchema.partial().shape,
     ...addEventsStepCommonDefinition.inputSchema.partial().shape,
-    // get_all only needs case_id — already covered above
     attachments: z
       .array(z.object({ type: z.string() }).loose())
       .min(1)
@@ -79,16 +70,8 @@ const buildAttachmentsSchema = (authorableTypeIds: string[]) =>
       .describe(describeAttachmentsField(authorableTypeIds)),
   });
 
-// Static schema used only for typing; the tool builds a schema with the
-// registry-derived type list at construction time (same shape, so the inferred
-// type is identical).
-const attachmentsSchema = buildAttachmentsSchema([]);
+const manageAttachmentsSchema = buildManageAttachmentsSchema([]);
 
-/**
- * Authorable attachment type IDs registered so far — those exposing a
- * `workflowSchema`/`schema` `ZodObject` (mirrors `selectAuthorableAttachmentSchemas`).
- * Built-in types are registered before this tool, so the list covers them.
- */
 const getAuthorableTypeIds = (registry: UnifiedAttachmentTypeRegistry): string[] =>
   registry
     .list()
@@ -96,19 +79,15 @@ const getAuthorableTypeIds = (registry: UnifiedAttachmentTypeRegistry): string[]
     .map(({ id }) => id)
     .sort();
 
-export const attachmentsTool = (
+export const manageAttachmentsTool = (
   getCasesClientFn: GetCasesClientFn,
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry,
   isCasesAttachmentsEnabled: boolean
-): BuiltinToolDefinition<typeof attachmentsSchema> => {
+): BuiltinToolDefinition<typeof manageAttachmentsSchema> => {
   const addCommentStepDef = addCommentStepDefinition(getCasesClientFn);
   const addAlertsStepDef = addAlertsStepDefinition(getCasesClientFn);
   const addEventsStepDef = addEventsStepDefinition(getCasesClientFn);
-  const getAllAttachmentsStepDef = getAllAttachmentsStepDefinition(getCasesClientFn);
 
-  // Built lazily on first use: the discriminated union must snapshot the
-  // registry after solution plugins have registered their attachment types
-  // (post-start), which is guaranteed by the time a handler runs.
   let addAttachmentsStepDef: ReturnType<typeof addAttachmentsStepDefinition>;
   const getAddAttachmentsStepDef = () => {
     if (addAttachmentsStepDef === undefined) {
@@ -120,16 +99,16 @@ export const attachmentsTool = (
     return addAttachmentsStepDef;
   };
 
-  const schema = buildAttachmentsSchema(
+  const schema = buildManageAttachmentsSchema(
     getAuthorableTypeIds(unifiedAttachmentTypeRegistry)
-  ) as typeof attachmentsSchema;
+  ) as typeof manageAttachmentsSchema;
 
   return {
-    id: platformCoreCasesTools.attachments,
+    id: platformCoreCasesTools.manageAttachments,
     type: ToolType.builtin,
-    description: `Case attachments. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps), \`get_all\` (fetch all comments, alerts, events). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
+    description: `Add attachments to cases. Modes: \`add_comment\` (user comment), \`add_alerts\` (link SIEM/detection alerts), \`add_events\` (link log/event docs), \`add_attachments\` (generic bulk — comments, alerts, and saved-object attachments like dashboards, lens, maps). See \`mode\` field for required inputs.\n\n${CASES_SOLUTION_CONTEXT_INSTRUCTION}${CASES_TOOL_TEXT_INSTRUCTION}`,
     annotations: {
-      title: 'Case Attachments',
+      title: 'Manage Case Attachments',
       readOnlyHint: false,
       destructiveHint: false,
       idempotentHint: false,
@@ -160,21 +139,16 @@ export const attachmentsTool = (
             }
             return invokeStepHandler(stepDef, { case_id, attachments }, toolContext);
           }
-          case 'get_all':
-            return invokeStepHandler(getAllAttachmentsStepDef, { case_id }, toolContext);
           default: {
             const _exhaustive: never = mode;
-            throw new Error(`Unknown attachments mode: ${_exhaustive}`);
+            throw new Error(`Unknown manage_attachments mode: ${_exhaustive}`);
           }
         }
       };
 
       const result = await runStep();
-      if (mode !== 'get_all') {
-        const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
-        return injectAttachmentIds(result, attachmentIds);
-      }
-      return result;
+      const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+      return injectAttachmentIds(result, attachmentIds);
     },
   };
 };
