@@ -101,4 +101,14 @@ export class BackgroundSearchPage {
   async waitForFlyout() {
     await this.managementTable.waitFor({ state: 'visible' });
   }
+
+  /**
+   * Restore the completed background search via the link in the completion toast. The wait is
+   * raised above the default because the toast only appears once Elasticsearch has finished the
+   * async search behind the 5s stalling filter these specs use.
+   */
+  async openCompletedSearchFromToast() {
+    await this.completedToastLink.waitFor({ state: 'visible', timeout: 30_000 });
+    await this.completedToastLink.click();
+  }
 }

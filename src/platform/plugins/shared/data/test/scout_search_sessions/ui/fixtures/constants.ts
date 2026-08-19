@@ -14,6 +14,8 @@ export const LOGSTASH_FUNCTIONAL_ARCHIVE =
 // Kibana archive paths — loaded per-space in spaceTest.beforeAll.
 export const DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_async/async_search.json';
+export const SESSION_IN_ANOTHER_SPACE_KBN_ARCHIVE =
+  'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/session_in_another_space';
 export const LENS_BASIC_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
 export const DISCOVER_DEFAULT_KBN_ARCHIVE =
@@ -29,6 +31,12 @@ export const FLIGHTS_SAMPLE_DATA_SET = 'flights';
 export const LOGSTASH_TIME_RANGE = {
   from: '2015-09-19T06:31:44.000Z',
   to: '2015-09-23T18:31:44.000Z',
+} as const;
+
+// Wider window used by the space-scoped archives.
+export const LOGSTASH_MONTH_TIME_RANGE = {
+  from: '2015-09-01T00:00:00.000Z',
+  to: '2015-10-01T00:00:00.000Z',
 } as const;
 
 /**
