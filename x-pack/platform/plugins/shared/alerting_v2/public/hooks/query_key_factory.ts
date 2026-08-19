@@ -37,8 +37,6 @@ export const ruleTemplateKeys = {
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
   }) => [...ruleTemplateKeys.lists(), filters] as const,
-  details: () => [...ruleTemplateKeys.all, 'details'] as const,
-  detail: (id: string) => [...ruleTemplateKeys.details(), id] as const,
 };
 
 export const workflowKeys = {
