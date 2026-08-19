@@ -226,7 +226,7 @@ describe('When a Console command is entered by the user', () => {
     await enterCommand('cmd6 --foo 234 --bar 123');
 
     expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-      'This command requires (only) one of the following arguments: foo, bar'
+      'This command requires (only) one of the following arguments: --foo, --bar'
     );
   });
 
@@ -431,7 +431,7 @@ describe('When a Console command is entered by the user', () => {
         await enterCommand('cmd-multi-exclusive --argA');
 
         expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-          'This command requires (only) one of the following arguments: argC, argD'
+          'This command requires (only) one of the following arguments: --argC, --argD'
         );
       });
 
@@ -440,7 +440,7 @@ describe('When a Console command is entered by the user', () => {
         await enterCommand('cmd-multi-exclusive --argA --argB --argC');
 
         expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
-          'This command requires (only) one of the following arguments: argA, argB'
+          'This command requires (only) one of the following arguments: --argA, --argB'
         );
       });
 
