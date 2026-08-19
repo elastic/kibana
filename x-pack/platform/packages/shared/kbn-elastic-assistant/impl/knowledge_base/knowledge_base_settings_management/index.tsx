@@ -31,7 +31,7 @@ import {
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
-import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useSearchParams } from '@kbn/shared-ux-router';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import { useKnowledgeBaseUpdater } from '../../assistant/settings/use_settings_updater/use_knowledge_base_updater';
 import { ProductDocumentationManagement } from '../../assistant/settings/product_documentation';
