@@ -54,6 +54,8 @@ fi
 
 # Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
 echo "--- Clearing yarn cache"
-rm -rf /opt/buildkite-agent/.cache/yarn
+echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
+echo 'Removing /opt/buildkite-agent/.yarn-local-mirror' && rm -rf /opt/buildkite-agent/.yarn-local-mirror
+echo 'Removing ./.yarn-local-mirror' && rm -rf ./.yarn-local-mirror
 echo "Available disk space after clearing yarn cache:"
 df -h . || echo "Failed to get disk space"
