@@ -19,6 +19,9 @@ import { disableRuleStepDefinition } from './disable_rule_step/disable_rule_step
 import { createRuleExceptionStepDefinition } from './create_rule_exception_step/create_rule_exception_step';
 import { createExceptionListItemStepDefinition } from './create_exception_list_item_step/create_exception_list_item_step';
 import { createNoteStepDefinition } from './create_note_step/create_note_step';
+import { deleteNoteStepDefinition } from './delete_note_step/delete_note_step';
+import { getNotesStepDefinition } from './get_notes_step/get_notes_step';
+import { updateNoteStepDefinition } from './update_note_step/update_note_step';
 /**
  * Registers all security workflow steps with the workflowsExtensions plugin.
  */
@@ -38,4 +41,7 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(createRuleExceptionStepDefinition);
   workflowsExtensions.registerStepDefinition(createExceptionListItemStepDefinition);
   workflowsExtensions.registerStepDefinition(createNoteStepDefinition);
+  workflowsExtensions.registerStepDefinition(deleteNoteStepDefinition);
+  workflowsExtensions.registerStepDefinition(getNotesStepDefinition);
+  workflowsExtensions.registerStepDefinition(updateNoteStepDefinition);
 };

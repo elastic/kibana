@@ -5,7 +5,32 @@
  * 2.0.
  */
 
+import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
+import { FF_MIGRATE_LEGACY_SECURITY_ASSETS } from '../common';
+
+export const featureFlags: FeatureFlagDefinitions = [
+  {
+    key: FF_MIGRATE_LEGACY_SECURITY_ASSETS,
+    name: 'Migrate Entity Store legacy Security-scoped indices',
+    description:
+      'When enabled, existing `.entities.v2.*.security_{space}` assets may be migrated to solution-neutral names. Reads and writes stay on the old concrete index until that index is deleted. Keep this off until the upgrade path is verified on a large environment.',
+    tags: ['entity-store', 'security-entity-analytics'],
+    variationType: 'boolean',
+    variations: [
+      {
+        name: 'Enabled',
+        description: 'Legacy Security-scoped assets may be migrated',
+        value: true,
+      },
+      {
+        name: 'Disabled',
+        description: 'Keep reads and writes on the old concrete indices',
+        value: false,
+      },
+    ],
+  },
+];
 
 export type {
   EntityStoreSetupContract,

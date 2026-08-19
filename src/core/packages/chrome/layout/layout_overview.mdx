@@ -123,5 +123,7 @@ application area rather than the full viewport:
 - **Push flyouts** apply padding to the application scroll container instead of `body`, keeping
   app content aligned with the layout grid.
 
-These overrides live in `GridLayoutGlobalStyles` and are temporary workarounds until EUI offers
-first-class layout-aware flyout positioning.
+These overrides live in `GridLayoutGlobalStyles` from `@kbn/ui-chrome-layout` and are temporary
+workarounds until EUI offers first-class layout-aware flyout positioning. Kibana-specific DOM
+selectors, legacy `--kbn*` variables, and the fixed chart viewport are applied separately by
+`KibanaGridLayoutGlobalStyles` in `@kbn/core-chrome-layout`.
