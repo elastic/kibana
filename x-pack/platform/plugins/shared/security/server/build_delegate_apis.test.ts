@@ -224,6 +224,7 @@ describe('buildSecurityApi', () => {
     it('returns the result from the service', async () => {
       const created = {
         id: 'service-account-id',
+        type: 'project' as const,
         name: 'nightshift-relay',
         organization_id: 'organization-id',
         role_assignments: {},
