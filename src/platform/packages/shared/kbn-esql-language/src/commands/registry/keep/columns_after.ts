@@ -23,7 +23,13 @@ export const columnsAfter = (
     },
   });
 
-  return previousColumns.filter((field) => {
-    return columnsToKeep.some((column) => column === field.name);
+  const columnsByName = new Map(previousColumns.map((column) => [column.name, column]));
+
+  // If `previousColumns` is `[a, b]`, `KEEP b, a` must return `[b, a]`.
+  // Multi-column IN uses this order to compare the fields on each side.
+  return columnsToKeep.flatMap((name) => {
+    const column = columnsByName.get(name);
+
+    return column ? [column] : [];
   });
 };

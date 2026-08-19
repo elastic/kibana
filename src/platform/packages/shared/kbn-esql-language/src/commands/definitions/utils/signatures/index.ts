@@ -16,6 +16,7 @@ export {
 
 export {
   argMatchesParamType,
+  areCompatibleStringTypes,
   getMatchingSignatures,
   PARAM_TYPES_THAT_SUPPORT_IMPLICIT_STRING_CASTING,
   pairKeywordAndTextTypes,

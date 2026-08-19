@@ -1191,6 +1191,72 @@ describe('autocomplete', () => {
 
   describe('IN operator with lists', () => {
     testSuggestions('FROM a | WHERE integerField IN (doubleField /', [{ text: ',' }]);
+    testSuggestions('FROM index | WHERE integerField IN (1, 2) /', [
+      '\n',
+      'AND $0',
+      'OR $0',
+      '| ',
+    ]);
+
+    it('suggests expressions inside an incomplete multi-column tuple', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('FROM index | WHERE (keywordField, /');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(suggestions.some(({ kind }) => kind === 'Variable')).toBe(true);
+      expect(suggestions.some(({ kind }) => kind === 'Function')).toBe(true);
+      sourceCommands.forEach((command) => expect(labels).not.toContain(command.toUpperCase()));
+    });
+
+    testSuggestions('FROM index | WHERE (keywordField, textField) /', ['IN $0', 'NOT IN $0']);
+
+    it('keeps standard operators after a parenthesized single-column expression', async () => {
+      const { suggest: suggestFn } = await setup();
+      const labels = (await suggestFn('FROM index | WHERE (keywordField) /')).map(
+        ({ label }) => label
+      );
+
+      expect(labels).toEqual(expect.arrayContaining(['==', 'IN']));
+      expect(labels).not.toContain(',');
+    });
+
+    it('suggests a comma alongside operators inside a parenthesized expression', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('FROM index | WHERE (keywordField /)');
+      const labels = suggestions.map(({ label }) => label);
+      const commaSuggestion = suggestions.find(({ label }) => label === ',');
+
+      expect(labels).toEqual(expect.arrayContaining([',', '==', 'IN']));
+      expect(commaSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
+    });
+
+    it('suggests a comma after a complete tuple item', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('FROM index | WHERE (keywordField, textField /)');
+      const commaSuggestion = suggestions.find(({ label }) => label === ',');
+
+      expect(commaSuggestion?.command?.id).toBe('editor.action.triggerSuggest');
+    });
+
+    it('keeps tuple operators while typing their prefix', async () => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn('FROM index | WHERE (keywordField, textField) I/');
+      const labels = suggestions.map(({ label }) => label);
+
+      expect(labels).toContain('IN');
+      sourceCommands.forEach((command) => expect(labels).not.toContain(command.toUpperCase()));
+    });
+
+    it.each(['IN', 'NOT IN'])('suggests right-hand operands after tuple %s', async (operator) => {
+      const { suggest: suggestFn } = await setup();
+      const suggestions = await suggestFn(
+        `FROM index | WHERE (keywordField, textField, integerField) ${operator} /`
+      );
+
+      expect(suggestions.map(({ text }) => text).sort()).toEqual(
+        ['($0)', '(FROM $0)', '(ROW $0)', '(TS $0)'].sort()
+      );
+    });
 
     testSuggestions('FROM index | WHERE doubleField IN (ROW /)', [
       'col0 = ',

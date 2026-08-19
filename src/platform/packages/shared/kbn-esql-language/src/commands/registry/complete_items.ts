@@ -231,6 +231,7 @@ export const commaCompleteItem = buildCharCompleteItem(
   }),
   { quoted: false, category: SuggestionCategory.COMMA }
 );
+export const commaWithAutoSuggestCompleteItem = withAutoSuggest(commaCompleteItem);
 
 export const promqlByCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'by',
