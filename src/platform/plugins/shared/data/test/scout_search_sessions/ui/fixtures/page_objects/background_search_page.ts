@@ -17,6 +17,7 @@ import type { Locator, ScoutPage } from '@kbn/scout';
  */
 export const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutButton';
 
+const FLYOUT_CLOSE_BUTTON = 'euiFlyoutCloseButton';
 const SUBMIT_BUTTON = 'querySubmitButton';
 const CANCEL_BUTTON = 'queryCancelButton';
 // While a search is in flight the split button switches from `querySubmitButton-*` to
@@ -100,6 +101,11 @@ export class BackgroundSearchPage {
   /** Wait for the flyout's background search table to render. */
   async waitForFlyout() {
     await this.managementTable.waitFor({ state: 'visible' });
+  }
+
+  async closeFlyout() {
+    await this.page.testSubj.locator(FLYOUT_CLOSE_BUTTON).click();
+    await this.managementTable.waitFor({ state: 'hidden' });
   }
 
   /**
