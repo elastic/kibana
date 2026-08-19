@@ -14,6 +14,7 @@ import type {
   ConversationOrigin,
   RoundCompleteEvent,
   ConversationAction,
+  UserIdAndName,
 } from '@kbn/agent-builder-common';
 import {
   ConversationParentRelation,
@@ -34,7 +35,13 @@ export const createConversation$ = ({
 }: {
   conversation: Pick<
     Conversation,
-    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation_id' | 'read_only'
+    | 'id'
+    | 'agent_id'
+    | 'access_control'
+    | 'origin'
+    | 'user'
+    | 'parent_conversation_id'
+    | 'read_only'
   >;
   conversationClient: ConversationClient;
   title$: Observable<string>;
@@ -260,12 +267,12 @@ export const getConversation = async ({
 /**
  * Sentinel user attached to a placeholder conversation.
  */
-export const PLACEHOLDER_USER: Conversation['user'] = {
+export const PLACEHOLDER_USER: UserIdAndName = {
   id: 'unknown',
   username: 'unknown',
 };
 
-export const isPlaceholderUser = (user: Conversation['user'] | undefined): boolean => {
+export const isPlaceholderUser = (user: UserIdAndName | undefined): boolean => {
   return user?.id === PLACEHOLDER_USER.id && user?.username === PLACEHOLDER_USER.username;
 };
 
