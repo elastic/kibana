@@ -60,10 +60,10 @@ export const durationFormatSchema = z
         title: 'Output precision',
         description: 'The number of decimal places to display in the duration value.',
       }),
-      show_suffix: z.boolean().default(true).optional().meta({
+      show_suffix: z.boolean().optional().meta({
         title: 'Show suffix',
         description:
-          'When true or not provided, the formatted duration includes a suffix (such as "seconds", "milliseconds", or "years"). When false, no suffix is shown.',
+          'When true, the formatted duration includes a suffix (such as "seconds", "milliseconds", or "years"). When false or not provided, no suffix is shown.',
       }),
       use_short_suffix: z.boolean().default(false).optional().meta({
         title: 'Use short suffix',

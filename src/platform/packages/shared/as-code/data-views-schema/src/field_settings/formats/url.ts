@@ -13,7 +13,7 @@ const baseSubtypeOptionsSchema = z.object({
   url_template: z.string().optional().meta({
     title: 'URL template',
     description:
-      'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}} and {{rawValue}}. For example: "https://example.com/{{value}}".',
+      'The template to use for the URL. The template is a string that contains the field value. The field value is replaced with the template. The available placeholders are: {{value}}, {{rawValue}} and {{risonValue}}. Use {{risonValue}} when embedding the field value inside Kibana app URL rison state (for example: query:\'{{risonValue}}\'). For example: "https://example.com/{{value}}".',
   }),
   label_template: z.string().optional().meta({
     title: 'Label template',

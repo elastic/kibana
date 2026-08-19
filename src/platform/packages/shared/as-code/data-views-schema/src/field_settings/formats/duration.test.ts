@@ -54,7 +54,6 @@ describe('formatSchema', () => {
           input_format: 'seconds',
           output_format: 'as_minutes',
           output_precision: 2,
-          show_suffix: true,
           use_short_suffix: false,
           include_space_with_suffix: true,
         },
