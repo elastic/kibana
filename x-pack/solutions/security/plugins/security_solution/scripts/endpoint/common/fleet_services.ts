@@ -537,27 +537,23 @@ export const getAgentVersionMatchingCurrentStack = async (
       return axios
         .get('https://artifacts-api.elastic.co/v1/versions')
         .catch(catchAxiosErrorFormatAndThrow)
-        .then((response) =>
-          map(
-            response.data.versions.filter(isValidArtifactVersion),
-            (version) => version.split('-SNAPSHOT')[0]
-          )
-        );
+        .then((response) => response.data.versions.filter(isValidArtifactVersion));
     },
     { maxTimeout: 10000 }
   );
 
   let version =
-    semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
-    kbnStatus.version.number;
+    semver.maxSatisfying(
+      map(agentVersions, (agentVersion) => agentVersion.split('-SNAPSHOT')[0]),
+      `<=${kbnStatus.version.number}`
+    ) ?? kbnStatus.version.number;
 
-  // Add `-SNAPSHOT` if version indicates it was from a snapshot or the build hash starts
-  // with `xxxxxxxxx` (value that seems to be present when running kibana from source)
+  const snapshotVersion = `${version}-SNAPSHOT`;
   if (
-    kbnStatus.version.build_snapshot ||
-    kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX')
+    agentVersions.includes(snapshotVersion) &&
+    (kbnStatus.version.build_snapshot || kbnStatus.version.build_hash.startsWith('XXXXXXXXXXXXXXX'))
   ) {
-    version += '-SNAPSHOT';
+    version = snapshotVersion;
   }
 
   return version;
