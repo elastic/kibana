@@ -25,9 +25,7 @@ spaceTest.describe('data drift data view flows', { tag: tags.stateful.classic },
   });
 
   spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
-    await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
     await mlTestResources.deleteDataViewByTitle('ft_fare*,ft_fareq*', scoutSpace.id);
-    await mlTestResources.deleteDataViewByTitle('ft_ihp_outlier', scoutSpace.id);
     await mlTestResources.deleteDataViewByTitle('ft_fare*_picker_test', scoutSpace.id);
     await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
   });

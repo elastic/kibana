@@ -28,7 +28,6 @@ spaceTest.describe('index based with module sample logs', { tag: tags.stateful.c
   });
 
   spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
-    await mlTestResources.deleteDataViewByTitle('ft_module_sample_logs', scoutSpace.id);
     await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
   });
 

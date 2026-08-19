@@ -259,19 +259,28 @@ export class DataDrift {
   }
 
   async setIndexPatternInput(id: SubjectId, pattern: string) {
-    const hasWildCard = pattern.endsWith('*');
-    const trimmedPattern = hasWildCard ? pattern.slice(0, -1) : pattern;
-    const inputTestSubj = `mlDataDriftIndexPatternTitleInput-${id}`;
+    const input = this.indexPatternInput(id);
+    await input.waitFor({ state: 'visible' });
 
-    await this.page.testSubj.clearInput(inputTestSubj);
-    await this.page.testSubj.typeWithDelay(inputTestSubj, trimmedPattern);
+    // fill() commits the full value in one input event, so the field's first-character
+    // auto-append of "*" does not run. typeWithDelay uses insertText, which can update
+    // the DOM without React state and leave this controlled input empty.
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      if (attempt > 1) {
+        await input.fill('');
+      }
+      await input.fill(pattern);
 
-    if (!hasWildCard) {
-      await this.indexPatternInput(id).focus();
-      await this.page.keyboard.press('Delete');
+      try {
+        await this.waitForIndexPatternInput(id, pattern);
+        return;
+      } catch (error) {
+        if (attempt === maxAttempts) {
+          throw error;
+        }
+      }
     }
-
-    await this.waitForIndexPatternInput(id, pattern);
   }
 
   async waitForAnalyzeWithoutSavingButtonHidden() {

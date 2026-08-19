@@ -89,8 +89,6 @@ spaceTest.describe('index based random sampler controls', { tag: tags.stateful.c
 
   spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
     await mlTestResources.deleteSavedSearches(scoutSpace.id);
-    await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
-    await mlTestResources.deleteDataViewByTitle('ft_module_sample_logs', scoutSpace.id);
     await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
   });
 

@@ -32,8 +32,6 @@ spaceTest.describe(
 
     spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
       await mlTestResources.deleteSavedSearches(scoutSpace.id);
-      await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
-      await mlTestResources.deleteDataViewByTitle('ft_ihp_outlier', scoutSpace.id);
       await mlTestResources.resetKibanaTimeZone(scoutSpace.id);
     });
 

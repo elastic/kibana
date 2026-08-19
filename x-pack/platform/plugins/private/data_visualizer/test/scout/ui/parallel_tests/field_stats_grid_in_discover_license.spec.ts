@@ -60,9 +60,8 @@ spaceTest.describe(
       await pageObjects.discover.setQueryMode('classic');
     });
 
-    spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
+    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(testData.SHOW_FIELD_STATISTICS);
-      await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
     });
 
     spaceTest(

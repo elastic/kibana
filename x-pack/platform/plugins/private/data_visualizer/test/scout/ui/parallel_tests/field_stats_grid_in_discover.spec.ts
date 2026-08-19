@@ -108,8 +108,6 @@ spaceTest.describe('field statistics in Discover', { tag: tags.stateful.classic 
   spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
     await scoutSpace.uiSettings.unset(testData.SHOW_FIELD_STATISTICS);
     await mlTestResources.deleteSavedSearches(scoutSpace.id);
-    await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
-    await mlTestResources.deleteDataViewByTitle('ft_module_sample_logs', scoutSpace.id);
   });
 
   spaceTest.skip(

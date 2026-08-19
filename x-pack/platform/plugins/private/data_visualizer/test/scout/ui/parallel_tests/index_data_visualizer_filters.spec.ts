@@ -222,7 +222,6 @@ spaceTest.describe(
 
     spaceTest.afterAll(async ({ mlTestResources, scoutSpace }) => {
       await mlTestResources.deleteSavedSearches(scoutSpace.id);
-      await mlTestResources.deleteDataViewByTitle('ft_farequote', scoutSpace.id);
     });
 
     spaceTest(
