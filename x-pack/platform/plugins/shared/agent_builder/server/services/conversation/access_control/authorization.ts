@@ -10,11 +10,16 @@ import { ConversationAccessControlMode } from '@kbn/agent-builder-common';
 
 export type ConversationAccess = 'converse' | 'owner' | 'rename' | 'delete' | 'updateAccessControl';
 
+interface ConversationOwner {
+  userId?: string;
+  username: string;
+}
+
 export const isConversationOwner = ({
   owner,
   user,
 }: {
-  owner: { userId?: string; username: string };
+  owner: ConversationOwner;
   user: CurrentUser;
 }): boolean => {
   if (owner.userId !== undefined && user.id !== undefined) {

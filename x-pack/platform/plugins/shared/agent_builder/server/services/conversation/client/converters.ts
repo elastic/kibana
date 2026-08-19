@@ -49,6 +49,15 @@ export type Document = Omit<
   _source: ConversationProperties;
 };
 
+export const isConversationDocument = (hit: Partial<Document>): hit is Document => {
+  return (
+    hit._id !== undefined &&
+    hit._source !== undefined &&
+    hit._seq_no !== undefined &&
+    hit._primary_term !== undefined
+  );
+};
+
 const convertBaseFromEs = (document: Document) => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');

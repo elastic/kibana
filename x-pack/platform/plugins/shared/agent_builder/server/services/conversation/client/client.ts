@@ -70,7 +70,14 @@ import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/v
 import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
-import { fromEs, fromEsWithoutRounds, toEs, createRequestToEs, type Document } from './converters';
+import {
+  fromEs,
+  fromEsWithoutRounds,
+  toEs,
+  createRequestToEs,
+  isConversationDocument,
+  type Document,
+} from './converters';
 
 /** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
 const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
@@ -234,9 +241,13 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) =>
-      this.withPermissions(withDeserializedMetadata(fromEsWithoutRounds(hit as Document)))
-    );
+    return response.hits.hits.map((hit) => {
+      if (!isConversationDocument(hit)) {
+        throw createInternalError('Conversation list search returned an incomplete hit');
+      }
+
+      return this.withPermissions(withDeserializedMetadata(fromEsWithoutRounds(hit)));
+    });
   }
 
   async get(conversationId: string): Promise<WithPermissions<Conversation>> {
@@ -267,10 +278,14 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    const hit = response.hits.hits[0] as Document | undefined;
+    const hit = response.hits.hits[0];
 
-    if (!hit || !hit._id) {
+    if (!hit) {
       return undefined;
+    }
+
+    if (!isConversationDocument(hit)) {
+      throw createInternalError('Conversation origin search returned an incomplete hit');
     }
 
     try {
@@ -645,13 +660,11 @@ class ConversationClientImpl implements ConversationClient {
       return undefined;
     }
 
-    const { _seq_no: seqNo, _primary_term: primaryTerm } = hit;
-
-    if (seqNo === undefined || primaryTerm === undefined) {
+    if (!isConversationDocument(hit)) {
       throw createInternalError(`Conversation ${conversationId} was read without version metadata`);
     }
 
-    return { ...(hit as Document), _seq_no: seqNo, _primary_term: primaryTerm };
+    return hit;
   }
 
   /**

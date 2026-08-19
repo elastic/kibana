@@ -22,7 +22,7 @@ import type { ConversationTemplate, SerializedMetadataValue } from '@kbn/agent-b
 import type { AgentRegistry } from '../../agents/agent_registry';
 import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
-import { type Document } from './converters';
+import type { Document } from './converters';
 
 jest.mock('../templates/registry');
 import { getTemplate } from '../templates/registry';
