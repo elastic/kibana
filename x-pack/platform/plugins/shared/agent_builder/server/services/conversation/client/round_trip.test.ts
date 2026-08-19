@@ -29,6 +29,8 @@ const baseRound = (overrides: Partial<ConversationRound> = {}): ConversationRoun
   id: 'round-1',
   status: ConversationRoundStatus.completed,
   input: { message: 'hello' },
+  // Every real round is stamped with a Kibana-user author (here, the conversation owner).
+  author: { id: 'user-1', username: 'alice' },
   steps: [],
   response: { message: 'hi there' },
   started_at: '2026-01-01T00:00:00.000Z',
@@ -100,20 +102,20 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
       status: ConversationRoundStatus.awaitingPrompt,
       pending_prompts: [{ id: 'p1' }] as unknown as PromptRequest[],
       state: { agent: { nodes: [] } } as unknown as ConversationRound['state'],
+      // A paused run has no final response yet.
+      response: { message: '' },
     });
+    expect(roundTrip([round])).toEqual([round]);
+  });
+
+  it('preserves a Kibana-user author distinct from the conversation owner (shared conversation)', () => {
+    const round = baseRound({ author: { id: 'kibana-user-2', username: 'bob' } });
     expect(roundTrip([round])).toEqual([round]);
   });
 
   describe('accepted, documented losses', () => {
     it('drops an in-progress round (the run has no terminal event yet)', () => {
       expect(roundTrip([baseRound({ status: ConversationRoundStatus.inProgress })])).toEqual([]);
-    });
-
-    it('collapses a Kibana-user author (author set, no origin) to the conversation owner', () => {
-      const round = baseRound({ author: { id: 'kibana-user-2', username: 'bob' } });
-      const [reconstructed] = roundTrip([round]);
-      // The author is not recoverable from a `user`-type actor, so it is dropped.
-      expect(reconstructed.author).toBeUndefined();
     });
   });
 });

@@ -39,7 +39,7 @@ const baseConversation = (rounds: ConversationRound[]): Conversation => ({
 });
 
 describe('roundsToEvents', () => {
-  it('maps a completed round to user_message + execution_started + execution_completed', () => {
+  it('maps a completed round to user_message + execution_started + execution_terminated(responded)', () => {
     const events = roundsToEvents(baseConversation([baseRound()]));
 
     expect(events).toHaveLength(3);
@@ -58,18 +58,18 @@ describe('roundsToEvents', () => {
       actor: { type: EventActorType.agent, id: 'agent-1' },
     });
     expect(events[2]).toMatchObject({
-      id: 'round-1::execution_completed',
-      type: TimelineEventType.executionCompleted,
+      id: 'round-1::execution_terminated',
+      type: TimelineEventType.executionTerminated,
       // started_at (00.000Z) + time_to_last_token (20ms), not the same instant as the start.
       created_at: '2026-01-01T00:00:00.020Z',
       execution_id: 'round-1::execution',
       trigger_event_id: 'round-1::user_message',
       actor: { type: EventActorType.agent, id: 'agent-1' },
       data: {
-        response: { message: 'hi there' },
         model_usage: { input_tokens: 5, output_tokens: 7 },
         time_to_first_token: 10,
         time_to_last_token: 20,
+        outcome: { type: 'responded', response: { message: 'hi there' } },
       },
     });
   });
@@ -85,7 +85,7 @@ describe('roundsToEvents', () => {
     ]);
   });
 
-  it('maps an awaiting-prompt round to user_message + execution_started + prompt_requested', () => {
+  it('maps an awaiting-prompt round to user_message + execution_started + execution_terminated(prompt_requested)', () => {
     const prompts = [{ id: 'p1' }] as unknown as PromptRequest[];
     const events = roundsToEvents(
       baseConversation([
@@ -99,14 +99,15 @@ describe('roundsToEvents', () => {
       type: TimelineEventType.executionStarted,
     });
     expect(events[2]).toMatchObject({
-      id: 'round-1::prompt_requested',
-      type: TimelineEventType.promptRequested,
+      id: 'round-1::execution_terminated',
+      type: TimelineEventType.executionTerminated,
       trigger_event_id: 'round-1::user_message',
+      // The paused terminal carries the run summary; the prompts live on the outcome.
       data: {
-        prompts,
         model_usage: { input_tokens: 5, output_tokens: 7 },
         time_to_first_token: 10,
         time_to_last_token: 20,
+        outcome: { type: 'prompt_requested', prompts },
       },
     });
   });
@@ -139,10 +140,10 @@ describe('roundsToEvents', () => {
     expect(first).toEqual([
       'round-1::user_message',
       'round-1::execution_started',
-      'round-1::execution_completed',
+      'round-1::execution_terminated',
       'round-2::user_message',
       'round-2::execution_started',
-      'round-2::execution_completed',
+      'round-2::execution_terminated',
     ]);
   });
 });

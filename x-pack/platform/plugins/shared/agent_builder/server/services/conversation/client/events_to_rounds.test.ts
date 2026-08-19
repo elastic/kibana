@@ -21,6 +21,8 @@ const baseRound = (overrides: Partial<ConversationRound> = {}): ConversationRoun
   id: 'round-1',
   status: ConversationRoundStatus.completed,
   input: { message: 'hello' },
+  // Every real round is stamped with a Kibana-user author (here, the conversation owner).
+  author: { id: 'user-1', username: 'alice' },
   steps: [],
   response: { message: 'hi there' },
   started_at: '2026-01-01T00:00:00.000Z',
@@ -53,6 +55,8 @@ describe('eventsToRounds', () => {
     const round = baseRound({
       status: ConversationRoundStatus.awaitingPrompt,
       pending_prompts: prompts,
+      // A paused run has no final response; the event model carries none, so it reconstructs empty.
+      response: { message: '' },
     });
 
     expect(eventsToRounds(roundsToEvents(baseConversation([round])))).toEqual([round]);
@@ -81,17 +85,17 @@ describe('eventsToRounds', () => {
       },
       {
         id: 'ec',
-        type: TimelineEventType.executionCompleted,
+        type: TimelineEventType.executionTerminated,
         created_at: '2026-01-01T00:00:01.000Z',
         actor: { type: EventActorType.agent, id: 'agent-1' },
         execution_id: 'exec-abc',
         trigger_event_id: 'um',
         data: {
-          response: { message: 'yo' },
           steps: [],
           model_usage: { connector_id: '', llm_calls: 0, input_tokens: 0, output_tokens: 0 },
           time_to_first_token: 0,
           time_to_last_token: 0,
+          outcome: { type: 'responded', response: { message: 'yo' } },
         },
       },
     ];
@@ -99,7 +103,7 @@ describe('eventsToRounds', () => {
     expect(eventsToRounds(events)[0].id).toBe('exec-abc');
   });
 
-  it('skips an execution with no completed or prompt_requested terminal (failed/aborted)', () => {
+  it('skips an execution with no execution_terminated event (failed/aborted/still running)', () => {
     const events: TimelineEvent[] = [
       {
         id: 'um',

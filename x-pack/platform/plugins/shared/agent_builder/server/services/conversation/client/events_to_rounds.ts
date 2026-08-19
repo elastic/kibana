@@ -8,8 +8,7 @@
 import type {
   ConversationRound,
   ConversationRoundAuthor,
-  ExecutionCompletedEvent,
-  PromptRequestedEvent,
+  ExecutionTerminatedEvent,
   RoundInput,
   TimelineEvent,
   UserMessageEvent,
@@ -27,14 +26,14 @@ const EXECUTION_ID_SUFFIX = '::execution';
  * `execution_id`, links each execution to the `user_message` that triggered it, and rebuilds one
  * round per execution, in round order.
  *
- * Best-effort: the rounds model cannot represent everything the timeline can. These are accepted,
- * documented losses:
+ * Authorship (Kibana-user and external) round-trips: the round `author` (and `origin`, for external)
+ * is recovered from the `user_message` actor. A round that carried no explicit author is attributed
+ * to its actor, i.e. the conversation owner — in practice every round is stamped with an author.
+ *
+ * Best-effort: the rounds model cannot represent everything the timeline can. These remain losses:
  * - `execution_failed` / `execution_aborted` and still-running executions (no terminal event) have
  *   no round equivalent and are skipped.
  * - `trigger_type` is not recoverable.
- * - Only an `external` author round-trips. A Kibana-user author on a shared conversation (author set,
- *   no origin) is emitted as a `user` actor and cannot be told apart from the owner here, so the
- *   reconstructed round attributes the message to the conversation owner.
  */
 export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => {
   const byId = new Map(events.map((event) => [event.id, event]));
@@ -62,15 +61,11 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
     }
     const userMessage = trigger as UserMessageEvent;
 
-    const completed = group.find((event) => event.type === TimelineEventType.executionCompleted) as
-      | ExecutionCompletedEvent
-      | undefined;
-    const promptRequested = group.find(
-      (event) => event.type === TimelineEventType.promptRequested
-    ) as PromptRequestedEvent | undefined;
+    const terminated = group.find(
+      (event) => event.type === TimelineEventType.executionTerminated
+    ) as ExecutionTerminatedEvent | undefined;
 
-    // A failed or aborted execution has no round equivalent.
-    if (!completed && !promptRequested) {
+    if (!terminated) {
       continue;
     }
 
@@ -79,9 +74,7 @@ export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => 
       input: toRoundInput(userMessage),
       started_at: userMessage.created_at,
       ...authorAndOrigin(userMessage),
-      ...(completed
-        ? completedRoundFields(completed.data)
-        : awaitingPromptRoundFields(promptRequested!.data)),
+      ...terminatedRoundFields(terminated.data),
     });
   }
 
@@ -103,7 +96,8 @@ const authorAndOrigin = (
   userMessage: UserMessageEvent
 ): Pick<ConversationRound, 'author' | 'origin'> => {
   const { actor } = userMessage;
-  if (actor.type !== EventActorType.external) {
+  // Only user/external actors carry round authorship; origin is present for external actors only.
+  if (actor.type !== EventActorType.user && actor.type !== EventActorType.external) {
     return {};
   }
   const author: ConversationRoundAuthor = {
@@ -114,57 +108,14 @@ const authorAndOrigin = (
   return { author, ...(actor.origin ? { origin: actor.origin } : {}) };
 };
 
-/** The run summary shared by both terminals (`execution_completed` and `prompt_requested`). */
-const runSummaryFields = (
-  data: ExecutionCompletedEvent['data']
-): Pick<
-  ConversationRound,
-  | 'response'
-  | 'steps'
-  | 'model_usage'
-  | 'time_to_first_token'
-  | 'time_to_last_token'
-  | 'trace_id'
-  | 'state'
-  | 'configuration_overrides'
-> => ({
-  response: data.response,
-  steps: data.steps,
-  model_usage: data.model_usage,
-  time_to_first_token: data.time_to_first_token,
-  time_to_last_token: data.time_to_last_token,
-  ...(data.trace_id ? { trace_id: data.trace_id } : {}),
-  ...(data.state ? { state: data.state } : {}),
-  ...(data.configuration_overrides
-    ? { configuration_overrides: data.configuration_overrides }
-    : {}),
-});
-
-const completedRoundFields = (
-  data: ExecutionCompletedEvent['data']
+/** Rebuild a round's terminal fields from an `execution_terminated` event's summary + outcome. */
+const terminatedRoundFields = (
+  data: ExecutionTerminatedEvent['data']
 ): Pick<
   ConversationRound,
   | 'status'
   | 'response'
-  | 'steps'
-  | 'model_usage'
-  | 'time_to_first_token'
-  | 'time_to_last_token'
-  | 'trace_id'
-  | 'state'
-  | 'configuration_overrides'
-> => ({
-  status: ConversationRoundStatus.completed,
-  ...runSummaryFields(data),
-});
-
-const awaitingPromptRoundFields = (
-  data: PromptRequestedEvent['data']
-): Pick<
-  ConversationRound,
-  | 'status'
   | 'pending_prompts'
-  | 'response'
   | 'steps'
   | 'model_usage'
   | 'time_to_first_token'
@@ -172,8 +123,29 @@ const awaitingPromptRoundFields = (
   | 'trace_id'
   | 'state'
   | 'configuration_overrides'
-> => ({
-  status: ConversationRoundStatus.awaitingPrompt,
-  pending_prompts: data.prompts,
-  ...runSummaryFields(data),
-});
+> => {
+  const { outcome } = data;
+  const summary = {
+    steps: data.steps,
+    model_usage: data.model_usage,
+    time_to_first_token: data.time_to_first_token,
+    time_to_last_token: data.time_to_last_token,
+    ...(data.trace_id ? { trace_id: data.trace_id } : {}),
+    ...(data.state ? { state: data.state } : {}),
+    ...(data.configuration_overrides
+      ? { configuration_overrides: data.configuration_overrides }
+      : {}),
+  };
+
+  if (outcome.type === 'responded') {
+    return { ...summary, status: ConversationRoundStatus.completed, response: outcome.response };
+  }
+
+  // A paused (HITL) run has no response; the rounds model represents it as awaiting_prompt.
+  return {
+    ...summary,
+    status: ConversationRoundStatus.awaitingPrompt,
+    pending_prompts: outcome.prompts,
+    response: { message: '' },
+  };
+};

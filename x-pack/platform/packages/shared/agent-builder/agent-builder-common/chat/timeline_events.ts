@@ -82,8 +82,7 @@ export enum TimelineEventType {
   promptResponse = 'prompt_response',
   // Execution lifecycle
   executionStarted = 'execution_started',
-  promptRequested = 'prompt_requested',
-  executionCompleted = 'execution_completed',
+  executionTerminated = 'execution_terminated',
   executionFailed = 'execution_failed',
   executionAborted = 'execution_aborted',
 }
@@ -156,22 +155,11 @@ export type ExecutionStartedEvent = BaseTimelineEvent<
   ExecutionStartedEventData
 >;
 
-/** The agent paused to ask a human. Terminal for the paused run, the same as `execution_completed`.*/
-export interface PromptRequestedEventData extends ExecutionCompletedEventData {
-  /** The open questions the run is waiting on. */
-  prompts: PromptRequest[];
-}
-export type PromptRequestedEvent = BaseTimelineEvent<
-  TimelineEventType.promptRequested,
-  PromptRequestedEventData
->;
-
 /**
- * The terminal event of a successful run and the source of truth for it.
+ * The run summary: everything describing the execution itself, independent of how it ended. The
+ * outcome (a response, or a pause to ask the human) lives on `ExecutionTerminatedEventData.outcome`.
  */
-export interface ExecutionCompletedEventData {
-  /** The final assistant response. */
-  response: AssistantResponse;
+export interface ExecutionRunSummary {
   /** The intermediate steps (tool calls, reasoning, etc.). */
   steps: ConversationRoundStep[];
   /** Model usage statistics for the run. */
@@ -187,9 +175,24 @@ export interface ExecutionCompletedEventData {
   /** Runtime configuration overrides applied to the run, when present. */
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
 }
-export type ExecutionCompletedEvent = BaseTimelineEvent<
-  TimelineEventType.executionCompleted,
-  ExecutionCompletedEventData
+
+/** How an execution ended: a final response, or a pause to ask the human (HITL). */
+export type ExecutionOutcome =
+  | { type: 'responded'; response: AssistantResponse }
+  | { type: 'prompt_requested'; prompts: PromptRequest[] };
+
+/**
+ * The terminal event of a run and the source of truth for it: the run summary plus the outcome.
+ * Unifies what were previously `execution_completed` (responded) and `prompt_requested` (paused) —
+ * both are emitted at the end of an execution and carry the same run data, so they differ only in
+ * the outcome.
+ */
+export interface ExecutionTerminatedEventData extends ExecutionRunSummary {
+  outcome: ExecutionOutcome;
+}
+export type ExecutionTerminatedEvent = BaseTimelineEvent<
+  TimelineEventType.executionTerminated,
+  ExecutionTerminatedEventData
 >;
 
 /** A run that ended in an error. */
@@ -217,8 +220,7 @@ export type TimelineEvent =
   | UserMessageEvent
   | PromptResponseEvent
   | ExecutionStartedEvent
-  | PromptRequestedEvent
-  | ExecutionCompletedEvent
+  | ExecutionTerminatedEvent
   | ExecutionFailedEvent
   | ExecutionAbortedEvent;
 
@@ -227,8 +229,7 @@ export type TimelineEventInput =
   | BaseTimelineEventInput<TimelineEventType.userMessage, UserMessageEventData>
   | BaseTimelineEventInput<TimelineEventType.promptResponse, PromptResponseEventData>
   | BaseTimelineEventInput<TimelineEventType.executionStarted, ExecutionStartedEventData>
-  | BaseTimelineEventInput<TimelineEventType.promptRequested, PromptRequestedEventData>
-  | BaseTimelineEventInput<TimelineEventType.executionCompleted, ExecutionCompletedEventData>
+  | BaseTimelineEventInput<TimelineEventType.executionTerminated, ExecutionTerminatedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionFailed, ExecutionFailedEventData>
   | BaseTimelineEventInput<TimelineEventType.executionAborted, ExecutionAbortedEventData>;
 

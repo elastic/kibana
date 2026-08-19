@@ -9,7 +9,8 @@ import type {
   Conversation,
   ConversationRound,
   EventActor,
-  ExecutionCompletedEventData,
+  ExecutionOutcome,
+  ExecutionRunSummary,
   TimelineEvent,
   UserMessageEventData,
 } from '@kbn/agent-builder-common';
@@ -22,7 +23,8 @@ import {
 
 /**
  * Converts a single round into its coarse timeline events: `user_message`, `execution_started`,
- * and a terminal `execution_completed` (or `prompt_requested` when the round is awaiting a prompt).
+ * and a terminal `execution_terminated` whose `outcome` is `responded` (completed round) or
+ * `prompt_requested` (awaiting-prompt round).
  */
 export const roundToEvents = (
   round: ConversationRound,
@@ -54,27 +56,20 @@ export const roundToEvents = (
     },
   ];
 
-  const lifecycle = {
+  const terminated = (outcome: ExecutionOutcome): TimelineEvent => ({
+    id: `${round.id}::execution_terminated`,
+    type: TimelineEventType.executionTerminated,
     created_at: endedAt,
     actor: agent,
     execution_id: executionId,
     trigger_event_id: userMessageId,
-  };
+    data: { ...executionRunSummary(round), outcome },
+  });
 
   if (round.status === ConversationRoundStatus.completed) {
-    events.push({
-      ...lifecycle,
-      id: `${round.id}::execution_completed`,
-      type: TimelineEventType.executionCompleted,
-      data: executionCompletedData(round),
-    });
+    events.push(terminated({ type: 'responded', response: round.response }));
   } else if (round.status === ConversationRoundStatus.awaitingPrompt) {
-    events.push({
-      ...lifecycle,
-      id: `${round.id}::prompt_requested`,
-      type: TimelineEventType.promptRequested,
-      data: { ...executionCompletedData(round), prompts: round.pending_prompts ?? [] },
-    });
+    events.push(terminated({ type: 'prompt_requested', prompts: round.pending_prompts ?? [] }));
   }
 
   return events;
@@ -90,9 +85,8 @@ export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
 /** The `user_message` payload for a round: the whole round input, carried verbatim. */
 export const userMessageData = (round: ConversationRound): UserMessageEventData => round.input;
 
-/** The run-summary payload for a completed round (also reused for the paused terminal). */
-export const executionCompletedData = (round: ConversationRound): ExecutionCompletedEventData => ({
-  response: round.response,
+/** The run summary for a round (shared by both outcomes); the response/prompts live on the outcome. */
+export const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => ({
   steps: round.steps,
   model_usage: round.model_usage,
   time_to_first_token: round.time_to_first_token,
