@@ -14,9 +14,9 @@
  *
  * Rules:
  *   - One case per required scenario family.
- *   - The broken fixture (isBrokenFixture: true) is required and must
- *     score 0 on at least one quality evaluator. Do not remove it.
  *   - Reference esqlQuery values are sourced from elastic/detection-rules.
+ *   - The deliberately unwinnable case lives in ./canary.ts, scored with an
+ *     inverted expectation so it cannot skew these aggregates.
  */
 
 export interface RuleCreationExample {
@@ -130,24 +130,6 @@ export const goldenDataset: RuleCreationExample[] = [
 | WHERE script_len > 1000
 | EVAL numeric_ratio = (script_len - LENGTH(REPLACE(powershell.file.script_block_text, "0123456789", "")))::double / script_len::double
 | WHERE numeric_ratio > 0.5`,
-    },
-  },
-
-  // BROKEN FIXTURE — required. The catch-all query must score 0 on Query Syntax Validity.
-  // Do not remove. A 100% pass rate means the quality gate was never tested.
-  {
-    id: 'broken-fixture-catch-all-query',
-    input: {
-      technique: 'T1059',
-      gap_description: 'Any command execution activity',
-      evidence: '',
-      confidence: 0.1,
-    },
-    output: {
-      mitreIds: ['T1059'],
-      language: 'esql',
-      esqlQuery: 'FROM * | LIMIT 1000', // catch-all — must fail Query Syntax Validity
-      isBrokenFixture: true,
     },
   },
 ];

@@ -31,7 +31,7 @@ import {
   validateSeverity,
 } from './helpers';
 
-type RuleEvaluator = Evaluator<RuleCreationExample, RuleCreationResult>;
+export type RuleEvaluator = Evaluator<RuleCreationExample, RuleCreationResult>;
 
 // ---------------------------------------------------------------------------
 // Skip wrapper — returns N/A for any example where the workflow produced no rule
@@ -261,8 +261,15 @@ export const createEvaluateDataset =
     esClient: EsClient;
     log: ToolingLog;
   }) =>
-  async ({ dataset }: { dataset: EvaluationDataset<RuleCreationExample> }): Promise<void> => {
-    const allEvaluators: RuleEvaluator[] = [
+  async ({
+    dataset,
+    evaluatorOverrides,
+  }: {
+    dataset: EvaluationDataset<RuleCreationExample>;
+    /** Replaces the default evaluator list — used by the canary dataset's inverted expectation. */
+    evaluatorOverrides?: RuleEvaluator[];
+  }): Promise<void> => {
+    const allEvaluators: RuleEvaluator[] = evaluatorOverrides ?? [
       createQuerySyntaxValidityEvaluator(),
       createFieldCoverageEvaluator(),
       createRuleTypeLanguageEvaluator(),
