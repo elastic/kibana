@@ -69,7 +69,7 @@ steps:
 
   - name: ensure_watermark
     type: data.set
-    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
     with:
       watermark: '{{ consts.initialWatermark }}'
 
@@ -155,7 +155,7 @@ steps:
                   trashed: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0].trashed ?? false }}'
                 links:
                   discovered_from_issue_url: '${{ variables.issueUrl }}'
-                  discovered_from_issue_target: '${{ variables.issueTicketType == "Epic" ? "epic" : "product" }}'
+                  discovered_from_issue_target: '{% if variables.issueTicketType == "Epic" %}epic{% else %}product{% endif %}'
                   source_url: '${{ foreach.item.url }}'
                   catalog_source: issue_body_url
                 payload: '${{ steps.fetch_drive_metadata_for_product_issue.output.files[0] }}'
@@ -176,7 +176,7 @@ steps:
                 relation: issue_references_design_doc
                 metadata:
                   org: '{{ consts.orgLogin }}'
-                  issue_target: '${{ variables.issueTicketType == "Epic" ? "epic" : "product" }}'
+                  issue_target: '{% if variables.issueTicketType == "Epic" %}epic{% else %}product{% endif %}'
                   issue_url: '${{ variables.issueUrl }}'
                   issue_number: '${{ variables.issueNumber }}'
                   repo: '${{ variables.issueRepo }}'

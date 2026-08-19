@@ -50,7 +50,6 @@ steps:
     connector-id: REPLACE_WITH_AI_CONNECTOR_ID
     create-conversation: true
     with:
-      timeout: 1200s
       message: |
         Run SDLC planning coverage analysis.
 

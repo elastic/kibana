@@ -241,7 +241,6 @@ steps:
     connector-id: REPLACE_WITH_AI_CONNECTOR_ID
     create-conversation: true
     with:
-      timeout: 900s
       message: |
         Summarize SDLC pull requests missing a related GitHub issue link.
 

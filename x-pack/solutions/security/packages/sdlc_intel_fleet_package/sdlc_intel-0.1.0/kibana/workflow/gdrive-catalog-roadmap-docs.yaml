@@ -82,7 +82,7 @@ steps:
 
       - name: ensure_folder_watermark
         type: data.set
-        if: '${{ variables.watermark == null || variables.watermark == "" }}'
+        if: '${{ variables.watermark == null or variables.watermark == "" }}'
         with:
           watermark: '{{ consts.initialWatermark }}'
 

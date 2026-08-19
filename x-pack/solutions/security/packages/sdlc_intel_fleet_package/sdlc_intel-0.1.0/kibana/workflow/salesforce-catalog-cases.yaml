@@ -62,7 +62,7 @@ steps:
 
   - name: ensure_watermark
     type: data.set
-    if: '${{ variables.watermark == null || variables.watermark == "" }}'
+    if: '${{ variables.watermark == null or variables.watermark == "" }}'
     with:
       watermark: '{{ consts.initialWatermark }}'
 
@@ -85,7 +85,7 @@ steps:
         type: salesforce.soqlIngest
         connector-id: '{{ consts.salesforceConnectorId }}'
         with:
-          soql: '${{ variables.nextRecordsUrl == null || variables.nextRecordsUrl == "" ? variables.baseSoql : "" }}'
+          soql: "{% if variables.nextRecordsUrl == null or variables.nextRecordsUrl == \"\" %}{{ variables.baseSoql }}{% else %}{% endif %}"
           nextRecordsUrl: '${{ variables.nextRecordsUrl }}'
 
       - name: build_bulk_ops
