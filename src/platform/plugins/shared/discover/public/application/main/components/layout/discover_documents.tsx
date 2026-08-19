@@ -122,7 +122,8 @@ function DiscoverDocumentsComponent({
   const persistedDiscoverSession = useInternalStateSelector(
     (state) => state.persistedDiscoverSession
   );
-  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
+  const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata, discoverFeatureFlags } =
+    services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
     dataSource,
@@ -435,7 +436,8 @@ function DiscoverDocumentsComponent({
 
   const getCellRenderersAccessor = useProfileAccessor('getCellRenderers');
   const cellRenderers = useMemo(() => {
-    return getCellRenderersAccessor(() => ({}))(cellRendererParams);
+    const getCellRenderers = getCellRenderersAccessor(() => ({}));
+    return getCellRenderers(cellRendererParams);
   }, [cellRendererParams, getCellRenderersAccessor]);
 
   const callouts = useMemo(
@@ -574,6 +576,11 @@ function DiscoverDocumentsComponent({
     return cascadedColumnsMeta;
   }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
 
+  const isDataTableJsonViewEnabled = useMemo(
+    () => discoverFeatureFlags.getDataTableJsonViewEnabled(),
+    [discoverFeatureFlags]
+  );
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       // class is used in tests
@@ -658,10 +665,14 @@ function DiscoverDocumentsComponent({
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
             onFullScreenChange={setIsDataGridFullScreen}
-            sourceDisplayMode={sourceDisplayMode}
-            onUpdateSourceDisplayMode={onUpdateSourceDisplayMode}
-            jsonModeSettings={jsonModeSettings}
-            onUpdateJsonModeSettings={onUpdateJsonModeSettings}
+            sourceDisplayMode={isDataTableJsonViewEnabled ? sourceDisplayMode : undefined}
+            onUpdateSourceDisplayMode={
+              isDataTableJsonViewEnabled ? onUpdateSourceDisplayMode : undefined
+            }
+            jsonModeSettings={isDataTableJsonViewEnabled ? jsonModeSettings : undefined}
+            onUpdateJsonModeSettings={
+              isDataTableJsonViewEnabled ? onUpdateJsonModeSettings : undefined
+            }
           />
         </CellActionsProvider>
       </div>
