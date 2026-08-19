@@ -16,8 +16,58 @@ import {
 import type { Field, InlineField, RefField, Validation } from '../types/domain/template/fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
 import { CustomFieldTypes } from '../types/domain/custom_field/v1';
+import { SAFE_SNAKE_KEY, AUTHORABLE_SNAKE_KEY, MAX_SNAKE_KEY_LENGTH } from '../constants';
 
 export const getFieldSnakeKey = (name: string, type: string): string => `${name}_as_${type}`;
+
+/**
+ * Returns true if `key` is safe to interpolate into a Painless string literal (read / storage
+ * path). Uses the lenient charset — hyphens and other index-legacy characters are allowed.
+ */
+export const isSafeExtendedFieldKey = (key: string): boolean =>
+  key.length > 0 && key.length <= MAX_SNAKE_KEY_LENGTH && SAFE_SNAKE_KEY.test(key);
+
+/**
+ * Why an authoring-time key check failed: `'charset'` — a character outside
+ * `AUTHORABLE_SNAKE_KEY`; `'length'` — the derived key exceeds `MAX_SNAKE_KEY_LENGTH`.
+ * Distinguished so error messages can tell the author what to actually fix — a 300-character
+ * clean snake_case name satisfies the charset rule and would be misled by a charset message.
+ */
+export type AuthorableKeyViolation = 'charset' | 'length';
+
+/**
+ * Checks `key` against the **authoring** rules (strict charset + max length) and returns the
+ * first violation, or `null` when the key is authorable. Charset is reported before length:
+ * fixing the charset can change the author's intended name, so it's the more actionable error.
+ */
+export const getAuthorableKeyViolation = (key: string): AuthorableKeyViolation | null => {
+  if (key.length === 0 || !AUTHORABLE_SNAKE_KEY.test(key)) return 'charset';
+  if (key.length > MAX_SNAKE_KEY_LENGTH) return 'length';
+  return null;
+};
+
+/**
+ * Returns true if `key` satisfies the **authoring** charset (strict subset of
+ * `isSafeExtendedFieldKey` — no hyphens). Use this when validating a new field name at write
+ * time; use `isSafeExtendedFieldKey` when reading back keys that may predate the strict rule.
+ */
+export const isAuthorableExtendedFieldKey = (key: string): boolean =>
+  getAuthorableKeyViolation(key) === null;
+
+/**
+ * Derives the storage key for `(name, type)` and returns the first authoring violation, or
+ * `null` when the name is authorable — see {@link getAuthorableKeyViolation}. This is the
+ * canonical way to validate a field name before writing it: derive first, check once, rather
+ * than maintaining a separate per-name rule.
+ */
+export const getAuthorableFieldNameViolation = (
+  name: string,
+  type: string
+): AuthorableKeyViolation | null => getAuthorableKeyViolation(getFieldSnakeKey(name, type));
+
+/** Boolean convenience over {@link getAuthorableFieldNameViolation}. */
+export const isAuthorableExtendedFieldName = (name: string, type: string): boolean =>
+  getAuthorableFieldNameViolation(name, type) === null;
 
 /**
  * Normalizes a field definition name for case-insensitive lookup and uniqueness.
@@ -32,6 +82,14 @@ export const normalizeFieldDefinitionName = (name: string): string => name.trim(
 
 export const getFieldCamelKey = (name: string, type: string): string =>
   camelCase(getFieldSnakeKey(name, type));
+
+/**
+ * Folds a field name the same way {@link getFieldCamelKey} folds the full storage key —
+ * lodash `camelCase`, under which `my-field`, `my_field`, and `myField` are all `myField`.
+ * Two names with equal folds and equal types collide on the UI's camel read key, silently
+ * showing each other's values; write-time validation uses this to reject such twins.
+ */
+export const getFoldedFieldName = (name: string): string => camelCase(name);
 
 /**
  * Collects the normalized (case-insensitive) `$ref` names from a template's fields array.
