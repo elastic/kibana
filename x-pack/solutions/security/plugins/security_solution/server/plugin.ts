@@ -904,7 +904,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     if (this.securityEventBus) {
       const securityEventBus = this.securityEventBus;
-      plugins.cases.onAlertStatusChanged(({ request, payload }) => {
+      plugins.cases.getCasesEventBus().onAlertStatusChanged(({ request, payload }) => {
         forwardCasesAlertStatusToSS(securityEventBus, logger, request, payload);
       });
     }

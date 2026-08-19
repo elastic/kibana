@@ -502,12 +502,11 @@ export class CasePlugin
     return {
       getCasesClientWithRequest: this.getCasesClientWithRequest(core, 'plugin_contract'),
       getUnifiedAttachmentTypeRegistry: () => this.unifiedAttachmentTypeRegistry,
-      onAlertStatusChanged: (listener) => {
+      getCasesEventBus: () => {
         if (!this.casesEventBus) {
-          this.logger.warn('onAlertStatusChanged called before casesEventBus was initialized');
-          return;
+          throw new Error('getCasesEventBus called before casesEventBus was initialized');
         }
-        this.casesEventBus.onAlertStatusChanged(listener);
+        return this.casesEventBus;
       },
       config: this.caseConfig,
     };
