@@ -255,6 +255,8 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
     label: 'Profiling Cypress Tests'
+    env:
+      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
@@ -275,6 +277,8 @@ steps:
 
   - command: .buildkite/scripts/steps/functional/apm_cypress.sh
     label: 'APM Cypress Tests'
+    env:
+      CLEAR_YARN_CACHE: '1'
     agents:
       image: family/kibana-ubuntu-2404
       imageProject: elastic-images-prod
