@@ -17,7 +17,6 @@ import type { OutputSizeStats } from '../lib/telemetry/events/workflows_executio
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { safeOutputSize } from '../step/errors';
 import { buildStepExecutionId } from '../utils';
-import { ByteLruCache } from './byte_lru_cache';
 import { StepIoCache } from './step_io_cache';
 
 export type { StepIoType } from './step_io_cache';
@@ -77,7 +76,7 @@ export interface StepIoLifecycle {
  * the LRU cache and `WorkflowExecutionState`.
  *
  * Responsibilities:
- *   - Output LRU cache (`StepIoCache` → `ByteLruCache`)
+ *   - Output LRU cache (`StepIoCache` → `lru-cache`)
  *   - `write(id, type, value)` — routes outputs to both cache and state, inputs to state only
  *   - `read(id, type)` — LRU hit or state fallback
  *   - `prepareForRead` — pre-warms the LRU from ES for cache misses
@@ -95,7 +94,7 @@ export class StepIoService implements StepIoWriter, StepIoLifecycle {
   constructor({ stepRepository, state, maxBytes = Infinity }: StepIoServiceInit) {
     this.stepRepository = stepRepository;
     this.state = state;
-    this.cache = new StepIoCache(new ByteLruCache(maxBytes));
+    this.cache = new StepIoCache(maxBytes);
   }
 
   // ----- IO reads -----------------------------------------------------------

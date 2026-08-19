@@ -8,12 +8,12 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
-import type { ByteLruCache } from './byte_lru_cache';
+import { LRUCache } from 'lru-cache';
 
 export type StepIoType = 'input' | 'output';
 
 /**
- * Domain wrapper around {@link ByteLruCache} for step IO.
+ * Byte-bounded LRU cache for step IO.
  *
  * Owns the key scheme (`${type}_${stepExecutionId}`) so raw key strings never
  * appear outside this class. Callers work with `(id, type)` pairs.
@@ -22,14 +22,18 @@ export type StepIoType = 'input' | 'output';
  * later requires no API change — just remove the guard in `StepIoService.write`.
  */
 export class StepIoCache {
-  constructor(private readonly lru: ByteLruCache<string, JsonValue | null>) {}
+  private readonly lru: LRUCache<string, JsonValue | null>;
+
+  constructor(maxBytes: number) {
+    this.lru = new LRUCache({ maxSize: maxBytes });
+  }
 
   get(id: string, type: StepIoType): JsonValue | null | undefined {
     return this.lru.get(`${type}_${id}`);
   }
 
   set(id: string, type: StepIoType, value: JsonValue | null, bytes: number): void {
-    this.lru.set(`${type}_${id}`, value, bytes);
+    this.lru.set(`${type}_${id}`, value, { size: bytes });
   }
 
   has(id: string, type: StepIoType): boolean {
@@ -41,7 +45,7 @@ export class StepIoCache {
   }
 
   get totalBytes(): number {
-    return this.lru.totalBytes;
+    return this.lru.calculatedSize;
   }
 
   get size(): number {
