@@ -6,7 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFormRow, EuiSpacer, EuiSuperSelect, EuiTitle } from '@elastic/eui';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiSelect,
+  EuiSuperSelect,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AttackDiscoveryWorkerConfig } from './types';
 import { useAdConnectors } from './use_ad_connectors';
@@ -18,8 +26,35 @@ interface Props {
 
 const DEFAULT_OPTION_VALUE = '';
 
+const UNIT_OPTIONS = [
+  {
+    value: 'm',
+    text: i18n.translate('xpack.pnd.adWorkerConfig.generation.unitMinutes', {
+      defaultMessage: 'minutes',
+    }),
+  },
+  {
+    value: 'h',
+    text: i18n.translate('xpack.pnd.adWorkerConfig.generation.unitHours', {
+      defaultMessage: 'hours',
+    }),
+  },
+  {
+    value: 'd',
+    text: i18n.translate('xpack.pnd.adWorkerConfig.generation.unitDays', {
+      defaultMessage: 'days',
+    }),
+  },
+];
+
+const parseEvery = (every: string): { amount: number; unit: string } => {
+  const match = /^(\d+)([mhd])$/.exec(every);
+  return match ? { amount: Number(match[1]), unit: match[2] } : { amount: 15, unit: 'm' };
+};
+
 export const GenerationSection: React.FC<Props> = ({ value, onChange }) => {
   const { data: connectors = [], isLoading } = useAdConnectors();
+  const { amount, unit } = parseEvery(value.run_every);
 
   const options = useMemo(
     () => [
@@ -29,30 +64,29 @@ export const GenerationSection: React.FC<Props> = ({ value, onChange }) => {
           defaultMessage: 'Default AI connector (server-resolved)',
         }),
       },
-      ...connectors.map((connector) => ({
-        value: connector.id,
-        inputDisplay: connector.name,
-      })),
+      ...connectors.map((connector) => ({ value: connector.id, inputDisplay: connector.name })),
     ],
     [connectors]
   );
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.pnd.adWorkerConfig.generation.title', {
-            defaultMessage: 'Generation',
-          })}
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="s" />
-
       <EuiFormRow
-        label={i18n.translate('xpack.pnd.adWorkerConfig.generation.connectorLabel', {
-          defaultMessage: 'LLM connector',
-        })}
+        label={
+          <>
+            {i18n.translate('xpack.pnd.adWorkerConfig.generation.connectorLabel', {
+              defaultMessage: 'Connector for generating attack discoveries',
+            })}{' '}
+            <EuiIconTip
+              content={i18n.translate('xpack.pnd.adWorkerConfig.generation.connectorAddModelNote', {
+                defaultMessage:
+                  'POC: lists existing connectors (http only). The AD flyout’s "+ Add model" needs the elastic-assistant connector selector (triggersActionsUi + AssistantProvider) — a follow-up.',
+              })}
+              position="right"
+              type="questionInCircle"
+            />
+          </>
+        }
         fullWidth
       >
         <EuiSuperSelect
@@ -67,6 +101,35 @@ export const GenerationSection: React.FC<Props> = ({ value, onChange }) => {
             })
           }
         />
+      </EuiFormRow>
+
+      <EuiFormRow
+        label={i18n.translate('xpack.pnd.adWorkerConfig.generation.runEveryLabel', {
+          defaultMessage: 'Run every',
+        })}
+        helpText={i18n.translate('xpack.pnd.adWorkerConfig.generation.runEveryHelp', {
+          defaultMessage: 'Cadence of the Watch Floor scheduled trigger that drives the worker.',
+        })}
+        fullWidth
+      >
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={2}>
+            <EuiFieldNumber
+              data-test-subj="adWorkerRunEveryAmount"
+              min={1}
+              value={amount}
+              onChange={(event) => onChange({ run_every: `${Number(event.target.value)}${unit}` })}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={3}>
+            <EuiSelect
+              data-test-subj="adWorkerRunEveryUnit"
+              options={UNIT_OPTIONS}
+              value={unit}
+              onChange={(event) => onChange({ run_every: `${amount}${event.target.value}` })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFormRow>
     </>
   );
