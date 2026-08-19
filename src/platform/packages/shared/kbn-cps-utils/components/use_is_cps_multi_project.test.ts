@@ -47,10 +47,14 @@ describe('useIsCpsMultiProject', () => {
     expect(renderCount).toBe(1);
   });
 
-  it('is false when there is no linked project', async () => {
+  // A synchronous `false` can't be told apart from "not loaded yet", so it has to stay pending
+  // until readiness confirms it rather than being seeded like a `true` reading.
+  it('stays pending on the first render and settles on false when there is no linked project', async () => {
     const cpsManager = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(false) });
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
+
+    expect(result.current).toBeUndefined();
 
     await waitFor(() => expect(cpsManager.whenReady).toHaveBeenCalled());
     expect(result.current).toBe(false);
@@ -77,24 +81,40 @@ describe('useIsCpsMultiProject', () => {
   // Reading `hasLinkedProjects()` before `whenReady()` resolves reports `false` even in a
   // multi-project deployment, which is the mistake this hook exists to prevent.
   it('waits for readiness before reporting a linked project', async () => {
+    let isReady = false;
     let markReady = () => {};
     const cpsManager = createCpsManager({
       whenReady: jest.fn().mockReturnValue(
         new Promise<void>((resolve) => {
-          markReady = resolve;
+          markReady = () => {
+            isReady = true;
+            resolve();
+          };
         })
       ),
-      hasLinkedProjects: jest.fn().mockReturnValue(true),
+      hasLinkedProjects: jest.fn(() => isReady),
     });
 
     const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
 
     expect(result.current).toBeUndefined();
-    expect(cpsManager.hasLinkedProjects).not.toHaveBeenCalled();
 
     markReady();
 
     await waitFor(() => expect(result.current).toBe(true));
+  });
+
+  // Consumers gate a column or panel on this, so a manager that has already resolved has to
+  // answer before paint, otherwise the gated element gets inserted afterwards.
+  it('reports an already-ready manager on the first render', async () => {
+    const cpsManager = createCpsManager({ hasLinkedProjects: jest.fn().mockReturnValue(true) });
+
+    const { result } = renderHook(() => useIsCpsMultiProject(cpsManager));
+
+    expect(result.current).toBe(true);
+
+    await waitFor(() => expect(cpsManager.whenReady).toHaveBeenCalled());
+    expect(result.current).toBe(true);
   });
 
   it('is false when readiness rejects', async () => {
