@@ -15,8 +15,9 @@ import {
   prefetchPreviousStatusesByQuery,
 } from './prefetch_previous_statuses';
 
-const makeFoundDoc = (id: string, status: string) => ({
+const makeFoundDoc = (id: string, status: string, index = 'test-index') => ({
   _id: id,
+  _index: index,
   found: true as const,
   _source: { [ALERT_WORKFLOW_STATUS]: status },
 });
@@ -24,14 +25,15 @@ const makeFoundDoc = (id: string, status: string) => ({
 const makeNotFoundDoc = (id: string) => ({ _id: id, found: false as const });
 
 const makeSearchResponse = (
-  hits: Array<{ _id: string; status: string }>,
+  hits: Array<{ _id: string; status: string; _index?: string }>,
   total: number,
   relation: 'eq' | 'gte' = 'eq'
 ) => ({
   hits: {
     total: { value: total, relation },
-    hits: hits.map(({ _id, status }) => ({
+    hits: hits.map(({ _id, status, _index = 'test-index' }) => ({
       _id,
+      _index,
       _source: { [ALERT_WORKFLOW_STATUS]: status },
     })),
   },
@@ -76,23 +78,54 @@ describe('prefetchPreviousStatusesByIds', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns empty array when no docs are found', async () => {
-    const result = await prefetchPreviousStatusesByIds(esClient, 'index', []);
-    expect(result).toEqual([]);
+  it('returns empty previousStatuses and empty idToIndex when no docs are found', async () => {
+    const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(
+      esClient,
+      'index',
+      []
+    );
+    expect(previousStatuses).toEqual([]);
+    expect(idToIndex.size).toBe(0);
   });
 
-  it('returns previous statuses for found docs', async () => {
+  it('returns previous statuses and idToIndex for found docs', async () => {
     esClient.mget.mockResolvedValue({
-      docs: [makeFoundDoc('id1', 'acknowledged'), makeFoundDoc('id2', 'closed')],
+      docs: [
+        makeFoundDoc('id1', 'acknowledged', '.alerts-security.alerts-default'),
+        makeFoundDoc('id2', 'closed', '.alerts-security.alerts-default'),
+      ],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
-    const result = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1', 'id2']);
+    const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(esClient, 'index', [
+      'id1',
+      'id2',
+    ]);
 
-    expect(result).toEqual([
+    expect(previousStatuses).toEqual([
       { id: 'id1', previousStatus: 'acknowledged' },
       { id: 'id2', previousStatus: 'closed' },
     ]);
+    expect(idToIndex).toEqual(
+      new Map([
+        ['id1', '.alerts-security.alerts-default'],
+        ['id2', '.alerts-security.alerts-default'],
+      ])
+    );
+  });
+
+  it('omits id from idToIndex when doc._index is absent, but still includes it in previousStatuses', async () => {
+    esClient.mget.mockResolvedValue({
+      docs: [{ _id: 'id1', found: true as const, _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+
+    const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByIds(esClient, 'index', [
+      'id1',
+    ]);
+
+    expect(previousStatuses).toEqual([{ id: 'id1', previousStatus: 'open' }]);
+    expect(idToIndex.size).toBe(0);
   });
 
   it('skips docs where found is false', async () => {
@@ -101,20 +134,30 @@ describe('prefetchPreviousStatusesByIds', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
-    const result = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1', 'id2']);
+    const { previousStatuses } = await prefetchPreviousStatusesByIds(esClient, 'index', [
+      'id1',
+      'id2',
+    ]);
 
-    expect(result).toEqual([{ id: 'id1', previousStatus: 'open' }]);
+    expect(previousStatuses).toEqual([{ id: 'id1', previousStatus: 'open' }]);
   });
 
   it('defaults previousStatus to "open" when source status is not a string', async () => {
     esClient.mget.mockResolvedValue({
-      docs: [{ _id: 'id1', found: true, _source: { [ALERT_WORKFLOW_STATUS]: null } }],
+      docs: [
+        {
+          _id: 'id1',
+          _index: 'test-index',
+          found: true,
+          _source: { [ALERT_WORKFLOW_STATUS]: null },
+        },
+      ],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
-    const result = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
+    const { previousStatuses } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
 
-    expect(result).toEqual([{ id: 'id1', previousStatus: 'open' }]);
+    expect(previousStatuses).toEqual([{ id: 'id1', previousStatus: 'open' }]);
   });
 
   it('calls mget with a string index as-is', async () => {
@@ -168,33 +211,66 @@ describe('prefetchPreviousStatusesByQuery', () => {
   });
 
   it('returns empty result when there are no hits', async () => {
-    const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
+    const { ids, previousStatuses, idToIndex, truncated } = await prefetchPreviousStatusesByQuery(
+      esClient,
+      'index',
+      { match_all: {} }
+    );
 
-    expect(result).toEqual({ ids: [], previousStatuses: [], truncated: false });
+    expect(ids).toEqual([]);
+    expect(previousStatuses).toEqual([]);
+    expect(idToIndex.size).toBe(0);
+    expect(truncated).toBe(false);
   });
 
-  it('returns ids and previousStatuses for each hit', async () => {
+  it('returns ids, previousStatuses, and idToIndex for each hit', async () => {
     esClient.search.mockResolvedValue(
       makeSearchResponse(
         [
-          { _id: 'id1', status: 'closed' },
-          { _id: 'id2', status: 'open' },
+          { _id: 'id1', status: 'closed', _index: '.alerts-security.alerts-default' },
+          { _id: 'id2', status: 'open', _index: '.alerts-security.alerts-default' },
         ],
         2
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ) as any
     );
 
-    const result = await prefetchPreviousStatusesByQuery(esClient, 'index', { match_all: {} });
+    const { ids, previousStatuses, idToIndex } = await prefetchPreviousStatusesByQuery(
+      esClient,
+      'index',
+      { match_all: {} }
+    );
 
-    expect(result).toEqual({
-      ids: ['id1', 'id2'],
-      previousStatuses: [
-        { id: 'id1', previousStatus: 'closed' },
-        { id: 'id2', previousStatus: 'open' },
-      ],
-      truncated: false,
-    });
+    expect(ids).toEqual(['id1', 'id2']);
+    expect(previousStatuses).toEqual([
+      { id: 'id1', previousStatus: 'closed' },
+      { id: 'id2', previousStatus: 'open' },
+    ]);
+    expect(idToIndex).toEqual(
+      new Map([
+        ['id1', '.alerts-security.alerts-default'],
+        ['id2', '.alerts-security.alerts-default'],
+      ])
+    );
+  });
+
+  it('omits id from idToIndex when hit._index is absent, but still includes it in previousStatuses', async () => {
+    esClient.search.mockResolvedValue({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [{ _id: 'id1', _source: { [ALERT_WORKFLOW_STATUS]: 'open' } }],
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
+
+    const { previousStatuses, idToIndex } = await prefetchPreviousStatusesByQuery(
+      esClient,
+      'index',
+      { match_all: {} }
+    );
+
+    expect(previousStatuses).toEqual([{ id: 'id1', previousStatus: 'open' }]);
+    expect(idToIndex.size).toBe(0);
   });
 
   it('sets truncated to true when total exceeds MAX_ALERTS_PER_TRIGGER (eq relation)', async () => {

@@ -123,9 +123,12 @@ export const setSignalsStatusRoute = (
             const previousStatuses: Array<{ id: string; previousStatus: string }> = [];
             if (eventBus) {
               try {
-                previousStatuses.push(
-                  ...(await prefetchPreviousStatusesByIds(esClient, alertsIndex, signalIds))
+                const { previousStatuses: fetched } = await prefetchPreviousStatusesByIds(
+                  esClient,
+                  alertsIndex,
+                  signalIds
                 );
+                previousStatuses.push(...fetched);
               } catch {
                 logger.warn('Failed to pre-fetch previous alert statuses for workflow trigger');
               }
@@ -182,6 +185,8 @@ export const setSignalsStatusRoute = (
             let truncated = false;
             if (eventBus) {
               try {
+                // TODO: Commit 2 — use idToIndex here to partition mixed-document results
+                // (detection alerts vs Attack Discovery) and emit the correct trigger per type.
                 ({
                   ids: prefetchedAlertIds,
                   previousStatuses,

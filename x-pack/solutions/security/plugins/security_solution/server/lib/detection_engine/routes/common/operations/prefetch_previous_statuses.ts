@@ -27,19 +27,23 @@ export const prefetchPreviousStatusesByIds = async (
   esClient: ElasticsearchClient,
   index: string | string[],
   ids: string[]
-): Promise<PreviousStatus[]> => {
+): Promise<{ previousStatuses: PreviousStatus[]; idToIndex: Map<string, string> }> => {
   const mgetResponse = await esClient.mget({
     index: resolveIndex(index),
     ids,
     _source_includes: [ALERT_WORKFLOW_STATUS],
   });
-  const results: PreviousStatus[] = [];
+  const previousStatuses: PreviousStatus[] = [];
+  const idToIndex = new Map<string, string>();
   for (const doc of mgetResponse.docs) {
     if ('found' in doc && doc.found && doc._id != null) {
-      results.push({ id: doc._id, previousStatus: extractWorkflowStatus(doc._source) });
+      previousStatuses.push({ id: doc._id, previousStatus: extractWorkflowStatus(doc._source) });
+      if (doc._index != null) {
+        idToIndex.set(doc._id, doc._index);
+      }
     }
   }
-  return results;
+  return { previousStatuses, idToIndex };
 };
 
 export const prefetchPreviousStatusesByQuery = async (
@@ -47,7 +51,12 @@ export const prefetchPreviousStatusesByQuery = async (
   index: string | string[],
   query: estypes.QueryDslQueryContainer,
   runtimeMappings?: estypes.MappingRuntimeFields
-): Promise<{ ids: string[]; previousStatuses: PreviousStatus[]; truncated: boolean }> => {
+): Promise<{
+  ids: string[];
+  previousStatuses: PreviousStatus[];
+  idToIndex: Map<string, string>;
+  truncated: boolean;
+}> => {
   const searchResponse = await esClient.search({
     index: resolveIndex(index),
     query: { bool: { filter: query } },
@@ -64,11 +73,15 @@ export const prefetchPreviousStatusesByQuery = async (
   const truncated = totalCount > MAX_ALERTS_PER_TRIGGER;
   const ids: string[] = [];
   const previousStatuses: PreviousStatus[] = [];
+  const idToIndex = new Map<string, string>();
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null) {
       ids.push(hit._id);
       previousStatuses.push({ id: hit._id, previousStatus: extractWorkflowStatus(hit._source) });
+      if (hit._index != null) {
+        idToIndex.set(hit._id, hit._index);
+      }
     }
   }
-  return { ids, previousStatuses, truncated };
+  return { ids, previousStatuses, idToIndex, truncated };
 };

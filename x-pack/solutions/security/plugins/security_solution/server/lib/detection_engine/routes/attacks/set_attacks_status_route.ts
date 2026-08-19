@@ -116,9 +116,12 @@ export const setAttacksStatusRoute = (
           if (eventBus) {
             try {
               const esClient = core.elasticsearch.client.asCurrentUser;
-              attackPreviousStatuses.push(
-                ...(await prefetchPreviousStatusesByIds(esClient, attackIndex, ids))
+              const { previousStatuses: fetched } = await prefetchPreviousStatusesByIds(
+                esClient,
+                attackIndex,
+                ids
               );
+              attackPreviousStatuses.push(...fetched);
             } catch {
               // Non-blocking
             }
@@ -189,9 +192,12 @@ export const setAttacksStatusRoute = (
             if (eventBus && relatedAlertIds.length > 0) {
               try {
                 const esClient = core.elasticsearch.client.asCurrentUser;
-                relatedAlertPreviousStatuses.push(
-                  ...(await prefetchPreviousStatusesByIds(esClient, index, relatedAlertIds))
+                const { previousStatuses: fetched } = await prefetchPreviousStatusesByIds(
+                  esClient,
+                  index,
+                  relatedAlertIds
                 );
+                relatedAlertPreviousStatuses.push(...fetched);
               } catch {
                 // Non-blocking
               }
