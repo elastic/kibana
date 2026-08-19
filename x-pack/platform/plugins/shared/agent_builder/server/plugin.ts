@@ -39,13 +39,7 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
-import {
-  migrateAgentToolIds,
-  migrateSkillToolIds,
-  TOOL_ID_MIGRATIONS,
-} from './services/agents/persisted/tool_id_migration';
-import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
-import { createStorage as createSkillStorage } from './services/skills/persisted/client/storage';
+import { runToolIdMigrations } from './services/agents/persisted/tool_id_migration';
 
 export class AgentBuilderPlugin
   implements
@@ -256,8 +250,8 @@ export class AgentBuilderPlugin
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
     });
 
-    this.runToolIdMigrations(elasticsearch).catch((error) => {
-      this.logger.error(`Tool ID migration failed: ${(error as Error).message}`);
+    this.runMigrations(elasticsearch).catch((error) => {
+      this.logger.error(`Migration failed: ${(error as Error).message}`);
     });
 
     const startServices = this.serviceManager.startServices({
@@ -343,26 +337,14 @@ export class AgentBuilderPlugin
   async stop() {
     await this.teardownTracing?.();
   }
+
   /**
-   * Applies all registered tool ID migrations (see {@link TOOL_ID_MIGRATIONS})
-   * to persisted agent configs and skill definitions. Idempotent — safe to run
-   * on every startup.
+   * Applies all registered migrations
    */
-  private async runToolIdMigrations(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
+  private async runMigrations(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
     const logger = this.logger.get('tool-id-migration');
     const esClient = elasticsearch.client.asInternalUser;
-
-    await migrateAgentToolIds({
-      storage: createAgentStorage({ logger, esClient }),
-      migrations: TOOL_ID_MIGRATIONS,
-      logger,
-    });
-
-    await migrateSkillToolIds({
-      storage: createSkillStorage({ logger, esClient }),
-      migrations: TOOL_ID_MIGRATIONS,
-      logger,
-    });
+    runToolIdMigrations(logger, esClient);
   }
 
   /**
