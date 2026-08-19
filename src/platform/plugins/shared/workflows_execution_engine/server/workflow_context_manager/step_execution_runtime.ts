@@ -129,8 +129,8 @@ export class StepExecutionRuntime {
     }
     const error = this.stepIoService.getStepError(this.stepExecutionId);
     return {
-      input: this.stepIoService.getStepInput(this.stepExecutionId) || {},
-      output: this.stepIoService.getStepOutput(this.stepExecutionId) || {},
+      input: this.stepIoService.read(this.stepExecutionId, 'input') || {},
+      output: this.stepIoService.read(this.stepExecutionId, 'output') || {},
       error: error ? new ExecutionError(error) : undefined,
     };
   }
@@ -165,7 +165,7 @@ export class StepExecutionRuntime {
   }
 
   public setInput(input: Record<string, unknown>): void {
-    this.stepIoService.setStepInput(this.stepExecutionId, input as JsonValue);
+    this.stepIoService.write(this.stepExecutionId, 'input', input as JsonValue);
   }
 
   /**
@@ -199,8 +199,9 @@ export class StepExecutionRuntime {
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.setStepOutput(
+    this.stepIoService.write(
       this.stepExecutionId,
+      'output',
       (stepOutput ?? null) as JsonValue | null,
       sizeBytes
     );
@@ -263,12 +264,9 @@ export class StepExecutionRuntime {
       ...(usage ? { usage } : {}),
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    // When partial output is provided, persist it so it remains reachable via
-    // `steps.x.output`. Otherwise write the `null` FAILED-step sentinel —
-    // distinct from `undefined` (evicted) so the eviction predicate can keep
-    // them apart.
-    this.stepIoService.setStepOutput(
+    this.stepIoService.write(
       this.stepExecutionId,
+      'output',
       partialOutput !== undefined ? (partialOutput as JsonValue) : null
     );
     this.logStepFail(executionError);
@@ -308,7 +306,7 @@ export class StepExecutionRuntime {
       error: serializedError,
       ...(executionTimeMs !== undefined ? { executionTimeMs } : {}),
     });
-    this.stepIoService.setStepOutput(this.stepExecutionId, null);
+    this.stepIoService.write(this.stepExecutionId, 'output', null);
     this.logStepFail(executionError);
   }
 

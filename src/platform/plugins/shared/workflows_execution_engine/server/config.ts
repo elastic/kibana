@@ -50,10 +50,14 @@ const configSchema = schema.object({
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
   eviction: schema.object({
     /**
-     * Minimum output payload size for a completed step to be eligible for eviction
-     * from in-memory state after it has been flushed to Elasticsearch.
-     * Payloads smaller than this threshold stay in memory to avoid ES round-trip latency.
-     * Set to "0b" to evict all completed step outputs, or a very large value to disable eviction.
+     * Maximum total byte size of the in-memory LRU output cache.
+     * When the cache exceeds this limit, the least-recently-used entries are evicted.
+     * Set to "0b" to disable caching entirely.
+     */
+    maxCacheSize: schema.byteSize({ defaultValue: '10mb' }),
+    /**
+     * No-op — retained for backwards-compatibility with existing Kibana configs that set it.
+     * Previously controlled the minimum payload size for eviction; the LRU cache ignores this.
      */
     minPayloadSize: schema.byteSize({ defaultValue: '10kb' }),
   }),

@@ -88,27 +88,6 @@ export class WorkflowContextManager {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
   }
 
-  /**
-   * Stable identifier for this node's execution — used as the consumer key
-   * in {@link StepIoService.prepareForRead} and {@link StepIoService.releaseReadPins}.
-   * Built from the same `(node.stepId, stackFrames)` the factory uses for
-   * `StepExecutionRuntime.stepExecutionId`, so they are provably identical.
-   * Lazily computed once and cached — the values are immutable after construction.
-   */
-  private get consumerExecutionId(): string {
-    if (!this._consumerExecutionId) {
-      const executionId = this.workflowExecutionState.getWorkflowExecution().id;
-      this._consumerExecutionId = buildStepExecutionId(
-        executionId,
-        this.node.stepId,
-        this.stackFrames
-      );
-    }
-    return this._consumerExecutionId;
-  }
-
-  private _consumerExecutionId: string | undefined;
-
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionState = init.workflowExecutionState;
@@ -123,34 +102,15 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Pre-warms the execution state by rehydrating any evicted step outputs
-   * that will be needed by `getContext()`. Must be called before `getContext()`.
-   *
-   * This exists so that `getContext()` and all its synchronous callers
-   * (`renderValueAccordingToContext`, `evaluateBooleanExpressionInContext`, etc.)
-   * remain synchronous. When nothing has been evicted, this is a no-op with
-   * zero overhead.
-   *
-   * Also read-pins the node's referenced outputs for the duration of this
-   * node's execution so the concurrent eviction loop cannot evict them between
-   * the pre-warm and the synchronous `getContext()` call that follows.
+   * Pre-warms the LRU cache with predecessor outputs that will be needed by
+   * `getContext()`. Must be called before `getContext()`. When all referenced
+   * outputs are already in cache, this is a no-op with zero overhead.
    */
   public async ensureContextReady(): Promise<void> {
     await this.stepIoService.prepareForRead({
       node: this.node,
       predecessorsResolver: () => this.predecessors,
-      consumerId: this.consumerExecutionId,
     });
-  }
-
-  /**
-   * Releases the read-pins set by {@link ensureContextReady} for this node.
-   * Must be called when the node finishes (success or error) so its pinned
-   * outputs become eviction candidates again. Idempotent — safe to call even
-   * if `ensureContextReady` was skipped (eviction-disabled fast path).
-   */
-  public releaseReadPins(): void {
-    this.stepIoService.releaseReadPins(this.consumerExecutionId);
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -321,13 +281,20 @@ export class WorkflowContextManager {
   }
 
   /**
-   * Get variables from all completed data.set steps in the workflow execution.
-   * Variables are retrieved from step outputs, which are persisted in execution state.
-   * This ensures variables survive across wait steps and task resumptions.
-   * Steps are processed in execution order to ensure consistent variable assignment.
+   * Aggregates outputs from all `data.set` step executions in execution order.
+   * Outputs are read via the normal IO read path (LRU cache → state fallback).
+   * O(N) over data.set executions — acceptable; improving static analysis is out of scope.
    */
   public getVariables(): Record<string, unknown> {
-    return this.stepIoService.getDataSetVariables();
+    const result: Record<string, unknown> = {};
+    for (const step of this.workflowExecutionState.getAllStepExecutions()) {
+      if (step.stepType !== 'data.set') continue;
+      const output = this.stepIoService.read(step.id, 'output');
+      if (output != null && typeof output === 'object' && !Array.isArray(output)) {
+        Object.assign(result, output);
+      }
+    }
+    return result;
   }
 
   /**
@@ -652,7 +619,7 @@ export class WorkflowContextManager {
     // metadata vs IO data are owned separately); a foreach is non-terminal
     // while iterating, so its input is never evicted by post-flush input
     // eviction — the service read is safe here.
-    const foreachInput = this.stepIoService.getStepInput(stepExecution.id);
+    const foreachInput = this.stepIoService.read(stepExecution.id, 'input');
     const foreachExpression = this.extractForeachExpression(foreachInput);
     const items = foreachExpression
       ? this.resolveForeachItems(foreachExpression, stepContext)

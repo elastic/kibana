@@ -527,11 +527,6 @@ export class EnterParallelNodeImpl implements NodeImplementation, CancellableNod
       branchRuntime.abortController
     );
 
-    // Release the read-pins set by ensureContextReady for this branch so its
-    // pinned outputs become eviction-eligible again. Runs on every exit path
-    // (completed / failed / waiting / timed-out). A still-in-flight 'waiting'
-    // branch re-pins on the next tick's ensureContextReady call. Idempotent.
-    branchRuntime.contextManager.releaseReadPins();
 
     if (timedOut) {
       // The deadline aborted the branch's in-flight work mid-run, so the branch
