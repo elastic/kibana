@@ -9,13 +9,18 @@ import type { MouseEvent } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
-import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
+import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
 import { paths } from '../constants';
 import { ruleKeys } from './query_key_factory';
 import { invalidateRulesContentList } from './invalidate_rules_content_list';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
 import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_error';
+
+export interface CreateRuleVariables {
+  payload: CreateRuleData;
+  enabled?: boolean;
+}
 
 export const useCreateRule = () => {
   const rulesApi = useService(RulesApi);
@@ -25,7 +30,13 @@ export const useCreateRule = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: CreateRuleData) => rulesApi.createRule(payload),
+    mutationFn: async ({ payload, enabled = true }: CreateRuleVariables): Promise<RuleResponse> => {
+      const rule = await rulesApi.createRule(payload);
+      if (enabled) {
+        return rule;
+      }
+      return rulesApi.disableRule(rule.id);
+    },
     onSuccess: (data) => {
       const href = basePath.prepend(paths.ruleDetails(data.id));
       toasts.addSuccess({

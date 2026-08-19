@@ -68,6 +68,7 @@ const createWrapper = () => {
 
 describe('useInstallRuleTemplate', () => {
   const mockCreateRule = jest.fn();
+  const mockDisableRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
   const mockNavigateToUrl = jest.fn();
@@ -80,7 +81,7 @@ describe('useInstallRuleTemplate', () => {
 
     mockUseService.mockImplementation((service: unknown) => {
       if (service === RulesApi) {
-        return { createRule: mockCreateRule } as any;
+        return { createRule: mockCreateRule, disableRule: mockDisableRule } as any;
       }
       if (service === 'notifications') {
         return { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } } as any;
@@ -95,14 +96,16 @@ describe('useInstallRuleTemplate', () => {
     });
   });
 
-  it('creates a rule from the template payload via useCreateRule', async () => {
+  it('creates a disabled rule from the template payload via useCreateRule', async () => {
     mockCreateRule.mockResolvedValue(mockRuleResponse);
+    mockDisableRule.mockResolvedValue({ ...mockRuleResponse, enabled: false });
     const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper: createWrapper() });
 
     result.current.mutate(mockTemplate);
 
     await waitFor(() => {
       expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayload);
+      expect(mockDisableRule).toHaveBeenCalledWith('rule-1');
       expect(mockAddSuccess).toHaveBeenCalledWith(
         expect.objectContaining({
           title: 'Rule "CPU usage" created successfully',
@@ -115,6 +118,12 @@ describe('useInstallRuleTemplate', () => {
       );
       expect(mockAddError).not.toHaveBeenCalled();
     });
+    expect(mockCreateRule.mock.invocationCallOrder[0]).toBeLessThan(
+      mockDisableRule.mock.invocationCallOrder[0]
+    );
+    expect(mockDisableRule.mock.invocationCallOrder[0]).toBeLessThan(
+      mockAddSuccess.mock.invocationCallOrder[0]
+    );
   });
 
   it('shows an error toast when install fails', async () => {

@@ -170,4 +170,28 @@ describe('RuleLibraryList', () => {
     const installAction = await screen.findByTestId('ruleLibraryInstallAction');
     expect(installAction).toHaveAttribute('aria-disabled', 'true');
   });
+
+  it('shows a loading install action while a template is installing', async () => {
+    mockInstallIsLoading = true;
+    mockInstallVariables = { id: 'template-1' };
+    const template = createTemplate();
+    mockFindItems.mockResolvedValue({
+      items: [
+        {
+          id: template.id,
+          title: template.rule.metadata.name,
+          description: template.rule.metadata.description,
+          tags: template.rule.metadata.tags,
+          template,
+        },
+      ],
+      total: 1,
+    });
+
+    renderList();
+
+    const installAction = await screen.findByTestId('ruleLibraryInstallAction');
+    expect(installAction).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByTestId('ruleLibraryInstallLoading')).toBeInTheDocument();
+  });
 });

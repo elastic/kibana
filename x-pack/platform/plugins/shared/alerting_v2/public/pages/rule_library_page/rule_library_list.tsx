@@ -6,7 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
 import {
   ContentList,
   ContentListFooter,
@@ -144,7 +150,8 @@ export const RuleLibraryList = () => {
             name={i18n.translate('xpack.alertingV2.ruleLibrary.column.tags', {
               defaultMessage: 'Tags',
             })}
-            width="16em"
+            width="10em"
+            maxWidth="10em"
             render={(item: ContentListItem) => {
               const tags = toTemplate(item).rule.metadata.tags;
               if (!tags?.length) return null;
@@ -159,10 +166,16 @@ export const RuleLibraryList = () => {
               );
             }}
           />
-          <Column.Actions width="10em" sticky={false}>
+          <Column.Actions width="14em" sticky={false}>
             <Action
               id="install"
-              name={INSTALL_ACTION_NAME}
+              name={(item: ContentListItem) =>
+                isInstalling && installingTemplate?.id === item.id ? (
+                  <EuiLoadingSpinner size="m" data-test-subj="ruleLibraryInstallLoading" />
+                ) : (
+                  INSTALL_ACTION_NAME
+                )
+              }
               description={INSTALL_ACTION_NAME}
               type="button"
               enabled={(item: ContentListItem) =>
