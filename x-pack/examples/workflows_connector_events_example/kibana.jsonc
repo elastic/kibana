@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/workflows-connector-events-example-plugin",
+  "owner": "@elastic/workflows-eng",
+  "description": "Example dual connector (actions + events) for Workflows connector-event triggers. Loaded with --run-examples.",
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "workflowsConnectorEventsExample",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["actions"]
+  }
+}
