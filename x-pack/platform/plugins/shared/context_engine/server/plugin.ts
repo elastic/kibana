@@ -109,9 +109,7 @@ export class ContextEnginePlugin
       description: 'Context Engine feedback loop signals generated from Agent Builder traces.',
       dest: { type: 'index', value: SIGNALS_INDEX_NAME },
       automations: [],
-      sources: [
-        { type: 'esql', value: `FROM ${AGENT_BUILDER_TRACES_INDEX_PATTERN}` },
-      ],
+      sources: [{ type: 'esql', value: `FROM ${AGENT_BUILDER_TRACES_INDEX_PATTERN}` }],
     });
 
     // Register as a managed workflow owner if workflows_extensions is available
@@ -121,7 +119,8 @@ export class ContextEnginePlugin
 
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
-      registerSeededAiIndex: (id, properties) => this.aiIndexRegistry.registerSeeded(id, properties),
+      registerSeededAiIndex: (id, properties) =>
+        this.aiIndexRegistry.registerSeeded(id, properties),
     };
   }
 

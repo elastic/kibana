@@ -39,7 +39,9 @@ export const installSignalGeneratorWorkflowAndMarkReady = async ({
       workflowsExtensions
     );
     await managedWorkflowsClient.ready();
-    logger.info('Context Engine workflows ready (signal generator workflow available for user creation)');
+    logger.info(
+      'Context Engine workflows ready (signal generator workflow available for user creation)'
+    );
   } catch (error) {
     logger.warn('Failed to initialize Context Engine workflows', { error });
   }
