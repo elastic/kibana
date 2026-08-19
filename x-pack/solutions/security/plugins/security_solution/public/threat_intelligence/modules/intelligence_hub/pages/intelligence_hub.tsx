@@ -69,10 +69,7 @@ import {
   IntelligenceHubDashboardView,
   type IntelligenceHubChipFilters,
 } from '../components/intelligence_hub_dashboard';
-import type {
-  FeedbackLoopSummary,
-  HuntFindingListItem,
-} from '../components/hunt_findings_panel';
+import type { FeedbackLoopSummary, HuntFindingListItem } from '../components/hunt_findings_panel';
 
 const emptyFilters: IntelligenceHubChipFilters = {
   regions: [],

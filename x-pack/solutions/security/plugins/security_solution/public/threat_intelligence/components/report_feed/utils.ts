@@ -76,10 +76,7 @@ export interface OpenDataHtmlReportUrlDeps {
  * yields a blank tab. Open offline HTML articles via a blob: URL instead.
  * http(s) links should keep native `<a href>` navigation.
  */
-export const openDataHtmlReportUrl = (
-  url: string,
-  deps: OpenDataHtmlReportUrlDeps = {}
-): void => {
+export const openDataHtmlReportUrl = (url: string, deps: OpenDataHtmlReportUrlDeps = {}): void => {
   const html = decodeDataHtmlReportUrl(url);
   if (!html) return;
   const createObjectURL = deps.createObjectURL ?? ((blob) => URL.createObjectURL(blob));

@@ -23,9 +23,9 @@ describe('isBrowsableReportUrl', () => {
   });
 
   it('returns true for data:text/html article URLs with charset', () => {
-    expect(
-      isBrowsableReportUrl('data:text/html;charset=utf-8,%3Ch1%3EReport%3C%2Fh1%3E')
-    ).toBe(true);
+    expect(isBrowsableReportUrl('data:text/html;charset=utf-8,%3Ch1%3EReport%3C%2Fh1%3E')).toBe(
+      true
+    );
   });
 
   it('returns true for data:text/html without charset', () => {
@@ -59,9 +59,9 @@ describe('isBrowsableReportUrl', () => {
 
 describe('decodeDataHtmlReportUrl', () => {
   it('returns decoded HTML for percent-encoded data:text/html URLs', () => {
-    expect(
-      decodeDataHtmlReportUrl('data:text/html;charset=utf-8,%3Ch1%3EReport%3C%2Fh1%3E')
-    ).toBe('<h1>Report</h1>');
+    expect(decodeDataHtmlReportUrl('data:text/html;charset=utf-8,%3Ch1%3EReport%3C%2Fh1%3E')).toBe(
+      '<h1>Report</h1>'
+    );
   });
 
   it('returns undefined for https URLs', () => {

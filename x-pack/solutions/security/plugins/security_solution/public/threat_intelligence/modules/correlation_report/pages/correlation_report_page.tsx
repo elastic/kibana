@@ -1100,6 +1100,7 @@ export const CorrelationReportPage: FC = () => {
         />
         <EuiPageTemplate.Section>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.securitySolution.threatIntelligence.correlationReport.featureDisabledTitle',
               { defaultMessage: 'Feature not enabled' }
@@ -1226,6 +1227,7 @@ export const CorrelationReportPage: FC = () => {
               <EuiSpacer size="s" />
               {disambigError ? (
                 <EuiCallOut
+                  announceOnMount
                   title={i18nText.errorTitle()}
                   color="danger"
                   iconType="alert"
@@ -1308,6 +1310,7 @@ export const CorrelationReportPage: FC = () => {
         {/* ---- Error ---- */}
         {!polling && error ? (
           <EuiCallOut
+            announceOnMount
             title={i18nText.errorTitle()}
             color="danger"
             iconType="alert"
