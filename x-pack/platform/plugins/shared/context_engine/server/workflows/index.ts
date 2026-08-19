@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export {
-  registerSignalGeneratorTaskDefinition,
-  scheduleSignalGenerator,
-} from './signal_generator_task';
+export { installSignalGeneratorWorkflowAndMarkReady } from './install';
+export { ensureStateIndexExists, STATE_INDEX_NAME } from './state_index';

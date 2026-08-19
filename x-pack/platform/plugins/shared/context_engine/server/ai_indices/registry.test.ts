@@ -24,6 +24,7 @@ const makeServiceMock = (overrides: Partial<AiIndexService> = {}): jest.Mocked<A
     get: jest.fn(),
     put: jest.fn(),
     putManaged: jest.fn(),
+    putSeeded: jest.fn(),
     list: jest.fn(),
     delete: jest.fn(),
     ...overrides,
@@ -62,6 +63,43 @@ describe('AiIndexRegistry', () => {
     it('throws if the same id is registered twice', () => {
       registry.register('test', makeProperties());
       expect(() => registry.register('test', makeProperties())).toThrow(
+        "AI index 'test' is already registered"
+      );
+    });
+  });
+
+  describe('registerSeeded()', () => {
+    it('buffers a seeded registration before startupRegister is called', async () => {
+      const service = makeServiceMock({
+        putSeeded: jest.fn().mockResolvedValue('created'),
+      });
+
+      registry.registerSeeded('test', makeProperties());
+      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+
+      expect(service.putSeeded).toHaveBeenCalledWith('test', makeProperties());
+      expect(service.putManaged).not.toHaveBeenCalled();
+    });
+
+    it('throws if called after startupRegister has run', async () => {
+      const service = makeServiceMock();
+      await registry.startupRegister({ aiIndexService: service, isEnabled: false, logger });
+
+      expect(() => registry.registerSeeded('test', makeProperties())).toThrow(
+        'registerAiIndex called after plugin start'
+      );
+    });
+
+    it('throws if the same id is registered twice', () => {
+      registry.registerSeeded('test', makeProperties());
+      expect(() => registry.registerSeeded('test', makeProperties())).toThrow(
+        "AI index 'test' is already registered"
+      );
+    });
+
+    it('throws if seeded id conflicts with managed id', () => {
+      registry.register('test', makeProperties());
+      expect(() => registry.registerSeeded('test', makeProperties())).toThrow(
         "AI index 'test' is already registered"
       );
     });
@@ -164,6 +202,68 @@ describe('AiIndexRegistry', () => {
       expect(service.putManaged).toHaveBeenCalledTimes(2);
       expect(service.putManaged).toHaveBeenCalledWith('a', makeProperties({ description: 'A' }));
       expect(service.putManaged).toHaveBeenCalledWith('b', makeProperties({ description: 'B' }));
+    });
+
+    it('calls putSeeded() for seeded registrations', async () => {
+      const service = makeServiceMock({
+        putSeeded: jest.fn().mockResolvedValue('created'),
+      });
+      registry.registerSeeded('test', makeProperties());
+
+      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+
+      expect(service.putSeeded).toHaveBeenCalledWith('test', makeProperties());
+      expect(service.putManaged).not.toHaveBeenCalled();
+    });
+
+    it('preserves user configuration when seeded entry already exists', async () => {
+      const service = makeServiceMock({
+        putSeeded: jest.fn().mockResolvedValue('exists'),
+      });
+      registry.registerSeeded('test', makeProperties());
+
+      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+
+      expect(service.putSeeded).toHaveBeenCalledWith('test', makeProperties());
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('preserving user configuration')
+      );
+    });
+
+    it('logs migration when converting managed to seeded', async () => {
+      const service = makeServiceMock({
+        putSeeded: jest.fn().mockResolvedValue('migrated'),
+      });
+      registry.registerSeeded('test', makeProperties());
+
+      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+
+      expect(service.putSeeded).toHaveBeenCalledWith('test', makeProperties());
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('migrated from managed to user-editable')
+      );
+    });
+
+    it('handles a mix of managed and seeded registrations', async () => {
+      const service = makeServiceMock({
+        putManaged: jest.fn().mockResolvedValue('created'),
+        putSeeded: jest.fn().mockResolvedValue('created'),
+      });
+      registry.register('managed', makeProperties({ description: 'Managed' }));
+      registry.registerSeeded('seeded', makeProperties({ description: 'Seeded' }));
+
+      await registry.startupRegister({ aiIndexService: service, isEnabled: true, logger });
+
+      expect(service.putManaged).toHaveBeenCalledTimes(1);
+      expect(service.putManaged).toHaveBeenCalledWith(
+        'managed',
+        makeProperties({ description: 'Managed' })
+      );
+      expect(service.putSeeded).toHaveBeenCalledTimes(1);
+      expect(service.putSeeded).toHaveBeenCalledWith(
+        'seeded',
+        makeProperties({ description: 'Seeded' })
+      );
     });
   });
 });

@@ -12,11 +12,11 @@ import type {
   ListSignalGroupsResponse,
   ListSignalsResponse,
 } from '../../common/http_api/signals';
-import { buildSignalsIndexName } from '../../common/http_api/signals';
+import { SIGNALS_INDEX_NAME } from '../../common/http_api/signals';
 
 /**
  * Reads run as free functions (rather than via `SignalsService`) because they need the
- * request-scoped `asCurrentUser` client, whereas the service holds a long-lived per-space
+ * request-scoped `asCurrentUser` client, whereas the service holds a long-lived
  * `asInternalUser` client used by the write path.
  */
 
@@ -36,18 +36,23 @@ interface TagsAggregation {
 }
 
 /**
- * Preaggregated grouped-by-tag list: a terms aggregation over the `tags` keyword field of the
- * current space's signals index. Returns one `{ tag, count }` per distinct tag, highest count first.
+ * Preaggregated grouped-by-tag list: a terms aggregation over the `tags` keyword field,
+ * filtered by `space_id`. Returns one `{ tag, count }` per distinct tag, highest count first.
  */
 export const getSignalGroups = async (
   esClient: ElasticsearchClient,
   { spaceId, maxGroups }: { spaceId: string; maxGroups: number }
 ): Promise<ListSignalGroupsResponse> => {
   const response = await esClient.search<unknown, TagsAggregation>({
-    index: buildSignalsIndexName(spaceId),
+    index: SIGNALS_INDEX_NAME,
     ...LENIENT_INDEX_OPTIONS,
     size: 0,
     track_total_hits: false,
+    query: {
+      bool: {
+        filter: [{ term: { space_id: spaceId } }],
+      },
+    },
     aggs: {
       tags: {
         terms: {
@@ -69,7 +74,7 @@ export const getSignalGroups = async (
 };
 
 /**
- * Fetches the individual signals carrying a given tag from the current space's index, newest first
+ * Fetches the individual signals carrying a given tag, filtered by `space_id`, newest first
  * and paginated. The evidence for each signal lives in its flattened `data` object.
  */
 export const getSignalsByTag = async (
@@ -77,7 +82,7 @@ export const getSignalsByTag = async (
   { spaceId, tag, from, size }: { spaceId: string; tag: string; from: number; size: number }
 ): Promise<ListSignalsResponse> => {
   const response = await esClient.search<Signal>({
-    index: buildSignalsIndexName(spaceId),
+    index: SIGNALS_INDEX_NAME,
     ...LENIENT_INDEX_OPTIONS,
     from,
     size,
@@ -85,7 +90,7 @@ export const getSignalsByTag = async (
     _source: { excludes: [...SIGNAL_SOURCE_EXCLUDES] },
     query: {
       bool: {
-        filter: [{ term: { tags: tag } }],
+        filter: [{ term: { space_id: spaceId } }, { term: { tags: tag } }],
       },
     },
     sort: [{ '@timestamp': { order: 'desc' } }],

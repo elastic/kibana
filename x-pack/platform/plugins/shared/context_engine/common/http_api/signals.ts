@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-/** Prefix for the per-space Context Engine signals indices (one index per Kibana space). */
-export const SIGNAL_INDEX_PREFIX = 'context-engine-signals-';
-
-/** The signals index name for a given Kibana space. */
-export const buildSignalsIndexName = (spaceId: string): string =>
-  `${SIGNAL_INDEX_PREFIX}${spaceId}`;
+/** The global signals index name (follows AI index naming convention). */
+export const SIGNALS_INDEX_NAME = 'ai-index-idx-signals';
 
 /** The set of signal types; `tool_call` is the first. */
 export type SignalType = 'tool_call';
@@ -19,6 +15,8 @@ export type SignalType = 'tool_call';
 export interface SignalEnvelope {
   signal_id: string;
   '@timestamp': string;
+  /** The Kibana space this signal belongs to. */
+  space_id: string;
   trace_ids?: string[];
   signal_type: SignalType;
   /** Classification labels; empty for a clean signal. */

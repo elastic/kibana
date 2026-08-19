@@ -8,6 +8,7 @@
  */
 
 import { SECURITY_ALERT_ANALYSIS_WORKFLOW } from './alert_analysis';
+import { SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW } from './context_engine';
 import {
   ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
   ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
@@ -59,6 +60,7 @@ export {
   ATTACK_DISCOVERY_SKILL_REPORT_WORKFLOW_ID,
   ATTACK_DISCOVERY_VALIDATE_WORKFLOW_ID,
 } from './discoveries';
+export { SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW_ID } from './context_engine';
 export { EXAMPLE_MANAGED_WORKFLOW_ID } from './workflows_extensions_example';
 export {
   SECURITY_ALERT_ANALYSIS_WORKFLOW,
@@ -107,6 +109,7 @@ export {
 // the FF off these definitions are inert, discoverable data — never installed or
 // executed.
 export const managedWorkflowDefinitions = [
+  SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW,
   ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
   ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
   ATTACK_DISCOVERY_GENERATION_WORKFLOW,

@@ -10,47 +10,31 @@ import type { Signal } from '../../common/http_api/signals';
 import type { SignalsStorageClient } from './storage';
 import { createSignalsStorageClient } from './storage';
 
-/** Signals-store API. Every call is scoped to a Kibana space, which maps to a per-space index. */
+/** Signals-store API using a global index with space isolation via `space_id` field. */
 export interface SignalsServiceApi {
-  ensureIndex(spaceId: string): Promise<void>;
-  write(spaceId: string, signals: Signal[]): Promise<void>;
+  ensureIndex(): Promise<void>;
+  write(signals: Signal[]): Promise<void>;
 }
 
-/** Owns the per-space `context-engine-signals-<space>` indices. Append/overwrite only; no delete path. */
+/** Owns the global `ai-index-idx-signals` index. Append/overwrite only; no delete path. */
 export class SignalsService implements SignalsServiceApi {
-  private readonly esClient: ElasticsearchClient;
-  private readonly logger: Logger;
-  private readonly clientsBySpace = new Map<string, SignalsStorageClient>();
+  private readonly client: SignalsStorageClient;
 
   constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
-    this.esClient = esClient;
-    this.logger = logger;
+    this.client = createSignalsStorageClient({ esClient, logger });
   }
 
-  private clientFor(spaceId: string): SignalsStorageClient {
-    let client = this.clientsBySpace.get(spaceId);
-    if (!client) {
-      client = createSignalsStorageClient({
-        esClient: this.esClient,
-        logger: this.logger,
-        spaceId,
-      });
-      this.clientsBySpace.set(spaceId, client);
-    }
-    return client;
+  /** Reconciles the signals index mappings if it exists; the index is created lazily on first write. */
+  async ensureIndex(): Promise<void> {
+    await this.client.reconcileMappings();
   }
 
-  /** Reconciles the space's signals index mappings if it exists; the index is created lazily on first write. */
-  async ensureIndex(spaceId: string): Promise<void> {
-    await this.clientFor(spaceId).reconcileMappings();
-  }
-
-  /** Bulk-writes signals into the space's index, keyed by `signal_id` so re-processing overwrites rather than duplicates. */
-  async write(spaceId: string, signals: Signal[]): Promise<void> {
+  /** Bulk-writes signals into the global index, keyed by `signal_id` so re-processing overwrites rather than duplicates. */
+  async write(signals: Signal[]): Promise<void> {
     if (signals.length === 0) {
       return;
     }
-    await this.clientFor(spaceId).bulk({
+    await this.client.bulk({
       operations: signals.map((signal) => ({
         index: { _id: signal.signal_id, document: signal },
       })),

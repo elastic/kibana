@@ -9,13 +9,14 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { IndexStorageSettings, IStorageClient, StorageSchema } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { SignalEnvelope } from '../../common/http_api/signals';
-import { buildSignalsIndexName } from '../../common/http_api/signals';
+import { SIGNALS_INDEX_NAME } from '../../common/http_api/signals';
 
-/** Shared mapping for every per-space signals index. */
+/** Schema for the global signals index (space isolation via `space_id` field). */
 export const signalsSchema = {
   properties: {
     signal_id: types.keyword({}),
     '@timestamp': types.date({}),
+    space_id: types.keyword({}),
     trace_ids: types.keyword({}),
     signal_type: types.keyword({}),
     tags: types.keyword({}),
@@ -23,27 +24,27 @@ export const signalsSchema = {
   },
 } satisfies StorageSchema;
 
-const buildStorageSettings = (spaceId: string) =>
-  ({ name: buildSignalsIndexName(spaceId), schema: signalsSchema } satisfies IndexStorageSettings);
+const storageSettings = {
+  name: SIGNALS_INDEX_NAME,
+  schema: signalsSchema,
+} satisfies IndexStorageSettings;
 
-export type SignalsStorageSettings = ReturnType<typeof buildStorageSettings>;
+export type SignalsStorageSettings = typeof storageSettings;
 
 export type SignalsStorageClient = IStorageClient<SignalsStorageSettings, SignalEnvelope>;
 
-/** Creates a storage client bound to a single space's signals index. */
+/** Creates a storage client for the global signals index. */
 export const createSignalsStorageClient = ({
   esClient,
   logger,
-  spaceId,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  spaceId: string;
 }): SignalsStorageClient => {
   const adapter = new StorageIndexAdapter<SignalsStorageSettings, SignalEnvelope>(
     esClient,
     logger,
-    buildStorageSettings(spaceId)
+    storageSettings
   );
   return adapter.getClient();
 };

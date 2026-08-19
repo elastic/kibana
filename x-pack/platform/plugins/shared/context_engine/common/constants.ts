@@ -64,13 +64,11 @@ export const MAX_AI_INDEX_SOURCES = 100;
 /** Advanced setting that gates the Context Engine feedback loop. */
 export const CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID = 'contextEngine:feedbackLoopEnabled';
 
-/** Task Manager type, id, and schedule for the global signal-generation task. */
-export const SIGNAL_GENERATOR_TASK_TYPE = 'contextEngine:signalGenerator';
-export const SIGNAL_GENERATOR_TASK_ID = 'contextengine-signal-generator';
-export const SIGNAL_GENERATOR_SCHEDULE_INTERVAL = '1h';
-
 /** Agent id whose tool calls are left untagged. */
 export const MANAGEMENT_AGENT_ID = 'platform.context_engine.agent';
+
+/** The managed AI index ID for signals. */
+export const SIGNALS_AI_INDEX_ID = 'signals';
 
 /**
  * Prefix for the per-space Agent Builder OTel traces indices (one per Kibana space). Kept
@@ -82,3 +80,6 @@ export const AGENT_BUILDER_TRACES_INDEX_PREFIX = 'traces-agent_builder.otel-';
 /** The Agent Builder OTel traces index name for a given Kibana space. */
 export const buildAgentBuilderTracesIndexName = (spaceId: string): string =>
   `${AGENT_BUILDER_TRACES_INDEX_PREFIX}${spaceId}`;
+
+/** Wildcard pattern matching all Agent Builder OTel traces indices across all spaces. */
+export const AGENT_BUILDER_TRACES_INDEX_PATTERN = `${AGENT_BUILDER_TRACES_INDEX_PREFIX}*`;

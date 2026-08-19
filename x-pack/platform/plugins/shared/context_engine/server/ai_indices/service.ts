@@ -119,6 +119,65 @@ export class AiIndexService {
     return this.writeDocument(aiIndexId, { ...properties, managed: true }, existing);
   }
 
+  /**
+   * Creates an AI index with default properties, but as non-managed so users
+   * can customize it. If the entry doesn't exist, it's created with the provided
+   * properties. If it exists as managed, it's converted to non-managed (one-time
+   * migration). If it exists as non-managed, user customizations are preserved.
+   *
+   * Use this for "seeded" indices where the code provides sensible defaults
+   * but users should be able to add automations, modify sources, etc.
+   *
+   * Returns 'created' if the entry was created, 'migrated' if converted from
+   * managed to non-managed, or 'exists' if it already existed as non-managed.
+   */
+  async putSeeded(
+    aiIndexId: string,
+    properties: AiIndexProperties
+  ): Promise<'created' | 'migrated' | 'exists'> {
+    await this.assertValidDest(properties.dest);
+    const existing = await this.findDocument(aiIndexId);
+
+    if (existing) {
+      if (existing.document.managed) {
+        // Migrate from managed to non-managed, updating properties but preserving dates
+        await this.storageClient.index({
+          id: aiIndexId,
+          document: {
+            ...properties,
+            managed: false,
+            date_created: existing.document.date_created,
+            date_modified: new Date().toISOString(),
+          },
+          if_seq_no: existing.seqNo,
+          if_primary_term: existing.primaryTerm,
+        });
+        return 'migrated';
+      }
+      // Already non-managed, preserve user customizations
+      return 'exists';
+    }
+
+    try {
+      await this.storageClient.index({
+        id: aiIndexId,
+        document: {
+          ...properties,
+          managed: false,
+          date_created: new Date().toISOString(),
+          date_modified: new Date().toISOString(),
+        },
+        op_type: 'create',
+      });
+      return 'created';
+    } catch (error) {
+      if (isResponseError(error) && error.statusCode === 409) {
+        return 'exists';
+      }
+      throw error;
+    }
+  }
+
   private async writeDocument(
     aiIndexId: string,
     document: Omit<AiIndexDocument, 'date_created' | 'date_modified'>,
