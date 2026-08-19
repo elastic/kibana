@@ -20,6 +20,9 @@ export const DISCOVER_DEFAULT_KBN_ARCHIVE =
 // Internal session management API path.
 export const SESSION_API_PATH = '/internal/session';
 
+// Sample data set installed via `apiServices.sampleData` for the ES|QL specs.
+export const FLIGHTS_SAMPLE_DATA_SET = 'flights';
+
 // The window the logstash-* archive holds documents in.
 export const LOGSTASH_TIME_RANGE = {
   from: '2015-09-19T06:31:44.000Z',

@@ -43,11 +43,13 @@ const ERROR_OR_WARNING_PATTERN =
  */
 export class BackgroundSearchPage {
   public readonly managementTable: Locator;
+  public readonly flyoutEntrypoint: Locator;
   public readonly completedToastLink: Locator;
   private readonly savedToastLink: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.managementTable = this.page.testSubj.locator(MANAGEMENT_TABLE);
+    this.flyoutEntrypoint = this.page.testSubj.locator(BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT);
     this.completedToastLink = this.page.testSubj.locator(COMPLETED_TOAST_LINK);
     this.savedToastLink = this.page.testSubj.locator(SAVED_TOAST_LINK);
   }
