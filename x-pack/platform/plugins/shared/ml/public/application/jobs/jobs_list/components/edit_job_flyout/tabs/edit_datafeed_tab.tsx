@@ -9,11 +9,9 @@ import type { ChangeEvent, FC } from 'react';
 import React, { useCallback, useMemo } from 'react';
 
 import { EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiFieldNumber } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { parseInterval } from '@kbn/ml-parse-interval';
 import type { ProjectRouting } from '@kbn/es-query';
-import { useFetchProjects } from '@kbn/cps-utils';
 import { MlProjectPickerPanel } from '@kbn/ml-cps';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -75,14 +73,14 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
   const cpsManager = cps?.cpsManager;
   const totalProjectCount = cpsManager?.getTotalProjectCount() ?? 0;
 
-  const fetchProjects = useCallback(
-    (routing?: ProjectRouting) => {
-      return cpsManager?.fetchProjects(routing) ?? Promise.resolve(null);
-    },
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
     [cpsManager]
   );
 
-  const projects = useFetchProjects(fetchProjects, datafeedProjectRouting);
+  const defaultProjectRoutingGetter = useCallback(() => {
+    return cpsManager?.getDefaultProjectRouting();
+  }, [cpsManager]);
 
   const onProjectRoutingChange = (projectRouting: ProjectRouting) => {
     setDatafeed({ datafeedProjectRouting: projectRouting });
@@ -106,7 +104,7 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
         </>
       )}
       <EuiForm>
-        {totalProjectCount > 1 && projects ? (
+        {totalProjectCount > 1 ? (
           <EuiFormRow
             label={
               <FormattedMessage
@@ -118,7 +116,8 @@ export const EditDatafeedTab: FC<EditDatafeedTabProps> = ({
             <MlProjectPickerPanel
               projectRouting={datafeedProjectRouting}
               onProjectRoutingChange={onProjectRoutingChange}
-              projects={projects}
+              fetchProjectsByRouting={fetchProjectsByRouting}
+              defaultProjectRoutingGetter={defaultProjectRoutingGetter}
               totalProjectCount={totalProjectCount}
               disabled={datafeedRunning}
               displayDisabledTooltip={false}

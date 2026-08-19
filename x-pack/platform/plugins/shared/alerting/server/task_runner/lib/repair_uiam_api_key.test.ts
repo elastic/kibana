@@ -14,7 +14,11 @@ import { ErrorWithReason } from '../../lib/error_with_reason';
 import { RuleExecutionStatusErrorReasons } from '../../types';
 import type { RawRule } from '../../types';
 import { ApiKeyType, type TaskRunnerContext } from '../types';
-import { isMissingUiamApiKeyRunError, repairUiamApiKey } from './repair_uiam_api_key';
+import {
+  isMissingUiamApiKeyLastRunError,
+  isMissingUiamApiKeyRunError,
+  repairUiamApiKey,
+} from './repair_uiam_api_key';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -130,6 +134,63 @@ describe('isMissingUiamApiKeyRunError()', () => {
     error.cause = error;
 
     expect(isMissingUiamApiKeyRunError(error)).toBe(false);
+  });
+});
+
+describe('isMissingUiamApiKeyLastRunError()', () => {
+  // Both messages are the text production actually records, taken from `siem.*` runs in
+  // production eu-west-1. Neither retains the structured Elasticsearch error, which is why these
+  // runs are matched on the message rather than through isMissingUiamApiKeyRunError().
+  const STRINGIFIED_RESPONSE_ERROR = [
+    'security_exception',
+    '\tCaused by:',
+    '\t\tsecurity_exception: failed to authenticate cloud API key: [0x28D520]',
+    '\tRoot causes:',
+    '\t\tsecurity_exception: failed to authenticate cloud API key: [0x28D520]',
+  ].join('\n');
+
+  const WRAPPED_BY_RULE_TYPE = `unable to fetch exception list items, message: "${STRINGIFIED_RESPONSE_ERROR}" full error: "ResponseError: ${STRINGIFIED_RESPONSE_ERROR}"`;
+
+  test('returns true for a stringified Elasticsearch error the rule type recorded as-is', () => {
+    expect(
+      isMissingUiamApiKeyLastRunError([{ message: STRINGIFIED_RESPONSE_ERROR, userError: false }])
+    ).toBe(true);
+  });
+
+  test('returns true when the rule type wrapped the error in its own message', () => {
+    expect(
+      isMissingUiamApiKeyLastRunError([{ message: WRAPPED_BY_RULE_TYPE, userError: false }])
+    ).toBe(true);
+  });
+
+  test('returns true when only one of several recorded errors reports the missing key', () => {
+    expect(
+      isMissingUiamApiKeyLastRunError([
+        { message: 'a different rule execution problem', userError: false },
+        { message: STRINGIFIED_RESPONSE_ERROR, userError: false },
+      ])
+    ).toBe(true);
+  });
+
+  test('requires the full Elasticsearch phrase, not just the code', () => {
+    // A detection rule searching for authentication failures can put the bare code into its own
+    // error text; re-granting a key off that would be wrong.
+    expect(
+      isMissingUiamApiKeyLastRunError([
+        { message: 'found 3 documents matching "0x28D520"', userError: false },
+      ])
+    ).toBe(false);
+  });
+
+  test('ignores errors the rule author is responsible for', () => {
+    expect(
+      isMissingUiamApiKeyLastRunError([{ message: STRINGIFIED_RESPONSE_ERROR, userError: true }])
+    ).toBe(false);
+  });
+
+  test('returns false for unrelated or absent run errors', () => {
+    expect(isMissingUiamApiKeyLastRunError([])).toBe(false);
+    expect(isMissingUiamApiKeyLastRunError([{ message: 'boom', userError: false }])).toBe(false);
   });
 });
 

@@ -38,6 +38,7 @@
     "@kbn/licensing-types",
     "@kbn/core-http-browser",
     "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",
