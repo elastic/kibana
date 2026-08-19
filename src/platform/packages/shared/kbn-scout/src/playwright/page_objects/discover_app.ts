@@ -869,7 +869,14 @@ export class DiscoverApp {
    * (e.g. `"Breakdown by geo.src"` or `"No breakdown"`.
    */
   async getBreakdownFieldValue(): Promise<string> {
-    return this.page.testSubj.innerText('unifiedHistogramBreakdownSelectorButton');
+    const visibleText = await this.page.testSubj.innerText(
+      'unifiedHistogramBreakdownSelectorButton'
+    );
+
+    // The button label truncates long field names via an absolutely positioned
+    // overlay, which the browser's visible-text computation renders as if it
+    // were on its own line. Collapse that whitespace since it isn't visible on screen.
+    return visibleText.replace(/\s+/g, ' ').trim();
   }
 
   /**
@@ -1120,6 +1127,12 @@ export class DiscoverApp {
     await this.waitUntilSearchingHasFinished();
     const queryMode = await this.getCurrentQueryMode();
     expect(queryMode).toBe('classic');
+  }
+
+  async selectFieldStatisticsView() {
+    await this.page.testSubj.click('dscViewModeToggleButton');
+    await this.page.testSubj.locator('dscViewModeToggleSelectable').waitFor({ state: 'visible' });
+    await this.page.testSubj.click('dscViewModeFieldStatsOption');
   }
 
   async writeAndSubmitEsqlQuery(query: string) {
@@ -1469,6 +1482,17 @@ export class DiscoverApp {
   }
 
   /**
+   * Waits until the cascade row with the given id reports the given expansion
+   * state, without waiting for the data of an expanded row to load.
+   */
+  async waitForCascadeLayoutRowExpanded(rowId: string, expanded: boolean): Promise<void> {
+    await this.page
+      .locator(`[id="${rowId}"]`)
+      .and(this.page.locator(`[aria-expanded="${expanded}"]`))
+      .waitFor({ state: 'attached' });
+  }
+
+  /**
    * Toggles (expands/collapses) the cascade row with the given id and waits
    * for the `aria-expanded` state to flip before returning. Waits for the doc
    * table to finish rendering after an expand, since that triggers a fetch.
@@ -1478,9 +1502,7 @@ export class DiscoverApp {
     const wasExpanded = (await row.getAttribute('aria-expanded')) === 'true';
 
     await this.clickCascadeRowToggle(rowId);
-    await row
-      .and(this.page.locator(`[aria-expanded="${!wasExpanded}"]`))
-      .waitFor({ state: 'attached' });
+    await this.waitForCascadeLayoutRowExpanded(rowId, !wasExpanded);
 
     if (!wasExpanded) {
       await this.dataGrid.waitForDocTableRendered();

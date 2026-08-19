@@ -64,3 +64,4 @@ mongodb
 mongodb-connection-string-url
 @swc/plugin-emotion
 graphql
+@cfworker/json-schema

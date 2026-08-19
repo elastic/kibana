@@ -13,6 +13,7 @@ import type { PostTransformsUpdateRequestSchema } from '../../api_schemas/update
 import type { TransformRequestHandlerContext } from '../../../services/license';
 
 import { wrapError } from '../../utils/error_utils';
+import { updateTransform } from './update_transform';
 
 export const routeHandler: RequestHandler<
   TransformIdParamSchema,
@@ -24,10 +25,10 @@ export const routeHandler: RequestHandler<
 
   try {
     const esClient = (await ctx.core).elasticsearch.client;
-    const body = await esClient.asCurrentUser.transform.updateTransform({
-      // @ts-expect-error query doesn't satisfy QueryDslQueryContainer from @elastic/elasticsearch
+    const body = await updateTransform({
       body: req.body,
-      transform_id: transformId,
+      esClient: esClient.asCurrentUser,
+      transformId,
     });
     return res.ok({
       body,

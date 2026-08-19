@@ -41,7 +41,7 @@ import { AttachmentRenderErrorBoundary } from './attachment_render_error_boundar
 
 type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
-  'userAction' | 'caseData' | 'handleDeleteComment' | 'userProfiles'
+  'userAction' | 'caseData' | 'permissions' | 'handleDeleteComment' | 'userProfiles'
 > & {
   attachment: SnakeToCamelCase<C>;
   registry: R;
@@ -91,6 +91,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
   attachment,
   registry,
   caseData,
+  permissions,
   isLoading,
   getId,
   getAttachmentViewProps,
@@ -129,6 +130,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
       ...getAttachmentViewProps(),
       savedObjectId: attachment.id,
       caseData: { id: caseData.id, title: caseData.title },
+      permissions,
     };
 
     const attachmentViewObject = attachmentType.getAttachmentViewObject(props);
