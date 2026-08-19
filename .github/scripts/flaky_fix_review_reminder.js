@@ -100,8 +100,7 @@ function buildCommentBody(ownerHandles) {
   ].join('\n');
 }
 
-const isBot = (user) =>
-  Boolean(user) && (user.type === 'Bot' || user.login.endsWith('[bot]'));
+const isBot = (user) => Boolean(user) && (user.type === 'Bot' || user.login.endsWith('[bot]'));
 
 /**
  * Whether a human (non-author, non-bot) submitted an APPROVED /
@@ -225,7 +224,10 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
       pull_number: pr.number,
       per_page: 100,
     });
-    const owners = resolveOwners(entries, files.map((f) => f.filename));
+    const owners = resolveOwners(
+      entries,
+      files.map((f) => f.filename)
+    );
     if (owners.length === 0) {
       core.info(`No codeowners resolved for #${pr.number}, skipping`);
       continue;
@@ -234,7 +236,9 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
 
     if (dryRun) {
       pinged += 1;
-      core.info(`[dry run] would ping #${pr.number} (${elapsed}d since ${reference}) -> ${mentioned}`);
+      core.info(
+        `[dry run] would ping #${pr.number} (${elapsed}d since ${reference}) -> ${mentioned}`
+      );
       continue;
     }
 
@@ -261,7 +265,9 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
   }
 
   core.info(
-    `Checked ${considered} open ready "${LABEL}" PR(s), pinged ${pinged}${dryRun ? ' (dry run)' : ''}`
+    `Checked ${considered} open ready "${LABEL}" PR(s), pinged ${pinged}${
+      dryRun ? ' (dry run)' : ''
+    }`
   );
 };
 
