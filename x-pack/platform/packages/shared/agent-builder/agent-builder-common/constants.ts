@@ -10,15 +10,15 @@ export const AGENT_BUILDER_INFERENCE_FEATURE_ID = 'agent_builder';
 export const AGENT_BUILDER_FAST_INFERENCE_FEATURE_ID = 'agent_builder_fast';
 
 export const AGENT_BUILDER_RECOMMENDED_ENDPOINTS = [
-  '.anthropic-claude-5-sonnet-chat_completion',  // Claude Sonnet 5, GA 2026-07-03
-  '.anthropic-claude-5-opus-chat_completion',    // Claude Opus 5, GA 2026-07-24
-  '.openai-gpt-5.6-sol-chat_completion',         // GPT-5.6 Sol, GA 2026-07-09
+  '.anthropic-claude-5-sonnet-chat_completion', // Claude Sonnet 5, GA 2026-07-03
+  '.anthropic-claude-5-opus-chat_completion', // Claude Opus 5, GA 2026-07-24
+  '.openai-gpt-5.6-sol-chat_completion', // GPT-5.6 Sol, GA 2026-07-09
 ];
 
 export const AGENT_BUILDER_FAST_RECOMMENDED_ENDPOINTS = [
-  '.anthropic-claude-4.5-haiku-chat_completion',       // Claude Haiku 4.5, GA 2025-10-01
-  '.openai-gpt-5.6-luna-chat_completion',              // GPT-5.6 Luna, GA 2026-07-09 — cost-efficient GPT-5.6 variant
-  '.google-gemini-3.5-flash-lite-chat_completion',     // Gemini 3.5 Flash Lite, GA 2026-07-21
+  '.anthropic-claude-4.5-haiku-chat_completion', // Claude Haiku 4.5, GA 2025-10-01
+  '.openai-gpt-5.6-luna-chat_completion', // GPT-5.6 Luna, GA 2026-07-09 — cost-efficient GPT-5.6 variant
+  '.google-gemini-3.5-flash-lite-chat_completion', // Gemini 3.5 Flash Lite, GA 2026-07-21
 ];
 
 /**
