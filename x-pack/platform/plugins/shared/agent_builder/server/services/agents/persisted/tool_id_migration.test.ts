@@ -37,10 +37,7 @@ describe('replaceToolIdsInToolSelection', () => {
   it('does not duplicate if new ids already present', () => {
     const tools = [
       {
-        tool_ids: [
-          'platform.core.cases.attachments',
-          'platform.core.cases.get_attachments',
-        ],
+        tool_ids: ['platform.core.cases.attachments', 'platform.core.cases.get_attachments'],
       },
     ];
     const result = replaceToolIdsInToolSelection(tools, 'platform.core.cases.attachments', [
@@ -49,29 +46,20 @@ describe('replaceToolIdsInToolSelection', () => {
     ]);
     expect(result).toEqual([
       {
-        tool_ids: [
-          'platform.core.cases.get_attachments',
-          'platform.core.cases.manage_attachments',
-        ],
+        tool_ids: ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments'],
       },
     ]);
   });
 
   it('handles multiple selections', () => {
-    const tools = [
-      { tool_ids: ['platform.core.cases.attachments'] },
-      { tool_ids: ['other.tool'] },
-    ];
+    const tools = [{ tool_ids: ['platform.core.cases.attachments'] }, { tool_ids: ['other.tool'] }];
     const result = replaceToolIdsInToolSelection(tools, 'platform.core.cases.attachments', [
       'platform.core.cases.get_attachments',
       'platform.core.cases.manage_attachments',
     ]);
     expect(result).toEqual([
       {
-        tool_ids: [
-          'platform.core.cases.get_attachments',
-          'platform.core.cases.manage_attachments',
-        ],
+        tool_ids: ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments'],
       },
       { tool_ids: ['other.tool'] },
     ]);
@@ -93,11 +81,10 @@ describe('replaceToolIdsInArray', () => {
   });
 
   it('returns unchanged array when old id is not present', () => {
-    const result = replaceToolIdsInArray(
-      ['other.tool'],
-      'platform.core.cases.attachments',
-      ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments']
-    );
+    const result = replaceToolIdsInArray(['other.tool'], 'platform.core.cases.attachments', [
+      'platform.core.cases.get_attachments',
+      'platform.core.cases.manage_attachments',
+    ]);
     expect(result).toEqual(['other.tool']);
   });
 
@@ -115,11 +102,10 @@ describe('replaceToolIdsInArray', () => {
 
   it('returns same reference when old id is absent', () => {
     const original = ['other.tool'];
-    const result = replaceToolIdsInArray(
-      original,
-      'platform.core.cases.attachments',
-      ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments']
-    );
+    const result = replaceToolIdsInArray(original, 'platform.core.cases.attachments', [
+      'platform.core.cases.get_attachments',
+      'platform.core.cases.manage_attachments',
+    ]);
     expect(result).toBe(original);
   });
 });
