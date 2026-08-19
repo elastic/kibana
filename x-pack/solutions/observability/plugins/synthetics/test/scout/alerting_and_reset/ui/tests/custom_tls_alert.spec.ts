@@ -94,8 +94,13 @@ test.describe(
           }
         });
 
-        await page.testSubj.locator('ruleScheduleNumberInput').fill('5');
-        await page.testSubj.locator('ruleScheduleUnitInput').selectOption('seconds');
+        // 1 minute is the smallest interval valid everywhere: serverless enforces
+        // xpack.alerting.rules.minimumScheduleInterval (1m), and a sub-minute value
+        // keeps the rule form invalid with the Save button disabled. The rule still
+        // runs immediately on creation, so the alert fires without waiting a full
+        // interval.
+        await page.testSubj.locator('ruleScheduleNumberInput').fill('1');
+        await page.testSubj.locator('ruleScheduleUnitInput').selectOption('minutes');
         await page.testSubj.click('ruleFormStep-details');
         await page.testSubj.locator('ruleDetailsNameInput').fill(tlsRuleName);
         await page.testSubj.click('ruleFlyoutFooterSaveButton');
