@@ -5,46 +5,22 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR, getLatestVersion } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
-import {
-  CUSTOM_CONTENT_MAX_PROMPT_LENGTH,
-  CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
-  customContentStateSchema,
-} from '@kbn/custom-content-common';
+import { customContentUpdateSchema } from '@kbn/custom-content-common';
 import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 
-const updateCustomContentSchema = customContentStateSchema
-  .omit({ template: true })
-  .extend({
-    prompt: z
-      .string()
-      .min(1)
-      .max(CUSTOM_CONTENT_MAX_PROMPT_LENGTH)
-      .optional()
-      .describe(
-        'Natural language instruction for what to create or change. The server generates the HTML template from this prompt, sampling the ES|QL schema only when the query is also changing.'
-      ),
-    esqlQuery: z
-      .string()
-      .max(CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH)
-      .nullable()
-      .optional()
-      .describe(
-        'New ES|QL query. Omit to keep the existing query. Pass null to remove the query entirely.'
-      ),
-  })
-  .refine(({ prompt, esqlQuery }) => prompt !== undefined || esqlQuery !== undefined, {
-    message: 'At least one of prompt or esqlQuery must be provided.',
-  });
+const updateCustomContentSchema = customContentUpdateSchema.refine(
+  ({ prompt, esqlQuery }) => prompt !== undefined || esqlQuery !== undefined,
+  { message: 'At least one of prompt or esqlQuery must be provided.' }
+);
 
 export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
   typeof updateCustomContentSchema
