@@ -7,8 +7,8 @@
 
 import type { SagaMiddleware } from 'redux-saga';
 import createSagaMiddleware from 'redux-saga';
-import type { Store, AnyAction, Dispatch } from 'redux-v4';
-import { combineReducers, createStore, applyMiddleware } from 'redux-v4';
+import type { Store, Action, Dispatch } from 'redux';
+import { combineReducers, legacy_createStore as createStore, applyMiddleware } from 'redux';
 import type { ChromeStart } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
@@ -91,5 +91,5 @@ export const createGraphStore = (deps: GraphStoreDependencies): Store => {
   return store;
 };
 
-export type GraphStore = Store<GraphState, AnyAction>;
-export type GraphDispatch = Dispatch<AnyAction>;
+export type GraphStore = Store<GraphState, Action<string>>;
+export type GraphDispatch = Dispatch<Action<string>>;
