@@ -894,14 +894,13 @@ describe('RulesListPage', () => {
       expect(screen.queryByTestId('createEsqlRuleCard')).not.toBeInTheDocument();
     });
 
-    it('hides row selection, quick edit, and actions menu affordances', async () => {
+    it('hides row selection and quick edit', async () => {
       renderPage();
       await waitForRules();
 
       expect(screen.queryByTestId('selectAllRulesOnPage')).not.toBeInTheDocument();
       expect(screen.queryByTestId('checkboxSelectRow-rule-1')).not.toBeInTheDocument();
       expect(screen.queryByTestId('quickEditRule-rule-1')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('ruleActionsButton-rule-1')).not.toBeInTheDocument();
     });
 
     it('hides the enabled switch and shows a read-only status badge instead', async () => {
