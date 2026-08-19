@@ -56,6 +56,7 @@ const filterButtonStyles = {
     css({
       position: 'relative',
       height: euiTheme.size.xl,
+      overflow: 'hidden',
       borderRadius: euiTheme.border.radius.control,
       '&::after': {
         content: "''",
@@ -72,9 +73,22 @@ const filterButtonStyles = {
       '&.kbnFilterButtonGroup--s': {
         height: euiTheme.size.xl,
       },
-      ' &.kbnFilterButtonGroup--attached': {
+      '&.kbnFilterButtonGroup--attached': {
         borderTopRightRadius: 0,
         borderBottomRightRadius: 0,
+        '> .euiFlexItem:last-child *:enabled': {
+          borderTopRightRadius: 0,
+          borderBottomRightRadius: 0,
+        },
+      },
+      // Square inner corners so sibling fills meet at the divider; keep EUI radius on the outer edges.
+      '> .euiFlexItem:first-child:not(:last-child) *:enabled': {
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
+      },
+      '> .euiFlexItem:last-child:not(:first-child) *:enabled': {
+        borderTopLeftRadius: 0,
+        borderBottomLeftRadius: 0,
       },
       '> *:not(:last-of-type)': {
         borderRight: `1px solid ${euiTheme.colors.borderBasePlain}`,
