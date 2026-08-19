@@ -43,7 +43,9 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run == true }}
         with:
-          # github-script defaults to GITHUB_TOKEN; pull-requests: write suffices.
+          # kibanamachine, not the default GITHUB_TOKEN: team @-mentions in
+          # comments posted by GitHub Apps do not notify the team.
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
           script: |
             const flakyFixReviewReminder = require('./.github/scripts/flaky_fix_review_reminder');
             await flakyFixReviewReminder({ github, context, core });

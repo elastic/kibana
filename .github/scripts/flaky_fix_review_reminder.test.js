@@ -175,7 +175,7 @@ function scenarioState() {
       // #5 was already pinged by us 4 days ago -> due for a re-ping.
       5: [
         {
-          user: { login: 'github-actions[bot]' },
+          user: { login: 'kibanamachine' },
           body: `...\n${reminder.REMINDER_MARKER}`,
           created_at: iso('2026-08-14'),
         },
