@@ -85,7 +85,7 @@ steps:
   - name: pause
     type: wait
     with:
-      duration: 1s
+      duration: 7s
 
   # ── 6. summary — reads across all prior steps after cold-cache resume ──────
   # prepareForRead rehydrates produce and increment outputs from ES.
