@@ -14,7 +14,6 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiInputPopover,
   EuiSelectable,
   EuiText,
@@ -23,7 +22,6 @@ import {
 import { css } from '@emotion/react';
 import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
 import { useListAiIndices } from '../../../hooks/ai_indices/use_list_ai_indices';
-import { getActiveAiIndices } from '../../../utils/ai_indices';
 import { labels } from '../../../utils/i18n';
 
 /**
@@ -116,8 +114,6 @@ export interface AiIndicesFieldsProps {
   isLoading: boolean;
   isFormDisabled: boolean;
   onChange: (assignedIds: string[]) => void;
-  /** The flyout states Context on/off in its own summary, so it hides this one. */
-  showStatus?: boolean;
 }
 
 export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
@@ -127,15 +123,11 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
   isLoading,
   isFormDisabled,
   onChange,
-  showStatus = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const fieldStyles = useFieldStyles();
 
   const inheritedIdSet = useMemo(() => new Set(inheritedIds), [inheritedIds]);
-
-  const isContextOn =
-    getActiveAiIndices({ assigned: assignedIds, inherited: inheritedIds }).length > 0;
 
   // Inherited ids are listed above as defaults, so they are not offered again here. Selecting one
   // would store an id that already applies, and unselecting it would change nothing on screen.
@@ -184,18 +176,6 @@ export const AiIndicesFields: React.FC<AiIndicesFieldsProps> = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      {showStatus && (
-        <EuiFlexItem grow={false}>
-          <EuiHealth
-            color={isContextOn ? 'success' : 'subdued'}
-            textSize="s"
-            data-test-subj={`agentBuilderContextStatus-${isContextOn ? 'on' : 'off'}`}
-          >
-            {isContextOn ? labels.aiIndices.contextOn : labels.aiIndices.contextOff}
-          </EuiHealth>
-        </EuiFlexItem>
-      )}
-
       {inheritedIds.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiFormRow

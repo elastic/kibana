@@ -95,28 +95,6 @@ describe('AiIndicesSection', () => {
     expect(screen.getByText('AI Indices')).toBeInTheDocument();
   });
 
-  describe('context status', () => {
-    it('reads On when the agent has AI indices assigned', () => {
-      renderSection({ assignedIds: ['sales-outreach'] });
-
-      expect(screen.getByTestId('agentBuilderContextStatus-on')).toBeInTheDocument();
-    });
-
-    it('reads On when only the agent type contributes AI indices', () => {
-      mockInheritedIds = ['sig-events'];
-
-      renderSection();
-
-      expect(screen.getByTestId('agentBuilderContextStatus-on')).toBeInTheDocument();
-    });
-
-    it('reads Off when neither layer contributes', () => {
-      renderSection();
-
-      expect(screen.getByTestId('agentBuilderContextStatus-off')).toBeInTheDocument();
-    });
-  });
-
   describe('default indices', () => {
     it('are listed as badges', () => {
       mockInheritedIds = ['sig-events'];

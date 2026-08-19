@@ -2953,12 +2953,6 @@ export const labels = {
         defaultMessage: 'Not affected by Elastic capabilities; retrieval is configured only here.',
       }
     ),
-    contextOn: i18n.translate('xpack.agentBuilder.aiIndices.contextOn', {
-      defaultMessage: 'Context: On',
-    }),
-    contextOff: i18n.translate('xpack.agentBuilder.aiIndices.contextOff', {
-      defaultMessage: 'Context: Off',
-    }),
     defaultIndicesLabel: i18n.translate('xpack.agentBuilder.aiIndices.defaultIndicesLabel', {
       defaultMessage: 'Default indices',
     }),

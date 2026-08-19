@@ -85,13 +85,6 @@ describe('AiIndicesSection (edit settings flyout)', () => {
     expect(screen.getByTestId('editDetailsAiIndicesSection')).toBeInTheDocument();
   });
 
-  // The flyout's own summary already states whether Context is on, so the pill would repeat it.
-  it('leaves the Context status to the overview', () => {
-    renderSection({ assignedIds: ['sales-outreach'] });
-
-    expect(screen.queryByTestId('agentBuilderContextStatus-on')).not.toBeInTheDocument();
-  });
-
   it('lists the AI indices the agent type contributes', () => {
     mockInheritedIds = ['sig-events'];
 

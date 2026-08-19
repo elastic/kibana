@@ -58,7 +58,6 @@ const AiIndicesSectionContent: React.FC<AiIndicesSectionProps> = ({ agentId, isD
               isLoading={isLoading}
               isFormDisabled={isDisabled}
               onChange={field.onChange}
-              showStatus={false}
             />
           )}
         />
