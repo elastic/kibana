@@ -5,6 +5,9 @@ steps:
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:
+      provider: gcp
+      image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-prod
       machineType: c4d-standard-16
       diskType: hyperdisk-balanced
       zones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d
@@ -53,11 +56,14 @@ steps:
   - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
+      provider: gcp
+      image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-prod
       machineType: n4-standard-16
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 130
+      diskSizeGb: 50
     key: linting
     timeout_in_minutes: 60
     env:
@@ -70,11 +76,14 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
+      provider: gcp
+      image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-prod
       machineType: n4-standard-32
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 130
+      diskSizeGb: 50
     key: linting_with_types
     timeout_in_minutes: 60
     env:
@@ -87,11 +96,14 @@ steps:
   - command: .buildkite/scripts/steps/lint_with_oxlint.sh
     label: 'Linting (with oxlint)'
     agents:
+      provider: gcp
+      image: family/kibana-minimal-ubuntu-2604
+      imageProject: elastic-images-prod
       machineType: n4-standard-4
       diskType: hyperdisk-balanced
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c,us-central1-f,us-east1-b,us-east1-c,us-east1-d,us-west1-a,us-west1-b,us-west1-c
-      diskSizeGb: 130
+      diskSizeGb: 50
     key: linting_with_oxlint
     timeout_in_minutes: 60
     env:

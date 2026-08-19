@@ -10,7 +10,11 @@
 import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite';
 import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const';
 import type { FunctionalGroup } from './types';
-import { expandAgentQueue } from '#pipeline-utils';
+import {
+  ELASTIC_IMAGES_PROD_PROJECT,
+  expandAgentQueue,
+  KIBANA_MINIMAL_IMAGE,
+} from '#pipeline-utils';
 
 interface JestStepOptions {
   command: string;
@@ -36,7 +40,16 @@ export function buildJestStep(opts: JestStepOptions): BuildkiteStep | undefined 
     parallelism: opts.parallelism,
     timeout_in_minutes: TEST_STEP_TIMEOUT_MINUTES,
     key: opts.key,
-    agents: expandAgentQueue('n2-4-spot', opts.agentDiskSize),
+    agents: {
+      ...expandAgentQueue('n2-4-spot', opts.agentDiskSize),
+      ...(opts.key === STEP_KEYS.JEST_UNIT
+        ? {
+            image: KIBANA_MINIMAL_IMAGE,
+            imageProject: ELASTIC_IMAGES_PROD_PROJECT,
+            diskSizeGb: 50,
+          }
+        : {}),
+    },
     env: opts.envFromLabels,
     depends_on: opts.dependsOn,
     retry: {

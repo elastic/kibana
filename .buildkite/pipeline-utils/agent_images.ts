@@ -17,6 +17,7 @@ export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';
 export const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
 export const FIPS_140_3_IMAGE = 'family/kibana-fips-140-3-ubuntu-2404';
 export const FIPS_140_2_IMAGE = 'family/kibana-fips-140-2-ubuntu-2404';
+export const KIBANA_MINIMAL_IMAGE = 'family/kibana-minimal-ubuntu-2604';
 
 // constrain AgentImageConfig to the type that doesn't have the `queue` property
 export const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
