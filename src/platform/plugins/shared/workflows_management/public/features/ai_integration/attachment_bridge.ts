@@ -8,7 +8,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
+import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { isToolUiEvent } from '@kbn/agent-builder-common';
 import { isConversationIdSetEvent } from '@kbn/agent-builder-common/chat/events';
 import type { monaco } from '@kbn/monaco';
@@ -60,6 +60,7 @@ export class AttachmentBridge {
   private workflowId: string | undefined;
   private conversationId: string | undefined;
   private broadSubscription: Subscription | null = null;
+  private activeConversationSubscription: Subscription | null = null;
   private getChatEvents$: ((conversationId: string) => Observable<BrowserChatEvent>) | undefined;
 
   start(
@@ -73,11 +74,20 @@ export class AttachmentBridge {
       /** Saved workflow id, or undefined on the `/workflows/create` route. */
       workflowId?: string;
       /**
-       * Per-conversation stream factory. Once `conversation_id_set` arrives on
-       * the broad `chat$`, we switch to `getChatEvents$(id)` so events from
-       * other conversations can't leak in.
+       * Per-conversation stream factory. Once the conversation id is known we
+       * switch to `getChatEvents$(id)` so events from other conversations
+       * can't leak in.
        */
       getChatEvents$?: (conversationId: string) => Observable<BrowserChatEvent>;
+      /**
+       * Active conversation binding published by the chat UI. This is the
+       * primary trigger for scoping, because the chat UI sets it for any
+       * conversation it renders — including a restored one. The server only
+       * emits `conversation_id_set` for newly created conversations, so
+       * relying on that event alone leaves resumed conversations unscoped and
+       * their YAML changes unapplied.
+       */
+      activeConversation$?: Observable<ActiveConversation | null>;
       onProposalReceived?: (params: {
         proposalId: string;
         toolId: string;
@@ -93,6 +103,16 @@ export class AttachmentBridge {
     this.attachmentId = options?.attachmentId;
     this.workflowId = options?.workflowId;
     this.getChatEvents$ = options?.getChatEvents$;
+
+    this.activeConversationSubscription =
+      options?.activeConversation$?.subscribe((activeConversation) => {
+        // An `undefined` id means a new conversation the server hasn't minted
+        // an id for yet. Keep the current scoped subscription until a real id
+        // arrives, either here or via `conversation_id_set`.
+        if (activeConversation?.id) {
+          this.onConversationIdKnown(activeConversation.id);
+        }
+      }) ?? null;
 
     this.broadSubscription = chat$.subscribe((event) => {
       if (isConversationIdSetEvent(event)) {
@@ -128,6 +148,15 @@ export class AttachmentBridge {
   }
 
   /**
+   * Repoint the attachment-id guard. The editor resolves the attachment it
+   * shares with the conversation only once that conversation has loaded, which
+   * can happen after `start`.
+   */
+  setAttachmentId(attachmentId: string): void {
+    this.attachmentId = attachmentId;
+  }
+
+  /**
    * Inject a simulated YAML change for testing purposes. Creates a
    * workflow:yaml_changed payload from the current model content and
    * processes it through the same pipeline as real LLM tool responses.
@@ -150,6 +179,8 @@ export class AttachmentBridge {
     this.subscription = null;
     this.broadSubscription?.unsubscribe();
     this.broadSubscription = null;
+    this.activeConversationSubscription?.unsubscribe();
+    this.activeConversationSubscription = null;
     this.proposalManager = null;
     this.tracker = null;
     this.editorRef = null;

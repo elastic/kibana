@@ -17,9 +17,12 @@ export type { ProposalStatus, ProposalRecord } from './proposal_tracker';
 
 export { setActiveProposalManager, acceptAllActiveProposals } from './active_proposal_manager';
 
+export { findLinkedWorkflowAttachmentId, needsOriginLink } from './attachment_link';
+
 export {
   setLastCreateAttachmentId,
   carryConversationToWorkflow,
+  getCarriedAttachmentId,
   setSidebarOpen,
   isSidebarOpen,
   requestSidebarRestore,

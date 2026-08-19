@@ -42,6 +42,14 @@ export const consumeSidebarRestoreFor = (workflowId: string): boolean => {
   return true;
 };
 
+// Attachment id of the create session that produced a saved workflow, keyed by
+// that workflow id. The destination editor reuses it so the conversation keeps
+// one workflow attachment instead of gaining a second one on save.
+const carriedAttachmentIds = new Map<string, string>();
+
+export const getCarriedAttachmentId = (workflowId: string): string | undefined =>
+  carriedAttachmentIds.get(workflowId);
+
 /**
  * Rewrite persisted conversation-id localStorage entries from the create
  * session's tag onto `savedWorkflowId`'s tag. Iterates a prefix because keys
@@ -53,6 +61,9 @@ export const carryConversationToWorkflow = (savedWorkflowId: string): void => {
   lastCreateAttachmentId = undefined;
 
   if (!from || from === savedWorkflowId) return;
+
+  carriedAttachmentIds.set(savedWorkflowId, from);
+
   if (typeof window === 'undefined' || !window.localStorage) return;
 
   const fromTag = `${SESSION_TAG_PREFIX}${from}`;

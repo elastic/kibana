@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
-import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { WORKFLOW_YAML_CHANGED_EVENT } from '@kbn/workflows/common/constants';
 import { AttachmentBridge, baseProposalId } from './attachment_bridge';
@@ -451,6 +451,141 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
     expect(manager.applyAfterYaml).not.toHaveBeenCalled();
 
     bridge.stop();
+  });
+});
+
+describe('AttachmentBridge: resumed conversation', () => {
+  // The server only emits `conversation_id_set` when it creates a new
+  // conversation. On a resumed one the bridge must still scope itself, using
+  // the active conversation published by the chat UI.
+  // https://github.com/elastic/security-team/issues/19002
+  const setup = (activeConversation: ActiveConversation | null) => {
+    const chat$ = new Subject<BrowserChatEvent>();
+    const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(activeConversation);
+    const perConversation$ = new Map<string, Subject<BrowserChatEvent>>();
+    const getChatEvents$ = jest.fn((conversationId: string) => {
+      let stream = perConversation$.get(conversationId);
+      if (!stream) {
+        stream = new Subject<BrowserChatEvent>();
+        perConversation$.set(conversationId, stream);
+      }
+      return stream.asObservable();
+    });
+
+    const editorRef = { current: createMockEditor('yaml: original') };
+    const tracker = new ProposalTracker();
+    const { manager } = createMockProposalManager();
+    const bridge = new AttachmentBridge();
+
+    bridge.start(chat$, manager, editorRef, tracker, {
+      attachmentId: 'workflow-a',
+      workflowId: 'workflow-a',
+      getChatEvents$,
+      activeConversation$,
+    });
+
+    return { bridge, chat$, activeConversation$, perConversation$, manager };
+  };
+
+  it('applies YAML changes without a conversation_id_set event', () => {
+    const { bridge, perConversation$, manager } = setup({ id: 'conv-restored' });
+
+    perConversation$.get('conv-restored')!.next(
+      makeYamlChangedEvent({
+        proposalId: 'resumed-1',
+        beforeYaml: 'yaml: original',
+        afterYaml: 'yaml: from-agent',
+        attachmentId: 'workflow-a',
+      })
+    );
+
+    expect(manager.applyAfterYaml).toHaveBeenCalledWith('yaml: from-agent');
+
+    bridge.stop();
+  });
+
+  it('scopes to a conversation restored after start', () => {
+    const { bridge, activeConversation$, perConversation$, manager } = setup(null);
+
+    activeConversation$.next({ id: 'conv-restored' });
+
+    perConversation$.get('conv-restored')!.next(
+      makeYamlChangedEvent({
+        proposalId: 'resumed-2',
+        beforeYaml: 'yaml: original',
+        afterYaml: 'yaml: from-agent',
+        attachmentId: 'workflow-a',
+      })
+    );
+
+    expect(manager.applyAfterYaml).toHaveBeenCalledWith('yaml: from-agent');
+
+    bridge.stop();
+  });
+
+  it('keeps the current scope when the chat UI reports a new, id-less conversation', () => {
+    // A new conversation emits `{ id: undefined }` before the server mints an
+    // id. That must not tear down the scope of the conversation in flight.
+    const { bridge, perConversation$, activeConversation$, manager } = setup({
+      id: 'conv-restored',
+    });
+
+    activeConversation$.next({ id: undefined });
+
+    perConversation$.get('conv-restored')!.next(
+      makeYamlChangedEvent({
+        proposalId: 'resumed-3',
+        beforeYaml: 'yaml: original',
+        afterYaml: 'yaml: from-agent',
+        attachmentId: 'workflow-a',
+      })
+    );
+
+    expect(manager.applyAfterYaml).toHaveBeenCalledWith('yaml: from-agent');
+
+    bridge.stop();
+  });
+
+  it('re-scopes when the user switches to another conversation', () => {
+    const { bridge, activeConversation$, perConversation$, manager } = setup({
+      id: 'conv-first',
+    });
+
+    activeConversation$.next({ id: 'conv-second' });
+
+    perConversation$.get('conv-first')!.next(
+      makeYamlChangedEvent({
+        proposalId: 'stale',
+        beforeYaml: 'yaml: original',
+        afterYaml: 'yaml: from-first',
+        attachmentId: 'workflow-a',
+      })
+    );
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
+
+    perConversation$.get('conv-second')!.next(
+      makeYamlChangedEvent({
+        proposalId: 'current',
+        beforeYaml: 'yaml: original',
+        afterYaml: 'yaml: from-second',
+        attachmentId: 'workflow-a',
+      })
+    );
+    expect(manager.applyAfterYaml).toHaveBeenCalledWith('yaml: from-second');
+
+    bridge.stop();
+  });
+
+  it('stops listening after stop()', () => {
+    const { bridge, activeConversation$, perConversation$, manager } = setup({
+      id: 'conv-restored',
+    });
+
+    bridge.stop();
+    activeConversation$.next({ id: 'conv-later' });
+
+    expect(perConversation$.has('conv-later')).toBe(false);
+    expect(manager.applyAfterYaml).not.toHaveBeenCalled();
   });
 });
 

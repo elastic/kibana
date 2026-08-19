@@ -18,6 +18,9 @@ import { setAiAssisted } from '../../../../entities/workflows/store/workflow_det
 import {
   AttachmentBridge,
   consumeSidebarRestoreFor,
+  findLinkedWorkflowAttachmentId,
+  getCarriedAttachmentId,
+  needsOriginLink,
   ProposalManager,
   setActiveProposalManager,
   setLastCreateAttachmentId,
@@ -76,6 +79,7 @@ export const useAgentBuilderIntegration = ({
   const chatOpenedReportedRef = useRef(false);
   const sessionAutoOpenedRef = useRef(false);
   const conversationIdRef = useRef<string | undefined>(undefined);
+  const syncAttachmentIdRef = useRef<string | undefined>(undefined);
   const validationErrorsRef = useRef(validationErrors);
   validationErrorsRef.current = validationErrors;
   const chatRefHandle = useRef<{ close: () => void } | null>(null);
@@ -85,7 +89,17 @@ export const useAgentBuilderIntegration = ({
   workflowNameRef.current = workflowName;
   const [isChatAccessible, setIsChatAccessible] = useState(false);
 
-  const attachmentId = workflowId ?? unsavedWorkflowIdRef.current;
+  // Identifies the editor session. Drives the chat session tag, which
+  // `carryConversationToWorkflow` rewrites onto the saved workflow across the
+  // first save.
+  const sessionId = workflowId ?? unsavedWorkflowIdRef.current;
+
+  // Identifies the attachment the session writes into. It follows `sessionId`
+  // except right after the first save, where the conversation already holds the
+  // create session's attachment. Reusing that id keeps one attachment with a
+  // growing version list instead of adding a second one. Resolved during render
+  // because the editor pushes an attachment before the conversation loads.
+  const attachmentId = (workflowId ? getCarriedAttachmentId(workflowId) : undefined) ?? sessionId;
 
   useEffect(() => {
     if (!agentBuilder || !hasShowPrivilege) {
@@ -209,6 +223,7 @@ export const useAgentBuilderIntegration = ({
       attachmentId,
       workflowId,
       getChatEvents$: agentBuilder.events.getChatEvents$?.bind(agentBuilder.events),
+      activeConversation$: agentBuilder.events.ui?.activeConversation$,
       onProposalReceived: ({ proposalId, toolId }) => {
         telemetry.reportAiProposalReceived({
           workflowId,
@@ -243,7 +258,7 @@ export const useAgentBuilderIntegration = ({
     const buildAttachment = (yaml: string) =>
       buildWorkflowAttachment({
         yaml,
-        attachmentId,
+        attachmentId: syncAttachmentIdRef.current ?? attachmentId,
         workflowId,
         workflowName: workflowNameRef.current,
         diagnostics: serializeClientDiagnostics(validationErrorsRef.current),
@@ -257,14 +272,74 @@ export const useAgentBuilderIntegration = ({
     });
 
     const syncAttachment = (yaml: string) => {
+      if (!attachmentTargetResolved) return;
       const attachment = buildAttachment(yaml);
       agentBuilder.setChatConfig({
-        sessionTag: `workflow-editor:${attachmentId}`,
+        sessionTag: `workflow-editor:${sessionId}`,
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         attachments: [attachment],
       });
       agentBuilder.addAttachment(attachment);
     };
+
+    // False while a bound conversation is still loading — see the subscription
+    // below.
+    let attachmentTargetResolved = true;
+
+    // The server only emits `conversation_id_set` for newly created
+    // conversations, so telemetry on a resumed conversation would otherwise
+    // report `conversationId: undefined`. The same subscription resolves the
+    // attachment this session shares with the conversation.
+    let originLinkRequested = false;
+    const activeConversationSub = agentBuilder.events.ui?.activeConversation$.subscribe(
+      (activeConversation) => {
+        if (activeConversation?.id) {
+          conversationIdRef.current = activeConversation.id;
+        }
+
+        // A bound conversation that has not loaded yet may already hold the
+        // attachment this session must write into. Syncing before it lands
+        // would add a second one, so hold the sync until it resolves.
+        const isLoading = Boolean(activeConversation?.id) && !activeConversation?.conversation;
+        if (isLoading) {
+          attachmentTargetResolved = false;
+          return;
+        }
+
+        const attachments = activeConversation?.conversation?.attachments;
+        const linkedId = findLinkedWorkflowAttachmentId({
+          attachments,
+          attachmentId,
+          workflowId,
+          carriedAttachmentId: workflowId ? getCarriedAttachmentId(workflowId) : undefined,
+        });
+        if (linkedId) {
+          syncAttachmentIdRef.current = linkedId;
+          bridge.setAttachmentId(linkedId);
+        }
+
+        if (!attachmentTargetResolved) {
+          attachmentTargetResolved = true;
+          const yaml = editorRef.current?.getModel()?.getValue();
+          if (yaml !== undefined) syncAttachment(yaml);
+        }
+
+        // The create session's attachment predates the workflow, so nothing has
+        // pointed it at one yet. Link it, otherwise the next session cannot
+        // find it and starts a second attachment.
+        if (!activeConversation?.id || !workflowId || !linkedId) return;
+        if (originLinkRequested) return;
+        if (!needsOriginLink({ attachments, attachmentId: linkedId, workflowId })) return;
+        originLinkRequested = true;
+        void agentBuilder
+          .updateAttachmentOrigin(activeConversation.id, linkedId, workflowId)
+          .catch(() => {
+            // Best-effort: the attachment still syncs, it just stays unlinked
+            // and the next session may add a second one.
+            originLinkRequested = false;
+          });
+      }
+    );
 
     let debounceTimer: ReturnType<typeof setTimeout> | null = null;
     let modelListener: monaco.IDisposable | null = null;
@@ -296,12 +371,14 @@ export const useAgentBuilderIntegration = ({
       chatOpenedReportedRef.current = false;
       sessionAutoOpenedRef.current = false;
       conversationIdRef.current = undefined;
+      syncAttachmentIdRef.current = undefined;
 
       if (debounceTimer) {
         clearTimeout(debounceTimer);
       }
       modelListener?.dispose();
       conversationIdSub.unsubscribe();
+      activeConversationSub?.unsubscribe();
       // Don't close the sidebar here — this runs on every deps change
       // (including the workflowId flip after Save). Close lives in the
       // unmount-only effect below.
@@ -324,6 +401,7 @@ export const useAgentBuilderIntegration = ({
     hasShowPrivilege,
     isChatAccessible,
     attachmentId,
+    sessionId,
     workflowId,
     telemetry,
     dispatch,
@@ -338,14 +416,14 @@ export const useAgentBuilderIntegration = ({
       const currentYaml = editorRef.current?.getModel()?.getValue() ?? '';
 
       const { chatRef } = agentBuilder.openChat({
-        sessionTag: `workflow-editor:${attachmentId}`,
+        sessionTag: `workflow-editor:${sessionId}`,
         greetingMessage: WORKFLOW_EDITOR_GREETING,
         initialMessage: options?.initialMessage,
         autoSendInitialMessage: options?.autoSendInitialMessage,
         attachments: [
           buildWorkflowAttachment({
             yaml: currentYaml,
-            attachmentId,
+            attachmentId: syncAttachmentIdRef.current ?? attachmentId,
             workflowId,
             workflowName,
             diagnostics: serializeClientDiagnostics(validationErrors),
@@ -372,6 +450,7 @@ export const useAgentBuilderIntegration = ({
       isChatAccessible,
       editorRef,
       attachmentId,
+      sessionId,
       workflowId,
       workflowName,
       validationErrors,
@@ -445,6 +524,10 @@ const buildWorkflowAttachment = ({
 }) => ({
   id: attachmentId,
   type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  // Links the attachment to the workflow it mirrors, so a later session can
+  // find it instead of adding a second one. A workflow being created has no id
+  // yet; `updateAttachmentOrigin` links its attachment after the first save.
+  ...(workflowId ? { origin: workflowId } : {}),
   data: {
     yaml,
     workflowId,

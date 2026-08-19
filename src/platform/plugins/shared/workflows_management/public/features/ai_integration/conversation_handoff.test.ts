@@ -10,6 +10,7 @@
 import {
   carryConversationToWorkflow,
   consumeSidebarRestoreFor,
+  getCarriedAttachmentId,
   isSidebarOpen,
   requestSidebarRestore,
   setLastCreateAttachmentId,
@@ -144,5 +145,28 @@ describe('conversation_handoff', () => {
     carryConversationToWorkflow('saved-wf-1');
 
     expect(window.localStorage.getItem('unrelated.key')).toBe('stays');
+  });
+
+  describe('carried attachment id', () => {
+    // The destination editor reuses this id so the conversation keeps one
+    // workflow attachment instead of gaining a second one on save.
+    // https://github.com/elastic/security-team/issues/18821
+    it('records the create session attachment id against the saved workflow', () => {
+      setLastCreateAttachmentId('draft-uuid');
+      carryConversationToWorkflow('workflow-a');
+
+      expect(getCarriedAttachmentId('workflow-a')).toBe('draft-uuid');
+    });
+
+    it('returns undefined for a workflow that was never carried', () => {
+      expect(getCarriedAttachmentId('never-saved-from-create')).toBeUndefined();
+    });
+
+    it('records nothing when the ids already match', () => {
+      setLastCreateAttachmentId('workflow-b');
+      carryConversationToWorkflow('workflow-b');
+
+      expect(getCarriedAttachmentId('workflow-b')).toBeUndefined();
+    });
   });
 });

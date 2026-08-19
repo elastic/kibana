@@ -8,6 +8,8 @@
  */
 
 import { act, renderHook, waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
+import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
@@ -38,6 +40,7 @@ jest.mock('../../../../features/ai_integration', () => ({
   AttachmentBridge: jest.fn().mockImplementation(() => ({
     start: jest.fn(),
     stop: jest.fn(),
+    setAttachmentId: jest.fn(),
   })),
   ProposalManager: jest.fn().mockImplementation(() => ({
     initialize: jest.fn(),
@@ -49,6 +52,10 @@ jest.mock('../../../../features/ai_integration', () => ({
   setLastCreateAttachmentId: jest.fn(),
   setSidebarOpen: jest.fn(),
   consumeSidebarRestoreFor: jest.fn().mockReturnValue(false),
+  getCarriedAttachmentId: jest.fn().mockReturnValue(undefined),
+  findLinkedWorkflowAttachmentId: jest.requireActual('../../../../features/ai_integration')
+    .findLinkedWorkflowAttachmentId,
+  needsOriginLink: jest.requireActual('../../../../features/ai_integration').needsOriginLink,
 }));
 
 type AiIntegrationModule = typeof import('../../../../features/ai_integration');
@@ -56,11 +63,16 @@ const {
   setLastCreateAttachmentId: mockSetLastCreateAttachmentId,
   setSidebarOpen: mockSetSidebarOpen,
   consumeSidebarRestoreFor: mockConsumeSidebarRestoreFor,
+  getCarriedAttachmentId: mockGetCarriedAttachmentId,
 } = jest.requireMock('../../../../features/ai_integration') as {
   setLastCreateAttachmentId: jest.MockedFunction<AiIntegrationModule['setLastCreateAttachmentId']>;
   setSidebarOpen: jest.MockedFunction<AiIntegrationModule['setSidebarOpen']>;
   consumeSidebarRestoreFor: jest.MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
+  getCarriedAttachmentId: jest.MockedFunction<AiIntegrationModule['getCarriedAttachmentId']>;
 };
+const { AttachmentBridge: mockAttachmentBridge } = jest.requireMock(
+  '../../../../features/ai_integration'
+) as { AttachmentBridge: jest.Mock };
 jest.mock('../../../../features/ai_integration/proposal_tracker', () => ({
   ProposalTracker: jest.fn().mockImplementation(() => ({
     onAllResolved: jest.fn().mockReturnValue(jest.fn()),
@@ -108,7 +120,12 @@ const createMockAgentBuilder = () => ({
   clearChatConfig: jest.fn(),
   openChat: jest.fn().mockReturnValue({ chatRef: { close: jest.fn() } }),
   getAgentBuilderAccess: jest.fn().mockResolvedValue(embeddableChatAccessReady),
-  events: { chat$: { subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }) } },
+  events: {
+    chat$: new Subject<BrowserChatEvent>(),
+    getChatEvents$: jest.fn(() => new Subject<BrowserChatEvent>().asObservable()),
+    ui: { activeConversation$: new BehaviorSubject<ActiveConversation | null>(null) },
+  },
+  updateAttachmentOrigin: jest.fn().mockResolvedValue(undefined),
   tools: {},
   attachments: {},
 });
@@ -145,6 +162,7 @@ const MOCK_UUID = 'mock-uuid-1234';
 const expectedAttachment = (yaml: string, overrides?: { workflowId?: string; name?: string }) => ({
   id: overrides?.workflowId ?? MOCK_UUID,
   type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  ...(overrides?.workflowId ? { origin: overrides.workflowId } : {}),
   data: {
     yaml,
     workflowId: overrides?.workflowId,
@@ -169,6 +187,7 @@ describe('useAgentBuilderIntegration', () => {
     jest.useFakeTimers();
     mockModel = createMockModel(INITIAL_YAML);
     mockConsumeSidebarRestoreFor.mockReturnValue(false);
+    mockGetCarriedAttachmentId.mockReturnValue(undefined);
   });
 
   afterEach(() => {
@@ -1094,6 +1113,200 @@ describe('useAgentBuilderIntegration', () => {
       await flushChatAccessCheck();
 
       expect(useUiSettingMock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('proposal telemetry conversation id', () => {
+    // The server only emits `conversation_id_set` for newly created
+    // conversations, so a resumed one must take its id from the active
+    // conversation published by the chat UI.
+    // https://github.com/elastic/security-team/issues/19002
+    const getOnProposalReceived = () => {
+      const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
+      return bridge.start.mock.calls.at(-1)[4].onProposalReceived;
+    };
+
+    it('reports the resumed conversation id without a conversation_id_set event', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: createMockEditor(mockModel) },
+          isEditorMounted: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      act(() => {
+        agentBuilder.events.ui.activeConversation$.next({ id: 'conv-resumed' });
+      });
+
+      getOnProposalReceived()({ proposalId: 'proposal-1', toolId: 'edit-tool' });
+
+      expect(mockTelemetry.reportAiProposalReceived).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: 'conv-resumed', proposalId: 'proposal-1' })
+      );
+    });
+  });
+
+  describe('attachment linking across the first save', () => {
+    // The editor mints its attachment id from the route: a uuid on
+    // /workflows/create, the workflow id once saved. Syncing under the new id
+    // adds a second workflow.yaml attachment to the same conversation.
+    // https://github.com/elastic/security-team/issues/18821
+    const DRAFT_ID = 'draft-uuid';
+
+    const workflowAttachment = (id: string, origin?: string) =>
+      ({
+        id,
+        type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+        versions: [],
+        ...(origin ? { origin } : {}),
+      } as never);
+
+    const renderSavedEditor = async (agentBuilder: ReturnType<typeof createMockAgentBuilder>) => {
+      setupKibanaMock(agentBuilder);
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: createMockEditor(mockModel) },
+          isEditorMounted: true,
+          workflowId: 'workflow-a',
+        })
+      );
+      await flushChatAccessCheck();
+    };
+
+    it('uses the carried draft id for the very first sync after a save', async () => {
+      // The editor pushes an attachment at mount, before the conversation
+      // loads, so the carried id has to be resolved during render.
+      const agentBuilder = createMockAgentBuilder();
+      mockGetCarriedAttachmentId.mockReturnValue(DRAFT_ID);
+      await renderSavedEditor(agentBuilder);
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: DRAFT_ID })
+      );
+      // The session tag still keys off the workflow, so the conversation
+      // handoff from the create route keeps working.
+      expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
+        expect.objectContaining({ sessionTag: 'workflow-editor:workflow-a' })
+      );
+    });
+
+    it('holds the sync until a bound conversation has loaded', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      agentBuilder.events.ui.activeConversation$.next({ id: 'conv-1' } as never);
+      await renderSavedEditor(agentBuilder);
+
+      expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
+
+      act(() => {
+        agentBuilder.events.ui.activeConversation$.next({
+          id: 'conv-1',
+          conversation: {
+            attachments: [workflowAttachment(DRAFT_ID, 'workflow-a')],
+          },
+        } as never);
+      });
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: DRAFT_ID })
+      );
+    });
+
+    it('reuses the draft attachment id when the conversation links it to this workflow', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      await renderSavedEditor(agentBuilder);
+
+      act(() => {
+        agentBuilder.events.ui.activeConversation$.next({
+          id: 'conv-1',
+          conversation: {
+            attachments: [workflowAttachment(DRAFT_ID, 'workflow-a')],
+          },
+        } as never);
+      });
+
+      agentBuilder.addAttachment.mockClear();
+      act(() => {
+        mockModel.simulateContentChange('name: edited');
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: DRAFT_ID })
+      );
+    });
+
+    it('links the create session attachment to the workflow after the first save', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      mockGetCarriedAttachmentId.mockReturnValue(DRAFT_ID);
+      await renderSavedEditor(agentBuilder);
+
+      act(() => {
+        // Carried over by `carryConversationToWorkflow`; no origin yet.
+        agentBuilder.events.ui.activeConversation$.next({
+          id: 'conv-1',
+          conversation: { attachments: [workflowAttachment(DRAFT_ID)] },
+        } as never);
+      });
+
+      expect(agentBuilder.updateAttachmentOrigin).toHaveBeenCalledWith(
+        'conv-1',
+        DRAFT_ID,
+        'workflow-a'
+      );
+
+      agentBuilder.addAttachment.mockClear();
+      act(() => {
+        mockModel.simulateContentChange('name: edited');
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: DRAFT_ID })
+      );
+    });
+
+    it('does not re-link an attachment whose origin is already set', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      await renderSavedEditor(agentBuilder);
+
+      act(() => {
+        agentBuilder.events.ui.activeConversation$.next({
+          id: 'conv-1',
+          conversation: {
+            attachments: [workflowAttachment(DRAFT_ID, 'workflow-a')],
+          },
+        } as never);
+      });
+
+      expect(agentBuilder.updateAttachmentOrigin).not.toHaveBeenCalled();
+    });
+
+    it('keeps its own attachment id when the conversation holds none', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      await renderSavedEditor(agentBuilder);
+
+      act(() => {
+        agentBuilder.events.ui.activeConversation$.next({
+          id: 'conv-1',
+          conversation: { attachments: [] },
+        } as never);
+      });
+
+      agentBuilder.addAttachment.mockClear();
+      act(() => {
+        mockModel.simulateContentChange('name: edited');
+        jest.advanceTimersByTime(1000);
+      });
+
+      expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'workflow-a', origin: 'workflow-a' })
+      );
     });
   });
 });
