@@ -84,12 +84,13 @@ function resolveOwners(entries, files) {
 function buildCommentBody(ownerHandles) {
   const mentions = ownerHandles.length ? ownerHandles.join(' ') : FALLBACK_OWNER;
   return [
-    `Hey ${mentions} — could you please review this flaky-fix PR?`,
+    `Hey ${mentions} 👋 this flaky test fix has been open for a while and needs an owner decision. Any of these helps:`,
     '',
-    '**Recommendations:**',
-    `- Ask for help in the [#kibana-qa](${QA_CHANNEL_URL}) channel if you have any questions`,
-    '- Mention `@copilot` if you need to make quick changes',
-    "- Close the PR if you don't find the fix valuable (you can leave a comment to explain why)",
+    '* ✅ Review & merge if it looks good',
+    '* ✏️ Need tweaks? Mention `@copilot` in a comment',
+    '* ❌ Not worth shipping? Just close it (drop a comment to help our workflow improve)',
+    '',
+    `Questions? Find the Applications DX team in [#kibana-qa](${QA_CHANNEL_URL}).`,
     '',
     REMINDER_MARKER,
   ].join('\n');
