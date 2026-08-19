@@ -1,5 +1,7 @@
 version: "1"
 # Every 1h: count Indicator Match and technique-overlap alerts per report (last 7d).
+# Driver `size: 100` per pass; hourly cadence drains the backlog. Layer 1 counts
+# come from one nested terms agg; layer 2 still needs per-report terms_lookup.
 name: Attribute alerts to reports
 description: Count Detection Engine hits per report (indicator match and technique overlap)
 tags:
@@ -14,7 +16,7 @@ steps:
     type: elasticsearch.search
     with:
       index: .kibana-threat-reports
-      size: 500
+      size: 100
       query:
         bool:
           filter:
@@ -38,31 +40,57 @@ steps:
       sort:
         - "@timestamp"
 
+  - name: init_attribution_bulk
+    type: data.set
+    with:
+      bulk_operations: []
+
+  # One search for all layer-1 counts. Per-report `term` queries inside foreach
+  # were 100 sequential alert searches per hourly pass.
+  - name: count_all_layer1_hits
+    type: elasticsearch.search
+    if: "steps.load_reports_with_extractions.output.hits.total.value > 0"
+    with:
+      index: .alerts-security.alerts-*
+      size: 0
+      query:
+        bool:
+          filter:
+            - range:
+                "@timestamp":
+                  gte: "now-7d"
+            - term:
+                kibana.alert.rule.type: threat_match
+            - nested:
+                path: threat.enrichments
+                query:
+                  regexp:
+                    threat.enrichments.indicator.reference: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+      aggs:
+        by_report_ref:
+          nested:
+            path: threat.enrichments
+          aggs:
+            refs:
+              terms:
+                field: threat.enrichments.indicator.reference
+                size: 100
+                include: "threat-report:({{ steps.load_reports_with_extractions.output.hits.hits | map: '_id' | join: '|' }})"
+    on-failure:
+      continue: true
+
   - name: backfill_each_report
     type: foreach
+    if: "steps.load_reports_with_extractions.output.hits.total.value > 0"
     foreach: "{{ steps.load_reports_with_extractions.output.hits.hits }}"
     steps:
-      - name: count_layer1_hits
-        type: elasticsearch.search
+      - name: capture_report_ref
+        type: data.set
         with:
-          index: .alerts-security.alerts-*
-          size: 0
-          query:
-            bool:
-              filter:
-                - range:
-                    "@timestamp":
-                      gte: "now-7d"
-                - term:
-                    kibana.alert.rule.type: threat_match
-                - nested:
-                    path: threat.enrichments
-                    query:
-                      term:
-                        threat.enrichments.indicator.reference: "threat-report:{{ foreach.item._id }}"
-        on-failure:
-          continue: true
+          report_ref: "threat-report:{{ foreach.item._id }}"
 
+      # Layer 2 — behavioral DE rule alerts whose ATT&CK techniques overlap
+      # with this report's `extracted.behaviors.technique_id` values.
       - name: layer2_search
         type: elasticsearch.search
         with:
@@ -85,21 +113,26 @@ steps:
         on-failure:
           continue: true
 
-      # `_update` needs the concrete backing index, not a wildcard.
-      - name: write_attribution
-        type: elasticsearch.update
+      - name: capture_hit_counts
+        type: data.set
         with:
-          index: "{{ foreach.item._index }}"
-          id: "{{ foreach.item._id }}"
-          # `${{ }}` keeps numbers and dates typed. `{{ }}` stringifies them.
-          doc:
-            attribution:
-              environment_hits:
-                window: "7d"
-                computed_at: "${{ now }}"
-                layer_1_ioc_match: "${{ steps.count_layer1_hits.output.hits.total.value | default: 0 }}"
-                layer_2_behavioral: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
-              # Liquid has no `+`. Use `plus`.
-              environment_hits_total: "${{ steps.count_layer1_hits.output.hits.total.value | default: 0 | plus: steps.layer2_search.output.hits.total.value }}"
-        on-failure:
-          continue: true
+          layer1_count: "${{ steps.count_all_layer1_hits.output.aggregations.by_report_ref.refs.buckets | default: [] | where: 'key', variables.report_ref | map: 'doc_count' | first | default: 0 }}"
+          layer2_count: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
+
+      - name: queue_bulk_update_meta
+        type: data.set
+        with:
+          bulk_operations: "${{ variables.bulk_operations | push: {'update': {'_index': foreach.item._index, '_id': foreach.item._id}} }}"
+
+      - name: queue_bulk_update_doc
+        type: data.set
+        with:
+          bulk_operations: "${{ variables.bulk_operations | push: {'doc': {'attribution': {'environment_hits': {'window': '7d', 'computed_at': now, 'layer_1_ioc_match': variables.layer1_count, 'layer_2_behavioral': variables.layer2_count}, 'environment_hits_total': variables.layer1_count | plus: variables.layer2_count}}}} }}"
+
+  - name: write_attributions_bulk
+    type: elasticsearch.bulk
+    if: "variables.bulk_operations.size > 0"
+    with:
+      operations: "${{ variables.bulk_operations }}"
+    on-failure:
+      continue: true

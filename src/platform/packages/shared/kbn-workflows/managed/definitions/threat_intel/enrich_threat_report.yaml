@@ -1,5 +1,7 @@
 version: "1"
 # Every 4h: IOC extract, taxonomy, severity, and Diamond for pending reports.
+# Driver `size: 50` caps wall clock and inference load. Each item runs several
+# LLM steps sequentially; partial drain per pass is intentional.
 name: Enrich threat report
 description: Extract IOCs, taxonomy, severity, and Diamond from pending reports
 tags:
@@ -16,7 +18,7 @@ steps:
       # Bare index name. `{index}/_search` is skipped if `index` is omitted, and the
       # engine falls through to cluster-wide `_search`.
       index: .kibana-threat-reports
-      size: 200
+      size: 50
       # Fingerprints only. Fetch bodies per item after the dedup skip (10 MB step cap).
       _source:
         - content_fingerprint
