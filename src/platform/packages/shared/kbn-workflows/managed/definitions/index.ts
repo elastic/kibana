@@ -109,7 +109,7 @@ export {
 // the FF off these definitions are inert, discoverable data — never installed or
 // executed.
 export const managedWorkflowDefinitions = [
-  SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW,
+  // SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW removed - users can create their own editable version
   ATTACK_DISCOVERY_ALERT_RETRIEVAL_WORKFLOW,
   ATTACK_DISCOVERY_CUSTOM_VALIDATION_EXAMPLE_WORKFLOW,
   ATTACK_DISCOVERY_GENERATION_WORKFLOW,

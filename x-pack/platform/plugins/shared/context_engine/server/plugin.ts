@@ -22,7 +22,6 @@ import {
   SIGNALS_AI_INDEX_ID,
 } from '../common/constants';
 import { SIGNALS_INDEX_NAME } from '../common/http_api/signals';
-import { SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -105,12 +104,11 @@ export class ContextEnginePlugin
     });
 
     // Register the signals AI index as seeded (user-editable with sensible defaults)
+    // Automations are left empty - users can add their own signal generator workflow
     this.aiIndexRegistry.registerSeeded(SIGNALS_AI_INDEX_ID, {
       description: 'Context Engine feedback loop signals generated from Agent Builder traces.',
       dest: { type: 'index', value: SIGNALS_INDEX_NAME },
-      automations: [
-        { type: 'workflow', value: SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW_ID },
-      ],
+      automations: [],
       sources: [
         { type: 'esql', value: `FROM ${AGENT_BUILDER_TRACES_INDEX_PATTERN}` },
       ],

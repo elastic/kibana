@@ -8,8 +8,6 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
-import { SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW_ID } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import { ensureStateIndexExists } from './state_index';
 
 const PLUGIN_ID = 'contextEngine';
@@ -20,16 +18,6 @@ export const initContextEngineManagedWorkflowsClient = async (
   workflowsExtensions: WorkflowsExtensionsServerPluginStart
 ): Promise<ContextEngineManagedWorkflowsClient> => {
   return workflowsExtensions.initManagedWorkflowsClient(PLUGIN_ID);
-};
-
-export const installSignalGeneratorWorkflow = async ({
-  managedWorkflowsClient,
-}: {
-  managedWorkflowsClient: ContextEngineManagedWorkflowsClient;
-}): Promise<void> => {
-  await managedWorkflowsClient.install(SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW_ID, {
-    spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-  });
 };
 
 export const installSignalGeneratorWorkflowAndMarkReady = async ({
@@ -45,13 +33,14 @@ export const installSignalGeneratorWorkflowAndMarkReady = async ({
     // Ensure state index exists for watermark storage
     await ensureStateIndexExists({ esClient, logger });
 
+    // Signal generator workflow is no longer auto-installed as managed.
+    // Users can create their own editable workflow via the Workflows UI.
     const managedWorkflowsClient = await initContextEngineManagedWorkflowsClient(
       workflowsExtensions
     );
-    await installSignalGeneratorWorkflow({ managedWorkflowsClient });
     await managedWorkflowsClient.ready();
-    logger.info('Signal generator workflow installed successfully');
+    logger.info('Context Engine workflows ready (signal generator workflow available for user creation)');
   } catch (error) {
-    logger.warn('Failed to install the signal generator workflow', { error });
+    logger.warn('Failed to initialize Context Engine workflows', { error });
   }
 };

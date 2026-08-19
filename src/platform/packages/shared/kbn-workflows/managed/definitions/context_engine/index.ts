@@ -26,12 +26,12 @@ export const SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW_ID =
 export const SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW = {
   id: SIGNAL_GENERATOR_ESQL_TOOL_CALL_WORKFLOW_ID,
   pluginId: 'contextEngine',
-  version: 18,
+  version: 19,
   billable: false,
   yaml: SIGNAL_GENERATOR_ESQL_TOOL_CALL_YAML,
   management: {
-    lifecycle: 'static',
+    lifecycle: 'dynamic',
     versionStrategy: 'auto',
-    enablement: 'enforced',
+    enablement: 'restorable',
   },
 } as const satisfies ManagedWorkflowDefinition;
