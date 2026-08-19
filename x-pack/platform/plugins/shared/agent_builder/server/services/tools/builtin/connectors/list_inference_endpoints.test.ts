@@ -11,7 +11,7 @@ import type {
   ToolHandlerContext,
   ToolHandlerStandardReturn,
 } from '@kbn/agent-builder-server/tools/handler';
-import { createListAiConnectorsTool } from './list_ai_connectors';
+import { createListInferenceEndpointsTool } from './list_inference_endpoints';
 import type { ConnectorToolsOptions } from './types';
 
 const mockGetConnectorList = jest.fn();
@@ -22,7 +22,7 @@ const getInference: ConnectorToolsOptions['getInference'] = jest.fn(() =>
   } as unknown as ReturnType<ConnectorToolsOptions['getInference']>)
 );
 
-// execute_connector_sub_action requires getActions; list_ai_connectors only uses getInference,
+// execute_connector_sub_action requires getActions; list_inference_endpoints only uses getInference,
 // but ConnectorToolsOptions requires both, so provide a minimal stub.
 const getActions: ConnectorToolsOptions['getActions'] = jest.fn(() =>
   Promise.resolve({} as unknown as ReturnType<ConnectorToolsOptions['getActions']>)
@@ -33,47 +33,76 @@ const mockContext = {
   request: { id: 'test-request' },
   logger: { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() },
   callContext: {
-    toolId: platformCoreTools.listAiConnectors,
+    toolId: platformCoreTools.listInferenceEndpoints,
     toolCallId: 'call-1',
     callSource: 'agent',
   },
 } as unknown as ToolHandlerContext;
 
-describe('createListAiConnectorsTool', () => {
+describe('createListInferenceEndpointsTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('delegates to inference.getConnectorList and returns the connectors', async () => {
-    const connectors = [
-      { connectorId: 'c1', name: 'GPT-4', type: '.gen-ai' },
-      { connectorId: 'c2', name: 'Claude', type: '.inference' },
-    ];
-    mockGetConnectorList.mockResolvedValueOnce(connectors);
+  it('should return only identifiers, names, and types for all inference-compatible entries', async () => {
+    mockGetConnectorList.mockResolvedValueOnce([
+      {
+        connectorId: 'endpoint-1',
+        name: 'Claude',
+        type: '.inference',
+        config: {
+          inferenceId: 'endpoint-1',
+          service: 'elastic',
+          serviceSettings: { model_id: 'claude' },
+        },
+        capabilities: {},
+        isInferenceEndpoint: true,
+        isPreconfigured: true,
+        isEis: true,
+        metadata: { display: { name: 'Claude', model_creator: 'Anthropic' } },
+      },
+      {
+        connectorId: 'connector-1',
+        name: 'GPT-4',
+        type: '.gen-ai',
+        config: { apiProvider: 'OpenAI' },
+        capabilities: { contextWindowSize: 128000 },
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+        isDeprecated: true,
+        isMissingSecrets: false,
+      },
+    ]);
 
-    const tool = createListAiConnectorsTool({ getActions, getInference });
+    const tool = createListInferenceEndpointsTool({ getActions, getInference });
     const result = (await tool.handler({}, mockContext)) as ToolHandlerStandardReturn;
 
     expect(getInference).toHaveBeenCalled();
     expect(mockGetConnectorList).toHaveBeenCalledWith(mockContext.request);
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data).toEqual({ total: 2, connectors });
+    expect(result.results[0].data).toEqual({
+      total: 2,
+      endpoints: [
+        { connectorId: 'endpoint-1', name: 'Claude', type: '.inference' },
+        { connectorId: 'connector-1', name: 'GPT-4', type: '.gen-ai' },
+      ],
+    });
   });
 
-  it('returns an empty list when inference resolves no connectors', async () => {
+  it('should return an empty list when inference resolves no endpoints', async () => {
     mockGetConnectorList.mockResolvedValueOnce([]);
 
-    const tool = createListAiConnectorsTool({ getActions, getInference });
+    const tool = createListInferenceEndpointsTool({ getActions, getInference });
     const result = (await tool.handler({}, mockContext)) as ToolHandlerStandardReturn;
 
     expect(result.results[0].type).toBe(ToolResultType.other);
-    expect(result.results[0].data).toEqual({ total: 0, connectors: [] });
+    expect(result.results[0].data).toEqual({ total: 0, endpoints: [] });
   });
 
-  it('returns an error result when getConnectorList throws', async () => {
+  it('should return an error result when getConnectorList throws', async () => {
     mockGetConnectorList.mockRejectedValueOnce(new Error('inference down'));
 
-    const tool = createListAiConnectorsTool({ getActions, getInference });
+    const tool = createListInferenceEndpointsTool({ getActions, getInference });
     const result = (await tool.handler({}, mockContext)) as ToolHandlerStandardReturn;
 
     expect(result.results[0].type).toBe(ToolResultType.error);

@@ -15,28 +15,24 @@ import type { ConnectorToolsOptions } from './types';
 const schema = z.object({});
 
 /**
- * Creates the list_ai_connectors tool.
+ * Creates the list_inference_endpoints tool.
  *
- * Lists available AI/model connectors (id, name, type) by delegating to the inference plugin's
- * `getConnectorList(request)` start contract. General-purpose: any skill that needs to resolve a
- * model name to a connector id can use it. Not specific to Automatic Migration.
- *
- * Registered by the agent_builder plugin (which already depends on inference), alongside
- * execute_connector_sub_action — no selfClient HTTP hop and no duplicated connector logic.
+ * Lists available inference endpoints (AI connectors) by delegating to the inference plugin's
+ * `getConnectorList(request)` start contract.
  */
-export const createListAiConnectorsTool = ({
+export const createListInferenceEndpointsTool = ({
   getInference,
 }: ConnectorToolsOptions): BuiltinToolDefinition<typeof schema> => ({
-  id: platformCoreTools.listAiConnectors,
+  id: platformCoreTools.listInferenceEndpoints,
   type: ToolType.builtin,
   description: `
-    List AI/model connectors (id, name, type) available via Inference Service so the agent can resolve a model name.
-    Never guess connector ids or default to the first one — always ask the user to pick from this list.
+    List available inference endpoints (AI connectors) with their IDs, names, and types.
+    Never guess an ID or select the first result — always ask the user to choose from this list.
 `,
   schema,
   tags: ['connector', 'ai', 'inference'],
   availability: {
-    // Connectors are space-scoped, so cache the result per space.
+    // Inference endpoints are space-scoped, so cache the result per space.
     cacheMode: 'space',
     handler: async () => ({ status: 'available' }),
   },
@@ -44,20 +40,26 @@ export const createListAiConnectorsTool = ({
     try {
       const inference = await getInference();
       const connectors = await inference.getConnectorList(request);
+      const endpoints = connectors.map(({ connectorId, name, type }) => ({
+        connectorId,
+        name,
+        type,
+      }));
+
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { total: connectors.length, connectors },
+            data: { total: endpoints.length, endpoints },
           },
         ],
       };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      logger.error(`list_ai_connectors failed: ${message}`);
+      logger.error(`list_inference_endpoints failed: ${message}`);
       return {
-        results: [createErrorResult({ message: `Failed to list AI connectors: ${message}` })],
+        results: [createErrorResult({ message: `Failed to list inference endpoints: ${message}` })],
       };
     }
   },

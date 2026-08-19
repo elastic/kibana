@@ -66,7 +66,7 @@ export const startRuleMigrationTool = (
     confirmation: { askUser: 'always' },
     description: `Start or reprocess a SIEM rule migration.
 
-Mutating — confirms with the user and resolves the connector via list_ai_connectors first.
+Mutating — confirms with the user and resolves the inference endpoint (AI connector) via list_inference_endpoints first.
 
 See the automatic-migration-rules-start-migration skill for the START vs REPROCESS vs RESUME decision policy.`,
     schema,

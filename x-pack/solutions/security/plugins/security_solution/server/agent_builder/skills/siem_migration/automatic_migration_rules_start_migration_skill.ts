@@ -30,7 +30,7 @@ export const automaticMigrationRulesStartMigrationSkill = defineSkillType({
   basePath: 'skills/security/siem_migrations',
   description: `Start, reprocess, or resume an Automatic Rule Migration translation run.
 
-Resolves the AI connector, confirms the mutating action with the user, and picks the right request body (START vs REPROCESS vs RESUME) from the rule migration state.`,
+Resolves the inference endpoint (AI connector), confirms the mutating action with the user, and picks the right request body (START vs REPROCESS vs RESUME) from the rule migration state.`,
   content: `
 # Start / Reprocess / Resume an Automatic Rule Migration
 
@@ -59,7 +59,8 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 - \`security.siem_migration.get_migration_rules\` — resolve rule **titles** to rule **item ids**
   for \`selection.ids\` (page is zero-based).
 - \`security.siem_migration.start_rule_migration\` — the mutating action. See decision policy below.
-- \`platform.core.list_ai_connectors\` — list available AI connectors so the user can pick one.
+- \`platform.core.list_inference_endpoints\` — list available inference endpoints (AI connectors)
+  so the user can pick one.
 
 ## Workflow
 
@@ -68,8 +69,9 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 2. **Inspect state**: call \`get_rule_migration_stats\` and \`get_rule_migration_translation_stats\`
    to read the task status and translation counts. Use the decision matrix below to pick the
    request body.
-3. **Resolve the connector** (START and RESUME only): call \`list_ai_connectors\`, present the
-   options, and ALWAYS ask the user which connector to use. Never choose one automatically.
+3. **Resolve the inference endpoint (AI connector)** (START and RESUME only): call
+   \`list_inference_endpoints\`, present the options, and ALWAYS ask the user which inference
+   endpoint (AI connector) to use. Never choose one automatically.
 4. **Confirm**: state exactly what you will do (START / REPROCESS / RESUME), which rules are
    affected, and that it consumes connector credits. Wait for explicit confirmation.
 5. **Execute**: call \`start_rule_migration\` with the body chosen in step 2.
@@ -93,7 +95,7 @@ between them.
 
 #### START
 - It is the first execution of a \`ready\` migration. complete \`settings\`  object is required and values must be confirmed with user.
-- Ask user for both which connector they want to use and whether they want to skip prebuilt rules matching. No retry, no selection.
+- Ask user for both which inference endpoint (AI connector) they want to use and whether they want to skip prebuilt rules matching. No retry, no selection.
 
 #### REPROCESS ( Also called retry)
 - Re-runs a subset of rules. By default, reuse the connector and skip_prebuilt_rules_matching
@@ -134,6 +136,6 @@ pattern, route them to the relevant sibling skill — this skill only starts/rep
     SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
     SIEM_MIGRATION_START_RULE_MIGRATION_TOOL_ID,
-    platformCoreTools.listAiConnectors,
+    platformCoreTools.listInferenceEndpoints,
   ],
 });

@@ -8,7 +8,7 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createExecuteConnectorSubActionTool } from './execute_connector_sub_action';
-import { createListAiConnectorsTool } from './list_ai_connectors';
+import { createListInferenceEndpointsTool } from './list_inference_endpoints';
 import type { ConnectorToolsOptions } from './types';
 
 export type { ConnectorToolsOptions } from './types';
@@ -18,7 +18,7 @@ export type { ConnectorToolsOptions } from './types';
  */
 export const connectorToolIds = [
   platformCoreTools.executeConnectorSubAction,
-  platformCoreTools.listAiConnectors,
+  platformCoreTools.listInferenceEndpoints,
 ] as const;
 
 /**
@@ -27,5 +27,5 @@ export const connectorToolIds = [
 export const createConnectorTools = (
   options: ConnectorToolsOptions
 ): BuiltinToolDefinition<any>[] => {
-  return [createExecuteConnectorSubActionTool(options), createListAiConnectorsTool(options)];
+  return [createExecuteConnectorSubActionTool(options), createListInferenceEndpointsTool(options)];
 };

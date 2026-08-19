@@ -213,9 +213,9 @@ describe('Security Skills', () => {
       expect(tools).toContain('security.siem_migration.start_rule_migration');
     });
 
-    it('includes list_ai_connectors for connector resolution', () => {
+    it('should include list_inference_endpoints for endpoint resolution', () => {
       const tools = automaticMigrationRulesStartMigrationSkill.getRegistryTools!();
-      expect(tools).toContain(platformCoreTools.listAiConnectors);
+      expect(tools).toContain(platformCoreTools.listInferenceEndpoints);
     });
 
     it('has no inline tools', () => {
