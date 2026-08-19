@@ -827,7 +827,7 @@ describe('bulkCreate', () => {
           casesClientMock
         )
       ).rejects.toThrow(
-        `Failed to bulk create cases: Error: extended_fields keys [unknown_as_keyword] are not global (isGlobal) field definitions`
+        'Failed to bulk create cases: Error: Invalid extended_fields: Unknown extended field key: "unknown_as_keyword". No fields are available for this case'
       );
 
       expect(clientArgs.services.caseService.bulkCreateCases).not.toHaveBeenCalled();
