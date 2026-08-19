@@ -13,6 +13,7 @@ import type {
   ConversationWithoutRounds,
   ToolResult,
   UserIdAndName,
+  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { AttachmentVersionRef } from '@kbn/agent-builder-common/attachments';
 import type { RoundState } from '@kbn/agent-builder-common/chat/round_state';
@@ -64,6 +65,7 @@ const convertBaseFromEs = (document: Document) => {
     status: document._source.status,
     read: document._source.read,
     pinned: document._source.pinned,
+    read_only: document._source.read_only ?? false,
     access_control: normalizeConversationAccessControl(document._source.access_control),
     ...(document._source.origin ? { origin: document._source.origin } : {}),
     ...(document._source.workspace_id ? { workspace_id: document._source.workspace_id } : {}),
@@ -75,6 +77,11 @@ const convertBaseFromEs = (document: Document) => {
             (document._source.parent_conversation_relation as ConversationParentRelation) ??
             ConversationParentRelation.subagent,
         }
+      : {}),
+    ...(document._source.metadata ? { metadata: document._source.metadata } : {}),
+    ...(document._source.template_id ? { template_id: document._source.template_id } : {}),
+    ...(document._source.template_version !== undefined
+      ? { template_version: document._source.template_version }
       : {}),
   };
 };
@@ -251,6 +258,7 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     status: conversation.status,
     read: conversation.read,
     pinned: conversation.pinned,
+    read_only: conversation.read_only,
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
@@ -260,6 +268,16 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
           parent_conversation_relation:
             conversation.parent_conversation_relation ?? ConversationParentRelation.subagent,
         }
+      : {}),
+    // Cast metadata to storage type — the flattened mapping requires string | string[].
+    // Deserialized domain values (boolean, number) only exist on read; writes always
+    // go through serializeMetadataValue before reaching this converter.
+    ...(conversation.metadata
+      ? { metadata: conversation.metadata as Record<string, SerializedMetadataValue> }
+      : {}),
+    ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
+    ...(conversation.template_version !== undefined
+      ? { template_version: conversation.template_version }
       : {}),
   };
 };
@@ -313,9 +331,18 @@ export const createRequestToEs = ({
     status: conversation.status,
     read: false,
     pinned: false,
+    read_only: conversation.read_only ?? false,
     access_control: normalizeConversationAccessControl(conversation.access_control),
     ...(conversation.origin ? { origin: conversation.origin } : {}),
     ...(conversation.workspace_id ? { workspace_id: conversation.workspace_id } : {}),
+    // Cast metadata to storage type — see note in toEs.
+    ...(conversation.metadata
+      ? { metadata: conversation.metadata as Record<string, SerializedMetadataValue> }
+      : {}),
+    ...(conversation.template_id ? { template_id: conversation.template_id } : {}),
+    ...(conversation.template_version !== undefined
+      ? { template_version: conversation.template_version }
+      : {}),
     ...(conversation.parent_conversation_id
       ? {
           parent_conversation_id: conversation.parent_conversation_id,

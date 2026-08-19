@@ -18,6 +18,7 @@ import type {
 import {
   ConversationParentRelation,
   normalizeConversationAccessControl,
+  DEFAULT_CONVERSATION_TITLE,
 } from '@kbn/agent-builder-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
@@ -33,7 +34,7 @@ export const createConversation$ = ({
 }: {
   conversation: Pick<
     Conversation,
-    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation_id'
+    'id' | 'agent_id' | 'access_control' | 'origin' | 'user' | 'parent_conversation_id' | 'read_only'
   >;
   conversationClient: ConversationClient;
   title$: Observable<string>;
@@ -55,6 +56,7 @@ export const createConversation$ = ({
         agent_id: conversation.agent_id,
         access_control: conversation.access_control,
         origin: conversation.origin,
+        read_only: conversation.read_only,
         state: roundCompletedEvent.data.conversation_state,
         status: roundCompletedEvent.data.round.status,
         read: false,
@@ -81,18 +83,21 @@ export const createConversation$ = ({
 };
 
 /**
- * Update an existing conversation and emit the corresponding event
+ * Update an existing conversation and emit the corresponding event.
+ * When `title$` is provided, the generated title is persisted alongside the round upsert.
  */
 export const updateConversation$ = ({
   conversationClient,
   conversation,
   roundCompletedEvents$,
   action,
+  title$,
 }: {
   conversation: Conversation;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
   action?: ConversationAction;
+  title$?: Observable<string>;
 }) => {
   return roundCompletedEvents$.pipe(
     switchMap((roundCompletedEvent) => {
@@ -106,7 +111,7 @@ export const updateConversation$ = ({
           ? conversation.rounds[conversation.rounds.length - 1]?.id
           : undefined;
 
-      return conversationClient.upsertRound(
+      const roundUpserted$ = conversationClient.upsertRound(
         {
           id: conversation.id,
           round,
@@ -123,6 +128,18 @@ export const updateConversation$ = ({
           workspaceId: roundCompletedEvent.data.workspace_id,
         },
         { access: 'converse' }
+      );
+
+      if (!title$) {
+        return roundUpserted$;
+      }
+
+      // Persist the generated title if provided
+      return forkJoin({ updated: roundUpserted$, title: title$ }).pipe(
+        switchMap(({ title }) => {
+          // system-driven write of generated title, not a user-initiated rename, so converse access is the right check.
+          return conversationClient.update({ id: conversation.id, title }, { access: 'converse' });
+        })
       );
     }),
     switchMap((updatedConversation) => {
@@ -151,6 +168,7 @@ export const getConversation = async ({
   accessControl,
   origin,
   subagentCreation,
+  readOnly,
 }: {
   agentId: string;
   conversationId: string | undefined;
@@ -162,6 +180,7 @@ export const getConversation = async ({
     parentConversationId: string;
     subagentName: string;
   };
+  readOnly?: boolean;
 }): Promise<ConversationWithOperation> => {
   // Case 1: No conversation ID - create new with placeholder
   if (!conversationId) {
@@ -175,7 +194,7 @@ export const getConversation = async ({
     }
 
     return {
-      ...placeholderConversation({ agentId, accessControl, origin }),
+      ...placeholderConversation({ agentId, accessControl, origin, readOnly }),
       operation: 'CREATE',
     };
   }
@@ -223,6 +242,7 @@ export const getConversation = async ({
         agentId,
         accessControl,
         origin,
+        readOnly,
       }),
       title: subagentCreation.subagentName,
       parent_conversation_id: subagentCreation.parentConversationId,
@@ -254,17 +274,20 @@ export const placeholderConversation = ({
   conversationId,
   accessControl,
   origin,
+  readOnly,
 }: {
   agentId: string;
   conversationId?: string;
   accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
   origin?: ConversationOrigin;
+  readOnly?: boolean;
 }): Conversation => {
   return {
     id: conversationId ?? uuidv4(),
-    title: 'New conversation',
+    title: DEFAULT_CONVERSATION_TITLE,
     agent_id: agentId,
     access_control: normalizeConversationAccessControl(accessControl),
+    read_only: readOnly ?? false,
     rounds: [],
     ...(origin ? { origin } : {}),
     updated_at: new Date().toISOString(),

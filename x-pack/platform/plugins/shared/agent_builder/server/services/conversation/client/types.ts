@@ -36,24 +36,41 @@ export type ConversationCreateRequest = Omit<
 > & {
   id?: string;
   /**
-   * Optional user override.
-   * Used to set the parent conversation's user when creating a child conversation for a subagent
+   * Optional user override. Used to set the parent conversation's user when creating a child conversation for a subagent
    */
   user?: Conversation['user'];
-  access_control?: Pick<ConversationAccessControl, 'access_mode'>;
+  access_control?: ConversationAccessControl;
 };
 
 export type ConversationUpdatableFields = Pick<Conversation, 'id'> &
   Partial<
     Pick<
       Conversation,
-      'title' | 'rounds' | 'attachments' | 'state' | 'status' | 'read' | 'pinned' | 'workspace_id'
+      | 'title'
+      | 'rounds'
+      | 'attachments'
+      | 'state'
+      | 'status'
+      | 'read'
+      | 'pinned'
+      | 'workspace_id'
+      | 'access_control'
+      | 'metadata'
+      | 'template_id'
+      | 'template_version'
     >
   >;
 
 export type ConversationUpdateRequest = Pick<
   ConversationUpdatableFields,
-  'id' | 'title' | 'attachments' | 'read' | 'pinned'
+  | 'id'
+  | 'title'
+  | 'attachments'
+  | 'read'
+  | 'pinned'
+  | 'metadata'
+  | 'template_id'
+  | 'template_version'
 >;
 
 export interface GetEventsOptions {

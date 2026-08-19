@@ -10,6 +10,8 @@ import {
   agentBuilderDefaultAgentId,
   ToolOrigin,
   type AgentCapabilities,
+  type ConversationTemplate,
+  type SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import type { AgentHandlerContext } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
@@ -27,6 +29,7 @@ import { createListFilesTool } from './list_files';
 import { createBashTool } from './bash';
 import { createDiscoverApisTool, createDescribeApiTool, createExecuteApiTool } from './api';
 import { createTodoTool } from '../../../tools/builtin/todo';
+import { createSetConversationMetadataTool } from '../../../tools/builtin/set_conversation_metadata';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
@@ -38,6 +41,10 @@ export interface RegisterInternalToolsParams {
   capabilities?: AgentCapabilities;
   abortSignal?: AbortSignal;
   backgroundExecutionService: BackgroundExecutionService;
+  /** Callback to merge key/value updates into the active conversation's metadata. */
+  updateConversationMetadata?: (updates: Record<string, SerializedMetadataValue>) => Promise<void>;
+  /** Active conversation template, used to validate values written by the LLM. */
+  conversationTemplate?: ConversationTemplate;
   /** The agent's resolved skills, used by the `search_relevant_skills` tool. */
   filteredSkills: InternalSkillDefinition[];
   /**
@@ -66,6 +73,8 @@ export const registerInternalTools = async ({
   capabilities,
   abortSignal,
   backgroundExecutionService,
+  updateConversationMetadata,
+  conversationTemplate,
   filteredSkills,
   relevantSkillsEnabled,
   parentConversationId,
@@ -153,6 +162,16 @@ export const registerInternalTools = async ({
   // load_skill — gated on the skills feature only.
   if (experimentalFeatures.skills) {
     tools.push(createLoadSkillTool({ analyticsService, trackingService }));
+  }
+
+  // set_conversation_metadata — only when both callback and template are wired.
+  if (updateConversationMetadata && conversationTemplate) {
+    tools.push(
+      createSetConversationMetadataTool({
+        updateConversationMetadata,
+        template: conversationTemplate,
+      })
+    );
   }
 
   // search_relevant_skills — context-aware skill discovery. Gated on the effective enablement

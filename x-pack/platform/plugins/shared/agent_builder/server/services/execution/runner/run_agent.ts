@@ -56,6 +56,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     analyticsService,
     trackingService,
     experimentalFeatures,
+    projectRouting,
   } = manager.deps;
 
   const spaceId = getCurrentSpaceId({ request, spaces });
@@ -75,7 +76,14 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     defaultConnectorId: manager.deps.defaultConnectorId,
     logger,
     modelProvider,
-    esClient: elasticsearch.client.asScoped(request, { projectRouting: 'space' }),
+    esClient: elasticsearch.client.asScoped(
+      request,
+      projectRouting
+        ? { projectRouting: 'expression', value: projectRouting }
+        : {
+            projectRouting: 'space',
+          }
+    ),
     selfClient: http.selfClient,
     savedObjectsClient: savedObjects.getScopedClient(request),
     runner: manager.getRunner(),
