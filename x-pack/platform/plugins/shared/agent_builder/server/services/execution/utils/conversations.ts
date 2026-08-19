@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Observable } from 'rxjs';
-import { forkJoin, switchMap } from 'rxjs';
+import { of, forkJoin, switchMap } from 'rxjs';
 import type {
   Conversation,
   ConversationAccessControl,
@@ -83,7 +83,7 @@ export const updateConversation$ = ({
   title$?: Observable<string>;
 }) => {
   return roundCompletedEvents$.pipe(
-    switchMap(async (roundCompletedEvent) => {
+    switchMap((roundCompletedEvent) => {
       const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
 
       // A resumed round keeps the pending round's id, so it is matched by id.
@@ -94,7 +94,6 @@ export const updateConversation$ = ({
           ? conversation.rounds[conversation.rounds.length - 1]?.id
           : undefined;
 
-      const updatedConversation = await conversationClient.upsertRound(
       const roundUpserted$ = conversationClient.upsertRound(
         {
           id: conversation.id,
@@ -114,7 +113,6 @@ export const updateConversation$ = ({
         { access: 'converse' }
       );
 
-      return createConversationUpdatedEvent(updatedConversation);
       if (!title$) {
         return roundUpserted$;
       }
