@@ -18,8 +18,6 @@ const RESOLUTION_MATCH = {
   isMatch: true,
   context: {
     category: DataSourceCategory.Metrics,
-    // Returning the definition here is what opts the profile into `_p` URL sync. Dropping it
-    // silently stops sort from reaching the URL, so it is asserted explicitly.
     profileState: METRICS_STATE_DEF,
   },
 };

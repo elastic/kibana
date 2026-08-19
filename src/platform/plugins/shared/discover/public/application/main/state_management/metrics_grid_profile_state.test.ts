@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ProfileStateRegistry, ProfileStateType } from '../profile_state';
-import { METRICS_STATE_DEF } from './metrics_grid_profile_state';
+import {
+  ProfileStateRegistry,
+  ProfileStateType,
+  METRICS_STATE_DEF,
+} from '../../../../common/context_awareness';
+import { LOCALLY_PERSISTED_PROFILE_STATE_TYPES } from './tabs_storage_manager';
 
 const KEY = METRICS_STATE_DEF.key;
-
-// Mirrors LOCALLY_PERSISTED_PROFILE_STATE_TYPES in tabs_storage_manager.ts, which is what
-// makes Url fields survive a reload without a URL.
-const LOCALLY_PERSISTED_TYPES = [ProfileStateType.Persistent, ProfileStateType.Url];
 
 const createRegistry = () => {
   const registry = new ProfileStateRegistry();
@@ -104,7 +104,7 @@ describe('METRICS_STATE_DEF', () => {
 
     const stripped = registry.pickStateByType({
       profileStateMap: { [KEY]: { counterAggregation: 'max', sortField: 'recency' } },
-      stateTypes: LOCALLY_PERSISTED_TYPES,
+      stateTypes: LOCALLY_PERSISTED_PROFILE_STATE_TYPES,
       defaultsHandling: 'strip',
     });
 

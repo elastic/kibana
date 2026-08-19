@@ -8,6 +8,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { PROFILE_STATE_URL_KEY } from '../../../../../../common/constants';
 import type { PaginationLocators } from './pagination';
 import { createGridPagination } from './pagination';
 import type { MetricsFlyout } from './flyout';
@@ -209,5 +210,14 @@ export class MetricsExperiencePage {
    */
   public getCardTitleHighlight(index: number, text: string): Locator {
     return this.getCardTitleHighlights(index).filter({ hasText: text });
+  }
+
+  /**
+   * Returns the decoded `_p` (profile state) segment of a Discover URL, or an
+   * empty string when the URL carries none.
+   */
+  public getProfileState(url: string): string {
+    const [, raw] = url.match(new RegExp(`${PROFILE_STATE_URL_KEY}=([^&]*)`)) ?? [];
+    return raw ? decodeURIComponent(raw) : '';
   }
 }

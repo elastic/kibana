@@ -26,16 +26,6 @@ const FIRST_CARD_DESC = `${
 }-0`;
 
 /**
- * Returns the decoded `_p` (profile state) segment of a Discover URL, or an empty string when the
- * URL carries none. Scoping to `_p` keeps the sort assertions from matching any other part of the
- * URL, and the rison payload may be percent-encoded, so it is decoded before matching.
- */
-const getSortState = (url: string): string => {
-  const [, profileState] = url.match(/_p=([^&]*)/) ?? [];
-  return profileState ? decodeURIComponent(profileState) : '';
-};
-
-/**
  * Polls localStorage until the persisted sort direction for the active Discover tab matches
  * `direction`, or until the poll times out. Necessary because tab state is written on a trailing
  * throttle, so an immediate reload/navigate could race the write.
@@ -150,7 +140,7 @@ spaceTest.describe(
       await spaceTest.step('a fresh session carries no sort in the URL', async () => {
         await expect(metricsExperience.grid).toBeVisible();
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
-        expect(getSortState(page.url())).not.toContain('sortDirection');
+        expect(metricsExperience.getProfileState(page.url())).not.toContain('sortDirection');
       });
 
       await spaceTest.step('changing the sort writes it to the URL', async () => {
@@ -158,13 +148,13 @@ spaceTest.describe(
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_DESC);
         // The URL is written through `kbnUrlControls`, which batches asynchronously and so is
         // not settled by the time the grid has re-rendered.
-        await expect.poll(() => getSortState(page.url())).toContain('sortDirection:desc');
+        await expect.poll(() => metricsExperience.getProfileState(page.url())).toContain('sortDirection:desc');
       });
 
       await spaceTest.step('restoring the default sort strips it from the URL', async () => {
         await metricsExperience.setSortDirection('asc');
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
-        await expect.poll(() => getSortState(page.url())).not.toContain('sortDirection');
+        await expect.poll(() => metricsExperience.getProfileState(page.url())).not.toContain('sortDirection');
       });
     });
 
@@ -173,7 +163,7 @@ spaceTest.describe(
       const { metricsExperience } = pageObjects;
 
       await metricsExperience.setSortDirection('desc');
-      await expect.poll(() => getSortState(page.url())).toContain('sortDirection:desc');
+      await expect.poll(() => metricsExperience.getProfileState(page.url())).toContain('sortDirection:desc');
       const descendingUrl = page.url();
 
       await spaceTest.step('return the locally persisted sort to the default', async () => {
@@ -181,7 +171,7 @@ spaceTest.describe(
         // below could be explained by local tab storage rather than by the URL.
         await metricsExperience.setSortDirection('asc');
         await expect(metricsExperience.getCardByIndex(0)).toHaveAttribute('id', FIRST_CARD_ASC);
-        await expect.poll(() => getSortState(page.url())).not.toContain('sortDirection');
+        await expect.poll(() => metricsExperience.getProfileState(page.url())).not.toContain('sortDirection');
         // Wait for the asc sort to land in local storage before navigating away,
         // so the storage state is 'asc' (not the earlier 'desc') when the URL loads.
         await waitForPersistedSortDirection(page, 'asc');
