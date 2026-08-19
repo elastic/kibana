@@ -88,7 +88,18 @@ Note that this option can't be used to increase the number of results if the que
 The \`filter\` parameter takes an Elasticsearch Query DSL object that is combined with the query using AND, and can only narrow the results.
 Use it only when something outside the query itself requires the results to be narrowed; it is not a substitute for writing a \`WHERE\` clause in the query.
 It is parsed separately from the query text, so it cannot reference \`?named\` parameters.
-Prefer a filter that every targeted index can match: against a wildcard pattern such as \`FROM logs-*\`, a clause naming a field that only some indices have will drop the others from the results.`,
+Prefer a filter that every targeted index can match: against a wildcard pattern such as \`FROM logs-*\`, a clause naming a field that only some indices have will drop the others from the results.
+
+## API documentation
+- ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
+- Query DSL reference (for the filter parameter): https://www.elastic.co/docs/reference/query-languages/querydsl`,
+    annotations: {
+      title: 'Execute ES|QL',
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     schema: executeEsqlToolSchema,
     handler: async (
       {

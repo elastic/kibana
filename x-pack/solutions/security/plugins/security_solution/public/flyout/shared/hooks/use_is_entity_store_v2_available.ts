@@ -31,7 +31,7 @@ const ENTITY_STORE_V2_AVAILABLE = ['GET', 'ENTITY_STORE_V2_AVAILABLE'];
  *
  * Uses the data search service to run a lightweight ES search (size: 0)
  * against the entities latest index. Both editor and viewer roles have
- * read access to `.entities.v2.latest.security_*` indices.
+ * read access to `.entities.v2.latest.*` indices.
  */
 export const useIsEntityStoreV2Available = () => {
   const { data } = useKibana().services;
