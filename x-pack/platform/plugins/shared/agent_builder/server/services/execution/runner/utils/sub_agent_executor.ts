@@ -13,9 +13,12 @@ import type { AgentExecutionService } from '@kbn/agent-builder-server/execution'
 export const createSubAgentExecutor = ({
   request,
   getExecutionService,
+  projectRouting,
 }: {
   request: KibanaRequest;
   getExecutionService: () => AgentExecutionService;
+  /** CPS routing of the parent run, inherited by every sub-agent it spawns. */
+  projectRouting?: string;
 }): SubAgentExecutor => {
   return {
     executeSubAgent: async (params) => {
@@ -29,6 +32,7 @@ export const createSubAgentExecutor = ({
           capabilities: params.capabilities,
           parentExecutionId: params.parentExecutionId,
           nextInput: { message: params.prompt },
+          projectRouting,
         },
         abortSignal: params.abortSignal,
       });
