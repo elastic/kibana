@@ -224,6 +224,7 @@ describe('bindAgentBuilder', () => {
           logger: expect.anything(),
           getWorkflow: expect.any(Function),
           getAvailableConnectors: expect.any(Function),
+          getPrivilegeChecker: expect.any(Function),
         })
       );
     });

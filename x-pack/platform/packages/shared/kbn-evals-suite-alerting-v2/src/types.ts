@@ -15,6 +15,13 @@ export type ExpectRenderAttachment = readonly string[];
 
 export type ExpectAttachmentDataFn = (attachments: VersionedAttachment[]) => void | Promise<void>;
 
+export interface ExpectedToolError {
+  /** The tool ID whose results should contain the error. */
+  toolId: string;
+  /** Substring that must appear in the error result's `data.message`. */
+  messageContains: string;
+}
+
 export interface RuleManagementExample extends Example {
   input: {
     turns: string[];
@@ -29,6 +36,8 @@ export interface RuleManagementExample extends Example {
     expectAttachmentData?: ExpectAttachmentDataFn;
     expectedSkills?: readonly string[];
     notExpectedSkills?: readonly string[];
+    /** Asserts that a specific tool returned an error containing the given substring. */
+    expectedToolError?: ExpectedToolError;
   };
 }
 

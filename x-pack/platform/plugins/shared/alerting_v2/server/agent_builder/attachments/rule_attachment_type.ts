@@ -19,10 +19,12 @@ import Boom from '@hapi/boom';
 import { ALERTING_LOG_CODES } from '../../lib/errors/error_codes';
 import type { LoggerServiceContract } from '../../lib/services/logger_service/logger_service';
 import type { RulesClient } from '../../lib/rules_client';
+import type { PrivilegeChecker } from '../../lib/services/privilege_checker/privilege_checker';
 
 interface CreateRuleAttachmentTypeOptions {
   logger: LoggerServiceContract;
   getRulesClient: (context: AttachmentResolveContext) => RulesClient;
+  getPrivilegeChecker: (context: { request: AttachmentResolveContext['request'] }) => PrivilegeChecker;
 }
 
 const formatRuleAttachmentDescription = (
@@ -48,6 +50,7 @@ const formatRuleAttachmentDescription = (
 export const createRuleAttachmentType = ({
   logger,
   getRulesClient,
+  getPrivilegeChecker,
 }: CreateRuleAttachmentTypeOptions): AttachmentTypeDefinition<
   typeof RULE_ATTACHMENT_TYPE,
   RuleAttachmentData
@@ -67,6 +70,15 @@ export const createRuleAttachmentType = ({
     context: AttachmentResolveContext
   ): Promise<RuleAttachmentData | undefined> => {
     try {
+      const privilegeChecker = getPrivilegeChecker({ request: context.request });
+      const canRead = await privilegeChecker.canRead('rules');
+      if (!canRead) {
+        logger.debug({
+          message: `Unauthorized to resolve rule attachment "${origin}": missing Rules: Read`,
+        });
+        return undefined;
+      }
+
       const rulesClient = getRulesClient(context);
       const rule = await rulesClient.getRule({ id: origin });
       return ruleAttachmentDataSchema.parse(rule);

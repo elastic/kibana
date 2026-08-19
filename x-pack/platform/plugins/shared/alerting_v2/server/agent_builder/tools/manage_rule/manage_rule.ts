@@ -11,9 +11,12 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ALERTING_TOOL_IDS } from '@kbn/alerting-v2-constants';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
 import { RULE_ATTACHMENT_TYPE, getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { getAlertingPrivilegeDisplayName } from '../../../../common/feature_privileges';
+import type { PrivilegeChecker } from '../../../lib/services/privilege_checker/privilege_checker';
 import {
   ruleOperationSchema,
   executeRuleOperations,
@@ -34,10 +37,12 @@ const manageRuleSchema = z.object({
 
 export interface ManageRuleToolDeps {
   logger: LoggerServiceContract;
+  getPrivilegeChecker: (context: { request: KibanaRequest }) => PrivilegeChecker;
 }
 
 export const manageRuleTool = ({
   logger,
+  getPrivilegeChecker,
 }: ManageRuleToolDeps): BuiltinSkillBoundedTool<typeof manageRuleSchema> => ({
   id: ALERTING_TOOL_IDS.manageRule,
   type: ToolType.builtin,
@@ -64,8 +69,25 @@ Use operations[] to:
   schema: manageRuleSchema,
   handler: async (
     { ruleAttachmentId: previousAttachmentId, operations },
-    { attachments, esClient, spaceId }
+    { attachments, esClient, request, spaceId }
   ) => {
+    const privilegeChecker = getPrivilegeChecker({ request });
+    const privilegeDisplayName = getAlertingPrivilegeDisplayName('rules', 'all');
+    const authorized = await privilegeChecker.canWrite('rules');
+    if (!authorized) {
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message: `Unauthorized to compose or modify Alerting V2 rules. Missing Kibana privilege: ${privilegeDisplayName}. Ask an administrator to grant this privilege, or continue with discovery-only if you only have Rules: Read.`,
+              metadata: { missingPrivileges: [privilegeDisplayName] },
+            },
+          },
+        ],
+      };
+    }
+
     let ruleId: string | undefined;
     try {
       const currentAttachment = previousAttachmentId

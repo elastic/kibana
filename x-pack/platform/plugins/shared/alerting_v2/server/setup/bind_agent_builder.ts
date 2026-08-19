@@ -61,6 +61,8 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
       createRuleAttachmentType({
         logger: loggerService.forSubsystem('agentBuilder'),
         getRulesClient: (context) => resolveRequestScoped(injection, context.request, RulesClient),
+        getPrivilegeChecker: (context) =>
+          resolveRequestScoped(injection, context.request, PrivilegeChecker),
       }) as AttachmentTypeDefinition,
     [LoggerServiceToken, CoreStart('injection')]
   );
@@ -147,10 +149,13 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
 
     const workflowsManagementApi = container.get(WorkflowsManagementApiToken);
     const agentBuilderLogger = container.get(LoggerServiceToken).forSubsystem('agentBuilder');
+    const injection = container.get(CoreStart('injection'));
     registerSkills(agentBuilder, {
       logger: agentBuilderLogger,
       getWorkflow: (id, sid) => workflowsManagementApi.getWorkflow(id, sid),
       getAvailableConnectors: (sid, req) => workflowsManagementApi.getAvailableConnectors(sid, req),
+      getPrivilegeChecker: (context) =>
+        resolveRequestScoped(injection, context.request, PrivilegeChecker),
     });
   });
 }
