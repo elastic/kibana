@@ -106,7 +106,7 @@ describe('signals routes', () => {
     expect(search).not.toHaveBeenCalled();
   });
 
-  it("aggregates by tag over the current space's index and reads as the current user", async () => {
+  it('aggregates by tag over the global signals index filtered by space and reads as the current user', async () => {
     search.mockResolvedValue({
       aggregations: { tags: { buckets: [{ key: 'query_error', doc_count: 5 }] } },
     });
@@ -115,7 +115,8 @@ describe('signals routes', () => {
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'context-engine-signals-default',
+        index: 'ai-index-idx-signals',
+        query: { bool: { filter: [{ term: { space_id: 'default' } }] } },
         aggs: { tags: { terms: expect.objectContaining({ field: 'tags' }) } },
       })
     );
@@ -124,7 +125,7 @@ describe('signals routes', () => {
     });
   });
 
-  it("fetches the signals for a tag from the current space's index", async () => {
+  it('fetches the signals for a tag from the global index filtered by space', async () => {
     const signal = { signal_id: 'sig-1', tags: ['query_error'], data: {} };
     search.mockResolvedValue({ hits: { total: { value: 1 }, hits: [{ _source: signal }] } });
 
@@ -132,8 +133,10 @@ describe('signals routes', () => {
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'context-engine-signals-default',
-        query: { bool: { filter: [{ term: { tags: 'query_error' } }] } },
+        index: 'ai-index-idx-signals',
+        query: {
+          bool: { filter: [{ term: { space_id: 'default' } }, { term: { tags: 'query_error' } }] },
+        },
       })
     );
     expect(response.ok).toHaveBeenCalledWith({ body: { signals: [signal], total: 1 } });

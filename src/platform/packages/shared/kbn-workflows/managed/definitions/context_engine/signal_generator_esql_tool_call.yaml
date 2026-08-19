@@ -1,0 +1,126 @@
+version: "1"
+name: Signal Generator - ES|QL Tool Calls
+description: Generates tool_call signals from Agent Builder ES|QL execution traces. Runs hourly, processes new traces since last watermark.
+enabled: true
+tags:
+  - context-engine
+  - signals
+settings:
+  timeout: 10m
+  concurrency:
+    key: signal-generator-esql-tool-call
+    strategy: drop
+    max: 1
+consts:
+  SIGNALS_INDEX: ai-index-idx-signals
+  STATE_INDEX: .kibana-context-engine-workflow-state
+  WATERMARK_ID: signal-generator-esql-tool-call
+  MAX_SPANS_PER_RUN: 1000
+triggers:
+  - type: scheduled
+    with:
+      every: 1h
+  - type: manual
+    inputs:
+      - name: since
+        description: Override watermark - process traces since this timestamp (ISO format)
+        required: false
+        type: string
+steps:
+  - name: read_watermark
+    type: elasticsearch.request
+    with:
+      method: GET
+      path: /{{ consts.STATE_INDEX }}/_doc/{{ consts.WATERMARK_ID }}
+    on-failure:
+      continue: true
+  - name: compute_watermark
+    type: data.set
+    with:
+      watermark: "${{ inputs.since | default: steps.read_watermark.output._source.value | default: '1970-01-01T00:00:00.000Z' }}"
+  - name: read_tool_spans
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM traces-agent_builder.otel-* METADATA _index
+        | WHERE span.name LIKE "execute_tool *"
+          AND `attributes.gen_ai.tool.name` == "platform.core.execute_esql"
+          AND @timestamp >= "{{ variables.watermark }}"
+        | EVAL status_code = `status.code`
+        | EVAL duration_ns = duration
+        | SORT @timestamp ASC
+        | LIMIT {{ consts.MAX_SPANS_PER_RUN }}
+        | KEEP _index, @timestamp, trace_id, span_id, status_code, duration_ns
+  - name: foreach_span
+    type: foreach
+    foreach: ${{ steps.read_tool_spans.output.values }}
+    steps:
+      - name: compute_status
+        type: data.set
+        with:
+          is_error: "{{ foreach.item[4] | plus: 0 }}"
+      - name: write_signal
+        type: elasticsearch.request
+        with:
+          method: POST
+          path: /{{ consts.SIGNALS_INDEX }}/_doc/{{ foreach.item[2] }}:{{ foreach.item[3] }}
+          body:
+            signal_id: "{{ foreach.item[2] }}:{{ foreach.item[3] }}"
+            "@timestamp": "{{ foreach.item[1] }}"
+            space_id: "{{ workflow.spaceId }}"
+            signal_type: tool_call
+            tags:
+              - tool_call
+            trace_ids:
+              - "{{ foreach.item[2] }}"
+            data:
+              tool: platform.core.execute_esql
+              query_kind: other
+              target_index: "{{ foreach.item[0] }}"
+              status: Ok
+              looped: false
+              fell_back_to_raw: false
+              producer: signal-generator-workflow
+              span_id: "{{ foreach.item[3] }}"
+              agent:
+                id: unknown
+                name: unknown
+                class: user
+              returned:
+                row_count: 0
+              duration_ms: "{{ foreach.item[5] | divided_by: 1000000 }}"
+              round_signals:
+                esql_count: 1
+                raw_query_count: 0
+                ki_retrieval_count: 0
+        on-failure:
+          continue: true
+    iteration-on-failure:
+      continue: true
+  - name: get_max_timestamp
+    type: data.set
+    with:
+      last_row: ${{ steps.read_tool_spans.output.values | last }}
+      has_results: ${{ steps.read_tool_spans.output.values | size }}
+  - name: extract_timestamp
+    type: data.set
+    if: ${{ steps.get_max_timestamp.output.has_results != 0 }}
+    with:
+      max_ts: "{{ steps.get_max_timestamp.output.last_row[1] }}"
+  - name: update_watermark
+    type: elasticsearch.request
+    if: ${{ steps.extract_timestamp.output.max_ts != null }}
+    with:
+      method: PUT
+      path: /{{ consts.STATE_INDEX }}/_doc/{{ consts.WATERMARK_ID }}
+      body:
+        value: "{{ steps.extract_timestamp.output.max_ts }}"
+        updated_at: "{{ 'now' | date: '%Y-%m-%dT%H:%M:%S.000Z' }}"
+        workflow: signal-generator-esql-tool-call
+    on-failure:
+      continue: true
+  - name: workflow_result
+    type: workflow.output
+    status: completed
+    with:
+      signals_written: "${{ steps.read_tool_spans.output.values | size | default: 0 }}"

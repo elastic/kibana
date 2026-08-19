@@ -14,6 +14,7 @@ export const buildSignal = (
 ): Signal => ({
   signal_id: 'sig-1',
   '@timestamp': '2026-08-01T00:00:00.000Z',
+  space_id: 'default',
   trace_ids: ['trace-1'],
   signal_type: 'tool_call',
   tags,

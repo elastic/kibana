@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGNAL_INDEX_PREFIX, buildSignalsIndexName } from '../../common/http_api/signals';
+import { SIGNALS_INDEX_NAME } from '../../common/http_api/signals';
 import { signalsSchema } from './storage';
 
 interface MappingProp {
@@ -17,11 +17,9 @@ interface MappingProp {
 const props = signalsSchema.properties as unknown as Record<string, MappingProp>;
 
 describe('signals storage', () => {
-  it('names a per-space user index under the prefix (not a hidden system index)', () => {
-    expect(SIGNAL_INDEX_PREFIX).toBe('context-engine-signals-');
-    expect(buildSignalsIndexName('default')).toBe('context-engine-signals-default');
-    expect(buildSignalsIndexName('my-space')).toBe('context-engine-signals-my-space');
-    expect(buildSignalsIndexName('default').startsWith('.')).toBe(false);
+  it('uses a global AI index name following the ai-index-idx- convention', () => {
+    expect(SIGNALS_INDEX_NAME).toBe('ai-index-idx-signals');
+    expect(SIGNALS_INDEX_NAME.startsWith('ai-index-idx-')).toBe(true);
   });
 
   it('maps `data` as flattened with ignore_above (subfields queryable; long free-text skipped)', () => {
@@ -31,6 +29,10 @@ describe('signals storage', () => {
 
   it('maps `tags` as a keyword array', () => {
     expect(props.tags.type).toBe('keyword');
+  });
+
+  it('maps `space_id` as a keyword for space isolation filtering', () => {
+    expect(props.space_id.type).toBe('keyword');
   });
 
   it('types the envelope fields', () => {

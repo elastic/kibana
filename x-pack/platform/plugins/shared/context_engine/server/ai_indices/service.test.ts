@@ -513,6 +513,101 @@ describe('AiIndexService', () => {
     });
   });
 
+  describe('putSeeded', () => {
+    const seededProperties = {
+      description: 'Context Engine signals (user-editable)',
+      dest: { type: 'index' as const, value: 'ai-index-idx-signals' },
+      automations: [{ type: 'workflow' as const, value: 'signal-generator' }],
+      sources: [{ type: 'esql' as const, value: 'FROM traces-*' }],
+    };
+
+    const mockValidIndexDest = () =>
+      esClient.indices.resolveIndex.mockResponse({
+        indices: [{ name: 'ai-index-idx-signals', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+
+    it('creates with managed: false and op_type: create', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockRejectedValue(createNotFoundError());
+
+      await expect(service.putSeeded('signals', seededProperties)).resolves.toBe('created');
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'signals',
+          op_type: 'create',
+          document: expect.objectContaining({
+            ...seededProperties,
+            managed: false,
+          }),
+        })
+      );
+    });
+
+    it('returns "exists" when the entry already exists (does not overwrite)', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockResolvedValue({
+        _id: 'signals',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 5,
+        _primary_term: 1,
+        _source: { ...aiIndexDocument, managed: false },
+      });
+
+      await expect(service.putSeeded('signals', seededProperties)).resolves.toBe('exists');
+
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+
+    it('returns "migrated" and updates when a managed entry exists', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockResolvedValue({
+        _id: 'signals',
+        _index: '.contextengine-ai-indices',
+        found: true,
+        _seq_no: 5,
+        _primary_term: 1,
+        _source: { ...aiIndexDocument, managed: true },
+      });
+
+      await expect(service.putSeeded('signals', seededProperties)).resolves.toBe('migrated');
+
+      expect(storageClient.index).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'signals',
+          if_seq_no: 5,
+          if_primary_term: 1,
+          document: expect.objectContaining({
+            ...seededProperties,
+            managed: false,
+            date_created: aiIndexDocument.date_created,
+          }),
+        })
+      );
+    });
+
+    it('returns "exists" when a concurrent create wins (409)', async () => {
+      mockValidIndexDest();
+      storageClient.get.mockRejectedValue(createNotFoundError());
+      storageClient.index.mockRejectedValue(createConflictError());
+
+      await expect(service.putSeeded('signals', seededProperties)).resolves.toBe('exists');
+    });
+
+    it('rejects an invalid dest before writing', async () => {
+      await expect(
+        service.putSeeded('signals', {
+          ...seededProperties,
+          dest: { type: 'index', value: 'invalid-prefix' },
+        })
+      ).rejects.toBeInstanceOf(InvalidAiIndexDestError);
+      expect(storageClient.index).not.toHaveBeenCalled();
+    });
+  });
+
   describe('get', () => {
     it('returns the AI index with its id', async () => {
       storageClient.get.mockResolvedValue({

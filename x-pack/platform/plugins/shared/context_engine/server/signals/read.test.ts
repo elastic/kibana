@@ -7,11 +7,13 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { Signal } from '../../common/http_api/signals';
+import { SIGNALS_INDEX_NAME } from '../../common/http_api/signals';
 import { getSignalGroups, getSignalsByTag } from './read';
 
 const buildSignal = (overrides: Partial<Signal> = {}): Signal => ({
   signal_id: 'sig-1',
   '@timestamp': '2026-08-01T00:00:00.000Z',
+  space_id: 'default',
   trace_ids: ['trace-1'],
   signal_type: 'tool_call',
   tags: ['query_error'],
@@ -35,7 +37,7 @@ const buildSignal = (overrides: Partial<Signal> = {}): Signal => ({
 });
 
 describe('getSignalGroups', () => {
-  it("runs a terms aggregation over the tags keyword field of the current space's signals index", async () => {
+  it('runs a terms aggregation over the tags keyword field, filtered by space_id', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({
       aggregations: {
@@ -52,10 +54,11 @@ describe('getSignalGroups', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'context-engine-signals-default',
+        index: SIGNALS_INDEX_NAME,
         size: 0,
         ignore_unavailable: true,
         allow_no_indices: true,
+        query: { bool: { filter: [{ term: { space_id: 'default' } }] } },
         aggs: {
           tags: {
             terms: { field: 'tags', size: 100, order: { _count: 'desc' } },
@@ -71,14 +74,16 @@ describe('getSignalGroups', () => {
     });
   });
 
-  it('reads the index for the requested space', async () => {
+  it('filters by the requested space_id', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.search.mockResolvedValue({ aggregations: { tags: { buckets: [] } } } as any);
 
     await getSignalGroups(esClient, { spaceId: 'marketing', maxGroups: 100 });
 
     expect(esClient.search).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'context-engine-signals-marketing' })
+      expect.objectContaining({
+        query: { bool: { filter: [{ term: { space_id: 'marketing' } }] } },
+      })
     );
   });
 
@@ -93,7 +98,7 @@ describe('getSignalGroups', () => {
 });
 
 describe('getSignalsByTag', () => {
-  it('fetches the signals for a tag, paginated and newest first', async () => {
+  it('fetches the signals for a tag filtered by space_id, paginated and newest first', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const signal = buildSignal();
     esClient.search.mockResolvedValue({
@@ -112,14 +117,16 @@ describe('getSignalsByTag', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: 'context-engine-signals-default',
+        index: SIGNALS_INDEX_NAME,
         from: 0,
         size: 25,
         ignore_unavailable: true,
         allow_no_indices: true,
         track_total_hits: true,
         _source: { excludes: ['data.returned.columns'] },
-        query: { bool: { filter: [{ term: { tags: 'query_error' } }] } },
+        query: {
+          bool: { filter: [{ term: { space_id: 'default' } }, { term: { tags: 'query_error' } }] },
+        },
         sort: [{ '@timestamp': { order: 'desc' } }],
       })
     );

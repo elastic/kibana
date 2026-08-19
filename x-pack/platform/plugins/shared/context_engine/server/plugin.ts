@@ -16,7 +16,12 @@ import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
-import { CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID } from '../common/constants';
+import {
+  AGENT_BUILDER_TRACES_INDEX_PATTERN,
+  CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID,
+  SIGNALS_AI_INDEX_ID,
+} from '../common/constants';
+import { SIGNALS_INDEX_NAME } from '../common/http_api/signals';
 import type {
   ContextEnginePluginSetup,
   ContextEnginePluginStart,
@@ -28,9 +33,7 @@ import { registerAiIndexRoutes } from './routes/ai_indices';
 import { registerSignalRoutes } from './routes/signals';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
-import { SignalsService } from './signals/service';
-import type { SignalsServiceApi } from './signals/service';
-import { registerSignalGeneratorTaskDefinition, scheduleSignalGenerator } from './tasks';
+import { installSignalGeneratorWorkflowAndMarkReady } from './workflows';
 
 export class ContextEnginePlugin
   implements
@@ -43,7 +46,6 @@ export class ContextEnginePlugin
 {
   private logger: Logger;
   private aiIndexService?: AiIndexService;
-  private signalsService?: SignalsService;
   private esClient?: ElasticsearchClient;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
@@ -75,24 +77,6 @@ export class ContextEnginePlugin
       },
     });
 
-    registerSignalGeneratorTaskDefinition({
-      taskManager: setupDeps.taskManager,
-      getEsClient: () => {
-        if (!this.esClient) {
-          throw new Error('Elasticsearch client not available — plugin has not started');
-        }
-        return this.esClient;
-      },
-      getSignalsService: (): SignalsServiceApi => {
-        if (!this.signalsService) {
-          throw new Error('Signals service not available — plugin has not started');
-        }
-        return this.signalsService;
-      },
-      getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
-      logger: this.logger.get('signal_generator'),
-    });
-
     const router = coreSetup.http.createRouter();
     registerAiIndexRoutes({
       router,
@@ -119,8 +103,24 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    // Register the signals AI index as seeded (user-editable with sensible defaults)
+    // Automations are left empty - users can add their own signal generator workflow
+    this.aiIndexRegistry.registerSeeded(SIGNALS_AI_INDEX_ID, {
+      description: 'Context Engine feedback loop signals generated from Agent Builder traces.',
+      dest: { type: 'index', value: SIGNALS_INDEX_NAME },
+      automations: [],
+      sources: [{ type: 'esql', value: `FROM ${AGENT_BUILDER_TRACES_INDEX_PATTERN}` }],
+    });
+
+    // Register as a managed workflow owner if workflows_extensions is available
+    if (setupDeps.workflowsExtensions) {
+      setupDeps.workflowsExtensions.registerManagedWorkflowOwner('contextEngine');
+    }
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
+      registerSeededAiIndex: (id, properties) =>
+        this.aiIndexRegistry.registerSeeded(id, properties),
     };
   }
 
@@ -133,12 +133,6 @@ export class ContextEnginePlugin
       esClient: this.esClient,
       logger: aiIndexLogger,
     });
-
-    this.signalsService = new SignalsService({
-      esClient: this.esClient,
-      logger: this.logger.get('signals'),
-    });
-    const signalsService = this.signalsService;
 
     const aiIndexService = this.aiIndexService;
     const registry = this.aiIndexRegistry;
@@ -168,15 +162,26 @@ export class ContextEnginePlugin
         );
       });
 
-    scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
+    // Install signal generator workflow if workflows_extensions is available
+    if (startDeps.workflowsExtensions) {
+      installSignalGeneratorWorkflowAndMarkReady({
+        workflowsExtensions: startDeps.workflowsExtensions,
+        esClient: this.esClient,
+        logger: this.logger.get('workflows'),
+      }).catch((err) => {
+        this.logger.warn(
+          `Failed to install signal generator workflow: ${
+            err instanceof Error ? err.message : String(err)
+          }`
+        );
+      });
+    } else {
       this.logger.warn(
-        `Failed to schedule signal generator: ${err instanceof Error ? err.message : String(err)}`
+        'workflowsExtensions plugin not available — signal generation workflow will not be installed'
       );
-    });
+    }
 
-    return {
-      getSignalsService: () => signalsService,
-    };
+    return {};
   }
 
   stop() {}
