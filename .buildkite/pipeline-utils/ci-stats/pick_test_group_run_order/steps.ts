@@ -41,7 +41,7 @@ export function buildJestStep(opts: JestStepOptions): BuildkiteStep | undefined 
       ...(opts.key === STEP_KEYS.JEST_UNIT
         ? {
             image: KIBANA_MINIMAL_IMAGE,
-            machineType: 'n4a-standard-4',
+            machineType: 'n4a-standard-8',
             diskType: 'hyperdisk-balanced',
             spotZones: N4A_SPOT_ZONES,
             diskSizeGb: 50,
