@@ -116,9 +116,22 @@ export async function stepSaveKnowledgeBase(
     existing.items.every((item) => item.version === packageInfo.version)
   ) {
     logger.debug(
-      `Knowledge base already indexed for ${packageInfo.name}@${packageInfo.version}, skipping`
+      `Knowledge base already indexed for ${packageInfo.name}@${packageInfo.version}, skipping re-index`
     );
-    return { esReferences };
+
+    // The content is already current, so skip the (expensive) re-indexing. But still ensure the
+    // es asset references are present: they may be missing if the epm-packages saved object was
+    // reset while the indexed content survived (e.g. after an install rollback).
+    const knowledgeBaseAssetRefs = existing.items.map((item) => ({
+      id: `${packageInfo.name}-${item.fileName}`,
+      type: ElasticsearchAssetType.knowledgeBase,
+    }));
+    const updatedEsReferences = await optimisticallyAddEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      knowledgeBaseAssetRefs
+    );
+    return { esReferences: updatedEsReferences };
   }
 
   return await indexKnowledgeBase(
@@ -138,7 +151,7 @@ export async function indexKnowledgeBase(
   logger: Logger,
   packageInfo: { name: string; version: string },
   archiveIterator: ArchiveIterator,
-  abortController?: AbortController
+  signal?: AbortSignal
 ): Promise<{ esReferences: EsAssetReference[] }> {
   // Extract knowledge base content directly from the archive
   const knowledgeBaseItems = await extractKnowledgeBaseFromArchive(
@@ -161,7 +174,7 @@ export async function indexKnowledgeBase(
         pkgName: packageInfo.name,
         pkgVersion: packageInfo.version,
         knowledgeBaseContent: knowledgeBaseItems,
-        abortController,
+        signal,
       });
 
       logger.debug(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { runPrivilegeTests } from '../../privileges_helpers';
@@ -66,11 +67,29 @@ export default function (providerContext: FtrProviderContext) {
       },
     ];
 
+    // Authorized users reach the handler and get 404 (non-existent policy) rather than 403,
+    // confirming that auth is enforced before handler logic for the rotate endpoint.
+    const ROTATE_SCENARIOS = [
+      { user: testUsers.fleet_all_only, statusCode: 404 },
+      { user: testUsers.fleet_agents_all_only, statusCode: 404 },
+      { user: testUsers.fleet_agents_read_only, statusCode: 403 },
+      { user: testUsers.fleet_read_only, statusCode: 403 },
+      { user: testUsers.fleet_no_access, statusCode: 403 },
+      { user: testUsers.fleet_minimal_all_only, statusCode: 403 },
+      { user: testUsers.fleet_minimal_read_only, statusCode: 403 },
+      { user: testUsers.fleet_settings_read_only, statusCode: 403 },
+    ];
+
     const ROUTES = [
       {
         method: 'GET',
         path: '/api/fleet/uninstall_tokens',
         scenarios: SCENARIOS,
+      },
+      {
+        method: 'POST',
+        path: uninstallTokensRouteService.getRotatePath('non-existent-policy-id'),
+        scenarios: ROTATE_SCENARIOS,
       },
     ];
     runPrivilegeTests(ROUTES, supertestWithoutAuth);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiFilterGroup } from '@elastic/eui';
+import React, { useCallback, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiFilterGroup, useEuiTheme } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { MoreFiltersSelectable } from '../../../all_cases/table_filter_config/more_filters_selectable';
@@ -26,6 +26,10 @@ import { TableSearch } from '../../../all_cases/search';
 import { DateRangeFilter } from '../../../all_cases/date_range_filter';
 import type { CasesColumnSelection } from '../types';
 import { ColumnsPopover } from './columns_popover';
+import { SortFilter } from './sort_filter';
+import { useCasesConfig } from '../../../../common/lib/kibana';
+import { useCasesToast } from '../../../../common/use_cases_toast';
+import { useGlobalInlineFields } from '../../../all_cases/hooks/use_global_inline_fields';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -46,6 +50,8 @@ export interface CasesTableFiltersProps {
   onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
   listFields: CasesColumnSelection[];
   onListFieldsChange: (fields: CasesColumnSelection[]) => void;
+  sortOrder: 'asc' | 'desc';
+  onSortOrderChange: (sortOrder: 'asc' | 'desc') => void;
 }
 
 const mergeCustomizer = (objValue: string | string[], srcValue: string | string[], key: string) => {
@@ -73,6 +79,8 @@ const CasesTableFiltersComponent = ({
   onSelectedColumnsChange,
   listFields,
   onListFieldsChange,
+  sortOrder,
+  onSortOrderChange,
 }: CasesTableFiltersProps) => {
   const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
   const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
@@ -82,18 +90,41 @@ const CasesTableFiltersComponent = ({
     isFetching: isLoadingCasesConfiguration,
   } = useGetCaseConfiguration();
 
+  const { euiTheme } = useEuiTheme();
+  const { templatesEnabled } = useCasesConfig();
+  const {
+    globalInlineFields,
+    isLoading: isLoadingGlobalFields,
+    isLoaded: areGlobalFieldsLoaded,
+  } = useGlobalInlineFields({ enabled: templatesEnabled });
+  const { showInfoToast } = useCasesToast();
+  const hasShownHiddenFieldsSearchToast = useRef(false);
+
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
       const newFilterOptions = mergeWith({}, filterOptions, partialFilterOptions, mergeCustomizer);
       if (!isEqual(newFilterOptions, filterOptions)) {
+        if (
+          templatesEnabled &&
+          !hasShownHiddenFieldsSearchToast.current &&
+          typeof partialFilterOptions.search === 'string' &&
+          partialFilterOptions.search.trim() !== ''
+        ) {
+          hasShownHiddenFieldsSearchToast.current = true;
+          showInfoToast(i18n.SEARCH_HIDDEN_FIELDS_INFO_TITLE, i18n.SEARCH_HIDDEN_FIELDS_INFO_TEXT);
+        }
         onFilterChanged(newFilterOptions);
       }
     },
-    [filterOptions, onFilterChanged]
+    [filterOptions, onFilterChanged, showInfoToast, templatesEnabled]
   );
 
   const isLoadingFilters =
-    isLoading || isLoadingTags || isLoadingCategories || isLoadingCasesConfiguration;
+    isLoading ||
+    isLoadingTags ||
+    isLoadingCategories ||
+    isLoadingCasesConfiguration ||
+    isLoadingGlobalFields;
 
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
@@ -121,6 +152,9 @@ const CasesTableFiltersComponent = ({
     isSelectorView,
     filterOptions,
     customFields,
+    globalInlineFields,
+    areGlobalFieldsLoaded,
+    templatesEnabled,
     isLoading: isLoadingFilters,
   });
 
@@ -130,37 +164,18 @@ const CasesTableFiltersComponent = ({
     }
   }, [onCreateCasePressed]);
 
-  return (
+  // Two rows rather than one: the search box wants to grow, and on a narrow window it and the
+  // filter pills were competing for the same line — the pills wrapped mid-group and the row's
+  // right-hand controls drifted. Giving the pills their own row also separates "how the list is
+  // displayed" (row one) from "what the list contains" (row two).
+  const filterPills = (
     <EuiFlexGroup
       gutterSize="s"
       justifyContent="flexStart"
       wrap={true}
-      data-test-subj="cases-table-filters"
+      alignItems="center"
+      data-test-subj="cases-table-filters-pills-row"
     >
-      {isSelectorView && onCreateCasePressed ? (
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleOnCreateCasePressed}
-            iconType="plusCircle"
-            data-test-subj="cases-table-add-case-filter-bar"
-          >
-            {i18n.CREATE_CASE_TITLE}
-          </EuiButton>
-        </EuiFlexItem>
-      ) : null}
-      <EuiFlexItem>
-        <TableSearch
-          filterOptionsSearch={filterOptions.search}
-          /**
-           * we need this to reset the internal state of the
-           * TableSearch component each time the search in
-           * the all cases state changes
-           */
-          key={filterOptions.search}
-          onFilterOptionsChange={onFilterOptionsChange}
-        />
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup
           css={css`
@@ -178,34 +193,86 @@ const CasesTableFiltersComponent = ({
           )}
         </EuiFilterGroup>
       </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  return (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      data-test-subj="cases-table-filters"
+      css={css`
+        padding-top: ${euiTheme.size.m};
+      `}
+    >
       <EuiFlexItem grow={false}>
-        {viewMode === VIEW_TOGGLE_TABLE_ID ? (
-          <ColumnsPopover
-            selectedColumns={selectedColumns}
-            onSelectedColumnsChange={onSelectedColumnsChange}
-          />
-        ) : (
-          <ColumnsPopover
-            selectedColumns={listFields}
-            onSelectedColumnsChange={onListFieldsChange}
-            buttonLabel={i18n.FIELDS_BUTTON_LABEL}
-            buttonIconType="list"
-          />
-        )}
+        <EuiFlexGroup
+          gutterSize="s"
+          justifyContent="flexStart"
+          wrap={true}
+          alignItems="center"
+          data-test-subj="cases-table-filters-controls-row"
+        >
+          {isSelectorView && onCreateCasePressed ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                onClick={handleOnCreateCasePressed}
+                iconType="plusCircle"
+                data-test-subj="cases-table-add-case-filter-bar"
+              >
+                {i18n.CREATE_CASE_TITLE}
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem>
+            <TableSearch
+              filterOptionsSearch={filterOptions.search}
+              /**
+               * we need this to reset the internal state of the
+               * TableSearch component each time the search in
+               * the all cases state changes
+               */
+              key={filterOptions.search}
+              onFilterOptionsChange={onFilterOptionsChange}
+            />
+          </EuiFlexItem>
+          {viewMode !== VIEW_TOGGLE_TABLE_ID && (
+            <EuiFlexItem grow={false}>
+              <SortFilter sortOrder={sortOrder} onChange={onSortOrderChange} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            {viewMode === VIEW_TOGGLE_TABLE_ID ? (
+              <ColumnsPopover
+                selectedColumns={selectedColumns}
+                onSelectedColumnsChange={onSelectedColumnsChange}
+              />
+            ) : (
+              <ColumnsPopover
+                selectedColumns={listFields}
+                onSelectedColumnsChange={onListFieldsChange}
+                buttonLabel={i18n.FIELDS_BUTTON_LABEL}
+                buttonIconType="listBullet"
+              />
+            )}
+          </EuiFlexItem>
+          {!isSelectorView && (
+            <EuiFlexItem grow={false}>
+              <ViewToggle idSelected={viewMode} onChange={onViewModeChange} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <DateRangeFilter
+              isLoading={isLoadingFilters}
+              filterOptions={filterOptions}
+              onFilterOptionsChange={onFilterOptionsChange}
+              deselectCases={deselectCases}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
-      {!isSelectorView && (
-        <EuiFlexItem grow={false}>
-          <ViewToggle idSelected={viewMode} onChange={onViewModeChange} />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={false}>
-        <DateRangeFilter
-          isLoading={isLoadingFilters}
-          filterOptions={filterOptions}
-          onFilterOptionsChange={onFilterOptionsChange}
-          deselectCases={deselectCases}
-        />
-      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{filterPills}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { parse as yamlLoad, stringify as yamlDump } from 'yaml';
+import { stringify as yamlDump } from 'yaml';
 import type { Template } from '../../../../common/types/domain/template/v1';
 import { useCasesEditTemplateNavigation } from '../../../common/navigation';
 import { useBulkDeleteTemplates } from './use_bulk_delete_templates';
@@ -48,22 +48,16 @@ export const useTemplatesActions = ({ onDeleteSuccess }: UseTemplatesActionsProp
 
   const handleClone = useCallback(
     (template: Template) => {
-      // The list endpoint returns definition as a parsed object (via parseTemplate),
-      // but the create endpoint expects a YAML string. Parse if needed, update the
-      // name, then re-serialize to YAML.
-      const parsed =
+      const clonedName = i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name);
+      const clonedDefinition =
         typeof template.definition === 'string'
-          ? (yamlLoad(template.definition) as Record<string, unknown>)
-          : (template.definition as Record<string, unknown>);
-
-      const clonedDefinition = yamlDump(
-        { ...parsed, name: i18n.CLONED_TEMPLATE_NAME_PREFIX(template.name) },
-        { lineWidth: 0 }
-      ).trimEnd();
+          ? template.definition
+          : yamlDump(template.definition as Record<string, unknown>, { lineWidth: 0 }).trimEnd();
 
       cloneTemplate(
         {
           template: {
+            name: clonedName,
             owner: template.owner,
             definition: clonedDefinition,
             description: template.description,

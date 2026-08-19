@@ -140,7 +140,7 @@ export const resetToZero = async ({
   });
 
   if (idBasedRiskScoringEnabled && crudClient) {
-    const entityStoreErrors = await persistRiskScoresToEntityStore({
+    const { unexpectedErrors: entityStoreErrors } = await persistRiskScoresToEntityStore({
       crudClient,
       logger,
       scores: { [entityType]: scores },

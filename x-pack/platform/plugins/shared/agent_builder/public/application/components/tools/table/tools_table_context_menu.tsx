@@ -133,6 +133,7 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
   return (
     <EuiPopover
       id={`${tool.id}_context-menu`}
+      aria-label={labels.tools.toolContextMenuButtonLabel}
       panelPaddingSize="s"
       button={
         <EuiToolTip content={labels.tools.toolContextMenuButtonLabel} disableScreenReaderOutput>

@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { getSigEventsLogPatternsEsql, type LogPatternEsqlEntry } from '@kbn/ai-tools';
-import { LOG_PATTERNS_FEATURE_TYPE } from '@kbn/streams-schema';
+import {
+  getSigEventsLogPatternsEsql,
+  DEFAULT_ESQL_QUERY_TIMEOUT_MS,
+  type LogPatternEsqlEntry,
+} from '@kbn/ai-tools';
+import { getStreamSamplingSource } from '@kbn/streams-schema';
+import { LOG_PATTERNS_FEATURE_TYPE } from '@kbn/significant-events-schema';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import type { ComputedFeatureGenerator } from './types';
 
@@ -41,7 +46,8 @@ export const logPatternsGenerator: ComputedFeatureGenerator = {
 
   llmInstructions: `Contains log message patterns identified by analyzing the log messages in the stream.
 Use the \`properties.patterns\` array to see both common and rare log patterns. The array contains the top common patterns (highest \`count\`) and the rarest patterns (lowest \`count\`) — rare patterns are often the most interesting for anomaly or error detection.
-Each pattern includes: field (source field name), pattern (normalized message with placeholders), count (frequency), and sample (a real example message, possibly truncated).
+Each pattern includes: field (source field name), pattern (the significant tokens shared by messages in this group, variable parts removed), count (frequency), and sample (a real example message, possibly truncated).
+Use \`pattern\` tokens for keyword/AND queries; use \`sample\` as the basis for phrase queries since variable parts between tokens are omitted and the token string is not a verbatim phrase.
 This is useful for understanding the types of logs in the stream and identifying anomalies or trends.`,
 
   generate: async ({ stream, start, end, esClient, logger }) => {
@@ -49,15 +55,15 @@ This is useful for understanding the types of logs in the stream and identifying
       client: esClient,
       logger,
       plugin: 'streams',
+      abortSignal: AbortSignal.timeout(DEFAULT_ESQL_QUERY_TIMEOUT_MS),
     });
 
     const patterns = await getSigEventsLogPatternsEsql({
       esClient: tracedClient,
-      index: stream.name,
+      samplingSource: getStreamSamplingSource(stream),
       start,
       end,
       fields: LOG_MESSAGE_FIELDS,
-      logger,
     });
 
     return { patterns: selectLogPatternsForLlm(patterns) };

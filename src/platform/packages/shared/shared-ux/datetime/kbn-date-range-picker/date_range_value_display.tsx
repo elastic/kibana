@@ -21,6 +21,8 @@ interface DateRangeValueDisplayProps {
   onPartClick: (part: RangePart) => void;
   /** When true, parts are rendered as plain text and click handlers are not attached. */
   disabled?: boolean;
+  /** Locale used to recognise `displayText`'s parts. @default `i18n.getLocale()` */
+  locale?: string;
 }
 
 /**
@@ -30,9 +32,10 @@ export function DateRangeValueDisplay({
   displayText,
   onPartClick,
   disabled = false,
+  locale,
 }: DateRangeValueDisplayProps) {
   const styles = useEuiMemoizedStyles(dateRangeValueDisplayStyles);
-  const parts = parseDisplayParts(displayText);
+  const parts = parseDisplayParts(displayText, locale);
 
   const chunks = parts.flatMap((part, index) => {
     const gapStart = index === 0 ? 0 : parts[index - 1].end;

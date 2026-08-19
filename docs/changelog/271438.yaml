@@ -1,0 +1,10 @@
+prs:
+- https://github.com/elastic/kibana/pull/271438
+type: feature
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Alerting and reporting
+title: Add Agent Builder integration for Cases
+description: "Adds Agent Builder tools, a Cases skill, and attachments that let you search, query, and summarize case data from Agent Builder."

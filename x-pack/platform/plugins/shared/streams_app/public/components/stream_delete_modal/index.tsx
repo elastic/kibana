@@ -109,7 +109,7 @@ export function StreamDeleteModal({
                       copyToClipboard(name);
                     }}
                   >
-                    {name} <EuiIcon type="copy" />
+                    {name} <EuiIcon type="copy" aria-hidden={true} />
                   </EuiLink>
                 ),
               }}

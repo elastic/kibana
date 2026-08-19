@@ -70,7 +70,9 @@ export function generateConnectorSnippet(
     // Create with block with required parameters as placeholders
     const withParams: Record<string, unknown> = {};
     requiredParams.forEach((param) => {
-      const placeholder = param.example || param.defaultValue || '';
+      // Use `??` so intentionally falsy placeholders (`""`, `false`, `0`) survive instead of being
+      // replaced by the defaultValue/empty-string fallback.
+      const placeholder = param.example ?? param.defaultValue ?? '';
       withParams[param.name] = placeholder;
     });
     parameters = { 'connector-id': connectorIdValue, with: withParams };

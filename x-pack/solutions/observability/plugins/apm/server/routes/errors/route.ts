@@ -5,43 +5,28 @@
  * 2.0.
  */
 
-import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
 import { notFound } from '@hapi/boom';
+import {
+  routeDefinitions,
+  type ErrorGroupMainStatisticsResponse,
+  type ErrorGroupPeriodsResponse,
+  type ErrorGroupSampleIdsResponse,
+  type ErrorSampleDetailsResponse,
+  type ErrorDistributionResponse,
+  type TopErroneousTransactionsResponse,
+} from '@kbn/apm-api-shared';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import type { ErrorDistributionResponse } from './distribution/get_distribution';
 import { getErrorDistribution } from './distribution/get_distribution';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
-import type { ErrorGroupMainStatisticsResponse } from './get_error_groups/get_error_group_main_statistics';
 import { getErrorGroupMainStatistics } from './get_error_groups/get_error_group_main_statistics';
-import type { ErrorGroupPeriodsResponse } from './get_error_groups/get_error_group_detailed_statistics';
 import { getErrorGroupPeriods } from './get_error_groups/get_error_group_detailed_statistics';
-import type { ErrorGroupSampleIdsResponse } from './get_error_groups/get_error_group_sample_ids';
 import { getErrorGroupSampleIds } from './get_error_groups/get_error_group_sample_ids';
-import type { ErrorSampleDetailsResponse } from './get_error_groups/get_error_sample_details';
 import { getErrorSampleDetails } from './get_error_groups/get_error_sample_details';
-import { offsetRt } from '../../../common/comparison_rt';
-import type { TopErroneousTransactionsResponse } from './erroneous_transactions/get_top_erroneous_transactions';
 import { getTopErroneousTransactionsPeriods } from './erroneous_transactions/get_top_erroneous_transactions';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 
 const errorsMainStatisticsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.partial({
-        sortField: t.string,
-        sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
-        searchQuery: t.string,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.errors.mainStatistics.endpoint,
+  params: routeDefinitions.errors.mainStatistics.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorGroupMainStatisticsResponse> => {
     const { params } = resources;
@@ -64,23 +49,8 @@ const errorsMainStatisticsRoute = createApmServerRoute({
 });
 
 const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
-  endpoint:
-    'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics_by_transaction_name',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.type({
-        transactionType: t.string,
-        transactionName: t.string,
-        maxNumberOfErrorGroups: toNumberRt,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.errors.mainStatisticsByTransactionName.endpoint,
+  params: routeDefinitions.errors.mainStatisticsByTransactionName.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorGroupMainStatisticsResponse> => {
     const { params } = resources;
@@ -111,22 +81,8 @@ const errorsMainStatisticsByTransactionNameRoute = createApmServerRoute({
 });
 
 const errorsDetailedStatisticsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
-      t.type({
-        numBuckets: toNumberRt,
-      }),
-    ]),
-    body: t.type({ groupIds: jsonRt.pipe(t.array(t.string)) }),
-  }),
+  endpoint: routeDefinitions.errors.detailedStatistics.endpoint,
+  params: routeDefinitions.errors.detailedStatistics.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorGroupPeriodsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -153,14 +109,8 @@ const errorsDetailedStatisticsRoute = createApmServerRoute({
 });
 
 const errorGroupsSamplesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-      groupId: t.string,
-    }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
-  }),
+  endpoint: routeDefinitions.errors.groupSamples.endpoint,
+  params: routeDefinitions.errors.groupSamples.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorGroupSampleIdsResponse> => {
     const { params } = resources;
@@ -181,15 +131,8 @@ const errorGroupsSamplesRoute = createApmServerRoute({
 });
 
 const errorGroupSampleDetailsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/error/{errorId}',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-      groupId: t.string,
-      errorId: t.string,
-    }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
-  }),
+  endpoint: routeDefinitions.errors.sampleDetails.endpoint,
+  params: routeDefinitions.errors.sampleDetails.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorSampleDetailsResponse> => {
     const { params } = resources;
@@ -216,23 +159,8 @@ const errorGroupSampleDetailsRoute = createApmServerRoute({
 });
 
 const errorDistributionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/errors/distribution',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      t.partial({
-        groupId: t.string,
-        transactionName: t.string,
-        bucketSizeInSeconds: toNumberRt,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
-    ]),
-  }),
+  endpoint: routeDefinitions.errors.distribution.endpoint,
+  params: routeDefinitions.errors.distribution.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ErrorDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
@@ -264,22 +192,8 @@ const errorDistributionRoute = createApmServerRoute({
 });
 
 const topErroneousTransactionsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/errors/{groupId}/top_erroneous_transactions',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-      groupId: t.string,
-    }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      offsetRt,
-      t.type({
-        numBuckets: toNumberRt,
-      }),
-    ]),
-  }),
+  endpoint: routeDefinitions.errors.topErroneousTransactions.endpoint,
+  params: routeDefinitions.errors.topErroneousTransactions.params,
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<TopErroneousTransactionsResponse> => {
     const { params } = resources;

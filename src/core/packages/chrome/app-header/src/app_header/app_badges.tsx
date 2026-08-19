@@ -13,6 +13,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AppHeaderBadge } from '../types';
 import { AppBadge } from './app_badge';
+import { asPlainText } from './as_plain_text';
+import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 const MAX_VISIBLE_BADGES = 2;
 const OVERFLOW_THRESHOLD = 3;
@@ -29,7 +31,12 @@ const useBadgesStyle = () => {
       }
     `;
 
-    return { badgesContainer };
+    const overflowList = css`
+      min-inline-size: 160px;
+      max-inline-size: 240px;
+    `;
+
+    return { badgesContainer, overflowList };
   }, [euiTheme]);
 };
 
@@ -38,7 +45,7 @@ export interface AppBadgesProps {
 }
 
 export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
-  const { badgesContainer } = useBadgesStyle();
+  const { badgesContainer, overflowList } = useBadgesStyle();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   if (!badges || badges.length === 0) {
@@ -66,7 +73,7 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
       css={badgesContainer}
     >
       {visibleBadges.map((badge) => (
-        <EuiFlexItem grow={false} key={badge.label}>
+        <EuiFlexItem grow={false} key={asPlainText(badge.label)}>
           <AppBadge badge={badge} />
         </EuiFlexItem>
       ))}
@@ -79,6 +86,7 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
             button={
               <EuiBadge
                 color="hollow"
+                data-test-subj={APP_HEADER_TEST_SUBJECTS.badgesOverflow}
                 onClick={handleTogglePopover}
                 onClickAriaLabel={i18n.translate(
                   'core.ui.chrome.appHeader.badges.overflowAriaLabel',
@@ -95,9 +103,15 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
             closePopover={handleClosePopover}
             panelPaddingSize="s"
           >
-            <EuiFlexGroup direction="column" gutterSize="xs" alignItems="center">
+            <EuiFlexGroup
+              direction="row"
+              wrap
+              gutterSize="xs"
+              alignItems="flexStart"
+              css={overflowList}
+            >
               {overflowBadges.map((badge) => (
-                <EuiFlexItem grow={false} key={badge.label}>
+                <EuiFlexItem grow={false} key={asPlainText(badge.label)}>
                   <AppBadge badge={badge} />
                 </EuiFlexItem>
               ))}

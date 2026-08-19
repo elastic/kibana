@@ -9,11 +9,19 @@
 
 import type { ScoutPage } from '..';
 import { expect } from '..';
+import { KibanaCodeEditorWrapper } from '../ui_components';
 
 interface FilterCreationOptions {
   field: string;
-  operator: 'is' | 'is not' | 'is one of' | 'is not one of' | 'exists' | 'does not exist';
-  value: string;
+  operator:
+    | 'is'
+    | 'is not'
+    | 'is one of'
+    | 'is not one of'
+    | 'is between'
+    | 'exists'
+    | 'does not exist';
+  value?: string | string[] | { from: string; to: string };
 }
 
 interface FilterFormOptions {
@@ -24,51 +32,85 @@ interface FilterFormOptions {
 
 interface FilterStateOptions {
   field: string;
-  value: string;
+  value?: string;
   enabled?: boolean;
   pinned?: boolean;
   negated?: boolean;
 }
 
 export class FilterBar {
-  constructor(private readonly page: ScoutPage) {}
+  private readonly codeEditor: KibanaCodeEditorWrapper;
+
+  constructor(private readonly page: ScoutPage) {
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
+  }
 
   async addFilter(options: FilterCreationOptions) {
+    const previousCount = await this.getFilterCount();
     await this.page.testSubj.click('addFilter');
-    await this.page.testSubj.waitForSelector('addFilterPopover');
-    // set field name
-    await this.page.testSubj.typeWithDelay(
-      'filterFieldSuggestionList > comboBoxSearchInput',
-      options.field
-    );
-    await this.page.locator(`.euiComboBoxOption[title="${options.field}"]`).click();
-    // set operator
+    await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'visible' });
+    // Prefer EUI comboBox helpers over typeWithDelay: under load the operator combo can be
+    // "stable" while a character-by-character type still times out (overlay / remount race).
+    await this.page.components
+      .comboBox('filterFieldSuggestionList')
+      .setSelectedOptions([options.field]);
     await expect(this.page.testSubj.locator('filterOperatorList')).not.toHaveClass(
       /euiComboBox-isDisabled/
     );
-    await this.page.testSubj.typeWithDelay(
-      'filterOperatorList > comboBoxSearchInput',
-      options.operator
-    );
-    await this.page.locator(`.euiComboBoxOption[title="${options.operator}"]`).click();
-    // set value
-    const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
-    await expect(filterParamsInput).not.toHaveAttribute('disabled');
-    // await this.page.waitForTimeout(100); // wait for input to be ready
-    await expect(filterParamsInput).toBeEditable();
-    await filterParamsInput.focus();
-    await this.page.typeWithDelay('[data-test-subj="filterParams"] input', options.value);
-    // save filter and wait for popover to close
+    await this.page.components
+      .comboBox('filterOperatorList')
+      .setSelectedOptions([options.operator]);
+    await this.fillFilterValue(options.value);
     await this.page.testSubj.click('saveFilter');
     await expect(
       this.page.testSubj.locator('addFilterPopover'),
       'Filter popover should close after saving'
     ).toBeHidden();
 
-    await expect(
-      this.page.testSubj.locator('^filter-badge'),
-      'New filter badge should be displayed'
-    ).toBeVisible();
+    await expect
+      .poll(() => this.getFilterCount(), { message: 'New filter badge should be displayed' })
+      .toBeGreaterThan(previousCount);
+  }
+
+  async addDslFilter(value: string) {
+    await this.page.testSubj.click('addFilter');
+    await this.page.testSubj.click('editQueryDSL');
+    await this.codeEditor.waitCodeEditorReady('addFilterPopover');
+    await this.codeEditor.setCodeEditorValue(value);
+    const saveButton = this.page.testSubj.locator('saveFilter');
+    await saveButton.scrollIntoViewIfNeeded();
+    await saveButton.click();
+    await this.page.testSubj.locator('addFilterPopover').waitFor({ state: 'hidden' });
+    await this.page.testSubj.locator('^filter-badge').waitFor({ state: 'visible' });
+  }
+
+  private async fillFilterValue(value: FilterCreationOptions['value']) {
+    if (value === undefined) {
+      return;
+    }
+
+    if (typeof value === 'object' && !Array.isArray(value)) {
+      await this.page.testSubj.locator('range-start').fill(value.from);
+      await this.page.testSubj.locator('range-end').fill(value.to);
+      return;
+    }
+
+    const filterParamsInput = this.page.locator('[data-test-subj="filterParams"] input');
+    await expect(filterParamsInput).not.toHaveAttribute('disabled');
+    await expect(filterParamsInput).toBeEditable();
+
+    for (const item of Array.isArray(value) ? value : [value]) {
+      await filterParamsInput.fill(item);
+      await filterParamsInput.press('Enter');
+    }
+  }
+
+  async removeAllFilters() {
+    while ((await this.getFilterCount()) > 0) {
+      const [filter] = await this.page.testSubj.locator('~filter').all();
+      await filter.click();
+      await this.page.testSubj.click('deleteFilter');
+    }
   }
 
   async removeFilter(field: string) {
@@ -104,6 +146,30 @@ export class FilterBar {
   async toggleFilterPinned(field: string) {
     await this.page.testSubj.click(`~filter & ~filter-key-${field}`);
     await this.page.testSubj.click('pinFilter');
+  }
+
+  async clickEditFilter(field: string, value: string) {
+    await this.page.testSubj.click(`~filter & ~filter-key-${field} & ~filter-value-${value}`);
+    await this.page.testSubj.click('editFilter');
+
+    const filterEditor = this.page.getByRole('dialog').filter({ hasText: 'Edit filter' });
+    await filterEditor.waitFor({ state: 'visible' });
+    await filterEditor
+      .locator('[data-test-subj~="filterParamsComboBox"]')
+      .waitFor({ state: 'visible' });
+  }
+
+  async getFilterEditorSelectedPhrases(): Promise<string[]> {
+    return this.page
+      .locator('[data-test-subj="filterParams"] .euiComboBoxPill')
+      .evaluateAll((elements) => elements.map((element) => element.textContent?.trim() ?? ''));
+  }
+
+  async closeFieldEditorModal() {
+    const filterEditor = this.page.getByRole('dialog').filter({ hasText: 'Edit filter' });
+    await filterEditor.waitFor({ state: 'visible' });
+    await this.page.keyboard.press('Escape');
+    await filterEditor.waitFor({ state: 'hidden' });
   }
 
   async toggleFilterNegated(field: string) {
@@ -173,10 +239,10 @@ export class FilterBar {
   async fillFilterForm(path: string, options: FilterFormOptions) {
     const form = this.page.locator(`[data-test-subj="filter-${path}"]`);
     await form.locator('[data-test-subj="filterFieldSuggestionList"] input').fill(options.field);
-    await this.page.locator(`.euiComboBoxOption[title="${options.field}"]`).click();
+    await this.page.testSubj.click(`filterFieldOption-${options.field}`);
 
     await form.locator('[data-test-subj="filterOperatorList"] input').fill(options.operator);
-    await this.page.locator(`.euiComboBoxOption[title="${options.operator}"]`).click();
+    await this.page.testSubj.click(`filterOperatorOption-${options.operator}`);
 
     if (options.value === undefined) {
       return;

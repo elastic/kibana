@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/core-security-server'
   - '@kbn/core-security-common'
   - '@kbn/scout'
+  - '@kbn/std'
 tags:
   - plugin
   - prod

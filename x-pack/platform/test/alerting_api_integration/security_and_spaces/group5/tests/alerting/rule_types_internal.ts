@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { omit } from 'lodash';
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { UserAtSpaceScenarios, StackAlertsOnlyFeatureReadUser } from '../../../scenarios';
 import { getUrlPrefix } from '../../../../common/lib/space_test_utils';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -177,5 +177,37 @@ export default function listInternalRuleTypes({ getService }: FtrProviderContext
         });
       });
     }
+
+    describe('alerts-only user', () => {
+      it('includes rule types the user can read as alerts when include_alert_viewable_types=true', async () => {
+        const response = await supertestWithoutAuth
+          .get(
+            `${getUrlPrefix(
+              'space1'
+            )}/internal/alerting/_rule_types?include_alert_viewable_types=true`
+          )
+          .auth(StackAlertsOnlyFeatureReadUser.username, StackAlertsOnlyFeatureReadUser.password);
+
+        expect(response.statusCode).to.eql(200);
+
+        const ruleTypeIds = response.body.map((ruleType: { id: string }) => ruleType.id);
+        // Authorized to read `.es-query` alerts via the stackAlertsOnly feature.
+        expect(ruleTypeIds).to.contain('.es-query');
+        // Not authorized to read the alertsFixture rule types (as rules or alerts).
+        expect(ruleTypeIds).not.to.contain('test.noop');
+        expect(ruleTypeIds).not.to.contain('test.restricted-noop');
+      });
+
+      it('returns an empty list without include_alert_viewable_types (rule authorization only)', async () => {
+        const response = await supertestWithoutAuth
+          .get(`${getUrlPrefix('space1')}/internal/alerting/_rule_types`)
+          .auth(StackAlertsOnlyFeatureReadUser.username, StackAlertsOnlyFeatureReadUser.password);
+
+        expect(response.statusCode).to.eql(200);
+        // The user holds no rule read/create privileges, so the rule-authorization
+        // path (the default) returns nothing.
+        expect(response.body).to.eql([]);
+      });
+    });
   });
 }

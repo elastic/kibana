@@ -36,8 +36,8 @@ export const createGetMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
   path: SYNTHETICS_API_URLS.MULTI_SPACE_SETTINGS,
   validate: false,
   handler: async ({ savedObjectsClient, server, response }) => {
-    // Mirror the UI's gating: the endpoint must not exist on serverless or when the
-    // experimental CCS flag is off, so external clients can't write a `synthetics-settings-multi-space`
+    // Mirror the UI's gating: the endpoint must not exist on serverless (where CCS is
+    // unavailable), so external clients can't write a `synthetics-settings-multi-space`
     // SO that nothing else respects.
     if (!isCCSEnabled(server)) {
       return response.notFound();
@@ -62,6 +62,14 @@ export const createPutMultiSpaceSettingsRoute: SyntheticsRestApiRouteFactory<
     }
     const repository = new DefaultSyntheticsMultiSpaceSettingsRepository(savedObjectsClient);
     const { spaces, ...attributes } = request.body;
-    return repository.save(attributes, spaces);
+    try {
+      return await repository.save(attributes, spaces);
+    } finally {
+      // `spaces` can re-share the singleton SO across arbitrary spaces, so a
+      // save can change what any space sees — clear all entries, not just this one.
+      // Run in finally so a partial save (SO updated, space-sharing throws) still
+      // invalidates on this node.
+      server.syntheticsIndicesCache.invalidate();
+    }
   },
 });

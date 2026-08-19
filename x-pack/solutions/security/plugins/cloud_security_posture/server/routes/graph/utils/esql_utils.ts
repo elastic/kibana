@@ -250,3 +250,28 @@ export const buildSourceMetadataEvals = (): string => {
   return `| EVAL sourceIps = source.ip
 | EVAL sourceCountryCodes = source.geo.country_iso_code`;
 };
+
+/**
+ * Generates the `| EVAL pinned = ...` statement used by both the events and relationships
+ * queries. A pinned entity is isolated into its own graph node (never merged into a same-type
+ * group) whether it appears as an actor or a target. The `pinned` column is set to the first
+ * candidate column whose value is one of the pinned IDs, or null when none match — so pinned
+ * entities get a distinct group key downstream.
+ *
+ * `candidateColumns` is the ordered list of ES|QL columns to test against the pinned IDs
+ * (e.g. `['_id', 'actorEntityId', 'targetEntityId']` for events, `['actorId', 'targetId']` for
+ * relationships). The pinned IDs are passed as `?pinned_id{idx}` query params by the caller.
+ */
+export const buildPinnedEsql = (candidateColumns: string[], pinnedIds?: string[]): string => {
+  if (!pinnedIds || pinnedIds.length === 0) {
+    return '| EVAL pinned = TO_STRING(null)';
+  }
+  const pinnedParamsStr = pinnedIds.map((_id, idx) => `?pinned_id${idx}`).join(', ');
+  const arms = candidateColumns
+    .map((col) => `${col} IN (${pinnedParamsStr}), ${col}`)
+    .join(',\n    ');
+  return `| EVAL pinned = CASE(
+    ${arms},
+    null
+  )`;
+};

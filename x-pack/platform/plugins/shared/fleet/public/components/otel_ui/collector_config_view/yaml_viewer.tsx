@@ -12,13 +12,14 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { dump } from 'js-yaml';
 import { i18n } from '@kbn/i18n';
 
 import type { OTelCollectorConfig } from '../../../../common/types';
+import { useYaml } from '../../../services';
 
 interface YamlViewerProps {
   config: OTelCollectorConfig;
@@ -26,7 +27,12 @@ interface YamlViewerProps {
 }
 
 export const YamlViewer: React.FunctionComponent<YamlViewerProps> = ({ config, agentName }) => {
-  const yamlContent = useMemo(() => dump(config, { lineWidth: -1, quotingType: '"' }), [config]);
+  const yaml = useYaml();
+
+  const yamlContent = useMemo(
+    () => (yaml ? yaml.stringify(config, { lineWidth: 0, singleQuote: false }) : ''),
+    [config, yaml]
+  );
 
   const lineCount = useMemo(() => yamlContent.split('\n').filter(Boolean).length, [yamlContent]);
 
@@ -36,6 +42,10 @@ export const YamlViewer: React.FunctionComponent<YamlViewerProps> = ({ config, a
     link.download = `${agentName || 'collector'}-effective-config.yaml`;
     link.click();
   }, [yamlContent, agentName]);
+
+  if (!yaml) {
+    return <EuiLoadingSpinner />;
+  }
 
   return (
     <div data-test-subj="otelYamlViewer">

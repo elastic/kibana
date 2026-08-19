@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { transformRRuleToCustomSchedule } from '@kbn/response-ops-schedule-schema';
 import type { CreateMaintenanceWindowRequestBodyV1 } from '../../../../../../schemas/maintenance_window/internal/request/create';
 import type { CreateMaintenanceWindowParams } from '../../../../../../../application/methods/create/types';
-import { transformRRuleToCustomSchedule } from '../../../../../../../lib/transforms/rrule_to_custom/latest';
 
 export const transformCreateBody = (
   createBody: CreateMaintenanceWindowRequestBodyV1

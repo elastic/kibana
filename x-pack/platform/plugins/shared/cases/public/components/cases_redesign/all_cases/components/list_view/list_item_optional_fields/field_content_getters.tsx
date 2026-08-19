@@ -8,11 +8,19 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { CaseStatuses } from '@kbn/cases-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { CaseUI, CaseUICustomField } from '../../../../../../../common/ui/types';
+import type { InlineField } from '../../../../../../../common/types/domain/template/fields';
+import { FieldType } from '../../../../../../../common/types/domain/template/fields';
+import { getFieldCamelKey } from '../../../../../../../common/utils';
 import { FormattedRelativePreferenceDate } from '../../../../../formatted_date';
-import { getExtendedFieldDisplayLabels } from '../../../../../all_cases/utils/extended_fields_column_utils';
-import { ExtendedFieldsListItemContent } from './extended_fields_content';
+import {
+  getExtendedFieldColumnKey,
+  getExtendedFieldDisplayValue,
+  parseUserPickerAssignees,
+} from '../../../../../all_cases/extended_field_columns';
+import { AssigneesColumn } from '../../../../../all_cases/assignees_column';
 import type { ListItemFieldContent } from './types';
 import * as i18n from '../../../translations';
 
@@ -86,6 +94,45 @@ const getCustomFieldContent = (field: string, theCase: CaseUI): ListItemFieldCon
   };
 };
 
+// Templates v2 renders global/extended fields (keyed `<name>_as_<type>`) instead of legacy
+// customFields. Values live on `theCase.extendedFields` under the camelCased key; empty values are
+// omitted so the card doesn't show a dangling label. User-picker fields render avatars (matching
+// the all-cases table column) instead of the comma-joined name text used for every other type.
+export const getExtendedFieldContent = (
+  field: InlineField,
+  theCase: CaseUI,
+  userProfiles: Map<string, UserProfileWithAvatar>
+): ListItemFieldContent | null => {
+  const rawValue = theCase.extendedFields?.[getFieldCamelKey(field.name, field.type)];
+  if (rawValue == null || rawValue === '') {
+    return null;
+  }
+
+  const label = field.label ?? field.name;
+  const testSubj = `cases-list-item-field-${getExtendedFieldColumnKey(field)}`;
+
+  if (field.control === FieldType.USER_PICKER) {
+    const assignees = parseUserPickerAssignees(rawValue) ?? [];
+    return {
+      label,
+      content: (
+        <AssigneesColumn
+          assignees={assignees}
+          userProfiles={userProfiles}
+          testSubjPrefix={`extendedField-${getExtendedFieldColumnKey(field)}`}
+        />
+      ),
+      testSubj,
+    };
+  }
+
+  return {
+    label,
+    content: getExtendedFieldDisplayValue(field.control, rawValue),
+    testSubj,
+  };
+};
+
 const listItemFieldContentGetters: Record<
   string,
   (theCase: CaseUI) => ListItemFieldContent | null
@@ -101,17 +148,17 @@ const listItemFieldContentGetters: Record<
         },
   totalComment: (theCase) => ({
     label: i18n.COMMENTS,
-    content: i18n.LIST_FIELD_COMMENTS(theCase.totalComment),
+    content: String(theCase.totalComment),
     testSubj: 'cases-list-item-field-comments',
   }),
   totalAlerts: (theCase) => ({
     label: i18n.ALERTS,
-    content: i18n.LIST_FIELD_ALERTS(theCase.totalAlerts ?? 0),
+    content: String(theCase.totalAlerts ?? 0),
     testSubj: 'cases-list-item-field-alerts',
   }),
   totalEvents: (theCase) => ({
     label: i18n.EVENTS,
-    content: i18n.LIST_FIELD_EVENTS(theCase.totalEvents ?? 0),
+    content: String(theCase.totalEvents ?? 0),
     testSubj: 'cases-list-item-field-events',
   }),
   createdAt: (theCase) => ({
@@ -153,25 +200,6 @@ const listItemFieldContentGetters: Record<
       label: i18n.DESCRIPTION,
       content: truncatedDescription,
       testSubj: 'cases-list-item-field-description',
-    };
-  },
-  extendedFields: (theCase) => {
-    const labels = getExtendedFieldDisplayLabels(
-      theCase.extendedFields,
-      theCase.extendedFieldsLabels
-    );
-    if (labels.length === 0) {
-      return null;
-    }
-    return {
-      label: i18n.EXTENDED_FIELDS,
-      content: (
-        <ExtendedFieldsListItemContent
-          extendedFields={theCase.extendedFields}
-          extendedFieldsLabels={theCase.extendedFieldsLabels}
-        />
-      ),
-      testSubj: 'cases-list-item-field-extended-fields',
     };
   },
 };

@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/272068
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+title: Add advanced policy option to disable DLL search order hijack enrichment
+description: 'Adds advanced policy options for Windows that let you disable the enrichment of DLL search order hijacking events.'

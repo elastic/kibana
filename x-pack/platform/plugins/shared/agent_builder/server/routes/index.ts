@@ -11,7 +11,6 @@ import { registerInternalToolsRoutes } from './internal/tools';
 import { registerInternalSkillsRoutes } from './internal/skills';
 import { registerInternalConversationRoutes } from './internal/conversations';
 import { registerConsumptionRoutes } from './consumption';
-import { registerInternalUserPromptsRoutes } from './internal/user_prompts';
 import { registerInternalSmlRoutes } from './internal/sml';
 import { registerInternalInferenceEndpointsRoute } from './internal/inference_endpoints';
 import { registerAgentRoutes } from './agents';
@@ -24,6 +23,7 @@ import { registerSkillsRoutes } from './skills';
 import { registerPluginsRoutes } from './plugins';
 import { registerInternalExecutionRoutes } from './internal/executions';
 import { registerAccessPrincipalsRoutes } from './internal/access_principals';
+import { registerWorkspaceFileRoutes } from './internal/workspace_files';
 
 export const registerRoutes = (dependencies: RouteDependencies) => {
   registerToolsRoutes(dependencies);
@@ -31,7 +31,6 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerInternalSkillsRoutes(dependencies);
   registerInternalConversationRoutes(dependencies);
   registerConsumptionRoutes(dependencies);
-  registerInternalUserPromptsRoutes(dependencies);
   registerInternalSmlRoutes(dependencies);
   registerInternalInferenceEndpointsRoute(dependencies);
   registerAgentRoutes(dependencies);
@@ -44,4 +43,5 @@ export const registerRoutes = (dependencies: RouteDependencies) => {
   registerPluginsRoutes(dependencies);
   registerInternalExecutionRoutes(dependencies);
   registerAccessPrincipalsRoutes(dependencies);
+  registerWorkspaceFileRoutes(dependencies);
 };

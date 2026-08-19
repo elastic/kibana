@@ -219,6 +219,10 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   return (
     <EuiPopover
       id={contextMenuPopoverId}
+      aria-label={i18n.translate(
+        'xpack.streams.streamDetailSchemaEditorFieldsTableActionsPopoverAriaLabel',
+        { defaultMessage: 'Field actions' }
+      )}
       button={
         <EuiToolTip
           content={i18n.translate(

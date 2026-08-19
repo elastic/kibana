@@ -74,7 +74,7 @@ export const Box: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
@@ -105,6 +105,7 @@ export const Box: ConnectorSpec = {
         .meta({
           widget: 'text',
           placeholder: 'https://mcp.box.com',
+          hidden: true,
           label: i18n.translate('connectorSpecs.box.config.serverUrl.label', {
             defaultMessage: 'MCP Server URL',
           }),
@@ -378,13 +379,11 @@ export const Box: ConnectorSpec = {
     }),
     handler: async (ctx) => {
       return withMcpClient(ctx, async (mcp) => {
-        const { tools } = await mcp.listTools();
-        return {
-          ok: true,
-          message: `Connected to Box MCP server. ${tools.length} tools available.`,
-        };
+        await mcp.listTools();
+        return {};
       });
     },
+    enabled: true,
   },
 
   skill: [

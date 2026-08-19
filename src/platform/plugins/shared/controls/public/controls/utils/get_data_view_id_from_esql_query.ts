@@ -7,11 +7,36 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { dataViewsService } from '../../services/kibana_services';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { apiPublishesDataViews } from '@kbn/presentation-publishing';
+import { coreServices, dataViewsService } from '../../services/kibana_services';
 
-export const getDataViewIdFromESQLQuery = async (query: string) => {
+interface Options {
+  parentApi?: unknown;
+}
+
+export const getDataViewIdFromESQLQuery = async (query: string, options: Options = {}) => {
+  const preferredDataViews = apiPublishesDataViews(options.parentApi)
+    ? options.parentApi.dataViews$.value
+    : undefined;
+
   const indexPattern = getIndexPatternFromESQLQuery(query);
+  const existingDataView = preferredDataViews?.find(
+    (dataView) => dataView.getIndexPattern() === indexPattern
+  );
+  if (existingDataView?.id) {
+    return existingDataView.id;
+  }
+
   const [dataView] = await dataViewsService.find(indexPattern);
-  return dataView.id;
+  if (dataView) {
+    return dataView.id;
+  }
+
+  const adHocDataView = await getESQLAdHocDataview({
+    dataViewsService,
+    query,
+    http: coreServices?.http,
+  });
+  return adHocDataView.id;
 };

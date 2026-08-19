@@ -39,6 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
   const browser = getService('browser');
 
   describe('custom urls', function () {
+    this.timeout(5 * 60 * 1000);
+
     const dfaJobId = `fq_regression_${Date.now()}`;
     const generateDestinationIndex = (analyticsId: string) => `user-${analyticsId}`;
     let testDashboardId: string | null = null;
@@ -78,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.api.deleteIndices('user-farequote_small');
+      await ml.api.deleteIndices(generateDestinationIndex(dfaJobId));
       await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
