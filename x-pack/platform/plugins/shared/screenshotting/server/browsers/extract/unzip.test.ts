@@ -5,33 +5,74 @@
  * 2.0.
  */
 
-import mockFs from 'mock-fs';
+import { readFileSync } from 'fs';
 import { readFile } from 'fs/promises';
+import path from 'path';
+import mockFs from 'mock-fs';
 import { ExtractError } from './extract_error';
 import { unzip } from './unzip';
 
-describe('unzip', () => {
-  beforeEach(() => {
-    mockFs({
-      '/test.zip': Buffer.from(
-        'UEsDBAoAAgAAANh0ElMMfn/YBAAAAAQAAAAIABwAdGVzdC50eHRVVAkAA1f/HGFX/xxhdXgLAAEE9QEAAAQUAAAAdGVzdFBLAQIeAwoAAgAAANh0ElMMfn/YBAAAAAQAAAAIABgAAAAAAAEAAACkgQAAAAB0ZXN0LnR4dFVUBQADV/8cYXV4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAE4AAABGAAAAAAA=',
-        'base64'
-      ),
-      '/invalid.zip': 'test',
-    });
-  });
+const readFixture = (name: string) => readFileSync(path.resolve(__dirname, '__fixtures__', name));
 
+const TEST_ZIP = Buffer.from(
+  'UEsDBAoAAgAAANh0ElMMfn/YBAAAAAQAAAAIABwAdGVzdC50eHRVVAkAA1f/HGFX/xxhdXgLAAEE9QEAAAQUAAAAdGVzdFBLAQIeAwoAAgAAANh0ElMMfn/YBAAAAAQAAAAIABgAAAAAAAEAAACkgQAAAAB0ZXN0LnR4dFVUBQADV/8cYXV4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAE4AAABGAAAAAAA=',
+  'base64'
+);
+const PATH_TRAVERSAL_ZIP = readFixture('path_traversal.zip');
+const SYMLINK_ESCAPE_ZIP = readFixture('symlink_escape.zip');
+const SYMLINK_OK_ZIP = readFixture('symlink_ok.zip');
+
+describe('unzip', () => {
   afterEach(() => {
     mockFs.restore();
   });
 
+  beforeEach(() => {
+    mockFs({
+      '/test.zip': TEST_ZIP,
+      '/invalid.zip': 'test',
+    });
+  });
+
   it('should extract zipped contents', async () => {
     await unzip('/test.zip', '/output');
-
     await expect(readFile('/output/test.txt', 'utf8')).resolves.toBe('test');
   });
 
   it('should reject on invalid archive', async () => {
     await expect(unzip('/invalid.zip', '/output')).rejects.toBeInstanceOf(ExtractError);
+  });
+
+  it('rejects when an entry path uses ../ to leave the origin directory', async () => {
+    // yauzl validates internally that the extracted entry path doesnt contain ../ when calling eachEntry()
+    mockFs({
+      '/path_traversal.zip': PATH_TRAVERSAL_ZIP,
+      '/output': {},
+    });
+    await expect(unzip('/path_traversal.zip', '/output')).rejects.toBeInstanceOf(ExtractError);
+    await expect(readFile('/escaped.txt')).rejects.toThrow();
+  });
+
+  it('rejects zip symlinks whose target lands outside the origin path', async () => {
+    mockFs({
+      '/symlink_escape.zip': SYMLINK_ESCAPE_ZIP,
+      '/output': {},
+    });
+    const errorMessage = 'Path traversal attempt: "/escaped.txt" escapes "/output"';
+
+    await expect(unzip('/symlink_escape.zip', '/output')).rejects.toThrowError(
+      new ExtractError(new Error(errorMessage))
+    );
+    await expect(readFile('/escaped.txt')).rejects.toThrow();
+  });
+
+  it('extracts zip symlinks whose target stays inside the origin path', async () => {
+    mockFs({
+      '/symlink_ok.zip': SYMLINK_OK_ZIP,
+      '/output': {},
+    });
+
+    await unzip('/symlink_ok.zip', '/output');
+    await expect(readFile('/output/link', 'utf8')).resolves.toBe('ok');
   });
 });
