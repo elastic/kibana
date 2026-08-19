@@ -21,8 +21,8 @@ import type * as React from 'react';
 
 type ReactNode = string | number | boolean | null | undefined | React.ReactElement;
 
-/** Chrome style variants applied to the layout. */
-export type ChromeStyle = 'classic' | 'project';
+/** Visual appearance of the application shell. */
+export type LayoutAppearance = 'plain' | 'framed';
 
 /** Pixel dimensions for each layout area. */
 export interface LayoutDimensions {
@@ -64,7 +64,7 @@ export interface ChromeLayoutConfig {
   applicationMarginTop?: number;
   applicationMarginBottom?: number;
   applicationMarginRight?: number;
-  chromeStyle?: ChromeStyle;
+  appearance?: LayoutAppearance;
 }
 
 /** Props for the ChromeLayoutConfigProvider component. */
@@ -91,7 +91,7 @@ export interface ChromeLayoutProps extends ChromeLayoutSlots {
 
 /** Props accepted by GridLayoutGlobalStyles. */
 export interface GridLayoutGlobalStylesProps {
-  chromeStyle?: ChromeStyle;
+  appearance?: LayoutAppearance;
 }
 
 export declare function ChromeLayout(props: ChromeLayoutProps): React.ReactNode;

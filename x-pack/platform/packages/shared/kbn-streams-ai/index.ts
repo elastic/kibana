@@ -49,7 +49,12 @@ export {
   type SearchSimilarFeaturesArguments,
   type SimilarFeatureHit,
 } from './src/features/identify_features';
-export { generateAllComputedFeatures } from './src/features/computed';
+export {
+  generateAllComputedFeatures,
+  DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS,
+  type ComputedFeatureGenerationResult,
+  type GenerateAllComputedFeaturesOptions,
+} from './src/features/computed';
 export {
   CODE_ANALYSIS_PROVIDER_KEY,
   codeAnalysisGenerator,
