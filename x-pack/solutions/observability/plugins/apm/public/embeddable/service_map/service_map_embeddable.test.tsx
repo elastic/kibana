@@ -316,7 +316,17 @@ describe('ServiceMapEmbeddable', () => {
     it('renders the map with a link to view the full map', () => {
       renderEmbeddable();
       expect(screen.getByTestId('apmServiceMapEmbeddable')).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /View full service map/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /View in Service map/i })).toBeInTheDocument();
+    });
+
+    it('seeds panel kuery into the View in Service map href', () => {
+      renderEmbeddable({ kuery: 'transaction.type: "request"' });
+
+      const fullMapLink = screen.getByRole('link', { name: /View in Service map/i });
+      expect(fullMapLink).toHaveAttribute(
+        'href',
+        expect.stringContaining('kuery=transaction.type')
+      );
     });
 
     it('shows the fit view button when embedded', () => {

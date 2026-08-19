@@ -66,6 +66,7 @@ export interface InjectedMetadata {
     packageInfo: PackageInfo;
     airgapped: boolean;
     isCoreRenderingInReactConcurrentMode: boolean;
+    exposeNavDependencies?: boolean;
   };
   featureFlags?: {
     overrides: Record<string, unknown>;
@@ -96,6 +97,7 @@ export interface InjectedMetadata {
   };
   customBranding: Pick<CustomBranding, 'logo' | 'customizedLogo' | 'pageTitle'>;
   userStorage: {
+    available: boolean;
     values: Record<string, unknown>;
   };
 }

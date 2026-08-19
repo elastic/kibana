@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const createDocs = getDocsGenerator(log, es, 'logsdb');
 
-  // Failing: See https://github.com/elastic/kibana/issues/270744
-  describe.skip('lens logsdb - smoke and scenarios 1-2', function () {
+  describe('lens logsdb - smoke and scenarios 1-2', function () {
     // see details: https://github.com/elastic/kibana/issues/195089
     this.tags(['failsOnMKI']);
     const logsdbIndex = 'kibana_sample_data_logslogsdb';

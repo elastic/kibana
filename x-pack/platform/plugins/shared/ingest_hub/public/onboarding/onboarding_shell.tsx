@@ -17,22 +17,25 @@ import {
   EuiStepsHorizontal,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 
 import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
+import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
 import { AWS_SERVICES_MAP } from './aws_service_matrix';
 import { useOnboardingFlow } from './onboarding_flow_context';
 import {
-  DeploySettingsStep,
+  AuthenticateAndDeployStep,
   ServicesStep,
   ServiceSettingsStep,
   DeployAndDetectStep,
 } from './step_components';
 
-const DEPLOY_SETTINGS_STEP_INDEX = ONBOARDING_STEPS.findIndex((s) => s.id === 'deploy-settings');
+const AUTHENTICATE_AND_DEPLOY_STEP_INDEX = ONBOARDING_STEPS.findIndex(
+  (s) => s.id === 'authenticate-and-deploy'
+);
+const DOWNSTREAM_OF_SERVICES_STEP_IDS = ONBOARDING_STEPS.slice(1).map((s) => s.id);
 
 export interface StepComponentProps {
   onContinue: () => void;
@@ -40,7 +43,7 @@ export interface StepComponentProps {
 }
 
 const STEP_COMPONENTS: Record<string, React.ComponentType<StepComponentProps>> = {
-  'deploy-settings': DeploySettingsStep,
+  'authenticate-and-deploy': AuthenticateAndDeployStep,
   services: ServicesStep,
   'service-settings': ServiceSettingsStep,
   'deploy-and-detect': DeployAndDetectStep,
@@ -60,7 +63,6 @@ export function OnboardingShell() {
   const { integrationId } = useParams<{ integrationId: string }>();
   const history = useHistory();
   const location = useLocation();
-  const { euiTheme } = useEuiTheme();
   const meta = INTEGRATION_META[integrationId];
 
   useEffect(() => {
@@ -69,12 +71,19 @@ export function OnboardingShell() {
     }
   }, [meta, history]);
 
-  const { completedSteps, markStepComplete, firstIncompleteStepId } = useStepState(integrationId);
+  const { completedSteps, markStepComplete, markStepsIncomplete, firstIncompleteStepId } =
+    useStepState(integrationId);
 
   const { servicesStep } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const needsDeploySettingsStep = useMemo(
+  useInvalidateDownstreamSteps({
+    selectedServiceIds,
+    downstreamStepIds: DOWNSTREAM_OF_SERVICES_STEP_IDS,
+    markStepsIncomplete,
+  });
+
+  const needsAuthenticateAndDeployStep = useMemo(
     () =>
       selectedServiceIds.length === 0 ||
       selectedServiceIds.some(
@@ -99,9 +108,9 @@ export function OnboardingShell() {
     const nextStep = ONBOARDING_STEPS[currentStepIndex + 1];
     return () => {
       markStepComplete(currentStepId);
-      if (currentStepId === 'services' && !needsDeploySettingsStep) {
-        markStepComplete('deploy-settings');
-        const stepAfterConnect = ONBOARDING_STEPS[DEPLOY_SETTINGS_STEP_INDEX + 1];
+      if (currentStepId === 'services' && !needsAuthenticateAndDeployStep) {
+        markStepComplete('authenticate-and-deploy');
+        const stepAfterConnect = ONBOARDING_STEPS[AUTHENTICATE_AND_DEPLOY_STEP_INDEX + 1];
         if (stepAfterConnect) {
           history.push({ ...location, hash: `#${stepAfterConnect.id}` });
         }
@@ -113,7 +122,7 @@ export function OnboardingShell() {
     currentStepId,
     currentStepIndex,
     markStepComplete,
-    needsDeploySettingsStep,
+    needsAuthenticateAndDeployStep,
     history,
     location,
   ]);
@@ -124,14 +133,14 @@ export function OnboardingShell() {
     let prevIndex = currentStepIndex - 1;
     while (
       prevIndex > 0 &&
-      ONBOARDING_STEPS[prevIndex].id === 'deploy-settings' &&
-      !needsDeploySettingsStep
+      ONBOARDING_STEPS[prevIndex].id === 'authenticate-and-deploy' &&
+      !needsAuthenticateAndDeployStep
     ) {
       prevIndex--;
     }
     const prevStep = ONBOARDING_STEPS[prevIndex];
     return () => history.push({ ...location, hash: `#${prevStep.id}` });
-  }, [currentStepIndex, needsDeploySettingsStep, history, location]);
+  }, [currentStepIndex, needsAuthenticateAndDeployStep, history, location]);
 
   const horizontalStepsConfig = useMemo(
     () =>
@@ -162,30 +171,32 @@ export function OnboardingShell() {
 
   return (
     <EuiPageTemplate data-test-subj="onboardingShell">
-      <EuiPageTemplate.Section
-        grow={false}
-        paddingSize="l"
-        restrictWidth
-        css={css`
-          border-bottom: ${euiTheme.border.thin};
-        `}
-      >
-        <EuiFlexGroup alignItems="center" gutterSize="l">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type={meta.icon} size="xxl" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="l">
+      <EuiPageTemplate.Section paddingSize="m" restrictWidth>
+        <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+          <EuiFlexGroup direction="row" alignItems="flexEnd" gutterSize="m">
+            <EuiIcon type={meta.icon} size="xl" aria-hidden={true} />
+            <EuiTitle
+              size="l"
+              css={css`
+                text-align: center;
+              `}
+            >
               <h1>{meta.title}</h1>
             </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiText size="m" color="subdued">
+          </EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiText
+              size="m"
+              color="subdued"
+              css={css`
+                text-align: center;
+              `}
+            >
               <p>{meta.description}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
+        <EuiSpacer size="xs" />
         <EuiStepsHorizontal steps={horizontalStepsConfig} />
         <EuiSpacer size="xl" />
         {CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />}

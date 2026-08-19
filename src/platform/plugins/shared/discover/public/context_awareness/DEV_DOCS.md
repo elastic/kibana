@@ -2,6 +2,7 @@
 
 > Internal reference for maintainers of the framework itself.
 > For consumer-facing guidance (registering profiles, extension points), see [`README.md`](./README.md).
+> For the design principles a new profile should uphold, see [`PRINCIPLES.md`](./PRINCIPLES.md).
 
 ## File map
 

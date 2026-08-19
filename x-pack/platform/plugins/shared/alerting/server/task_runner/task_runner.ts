@@ -36,7 +36,7 @@ import type {
 import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
-import { asErr, asOk, isOk } from '../lib/result_type';
+import { asErr, asOk, isErr, isOk } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
 import {
   atomicRemoveSnoozedInstancesWithEs,
@@ -79,6 +79,15 @@ import {
   evaluatePerAlertSnoozeExpiry,
   evaluatePerAlertSnoozeConditions,
 } from './lib';
+// Imported directly rather than through `./lib`: that barrel is also the entry point for widely used
+// helpers such as `withAlertingSpan`, so adding a module with heavy dependencies to it changes module
+// initialization order for every importer and closes an import cycle that leaves
+// `DEFAULT_APP_CATEGORIES` undefined in `alert_deletion_client`.
+import {
+  isMissingUiamApiKeyLastRunError,
+  isMissingUiamApiKeyRunError,
+  repairUiamApiKey,
+} from './lib/repair_uiam_api_key';
 import {
   ErrorWithType,
   isOutdatedTaskVersionError,
@@ -696,6 +705,7 @@ export class TaskRunner<
         name: runRuleParams.rule.name,
         consumer: runRuleParams.rule.consumer,
         revision: runRuleParams.rule.revision,
+        tags: runRuleParams.rule.tags,
         uuid:
           this.ruleType.solution === 'security' &&
           typeof runRuleParams.rule.params.ruleId === 'string'
@@ -874,7 +884,16 @@ export class TaskRunner<
       schedule: taskSchedule,
     } = this.taskInstance;
 
-    this.logger = createTaskRunnerLogger({ logger: this.logger, tags: [ruleId, this.ruleType.id] });
+    this.logger = createTaskRunnerLogger({
+      logger: this.logger,
+      labels: {
+        ruleId,
+        ruleType: this.ruleType.id,
+        spaceId,
+        executionId: this.executionId,
+        taskInstanceId: this.taskInstance.id,
+      },
+    });
 
     let runRuleResult: Result<RunRuleResult, Error>;
     let schedule: Result<IntervalSchedule, Error>;
@@ -898,6 +917,21 @@ export class TaskRunner<
       runRuleResult = asErr(err);
       schedule = asErr(err);
       shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
+    }
+
+    // The rule's UIAM API key is unusable, so re-grant it now: the rule's next scheduled run then
+    // authenticates with a working credential instead of failing the same way indefinitely.
+    //
+    // Both shapes a failed run can take have to be checked. A rule type that throws leaves the
+    // Elasticsearch error on `runRuleResult`, while one that reports a failed run without throwing
+    // never enters the catch above at all and only exposes the failure as a recorded run error.
+    if (
+      (isErr(runRuleResult) && isMissingUiamApiKeyRunError(runRuleResult.error)) ||
+      isMissingUiamApiKeyLastRunError(this.ruleResult.getLastRunResults().errors)
+    ) {
+      await withAlertingSpan('alerting:repair-uiam-api-key', () =>
+        repairUiamApiKey({ context: this.context, logger: this.logger, ruleId, spaceId })
+      );
     }
 
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>

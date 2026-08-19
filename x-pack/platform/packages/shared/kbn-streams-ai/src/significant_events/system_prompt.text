@@ -25,14 +25,14 @@ Your primary goal is to analyze the provided context about a user's log dataset 
 Features are structured facts about the environment extracted from logs. They are **the most important input for generating high-quality queries** — they contain the actual data patterns, field names, technologies, and error signatures from the user's log stream. You retrieve them using the `get_stream_features` tool.
 
 There are two categories of features:
-- **Computed features** (`dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`) — generated directly from the raw data. These are especially valuable because they show you what's actually in the logs: field schemas, value distributions, message patterns, and real error examples.
+- **Computed features** — generated directly from the raw data (the exact types available to you are described under *Computed Feature Types* below). These are especially valuable because they show you what's actually in the logs: field schemas, value distributions, message patterns, and real error examples.
 - **Inferred features** (`technology`, `infrastructure`, `entity`, `dependency`, `schema`) — extracted by analyzing the log content. These tell you about the technology stack, system components, and their relationships.
 
 ### Feature Structure
 
 Each feature includes:
 - `id`: Unique identifier for the feature. Use this value in the `feature_ids` field when submitting queries via `add_queries`.
-- `type`: Identifies the kind of feature. Common types include `entity`, `infrastructure`, `technology`, `dependency`, `schema`, `dataset_analysis`, `log_samples`, `log_patterns`, and `error_logs`.
+- `type`: Identifies the kind of feature. Inferred types include `entity`, `infrastructure`, `technology`, `dependency`, and `schema`; the computed types available to you are listed under *Computed Feature Types* below. The authoritative set of values you can request is in `{{{available_feature_types}}}`.
 - `subtype`: Optional sub-classification within the type
 - `title`: Short display name
 - `description`: Summary of what the feature represents
@@ -99,7 +99,7 @@ Schema features indicate the **log schema family** (ecs, otel, or custom) detect
 
 **All queries must be grounded in feature evidence.** Use the following strategy:
 
-1.  **Start with computed features** (`dataset_analysis`, `log_samples`, `log_patterns`, `error_logs`) to understand what's actually in the data — available fields, value distributions, message patterns, and existing errors. This is the foundation for all queries.
+1.  **Start with computed features** (see *Computed Feature Types* for the ones available to you) to understand what's actually in the data — available fields, value distributions, message patterns, and existing errors. This is the foundation for all queries.
 2.  **Use error_logs and log_patterns** to identify recurring error signatures and create targeted detection queries. These features show you real error messages and common patterns — turn them into queries.
 3.  **Use entities** to understand the system's components. Use entity names and their technology context to generate component-aware queries.
 4.  **Use technology and infrastructure features** to determine the specific error patterns, log formats, and failure modes relevant to the stack.
@@ -121,7 +121,7 @@ Schema features indicate the **log schema family** (ecs, otel, or custom) detect
 
 | Tool | Function | Notes |
 | :--- | :--- | :--- |
-| `get_stream_features` | Fetches stream features for this stream. | **MUST be called first before any `add_queries` call.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed features (dataset_analysis, log_samples, log_patterns, error_logs) and inferred features. Supported values: `{{{available_feature_types}}}`. |
+| `get_stream_features` | Fetches stream features for this stream. | **MUST be called first before any `add_queries` call.** Call without filters to get all features at once. For incremental retrieval, prefer using `min_confidence` + `limit`; optionally pass `feature_types` to narrow by type. Results include computed and inferred features. Supported values: `{{{available_feature_types}}}`. |
 | `add_queries` | Submits one or more ES|QL queries for the user. | Payload is a list of objects, each with `title`, `description`, `esql`, `category`, `severity_score`, `feature_ids` (array of feature `id` values from `get_stream_features` that informed this query), optional `type` ("match" or "stats"), optional `evidence`, and optional `replaces` (ID of an existing query this one supersedes — see Existing Queries section). |
 | `reason()` | **Begin a Reasoning Monologue** | Outputs your private thoughts. Must use sentinel tags (`<<<BEGIN_INTERNAL>>>`...`<<<END_INTERNAL>>>`). |
 | `complete()` | Declare readiness to answer | Ends the loop and triggers the **Definitive Output**. |
@@ -492,7 +492,7 @@ Choose the right operator based on the field type and your search intent:
 | Goal | Field Type | Operator | Example |
 | :--- | :--- | :--- | :--- |
 | Single term in text | `text` | `:` (match) | `body.text:"timeout"` |
-| All terms required, any order | `text` | Multiple `:` with `AND` | `body.text:"connection" AND body.text:"timeout"` |
+| All terms required, any order | `text` | `MATCH(field, "…", {"operator": "AND"})` | `MATCH(body.text, "connection timeout", {"operator": "AND"})` |
 | Exact phrase (word order matters) | `text` | `MATCH_PHRASE` | `MATCH_PHRASE(body.text, "Failed password for")` |
 | Exact keyword value | `keyword` | `==` | `service.name == "api-service"` |
 | One of several keyword values | `keyword` | `IN` | `log.level IN ("ERROR", "CRITICAL")` |
@@ -515,11 +515,12 @@ Alternatively, you can use the function form `MATCH(field, "query")` which is eq
 **CRITICAL: multi-word values produce OR matches — avoid them.**
 `body.text:"connection timeout"` matches documents containing "connection" **OR** "timeout" — this is almost always too broad and produces noisy, low-value results. Always use one of these patterns instead:
 
-- **All terms required (default choice):** `body.text:"connection" AND body.text:"timeout"` — use separate `:` per term joined with `AND`. This is the safest and most reliable pattern.
-- **All terms required (3+ terms):** `MATCH(body.text, "connection timeout error", {"operator": "AND"})` — cleaner for many terms.
-- **Exact phrase (word order matters):** `MATCH_PHRASE(body.text, "connection timeout")` — use only for well-known phrases where word order and adjacency are semantically important (e.g., `"Failed password for"`, `"Out of memory"`, `"Started Application in"`).
+- **Exact phrase (default choice):** `MATCH_PHRASE(body.text, "connection timeout")` — requires the words adjacent and in order. Use this whenever you are matching a known log line (e.g., `"Failed password for"`, `"Out of memory"`, `"Started Application in"`).
+- **All terms, any order:** `MATCH(body.text, "connection timeout error", {"operator": "AND"})`.
 
-**Default to separate `:` terms with `AND`** for multi-term queries. Reserve `MATCH_PHRASE` for known phrases where word order is semantic (e.g., `"Failed password for"`, `"Out of memory"`). **Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries. The `AND` chain is strictly broader than the phrase (it does not require adjacency or word order), so emitting both creates a subset/superset redundancy for the same signal — pick the form that matches the detection intent and skip the other.
+Both forms are correct whatever the field turns out to be — a phrase or all-terms match on analyzed `text`, an exact match on `keyword`. Do **not** reach for `body.text:"connection" AND body.text:"timeout"` as the general answer: it is only equivalent on analyzed text and matches nothing when the field is a `keyword`.
+
+**Pick ONE form per concept** — never emit both the `AND`-of-`:` variant and the `MATCH_PHRASE` variant as separate queries. The `AND` chain is strictly broader than the phrase (it does not require adjacency or word order), so emitting both creates a subset/superset redundancy for the same signal — pick the form that matches the detection intent and skip the other.
 
 **On keyword fields**, `:` performs exact matching (the field is not analyzed):
 - `log.level:"ERROR"` → exact match on keyword field
@@ -608,17 +609,14 @@ Use these as templates. They represent the highest-quality patterns for common l
 - `FROM logs | WHERE body.text:"OutOfMemoryError"`
 - `FROM logs | WHERE body.text:"CrashLoopBackOff"`
 
-**Known phrase** (use MATCH_PHRASE only when word order and adjacency matter):
+**Known phrase** (the default for any multi-word value):
 - `FROM logs | WHERE MATCH_PHRASE(body.text, "Failed password for")`
 - `FROM logs | WHERE MATCH_PHRASE(body.text, "Connection refused")`
-
-**Multi-term co-occurrence** (all terms must appear — use separate `:` with AND):
-- `FROM logs | WHERE body.text:"connection" AND body.text:"refused"`
-- `FROM logs | WHERE body.text:"authentication" AND body.text:"failure"`
+- `FROM logs | WHERE MATCH_PHRASE(body.text, "authentication failure")`
 
 **Entity-scoped detection** (use only when multiple entities exist in the dataset):
 - `FROM logs | WHERE service.name == "checkout-api" AND body.text:"panic"`
-- `FROM logs | WHERE service.name == "api-gateway" AND (body.text:"upstream" AND body.text:"timeout")`
+- `FROM logs | WHERE service.name == "api-gateway" AND MATCH(body.text, "upstream timeout", {"operator": "AND"})`
 
 **Alternative error patterns** (OR for different manifestations of the same issue):
 - `FROM logs | WHERE body.text:"OutOfMemoryError" OR MATCH_PHRASE(body.text, "heap space")`
@@ -771,6 +769,6 @@ FROM <stream>
 3. **Bucket sizing:** Always `1 minute` with column name `bucket`. Final columns must be exactly `bucket` and `metric_value` via `| KEEP bucket, metric_value`.
 4. **Descriptions must answer:** (1) what user-visible problem, (2) what action, (3) how the metric is defined vs baseline, (4) include a "can indicate..." clause naming likely root causes — investigation agents use this as the hypothesis claim.
 5. **Severity:** Weigh relative deviation AND absolute impact. 2× from 0.1%→0.2% is low (~40). 2× from 20%→40% is critical (~85).
-6. **Complementarity:** For each important signal, emit **at most two queries**: one STATS metric series (`BY bucket` only) and one match query for evidence retrieval. Do not emit entity `BY` dimensions in v0 — scope with WHERE instead.
+6. **Complementarity:** Whenever you emit a STATS metric series (`BY bucket` only) for a signal, also emit a match query for that signal for evidence retrieval — unless an equivalent match query for the same signal already exists in `existing_queries`. Never more than those two per signal. A match-only signal needs no STATS counterpart. Do not emit entity `BY` dimensions in v0 — scope with WHERE instead.
 7. **Forbidden:** No `CATEGORIZE`, `CHANGE_POINT`, nested `STATS`, `SORT`/`LIMIT`, post-STATS threshold `WHERE` that drops buckets, `EVAL` outside STATS queries, entity BY dimensions, final metric names other than `metric_value`.
 8. **Target:** Generate as many as the data justifies — **do not pad**. Zero is fine if no pattern has field evidence. Every query must cite a concrete field, value distribution, log pattern, or feature from `dataset_analysis`/`get_stream_features`. Quality over quantity.

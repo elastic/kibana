@@ -14,6 +14,7 @@ import semVerCoerce from 'semver/functions/coerce';
 import hjson from 'hjson';
 import { i18n } from '@kbn/i18n';
 
+import type { Color, Gradient } from 'vega';
 import { logger, Warn, None, version as vegaVersion, scheme } from 'vega';
 import type { TopLevelSpec } from 'vega-lite';
 import { compile, version as vegaLiteVersion } from 'vega-lite';
@@ -21,7 +22,7 @@ import { compile, version as vegaLiteVersion } from 'vega-lite';
 import type { CoreTheme } from '@kbn/core/public';
 import { EsQueryParser } from './es_query_parser';
 import { EsqlQueryParser } from './esql_query_parser';
-import { Utils, getVegaThemeColors } from './utils';
+import { Utils, getDefaultAreaGradientFill, getVegaThemeColors } from './utils';
 import { EmsFileParser } from './ems_file_parser';
 import { UrlParser } from './url_parser';
 import type { SearchAPI } from './search_api';
@@ -712,26 +713,43 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
 
     const defaultColor = getVegaThemeColors(this.theme, 'default');
+    const defaultAreaFill = getDefaultAreaGradientFill(defaultColor);
+
+    const setMarkDefaultColor = (
+      markType: string,
+      colorProperty: 'fill' | 'stroke',
+      color: Color | Gradient
+    ) => {
+      const hasCustomColor = [this.spec?.config?.mark, this.spec?.config?.[markType]].some(
+        (markConfig) => markConfig?.color !== undefined || markConfig?.[colorProperty] !== undefined
+      );
+
+      if (!hasCustomColor) {
+        this._setDefaultValue(color, 'config', markType, colorProperty);
+      }
+    };
+
     if (this.isVegaLite) {
+      setMarkDefaultColor('area', 'fill', defaultAreaFill);
       // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: 'euiColorVis0' }}
       this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
     } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
       // https://github.com/vega/vega/issues/1083
-      // Don't set defaults if spec.config.mark.color or fill are set
-      if (
-        !this.spec?.config.mark ||
-        (this.spec.config.mark.color === undefined && this.spec.config.mark.fill === undefined)
-      ) {
-        this._setDefaultValue(defaultColor, 'config', 'arc', 'fill');
-        this._setDefaultValue(defaultColor, 'config', 'area', 'fill');
-        this._setDefaultValue(defaultColor, 'config', 'line', 'stroke');
-        this._setDefaultValue(defaultColor, 'config', 'path', 'stroke');
-        this._setDefaultValue(defaultColor, 'config', 'rect', 'fill');
-        this._setDefaultValue(defaultColor, 'config', 'rule', 'stroke');
-        this._setDefaultValue(defaultColor, 'config', 'shape', 'stroke');
-        this._setDefaultValue(defaultColor, 'config', 'symbol', 'fill');
-        this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
+      const markDefaults = [
+        ['arc', 'fill', defaultColor],
+        ['area', 'fill', defaultAreaFill],
+        ['line', 'stroke', defaultColor],
+        ['path', 'stroke', defaultColor],
+        ['rect', 'fill', defaultColor],
+        ['rule', 'stroke', defaultColor],
+        ['shape', 'stroke', defaultColor],
+        ['symbol', 'fill', defaultColor],
+        ['trail', 'fill', defaultColor],
+      ] as const;
+
+      for (const [markType, colorProperty, color] of markDefaults) {
+        setMarkDefaultColor(markType, colorProperty, color);
       }
     }
 
@@ -748,7 +766,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     this._setDefaultValue(axisColor, 'config', 'axis', 'gridColor');
     this._setDefaultValue(500, 'config', 'axis', 'titleFontWeight');
 
-    this._setDefaultValue(0.2, 'config', 'area', 'fillOpacity');
+    this._setDefaultValue(0.3, 'config', 'area', 'fillOpacity');
     this._setDefaultValue(null, 'config', 'view', 'stroke');
     this._setDefaultValue(true, 'config', 'area', 'line');
     this._setDefaultValue(1.5, 'config', 'area', 'line', 'strokeWidth');
