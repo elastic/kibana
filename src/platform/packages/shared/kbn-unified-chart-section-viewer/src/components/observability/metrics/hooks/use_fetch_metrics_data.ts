@@ -32,8 +32,9 @@ import { stripSelectedDimensionWherePredicates } from '../../../../common/utils/
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
- * When selectedDimensionNames is non-empty, refetches with a WHERE filter so only
- * metrics that have all of the selected dimensions are returned.
+ * When selectedDimensionNames is non-empty, strips selected-dimension WHERE predicates from
+ * the capability source and post-filters with MV_CONTAINS so only metrics that declare
+ * every selected dimension are returned.
  * Returns loading state, error, and parsed metrics info for the grid.
  */
 export function useFetchMetricsData({
@@ -59,10 +60,9 @@ export function useFetchMetricsData({
   const shouldFetch = isComponentVisible && !!esql && !hasTransformationalCommand(esql);
 
   // Pre-fetch defense against dimensions the active stream does not map.
-  // Pushing a field name that is not in the dataView into the
-  // `WHERE TO_STRING(field) IS NOT NULL` clause breaks the query and surfaces
-  // "Unable to load visualization". The post-fetch state wipe (against
-  // `allDimensions`) lives in `MetricsExperienceGrid` via `useDimensionsWipe`.
+  // Unmapped names are omitted from predicate stripping and the MV_CONTAINS
+  // post-filter. The post-fetch state wipe (against `allDimensions`) lives in
+  // `MetricsExperienceGrid` via `useDimensionsWipe`.
   const appliedDimensions = useMemo(() => {
     if (!selectedDimensionNames?.length || !dataView) {
       return selectedDimensionNames;
@@ -87,11 +87,7 @@ export function useFetchMetricsData({
       esql,
       appliedDimensionNames
     );
-    return buildMetricsInfoQuery(
-      metricsInfoSourceQuery,
-      appliedDimensionNames,
-      declaredDimensionFilter
-    );
+    return buildMetricsInfoQuery(metricsInfoSourceQuery, declaredDimensionFilter);
   }, [esql, appliedDimensionNames]);
 
   const [{ value, error, loading }, executeFetch] = useAsyncFn(
