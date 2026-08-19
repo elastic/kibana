@@ -226,7 +226,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
 
-        expect(body.message).to.contain('[request body.otlp_exporter.tls.key_pem]');
+        expect(body.message).to.contain('[request body.otlp_exporter.tls.1.key_pem]');
       });
 
       it('stores tls secrets as ESO secret refs and returns them on GET', async () => {
