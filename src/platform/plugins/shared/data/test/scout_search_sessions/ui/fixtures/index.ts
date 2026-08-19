@@ -16,11 +16,13 @@ import type {
 import { spaceTest as spaceBaseTest, createLazyPageObject } from '@kbn/scout';
 import { BackgroundSearchManagementPage } from './page_objects/background_search_management_page';
 import { BackgroundSearchPage } from './page_objects/background_search_page';
+import { PanelInspectorPage } from './page_objects/panel_inspector_page';
 
 export interface BackgroundSearchTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
     backgroundSearch: BackgroundSearchPage;
     backgroundSearchManagement: BackgroundSearchManagementPage;
+    panelInspector: PanelInspectorPage;
   };
 }
 
@@ -42,6 +44,7 @@ export const spaceTest = spaceBaseTest.extend<
       ...pageObjects,
       backgroundSearch: createLazyPageObject(BackgroundSearchPage, page),
       backgroundSearchManagement: createLazyPageObject(BackgroundSearchManagementPage, page),
+      panelInspector: createLazyPageObject(PanelInspectorPage, page),
     });
   },
 });
@@ -51,6 +54,7 @@ export {
   DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE,
   DISCOVER_DEFAULT_KBN_ARCHIVE,
   FLIGHTS_SAMPLE_DATA_SET,
+  LENS_BASIC_KBN_ARCHIVE,
   LOGSTASH_TIME_RANGE,
   STALLING_DSL_FILTER,
 } from './constants';

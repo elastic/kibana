@@ -14,6 +14,8 @@ export const LOGSTASH_FUNCTIONAL_ARCHIVE =
 // Kibana archive paths — loaded per-space in spaceTest.beforeAll.
 export const DASHBOARD_ASYNC_SEARCH_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard_async/async_search.json';
+export const LENS_BASIC_KBN_ARCHIVE =
+  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json';
 export const DISCOVER_DEFAULT_KBN_ARCHIVE =
   'x-pack/platform/test/functional/fixtures/kbn_archives/discover/default';
 
