@@ -69,7 +69,7 @@ const ENTITY_CARD_HEADER_CHROME_WIDTH =
   40 + // icon
   12 + // gap icon → text
   8 + // gap text → badge
-  52 + // risk badge (~"90.01")
+  52 + // risk score badge (~"90.01")
   4 + // gap badge → actions
   24 + // ⋯ / actions
   12; // pad right
@@ -124,10 +124,6 @@ const HOVER_ACTIONS_EXIT_MS = 140;
 /** Card / icon radius per Figma Source Panel — Borealis 4px. */
 const CARD_BORDER_RADIUS = 4;
 const ICON_BORDER_RADIUS = 4;
-/** Risk score badge — EuiBadge / Figma pill (fully rounded). */
-const RISK_BADGE_BORDER_RADIUS = 999;
-const RISK_BADGE_HEIGHT = 20;
-const RISK_BADGE_PADDING_X = 8;
 const ICON_SIZE = 40;
 /** Zoom-out / preview-aligned compact card: horizontal icon + name + type/badge. */
 const COMPACT_COLORED_ICON_SIZE = 32;
@@ -160,24 +156,8 @@ const simplifiedCardHandleStyle: React.CSSProperties = {
 type CriticalityLevel = 'extreme' | 'high' | 'medium' | 'low';
 type CriticalityHealthColor = 'danger' | 'risk' | 'warning' | 'neutral';
 
-/** Risk severity bands aligned with Entity Analytics (and Figma entity card variants). */
+/** Risk severity bands aligned with Entity Analytics. */
 type EntityRiskLevel = 'critical' | 'high' | 'moderate' | 'low' | 'unknown';
-
-interface EntityRiskTheme {
-  /**
-   * Variant 2D: header stays plain (`backgroundBasePlain`); this token is unused for fill
-   * but kept for optional severity-header experiments.
-   */
-  headerBackground: string;
-  /** Icon square fill — Backgrounds/Light/{Danger|Risk|Warning|Neutral|Text} */
-  iconBackground: string;
-  /** Icon glyph color — Text/{Danger|Risk|…} */
-  accent: string;
-  /** Risk score pill fill — Backgrounds/Filled/{Danger|Risk|…} (solid / high emphasis) */
-  badgeBackground: string;
-  /** Risk score pill text — Text/Inverse on filled badges */
-  badgeText: string;
-}
 
 const CRITICALITY_HEALTH_COLOR: Record<CriticalityLevel, CriticalityHealthColor> = {
   extreme: 'danger',
@@ -219,7 +199,7 @@ const CardShell = styled.div<{
 }>`
   position: relative;
   width: 100%;
-  border: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
+  border: 1px solid ${({ defaultBorderColor }) => defaultBorderColor};
   border-radius: ${CARD_BORDER_RADIUS}px;
   background: ${({ bgColor }) => bgColor};
   /* Shadow must live on this element — do not set overflow:hidden here or it clips. */
@@ -259,24 +239,18 @@ const CardHeader = styled.div<{
 
 const IconBox = styled.div<{
   bgColor: string;
-  emphasizedBackgroundColor: string;
+  borderColor: string;
 }>`
   position: relative;
   flex-shrink: 0;
   width: ${ICON_SIZE}px;
   height: ${ICON_SIZE}px;
   border-radius: ${ICON_BORDER_RADIUS}px;
-  /* Entity card icon: light risk fill + glyph only — no border. */
-  border: none;
+  border: 1px solid ${({ borderColor }) => borderColor};
   background: ${({ bgColor }) => bgColor};
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.15s ease;
-
-  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
-    background: ${({ emphasizedBackgroundColor }) => emphasizedBackgroundColor};
-  }
 `;
 
 const IconCountBadge = styled.div`
@@ -378,9 +352,9 @@ const GroupStackTab = styled.div<{
   bgColor: string;
 }>`
   height: ${GROUP_STACK_HEIGHT}px;
-  border-left: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
-  border-right: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
-  border-bottom: 1.5px solid ${({ defaultBorderColor }) => defaultBorderColor};
+  border-left: 1px solid ${({ defaultBorderColor }) => defaultBorderColor};
+  border-right: 1px solid ${({ defaultBorderColor }) => defaultBorderColor};
+  border-bottom: 1px solid ${({ defaultBorderColor }) => defaultBorderColor};
   border-bottom-left-radius: ${CARD_BORDER_RADIUS}px;
   border-bottom-right-radius: ${CARD_BORDER_RADIUS}px;
   background: ${({ bgColor }) => bgColor};
@@ -405,27 +379,21 @@ const SimplifiedIconShell = styled.div`
 
 const SimplifiedIconBox = styled.div<{
   activeBorderColor: string;
+  borderColor: string;
   bgColor: string;
   defaultShadow?: string;
-  hoverShadow?: string;
 }>`
   width: 100%;
   height: 100%;
   border-radius: ${ICON_BORDER_RADIUS}px;
-  /* Zoom-out entity icon (PDF): light fill + shadow only — no border. */
-  border: 2px solid transparent;
+  border: 1px solid ${({ borderColor }) => borderColor};
   background: ${({ bgColor }) => bgColor};
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: visible;
   ${({ defaultShadow }) => defaultShadow ?? ''}
-  transition: background-color 0.15s ease, box-shadow ${CARD_INTERACTIVE_TRANSITION},
-    border-color ${CARD_INTERACTIVE_TRANSITION};
-
-  .react-flow__node:not(.non-interactive):hover:not(.dragging) & {
-    ${({ hoverShadow }) => hoverShadow ?? ''}
-  }
+  transition: box-shadow ${CARD_INTERACTIVE_TRANSITION}, border-color ${CARD_INTERACTIVE_TRANSITION};
 
   .react-flow__node:not(.non-interactive).selected:not(.dragging) &,
   .react-flow__node:not(.non-interactive).dragging & {
@@ -455,81 +423,40 @@ const getEntityRiskLevel = (score?: number): EntityRiskLevel => {
 };
 
 /**
- * Borealis tokens for entity card variant 2D:
- * - header: plain (Backgrounds/Base/Plain) — applied by caller
- * - icon: Backgrounds/Light/*
- * - badge: Backgrounds/Filled/* + Text/Inverse
+ * Light EUI badge fills used by Entity Analytics Entities table (`RiskScoreCell`).
  */
-const getEntityRiskTheme = (
+const getRiskScoreBadgeColors = (
   level: EntityRiskLevel,
   colors: {
-    backgroundBaseDanger: string;
-    backgroundBaseRisk: string;
-    backgroundBaseWarning: string;
+    backgroundBaseSubdued: string;
     backgroundBaseNeutral: string;
-    backgroundBasePrimary: string;
-    backgroundLightDanger: string;
-    backgroundLightRisk: string;
     backgroundLightWarning: string;
-    backgroundLightNeutral: string;
-    backgroundLightText: string;
-    backgroundFilledDanger: string;
-    backgroundFilledRisk: string;
-    backgroundFilledWarning: string;
-    backgroundFilledNeutral: string;
-    backgroundFilledText: string;
-    textDanger: string;
-    textRisk: string;
-    textWarning: string;
+    backgroundLightRisk: string;
+    backgroundLightDanger: string;
+    textSubdued: string;
     textNeutral: string;
-    textParagraph: string;
-    textInverse: string;
+    textWarning: string;
+    textRisk: string;
+    textDanger: string;
   }
-): EntityRiskTheme => {
+): { background: string; text: string } => {
   switch (level) {
     case 'critical':
-      return {
-        headerBackground: colors.backgroundBaseDanger,
-        iconBackground: colors.backgroundLightDanger,
-        accent: colors.textDanger,
-        badgeBackground: colors.backgroundFilledDanger,
-        badgeText: colors.textInverse,
-      };
+      return { background: colors.backgroundLightDanger, text: colors.textDanger };
     case 'high':
-      return {
-        headerBackground: colors.backgroundBaseRisk,
-        iconBackground: colors.backgroundLightRisk,
-        accent: colors.textRisk,
-        badgeBackground: colors.backgroundFilledRisk,
-        badgeText: colors.textInverse,
-      };
+      return { background: colors.backgroundLightRisk, text: colors.textRisk };
     case 'moderate':
-      return {
-        headerBackground: colors.backgroundBaseWarning,
-        iconBackground: colors.backgroundLightWarning,
-        accent: colors.textWarning,
-        badgeBackground: colors.backgroundFilledWarning,
-        badgeText: colors.textInverse,
-      };
+      return { background: colors.backgroundLightWarning, text: colors.textWarning };
     case 'low':
-      return {
-        headerBackground: colors.backgroundBaseNeutral,
-        iconBackground: colors.backgroundLightNeutral,
-        accent: colors.textNeutral,
-        badgeBackground: colors.backgroundFilledNeutral,
-        badgeText: colors.textInverse,
-      };
+      return { background: colors.backgroundBaseNeutral, text: colors.textNeutral };
     case 'unknown':
     default:
-      return {
-        headerBackground: colors.backgroundBasePrimary,
-        iconBackground: colors.backgroundLightText,
-        accent: colors.textParagraph,
-        badgeBackground: colors.backgroundFilledText,
-        badgeText: colors.textInverse,
-      };
+      return { background: colors.backgroundBaseSubdued, text: colors.textSubdued };
   }
 };
+
+/** Match Entity Analytics `formatRiskScore` (two decimal places). */
+const formatRiskScore = (riskScore: number) => (Math.round(riskScore * 100) / 100).toFixed(2);
 
 /** Single score used for compact risk indicators (prefer max when range). */
 const getDisplayRiskScore = (
@@ -717,27 +644,19 @@ const CardActionsButton = ({ onClick, containerRef, inHeader = false }: CardActi
 
 const RiskScoreBadge = ({ score }: { score: number }) => {
   const { euiTheme } = useEuiTheme();
-  const theme = getEntityRiskTheme(getEntityRiskLevel(score), euiTheme.colors);
+  const colors = getRiskScoreBadgeColors(getEntityRiskLevel(score), euiTheme.colors);
 
   return (
-    <EuiBadge
-      color="hollow"
-      css={css`
-        ${metadataTextCss}
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        height: ${RISK_BADGE_HEIGHT}px;
-        padding: 0 ${RISK_BADGE_PADDING_X}px;
-        background-color: ${theme.badgeBackground};
-        color: ${theme.badgeText};
-        border: none;
-        border-radius: ${RISK_BADGE_BORDER_RADIUS}px;
-        font-weight: ${euiTheme.font.weight.medium};
-        line-height: ${euiTheme.size.base};
-      `}
-    >
-      {score.toFixed(2)}
+    <EuiBadge color={colors.background}>
+      <EuiText
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+        size="xs"
+        color={colors.text}
+      >
+        {formatRiskScore(score)}
+      </EuiText>
     </EuiBadge>
   );
 };
@@ -750,11 +669,10 @@ interface SimplifiedCardProps {
   count?: number;
   activeBorderColor: string;
   iconBg: string;
-  iconAccent: string;
+  iconBorderColor: string;
   originOutlineColor: string;
   highlightAsOrigin?: boolean;
   defaultShadow?: string;
-  hoverShadow?: string;
   interactive?: boolean;
   showExpandButton?: boolean;
   nodeClick?: EntityNodeViewModel['nodeClick'];
@@ -810,11 +728,10 @@ const SimplifiedCard = ({
   count,
   activeBorderColor,
   iconBg,
-  iconAccent,
+  iconBorderColor,
   originOutlineColor,
   highlightAsOrigin = false,
   defaultShadow,
-  hoverShadow,
   interactive,
   showExpandButton = true,
   nodeClick,
@@ -850,9 +767,9 @@ const SimplifiedCard = ({
         )}
         <SimplifiedIconBox
           activeBorderColor={activeBorderColor}
+          borderColor={iconBorderColor}
           bgColor={iconBg}
           defaultShadow={defaultShadow}
-          hoverShadow={hoverShadow}
           data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
         >
           {isGroup && count !== undefined && (
@@ -863,7 +780,7 @@ const SimplifiedCard = ({
           <EuiIcon
             type={resolvedIcon}
             size="l"
-            color={iconAccent}
+            color="primary"
             aria-hidden={true}
             css={css`
               svg {
@@ -917,7 +834,7 @@ const SimplifiedCard = ({
 
 /**
  * Zoom-out entity card — matches Graph preview NodePill:
- * plain white card, risk-light icon, title, type + filled risk badge.
+ * plain white card, primary-blue icon, title, type + Entities-table risk badge.
  */
 const CompactColoredCard = ({
   isGroup,
@@ -927,8 +844,7 @@ const CompactColoredCard = ({
   activeBorderColor,
   cardBg,
   iconBg,
-  iconEmphasizedBg,
-  iconAccent,
+  iconBorderColor,
   originOutlineColor,
   highlightAsOrigin = false,
   defaultShadow,
@@ -953,8 +869,7 @@ const CompactColoredCard = ({
   activeBorderColor: string;
   cardBg: string;
   iconBg: string;
-  iconEmphasizedBg: string;
-  iconAccent: string;
+  iconBorderColor: string;
   originOutlineColor: string;
   highlightAsOrigin?: boolean;
   defaultShadow?: string;
@@ -1045,17 +960,13 @@ const CompactColoredCard = ({
                   width: ${COMPACT_COLORED_ICON_SIZE}px;
                   height: ${COMPACT_COLORED_ICON_SIZE}px;
                   border-radius: ${ICON_BORDER_RADIUS}px;
+                  border: 1px solid ${iconBorderColor};
                   background: ${iconBg};
                   display: flex;
                   align-items: center;
                   justify-content: center;
                   flex-shrink: 0;
-                  overflow: hidden;
-                  transition: background-color 0.15s ease;
-
-                  .react-flow__node:not(.non-interactive):hover:not(.selected):not(.dragging) & {
-                    background: ${iconEmphasizedBg};
-                  }
+                  overflow: visible;
                 `}
               >
                 {isGroup && count !== undefined && (
@@ -1066,7 +977,7 @@ const CompactColoredCard = ({
                 <EuiIcon
                   type={resolvedIcon}
                   size="l"
-                  color={iconAccent}
+                  color="primary"
                   aria-hidden={true}
                   css={css`
                     svg {
@@ -1329,22 +1240,13 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
   const headerPrimaryText = isGroup ? entityTypeLabel ?? entityName : entityName;
   const headerSecondaryText = isGroup ? undefined : entityTypeLabel;
 
-  const defaultBorderColor = euiTheme.colors.borderBaseSubdued;
+  const defaultBorderColor = euiTheme.colors.borderBasePlain;
   const activeBorderColor = euiTheme.colors.borderBasePrimary;
   const cardBg = euiTheme.colors.backgroundBasePlain;
   const displayRiskScore = getDisplayRiskScore(riskScore, riskScoreMin, riskScoreMax);
-  // Variant 2D: plain header + risk-light icon + solid risk badge.
-  const riskTheme = isColoredStyle
-    ? getEntityRiskTheme(getEntityRiskLevel(displayRiskScore), euiTheme.colors)
-    : getEntityRiskTheme('unknown', euiTheme.colors);
   const headerBg = cardBg;
-  const iconBg = isColoredStyle
-    ? riskTheme.iconBackground
-    : euiTheme.colors.backgroundLightText;
-  const iconEmphasizedBg = isColoredStyle
-    ? riskTheme.headerBackground
-    : euiTheme.colors.backgroundBaseFormsControlDisabled;
-  const iconAccent = riskTheme.accent;
+  const iconBg = cardBg;
+  const iconBorderColor = euiTheme.colors.borderBasePlain;
   const originOutlineColor = euiTheme.colors.borderBaseProminent;
   const resolvedIcon = resolveIcon(icon, tag);
 
@@ -1382,12 +1284,11 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
         isGroup={isGroup}
         resolvedIcon={resolvedIcon}
         count={count}
-        defaultBorderColor={euiTheme.colors.borderBasePlain}
+        defaultBorderColor={defaultBorderColor}
         activeBorderColor={activeBorderColor}
         cardBg={cardBg}
         iconBg={iconBg}
-        iconEmphasizedBg={iconEmphasizedBg}
-        iconAccent={iconAccent}
+        iconBorderColor={iconBorderColor}
         originOutlineColor={originOutlineColor}
         highlightAsOrigin={highlightAsOrigin}
         defaultShadow={defaultShadow}
@@ -1416,11 +1317,10 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
         count={count}
         activeBorderColor={activeBorderColor}
         iconBg={iconBg}
-        iconAccent={iconAccent}
+        iconBorderColor={iconBorderColor}
         originOutlineColor={originOutlineColor}
         highlightAsOrigin={highlightAsOrigin}
         defaultShadow={defaultShadow}
-        hoverShadow={hoverShadow}
         interactive={interactive}
         showExpandButton={showExpandButton}
         nodeClick={nodeClick}
@@ -1480,13 +1380,13 @@ export const CardNode = memo<NodeProps>((props: NodeProps) => {
               $dividerColor={hasBody ? defaultBorderColor : undefined}
               data-test-subj={GRAPH_ENTITY_NODE_HOVER_SHAPE_ID}
             >
-              <IconBox bgColor={iconBg} emphasizedBackgroundColor={iconEmphasizedBg}>
+              <IconBox bgColor={iconBg} borderColor={iconBorderColor}>
                 {isGroup && count !== undefined && (
                   <IconCountBadge>
                     <EntityGroupCountBadge count={count} />
                   </IconCountBadge>
                 )}
-                <EuiIcon type={resolvedIcon} size="l" color={iconAccent} aria-hidden={true} />
+                <EuiIcon type={resolvedIcon} size="l" color="primary" aria-hidden={true} />
               </IconBox>
 
               <HeaderText>

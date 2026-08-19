@@ -6,7 +6,6 @@
  */
 import React, { memo, useMemo } from 'react';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -27,6 +26,7 @@ import {
   GRAPH_BACKGROUND_DOT_GAP,
   GRAPH_BACKGROUND_DOT_SIZE,
 } from '@kbn/cloud-security-posture-graph/src/components/constants';
+import { RiskScoreCell } from '../../../entity_analytics/components/home/entities_table/risk_score_cell';
 import { GRAPH_PREVIEW_TEST_ID, GRAPH_PREVIEW_LOADING_TEST_ID } from './test_ids';
 
 const ENTITY_SHAPES = new Set(['hexagon', 'pentagon', 'ellipse', 'rectangle', 'diamond']);
@@ -51,10 +51,6 @@ const PREVIEW_PILL_CHROME_WIDTH =
 /** Keep pills readable in the entity flyout (~480px content). */
 const PREVIEW_PILL_WIDTH_MIN = 148;
 const PREVIEW_PILL_WIDTH_MAX = 200;
-
-const RISK_BADGE_BORDER_RADIUS = 999;
-const RISK_BADGE_HEIGHT = 20;
-const RISK_BADGE_PADDING_X = 8;
 
 type PreviewEntityNode = {
   id: string;
@@ -118,82 +114,9 @@ const pickMainEntityNode = (
   });
 };
 
-type PreviewRiskLevel = 'critical' | 'high' | 'moderate' | 'low' | 'unknown';
-
 const isEntityNode = (node: NodeDataModel): boolean =>
   ENTITY_SHAPES.has((node as { shape?: string }).shape ?? '');
 
-const getPreviewRiskLevel = (score?: number): PreviewRiskLevel => {
-  if (score === undefined) return 'unknown';
-  if (score >= 90) return 'critical';
-  if (score >= 70) return 'high';
-  if (score >= 40) return 'moderate';
-  if (score >= 20) return 'low';
-  return 'unknown';
-};
-
-const getPreviewRiskTone = (
-  level: PreviewRiskLevel,
-  colors: {
-    backgroundLightDanger: string;
-    backgroundLightRisk: string;
-    backgroundLightWarning: string;
-    backgroundLightNeutral: string;
-    backgroundLightText: string;
-    backgroundFilledDanger: string;
-    backgroundFilledRisk: string;
-    backgroundFilledWarning: string;
-    backgroundFilledNeutral: string;
-    backgroundFilledText: string;
-    textDanger: string;
-    textRisk: string;
-    textWarning: string;
-    textNeutral: string;
-    textParagraph: string;
-    textInverse: string;
-  }
-) => {
-  switch (level) {
-    case 'critical':
-      return {
-        iconBg: colors.backgroundLightDanger,
-        accent: colors.textDanger,
-        badgeBackground: colors.backgroundFilledDanger,
-        badgeText: colors.textInverse,
-      };
-    case 'high':
-      return {
-        iconBg: colors.backgroundLightRisk,
-        accent: colors.textRisk,
-        badgeBackground: colors.backgroundFilledRisk,
-        badgeText: colors.textInverse,
-      };
-    case 'moderate':
-      return {
-        iconBg: colors.backgroundLightWarning,
-        accent: colors.textWarning,
-        badgeBackground: colors.backgroundFilledWarning,
-        badgeText: colors.textInverse,
-      };
-    case 'low':
-      return {
-        iconBg: colors.backgroundLightNeutral,
-        accent: colors.textNeutral,
-        badgeBackground: colors.backgroundFilledNeutral,
-        badgeText: colors.textInverse,
-      };
-    case 'unknown':
-    default:
-      return {
-        iconBg: colors.backgroundLightText,
-        accent: colors.textParagraph,
-        badgeBackground: colors.backgroundFilledText,
-        badgeText: colors.textInverse,
-      };
-  }
-};
-
-/** Approximate medium/12px label width so both preview pills can share one fixed size. */
 const estimatePreviewLabelWidth = (label: string): number => Math.ceil(label.length * 7.2);
 
 const getPreviewPillWidthForLabels = (labels: string[]): number => {
@@ -262,7 +185,7 @@ interface NodePillProps {
   icon?: string;
   /** Shared fixed width for both pills in the preview (longest label wins). */
   width: number;
-  /** Optional risk score for 2D icon coloring. */
+  /** Optional risk score for the Entities table risk badge. */
   riskScore?: number;
   /** When true, render a stacked card edge for grouped neighbors. */
   isGroup?: boolean;
@@ -270,13 +193,13 @@ interface NodePillProps {
 
 /**
  * Entity preview card — matches zoom-out CompactColoredCard:
- * plain card, risk-light icon, title, type + filled risk badge.
+ * plain card, primary-blue icon, title, type + Entities-table risk badge.
  */
 const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: NodePillProps) => {
   const { euiTheme } = useEuiTheme();
   const fillColor = euiTheme.colors.backgroundBasePlain;
   const borderColor = euiTheme.colors.borderBasePlain;
-  const tone = getPreviewRiskTone(getPreviewRiskLevel(riskScore), euiTheme.colors);
+  const iconBorderColor = euiTheme.colors.borderBasePlain;
 
   return (
     <div
@@ -332,8 +255,8 @@ const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: 
                 width: ${NODE_ICON_BOX_SIZE}px;
                 height: ${NODE_ICON_BOX_SIZE}px;
                 border-radius: ${NODE_ICON_BORDER_RADIUS}px;
-                border: none;
-                background: ${tone.iconBg};
+                border: 1px solid ${iconBorderColor};
+                background: ${fillColor};
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -343,7 +266,7 @@ const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: 
               <EuiIcon
                 type={icon}
                 size="l"
-                color={tone.accent}
+                color="primary"
                 aria-hidden={true}
                 css={css`
                   svg {
@@ -399,27 +322,7 @@ const NodePill = ({ label, subtitle, icon, width, riskScore, isGroup = false }: 
                   {subtitle}
                 </EuiText>
               ) : null}
-              {riskScore !== undefined && (
-                <EuiBadge
-                  color="hollow"
-                  css={css`
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    height: ${RISK_BADGE_HEIGHT}px;
-                    padding: 0 ${RISK_BADGE_PADDING_X}px;
-                    background-color: ${tone.badgeBackground};
-                    color: ${tone.badgeText};
-                    border: none;
-                    border-radius: ${RISK_BADGE_BORDER_RADIUS}px;
-                    font-size: 12px;
-                    font-weight: ${euiTheme.font.weight.medium};
-                    line-height: ${euiTheme.size.base};
-                  `}
-                >
-                  {riskScore.toFixed(2)}
-                </EuiBadge>
-              )}
+              {riskScore !== undefined && <RiskScoreCell riskScore={riskScore} />}
             </div>
           )}
         </EuiFlexItem>
@@ -495,7 +398,7 @@ export const GraphPreview: React.FC<GraphPreviewProps> = memo(
       const entityNeighborCount =
         entityNeighbors.length || Math.max(entityNodes.length - 1, 0);
 
-      // Use the highest neighbor risk for the grouped pill icon tint.
+      // Use the highest neighbor risk for the grouped pill severity badge.
       const maxNeighborRisk = entityNeighbors.reduce<number | undefined>((max, neighbor) => {
         const score = neighbor.riskScore;
         if (score === undefined) return max;

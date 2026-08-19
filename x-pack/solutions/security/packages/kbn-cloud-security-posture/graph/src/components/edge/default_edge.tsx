@@ -45,7 +45,7 @@ export const DefaultEdge = memo(
     const targetMargin = getShapeHandlePosition(data?.targetShape);
     const markerEnd =
       !data?.targetShape || !NODES_WITHOUT_MARKER.includes(data?.targetShape)
-        ? getMarkerEnd(color)
+        ? getMarkerEnd('primary')
         : undefined;
 
     const sX = Math.round(sourceX - sourceMargin);

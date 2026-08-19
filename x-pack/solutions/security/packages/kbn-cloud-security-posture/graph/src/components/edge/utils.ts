@@ -9,16 +9,14 @@ import type { NodeShape } from '@kbn/cloud-security-posture-common/types/graph/l
 
 export function getShapeHandlePosition(shape?: NodeShape) {
   switch (shape) {
+    // Entity nodes render as rectangular cards that fill their bounding box.
+    // Do not inset the path into the card, or the arrow sits under the node.
     case 'hexagon':
-      return 18;
     case 'pentagon':
-      return 18;
     case 'ellipse':
-      return 17;
     case 'rectangle':
-      return 21;
     case 'diamond':
-      return 14;
+      return 0;
     case 'label':
     case 'relationship':
       return 3;
