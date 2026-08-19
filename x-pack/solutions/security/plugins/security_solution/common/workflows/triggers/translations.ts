@@ -82,6 +82,11 @@ export const ATTACK_STATUS_CHANGED_SCHEMA_PREVIOUS_STATUSES_DESCRIPTION = i18n.t
   { defaultMessage: 'Previous status for each attack before this update.' }
 );
 
+export const ATTACK_STATUS_CHANGED_SCHEMA_TRUNCATED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.workflows.triggers.attackStatusChanged.schema.truncated',
+  { defaultMessage: 'True if the number of affected attacks exceeded the capture limit.' }
+);
+
 // Attack tags changed
 
 export const ATTACK_TAGS_CHANGED_SCHEMA_ATTACK_IDS_DESCRIPTION = i18n.translate(
@@ -210,7 +215,7 @@ export const ATTACK_STATUS_CHANGED_TRIGGER_DOCUMENTATION_DETAILS = i18n.translat
   'xpack.securitySolution.workflows.triggers.attackStatusChanged.documentation.details',
   {
     defaultMessage:
-      'Emitted after a batch of attack discoveries has their workflow status updated. The payload includes event.attackIds, event.status, and event.previousStatuses.',
+      'Emitted after a batch of attack discoveries has their workflow status updated. The payload includes event.attackIds, event.status (new status), event.previousStatuses, and event.truncated (true when more than 10,000 attack discoveries were affected).',
   }
 );
 

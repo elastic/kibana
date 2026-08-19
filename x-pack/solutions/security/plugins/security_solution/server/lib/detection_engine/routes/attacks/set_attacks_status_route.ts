@@ -142,6 +142,7 @@ export const setAttacksStatusRoute = (
                 attackIds: ids.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
                 previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+                truncated: ids.length > MAX_ALERTS_PER_TRIGGER,
               });
               return result;
             }
@@ -214,6 +215,7 @@ export const setAttacksStatusRoute = (
               attackIds: verifiedAttackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
               status,
               previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+              truncated: verifiedAttackIds.length > MAX_ALERTS_PER_TRIGGER,
             });
             if (relatedAlertIds.length > 0) {
               void eventBus?.emitAlertStatusChanged(request, {

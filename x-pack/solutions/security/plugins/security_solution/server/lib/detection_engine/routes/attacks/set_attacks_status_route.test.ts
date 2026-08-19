@@ -437,6 +437,7 @@ describe('set attacks workflow status', () => {
           expect.objectContaining({
             attackIds: ['attack1', 'attack2'],
             status: 'acknowledged',
+            truncated: false,
           })
         );
         expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
@@ -461,6 +462,7 @@ describe('set attacks workflow status', () => {
           expect.objectContaining({
             attackIds: ['attack1'],
             status: 'acknowledged',
+            truncated: false,
           })
         );
         expect(mockEventBus.emitAlertStatusChanged).toHaveBeenCalledWith(

@@ -126,6 +126,7 @@ export const setUnifiedAlertsWorkflowStatusRoute = (
                 attackIds: attackIds.slice(0, MAX_ALERTS_PER_TRIGGER),
                 status,
                 previousStatuses: attackPreviousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
+                truncated: attackIds.length > MAX_ALERTS_PER_TRIGGER,
               });
             }
             if (alertIds.length > 0) {

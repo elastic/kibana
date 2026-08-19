@@ -322,6 +322,7 @@ describe('set unified alerts workflow status', () => {
         expect.objectContaining({
           attackIds: ['somefakeid1', 'somefakeid2'],
           status: 'closed',
+          truncated: false,
         })
       );
       expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
@@ -357,7 +358,7 @@ describe('set unified alerts workflow status', () => {
       );
       expect(mockEventBus.emitAttackStatusChanged).toHaveBeenCalledWith(
         expect.anything(),
-        expect.objectContaining({ attackIds: ['somefakeid2'], status: 'closed' })
+        expect.objectContaining({ attackIds: ['somefakeid2'], status: 'closed', truncated: false })
       );
     });
 

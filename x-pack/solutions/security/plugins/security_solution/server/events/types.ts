@@ -36,6 +36,7 @@ export interface AttackStatusChangedPayload {
   readonly attackIds: string[];
   readonly status: WorkflowStatus;
   readonly previousStatuses: PreviousStatus[];
+  readonly truncated: boolean;
 }
 
 export interface AttackTagsChangedPayload {
