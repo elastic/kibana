@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import moment from 'moment';
+import type { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
@@ -13,14 +14,19 @@ import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 const onRefresh = jest.fn();
 
 describe('RulesListAutoRefresh', () => {
+  let wrapper: ReactWrapper | undefined;
+
   afterEach(() => {
+    wrapper?.unmount();
+    wrapper = undefined;
+    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
   it('renders the update text correctly', async () => {
     jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
 
-    const wrapper = mountWithIntl(
+    wrapper = mountWithIntl(
       <RulesListAutoRefresh lastUpdate={moment('1990-01-01').format()} onRefresh={onRefresh} />
     );
 
@@ -52,7 +58,7 @@ describe('RulesListAutoRefresh', () => {
   it('calls onRefresh when it auto refreshes', async () => {
     jest.useFakeTimers().setSystemTime(moment('1990-01-01').toDate());
 
-    mountWithIntl(
+    wrapper = mountWithIntl(
       <RulesListAutoRefresh
         lastUpdate={moment('1990-01-01').format()}
         initialUpdateInterval={1000}

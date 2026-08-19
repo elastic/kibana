@@ -7,6 +7,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
@@ -75,6 +76,7 @@ const isAuthenticationTypeApiKeyMock = jest.fn();
 const getAuthenticationApiKeyMock = jest.fn();
 
 const rulesClientParams: jest.Mocked<ConstructorOptions> = {
+  request: httpServerMock.createKibanaRequest(),
   taskManager,
   ruleTypeRegistry,
   unsecuredSavedObjectsClient,
@@ -3374,6 +3376,52 @@ describe('bulkEdit()', () => {
         'message',
         'Mutated params invalid: Mutated error for rule'
       );
+      expect(result.errors[0]).toHaveProperty('rule.id', '1');
+      expect(result.errors[0]).toHaveProperty('rule.name', 'my rule name');
+    });
+
+    test('should return error when params authorization fails', async () => {
+      ruleTypeRegistry.get.mockReturnValue({
+        id: '123',
+        name: 'Test',
+        actionGroups: [{ id: 'default', name: 'Default' }],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        recoveryActionGroup: RecoveredActionGroup,
+        validate: {
+          params: schema.object({}),
+        },
+        authorize: {
+          params: {
+            authorize: async () => {
+              throw Error('Not authorized to modify params');
+            },
+          },
+        },
+        async executor() {
+          return { state: {} };
+        },
+        producer: 'alerts',
+        solution: 'stack',
+        category: 'test',
+        validLegacyConsumers: [],
+      });
+
+      const result = await rulesClient.bulkEdit({
+        filter: 'alert.attributes.tags: "APM"',
+        operations: [
+          {
+            field: 'tags',
+            operation: 'add',
+            value: ['test-1'],
+          },
+        ],
+      });
+
+      expect(result.errors).toHaveLength(1);
+
+      expect(result.errors[0]).toHaveProperty('message', 'Not authorized to modify params');
       expect(result.errors[0]).toHaveProperty('rule.id', '1');
       expect(result.errors[0]).toHaveProperty('rule.name', 'my rule name');
     });

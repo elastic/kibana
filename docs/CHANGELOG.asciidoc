@@ -10,6 +10,9 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.19.20>>
+* <<release-notes-8.19.19>>
+* <<release-notes-8.19.18>>
 * <<release-notes-8.19.17>>
 * <<release-notes-8.19.16>>
 * <<release-notes-8.19.15>>
@@ -124,10 +127,127 @@ Review important information about the {kib} 8.x releases.
 
 include::upgrade-notes.asciidoc[]
 
+[[release-notes-8.19.20]]
+== {kib} 8.19.20
+
+The 8.19.20 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.20]]
+=== Fixes
+Data ingestion and Fleet::
+* Fix Kafka outputs incorrectly accepting a proxy configuration, which Kafka doesn't support ({kibana-pull}282313[#282313]).
+* Fix preconfigured Fleet proxies being rewritten on every {kib} startup even when unchanged, which needlessly incremented dependent agent policies ({kibana-pull}281059[#281059]).
+* Fix Fleet package policy bulk creation to store secrets in the secrets index instead of inline on the saved object, matching the existing create, update, and bulk update behavior ({kibana-pull}282213[#282213]).
+* Fix the create enrollment API key request to preserve an existing expiration value when creating the key in {es} security ({kibana-pull}281324[#281324]).
+Data management::
+* Fix ILM Explain in Index Management to include hidden and system indices when filtering by lifecycle phase ({kibana-pull}282137[#282137]).
+* Fix Cross-Cluster Replication to clear selected follower indices after a pause, resume, or unfollow action, so the Manage menu reflects the updated state ({kibana-pull}273576[#273576]).
+Elastic Observability solution::
+* Fix the Synthetics monitors overview failing to load maintenance window status for users with read-only access ({kibana-pull}281894[#281894]).
+Elastic Security solution::
+For the Elastic Security 8.19.20 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Machine Learning::
+* Fix the trained model infer, update, and stop APIs to prevent a deployment ID from being used to access a different trained model ({kibana-pull}280511[#280511]).
+* Fix the annotation and anomaly result search APIs to enforce job-level space access checks, and require a job ID on anomaly searches to prevent bypassing those checks ({kibana-pull}277197[#277197]).
+* Fix {ml} saved objects APIs to accept any one of the anomaly detection, data frame analytics, or trained models privileges instead of requiring all three, and correctly check trained models access when removing a saved object from a space ({kibana-pull}276936[#276936]).
+
+[[release-notes-8.19.19]]
+== {kib} 8.19.19
+
+The 8.19.19 release includes the following enhancements and fixes.
+
+[IMPORTANT]
+====
+The 8.19.19 release contains fixes for potential security vulnerabilities.
+For details, go to the https://discuss.elastic.co/c/announcements/security-announcements/31[security announcements].
+====
+
+[float]
+[[enhancement-v8.19.19]]
+=== Enhancements
+Elastic Observability solution::
+* Ensures APM integration policy updates retain API keys when clients omit them ({kibana-pull}274647[#274647]).
+* Speeds up loading Synthetics journey screenshots and step details ({kibana-pull}273513[#273513]).
+* Honors the `observability:searchExcludedDataTiers` advanced setting in Synthetics searches so operators can exclude slow data tiers such as `data_frozen` ({kibana-pull}273418[#273418]).
+Elasticsearch solution::
+* Adds a MongoDB connector `datetime_conversion` setting so syncs can clamp, convert, or error on dates outside the supported range instead of always aborting ({kibana-pull}277685[#277685]).
+
+[float]
+[[fixes-v8.19.19]]
+=== Fixes
+Alerting::
+* Defaults a missing reporting job `version` parameter to the current {kib} version instead of showing a hardcoded `7.14.0` value ({kibana-pull}275469[#275469]).
+Dashboards and Visualizations::
+* Limits the Canvas `createTable` expression `rowCount` to a maximum of `10000`, matching the default {es} `index.max_result_window` ({kibana-pull}276502[#276502]).
+Data ingestion and Fleet::
+* Fixes resetting preconfigured agent policies aborting with a 404 on deployments where space awareness is disabled ({kibana-pull}276742[#276742]).
+Developer tools::
+* Fixes Console autocomplete so nested object fields and multi-fields in index mapping bodies suggest mapping options again ({kibana-pull}278508[#278508]).
+* Fixes Console requests that combine comments with triple-quote strings failing with `x_content_e_o_f_exception` ({kibana-pull}277259[#277259]).
+* Fixes a Windows-specific code editor issue that could corrupt multi-line edited text after refresh ({kibana-pull}277007[#277007]).
+* Fixes the Console **Copy** button silently failing to copy response output ({kibana-pull}276365[#276365]).
+* Fixes Console autocomplete matching an incorrect API endpoint when a URL matches both a literal path and a parameterized path ({kibana-pull}276239[#276239]).
+* Improves Console {esql} source autocomplete by reusing a fresh source list instead of refetching it on every keystroke ({kibana-pull}275535[#275535]).
+Elastic Observability solution::
+* Fixes Synthetics monitor updates ignoring `retest_on_failure: false`, which left retests enabled on existing monitors ({kibana-pull}277701[#277701]).
+Elastic Security solution::
+For the Elastic Security 8.19.19 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Kibana platform::
+* Fixes `kibana-frontend` page-load transaction names to use low-cardinality `/app/{appId}` labels instead of raw URLs ({kibana-pull}275650[#275650]).
+Machine Learning::
+* Prevents removing all spaces from a {ml} job or trained model through the spaces update APIs ({kibana-pull}276490[#276490]).
+* Restricts the clear audit messages API so users can only clear messages for jobs they can access, and only against valid notification indices ({kibana-pull}276419[#276419]).
+* Adds request size limits to the file upload and `index_exists` endpoints ({kibana-pull}274566[#274566]).
+
+[[release-notes-8.19.18]]
+== {kib} 8.19.18
+
+The 8.19.18 release includes the following fixes.
+
+[float]
+[[fixes-v8.19.18]]
+=== Fixes
+Alerting and cases::
+* Fixes case pushes only stamping a subset of attachments, which caused the alert count comment to be duplicated in the external system on every push ({kibana-pull}274451[#274451]).
+Dashboards and Visualizations::
+* Fixes **Canvas** autoplay not advancing past the first page ({kibana-pull}272619[#272619]).
+Data ingestion and Fleet::
+* Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call ({kibana-pull}273848[#273848]).
+* Fixes a crash in the **Integrations** view when a package has no icon ({kibana-pull}273191[#273191]).
+Developer tools::
+* Fixes **Dev Tools Console** autocomplete in query filter context to suggest query DSL instead of the obsolete Elasticsearch 1.x filter DSL ({kibana-pull}272907[#272907]).
+Elastic Observability solution::
+* Fixes deleting a label from a Synthetics monitor not persisting on edit ({kibana-pull}274404[#274404]).
+Elastic Security solution::
+For the Elastic Security 8.19.18 release information, refer to {security-guide}/release-notes.html[_Elastic Security release notes_].
+Kibana platform::
+* Fixes the Files plugin blob download to return the requested file type ({kibana-pull}274783[#274783]).
+* Fixes an issue where the Kibana JSON logger could produce JSON objects with a large number of numbered keys ({kibana-pull}256233[#256233]).
+
 [[release-notes-8.19.17]]
 == {kib} 8.19.17
 
-The 8.19.17 release includes the following fixes.
+The 8.19.17 release includes the following known issues and fixes.
+
+[float]
+[[known-issues-8.19.17]]
+=== Known issues
+
+// tag::known-issue-268398[]
+.Canvas Autoplay stops advancing after one page.
+[%collapsible]
+====
+*Details* +
+Multipage Canvas visualizations stop advancing after one page when in autoplay mode
+
+*Workaround* +
+Manually advance to the next page or upgrade to 8.19.18 or 9.3.7.
+
+*Resolved* + 
+This issue is resolved in 8.19.18 and 9.3.7.
+====
+// end::known-issue-268398[]
 
 [float]
 [[fixes-v8.19.17]]
@@ -137,7 +257,6 @@ Alerting::
 Dashboards and Visualizations::
 * Fixes the autoplay timer in **Canvas** jumping to the wrong page when pages are added or removed ({kibana-pull}268398[#268398]).
 Data ingestion and Fleet::
-* Improves `POST /api/fleet/setup` performance for deployments with a large number of configured outputs by no longer decrypting every output on each call ({kibana-pull}273848[#273848]).
 * Fixes data stream selectors in input packages with multiple policy templates incorrectly sharing or duplicating variables between templates ({kibana-pull}273364[#273364]).
 * Improves response time of the agent policies list by computing counts in a single aggregation instead of multiple queries per policy ({kibana-pull}272429[#272429]).
 * Fixes missing security rule names in the **Integrations → Assets** tab ({kibana-pull}272089[#272089]).

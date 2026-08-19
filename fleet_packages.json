@@ -30,11 +30,11 @@
   },
   {
     "name": "elastic_agent",
-    "version": "2.8.0"
+    "version": "2.9.4"
   },
   {
     "name": "endpoint",
-    "version": "8.19.2"
+    "version": "8.19.3"
   },
   {
     "name": "fleet_server",
@@ -56,7 +56,7 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "8.19.23"
+    "version": "8.19.31"
   },
   {
     "name": "security_ai_prompts",

@@ -78,7 +78,8 @@ describe('syncEditedMonitor', () => {
       '7af7e2f0-d5dc-11ec-87ac-bdfdb894c53d',
       expect.objectContaining({
         enabled: true,
-      })
+      }),
+      { mergeAttributes: false }
     );
   });
 });

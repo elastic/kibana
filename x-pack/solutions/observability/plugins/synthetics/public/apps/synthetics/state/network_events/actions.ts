@@ -11,6 +11,7 @@ import { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtim
 export interface FetchNetworkEventsParams {
   checkGroup: string;
   stepIndex: number;
+  timestamp?: string;
 }
 
 export interface FetchNetworkEventsFailPayload {

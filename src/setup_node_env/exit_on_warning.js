@@ -103,6 +103,16 @@ var IGNORE_WARNINGS = [
     message:
       'The URL git+ssh://git@github.com:isaacs/cliui is invalid. Future versions of Node.js will throw an error.',
   },
+  // url.parse deprecated. migrate to WHATWG URL API.
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0169',
+  },
+  // child_process: passing args with shell option true. emitted by storybook's bundled execa.
+  {
+    name: 'DeprecationWarning',
+    code: 'DEP0190',
+  },
 ];
 
 if (process.noProcessWarnings !== true) {

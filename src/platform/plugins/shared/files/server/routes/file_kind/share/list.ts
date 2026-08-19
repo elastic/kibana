@@ -21,7 +21,7 @@ const rt = {
   query: schema.object({
     page: schema.maybe(cs.page),
     perPage: schema.maybe(cs.pageSize),
-    forFileId: schema.maybe(schema.string()),
+    forFileId: schema.maybe(cs.fileId),
   }),
 };
 

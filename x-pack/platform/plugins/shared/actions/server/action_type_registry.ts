@@ -11,7 +11,7 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 import { TaskCost } from '@kbn/task-manager-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { ActionType as CommonActionType } from '../common';
-import { areValidFeatures } from '../common';
+import { areValidFeatures, MAX_FEATURE_ID_LENGTH } from '../common';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import type { TaskRunnerFactory, ILicenseState, ActionExecutionSourceType } from './lib';
 import { getActionTypeFeatureUsageName } from './lib';
@@ -166,6 +166,19 @@ export class ActionTypeRegistry {
             'At least one "supportedFeatureId" value must be supplied for connector type "{connectorTypeId}".',
           values: {
             connectorTypeId: actionType.id,
+          },
+        })
+      );
+    }
+
+    if (actionType.supportedFeatureIds.some((id) => id.length > MAX_FEATURE_ID_LENGTH)) {
+      throw new Error(
+        i18n.translate('xpack.actions.actionTypeRegistry.register.featureIdTooLong', {
+          defaultMessage:
+            'Feature IDs for connector type "{connectorTypeId}" must not exceed {maxLength} characters.',
+          values: {
+            connectorTypeId: actionType.id,
+            maxLength: MAX_FEATURE_ID_LENGTH,
           },
         })
       );

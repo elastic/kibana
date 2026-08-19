@@ -66,7 +66,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             // There is a race condition that makes these 2 fields to show up some times
             page: 'app',
             id: 'new',
-          });
+          }) ||
+          // bfetch requests may log the merged search context without an enclosing HTTP parent context
+          (!!expectedExecutionContext.child &&
+            isExecutionContextLog(record, expectedExecutionContext.child));
       }
 
       describe('propagates context for Discover', () => {
@@ -140,6 +143,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return (record: Ecs): boolean =>
           Boolean(
             [
+              // Requests may log the embeddable context without an enclosing app context
+              'kibana:',
               'kibana:application:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;',
               // Race conditions may miss the dashboard ID at the top level
               'kibana:application:dashboards:;',

@@ -11,6 +11,7 @@ import {
   ENDPOINT_SECURITY_ROLE_NAMES,
   getAllEndpointSecurityRoles,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
+import { EndpointSecurityTestRolesLoader } from '@kbn/security-solution-plugin/scripts/endpoint/common/role_and_user_loader';
 
 import { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
 
@@ -20,7 +21,12 @@ const rolesMapping = getAllEndpointSecurityRoles();
 
 export function RolesUsersProvider({ getService }: FtrProviderContext) {
   const security = getService('security');
+  const kbnServer = getService('kibanaServer');
+  const log = getService('log');
+
   return {
+    /** Endpoint security test roles loader */
+    loader: new EndpointSecurityTestRolesLoader(kbnServer, log),
     /**
      * Creates an user with specific values
      * @param user
