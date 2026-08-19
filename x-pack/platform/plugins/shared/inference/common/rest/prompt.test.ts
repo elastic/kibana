@@ -89,6 +89,31 @@ describe('createPromptRestApi', () => {
     });
   });
 
+  it('forwards reasoning in the request body', async () => {
+    const params = {
+      connectorId: 'my-connector',
+      input: {
+        question: 'What is Kibana?',
+      },
+      prompt,
+      reasoning: { enabled: true },
+    } satisfies PromptOptions;
+
+    http.fetch.mockResolvedValue({});
+
+    await promptApi({
+      ...params,
+      stream: false,
+    });
+
+    const callBody = http.fetch.mock.lastCall!;
+    const parsedBody = JSON.parse((callBody as any[])[1].body as string);
+    expect(parsedBody).toEqual({
+      ...omit(params, 'stream', 'prompt'),
+      prompt: omit(prompt, 'input'),
+    });
+  });
+
   it('calls http.fetch with the right parameters for streaming', async () => {
     const params = {
       connectorId: 'my-connector',

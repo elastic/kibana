@@ -23,6 +23,7 @@ import { buildExecutionId } from './utils/build_execution_id';
 import { createDefaultTerminalReporter } from './utils/reporting/evaluation_reporter';
 import { createConnectorFixture, resolveConnectorId } from './utils/create_connector_fixture';
 import { wrapInferenceClientWithEisConnectorTelemetry } from './utils/wrap_inference_client_with_connector_telemetry';
+import { wrapInferenceClientWithReasoningDefault } from './utils/wrap_inference_client_with_reasoning_default';
 import { createAgentBuilderClient } from './utils/agent_builder_client';
 import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
@@ -172,7 +173,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
           connectorId: connector.id,
         },
       });
-      const wrappedInferenceClient = wrapInferenceClientWithEisConnectorTelemetry(inferenceClient);
+      const wrappedInferenceClient = wrapInferenceClientWithEisConnectorTelemetry(
+        wrapInferenceClientWithReasoningDefault(inferenceClient, connector.id)
+      );
       log.serviceLoaded?.('inferenceClient');
 
       await use(wrappedInferenceClient);

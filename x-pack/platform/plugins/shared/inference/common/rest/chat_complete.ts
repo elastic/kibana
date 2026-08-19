@@ -48,6 +48,7 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
       maxRetries,
       metadata,
       retryConfiguration,
+      reasoning,
     } = options;
 
     const body: ChatCompleteRequestBody = {
@@ -62,6 +63,7 @@ export function createChatCompleteRestApi({ fetch, signal }: CreatePublicChatCom
       retryConfiguration: undefined,
       maxRetries,
       metadata,
+      reasoning,
     };
 
     function retry<T>() {

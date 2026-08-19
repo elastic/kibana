@@ -55,6 +55,7 @@ export function registerChatCompleteRoute({
       retryConfiguration,
       temperature,
       metadata,
+      reasoning,
     } = request.body;
 
     return client.chatComplete({
@@ -71,6 +72,7 @@ export function registerChatCompleteRoute({
       retryConfiguration,
       temperature,
       metadata,
+      reasoning,
     });
   }
 

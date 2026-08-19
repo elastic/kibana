@@ -55,6 +55,7 @@ export function registerPromptRoute({
       metadata,
       prevMessages,
       toolChoice,
+      reasoning,
     } = request.body;
 
     return client.prompt({
@@ -75,6 +76,7 @@ export function registerPromptRoute({
       metadata,
       prevMessages,
       toolChoice,
+      reasoning,
     });
   }
 

@@ -374,6 +374,8 @@ Use `selectEvaluators<MyExample, MyTaskOutput>(...)` for typed evaluator callbac
 | `reportModelScore` | Displays results in terminal (overridable for custom reporting).           |
 | `traceEsClient`    | ES client for querying OTel traces (defaults to Scout `esClient` cluster). |
 
+For EIS connectors, `inferenceClient` (and the judge derived from it) defaults `reasoning` to `{ enabled: true }` when a call omits it, so reasoning-mandatory EIS endpoints don't reject `effort: none`. Non-EIS connectors are left as-is, and an explicit `reasoning` always wins.
+
 ### Available evaluators
 
 Built-in evaluator factories you can use directly or as inspiration for custom evaluators:
