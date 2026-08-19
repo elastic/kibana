@@ -79,7 +79,7 @@ export const EUI_LOGO_BY_BRAND: Partial<Record<SupportedLogo, string>> = {
   logstash: 'logoLogstash',
   apm: 'apmApp',
   synthetics: 'logoUptime',
-  auto_import: 'importAction',
+  auto_import: 'download',
   upload_file: 'addDataApp',
   custom_logs: 'filebeatApp',
 };

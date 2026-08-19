@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiPanel } from '@elastic/eui';
 import { parse as parseYaml } from 'yaml';
-import { InlineFieldSchema } from '../../../../common/types/domain/template/fields';
+import { StrictInlineFieldSchema } from '../../../../common/types/domain/template/strict_fields';
 import { TemplateYamlEditorBase } from '../../templates_v2/components/template_yaml_editor';
 import { TemplateActionsMenu } from '../../templates_v2/components/template_actions_menu';
 import {
@@ -55,12 +55,15 @@ const validationFooterCss = css({
 
 const getDefinitionValidationErrors = (value: string): ValidationError[] => {
   try {
-    const result = InlineFieldSchema.safeParse(parseYaml(value));
+    const result = StrictInlineFieldSchema.safeParse(parseYaml(value));
     if (result.success) return [];
 
+    // Surface the first issue's message so the author sees which character is invalid,
+    // rather than the blanket "invalid field definition YAML" fallback.
+    const message = result.error.issues[0]?.message ?? i18n.FIELD_DEFINITION_YAML_INVALID;
     return [
       {
-        message: i18n.FIELD_DEFINITION_YAML_INVALID,
+        message,
         severity: 'error',
         startLineNumber: 1,
         startColumn: 1,
