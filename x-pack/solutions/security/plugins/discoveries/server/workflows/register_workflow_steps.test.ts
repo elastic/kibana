@@ -83,10 +83,16 @@ describe('registerWorkflowSteps', () => {
     );
   });
 
-  it('registers all five step definitions', () => {
+  it('registers get status step definition when the feature flag is on', async () => {
     registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledTimes(5);
+    expect(await resolveRegisteredStepIds()).toContain('security.attack-discovery.get_status');
+  });
+
+  it('registers all six step definitions', () => {
+    registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
+
+    expect(mockRegisterStepDefinition).toHaveBeenCalledTimes(6);
   });
 
   it('registers loaders (functions), not definitions, with workflowsExtensions', () => {
@@ -106,7 +112,7 @@ describe('registerWorkflowSteps', () => {
   it('returns StepRegistrationResult with all registeredSteps and no failedSteps when all succeed', () => {
     const result = registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
-    expect(result.registeredSteps).toHaveLength(5);
+    expect(result.registeredSteps).toHaveLength(6);
     expect(result.failedSteps).toHaveLength(0);
   });
 
@@ -121,8 +127,8 @@ describe('registerWorkflowSteps', () => {
 
     const result = registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
-    expect(mockRegisterStepDefinition).toHaveBeenCalledTimes(5);
-    expect(result.registeredSteps).toHaveLength(4);
+    expect(mockRegisterStepDefinition).toHaveBeenCalledTimes(6);
+    expect(result.registeredSteps).toHaveLength(5);
     expect(result.failedSteps).toHaveLength(1);
   });
 
@@ -157,7 +163,7 @@ describe('registerWorkflowSteps', () => {
     const result = registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
     expect(result.registeredSteps).toHaveLength(0);
-    expect(result.failedSteps).toHaveLength(5);
+    expect(result.failedSteps).toHaveLength(6);
   });
 
   it('logs debug messages for each registered step', () => {

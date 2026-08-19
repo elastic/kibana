@@ -19,6 +19,7 @@ import {
   defaultAlertRetrievalStepPublicDefinition,
   defaultValidationStepPublicDefinition,
   generateStepPublicDefinition,
+  getStatusStepPublicDefinition,
   persistDiscoveriesStepPublicDefinition,
   runStepPublicDefinition,
 } from './step_types';
@@ -65,6 +66,7 @@ export class DiscoveriesPublicPlugin
       gate(persistDiscoveriesStepPublicDefinition)
     );
     plugins.workflowsExtensions.registerStepDefinition(gate(runStepPublicDefinition));
+    plugins.workflowsExtensions.registerStepDefinition(gate(getStatusStepPublicDefinition));
 
     return {};
   }

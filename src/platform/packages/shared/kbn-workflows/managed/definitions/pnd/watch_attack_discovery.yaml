@@ -53,29 +53,56 @@ outputs:
   - name: investigation_conversation_id
     type: string
 steps:
-  # One step orchestrates the full pipeline (retrieve -> generate -> validate ->
-  # persist). Running via the workflow (non-alerting) path persists to the shared
-  # ad-hoc AD index and creates no alerting rule / Attacks-page schedule.
+  # Kick off the full pipeline (retrieve -> generate -> validate -> persist) in
+  # async mode so the step returns an execution_uuid immediately. Running via the
+  # workflow (non-alerting) path persists to the shared ad-hoc AD index and
+  # creates no alerting rule / Attacks-page schedule.
   - name: run_attack_discovery
     type: security.attack-discovery.run
     timeout: "10m"
     with:
       connector_id: "{{ inputs.connector_id }}"
       alert_retrieval_mode: custom_query
-      mode: sync
+      mode: async
       size: "${{ inputs.size }}"
       start: "{{ inputs.start }}"
       end: "{{ inputs.end }}"
       filter: "${{ inputs.filter }}"
 
-  # Sync mode can return status 'pending' when the pipeline exceeds its soft
-  # deadline; the discoveries still persist in the background, but we only have
-  # them inline to summarize when the run completed with at least one discovery.
+  # Generation runs longer than the run step's soft deadline, so poll the
+  # event-log-backed status by execution_uuid until it leaves the running state.
+  # `not_found` is also transient right after launch (the event log lags), so we
+  # keep polling through it; the iteration bound (40 x 15s = 10m) caps the wait.
+  - name: poll_status
+    type: while
+    condition: >-
+      ${{ steps.check_status.output.status == 'running'
+        or steps.check_status.output.status == 'not_found' }}
+    max-iterations:
+      limit: 40
+      on-limit: continue
+    steps:
+      - name: wait_before_poll
+        type: wait
+        with:
+          duration: "15s"
+      - name: check_status
+        type: security.attack-discovery.get_status
+        with:
+          execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
+
+  # Re-read once outside the loop so the terminal status and discoveries are
+  # available at a stable top-level step reference for the steps below.
+  - name: final_status
+    type: security.attack-discovery.get_status
+    with:
+      execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
+
   - name: write_investigation
     type: ai.agent
     if: >-
-      ${{ steps.run_attack_discovery.output.status == 'completed'
-        and steps.run_attack_discovery.output.discovery_count > 0 }}
+      ${{ steps.final_status.output.status == 'succeeded'
+        and steps.final_status.output.discovery_count > 0 }}
     timeout: "10m"
     create-conversation: true
     with:
@@ -85,13 +112,13 @@ steps:
         involved, and the immediate next steps to verify or contain it.
 
         Attack Discoveries:
-        {{ steps.run_attack_discovery.output.attack_discoveries | json }}
+        {{ steps.final_status.output.attack_discoveries | json }}
 
   - name: emit_result
     type: workflow.output
     status: completed
     with:
-      discovery_count: "${{ steps.run_attack_discovery.output.discovery_count | default: 0 }}"
+      discovery_count: "${{ steps.final_status.output.discovery_count | default: 0 }}"
       execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
-      status: "{{ steps.run_attack_discovery.output.status }}"
+      status: "{{ steps.final_status.output.status }}"
       investigation_conversation_id: "{{ steps.write_investigation.output.conversation_id }}"
