@@ -97,51 +97,34 @@ steps:
         with:
           duration: 60s
 
-      - name: index_issues
-        type: foreach
-        foreach: '{{ steps.fetch_issues.output.data.search.nodes | json }}'
-        iteration-on-failure:
-          continue: true
-        steps:
-          - name: skip_if_not_issue
-            type: loop.continue
-            if: '${{ foreach.item.id == "" or foreach.item.createdAt == "" }}'
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign items = steps.fetch_issues.output.data.search.nodes %}
+            [
+            {%- for node in items -%}
+              {
+                "id": "{{ node.id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "entity": {"type": "issue", "id": "{{ node.id }}", "url": "{{ node.url }}", "number": "{{ node.number }}"},
+                "org": {"login": "{{ consts.orgLogin }}"},
+                "repository": {"name": "{{ node.repository.name }}", "full_name": "{{ node.repository.nameWithOwner }}"},
+                "github": {"created_at": "{{ node.createdAt }}", "updated_at": "{{ node.updatedAt }}", "state": "{{ node.state }}"},
+                "people": {"author": "{{ node.author.login }}"},
+                "content": {"title": "{{ node.title }}", "body": "{{ node.body }}"},
+                "payload": {{ node | json }}
+              }  {% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
 
-          - name: upsert_issue
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.issuesIndex }}'
-              id: '{{ foreach.item.id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                entity:
-                  type: issue
-                  id: '{{ foreach.item.id }}'
-                  url: '{{ foreach.item.url }}'
-                  number: '{{ foreach.item.number }}'
-                org:
-                  login: '{{ consts.orgLogin }}'
-                repository:
-                  name: '{{ foreach.item.repository.name }}'
-                  full_name: '{{ foreach.item.repository.nameWithOwner }}'
-                github:
-                  created_at: '{{ foreach.item.createdAt }}'
-                  updated_at: '{{ foreach.item.updatedAt }}'
-                  state: '{{ foreach.item.state }}'
-                people:
-                  author: '{{ foreach.item.author.login }}'
-                content:
-                  title: '{{ foreach.item.title }}'
-                  body: '{{ foreach.item.body }}'
-                payload: '${{ foreach.item }}'
-
-          - name: track_last_updated
-            type: data.set
-            with:
-              lastIssueUpdatedAt: '{{ foreach.item.updatedAt }}'
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.issuesIndex }}'
+          id_field: id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
 
       - name: advance_cursor
         type: data.set

@@ -152,48 +152,34 @@ steps:
                   end_cursor: '${{ steps.fetch_project_items.output.pageInfo.endCursor }}'
                 payload: '${{ steps.fetch_project_items.output.data.node.items }}'
 
-          - name: index_project_items
-            type: foreach
-            foreach: '{{ steps.fetch_project_items.output.data.node.items.nodes | json }}'
-            steps:
-              - name: upsert_project_item
-                type: elasticsearch.update
-                with:
-                  index: '{{ consts.projectItemsIndex }}'
-                  id: '{{ foreach.item.id }}'
-                  doc_as_upsert: true
-                  retry_on_conflict: 3
-                  doc:
-                    '@timestamp': '{{ execution.startedAt }}'
-                    sync:
-                      run_id: '{{ execution.id }}'
-                      source: '{{ consts.syncSource }}'
-                    entity:
-                      type: project_item
-                      id: '{{ foreach.item.id }}'
-                      subtype: '${{ foreach.item.content.__typename }}'
-                      number: '${{ foreach.item.content.number }}'
-                      url: '${{ foreach.item.content.url }}'
-                    org:
-                      login: '{{ consts.orgLogin }}'
-                    project:
-                      id: '${{ variables.projectId }}'
-                      number: '${{ variables.projectNumber }}'
-                      title: '${{ variables.projectTitle }}'
-                    repository:
-                      name: '${{ foreach.item.content.repository.name }}'
-                      full_name: '${{ foreach.item.content.repository.nameWithOwner }}'
-                    github:
-                      created_at: '${{ foreach.item.createdAt }}'
-                      updated_at: '${{ foreach.item.updatedAt }}'
-                      state: '${{ foreach.item.content.state }}'
-                    content_ref:
-                      type: '${{ foreach.item.content.__typename }}'
-                      id: '${{ foreach.item.content.id }}'
-                      repo: '${{ foreach.item.content.repository.nameWithOwner }}'
-                      number: '${{ foreach.item.content.number }}'
-                      url: '${{ foreach.item.content.url }}'
-                    payload: '${{ foreach.item }}'
+          - name: build_project_items_ops
+            type: data.set
+            with:
+              operations: |-
+                {% assign items = steps.fetch_project_items.output.data.node.items.nodes %}
+                [
+                {%- for node in items -%}
+                  {
+                    "id": "${{ node.id }}",
+                    "@timestamp": "{{ execution.startedAt }}",
+                    "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                    "entity": {"type": "project_item", "id": "${{ node.id }}", "subtype": "${{ node.content.__typename }}", "number": "${{ node.content.number }}", "url": "${{ node.content.url }}"},
+                    "org": {"login": "{{ consts.orgLogin }}"},
+                    "project": {"id": "${{ variables.projectId }}", "number": "${{ variables.projectNumber }}", "title": "${{ variables.projectTitle }}"},
+                    "repository": {"name": "${{ node.content.repository.name }}", "full_name": "${{ node.content.repository.nameWithOwner }}"},
+                    "github": {"created_at": "${{ node.createdAt }}", "updated_at": "${{ node.updatedAt }}", "state": "${{ node.content.state }}"},
+                    "content_ref": {"type": "${{ node.content.__typename }}", "id": "${{ node.content.id }}", "repo": "${{ node.content.repository.nameWithOwner }}", "number": "${{ node.content.number }}", "url": "${{ node.content.url }}"},
+                    "payload": {{ node | json }}
+                  }  {% unless forloop.last %},{% endunless %}
+                {%- endfor -%}
+                ]
+
+          - name: bulk_index_project_items
+            type: elasticsearch.bulk
+            with:
+              index: '{{ consts.projectItemsIndex }}'
+              id_field: id
+              operations: '${{ steps.build_project_items_ops.output.operations | json_parse }}'
 
           - name: advance_project_item_cursor
             type: data.set
