@@ -42,6 +42,7 @@ export const executeAgent$ = ({
   configurationOverrides,
   action,
   executionMode,
+  projectRouting,
 }: {
   agentId: string;
   executionId: string;
@@ -62,6 +63,7 @@ export const executeAgent$ = ({
   configurationOverrides?: AgentConfigurationOverrides;
   action?: ConversationAction;
   executionMode?: AgentExecutionMode;
+  projectRouting?: string;
 }): Observable<ChatAgentEvent> => {
   return new Observable<ChatAgentEvent>((observer) => {
     runAgent({
@@ -73,6 +75,7 @@ export const executeAgent$ = ({
       telemetryMetadata,
       maxContentLength,
       executionMode,
+      projectRouting,
       agentParams: {
         nextInput,
         conversation,
