@@ -13,6 +13,7 @@ import { once } from 'lodash';
 import type { BundledPackage, Installation } from '../../../types';
 import { BundledPackageLocationNotFoundError } from '../../../errors';
 import { appContextService } from '../../app_context';
+import { airGappedUtils } from '../airgapped';
 import { splitPkgKey, pkgToPkgKey } from '../registry';
 
 let CACHE_BUNDLED_PACKAGES: BundledPackage[] | undefined;
@@ -104,7 +105,7 @@ export async function getBundledPackageByPkgKey(
     if (pkgKey.includes('-')) {
       return pkgToPkgKey(pkg) === pkgKey;
     } else {
-      return pkg.name === pkgKey;
+      return airGappedUtils().shouldSkipRegistryRequests && pkg.name === pkgKey;
     }
   });
 }

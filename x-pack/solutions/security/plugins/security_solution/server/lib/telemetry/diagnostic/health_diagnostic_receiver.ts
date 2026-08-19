@@ -99,13 +99,9 @@ function streamApi(
             subscriber.next(extracted);
           }
         } else {
-          const pathDesc = query.responsePath
-            ? `responsePath '${query.responsePath}'`
-            : 'response root';
-          subscriber.error(
-            new Error(`${pathDesc} resolved to a scalar value; expected array or object`)
-          );
-          return;
+          // null, undefined, or a primitive scalar — treat as empty result set.
+          // This happens when an API returns {"count": 0} with the path key absent,
+          // or {"jobs": null} when there are no entities. No items to emit.
         }
         subscriber.complete();
       })
