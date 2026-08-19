@@ -562,6 +562,18 @@ export function buildAwsServiceMatrix(
     // gets deployment methods and becomes visible without a manual showInUI update.
     const showInUI = entry.showInUI ?? deploymentMethods.length > 0;
 
+    // For ECF-only services, ECF manages all configuration internally.
+    // Only the trigger-source var needs user input: bucket_arn (S3) or log_group_arn (CloudWatch).
+    // Suppress the rest of the manifest vars so the flyout stays minimal.
+    const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
+    if (deploymentMethods.length > 0 && deploymentMethods.every((m) => m.method === 'ecf')) {
+      const ecfVarNames = Object.keys(varDefs).filter((v) => ECF_TRIGGER_VARS.has(v));
+      if (ecfVarNames.length > 0) {
+        requiredConfig = ecfVarNames;
+        optionalConfig = undefined;
+      }
+    }
+
     const merged = {
       ...rest,
       name: (name ?? entry.id) as string,
