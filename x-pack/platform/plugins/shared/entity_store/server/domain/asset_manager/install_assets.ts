@@ -19,6 +19,7 @@ import { getEntityDefinition } from '../../../common/domain/definitions/registry
 import { getLatestEntityIndexTemplateConfig } from './latest_index_template';
 import {
   getLatestEntitiesIndexName,
+  getLegacySecurityLatestEntitiesIndexName,
   getEntitiesAlias,
   ENTITY_LATEST,
 } from '../../../common/domain/entity_index';
@@ -32,17 +33,25 @@ import {
   getLegacySecurityHistorySnapshotIndexPattern,
 } from './history_snapshot_index';
 import { getUpdatesEntityIndexTemplateConfig } from './updates_index_template';
-import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
+import {
+  getUpdatesEntitiesDataStreamName,
+  getLegacySecurityUpdatesEntitiesDataStreamName,
+} from './updates_data_stream';
 import { installLatestIndexIngestPipeline } from './latest_index_ingest_pipeline';
 import { getMetadataComponentTemplate } from './metadata_component_templates';
 import { getMetadataEntityIndexTemplateConfig } from './metadata_index_template';
-import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import {
+  getMetadataEntitiesDataStreamName,
+  getLegacySecurityMetadataEntitiesDataStreamName,
+} from './metadata_data_stream';
 import { installMetadataIndexIngestPipeline } from './metadata_index_ingest_pipeline';
 import {
   ensureLegacyCompatibilityAliases,
+  hasCollidingNeutralNamespaceAssets,
   hasLegacySecurityAssets,
   migrateLegacySecurityAssets,
 } from './migrate_legacy_security_assets';
+import { resolveEntityStoreWriteTargets } from './resolve_entity_store_indices';
 
 interface SharedElasticsearchAssetOptions {
   esClient: ElasticsearchClient;
@@ -59,6 +68,12 @@ interface InstallSharedElasticsearchAssetOptions extends SharedElasticsearchAsse
    * caller-created indices in serverless.
    */
   migrationEsClient: ElasticsearchClient;
+  /**
+   * When false, Security-scoped `.entities.v2.*.security_{namespace}` assets are
+   * left in place. Reads and writes stay on those concrete names until they are
+   * deleted after a later migration.
+   */
+  allowLegacyMigration: boolean;
 }
 
 /**
@@ -66,14 +81,16 @@ interface InstallSharedElasticsearchAssetOptions extends SharedElasticsearchAsse
  * initialization begins: ingest pipeline, component templates (for ALL entity types),
  * index templates, the latest index, and the updates data stream.
  *
- * When Security-scoped `.entities.v2.*.security_{namespace}` assets are present, they are
- * migrated to the solution-neutral names after the new templates are installed.
+ * When Security-scoped `.entities.v2.*.security_{namespace}` assets are present and
+ * `allowLegacyMigration` is true, they are migrated to the solution-neutral names
+ * after the new templates are installed.
  */
 export async function installSharedElasticsearchAssets({
   esClient,
   migrationEsClient,
   logger,
   namespace,
+  allowLegacyMigration,
 }: InstallSharedElasticsearchAssetOptions): Promise<void> {
   try {
     await installLatestIndexIngestPipeline(esClient, namespace, logger);
@@ -82,15 +99,20 @@ export async function installSharedElasticsearchAssets({
     await installIndexTemplates(esClient, namespace, logger);
 
     const legacyPresent = await hasLegacySecurityAssets(migrationEsClient, namespace);
-    if (legacyPresent) {
+    if (legacyPresent && allowLegacyMigration) {
       await migrateLegacySecurityAssets({
         esClient: migrationEsClient,
         logger,
         namespace,
       });
+    } else if (legacyPresent) {
+      logger.info(
+        `Skipping legacy Security-scoped Entity Store migration in ${namespace}; feature flag is off`
+      );
     }
 
     // Greenfield (or post-migration): ensure neutral indices/data streams exist.
+    // Skipped per-dataset while the matching legacy concrete asset still exists.
     await installIndicesAndDataStreams(esClient, namespace, logger);
 
     // Bridge custom / predefined roles still granting `.entities.v2.*.security_*`
@@ -111,15 +133,28 @@ export async function installSharedElasticsearchAssets({
 
 /**
  * Creates the latest index and updates data stream after the required templates are installed.
+ * Does not create a neutral asset while its legacy concrete counterpart still exists, so
+ * reads and writes stay on the old index until migration deletes it.
  */
 export async function installIndicesAndDataStreams(
   esClient: ElasticsearchClient,
   namespace: string,
   logger: Logger
 ) {
+  const targets = await resolveEntityStoreWriteTargets(esClient, namespace);
+  const latestIndex = getLatestEntitiesIndexName(namespace);
+  const updatesDataStream = getUpdatesEntitiesDataStreamName(namespace);
+  const metadataDataStream = getMetadataEntitiesDataStreamName(namespace);
+
   await Promise.all([
     (async () => {
-      await createIndex(esClient, getLatestEntitiesIndexName(namespace), {
+      if (targets.latestIndex !== latestIndex) {
+        logger.debug(
+          `Skipping create of ${latestIndex}; writes stay on ${targets.latestIndex} until migration deletes it`
+        );
+        return;
+      }
+      await createIndex(esClient, latestIndex, {
         throwIfExists: false,
         aliases: { [getEntitiesAlias(ENTITY_LATEST, namespace)]: {} },
       });
@@ -127,14 +162,26 @@ export async function installIndicesAndDataStreams(
     })(),
 
     (async () => {
-      await createDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace), {
+      if (targets.updatesDataStream !== updatesDataStream) {
+        logger.debug(
+          `Skipping create of ${updatesDataStream}; writes stay on ${targets.updatesDataStream} until migration deletes it`
+        );
+        return;
+      }
+      await createDataStream(esClient, updatesDataStream, {
         throwIfExists: false,
       });
       logger.debug(`created updates entity data stream in ${namespace}`);
     })(),
 
     (async () => {
-      await createDataStream(esClient, getMetadataEntitiesDataStreamName(namespace), {
+      if (targets.metadataDataStream !== metadataDataStream) {
+        logger.debug(
+          `Skipping create of ${metadataDataStream}; writes stay on ${targets.metadataDataStream} until migration deletes it`
+        );
+        return;
+      }
+      await createDataStream(esClient, metadataDataStream, {
         throwIfExists: false,
       });
       logger.debug(`created metadata entity data stream in ${namespace}`);
@@ -225,22 +272,36 @@ async function uninstallIndicesAndDataStreams(
   namespace: string,
   logger: Logger
 ) {
+  const colliding = await hasCollidingNeutralNamespaceAssets(esClient, namespace);
+
   await Promise.all([
     (async () => {
       await deleteIndex(esClient, getLatestEntitiesIndexName(namespace));
+      if (!colliding) {
+        await deleteIndex(esClient, getLegacySecurityLatestEntitiesIndexName(namespace));
+      }
       logger.debug(`deleted entity index`);
     })(),
     (async () => {
       // Resolve wildcards to concrete names first: ES rejects wildcard deletes when
       // `action.destructive_requires_name=true` (default in Kibana test clusters).
-      await deleteHistorySnapshotIndices(esClient, namespace, logger);
+      await deleteHistorySnapshotIndices(esClient, namespace, logger, colliding);
     })(),
     (async () => {
       await deleteDataStream(esClient, getUpdatesEntitiesDataStreamName(namespace));
+      if (!colliding) {
+        await deleteDataStream(esClient, getLegacySecurityUpdatesEntitiesDataStreamName(namespace));
+      }
       logger.debug(`deleted entity updates data stream`);
     })(),
     (async () => {
       await deleteDataStream(esClient, getMetadataEntitiesDataStreamName(namespace));
+      if (!colliding) {
+        await deleteDataStream(
+          esClient,
+          getLegacySecurityMetadataEntitiesDataStreamName(namespace)
+        );
+      }
       logger.debug(`deleted entity metadata data stream`);
     })(),
   ]);
@@ -249,13 +310,15 @@ async function uninstallIndicesAndDataStreams(
 async function deleteHistorySnapshotIndices(
   esClient: ElasticsearchClient,
   namespace: string,
-  logger: Logger
+  logger: Logger,
+  collidingNeutralNamespace: boolean
 ): Promise<void> {
   // Include the legacy Security-scoped pattern so pre-migration leftovers (or a
   // failed upgrade) are removed on uninstall, not left as orphaned storage.
+  // Skip it when those names belong to space `security_{namespace}`.
   const patterns = [
     getHistorySnapshotIndexPattern(namespace),
-    getLegacySecurityHistorySnapshotIndexPattern(namespace),
+    ...(collidingNeutralNamespace ? [] : [getLegacySecurityHistorySnapshotIndexPattern(namespace)]),
   ];
 
   const historyIndices = (

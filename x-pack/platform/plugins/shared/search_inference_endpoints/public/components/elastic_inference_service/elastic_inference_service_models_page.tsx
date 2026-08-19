@@ -119,7 +119,6 @@ export const ElasticInferenceServiceModelsPage = () => {
         <EisCloudConnectPromoCallout
           promoId="elasticInferencePage"
           isSelfManaged={!cloud?.isCloudEnabled}
-          direction="row"
           navigateToApp={() =>
             application.navigateToApp(CLOUD_CONNECT_NAV_ID, { openInNewTab: true })
           }
