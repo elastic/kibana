@@ -203,7 +203,7 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
 
 export const normalizeFromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
   const base = convertBaseFromEs(document, user);
-  const readBy = { read_by: migrateReadBy(document._source!) };
+  const readBy = { read_by: migrateReadBy(document._source) };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
