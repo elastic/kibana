@@ -23,6 +23,6 @@
     "@kbn/i18n-react",
     "@kbn/storybook",
     "@kbn/index-lifecycle-management-common-shared",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
   ]
 }

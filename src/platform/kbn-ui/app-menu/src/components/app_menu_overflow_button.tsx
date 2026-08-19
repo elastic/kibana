@@ -93,6 +93,7 @@ export const AppMenuOverflowButton = ({
       switchConfig={switchConfig}
       onClose={onPopoverClose}
       onCloseOverflowButton={onPopoverClose}
+      anchorPosition="downRight"
     />
   );
 };

@@ -40,6 +40,7 @@ export const mountManagementSection = (
     dataSourcesClient: new DataSourcesClient(coreStart.http),
     datasetsClient: new DatasetsClient(coreStart.http),
     toasts: coreStart.notifications.toasts,
+    docLinks: coreStart.docLinks,
     cloudInfo,
     featureFlags: {
       enableFederatedIdentityAuth,

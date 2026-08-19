@@ -27,7 +27,7 @@ export const fetchEndpointActionList = async (
     ).data;
   } catch (error) {
     // FIXME: remove once the Action List API is fixed (task #5221)
-    if (error?.response?.status === 404) {
+    if (error?.status === 404) {
       return {
         data: [],
         total: 0,
