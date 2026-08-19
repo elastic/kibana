@@ -17,11 +17,11 @@ project:
   owner: '@elastic/security-detection-platform'
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-security-deep-watch-forensics
 dependsOn:
-  - '@kbn/core'
-  - '@kbn/esql-language'
   - '@kbn/evals'
   - '@kbn/kbn-client'
   - '@kbn/tooling-log'
+  - '@kbn/expect'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package

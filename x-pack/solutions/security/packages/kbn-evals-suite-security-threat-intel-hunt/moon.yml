@@ -21,6 +21,8 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/evals'
   - '@kbn/tooling-log'
+  - '@kbn/expect'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package
