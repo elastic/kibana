@@ -69,6 +69,7 @@ export { evaluate } from './src/evaluate';
 export { createAgentBuilderClient } from './src/utils/agent_builder_client';
 export type {
   AgentBuilderClient,
+  AgentBuilderConfigurationOverrides,
   AgentBuilderConverseParams,
   AgentBuilderClientResponse,
   ConverseStep,
