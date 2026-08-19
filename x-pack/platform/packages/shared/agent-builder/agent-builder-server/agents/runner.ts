@@ -61,6 +61,10 @@ export interface RunAgentParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  /**
+   * Optional CPS project routing expression to scope this run's search tools to a specific projects
+   */
+  projectRouting?: string;
 }
 
 export type RunAgentOnEventFn = (event: ChatAgentEvent) => void;

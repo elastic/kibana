@@ -36,6 +36,7 @@ export interface ChatRequestBodyPayload {
   browser_api_tools?: BrowserApiToolMetadata[];
   configuration_overrides?: RuntimeAgentConfigurationOverrides;
   action?: ConversationAction;
+  project_routing?: string;
   /** Force a specific execution mode. When omitted, the server auto-detects. */
   _execution_mode?: 'local' | 'task_manager';
 }

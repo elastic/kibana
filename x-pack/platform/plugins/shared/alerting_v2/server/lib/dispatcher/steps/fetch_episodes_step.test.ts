@@ -8,8 +8,15 @@
 import { FetchEpisodesStep, parseAlertEpisodes } from './fetch_episodes_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
-import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
+import {
+  createAlertEpisode,
+  createDispatcherPipelineState,
+  createStepLogger,
+} from '../fixtures/test_utils';
+import { EPISODE_QUERY_LIMIT } from '../queries';
 import type { AlertEventSeverity } from '../../../resources/datastreams/alert_events';
+
+const logger = createStepLogger();
 
 describe('FetchEpisodesStep', () => {
   it('returns episodes and continues when episodes are found', async () => {
@@ -24,7 +31,7 @@ describe('FetchEpisodesStep', () => {
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
 
     const state = createDispatcherPipelineState();
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -39,9 +46,70 @@ describe('FetchEpisodesStep', () => {
     mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse([]));
 
     const state = createDispatcherPipelineState();
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result).toEqual({ type: 'halt', reason: 'no_episodes' });
+  });
+
+  it('does not cap the Lucene filter at windowEnd so actions stamped after the settle buffer still join last_fired', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createDispatchableAlertEventsResponse([createAlertEpisode()])
+    );
+
+    const state = createDispatcherPipelineState();
+    const { windowStart, windowEnd } = state.input;
+    await step.execute(state, logger);
+
+    const request = mockEsClient.esql.query.mock.calls[0][0];
+    expect(request.filter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: windowStart.toISOString(),
+        },
+      },
+    });
+    expect(request.query).toContain(
+      `type IS NULL OR @timestamp >= "${windowStart.toISOString()}"::DATETIME AND @timestamp <= "${windowEnd.toISOString()}"::DATETIME`
+    );
+  });
+
+  it('sets truncated: true when the query returns exactly EPISODE_QUERY_LIMIT rows', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    const maxEpisodes = Array.from({ length: EPISODE_QUERY_LIMIT }, (_, i) =>
+      createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
+    );
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createDispatchableAlertEventsResponse(maxEpisodes)
+    );
+
+    const state = createDispatcherPipelineState();
+    const result = await step.execute(state, logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.truncated).toBe(true);
+  });
+
+  it('sets truncated: false when the query returns fewer than EPISODE_QUERY_LIMIT rows', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchEpisodesStep(queryService);
+
+    const episodes = Array.from({ length: EPISODE_QUERY_LIMIT - 1 }, (_, i) =>
+      createAlertEpisode({ episode_id: `ep-${i}`, group_hash: `h-${i}` })
+    );
+    mockEsClient.esql.query.mockResolvedValueOnce(createDispatchableAlertEventsResponse(episodes));
+
+    const state = createDispatcherPipelineState();
+    const result = await step.execute(state, logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.truncated).toBe(false);
   });
 
   it('propagates query errors', async () => {
@@ -51,7 +119,7 @@ describe('FetchEpisodesStep', () => {
     mockEsClient.esql.query.mockRejectedValueOnce(new Error('ES error'));
 
     const state = createDispatcherPipelineState();
-    await expect(step.execute(state)).rejects.toThrow('ES error');
+    await expect(step.execute(state, logger)).rejects.toThrow('ES error');
   });
 });
 

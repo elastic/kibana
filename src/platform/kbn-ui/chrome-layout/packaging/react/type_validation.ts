@@ -27,23 +27,23 @@
 
 // Source types.
 import type { LayoutConfig as SourceLayoutConfig } from '../../src/layout_config_context';
-import type { ChromeStyle as SourceChromeStyle } from '../../src/layout.types';
+import type { LayoutAppearance as SourceLayoutAppearance } from '../../src/layout.types';
 import type { GridLayoutGlobalStylesProps as SourceGridLayoutGlobalStylesProps } from '../../src/layouts/grid_global_app_style';
 
 // Packaged types.
 import type {
   ChromeLayoutConfig as PackagedChromeLayoutConfig,
-  ChromeStyle as PackagedChromeStyle,
+  LayoutAppearance as PackagedLayoutAppearance,
   GridLayoutGlobalStylesProps as PackagedGridLayoutGlobalStylesProps,
 } from './types';
 
-// ChromeStyle must match exactly.
-type ValidateChromeStyle = [SourceChromeStyle] extends [PackagedChromeStyle]
-  ? [PackagedChromeStyle] extends [SourceChromeStyle]
+// LayoutAppearance must match exactly.
+type ValidateLayoutAppearance = [SourceLayoutAppearance] extends [PackagedLayoutAppearance]
+  ? [PackagedLayoutAppearance] extends [SourceLayoutAppearance]
     ? true
     : false
   : false;
-const _chromeStyle: ValidateChromeStyle = true;
+const _layoutAppearance: ValidateLayoutAppearance = true;
 
 // Structural types: packaged must be compatible with source.
 const _layoutConfig: PackagedChromeLayoutConfig = {} as SourceLayoutConfig;
@@ -55,7 +55,7 @@ const _gridLayoutGlobalStylesProps: PackagedGridLayoutGlobalStylesProps =
 // The functional API (passing ReactElement, string, number, null, functions) is
 // fully compatible; only edge-case portal/fragment props differ.
 
-void _chromeStyle;
+void _layoutAppearance;
 void _layoutConfig;
 void _gridLayoutGlobalStylesProps;
 
