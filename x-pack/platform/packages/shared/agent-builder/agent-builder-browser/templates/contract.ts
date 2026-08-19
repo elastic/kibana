@@ -15,7 +15,13 @@ import type { Conversation } from '@kbn/agent-builder-common';
 export interface ConversationTemplateTabDefinition {
   /** Localized display label for the tab. */
   label: string;
-  /** Tab body. Rendered as a component so it may use hooks. */
+  /**
+   * Tab body. Rendered as a component so it may use hooks.
+   *
+   * Must be self-contained: capture your plugin's services in a closure at registration and
+   * mount any providers you need inside this component. The flyout can render outside any
+   * `KibanaContextProvider`, so ambient context (`useKibana()` etc.) is not available.
+   */
   content: ComponentType<{ conversation: Conversation }>;
 }
 
