@@ -72,6 +72,14 @@ const failed = (error: unknown, log: Logger) => {
   };
 };
 
+const readOnlyAnnotations = (title: string) => ({
+  title,
+  readOnlyHint: true as const,
+  destructiveHint: false as const,
+  idempotentHint: true as const,
+  openWorldHint: false as const,
+});
+
 export const registerRumTools = ({
   agentBuilder,
   core,
@@ -92,6 +100,7 @@ export const registerRumTools = ({
   agentBuilder.tools.register({
     id: RUM_UX_TOOL_IDS.getOverview,
     type: ToolType.builtin,
+    annotations: readOnlyAnnotations('Get RUM overview'),
     description: `Retrieves RUM overview KPIs, Core Web Vitals, countries, browsers, OS, frustration counts, and top pages.
 
 When to use:
@@ -117,6 +126,7 @@ When NOT to use:
   agentBuilder.tools.register({
     id: RUM_UX_TOOL_IDS.findSessions,
     type: ToolType.builtin,
+    annotations: readOnlyAnnotations('Find RUM sessions'),
     description: `Finds RUM sessions matching filters, sorted by duration, errors, or rage clicks.
 
 When to use:
@@ -183,6 +193,7 @@ Returns a compact session list with IDs that can be opened in Session Replay.`,
   agentBuilder.tools.register({
     id: RUM_UX_TOOL_IDS.getErrors,
     type: ToolType.builtin,
+    annotations: readOnlyAnnotations('Get RUM errors'),
     description: `Retrieves RUM exception groups ranked by impact (count, sessions, identified users).
 
 When to use:
@@ -206,6 +217,7 @@ When NOT to use:
   agentBuilder.tools.register({
     id: RUM_UX_TOOL_IDS.getPages,
     type: ToolType.builtin,
+    annotations: readOnlyAnnotations('Get RUM pages'),
     description: `Retrieves per-page RUM views and Core Web Vitals (LCP, INP, CLS) plus error counts.
 
 When to use:
@@ -226,6 +238,7 @@ When to use:
   agentBuilder.tools.register({
     id: RUM_UX_TOOL_IDS.getReport,
     type: ToolType.builtin,
+    annotations: readOnlyAnnotations('Get RUM report'),
     description: `Builds a full RUM report for a template (scorecard, pages, errors, frustration, funnel, clients, users), including period-over-period deltas when compare=previous.
 
 When to use:

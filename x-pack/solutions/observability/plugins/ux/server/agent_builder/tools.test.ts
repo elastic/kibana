@@ -14,11 +14,19 @@ import { registerRumTools } from './tools';
 
 describe('registerRumTools', () => {
   it('registers the five RUM tools with bounded defaulted schemas', () => {
-    const registered: Array<{ id: string; schema: { parse: (value: unknown) => unknown } }> = [];
+    const registered: Array<{
+      id: string;
+      schema: { parse: (value: unknown) => unknown };
+      annotations: { readOnlyHint: boolean };
+    }> = [];
     registerRumTools({
       agentBuilder: {
         tools: {
-          register: (tool: { id: string; schema: { parse: (value: unknown) => unknown } }) => {
+          register: (tool: {
+            id: string;
+            schema: { parse: (value: unknown) => unknown };
+            annotations: { readOnlyHint: boolean };
+          }) => {
             registered.push(tool);
           },
         },
@@ -34,6 +42,7 @@ describe('registerRumTools', () => {
       RUM_UX_TOOL_IDS.getPages,
       RUM_UX_TOOL_IDS.getReport,
     ]);
+    expect(registered.every((tool) => tool.annotations.readOnlyHint === true)).toBe(true);
 
     expect(registered[0].schema.parse({})).toEqual(
       expect.objectContaining({ start: 'now-24h', end: 'now' })
