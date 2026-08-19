@@ -141,6 +141,10 @@ paths:
                             type: string
                             maxLength: 256
                             nullable: true
+                          higher_is_better:
+                            type: boolean
+                            description: >-
+                              Whether a higher score is an improvement.
                         required:
                           - name
                     required:

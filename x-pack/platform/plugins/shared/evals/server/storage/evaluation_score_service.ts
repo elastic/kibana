@@ -70,6 +70,7 @@ const toEvaluationScoreDocuments = (
         explanation: score.evaluator.explanation,
         metadata: score.evaluator.metadata,
         trace_id: score.evaluator.trace_id,
+        higher_is_better: score.evaluator.higher_is_better,
         model: request.evaluator_model,
       },
       metadata: {

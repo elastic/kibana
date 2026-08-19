@@ -112,6 +112,10 @@ export const EvaluatorInfo = lazySchema(() =>
     explanation: z.string().max(4096).nullable().optional(),
     metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
     trace_id: z.string().max(256).nullable().optional(),
+    /**
+     * Whether a higher score is an improvement.
+     */
+    higher_is_better: z.boolean().optional(),
     model: Model,
   })
 );

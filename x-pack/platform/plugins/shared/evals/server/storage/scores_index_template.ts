@@ -84,6 +84,7 @@ const evaluationsDataStreamMappings = {
         explanation: { type: 'text', index: false },
         metadata: { type: 'flattened' },
         trace_id: { type: 'keyword' },
+        higher_is_better: { type: 'boolean' },
         model: {
           type: 'object',
           properties: {
@@ -99,7 +100,7 @@ const evaluationsDataStreamMappings = {
 
 export const evaluationsDataStreamDefinition: DataStreamDefinition<MappingsDefinition> = {
   name: EvaluationIndices.SCORES,
-  version: 2,
+  version: 3,
   hidden: true,
   template: {
     lifecycle: {

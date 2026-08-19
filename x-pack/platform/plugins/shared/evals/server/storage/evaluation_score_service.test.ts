@@ -66,6 +66,7 @@ const getBaseRequest = (): IngestScoresRequestBody => ({
         explanation: 'mostly correct',
         metadata: { rubric: 'v1' },
         trace_id: 'trace-evaluator-1',
+        higher_is_better: true,
       },
     },
   ],
@@ -138,11 +139,61 @@ describe('EvaluationScoreService', () => {
         dataset: request.scores[0].example.dataset,
       },
       task: { model: request.task_model, repetition_index: 0 },
-      evaluator: { model: request.evaluator_model, name: 'correctness' },
+      evaluator: {
+        model: request.evaluator_model,
+        name: 'correctness',
+        higher_is_better: true,
+      },
     });
     expect(computeScoreDocumentId(capturedDocuments[0])).toBe(
       'exp-1-suite-1-task-model-dataset-1-example-1-correctness-0'
     );
+  });
+
+  it('leaves higher_is_better undefined when the ingest field is absent', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const request = getBaseRequest();
+    delete request.scores[0].evaluator.higher_is_better;
+    const capturedDocuments: Array<{ _id: string } & EvaluationScoreDocument> = [];
+    const { coreDataStreams, create } = createDataStreamsMock();
+
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => {
+      capturedDocuments.push(...(documents as Array<{ _id: string } & EvaluationScoreDocument>));
+      return {
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      };
+    });
+
+    const service = new EvaluationScoreService(logger, coreDataStreams);
+    await service.write(request, ['default']);
+
+    expect(capturedDocuments[0].evaluator.higher_is_better).toBeUndefined();
+  });
+
+  it('persists higher_is_better: false for lower-is-better evaluators', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const request = getBaseRequest();
+    request.scores[0].evaluator = {
+      ...request.scores[0].evaluator,
+      name: 'Latency',
+      higher_is_better: false,
+    };
+    const capturedDocuments: Array<{ _id: string } & EvaluationScoreDocument> = [];
+    const { coreDataStreams, create } = createDataStreamsMock();
+
+    create.mockImplementation(async ({ documents }: { documents: Array<{ _id: string }> }) => {
+      capturedDocuments.push(...(documents as Array<{ _id: string } & EvaluationScoreDocument>));
+      return {
+        errors: false,
+        items: documents.map((document) => ({ create: { _id: document._id, status: 201 } })),
+      };
+    });
+
+    const service = new EvaluationScoreService(logger, coreDataStreams);
+    await service.write(request, ['default']);
+
+    expect(capturedDocuments[0].evaluator.higher_is_better).toBe(false);
   });
 
   it('treats 409 bulk drops as idempotent conflicts', async () => {
