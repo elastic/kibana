@@ -36,7 +36,7 @@ import {
   getEsqlDataView,
 } from '@kbn/discover-utils';
 import { AbortReason } from '@kbn/kibana-utils-plugin/common';
-import { getESQLStatsQueryMeta } from '@kbn/esql-utils';
+import { getESQLStatsQueryMeta, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { isEqual, sortBy } from 'lodash';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
@@ -82,6 +82,8 @@ export interface DataDocumentsMsg extends DataMsg {
   esqlQueryColumns?: DatatableColumn[]; // columns from ES|QL request
   esqlHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[]; // warnings (like shard failures)
+  resultSource?: 'previous' | 'fresh';
+  isBackgroundRevalidation?: boolean;
 }
 
 export interface DataTotalHitsMsg extends DataMsg {
@@ -168,6 +170,7 @@ export function getDataStateContainer({
   urlStateStorage,
   injectCurrentTab,
   getCurrentTab,
+  useEsqlTabState = false,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
@@ -176,6 +179,7 @@ export function getDataStateContainer({
   urlStateStorage: IKbnUrlStateStorage;
   injectCurrentTab: TabActionInjector;
   getCurrentTab: () => TabState;
+  useEsqlTabState?: boolean;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -184,6 +188,7 @@ export function getDataStateContainer({
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
   let numberOfFetches = 0;
   let unsubscribeIsRequested = false;
+  let canUsePreparedDataViewForFirstFetch = useEsqlTabState;
 
   /**
    * The observable to trigger data fetching in UI
@@ -501,6 +506,7 @@ export function getDataStateContainer({
             ...commonFetchParams,
             reset: options.reset,
             abortController,
+            usePreviousEsqlDocuments: useEsqlTabState && numberOfFetches === 1,
             onFetchRecordsComplete: async () => {
               if (isEsqlQuery && !abortController.signal.aborted) {
                 // defer triggering chart fetching until after main request completes for ES|QL mode
@@ -608,8 +614,20 @@ export function getDataStateContainer({
     const query = getCurrentTab().appState.query;
     const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, getCurrentTab().id);
     const currentDataView = currentDataView$.getValue();
+    const isEsqlQuery = isOfAggregateQueryType(query);
+    let shouldResolveDataView = isEsqlQuery;
 
-    if (isOfAggregateQueryType(query)) {
+    // A restored ES|QL tab already prepared its Data View. Resolve it again only if the query
+    // now points to a different index pattern.
+    if (canUsePreparedDataViewForFirstFetch && isEsqlQuery) {
+      const currentIndexPattern = currentDataView?.getIndexPattern();
+      const queryIndexPattern = getIndexPatternFromESQLQuery(query.esql);
+      shouldResolveDataView = currentIndexPattern !== queryIndexPattern;
+    }
+
+    canUsePreparedDataViewForFirstFetch = false;
+
+    if (isEsqlQuery && shouldResolveDataView) {
       const nextDataView = await getEsqlDataView(query, currentDataView, services);
       if (nextDataView !== currentDataView) {
         internalState.dispatch(

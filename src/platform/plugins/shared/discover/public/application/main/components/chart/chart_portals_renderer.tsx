@@ -16,8 +16,11 @@ import React, {
   useCallback,
 } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode, InPortal } from 'react-reverse-portal';
-import type { UnifiedHistogramPartialLayoutProps } from '@kbn/unified-histogram';
-import { UnifiedHistogramChart, useUnifiedHistogram } from '@kbn/unified-histogram';
+import {
+  UnifiedHistogramChart,
+  useUnifiedHistogram,
+  type UnifiedHistogramPartialLayoutProps,
+} from '@kbn/unified-histogram';
 import { useChartStyles } from '@kbn/unified-histogram/components/chart/hooks/use_chart_styles';
 import { useServicesBootstrap } from '@kbn/unified-histogram/hooks/use_services_bootstrap';
 import type { UnifiedMetricsGridRestorableState } from '@kbn/unified-chart-section-viewer';
@@ -43,6 +46,11 @@ import { useUnifiedHistogramRuntimeState } from './use_unified_histogram_runtime
 import { useUnifiedHistogramCommon } from './use_unified_histogram_common';
 import type { ChartSectionConfiguration } from '../../../../context_awareness/types';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import {
+  type EsqlHistogramRendererProps,
+  useReconcileEsqlHistogramCache,
+  withEsqlHistogramCache,
+} from '../../../../esql_result_cache/histogram/with_esql_histogram_cache';
 
 export type ChartPortalNode = HtmlPortalNode;
 export type ChartPortalNodes = Record<string, ChartPortalNode>;
@@ -58,6 +66,7 @@ export const ChartPortalsRenderer = ({
   const chartPortalNodes = useRef<ChartPortalNodes>({});
 
   chartPortalNodes.current = updatePortals(chartPortalNodes.current, allTabIds);
+  useReconcileEsqlHistogramCache(allTabIds);
 
   return (
     <>
@@ -177,13 +186,15 @@ const ChartsWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
       chartSectionConfig={chartSectionConfig}
     />
   ) : (
-    <UnifiedHistogramWrapper panelsToggle={panelsToggle} />
+    <UnifiedHistogramWithCache panelsToggle={panelsToggle} />
   );
 };
 
-const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) => {
-  const { currentTabId, unifiedHistogramProps } = useUnifiedHistogramRuntimeState();
-
+const UnifiedHistogramWrapper = ({
+  currentTabId,
+  panelsToggle,
+  unifiedHistogramProps,
+}: EsqlHistogramRendererProps) => {
   const { setUnifiedHistogramApi } = unifiedHistogramProps;
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
 
@@ -208,6 +219,8 @@ const UnifiedHistogramWrapper = ({ panelsToggle }: UnifiedHistogramChartProps) =
     />
   );
 };
+
+const UnifiedHistogramWithCache = withEsqlHistogramCache(UnifiedHistogramWrapper);
 
 const CustomChartSectionWrapper = ({
   panelsToggle,

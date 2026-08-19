@@ -36,6 +36,7 @@ import { fetchEsql } from './fetch_esql';
 import type { InternalStateStore, TabState } from '../state_management/redux';
 import type { ScopedProfilesManager } from '../../../context_awareness';
 import type { ScopedDiscoverEBTManager } from '../../../ebt_manager';
+import type { EsqlDocumentsFetch } from '../../../esql_result_cache/service';
 
 export interface CommonFetchParams {
   dataSubjects: SavedSearchData;
@@ -61,6 +62,7 @@ export interface CommonFetchParams {
 export function fetchAll(
   params: CommonFetchParams & {
     reset: boolean;
+    usePreviousEsqlDocuments?: boolean;
     onFetchRecordsComplete?: () => Promise<void>;
   }
 ): Promise<void> {
@@ -76,6 +78,7 @@ export function fetchAll(
     abortController,
     getCurrentTab,
     onFetchRecordsComplete,
+    usePreviousEsqlDocuments = false,
   } = params;
   const { data, expressions } = services;
 
@@ -100,29 +103,49 @@ export function fetchAll(
       });
     }
 
-    // Mark all subjects as loading
-    sendLoadingMsg(dataSubjects.main$);
     sendLoadingMsg(dataSubjects.documents$, { query });
     sendLoadingMsg(dataSubjects.totalHits$, {
       result: dataSubjects.totalHits$.getValue().result,
     });
 
     // Start fetching all required requests
-    const response = isEsqlQuery
-      ? fetchEsql({
-          query,
-          dataView,
-          abortSignal: abortController.signal,
-          inspectorAdapters,
-          data,
-          expressions,
-          scopedProfilesManager,
-          timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
-          esqlVariables: currentTab.esqlVariables,
-          searchSessionId: params.searchSessionId,
-          esqlApproximation: currentTab.appState.esqlApproximation ?? false,
-        })
-      : fetchDocuments(searchSource, params);
+    let response: ReturnType<typeof fetchDocuments>;
+    let esqlDocumentsFetch: EsqlDocumentsFetch | undefined;
+
+    if (isEsqlQuery) {
+      const freshRequest = {
+        query,
+        dataView,
+        abortSignal: abortController.signal,
+        inspectorAdapters,
+        data,
+        expressions,
+        scopedProfilesManager,
+        timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
+        esqlVariables: currentTab.esqlVariables,
+        searchSessionId: params.searchSessionId,
+        esqlApproximation: currentTab.appState.esqlApproximation ?? false,
+      };
+
+      esqlDocumentsFetch = services.esqlResultCache.manageDocuments({
+        dataSubjects,
+        enabled: usePreviousEsqlDocuments,
+        freshRequest,
+        freshResponse: fetchEsql(freshRequest),
+        isCurrentFetch: () =>
+          getCurrentTab().dataRequestParams.searchSessionId === params.searchSessionId,
+        selectedTimeRange: currentTab.dataRequestParams.timeRangeRelative,
+        tabId: currentTab.id,
+      });
+      response = esqlDocumentsFetch.freshResponse;
+    } else {
+      response = fetchDocuments(searchSource, params);
+    }
+
+    // Keep the existing layout visible while the previous response is being resolved.
+    if (!esqlDocumentsFetch?.hasPreviousResult) {
+      sendLoadingMsg(dataSubjects.main$);
+    }
 
     const fetchAllRequestsOnlyTracker = scopedEbtManager.trackQueryPerformanceEvent({
       eventName: 'discoverFetchAllRequestsOnly',
@@ -178,8 +201,11 @@ export function fetchAll(
           esqlHeaderWarning,
           interceptedWarnings,
           query,
+          ...(esqlDocumentsFetch && {
+            resultSource: 'fresh' as const,
+            isBackgroundRevalidation: esqlDocumentsFetch.wasPreviousResultPublished(),
+          }),
         });
-
         checkHitCount(dataSubjects.main$, records.length);
       })
       // In the case that the request was aborted (e.g. a refresh), swallow the abort error
@@ -198,9 +224,9 @@ export function fetchAll(
     return firstValueFrom(
       race(
         combineLatest([
-          isComplete(dataSubjects.documents$).pipe(
-            switchMap(async () => onFetchRecordsComplete?.())
-          ),
+          isComplete(dataSubjects.documents$, ({ resultSource }) =>
+            esqlDocumentsFetch?.hasPreviousResult ? resultSource === 'fresh' : true
+          ).pipe(switchMap(async () => onFetchRecordsComplete?.())),
           isComplete(dataSubjects.totalHits$),
         ]),
         noResultsFound(dataSubjects.main$)
@@ -271,9 +297,16 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
   }
 }
 
-const isComplete = <T extends DataMsg>(subject: BehaviorSubject<T>) => {
+const isComplete = <T extends DataMsg>(
+  subject: BehaviorSubject<T>,
+  isExpectedResult: (message: T) => boolean = () => true
+) => {
   return subject.pipe(
-    filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+    filter(
+      (message) =>
+        message.fetchStatus === FetchStatus.ERROR ||
+        (message.fetchStatus === FetchStatus.COMPLETE && isExpectedResult(message))
+    ),
     distinctUntilChanged((a, b) => a.fetchStatus === b.fetchStatus)
   );
 };

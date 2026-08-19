@@ -97,6 +97,7 @@ export const setTabs: InternalStateThunkActionCreator<
     // Wait to delete runtime state until after all removed tabs
     // are disconnected to avoid undefined errors in side effects
     for (const tab of removedTabs) {
+      services.esqlResultCache.closeTab(tab.id);
       delete runtimeStateManager.tabs.byId[tab.id];
     }
 

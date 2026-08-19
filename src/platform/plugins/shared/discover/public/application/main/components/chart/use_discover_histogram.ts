@@ -80,8 +80,12 @@ export const useDiscoverHistogram = (
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
   const documentsState = useDataState(documents$);
   const isChartLoading = useMemo(() => {
-    return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
-  }, [isEsqlMode, documentsState?.fetchStatus]);
+    return (
+      isEsqlMode &&
+      (documentsState?.fetchStatus === FetchStatus.LOADING ||
+        documentsState?.isBackgroundRevalidation === true)
+    );
+  }, [isEsqlMode, documentsState?.fetchStatus, documentsState?.isBackgroundRevalidation]);
 
   /**
    * API initialization
