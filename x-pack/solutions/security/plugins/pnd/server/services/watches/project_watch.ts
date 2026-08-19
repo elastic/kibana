@@ -7,7 +7,6 @@
 
 import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
 import type {
-  AutonomyLevel,
   ScheduleCadence,
   ScheduleHandoff,
   ScheduleMode,
@@ -25,7 +24,6 @@ import { coverageFromSchedule } from '@kbn/pnd-common';
 /** Static watch policy bag from `consts.watch_policy`. */
 interface WatchPolicyAttrs {
   mandate?: string;
-  autonomyLevel?: AutonomyLevel;
   handoff?: ScheduleHandoff;
   scopes?: WatchScope[];
   onDemand?: boolean;
@@ -58,12 +56,6 @@ const asNumber = (value: unknown, fallback: number): number =>
 
 const asBoolean = (value: unknown, fallback: boolean): boolean =>
   typeof value === 'boolean' ? value : fallback;
-
-const asAutonomyLevel = (value: unknown): AutonomyLevel => {
-  const n = asNumber(value, 1);
-  if (n >= 1 && n <= 5) return n as AutonomyLevel;
-  return 1;
-};
 
 const asScopeAccess = (value: unknown): ScopeAccess => {
   if (value === 'full' || value === 'masked' || value === 'denied') return value;
@@ -323,7 +315,6 @@ export const projectWorkflowToWatch = (item: WorkflowListItemDto): Watch => {
     scopeSummary: asString(policy?.scopeSummary, '—'),
     scopes: projectScopes(policy),
     callables: projectCallablesFromDefinition(definition, policy),
-    autonomyLevel: asAutonomyLevel(policy?.autonomyLevel),
     metrics: {
       // Real 7-day run counts are not available from the list/history projection yet.
       runs7d: null,
@@ -347,7 +338,6 @@ triggers:
 consts:
   watch_policy:
     mandate: ${JSON.stringify(name)}
-    autonomyLevel: 1
     handoff: none
     onDemand: true
     draft: false

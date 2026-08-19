@@ -17,3 +17,10 @@ export {
 
 export { customContentStateSchema } from './schema';
 export type { CustomContentState } from './schema';
+
+export { stripMarkdownFences } from './strip_markdown_fences';
+export {
+  CUSTOM_CONTENT_CSS_VARS_GUIDANCE,
+  CUSTOM_CONTENT_SANDBOX_GUIDANCE,
+  CUSTOM_CONTENT_LIQUID_DATA_MODEL_GUIDANCE,
+} from './template_guidance';

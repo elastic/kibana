@@ -325,6 +325,7 @@ export interface DocLinks {
     readonly ingestDataToSecurity: string;
     readonly automaticImport: string;
     readonly attacksPage: string;
+    readonly runAttackDiscoveryInWorkflow: string;
     readonly mitreCoverage: string;
     readonly remapMitreAttack: string;
   };
@@ -746,6 +747,18 @@ export interface DocLinks {
   };
   readonly datasetQuality: {
     readonly failureStore: string;
+  };
+  readonly dataFederation: {
+    readonly overview: string;
+    readonly quickstart: string;
+    readonly dataSources: string;
+    readonly datasets: string;
+    readonly datasetSettings: string;
+    readonly authentication: string;
+    readonly staticCredentials: string;
+    readonly federatedIdentity: string;
+    readonly querying: string;
+    readonly security: string;
   };
   readonly agentBuilder: {
     readonly agentBuilder: string;
