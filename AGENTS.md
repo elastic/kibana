@@ -78,11 +78,12 @@ Follow existing patterns in the target area first; below are common defaults.
 - Handle errors explicitly; return typed errors from APIs when possible.
 - Keep async logic linear; avoid nested `try` blocks when possible.
 
-### React / UI Conventions
-- Use functional components; type props explicitly.
-- Keep hooks at the top level; avoid conditional hooks.
-- Avoid inline styles unless consistent with the file’s conventions.
-- Use `@elastic/eui` components with Emotion (`@emotion/react`) for styling.
+### UI Component Selection and Styling
+- Reuse existing components from the target module and shared packages it can depend on. Prefer `@kbn/ui-*` packages under `src/platform/kbn-ui` over equivalent `@elastic/eui` components — they encode Kibana-specific behavior and conventions.
+- Treat every component you consume as encapsulated; customize it through its public props and supported composition points.
+- Do not target a component's internal DOM, internal or generated class names, or use `!important` to override its appearance. Existing instances of these patterns are not precedent.
+- When the public API cannot meet the requirement: if changing the component is in scope, extend its public API; otherwise implement the closest supported result and recommend consulting its owning team (`owner` in `kibana.jsonc`; `@elastic/eui-team` for EUI). Treat duplicating a component as a last resort.
+- Style with Emotion (`@emotion/react`) and EUI design tokens; reserve inline styles for runtime-computed values.
 
 ### Schema validation
 - When adding `schema.string()` / `schema.arrayOf()` (`@kbn/config-schema`) or `z.string()` / `z.array()` (`zod`) for HTTP request input, always bound them (`maxLength` / `maxSize` / `.max()`) to prevent unbounded-input DoS.
