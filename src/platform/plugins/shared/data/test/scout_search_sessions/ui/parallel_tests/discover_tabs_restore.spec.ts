@@ -130,6 +130,7 @@ spaceTest.describe(
       async ({ page, pageObjects }) => {
         await spaceTest.step('store a named ES|QL background search', async () => {
           await pageObjects.discover.goto({ queryMode: 'esql' });
+          await pageObjects.discover.waitUntilTabIsLoaded();
           await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
           await pageObjects.backgroundSearch.sendToBackground();
 

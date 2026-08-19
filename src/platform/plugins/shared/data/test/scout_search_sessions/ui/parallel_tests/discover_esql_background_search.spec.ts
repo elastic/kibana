@@ -51,6 +51,7 @@ spaceTest.describe(
       'stores a running search and surfaces it in the background search flyout',
       async ({ pageObjects }) => {
         await pageObjects.discover.goto({ queryMode: 'esql' });
+        await pageObjects.discover.waitUntilTabIsLoaded();
         await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
 
         await pageObjects.backgroundSearch.sendToBackground();

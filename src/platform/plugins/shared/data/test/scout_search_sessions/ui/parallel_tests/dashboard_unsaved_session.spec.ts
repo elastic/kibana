@@ -36,9 +36,7 @@ spaceTest.describe(
 
       // Every test needs the same Discover session on an unsaved dashboard, so build it here.
       await pageObjects.discover.goto({ queryMode: 'esql' });
-      // Let the initial search finish so the Monaco editor has a model to write to, otherwise
-      // setCodeEditorValue fails with "No Monaco editor models found".
-      await pageObjects.discover.waitUntilSearchingHasFinished();
+      await pageObjects.discover.waitUntilTabIsLoaded();
       await pageObjects.discover.codeEditor.setCodeEditorValue(SLOW_ESQL_QUERY);
       await pageObjects.discover.submitQuery();
       await pageObjects.discover.waitUntilSearchingHasFinished();
