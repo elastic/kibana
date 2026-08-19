@@ -226,18 +226,19 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeDisabled();
   });
 
-  test('regions-only service shows no attention badge and does not block Continue', async ({
+  test('service with no required text vars shows no attention badge and does not block Continue', async ({
     browserAuth,
     page,
   }) => {
-    // firewall_metrics: optionalConfig: ['regions'] — no required text fields
+    // s3access: showInUI:true, managed_integration; no required text vars in the manifest
+    // so no incomplete instance → no attention callout → Continue enabled.
+    // (firewall_metrics was previously used here but has showInUI:false, which the context
+    // filters out of selectedServiceIds — making the step unreachable.)
     await navigateToServiceSettings(browserAuth, page, {
-      selectedServiceIds: ['firewall_metrics'],
+      selectedServiceIds: ['s3access'],
     });
 
-    await expect(
-      page.testSubj.locator('serviceSettingsStep-attentionIcon-firewall_metrics')
-    ).toBeHidden();
+    await expect(page.testSubj.locator('serviceSettingsStep-attentionIcon-s3access')).toBeHidden();
     await expect(page.testSubj.locator('serviceSettingsStep-attentionCallout')).toBeHidden();
     await expect(page.testSubj.locator('serviceSettingsStep-continueButton')).toBeEnabled();
   });
