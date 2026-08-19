@@ -111,6 +111,8 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
+import { WithNewIndicator } from './custom_toolbar/with_new_indicator';
+import { useViewModeNewBadge } from '../hooks/use_view_mode_new_badge';
 import { RowHeightType, useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
@@ -665,6 +667,22 @@ const InternalUnifiedDataTable = React.forwardRef<
     const displayedColumns = getDisplayedColumns(columns, dataView, sourceDisplayMode);
     const isSummaryOnlyColumn = getIsSummaryOnlyColumn(displayedColumns);
     const showSummaryColumn = getShowSummaryColumn(displayedColumns);
+
+    const { isNew: isViewModeNew, markAsSeen: markViewModeSeen } = useViewModeNewBadge(
+      storage,
+      Boolean(onUpdateSourceDisplayMode)
+    );
+
+    const onUpdateSourceDisplayModeWithSeen = useMemo(
+      () =>
+        onUpdateSourceDisplayMode
+          ? (mode: SourceDisplayMode) => {
+              markViewModeSeen();
+              onUpdateSourceDisplayMode(mode);
+            }
+          : undefined,
+      [markViewModeSeen, onUpdateSourceDisplayMode]
+    );
 
     const docMap = useMemo<DocMap>(
       () => new Map(rows?.map((row, docIndex) => [row.id, { doc: row, docIndex }]) ?? []),
@@ -1320,10 +1338,18 @@ const InternalUnifiedDataTable = React.forwardRef<
                   toolbarProps.columnControl
                 );
 
+              const displayControl =
+                isViewModeNew && toolbarProps.displayControl ? (
+                  <WithNewIndicator>{toolbarProps.displayControl}</WithNewIndicator>
+                ) : (
+                  toolbarProps.displayControl
+                );
+
               return renderCustomToolbar({
                 toolbarProps: {
                   ...toolbarProps,
                   columnControl,
+                  displayControl,
                 },
                 gridProps: {
                   additionalControls:
@@ -1343,6 +1369,7 @@ const InternalUnifiedDataTable = React.forwardRef<
         showSummaryColumn,
         isSummaryOnlyColumn,
         onChangeShowSummaryColumn,
+        isViewModeNew,
       ]
     );
 
@@ -1378,9 +1405,10 @@ const InternalUnifiedDataTable = React.forwardRef<
               headerLineCountInput={headerLineCountInput}
               densityControl={densityControl}
               sourceDisplayMode={sourceDisplayMode}
-              onChangeSourceDisplayMode={onUpdateSourceDisplayMode}
+              onChangeSourceDisplayMode={onUpdateSourceDisplayModeWithSeen}
               jsonModeSettings={jsonModeSettings}
               onChangeJsonModeSettings={onUpdateJsonModeSettings}
+              isViewModeNew={isViewModeNew}
             />
           </>
         ),
@@ -1401,9 +1429,10 @@ const InternalUnifiedDataTable = React.forwardRef<
       lineCountInput,
       headerLineCountInput,
       sourceDisplayMode,
-      onUpdateSourceDisplayMode,
+      onUpdateSourceDisplayModeWithSeen,
       jsonModeSettings,
       onUpdateJsonModeSettings,
+      isViewModeNew,
     ]);
 
     const toolbarVisibility = useMemo(

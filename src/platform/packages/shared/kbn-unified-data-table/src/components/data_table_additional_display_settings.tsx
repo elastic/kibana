@@ -39,6 +39,7 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   onChangeSourceDisplayMode?: (sourceDisplayMode: SourceDisplayMode) => void;
   jsonModeSettings: JsonModeSettings;
   onChangeJsonModeSettings?: (jsonModeSettings: JsonModeSettings) => void;
+  isViewModeNew?: boolean;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -177,6 +178,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   onChangeSourceDisplayMode,
   jsonModeSettings,
   onChangeJsonModeSettings,
+  isViewModeNew,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
@@ -221,6 +223,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     <ViewModeSettings
       sourceDisplayMode={sourceDisplayMode}
       onChangeSourceDisplayMode={onChangeSourceDisplayMode}
+      isNew={isViewModeNew}
     />
   ) : null;
 

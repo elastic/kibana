@@ -9,19 +9,31 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { SourceDisplayMode } from '../types';
 const dataTestSubj = 'unifiedDataTableViewModeSettings';
 
 export interface ViewModeSettingsProps {
   sourceDisplayMode: SourceDisplayMode;
   onChangeSourceDisplayMode: (sourceDisplayMode: SourceDisplayMode) => void;
+  isNew?: boolean;
 }
 
 export function ViewModeSettings({
   sourceDisplayMode,
   onChangeSourceDisplayMode,
+  isNew = false,
 }: ViewModeSettingsProps) {
+  const { euiTheme } = useEuiTheme();
+
   const label = i18n.translate('unifiedDataTable.viewMode.label', {
     defaultMessage: 'View mode',
   });
@@ -43,9 +55,36 @@ export function ViewModeSettings({
     },
   ];
 
+  const formLabel = isNew ? (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          line-height: 0;
+        `}
+      >
+        <EuiBetaBadge
+          size="s"
+          label={i18n.translate('unifiedDataTable.viewMode.newBadgeLabel', {
+            defaultMessage: 'New',
+          })}
+          data-test-subj={`${dataTestSubj}_newBadge`}
+          css={css`
+            background-color: ${euiTheme.colors.backgroundFilledPrimary};
+            color: ${euiTheme.colors.textInverse};
+            border: none;
+          `}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    label
+  );
+
   return (
     <EuiFormRow
-      label={label}
+      label={formLabel}
       aria-label={label}
       display="columnCompressed"
       data-test-subj={dataTestSubj}
