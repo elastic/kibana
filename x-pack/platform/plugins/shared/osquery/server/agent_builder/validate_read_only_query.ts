@@ -104,12 +104,6 @@ export const validateReadOnlyQuery = (
   // from the raw query would delete everything after that `--`, so the
   // validator would scan only the truncated prefix while `run_live_query`
   // dispatches the ORIGINAL query — bypassing the table allowlist.
-  // Blank string literals FIRST, then strip comments. The order is
-  // load-bearing (github-actions #4961701853): a `--` or `/* */` *inside* a
-  // string literal is not a comment — e.g. `name = 'x--'`. Stripping comments
-  // from the raw query would delete everything after that `--`, so the
-  // validator would scan only the truncated prefix while `run_live_query`
-  // dispatches the ORIGINAL query — bypassing the table allowlist.
   const withoutLiterals = blankStringLiterals(trimmed);
 
   // Strip single-line and block comments before keyword checks
