@@ -97,10 +97,11 @@ export const registerInternalTools = async ({
     bashService,
     todoStateManager,
     selfClient,
+    parentExecutionId,
   } = context;
 
-  // sub-agent creation is only available for non-standalone executions
-  const canSpawnSubagents = executionMode !== AgentExecutionMode.standalone;
+  // Sub-agent spawning is reserved for top-level, non-standalone runs
+  const canSpawnSubagents = executionMode !== AgentExecutionMode.standalone && !parentExecutionId;
   const interactive = interactivity.enabled;
 
   const tools: Array<BuiltinToolDefinition<any>> = [];
@@ -124,7 +125,8 @@ export const registerInternalTools = async ({
     tools.push(createExecuteApiTool({ selfClient }));
   }
 
-  // run_subagent + send_message + sleep — experimental, and not available to sub-agents
+  // run_subagent + send_message + sleep — experimental; reserved for top-level
+  // runs (see `canSpawnSubagents` above for why sub-agents can't nest-spawn).
   if (experimentalFeatures.subagents && canSpawnSubagents) {
     tools.push(
       createSubagentTool({

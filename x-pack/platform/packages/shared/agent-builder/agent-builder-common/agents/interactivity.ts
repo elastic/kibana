@@ -9,8 +9,6 @@ import { AgentExecutionMode } from './execution_mode';
 
 /**
  * Interactivity configuration - defines behavior for features that require a live user.
- *
- * For now only supporting disabled/enabled, but more will come soon.
  */
 export interface InteractivityConfig {
   /**

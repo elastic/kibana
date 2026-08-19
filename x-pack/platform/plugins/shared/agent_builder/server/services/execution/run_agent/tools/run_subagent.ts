@@ -134,12 +134,11 @@ export const createSubagentTool = ({
       const fullPrompt = `${description}\n\n${prompt}`;
       const isPersistent = mode === SubagentMode.persistent;
 
-      const subAgentModel = await modelProvider.selectModel({
-        effortLevel: effort as EffortLevel,
-      });
-      const selectedConnectorId = subAgentModel.connector.connectorId;
-
       try {
+        const subAgentModel = await modelProvider.selectModel({
+          effortLevel: effort as EffortLevel,
+        });
+        const selectedConnectorId = subAgentModel.connector.connectorId;
         if (isPersistent) {
           const finalName = name ?? 'subagent';
 
