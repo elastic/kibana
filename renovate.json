@@ -2175,7 +2175,7 @@
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
       "reviewers": ["team:siem-conduit"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:SIEM-Conduit"],
+      "addLabels": ["Team:security-siem-conduit"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
