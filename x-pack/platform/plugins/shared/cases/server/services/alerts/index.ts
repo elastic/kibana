@@ -148,9 +148,12 @@ export class AlertService {
   private async prefetchPreviousStatuses(
     alerts: UpdateAlertStatusRequest[]
   ): Promise<Map<string, STATUS_VALUES>> {
-    const docs = alerts
-      .filter((a) => !AlertService.isEmptyAlert(a))
-      .map((a) => ({ _id: a.id, _index: a.index }));
+    const docs = alerts.reduce<Array<{ _id: string; _index: string }>>((acc, a) => {
+      if (!AlertService.isEmptyAlert(a)) {
+        acc.push({ _id: a.id, _index: a.index });
+      }
+      return acc;
+    }, []);
     if (docs.length === 0) return new Map();
     const response = await this.scopedClusterClient.mget({
       docs,
