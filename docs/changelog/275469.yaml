@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/275469
+issues:
+- https://github.com/elastic/kibana/issues/272420
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+areas:
+- Alerting and reporting
+title: "Fix reporting jobs showing Kibana version 7.14.0 when version is omitted"
+description: "When a reporting job is created through the API without a `version` in its parameters, the report info flyout now shows the current Kibana version instead of a hardcoded 7.14.0 fallback."

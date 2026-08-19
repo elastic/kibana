@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/metrics-data-access-plugin",
-  "owner": ["@elastic/obs-presentation-team"],
+  "owner": ["@elastic/obs-signals-metrics-team"],
   "group": "observability",
   "visibility": "private",
   "description": "Exposes utilities for accessing metrics data",

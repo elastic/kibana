@@ -89,6 +89,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isDeprecated: false,
         allowMultipleSystemActions: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
 
@@ -130,6 +131,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isDeprecated: false,
         allowMultipleSystemActions: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
 
@@ -170,6 +172,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isDeprecated: false,
         allowMultipleSystemActions: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
 
@@ -218,6 +221,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isDeprecated: false,
         allowMultipleSystemActions: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
 
@@ -266,6 +270,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isDeprecated: false,
         allowMultipleSystemActions: true,
         source: 'stack',
+        isTestable: false,
       },
     ]);
 
@@ -330,6 +335,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isDeprecated: false,
         allowMultipleSystemActions: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
 
@@ -405,6 +411,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isDeprecated: false,
         allowMultipleSystemActions: false,
         source: 'stack',
+        isTestable: false,
       },
       {
         id: '.test-2',
@@ -418,6 +425,7 @@ describe('validateAndAuthorizeSystemActions', () => {
         isDeprecated: false,
         allowMultipleSystemActions: false,
         source: 'stack',
+        isTestable: false,
       },
     ]);
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ControlValuesSource } from '@kbn/controls-constants';
 
@@ -23,14 +24,17 @@ const phraseFilter = (field: string, value: string) =>
 const buildApi = ({
   filters$,
   parentQuery$,
+  projectRouting$,
 }: {
   filters$: BehaviorSubject<unknown>;
   parentQuery$: BehaviorSubject<unknown>;
+  projectRouting$?: BehaviorSubject<string | undefined>;
 }) => {
   const parentApi = {
     filters$,
     query$: parentQuery$,
     timeRange$: new BehaviorSubject({ from: 'now-15m', to: 'now' }),
+    ...(projectRouting$ ? { projectRouting$ } : {}),
   };
   return {
     parentApi,
@@ -76,14 +80,15 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
     const searchTechnique$ = new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard');
     const sort$ = new BehaviorSubject<unknown>({ by: '_count', direction: 'desc' });
 
-    const subscription = fetchAndValidate$({
+    const { suggestions$ } = fetchAndValidate$({
       api,
       requestSize$: requestSize$ as any,
       runPastTimeout$: runPastTimeout$ as any,
       selectedOptions$: selectedOptions$ as any,
       searchTechnique$: searchTechnique$ as any,
       sort$: sort$ as any,
-    }).subscribe(() => {});
+    });
+    const subscription = suggestions$.subscribe(() => {});
 
     await new Promise((resolve) => setTimeout(resolve, 200));
     expect(fetchSpy).toHaveBeenCalledTimes(1);
@@ -100,4 +105,98 @@ describe('fetchAndValidate$ ES|QL filter wiring', () => {
 
     subscription.unsubscribe();
   }, 10000);
+
+  it('forwards the parent CPS project routing into the fetch request body', async () => {
+    const filters$ = new BehaviorSubject<unknown>([]);
+    const parentQuery$ = new BehaviorSubject<unknown>(undefined);
+    const projectRouting$ = new BehaviorSubject<string | undefined>('_alias:*');
+    const api = buildApi({ filters$, parentQuery$, projectRouting$ });
+
+    const requestSize$ = new BehaviorSubject<number>(10);
+    const runPastTimeout$ = new BehaviorSubject<boolean>(false);
+    const selectedOptions$ = new BehaviorSubject<unknown[]>([]);
+    const searchTechnique$ = new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard');
+    const sort$ = new BehaviorSubject<unknown>({ by: '_count', direction: 'desc' });
+
+    const { suggestions$ } = fetchAndValidate$({
+      api,
+      requestSize$: requestSize$ as any,
+      runPastTimeout$: runPastTimeout$ as any,
+      selectedOptions$: selectedOptions$ as any,
+      searchTechnique$: searchTechnique$ as any,
+      sort$: sort$ as any,
+    });
+    const subscription = suggestions$.subscribe(() => {});
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(fetchSpy.mock.calls[0][1].body);
+    expect(body.projectRouting).toBe('_alias:*');
+
+    subscription.unsubscribe();
+  }, 10000);
+
+  describe('cancellation', () => {
+    let filters$: BehaviorSubject<unknown>;
+    let cancelRequests: () => void;
+    let subscription: Subscription;
+
+    beforeEach(async () => {
+      filters$ = new BehaviorSubject<unknown>([]);
+      const parentQuery$ = new BehaviorSubject<unknown>(undefined);
+      const api = buildApi({ filters$, parentQuery$ });
+
+      const requestSize$ = new BehaviorSubject<number>(10);
+      const runPastTimeout$ = new BehaviorSubject<boolean>(false);
+      const selectedOptions$ = new BehaviorSubject<unknown[]>([]);
+      const searchTechnique$ = new BehaviorSubject<'wildcard' | 'prefix' | 'exact'>('wildcard');
+      const sort$ = new BehaviorSubject<unknown>({ by: '_count', direction: 'desc' });
+
+      const result = fetchAndValidate$({
+        api,
+        requestSize$: requestSize$ as any,
+        runPastTimeout$: runPastTimeout$ as any,
+        selectedOptions$: selectedOptions$ as any,
+        searchTechnique$: searchTechnique$ as any,
+        sort$: sort$ as any,
+      });
+
+      cancelRequests = result.cancelRequests;
+      subscription = result.suggestions$.subscribe(() => {});
+
+      await new Promise((resolve) => setTimeout(resolve, 200));
+    });
+
+    afterEach(() => {
+      subscription.unsubscribe();
+    });
+
+    it('should pass AbortSignal to HTTP fetch', () => {
+      expect(fetchSpy).toHaveBeenCalled();
+      const fetchOptions = fetchSpy.mock.calls[0][1];
+      expect(fetchOptions.signal).toBeInstanceOf(AbortSignal);
+      expect(fetchOptions.signal.aborted).toBe(false);
+    });
+
+    it('should abort previous request when new request starts', async () => {
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      const firstSignal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
+      expect(firstSignal.aborted).toBe(false);
+
+      filters$.next([phraseFilter('host', 'mainframe')]);
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
+      expect(firstSignal.aborted).toBe(true);
+    }, 10000);
+
+    it('cancelRequests() should abort in-flight request', () => {
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+      const signal: AbortSignal = fetchSpy.mock.calls[0][1].signal;
+      expect(signal.aborted).toBe(false);
+
+      cancelRequests();
+      expect(signal.aborted).toBe(true);
+    });
+  });
 });

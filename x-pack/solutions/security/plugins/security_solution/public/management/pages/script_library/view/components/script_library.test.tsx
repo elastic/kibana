@@ -18,7 +18,7 @@ import { SCRIPT_LIBRARY_PATH } from '../../../../../../common/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import { useToasts } from '../../../../../common/lib/kibana';
-import { SCRIPT_LIBRARY_PAGE_STORAGE_KEY, ScriptLibrary } from './script_library';
+import { ScriptLibrary } from './script_library';
 import { useWithScriptLibraryData } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
@@ -172,70 +172,8 @@ describe('ScriptLibrary', () => {
       expect(getByTestId('test-header')).toBeInTheDocument();
       expect(getByTestId('header-page-title').textContent).toEqual('Script Library');
       expect(getByTestId('header-panel-subtitle').textContent).toEqual(
-        'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend.'
+        'Upload and manage scripts to use with the runscript response action on endpoints protected by Elastic Defend. Learn more(external, opens in a new tab or window)'
       );
-    });
-  });
-
-  describe('Page banner', () => {
-    it('should show new page banner', () => {
-      render();
-      const { getByTestId, getByText } = renderResult;
-      const banner = getByTestId('test-new-page-banner');
-      expect(banner).toBeInTheDocument();
-
-      expect(getByText('New: Script library')).toBeInTheDocument();
-      expect(
-        getByText(
-          'Upload and manage reusable scripts to run on endpoints protected by Elastic Defend.'
-        )
-      ).toBeInTheDocument();
-    });
-
-    it('should show a `learn more` link within the banner', () => {
-      render();
-      const { getByTestId } = renderResult;
-      const banner = getByTestId('test-new-page-banner');
-      expect(banner).toBeInTheDocument();
-
-      const learnMoreLink = banner.querySelector('a');
-      expect(learnMoreLink).toBeInTheDocument();
-      expect(learnMoreLink?.getAttribute('href')).toContain('script-library');
-    });
-
-    it('should not show new page banner after it is dismissed', async () => {
-      render();
-      const { getByTestId, queryByTestId } = renderResult;
-      const banner = getByTestId('test-new-page-banner');
-      expect(banner).toBeInTheDocument();
-
-      const dismissButton = getByTestId('euiDismissCalloutButton');
-      await userEvent.click(dismissButton);
-
-      await waitFor(() => {
-        expect(queryByTestId('test-new-page-banner')).not.toBeInTheDocument();
-      });
-
-      // Verify that the dismiss was recorded in storage
-      expect(mockStorageSet).toHaveBeenCalledWith(SCRIPT_LIBRARY_PAGE_STORAGE_KEY, false);
-    });
-
-    it('should not show the banner when storage value is set to false (dismissed)', () => {
-      mockStorageGet.mockReturnValue(false);
-
-      render();
-      const { queryByTestId } = renderResult;
-      const banner = queryByTestId('test-new-page-banner');
-      expect(banner).not.toBeInTheDocument();
-    });
-
-    it('should show the banner when storage value is cleared', () => {
-      mockStorageSet.mockReturnValue(undefined);
-
-      render();
-      const { getByTestId } = renderResult;
-      const banner = getByTestId('test-new-page-banner');
-      expect(banner).toBeInTheDocument();
     });
   });
 

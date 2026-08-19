@@ -23,9 +23,11 @@ import type { SharedComponent } from '../autocomplete/components/shared_componen
 
 import { Api } from './api';
 import { isRecord } from '../../../common/utils/record_utils';
+import type { KibanaApiDocLinksMap } from '../../../common/types/api_responses';
 
 let ACTIVE_API = new Api();
 let apiLoaded = false;
+let KIBANA_API_DOC_LINKS: KibanaApiDocLinksMap = {};
 
 type ParamComponentFactory = (name: string, parent?: SharedComponent) => SharedComponent;
 
@@ -78,7 +80,11 @@ export function getEndpointBodyCompleteComponents(endpoint: string) {
   if (!desc) {
     throw new Error("failed to resolve endpoint ['" + endpoint + "']");
   }
-  return desc.bodyAutocompleteRootComponents;
+  const components = desc.bodyAutocompleteRootComponents;
+  if (!components) {
+    throw new Error("failed to compile endpoint body ['" + endpoint + "']");
+  }
+  return components;
 }
 
 export function getTopLevelUrlCompleteComponents(method: string) {
@@ -143,6 +149,16 @@ function setActiveApi(api: Api | undefined) {
   ACTIVE_API = api;
 }
 
+function setKibanaApiDocLinks(docLinks: unknown) {
+  if (isRecord(docLinks)) {
+    KIBANA_API_DOC_LINKS = docLinks as KibanaApiDocLinksMap;
+  }
+}
+
+export function getKibanaApiDocLinks(): KibanaApiDocLinksMap {
+  return KIBANA_API_DOC_LINKS;
+}
+
 export async function loadActiveApi(http: HttpSetup) {
   // Only load the API data once
   if (apiLoaded) return;
@@ -150,7 +166,10 @@ export async function loadActiveApi(http: HttpSetup) {
 
   try {
     const data: unknown = await http.get(`${API_BASE_PATH}/api_server`);
-    setActiveApi(loadApisFromJson(data));
+    if (isRecord(data)) {
+      setActiveApi(loadApisFromJson({ es: data.es }));
+      setKibanaApiDocLinks(isRecord(data.kibana) ? data.kibana.docLinks : undefined);
+    }
   } catch (err) {
     const responseText =
       isRecord(err) && typeof err.responseText === 'string' ? err.responseText : String(err);
@@ -164,4 +183,5 @@ export async function loadActiveApi(http: HttpSetup) {
 export const _test = {
   loadApisFromJson,
   setActiveApi,
+  setKibanaApiDocLinks,
 };

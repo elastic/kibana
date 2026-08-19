@@ -6,16 +6,27 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import React, { useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { useDefaultToolsFlyoutProperties } from '../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
+import { Header } from '../../flyout_v2/attack/main/header';
+import { documentFlyoutHistoryKey } from '../../flyout_v2/shared/constants/flyout_history';
+import { NotesDetails } from '../../flyout_v2/shared/tools/notes';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
-
-const PLACEHOLDER_LABEL = i18n.translate(
-  'xpack.securitySolution.oneDiscover.attackFlyoutHeader.placeholder',
-  { defaultMessage: 'attack header placeholder' }
-);
+import { useIsInSecurityApp } from '../../common/hooks/is_in_security_app';
+import { formatFlyoutTitle, NOTES_TITLE } from '../../flyout_v2/shared/constants/flyout_titles';
+import { getAttackTitleValue } from '../../flyout_v2/attack/utils/get_attack_title';
+import {
+  FLYOUT_ORIGIN,
+  FLYOUT_SESSION_KIND,
+  FLYOUT_SURFACE,
+  FLYOUT_TOOL,
+  FLYOUT_TYPE,
+} from '../../common/lib/telemetry';
+import { trackFlyoutOpen } from '../../flyout_v2/shared/hooks/use_flyout_telemetry';
 
 export interface AttackFlyoutHeaderProps {
   hit: DataTableRecord;
@@ -25,13 +36,48 @@ export interface AttackFlyoutHeaderProps {
 }
 
 export const AttackFlyoutHeader = ({
-  hit: _hit,
+  hit,
   servicesPromise,
   storePromise,
-  onAttackUpdated: _onAttackUpdated,
+  onAttackUpdated,
 }: AttackFlyoutHeaderProps) => {
+  const history = useHistory();
   const [services, setServices] = useState<StartServices | null>(null);
   const [store, setStore] = useState<SecurityAppStore | null>(null);
+  const isSecurityApp = useIsInSecurityApp();
+  const historyKey = isSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const defaultToolsFlyoutProperties = useDefaultToolsFlyoutProperties();
+  const attackTitle = useMemo(() => getAttackTitleValue(hit), [hit]);
+
+  const openNotesFlyout = useCallback(() => {
+    if (!services || !store) {
+      return;
+    }
+
+    const ref = services.overlays?.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <NotesDetails hit={hit} />,
+      }),
+      {
+        ...defaultToolsFlyoutProperties,
+        historyKey,
+        session: FLYOUT_SESSION_KIND.START,
+        title: formatFlyoutTitle(NOTES_TITLE, attackTitle),
+      }
+    );
+    if (ref) {
+      trackFlyoutOpen(services.telemetry, ref, {
+        surface: FLYOUT_SURFACE.TOOL,
+        flyoutType: FLYOUT_TYPE.ATTACK,
+        tool: FLYOUT_TOOL.NOTES,
+        session: FLYOUT_SESSION_KIND.START,
+        origin: FLYOUT_ORIGIN.FLYOUT_HEADER,
+      });
+    }
+  }, [attackTitle, defaultToolsFlyoutProperties, history, historyKey, hit, services, store]);
 
   useEffect(() => {
     let isCanceled = false;
@@ -64,6 +110,6 @@ export const AttackFlyoutHeader = ({
   return flyoutProviders({
     services,
     store,
-    children: <div data-test-subj="attackFlyoutHeaderPlaceholder">{PLACEHOLDER_LABEL}</div>,
+    children: <Header hit={hit} onAttackUpdated={onAttackUpdated} onShowNotes={openNotesFlyout} />,
   });
 };

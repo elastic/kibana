@@ -50,6 +50,44 @@ describe('BackLink', () => {
     });
   });
 
+  it('renders back to collection link when the return path names a known collection', async () => {
+    const appId = 'observabilityOnboarding';
+    const path = '?search=nginx&collection=nginx';
+    const queryParams = new URLSearchParams();
+    queryParams.set('returnAppId', appId);
+    queryParams.set('returnPath', path);
+
+    const { getByText } = render(
+      <I18nProvider>
+        <BackLink queryParams={queryParams} integrationsPath="/browse" />
+      </I18nProvider>
+    );
+    expect(getByText('Back to Nginx collection')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(getByText('Back to Nginx collection'));
+    });
+    await waitFor(() => {
+      expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
+        path,
+      });
+    });
+  });
+
+  it('falls back to the selection link when the return path names an unknown collection', async () => {
+    const appId = 'observabilityOnboarding';
+    const path = '?collection=notagroup';
+    const queryParams = new URLSearchParams();
+    queryParams.set('returnAppId', appId);
+    queryParams.set('returnPath', path);
+
+    const { getByText } = render(
+      <I18nProvider>
+        <BackLink queryParams={queryParams} integrationsPath="/browse" />
+      </I18nProvider>
+    );
+    expect(getByText('Back to selection')).toBeInTheDocument();
+  });
+
   it('renders back to integrations link when no query params are present', async () => {
     const appId = 'integrations';
     const path = '/browse';
@@ -66,6 +104,30 @@ describe('BackLink', () => {
     await waitFor(() => {
       expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
         path,
+      });
+    });
+  });
+
+  it('renders back to collection link when collectionTitle is provided', async () => {
+    const appId = 'integrations';
+    const collectionPath = '/collection/nginx';
+    const queryParams = new URLSearchParams();
+    const { getByText } = render(
+      <I18nProvider>
+        <BackLink
+          queryParams={queryParams}
+          integrationsPath={collectionPath}
+          collectionTitle="Nginx"
+        />
+      </I18nProvider>
+    );
+    expect(getByText('Back to Nginx collection')).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(getByText('Back to Nginx collection'));
+    });
+    await waitFor(() => {
+      expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
+        path: collectionPath,
       });
     });
   });

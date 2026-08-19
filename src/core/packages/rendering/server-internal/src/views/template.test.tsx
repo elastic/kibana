@@ -23,7 +23,6 @@ const baseMetadata = {
   themeVersion: 'v9',
   darkMode: false,
   stylesheetPaths: [],
-  scriptPaths: [],
   injectedMetadata: { theme: { name: 'borealis' } },
   customBranding: {},
 } as unknown as RenderingMetadata;
@@ -76,5 +75,48 @@ describe('Template (boot splash)', () => {
     const wrap = $('#kbn_loading_message .kbnLoaderWrap');
     expect(wrap.attr('role')).toBe('progressbar');
     expect(wrap.attr('aria-label')).toBe('Loading Elastic');
+  });
+
+  describe('splash color mode', () => {
+    // Select only the inline splash <style> (the block that defines the loader
+    // colors, identified by `.kbnProgress`) rather than every <style> in the
+    // head, so the assertions validate the splash rules specifically.
+    const getSplashCss = ($: ReturnType<typeof render>) =>
+      $('head style')
+        .filter((_i, el) => $(el).text().includes('.kbnProgress'))
+        .text();
+
+    it('inlines a single set of splash colors for an explicit dark mode', () => {
+      const css = getSplashCss(render({ ...baseMetadata, darkMode: true }));
+      expect(css).toContain('background-color: #07101F;'); // borealis dark page background
+      expect(css).not.toContain('#F6F9FC'); // no light background
+      expect(css).not.toContain('@media (prefers-color-scheme');
+    });
+
+    it('inlines both variants behind a media query for system mode so the splash has no flash', () => {
+      const $ = render({ ...baseMetadata, darkMode: 'system' });
+      const css = getSplashCss($);
+      // light defaults applied at first paint, dark applied via the CSS engine (no JS, no flash)
+      expect(css).toContain('background-color: #F6F9FC;'); // light default page background
+      expect(css).toContain('@media (prefers-color-scheme: dark)');
+      expect(css).toContain('background-color: #07101F;'); // dark override page background
+      // the old JS-based system theme bootstrap must no longer be injected
+      expect($('head script[src*="bootstrap_system_theme"]')).toHaveLength(0);
+    });
+
+    it('uses the theme-specific palette for a non-borealis theme in system mode', () => {
+      // The old bootstrap script was hard-coded to the borealis palette regardless
+      // of theme; resolving colors from `getThemeStyles(themeName)` means a
+      // non-borealis theme now gets its own splash colors.
+      const $ = render({
+        ...baseMetadata,
+        darkMode: 'system',
+        injectedMetadata: { theme: { name: 'amsterdam' } },
+      } as unknown as RenderingMetadata);
+      const css = getSplashCss($);
+      expect(css).toContain('background-color: #F8FAFD;'); // amsterdam light default
+      expect(css).toContain('@media (prefers-color-scheme: dark)');
+      expect(css).toContain('background-color: #141519;'); // amsterdam dark override
+    });
   });
 });

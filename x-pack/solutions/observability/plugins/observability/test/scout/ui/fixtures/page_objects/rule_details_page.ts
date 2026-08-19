@@ -138,7 +138,9 @@ export class RuleDetailsPage {
   async openActionsMenu() {
     await expect(this.actionsButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.actionsButton.click();
-    await expect(this.editRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
+    // `Edit rule` is a primary action rendered inline, so detect the open popover via an
+    // overflow-only action (`Delete rule`).
+    await expect(this.deleteRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
   }
 
   /**
@@ -146,7 +148,7 @@ export class RuleDetailsPage {
    */
   async closeActionsMenu() {
     await this.actionsButton.click();
-    await expect(this.editRuleButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
+    await expect(this.deleteRuleButton).toBeHidden({ timeout: SHORTER_TIMEOUT });
   }
 
   /**
@@ -223,7 +225,8 @@ export class RuleDetailsPage {
    * Opens the rule edit form
    */
   async openRuleEditForm() {
-    await this.openActionsMenu();
+    // `Edit rule` is a primary action rendered inline, so it can be clicked directly.
+    await expect(this.editRuleButton).toBeVisible({ timeout: SHORTER_TIMEOUT });
     await this.editRuleButton.click();
     await expect(this.ruleNameInput).toBeVisible({ timeout: BIGGER_TIMEOUT });
   }

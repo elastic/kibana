@@ -51,26 +51,10 @@ export const JiraConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
   auth: {
     types: [
-      {
-        type: 'basic',
-        defaults: {},
-        overrides: {
-          meta: {
-            password: {
-              label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.label', {
-                defaultMessage: 'API key',
-              }),
-              helpText: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.helpText', {
-                defaultMessage: 'Your Jira API token',
-              }),
-            },
-          },
-        },
-      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -84,6 +68,25 @@ export const JiraConnector: ConnectorSpec = {
           authorizationUrl: 'https://auth.atlassian.com/authorize',
           tokenUrl: 'https://auth.atlassian.com/oauth/token',
           scope: 'read:jira-work read:jira-user offline_access',
+        },
+      },
+      {
+        type: 'basic',
+        defaults: {},
+        overrides: {
+          label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.basic.label', {
+            defaultMessage: 'Shared API key',
+          }),
+          meta: {
+            password: {
+              label: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.label', {
+                defaultMessage: 'API key',
+              }),
+              helpText: i18n.translate('core.kibanaConnectorSpecs.jira.auth.password.helpText', {
+                defaultMessage: 'Your Jira API token',
+              }),
+            },
+          },
         },
       },
     ],
@@ -216,6 +219,18 @@ export const JiraConnector: ConnectorSpec = {
       },
     },
   },
+  test: {
+    description: i18n.translate('core.kibanaConnectorSpecs.jira.test.description', {
+      defaultMessage: 'Verifies Jira Cloud connection by fetching the current user',
+    }),
+    handler: async (ctx) => {
+      const baseUrl = buildBaseUrl(ctx);
+      await ctx.client.get(`${baseUrl}/rest/api/3/myself`);
+      return {};
+    },
+    enabled: true,
+  },
+
   skill: [
     'Typical patterns:',
     '- Discovery: getProjects → getProject (by key) → searchIssuesWithJql (scoped to project)',

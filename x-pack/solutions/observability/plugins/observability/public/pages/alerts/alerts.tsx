@@ -8,6 +8,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { AppHeader } from '@kbn/app-header';
+import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { usePageReady } from '@kbn/ebt-tools';
@@ -16,6 +18,7 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '@kbn/observability-shared-plugin/common';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared/src/maintenance_window_callout';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 
@@ -47,7 +50,6 @@ import { ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
 import { getColumns } from '../../components/alerts_table/common/get_columns';
-import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
 import type { RuleStatsState } from './components/rule_stats';
 import { renderRuleStats } from './components/rule_stats';
@@ -78,6 +80,7 @@ function InternalAlertsPage() {
     settings,
     charts,
     dataViews,
+    docLinks,
     observabilityAIAssistant,
     share: {
       url: { locators },
@@ -120,6 +123,12 @@ function InternalAlertsPage() {
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
   const ruleTypesWithDescriptions = useGetAvailableRulesWithDescriptions();
+
+  const { authorizedToReadAnyRules } = useGetRuleTypesPermissions({
+    http,
+    toasts,
+    filteredRuleTypes,
+  });
 
   const [tableLoading, setTableLoading] = useState(true);
   const [tableCount, setTableCount] = useState(0);
@@ -262,30 +271,57 @@ function InternalAlertsPage() {
   }
 
   useEffect(() => {
-    loadRuleStats();
+    if (authorizedToReadAnyRules) {
+      loadRuleStats();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authorizedToReadAnyRules]);
 
   const manageRulesHref = useRulesLink().href;
 
+  const appMenu = useMemo<AppMenuConfig>(
+    () => ({
+      primaryActionItem: authorizedToReadAnyRules
+        ? {
+            id: 'manageRules',
+            label: i18n.translate('xpack.observability.alerts.manageRulesButtonLabel', {
+              defaultMessage: 'Manage rules',
+            }),
+            iconType: 'gear',
+            href: manageRulesHref as string,
+            testId: 'manageRulesPageButton',
+          }
+        : undefined,
+    }),
+    [authorizedToReadAnyRules, manageRulesHref]
+  );
+
   return (
     <Provider value={alertSearchBarStateContainer}>
-      <ObservabilityPageTemplate
-        data-test-subj="alertsPageWithData"
-        pageHeader={{
-          pageTitle: (
-            <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
-          ),
-          rightSideItems: renderRuleStats(
-            ruleStats,
-            manageRulesHref as string,
-            ruleStatsLoading,
-            locators.get<RulesLocatorParams>(rulesLocatorID)
-          ),
-        }}
-      >
-        <HeaderMenu />
+      <ObservabilityPageTemplate data-test-subj="alertsPageWithData">
+        <AppHeader
+          title={i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}
+          menu={appMenu}
+          docLink={docLinks.links.observability.createAlerts}
+          spacing="largeBleed"
+        />
+        <EuiSpacer size="l" />
         <EuiFlexGroup direction="column" gutterSize="m">
+          {authorizedToReadAnyRules && (
+            <EuiFlexItem>
+              <EuiFlexGroup gutterSize="l" responsive={false} alignItems="center" wrap>
+                {renderRuleStats(
+                  ruleStats,
+                  ruleStatsLoading,
+                  locators.get<RulesLocatorParams>(rulesLocatorID)
+                ).map((statComponent, index) => (
+                  <EuiFlexItem grow={false} key={index}>
+                    {statComponent}
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             <MaintenanceWindowCallout
               kibanaServices={kibanaServices}

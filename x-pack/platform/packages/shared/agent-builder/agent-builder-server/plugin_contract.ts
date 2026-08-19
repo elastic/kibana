@@ -7,16 +7,19 @@
 
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  Conversation,
-  ConversationWithoutRounds,
-  ConversationListOptions,
-} from '@kbn/agent-builder-common';
+import type { AgentCreateRequest } from '@kbn/agent-builder-common';
+import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition } from './attachments';
+import type { RendererTypeDefinition } from './renderers';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
-import type { BuiltInAgentDefinition, AgentRegistry } from './agents';
+import type {
+  BuiltInAgentDefinition,
+  AgentTypeDefinition,
+  AgentRegistry,
+  AgentAvailabilityConfig,
+} from './agents';
 import type { RunToolFn, ModelProvider } from './runner';
 import type { RunAgentFn } from './agents';
 import type { HooksServiceSetup } from './hooks/types';
@@ -59,6 +62,18 @@ export interface AttachmentsSetup {
   registerType(attachmentType: AttachmentTypeDefinition): void;
 }
 
+export interface RenderersSetup {
+  /**
+   * Register a renderer type to be available in agentBuilder.
+   *
+   * A matching browser-side UI definition must be registered with the same
+   * `type` (via the browser plugin's `renderers.register`). Otherwise the
+   * agent will be told it can render this type, but `<render>` directives for
+   * it will fail to resolve in the UI.
+   */
+  register(rendererType: RendererTypeDefinition): void;
+}
+
 export interface SkillsSetup {
   /**
    * Register a built-in skill to be available in agentBuilder.
@@ -86,8 +101,14 @@ export interface SkillsStart {
 export interface AgentsSetup {
   /**
    * Register a built-in agent to be available in agentBuilder.
+   * If the definition references an agent type, the type must be registered first.
    */
   register: (definition: BuiltInAgentDefinition) => void;
+  /**
+   * Register an agent type carrying a managed base configuration that agents of
+   * that type inherit at resolution time.
+   */
+  registerType: (definition: AgentTypeDefinition) => void;
 }
 
 export interface AgentsStart {
@@ -100,6 +121,19 @@ export interface AgentsStart {
    * Return an agent registry scoped to the current user and context.
    */
   getRegistry: (opts: { request: KibanaRequest }) => Promise<AgentRegistry>;
+  /**
+   * Ensure a system-owned persisted agent exists in a space without overwriting later edits.
+   * Intended for code-owned startup installation; does not require a user request.
+   *
+   * Optional `availability` is kept in memory and keyed by `agent.id` (never persisted). Use the
+   * same {@link AgentAvailabilityConfig} shape as built-in agents. Prefer passing it on every
+   * `ensure` call for that id.
+   */
+  ensure: (opts: {
+    spaceId: string;
+    agent: AgentCreateRequest;
+    availability?: AgentAvailabilityConfig;
+  }) => Promise<void>;
 }
 
 /**
@@ -158,27 +192,13 @@ export interface RuntimeStart {
 }
 
 /**
- * A read-only conversation client exposing only get and list operations.
- */
-export interface ReadOnlyConversationClient {
-  /**
-   * Retrieve a single conversation by its ID, including all rounds.
-   */
-  get(conversationId: string): Promise<Conversation>;
-  /**
-   * List conversations for the current user, optionally filtered by agent ID.
-   */
-  list(options?: ConversationListOptions): Promise<ConversationWithoutRounds[]>;
-}
-
-/**
- * AgentBuilder conversations service's start contract (read-only).
+ * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
   /**
-   * Returns a read-only conversation client scoped to the given request's user and space.
+   * Returns a conversation client scoped to the given request's user and space.
    */
-  getScopedClient(opts: { request: KibanaRequest }): Promise<ReadOnlyConversationClient>;
+  getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
 }
 
 /**
@@ -205,6 +225,10 @@ export interface AgentBuilderPluginSetup {
    * Attachments setup contract, which can be used to register attachment types.
    */
   attachments: AttachmentsSetup;
+  /**
+   * Renderers setup contract, which can be used to register renderer types.
+   */
+  renderers: RenderersSetup;
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */

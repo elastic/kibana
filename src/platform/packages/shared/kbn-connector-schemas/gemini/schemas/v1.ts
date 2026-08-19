@@ -49,6 +49,7 @@ export const RunActionParamsSchema = lazySchema(() =>
       temperature: z.coerce.number().optional(),
       stopSequences: z.array(z.string()).optional(),
       raw: z.boolean().optional(),
+      maxContentLength: z.coerce.number().optional(),
       telemetryMetadata: TelemetryMetadataSchema.optional(),
     })
     .strict()
@@ -100,6 +101,7 @@ export const InvokeAIActionParamsSchema = lazySchema(() =>
         })
         .strict()
         .optional(),
+      maxContentLength: z.coerce.number().optional(),
       telemetryMetadata: TelemetryMetadataSchema.optional(),
     })
     .strict()

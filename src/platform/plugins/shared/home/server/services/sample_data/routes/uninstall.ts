@@ -34,7 +34,7 @@ export function createUninstallRoute(
         },
       },
       validate: {
-        params: schema.object({ id: schema.string() }),
+        params: schema.object({ id: schema.string({ minLength: 1, maxLength: 256 }) }),
       },
     },
     async (context, request, response) => {

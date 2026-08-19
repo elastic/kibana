@@ -261,6 +261,26 @@ describe('utils', () => {
       });
     });
 
+    it('omits legacy custom fields when includeLegacyCustomFields is false', () => {
+      expect(
+        createFormSerializer(
+          [],
+          casesConfigurationsMock,
+          {
+            ...dataToSerialize,
+            customFields: {
+              test_key_1: 'first value',
+              test_key_2: true,
+            },
+          },
+          { includeLegacyCustomFields: false }
+        )
+      ).toEqual({
+        ...serializedFormData,
+        customFields: [],
+      });
+    });
+
     it('trims form data', () => {
       const untrimmedData = {
         title: '  title  ',

@@ -6,12 +6,8 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import {
-  ALL_VALUE,
-  type CompositeSLOWithSummaryResponse,
-  type GetSLOResponse,
-} from '@kbn/slo-schema';
-import { useKibana } from '../../../hooks/use_kibana';
+import { ALL_VALUE, type CompositeSLODefinitionResponse } from '@kbn/slo-schema';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import type { CreateCompositeSLOForm } from '../types';
 
 interface Response {
@@ -21,21 +17,27 @@ interface Response {
 }
 
 export function useFetchCompositeSlo(compositeSloId: string | undefined): Response {
-  const { http } = useKibana().services;
+  const { sloClient } = usePluginContext();
 
   const { isLoading, isError, data } = useQuery({
     queryKey: ['fetchCompositeSlo', compositeSloId],
     queryFn: async ({ signal }) => {
-      const response = await http.get<CompositeSLOWithSummaryResponse>(
-        `/api/observability/slo_composites/${encodeURIComponent(compositeSloId!)}`,
-        { signal }
+      const response = await sloClient.fetch(
+        'GET /api/observability/slo_composites/_definitions/{id} 2023-10-31',
+        {
+          params: { path: { id: compositeSloId! } },
+          signal,
+        }
       );
 
       const uniqueSloIds = [...new Set(response.members.map((m) => m.sloId))];
       const definitions = await Promise.all(
         uniqueSloIds.map((id) =>
-          http
-            .get<GetSLOResponse>(`/api/observability/slos/${encodeURIComponent(id)}`, { signal })
+          sloClient
+            .fetch('GET /api/observability/slos/{id} 2023-10-31', {
+              params: { path: { id } },
+              signal,
+            })
             .catch(() => null)
         )
       );
@@ -55,7 +57,7 @@ export function useFetchCompositeSlo(compositeSloId: string | undefined): Respon
 }
 
 function toFormValues(
-  response: CompositeSLOWithSummaryResponse,
+  response: CompositeSLODefinitionResponse,
   defMap: Map<string, { name: string; groupBy: string | string[] }>
 ): CreateCompositeSLOForm {
   return {

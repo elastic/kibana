@@ -1,0 +1,11 @@
+prs:
+- https://github.com/elastic/kibana/pull/277976
+issues:
+- https://github.com/elastic/security-team/issues/18233
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.5.0
+title: Fix scheduled trigger YAML insertion

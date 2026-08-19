@@ -7,7 +7,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Case } from '../../../common/types/domain';
+import type { Case, CaseStatuses } from '../../../common/types/domain';
 import type { AttachmentMode } from '../../../common/types/domain/attachment/v2';
 import type { IndexRefresh } from '../types';
 import type { User } from '../../common/types/user';
@@ -25,7 +25,6 @@ export interface GetCaseIdsByAlertIdArgs {
   filter?: KueryNode;
   /**
    * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
-   * Only used when the unified attachments feature flag is enabled.
    */
   unifiedFilter?: KueryNode;
 }
@@ -78,6 +77,13 @@ export interface PatchCase extends IndexRefresh {
   originalCase: CaseSavedObjectTransformed;
   closeReason?: string;
   version?: string;
+  /**
+   * v1 customFields key → linked `extended_fields` storage key for fields the
+   * pairing adapter synchronized in this update. When the canonical
+   * `extended_fields` user action records the same edit, the duplicate legacy
+   * `customFields` user action for that key is suppressed (#282474).
+   */
+  pairedCustomFieldStorageKeys?: Record<string, string>;
 }
 
 export type PatchCaseArgs = PatchCase;
@@ -91,6 +97,14 @@ export interface CasesMapWithPageInfo {
   page: number;
   perPage: number;
   total: number;
+}
+
+export interface CasesSearchStats {
+  statusStats: {
+    [status in CaseStatuses]: number;
+  };
+  /** Average of `duration` (seconds) across the matching cases; null when none has closed. */
+  mttr: number | null;
 }
 
 export interface GetTagsArgs {

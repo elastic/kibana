@@ -19,12 +19,11 @@ export const NotionConnector: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
-      'bearer',
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -39,6 +38,7 @@ export const NotionConnector: ConnectorSpec = {
           tokenUrl: 'https://api.notion.com/v1/oauth/token',
         },
       },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       'Notion-Version': '2025-09-03',
@@ -228,17 +228,9 @@ export const NotionConnector: ConnectorSpec = {
     // if listing all users feels a bit too much
     handler: async (ctx) => {
       ctx.log.debug('Notion test handler');
-
-      try {
-        const response = await ctx.client.get('https://api.notion.com/v1/users');
-        const numOfUsers = response.data.results.length;
-        return {
-          ok: true,
-          message: `Successfully connected to Notion API: found ${numOfUsers} users`,
-        };
-      } catch (error) {
-        return { ok: false, message: error.message };
-      }
+      await ctx.client.get('https://api.notion.com/v1/users');
+      return {};
     },
+    enabled: true,
   },
 };

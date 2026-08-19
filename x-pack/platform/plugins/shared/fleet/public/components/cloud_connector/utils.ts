@@ -15,6 +15,8 @@ import type {
   GcpCloudConnectorVars,
   CloudConnectorVars,
 } from '../../../common/types';
+import { isCloudProvider } from '../../../common/types';
+import { getIacTemplateUrlFromVarGroupSelection } from '../../../common/services/cloud_connectors';
 
 import type {
   AwsCloudConnectorCredentials,
@@ -197,11 +199,43 @@ export const getTemplateUrlFromPackageInfo = (
   }
 };
 
+/**
+ * Searches a package for the cloud connectors IAC template URL without a specific
+ * policy template name or var_group selection. Selects whichever option in each
+ * var_group has a cloud provider (the newer AWS-package format).
+ *
+ * TODO: When multiple selected services support federated identity, a combined
+ * CloudFormation template will be needed rather than a single per-package URL.
+ */
+export const getAnyCloudConnectorIacTemplateUrl = (
+  packageInfo: PackageInfo | undefined
+): string | undefined => {
+  const varGroups = packageInfo?.var_groups;
+  if (!varGroups?.length) return undefined;
+  // Build a synthetic selection that picks the cloud connector option in each var_group.
+  const selections: Record<string, string> = {};
+  for (const group of varGroups) {
+    const cloudOption = group.options.find((o) => isCloudProvider(o.provider));
+    if (cloudOption) selections[group.name] = cloudOption.name;
+  }
+  return getIacTemplateUrlFromVarGroupSelection(varGroups, selections);
+};
+
 export const getCloudConnectorRemoteRoleTemplate = ({
   cloud,
   accountType,
   iacTemplateUrl,
 }: GetCloudConnectorRemoteRoleTemplateParams): string | undefined => {
+  if (!iacTemplateUrl) return undefined;
+
+  // URLs without substitution tokens need no cloud identifiers — return as-is.
+  if (
+    !iacTemplateUrl.includes(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR) &&
+    !iacTemplateUrl.includes(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR)
+  ) {
+    return iacTemplateUrl;
+  }
+
   let elasticResourceId: string | undefined;
   const deploymentId = getDeploymentIdFromUrl(cloud?.deploymentUrl);
   const kibanaComponentId = getKibanaComponentId(cloud?.cloudId);
@@ -214,7 +248,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     elasticResourceId = kibanaComponentId;
   }
 
-  if (!elasticResourceId || !accountType || !iacTemplateUrl) return undefined;
+  if (!elasticResourceId || !accountType) return undefined;
 
   return iacTemplateUrl
     .replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)

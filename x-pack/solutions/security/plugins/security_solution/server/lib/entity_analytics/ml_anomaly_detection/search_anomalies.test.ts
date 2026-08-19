@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock, loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { searchEntityAnomalies } from './search_anomalies';
+import { buildScoreRangeFilter, searchEntityAnomalies } from './search_anomalies';
 import { makeHit, makeResponse } from './test_helpers';
 
 jest.mock('./get_security_ml_job_ids', () => ({
@@ -16,20 +16,29 @@ jest.mock('./get_security_ml_job_ids', () => ({
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
-    painless: {
-      getEuidRuntimeMapping: jest.fn().mockReturnValue({ type: 'keyword', source: 'mock-script' }),
+    dsl: {
+      getEuidFilterBasedOnEntityRecord: jest
+        .fn()
+        .mockReturnValue({ term: { 'user.name': 'alice' } }),
     },
   },
 }));
+
+const mockEntityFilter = { term: { 'user.name': 'alice' } };
 
 let mockMlAnomalySearch: jest.Mock;
 let mockMl: MlPluginSetup;
 let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 const soClient = savedObjectsClientMock.create();
+const request = httpServerMock.createKibanaRequest();
+
+const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
 
 const defaultOpts = {
   entityType: 'user' as const,
   entityId: 'user:alice',
+  entityRecord: mockEntityRecord,
+  request,
 };
 
 beforeEach(() => {
@@ -73,11 +82,12 @@ describe('searchEntityAnomalies', () => {
 
     await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
-    expect(euid.painless.getEuidRuntimeMapping).toHaveBeenCalledWith('user');
+    expect(euid.dsl.getEuidFilterBasedOnEntityRecord).toHaveBeenCalledWith(
+      'user',
+      mockEntityRecord
+    );
     expect(mockMlAnomalySearch).toHaveBeenCalledWith(
       expect.objectContaining({
-        fields: ['entity_id'],
-        runtime_mappings: { entity_id: { type: 'keyword', source: 'mock-script' } },
         query: {
           bool: {
             filter: expect.arrayContaining([
@@ -85,13 +95,17 @@ describe('searchEntityAnomalies', () => {
               { term: { is_interim: false } },
               { range: { record_score: { gte: 1 } } },
               { range: { timestamp: { gte: 'now-30d' } } },
-              { term: { entity_id: 'user:alice' } },
+              mockEntityFilter,
               { terms: { job_id: ['security-job-1', 'security-job-2'] } },
             ]),
           },
         },
       }),
       []
+    );
+    expect(mockMlAnomalySearch).not.toHaveBeenCalledWith(
+      expect.objectContaining({ runtime_mappings: expect.anything() }),
+      expect.anything()
     );
   });
 
@@ -328,11 +342,16 @@ describe('searchEntityAnomalies', () => {
     expect(result.hits).toEqual([]);
   });
 
-  it('skips hits where entity_id runtime field is missing', async () => {
-    mockMlAnomalySearch.mockResolvedValueOnce(makeResponse([makeHit({ noEntityId: true })]));
+  it('returns empty result and logs a warning when entity filter cannot be built', async () => {
+    const { euid } = jest.requireMock('@kbn/entity-store/common/euid_helpers');
+    euid.dsl.getEuidFilterBasedOnEntityRecord.mockReturnValueOnce(undefined);
 
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
+
     expect(result.hits).toEqual([]);
+    expect(result.total).toBe(0);
+    expect(mockMlAnomalySearch).not.toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Cannot build entity filter'));
   });
 
   it('skips hits where _source is missing', async () => {
@@ -358,5 +377,35 @@ describe('searchEntityAnomalies', () => {
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
     expect(result.hits).toEqual([]);
     expect(result.total).toBe(0);
+  });
+});
+
+describe('buildScoreRangeFilter', () => {
+  it('defaults to gte 1 when no ranges are given', () => {
+    expect(buildScoreRangeFilter(undefined)).toEqual({ range: { record_score: { gte: 1 } } });
+    expect(buildScoreRangeFilter([])).toEqual({ range: { record_score: { gte: 1 } } });
+  });
+
+  it('builds a should clause with one range per selected bucket', () => {
+    expect(buildScoreRangeFilter([{ min_score: 25, max_score: 50 }, { min_score: 100 }])).toEqual({
+      bool: {
+        should: [
+          { range: { record_score: { gte: 25, lt: 50 } } },
+          { range: { record_score: { gte: 100 } } },
+        ],
+        minimum_should_match: 1,
+      },
+    });
+  });
+
+  // Record scores below 1 are noise, so even a bucket like Low [0,3) must not lower the
+  // gte below the standard threshold of 1.
+  it('clamps a range min_score below 1 up to 1', () => {
+    expect(buildScoreRangeFilter([{ min_score: 0, max_score: 3 }])).toEqual({
+      bool: {
+        should: [{ range: { record_score: { gte: 1, lt: 3 } } }],
+        minimum_should_match: 1,
+      },
+    });
   });
 });

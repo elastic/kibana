@@ -17,6 +17,21 @@ describe('Events Details Helpers', () => {
       const result = getDataFromFieldsHits(fields);
       expect(result).toEqual(resultFields);
     });
+    it('handles geo fields with undefined values', () => {
+      const result = getDataFromFieldsHits({
+        'source.geo.location': undefined,
+      } as unknown as EventHit['fields']);
+
+      expect(result).toEqual([
+        {
+          category: 'source',
+          field: 'source.geo.location',
+          values: [],
+          originalValue: [],
+          isObjectArray: true,
+        },
+      ]);
+    });
     it('lets get weird', () => {
       const whackFields = {
         'crazy.pants': [

@@ -30,6 +30,8 @@ export interface FieldMeta {
   transport?: TransportType;
   placeholder?: string;
   helpText?: string;
+  /** True when the manifest var is multi: true (Fleet expects an array, not a string) */
+  multi?: boolean;
 }
 
 export const FIELD_CONFIG: Record<string, FieldMeta> = {
@@ -37,7 +39,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
     label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.bucketArn.label', {
       defaultMessage: 'Bucket ARN',
     }),
-    placement: 'inline',
+    placement: 'flyout',
     transport: 'aws-s3',
     placeholder: 'arn:aws:s3:::my-bucket',
   },
@@ -45,7 +47,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
     label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.logGroupArn.label', {
       defaultMessage: 'Log Group ARN',
     }),
-    placement: 'inline',
+    placement: 'flyout',
     transport: 'aws-cloudwatch',
     placeholder: 'arn:aws:logs:us-east-1:123456789012:log-group:my-log-group',
   },
@@ -74,6 +76,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
       defaultMessage: 'Regions',
     }),
     placement: 'flyout',
+    multi: true,
     helpText: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.regions.helpText', {
       defaultMessage: 'Optional. Restrict collection to specific AWS regions.',
     }),
@@ -83,7 +86,7 @@ export const FIELD_CONFIG: Record<string, FieldMeta> = {
     label: i18n.translate('xpack.ingestHub.serviceSettingsStep.field.detectorId.label', {
       defaultMessage: 'Detector ID',
     }),
-    placement: 'inline',
+    placement: 'flyout',
     placeholder: 'abc123...',
   },
   metrics: {
@@ -180,7 +183,8 @@ export function getInlineFields(
   service: AwsServiceMatrixEntry,
   activeTransport: TransportType | null
 ): string[] {
-  return (service.requiredConfig ?? []).filter((f) => {
+  const allFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  return allFields.filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
     if (meta.placement !== 'inline') return false;
@@ -193,7 +197,8 @@ export function getFlyoutFields(
   service: AwsServiceMatrixEntry,
   activeTransport: TransportType | null
 ): string[] {
-  return (service.requiredConfig ?? []).filter((f) => {
+  const allFields = [...(service.requiredConfig ?? []), ...(service.optionalConfig ?? [])];
+  return allFields.filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
     if (meta.placement !== 'flyout') return false;
@@ -209,6 +214,46 @@ export function getMandatoryBooleanFields(
   return (service.mandatoryFields ?? []).filter((f) => {
     const meta = FIELD_CONFIG[f];
     if (!meta) return false;
+    if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
+    return true;
+  });
+}
+
+export const REGION_FIELD_NAMES = new Set(['region', 'region_name', 'aws_region']);
+
+/** Returns true when the flyout has at least one visible field for the given service. */
+export function hasConfigurableFlyoutFields(service: AwsServiceMatrixEntry): boolean {
+  if (hasTransportChoice(service)) return true;
+  const defaultTransport = getDefaultTransport(service);
+  if (getRequiredTextFields(service, defaultTransport).length > 0) return true;
+  if (getMandatoryBooleanFields(service, defaultTransport).length > 0) return true;
+  const flyoutFields = getFlyoutFields(service, defaultTransport);
+  const requiredSet = new Set(getRequiredTextFields(service, defaultTransport));
+  return flyoutFields.some(
+    (f) => !REGION_FIELD_NAMES.has(f) && !requiredSet.has(f) && f !== 'regions'
+  );
+}
+
+export function getRegionFieldName(
+  service: AwsServiceMatrixEntry,
+  activeTransport: string | null
+): string {
+  const rc = service.requiredConfig ?? [];
+  if (activeTransport === 'aws-s3' && rc.includes('region')) return 'region';
+  if (activeTransport === 'aws-cloudwatch' && rc.includes('region_name')) return 'region_name';
+  if (rc.includes('aws_region')) return 'aws_region';
+  return 'aws_region';
+}
+
+export function getRequiredTextFields(
+  service: AwsServiceMatrixEntry,
+  activeTransport: TransportType | null
+): string[] {
+  return (service.requiredConfig ?? []).filter((f) => {
+    const meta = FIELD_CONFIG[f];
+    if (!meta) return false;
+    if (meta.type === 'boolean') return false;
+    if (REGION_FIELD_NAMES.has(f)) return false;
     if (meta.transport && activeTransport && meta.transport !== activeTransport) return false;
     return true;
   });

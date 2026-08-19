@@ -73,8 +73,10 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
       // if there's line number encoded in the message use it as new positioning
       // and replace the actual message without it
       if (/Line (\d+):(\d+):/.test(warningMessage)) {
-        const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+        const [encodedLine, encodedColumn, innerMessage, ...additionalParts] =
           warningMessage.split(':');
+        const additionalInfoMessage =
+          additionalParts.length > 0 ? additionalParts.join(':') : undefined;
         // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
         warningMessage = additionalInfoMessage ?? innerMessage;
         if (!Number.isNaN(Number(encodedColumn))) {
@@ -85,7 +87,7 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
         if (openingSquareBracketIndex !== -1) {
           const closingSquareBracketIndex = warningMessage.indexOf(']', openingSquareBracketIndex);
           if (closingSquareBracketIndex !== -1) {
-            errorLength = warningMessage.length - openingSquareBracketIndex - 1;
+            errorLength = closingSquareBracketIndex - openingSquareBracketIndex - 1;
           }
         }
       }
@@ -247,6 +249,7 @@ export const onMouseDownResizeHandler = (
 
   document.body.addEventListener('mousemove', onMouseMove);
   document.body.addEventListener('mouseup', onMouseUp, { once: true });
+  document.body.addEventListener('touchend', onMouseUp, { once: true });
 };
 
 export const onKeyDownResizeHandler = (
@@ -464,27 +467,33 @@ export const shouldAutoTriggerSuggestions = (lineContentBeforeCursor: string): b
 export const trackSuggestionPopupState = (
   editor: monaco.editor.IStandaloneCodeEditor,
   isSuggestionPopupOpenRef: React.MutableRefObject<boolean>
-) => {
+): monaco.IDisposable => {
   const suggestionController = editor.getContribution('editor.contrib.suggestController') as
     | (monaco.editor.IEditorContribution & {
         widget?: {
           value?: {
-            onDidShow?: (cb: () => void) => void;
-            onDidHide?: (cb: () => void) => void;
+            onDidShow?: (cb: () => void) => monaco.IDisposable;
+            onDidHide?: (cb: () => void) => monaco.IDisposable;
           };
         };
       })
     | undefined;
   const suggestionWidget = suggestionController?.widget?.value;
 
+  const disposables: monaco.IDisposable[] = [];
   if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
-    suggestionWidget.onDidShow(() => {
-      isSuggestionPopupOpenRef.current = true;
-    });
-    suggestionWidget.onDidHide(() => {
-      isSuggestionPopupOpenRef.current = false;
-    });
+    disposables.push(
+      suggestionWidget.onDidShow(() => {
+        isSuggestionPopupOpenRef.current = true;
+      })
+    );
+    disposables.push(
+      suggestionWidget.onDidHide(() => {
+        isSuggestionPopupOpenRef.current = false;
+      })
+    );
   }
+  return { dispose: () => disposables.forEach((d) => d.dispose()) };
 };
 
 /**

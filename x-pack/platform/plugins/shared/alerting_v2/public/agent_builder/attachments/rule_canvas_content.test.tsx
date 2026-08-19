@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { RULE_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { RuleCanvasContent } from './rule_canvas_content';
 
 const mockUpsertRule = jest.fn().mockResolvedValue({});
@@ -34,8 +35,9 @@ jest.mock('../../components/rule_details/rule_context', () => ({
   RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-jest.mock('../../components/rule_details/rule_header_description', () => ({
+jest.mock('../../components/rule_details/rule_summary_header', () => ({
   RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
+  RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
 }));
 
 jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
@@ -50,7 +52,7 @@ const createAttachment = (
   overrides: { origin?: string; enabled?: boolean; dataId?: string } = {}
 ) => ({
   id: 'att-1',
-  type: 'rule' as const,
+  type: RULE_ATTACHMENT_TYPE,
   versions: [],
   current_version: 1,
   origin: overrides.origin,

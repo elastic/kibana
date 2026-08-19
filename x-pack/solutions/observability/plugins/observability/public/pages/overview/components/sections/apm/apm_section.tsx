@@ -122,7 +122,15 @@ export function APMSection({ bucketSize }: Props) {
                   {i18n.translate('xpack.observability.overview.apm.throughput', {
                     defaultMessage: 'Throughput',
                   })}{' '}
-                  <EuiIcon size="s" color="subdued" type="question" className="eui-alignCenter" />
+                  <EuiIcon
+                    aria-label={i18n.translate('xpack.observability.overview.apm.throughputHelp', {
+                      defaultMessage: 'Throughput information',
+                    })}
+                    size="s"
+                    color="subdued"
+                    type="question"
+                    className="eui-alignCenter"
+                  />
                 </>
               </EuiToolTip>
             }

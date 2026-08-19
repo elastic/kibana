@@ -23,7 +23,7 @@ export const CreateUpdateProtectionUpdatesNoteRequestParams = lazySchema(() =>
     /**
      * The package policy ID to create or update the protection updates note for.
      */
-    package_policy_id: z.string(),
+    package_policy_id: z.string().max(256),
   })
 );
 export type CreateUpdateProtectionUpdatesNoteRequestParams = z.infer<
@@ -38,7 +38,7 @@ export const CreateUpdateProtectionUpdatesNoteRequestBody = lazySchema(() =>
     /**
      * The note content.
      */
-    note: z.string().optional(),
+    note: z.string().max(10000),
   })
 );
 export type CreateUpdateProtectionUpdatesNoteRequestBody = z.infer<
@@ -60,7 +60,7 @@ export const GetProtectionUpdatesNoteRequestParams = lazySchema(() =>
     /**
      * The package policy ID to retrieve the protection updates note for.
      */
-    package_policy_id: z.string(),
+    package_policy_id: z.string().max(256),
   })
 );
 export type GetProtectionUpdatesNoteRequestParams = z.infer<

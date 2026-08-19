@@ -28,19 +28,8 @@ import type {
 } from '@kbn/unified-histogram/types';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { RestorableStateProviderProps } from '@kbn/restorable-state';
-import type { ReactElement } from 'react';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/redux';
-
-/**
- * Legacy rule type entry shown in the alerting v2 create-rule options flyout.
- */
-export interface AlertsLegacyRuleType {
-  id: string;
-  label: string;
-  render: (onClose: () => void) => ReactElement | null;
-  'data-test-subj'?: string;
-}
 
 export type UpdateESQLQueryFn = (queryOrUpdater: string | ((prevQuery: string) => string)) => void;
 
@@ -54,11 +43,6 @@ export interface AppMenuExtension {
    * @returns The updated app menu registry
    */
   appMenuRegistry: (prevRegistry: AppMenuRegistry) => AppMenuRegistry;
-  /**
-   * Additional legacy rule types for the alerting v2 create-rule options flyout.
-   * Used instead of alerts popover items when alerting v2 is enabled in ES|QL mode.
-   */
-  getAlertsLegacyRuleTypes?: () => AlertsLegacyRuleType[];
 }
 
 /**
@@ -123,6 +107,10 @@ export interface OpenInNewTabParams {
    * The time range to open in the new tab
    */
   timeRange?: TimeRange;
+  /**
+   * Whether the new tab should use approximate ES|QL execution
+   */
+  esqlApproximation?: boolean;
 }
 
 /**
@@ -207,7 +195,8 @@ export interface RowIndicatorExtensionParams {
  */
 export interface DefaultAppStateColumn {
   /**
-   * The field name of the column
+   * The field name of the column.
+   * Use `'_source'` for the Summary column - it is always treated as a valid profile column.
    */
   name: string;
   /**
@@ -231,7 +220,9 @@ export interface DefaultAppStateExtensionParams {
  */
 export interface DefaultAppStateExtension {
   /**
-   * The columns to display in the data grid
+   * The columns to display in the data grid.
+   * Include `{ name: '_source' }` (usually last; omit `width` for auto-width) to show Summary
+   * alongside other default fields. Users can still pin or unpin Summary from the Columns popover.
    */
   columns?: DefaultAppStateColumn[];
   /**
@@ -253,6 +244,10 @@ export interface DefaultAppStateExtension {
    * The state for data table visibility toggle
    */
   hideTable?: boolean;
+  /**
+   * The state for field list sidebar visibility toggle
+   */
+  hideSidebar?: boolean;
 }
 
 /**

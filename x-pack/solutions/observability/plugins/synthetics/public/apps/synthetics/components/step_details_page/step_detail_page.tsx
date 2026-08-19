@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux-v7';
 import { ErrorCallOut } from './error_callout';
 import { useStepDetailsBreadcrumbs } from './hooks/use_step_details_breadcrumbs';
 import { WaterfallChartContainer } from './step_waterfall_chart/waterfall/waterfall_chart_container';
@@ -39,15 +39,20 @@ export const StepDetailPage = () => {
 
   const { remoteName } = useGetUrlParams();
 
+  // Once the step is known we forward its run `@timestamp` so the network
+  // events query can be bounded to that run and prune frozen-tier shards.
+  const stepTimestamp = currentStep?.['@timestamp'];
+
   useEffect(() => {
     dispatch(
       getNetworkEvents.get({
         checkGroup: checkGroupId,
         stepIndex: Number(stepIndex),
         remoteName,
+        timestamp: stepTimestamp,
       })
     );
-  }, [dispatch, stepIndex, checkGroupId, remoteName]);
+  }, [dispatch, stepIndex, checkGroupId, remoteName, stepTimestamp]);
 
   return (
     <>

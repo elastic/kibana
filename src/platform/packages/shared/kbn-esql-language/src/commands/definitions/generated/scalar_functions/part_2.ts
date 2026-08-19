@@ -202,6 +202,32 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'start',
+          type: 'integer',
+          optional: false,
+          description:
+            'Start position. If `null`, the function returns `null`. The start argument can be negative. An index of -1 is used to specify the last value in the list.',
+        },
+        {
+          name: 'end',
+          type: 'integer',
+          optional: true,
+          description:
+            'End position(included). Optional; if omitted, the position at `start` is returned. The end argument can be negative. An index of -1 is used to specify the last value in the list.',
+        },
+      ],
+      returnType: 'flattened',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'geo_point',
           optional: false,
           description:
@@ -557,8 +583,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'boolean',
@@ -577,8 +605,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'date',
@@ -597,8 +627,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'date_nanos',
@@ -617,8 +649,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'double',
@@ -637,8 +671,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'integer',
@@ -657,8 +693,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'ip',
@@ -677,8 +715,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'keyword',
@@ -697,8 +737,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'long',
@@ -717,8 +759,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'keyword',
@@ -737,8 +781,10 @@ const mvSortDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: true,
           description: 'Sort order. The valid options are ASC and DESC, the default is ASC.',
-          constantOnly: true,
-          suggestedValues: ['asc', 'desc'],
+          hint: {
+            kind: 'constant',
+            allowedValues: ['asc', 'desc'],
+          },
         },
       ],
       returnType: 'version',
@@ -962,6 +1008,25 @@ const mvUnionDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
+        },
+        {
+          name: 'field2',
+          type: 'flattened',
+          optional: false,
+          description:
+            'Expression that can be null, a single value, or multiple values. Null values are treated as empty sets.',
+        },
+      ],
+      returnType: 'flattened',
     },
     {
       params: [
@@ -2028,7 +2093,9 @@ const qstrDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Query string in Lucene query string format.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'options',
@@ -2038,7 +2105,9 @@ const qstrDefinition: FunctionDefinition = {
           optional: true,
           description:
             '(Optional) Additional options for Query String as <<esql-function-named-params,function named parameters>>. See <<query-dsl-query-string-query,query string query>> for more information.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -2050,7 +2119,9 @@ const qstrDefinition: FunctionDefinition = {
           type: 'text',
           optional: false,
           description: 'Query string in Lucene query string format.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'options',
@@ -2060,13 +2131,21 @@ const qstrDefinition: FunctionDefinition = {
           optional: true,
           description:
             '(Optional) Additional options for Query String as <<esql-function-named-params,function named parameters>>. See <<query-dsl-query-string-query,query string query>> for more information.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.WHERE, Location.STATS_WHERE, Location.JOIN, Location.EVAL],
+  locationsAvailable: [
+    Location.WHERE,
+    Location.STATS_WHERE,
+    Location.JOIN,
+    Location.EVAL,
+    Location.HIGHLIGHT_QUERY,
+  ],
   examples: [
     'FROM books\n| WHERE QSTR("author: Faulkner")',
     'FROM books\n| WHERE QSTR("title: Hobbjt~", {"fuzziness": 2})',
@@ -2696,7 +2775,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -2715,7 +2796,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -2745,7 +2828,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'integer',
@@ -2764,7 +2849,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'integer',
@@ -2794,7 +2881,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'long',
@@ -2813,7 +2902,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'long',
@@ -2843,7 +2934,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'unsigned_long',
@@ -2862,7 +2955,9 @@ const roundDefinition: FunctionDefinition = {
           optional: true,
           description:
             'The number of decimal places to round to. Defaults to 0. If `null`, the function returns `null`.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'unsigned_long',
@@ -2912,7 +3007,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'date',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'date',
@@ -2931,7 +3028,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'date_nanos',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'date_nanos',
@@ -2950,7 +3049,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -2969,7 +3070,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -2988,7 +3091,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -3007,7 +3112,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -3026,7 +3133,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'integer',
@@ -3045,7 +3154,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'long',
@@ -3064,7 +3175,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'double',
@@ -3083,7 +3196,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'long',
@@ -3102,7 +3217,9 @@ const roundToDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Remaining rounding points. Must be constants.',
-          constantOnly: true,
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'long',
@@ -3981,6 +4098,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -3999,6 +4119,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -4017,6 +4140,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -4035,6 +4161,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -4053,6 +4182,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -4071,6 +4203,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -4089,6 +4224,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -4107,6 +4245,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -4125,6 +4266,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4143,6 +4287,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4161,6 +4308,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4179,6 +4329,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4197,6 +4350,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4215,6 +4371,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4233,6 +4392,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4251,6 +4413,9 @@ const stBufferDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Buffer distance in the units of the input spatial reference system',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -4460,6 +4625,191 @@ const stContainsDefinition: FunctionDefinition = {
   ],
   examples: [
     'FROM airport_city_boundaries\n| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))\n| KEEP abbrev, airport, region, city, city_location',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stDifferenceDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_DIFFERENCE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_difference', {
+    defaultMessage:
+      'Returns the part of `geomA` that does not intersect with `geomB`. This is equivalent to subtracting `geomB` from `geomA`. Both geometries must share the same coordinate reference system.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW a = TO_GEOSHAPE("POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))"),\n    b = TO_GEOSHAPE("POLYGON ((1 1, 4 1, 4 4, 1 4, 1 1))")\n| EVAL diff = ST_DIFFERENCE(a, b)\n| KEEP diff',
   ],
 };
 
@@ -5019,6 +5369,9 @@ const stGeohashDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geohash',
@@ -5037,6 +5390,9 @@ const stGeohashDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [1 and 12](https://en.wikipedia.org/wiki/Geohash).',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'bounds',
@@ -5044,6 +5400,9 @@ const stGeohashDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geohash',
@@ -5095,6 +5454,9 @@ const stGeohexDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       license: 'platinum',
@@ -5114,6 +5476,9 @@ const stGeohexDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 15](https://h3geo.org/docs/core-library/restable/).',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'bounds',
@@ -5121,6 +5486,9 @@ const stGeohexDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       license: 'platinum',
@@ -5255,6 +5623,9 @@ const stGeotileDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geotile',
@@ -5273,6 +5644,9 @@ const stGeotileDefinition: FunctionDefinition = {
           optional: false,
           description:
             'Expression of type `integer`. If `null`, the function returns `null`. Valid values are between [0 and 29](https://wiki.openstreetmap.org/wiki/Zoom_levels).',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'bounds',
@@ -5280,6 +5654,9 @@ const stGeotileDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Optional bounds to filter the grid tiles, a `geo_shape` of type `BBOX`. Use [`ST_ENVELOPE`](https://www.elastic.co/docs/reference/query-languages/esql/functions-operators/spatial-functions/st_envelope) if the `geo_shape` is of any other type.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geotile',
@@ -5303,6 +5680,191 @@ const stGeotileDefinition: FunctionDefinition = {
   ],
   examples: [
     'FROM airports\n| EVAL geotile = ST_GEOTILE(location, 2)\n| STATS\n    count = COUNT(geotile),\n    centroid = ST_CENTROID_AGG(location)\n      BY geotile\n| EVAL geotileString = TO_STRING(geotile)\n| SORT count DESC, geotileString ASC\n| KEEP count, centroid, geotileString',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stIntersectionDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_INTERSECTION,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_intersection', {
+    defaultMessage:
+      'Returns the geometric intersection of two geometries. The result is a geometry representing the portion that both input geometries have in common. Returns an empty geometry if the inputs do not intersect. Both geometries must share the same coordinate reference system.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW a = TO_GEOSHAPE("POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))"),\n    b = TO_GEOSHAPE("POLYGON ((1 1, 4 1, 4 4, 1 4, 1 1))")\n| EVAL intersected = ST_INTERSECTION(a, b)\n| KEEP intersected',
   ],
 };
 
@@ -5791,6 +6353,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -5809,6 +6374,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -5827,6 +6395,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -5845,6 +6416,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -5863,6 +6437,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -5881,6 +6458,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -5899,6 +6479,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -5917,6 +6500,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -5935,6 +6521,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -5953,6 +6542,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -5971,6 +6563,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -5989,6 +6584,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -6007,6 +6605,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -6025,6 +6626,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -6043,6 +6647,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -6061,6 +6668,9 @@ const stSimplifyDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -6112,6 +6722,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -6130,6 +6743,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -6148,6 +6764,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -6166,6 +6785,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_point',
@@ -6184,6 +6806,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -6202,6 +6827,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -6220,6 +6848,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -6238,6 +6869,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'cartesian_shape',
@@ -6256,6 +6890,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -6274,6 +6911,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -6292,6 +6932,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -6310,6 +6953,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_point',
@@ -6328,6 +6974,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'double',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -6346,6 +6995,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'float',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -6364,6 +7016,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'integer',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -6382,6 +7037,9 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
           type: 'long',
           optional: false,
           description: 'Tolerance for the geometry simplification, in the units of the input SRS',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'geo_shape',
@@ -6405,6 +7063,376 @@ const stSimplifypreservetopologyDefinition: FunctionDefinition = {
   ],
   examples: [
     'ROW wkt = "POLYGON ((7.998 53.827, 9.470 53.068, 15.754 53.801, 16.523 57.160, 11.162 57.868, 8.064 57.445, 6.219 55.317, 7.998 53.827))"\n| EVAL simplified = ST_SIMPLIFYPRESERVETOPOLOGY(TO_GEOSHAPE(wkt), 0.7)',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stSymdifferenceDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_SYMDIFFERENCE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_symdifference', {
+    defaultMessage:
+      'Returns the symmetric difference of two geometries, that is the parts of each geometry that are not shared by both. This is equivalent to the union of the two differences: `ST_UNION(ST_DIFFERENCE(geomA, geomB), ST_DIFFERENCE(geomB, geomA))`. Both geometries must share the same coordinate reference system.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW a = TO_GEOSHAPE("POLYGON ((0 0, 3 0, 3 3, 0 3, 0 0))"),\n    b = TO_GEOSHAPE("POLYGON ((1 1, 4 1, 4 4, 1 4, 1 1))")\n| EVAL symdiff = ST_SYMDIFFERENCE(a, b)\n| KEEP symdiff',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const stUnionDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.ST_UNION,
+  description: i18n.translate('kbn-esql-language.esql.definitions.st_union', {
+    defaultMessage:
+      'Returns the geometric union of two geometries. The result is a geometry that covers all points covered by either input geometry. Both geometries must share the same coordinate reference system.',
+  }),
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'cartesian_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_point',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+    {
+      params: [
+        {
+          name: 'geomA',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. If `null`, the function returns `null`.',
+        },
+        {
+          name: 'geomB',
+          type: 'geo_shape',
+          optional: false,
+          description:
+            'Expression of type `geo_point`, `geo_shape`, `cartesian_point` or `cartesian_shape`. Must share the same coordinate reference system as the first parameter. If `null`, the function returns `null`.',
+        },
+      ],
+      returnType: 'geo_shape',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW a = TO_GEOSHAPE("POLYGON ((0 0, 2 0, 2 2, 0 2, 0 0))"),\n    b = TO_GEOSHAPE("POLYGON ((2 0, 4 0, 4 2, 2 2, 2 0))")\n| EVAL unioned = ST_UNION(a, b)\n| KEEP unioned',
   ],
 };
 
@@ -8143,6 +9171,9 @@ const toDateperiodDefinition: FunctionDefinition = {
           type: 'date_period',
           optional: false,
           description: 'Input value. The input is a valid constant date period expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'date_period',
@@ -8154,6 +9185,9 @@ const toDateperiodDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Input value. The input is a valid constant date period expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'date_period',
@@ -8165,6 +9199,9 @@ const toDateperiodDefinition: FunctionDefinition = {
           type: 'text',
           optional: false,
           description: 'Input value. The input is a valid constant date period expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'date_period',
@@ -10082,6 +11119,39 @@ const toRadiansDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const toRangeDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.TO_RANGE,
+  description: i18n.translate('kbn-esql-language.esql.definitions.to_range', {
+    defaultMessage:
+      'Constructs a range from two boundary values. The first argument is the inclusive lower bound; the second is the exclusive upper bound, following the half-open `[from, to)` convention used for all range types in ES|QL. Currently accepts `datetime` arguments and returns a `date_range`.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: true,
+  alias: undefined,
+  signatures: [],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.CHANGE_POINT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'ROW from_dt = TO_DATETIME("2000-01-01T00:00:00.000Z"), to_dt = TO_DATETIME("2010-01-01T00:00:00.000Z")\n| EVAL r = TO_RANGE(from_dt, to_dt)\n| KEEP r',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const toStringDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_STRING,
@@ -10192,6 +11262,18 @@ const toStringDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'exponential_histogram',
+          optional: false,
+          description:
+            'Input value. The input can be a single- or multi-valued column or an expression.',
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'flattened',
           optional: false,
           description:
             'Input value. The input can be a single- or multi-valued column or an expression.',
@@ -10446,10 +11528,9 @@ const toTextDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.TO_TEXT,
   description: i18n.translate('kbn-esql-language.esql.definitions.to_text', {
-    defaultMessage: 'Converts an input value into a text.',
+    defaultMessage: 'Converts an input value into text.',
   }),
-  ignoreAsSuggestion: true,
-  preview: false,
+  preview: true,
   alias: undefined,
   signatures: [
     {
@@ -10513,6 +11594,9 @@ const toTimedurationDefinition: FunctionDefinition = {
           type: 'keyword',
           optional: false,
           description: 'Input value. The input is a valid constant time duration expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'time_duration',
@@ -10524,6 +11608,9 @@ const toTimedurationDefinition: FunctionDefinition = {
           type: 'text',
           optional: false,
           description: 'Input value. The input is a valid constant time duration expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'time_duration',
@@ -10535,6 +11622,9 @@ const toTimedurationDefinition: FunctionDefinition = {
           type: 'time_duration',
           optional: false,
           description: 'Input value. The input is a valid constant time duration expression.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'time_duration',
@@ -10836,6 +11926,9 @@ const topSnippetsDefinition: FunctionDefinition = {
           optional: false,
           description:
             'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'keyword',
@@ -10855,6 +11948,9 @@ const topSnippetsDefinition: FunctionDefinition = {
           optional: false,
           description:
             'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'options',
@@ -10883,6 +11979,9 @@ const topSnippetsDefinition: FunctionDefinition = {
           optional: false,
           description:
             'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'keyword',
@@ -10902,6 +12001,9 @@ const topSnippetsDefinition: FunctionDefinition = {
           optional: false,
           description:
             'The input text containing only query terms for snippet extraction. Lucene query syntax, operators, and wildcards are not allowed.',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'options',
@@ -10960,6 +12062,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: false,
           description:
             ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'end_time',
@@ -10967,6 +12072,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -10979,6 +12087,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: false,
           description:
             ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'end_time',
@@ -10986,6 +12097,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -10998,6 +12112,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: false,
           description:
             ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -11010,6 +12127,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: false,
           description:
             ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'end_time',
@@ -11017,6 +12137,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -11029,6 +12152,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: false,
           description:
             ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
+          hint: {
+            kind: 'constant',
+          },
         },
         {
           name: 'end_time',
@@ -11036,6 +12162,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: true,
           description:
             'Explicit end time that can be a date string, date, date_nanos or epoch milliseconds.',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -11048,6 +12177,9 @@ const trangeDefinition: FunctionDefinition = {
           optional: false,
           description:
             ' Offset from NOW for the single parameter mode. Start time for two parameter mode.  In two parameter mode, the start time value can be a date string, date, date_nanos or epoch milliseconds. ',
+          hint: {
+            kind: 'constant',
+          },
         },
       ],
       returnType: 'boolean',
@@ -11665,6 +12797,7 @@ export const scalarFunctionDefinitionsPart2: FunctionDefinition[] = [
   sqrtDefinition,
   stBufferDefinition,
   stContainsDefinition,
+  stDifferenceDefinition,
   stDimensionDefinition,
   stDisjointDefinition,
   stDistanceDefinition,
@@ -11673,11 +12806,14 @@ export const scalarFunctionDefinitionsPart2: FunctionDefinition[] = [
   stGeohexDefinition,
   stGeometrytypeDefinition,
   stGeotileDefinition,
+  stIntersectionDefinition,
   stIntersectsDefinition,
   stIsemptyDefinition,
   stNpointsDefinition,
   stSimplifyDefinition,
   stSimplifypreservetopologyDefinition,
+  stSymdifferenceDefinition,
+  stUnionDefinition,
   stWithinDefinition,
   stXDefinition,
   stXmaxDefinition,
@@ -11716,6 +12852,7 @@ export const scalarFunctionDefinitionsPart2: FunctionDefinition[] = [
   toLongDefinition,
   toLowerDefinition,
   toRadiansDefinition,
+  toRangeDefinition,
   toStringDefinition,
   toTdigestDefinition,
   toTextDefinition,

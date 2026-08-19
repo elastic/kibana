@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux-v7';
 import {
   EuiColorPalettePicker,
   EuiConfirmModal,

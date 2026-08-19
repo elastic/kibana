@@ -43,7 +43,17 @@ export const setupMockCoreStartServices = (
     asInternalUser: mockEsClient.asInternalUser,
     asCurrentUser: mockEsClient.asCurrentUser,
   });
-  mockCore.getStartServices.mockResolvedValue([mockCoreStart, {}, {}]);
+  mockCore.getStartServices.mockResolvedValue([
+    mockCoreStart,
+    {
+      entityStore: {
+        createCRUDClient: jest.fn().mockReturnValue({}),
+        createResolutionClient: undefined,
+        getMaintainerStatus: jest.fn().mockResolvedValue([]),
+      },
+    },
+    {},
+  ]);
   return mockCoreStart;
 };
 

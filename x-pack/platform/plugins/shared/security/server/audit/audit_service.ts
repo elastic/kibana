@@ -18,6 +18,11 @@ import type { AuditEvent, AuditLogger, AuditServiceSetup } from '@kbn/security-p
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { httpRequestEvent } from './audit_events';
+import {
+  applyAuditOtelFieldMap,
+  AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+  AUDIT_OTEL_RESOURCE_ATTRIBUTES,
+} from './audit_otel_transform';
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common';
 import type { ConfigType } from '../config';
 import type { SecurityPluginSetup } from '../plugin';
@@ -32,6 +37,10 @@ interface AuditServiceSetupParams {
   config: ConfigType['audit'];
   logging: Pick<LoggingServiceSetup, 'configure'>;
   http: Pick<HttpServiceSetup, 'registerOnPostAuth'>;
+  // The OTel audit field transforms target Serverless log-delivery requirements only. On other
+  // build flavors the OTel appender is left untouched (full resource, raw ECS field names).
+  // Defaults to `false` (no transforms) when omitted; the plugin always passes it explicitly.
+  isServerless?: boolean;
 
   getCurrentUser(
     request: KibanaRequest
@@ -59,6 +68,7 @@ export class AuditService {
     config,
     logging,
     http,
+    isServerless = false,
     getCurrentUser,
     getSID,
     getSpaceId,
@@ -68,7 +78,7 @@ export class AuditService {
     logging.configure(
       license.features$.pipe(
         distinctUntilKeyChanged('allowAuditLogging'),
-        createLoggingConfig(config)
+        createLoggingConfig(config, isServerless)
       )
     );
 
@@ -164,25 +174,53 @@ export class AuditService {
   }
 }
 
-export const createLoggingConfig = (config: ConfigType['audit']) =>
-  map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => ({
-    appenders: {
-      auditTrailAppender: config.appender ?? {
-        type: 'console',
-        layout: {
-          type: 'pattern',
-          highlight: true,
+export const createLoggingConfig = (config: ConfigType['audit'], isServerless = false) =>
+  map<Pick<SecurityLicenseFeatures, 'allowAuditLogging'>, LoggerContextConfigInput>((features) => {
+    const baseAppender = config.appender ?? {
+      type: 'console' as const,
+      layout: {
+        type: 'pattern' as const,
+        highlight: true,
+      },
+    };
+    // On Serverless, when the configured appender is OTel, inject the audit-specific attribute
+    // transform callback (renames, drops, defaults, additions) to satisfy Serverless audit log
+    // field requirements at the output layer — without touching the upstream AuditEvent type — and
+    // slim the resource to the minimal audit attributes. These transforms are Serverless-only: on
+    // other build flavors the OTel appender is left untouched (full resource, raw ECS field names).
+    const appender =
+      isServerless && baseAppender.type === 'otel'
+        ? {
+            ...baseAppender,
+            transformAttributes: applyAuditOtelFieldMap,
+            // Slim the resource to the configured attributes — the appender's own `attributes` plus
+            // the audit service.name/service.type — dropping the detectors' host/OS/process/env
+            // fields. The allowlist also keeps the promoted keys (AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            // e.g. project.id): they must survive in the resource because log delivery reads them
+            // there, in addition to being copied into per-record attributes below.
+            includeResources: [
+              ...Object.keys({ ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES }),
+              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            ],
+            promoteResourceAttributes: [
+              ...(baseAppender.promoteResourceAttributes ?? []),
+              ...AUDIT_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+            ],
+            attributes: { ...baseAppender.attributes, ...AUDIT_OTEL_RESOURCE_ATTRIBUTES },
+          }
+        : baseAppender;
+
+    return {
+      appenders: { auditTrailAppender: appender },
+      loggers: [
+        {
+          name: 'audit.ecs',
+          level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
+          appenders: ['auditTrailAppender'],
         },
-      },
-    },
-    loggers: [
-      {
-        name: 'audit.ecs',
-        level: config.enabled && config.appender && features.allowAuditLogging ? 'info' : 'off',
-        appenders: ['auditTrailAppender'],
-      },
-    ],
-  }));
+      ],
+    };
+  });
 
 /**
  * Evaluates the list of provided ignore rules, and filters out events only

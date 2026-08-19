@@ -250,6 +250,50 @@ describe('getCompletionItemProvider', () => {
       expect(result?.suggestions?.[0].label).toBe('scheduled');
     });
 
+    it('should deduplicate event-driven triggers from YAML schema and workflow provider by technical id', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getSuggestions } = require('./suggestions/get_suggestions');
+      getSuggestions.mockReturnValueOnce([
+        {
+          label: 'Alerting - Episode acknowledged',
+          insertText: 'alerting.episodeAcked snippet',
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          filterText: 'alerting.episodeAcked',
+          detail: 'alerting.episodeAcked',
+        },
+      ]);
+
+      const yamlProvider: monaco.languages.CompletionItemProvider = {
+        provideCompletionItems: jest.fn().mockResolvedValue({
+          suggestions: [
+            {
+              label: 'alerting.episodeAcked',
+              insertText: 'alerting.episodeAcked',
+              filterText: 'alerting.episodeAcked',
+            },
+          ],
+          incomplete: false,
+        }),
+      };
+
+      monaco.languages.registerCompletionItemProvider(YAML_LANG_ID, yamlProvider);
+
+      const provider = getCompletionItemProvider(getState);
+      const result = await provider.provideCompletionItems!(
+        mockModel,
+        mockPosition,
+        mockCompletionContext,
+        {} as monaco.CancellationToken
+      );
+
+      expect(result?.suggestions).toHaveLength(1);
+      expect(result?.suggestions?.[0]).toMatchObject({
+        label: 'Alerting - Episode acknowledged',
+        detail: 'alerting.episodeAcked',
+        filterText: 'alerting.episodeAcked',
+      });
+    });
+
     it('should deduplicate duplicate keys across YAML providers, preferring snippets', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
       const { getSuggestions } = require('./suggestions/get_suggestions');

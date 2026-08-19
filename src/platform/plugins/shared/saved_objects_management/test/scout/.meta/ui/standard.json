@@ -1,5 +1,5 @@
 {
-  "sha1": "f559ae6a1bbaddd2b8f54acc9381a35359e1295d",
+  "sha1": "f3ab25b20c9d50b76184606165a6967ac635ba7a",
   "tests": [
     {
       "id": "12438030416ccc4-0ca770f7b4f667b",
@@ -95,8 +95,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
-        "line": 59,
-        "column": 7
+        "line": 63,
+        "column": 9
       }
     },
     {
@@ -109,8 +109,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/saved_objects_management/test/scout/ui/tests/imports.spec.ts",
-        "line": 81,
-        "column": 7
+        "line": 85,
+        "column": 22
       }
     },
     {

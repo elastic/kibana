@@ -8,13 +8,14 @@
  */
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import type { TraceWaterfallRestorableState } from '.';
 import { TraceWaterfall } from '.';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
 import type { UnifiedDocViewerServices } from '../../../../../types';
-import type { TraceWaterfallRestorableState } from '.';
 import type { FullScreenWaterfallProps } from '../full_screen_waterfall';
+import { apmSharedMock } from '@kbn/apm-shared/public/mocks';
 
 jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
@@ -93,22 +94,7 @@ describe('TraceWaterfall', () => {
           },
         },
       },
-      discoverShared: {
-        features: {
-          registry: {
-            getById: (id: string) => {
-              if (id === 'observability-focused-trace-waterfall') {
-                return {
-                  render: () => (
-                    <div data-test-subj="focusedTraceWaterfall">FocusedTraceWaterfall</div>
-                  ),
-                };
-              }
-              return undefined;
-            },
-          },
-        },
-      },
+      apmShared: apmSharedMock.createStartContract(),
     } as unknown as UnifiedDocViewerServices);
   });
 
@@ -119,19 +105,19 @@ describe('TraceWaterfall', () => {
   it('renders the focused trace waterfall without docId', () => {
     render(<TraceWaterfall {...defaultProps} docId={undefined} />);
 
-    expect(screen.getByTestId('focusedTraceWaterfall')).toBeInTheDocument();
+    expect(screen.getByTestId('focused-trace-waterfall-with-fetching')).toBeInTheDocument();
   });
 
   it('renders the focused trace waterfall without serviceName', () => {
     render(<TraceWaterfall {...defaultProps} serviceName={undefined} />);
 
-    expect(screen.getByTestId('focusedTraceWaterfall')).toBeInTheDocument();
+    expect(screen.getByTestId('focused-trace-waterfall-with-fetching')).toBeInTheDocument();
   });
 
   it('renders the focused trace waterfall without docId and serviceName', () => {
     render(<TraceWaterfall {...defaultProps} docId={undefined} serviceName={undefined} />);
 
-    expect(screen.getByTestId('focusedTraceWaterfall')).toBeInTheDocument();
+    expect(screen.getByTestId('focused-trace-waterfall-with-fetching')).toBeInTheDocument();
   });
 
   describe('opening and closing', () => {

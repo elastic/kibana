@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { floatFourDecimalPlacesRt } from '@kbn/apm-common';
+export { floatFourDecimalPlacesSchema } from '@kbn/apm-common';

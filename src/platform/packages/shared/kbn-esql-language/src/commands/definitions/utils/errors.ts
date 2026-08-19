@@ -25,6 +25,15 @@ import type {
   Signature,
   SupportedDataType,
 } from '../types';
+import { FULL_TEXT_SEARCH_DEFINITIONS } from '../constants';
+
+/**
+ * Full-text function names for user-facing messages. Operator forms (the `:` match operator)
+ * are left out, since only the named functions read well in a list.
+ */
+const FULL_TEXT_FUNCTION_NAMES = FULL_TEXT_SEARCH_DEFINITIONS.filter((name) => /^\w+$/.test(name))
+  .map((name) => name.toUpperCase())
+  .join(', ');
 
 function getMessageAndTypeFromId<K extends ErrorTypes>({
   messageId,
@@ -507,6 +516,49 @@ Expected one of:
         }),
         type: 'error',
       };
+    case 'invalidMapParameterValue':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.invalidMapParameterValue', {
+          defaultMessage:
+            'Invalid value "{value}" for parameter "{paramName}". Expected one of: {allowedValues}.',
+          values: {
+            paramName: out.paramName,
+            value: out.value,
+            allowedValues: out.allowedValues,
+          },
+        }),
+        type: 'error',
+      };
+    case 'highlightMissingOnClause':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.highlightMissingOnClause', {
+          defaultMessage: '[HIGHLIGHT] Missing ON clause. Specify the fields to highlight.',
+        }),
+        type: 'error',
+      };
+    case 'highlightInvalidPrefixModifier':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.highlightInvalidPrefixModifier',
+          {
+            defaultMessage: '[HIGHLIGHT] Invalid modifier [{keyword}], expected [prefix]',
+            values: { keyword: out.keyword },
+          }
+        ),
+        type: 'error',
+      };
+    case 'highlightInvalidQueryExpression':
+      return {
+        message: i18n.translate(
+          'kbn-esql-language.esql.validation.highlightInvalidQueryExpression',
+          {
+            defaultMessage:
+              '[HIGHLIGHT] Query must be a full-text function ({functions}), a string literal, or a boolean combination of them. Found [{expression}]',
+            values: { functions: FULL_TEXT_FUNCTION_NAMES, expression: out.expression },
+          }
+        ),
+        type: 'error',
+      };
     case 'tsdbIncompatibleFunction':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.tsdbIncompatibleFunction', {
@@ -791,10 +843,16 @@ export const errors = {
   ): ESQLMessage =>
     tagSemanticError(
       withWarningSeverity(
-        errors.byId('columnTypeConflict', column.location, {
-          columnName,
-          types: types.map((type) => `[${type}]`).join(', '),
-        }),
+        {
+          ...errors.byId('columnTypeConflict', column.location, {
+            columnName,
+            types: types.map((type) => `[${type}]`).join(', '),
+          }),
+          data: {
+            columnName,
+            types,
+          },
+        },
         shouldWarn
       ),
       'getColumnsFor'

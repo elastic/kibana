@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
-import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
+import { useCanUpdateAgent } from '../../../hooks/agents/use_can_update_agent';
 import { useAgentConnectors } from '../../../hooks/connectors/use_agent_connectors';
 import { useConnectorsActions } from '../../../context/connectors_provider';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -49,7 +49,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   const agentQuery = useAgentBuilderAgentById(agentId);
   const { openCreateFlyout } = useConnectorsActions();
   const hasAllPrivileges = useHasConnectorsAllPrivileges();
-  const canEditAgent = useCanEditAgent({ agent: agentQuery.agent ?? null });
+  const canEditAgent = useCanUpdateAgent({ agent: agentQuery.agent ?? null });
 
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,7 +171,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                         button={
                           <EuiButton
                             fill
-                            iconType="plusInCircle"
+                            iconType="plusCircle"
                             iconSide="left"
                             onClick={() => setIsAddMenuOpen((prev) => !prev)}
                             data-test-subj="agentBuilderAddConnectorButton"
@@ -188,7 +188,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                           items={[
                             <EuiContextMenuItem
                               key="from-library"
-                              icon="importAction"
+                              icon="download"
                               disabled={isAddDisabled}
                               onClick={() => {
                                 setIsAddMenuOpen(false);
@@ -199,7 +199,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                             </EuiContextMenuItem>,
                             <EuiContextMenuItem
                               key="create-new"
-                              icon="plusInCircle"
+                              icon="plusCircle"
                               onClick={() => {
                                 setIsAddMenuOpen(false);
                                 openCreateFlyout();
