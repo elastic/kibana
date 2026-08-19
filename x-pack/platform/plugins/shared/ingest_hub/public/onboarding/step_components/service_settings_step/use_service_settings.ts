@@ -9,6 +9,7 @@ import { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
+import { getOnboardingSessionKey } from '../../onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { getDefaultTransport, getRequiredTextFields } from './field_config';
 import type { TransportType } from './field_config';
@@ -33,7 +34,7 @@ export interface ServiceInstance {
   isDuplicate: boolean;
 }
 
-interface PersistedState {
+export interface ServiceSettingsPersistedState {
   globalRegion: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
@@ -41,7 +42,7 @@ interface PersistedState {
   instances?: ServiceInstance[];
 }
 
-export const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
+export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
 
 /** Derive the canonical base instances (one per serviceId) from the selected ids list. */
 function baseInstances(selectedServiceIds: string[]): ServiceInstance[] {
@@ -90,7 +91,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const { servicesStep, removeDeployInstance } = useOnboardingFlow();
   const { selectedServiceIds } = servicesStep;
 
-  const [persisted, setPersisted] = useSessionStorage<PersistedState>(
+  const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
     SERVICE_SETTINGS_SESSION_KEY,
     {
       globalRegion: '',

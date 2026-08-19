@@ -261,7 +261,6 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             onLoad={setInspectData}
             overrides={overrides}
             searchSessionId={searchSessionId}
-            showInspector={false}
             style={lensComponentStyle}
             css={{ minWidth: '100px' }}
             syncCursor={false}
