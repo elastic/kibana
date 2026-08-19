@@ -5773,6 +5773,21 @@ describe('Package policy service', () => {
         });
       });
 
+      it('does not bump associated agent policies when bumpRevision is false', async () => {
+        const savedObjectsClient = createSavedObjectClientMock();
+        setupSOClientMocks(savedObjectsClient);
+        const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        await packagePolicyService.bulkUpdate(
+          savedObjectsClient,
+          elasticsearchClient,
+          testedPackagePolicies,
+          { force: true, bumpRevision: false }
+        );
+
+        expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
+      });
+
       it('should remove protections if policy_ids is changed, only affected policies', async () => {
         const savedObjectsClient = createSavedObjectClientMock();
 
@@ -6058,6 +6073,39 @@ describe('Package policy service', () => {
         expect.any(String),
         expect.objectContaining({ asyncDeploy: true })
       );
+    });
+
+    it('should not bump associated agent policies when bumpRevision is false', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: createPackagePolicyMock(),
+          },
+        ],
+      });
+      soClient.get.mockResolvedValueOnce({ ...mockPackagePolicy });
+      mockAgentPolicyGet();
+      mockAgentPolicyService.bumpRevision.mockClear();
+
+      const idToDelete = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
+      soClient.bulkDelete.mockResolvedValue({
+        statuses: [
+          { id: idToDelete, type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, success: true },
+        ],
+      });
+
+      await packagePolicyService.delete(soClient, esClient, [idToDelete], {
+        bumpRevision: false,
+      });
+
+      expect(mockAgentPolicyService.bumpRevision).not.toHaveBeenCalled();
     });
 
     it('should allow to delete orphaned package policies from ES index', async () => {
