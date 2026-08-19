@@ -43,7 +43,14 @@ const typeExistsExpression = {
   tagValue: undefined,
 } as const;
 
+const envStagingExpression = {
+  operator: FilterOperator.EQUALS,
+  tagName: 'env',
+  tagValue: 'staging',
+} as const;
+
 const typeSecurityKey = getFilterExpressionLookupKey(typeSecurityExpression);
+const envStagingKey = getFilterExpressionLookupKey(envStagingExpression);
 
 const mockUseProjectPickerState = jest.fn();
 const mockUseProjectPickerActions = jest.fn();
@@ -370,5 +377,88 @@ describe('ProjectPickerFilterForm', () => {
     });
     expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
     expect(onCloseFilterFormRequested).toHaveBeenCalled();
+  });
+
+  it('shows a custom value when editing a filter and keeps it selectable', async () => {
+    const user = userEvent.setup();
+    mockFetchProjectsByRouting.mockImplementation(async (routing?: string) => {
+      if (routing?.includes('env:staging')) {
+        return { origin: securityProject, linkedProjects: [] };
+      }
+      return { origin: null, linkedProjects: [] };
+    });
+
+    const { onCloseFilterFormRequested } = renderForm(
+      {
+        filterExpressions: createFilterExpressions([[envStagingExpression]]),
+      },
+      { filterId: envStagingKey }
+    );
+
+    const valueInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
+    expect(valueInput).toHaveValue('staging');
+
+    await user.click(screen.getByTestId('comboBoxInput'));
+    expect(await screen.findByRole('option', { name: 'staging' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: 'prod' })).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
+
+    expect(defaultActions.updateFilterExpression).toHaveBeenCalledWith({
+      id: envStagingKey,
+      expression: {
+        operator: FilterOperator.EQUALS,
+        tagName: 'env',
+        tagValue: 'staging',
+      },
+    });
+    expect(defaultActions.addFilterExpression).not.toHaveBeenCalled();
+    expect(onCloseFilterFormRequested).toHaveBeenCalled();
+  });
+
+  it('keeps a failed custom value on the input but removes it from selectable options', async () => {
+    const user = userEvent.setup();
+    mockFetchProjectsByRouting.mockResolvedValue({ origin: null, linkedProjects: [] });
+    renderForm();
+
+    await user.click(screen.getByRole('button', { name: 'Select a tag' }));
+    await selectOption(user, 'env');
+
+    const comboInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
+    await user.click(comboInput);
+    await user.type(comboInput, 'staging{enter}');
+
+    await user.click(screen.getByTestId('projectPickerFilterFormCreateBtn'));
+
+    expect(
+      await screen.findByText(
+        'No projects match this filter. Adjust so at least one project is included in your search.'
+      )
+    ).toBeInTheDocument();
+    expect(comboInput).toHaveValue('staging');
+
+    await user.click(screen.getByTestId('comboBoxInput'));
+    expect(await screen.findByRole('option', { name: 'prod' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'staging' })).not.toBeInTheDocument();
+  });
+
+  it('appends a custom value when using a one-of operator', async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    await user.click(screen.getByRole('button', { name: 'Select a tag' }));
+    await selectOption(user, 'env');
+
+    await user.click(screen.getByRole('button', { name: 'is' }));
+    await selectOption(user, 'is one of');
+
+    await user.click(screen.getByTestId('comboBoxInput'));
+    await selectOption(user, 'prod');
+
+    const comboInput = within(screen.getByTestId('comboBoxInput')).getByRole('combobox');
+    await user.type(comboInput, 'staging{enter}');
+
+    expect(screen.getByText('prod')).toBeInTheDocument();
+    expect(screen.getByText('staging')).toBeInTheDocument();
   });
 });

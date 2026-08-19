@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState, type ComponentProps } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+} from 'react';
 import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiSuperSelect,
@@ -97,6 +104,22 @@ function toSelectableOptions(values: string[], valueToLabelMapper?: (value: stri
     inputDisplay: valueToLabelMapper?.(value) ?? value,
     dropdownDisplay: valueToLabelMapper?.(value) ?? value,
   }));
+}
+
+function toComboBoxOptions(values: string[]): Array<EuiComboBoxOptionOption<string>> {
+  return values.map((value) => ({
+    key: value,
+    label: value,
+    value,
+  }));
+}
+
+function toTagValueList(tagValue: FilterInput['tagValue']): string[] {
+  if (tagValue == null) {
+    return [];
+  }
+
+  return Array.isArray(tagValue) ? tagValue : [tagValue];
 }
 
 function isMultiValueOperator(operator: FilterOperatorLiteral | undefined) {
@@ -207,24 +230,51 @@ export function FilterSelectionInput({
     []
   );
 
-  const [customFilterValues, setCustomFilterValues] = useState<string[]>([]);
+  const knownFilterValues = useMemo(
+    () =>
+      getFilterValuesOptions({
+        tagName: anchoringFilteringTagName,
+        operator: filteringOperator,
+      }),
+    [anchoringFilteringTagName, filteringOperator, getFilterValuesOptions]
+  );
+
+  const [customFilterValues, setCustomFilterValues] = useState<string[]>(() => {
+    const knownValues = new Set(
+      getFilterValuesOptions({
+        tagName: form.getValues('tagName'),
+        operator: form.getValues('operator'),
+      })
+    );
+
+    return toTagValueList(form.getValues('tagValue')).filter((value) => !knownValues.has(value));
+  });
+
+  const previousTagNameRef = useRef(anchoringFilteringTagName);
 
   useEffect(() => {
-    if (errors.tagValue) {
-      setCustomFilterValues((prevCustomFilterValues) =>
-        prevCustomFilterValues.filter((value) => value !== filteringTagValue)
-      );
+    if (previousTagNameRef.current === anchoringFilteringTagName) {
+      return;
     }
+
+    previousTagNameRef.current = anchoringFilteringTagName;
+    setCustomFilterValues([]);
+  }, [anchoringFilteringTagName]);
+
+  useEffect(() => {
+    if (!errors.tagValue) {
+      return;
+    }
+
+    const failedValues = new Set(toTagValueList(filteringTagValue));
+    setCustomFilterValues((prevCustomFilterValues) =>
+      prevCustomFilterValues.filter((value) => !failedValues.has(value))
+    );
   }, [filteringTagValue, errors.tagValue]);
 
   const filterValues = useMemo(() => {
-    return toSelectableOptions(
-      ([] as string[]).concat(
-        customFilterValues,
-        getFilterValuesOptions({ tagName: anchoringFilteringTagName, operator: filteringOperator })
-      )
-    );
-  }, [anchoringFilteringTagName, customFilterValues, filteringOperator, getFilterValuesOptions]);
+    return toComboBoxOptions([...new Set([...customFilterValues, ...knownFilterValues])]);
+  }, [customFilterValues, knownFilterValues]);
 
   const renderTagValueInput = useCallback<
     ComponentProps<typeof Controller<FilterInput, 'tagValue'>>['render']
@@ -238,11 +288,7 @@ export function FilterSelectionInput({
         }
       };
 
-      const selectedOptions = filterValues.filter((option) =>
-        Array.isArray(field.value)
-          ? field.value.includes(option.value)
-          : field.value === option.value
-      );
+      const selectedOptions = toComboBoxOptions(toTagValueList(field.value));
 
       const onCreateOption: NonNullable<EuiComboBoxOptionsListProps<string>['onCreateOption']> = (
         searchValue
@@ -253,11 +299,18 @@ export function FilterSelectionInput({
           return;
         }
 
-        setCustomFilterValues((prev) => [...prev, normalizedSearchValue]);
+        setCustomFilterValues((prev) =>
+          prev.includes(normalizedSearchValue) ? prev : [...prev, normalizedSearchValue]
+        );
 
         if (isMultiValueFilteringOperation) {
-          // Select the option.
-          field.onChange([normalizedSearchValue]);
+          const currentValues = Array.isArray(field.value) ? field.value : [];
+
+          if (currentValues.includes(normalizedSearchValue)) {
+            return;
+          }
+
+          field.onChange([...currentValues, normalizedSearchValue]);
         } else {
           field.onChange(normalizedSearchValue);
         }
