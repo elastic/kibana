@@ -29,6 +29,36 @@ const MAX_TRANSFORM_LIST_HEIGHT = 200;
 const getEffectiveProjectRouting = (projectRouting?: ProjectRouting): ProjectRouting =>
   projectRouting ?? PROJECT_ROUTING.ORIGIN;
 
+const projectMatchesFilterExpression = (
+  project: CPSProject,
+  expression: ReturnType<typeof projectRoutingCodec.decode>['filterExpressions'][number]
+): boolean => {
+  const projectValue = project[expression.tagName as keyof CPSProject];
+
+  switch (expression.operator) {
+    case 'is':
+      return projectValue === expression.tagValue;
+    case 'not':
+      return projectValue !== undefined && projectValue !== expression.tagValue;
+    case 'oneOf':
+      return (
+        typeof projectValue === 'string' &&
+        Array.isArray(expression.tagValue) &&
+        expression.tagValue.includes(projectValue)
+      );
+    case 'notOneOf':
+      return (
+        typeof projectValue === 'string' &&
+        Array.isArray(expression.tagValue) &&
+        !expression.tagValue.includes(projectValue)
+      );
+    case 'exists':
+      return projectValue !== undefined && projectValue !== '';
+    case 'notExists':
+      return projectValue === undefined || projectValue === '';
+  }
+};
+
 const getIncludedProjectIds = ({
   availableProjects,
   originProjectId,
@@ -49,17 +79,31 @@ const getIncludedProjectIds = ({
   }
 
   const decodedProjectRouting = projectRoutingCodec.decode(projectRouting);
+  const filteredProjectIds =
+    decodedProjectRouting.filterExpressions.length > 0
+      ? availableProjects
+          .filter((project) =>
+            decodedProjectRouting.filterExpressions.every((expression) =>
+              projectMatchesFilterExpression(project, expression)
+            )
+          )
+          .map(({ _id: projectId }) => projectId)
+      : availableProjectIds;
 
   if (decodedProjectRouting.selectedProjectIds.length > 0) {
     return decodedProjectRouting.selectedProjectIds.filter((projectId) =>
-      availableProjectIds.includes(projectId)
+      filteredProjectIds.includes(projectId)
     );
   }
 
   if (decodedProjectRouting.excludedProjectIds.length > 0) {
-    return availableProjectIds.filter(
+    return filteredProjectIds.filter(
       (projectId) => !decodedProjectRouting.excludedProjectIds.includes(projectId)
     );
+  }
+
+  if (decodedProjectRouting.filterExpressions.length > 0) {
+    return filteredProjectIds;
   }
 };
 
