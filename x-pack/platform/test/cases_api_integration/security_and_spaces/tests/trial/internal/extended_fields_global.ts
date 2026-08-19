@@ -269,9 +269,10 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
 
-        // The legacy value is mirrored into the v2 surface.
+        // The legacy value is mirrored into the v2 surface under the linked definition's
+        // label-derived friendly name ("text"), not the raw v1 custom-field key.
         expect(createdCase[CASE_EXTENDED_FIELDS]).to.eql({
-          test_custom_field_as_keyword: 'legacy value',
+          text_as_keyword: 'legacy value',
         });
       });
     });

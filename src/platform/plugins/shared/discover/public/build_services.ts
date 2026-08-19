@@ -170,6 +170,7 @@ export interface DiscoverServices {
   cps?: CPSPluginStart;
   embeddableEditor: EmbeddableEditorService;
   logger: Logger;
+  feedback?: DiscoverStartPlugins['feedback'];
 }
 
 export const buildServices = ({
@@ -286,5 +287,6 @@ export const buildServices = ({
       core.application
     ),
     logger: context.logger.get(),
+    feedback: plugins.feedback,
   };
 };

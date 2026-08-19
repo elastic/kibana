@@ -8,6 +8,7 @@
 import { injectable } from 'inversify';
 import { get } from 'lodash';
 import objectHash from 'object-hash';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type {
   ActionGroup,
   DispatcherPipelineState,
@@ -22,7 +23,10 @@ import type {
 export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { matched = [], rules = new Map<RuleId, Rule>() } = state;
 
     const groups = buildActionGroups(matched, rules);
