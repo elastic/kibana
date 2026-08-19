@@ -8,6 +8,7 @@
     "public/**/*",
     "server/**/*",
     "test/scout/**/*",
+    "test/scout_cps_local/**/*",
     "../../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "public/**/*.json"
@@ -91,7 +92,10 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/task-manager-plugin",
     "@kbn/cps-utils",
-    "@kbn/core-notifications-browser"
+    "@kbn/core-notifications-browser",
+    "@kbn/cps-common",
+    "@kbn/mock-idp-utils",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }

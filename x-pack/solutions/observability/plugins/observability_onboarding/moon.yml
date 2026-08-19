@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/dashboard-plugin'
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/zod'
+  - '@kbn/test-jest-helpers'
 tags:
   - plugin
   - prod

@@ -135,7 +135,7 @@ export function bindAgentBuilder({ bind }: ContainerModuleLoadOptions) {
     );
   });
 
-  bind(OnStart).toConstantValue(async (container) => {
+  bind(OnStart).toConstantValue((container) => {
     const agentBuilder = getAgentBuilder(container);
     if (!agentBuilder) {
       return;

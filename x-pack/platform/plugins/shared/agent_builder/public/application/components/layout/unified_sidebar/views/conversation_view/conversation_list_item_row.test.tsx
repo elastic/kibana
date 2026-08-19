@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom-v5-compat';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { MemoryRouter } from '@kbn/shared-ux-router';
 import type { ConversationPermissions } from '../../../../../../../common/http_api/conversations';
 import { useConversationListMutations } from '../../../../../hooks/use_conversation_list_mutations';
 import { ConversationListItemRow } from './conversation_list_item_row';
@@ -25,7 +25,7 @@ const mockUseConversationListMutations = jest.mocked(useConversationListMutation
 
 const conversationId = 'conversation-1';
 
-const renderRow = (permissions: ConversationPermissions) => {
+const renderRow = (permissions: Partial<ConversationPermissions>) => {
   render(
     <IntlProvider locale="en">
       <MemoryRouter>
@@ -35,7 +35,12 @@ const renderRow = (permissions: ConversationPermissions) => {
           title="My conversation"
           isActive={false}
           routeConversationId={conversationId}
-          permissions={permissions}
+          permissions={{
+            rename: false,
+            delete: false,
+            update_access_control: false,
+            ...permissions,
+          }}
         />
       </MemoryRouter>
     </IntlProvider>
