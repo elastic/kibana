@@ -8,8 +8,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { ProjectRouting } from '@kbn/es-query';
 import { type CPSProject, PROJECT_ROUTING, useFetchProjects } from '@kbn/cps-utils';
+import { i18n } from '@kbn/i18n';
 
-import { useAppDependencies } from '../../../../app_dependencies';
+import { TRANSFORM_PROJECT_ROUTING_MAX_LENGTH } from '../../../../../../common/constants';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import type { TransformListRow } from '../../../../common';
 import { useTransformCapabilities, useUpdateTransformsProjectScope } from '../../../../hooks';
 
@@ -22,6 +24,7 @@ export type ProjectScopeAction = ReturnType<typeof useProjectScopeAction>;
 
 export const useProjectScopeAction = () => {
   const { cps } = useAppDependencies();
+  const toastNotifications = useToastNotifications();
   const cpsManager = cps?.cpsManager;
   const { canCreateTransform } = useTransformCapabilities();
   const updateTransformsProjectScope = useUpdateTransformsProjectScope();
@@ -97,10 +100,32 @@ export const useProjectScopeAction = () => {
     [defaultProjectRouting, isDisabled]
   );
 
-  const openModal = useCallback((projectRouting: NonNullable<ProjectRouting>) => {
-    setTargetProjectRouting(projectRouting);
-    setModalVisible(true);
-  }, []);
+  const openModal = useCallback(
+    (projectRouting: NonNullable<ProjectRouting>) => {
+      if (projectRouting.length > TRANSFORM_PROJECT_ROUTING_MAX_LENGTH) {
+        toastNotifications.addDanger({
+          title: i18n.translate(
+            'xpack.transform.transformList.projectScopeRoutingTooLargeToastTitle',
+            {
+              defaultMessage: 'Project scope is too large to save',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.transform.transformList.projectScopeRoutingTooLargeToastText',
+            {
+              defaultMessage:
+                'Reduce the number of selected projects or adjust the project filters and try again.',
+            }
+          ),
+        });
+        return;
+      }
+
+      setTargetProjectRouting(projectRouting);
+      setModalVisible(true);
+    },
+    [toastNotifications]
+  );
 
   const onProjectRoutingChange = useCallback((projectRouting: ProjectRouting) => {
     if (projectRouting !== undefined) {

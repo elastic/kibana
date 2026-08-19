@@ -10,10 +10,11 @@ import { schema } from '@kbn/config-schema';
 
 import type { CommonResponseStatusSchema } from './common';
 import { transformIdsSchema } from './common';
+import { TRANSFORM_PROJECT_ROUTING_MAX_LENGTH } from '../../../common/constants';
 
 export const updateTransformsProjectScopeRequestSchema = schema.object({
   transformsInfo: transformIdsSchema,
-  projectRouting: schema.string({ maxLength: 1000 }),
+  projectRouting: schema.string({ maxLength: TRANSFORM_PROJECT_ROUTING_MAX_LENGTH }),
 });
 
 export type UpdateTransformsProjectScopeRequestSchema = TypeOf<
