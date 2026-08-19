@@ -461,16 +461,7 @@ export class SavedMap {
         return;
       }
     } else {
-      const storedState = this._store.getState();
-      mapEmbeddableState = {
-        ...getByValueState(this._mapEmbeddableState, this._attributes),
-        hiddenLayers: getLayerListRaw(storedState)
-          .filter((layer) => !layer.visible)
-          .map((layer) => layer.id),
-        isLayerTOCOpen: getIsLayerTOCOpen(storedState),
-        mapCenter: { ...getMapCenter(storedState), zoom: getMapZoom(storedState) },
-        openTOCDetails: getOpenTOCDetails(storedState),
-      };
+      mapEmbeddableState = getByValueState(this._mapEmbeddableState, this._attributes);
     }
 
     if (tags) {
@@ -542,7 +533,6 @@ export class SavedMap {
   private async _getStoreAttributes() {
     const state: MapStoreState = this._store.getState();
     const mapSettings = getMapSettings(state);
-
     return {
       adHocDataViews: await this._getAdHocDataViews(),
       center: getMapCenter(state),

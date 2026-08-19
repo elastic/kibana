@@ -15,7 +15,7 @@ import { MonitorConfiguration } from './monitor_configuration';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../../../../common/embeddables/monitors_overview/constants';
 import type { OverviewMonitorsEmbeddableCustomState } from '../monitors_overview/monitors_embeddable_factory';
 import type { OverviewStatsEmbeddableCustomState } from '../../../../common/types';
-import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
+import type { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../common/embeddables/stats_overview/constants';
 
 interface CommonParams {
   title: string;
@@ -68,12 +68,8 @@ export async function openMonitorConfiguration({
                 title={title}
                 initialInput={initialState}
                 onCreate={(update) => {
-                  const { view, ...state } = update;
                   flyoutSession.close();
-                  // drop 'view' for overview stats embeddables
-                  resolve(
-                    type === SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE ? state : { ...state, view }
-                  );
+                  resolve(update);
                 }}
                 onCancel={() => {
                   flyoutSession.close();

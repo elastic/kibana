@@ -26,7 +26,7 @@ export const initializeStateApi = <StateType extends object = object>({
   defaultState,
   serializeState,
   anyStateChange$,
-}: HasSerializableState<StateType> &
+}: Omit<HasSerializableState<StateType>, 'latestState$'> &
   HasUniqueId &
   HasParentApi & {
     getComparators: () => StateComparators<StateType>;

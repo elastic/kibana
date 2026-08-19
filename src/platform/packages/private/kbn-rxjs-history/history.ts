@@ -39,7 +39,6 @@ export function startTrackingHistory<T extends object = {}>({
       pairwise()
     )
     .subscribe(([previous, current]) => {
-      // console.log({ previous, current });
       if (undoOrRedoAction) {
         // do not add to history if state change is coming from undo or redo action
         undoOrRedoAction = false;
@@ -47,7 +46,6 @@ export function startTrackingHistory<T extends object = {}>({
       }
       const diff = jsondiffpatch.diff(previous, current);
       if (!diff) return;
-      // console.log('ADD TO HISTORY', { diff });
 
       const pointer = pointer$.getValue();
       if (pointer !== history.length - 1) {
@@ -63,14 +61,17 @@ export function startTrackingHistory<T extends object = {}>({
       pointer$.next(history.length - 1); // note: this is safer than incrementing, just in case things get out of sync
     });
 
-  const disabledActionsSubscription = combineLatest([pointer$, disableUndoRedo$])
-    .pipe(debounceTime(60)) // prevent flickering of undo/redo disabled state
-    .subscribe(([pointer, disableUndoRedo]) => {
-      disabledActions$.next({
-        undo: disableUndoRedo || pointer <= -1, // at the bottom of the history stack
-        redo: disableUndoRedo || pointer + 1 >= history.length, // at the top of the history stack
-      });
+  const disabledActionsSubscription = combineLatest([
+    pointer$,
+    disableUndoRedo$.pipe(
+      debounceTime(200) // prevent flickering of undo/redo disabled state
+    ),
+  ]).subscribe(([pointer, disableUndoRedo]) => {
+    disabledActions$.next({
+      undo: disableUndoRedo || pointer <= -1, // at the bottom of the history stack
+      redo: disableUndoRedo || pointer + 1 >= history.length, // at the top of the history stack
     });
+  });
 
   const undoPatch = () => {
     if (disableUndoRedo$.getValue()) return;

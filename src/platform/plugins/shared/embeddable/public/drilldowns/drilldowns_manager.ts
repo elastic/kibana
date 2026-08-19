@@ -24,7 +24,6 @@ export function initializeDrilldownsManager(
   const api: DrilldownsManager['api'] = {
     drilldowns$: drilldowns$ as PublishingSubject<DrilldownActionState[]>,
     setDrilldowns: (next: DrilldownState[]) => {
-      if (deepEqual(drilldowns$.value ?? [], next ?? [])) return;
       deleteActions();
       const drilldowns = next.map((drilldown) => {
         return {
@@ -52,15 +51,12 @@ export function initializeDrilldownsManager(
       skip(1),
       map(() => undefined)
     ),
-    getLatestState: () =>
-      drilldowns$.value.length
-        ? {
-            drilldowns: drilldowns$.value.map((drilldown) => {
-              const { actionId, ...rest } = drilldown;
-              return rest;
-            }),
-          }
-        : {},
+    getLatestState: () => ({
+      drilldowns: drilldowns$.value.map((drilldown) => {
+        const { actionId, ...rest } = drilldown;
+        return rest;
+      }),
+    }),
     reinitializeState: (lastState: SerializedDrilldowns) => {
       api.setDrilldowns(lastState.drilldowns ?? []);
     },
