@@ -10,7 +10,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 
-export const ensureConnectorAccessible = async ({
+export const ensureJudgeConnectorAccessible = async ({
   fetch,
   connector,
   log,

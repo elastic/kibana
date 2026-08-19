@@ -10,7 +10,7 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus } from '@kbn/workflows';
 import { evaluate, tags } from '../src/evaluate';
-import { assertWorkflowInstalled, ensureConnectorAccessible } from '../src/workflow_fixture';
+import { assertWorkflowInstalled, ensureJudgeConnectorAccessible } from '../src/workflow_fixture';
 
 const APPROVAL_INPUT = {
   technique: 'T1078.001',
@@ -48,7 +48,7 @@ evaluate.describe(
         connector: AvailableConnectorWithId;
         log: ToolingLog;
       }) => {
-        await ensureConnectorAccessible({ fetch, connector, log });
+        await ensureJudgeConnectorAccessible({ fetch, connector, log });
         await assertWorkflowInstalled({ fetch, log });
       }
     );
