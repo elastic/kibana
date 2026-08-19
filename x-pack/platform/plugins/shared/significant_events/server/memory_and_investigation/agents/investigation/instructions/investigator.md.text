@@ -185,7 +185,7 @@ Rules:
 - Findings from tools that don't expose a query (`get_logs`, `get_log_change_points`,
   `get_metric_change_points`, `get_trace_metrics`) cannot be cited directly. When one of them
   decides a hypothesis and you want the reader to be able to check it, run the equivalent ES|QL
-  with `execute_esql` and cite that query instead.
+  with `platform_core_execute_esql` and cite that query instead.
 
 **Example:**
 
@@ -198,7 +198,7 @@ Rules:
   "evidence": [
     {
       "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-      "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+      "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
       "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
     },
     {
@@ -218,19 +218,29 @@ Rules:
 </citing_evidence>
 
 <esql_rules>
-Keep ES|QL responses small — large result sets overflow context and make analysis harder:
+Use `platform_core_execute_esql` for ES|QL. Keep responses small — large result sets overflow context
+and make analysis harder:
 
 - Prefer STATS aggregations (COUNT(\*), AVG(), MAX(), etc.) over raw rows; they're more informative
   and compact.
 - When fetching raw rows (e.g. with WHERE), always cap with a low LIMIT (20 or fewer).
-- Good: `FROM index | STATS errors = COUNT(*) BY service.name | SORT errors DESC | LIMIT 20`
-- Good: `FROM index | WHERE log.level == "error" | SORT @timestamp DESC | LIMIT 10`
+- Good: `FROM index | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) BY service.name | SORT errors DESC | LIMIT 20`
+- Good: `FROM index | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend AND log.level == "error" | SORT @timestamp DESC | LIMIT 10`
 - Avoid: `FROM index | LIMIT 500` or any query without LIMIT — large row counts overflow context.
+- **Mandatory time scope — `?_tstart` and `?_tend` must appear in the query body.**
+  Every data query must include `WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend` and pass a
+  matching `time_range`. This applies equally to STATS aggregations and row fetches — a `STATS`
+  with no `@timestamp` filter scans the entire stream and will timeout. `time_range` does nothing
+  without `?_tstart`/`?_tend` in the query body; the tool silently ignores the range and runs a
+  full scan. Never substitute hardcoded `@timestamp >=` literals or inline datemath for the
+  placeholders. If the tool warns that your `time_range` was not applied, you omitted the
+  placeholders — add them and re-run before using the numbers. Schema probes (`| LIMIT 0`, or a
+  single-row `| LIMIT 1`) are exempt.
 - Kickoff "Related streams" are **logical stream names**, not guaranteed ES|QL `FROM` targets.
   Query streams live behind a prefixed view (`$.<name>`). Before the first ES|QL on an unfamiliar
   stream, load `streams-management` and call `inspect_streams` (aspects: `["overview"]`):
   - `type: wired|classic` → `FROM <stream_name>`
-  - `type: query` → `FROM <query.view>` (do not use the bare name)
+  - `type: query` → `FROM <query.view>` (if it starts with `$.`, that prefix is a required literal — never strip, correct, or decompose it into raw index patterns)
 - Do not use get_index_info for Streams / CCS / query-stream views — it often returns no fields.
   Discover shape from KI evidence / `dataset_analysis` field lists first, or run
   `FROM <resolved_target> | LIMIT 0` (columns only). If still missing fields, try a raw `LIMIT 1`
@@ -324,7 +334,7 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
@@ -337,7 +347,7 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "IOPS and queue depth stayed flat across the whole window.",
-          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
+          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
@@ -365,7 +375,7 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "Pool utilization jumps from 40% to 100% within a minute of the deploy.",
-          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
+          "esql_query": "FROM metrics-* | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_util = MAX(pool.utilization) BY BUCKET(@timestamp, 1 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
@@ -378,7 +388,7 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "IOPS and queue depth stayed flat across the whole window.",
-          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
+          "esql_query": "FROM metrics-* | WHERE host.name LIKE \"checkout-*\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS max_iops = MAX(system.diskio.iops), max_queue = MAX(system.diskio.queue) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
@@ -391,7 +401,7 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "payment-service error rate and p99 latency stayed at baseline throughout.",
-          "esql_query": "FROM traces-* | WHERE service.name == \"payment-service\" | STATS errors = COUNT(*) WHERE event.outcome == \"failure\", p99 = PERCENTILE(duration, 99) BY BUCKET(@timestamp, 5 minute)",
+          "esql_query": "FROM traces-* | WHERE service.name == \"payment-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS errors = COUNT(*) WHERE event.outcome == \"failure\", p99 = PERCENTILE(duration, 99) BY BUCKET(@timestamp, 5 minute)",
           "time_range": { "from": "2026-07-28T13:30:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]
@@ -410,7 +420,7 @@ not end the investigation. Keep working after calling it.
       "evidence": [
         {
           "description": "Zero successful checkout completions and a 100% error rate on the checkout path during the incident window.",
-          "esql_query": "FROM traces | WHERE service.name == \"checkout-service\" AND @timestamp >= \"2026-07-28T14:00:00Z\" | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\"",
+          "esql_query": "FROM traces | WHERE service.name == \"checkout-service\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS total = COUNT(*), failures = COUNT(*) WHERE event.outcome == \"failure\"",
           "time_range": { "from": "2026-07-28T14:00:00Z", "to": "2026-07-28T15:00:00Z" }
         }
       ]

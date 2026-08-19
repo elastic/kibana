@@ -17,6 +17,7 @@ export type {
   ToolAvailabilityConfig,
   ToolReturnSummarizerFn,
   BuiltInToolConfirmationPolicy,
+  McpToolAnnotations,
 } from './builtin';
 export {
   type ToolHandlerFn,

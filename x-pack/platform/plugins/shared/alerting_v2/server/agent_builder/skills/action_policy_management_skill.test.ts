@@ -23,6 +23,10 @@ const createDeps = (): ManageActionPolicyToolDeps => ({
 });
 
 describe('createActionPolicyManagementSkill', () => {
+  it('generates schema docs without throwing', () => {
+    expect(() => createActionPolicyManagementSkill(createDeps())).not.toThrow();
+  });
+
   it('registers the skill under the stable action-policy-management id and name', () => {
     const skill = createActionPolicyManagementSkill(createDeps());
 

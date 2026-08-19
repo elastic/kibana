@@ -27,7 +27,7 @@ import {
 } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
 import {
-  ModeFilter,
+  KindFilter,
   RULES_LIST_FEATURES_FIELDS,
   StatusFilter,
   TagsFilter,
@@ -129,7 +129,7 @@ export const RulesListPage = () => {
               {
                 field: 'kind',
                 name: i18n.translate('xpack.alertingV2.rulesList.sort.kind', {
-                  defaultMessage: 'Mode',
+                  defaultMessage: 'Outcome',
                 }),
               },
               {
@@ -161,7 +161,7 @@ export const RulesListPage = () => {
             <ContentListToolbar.Filters>
               <StatusFilter />
               <TagsFilter />
-              <ModeFilter />
+              <KindFilter />
             </ContentListToolbar.Filters>
           </ContentListToolbar>
           <RulesListTableContainer

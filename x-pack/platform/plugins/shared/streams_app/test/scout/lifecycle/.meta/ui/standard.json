@@ -1,5 +1,5 @@
 {
-  "sha1": "8efb1759794ef0a13a0392294506e8b42d5c7122",
+  "sha1": "b7d12297587689052a800495993d00741df76fb7",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -817,7 +817,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/lifecycle/ui/tests/data_retention/retention_inheritance.spec.ts",
-        "line": 101,
+        "line": 100,
         "column": 24
       }
     },
