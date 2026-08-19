@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -97,13 +97,8 @@ export const FaceliftHome: React.FC<FaceliftHomeProps> = ({
   const [pageFilters, setPageFilters] = useState<PageFilters>(EMPTY_PAGE_FILTERS);
   const [tableView, setTableView] = useState<TableView>('resolved');
 
-  const clearActiveFilter = useCallback(() => setActiveFilter(null), []);
-
-  useSyncEntityFilters({
-    activeFilter,
-    onClearOverview: clearActiveFilter,
-    dataViewId: dataView?.id,
-  });
+  // Strip leftover Overview KQL pills; card filters stay in React state only.
+  useSyncEntityFilters();
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -140,6 +135,7 @@ export const FaceliftHome: React.FC<FaceliftHomeProps> = ({
           entityDataView={dataView}
           entityDataViewLoading={dataViewLoading}
           pageFilters={pageFilters}
+          activeFilter={activeFilter}
           view={tableView}
         />
       </EuiFlexItem>
@@ -151,11 +147,13 @@ const EntityAnalyticsEntitiesTable = ({
   entityDataView,
   entityDataViewLoading,
   pageFilters,
+  activeFilter,
   view,
 }: {
   entityDataView: DataView;
   entityDataViewLoading: boolean;
   pageFilters: PageFilters;
+  activeFilter: ActiveFilter | null;
   view: TableView;
 }) => {
   const dataViewContextValue = useMemo(
@@ -172,7 +170,11 @@ const EntityAnalyticsEntitiesTable = ({
 
   return (
     <DataViewContext.Provider value={dataViewContextValue}>
-      <EntityAnalyticsEntitiesTableContent view={view} pageFilters={pageFilters} />
+      <EntityAnalyticsEntitiesTableContent
+        view={view}
+        pageFilters={pageFilters}
+        activeFilter={activeFilter}
+      />
     </DataViewContext.Provider>
   );
 };
@@ -180,9 +182,11 @@ const EntityAnalyticsEntitiesTable = ({
 const EntityAnalyticsEntitiesTableContent = ({
   view,
   pageFilters,
+  activeFilter,
 }: {
   view: TableView;
   pageFilters: PageFilters;
+  activeFilter: ActiveFilter | null;
 }) => {
   const urlState = useEntityURLState({
     paginationLocalStorageKey: ENTITY_ANALYTICS_LOCAL_STORAGE_PAGE_SIZE_KEY,
@@ -190,6 +194,11 @@ const EntityAnalyticsEntitiesTableContent = ({
   });
 
   return (
-    <ResolvedEntitiesGrid query={urlState.query} view={view} pageFilters={pageFilters} />
+    <ResolvedEntitiesGrid
+      query={urlState.query}
+      view={view}
+      pageFilters={pageFilters}
+      activeFilter={activeFilter}
+    />
   );
 };

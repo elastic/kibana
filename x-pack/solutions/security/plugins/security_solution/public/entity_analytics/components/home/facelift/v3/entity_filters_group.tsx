@@ -12,7 +12,7 @@
  * `fullWidth` so it spans the page content.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiBadge,
   EuiFilterButton,
@@ -37,6 +37,7 @@ import { EntityIconByType } from '../../../entity_store/entity_icon_by_type';
 import { getRiskScoreColors } from '../../entities_table/risk_score_cell';
 import type { FaceliftRiskLevel, FaceliftWatchlist, PageFilters, TableView } from './data';
 import { ENTITY_SOURCE_LABELS, FACELIFT_WATCHLISTS, RISK_LEVELS } from './data';
+import { facetCount, getFilterFacetCounts } from './filter_facet_counts';
 
 const ENTITY_TYPES = [EntityType.user, EntityType.host, EntityType.service];
 
@@ -87,6 +88,29 @@ const TITLES = {
   ),
 };
 
+const OptionWithCount: React.FC<{ count: number; children: React.ReactNode }> = ({
+  count,
+  children,
+}) => (
+  <EuiFlexGroup
+    gutterSize="s"
+    alignItems="center"
+    justifyContent="spaceBetween"
+    responsive={false}
+    css={css`
+      inline-size: 100%;
+    `}
+  >
+    {/* grow=false so badges / labels stay content-sized (e.g. risk level chips). */}
+    <EuiFlexItem grow={false}>{children}</EuiFlexItem>
+    <EuiFlexItem grow={false}>
+      <EuiText size="s" color="subdued">
+        {count}
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const RiskLevelFilterBadge: React.FC<{ level: FaceliftRiskLevel }> = ({ level }) => {
   const { euiTheme } = useEuiTheme();
   const colors = getRiskScoreColors(euiTheme, RISK_SCORE_LEVEL_BY_FACELIFT[level]);
@@ -123,6 +147,8 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
   tableView,
   onTableViewChange,
 }) => {
+  const counts = useMemo(() => getFilterFacetCounts(tableView), [tableView]);
+
   const onSelectResolved = useCallback(
     () => onTableViewChange('resolved'),
     [onTableViewChange]
@@ -157,33 +183,59 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
 
   const renderEntityType = useCallback(
     (entityType: EntityType) => (
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon
-            type={EntityIconByType[entityType]}
-            size="s"
-            color="subdued"
-            aria-hidden={true}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="s">{capitalize(entityType)}</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <OptionWithCount count={facetCount(counts, 'entityTypes', entityType)}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={EntityIconByType[entityType]}
+              size="s"
+              color="subdued"
+              aria-hidden={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{capitalize(entityType)}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </OptionWithCount>
     ),
-    []
+    [counts]
+  );
+
+  const renderWatchlist = useCallback(
+    (watchlist: FaceliftWatchlist) => (
+      <OptionWithCount count={facetCount(counts, 'watchlists', watchlist)}>
+        <EuiText size="s">{watchlist}</EuiText>
+      </OptionWithCount>
+    ),
+    [counts]
+  );
+
+  const renderSource = useCallback(
+    (source: string) => (
+      <OptionWithCount count={facetCount(counts, 'sources', source)}>
+        <EuiText size="s">{source}</EuiText>
+      </OptionWithCount>
+    ),
+    [counts]
   );
 
   const renderRiskLevel = useCallback(
-    (level: FaceliftRiskLevel) => <RiskLevelFilterBadge level={level} />,
-    []
+    (level: FaceliftRiskLevel) => (
+      <OptionWithCount count={facetCount(counts, 'riskLevels', level)}>
+        <RiskLevelFilterBadge level={level} />
+      </OptionWithCount>
+    ),
+    [counts]
   );
 
   const renderCriticality = useCallback(
     (level: CriticalityLevelWithUnassigned) => (
-      <AssetCriticalityBadge criticalityLevel={level} css={{ lineHeight: 'inherit' }} />
+      <OptionWithCount count={facetCount(counts, 'criticalities', level)}>
+        <AssetCriticalityBadge criticalityLevel={level} css={{ lineHeight: 'inherit' }} />
+      </OptionWithCount>
     ),
-    []
+    [counts]
   );
 
   const isResolved = tableView === 'resolved';
@@ -199,7 +251,7 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
         onSelectionChange={onSelectEntityTypes}
         renderItem={renderEntityType}
         renderLabel={capitalize}
-        width={160}
+        width={200}
         grow
       />
       <MultiselectFilter<FaceliftWatchlist>
@@ -208,7 +260,8 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
         items={[...FACELIFT_WATCHLISTS]}
         selectedItems={pageFilters.watchlists}
         onSelectionChange={onSelectWatchlists}
-        width={220}
+        renderItem={renderWatchlist}
+        width={260}
         grow
       />
       <MultiselectFilter<string>
@@ -217,7 +270,8 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
         items={ENTITY_SOURCE_LABELS}
         selectedItems={pageFilters.sources}
         onSelectionChange={onSelectSources}
-        width={180}
+        renderItem={renderSource}
+        width={220}
         grow
       />
       <MultiselectFilter<FaceliftRiskLevel>
@@ -227,7 +281,7 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
         selectedItems={pageFilters.riskLevels}
         onSelectionChange={onSelectRiskLevels}
         renderItem={renderRiskLevel}
-        width={150}
+        width={180}
         grow
       />
       <MultiselectFilter<CriticalityLevelWithUnassigned>
@@ -238,7 +292,7 @@ export const EntityFiltersGroup: React.FC<EntityFiltersGroupProps> = ({
         onSelectionChange={onSelectCriticalities}
         renderItem={renderCriticality}
         renderLabel={(level) => CRITICALITY_LEVEL_TITLE[level]}
-        width={190}
+        width={230}
         grow
       />
       <EuiFilterButton

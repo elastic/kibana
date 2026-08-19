@@ -54,8 +54,12 @@ import { DataViewContext } from '../../entities_table';
 import { AdditionalControls } from '../../entities_table/additional_controls';
 import { ENTITY_GROUPING_OPTIONS } from '../../entities_table/constants';
 import { RiskScoreCell } from '../../entities_table/risk_score_cell';
-import type { PageFilters, TableView } from './data';
-import { EMPTY_PAGE_FILTERS } from './data';
+import type { ActiveFilter, PageFilters, TableView } from './data';
+import {
+  EMPTY_PAGE_FILTERS,
+  filterIdentities,
+  filterRawRecords,
+} from './data';
 import { EntityRowActions, ENTITY_ROW_ACTIONS_WIDTH } from './entity_row_actions';
 import type {
   AlertSeverityCounts,
@@ -905,12 +909,15 @@ export interface ResolvedEntitiesGridProps {
   view: TableView;
   /** Filter-group facets — applied in-page, not as KQL pills. */
   pageFilters?: PageFilters;
+  /** Needs-attention metric selection — applied in-page, not as KQL pills. */
+  activeFilter?: ActiveFilter | null;
 }
 
 export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
   query,
   view,
   pageFilters = EMPTY_PAGE_FILTERS,
+  activeFilter = null,
 }) => {
   const {
     timelinePrivileges: { read: canUseTimeline },
@@ -953,13 +960,27 @@ export const ResolvedEntitiesGrid: React.FC<ResolvedEntitiesGridProps> = ({
     });
   }, [view]);
 
-  const rows = useMemo(
-    () =>
-      isResolvedView
-        ? sortRows(getResolvedEntities(query, pageFilters), sortingColumns)
-        : sortRows(getRawRecords(query, pageFilters), sortingColumns),
-    [isResolvedView, query, pageFilters, sortingColumns]
-  );
+  const rows = useMemo(() => {
+    let next = isResolvedView
+      ? getResolvedEntities(query, pageFilters)
+      : getRawRecords(query, pageFilters);
+
+    if (activeFilter?.type === 'card') {
+      if (isResolvedView) {
+        const matchingIds = new Set(filterIdentities(activeFilter).map((identity) => identity.id));
+        next = next.filter((row) =>
+          'isUnresolved' in row && row.isUnresolved
+            ? Boolean(activeFilter.exclude)
+            : matchingIds.has(row.id)
+        );
+      } else {
+        const matchingIds = new Set(filterRawRecords(activeFilter).map((record) => record.id));
+        next = next.filter((row) => matchingIds.has(row.id));
+      }
+    }
+
+    return sortRows(next, sortingColumns);
+  }, [isResolvedView, query, pageFilters, activeFilter, sortingColumns]);
 
   const [lastUpdatedAt, setLastUpdatedAt] = useState(Date.now());
   useEffect(() => setLastUpdatedAt(Date.now()), [query]);

@@ -6,8 +6,15 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { Chart, Metric, Settings, type MetricDatum } from '@elastic/charts';
 import {
+  AreaSeries,
+  Chart,
+  CurveType,
+  ScaleType,
+  Settings,
+} from '@elastic/charts';
+import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -39,7 +46,20 @@ export interface SignalCardsProps {
  */
 const CARDS_HEIGHT = METRIC_CHARTS_BODY_HEIGHT;
 const VALUE_FONT_SIZE = 42;
+/** Title matches EUI `s` +2px; subtitle is +1px vs `xs`; delta / captions +2px. */
+const TITLE_FONT_SIZE = 17;
+const SUBTITLE_FONT_SIZE = 14;
+const BODY_FONT_SIZE = 14;
+const TITLE_SUBTITLE_GAP = 8;
+const SUBTITLE_STATUS_GAP = 8;
+const DELTA_VALUE_GAP = 4;
 const DIMMED_OPACITY = 0.7;
+const SPARKLINE_HEIGHT_RATIO = 0.5;
+const CARD_PADDING = 8;
+/** Default sparkline fill: #2B394F at 8% opacity. */
+const SPARKLINE_FILL = 'rgba(43, 57, 79, 0.08)';
+/** Active-state sparkline fill: #002D80 at 12% opacity. */
+const SPARKLINE_FILL_ACTIVE = 'rgba(0, 45, 128, 0.12)';
 
 /**
  * v.3-only mock trends / deltas (kept out of shared `v2/data` so v.2 charts
@@ -63,6 +83,14 @@ const V3_CARD_DELTAS: Partial<Record<SignalCardId, number>> = {
   hiddenRisk: -2,
 };
 
+/** v.3 title overrides (tooltip uses the same string). */
+const V3_CARD_TITLES: Partial<Record<SignalCardId, string>> = {
+  newToCritical: 'New to critical',
+};
+
+const displayTitleFor = (card: SignalCardData): string =>
+  V3_CARD_TITLES[card.id] ?? card.title;
+
 const FILTERING_TABLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.facelift.signalCards.filteringTable',
   { defaultMessage: 'Filtering table' }
@@ -76,10 +104,10 @@ const VS_YESTERDAY = i18n.translate(
   { defaultMessage: 'vs yesterday' }
 );
 
-const filterTableTooltip = (label: string) =>
+const filterTableTooltip = (title: string) =>
   i18n.translate('xpack.securitySolution.entityAnalytics.facelift.signalCards.filterTableTooltip', {
-    defaultMessage: 'Filter table: {label}',
-    values: { label },
+    defaultMessage: 'Filter table: {title}',
+    values: { title },
   });
 
 /**
@@ -87,41 +115,35 @@ const filterTableTooltip = (label: string) =>
  * polarity is inverted vs typical KPIs: an increase is danger (worse), a
  * decrease is success (better).
  */
-const DeltaExtra: React.FC<{ delta: number; fontSize: number; color: string }> = ({
-  delta,
-  fontSize,
-}) => {
+const DeltaCaption: React.FC<{ delta: number }> = ({ delta }) => {
   const { euiTheme } = useEuiTheme();
   const increased = delta > 0;
   const tone = increased ? euiTheme.colors.textDanger : euiTheme.colors.textSuccess;
   const sign = increased ? '+' : '';
 
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      alignItems="center"
-      responsive={false}
-      css={css`
-        color: ${tone};
-        font-size: ${fontSize}px;
-        line-height: 1.2;
-      `}
-    >
+    <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiIcon type={increased ? 'sortUp' : 'sortDown'} size="s" color={tone} aria-hidden />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <span>
+        <EuiText
+          color={tone}
+          css={css`
+            font-size: ${BODY_FONT_SIZE}px;
+            line-height: 1.2;
+          `}
+        >
           {sign}
           {delta} {VS_YESTERDAY}
-        </span>
+        </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 const StatusCaption: React.FC<{
-  iconType: 'check' | 'checkInCircleFilled';
+  iconType: 'filterInclude' | 'checkInCircleFilled';
   label: string;
   color: string;
 }> = ({ iconType, label, color }) => (
@@ -130,29 +152,32 @@ const StatusCaption: React.FC<{
       <EuiIcon type={iconType} size="s" color={color} aria-hidden />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText size="xs" color={color}>
+      <EuiText
+        color={color}
+        css={css`
+          font-size: ${BODY_FONT_SIZE}px;
+          line-height: 1.2;
+        `}
+      >
         {label}
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
 
-const CornerIcon: React.FC<{
-  width: number;
-  height: number;
-  color: string;
+const CornerControl: React.FC<{
   selected: boolean;
   interactive: boolean;
-  hovered: boolean;
+  emphasized: boolean;
   onClear?: () => void;
-}> = ({ width, height, selected, interactive, hovered, onClear }) => {
+}> = ({ selected, interactive, emphasized, onClear }) => {
   const { euiTheme } = useEuiTheme();
 
   if (!interactive) {
     return null;
   }
 
-  const iconColor = selected || hovered ? 'primary' : euiTheme.colors.textSubdued;
+  const iconColor = selected || emphasized ? 'primary' : euiTheme.colors.textSubdued;
 
   if (selected && onClear) {
     return (
@@ -176,8 +201,6 @@ const CornerIcon: React.FC<{
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          inline-size: ${width}px;
-          block-size: ${height}px;
           padding: 0;
           border: 0;
           background: transparent;
@@ -190,18 +213,49 @@ const CornerIcon: React.FC<{
     );
   }
 
+  return <EuiIcon type="filter" size="m" color={iconColor} aria-hidden />;
+};
+
+/** Decorative area sparkline behind the value — fill only, no stroke. */
+const Sparkline: React.FC<{ values: number[]; fill: string }> = ({ values, fill }) => {
+  const chartBaseTheme = useElasticChartsTheme();
+  const data = useMemo(
+    () => values.map((y, x) => ({ x, y })),
+    [values]
+  );
+
+  if (values.length < 2) {
+    return null;
+  }
+
   return (
-    <span
-      css={css`
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        inline-size: ${width}px;
-        block-size: ${height}px;
-      `}
-    >
-      <EuiIcon type="filter" size="m" color={iconColor} aria-hidden />
-    </span>
+    <Chart size={['100%', '100%']}>
+      <Settings
+        baseTheme={chartBaseTheme}
+        locale={i18n.getLocale()}
+        showLegend={false}
+        theme={{
+          background: { color: 'transparent' },
+          chartMargins: { left: 0, right: 0, top: 0, bottom: 0 },
+          chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
+        }}
+      />
+      <AreaSeries
+        id="trend"
+        xScaleType={ScaleType.Linear}
+        yScaleType={ScaleType.Linear}
+        xAccessor="x"
+        yAccessors={['y']}
+        data={data}
+        curve={CurveType.CURVE_MONOTONE_X}
+        color={fill}
+        areaSeriesStyle={{
+          area: { opacity: 1, visible: true },
+          line: { strokeWidth: 0, visible: false },
+          point: { visible: 'never' },
+        }}
+      />
+    </Chart>
   );
 };
 
@@ -213,8 +267,8 @@ interface SignalMetricCardProps {
 }
 
 /**
- * One Needs-attention metric: Elastic Charts Metric inside an interactive
- * EUI wrapper (border / tooltip / keyboard) for states Metric cannot express.
+ * Custom Needs-attention KPI tile (EUI layout + Area sparkline). Whole-card
+ * filter toggle with hover / active / dimmed / all-clear states.
  */
 const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   card,
@@ -223,85 +277,29 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
   onToggle,
 }) => {
   const { euiTheme } = useEuiTheme();
-  const chartBaseTheme = useElasticChartsTheme();
   const [hovered, setHovered] = useState(false);
-  const [focused, setFocused] = useState(false);
 
   const isZero = card.value === 0;
   const interactive = !isZero;
-  const emphasized = interactive && (hovered || focused);
+  // Hover only — mouse clicks must not leave focus chrome that looks like hover after deselect.
+  const emphasized = interactive && hovered;
 
-  // Default / hover / active surfaces — EUI semantic tokens.
   const defaultBg = euiTheme.colors.backgroundBasePlain;
   const hoverBg = euiTheme.colors.backgroundBaseSubdued;
-  const activeBg = euiTheme.colors.backgroundLightPrimary;
   const defaultBorder = euiTheme.colors.borderBasePlain;
   const hoverBorder = euiTheme.colors.borderBaseProminent;
   const activeBorder = euiTheme.colors.borderStrongPrimary;
 
-  const tileBackground = selected ? activeBg : emphasized ? hoverBg : defaultBg;
+  // Active keeps a white tile; only the border (and sparkline tint) mark selection.
+  const tileBackground = selected ? defaultBg : emphasized ? hoverBg : defaultBg;
   const borderColor = selected ? activeBorder : emphasized ? hoverBorder : defaultBorder;
+  const sparklineFill = selected ? SPARKLINE_FILL_ACTIVE : SPARKLINE_FILL;
 
-  const showTrend = interactive && !selected;
   const delta = V3_CARD_DELTAS[card.id] ?? card.delta;
   const showDelta = interactive && !isZero && delta !== undefined && delta !== 0;
   const trendKeyframes = V3_CARD_TRENDS[card.id] ?? card.trend;
-
-  const datum = useMemo<MetricDatum>(() => {
-    const base = {
-      title: card.title,
-      subtitle: card.description,
-      value: card.value,
-      valueFormatter: (value: number) => String(value),
-      /*
-       * Metric derives the trend sparkline from `color` via a native lightness
-       * shift (semi-transparent overlay on the tile). Keep `color` on the tile
-       * surface — do not substitute a solid muted fill.
-       */
-      color: tileBackground,
-      background: tileBackground,
-      icon: (props: { width: number; height: number; color: string }) => (
-        <CornerIcon
-          {...props}
-          selected={selected}
-          interactive={interactive}
-          hovered={emphasized}
-          onClear={selected ? onToggle : undefined}
-        />
-      ),
-      ...(showDelta
-        ? {
-            extra: (props: { fontSize: number; color: string }) => (
-              <DeltaExtra delta={delta!} {...props} />
-            ),
-          }
-        : {}),
-      // Captions are overlaid on the wrapper — Metric may hide `body` when short.
-    };
-
-    if (showTrend && trendKeyframes && trendKeyframes.length > 1) {
-      return {
-        ...base,
-        trend: trendKeyframes.map((y, x) => ({ x, y })),
-        trendShape: 'area' as const,
-      };
-    }
-
-    return base;
-  }, [
-    card.description,
-    card.title,
-    card.value,
-    delta,
-    emphasized,
-    interactive,
-    onToggle,
-    selected,
-    showDelta,
-    showTrend,
-    tileBackground,
-    trendKeyframes,
-  ]);
+  const showTrend = interactive && Boolean(trendKeyframes && trendKeyframes.length > 1);
+  const displayTitle = displayTitleFor(card);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -322,16 +320,24 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
       tabIndex={interactive ? 0 : -1}
       aria-pressed={interactive ? selected : undefined}
       aria-disabled={isZero || undefined}
-      aria-label={card.filterLabel}
+      aria-label={displayTitle}
       data-test-subj={`eaFaceliftSignalCard-${card.id}`}
       onClick={interactive ? onToggle : undefined}
       onKeyDown={onKeyDown}
+      onMouseDown={(event) => {
+        // Keep mouse activation from focusing the card, so deselection returns to
+        // the default tile (not sticky focus-as-hover) when the pointer leaves.
+        if (interactive && event.button === 0) {
+          event.preventDefault();
+        }
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
       css={css`
+        display: flex;
+        flex-direction: column;
         block-size: 100%;
+        padding: ${CARD_PADDING}px;
         border: 1px solid ${borderColor};
         border-radius: 0;
         background: ${tileBackground};
@@ -348,68 +354,139 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
         &:focus-visible {
           border-color: ${selected ? activeBorder : hoverBorder};
         }
-
-        .echMetric {
-          cursor: inherit !important;
-          border-color: transparent !important;
-        }
-
-        .echMetricText__value {
-          font-weight: ${euiTheme.font.weight.bold};
-        }
       `}
     >
-      <Chart size={['100%', '100%']}>
-        <Settings
-          baseTheme={chartBaseTheme}
-          locale={i18n.getLocale()}
-          theme={{
-            metric: {
-              titleWeight: 'bold',
-              valueFontSize: VALUE_FONT_SIZE,
-              valueTextAlign: 'right',
-              valuePosition: 'bottom',
-              iconAlign: 'right',
-              border: 'transparent',
-              emptyBackground: tileBackground,
-            },
-            background: { color: tileBackground, fallbackColor: tileBackground },
-          }}
+      {showTrend ? (
+        <div
+          aria-hidden
+          css={css`
+            position: absolute;
+            inset-inline: 0;
+            inset-block-end: 0;
+            block-size: ${SPARKLINE_HEIGHT_RATIO * 100}%;
+            pointer-events: none;
+            z-index: 0;
+          `}
+        >
+          <Sparkline values={trendKeyframes!} fill={sparklineFill} />
+        </div>
+      ) : null}
+
+      <div
+        css={css`
+          position: relative;
+          z-index: 1;
+          display: flex;
+          flex-direction: column;
+          flex: 1 1 auto;
+          min-block-size: 0;
+        `}
+      >
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="flexStart"
+          justifyContent="spaceBetween"
+          responsive={false}
+        >
+          <EuiFlexItem grow={true} css={css`min-inline-size: 0;`}>
+            <EuiText
+              css={css`
+                font-size: ${TITLE_FONT_SIZE}px;
+                font-weight: ${euiTheme.font.weight.bold};
+                line-height: 1.25;
+              `}
+            >
+              {displayTitle}
+            </EuiText>
+            <EuiText
+              color="subdued"
+              css={css`
+                margin-block-start: ${TITLE_SUBTITLE_GAP}px;
+                font-size: ${SUBTITLE_FONT_SIZE}px;
+                line-height: 1.3;
+              `}
+            >
+              {card.description}
+            </EuiText>
+            {selected ? (
+              <div
+                css={css`
+                  margin-block-start: ${SUBTITLE_STATUS_GAP}px;
+                `}
+              >
+                <EuiBadge
+                  color="primary"
+                  iconType="filterInclude"
+                  css={css`
+                    font-size: ${BODY_FONT_SIZE}px;
+                  `}
+                >
+                  {FILTERING_TABLE}
+                </EuiBadge>
+              </div>
+            ) : null}
+            {isZero ? (
+              <div
+                css={css`
+                  margin-block-start: ${SUBTITLE_STATUS_GAP}px;
+                `}
+              >
+                <StatusCaption
+                  iconType="checkInCircleFilled"
+                  label={ALL_CLEAR}
+                  color={euiTheme.colors.textSuccess}
+                />
+              </div>
+            ) : null}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CornerControl
+              selected={selected}
+              interactive={interactive}
+              emphasized={emphasized}
+              onClear={selected ? onToggle : undefined}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <div
+          css={css`
+            flex: 1 1 auto;
+            min-block-size: ${euiTheme.size.m};
+          `}
         />
-        <Metric id={`eaFaceliftSignalCard-${card.id}`} data={[[datum]]} />
-      </Chart>
-      {selected ? (
-        <div
-          css={css`
-            position: absolute;
-            inset-inline-start: ${euiTheme.size.m};
-            inset-block-end: ${euiTheme.size.m};
-            pointer-events: none;
-          `}
+
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="flexEnd"
+          justifyContent="flexEnd"
+          responsive={false}
         >
-          <StatusCaption
-            iconType="check"
-            label={FILTERING_TABLE}
-            color={euiTheme.colors.textPrimary}
-          />
-        </div>
-      ) : null}
-      {isZero ? (
-        <div
-          css={css`
-            position: absolute;
-            inset-inline-start: ${euiTheme.size.m};
-            inset-block-end: ${euiTheme.size.m};
-            pointer-events: none;
-          `}
-        >
-          <StatusCaption
-            iconType="checkInCircleFilled"
-            label={ALL_CLEAR}
-            color={euiTheme.colors.textSuccess}
-          />
-        </div>
-      ) : null}
+          <EuiFlexItem grow={false}>
+            <div
+              css={css`
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: ${DELTA_VALUE_GAP}px;
+              `}
+            >
+              {showDelta ? <DeltaCaption delta={delta!} /> : null}
+              <EuiText
+                css={css`
+                  font-size: ${VALUE_FONT_SIZE}px;
+                  font-weight: ${euiTheme.font.weight.bold};
+                  line-height: 1;
+                  text-align: end;
+                  color: ${euiTheme.colors.textParagraph};
+                `}
+              >
+                {card.value}
+              </EuiText>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </div>
     </div>
   );
 
@@ -419,7 +496,7 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
 
   return (
     <EuiToolTip
-      content={filterTableTooltip(card.filterLabel)}
+      content={filterTableTooltip(displayTitle)}
       display="block"
       anchorProps={{
         css: css`
@@ -433,8 +510,8 @@ const SignalMetricCard: React.FC<SignalMetricCardProps> = ({
 };
 
 /**
- * Row of six Needs-attention metrics. Each card toggles the Overview KQL
- * filter; selection stays in sync with the filter badge.
+ * Row of six Needs-attention metrics. Each card toggles an in-page table
+ * filter (no KQL pill); selection stays on the card itself.
  */
 export const SignalCards: React.FC<SignalCardsProps> = ({
   activeFilter,
