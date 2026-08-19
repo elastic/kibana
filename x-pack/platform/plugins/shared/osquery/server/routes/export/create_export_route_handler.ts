@@ -13,15 +13,22 @@ import type { AuditEvent } from '@kbn/core-security-server';
 
 import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters, isFilters } from '@kbn/es-query';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { getQueryFilter } from '../../utils/build_query';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { buildExportResultsIndex } from '../../utils/build_export_results_index';
+import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
+import { getReadEsClient } from '../../utils/get_read_es_client';
+import { getScopedSearch } from '../../utils/get_scoped_search';
 import { exportResultsToStream } from '../../lib/export_results_to_stream';
 import { createFormatter } from '../../lib/format_results';
 import type { ExportFormat, ExportMetadata } from '../../lib/format_results';
 import { getUserInfo } from '../../lib/get_user_info';
+import { hasOsqueryReadPrivilege } from '../../lib/has_osquery_read_privilege';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
+import { OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR } from '../../search_strategy/constants';
 import { composeExportKuery } from '../../lib/compose_export_kuery';
 import type { ExportRequestBody } from './export_request_body_schema';
 
@@ -32,6 +39,11 @@ export interface ExportRouteParams {
   metadata: Pick<ExportMetadata, 'action_id' | 'query' | 'execution_count'>;
   /** Filename prefix (e.g. `osquery-results-{id}` or `osquery-scheduled-results-{id}-{count}`) */
   fileNamePrefix: string;
+  /**
+   * When false, default-space export reads match only documents with an explicit
+   * `space_id: default` stamp. Required for URL-supplied scheduled exports under CPS.
+   */
+  matchMissingSpaceId?: boolean;
   /**
    * ECS mapping from the originating action/saved query. Plumbed into the
    * row-flattener so the export surfaces the same ECS-mapped columns users
@@ -48,7 +60,13 @@ export const createExportRouteHandler =
     response: KibanaResponseFactory,
     params: ExportRouteParams
   ) => {
-    const { baseFilter, metadata: routeMetadata, fileNamePrefix, ecsMapping } = params;
+    const {
+      baseFilter,
+      metadata: routeMetadata,
+      fileNamePrefix,
+      ecsMapping,
+      matchMissingSpaceId,
+    } = params;
     const { format } = request.query;
     const kuery = request.body?.kuery;
     const agentIds = request.body?.agentIds;
@@ -101,13 +119,14 @@ export const createExportRouteHandler =
     }
 
     const coreContext = await context.core;
+    const [coreStart] = await osqueryContext.getStartServices();
+    const clusterClient = coreStart.elasticsearch.client;
+    const internalEsClient = clusterClient.asInternalUser;
+    const readEsClient = getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled);
 
-    // PIT lifecycle stays in route; data plugin search context does not expose PIT lifecycle (design D5).
-    const esClient = coreContext.elasticsearch.client.asInternalUser;
-
-    // Resolve integration namespaces and pass them to the factory for index resolution.
-    // The factory (query.export_results.dsl.ts) handles buildIndexNameWithNamespace,
-    // CCS prefixing, and tolerance flags — the route no longer builds the index string.
+    // Resolve integration namespaces once and reuse them for both the PIT scope
+    // (buildExportResultsIndex below) and the factory's search body, so the PIT
+    // and the per-page searches target the same namespace-scoped indices.
     let integrationNamespaces: string[] | undefined;
 
     if (osqueryContext?.service?.getIntegrationNamespaces) {
@@ -127,6 +146,10 @@ export const createExportRouteHandler =
       }
     }
 
+    const spaceId = osqueryContext?.service?.getActiveSpace
+      ? (await osqueryContext.service.getActiveSpace(request))?.id ?? DEFAULT_SPACE_ID
+      : DEFAULT_SPACE_ID;
+
     const auditLabels = {
       action_id: routeMetadata.action_id,
       format,
@@ -135,20 +158,7 @@ export const createExportRouteHandler =
         : {}),
     };
 
-    // Open PIT with the broad index pattern. Index resolution for per-namespace
-    // scoping is the factory's responsibility; ES ignores the `index` in search
-    // body when a PIT is provided, so the PIT scope is determined here.
-    // ignore_unavailable mirrors query.all_results.dsl.ts.
-    // If openPointInTime throws, there is no PIT to close — handle separately.
-    let pitId: string;
-    try {
-      const pitResponse = await esClient.openPointInTime({
-        index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
-        keep_alive: '5m',
-        ignore_unavailable: true,
-      });
-      pitId = pitResponse.id;
-    } catch (e) {
+    const logExportFailure = () => {
       const failureAuditEvent: AuditEvent = {
         message: 'Osquery export failed',
         event: {
@@ -160,6 +170,36 @@ export const createExportRouteHandler =
         labels: auditLabels,
       };
       coreContext.security.audit.logger.log(failureAuditEvent);
+    };
+
+    // Check read access before allocating a PIT, so we return early and skip the
+    // work below when the caller is not permitted. Mirrors the search strategy's
+    // own check.
+    if (!(await hasOsqueryReadPrivilege(osqueryContext.security, request))) {
+      logExportFailure();
+
+      return response.forbidden({
+        body: { message: OSQUERY_SEARCH_STRATEGY_AUTHZ_ERROR },
+      });
+    }
+
+    // Scope the PIT to the same namespace- and CCS-resolved targets the factory
+    // would set on the search body: ES ignores the body `index` once a PIT is
+    // provided, so the PIT itself must carry the correct index scope.
+    // ignore_unavailable mirrors query.all_results.dsl.ts.
+    // If openPointInTime throws, there is no PIT to close — handle separately.
+    const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+
+    let pitId: string;
+    try {
+      const pitResponse = await readEsClient.openPointInTime({
+        index: buildExportResultsIndex({ integrationNamespaces, ccsEnabled }),
+        keep_alive: '5m',
+        ignore_unavailable: true,
+      });
+      pitId = pitResponse.id;
+    } catch (e) {
+      logExportFailure();
 
       const message = e instanceof Error ? e.message : String(e);
 
@@ -169,11 +209,20 @@ export const createExportRouteHandler =
       });
     }
 
+    // Idempotent so the PIT is closed exactly once no matter how many failure
+    // paths (route handler catch, stream cleanup) invoke it.
+    let pitClosed = false;
     const closePit = async (id: string) => {
+      if (pitClosed) {
+        return;
+      }
+
+      pitClosed = true;
+
       try {
-        await esClient.closePointInTime({ id });
+        await readEsClient.closePointInTime({ id });
       } catch (e) {
-        // Leaked PITs consume cluster memory until keep_alive expires (5m).
+        // An unclosed PIT holds cluster memory until keep_alive expires (5m).
         // Surface at warn so cluster-memory pressure is visible in ops dashboards.
         logger.warn(`Failed to close PIT ${id}: ${e instanceof Error ? e.message : String(e)}`);
       }
@@ -202,7 +251,12 @@ export const createExportRouteHandler =
           ? (['agent.name', 'agent.id', ...Object.keys(ecsMapping)] as string[])
           : undefined;
 
-      const searchContext = await context.search;
+      const searchContext = await getScopedSearch(
+        context,
+        request,
+        osqueryContext.cpsEnabled,
+        osqueryContext.getStartServices
+      );
 
       const result = await exportResultsToStream({
         search: searchContext,
@@ -217,6 +271,8 @@ export const createExportRouteHandler =
           size: 1_000,
           ecsMapping,
           integrationNamespaces,
+          spaceId,
+          ...(matchMissingSpaceId !== undefined ? { matchMissingSpaceId } : {}),
         },
         formatter,
         metadata: {
@@ -231,8 +287,12 @@ export const createExportRouteHandler =
         ecsMapping,
       });
 
-      // Check if we got an error (max results exceeded)
+      // Check if we got an error (max results exceeded). exportResultsToStream
+      // already closed the PIT on this path; closePit is idempotent so this is a
+      // no-op guard against a double close if that ever changes.
       if ('statusCode' in result) {
+        await closePit(pitId);
+
         return response.badRequest({
           body: { message: result.message },
         });
@@ -262,18 +322,7 @@ export const createExportRouteHandler =
       });
     } catch (e) {
       await closePit(pitId);
-
-      const failureAuditEvent: AuditEvent = {
-        message: 'Osquery export failed',
-        event: {
-          action: 'osquery_export',
-          category: ['database'],
-          type: ['access'],
-          outcome: 'failure',
-        },
-        labels: auditLabels,
-      };
-      coreContext.security.audit.logger.log(failureAuditEvent);
+      logExportFailure();
 
       const message = e instanceof Error ? e.message : String(e);
 

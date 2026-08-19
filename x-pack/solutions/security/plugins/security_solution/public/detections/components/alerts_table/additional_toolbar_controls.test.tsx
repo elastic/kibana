@@ -19,8 +19,8 @@ import * as useGetGroupSelectorHook from '@kbn/grouping/src/hooks/use_get_group_
 const mockDispatch = jest.fn();
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
   return {
     ...original,
     useDispatch: () => mockDispatch,

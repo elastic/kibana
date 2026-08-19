@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/278075
+issues:
+- https://github.com/elastic/kibana/issues/278492
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-07-21
+- product: kibana
+  target: 9.6.0
+title: "Support filtering on columns renamed with ES|QL `EVAL`"
+description: "Charts and filters can target fields renamed with `EVAL new = old` by tracking renamed column pairs, matching existing support for renamed columns from `STATS`."

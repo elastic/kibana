@@ -6,14 +6,10 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { PipelineStateStream, RuleExecutionStep } from '../types';
-import { ALERT_EVENTS_DATA_STREAM } from '../../../resources/datastreams/alert_events';
 import { StorageServiceInternalToken } from '../../services/storage_service/tokens';
 import type { StorageServiceContract } from '../../services/storage_service/storage_service';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import { guardedMapStep } from '../stream_utils';
 
 @injectable()
@@ -21,26 +17,35 @@ export class StoreAlertEventsStep implements RuleExecutionStep {
   public readonly name = 'store_alert_events';
 
   constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
     @inject(StorageServiceInternalToken) private readonly storageService: StorageServiceContract
   ) {}
 
   public executeStream(streamState: PipelineStateStream): PipelineStateStream {
     return guardedMapStep(streamState, ['alertEventsBatch'], async (state) => {
-      this.logger.debug({
+      const logger = state.logger.withLabels({ step: this.name });
+
+      logger.debug({
         message: `[${this.name}] Storing alert events batch to ${ALERT_EVENTS_DATA_STREAM}`,
       });
 
-      await this.storageService.bulkIndexDocs({
+      const bulkResult = await this.storageService.bulkIndexDocs({
         index: ALERT_EVENTS_DATA_STREAM,
         docs: state.alertEventsBatch,
       });
 
-      this.logger.debug({
-        message: `[${this.name}] Successfully stored alert events batch`,
+      logger.debug({
+        message: `[${this.name}] Bulk-indexed alert events batch (attempted=${bulkResult.attempted}, persisted=${bulkResult.docs.length})`,
       });
 
-      return { type: 'continue', state };
+      return {
+        type: 'continue',
+        state,
+        meta: {
+          observations: {
+            bulkIndexResult: bulkResult,
+          },
+        },
+      };
     });
   }
 }

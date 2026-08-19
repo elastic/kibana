@@ -14,6 +14,8 @@ import { satisfies } from 'semver';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
+import { mergeVersionSuffixedPolicyBuckets } from '../../utils/merge_version_suffixed_policy_buckets';
+import { buildPolicyIdKuery } from '../../../common/utils/build_policy_id_kuery';
 import { processAggregations } from '../../../common/utils/aggregations';
 import { getAgentsRequestQuerySchema } from '../../../common/api';
 import type { GetAgentsRequestQuerySchema } from '../../../common/api';
@@ -92,7 +94,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
             // remove the ) from the end of the kuery
             kuery.slice(0, -1) +
             ' or ' +
-            foundPolicyByName.map((p) => `policy_id:${p.id}`).join(' or ') +
+            buildPolicyIdKuery(foundPolicyByName.map((p) => p.id)) +
             ')';
         }
 
@@ -140,7 +142,7 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
             groups: {
               platforms,
               overlap,
-              policies: policies.map((p) => {
+              policies: mergeVersionSuffixedPolicyBuckets(policies).map((p) => {
                 const name = agentPolicyById[p.id]?.name ?? p.name;
 
                 return {

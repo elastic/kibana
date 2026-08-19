@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/embeddable/_saved_search_embeddable.ts
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -293,6 +295,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           .then((unifiedTabs) => expect(unifiedTabs).to.be(true)),
         discover.isOnDashboardsEditMode().then((editMode) => expect(editMode).to.be(false)),
       ]);
+    });
+
+    it('should preserve column headers when saved search is added to dashboard', async () => {
+      await addSearchEmbeddableToDashboard();
+      await retry.try(async () => {
+        expect(await dataGrid.getHeaderFields()).to.eql([
+          '@timestamp',
+          'agent',
+          'bytes',
+          'clientip',
+        ]);
+      });
     });
 
     describe('edit session round-trip', () => {

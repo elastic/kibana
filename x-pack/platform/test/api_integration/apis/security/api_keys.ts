@@ -139,6 +139,59 @@ export default function ({ getService }: FtrProviderContext) {
             })
             .expect(400);
         });
+
+        it(`should allow a cross cluster API Key to be created with a certificate identity`, async () => {
+          const certificateIdentity = 'CN=host,OU=engineering,DC=example,DC=com';
+          const createResult = await supertest
+            .post('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              name: 'test_cc_api_key_with_certificate_identity',
+              metadata: {},
+              certificate_identity: certificateIdentity,
+              access: {
+                search: [
+                  {
+                    names: ['logs*'],
+                  },
+                ],
+              },
+            })
+            .expect(200);
+
+          const queryResult = await supertest
+            .post('/internal/security/api_key/_query')
+            .send({})
+            .set('kbn-xsrf', 'xxx')
+            .expect(200);
+
+          const createdKey = queryResult.body.apiKeys.find(
+            (apiKey: { id: string }) => apiKey.id === createResult.body.id
+          );
+          expect(createdKey).to.not.be(undefined);
+          expect(createdKey.certificate_identity).to.eql(certificateIdentity);
+        });
+
+        it(`should reject a cross cluster API Key with a certificate identity exceeding 1024 characters`, async () => {
+          await supertest
+            .post('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              name: 'test_cc_api_key_with_oversized_certificate_identity',
+              metadata: {},
+              certificate_identity: 'C'.repeat(1025),
+              access: {
+                search: [
+                  {
+                    names: ['logs*'],
+                  },
+                ],
+              },
+            })
+            .expect(400);
+        });
       }
     });
 
@@ -347,6 +400,36 @@ export default function ({ getService }: FtrProviderContext) {
               },
             })
             .expect(400);
+        });
+
+        it('should allow allow_restricted_indices in replication entries', async () => {
+          const createResult = await supertest
+            .post('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              name: 'test_cc_api_key_replication_restricted',
+              metadata: {},
+              access: {
+                replication: [{ names: ['logs*'], allow_restricted_indices: true }],
+              },
+            })
+            .expect(200);
+
+          const updateResult = await supertest
+            .put('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              id: createResult.body.id,
+              metadata: {},
+              access: {
+                replication: [{ names: ['logs*'], allow_restricted_indices: false }],
+              },
+            })
+            .expect(200);
+
+          expect(updateResult.body.updated).to.be(true);
         });
       }
     });

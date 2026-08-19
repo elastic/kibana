@@ -82,6 +82,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
@@ -100,6 +101,7 @@ describe('RenderingService', () => {
   let i18n: ReturnType<typeof i18nServiceMock.createStartContract>;
   let theme: ReturnType<typeof themeServiceMock.createStartContract>;
   let userProfile: ReturnType<typeof userProfileServiceMock.createStart>;
+  let authc: ReturnType<typeof securityServiceMock.createStart>['authc'];
   let featureFlags: ReturnType<typeof coreFeatureFlagsMock.createStart>;
   let targetDomElement: HTMLDivElement;
   let rendering: RenderingService;
@@ -128,6 +130,7 @@ describe('RenderingService', () => {
 
     executionContext = executionContextServiceMock.createStartContract();
     userProfile = userProfileServiceMock.createStart();
+    authc = securityServiceMock.createStart().authc;
     theme = themeServiceMock.createStartContract();
     i18n = i18nServiceMock.createStartContract();
     featureFlags = coreFeatureFlagsMock.createStart();
@@ -161,6 +164,7 @@ describe('RenderingService', () => {
         executionContext,
         theme,
         userProfile,
+        authc,
         coreEnv: env,
         chrome,
       });
@@ -266,7 +270,16 @@ describe('RenderingService', () => {
     });
 
     it('renders the React element when dependencies are provided', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
+      const deps = {
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+        authc,
+        coreEnv,
+        chrome,
+      };
       rendering.start(deps);
 
       const TestComponent = rendering.addContext(<div>Test Element</div>);
@@ -278,7 +291,16 @@ describe('RenderingService', () => {
     });
 
     it('maintains component identity across multiple calls to prevent remounting', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
+      const deps = {
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+        authc,
+        coreEnv,
+        chrome,
+      };
       rendering.start(deps);
 
       // Create a stateful component to test remounting behavior
@@ -321,7 +343,16 @@ describe('RenderingService', () => {
     });
 
     it('preserves component state and focus during re-renders', () => {
-      const deps = { analytics, executionContext, i18n, theme, userProfile, coreEnv, chrome };
+      const deps = {
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+        authc,
+        coreEnv,
+        chrome,
+      };
       rendering.start(deps);
 
       // Create a component with an input to test focus preservation

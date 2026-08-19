@@ -6,13 +6,26 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 export const PLUGIN_ID = 'workflowsExecutionEngine';
 export const PLUGIN_NAME = 'Workflows Execution Engine';
 
 export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
 export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+
+// Normalized LLM token usage. Shared between the step-execution mapping (per-step
+// usage extracted from `output.metadata.usage`) and the execution mapping (the
+// aggregated per-execution total). Present only for token-consuming (`ai.*`) steps.
+const TOKEN_USAGE_MAPPING: MappingProperty = {
+  type: 'object',
+  properties: {
+    inputTokens: { type: 'long' },
+    outputTokens: { type: 'long' },
+    cachedTokens: { type: 'long' },
+    totalTokens: { type: 'long' },
+  },
+};
 
 export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
   dynamic: false,
@@ -84,6 +97,25 @@ export const WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
     },
     concurrencyGroupKey: {
       type: 'keyword',
+    },
+    // Aggregated token usage across all token-consuming steps, accumulated
+    // incrementally as each step finishes.
+    usage: TOKEN_USAGE_MAPPING,
+    // Per-step token usage, retained on the workflow execution so callers can
+    // query usage by producing step and resolved connector.
+    stepUsage: {
+      type: 'nested',
+      properties: {
+        stepId: { type: 'keyword' },
+        connectorId: { type: 'keyword' },
+        inputTokens: { type: 'long' },
+        outputTokens: { type: 'long' },
+        cachedTokens: { type: 'long' },
+        totalTokens: { type: 'long' },
+      },
+    },
+    version: {
+      type: 'long',
     },
   },
 };
@@ -161,5 +193,7 @@ export const WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS: MappingTypeMapping = {
       // milliseconds
       type: 'long',
     },
+    // Per-step token usage, extracted from `output.metadata.usage`.
+    usage: TOKEN_USAGE_MAPPING,
   },
 };

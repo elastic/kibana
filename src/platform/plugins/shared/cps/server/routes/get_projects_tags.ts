@@ -18,7 +18,7 @@ export const registerProjectTagsRoute = (router: IRouter, { logger }: PluginInit
       validate: {
         body: schema.nullable(
           schema.object({
-            project_routing: schema.maybe(schema.string()),
+            project_routing: schema.maybe(schema.string({ maxLength: 1024 })),
           })
         ),
       },

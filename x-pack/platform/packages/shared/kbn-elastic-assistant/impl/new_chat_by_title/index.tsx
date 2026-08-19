@@ -42,6 +42,20 @@ const NewChatByTitleComponent: React.FC<NewChatByTitleComponentProps> = ({
 }) => {
   const showOverlay = useCallback(() => showAssistantOverlay(true), [showAssistantOverlay]);
 
+  if (!text) {
+    return (
+      <AiButton
+        aria-label={i18n.ASK_AI_ASSISTANT}
+        data-test-subj={BUTTON_TEST_ID}
+        onClick={showOverlay}
+        size={size}
+        variant="empty"
+        iconType="aiAssistantLogo"
+        iconOnly
+      />
+    );
+  }
+
   return (
     <AiButton
       aria-label={i18n.ASK_AI_ASSISTANT}
@@ -50,9 +64,8 @@ const NewChatByTitleComponent: React.FC<NewChatByTitleComponentProps> = ({
       size={size}
       variant="empty"
       iconType="aiAssistantLogo"
-      iconOnly={!text}
     >
-      {text ? <span data-test-subj={BUTTON_TEXT_TEST_ID}>{text}</span> : null}
+      <span data-test-subj={BUTTON_TEXT_TEST_ID}>{text}</span>
     </AiButton>
   );
 };

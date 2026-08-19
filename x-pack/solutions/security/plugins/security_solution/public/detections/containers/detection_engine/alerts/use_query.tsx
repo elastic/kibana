@@ -8,7 +8,11 @@
 import { isEmpty } from 'lodash';
 import type { Dispatch, SetStateAction } from 'react';
 import { useMemo, useEffect, useState } from 'react';
-import type { fetchQueryUnifiedAlerts, fetchQueryRuleRegistryAlerts } from './api';
+import type {
+  fetchQueryAttacks,
+  fetchQueryUnifiedAlerts,
+  fetchQueryRuleRegistryAlerts,
+} from './api';
 import { fetchQueryAlerts } from './api';
 import type { AlertSearchResponse, QueryAlerts } from './types';
 import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
@@ -30,7 +34,8 @@ export type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QU
 type FetchMethod =
   | typeof fetchQueryAlerts
   | typeof fetchQueryRuleRegistryAlerts
-  | typeof fetchQueryUnifiedAlerts;
+  | typeof fetchQueryUnifiedAlerts
+  | typeof fetchQueryAttacks;
 export interface AlertsQueryParams {
   fetchMethod?: FetchMethod;
   query: object;

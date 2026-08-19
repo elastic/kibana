@@ -7,8 +7,8 @@
 
 import type { SagaMiddleware } from 'redux-saga';
 import createSagaMiddleware from 'redux-saga';
-import type { Store, AnyAction, Dispatch } from 'redux';
-import { combineReducers, createStore, applyMiddleware } from 'redux';
+import type { Store, AnyAction, Dispatch } from 'redux-v4';
+import { combineReducers, createStore, applyMiddleware } from 'redux-v4';
 import type { ChromeStart } from '@kbn/core/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';

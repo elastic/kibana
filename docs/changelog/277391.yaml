@@ -1,0 +1,8 @@
+prs:
+- https://github.com/elastic/kibana/pull/277391
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-14
+title: "Fix `FormatDate` rejecting epoch-millisecond strings in alert templates"
+description: "The `FormatDate` mustache template function now accepts epoch-millisecond strings (for example, `1669736864000`) so nested date formatting in connector actions works reliably."

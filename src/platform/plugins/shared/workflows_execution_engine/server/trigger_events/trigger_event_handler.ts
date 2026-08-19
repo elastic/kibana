@@ -17,7 +17,7 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionEngineModel,
 } from '@kbn/workflows';
-import { pickManagedWorkflowFields } from '@kbn/workflows';
+import { toWorkflowExecutionEngineModel } from '@kbn/workflows';
 import { validateWorkflowForExecution, type WorkflowRepository } from '@kbn/workflows/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 import {
@@ -172,7 +172,7 @@ export class TriggerEventHandler {
     this.telemetryClient = new WorkflowExecutionTelemetryClient(coreStart.analytics, deps.logger);
 
     const esClient = coreStart.elasticsearch.client.asInternalUser;
-    this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
+    this.workflowExecutionRepository = new WorkflowExecutionRepository(esClient, this.logger);
     this.triggerEventsClientPromise =
       deps.triggerEventsClientPromise ?? initializeTriggerEventsClient(coreStart.dataStreams);
   }
@@ -508,14 +508,8 @@ export class TriggerEventHandler {
           }
           try {
             validateWorkflowForExecution(workflow, workflow.id);
-            const workflowToRun: WorkflowExecutionEngineModel = {
-              id: workflow.id,
-              name: workflow.name,
-              enabled: workflow.enabled,
-              definition: workflow.definition,
-              yaml: workflow.yaml,
-              ...pickManagedWorkflowFields(workflow),
-            };
+            const workflowToRun: WorkflowExecutionEngineModel =
+              toWorkflowExecutionEngineModel(workflow);
             const context: Record<string, unknown> = {
               event: scheduleResult.event,
               spaceId: eventParams.spaceId,

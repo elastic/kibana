@@ -67,6 +67,25 @@ describe('getLiquidInstance', () => {
       expect(result).toBe('not json');
     });
   });
+
+  describe('pick filter behavior', () => {
+    it('registers pick so a template using it parses and renders (strictFilters)', () => {
+      const engine = getLiquidInstance();
+      const template = engine.parse('{{ val | pick: fields | json }}');
+      const result = engine.renderSync(template, { val: { a: 1, b: 2 }, fields: ['a'] });
+      expect(JSON.parse(result as string)).toEqual({ a: 1 });
+    });
+
+    it('keeps nested dotted-path fields', () => {
+      const engine = getLiquidInstance();
+      const template = engine.parse('{{ val | pick: fields | json }}');
+      const result = engine.renderSync(template, {
+        val: { host: { name: 'h1', ip: '10.0.0.1' } },
+        fields: ['host.name'],
+      });
+      expect(JSON.parse(result as string)).toEqual({ host: { name: 'h1' } });
+    });
+  });
 });
 
 describe('parseTemplateString', () => {

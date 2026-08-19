@@ -433,6 +433,91 @@ describe('InferenceChatModel', () => {
       expect(chatComplete.mock.calls[0][0].toolChoice).toBeUndefined();
       expect(chatComplete.mock.calls[0][0].tools).toBeUndefined();
     });
+
+    it('forwards cacheControl and sessionId per-call options to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        cacheControl: { type: 'ephemeral', ttl: '1h' },
+        sessionId: 'round-1',
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '1h' },
+          sessionId: 'round-1',
+        })
+      );
+    });
+
+    it('omits cacheControl and sessionId from chatComplete when not set', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete.mock.calls[0][0].cacheControl).toBeUndefined();
+      expect(chatComplete.mock.calls[0][0].sessionId).toBeUndefined();
+    });
+
+    it('forwards constructor-level cacheControl and sessionId to chatComplete', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: 'constructor-session',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '5m' },
+          sessionId: 'constructor-session',
+        })
+      );
+    });
+
+    it('per-call options take precedence over constructor-level cacheControl and sessionId', async () => {
+      const chatModel = new InferenceChatModel({
+        chatComplete,
+        connector,
+        cacheControl: { type: 'ephemeral', ttl: '5m' },
+        sessionId: 'constructor-session',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question', {
+        cacheControl: { type: 'ephemeral', ttl: '1h' },
+        sessionId: 'call-session',
+      });
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral', ttl: '1h' },
+          sessionId: 'call-session',
+        })
+      );
+    });
+
+    it('forwards cacheControl and sessionId via withConfig', async () => {
+      const chatModel = new InferenceChatModel({ chatComplete, connector }).withConfig({
+        cacheControl: { type: 'ephemeral' },
+        sessionId: 'round-2',
+      });
+      chatComplete.mockResolvedValue(createResponse({ content: 'dummy' }));
+
+      await chatModel.invoke('question');
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cacheControl: { type: 'ephemeral' },
+          sessionId: 'round-2',
+        })
+      );
+    });
   });
 
   describe('Response handling', () => {

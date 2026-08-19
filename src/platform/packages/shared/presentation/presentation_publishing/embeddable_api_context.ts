@@ -13,6 +13,8 @@ export interface EmbeddableApiContext {
    * to reflect the fact that this context could contain any api.
    */
   embeddable: unknown;
+  /** Returns focus to the control that opened the action, when available. */
+  returnFocus?: () => void;
 }
 
 export const isEmbeddableApiContext = (context: unknown): context is EmbeddableApiContext =>

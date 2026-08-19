@@ -170,9 +170,14 @@ export const HelpPopover: React.FC<{
   }, [activeSolutionId, http, queryForRecommendedQueries]);
 
   const toggleLanguageComponent = useCallback(() => {
+    if (actions?.editorIsInline) {
+      actions.toggleLanguageComponent();
+      setIsESQLMenuPopoverOpen(false);
+      return;
+    }
     setIsLanguageComponentOpen(!isLanguageComponentOpen);
     setIsESQLMenuPopoverOpen(false);
-  }, [isLanguageComponentOpen]);
+  }, [actions, isLanguageComponentOpen]);
 
   const onHelpMenuVisibilityChange = useCallback(
     (status: boolean) => {
@@ -323,12 +328,14 @@ export const HelpPopover: React.FC<{
           <EuiContextMenu initialPanelId={0} panels={esqlContextMenuPanels} />
         </div>
       </EuiPopover>
-      <LanguageDocumentationFlyout
-        searchInDescription
-        linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
-        isHelpMenuOpen={isLanguageComponentOpen}
-        onHelpMenuVisibilityChange={onHelpMenuVisibilityChange}
-      />
+      {!actions?.editorIsInline && (
+        <LanguageDocumentationFlyout
+          searchInDescription
+          linkToDocumentation={docLinks?.links?.query?.queryESQL ?? ''}
+          isHelpMenuOpen={isLanguageComponentOpen}
+          onHelpMenuVisibilityChange={onHelpMenuVisibilityChange}
+        />
+      )}
     </>
   );
 };

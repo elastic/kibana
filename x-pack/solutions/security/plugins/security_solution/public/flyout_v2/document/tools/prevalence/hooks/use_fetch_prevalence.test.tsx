@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { buildEsQuery } from '@kbn/es-query';
 import { useQuery } from '@kbn/react-query';
-import { useSelector } from 'react-redux';
+import { useSelector } from 'react-redux-v7';
 import { useFetchPrevalence } from './use_fetch_prevalence';
 import { createFetchData } from '../../../main/utils/fetch_data';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -17,7 +17,7 @@ import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hoo
 
 jest.mock('@kbn/es-query');
 jest.mock('@kbn/react-query');
-jest.mock('react-redux');
+jest.mock('react-redux-v7');
 jest.mock('../../../main/utils/fetch_data');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns');

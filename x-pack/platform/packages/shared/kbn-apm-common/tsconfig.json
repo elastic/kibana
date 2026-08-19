@@ -9,5 +9,9 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/elastic-agent-utils",
+    "@kbn/apm-types-shared",
+    "@kbn/apm-types",
+    "@kbn/zod",
+    "@kbn/zod-helpers",
   ]
 }

@@ -401,6 +401,7 @@ export class CoreSystem {
         i18n,
         theme,
         userProfile,
+        authc: security.authc,
         coreEnv: this.coreContext.env,
         chrome,
       });

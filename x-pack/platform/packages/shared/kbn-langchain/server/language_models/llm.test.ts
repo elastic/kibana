@@ -22,6 +22,11 @@ const mockLogger = loggerMock.create();
 
 const prompt = 'Do you know my name?';
 
+const getDebugMessages = (): string[] =>
+  (mockLogger.debug as jest.Mock).mock.calls.map(([arg]) =>
+    typeof arg === 'function' ? (arg as () => string)() : String(arg)
+  );
+
 describe('ActionsClientLlm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -130,6 +135,68 @@ describe('ActionsClientLlm', () => {
       expect(result).toEqual(mockActionResponse.message);
     });
 
+    it('logs the response content at debug on success', async () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+      });
+
+      await actionsClientLlm._call(prompt);
+
+      expect(
+        getDebugMessages().some((message) => message.includes(mockActionResponse.message))
+      ).toBe(true);
+    });
+
+    it('logs the response content at debug when llmType is inference', async () => {
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          data: {
+            choices: [
+              {
+                message: { content: mockActionResponse.message },
+              },
+            ],
+          },
+          status: 'ok',
+        })
+      );
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+        llmType: 'inference',
+      });
+
+      await actionsClientLlm._call(prompt);
+
+      expect(
+        getDebugMessages().some((message) => message.includes(mockActionResponse.message))
+      ).toBe(true);
+    });
+
+    it('logs the serviceMessage at debug when the action result status is error', async () => {
+      actionsClient.execute.mockImplementation(
+        jest.fn().mockResolvedValue({
+          message: 'action-result-message',
+          serviceMessage: 'action-result-service-message',
+          status: 'error',
+        })
+      );
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+      });
+
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrowError();
+
+      expect(
+        getDebugMessages().some((message) => message.includes('action-result-service-message'))
+      ).toBe(true);
+    });
+
     it('rejects with the expected error when the action result status is error', async () => {
       actionsClient.execute.mockImplementation(() => {
         throw new Error(
@@ -217,6 +284,37 @@ describe('ActionsClientLlm', () => {
         expect(mockInferenceClient.chatComplete).toHaveBeenCalledWith(
           expect.objectContaining({ modelName: 'my-model', temperature: 0.5 })
         );
+      });
+
+      it('logs the response content at debug on success', async () => {
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        await actionsClientLlm._call(prompt);
+
+        expect(getDebugMessages().some((message) => message.includes('Hello, world'))).toBe(true);
+      });
+
+      it('logs the error at debug when inferenceClient.chatComplete rejects', async () => {
+        (mockInferenceClient.chatComplete as jest.Mock).mockRejectedValue(
+          new Error('quota exceeded')
+        );
+        const actionsClientLlm = new ActionsClientLlm({
+          actionsClient,
+          connectorId,
+          inferenceClient: mockInferenceClient,
+          isInferenceEndpoint: true,
+          logger: mockLogger,
+        });
+
+        await expect(actionsClientLlm._call(prompt)).rejects.toThrowError('quota exceeded');
+
+        expect(getDebugMessages().some((message) => message.includes('quota exceeded'))).toBe(true);
       });
 
       it('rejects when inferenceClient is not provided', async () => {

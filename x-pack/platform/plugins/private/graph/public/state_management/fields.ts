@@ -8,7 +8,7 @@
 import type { Action } from 'typescript-fsa';
 import actionCreatorFactory from 'typescript-fsa';
 import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
-import { createSelector } from 'reselect';
+import { createSelector } from 'reselect-v4';
 import { select, takeLatest, takeEvery } from 'redux-saga/effects';
 import type { WorkspaceField } from '../types';
 import type { GraphState, GraphStoreDependencies } from './store';

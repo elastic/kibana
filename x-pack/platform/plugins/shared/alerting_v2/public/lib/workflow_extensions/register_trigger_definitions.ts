@@ -47,4 +47,29 @@ export function registerTriggerDefinitions(
       (m) => m.episodeDeactivatedTriggerPublicDefinition
     )
   );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_created').then((m) => m.ruleCreatedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_updated').then((m) => m.ruleUpdatedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_deleted').then((m) => m.ruleDeletedTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_enabled').then((m) => m.ruleEnabledTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_disabled').then((m) => m.ruleDisabledTriggerPublicDefinition)
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_events_generated').then(
+      (m) => m.ruleEventsGeneratedTriggerPublicDefinition
+    )
+  );
+  workflowsExtensions.registerTriggerDefinition(() =>
+    import('./triggers/rule_execution_failed').then(
+      (m) => m.ruleExecutionFailedTriggerPublicDefinition
+    )
+  );
 }

@@ -4,12 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as t from 'io-ts';
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { FailedTransactionsCorrelation } from '@kbn/apm-types';
-import { environmentRt } from '@kbn/apm-types';
+import { environmentSchema } from '@kbn/apm-types';
 import { defineRoute } from '../types';
-import { kueryRt, rangeRt } from '../../default_api_types';
+import { kuerySchema, rangeSchema } from '../../default_api_types';
 
 export interface PValuesResponse {
   failedTransactionsCorrelations: FailedTransactionsCorrelation[];
@@ -19,21 +18,22 @@ export interface PValuesResponse {
 
 export const pValuesTransactionsRoute = defineRoute<PValuesResponse>()({
   endpoint: 'POST /internal/apm/correlations/p_values/transactions',
-  params: t.type({
-    body: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-        durationMin: toNumberRt,
-        durationMax: toNumberRt,
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.type({
-        fieldCandidates: t.array(t.string),
-      }),
-    ]),
-  }),
+  params: lazySchema(() =>
+    z.object({
+      body: z
+        .object({
+          serviceName: z.string().optional(),
+          transactionName: z.string().optional(),
+          transactionType: z.string().optional(),
+          durationMin: z.coerce.number().optional(),
+          durationMax: z.coerce.number().optional(),
+        })
+        .merge(environmentSchema)
+        .merge(kuerySchema)
+        .merge(rangeSchema)
+        .extend({
+          fieldCandidates: z.array(z.string()),
+        }),
+    })
+  ),
 });

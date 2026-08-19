@@ -33,6 +33,9 @@ const OverlayRootContainer = styled.div`
 
   border-left: 1px solid ${({ theme }) => theme.euiTheme.colors.backgroundBaseSubdued};
 
+  // Default (legacy expandable flyout) stacking level. When the new flyout system is enabled, the
+  // caller passes an explicit dynamic z-index (see ConsolePageOverlay) so the overlay slots into
+  // EUI's shared flyout z-index sequence instead of using this static value.
   z-index: ${({ theme }) => theme.euiTheme.levels.flyout};
 
   background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBasePlain};
@@ -317,6 +320,36 @@ export const PageOverlay = memo<PageOverlayProps>(
         },
       });
     }, []);
+
+    // Close the overlay on Escape, revealing whatever is behind it (e.g. a flyout).
+    // The listener is attached to `document`, which sits below `window` in the DOM bubble path, so
+    // `stopPropagation()` prevents the Escape from reaching the window-level `keydown` handlers of
+    // underlying layers - notably `EuiFlyout` (via `EuiWindowEvent`), which would otherwise close the
+    // flyout instead. Because we stop the event below `window`, this works regardless of which layer
+    // mounted first. Inner widgets that handle Escape themselves (e.g. the console's input popover,
+    // via `EuiPopover`) call `stopPropagation()` before the event bubbles to `document`, so they keep
+    // precedence. Only active while the overlay is actually visible.
+    useEffect(() => {
+      if (isHidden) {
+        return;
+      }
+
+      const onKeyDown = (ev: KeyboardEvent) => {
+        if (ev.key !== 'Escape' || ev.defaultPrevented) {
+          return;
+        }
+
+        ev.stopPropagation();
+        ev.preventDefault();
+        onHide();
+      };
+
+      document.addEventListener('keydown', onKeyDown);
+
+      return () => {
+        document.removeEventListener('keydown', onKeyDown);
+      };
+    }, [isHidden, onHide]);
 
     return (
       <EuiPortal portalRef={setPortalEleRef}>

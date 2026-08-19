@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT. High value feature that touches many surfaces.
+ */
+
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -61,6 +65,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await searchSessions.save({ withRefresh: true });
+
+        // Verify the completion toast is shown
+        await searchSessions.expectCompletedSearchToast();
       });
 
       describe('when clicking the open background search flyout button', () => {

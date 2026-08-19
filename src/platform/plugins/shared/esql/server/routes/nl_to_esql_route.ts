@@ -12,7 +12,7 @@ import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { EsqlServerPluginStart } from '../types';
-import { createScopedModel, resolveConnectorId } from './helpers';
+import { createScopedModel, resolveConnectorId, resolveIncludeDatasets } from './helpers';
 
 const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
@@ -97,6 +97,7 @@ export const registerNLtoESQLRoute = (
         }
 
         const additionalContext = buildNlToEsqlAdditionalContext(trimmedCurrent ?? '');
+        const includeDatasets = await resolveIncludeDatasets(core.uiSettings.client);
 
         const result = await generateEsql({
           model,
@@ -105,6 +106,7 @@ export const registerNLtoESQLRoute = (
           nlQuery: nlInstruction,
           additionalContext,
           executeQuery: false,
+          includeDatasets,
         });
 
         return response.ok({

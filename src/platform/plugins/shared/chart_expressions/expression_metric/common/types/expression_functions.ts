@@ -37,6 +37,7 @@ import type {
 } from '../constants';
 
 export type AvailableMetricIcon = $Values<typeof AvailableMetricIcons>;
+export type MetricDensity = 'compact' | 'default';
 
 export interface MetricArguments {
   metric: ExpressionValueVisDimension | string;
@@ -57,6 +58,7 @@ export interface MetricArguments {
   secondaryAlign: MetricStyle['extraTextAlign'];
   iconAlign: MetricStyle['iconAlign'];
   valueFontSize: MetricStyle['valueFontSize'];
+  density: MetricDensity;
   primaryPosition: MetricStyle['valuePosition'];
   color?: string;
   icon?: string;

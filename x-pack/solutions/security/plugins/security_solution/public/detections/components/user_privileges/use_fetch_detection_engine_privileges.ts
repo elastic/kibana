@@ -8,6 +8,7 @@
 import { useEffect, useRef } from 'react';
 import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
+import { isAbortError } from '../../../common/utils/exceptions';
 import { getUserPrivilege } from '../../containers/detection_engine/alerts/api';
 import * as i18n from './translations';
 
@@ -36,7 +37,9 @@ export const useFetchDetectionEnginePrivileges = (isAppAvailable: boolean = true
 
   useEffect(() => {
     const error = detectionEnginePrivileges.error;
-    if (error != null) {
+    // A fetch cancelled on unmount (rapid card mount/unmount during streaming)
+    // surfaces as an AbortError; it is not a real failure, so don't toast it.
+    if (error != null && !isAbortError(error)) {
       addError(error, {
         title: i18n.DETECTION_ENGINE_PRIVILEGES_FETCH_FAILURE,
       });

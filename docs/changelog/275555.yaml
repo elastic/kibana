@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/275555
+issues:
+- https://github.com/elastic/kibana/issues/274661
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-02
+title: Fix incorrect handling of environment in service logs

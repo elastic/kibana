@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Migration recommendation: MIGRATE TO SCOUT.
+ */
+
+// Serverless test (remove during Scout migration): x-pack/platform/test/serverless/functional/test_suites/discover/group1/_discover.ts
+
 import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../ftr_provider_context';

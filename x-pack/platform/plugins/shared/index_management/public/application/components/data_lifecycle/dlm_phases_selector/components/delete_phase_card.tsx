@@ -16,6 +16,7 @@ export interface DeletePhaseCardProps {
   id: string;
   duration: DlmPhaseDuration;
   isCardDisabled: boolean;
+  hideToggle?: boolean;
   durationError?: string;
   helpText?: React.ReactNode;
   isFormDisabled: boolean;
@@ -26,6 +27,7 @@ export const DeletePhaseCard = ({
   id,
   duration,
   isCardDisabled,
+  hideToggle = false,
   durationError,
   helpText,
   isFormDisabled,
@@ -39,11 +41,17 @@ export const DeletePhaseCard = ({
       checked={duration.enabled}
       dataTestSubj="dlmPhasesSelectorDeletePhaseCard"
       disabled={isCardDisabled}
+      showCheckbox={!hideToggle}
       checkboxAriaLabel={strings.deletePhaseCheckboxAriaLabel}
       title={strings.deletePhaseLabel}
       description={strings.deletePhaseDescription}
       icon={<EuiIcon type="trash" color={isCardDisabled ? 'subdued' : 'text'} aria-hidden />}
-      onChange={(checked) => onChange({ ...duration, enabled: checked })}
+      onChange={(checked) => {
+        if (hideToggle || isCardDisabled) {
+          return;
+        }
+        onChange({ ...duration, enabled: checked });
+      }}
     >
       <DurationFields
         label={strings.deleteAfterLabel}
