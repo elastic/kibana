@@ -773,7 +773,7 @@ describe('EsqlQueryParser._injectNamedParams', () => {
     expect(result.params).toEqual([{ field: 'host.name' }]);
   });
 
-  test('dashboard control values win collisions with static spec params', () => {
+  test('static spec params take precedence over dashboard control values on collisions', () => {
     const { parser } = createParser(rangeStart, rangeEnd, {}, [
       { key: 'fizzbuzz', value: 'ios', type: ESQLVariableType.VALUES },
     ]);
@@ -784,7 +784,7 @@ describe('EsqlQueryParser._injectNamedParams', () => {
       params: [{ fizzbuzz: 'hardcoded' }],
     });
 
-    expect(result.params).toEqual([{ fizzbuzz: 'ios' }]);
+    expect(result.params).toEqual([{ fizzbuzz: 'ios' }, { fizzbuzz: 'hardcoded' }]);
   });
 
   test('keeps static spec params whose keys are not bound by dashboard controls', () => {
