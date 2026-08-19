@@ -13,6 +13,7 @@ import React, { createContext } from 'react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { ProjectPickerButton } from './button';
 import type { ProjectPickerState } from '../../state/reducers';
+import { strings } from '../../../strings';
 
 // Create  a minimal mock context that can be used to render the button
 const MockProjectPickerContext = createContext<{ state: unknown } | null>(null);
@@ -105,5 +106,18 @@ describe('ProjectPickerButton', () => {
     expect(button).toBeDisabled();
     expect(screen.queryByTestId('cps-project-picker-button-label')).not.toBeInTheDocument();
     expect(screen.queryByTestId('cps-project-picker-button')).not.toBeInTheDocument();
+  });
+
+  it('should show a tooltip that matches the disabled aria label when isDisabled is true', async () => {
+    renderButton({ isDisabled: true });
+
+    const button = screen.getByTestId('cps-project-picker-button-disabled');
+    const tooltipAnchor = button.closest('.euiToolTipAnchor') ?? button;
+    await userEvent.hover(tooltipAnchor);
+
+    const tooltip = await screen.findByRole('tooltip');
+    expect(tooltip).toHaveTextContent(strings.projectPickerButtonDisabledAriaLabel);
+    expect(button).toHaveAttribute('aria-labelledby', tooltip.id);
+    expect(button).toHaveAccessibleName(strings.projectPickerButtonDisabledAriaLabel);
   });
 });

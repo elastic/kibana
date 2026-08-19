@@ -20,6 +20,12 @@ export const strings = {
       defaultMessage: 'Cross-project search project picker',
     });
   },
+  get projectPickerButtonDisabledAriaLabel() {
+    return i18n.translate('cpsUtils.projectPicker.projectPickerButtonDisabledLabel', {
+      defaultMessage:
+        'Cross-project search is not available here. Unless otherwise informed, your project scope will be limited to this project alone.',
+    });
+  },
   getProjectPickerButtonLabel: (numberOfProjects: number, totalProjects: number) =>
     i18n.translate('cpsUtils.projectPicker.originProjectTooltip', {
       defaultMessage:

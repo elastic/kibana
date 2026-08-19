@@ -47,7 +47,10 @@ export const ProjectPickerButton = ({
 
   if (isDisabled) {
     return (
-      <EuiToolTip content={customTooltipContent ?? strings.projectPickerButtonAriaLabel} id={id}>
+      <EuiToolTip
+        content={customTooltipContent ?? strings.projectPickerButtonDisabledAriaLabel}
+        id={id}
+      >
         <EuiButtonIcon
           {...sharedButtonProps}
           color="text"
