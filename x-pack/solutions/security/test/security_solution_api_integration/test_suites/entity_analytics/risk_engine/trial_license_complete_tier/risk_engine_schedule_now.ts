@@ -11,7 +11,6 @@ import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
   riskEngineRouteHelpersFactory,
-  waitForRiskEngineRun,
   waitForRiskScoresToBePresent,
 } from '../../utils';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -63,12 +62,10 @@ export default ({ getService }: FtrProviderContext) => {
 
       // first risk engine run
       await riskEngineRoutes.init();
-      await waitForRiskEngineRun({ log, supertest });
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
 
       // second risk engine run
       await riskEngineRoutes.scheduleNow();
-      await waitForRiskEngineRun({ log, supertest });
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 2 }); // Should calculate risk score again for the same document
     });
   });

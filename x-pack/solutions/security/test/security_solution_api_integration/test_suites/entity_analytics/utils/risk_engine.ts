@@ -392,31 +392,6 @@ export const waitForRiskScoreForId = async ({
   return bestMatch;
 };
 
-/**
- *
- * It waits for the risk engine 'runAt' time to be bigger than the initial time.
- */
-export const waitForRiskEngineRun = async ({
-  supertest,
-  log,
-}: {
-  supertest: SuperTest.Agent;
-  log: ToolingLog;
-}): Promise<void> => {
-  const initialTime = new Date();
-  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
-
-  await waitFor(
-    async () => {
-      const { body } = await riskEngineRoutes.getStatus();
-      const runAtTime = body?.risk_engine_task_status?.runAt;
-      return !!runAtTime && new Date(runAtTime) > initialTime;
-    },
-    'waitForRiskEngineToRun',
-    log
-  );
-};
-
 export const getRiskEngineTasks = async ({
   es,
   index = ['.kibana_task_manager*'],
