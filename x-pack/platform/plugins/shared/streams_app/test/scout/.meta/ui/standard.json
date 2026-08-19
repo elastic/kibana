@@ -1,5 +1,5 @@
 {
-  "sha1": "3bbd2cb0a12ba2ba41d03f3cb6443061b54181ef",
+  "sha1": "3325d0f353a0ad5f70d8dc309972722d3fb8077f",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -199,7 +199,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 53,
+        "line": 54,
         "column": 9
       }
     },
@@ -215,7 +215,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 9
       }
     },
@@ -231,7 +231,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 140,
+        "line": 141,
         "column": 9
       }
     },
@@ -247,7 +247,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_mapping/wired_streams_schema.spec.ts",
-        "line": 194,
+        "line": 195,
         "column": 9
       }
     },
@@ -261,7 +261,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 96,
+        "line": 98,
         "column": 9
       }
     },
@@ -275,7 +275,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 103,
+        "line": 105,
         "column": 9
       }
     },
@@ -289,7 +289,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 127,
+        "line": 129,
         "column": 9
       }
     },
@@ -303,7 +303,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 146,
+        "line": 148,
         "column": 9
       }
     },
@@ -317,7 +317,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests/data_management/data_processing/draft_stream_simulation.spec.ts",
-        "line": 170,
+        "line": 172,
         "column": 9
       }
     },

@@ -485,8 +485,28 @@ describe('CaseConfigureService', () => {
           Object {
             "references": undefined,
             "refresh": undefined,
+            "version": undefined,
           }
         `);
+      });
+
+      it('threads the original configuration version through for optimistic concurrency control', async () => {
+        unsecuredSavedObjectsClient.update.mockReturnValue(
+          Promise.resolve({} as SavedObjectsUpdateResponse<ConfigurationPatchRequest>)
+        );
+
+        await service.patch({
+          configurationId: '1',
+          unsecuredSavedObjectsClient,
+          updatedAttributes: createConfigUpdateParams(),
+          originalConfiguration: {
+            version: 'WzAsMV0=',
+          } as SavedObject<ConfigurationAttributes>,
+        });
+
+        const updateOptions = unsecuredSavedObjectsClient.update.mock
+          .calls[0][3] as SavedObjectsUpdateOptions;
+        expect(updateOptions.version).toBe('WzAsMV0=');
       });
 
       it('creates an update object with the none connector', async () => {

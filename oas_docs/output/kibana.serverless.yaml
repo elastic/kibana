@@ -299,6 +299,7 @@ tags:
     name: Security Timeline API
     x-displayName: Security timeline
   - name: significant_events
+    x-displayName: Significant Events
   - description: SLO APIs enable you to define, manage and track service-level objectives
     name: slo
     x-displayName: Service level objectives
@@ -2845,9 +2846,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -3304,9 +3315,19 @@ paths:
                   description: Runtime configuration overrides. These override the stored agent configuration for this execution only.
                   type: object
                   properties:
+                    enable_elastic_capabilities:
+                      description: Whether to enable built-in Elastic skills for this execution.
+                      type: boolean
                     instructions:
                       description: Custom instructions for the agent.
                       type: string
+                    skill_ids:
+                      description: 'Skill IDs to enable for this execution, replacing the stored skill list. Note: only fully restricts the available skill set when enable_elastic_capabilities is also set to false.'
+                      items:
+                        maxLength: 256
+                        type: string
+                      maxItems: 100
+                      type: array
                     tools:
                       description: Tool selection to enable for this execution.
                       items:
@@ -11320,8 +11341,8 @@ paths:
     get:
       tags:
         - Dashboards
-      summary: Get dashboards
-      operationId: get-dashboards-redirect
+      summary: Search dashboards
+      operationId: search-dashboards
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11333,7 +11354,7 @@ paths:
       tags:
         - Dashboards
       summary: Create a dashboard
-      operationId: create-dashboard-redirect
+      operationId: create-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11346,7 +11367,7 @@ paths:
       tags:
         - Dashboards
       summary: Get a dashboard
-      operationId: get-dashboard-redirect
+      operationId: get-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11357,8 +11378,8 @@ paths:
     put:
       tags:
         - Dashboards
-      summary: Update a dashboard
-      operationId: update-dashboard-redirect
+      summary: Upsert a dashboard
+      operationId: upsert-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -11370,7 +11391,7 @@ paths:
       tags:
         - Dashboards
       summary: Delete a dashboard
-      operationId: delete-dashboard-redirect
+      operationId: delete-dashboard
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -19218,6 +19239,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/delete:
     delete:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19225,7 +19247,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
+        **Deprecated in 9.4.0.** Deletes the Privilege Monitoring Engine and optionally removes all associated privileged user data.
       operationId: DeleteMonitoringEngine
       parameters:
         - description: Whether to delete all the privileged user data
@@ -19260,6 +19282,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/disable:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19267,7 +19290,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
+        **Deprecated in 9.4.0.** Disables the Privilege Monitoring Engine, stopping all monitoring activity without removing data.
       operationId: DisableMonitoringEngine
       responses:
         '200':
@@ -19289,6 +19312,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/init:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19296,7 +19320,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
+        **Deprecated in 9.4.0.** Initializes the Privilege Monitoring Engine, setting up the required resources and starting the engine.
       operationId: InitMonitoringEngine
       responses:
         '200':
@@ -19331,6 +19355,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/engine/schedule_now:
     post:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19338,7 +19363,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
+        **Deprecated in 9.4.0.** Schedules the Privilege Monitoring Engine to run as soon as possible, triggering an immediate monitoring cycle.
       operationId: ScheduleMonitoringEngine
       responses:
         '200':
@@ -19379,6 +19404,7 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/privileges/health:
     get:
+      deprecated: true
       description: |-
         **Spaces method and path for this operation:**
 
@@ -19386,7 +19412,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
+        **Deprecated in 9.4.0.** Returns the current health status of the Privilege Monitoring Engine, including engine status, error details, and user count statistics.
       operationId: PrivMonHealth
       responses:
         '200':
@@ -19436,14 +19462,17 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/privileges/privileges:
     get:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/privileges</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Check if the current user has all required permissions for Privilege Monitoring
+        **Deprecated in 9.4.0.** Use the Watchlists APIs instead.
+
+        Check if the current user has all required permissions for Privilege Monitoring.
       operationId: PrivMonPrivileges
       responses:
         '200':
@@ -19470,12 +19499,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users:
     post:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Creates a new privileged user to be monitored by the Privilege Monitoring Engine.
       operationId: CreatePrivMonUser
@@ -19527,12 +19559,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/_csv:
     post:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/_csv</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Bulk upserts privileged users by uploading a CSV file. Returns per-row errors and aggregate upload statistics.
       operationId: PrivmonBulkUploadUsersCSV
@@ -19596,12 +19631,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/{id}:
     delete:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Removes a privileged user from monitoring by their document ID.
       operationId: DeletePrivMonUser
@@ -19641,12 +19679,15 @@ paths:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
     put:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Updates the details of an existing monitored privileged user by their document ID.
       operationId: UpdatePrivMonUser
@@ -19706,12 +19747,15 @@ paths:
           name: product_name
   /api/entity_analytics/monitoring/users/list:
     get:
-      description: |-
+      deprecated: true
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/list</span></div>
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        **Deprecated in 9.4.0.** Use the Watchlists API instead.
 
         Returns a list of all privileged users currently being monitored. Supports optional KQL filtering.
       operationId: ListPrivMonUsers
@@ -20477,7 +20521,7 @@ paths:
           name: product_name
   /api/exception_lists:
     delete:
-      description: |-
+      description: |
         **Spaces method and path for this operation:**
 
         <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists</span></div>
@@ -20485,6 +20529,10 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Delete an exception list using the `id` or `list_id` field.
+
+        Before deleting an exception list that is linked to detection rules, remove or unlink the
+        exception list from those rules. Deleting a linked exception list can leave rules referencing
+        an exception list that no longer exists.
       operationId: DeleteExceptionList
       parameters:
         - description: Exception list's identifier. Either `id` or `list_id` must be specified.
@@ -34425,6 +34473,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, delete the package even if it has active package policies
           in: query
@@ -34497,6 +34546,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, returns the package even if the signature cannot be verified
           in: query
@@ -34604,6 +34654,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
         - description: When true, allow installing prerelease versions
           in: query
@@ -34719,6 +34770,7 @@ paths:
           name: pkgName
           required: true
           schema:
+            maxLength: 255
             type: string
       requestBody:
         content:
@@ -42360,7 +42412,8 @@ paths:
                   - item
           description: Successful response
       summary: Get space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -42435,7 +42488,8 @@ paths:
                   - item
           description: Successful response
       summary: Create space settings
-      tags: []
+      tags:
+        - Fleet internals
       x-state: Generally available
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -48156,6 +48210,7 @@ paths:
       summary: Get risk score history for an entity
       tags:
         - Security Entity Analytics API
+      x-state: Added in 9.5.0
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -63674,8 +63729,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get visualizations
-      operationId: get-visualizations-redirect
+      summary: Search visualizations
+      operationId: search-visualizations
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63686,8 +63741,8 @@ paths:
     post:
       tags:
         - Visualizations
-      summary: Create a visualization
-      operationId: create-visualization-redirect
+      summary: Create visualization
+      operationId: create-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63699,8 +63754,8 @@ paths:
     get:
       tags:
         - Visualizations
-      summary: Get a visualization
-      operationId: get-visualization-redirect
+      summary: Get visualization
+      operationId: get-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63711,8 +63766,8 @@ paths:
     put:
       tags:
         - Visualizations
-      summary: Update a visualization
-      operationId: update-visualization-redirect
+      summary: Upsert visualization
+      operationId: upsert-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -63723,8 +63778,8 @@ paths:
     delete:
       tags:
         - Visualizations
-      summary: Delete a visualization
-      operationId: delete-visualization-redirect
+      summary: Delete visualization
+      operationId: delete-visualization
       description: |
         > This documentation is temporarily hosted at a separate location.
         >
@@ -65405,7 +65460,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a single step from a workflow definition in test mode.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-step-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -65518,7 +65573,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow in test mode without requiring it to be saved or enabled. Provide either a workflow ID to test a saved workflow, a YAML definition to test an unsaved draft, or both to test a modified version of an existing workflow.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-test
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -66112,7 +66167,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute AND workflowsManagement:read.
+        Execute a workflow by its ID with the provided inputs. The workflow must be enabled and have a valid definition. Returns an execution ID that can be used to monitor progress.<br/><br/>[Required authorization] Route required privileges: workflowsManagement:execute.
       operationId: post-workflows-workflow-id-run
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -72927,6 +72982,53 @@ components:
                 type: array
               success:
                 type: boolean
+              warnings:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    baseTemplateName:
+                      maxLength: 1000
+                      type: string
+                    conflictingTemplates:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          conflictType:
+                            enum:
+                              - overrides_fleet
+                              - blocked_by_same_priority
+                              - overridden_by_fleet
+                            type: string
+                          name:
+                            maxLength: 1000
+                            type: string
+                          priority:
+                            type: number
+                        required:
+                          - name
+                          - priority
+                          - conflictType
+                      maxItems: 100
+                      type: array
+                    dataStreamName:
+                      maxLength: 1000
+                      type: string
+                    namespace:
+                      maxLength: 255
+                      type: string
+                    nsTemplateName:
+                      maxLength: 1000
+                      type: string
+                  required:
+                    - dataStreamName
+                    - namespace
+                    - baseTemplateName
+                    - nsTemplateName
+                    - conflictingTemplates
+                maxItems: 100
+                type: array
             required:
               - name
               - success
@@ -76624,8 +76726,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -76756,11 +76857,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -76780,11 +76886,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -77479,6 +77590,12 @@ components:
       additionalProperties: false
       description: Duration format between time units.
       properties:
+        compact:
+          description: When `true`, uses short unit suffixes (for example, `ms` instead of `Milliseconds`). Defaults to `true`. Ignored for `auto-approximate`.
+          type: boolean
+        decimals:
+          description: Number of decimal places to display. Defaults to `0`. Ignored for `auto-approximate`.
+          type: number
         from:
           description: Source time unit of the raw field value, including fine-grained units (`ps`, `ns`, `us`) in addition to standard units. This describes how the stored data is encoded, not a query duration literal.
           enum:
@@ -77534,6 +77651,9 @@ components:
           description: The ID of the API key in the Security API.
           type: string
         created_at:
+          type: string
+        expire_at:
+          description: The expiration date of the enrollment token as an ISO 8601 date string. Absent when the token never expires.
           type: string
         hidden:
           type: boolean
@@ -81873,8 +81993,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -87435,8 +87554,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -87519,11 +87637,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -87543,11 +87666,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -92066,8 +92194,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -92142,11 +92269,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -92166,11 +92298,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -92286,8 +92423,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -92366,11 +92502,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -92390,11 +92531,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -93456,6 +93602,8 @@ components:
       additionalProperties: false
       properties:
         expiration:
+          description: The expiration time for the enrollment token, expressed as a duration (for example, 30d, 24h, 90m). By default, enrollment tokens never expire.
+          maxLength: 20
           type: string
         name:
           type: string
@@ -93510,7 +93658,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -93653,7 +93801,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -93688,6 +93836,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -93801,7 +93951,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -93886,7 +94036,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -94818,7 +94968,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -94961,7 +95111,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -94996,6 +95146,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -95109,7 +95261,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -95194,7 +95346,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -96482,8 +96634,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -96562,11 +96713,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -96586,11 +96742,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -97941,8 +98102,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -98039,11 +98199,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -98063,11 +98228,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -101775,8 +101945,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -101851,11 +102020,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -101875,11 +102049,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -101931,11 +102110,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -101955,11 +102139,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -102605,8 +102794,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -102685,11 +102873,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -102709,11 +102902,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -103589,7 +103787,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -103726,7 +103924,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -103761,6 +103959,8 @@ components:
           nullable: true
           type: string
         proxy_id:
+          deprecated: true
+          description: Kafka outputs do not support proxy configuration. This field is accepted for backwards compatibility but is ignored — it is cleared to null on save and has no effect on the compiled agent policy.
           nullable: true
           type: string
         random:
@@ -103871,7 +104071,7 @@ components:
         hosts:
           items:
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -103950,7 +104150,7 @@ components:
           items:
             format: uri
             type: string
-          maxItems: 10
+          maxItems: 100
           minItems: 1
           type: array
         id:
@@ -104363,6 +104563,53 @@ components:
       properties:
         item:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_get_package_info'
+        warnings:
+          items:
+            additionalProperties: false
+            type: object
+            properties:
+              baseTemplateName:
+                maxLength: 1000
+                type: string
+              conflictingTemplates:
+                items:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    conflictType:
+                      enum:
+                        - overrides_fleet
+                        - blocked_by_same_priority
+                        - overridden_by_fleet
+                      type: string
+                    name:
+                      maxLength: 1000
+                      type: string
+                    priority:
+                      type: number
+                  required:
+                    - name
+                    - priority
+                    - conflictType
+                maxItems: 100
+                type: array
+              dataStreamName:
+                maxLength: 1000
+                type: string
+              namespace:
+                maxLength: 255
+                type: string
+              nsTemplateName:
+                maxLength: 1000
+                type: string
+            required:
+              - dataStreamName
+              - namespace
+              - baseTemplateName
+              - nsTemplateName
+              - conflictingTemplates
+          maxItems: 100
+          type: array
       required:
         - item
       title: update_package_response
@@ -105111,8 +105358,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -105191,11 +105437,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -105215,11 +105466,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -107492,8 +107748,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -107578,11 +107833,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -107602,11 +107862,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -109485,8 +109750,7 @@ components:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_formatType'
         granularity:
           anyOf:
-            - description: Granularity of the histogram.
-              maximum: 7
+            - description: Target number of histogram buckets (bars). The maximum is controlled by the `histogram:maxBars` advanced setting, which defaults to 1000.
               minimum: 1
               type: number
             - enum:
@@ -109557,11 +109821,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to exclude.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to exclude.
           required:
             - values
         fields:
@@ -109581,11 +109850,16 @@ components:
               description: When `true`, treats the values as regular expressions.
               type: boolean
             values:
-              items:
-                description: Values to include.
-                type: string
-              maxItems: 100
-              type: array
+              anyOf:
+                - items:
+                    type: string
+                  maxItems: 100
+                  type: array
+                - items:
+                    type: number
+                  maxItems: 100
+                  type: array
+              description: Values to include.
           required:
             - values
         increase_accuracy:
@@ -126127,6 +126401,11 @@ components:
           $ref: '#/components/schemas/Security_Osquery_API_ECSMapping'
         id:
           $ref: '#/components/schemas/Security_Osquery_API_QueryId'
+        interval:
+          description: |
+            Interval for this query, in seconds. Overrides the pack's `interval` when this query also has `schedule_type: interval`. If you send `interval` without `schedule_type: interval`, Kibana removes it when saving, and the query uses the pack's `interval` instead. Ignored when the pack's `schedule_type` is `rrule`.
+          nullable: true
+          type: integer
         platform:
           $ref: '#/components/schemas/Security_Osquery_API_Platform'
         query:

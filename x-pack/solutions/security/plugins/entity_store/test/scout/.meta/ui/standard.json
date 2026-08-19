@@ -1,9 +1,13 @@
 {
-  "sha1": "92cc6bd7ff74bd42f83732774b934c805a3eda68",
+  "sha1": "ca00951d2b4db4ec0673c0340ea412d4b6a8b969",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
   "tests": [
     {
-      "id": "1e6508623084a7d-b3c4008ef7e0517",
-      "title": "Entity Store auto-install auto-installs the entity store when visiting a Security page",
+      "id": "1e6508623084a7d-b693a2a4b92c356",
+      "title": "Entity Store v1 migration auto-install auto-installs the entity store when visiting a Security page",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -13,13 +17,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/ui/tests/entity_store_auto_install.spec.ts",
-        "line": 85,
+        "line": 108,
         "column": 9
       }
     },
     {
-      "id": "1e6508623084a7d-07b6d4e7ffddae4",
-      "title": "Entity Store auto-install does not auto-install after stopping",
+      "id": "1e6508623084a7d-ea84baa3446d442",
+      "title": "Entity Store v1 migration auto-install does not auto-install after stopping",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -29,13 +33,13 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/ui/tests/entity_store_auto_install.spec.ts",
-        "line": 105,
+        "line": 128,
         "column": 9
       }
     },
     {
-      "id": "1e6508623084a7d-709a391808d5c2b",
-      "title": "Entity Store auto-install does not auto-install after uninstalling",
+      "id": "1e6508623084a7d-cf6ac24bc92ed17",
+      "title": "Entity Store v1 migration auto-install does not auto-install after uninstalling",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -45,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/entity_store/test/scout/ui/tests/entity_store_auto_install.spec.ts",
-        "line": 129,
+        "line": 152,
         "column": 9
       }
     }

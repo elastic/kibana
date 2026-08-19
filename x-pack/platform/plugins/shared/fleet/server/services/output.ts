@@ -715,6 +715,8 @@ class OutputService {
         data.username = undefined;
         data.password = undefined;
       }
+      // Kafka does not support proxies — clear any proxy_id silently (#267281)
+      data.proxy_id = null;
     }
 
     await remoteSyncIntegrationsCheck(esClient, output);
@@ -1162,6 +1164,11 @@ class OutputService {
       updateData.hosts
     ) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
+    }
+
+    // Kafka does not support proxies — clear any proxy_id silently (#267281)
+    if (mergedType === outputType.Kafka) {
+      updateData.proxy_id = null;
     }
 
     if (

@@ -210,7 +210,7 @@ a "what happened" description onto an EBT event. Event types and schemas live in
 - `useOpenFlyout()` — the instrumented wrapper around `overlays.openSystemFlyout(flyoutProviders({...}))`. Handles
   Suspense fallback (`FlyoutLoading`), the `FlyoutSessionContextProvider`, and telemetry. All open methods go through
   it.
-- `useDefaultDocumentFlyoutProperties()` / `defaultToolsFlyoutProperties` — consistent size/width/padding options.
+- `useDefaultDocumentFlyoutProperties()` / `useDefaultToolsFlyoutProperties()` — consistent size/width/padding options.
   Spread these into your flyout properties.
 - `useTabs<T>()` — generic tab selection with localStorage persistence and optional tab-click telemetry. Priority:
   `initialTabId` → localStorage → `validTabIds[0]`.

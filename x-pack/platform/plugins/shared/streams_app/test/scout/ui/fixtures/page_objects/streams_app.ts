@@ -370,7 +370,10 @@ export class StreamsApp {
 
   // Routing-specific utility methods
   async clickCreateRoutingRule() {
-    await this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton').click();
+    const button = this.page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
+    await expect(button).toBeVisible();
+    // Locator.click() can get flaky here due to rapid re-renders; use a direct DOM click.
+    await button.evaluate((el) => (el as HTMLElement).click());
   }
 
   async fillRoutingRuleName(name: string) {
@@ -386,6 +389,26 @@ export class StreamsApp {
   async switchToColumnsView() {
     // Draft streams fetch samples via ES|QL from the parent, which can be slow
     await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 60_000 });
+  }
+
+  /**
+   * Draft-stream samples are fetched via ES|QL from the parent stream's `$.` view,
+   * which the server creates asynchronously. Until it propagates, the query fails with
+   * "Unknown index" and the data-source machine treats that as terminal (empty grid, no
+   * auto-retry), so the preview grid — and the view-mode toggle inside its toolbar — never
+   * render and any wait times out. Re-trigger the fetch via the refresh button until the
+   * grid appears, so a not-yet-propagated parent view is retried rather than fatally awaited.
+   */
+  async waitForDraftPreviewSamples() {
+    const grid = this.page.getByTestId('euiDataGridBody');
+    const refreshButton = this.page.getByRole('button', { name: 'Refresh data preview' });
+
+    await expect(async () => {
+      if (await grid.isVisible()) return;
+      // `click` auto-waits for the button to be enabled (i.e. not mid-load) before refetching.
+      await refreshButton.click({ timeout: 15_000 });
+      await expect(grid).toBeVisible({ timeout: 10_000 });
+    }).toPass({ timeout: 90_000 });
   }
 
   async saveRoutingRule() {

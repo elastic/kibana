@@ -9,7 +9,7 @@ import { withActiveSpan } from '@kbn/tracing-utils';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import pMap from 'p-map';
-import { lt, minVersion, gt } from 'semver';
+import { lt, minVersion, gt, rcompare, coerce } from 'semver';
 import type {
   AuthenticatedUser,
   ElasticsearchClient,
@@ -128,7 +128,9 @@ import {
 import {
   hasVersionSuffix,
   removeVersionSuffixFromPolicyId,
+  splitVersionSuffixFromPolicyId,
   buildPolicyIdOrVariantsEsFilter,
+  buildPolicyBaseIdWithFallbackEsFilter,
 } from '../../common/services/version_specific_policies_utils';
 
 import { VERIFY_PERMISSIONS_TASK } from '../tasks/agentless/verify_permissions_task';
@@ -177,6 +179,7 @@ import { getSpaceForAgentPolicy, getSpaceForAgentPolicySO } from './spaces/helpe
 import {
   getVersionSpecificPolicies,
   getAgentVersionsForVersionSpecificPolicies,
+  reassignAgentsFromVersionSpecificPolicies,
 } from './utils/version_specific_policies';
 import { scheduleReassignAgentsToVersionSpecificPoliciesTask } from './agent_policies/reassign_agents_to_version_specific_policies_task';
 
@@ -331,6 +334,32 @@ class AgentPolicyService {
             spaceId: soClient.getCurrentNamespace(),
           },
         ]);
+      }
+    }
+
+    // If this policy no longer requires version-specific policies (e.g. the integration/input
+    // that required them was removed), reassign any agents still assigned to a variant policy back
+    // to the base policy and clean up the stale variant documents. Otherwise those agents stay on
+    // a variant policy that is never updated again and get stuck reporting an outdated policy.
+    // See https://github.com/elastic/kibana/issues/276294
+    if (
+      appContextService.getExperimentalFeatures().enableVersionSpecificPolicies &&
+      existingAgentPolicy.has_agent_version_conditions &&
+      options.hasAgentVersionConditions === false
+    ) {
+      logger.debug(
+        `Agent policy [${id}] no longer has agent version conditions, reassigning agents from version-specific policies back to the base policy`
+      );
+      // Swallow and log: the SO update, revision bump, and deploy have already committed above, so
+      // a transient failure here must not fail the whole update (a retry would also skip this
+      // branch, since has_agent_version_conditions is now false). The periodic sweep is the
+      // fallback that recovers any agents this inline pass misses.
+      try {
+        await reassignAgentsFromVersionSpecificPolicies(soClient, esClient, id);
+      } catch (error) {
+        logger.error(
+          `Failed to reassign agents from version-specific policies for agent policy [${id}]: ${error}`
+        );
       }
     }
 
@@ -2168,23 +2197,66 @@ class AgentPolicyService {
     agentPolicyId: string,
     revision: number
   ) {
-    const res = await esClient.search<FleetServerPolicy>({
-      index: AGENT_POLICY_INDEX,
-      ignore_unavailable: true,
-      rest_total_hits_as_int: true,
-      query: {
-        bool: {
-          filter: [{ term: { policy_id: agentPolicyId } }, { term: { revision_idx: revision } }],
-        },
-      },
-      size: 1,
-    });
+    const MAX_POLICY_VARIANTS_PER_REVISION = 100;
+    const revisionFilter = { term: { revision_idx: revision } };
+    const search = (policyFilter: estypes.QueryDslQueryContainer, size: number) =>
+      esClient.search<FleetServerPolicy>({
+        index: AGENT_POLICY_INDEX,
+        ignore_unavailable: true,
+        rest_total_hits_as_int: true,
+        query: { bool: { filter: [policyFilter, revisionFilter] } },
+        size,
+      });
 
-    if ((res.hits.total as number) === 0) {
+    // 1. Exact policy_id match — preserves current behaviour. This is also the only path
+    //    that resolves a version-specific variant id (e.g. `my-policy#9.2`, as passed by
+    //    AgentPolicyYamlFlyout): falling through to the base-id fallback would be wrong
+    //    because that query matches every variant at the revision, not just the requested one.
+    const exact = await search({ term: { policy_id: agentPolicyId } }, 1);
+    if ((exact.hits.total as number) > 0) {
+      return exact.hits.hits[0]._source;
+    }
+
+    // 2. A specific variant was requested and does not exist — do NOT fall back, as serving a
+    //    different variant would return the wrong compiled inputs.
+    if (hasVersionSuffix(agentPolicyId)) {
       return null;
     }
 
-    return res.hits.hits[0]._source;
+    // 3. Base id with no base document at this revision. Two causes:
+    //    (a) deployPolicies only pushes the base FleetServerPolicy when `!options.agentVersions`
+    //        (~line 1950), so revisions deployed by the version-specific assignment task exist
+    //        only as variants;
+    //    (b) the revisions-cleanup task prunes base docs independently of variant agents.
+    //    Serve the highest-version variant rather than 404-ing. Term-only — no prefix/wildcard —
+    //    so this stays compatible with search.allow_expensive_queries:false; the fallback branch
+    //    inside buildPolicyBaseIdWithFallbackEsFilter also covers pre-backfill docs with no
+    //    policy_base_id.
+    const variants = await search(
+      buildPolicyBaseIdWithFallbackEsFilter(agentPolicyId),
+      MAX_POLICY_VARIANTS_PER_REVISION
+    );
+    if ((variants.hits.total as number) === 0) {
+      return null;
+    }
+
+    // Deterministic pick: highest agent version. A variant only ever *removes* inputs whose
+    // agentVersion range excludes its version, so the newest variant is the closest available
+    // representation of the full policy. Sorted with semver because a lexicographic sort on
+    // policy_id orders `#9.10` before `#9.2`.
+    return (
+      variants.hits.hits
+        .map((hit) => hit._source)
+        .filter((source): source is FleetServerPolicy => Boolean(source))
+        .sort((a, b) => {
+          const va = coerce(splitVersionSuffixFromPolicyId(a.policy_id ?? '').version ?? '0.0.0');
+          const vb = coerce(splitVersionSuffixFromPolicyId(b.policy_id ?? '').version ?? '0.0.0');
+          if (!va && !vb) return 0;
+          if (!va) return 1;
+          if (!vb) return -1;
+          return rcompare(va, vb);
+        })[0] ?? null
+    );
   }
 
   public async getFullAgentConfigMap(

@@ -1,5 +1,5 @@
 {
-  "sha1": "a0d5747b5c064d5faf1cfbcfcfbe84abc6b61c56",
+  "sha1": "57e6bae28710e945037ba53bf2a643dcb4030116",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -6746,6 +6746,32 @@
       }
     },
     {
+      "id": "b6357d3d7fe0fc8-aada47ed9bc3de0",
+      "title": "Update rule API validation: should reject updating a signal rule query to composed format",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 445,
+        "column": 10
+      }
+    },
+    {
+      "id": "b6357d3d7fe0fc8-59a4fa78ddb28c7",
+      "title": "Update rule API validation: should reject setting recovery_strategy on a signal rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
+        "line": 469,
+        "column": 10
+      }
+    },
+    {
       "id": "b6357d3d7fe0fc8-0be0aa964382938",
       "title": "Update rule API authorization: should return 200 for a user with full alerting_v2 privileges",
       "expectedStatus": "passed",
@@ -6754,7 +6780,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 433,
+        "line": 484,
         "column": 10
       }
     },
@@ -6767,7 +6793,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 448,
+        "line": 499,
         "column": 10
       }
     },
@@ -6780,7 +6806,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/routes/rules/update_rule.spec.ts",
-        "line": 468,
+        "line": 519,
         "column": 10
       }
     },
@@ -7379,7 +7405,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1739,
+        "line": 1740,
         "column": 10
       }
     },
@@ -7393,7 +7419,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1790,
+        "line": 1791,
         "column": 10
       }
     },
@@ -7407,7 +7433,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1855,
+        "line": 1856,
         "column": 10
       }
     },
@@ -7421,7 +7447,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1898,
+        "line": 1899,
         "column": 10
       }
     },
@@ -7435,7 +7461,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1920,
+        "line": 1921,
         "column": 10
       }
     },
@@ -7449,7 +7475,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 1978,
+        "line": 1979,
         "column": 10
       }
     },
@@ -7463,7 +7489,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2055,
+        "line": 2056,
         "column": 10
       }
     },
@@ -7477,7 +7503,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2113,
+        "line": 2114,
         "column": 10
       }
     },
@@ -7491,7 +7517,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2178,
+        "line": 2179,
         "column": 10
       }
     },
@@ -7505,7 +7531,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2226,
+        "line": 2227,
         "column": 10
       }
     },
@@ -7519,7 +7545,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
-        "line": 2283,
+        "line": 2284,
         "column": 10
       }
     },

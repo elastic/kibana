@@ -429,10 +429,16 @@ export class SyntheticsAppPage {
     await this.page.testSubj.waitForSelector('querySubmitButton');
   }
 
-  async refreshOverview() {
-    // The overview header replaced the shared refresh button with the
-    // SyntheticsDatePicker, whose EuiSuperDatePicker apply/refresh button drives
-    // the app refresh.
+  async refreshOverview(refreshInterval = 15) {
+    // Callers create monitors via the API after navigating with zero monitors, so
+    // the overview has already redirected to its empty getting-started/management
+    // state, which has no SyntheticsDatePicker. Re-navigate so the fresh load
+    // re-queries the now-existing monitors and renders the populated overview
+    // header before clicking the date picker's apply/refresh button.
+    await this.navigateToOverview(refreshInterval);
+    await expect(this.page.testSubj.locator('superDatePickerApplyTimeButton')).toBeVisible({
+      timeout: 30_000,
+    });
     await this.page.testSubj.click('superDatePickerApplyTimeButton');
     await this.waitForLoadingToFinish();
   }

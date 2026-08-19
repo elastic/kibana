@@ -1,5 +1,5 @@
 {
-  "sha1": "7157a8845f3003ec0c1c0ced1e76de510453d92d",
+  "sha1": "d058898095c3ebb721c85d069b0f6fc5e45846a7",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -33,7 +33,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 66,
+        "line": 92,
         "column": 9
       }
     },
@@ -49,7 +49,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 73,
+        "line": 99,
         "column": 9
       }
     },
@@ -65,7 +65,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 84,
+        "line": 110,
         "column": 9
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 91,
+        "line": 117,
         "column": 9
       }
     },
@@ -97,7 +97,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 98,
+        "line": 124,
         "column": 9
       }
     },
@@ -113,7 +113,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 109,
+        "line": 135,
         "column": 9
       }
     },
@@ -129,7 +129,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 120,
+        "line": 146,
         "column": 9
       }
     },
@@ -145,7 +145,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 131,
+        "line": 157,
         "column": 9
       }
     },
@@ -161,7 +161,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alert_details_page.spec.ts",
-        "line": 142,
+        "line": 168,
         "column": 9
       }
     },
@@ -258,102 +258,6 @@
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/alerts_table_rbac.spec.ts",
         "line": 184,
-        "column": 9
-      }
-    },
-    {
-      "id": "09420caa5b9785f-1887bb9ce43cc37",
-      "title": "Observability Landing Page redirects to page specified in defaultRoute uiSetting",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 35,
-        "column": 9
-      }
-    },
-    {
-      "id": "09420caa5b9785f-b4d285151fca090",
-      "title": "Observability Landing Page redirects to Discover logs when logs data exists",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 57,
-        "column": 9
-      }
-    },
-    {
-      "id": "09420caa5b9785f-1089e5f36b13719",
-      "title": "Observability Landing Page redirects to APM services when only APM data exists",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 76,
-        "column": 9
-      }
-    },
-    {
-      "id": "09420caa5b9785f-b8a96bff3cd83db",
-      "title": "Observability Landing Page redirects to Discover logs when both logs and APM data exist (logs priority)",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 95,
-        "column": 9
-      }
-    },
-    {
-      "id": "09420caa5b9785f-00e86e3614855e3",
-      "title": "Observability Landing Page redirects to onboarding when no data exists",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 121,
-        "column": 9
-      }
-    },
-    {
-      "id": "09420caa5b9785f-d5a54704b60249e",
-      "title": "Observability Landing Page redirects to onboarding when log data that should be ignored exists",
-      "expectedStatus": "skipped",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-observability_complete",
-        "@cloud-serverless-observability_complete"
-      ],
-      "location": {
-        "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/parallel_tests/landing.spec.ts",
-        "line": 129,
         "column": 9
       }
     },

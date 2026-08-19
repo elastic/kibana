@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { CasesConfigurationUI } from '../../../../common/ui';
+import type { CasesConfigurationUI, FilterOptions } from '../../../../common/ui';
 import type { CustomFieldTypes } from '../../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../../custom_fields/builder';
 import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
@@ -34,7 +34,7 @@ const customFieldFilterOptionFactory = ({
     isActive: false,
     isAvailable: true,
     label: buttonLabel,
-    getEmptyOptions: () => {
+    getEmptyOptions: (_filterOptions: FilterOptions) => {
       return {
         customFields: {
           [fieldKey]: {

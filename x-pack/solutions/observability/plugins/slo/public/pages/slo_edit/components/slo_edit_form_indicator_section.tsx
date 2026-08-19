@@ -74,6 +74,7 @@ export function SloEditFormIndicatorSection({ formSettings }: SloEditFormIndicat
       {isServerless && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.slo.sloEdit.cpsReadiness.title', {
               defaultMessage: 'Cross-project search for SLOs coming soon',
             })}

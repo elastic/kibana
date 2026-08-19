@@ -68,46 +68,41 @@ export const createConversation$ = ({
 export const updateConversation$ = ({
   conversationClient,
   conversation,
-  title$,
   roundCompletedEvents$,
   action,
 }: {
   conversation: Conversation;
-  title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
   action?: ConversationAction;
 }) => {
-  return forkJoin({
-    title: title$,
-    roundCompletedEvent: roundCompletedEvents$,
-  }).pipe(
-    switchMap(({ title, roundCompletedEvent }) => {
+  return roundCompletedEvents$.pipe(
+    switchMap((roundCompletedEvent) => {
       const { round, resumed = false, conversation_state } = roundCompletedEvent.data;
-      // Replace last round when resumed (HITL flow), regenerate action is requested
-      const shouldReplaceLastRound = resumed || action === 'regenerate';
-      const updatedRound = shouldReplaceLastRound
-        ? [...conversation.rounds.slice(0, -1), round]
-        : [...conversation.rounds, round];
 
-      // Only set workspace_id if it's new (once set it should not change).
-      const newWorkspaceId =
-        roundCompletedEvent.data.workspace_id && !conversation.workspace_id
-          ? roundCompletedEvent.data.workspace_id
+      // A resumed round keeps the pending round's id, so it is matched by id.
+      // Regenerate mints a new id, so it has to name the round it supersedes —
+      // an identity rather than stale data, so the snapshot is safe to read here.
+      const replacesRoundId =
+        action === 'regenerate' && !resumed
+          ? conversation.rounds[conversation.rounds.length - 1]?.id
           : undefined;
 
-      return conversationClient.update(
+      return conversationClient.upsertRound(
         {
           id: conversation.id,
-          title,
-          rounds: updatedRound,
+          round,
+          replacesRoundId,
           state: conversation_state,
-          status: round.status,
-          read: false,
-          ...(roundCompletedEvent.data.attachments !== undefined
-            ? { attachments: roundCompletedEvent.data.attachments }
+          ...(roundCompletedEvent.data.attachments
+            ? {
+                attachments: {
+                  snapshot: conversation.attachments ?? [],
+                  produced: roundCompletedEvent.data.attachments,
+                },
+              }
             : {}),
-          ...(newWorkspaceId ? { workspace_id: newWorkspaceId } : {}),
+          workspaceId: roundCompletedEvent.data.workspace_id,
         },
         { access: 'converse' }
       );

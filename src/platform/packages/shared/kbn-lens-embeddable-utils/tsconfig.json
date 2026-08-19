@@ -30,5 +30,6 @@
     "@kbn/transpose-utils",
     "@kbn/palettes",
     "@kbn/crypto-browser",
+    "@kbn/std",
   ]
 }

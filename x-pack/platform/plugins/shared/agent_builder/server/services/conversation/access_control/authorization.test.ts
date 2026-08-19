@@ -41,13 +41,37 @@ describe('conversation access control', () => {
       ).toBe(true);
     });
 
-    it('falls back to username for legacy conversations without profile ids', () => {
+    it('falls back to username for conversations that never stored a user_id', () => {
       expect(
         isConversationOwner({
           conversation: conversation({ user_id: undefined, user_name: user.username }),
           user,
         })
       ).toBe(true);
+      expect(
+        isConversationOwner({
+          conversation: conversation({ user_id: undefined, user_name: user.username }),
+          user: { username: user.username },
+        })
+      ).toBe(true);
+    });
+
+    it('does not fall back to username when the conversation stored a user_id', () => {
+      expect(
+        isConversationOwner({
+          conversation: conversation({ user_id: 'owner-profile-id', user_name: user.username }),
+          user: { username: user.username },
+        })
+      ).toBe(false);
+      expect(
+        isConversationOwner({
+          conversation: conversation({
+            user_id: 'realm:["file","file1","alice"]',
+            user_name: user.username,
+          }),
+          user: { id: 'realm:["native","native1","alice"]', username: user.username },
+        })
+      ).toBe(false);
     });
   });
 

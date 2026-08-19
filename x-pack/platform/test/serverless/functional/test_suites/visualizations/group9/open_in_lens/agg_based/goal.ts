@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'Count',
           subtitle: undefined,
           extraText: '',
-          value: '140.05%',
+          value: '140.04%',
           color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,

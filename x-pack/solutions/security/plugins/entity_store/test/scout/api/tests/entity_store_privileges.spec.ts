@@ -21,7 +21,12 @@ import {
   ENTITY_LATEST,
   getLatestEntityIndexPattern,
 } from '../../../../common/domain/entity_index';
-import { PUBLIC_HEADERS, ENTITY_STORE_ROUTES, ENTITY_STORE_TAGS } from '../fixtures/constants';
+import {
+  PUBLIC_HEADERS,
+  INTERNAL_HEADERS,
+  ENTITY_STORE_ROUTES,
+  ENTITY_STORE_TAGS,
+} from '../fixtures/constants';
 import { clearEntityStoreIndices } from '../fixtures/helpers';
 import { getUpdatesEntitiesDataStreamName } from '../../../../server/domain/asset_manager/updates_data_stream';
 import { getMetadataEntitiesDataStreamName } from '../../../../server/domain/asset_manager/metadata_data_stream';
@@ -251,6 +256,76 @@ apiTest.describe('Entity Store - privilege checks', { tag: ENTITY_STORE_TAGS }, 
         responseType: 'json',
         body: { logExtraction: {} },
       });
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
+      });
+    }
+  );
+
+  // --- entity maintainers lifecycle (mutating routes require management privileges) ---
+  // The privilege check runs before any maintainer lookup, so an under-privileged caller is
+  // rejected with 403 regardless of whether the store is installed or the id exists.
+
+  apiTest(
+    'maintainers stop - Should fail when user lacks management privileges',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutSavedObjectCreate()
+      );
+
+      const response = await apiClient.put(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_STOP('risk-score'),
+        {
+          headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
+      });
+    }
+  );
+
+  apiTest(
+    'maintainers start - Should fail when user lacks management privileges',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutSavedObjectCreate()
+      );
+
+      const response = await apiClient.put(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_START('risk-score'),
+        {
+          headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
+          responseType: 'json',
+        }
+      );
+
+      expect(response.statusCode).toBe(403);
+      expect(response.body.attributes).toMatchObject({
+        missing_kibana_privileges: [ENGINE_DESCRIPTOR_CREATE_PRIVILEGE],
+      });
+    }
+  );
+
+  apiTest(
+    'maintainers run - Should fail when user lacks management privileges',
+    async ({ apiClient, requestAuth }) => {
+      const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
+        getRoleWithoutSavedObjectCreate()
+      );
+
+      const response = await apiClient.post(
+        ENTITY_STORE_ROUTES.internal.ENTITY_MAINTAINERS_RUN('risk-score'),
+        {
+          headers: { ...INTERNAL_HEADERS, ...apiKeyHeader },
+          responseType: 'json',
+        }
+      );
 
       expect(response.statusCode).toBe(403);
       expect(response.body.attributes).toMatchObject({
