@@ -8,7 +8,7 @@
  */
 
 export const pluginName = 'index_pattern_editor';
-export const MAX_NUMBER_OF_MATCHING_INDICES = 100;
+export const MAX_NUMBER_OF_MATCHING_INDICES = 10000;
 export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 
 // This isn't ideal. We want to avoid searching for 20 indices
