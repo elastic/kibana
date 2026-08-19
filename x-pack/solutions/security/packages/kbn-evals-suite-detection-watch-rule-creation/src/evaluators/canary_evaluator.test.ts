@@ -6,7 +6,7 @@
  */
 
 import type { DefaultEvaluators } from '@kbn/evals';
-import type { RuleCreationResult } from './rule_creation_client';
+import type { RuleCreationResult } from '../rule_creation_client';
 import { createCanaryEvaluator } from './canary_evaluator';
 
 const makeEvaluators = (gapScore: number): DefaultEvaluators =>
