@@ -5,10 +5,15 @@
  * 2.0.
  */
 import type { ScoutPage, ScoutTestConfig } from '@kbn/scout-oblt';
+import { ObservabilityNavigation } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 
 export class SLOApp {
-  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {}
+  private readonly nav: ObservabilityNavigation;
+
+  constructor(private readonly page: ScoutPage, private readonly config: ScoutTestConfig) {
+    this.nav = new ObservabilityNavigation(page);
+  }
 
   /** Navigate to SLO app (main list). Waits for "Manage SLOs" header link. */
   async goto() {
@@ -29,10 +34,10 @@ export class SLOApp {
   }
 
   async openFromSideMenu() {
-    if (this.config.isCloud) {
-      await this.page.testSubj.hover('kbnChromeNav-moreMenuTrigger');
-      await this.page.testSubj.waitForSelector('side-nav-popover-More');
-      await this.page.locator('#slo').click();
+    if (this.config.serverless || this.config.isCloud) {
+      // New chrome nav: the shared helper resolves whether SLOs render in the
+      // primary nav or the "More" overflow menu.
+      await this.nav.clickBodyNavItemByDeepLinkId('slo');
     } else {
       await this.page.getByTestId('observability-nav-slo-slos').click();
     }

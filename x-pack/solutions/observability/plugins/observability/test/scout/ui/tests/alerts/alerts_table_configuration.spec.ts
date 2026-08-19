@@ -83,7 +83,7 @@ const PERSISTED_TABLE_CONFIG = JSON.stringify({
 // Uses an admin session to match the FTR superuser so all row actions render.
 test.describe(
   'Observability alerts - table configuration',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);

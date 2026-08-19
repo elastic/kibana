@@ -22,7 +22,7 @@ const ALERTS_FIRST_PAGE = 10;
 
 test.describe(
   'Observability alerts - overview alert table',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  { tag: [...tags.stateful.classic] },
   () => {
     test.beforeAll(async ({ esClient }) => {
       await generateObservabilityAlerts(esClient);
