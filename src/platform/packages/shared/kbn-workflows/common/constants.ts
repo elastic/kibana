@@ -48,6 +48,13 @@ export const WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID =
   'workflowsManagement:globalExecutionsView:enabled';
 
 /**
+ * Gates the failed-step error panel "Diagnose with AI Agent" handoff.
+ * Package assembly and CTA wiring ship regardless; default off until rollout.
+ */
+export const WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID =
+  'workflows:executionFlyout:aiDiagnose:enabled';
+
+/**
  * Map of regular (saved object) connector types -> their system connector equivalents.
  * Use this map to make the `connector-id` step config property optional for a given connector step type, allowing it to be executed via its linked system connector.
  * Pre-requisite for this to work:

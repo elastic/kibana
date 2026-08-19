@@ -32,6 +32,18 @@ jest.mock('../build_step_executions_tree', () => ({
   injectChildWorkflowSteps: jest.fn((tree) => ({ tree, childStepExecutions: [] })),
 }));
 
+jest.mock('../../lib/use_error_panel_diagnose_availability', () => ({
+  useErrorPanelDiagnoseAvailability: () => ({
+    state: 'd',
+    rawState: 'd',
+    requiredLicenseTier: 'enterprise',
+    diagnoseFeatureEnabled: false,
+    openDiagnose: jest.fn(),
+    openLicenseManagement: jest.fn(),
+    licenseManagementHref: '/app/management/license_management',
+  }),
+}));
+
 // Mock child components
 jest.mock('../step_execution_tree_row', () => ({
   TREE_ROW_CHEVRON_SLOT_PX: 16,

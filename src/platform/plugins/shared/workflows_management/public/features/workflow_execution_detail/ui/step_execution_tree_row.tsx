@@ -30,6 +30,7 @@ import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { TokenUsageBadge } from '../../../shared/ui/token_usage_badge/token_usage_badge';
 import type { IterationPinKind } from '../lib/iteration_pins';
+import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
 
 /** Chevron / gap-glyph gutter width — reserved per sibling group when needed. */
 export const TREE_ROW_CHEVRON_SLOT_PX = 16;
@@ -109,6 +110,12 @@ export interface StepExecutionTreeRowProps {
   reserveChevronSlot?: boolean;
   error?: SerializedError | string | null;
   onViewFailedStepInput?: () => void;
+  /** AI diagnose CTA state for the inline error panel (A–D). */
+  errorPanelDiagnoseState?: ErrorPanelDiagnoseState;
+  onDiagnoseFailedStep?: () => void;
+  errorPanelRequiredLicenseTier?: string;
+  errorPanelLicenseManagementHref?: string;
+  onOpenLicenseManagement?: () => void;
   errorPanelExpanded?: boolean;
   /** Accessible name for the inline error region. */
   errorPanelAriaLabel?: string;
@@ -216,6 +223,11 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     reserveChevronSlot = true,
     error,
     onViewFailedStepInput,
+    errorPanelDiagnoseState,
+    onDiagnoseFailedStep,
+    errorPanelRequiredLicenseTier,
+    errorPanelLicenseManagementHref,
+    onOpenLicenseManagement,
     errorPanelExpanded: _errorPanelExpanded,
     errorPanelAriaLabel,
     errorPanelMessageOverride,
@@ -636,6 +648,11 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             error={error}
             stepType={stepType}
             onViewInput={onViewFailedStepInput}
+            diagnoseState={errorPanelDiagnoseState}
+            onDiagnose={onDiagnoseFailedStep}
+            requiredLicenseTier={errorPanelRequiredLicenseTier}
+            licenseManagementHref={errorPanelLicenseManagementHref}
+            onOpenLicenseManagement={onOpenLicenseManagement}
             ariaLabel={
               errorPanelAriaLabel ??
               i18n.translate('workflows.executionFlyout.failedStep.regionLabel', {

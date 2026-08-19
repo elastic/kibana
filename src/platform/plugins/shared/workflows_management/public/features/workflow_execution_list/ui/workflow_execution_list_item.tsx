@@ -37,7 +37,11 @@ export const getExecutionTitleColor = (
   euiTheme: EuiThemeComputed,
   status: ExecutionStatus
 ): string | undefined => {
-  if (status === ExecutionStatus.FAILED || status === ExecutionStatus.CANCELLED) {
+  if (
+    status === ExecutionStatus.COMPLETED ||
+    status === ExecutionStatus.FAILED ||
+    status === ExecutionStatus.CANCELLED
+  ) {
     return getExecutionStatusColors(euiTheme, status).color;
   }
 };

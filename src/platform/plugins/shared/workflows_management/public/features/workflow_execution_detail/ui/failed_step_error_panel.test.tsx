@@ -28,6 +28,13 @@ const renderPanel = (props: Partial<React.ComponentProps<typeof FailedStepErrorP
     </EuiProvider>
   );
 
+const getPrimaryAndSecondary = () => {
+  const region = screen.getByTestId('workflowFailedStepErrorPanel');
+  const buttons = region.querySelectorAll('button');
+  expect(buttons.length).toBeGreaterThanOrEqual(2);
+  return { primary: buttons[0], secondary: buttons[1] };
+};
+
 describe('FailedStepErrorPanel', () => {
   it('renders message-first with no visible heading and exposes the region label', () => {
     renderPanel();
@@ -37,18 +44,79 @@ describe('FailedStepErrorPanel', () => {
     expect(screen.queryByText('Why this step failed')).not.toBeInTheDocument();
   });
 
-  it('renders outlined View input and empty Copy error buttons', async () => {
+  it('state D: bordered View input + text Copy error, no AB strings', async () => {
     const onViewInput = jest.fn();
-    renderPanel({ onViewInput });
+    const { container } = renderPanel({ onViewInput, diagnoseState: 'd' });
     const viewBtn = screen.getByTestId('workflowFailedStepViewInput');
     expect(viewBtn).toHaveTextContent('View input');
     await userEvent.click(viewBtn);
     expect(onViewInput).toHaveBeenCalled();
     expect(screen.getByTestId('workflowFailedStepCopyError')).toHaveTextContent('Copy error');
+    expect(screen.queryByTestId('workflowFailedStepDiagnose')).not.toBeInTheDocument();
+    expect(container.textContent).not.toMatch(/Diagnose with AI Agent/i);
+    expect(screen.queryByTestId('workflowFailedStepDiagnoseLicenseTeaser')).not.toBeInTheDocument();
+  });
+
+  it('state A: Diagnose primary + View input secondary, no Copy error', async () => {
+    const onDiagnose = jest.fn();
+    const onViewInput = jest.fn();
+    renderPanel({ diagnoseState: 'a', onDiagnose, onViewInput });
+
+    const diagnose = screen.getByTestId('workflowFailedStepDiagnose');
+    expect(diagnose).toHaveTextContent('Diagnose with AI Agent');
+    expect(diagnose).toHaveAttribute('aria-label', 'Diagnose with AI Agent');
+    await userEvent.click(diagnose);
+    expect(onDiagnose).toHaveBeenCalled();
+
+    expect(screen.getByTestId('workflowFailedStepViewInput')).toHaveTextContent('View input');
+    expect(screen.queryByTestId('workflowFailedStepCopyError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowFailedStepDiagnoseLicenseTeaser')).not.toBeInTheDocument();
+
+    const { primary, secondary } = getPrimaryAndSecondary();
+    expect(primary).toHaveAttribute('data-test-subj', 'workflowFailedStepDiagnose');
+    expect(secondary).toHaveAttribute('data-test-subj', 'workflowFailedStepViewInput');
+  });
+
+  it('state B renders the same CTAs as state A', () => {
+    const shared = { onDiagnose: jest.fn(), onViewInput: jest.fn() };
+    renderPanel({ diagnoseState: 'a', ...shared });
+    expect(screen.getByTestId('workflowFailedStepDiagnose')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowFailedStepViewInput')).toBeInTheDocument();
+    expect(screen.queryByTestId('workflowFailedStepCopyError')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('workflowFailedStepDiagnoseLicenseTeaser')).not.toBeInTheDocument();
+  });
+
+  it('state B Diagnose click invokes onDiagnose (routes via AB setup when no LLM)', async () => {
+    const onDiagnose = jest.fn();
+    renderPanel({ diagnoseState: 'b', onDiagnose, onViewInput: jest.fn() });
+    await userEvent.click(screen.getByTestId('workflowFailedStepDiagnose'));
+    expect(onDiagnose).toHaveBeenCalled();
+    expect(screen.queryByTestId('workflowFailedStepCopyError')).not.toBeInTheDocument();
+  });
+  it('state C: View input + Copy error + license teaser link, no gated button', async () => {
+    const onOpenLicenseManagement = jest.fn();
+    renderPanel({
+      diagnoseState: 'c',
+      requiredLicenseTier: 'enterprise',
+      licenseManagementHref: '/app/management/license_management',
+      onOpenLicenseManagement,
+    });
+
+    expect(screen.getByTestId('workflowFailedStepViewInput')).toHaveTextContent('View input');
+    expect(screen.getByTestId('workflowFailedStepCopyError')).toHaveTextContent('Copy error');
+    expect(screen.queryByTestId('workflowFailedStepDiagnose')).not.toBeInTheDocument();
+
+    const teaser = screen.getByTestId('workflowFailedStepDiagnoseLicenseTeaser');
+    expect(teaser).toHaveTextContent(/Diagnose with AI Agent/);
+    expect(teaser).toHaveTextContent(/requires enterprise license/);
+
+    const link = screen.getByTestId('workflowFailedStepDiagnoseLicenseLink');
+    await userEvent.click(link);
+    expect(onOpenLicenseManagement).toHaveBeenCalled();
   });
 
   it('uses View request for http steps', () => {
-    renderPanel({ stepType: 'http' });
+    renderPanel({ stepType: 'http', diagnoseState: 'd' });
     expect(screen.getByTestId('workflowFailedStepViewInput')).toHaveTextContent('View request');
   });
 

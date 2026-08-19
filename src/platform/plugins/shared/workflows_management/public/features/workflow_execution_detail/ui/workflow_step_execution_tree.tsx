@@ -48,6 +48,9 @@ import {
   deriveIterationStatus,
 } from '../lib/derive_iteration_status';
 import { findStepRetryConfig } from '../lib/find_step_retry_delay';
+import { buildDiagnosisContextPackage } from '../lib/build_diagnosis_context_package';
+import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
+import { useErrorPanelDiagnoseAvailability } from '../lib/use_error_panel_diagnose_availability';
 import {
   iterationGapCount,
   iterationGapId,
@@ -309,6 +312,13 @@ function convertTreeToOpenNodes(
      * (every iteration pinned, no gap rows). Defaults to true (Table tab).
      */
     collapseIterations?: boolean;
+    diagnose?: {
+      state: ErrorPanelDiagnoseState;
+      requiredLicenseTier: string;
+      licenseManagementHref: string;
+      onOpenLicenseManagement: () => void;
+      onDiagnoseStep: (stepExecution: WorkflowStepExecutionDto) => void;
+    };
   }
 ): OpenTreeNode[] {
   return treeItems.flatMap((item) => {
@@ -764,6 +774,18 @@ function convertTreeToOpenNodes(
           status && isDangerousStatus(status) && stepExecution?.id
             ? () => onSelectStepExecution(stepExecution.id)
             : undefined,
+        errorPanelDiagnoseState: options?.diagnose?.state,
+        onDiagnoseFailedStep:
+          status &&
+          isDangerousStatus(status) &&
+          stepExecution != null &&
+          options?.diagnose != null &&
+          (options.diagnose.state === 'a' || options.diagnose.state === 'b')
+            ? () => options.diagnose!.onDiagnoseStep(stepExecution)
+            : undefined,
+        errorPanelRequiredLicenseTier: options?.diagnose?.requiredLicenseTier,
+        errorPanelLicenseManagementHref: options?.diagnose?.licenseManagementHref,
+        onOpenLicenseManagement: options?.diagnose?.onOpenLicenseManagement,
         errorPanelExpanded:
           options?.autoExpandErrorForStepId != null &&
           stepExecution?.id === options.autoExpandErrorForStepId,
@@ -1122,6 +1144,33 @@ export const WorkflowStepExecutionTree = ({
   const styles = useMemoCss(componentStyles);
   const [expandedGapIds, setExpandedGapIds] = useState<Set<string>>(new Set());
   const [userExpandedIds, setUserExpandedIds] = useState<Set<string> | null>(null);
+  const diagnoseAvailability = useErrorPanelDiagnoseAvailability();
+
+  const onDiagnoseStep = useCallback(
+    (stepExecution: WorkflowStepExecutionDto) => {
+      if (!execution) return;
+      const contextPackage = buildDiagnosisContextPackage({
+        failedStep: stepExecution,
+        allStepExecutions: execution.stepExecutions,
+        definition,
+        workflowId: execution.workflowId,
+        executionId: execution.id,
+      });
+      diagnoseAvailability.openDiagnose(contextPackage);
+    },
+    [definition, diagnoseAvailability, execution]
+  );
+
+  const diagnoseOptions = useMemo(
+    () => ({
+      state: diagnoseAvailability.state,
+      requiredLicenseTier: diagnoseAvailability.requiredLicenseTier,
+      licenseManagementHref: diagnoseAvailability.licenseManagementHref,
+      onOpenLicenseManagement: diagnoseAvailability.openLicenseManagement,
+      onDiagnoseStep,
+    }),
+    [diagnoseAvailability, onDiagnoseStep]
+  );
 
   const onToggleGap = useCallback((id: string) => {
     setExpandedGapIds((prev) => {
@@ -1233,6 +1282,7 @@ export const WorkflowStepExecutionTree = ({
         errorArrivalPulseStepId,
         isExecutionComplete: isTerminalStatus(execution.status),
         definition,
+        diagnose: diagnoseOptions,
       }
     );
   }, [
@@ -1240,6 +1290,7 @@ export const WorkflowStepExecutionTree = ({
     errorArrivalPulseStepId,
     childExecutionsMap,
     definition,
+    diagnoseOptions,
     error,
     execution,
     expandedGapIds,

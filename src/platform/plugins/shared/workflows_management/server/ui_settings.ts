@@ -12,6 +12,7 @@ import type { CoreSetup } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
+  WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID,
   WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
   WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
   WORKFLOWS_UI_SETTING_ID,
@@ -87,6 +88,24 @@ export const registerUISettings = (
       value: false,
       experimental: true,
       requiresPageReload: true,
+      readonly: false,
+      category: ['workflows'],
+    },
+    [WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID]: {
+      description: i18n.translate(
+        'workflowsManagement.uiSettings.errorPanelAiDiagnose.description',
+        {
+          defaultMessage:
+            'Enables the "Diagnose with AI Agent" action on failed-step error panels in the execution flyout.',
+        }
+      ),
+      name: i18n.translate('workflowsManagement.uiSettings.errorPanelAiDiagnose.name', {
+        defaultMessage: 'Workflows: AI Agent failure diagnosis',
+      }),
+      schema: schema.boolean(),
+      value: true,
+      experimental: true,
+      requiresPageReload: false,
       readonly: false,
       category: ['workflows'],
     },

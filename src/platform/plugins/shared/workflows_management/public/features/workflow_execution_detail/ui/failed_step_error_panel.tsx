@@ -13,12 +13,16 @@ import {
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiLink,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { SerializedError } from '@kbn/workflows';
+import type { ErrorPanelDiagnoseState } from '../lib/derive_error_panel_diagnose_availability';
 
 interface FailedStepErrorPanelProps {
   error: SerializedError | string;
@@ -31,13 +35,41 @@ interface FailedStepErrorPanelProps {
    * already includes the last error message).
    */
   messageOverride?: string;
+  /**
+   * AI diagnose availability (A–D). Defaults to D (pre-AB: View input + Copy error).
+   */
+  diagnoseState?: ErrorPanelDiagnoseState;
+  /** Required when diagnoseState is A or B. */
+  onDiagnose?: () => void;
+  /** Required when diagnoseState is C — license management deep link. */
+  requiredLicenseTier?: string;
+  licenseManagementHref?: string;
+  onOpenLicenseManagement?: () => void;
 }
+
+const diagnosePrimaryLabel = i18n.translate(
+  'workflows.executionFlyout.failedStep.diagnoseWithAiAgent',
+  { defaultMessage: 'Diagnose with AI Agent' }
+);
 
 /**
  * Inline error details under a failed row. Message-first; no visible heading.
+ * CTAs follow diagnose availability states A–D (exactly one bordered primary +
+ * one text secondary).
  */
 export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
-  ({ error, stepType, onViewInput, ariaLabel, messageOverride }) => {
+  ({
+    error,
+    stepType,
+    onViewInput,
+    ariaLabel,
+    messageOverride,
+    diagnoseState = 'd',
+    onDiagnose,
+    requiredLicenseTier = 'enterprise',
+    licenseManagementHref,
+    onOpenLicenseManagement,
+  }) => {
     const { euiTheme } = useEuiTheme();
 
     const message = messageOverride ?? (typeof error === 'string' ? error : error.message);
@@ -52,11 +84,67 @@ export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
           defaultMessage: 'View input',
         });
 
+    const copyErrorLabel = i18n.translate('workflows.executionFlyout.failedStep.copyError', {
+      defaultMessage: 'Copy error',
+    });
+
+    const showDiagnose = diagnoseState === 'a' || diagnoseState === 'b';
+    const showLicenseTeaser = diagnoseState === 'c';
+
+    const primaryButton = showDiagnose ? (
+      <EuiButton
+        size="s"
+        color="danger"
+        fill={false}
+        iconType="sparkles"
+        onClick={onDiagnose}
+        data-test-subj="workflowFailedStepDiagnose"
+        aria-label={diagnosePrimaryLabel}
+      >
+        {diagnosePrimaryLabel}
+      </EuiButton>
+    ) : (
+      <EuiButton
+        size="s"
+        color="danger"
+        fill={false}
+        onClick={onViewInput}
+        data-test-subj="workflowFailedStepViewInput"
+      >
+        {viewInputLabel}
+      </EuiButton>
+    );
+
+    const secondaryButton = showDiagnose ? (
+      <EuiButtonEmpty
+        size="s"
+        color="danger"
+        onClick={onViewInput}
+        data-test-subj="workflowFailedStepViewInput"
+      >
+        {viewInputLabel}
+      </EuiButtonEmpty>
+    ) : (
+      <EuiCopy textToCopy={copyText}>
+        {(copy) => (
+          <EuiButtonEmpty
+            size="s"
+            color="danger"
+            onClick={copy}
+            data-test-subj="workflowFailedStepCopyError"
+          >
+            {copyErrorLabel}
+          </EuiButtonEmpty>
+        )}
+      </EuiCopy>
+    );
+
     return (
       <div
         role="region"
         aria-label={ariaLabel}
         data-test-subj="workflowFailedStepErrorPanel"
+        data-diagnose-state={diagnoseState}
         css={{
           marginTop: euiTheme.size.xs,
           padding: euiTheme.size.s,
@@ -78,34 +166,51 @@ export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
             responsive={false}
             css={{ marginTop: euiTheme.size.s }}
           >
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                color="danger"
-                fill={false}
-                onClick={onViewInput}
-                data-test-subj="workflowFailedStepViewInput"
-              >
-                {viewInputLabel}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={copyText}>
-                {(copy) => (
-                  <EuiButtonEmpty
-                    size="s"
-                    color="danger"
-                    onClick={copy}
-                    data-test-subj="workflowFailedStepCopyError"
-                  >
-                    {i18n.translate('workflows.executionFlyout.failedStep.copyError', {
-                      defaultMessage: 'Copy error',
-                    })}
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
-            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{primaryButton}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{secondaryButton}</EuiFlexItem>
           </EuiFlexGroup>
+          {showLicenseTeaser && (
+            <EuiFlexGroup
+              gutterSize="xs"
+              alignItems="center"
+              responsive={false}
+              css={{ marginTop: euiTheme.size.s }}
+              data-test-subj="workflowFailedStepDiagnoseLicenseTeaser"
+            >
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="sparkles" size="s" color="subdued" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  <FormattedMessage
+                    id="workflows.executionFlyout.failedStep.diagnoseLicenseTeaser"
+                    defaultMessage="Diagnose with AI Agent — {licenseLink}"
+                    values={{
+                      licenseLink: (
+                        // eslint-disable-next-line @elastic/eui/href-or-on-click
+                        <EuiLink
+                          href={licenseManagementHref}
+                          onClick={(ev: React.MouseEvent<HTMLAnchorElement>) => {
+                            ev.preventDefault();
+                            onOpenLicenseManagement?.();
+                          }}
+                          data-test-subj="workflowFailedStepDiagnoseLicenseLink"
+                        >
+                          {i18n.translate(
+                            'workflows.executionFlyout.failedStep.diagnoseRequiresLicense',
+                            {
+                              defaultMessage: 'requires {tier} license',
+                              values: { tier: requiredLicenseTier },
+                            }
+                          )}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </div>
       </div>
     );
