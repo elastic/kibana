@@ -111,6 +111,7 @@ export const createMockEndpointAppContextService = (
   const {
     esClient,
     dataStart,
+    clusterClient,
     fleetStartServices,
     savedObjectsServiceStart,
     exceptionListsClient,
@@ -139,9 +140,13 @@ export const createMockEndpointAppContextService = (
   const telemetryServiceMock = analyticsServiceMock.createAnalyticsServiceSetup();
   const scriptsClient = ScriptsLibraryMock.getMockedClient();
   const isCpsEnabled = jest.fn().mockReturnValue(false);
+  const isPlatformCpsEnabled = jest.fn().mockReturnValue(false);
   // Hoisted so `asScoped` can delegate to the same mocks the service exposes directly. A test that
   // overrides one of these changes what the scoped instance answers too, so the two cannot disagree.
   const getReadEsClient = jest.fn().mockReturnValue(esClient);
+  const getResolverScopedClusterClient = jest.fn((request: KibanaRequest) =>
+    clusterClient.asScoped(request)
+  );
   const getScopedSearchClient = jest.fn((request: KibanaRequest) =>
     dataStart.search.asScoped(request)
   );
@@ -178,9 +183,14 @@ export const createMockEndpointAppContextService = (
     isCpsEnabled,
     // Mirrors production: a read with no request identity cannot fan out, whatever the flag says
     isCpsRead: jest.fn((request?: KibanaRequest) => isCpsEnabled() && request != null),
+    isPlatformCpsEnabled,
+    isPlatformCpsRead: jest.fn(
+      (request?: KibanaRequest) => isPlatformCpsEnabled() && request != null
+    ),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
     // Matches the flag-off branch; fan-out tests override this along with `isCpsEnabled`
     getReadEsClient,
+    getResolverScopedClusterClient,
     getScopedSearchClient,
     asScoped: jest.fn((request: KibanaRequest) => ({
       isCpsRead: () => isCpsEnabled() && request != null,
