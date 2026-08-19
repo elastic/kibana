@@ -133,6 +133,12 @@ export class TaskRunnerFactory {
               ? TaskErrorSource.USER
               : getErrorSource(e) || TaskErrorSource.FRAMEWORK;
           logger.error(`Action '${actionId}' failed: ${e.message}`, {
+            labels: {
+              actionId,
+              actionExecutionId,
+              executionId,
+              spaceId,
+            },
             tags: ['connector-run-failed', `${errorSource}-error`],
           });
           if (e instanceof ActionTypeDisabledError) {
@@ -151,6 +157,12 @@ export class TaskRunnerFactory {
             message = `${message}: ${executorResult.serviceMessage}`;
           }
           logger.error(`Action '${actionId}' failed: ${message}`, {
+            labels: {
+              actionId,
+              actionExecutionId,
+              executionId,
+              spaceId,
+            },
             tags: ['connector-run-failed', `${executorResult.errorSource}-error`],
           });
 
@@ -199,7 +211,15 @@ export class TaskRunnerFactory {
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
 
         logger.debug(
-          `Cancelling action task for action with id ${actionId} - execution error due to timeout.`
+          `Cancelling action task for action with id ${actionId} - execution error due to timeout.`,
+          {
+            labels: {
+              actionId,
+              actionExecutionId,
+              executionId,
+              spaceId,
+            },
+          }
         );
         return { state: {} };
       },
@@ -214,7 +234,12 @@ export class TaskRunnerFactory {
         } catch (e) {
           // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
           logger.error(
-            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`
+            `Failed to cleanup ${ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE} object [id="${actionTaskExecutorParams.actionTaskParamsId}"]: ${e.message}`,
+            {
+              labels: {
+                actionExecutionId,
+              },
+            }
           );
         }
       },
@@ -280,7 +305,12 @@ async function getActionTaskParams(
       : TaskErrorSource.FRAMEWORK;
     logger.error(
       `Failed to load action task params ${executorParams.actionTaskParamsId}: ${e.message}`,
-      { tags: ['connector-run-failed', `${errorSource}-error`] }
+      {
+        labels: {
+          spaceId,
+        },
+        tags: ['connector-run-failed', `${errorSource}-error`],
+      }
     );
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       throw createRetryableError(createTaskRunError(e, errorSource), true);
