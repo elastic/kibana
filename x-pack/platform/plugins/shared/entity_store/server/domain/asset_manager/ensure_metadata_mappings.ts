@@ -17,7 +17,7 @@ import {
   getMetadataComponentTemplate,
   getMetadataIndexMappings,
 } from './metadata_component_templates';
-import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import { resolveMetadataDataStreamName } from './resolve_entity_store_indices';
 import { getMetadataEntityIndexTemplateConfig } from './metadata_index_template';
 import { installMetadataIndexIngestPipeline } from './metadata_index_ingest_pipeline';
 
@@ -104,7 +104,7 @@ export const ensureMetadataDataStreamMappings = async (
   await putComponentTemplate(esClient, getMetadataComponentTemplate(namespace));
   await putIndexTemplate(esClient, getMetadataEntityIndexTemplateConfig(namespace));
 
-  const dataStream = getMetadataEntitiesDataStreamName(namespace);
+  const dataStream = await resolveMetadataDataStreamName(esClient, namespace);
 
   // Repair corrupted state: a plain index at the data stream name means ES
   // auto-created a regular index before the index template was installed on
