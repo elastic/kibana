@@ -360,6 +360,18 @@ describe('set signal status', () => {
           })
         );
       });
+
+      test('does not emit when prefetch fails', async () => {
+        context.core.elasticsearch.client.asCurrentUser.search.mockRejectedValue(
+          new Error('ES search error')
+        );
+        await server.inject(
+          getSetSignalStatusByQueryRequest(),
+          requestContextMock.convertContext(context)
+        );
+        await new Promise((r) => setTimeout(r, 0));
+        expect(mockEventBus.emitAlertStatusChanged).not.toHaveBeenCalled();
+      });
     });
   });
 });

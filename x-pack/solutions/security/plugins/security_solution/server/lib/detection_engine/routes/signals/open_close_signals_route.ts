@@ -186,8 +186,6 @@ export const setSignalsStatusRoute = (
             let truncated = false;
             if (eventBus) {
               try {
-                // TODO: Commit 2 — use idToIndex here to partition mixed-document results
-                // (detection alerts vs Attack Discovery) and emit the correct trigger per type.
                 ({
                   ids: prefetchedAlertIds,
                   previousStatuses,
@@ -214,12 +212,14 @@ export const setSignalsStatusRoute = (
               runtimeMappings
             );
 
-            void eventBus?.emitAlertStatusChanged(request, {
-              alertIds: prefetchedAlertIds,
-              status,
-              previousStatuses,
-              truncated,
-            });
+            if (prefetchedAlertIds.length > 0) {
+              void eventBus?.emitAlertStatusChanged(request, {
+                alertIds: prefetchedAlertIds,
+                status,
+                previousStatuses,
+                truncated,
+              });
+            }
 
             return response.ok({ body });
           }

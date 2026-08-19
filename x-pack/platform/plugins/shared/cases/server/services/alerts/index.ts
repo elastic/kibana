@@ -201,6 +201,7 @@ export class AlertService {
           id,
           previousStatus: previousStatusMap.get(id) ?? 'open',
         })),
+        alertIdToIndex: Object.fromEntries(idToIndex),
         indices: Array.from(indicesSet),
       });
     }

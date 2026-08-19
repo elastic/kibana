@@ -876,6 +876,7 @@ describe('updateAlertsStatus — event bus', () => {
     expect(payload.alertIds).toEqual(['a1']);
     expect(payload.status).toBe('closed');
     expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'open' }]);
+    expect(payload.alertIdToIndex).toEqual({ a1: '.siem-signals' });
     expect(payload.indices).toEqual(['.siem-signals']);
 
     bus.removeAllListeners();

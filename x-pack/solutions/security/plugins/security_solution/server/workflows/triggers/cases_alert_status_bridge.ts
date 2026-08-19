@@ -25,8 +25,14 @@ interface CasesAlertStatusPayload {
     readonly id: string;
     readonly previousStatus: WorkflowStatus;
   }>;
+  readonly alertIdToIndex: Readonly<Record<string, string>>;
   readonly indices: readonly string[];
 }
+
+const isSecurityIndex = (index: string): boolean =>
+  index.startsWith(SECURITY_ALERT_INDEX_PREFIX) ||
+  index.startsWith(SECURITY_ALERT_BACKING_INDEX_PREFIX) ||
+  index.startsWith(SIEM_SIGNALS_INDEX_PREFIX);
 
 export const forwardCasesAlertStatusToSS = (
   securityEventBus: SecuritySolutionEventBus,
@@ -34,19 +40,22 @@ export const forwardCasesAlertStatusToSS = (
   request: KibanaRequest,
   payload: CasesAlertStatusPayload
 ): void => {
-  const isSecurityIndex = (index: string): boolean =>
-    index.startsWith(SECURITY_ALERT_INDEX_PREFIX) ||
-    index.startsWith(SECURITY_ALERT_BACKING_INDEX_PREFIX) ||
-    index.startsWith(SIEM_SIGNALS_INDEX_PREFIX);
-  if (!payload.indices.some(isSecurityIndex)) {
+  const securityAlertIds = payload.alertIds.filter((id) => {
+    const index = payload.alertIdToIndex[id];
+    return index !== undefined && isSecurityIndex(index);
+  });
+  if (securityAlertIds.length === 0) {
     return;
   }
+  const securityIdSet = new Set(securityAlertIds);
   try {
     void securityEventBus.emitAlertStatusChanged(request, {
-      alertIds: payload.alertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
+      alertIds: securityAlertIds.slice(0, MAX_ALERTS_PER_TRIGGER),
       status: payload.status,
-      previousStatuses: payload.previousStatuses.slice(0, MAX_ALERTS_PER_TRIGGER),
-      truncated: payload.alertIds.length > MAX_ALERTS_PER_TRIGGER,
+      previousStatuses: payload.previousStatuses
+        .filter(({ id }) => securityIdSet.has(id))
+        .slice(0, MAX_ALERTS_PER_TRIGGER),
+      truncated: securityAlertIds.length > MAX_ALERTS_PER_TRIGGER,
     });
   } catch (err) {
     logger.warn(`Failed to forward Cases alertStatusChanged event to workflow triggers: ${err}`);

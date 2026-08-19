@@ -56,6 +56,8 @@ export interface AlertStatusChangedEventPayload {
     readonly id: string;
     readonly previousStatus: STATUS_VALUES;
   }>;
+  /** Maps each alert ID to the ES index it lives in — used by consumers to filter by alert owner. */
+  readonly alertIdToIndex: Readonly<Record<string, string>>;
   /** Unique ES indices the affected alerts live in — used by consumers to filter by alert owner. */
   readonly indices: readonly string[];
 }

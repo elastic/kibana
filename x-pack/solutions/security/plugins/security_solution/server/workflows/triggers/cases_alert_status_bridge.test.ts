@@ -41,6 +41,7 @@ describe('forwardCasesAlertStatusToSS', () => {
         { id: 'a1', previousStatus: 'open' },
         { id: 'a2', previousStatus: 'open' },
       ],
+      alertIdToIndex: { a1: securityAliasIndex, a2: securityAliasIndex },
       indices: [securityAliasIndex],
     });
 
@@ -63,7 +64,53 @@ describe('forwardCasesAlertStatusToSS', () => {
       alertIds: ['a1'],
       status: 'acknowledged',
       previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
+      alertIdToIndex: { a1: obsIndex },
       indices: [obsIndex],
+    });
+
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it('emits only security alertIds when case has mixed SS and obs alerts', () => {
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+      alertIds: ['ss1', 'obs1', 'ss2'],
+      status: 'closed',
+      previousStatuses: [
+        { id: 'ss1', previousStatus: 'open' },
+        { id: 'obs1', previousStatus: 'open' },
+        { id: 'ss2', previousStatus: 'acknowledged' },
+      ],
+      alertIdToIndex: {
+        ss1: securityAliasIndex,
+        obs1: obsIndex,
+        ss2: securityAliasIndex,
+      },
+      indices: [securityAliasIndex, obsIndex],
+    });
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    const { payload } = listener.mock.calls[0][0];
+    expect(payload.alertIds).toEqual(['ss1', 'ss2']);
+    expect(payload.previousStatuses).toEqual([
+      { id: 'ss1', previousStatus: 'open' },
+      { id: 'ss2', previousStatus: 'acknowledged' },
+    ]);
+  });
+
+  it('does not emit when all alertIds map to non-security indices (even if indices list has security entry)', () => {
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    // indices list says security, but alertIdToIndex shows all IDs are in obs index
+    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+      alertIds: ['obs1'],
+      status: 'closed',
+      previousStatuses: [{ id: 'obs1', previousStatus: 'open' }],
+      alertIdToIndex: { obs1: obsIndex },
+      indices: [securityAliasIndex],
     });
 
     expect(listener).not.toHaveBeenCalled();
@@ -77,6 +124,7 @@ describe('forwardCasesAlertStatusToSS', () => {
       alertIds: ['a1'],
       status: 'closed',
       previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
+      alertIdToIndex: { a1: securityBackingIndex },
       indices: [securityBackingIndex],
     });
 
@@ -92,6 +140,7 @@ describe('forwardCasesAlertStatusToSS', () => {
       alertIds: ['a1'],
       status: 'closed',
       previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
+      alertIdToIndex: { a1: siemSignalsIndex },
       indices: [siemSignalsIndex],
     });
 
@@ -104,10 +153,12 @@ describe('forwardCasesAlertStatusToSS', () => {
     bus.onAlertStatusChanged(listener);
 
     const oversizedIds = Array.from({ length: MAX_ALERTS_PER_TRIGGER + 5 }, (_, i) => `id-${i}`);
+    const alertIdToIndex = Object.fromEntries(oversizedIds.map((id) => [id, securityAliasIndex]));
     forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
       alertIds: oversizedIds,
       status: 'closed',
       previousStatuses: [],
+      alertIdToIndex,
       indices: [securityAliasIndex],
     });
 
@@ -125,10 +176,12 @@ describe('forwardCasesAlertStatusToSS', () => {
       previousStatus: 'open' as const,
     }));
     const oversizedIds = oversizedPrev.map((p) => p.id);
+    const alertIdToIndex = Object.fromEntries(oversizedIds.map((id) => [id, securityAliasIndex]));
     forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
       alertIds: oversizedIds,
       status: 'open',
       previousStatuses: oversizedPrev,
+      alertIdToIndex,
       indices: [securityAliasIndex],
     });
 
@@ -146,6 +199,7 @@ describe('forwardCasesAlertStatusToSS', () => {
         alertIds: ['a1'],
         status: 'open',
         previousStatuses: [],
+        alertIdToIndex: { a1: securityAliasIndex },
         indices: [securityAliasIndex],
       })
     ).not.toThrow();
