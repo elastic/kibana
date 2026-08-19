@@ -171,6 +171,10 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       max-width: none !important;
     }
 
+    ${scope} [data-test-subj='search-homepage'] [class*='css-'][class*='-euiPageSection__content'][class*='-restrictWidth'] > .euiFlexGroup:first-of-type {
+      padding-block-end: ${DESIGN_EXPLORATION_PADDING_COMPACT}px !important;
+    }
+
     ${scope} .euiPageSidebar,
     ${scope} [class*='css-'][class*='-euiPageSidebar'] {
       border-inline-end: ${TARGET_HAIRLINE} !important;
@@ -1407,7 +1411,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     /* ----- App header ----- */
     /* Flat, static, no glass/blur — same philosophy as Linbana. */
     ${scope} [data-test-subj='appHeader'] > div:not([data-test-subj='appHeaderTabs']) {
-      padding-block-start: ${DESIGN_EXPLORATION_PADDING}px !important;
+      padding-block-start: ${knobVar('padding')} !important;
     }
 
     ${scope} [data-test-subj='appHeaderTabs'] {
@@ -1603,10 +1607,18 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] > div:not([data-test-subj='appHeaderTabs']) {
-      padding-block: 16px !important;
+      padding-block: ${knobVar('padding')} !important;
       opacity: 1;
       transition: opacity ${TARGET_APP_HEADER_TRANSITION_MS}ms ease
         ${TARGET_APP_HEADER_TRANSITION_MS}ms !important;
+    }
+
+    ${scope} [data-test-subj='workflowsPage'] [data-test-subj='appHeader'] {
+      padding-inline: ${knobVar('padding')} !important;
+    }
+
+    ${scope} [data-test-subj='workflowsPage'] [data-test-subj='appHeader'] > div:not([data-test-subj='appHeaderTabs']) {
+      padding-block: ${knobVar('padding')} !important;
     }
 
     ${scope} .kbnChromeLayoutApplication div:has(> [data-test-subj='appHeader']) {
