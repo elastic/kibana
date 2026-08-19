@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSecurityDelegateContract } from '@kbn/core-security-browser';
-import type { InternalSecurityServiceStart } from '../internal_contracts';
+/** Base path for the Discover Sessions API (no leading slash, for use with `apiClient`). */
+export const DISCOVER_SESSION_API_PATH = 'api/discover_sessions';
 
-export const convertSecurityApi = (
-  privateApi: CoreSecurityDelegateContract
-): InternalSecurityServiceStart => {
-  // shapes are the same for now, so the delegate can be re-exposed as-is.
-  return privateApi;
-};
+/** `elastic-api-version` header value for the Discover Sessions API. */
+export const DISCOVER_SESSION_API_VERSION = '1';
