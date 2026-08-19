@@ -9,7 +9,7 @@
 
 import * as Fs from 'fs';
 
-import minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
 import type { BuildkiteStep } from '../../buildkite';
 import { BuildkiteClient } from '../../buildkite';
