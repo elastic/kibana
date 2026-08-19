@@ -158,8 +158,14 @@ export function FilterSelectionInput({
     'tagValue',
   ]);
 
-  const isMultiValueFilteringOperation = isMultiValueOperator(filteringOperator);
-  const isExistenceCheckFilteringOperation = isExistenceCheckOperator(filteringOperator);
+  const isMultiValueFilteringOperation = useMemo(
+    () => isMultiValueOperator(filteringOperator),
+    [filteringOperator]
+  );
+  const isExistenceCheckFilteringOperation = useMemo(
+    () => isExistenceCheckOperator(filteringOperator),
+    [filteringOperator]
+  );
 
   useEffect(() => {
     if (anchoringFilteringTagName && !filteringOperator) {
@@ -285,6 +291,7 @@ export function FilterSelectionInput({
                   defaultMessage: 'Select a value',
                 })
           }
+          isClearable={false}
           inputRef={ref}
           truncationProps={{ truncation: 'middle' as const }}
           inputPopoverProps={{ panelMinWidth, anchorPosition: 'downRight' }}
@@ -324,8 +331,10 @@ export function FilterSelectionInput({
       [`@media (min-width: ${euiTheme.breakpoint.s}px)`]: {
         flexWrap: 'nowrap' as const,
 
-        '& > *': {
+        '& > *:nth-child(3n+1), & > *:nth-child(3n+2), & > *:nth-child(3n+3)': {
           flexBasis: 'calc(100% / 3)',
+          flexShrink: 1,
+          flexGrow: 0,
         },
 
         '& > *:nth-child(3n+1) button:not(:has(svg)), & > *:nth-child(3n+1) [data-test-subj="comboBoxInput"]':
