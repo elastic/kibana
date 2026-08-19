@@ -114,9 +114,10 @@ export const userMessageActor = (
   }
 
   return {
-    type: EventActorType.user,
+    type: round.origin ? EventActorType.external : EventActorType.user,
     id: conversation.user.id ?? conversation.user.username,
     ...(conversation.user.username ? { username: conversation.user.username } : {}),
+    ...(round.origin ? { origin: round.origin } : {}),
   };
 };
 

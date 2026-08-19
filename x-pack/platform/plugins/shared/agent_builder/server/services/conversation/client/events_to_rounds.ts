@@ -26,9 +26,10 @@ const EXECUTION_ID_SUFFIX = '::execution';
  * `execution_id`, links each execution to the `user_message` that triggered it, and rebuilds one
  * round per execution, in round order.
  *
- * Authorship (Kibana-user and external) round-trips: the round `author` (and `origin`, for external)
- * is recovered from the `user_message` actor. A round that carried no explicit author is attributed
- * to its actor, i.e. the conversation owner — in practice every round is stamped with an author.
+ * Authorship (Kibana-user and external) round-trips: the round `author` and `origin` are recovered
+ * from the `user_message` actor. A round that carried no explicit author is attributed to its actor,
+ * i.e. the conversation owner — in practice every round is stamped with an author. An authorless
+ * external round (an `origin` but no author) keeps its `origin` and is attributed to the owner.
  *
  * Best-effort: the rounds model cannot represent everything the timeline can. These remain losses:
  * - `execution_failed` / `execution_aborted` and still-running executions (no terminal event) have

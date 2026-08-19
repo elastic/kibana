@@ -130,6 +130,19 @@ describe('roundsToEvents', () => {
     });
   });
 
+  it('marks an authorless round that has an origin as an external actor carrying the origin', () => {
+    const events = roundsToEvents(
+      baseConversation([baseRound({ origin: { type: ConversationOriginType.Slack } })])
+    );
+
+    expect(events[0].actor).toEqual({
+      type: EventActorType.external,
+      id: 'user-1',
+      username: 'alice',
+      origin: { type: ConversationOriginType.Slack },
+    });
+  });
+
   it('produces deterministic ids across calls, in round order', () => {
     const conversation = baseConversation([baseRound(), baseRound({ id: 'round-2' })]);
 

@@ -10,7 +10,11 @@ import type {
   ConversationRound,
   ConversationRoundStep,
 } from '@kbn/agent-builder-common';
-import { ConversationRoundStatus, ConversationRoundStepType } from '@kbn/agent-builder-common';
+import {
+  ConversationOriginType,
+  ConversationRoundStatus,
+  ConversationRoundStepType,
+} from '@kbn/agent-builder-common';
 import type { PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { roundsToEvents } from './rounds_to_events';
 import { eventsToRounds } from './events_to_rounds';
@@ -111,6 +115,21 @@ describe('round-trip fidelity: eventsToRounds(roundsToEvents(round)) === round',
   it('preserves a Kibana-user author distinct from the conversation owner (shared conversation)', () => {
     const round = baseRound({ author: { id: 'kibana-user-2', username: 'bob' } });
     expect(roundTrip([round])).toEqual([round]);
+  });
+
+  it('keeps origin on an authorless external round (attributes it to the conversation owner)', () => {
+    const { author, ...noAuthor } = baseRound();
+    const round: ConversationRound = {
+      ...noAuthor,
+      origin: { type: ConversationOriginType.Slack },
+    };
+
+    const [reconstructed] = roundTrip([round]);
+
+    // The regression this guards: origin must survive even when the round has no author.
+    expect(reconstructed.origin).toEqual({ type: ConversationOriginType.Slack });
+    // No source author, so the round is attributed to the conversation owner (documented behavior).
+    expect(reconstructed.author).toEqual({ id: 'user-1', username: 'alice' });
   });
 
   describe('accepted, documented losses', () => {
