@@ -98,7 +98,7 @@ export function initializeLayoutManager(
     initialPanels,
     initialPinnedPanels
   );
-  const currentChildState = initialChildState;
+  let currentChildState = initialChildState;
 
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
   const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
@@ -163,10 +163,10 @@ export function initializeLayoutManager(
       state.panels,
       state.pinned_panels
     );
-
     if (!areLayoutsEqual(layout$.getValue(), layoutToApply)) {
       layout$.next({ ...layoutToApply });
     }
+    currentChildState = { ...childStateToApply };
 
     let childrenModified = false;
     const currentChildren = { ...children$.value };
@@ -461,8 +461,7 @@ export function initializeLayoutManager(
       (serializedState as PinnedControlLayoutState) ?? DEFAULT_PINNED_CONTROL_STATE;
     const newPanelUuid = createPanel({ ...panelPackage, serializedState: panelState });
     const layoutState = {
-      ...(grow !== undefined && { grow }),
-      ...(width && { width }),
+      ...(serializedState ? pick(serializedState, 'grow', 'width') : {}),
       ...prevLayoutState,
     };
     const panelToPin = {

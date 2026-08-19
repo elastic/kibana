@@ -80,7 +80,12 @@ export function initializeHistoryManager({
 
   // when the history's state updates, respond by setting state on the Dashboard
   const historyStateSubscription = historyApi.currentState$
-    .pipe(switchMap(async (newState) => setState(newState)))
+    .pipe(
+      switchMap(async (newState) => {
+        if (!newState) return;
+        await setState(newState);
+      })
+    )
     .subscribe();
 
   return {

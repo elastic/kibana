@@ -52,8 +52,7 @@ export const initializeStateApi = <StateType extends object = object>({
   const hasUnsavedChanges$ = latestState$.pipe(
     combineLatestWith(parentApi.lastSavedStateForChild$(uuid)),
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
-    map(([, lastSavedState]) => {
-      const currentState = serializeState();
+    map(([currentState, lastSavedState]) => {
       // check state equality
       return !areComparatorsEqual(
         getComparators(),
