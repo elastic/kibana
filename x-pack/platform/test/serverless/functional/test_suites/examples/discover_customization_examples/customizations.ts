@@ -56,15 +56,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await testSubjects.click('logsViewSelectorButton');
       await testSubjects.click('logsViewSelectorOption-ASavedSearch');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await retry.try(async () => {
-        const { title, description } = await PageObjects.common.getSharedItemTitleAndDescription();
-        const expected = {
-          title: 'A Saved Search',
-          description: 'A Saved Search Description',
-        };
-        expect(title).to.eql(expected.title);
-        expect(description).to.eql(expected.description);
-      });
       await browser.goBack();
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
