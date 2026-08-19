@@ -32,7 +32,6 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/search-types",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/react-kibana-mount",
     "@kbn/search-response-warnings",
     "@kbn/react-kibana-context-render",

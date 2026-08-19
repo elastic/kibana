@@ -34,6 +34,7 @@ enabled:
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.graph.ts
   - x-pack/solutions/security/test/serverless/api_integration/configs/config.graph_essentials.ts
   - x-pack/platform/test/serverless/api_integration/configs/security/config.group1.ts
+  - x-pack/platform/test/serverless/api_integration/configs/security/config.task_manager_uiam.ts
   - x-pack/solutions/security/test/serverless/api_integration/test_suites/fleet/config.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.screenshots.ts
   - x-pack/solutions/security/test/serverless/functional/configs/config.ts
@@ -56,7 +57,6 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/security/config.group9.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group11.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group12.ts
-  - x-pack/platform/test/serverless/functional/configs/security/config.group14.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group15.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group16.ts
   - x-pack/platform/test/serverless/functional/configs/security/config.group18.ts

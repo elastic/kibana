@@ -10,7 +10,7 @@ import { type FC, useCallback } from 'react';
 import React from 'react';
 
 import type { CPSPluginStart } from '@kbn/cps/public';
-import { ProjectPickerContent, useFetchProjects } from '@kbn/cps-utils';
+import { ProjectPickerContent } from '@kbn/cps-utils';
 import type { ProjectRouting } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,16 +40,20 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
     [cps?.cpsManager]
   );
 
-  const projects = useFetchProjects(fetchProjects, space.projectRouting);
+  const updateProjectRouting = useCallback(
+    (newRouting: ProjectRouting) => {
+      onChange({
+        ...space,
+        projectRouting: newRouting,
+      });
+    },
+    [onChange, space]
+  );
 
-  const updateProjectRouting = (newRouting: ProjectRouting) => {
-    onChange({
-      ...space,
-      projectRouting: newRouting,
-    });
-  };
-
-  const canEdit = () => application?.capabilities?.project_routing?.manage_space_default === true;
+  const canEdit = useCallback(
+    () => application?.capabilities?.project_routing?.manage_space_default === true,
+    [application?.capabilities?.project_routing?.manage_space_default]
+  );
 
   return (
     <SectionPanel dataTestSubj="cpsDefaultScopePanel">
@@ -82,9 +86,10 @@ export const CustomizeCps: FC<Props> = ({ space, onChange }) => {
         >
           <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
             <ProjectPickerContent
+              customHeaderText={<React.Fragment />}
               projectRouting={space.projectRouting}
               onProjectRoutingChange={updateProjectRouting}
-              projects={projects}
+              fetchProjectsByRouting={fetchProjects}
               controlsState={canEdit() ? 'enabled' : 'disabled'}
             />
           </EuiPanel>
