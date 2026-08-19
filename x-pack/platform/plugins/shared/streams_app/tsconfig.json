@@ -64,6 +64,7 @@
     "@kbn/inference-common",
     "@kbn/inference-connectors",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/ingest-pipeline-json-editor",
     "@kbn/ingest-pipelines-plugin",
     "@kbn/io-ts-utils",
     "@kbn/kibana-react-plugin",
@@ -108,7 +109,6 @@
     "@kbn/tooling-log",
     "@kbn/traced-es-client",
     "@kbn/typed-react-router-config",
-    "@kbn/ui-side-navigation",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/unified-doc-viewer-plugin",
@@ -116,6 +116,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/utility-types",
     "@kbn/xstate-utils",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/ui-callout"
   ]
 }

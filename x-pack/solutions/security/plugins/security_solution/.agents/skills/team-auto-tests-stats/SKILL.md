@@ -103,7 +103,7 @@ Per config directory (from repo root, `REPO_ROOT="$(git rev-parse --show-topleve
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 TMP_JSON="/tmp/team-auto-tests-stats-<slug>-pw-list-<config-id>.json"
 cd <directory-containing-playwright.config.ts>
-npx playwright test --list --reporter=json > "$TMP_JSON"
+node "$REPO_ROOT/scripts/playwright" test --list --reporter=json > "$TMP_JSON"
 node "$REPO_ROOT/x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats/scripts/count_playwright_list_unique_specs.mjs" "$TMP_JSON"
 rm -f "$TMP_JSON"
 ```
@@ -196,7 +196,7 @@ ls .buildkite/pipelines/pull_request/security_solution/
 rg -l '<team-keyword>' .buildkite/pipelines/pull_request/security_solution/
 
 # Post-merge
-grep -n '<team-keyword>' .buildkite/pipelines/on_merge_fanout.yml
+grep -n '<team-keyword>' .buildkite/pipelines/security_solution_on_merge.yml
 
 # Quality gate + periodic
 ls .buildkite/pipelines/security_solution_quality_gate/

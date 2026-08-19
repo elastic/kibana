@@ -478,6 +478,55 @@ describe('CountTimeframeStrategy', () => {
     });
   });
 
+  describe("no_data event with no_data_strategy: 'recover'", () => {
+    const stateTransition: RuleResponse['state_transition'] = {
+      pending_count: 3,
+      recovering_count: 3,
+    };
+
+    it('transitions inactive → inactive immediately, ignoring pending gating', () => {
+      expectTransition({
+        from: alertEpisodeStatus.inactive,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+      });
+    });
+
+    it('transitions pending → inactive immediately, ignoring pending gating', () => {
+      expectTransition({
+        from: alertEpisodeStatus.pending,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+        statusCount: 1,
+      });
+    });
+
+    it('transitions active → inactive immediately, ignoring recovery delay', () => {
+      expectTransition({
+        from: alertEpisodeStatus.active,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+      });
+    });
+
+    it('transitions recovering → inactive immediately, ignoring recovery delay', () => {
+      expectTransition({
+        from: alertEpisodeStatus.recovering,
+        on: alertEventStatus.no_data,
+        to: alertEpisodeStatus.inactive,
+        stateTransition,
+        noDataStrategy: 'recover',
+        statusCount: 1,
+      });
+    });
+  });
+
   describe("no_data event with no_data_strategy: 'emit'", () => {
     const stateTransition: RuleResponse['state_transition'] = {
       pending_count: 3,

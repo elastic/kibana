@@ -1216,22 +1216,6 @@ describe('validators', () => {
   });
 
   describe('validateExtendedFieldsOnClose', () => {
-    const makeOriginalCase = (
-      overrides: Partial<{
-        templateId: string | null;
-        status: string;
-        extendedFields: Record<string, string>;
-      }> = {}
-    ): CaseSavedObjectTransformed =>
-      ({
-        id: 'case-1',
-        attributes: {
-          status: overrides.status ?? CaseStatuses.open,
-          template: overrides.templateId ? { id: overrides.templateId, version: 1 } : null,
-          extended_fields: overrides.extendedFields ?? {},
-        },
-      } as unknown as CaseSavedObjectTransformed);
-
     const makeGlobalFields = (
       defs: Array<{
         name: string;
@@ -1273,8 +1257,10 @@ describe('validators', () => {
     it('returns without error when status is not being set to closed', () => {
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.open },
-          originalCase: makeOriginalCase({ status: CaseStatuses.open }),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.open,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
           templateFields: [requiredOnCloseField],
           globalFields: makeGlobalFields(),
         })
@@ -1284,8 +1270,23 @@ describe('validators', () => {
     it('returns without error when case is already closed (no transition)', () => {
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase({ status: CaseStatuses.closed }),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.closed,
+          finalExtendedFields: {},
+          templateFields: [requiredOnCloseField],
+          globalFields: makeGlobalFields(),
+        })
+      ).not.toThrow();
+    });
+
+    it('returns without error when the request does not set a status', () => {
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: undefined,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
           templateFields: [requiredOnCloseField],
           globalFields: makeGlobalFields(),
         })
@@ -1295,20 +1296,24 @@ describe('validators', () => {
     it('returns without error when no template fields and no global required_on_close fields', () => {
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase(),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
           templateFields: [],
           globalFields: makeGlobalFields([{ name: 'notes', type: 'keyword' }]),
         })
       ).not.toThrow();
     });
 
-    it('throws when closing and required_on_close field is missing from merged extended_fields', () => {
+    it('throws when closing and required_on_close field is missing from the final extended_fields', () => {
       // FAILURE SCENARIO: user closes the case without filling the required_on_close field
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase(),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
           templateFields: [requiredOnCloseField],
           globalFields: makeGlobalFields(),
         })
@@ -1318,72 +1323,55 @@ describe('validators', () => {
     it('error message includes the case ID', () => {
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'my-case-id', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase(),
+          caseId: 'my-case-id',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
           templateFields: [requiredOnCloseField],
           globalFields: makeGlobalFields(),
         })
       ).toThrow('Cannot close case my-case-id, required fields must be filled');
     });
 
-    it('throws when closing and required_on_close field is empty string in extended_fields', () => {
+    it('throws when closing and required_on_close field is empty string in the final map', () => {
       // FAILURE SCENARIO: field was explicitly cleared before closing
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            extended_fields: { resolution_as_keyword: '' },
-          },
-          originalCase: makeOriginalCase(),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: { resolution_as_keyword: '' },
           templateFields: [requiredOnCloseField],
           globalFields: makeGlobalFields(),
         })
       ).toThrow('Cannot close case case-1, required fields must be filled');
     });
 
-    it('passes when closing and required_on_close field is filled in the request', () => {
+    it('passes when closing and required_on_close field is filled in the final map', () => {
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            extended_fields: { resolution_as_keyword: 'Fixed the issue' },
-          },
-          originalCase: makeOriginalCase(),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: { resolution_as_keyword: 'Fixed the issue' },
           templateFields: [requiredOnCloseField],
           globalFields: makeGlobalFields(),
         })
       ).not.toThrow();
     });
 
-    it('passes when required_on_close field was filled previously and is not in the request', () => {
-      // The existing SO already has the value — no extended_fields in this update request
+    it('does not consult any state outside the final map (deleted keys stay deleted)', () => {
+      // REGRESSION: the validator used to merge the original case's stored extended_fields
+      // under its input, resurrecting keys that pairing deliberately deleted (a linked field
+      // cleared via customFields). The final map is now the single source of truth — an absent
+      // key must read as empty regardless of what the case previously stored.
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase({ extendedFields: { resolution_as_keyword: 'Resolved' } }),
-          templateFields: [requiredOnCloseField],
-          globalFields: makeGlobalFields(),
-        })
-      ).not.toThrow();
-    });
-
-    it('uses merged extended_fields (request value overrides existing SO value)', () => {
-      // FAILURE SCENARIO: existing SO has the field filled, but the request clears it
-      expect(() =>
-        validateExtendedFieldsOnClose({
-          updateReq: {
-            id: 'case-1',
-            version: '1',
-            status: CaseStatuses.closed,
-            extended_fields: { resolution_as_keyword: '' },
-          },
-          originalCase: makeOriginalCase({
-            extendedFields: { resolution_as_keyword: 'was filled' },
-          }),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          // Pairing removed resolution_as_keyword; the previously saved value must not leak in.
+          finalExtendedFields: { unrelated_as_keyword: 'kept' },
           templateFields: [requiredOnCloseField],
           globalFields: makeGlobalFields(),
         })
@@ -1394,11 +1382,10 @@ describe('validators', () => {
       // Caller passes [] when template is null — no template fields to enforce
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase({
-            templateId: 'tpl-1',
-            extendedFields: { resolution_as_keyword: 'old value' },
-          }),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: { resolution_as_keyword: 'old value' },
           templateFields: [],
           globalFields: makeGlobalFields(),
         })
@@ -1409,8 +1396,10 @@ describe('validators', () => {
       // FAILURE SCENARIO: global field has required_on_close but is not filled
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase(),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
           templateFields: [],
           globalFields: makeGlobalFields([
             {
@@ -1433,8 +1422,10 @@ describe('validators', () => {
       });
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase(),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
           templateFields: [regularRequiredField],
           globalFields: makeGlobalFields(),
         })
@@ -1454,12 +1445,102 @@ describe('validators', () => {
       } as unknown as InlineField;
       expect(() =>
         validateExtendedFieldsOnClose({
-          updateReq: { id: 'case-1', version: '1', status: CaseStatuses.closed },
-          originalCase: makeOriginalCase(),
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
           templateFields: [markdownField],
           globalFields: makeGlobalFields(),
         })
       ).not.toThrow();
+    });
+
+    it('mentions a global required_on_close field once when the template also resolves the same key', () => {
+      // FAILURE SCENARIO (before fix): naive concat of global + template `$ref` listed the same
+      // field twice in the close error ("Field X is required; Field X is required").
+      const globalResolutionNotes = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+          validation: { required_on_close: true },
+        },
+      ]);
+      const templateRefToSameField = makeTemplateField({
+        name: 'resolution_notes',
+        label: 'Resolution notes',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [templateRefToSameField],
+          globalFields: globalResolutionNotes,
+        })
+      ).toThrow(
+        'Cannot close case case-1, required fields must be filled: Field "Resolution notes" is required'
+      );
+    });
+
+    it('ignores template required_on_close when a colliding global field is not required on close', () => {
+      // Global wins: template `$ref` override must not block close if the global definition
+      // does not set required_on_close.
+      const globalWithoutRequiredOnClose = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+        },
+      ]);
+      const templateRefRequiredOnClose = makeTemplateField({
+        name: 'resolution_notes',
+        label: 'Resolution notes',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [templateRefRequiredOnClose],
+          globalFields: globalWithoutRequiredOnClose,
+        })
+      ).not.toThrow();
+    });
+
+    it('lists distinct global and template required_on_close fields once each', () => {
+      const globalRequiredOnClose = makeGlobalFields([
+        {
+          name: 'resolution_notes',
+          type: 'keyword',
+          label: 'Resolution notes',
+          validation: { required_on_close: true },
+        },
+      ]);
+      const templateOnlyRequiredOnClose = makeTemplateField({
+        name: 'recovery_approach',
+        label: 'Recovery approach',
+        validation: { required_on_close: true },
+      });
+
+      expect(() =>
+        validateExtendedFieldsOnClose({
+          caseId: 'case-1',
+          requestedStatus: CaseStatuses.closed,
+          originalStatus: CaseStatuses.open,
+          finalExtendedFields: {},
+          templateFields: [templateOnlyRequiredOnClose],
+          globalFields: globalRequiredOnClose,
+        })
+      ).toThrow(
+        'Cannot close case case-1, required fields must be filled: Field "Resolution notes" is required; Field "Recovery approach" is required'
+      );
     });
   });
 
