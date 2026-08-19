@@ -100,7 +100,13 @@ describe('toConditionUpdates', () => {
 
   it('carries the version token so Fleet rejects a stale (lost-update) write', () => {
     const bySpace = toConditionUpdates(
-      [policy({ id: `m1-${LOCATION}`, version: 'WzEsMV0=', condition: agentIdCondition('agent-a') })],
+      [
+        policy({
+          id: `m1-${LOCATION}`,
+          version: 'WzEsMV0=',
+          condition: agentIdCondition('agent-a'),
+        }),
+      ],
       new Map([['m1', 'agent-b']]),
       LOCATION
     );
