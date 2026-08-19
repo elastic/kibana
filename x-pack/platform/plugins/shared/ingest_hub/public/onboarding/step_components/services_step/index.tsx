@@ -151,7 +151,7 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
                   >
                     <EuiFlexItem grow={false}>
                       <EuiTitle size="xs">
-                        <h3>{activeCategory}</h3>
+                        <h3>{getCategoryTitle(activeCategory)}</h3>
                       </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
