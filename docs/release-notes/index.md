@@ -30,10 +30,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Alerting and cases**:
 * Add a public API to create, update, and delete case templates (`POST`, `PUT`, and `DELETE /api/cases/templates`), including a dry-run mode that validates a template without saving it [#280144]({{kib-pull}}280144).
-* Improve the case view, cases list, and field library with a sticky attributes panel, collapsible activity and attachment sections, and clearer cases list filters [#282197]({{kib-pull}}282197).
+* Improve the case view, cases list, and field library by keeping the case details panel in view as you scroll, saving status and other fields immediately when changed, and adding drag-and-drop field reordering to the field library [#282197]({{kib-pull}}282197).
 * Add an Agent Builder tool to attach saved dashboards, maps, Discover sessions, and Lens visualizations to a case [#279680]({{kib-pull}}279680).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (not yet on the 9.5 branch as of 2026-08-19). Re-verify against the next BC before publishing.
-% * Warn in the field library and template editors when a required case field has no default value, since automated case creation can't fill it in, and show a field's name and type as permanent as soon as you create it [#285453]({{kib-pull}}285453).
+% * Warn in the field library and template editors when a required case field has no default value, because automated case creation can't fill it in, and show a field's name and type as permanent as soon as you create it [#285453]({{kib-pull}}285453).
 
 **Dashboards and Visualizations**:
 * Restore **Defer loading panels below "the fold"** (`labs:dashboard:deferBelowFold`) so off-screen dashboard panels wait to fetch data until they scroll into view. The setting is off by default [#284004]({{kib-pull}}284004).
@@ -45,19 +45,19 @@ For the {{product.observability}} 9.5.2 release information, refer to [{{product
 For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **{{es}} solution**:
-* Add a toggle to the Manage region preferences modal so you can remove a custom region policy and revert to allowing all regions [#282769]({{kib-pull}}282769).
+* Add a toggle to the **Manage region preferences** modal so you can remove a custom region policy and revert to allowing all regions [#282769]({{kib-pull}}282769).
 
 **Workflows**:
 * Add step-level `if` skip conditions to all workflow step types except the `if` step, which continues to use `condition` [#279210]({{kib-pull}}279210).
-* Enable workflow execution with the execute privilege alone, without also requiring read access to the workflow definition [#284822]({{kib-pull}}284822).
+* Enable running a workflow with only the `execute` privilege, without also requiring the `read` privilege on the workflow definition [#284822]({{kib-pull}}284822).
 
 ### Fixes [kibana-9.5.2-fixes]
 
 **Elastic Agent Builder**:
 * Fix missing screen reader announcements when toggling the **Show active only** filter on the agent tools page [#282276]({{kib-pull}}282276).
-* Fix Agent Builder queries failing with a security exception on {{es}} 9.4 when {{ccs}} index patterns are configured but the cluster does not have the remote cluster client role [#281609]({{kib-pull}}281609).
+* Fix Agent Builder queries failing with a security exception on {{es}} 9.4 when you configure {{ccs}} index patterns but the cluster doesn't have the remote cluster client role [#281609]({{kib-pull}}281609).
 * Fix chat completion streams continuing after you cancel a request, and cap their duration at 10 minutes [#285119]({{kib-pull}}285119).
-* Fix Agent Builder requests to Google Vertex AI {{infer}} endpoints failing when tool schemas include JSON Schema fields that Vertex does not accept [#284810]({{kib-pull}}284810).
+* Fix Agent Builder requests to Google Vertex AI {{infer}} endpoints failing when tool schemas include JSON Schema fields that Vertex doesn't accept [#284810]({{kib-pull}}284810).
 * Fix Agent Builder conversations failing when a prompt contains special tokens such as `<|endoftext|>`, or when Claude models receive empty text blocks [#283177]({{kib-pull}}283177).
 * Restore legacy root-level inputs in Agent Builder workflow tool schemas so existing workflow tools keep working [#285149]({{kib-pull}}285149).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
@@ -74,8 +74,7 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 * Resolve case field-definition references without regard to capitalization so renaming a field's casing no longer hides it from templates [#282450]({{kib-pull}}282450).
 * Fix global case field defaults not being applied to cases created through the API or workflow steps, and prevent the field-migration backfill from overwriting values you've already set or cleared [#283185]({{kib-pull}}283185).
 * Fix the case details **Associated Users** and **Associated Hosts** counts omitting directly attached user and host entities [#283036]({{kib-pull}}283036).
-* Fix alert suppression creating duplicate alerts when alert `_source` stores fields in nested form, such as with synthetic `_source` or a dot expander ingest processor [#282192]({{kib-pull}}282192).
-* Fix the Alerting v2 update API rejecting a valid change of a signal rule's query format to `composed` [#283754]({{kib-pull}}283754).
+* Fix the Alerting V2 update API rejecting a valid change of a signal rule's query format to `composed` [#283754]({{kib-pull}}283754).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff, or not yet on the 9.5 branch). Re-verify against the next BC before publishing.
 % * Fix matching fields missing from Cases Activity search results [#284940]({{kib-pull}}284940).
 % * Fix cases created from v2 templates by a system action not inheriting the template's external connector, sync and observables settings, and assignees [#284854]({{kib-pull}}284854).
@@ -152,7 +151,7 @@ For the {{elastic-sec}} 9.5.1 release information, refer to [{{elastic-sec}} Sol
 
 % **{{es}} solution**:
 % Moved to 9.5.2; not in build candidate 9.5.1-f8f63005.
-% * Add a toggle to the Manage region preferences modal so you can remove a custom region policy and revert to allowing all regions [#282769]({{kib-pull}}282769).
+% * Add a toggle to the **Manage region preferences** modal so you can remove a custom region policy and revert to allowing all regions [#282769]({{kib-pull}}282769).
 
 % **Workflows**:
 % Excluded from 9.5.2 as well: #280381 is labeled `release_note:skip` (feature-flagged workflow-step surface).
