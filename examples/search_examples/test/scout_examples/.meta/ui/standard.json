@@ -1,0 +1,128 @@
+{
+  "sha1": "12243bec7f7f9ce52ca71ec097b2f37fa079994d",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "a396aa0c2e44f9b-130d4392f8055c9",
+      "title": "Partial results example should update a progress bar",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/partial_results_example.spec.ts",
+        "line": 21,
+        "column": 21
+      }
+    },
+    {
+      "id": "41fbcb7cfc00b12-66493493f623dac",
+      "title": "Search example should have an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
+        "line": 69,
+        "column": 8
+      }
+    },
+    {
+      "id": "41fbcb7cfc00b12-26e2cab1cf7ba51",
+      "title": "Search example should not have an other bucket",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
+        "line": 73,
+        "column": 39
+      }
+    },
+    {
+      "id": "41fbcb7cfc00b12-504f27ff07a6412",
+      "title": "Search example should handle warnings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
+        "line": 75,
+        "column": 21
+      }
+    },
+    {
+      "id": "41fbcb7cfc00b12-346daa97424de61",
+      "title": "Search example with bfetch disabled should have an other bucket with bfetch disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_example.spec.ts",
+        "line": 92,
+        "column": 47
+      }
+    },
+    {
+      "id": "fb19ff88e33b9b5-4b8f07b8fb4dc22",
+      "title": "Search session example should start search, save session, restore session using restore button",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/search_session_example.spec.ts",
+        "line": 44,
+        "column": 8
+      }
+    },
+    {
+      "id": "0a881f744f0b6a1-94d9cdaca9f2f42",
+      "title": "SQL search example should search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/search_examples/test/scout_examples/ui/tests/sql_search_example.spec.ts",
+        "line": 24,
+        "column": 8
+      }
+    }
+  ]
+}
