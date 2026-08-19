@@ -83,10 +83,10 @@ describe('registerWorkflowSteps', () => {
     );
   });
 
-  it('registers get status step definition when the feature flag is on', async () => {
+  it('registers status step definition when the feature flag is on', async () => {
     registerWorkflowSteps(mockWorkflowsExtensions, defaultArgs);
 
-    expect(await resolveRegisteredStepIds()).toContain('security.attack-discovery.get_status');
+    expect(await resolveRegisteredStepIds()).toContain('security.attack-discovery.status');
   });
 
   it('registers all six step definitions', () => {

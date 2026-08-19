@@ -11,27 +11,27 @@ import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
 import { StepCategory } from '@kbn/workflows';
 
 /**
- * Step type ID for the Attack Discovery get-status step.
+ * Step type ID for the Attack Discovery status step.
  */
-export const GetStatusStepTypeId = 'security.attack-discovery.get_status';
+export const StatusStepTypeId = 'security.attack-discovery.status';
 
 /**
- * Input schema for the get-status step. Takes the `execution_uuid` returned by
- * the `security.attack-discovery.run` step (which returns early with
+ * Input schema for the status step. Takes the `execution_uuid` returned by the
+ * `security.attack-discovery.run` step (which returns early with
  * `status: 'pending'` once generation exceeds its soft deadline).
  */
-export const GetStatusStepInputSchema = z.object({
+export const StatusStepInputSchema = z.object({
   execution_uuid: z.string().min(1),
 });
 
 /**
- * Output schema for the get-status step.
+ * Output schema for the status step.
  *
  * `attack_discoveries` is intentionally permissive (`unknown[]`) because it echoes
  * the persisted `AttackDiscoveryApiAlert` shape resolved from the validation
  * execution, which is richer than the generation-time discovery schema.
  */
-export const GetStatusStepOutputSchema = z.object({
+export const StatusStepOutputSchema = z.object({
   attack_discoveries: z.array(z.unknown()).nullable(),
   discovery_count: z.number().int(),
   error_message: z.string().nullable(),
@@ -41,22 +41,22 @@ export const GetStatusStepOutputSchema = z.object({
 });
 
 /**
- * Common step definition for the get-status step. Shared between server and
- * public implementations.
+ * Common step definition for the status step. Shared between server and public
+ * implementations.
  */
-export const GetStatusStepCommonDefinition: CommonStepDefinition<
-  typeof GetStatusStepInputSchema,
-  typeof GetStatusStepOutputSchema
+export const StatusStepCommonDefinition: CommonStepDefinition<
+  typeof StatusStepInputSchema,
+  typeof StatusStepOutputSchema
 > = {
   category: StepCategory.Kibana,
-  description: i18n.translate('xpack.discoveries.workflowSteps.getStatus.description', {
+  description: i18n.translate('xpack.discoveries.workflowSteps.status.description', {
     defaultMessage:
       'Look up an Attack Discovery generation by execution_uuid and, once complete, return its persisted discoveries',
   }),
-  id: GetStatusStepTypeId,
-  inputSchema: GetStatusStepInputSchema,
-  label: i18n.translate('xpack.discoveries.workflowSteps.getStatus.label', {
-    defaultMessage: 'Attack Discovery: Get Status',
+  id: StatusStepTypeId,
+  inputSchema: StatusStepInputSchema,
+  label: i18n.translate('xpack.discoveries.workflowSteps.status.label', {
+    defaultMessage: 'Attack Discovery: Status',
   }),
-  outputSchema: GetStatusStepOutputSchema,
+  outputSchema: StatusStepOutputSchema,
 };

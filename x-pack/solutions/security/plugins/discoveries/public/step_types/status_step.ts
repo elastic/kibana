@@ -8,13 +8,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { PublicStepDefinition } from '@kbn/workflows-extensions/public';
-import {
-  GetStatusStepCommonDefinition,
-  GetStatusStepTypeId,
-} from '../../common/step_types/get_status_step';
+import { StatusStepCommonDefinition, StatusStepTypeId } from '../../common/step_types/status_step';
 
-export const getStatusStepPublicDefinition: PublicStepDefinition = {
-  ...GetStatusStepCommonDefinition,
+export const statusStepPublicDefinition: PublicStepDefinition = {
+  ...StatusStepCommonDefinition,
 
   icon: React.lazy(() =>
     import('@elastic/eui/es/components/icon/assets/clock').then(({ icon }) => ({
@@ -23,7 +20,7 @@ export const getStatusStepPublicDefinition: PublicStepDefinition = {
   ),
 
   documentation: {
-    details: i18n.translate('xpack.discoveries.workflowSteps.getStatus.documentation.details', {
+    details: i18n.translate('xpack.discoveries.workflowSteps.status.documentation.details', {
       defaultMessage: `Resolves an Attack Discovery generation by its {executionUuidField} and, once the pipeline completes, returns the persisted discoveries.
 
 **When to use:**
@@ -66,7 +63,7 @@ export const getStatusStepPublicDefinition: PublicStepDefinition = {
       with:
         duration: '10s'
     - name: check_status
-      type: ${GetStatusStepTypeId}
+      type: ${StatusStepTypeId}
       with:
         execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
 \`\`\``,

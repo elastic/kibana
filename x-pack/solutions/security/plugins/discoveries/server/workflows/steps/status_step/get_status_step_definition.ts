@@ -10,7 +10,7 @@ import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugi
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { ExecutionStatus, type WorkflowExecutionDto } from '@kbn/workflows';
 
-import { GetStatusStepCommonDefinition } from '../../../../common/step_types/get_status_step';
+import { StatusStepCommonDefinition } from '../../../../common/step_types/status_step';
 import type { DiscoveriesPluginStartDeps } from '../../../types';
 import { authenticateAndGetSpace } from '../default_validation_step/helpers/authenticate_and_get_space';
 import { extractPipelineValidationData } from '../../../routes/get/pipeline_data/helpers/extract_pipeline_validation_data';
@@ -35,7 +35,7 @@ const toErrorMessage = (error: WorkflowExecutionDto['error']): string | null => 
 };
 
 /**
- * Server-side implementation of the Attack Discovery get-status step.
+ * Server-side implementation of the Attack Discovery status step.
  *
  * Resolves an in-flight (or completed) generation by its `execution_uuid` by
  * reading the workflow event log — the same path the Agent Builder status tool
@@ -43,7 +43,7 @@ const toErrorMessage = (error: WorkflowExecutionDto['error']): string | null => 
  * discoveries, letting a workflow poll (e.g. a `while` loop) resume the slow
  * path after the run step returned early with `status: 'pending'`.
  */
-export const getGetStatusStepDefinition = ({
+export const getStatusStepDefinition = ({
   getEventLogIndex,
   getStartServices,
   logger,
@@ -58,7 +58,7 @@ export const getGetStatusStepDefinition = ({
   workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
 }) =>
   createServerStepDefinition({
-    ...GetStatusStepCommonDefinition,
+    ...StatusStepCommonDefinition,
     handler: async (context) => {
       const { execution_uuid: executionUuid } = context.input;
 
@@ -176,14 +176,14 @@ export const getGetStatusStepDefinition = ({
         return running('alert_retrieval');
       } catch (error) {
         context.logger.error(
-          `Attack Discovery get-status step failed (execution=${executionUuid}): ${
+          `Attack Discovery status step failed (execution=${executionUuid}): ${
             error instanceof Error ? error.message : 'Unknown error'
           }`,
           error instanceof Error ? error : undefined
         );
         return {
           error: new Error(
-            error instanceof Error ? error.message : 'Attack Discovery get-status step failed'
+            error instanceof Error ? error.message : 'Attack Discovery status step failed'
           ),
         };
       }

@@ -87,14 +87,14 @@ steps:
         with:
           duration: "15s"
       - name: check_status
-        type: security.attack-discovery.get_status
+        type: security.attack-discovery.status
         with:
           execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
 
   # Re-read once outside the loop so the terminal status and discoveries are
   # available at a stable top-level step reference for the steps below.
   - name: final_status
-    type: security.attack-discovery.get_status
+    type: security.attack-discovery.status
     with:
       execution_uuid: "{{ steps.run_attack_discovery.output.execution_uuid }}"
 

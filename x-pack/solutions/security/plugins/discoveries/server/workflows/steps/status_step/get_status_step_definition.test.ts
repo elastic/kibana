@@ -24,11 +24,11 @@ jest.mock('../../../routes/get/pipeline_data/helpers/extract_pipeline_validation
   extractPipelineValidationData: (...args: unknown[]) => mockExtractPipelineValidationData(...args),
 }));
 
-import { getGetStatusStepDefinition } from './get_get_status_step_definition';
+import { getStatusStepDefinition } from './get_status_step_definition';
 
 const EXECUTION_UUID = 'run-execution-uuid';
 
-describe('getGetStatusStepDefinition', () => {
+describe('getStatusStepDefinition', () => {
   const mockLogger = {
     debug: jest.fn(),
     error: jest.fn(),
@@ -54,17 +54,17 @@ describe('getGetStatusStepDefinition', () => {
       info: jest.fn(),
       warn: jest.fn(),
     },
-    stepId: 'get-status-1',
-    stepType: 'security.attack-discovery.get_status',
+    stepId: 'status-1',
+    stepType: 'security.attack-discovery.status',
   };
 
   const getStepDefinition = () =>
-    getGetStatusStepDefinition({
+    getStatusStepDefinition({
       getEventLogIndex: mockGetEventLogIndex,
       getStartServices: mockGetStartServices,
       logger: mockLogger,
       workflowsManagementApi: mockWorkflowsManagementApi as unknown as Parameters<
-        typeof getGetStatusStepDefinition
+        typeof getStatusStepDefinition
       >[0]['workflowsManagementApi'],
     });
 
@@ -80,7 +80,7 @@ describe('getGetStatusStepDefinition', () => {
   });
 
   it('has the correct step id', () => {
-    expect(getStepDefinition().id).toBe('security.attack-discovery.get_status');
+    expect(getStepDefinition().id).toBe('security.attack-discovery.status');
   });
 
   it('returns not_found when the execution is not tracked in the event log', async () => {

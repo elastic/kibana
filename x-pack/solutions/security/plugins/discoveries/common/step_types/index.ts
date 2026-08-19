@@ -17,14 +17,14 @@ export {
 
 export { GenerateStepCommonDefinition, GenerateStepTypeId } from './generate_step';
 
-export { GetStatusStepCommonDefinition, GetStatusStepTypeId } from './get_status_step';
-
 export {
   PersistDiscoveriesStepCommonDefinition,
   PersistDiscoveriesStepTypeId,
 } from './persist_discoveries_step';
 
 export { RunStepCommonDefinition, RunStepTypeId } from './run_step';
+
+export { StatusStepCommonDefinition, StatusStepTypeId } from './status_step';
 
 export { AnonymizedAlertSchema, ApiConfigSchema, AttackDiscoverySchema } from './shared_schemas';
 

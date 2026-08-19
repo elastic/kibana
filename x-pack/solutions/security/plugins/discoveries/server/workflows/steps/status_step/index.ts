@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getGetStatusStepDefinition } from './get_get_status_step_definition';
+export { getStatusStepDefinition } from './get_status_step_definition';
