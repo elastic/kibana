@@ -85,7 +85,7 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 * Fix Lens metric trendline breakdown ordering to rank by the trendline's own metric instead of falling back to alphabetical order [#283159]({{kib-pull}}283159).
 * Fix histogram granularity to preserve the saved bar count instead of resetting to **Auto** above 7 bars. The effective ceiling remains the `histogram:maxBars` advanced setting [#283058]({{kib-pull}}283058).
 * Fix duration format to preserve decimal and compact settings on round-trip, except when using the automatic (`auto-approximate`) duration format [#282815]({{kib-pull}}282815).
-* Fix the dashboards list endpoint not sorting by last updated date, descending, when no search query is set [#282363]({{kib-pull}}282363).
+* Fix the dashboards list endpoint not sorting by last updated date in descending order when no search query is set [#282363]({{kib-pull}}282363).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (not yet on the 9.5 branch). Re-verify against the next BC before publishing.
 % * Fix by-reference Lens panels disappearing from dashboards when the panel's `savedObjectRef` reference is missing [#285476]({{kib-pull}}285476).
 
