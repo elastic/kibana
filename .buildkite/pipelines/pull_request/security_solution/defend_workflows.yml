@@ -2,8 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: 'Defend Workflows Cypress Tests'
     key: defend-workflows
-    env:
-      CLEAR_YARN_CACHE: '1'
     agents:
       enableNestedVirtualization: true
       machineType: n2-standard-4
