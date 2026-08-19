@@ -7,10 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 import { parseDurationToMs } from '../../duration';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getLastNotifiedTimestampsQueries } from '../queries';
@@ -31,11 +28,13 @@ export class ApplyThrottlingStep implements DispatcherStep {
   public readonly name = 'apply_throttling';
 
   constructor(
-    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
 
     if (groups.length === 0) {
@@ -51,7 +50,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
       input.startedAt
     );
 
-    this.logger.debug({
+    logger.debug({
       message: () =>
         `Applied throttling to ${throttled.length} groups and dispatched ${dispatch.length} groups`,
     });
