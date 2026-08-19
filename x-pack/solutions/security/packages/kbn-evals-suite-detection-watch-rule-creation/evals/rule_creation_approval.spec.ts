@@ -12,7 +12,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { evaluate, tags } from '../src/evaluate';
 import { assertWorkflowInstalled, ensureJudgeConnectorAccessible } from '../src/workflow_fixture';
 
-const APPROVAL_INPUT = {
+const WORKFLOW_INPUT = {
   technique: 'T1078.001',
   gap_description:
     'No rule covering attempts to authenticate using known default credentials on Linux hosts.',
@@ -56,7 +56,7 @@ evaluate.describe(
     evaluate(
       'rule is saved in the detection engine when the user approves',
       async ({ ruleCreationClient, fetch, log }) => {
-        const result = await ruleCreationClient.run({ input: APPROVAL_INPUT });
+        const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
 
         if (!result.pendingApproval) {
           throw new Error(
@@ -89,7 +89,7 @@ evaluate.describe(
         }
 
         // Delete immediately — a leaked rule would false-fail the rejection
-        // test's name-based lookup, since both tests share APPROVAL_INPUT.
+        // test's name-based lookup, since both tests share WORKFLOW_INPUT.
         log.info(`Rule "${ruleName}" confirmed in detection engine — cleaning up`);
         await fetch(`/api/detection_engine/rules`, {
           method: 'DELETE',
@@ -101,7 +101,7 @@ evaluate.describe(
     evaluate(
       'rule is not saved in the detection engine when the user rejects',
       async ({ ruleCreationClient, fetch, log }) => {
-        const result = await ruleCreationClient.run({ input: APPROVAL_INPUT });
+        const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
 
         if (!result.pendingApproval) {
           throw new Error(
