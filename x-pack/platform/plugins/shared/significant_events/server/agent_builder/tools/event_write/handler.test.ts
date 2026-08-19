@@ -147,15 +147,13 @@ describe('eventsWriteHandler', () => {
     }
   });
 
-  it('sets previous_event_uuid from the latest event returned by findLatestByEventIds', async () => {
+  it('sets previous_event_uuid from the latest event in the stored lineage', async () => {
     const stored = makeStoredEvent('checkout__latency-abc12345', {
       event_uuid: 'latest-id',
       status: 'closed',
     });
     const eventClient = makeEventClient({
-      findLatestByEventIds: jest
-        .fn()
-        .mockResolvedValue(new Map([['checkout__latency-abc12345', stored]])),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     const result = await eventsWriteHandler({
@@ -199,9 +197,7 @@ describe('eventsWriteHandler', () => {
       investigations: storedInvestigations,
     });
     const eventClient = makeEventClient({
-      findLatestByEventIds: jest
-        .fn()
-        .mockResolvedValue(new Map([['checkout__latency-abc12345', stored]])),
+      findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
     });
 
     await eventsWriteHandler({
@@ -242,14 +238,24 @@ describe('eventsWriteHandler', () => {
         stream_name: 'logs.checkout',
         description: 'Rule one detected an issue',
         verdict: 'confirms',
-        metadata: { detection_id: 'det-rule-1', rule_uuid: 'rule-1' },
+        metadata: {
+          detection_id: 'det-rule-1',
+          rule_uuid: 'rule-1',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
       };
       const ruleTwo: SignalEntry = {
         type: 'detection',
         stream_name: 'logs.checkout',
         description: 'Rule two detected an issue',
         verdict: 'confirms',
-        metadata: { detection_id: 'det-rule-2', rule_uuid: 'rule-2' },
+        metadata: {
+          detection_id: 'det-rule-2',
+          rule_uuid: 'rule-2',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
       };
       const stored = makeStoredEvent('checkout-stable', {
         signals: [ruleOne],
@@ -278,6 +284,43 @@ describe('eventsWriteHandler', () => {
       );
     });
 
+    it('skips when an unchanged snapshot resubmits a rule absent from the latest version', async () => {
+      const ruleOne: SignalEntry = {
+        type: 'detection',
+        stream_name: 'logs.checkout',
+        description: 'Rule one detected an issue',
+        verdict: 'confirms',
+        metadata: {
+          detection_id: 'det-rule-1',
+          rule_uuid: 'rule-1',
+          change_point_type: 'spike',
+          p_value: 0.01,
+        },
+      };
+      const latest = makeStoredEvent('checkout-stable');
+      const eventClient = makeEventClient({
+        findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', latest]])),
+        findByEventId: jest.fn().mockResolvedValue({
+          hits: [makeStoredEvent('checkout-stable', { signals: [ruleOne] }), latest],
+        }),
+        bulkCreate: jest.fn(),
+      });
+
+      const result = await eventsWriteHandler({
+        eventClient,
+        input: {
+          ...baseInput,
+          event_id: 'checkout-stable',
+          status: 'open',
+          severity: '60-high',
+          signals: [ruleOne],
+        },
+      });
+
+      expect(result).toMatchObject({ written: false, reason: 'unchanged_outcome' });
+      expect(eventClient.bulkCreate).not.toHaveBeenCalled();
+    });
+
     it('throws when the bulk result is existing_active_event (wrapper does not swallow skips)', async () => {
       const eventClient = makeEventClient({
         findLatestActive: jest.fn().mockResolvedValue({
@@ -295,7 +338,7 @@ describe('eventsWriteHandler', () => {
 });
 
 describe('eventsWriteBulkHandler', () => {
-  it('writes unique event ids with one lookup and one bulk request', async () => {
+  it('writes unique event ids with one lineage lookup per event and one bulk request', async () => {
     const eventClient = makeEventClient();
 
     const results = await eventsWriteBulkHandler({
@@ -306,7 +349,9 @@ describe('eventsWriteBulkHandler', () => {
       ],
     });
 
-    expect(eventClient.findLatestByEventIds).toHaveBeenCalledWith(['event-1', 'event-2']);
+    expect(eventClient.findByEventId).toHaveBeenCalledTimes(2);
+    expect(eventClient.findByEventId).toHaveBeenCalledWith('event-1');
+    expect(eventClient.findByEventId).toHaveBeenCalledWith('event-2');
     expect(eventClient.bulkCreate).toHaveBeenCalledTimes(1);
     expect(eventClient.bulkCreate.mock.calls[0][0]).toHaveLength(2);
     expect(results).toEqual([
@@ -986,7 +1031,6 @@ describe('eventsWriteBulkHandler — continuation status', () => {
   it('no-op guard skips when both severity and status are identical to latest', async () => {
     const stored = makeStoredEvent('checkout-stable');
     const eventClient = makeEventClient({
-      findLatestByEventIds: jest.fn().mockResolvedValue(new Map([['checkout-stable', stored]])),
       findByEventId: jest.fn().mockResolvedValue({ hits: [stored] }),
       bulkCreate: jest.fn(),
     });

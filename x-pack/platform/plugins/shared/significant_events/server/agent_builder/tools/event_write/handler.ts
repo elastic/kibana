@@ -426,23 +426,15 @@ const resolveDedupSkips = (
   return toWrite;
 };
 
-/** Latest stored version per explicit event_id — enough to decide snapshot no-ops. */
-const fetchLatestByEventId = async (
-  eventClient: EventClient,
-  candidates: WriteCandidate[]
-): Promise<Map<string, SignificantEvent>> => {
-  const explicitIds = candidates.flatMap((c) =>
-    c.input.event_id !== undefined ? [c.eventId] : []
-  );
-  if (explicitIds.length === 0) return new Map();
-  return eventClient.findLatestByEventIds(explicitIds);
-};
-
-/** Full history for continuation no-op evaluation and lineage merge. */
+/** Full ordered history for continuation no-op evaluation and lineage merge. */
 const fetchPriorDocsByEventId = async (
   eventClient: EventClient,
   candidates: WriteCandidate[]
-): Promise<Map<string, SignificantEvent[]>> => {
+): Promise<{
+  latestByEventId: Map<string, SignificantEvent>;
+  priorDocsByEventId: Map<string, SignificantEvent[]>;
+}> => {
+  const latestByEventId = new Map<string, SignificantEvent>();
   const priorDocsByEventId = new Map<string, SignificantEvent[]>();
   await Promise.all(
     candidates
@@ -450,9 +442,13 @@ const fetchPriorDocsByEventId = async (
       .map(async (c) => {
         const { hits } = await eventClient.findByEventId(c.eventId);
         priorDocsByEventId.set(c.eventId, hits);
+        const latest = hits.at(-1);
+        if (latest !== undefined) {
+          latestByEventId.set(c.eventId, latest);
+        }
       })
   );
-  return priorDocsByEventId;
+  return { latestByEventId, priorDocsByEventId };
 };
 
 const buildPendingWrite = (
@@ -533,7 +529,8 @@ const applyBulkResults = (
  * returned results.
  *
  * Find-or-create items (no `event_id`):
- *  - Scan all currently-active events for one with the same exact stream+rules identity.
+ *  - Scan all currently-active events for one whose rules contain the candidate rules and whose
+ *    streams overlap the candidate streams.
  *  - If found, skip the write and return the existing event_id (existing_active_event).
  *  - Otherwise write a new event with the caller-supplied status.
  *
@@ -562,8 +559,10 @@ export async function eventsWriteBulkHandler({
   const activeEvents = await fetchActiveEventsForDedup(eventClient, dedupCandidates);
   const toWrite = resolveDedupSkips(validCandidates, activeEvents, results);
 
-  const latestByEventId = await fetchLatestByEventId(eventClient, toWrite);
-  const priorDocsByEventId = await fetchPriorDocsByEventId(eventClient, toWrite);
+  const { latestByEventId, priorDocsByEventId } = await fetchPriorDocsByEventId(
+    eventClient,
+    toWrite
+  );
   const remaining = toWrite.filter((candidate) => {
     if (
       candidate.mode === 'snapshot' &&

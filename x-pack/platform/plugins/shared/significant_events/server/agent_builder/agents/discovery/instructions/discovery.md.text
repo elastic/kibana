@@ -332,7 +332,8 @@ For each event candidate, decide from all signals that will appear in the final 
 
 1. **Blind assessment and challenge.** Before reading `symptom_hypothesis`, `summary`, or `title`: classify each event from `signals[]` alone — — each signal's stored or **Current evidence** verdict, evidence result, and preliminary status. Then read the narrative fields and state the strongest case for each alternative status (open ↔ dismissed ↔ closed). If the challenge surfaces a more credible alternative, adopt it. Resolve remaining uncertainty conservatively: prefer `open/medium` over `open/critical` or `open/low` when evidence is ambiguous.
 2. Decide `status` by applying `<critical_rules>` rule 6 from signals whose **Current evidence** verdict is `confirms` and that are event-aligned. A found detection whose **Current evidence** verdict is `off_topic` with a concrete non-benign error is direct confirmation of its separate observed-error event even though the source rule signal remains `off_topic`; status, severity, and confidence must use that row's observed error and impact. Prior-cycle signals copied unchanged use their stored signal verdict and still count. Do not run additional queries.
-3. **Calibrate `severity`** — read and apply the `severity` field description on `platform_sig_events_events_write` at emit time. Severity is a function of **confirmed grounding impact**, with rule `severity_score` as a supporting input when grounding confirms a matching failure class:
+3. Apply `<chronic_and_recurring>` using memory findings.
+4. **Calibrate `severity`** — read and apply the `severity` field description on `platform_sig_events_events_write` at emit time. Severity is a function of **confirmed grounding impact**, with rule `severity_score` as a supporting input when grounding confirms a matching failure class:
    - **Change-point metadata is not severity** — see `<critical_rules>` rule 7.
    - **Rule `severity_score` supports, never replaces, grounding** — when grounding confirms the rule's failure class, a high `severity_score` supports selecting the higher applicable tier from the field description; it cannot override absent, healthy, or contradictory grounding.
    - **Confirmed impact sets the tier** — apply the ordered `severity` field decision on `platform_sig_events_events_write`. When grounding confirms the operation fails or is blocked on the verified path, take the matching tier from that field. Treat a blocked primary function with no fallback as `80-critical`; use `60-high` for a single scoped path only when other paths still serve the same operation. Unknown population reach adjusts `confidence` only — it does not lower the tier when the path is already confirmed failing. Do not default to a lower tier because topology is sparse, the component is internal, or the rule hypothesis was refuted.
@@ -341,8 +342,8 @@ For each event candidate, decide from all signals that will appear in the final 
    - **Narrative must match the tier** — the assigned tier must be reflected in `symptom_hypothesis` and `summary`; do not use low-impact phrasing for a high-tier event.
    - **Count is not a tier** — weigh scope from what the operation does, not how many detections fired.
    - **Known-ongoing cap only** — apply <critical_rules> rule 9's memory cap only when memory identifies that exact condition as ongoing/background; it does not cap newly confirmed failures on the same component.
-4. **Apply `<chronic_and_recurring>` last** using memory findings and the prior event version.
-5. Set `confidence` after status and severity:
+5. **Apply `<chronic_and_recurring>` last** using memory findings and the prior event version.
+6. Set `confidence` after status and severity:
    - `p_value`, `change_point_type`, and `recent_detection_count` adjust `confidence` only — never `severity`.
    - For a continuation, start from the matched open event's existing `confidence` and apply adjustments incrementally; do not recalculate from `p_value`.
    - For a new event, derive the base from the strongest detection's `p_value` (≤0.01 → 0.55–0.65; 0.01–0.05 → 0.40–0.55; 0.05–0.1 → 0.25–0.40; >0.1 → below 0.25).

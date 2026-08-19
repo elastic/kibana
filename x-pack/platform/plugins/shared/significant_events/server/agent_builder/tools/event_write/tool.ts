@@ -155,9 +155,10 @@ export function createEventsWriteTool({
       unchanged (written: false, reason: unchanged_outcome). Keep an open continuation at or
       above the prior severity unless grounding shows reduced impact.
 
-      **Without event_id**: find-or-create. Scans all currently-active events for one with the
-      same exact stream+rule identity. If found, returns it without writing (written: false,
-      reason: existing_active_event). Otherwise creates a new event with a generated event_id.
+      **Without event_id**: find-or-create. Scans all currently-active events for one whose rule
+      set contains the submitted rules and shares at least one stream name. If found, returns it
+      without writing (written: false, reason: existing_active_event). Otherwise creates a new
+      event with a generated event_id.
     `,
     annotations: {
       title: 'Write Significant Events',
