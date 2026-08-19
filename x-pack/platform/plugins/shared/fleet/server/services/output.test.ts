@@ -1479,7 +1479,7 @@ describe('Output Service', () => {
         );
       });
 
-      it('should write tls secrets as plaintext when secret storage is disabled', async () => {
+      it('should write tls secrets into otlp_exporter_secrets when secret storage is disabled', async () => {
         const soClient = getMockedSoClient();
         mockedAgentPolicyService.list.mockResolvedValue({ items: [] } as any);
         mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
@@ -1512,11 +1512,12 @@ describe('Output Service', () => {
           expect.anything(),
           expect.objectContaining({
             type: 'otlp',
-            otlp_exporter: expect.objectContaining({
-              tls: expect.objectContaining({
-                key_pem: 'my-key-pem',
-                tpm: expect.objectContaining({ owner_auth: 'my-owner-auth', auth: 'my-auth' }),
-              }),
+            otlp_exporter: expect.not.objectContaining({
+              tls: expect.objectContaining({ key_pem: expect.anything() }),
+            }),
+            otlp_exporter_secrets: JSON.stringify({
+              key_pem: 'my-key-pem',
+              tpm: { owner_auth: 'my-owner-auth', auth: 'my-auth' },
             }),
           }),
           expect.anything()
