@@ -17,10 +17,7 @@ import {
   type CustomContentContextAttachmentData,
 } from '../../common/panel_context_attachment';
 
-const updateCustomContentSchema = customContentUpdateSchema.refine(
-  ({ prompt, esqlQuery }) => prompt !== undefined || esqlQuery !== undefined,
-  { message: 'At least one of prompt or esqlQuery must be provided.' }
-);
+const updateCustomContentSchema = customContentUpdateSchema;
 
 export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
   typeof updateCustomContentSchema
