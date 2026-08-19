@@ -263,18 +263,6 @@ pivot:
       - 'Feature:AutomaticImport'
       - 'Feature:Event Correlation (EQL) Rule'
 
-  # Feature ID definitions with labels (optional).
-  # Keys are feature-id values written to the changelog; values are label strings or lists.
-  # When a PR has a matching label and --feature-id is not set, that feature-id is applied.
-  # If multiple labels map to distinct feature-ids, a warning is emitted and the first match is used.
-  # Precedence: --feature-id CLI option > pivot.features label mapping.
-  # Unreleased feature IDs should also be listed under bundle.profiles.<name>.hide_features.
-  #
-  # features:
-  #   'feature:new-search-api':
-  #     - "feature-flag:new-search-api"
-  #     - ":Feature/NewSearchApi"
-
 # Rules configuration — controls which PRs create changelogs and which entries are published.
 # Global match default for multi-valued fields (labels, areas, products).
 #   any (default) = match if ANY item matches the list

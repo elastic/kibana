@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/275535
+issues:
+- https://github.com/elastic/kibana/issues/271878
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Search and data
+title: Fix Console ES|QL autocomplete refetching sources on every keystroke
+description: Console ES|QL source autocomplete now reuses a fresh source list instead of refetching it on every keystroke.

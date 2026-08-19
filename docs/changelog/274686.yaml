@@ -1,0 +1,12 @@
+prs:
+- https://github.com/elastic/kibana/pull/274686
+issues:
+- https://github.com/elastic/kibana/issues/249023
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-07-07
+areas:
+- Alerting and reporting
+title: Fix empty source fields in Elasticsearch query rule recovery actions
+description: "Fixes Elasticsearch query rules that recovered with an empty `context.sourceFields` array, which prevented recovery action templates from referencing field values such as `host.hostname`."
