@@ -28,10 +28,56 @@ interface Props {
 const toServiceLabel = (euid: string): string =>
   euid.startsWith('service:') ? euid.slice('service:'.length) : euid;
 
+// Dimensions used for layout spacing and explicit node sizing.
+const SERVICE_NODE_SIZE = 140;
+const BACKEND_NODE_WIDTH = 160;
+const BACKEND_NODE_HEIGHT = 56;
+
 export const ServiceMap = ({ items, edges }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const { nodes: layoutNodes, edges: rfEdges } = useMemo(() => {
+    // Shared style helpers — defined inside useMemo so they close over euiTheme.
+    const serviceNodeStyle: React.CSSProperties = {
+      width: SERVICE_NODE_SIZE,
+      height: SERVICE_NODE_SIZE,
+      borderRadius: '50%',
+      border: `2px solid ${euiTheme.colors.primary}`,
+      backgroundColor: euiTheme.colors.emptyShade,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      padding: '12px',
+      boxSizing: 'border-box',
+      fontSize: '12px',
+      fontWeight: 500,
+      lineHeight: 1.3,
+      color: euiTheme.colors.title,
+      overflowWrap: 'break-word',
+      wordBreak: 'break-word',
+      boxShadow: `0 2px 8px ${euiTheme.colors.shadow ?? 'rgba(0,0,0,0.12)'}`,
+    };
+
+    const backendNodeStyle: React.CSSProperties = {
+      width: BACKEND_NODE_WIDTH,
+      height: BACKEND_NODE_HEIGHT,
+      borderRadius: euiTheme.border.radius.medium,
+      border: `2px dashed ${euiTheme.colors.mediumShade}`,
+      backgroundColor: euiTheme.colors.lightShade,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      padding: '8px',
+      boxSizing: 'border-box',
+      fontSize: '12px',
+      lineHeight: 1.3,
+      color: euiTheme.colors.text,
+      overflowWrap: 'break-word',
+      wordBreak: 'break-word',
+    };
+
     // Start with a node per known service entity.
     const nodeMap = new Map<string, Node>(
       items.map((item) => [
@@ -39,6 +85,9 @@ export const ServiceMap = ({ items, edges }: Props) => {
         {
           id: item['entity.id'],
           position: { x: 0, y: 0 },
+          width: SERVICE_NODE_SIZE,
+          height: SERVICE_NODE_SIZE,
+          style: serviceNodeStyle,
           data: { label: item['entity.name'] },
         },
       ])
@@ -53,6 +102,9 @@ export const ServiceMap = ({ items, edges }: Props) => {
         nodeMap.set(source, {
           id: source,
           position: { x: 0, y: 0 },
+          width: SERVICE_NODE_SIZE,
+          height: SERVICE_NODE_SIZE,
+          style: serviceNodeStyle,
           data: { label: toServiceLabel(source) },
         });
       }
@@ -60,23 +112,22 @@ export const ServiceMap = ({ items, edges }: Props) => {
       if (!nodeMap.has(target)) {
         if (targetKind === 'backend') {
           // Backend nodes: caller-agnostic id (two services calling elasticsearch share one node).
-          // Use a dashed border and subdued background to distinguish from service nodes.
+          // Rendered as a dashed rectangle to visually separate them from service circles.
           nodeMap.set(target, {
             id: target,
             position: { x: 0, y: 0 },
-            style: {
-              border: `2px dashed ${euiTheme.colors.mediumShade}`,
-              backgroundColor: euiTheme.colors.lightestShade,
-              borderRadius: euiTheme.border.radius.medium,
-              fontSize: euiTheme.size.s,
-              color: euiTheme.colors.subduedText,
-            },
+            width: BACKEND_NODE_WIDTH,
+            height: BACKEND_NODE_HEIGHT,
+            style: backendNodeStyle,
             data: { label: target },
           });
         } else {
           nodeMap.set(target, {
             id: target,
             position: { x: 0, y: 0 },
+            width: SERVICE_NODE_SIZE,
+            height: SERVICE_NODE_SIZE,
+            style: serviceNodeStyle,
             data: { label: toServiceLabel(target) },
           });
         }
