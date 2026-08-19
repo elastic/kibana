@@ -45,11 +45,12 @@ export class CasesPage {
     this.createCaseButton = this.page.testSubj.locator('createNewCaseBtn');
     this.createCaseForm = this.page.testSubj.locator('case-creation-form-steps');
     // Classic chrome renders the legacy `chrome.setBadge()` read-only badge in the
-    // header (`headerBadge`); with Chrome Next (serverless / cases redesign) the
-    // AppHeader renders it next to the page title as `appHeaderBadge` instead.
-    this.readOnlyBadge = this.page.locator(
-      '[data-test-subj="headerBadge"],[data-test-subj="appHeaderBadge"]'
-    );
+    // header (`headerBadge`); the Chrome Next AppHeader (serverless / cases redesign)
+    // renders it next to the page title as `appHeaderBadge`. Stateful renders both at
+    // once, so take the first match rather than requiring a unique one.
+    this.readOnlyBadge = this.page
+      .locator('[data-test-subj="headerBadge"],[data-test-subj="appHeaderBadge"]')
+      .first();
     this.noPrivilegesPrompt = this.page.getByRole('heading', { name: 'Privileges required' });
     this.caseViewTitle = this.page.locator(
       '[data-test-subj="case-view-title"],[data-test-subj="appHeaderTitle"]'
