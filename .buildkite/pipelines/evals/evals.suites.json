@@ -142,7 +142,9 @@
           "models": [
             "eis/anthropic-claude-4.6-sonnet",
             "eis/openai-gpt-5.4",
-            "eis/openai-gpt-5.6-terra"
+            "eis/openai-gpt-5.6-terra",
+            "eis/openai-gpt-5.2",
+            "eis/anthropic-claude-4.6-opus"
           ]
         },
         {
@@ -159,7 +161,8 @@
             "eis/openai-gpt-5.6-luna",
             "eis/openai-gpt-oss-120b",
             "eis/openai-gpt-5.4",
-            "eis/openai-gpt-5.4-nano"
+            "eis/openai-gpt-5.4-nano",
+            "eis/anthropic-claude-4.6-sonnet"
           ]
         },
         {
