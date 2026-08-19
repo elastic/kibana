@@ -8,7 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import {
   SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
-  SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
+  SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
   SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID,
 } from '../../tools/siem_migrations';
 import {
@@ -46,8 +46,8 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 ## Available Tools
 
 - \`security.siem_migration.get_all_rule_migration_stats\` — resolve a migration name to its id.
-- \`security.siem_migration.get_rule_migration\` — fetch a single migration by id; used as a
-  pasted-id fallback (see Name→ID block).
+- \`security.siem_migration.get_rule_migration_stats\` — fetch stats for a single migration by id;
+  also used as a pasted-id fallback (see Name→ID block).
 - \`security.siem_migration.update_rule_migration\` — update \`name\` and/or \`index_pattern\`.
   At least one field is required. Mutating; user confirmation is requested automatically.
 
@@ -78,7 +78,7 @@ my rules", explain the distinction and direct them to the Automatic Migration UI
 ## Workflow
 
 1. **Resolve the migration** by name using \`get_all_rule_migration_stats\` (Name→ID block).
-   If the user pastes an id, verify it with \`get_rule_migration\`.
+   If the user pastes an id, verify it with \`get_rule_migration_stats\`.
 2. **Gather fields**: prompt ONLY for fields the user has not already supplied.
    - If no new name or index pattern was provided, ask what they want to change.
    - If only one was provided, proceed without asking for the other.
@@ -97,7 +97,7 @@ To check migration progress, route the user to the **automatic-migration-rules-s
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
-    SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
+    SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
     SIEM_MIGRATION_UPDATE_RULE_MIGRATION_TOOL_ID,
   ],
 });

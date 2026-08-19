@@ -1,0 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { NonEmptyString } from '../../../../../common/api/model/primitives.gen';
+
+export const MigrationId = NonEmptyString.describe(
+  'The id of the rule migration. Use get_all_rule_migration_stats to resolve a name to its id.'
+);

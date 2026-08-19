@@ -9,7 +9,6 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import {
   SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
-  SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
   SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
   SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,
@@ -51,8 +50,6 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 ## Available Tools
 
 - \`security.siem_migration.get_all_rule_migration_stats\` — resolve a migration name to its id.
-- \`security.siem_migration.get_rule_migration\` — fetch a single migration by id (name, created_by,
-  created_at, last_execution) and verify a pasted id.
 - \`security.siem_migration.get_rule_migration_stats\` — task status (ready / running / stopped /
   interrupted / finished) and per-state item counts. Returns an empty zero-shape for no items.
 - \`security.siem_migration.get_rule_migration_translation_stats\` — translation counts (full /
@@ -144,7 +141,7 @@ Call \`list_ai_connectors\` and present the options as a multiple-choice questio
 ## Workflow
 
 1. **Resolve the migration**: get the migration id from the name (Name→ID block). If the user
-   pastes an id, verify it with \`get_rule_migration\`.
+   pastes an id, verify it with \`get_rule_migration_stats\`.
 2. **Inspect state**: call \`get_rule_migration_stats\` and \`get_rule_migration_translation_stats\`
    to read the task status and translation counts. Use the decision matrix below to pick the
    request body.
@@ -207,7 +204,6 @@ pattern, route them to the relevant sibling skill — this skill only starts/rep
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
-    SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
     SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_RULE_MIGRATION_TRANSLATION_STATS_TOOL_ID,
     SIEM_MIGRATION_GET_MIGRATION_RULES_TOOL_ID,

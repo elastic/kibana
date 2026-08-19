@@ -57,7 +57,7 @@ Returns { total, migrations: [{ id, name, status, items: { total, pending, proce
 
 Use \`name\` to resolve the user-supplied migration name to \`id\` (names can collide — disambiguate by vendor, then status/created_at/counts; see the active skill for the full hierarchy).
 
-Only migrations with >=1 eligible rule item are returned. If the user names one that is missing, ask them to paste the migration id from the UI and verify it via get_rule_migration.
+Only migrations with >=1 eligible rule item are returned. If the user names one that is missing, ask them to paste the migration id from the UI and verify it via get_rule_migration_stats.
 
 Read-only.`,
     schema,

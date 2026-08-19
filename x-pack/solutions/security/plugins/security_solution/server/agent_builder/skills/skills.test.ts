@@ -165,9 +165,9 @@ describe('Security Skills', () => {
       expect(automaticMigrationRulesSummarizeSkill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('returns 5 registry tools (under 25 limit)', () => {
+    it('returns 4 registry tools (under 25 limit)', () => {
       const tools = automaticMigrationRulesSummarizeSkill.getRegistryTools!();
-      expect(tools).toHaveLength(5);
+      expect(tools).toHaveLength(4);
       expect((tools as string[]).length).toBeLessThanOrEqual(25);
     });
 
@@ -208,9 +208,9 @@ describe('Security Skills', () => {
       );
     });
 
-    it('returns 8 registry tools (under 25 limit)', () => {
+    it('returns 7 registry tools (under 25 limit)', () => {
       const tools = automaticMigrationRulesStartMigrationSkill.getRegistryTools!();
-      expect(tools).toHaveLength(8);
+      expect(tools).toHaveLength(7);
       expect((tools as string[]).length).toBeLessThanOrEqual(25);
     });
 
@@ -359,7 +359,7 @@ describe('Security Skills', () => {
 
     it('content describes the scope limit for index-pattern rewrites', () => {
       expect(automaticMigrationRulesUpdateMigrationSkill.content).toContain(
-        'MISSING_INDEX_PATTERN_PLACEHOLDER'
+        'index-pattern change is UI-only'
       );
     });
 

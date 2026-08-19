@@ -8,7 +8,7 @@
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import {
   SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
-  SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
+  SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
   SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID,
 } from '../../tools/siem_migrations';
 import {
@@ -47,15 +47,15 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
 
 - \`security.siem_migration.get_all_rule_migration_stats\` — resolve a migration name to its id and
   check its current status.
-- \`security.siem_migration.get_rule_migration\` — fetch a single migration by id; used as a
-  pasted-id fallback (see Name→ID block).
+- \`security.siem_migration.get_rule_migration_stats\` — fetch stats for a single migration by id;
+  also used as a pasted-id fallback (see Name→ID block).
 - \`security.siem_migration.stop_rule_migration\` — stop the migration. Mutating; user confirmation
   is requested automatically before this tool executes.
 
 ## Workflow
 
 1. **Resolve the migration** by name using \`get_all_rule_migration_stats\` (Name→ID block).
-   If the user pastes an id, verify it with \`get_rule_migration\`.
+   If the user pastes an id, verify it with \`get_rule_migration_stats\`.
 2. **Check status**: if the migration is not currently \`running\`, tell the user — there is nothing
    to stop. Do NOT call \`stop_rule_migration\` on a non-running migration.
 3. **Confirm**: state the migration name and that the running translation will be paused. The
@@ -71,7 +71,7 @@ To resume a stopped migration or check its progress, route the user to the
 `,
   getRegistryTools: () => [
     SIEM_MIGRATION_GET_ALL_RULE_MIGRATION_STATS_TOOL_ID,
-    SIEM_MIGRATION_GET_RULE_MIGRATION_TOOL_ID,
+    SIEM_MIGRATION_GET_RULE_MIGRATION_STATS_TOOL_ID,
     SIEM_MIGRATION_STOP_RULE_MIGRATION_TOOL_ID,
   ],
 });

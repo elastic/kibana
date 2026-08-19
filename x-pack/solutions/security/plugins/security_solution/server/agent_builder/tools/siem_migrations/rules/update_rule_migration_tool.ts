@@ -43,15 +43,10 @@ export const updateRuleMigrationTool = (
     type: ToolType.builtin,
     availability: createSiemMigrationAvailability(core, productFeaturesService, logger),
     confirmation: { askUser: 'always' },
-    description: `Update a rule migration's name and/or default index pattern.
+    description: `Update a rule migration's name.
 
-Accepts { name?, index_pattern? } — at least one must be provided. Returns { ok: true, migration_id }.
+Accepts { name }. Returns { ok: true, migration_id }.`,
 
-NOTE: this only updates the migration document's name / index_pattern field. It does NOT rewrite
-MISSING_INDEX_PATTERN_PLACEHOLDER in already-translated rule queries — that is a separate UI-only
-operation. Mutating — confirms with the user before executing.
-
-See the automatic-migration-rules-update-migration skill for example flows.`,
     schema,
     tags: ['security', 'siem-migration', 'rules'],
     handler: async (input, { request }) => {

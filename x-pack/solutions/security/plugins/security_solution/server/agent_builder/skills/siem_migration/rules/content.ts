@@ -65,7 +65,7 @@ the name instead and resolve it to the id internally when calling tools.
 4. **Pasted-id fallback**: \`get_all_rule_migration_stats\` only returns migrations that have at
    least one eligible rule item. A migration with zero eligible items (or only non-eligible
    items) is invisible to name resolution. If the user pastes a migration id directly (e.g. copied
-   from the UI), verify it with \`security.siem_migration.get_rule_migration\` before acting on it.
+   from the UI), verify it with \`security.siem_migration.get_rule_migration_stats\` before acting on it (stats returns the same fields plus status/counts, using fewer tokens).
 5. **Rule item ids**: some actions (install specific rules, reprocess a subset) need a **rule item
    id** — never a migration id. Resolve a user-provided rule **title** to its item id by calling
    \`security.siem_migration.get_migration_rules\` and matching on the original or translated title.
