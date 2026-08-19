@@ -52,9 +52,7 @@ export function LensEmbeddableComponent({
   }, [api, onUnmount]);
 
   return (
-    <div
-      css={{ width: '100%', height: '100%', position: 'relative' }}
-    >
+    <div css={{ width: '100%', height: '100%', position: 'relative' }}>
       {expressionParams == null || blockingErrors.length ? null : (
         <ExpressionWrapper {...expressionParams} paddingTop={hideTitle || !panelTitle?.length} />
       )}
