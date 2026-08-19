@@ -4316,6 +4316,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-v2-browser-shared@link:x-pack/platform/packages/shared/response-ops/alerting-v2-browser-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-v2-common-queries@link:x-pack/platform/packages/shared/response-ops/alerting-v2-common-queries":
   version "0.0.0"
   uid ""
@@ -6073,6 +6077,10 @@
   uid ""
 
 "@kbn/custom-content-plugin@link:x-pack/platform/plugins/shared/custom_content":
+  version "0.0.0"
+  uid ""
+
+"@kbn/custom-content-server@link:x-pack/platform/packages/shared/custom-content/custom-content-server":
   version "0.0.0"
   uid ""
 

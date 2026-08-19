@@ -599,4 +599,40 @@ describe('identifyKIQueries agent', () => {
       expect(result.queryAttempts).toBeUndefined();
     });
   });
+
+  describe('over-broad full-text predicate rejection', () => {
+    it('rejects a multi-word `:` value and asks for a rewrite', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        scriptedAddQueries: [[scriptedQuery('FROM logs | WHERE message : "request failed"')]],
+      });
+
+      expect(result.queries).toHaveLength(0);
+
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ status: string; failureReason?: string; error?: string }> };
+      };
+      const [rejected] = response.response.queries;
+      expect(rejected.status).toBe('Failed to add');
+      expect(rejected.failureReason).toBe('validation_error');
+      expect(rejected.error).toContain('MATCH_PHRASE');
+    });
+
+    it('admits the AND-of-single-terms and MATCH_PHRASE rewrites', async () => {
+      const { result, addQueriesResponses } = await runIdentifyKIQueries({
+        scriptedAddQueries: [
+          [
+            scriptedQuery('FROM logs | WHERE message:"request" AND message:"failed"'),
+            scriptedQuery('FROM logs | WHERE MATCH_PHRASE(message, "request failed")'),
+          ],
+        ],
+      });
+
+      expect(result.queries).toHaveLength(2);
+
+      const response = addQueriesResponses[0] as {
+        response: { queries: Array<{ status: string }> };
+      };
+      expect(response.response.queries.map((q) => q.status)).toEqual(['Added', 'Added']);
+    });
+  });
 });

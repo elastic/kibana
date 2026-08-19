@@ -30,6 +30,44 @@ beforeEach(() => {
   mockEsqlQuery.mockResolvedValue({ columns: [], values: [] });
 });
 
+describe('createCustomContentTemplateResolver — system prompt selection', () => {
+  const resolve = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
+
+  it('uses the Liquid system prompt when hasExistingQuery is true and esqlQuery is omitted', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>{{ row["x"].value }}</div>' });
+
+    await resolve({
+      prompt: 'Change the colors',
+      existingTemplate: '<div>{{ row["x"].value }}</div>',
+      hasExistingQuery: true,
+    });
+
+    expect(mockEsqlQuery).not.toHaveBeenCalled();
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('Liquid template syntax');
+    expect(systemArg).not.toContain('Output ONLY valid HTML');
+  });
+
+  it('does not sample ES when hasExistingQuery is true and esqlQuery is omitted', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>ok</div>' });
+
+    await resolve({ prompt: 'Restyle', hasExistingQuery: true });
+
+    expect(mockEsqlQuery).not.toHaveBeenCalled();
+  });
+
+  it('uses the static system prompt when neither esqlQuery nor hasExistingQuery is set', async () => {
+    mockChatComplete.mockResolvedValue({ content: '<div>hello</div>' });
+
+    await resolve({ prompt: 'Show a KPI card' });
+
+    const systemArg: string = mockChatComplete.mock.calls[0][0].system;
+    expect(systemArg).toContain('Output ONLY valid HTML');
+    expect(systemArg).not.toContain('Liquid template syntax');
+  });
+});
+
 describe('createCustomContentTemplateResolver — output validation', () => {
   const resolve = createCustomContentTemplateResolver({ modelProvider, esClient, logger });
 
