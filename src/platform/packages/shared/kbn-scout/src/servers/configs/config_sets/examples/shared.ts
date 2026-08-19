@@ -12,10 +12,22 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { findTestPluginPaths } from '@kbn/test-kibana-server';
 
 /**
- * Server args aligned with x-pack/platform/test/examples/config.ts so developer
- * example plugins (and their cross-dependencies) load via --plugin-path.
+ * Example plugins via --plugin-path, plus --run-examples so RSPack builds their
+ * UI bundles. Without --run-examples, the server discovers plugins from
+ * --plugin-path but RSPack omits them from kibana.bundle.js (unlike the legacy
+ * webpack optimizer, which honored pluginPaths), causing browser bootstrap
+ * errors: `Definition of plugin "…" not found`.
+ */
+export const examplesPluginPathArgs = [
+  '--run-examples',
+  ...findTestPluginPaths([resolve(REPO_ROOT, 'examples'), resolve(REPO_ROOT, 'x-pack/examples')]),
+];
+
+/**
+ * Stateful examples server args: example plugins + search sessions
+ * (not available in serverless).
  */
 export const examplesServerArgs = [
   '--data.search.sessions.enabled=true',
-  ...findTestPluginPaths([resolve(REPO_ROOT, 'examples'), resolve(REPO_ROOT, 'x-pack/examples')]),
+  ...examplesPluginPathArgs,
 ];

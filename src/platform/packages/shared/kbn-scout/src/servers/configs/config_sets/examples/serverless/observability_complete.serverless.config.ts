@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
-import { defaultConfig } from '../../default/stateful/base.config';
-import { examplesServerArgs } from '../shared';
+import { examplesPluginPathArgs } from '../shared';
 
 /**
- * Scout server config for example-plugin tests on local stateful classic.
+ * Scout server config for example-plugin tests on local serverless Observability complete.
  *
  * Usage:
- *   node scripts/scout.js start-server --arch stateful --domain classic --serverConfigSet examples
+ *   node scripts/scout.js start-server --arch serverless --domain observability_complete --serverConfigSet examples
  */
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
     ...defaultConfig.kbnTestServer,
-    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...examplesServerArgs],
+    serverArgs: [...defaultConfig.kbnTestServer.serverArgs, ...examplesPluginPathArgs],
   },
 };
