@@ -21,6 +21,7 @@ import { OpenAdWorkerConfigButton } from './open_ad_worker_config_button';
 const services = {
   http: { get: jest.fn().mockResolvedValue({ results: [], total: 0 }) },
   notifications: { toasts: { addError: jest.fn() } },
+  application: { navigateToApp: jest.fn() },
 };
 
 const renderButton = () => {
@@ -32,6 +33,11 @@ const renderButton = () => {
       </KibanaContextProvider>
     </QueryClientProvider>
   );
+};
+
+const open = () => {
+  renderButton();
+  fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
 };
 
 describe('OpenAdWorkerConfigButton / AdWorkerConfigFlyout', () => {
@@ -46,52 +52,56 @@ describe('OpenAdWorkerConfigButton / AdWorkerConfigFlyout', () => {
   });
 
   it('opens a flyout with the numbered steps timeline and inputs preview', () => {
-    renderButton();
-    fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
-
+    open();
     expect(screen.getByTestId('adWorkerConfigFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('pipelineIndicator')).toBeInTheDocument();
     expect(screen.getByTestId('adWorkerStepRetrieval')).toBeInTheDocument();
     expect(screen.getByTestId('adWorkerStepGeneration')).toBeInTheDocument();
     expect(screen.getByTestId('adWorkerStepValidation')).toBeInTheDocument();
-    expect(screen.getByTestId('queryModeSelector')).toBeInTheDocument();
 
     const preview = screen.getByTestId('adWorkerConfigPreview');
     expect(preview).toHaveTextContent('"run_every": "15m"');
     expect(preview).toHaveTextContent('"validation_workflow_id": "default"');
   });
 
-  it('defaults to ES|QL mode with a pre-populated query, and shows the placeholder in Query-builder mode', () => {
-    renderButton();
-    fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
+  it('has retrieval switch buttons; ES|QL editor is pre-populated and hides when the switch is off', () => {
+    open();
 
-    // ES|QL editor present by default, pre-populated
+    expect(screen.getByTestId('adWorkerDefaultRetrievalSwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('adWorkerRetrievalWorkflowsSwitch')).toBeInTheDocument();
+
     const esql = screen.getByTestId('adWorkerEsqlQuery') as HTMLTextAreaElement;
-    expect(esql).toBeInTheDocument();
     expect(esql.value).toContain('FROM .alerts-security.alerts-default');
 
-    fireEvent.click(screen.getByTestId('queryModeQueryBuilderModeButton'));
-
+    fireEvent.click(screen.getByTestId('adWorkerDefaultRetrievalSwitch'));
     expect(screen.queryByTestId('adWorkerEsqlQuery')).not.toBeInTheDocument();
-    expect(screen.getByTestId('adWorkerQueryBuilderPlaceholder')).toBeInTheDocument();
   });
 
-  it('loads connectors scoped to the attack_discovery feature', () => {
-    renderButton();
-    fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
+  it('reveals the retrieval workflows selector when its switch is enabled', () => {
+    open();
+
+    expect(screen.queryByTestId('adWorkerRetrievalWorkflows')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('adWorkerRetrievalWorkflowsSwitch'));
+    expect(screen.getByTestId('adWorkerRetrievalWorkflows')).toBeInTheDocument();
+  });
+
+  it('lists connectors (attack_discovery) with an "+ Add model" option', () => {
+    open();
 
     expect(mockUseLoadConnectors).toHaveBeenCalledWith(
       expect.objectContaining({ featureId: 'attack_discovery' })
     );
+
+    fireEvent.click(screen.getByTestId('adWorkerConnector'));
+    const listbox = screen.getByRole('listbox');
+    expect(listbox).toHaveTextContent('GPT-4o');
+    expect(listbox).toHaveTextContent('+ Add model');
   });
 
   it('closes the flyout via the footer button', () => {
-    renderButton();
-    fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
+    open();
     expect(screen.getByTestId('adWorkerConfigFlyout')).toBeInTheDocument();
-
     fireEvent.click(screen.getByTestId('adWorkerConfigClose'));
-
     expect(screen.queryByTestId('adWorkerConfigFlyout')).not.toBeInTheDocument();
   });
 });
