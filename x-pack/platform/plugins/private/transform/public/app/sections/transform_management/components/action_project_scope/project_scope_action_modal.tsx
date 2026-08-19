@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import type { TransformListRow } from '../../../../common';
 import type { ProjectScopeAction } from './use_project_scope_action';
 
-const MAX_PREVIEW_TRANSFORMS = 6;
+const MAX_TRANSFORM_LIST_HEIGHT = 200;
 
 const getEffectiveProjectRouting = (projectRouting?: ProjectRouting): ProjectRouting =>
   projectRouting ?? PROJECT_ROUTING.ORIGIN;
@@ -130,7 +130,6 @@ export const ProjectScopeActionModal: FC<ProjectScopeAction> = ({
   targetProjectRouting,
 }) => {
   const confirmModalTitleId = useGeneratedHtmlId();
-  const previewItems = items.slice(0, MAX_PREVIEW_TRANSFORMS);
 
   return (
     <EuiConfirmModal
@@ -168,8 +167,14 @@ export const ProjectScopeActionModal: FC<ProjectScopeAction> = ({
           )}
         </h5>
       </EuiTitle>
-      <EuiPanel color="subdued" paddingSize="s" hasShadow={false}>
-        {previewItems.map((item, index) => (
+      <EuiPanel
+        color="subdued"
+        css={{ maxHeight: MAX_TRANSFORM_LIST_HEIGHT, overflowY: 'auto' }}
+        data-test-subj="transformBulkProjectScopeModalTransformList"
+        paddingSize="s"
+        hasShadow={false}
+      >
+        {items.map((item, index) => (
           <React.Fragment key={item.id}>
             <EuiFlexGroup
               alignItems="center"
@@ -189,7 +194,7 @@ export const ProjectScopeActionModal: FC<ProjectScopeAction> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            {index < previewItems.length - 1 ? <EuiSpacer size="m" /> : null}
+            {index < items.length - 1 ? <EuiSpacer size="m" /> : null}
           </React.Fragment>
         ))}
       </EuiPanel>

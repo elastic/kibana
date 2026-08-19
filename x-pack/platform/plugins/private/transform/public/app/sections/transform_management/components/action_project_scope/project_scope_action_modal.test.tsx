@@ -13,21 +13,26 @@ import type { TransformListRow } from '../../../../common';
 import { ProjectScopeActionModal } from './project_scope_action_modal';
 import type { ProjectScopeAction } from './use_project_scope_action';
 
-const transformItem = {
-  id: 'transform-1',
-  config: {
-    id: 'transform-1',
-    source: { index: ['source-index'] },
-    dest: { index: 'dest-index' },
-  },
-} as unknown as TransformListRow;
+const createTransformItem = (id: string) =>
+  ({
+    id,
+    config: {
+      id,
+      source: { index: ['source-index'] },
+      dest: { index: 'dest-index' },
+    },
+  } as unknown as TransformListRow);
+
+const transformItem = createTransformItem('transform-1');
 
 const renderModal = ({
   closeModal = jest.fn(),
   confirmAndCloseModal = jest.fn(),
+  items = [transformItem],
 }: {
   closeModal?: jest.Mock;
   confirmAndCloseModal?: jest.Mock;
+  items?: TransformListRow[];
 } = {}) => {
   render(
     <ProjectScopeActionModal
@@ -48,7 +53,7 @@ const renderModal = ({
         ],
         closeModal,
         confirmAndCloseModal,
-        items: [transformItem],
+        items,
         originProjectId: 'origin-project',
         targetProjectRouting: '_id:linked-project',
       } as unknown as ProjectScopeAction)}
@@ -79,5 +84,18 @@ describe('ProjectScopeActionModal', () => {
 
     expect(closeModal).toHaveBeenCalledTimes(1);
     expect(confirmAndCloseModal).not.toHaveBeenCalled();
+  });
+
+  it('renders all affected transforms in a scrollable list', () => {
+    const items = Array.from({ length: 8 }, (_, index) =>
+      createTransformItem(`transform-${index + 1}`)
+    );
+
+    renderModal({ items });
+
+    expect(screen.getByTestId('transformBulkProjectScopeModalTransformList')).toBeInTheDocument();
+    expect(screen.getByText('transform-1')).toBeInTheDocument();
+    expect(screen.getByText('transform-7')).toBeInTheDocument();
+    expect(screen.getByText('transform-8')).toBeInTheDocument();
   });
 });
