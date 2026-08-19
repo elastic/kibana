@@ -31,6 +31,8 @@ export const ALERTING_ERROR_CODES = {
   RULE_VERSION_CONFLICT: 'RULE_VERSION_CONFLICT',
   /** The submitted rule body failed schema validation. */
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
+  /** A registered artifact's `data` failed its type-specific schema validation. */
+  INVALID_ARTIFACT_DATA: 'INVALID_ARTIFACT_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
   /** A signal rule's merged shape violates signal constraints. */
