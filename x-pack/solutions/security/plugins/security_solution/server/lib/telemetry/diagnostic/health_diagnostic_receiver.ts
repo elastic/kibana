@@ -322,7 +322,7 @@ export class CircuitBreakingQueryExecutorImpl implements CircuitBreakingQueryExe
 
   /**
    * Returns the list of indices to query based on the provided tiers.
-   * Dispatches on query version: v1 uses `query.index`, v2 uses resolved indices from Fleet.
+   * Uses `query.index` for direct-index queries; falls back to Fleet-resolved indices.
    * When running in serverless or the index is not managed by ILM, returns the base indices as-is.
    */
   async indicesFor(executableQuery: ExecutableQuery): Promise<string[]> {
