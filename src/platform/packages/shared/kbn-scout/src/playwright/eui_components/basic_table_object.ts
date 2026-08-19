@@ -52,15 +52,28 @@ export class EuiBasicTableObject extends BaseObject {
    * `expect(await table.cells('status')).toHaveText(['Running'])`).
    *
    * Resolves the column's position from EUI's own header cell
-   * (`tableHeaderCell_<field>_<index>`) via its native `cellIndex`, then reads
-   * the cell at that position in every row via `:nth-child` — this is the same
-   * positional alignment EUI itself relies on, so it holds regardless of a
-   * leading selection checkbox column. Throws (via a locator timeout) if no
-   * column with that `field` is rendered.
+   * (`tableHeaderCell_<field>_<index>`, matched exactly so a column named e.g.
+   * `status` doesn't also match a `status_detail` header) via its native
+   * `cellIndex`, then reads the cell at that position in every row via
+   * `:nth-child` — this is the same positional alignment EUI itself relies
+   * on, so it holds regardless of a leading selection checkbox column.
+   * Matches both `<td>` and `<th>`: EUI renders the `rowHeader` column's body
+   * cell as a `<th scope="row">` for accessibility, not a `<td>`. Throws if
+   * no column with that `field` is rendered.
    */
   async cells(field: string): Promise<Locator> {
-    const header = this.root.locator(`[data-test-subj^="tableHeaderCell_${field}_"]`);
-    const cellIndex = await header.evaluate((el) => (el as HTMLTableCellElement).cellIndex);
-    return this.rows.locator(`td:nth-child(${cellIndex + 1})`);
+    const escaped = field.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const cellIndex = await this.root.evaluate((tableEl, pattern) => {
+      const regex = new RegExp(`^tableHeaderCell_${pattern}_\\d+$`);
+      const headers = Array.from(tableEl.querySelectorAll('thead th, thead td'));
+      const header = headers.find((el) => regex.test(el.getAttribute('data-test-subj') ?? '')) as
+        | HTMLTableCellElement
+        | undefined;
+      if (!header) {
+        throw new Error(`EuiBasicTableObject.cells: no column with field "${pattern}" found.`);
+      }
+      return header.cellIndex;
+    }, escaped);
+    return this.rows.locator(`:is(td, th):nth-child(${cellIndex + 1})`);
   }
 }
