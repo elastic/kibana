@@ -134,7 +134,13 @@ export function WorkflowsEmptyState({ onCreateWorkflow }: WorkflowsEmptyStatePro
 export function WorkflowsEmptyStateReadOnly() {
   return (
     <EuiEmptyPrompt
-      icon={<EuiIllustration type={relevanceHandTouch} alt="" style={{ maxInlineSize: 240, marginInline: 'auto' }} />}
+      icon={
+        <EuiIllustration
+          type={relevanceHandTouch}
+          alt=""
+          style={{ maxInlineSize: 240, marginInline: 'auto' }}
+        />
+      }
       title={
         <h2 style={{ whiteSpace: 'nowrap' }}>
           <FormattedMessage
