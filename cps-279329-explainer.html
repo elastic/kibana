@@ -178,6 +178,21 @@ body[data-state=healthy] .node-error .node-explain{opacity:.5}
 .cmp-why>div{padding:.3rem .9rem .6rem;border:none;font-size:.75rem;color:var(--muted);
   line-height:1.45;font-style:italic}
 
+/* what still works table */
+.works-tbl{border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:.75rem;font-size:.82rem}
+.works-hdr,.works-row{display:grid;grid-template-columns:1.3fr 2fr 1fr}
+.works-hdr{border-bottom:2px solid var(--border)}
+.works-hdr>div{padding:.5rem .85rem;font-weight:600;font-size:.79rem;background:var(--surface2)}
+.works-row{border-top:1px solid var(--border)}
+.works-row:first-of-type{border-top:none}
+.works-row>div{padding:.5rem .85rem}
+.works-wk{font-weight:500;font-size:.82rem}
+.works-wd{color:var(--muted);font-size:.79rem;line-height:1.5}
+.works-ws{font-family:'Menlo','Consolas',monospace;font-size:.71rem;color:var(--muted)}
+.result-box{margin-top:.75rem;padding:.65rem .9rem;border-radius:8px;font-size:.83rem}
+.result-box.ok{background:var(--green-bg);border:1px solid var(--green-bd);color:var(--green)}
+.result-box.warn{background:var(--amber-bg);border:1px solid var(--amber-bd);color:var(--amber)}
+
 /* repro */
 .repro{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;
   padding:.9rem;font-family:'Menlo','Consolas',monospace;font-size:.78rem;
@@ -621,7 +636,66 @@ body[data-state=healthy] .node-error .node-explain{opacity:.5}
       <code>status='error'</code>. The UI cannot distinguish a cluster failure from "no data".</div>
     </div>
   </div>
+  <div class="bug-card">
+    <div class="bug-num">5</div>
+    <div>
+      <div class="bug-title">Page filters make a second, independent field-caps trip to the same brownout</div>
+      <div class="bug-desc"><code>AlertFilterControls</code> → <code>useAlertsDataView</code> → <code>dataViewsService.create()</code>
+      performs its own <code>_fields_for_wildcard</code> call with global routing — hitting the paused cluster a
+      second time. It survives only by accident: <code>refreshFields</code> swallows the error when <code>displayErrors</code>
+      is true (<code>data_views.ts:708–734</code>), so <code>create()</code> still resolves — with an empty field list.
+      The page-filter option lists come back empty and the filter row shows a spinner for the full 60–90 s window.
+      Layers B and C each patch one call site; Layer A is the only fix that covers both.</div>
+    </div>
+  </div>
 </div>
+
+<h2>What still works during the brownout</h2>
+<p class="phase-intro">When the brownout occurs and the DataView resolves with <code>fields={}</code> and <code>matchedIndices=[]</code>, these paths are unaffected. This is why Layer C alone restores analyst access.</p>
+<div class="works-tbl">
+  <div class="works-hdr">
+    <div>What</div>
+    <div>Why it still works</div>
+    <div>Source</div>
+  </div>
+  <div class="works-row">
+    <div class="works-wk"><code>AlertsPageContent</code></div>
+    <div class="works-wd">Pure pass-through — never reads a property off <code>dataView</code> itself; only forwards it to children</div>
+    <div class="works-ws">content.tsx:58–141</div>
+  </div>
+  <div class="works-row">
+    <div class="works-wk">Alert rows</div>
+    <div class="works-wd">Fetched via <code>ruleTypeIds</code> + <code>consumers</code> + <code>projectRouting={PROJECT_ROUTING.ORIGIN}</code> — already origin-scoped, never touches the DataView's index pattern</div>
+    <div class="works-ws">alerts_table/index.tsx:471–473</div>
+  </div>
+  <div class="works-row">
+    <div class="works-wk">Table columns</div>
+    <div class="works-wd">Static default from <code>getColumns(license)</code> — not derived from the field list</div>
+    <div class="works-ws">alerts_table/index.tsx:273–276</div>
+  </div>
+  <div class="works-row">
+    <div class="works-wk">Empty <code>browserFields</code></div>
+    <div class="works-wd">Shared table falls back to the raw column list rather than rendering nothing</div>
+    <div class="works-ws">use_columns.ts:165–167</div>
+  </div>
+  <div class="works-row">
+    <div class="works-wk"><code>getIndexPattern()</code> / <code>title</code></div>
+    <div class="works-wd">Set from the saved object <em>before</em> the field-caps fetch — the catch block never touches it</div>
+    <div class="works-ws">data_views.ts:931, :974–980</div>
+  </div>
+  <div class="works-row">
+    <div class="works-wk">Grouping guard</div>
+    <div class="works-wd"><code>if (isEmpty(dataViewTitle)) return null</code> — the one hard blocker, but <code>title</code> is populated, so it doesn't fire</div>
+    <div class="works-ws">alerts_grouping.tsx:439–441</div>
+  </div>
+</div>
+<div class="result-box ok"><strong>An empty DataView degrades the page — it does not break it.</strong> Layer C alone turns a full-page red error into a working alert table.</div>
+<p style="font-size:.8rem;color:var(--muted);margin-top:.65rem;line-height:1.55">
+  What goes dark without A or B: KQL autocomplete (field suggestions dead); field browser and cell actions
+  (driven off <code>browserFields={}</code> — see Layer C for a one-line fix); grouping field-value flattening
+  (<code>alerts_grouping.tsx:235–238</code>); page-filter option lists (the <code>AlertFilterControls</code>
+  second field-caps trip, bug #5 above).
+</p>
 
 <h2>Proposed fix — three layers</h2>
 <div class="fixes">
@@ -631,24 +705,33 @@ body[data-state=healthy] .node-error .node-explain{opacity:.5}
       <strong>Layer A — Per-DataView <code>projectRouting</code></strong>
     </div>
     <div class="fix-body">
-      Add <code>projectRouting?: string</code> to <code>DataViewSpec</code> and <code>AbstractDataView</code>.
-      Thread it through <code>refreshFieldSpecMap</code> and <code>getFieldsAndIndicesForDataView</code>.
-      Set <code>PROJECT_ROUTING.ORIGIN = '_alias:_origin'</code> when creating the security alert data view.
+      Add <code>projectRouting?: string</code> to <code>DataViewSpec</code>, <code>DataViewAttributes</code>, and <code>AbstractDataView</code>,
+      following the <code>allowHidden</code> precedent (<code>common/types.ts:168/:570</code>, <code>abstract_data_views.ts:137</code>).
+      The two missing links are: <code>initFromSavedObjectLoadFields</code> (<code>data_views.ts:905–913</code>) builds the
+      <code>getFieldsForWildcard</code> options but omits <code>projectRouting</code>; and <code>getFieldsAndIndicesForDataView</code>
+      (<code>data_views.ts:639–652</code>), used by <code>refreshFields</code>, omits it too.
+      Each is a one-line addition — the heavy lifting is the spec/attribute plumbing.
+      Set <code>PROJECT_ROUTING.ORIGIN</code> at <code>createAndSave</code> time (<code>index.ts:122–131</code>)
+      and add a backfill branch for existing saved objects, mirroring the name-fixup at <code>index.ts:150–154</code>.
       <br><br>
-      <em style="color:var(--muted);font-size:.8rem">In-memory only — not stored in DataViewAttributes → no saved-object migration needed.
-      The alert data view is recreated by the init flow each time.</em>
+      <em style="color:var(--muted);font-size:.8rem">Stored in <code>DataViewAttributes</code> — no mapping change or migration required.
+      The saved-object type declares <code>mappings:&nbsp;{&nbsp;dynamic:&nbsp;false&nbsp;}</code> with only <code>title</code>/<code>type</code>/<code>name</code> indexed
+      (<code>server/saved_objects/data_views.ts:39–52</code>), so new attributes are stored without a schema change.
+      This is the same approach used by <code>allowHidden</code>. Note: the content-management schema
+      (<code>cm_services.ts</code>) uses <code>{&nbsp;unknowns:&nbsp;'forbid'&nbsp;}</code> and must be updated too.</em>
       <div class="fix-files">
         <span class="fix-file">src/platform/plugins/shared/data_views/common/types.ts</span>
         <span class="fix-file">src/platform/plugins/shared/data_views/common/data_views/abstract_data_views.ts</span>
         <span class="fix-file">src/platform/plugins/shared/data_views/common/data_views/data_views.ts</span>
+        <span class="fix-file">src/platform/plugins/shared/data_views/server/content_management/schema/v1/cm_services.ts</span>
         <span class="fix-file">x-pack/solutions/security/plugins/security_solution/server/lib/initialization/flows/initialize_security_data_views/index.ts</span>
       </div>
       <div class="fix-risks">
         <div class="fix-risks-title">Risks &amp; open questions</div>
         <ul>
-          <li><strong>Stale existing data views.</strong> The field is in-memory only and set at creation time. Alert data views already saved on disk won't carry <code>projectRouting</code> until the init flow recreates them on the next Kibana restart. The old fan-out behaviour applies in the window between deployment and restart.</li>
-          <li><strong>Coverage is narrow.</strong> This only fixes the security alert data view. Any other data view backed by origin-local indices (e.g. future plugin data views) remains vulnerable unless its creation code is similarly updated.</li>
-          <li><strong>API surface change.</strong> <code>DataViewSpec</code> gains a new optional field. Any code that copies or clones a spec (serialisers, migration helpers, test fixtures) should be audited to ensure the field is not silently dropped.</li>
+          <li><strong>Backfill needed for existing saved objects.</strong> Alert data view saved objects already on disk won't carry <code>projectRouting</code> until the backfill path runs on the next Kibana restart. The fan-out behaviour applies in the window before restart — but the existing name-fixup pattern (<code>index.ts:150–154</code>) gives a clear template: read with <code>getDataViewLazy</code> (no field-caps fetch), set the attribute, call <code>updateSavedObject</code>.</li>
+          <li><strong>Coverage is narrow.</strong> This fixes the security alert and attack data views. Any other data view backed by origin-local indices remains vulnerable unless its creation code is similarly updated.</li>
+          <li><strong>API surface change + CM schema.</strong> <code>DataViewSpec</code> gains a new optional field. Code that clones specs should be audited. The CM schema must be extended to avoid <code>unknowns:&nbsp;'forbid'</code> validation failures on create/update.</li>
         </ul>
       </div>
     </div>
@@ -659,18 +742,25 @@ body[data-state=healthy] .node-error .node-explain{opacity:.5}
       <strong>Layer B — Server-side origin fallback on cross-cluster failure</strong>
     </div>
     <div class="fix-body">
-      In the <code>fields_for.ts</code> catch block: if routing was cross-project and the error is not
-      <code>isNoMatchingIndicesError</code>, retry with <code>projectRouting:'_alias:_origin'</code>.
-      Return local fields with header <code>x-cps-partial-result: remote-cluster-unavailable</code>.
+      Stop collapsing every failure class into 404. Add <code>isEsTransportFailure</code> to <code>errors.ts</code>
+      alongside the existing <code>isNoMatchingIndicesError</code> helper, and use it in <code>convertEsError</code>
+      to stamp a machine-readable <code>code: 'es_unreachable'</code> on transport failures (rather than boomifying them to
+      a generic 500 that <code>fields_for.ts</code> then launders into a 404).
+      On cross-project routing, bound the first attempt with a configurable timeout + <code>maxRetries:&nbsp;0</code>,
+      then fall back to <code>projectRouting:'_alias:_origin'</code> on failure and return origin fields with response
+      header <code>x-kbn-fields-degraded: cross_project_unavailable</code>.
       <div class="fix-files">
+        <span class="fix-file">src/platform/plugins/shared/data_views/server/fetcher/lib/errors.ts</span>
+        <span class="fix-file">src/platform/plugins/shared/data_views/server/fetcher/lib/es_api.ts</span>
         <span class="fix-file">src/platform/plugins/shared/data_views/server/rest_api_routes/internal/fields_for.ts</span>
       </div>
       <div class="fix-risks">
         <div class="fix-risks-title">Risks &amp; open questions</div>
         <ul>
-          <li><strong>Extra latency on every cross-cluster error.</strong> A failed primary call now costs a full extra ES round-trip before returning. On a brownout this adds ~30s to the wait; on a transient connection error it adds however long the origin retry takes. Any consumer on a cross-project data view pays this penalty.</li>
-          <li><strong>Origin retry can also fail.</strong> If the origin cluster is unavailable (not just the linked one), the retry fails with a second error. The user receives the same opaque 404 with no indication of which cluster failed or why.</li>
-          <li><strong><code>x-cps-partial-result</code> header is currently unread.</strong> No existing client code inspects this header. Until a consumer is added (likely as part of Layer C), the header is informational only — the client treats the partial-result response identically to a full-result response, so users get no degradation warning from this layer alone.</li>
+          <li><strong>Budget reduces worst-case hang.</strong> With <code>maxRetries:0</code> + a configurable timeout (default 10 s), the cross-project attempt costs at most 10 s rather than 90 s, then falls back immediately. Much better than today — but the fallback still adds origin-fetch latency. Any consumer on a cross-project data view sees this.</li>
+          <li><strong>Origin retry can also fail.</strong> If the origin cluster is unavailable, the retry fails too. The user now gets a proper status code and machine-readable error rather than a bare 404, but the page still doesn't load.</li>
+          <li><strong><code>x-kbn-fields-degraded</code> header is currently unread.</strong> No existing client code inspects this header. Until a consumer is added (as part of Layer C's callout messaging), the degradation signal only appears in server logs. Layer C's callout fires on <code>!hasMatchedIndices()</code> regardless; the header allows it to give a more precise message once B lands.</li>
+          <li><strong>Status-code change is a contract change.</strong> <code>fields_for.ts</code> is an internal route, but any caller treating any 404 from it as "no indices" now sees 503/500 for transport failures. The <code>data_views_api_client</code> gate already requires <code>attributes.code==='no_matching_indices'</code> so it is safe; FTR/Scout api-integration tests asserting 404 for timeout scenarios need updating.</li>
         </ul>
       </div>
     </div>
@@ -684,25 +774,52 @@ body[data-state=healthy] .node-error .node-explain{opacity:.5}
       Hard-fail only on <code>status==='error'</code>. When <code>status==='ready' &amp;&amp; !hasMatchedIndices()</code>,
       render <code>AlertsPageContent</code> with a warning <code>EuiCallOut</code> instead of the
       full-page danger prompt. Local alerts are available and should be shown.
+      <br><br>
+      <strong>Bonus — recover the field browser for free.</strong> <code>alerts_table/index.tsx:278–281</code> computes
+      <code>finalBrowserFields</code> from <code>useBrowserFields(dataView)</code>, which returns <code>{}</code> when the data view is
+      empty. The shared table's fallback field-fetch (<code>alerts_table.tsx:330–337</code>) is gated on
+      <code>!alertsFieldsProp</code> — but an empty object is not nullish, so the fallback stays disabled.
+      Passing <code>undefined</code> instead of <code>{}</code> when <code>!dataView.hasMatchedIndices()</code> re-enables
+      <code>useFetchAlertsFieldsQuery</code>, which goes to <code>/internal/rac/alerts/browser_fields</code>
+      (<code>fetch_alerts_fields.ts:16–17</code>) — a route the CPS routing path never touches.
+      This recovers the field browser, cell actions, and column type metadata without needing Layer B.
       <div class="fix-files">
         <span class="fix-file">x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts/wrapper.tsx</span>
+        <span class="fix-file">x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/index.tsx</span>
       </div>
       <div class="fix-risks">
         <div class="fix-risks-title">Risks &amp; open questions</div>
         <ul>
-          <li><strong>Cannot distinguish brownout from legitimately empty indices.</strong> Both produce <code>status==='ready' &amp;&amp; !hasMatchedIndices()</code>. Without Layer B's <code>x-cps-partial-result</code> header flowing through to the component, the warning callout fires in both cases — a healthy deployment with no alert data yet would show a misleading "linked project unavailable" warning.</li>
-          <li><strong>Silent failure risk.</strong> Replacing a full-page error with a subtle callout means analysts may not notice the warning and operate on an empty alerts table, assuming there are simply no alerts rather than that data is missing due to a cluster issue.</li>
-          <li><strong>Warning text needs a clear signal to key off.</strong> Until the partial-result header (from Layer B) or a typed error reaches the component, any warning text is speculative. The component would need to be updated again once Layer B lands to accurately describe what's wrong.</li>
+          <li><strong>Cannot cleanly distinguish brownout from legitimately empty indices.</strong> Both produce <code>status==='ready' &amp;&amp; !hasMatchedIndices()</code>. The callout fires in both cases. A fresh deployment with no alert data yet would show a misleading warning. Mitigation: make the callout copy specific — show <code>dataView.getIndexPattern()</code> and a link to Data View Management so the analyst can tell the difference. Layer B's <code>x-kbn-fields-degraded</code> header allows a more precise message once that lands.</li>
+          <li><strong>Genuine misconfiguration becomes less visible.</strong> A data view whose pattern truly matches nothing (typo'd index, deleted index, revoked privileges) currently produces an unmissable red page. After C it produces an amber callout plus zero rows. The analyst must connect the two signals. Non-dismissible callout text that includes the pattern string is the recommended mitigation.</li>
+          <li><strong>Warning callout wording can be improved once Layer B lands.</strong> Without B's header the callout cannot yet say "linked project unavailable" with certainty. The initial wording should be cautious ("Some fields are unavailable — alerts are still shown"). Refine after B ships.</li>
         </ul>
       </div>
     </div>
   </div>
 
   <div class="fix-interaction">
-    <div class="fix-interaction-title">Layer interaction — how they fit together</div>
-    <p style="margin-bottom:.5rem"><strong>B + C together are more coherent than either alone.</strong> Layer B makes the server return local fields on cross-cluster failure (so the DataView has matched indices and the callout in Layer C never fires spuriously). Layer B also adds the <code>x-cps-partial-result</code> header that Layer C's component can key off to show an accurate "linked project unavailable" message rather than a generic warning. Without B, Layer C's callout fires on both failure and empty-data scenarios. Without C, Layer B's header has no UI consumer.</p>
-    <p style="margin-bottom:.5rem"><strong>Layer A alone is the cleanest fix for this specific data view</strong> but leaves the server error handling unchanged — a brownout still causes a 30-second hang for the retry path, and any other data view that isn't explicitly tagged remains vulnerable.</p>
-    <p><strong>Recommended landing order:</strong> C first (immediate analyst relief, no API change, low risk), then B (server fix, exposes the partial-result signal to C), then A (root fix, eliminates the fan-out entirely for origin-local views and makes B's retry path unreachable for the alert data view).</p>
+    <div class="fix-interaction-title">Layer interaction — recommended landing order: C → B → A</div>
+    <p style="margin-bottom:.6rem"><strong>Why C first?</strong> Not intuition — code evidence.
+    The alert rows are already fetched via <code>ruleTypeIds</code> + <code>projectRouting={PROJECT_ROUTING.ORIGIN}</code>
+    at <code>alerts_table/index.tsx:473</code>, independently of the DataView's field list.
+    The brownout ate the <em>field metadata</em>, not the <em>data</em>.
+    C turns a full-page red error into a working alert table with a warning callout — analyst triage is restored.
+    C also carries the <code>browserFields={undefined}</code> fix (Layer C above) that re-enables the shared table's own
+    <code>/internal/rac/alerts/browser_fields</code> fetch, recovering the field browser and cell actions without B.
+    C is ~20 lines in a single Security-owned file with zero platform surface area.</p>
+    <p style="margin-bottom:.6rem"><strong>Why B second?</strong> B's primary job is not to make C work better — it is to fix the
+    error-classification bug that affects <em>every consumer</em> of <code>fields_for.ts</code>, not just this page.
+    It also bounds the worst-case brownout hang (configurable timeout + <code>maxRetries:0</code> on the cross-project
+    attempt) and provides the <code>x-kbn-fields-degraded</code> header that allows C's callout to say "linked project
+    unavailable" with precision rather than "some fields unavailable" as a guess.
+    B touches the <code>data_views</code> platform plugin and needs a new config key, so it lands in a separate PR.</p>
+    <p><strong>Why A last?</strong> A is the root fix — it eliminates the fan-out entirely for the alerts data view,
+    making B's retry path unreachable and C's degraded-state callout permanently quiet.
+    Despite spanning two teams (data_views platform + security server), the code change is smaller than it looks:
+    two one-line additions in <code>data_views.ts</code> plus spec/attribute plumbing and a CM schema line.
+    No mapping change, no migration. A is also the only layer that covers bug #5 (the <code>AlertFilterControls</code>
+    second field-caps trip) — C and B each patch one call site, while A patches both at once.</p>
   </div>
 </div>
 
