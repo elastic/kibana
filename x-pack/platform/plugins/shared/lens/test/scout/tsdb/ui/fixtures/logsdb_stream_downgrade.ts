@@ -252,7 +252,7 @@ export const createLogsDBScenario = ({ title, type }: LogsDBScenarioConfig) => {
   };
 
   const assertEsqlVisualization = async ({ page, pageObjects }: LensFixtures): Promise<void> => {
-    await page.gotoApp('discover');
+    await pageObjects.discover.goto({ queryMode: 'esql' });
     const esqlQuery = `from ${indexes
       .map(({ index }) => index)
       .join(', ')} | stats averageB = avg(bytes) by extension`;
