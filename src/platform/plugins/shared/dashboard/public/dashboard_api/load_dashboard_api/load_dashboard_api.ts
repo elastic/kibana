@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
-
 import type { EuiFlyoutProps } from '@elastic/eui';
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
 import { asyncForEach } from '@kbn/std';
@@ -94,14 +92,11 @@ export async function loadDashboardApi({
     creationOptions,
     panelFlyoutType,
     incomingEmbeddables,
-    initialState: omit(
-      {
-        ...getLastSavedState(readResult),
-        ...unsavedChanges,
-        ...overrideState,
-      },
-      'viewMode'
-    ),
+    initialState: {
+      ...getLastSavedState(readResult),
+      ...unsavedChanges,
+      ...overrideState,
+    },
     readResult,
     savedObjectId,
     user,
