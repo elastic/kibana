@@ -70,6 +70,8 @@ describe('useInstallRuleTemplate', () => {
   const mockCreateRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const mockNavigateToUrl = jest.fn();
+  const mockPrepend = jest.fn((path: string) => path);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -83,11 +85,17 @@ describe('useInstallRuleTemplate', () => {
       if (service === 'notifications') {
         return { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } } as any;
       }
+      if (service === 'application') {
+        return { navigateToUrl: mockNavigateToUrl } as any;
+      }
+      if (service === 'http') {
+        return { basePath: { prepend: mockPrepend } } as any;
+      }
       return undefined as any;
     });
   });
 
-  it('creates a rule from the template payload and shows a success toast', async () => {
+  it('creates a rule from the template payload via useCreateRule', async () => {
     mockCreateRule.mockResolvedValue(mockRuleResponse);
     const { result } = renderHook(() => useInstallRuleTemplate(), { wrapper: createWrapper() });
 
@@ -95,7 +103,16 @@ describe('useInstallRuleTemplate', () => {
 
     await waitFor(() => {
       expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayload);
-      expect(mockAddSuccess).toHaveBeenCalledWith('Rule "CPU usage" installed successfully');
+      expect(mockAddSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Rule "CPU usage" created successfully',
+          actionProps: {
+            primary: expect.objectContaining({
+              children: 'View rule',
+            }),
+          },
+        })
+      );
       expect(mockAddError).not.toHaveBeenCalled();
     });
   });
@@ -109,7 +126,7 @@ describe('useInstallRuleTemplate', () => {
 
     await waitFor(() => {
       expect(mockAddError).toHaveBeenCalledWith(error, {
-        title: 'Template not installed',
+        title: 'Rule not created',
         toastMessage: 'Network down',
       });
       expect(mockAddSuccess).not.toHaveBeenCalled();

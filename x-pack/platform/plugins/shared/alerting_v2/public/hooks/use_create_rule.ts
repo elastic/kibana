@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { MouseEvent } from 'react';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import type { CreateRuleData } from '@kbn/alerting-v2-schemas';
 import { RulesApi } from '../services/rules_api';
+import { paths } from '../constants';
 import { ruleKeys } from './query_key_factory';
 import { invalidateRulesContentList } from './invalidate_rules_content_list';
 import { enrichHttpErrorMessage } from '../utils/enrich_http_error';
@@ -18,17 +20,33 @@ import { getFriendlyRuleHttpErrorToastMessage } from '../utils/friendly_http_err
 export const useCreateRule = () => {
   const rulesApi = useService(RulesApi);
   const { toasts } = useService(CoreStart('notifications'));
+  const { navigateToUrl } = useService(CoreStart('application'));
+  const { basePath } = useService(CoreStart('http'));
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (payload: CreateRuleData) => rulesApi.createRule(payload),
     onSuccess: (data) => {
-      toasts.addSuccess(
-        i18n.translate('xpack.alertingV2.hooks.useCreateRule.successMessage', {
+      const href = basePath.prepend(paths.ruleDetails(data.id));
+      toasts.addSuccess({
+        title: i18n.translate('xpack.alertingV2.hooks.useCreateRule.successMessage', {
           defaultMessage: 'Rule "{ruleName}" created successfully',
           values: { ruleName: data.metadata.name },
-        })
-      );
+        }),
+        actionProps: {
+          primary: {
+            children: i18n.translate('xpack.alertingV2.hooks.useCreateRule.viewRuleButtonLabel', {
+              defaultMessage: 'View rule',
+            }),
+            href,
+            onClick: (event: MouseEvent) => {
+              event.preventDefault();
+              void navigateToUrl(href);
+            },
+            'data-test-subj': 'alertingV2ViewRuleToastLink',
+          },
+        },
+      });
       void invalidateRulesContentList();
       queryClient.invalidateQueries(ruleKeys.lists());
       queryClient.invalidateQueries(ruleKeys.allTags());

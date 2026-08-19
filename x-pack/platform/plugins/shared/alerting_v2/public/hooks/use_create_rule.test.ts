@@ -61,6 +61,8 @@ describe('useCreateRule', () => {
   const mockCreateRule = jest.fn();
   const mockAddSuccess = jest.fn();
   const mockAddError = jest.fn();
+  const mockNavigateToUrl = jest.fn();
+  const mockPrepend = jest.fn((path: string) => path);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -74,6 +76,12 @@ describe('useCreateRule', () => {
       if (service === 'notifications') {
         return { toasts: { addSuccess: mockAddSuccess, addError: mockAddError } } as any;
       }
+      if (service === 'application') {
+        return { navigateToUrl: mockNavigateToUrl } as any;
+      }
+      if (service === 'http') {
+        return { basePath: { prepend: mockPrepend } } as any;
+      }
       return undefined as any;
     });
   });
@@ -86,9 +94,24 @@ describe('useCreateRule', () => {
 
     await waitFor(() => {
       expect(mockCreateRule).toHaveBeenCalledWith(mockCreatePayload);
-      expect(mockAddSuccess).toHaveBeenCalledWith('Rule "My CPU Alert" created successfully');
+      expect(mockAddSuccess).toHaveBeenCalledWith({
+        title: 'Rule "My CPU Alert" created successfully',
+        actionProps: {
+          primary: expect.objectContaining({
+            children: 'View rule',
+            href: '/app/management/alertingV2/rules/rule-1',
+            'data-test-subj': 'alertingV2ViewRuleToastLink',
+          }),
+        },
+      });
       expect(mockAddError).not.toHaveBeenCalled();
     });
+
+    const toast = mockAddSuccess.mock.calls[0][0];
+    const preventDefault = jest.fn();
+    toast.actionProps.primary.onClick({ preventDefault });
+    expect(preventDefault).toHaveBeenCalled();
+    expect(mockNavigateToUrl).toHaveBeenCalledWith('/app/management/alertingV2/rules/rule-1');
   });
 
   it('should surface the server error message in the modal and a friendly status in the toast', async () => {
