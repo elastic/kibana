@@ -38,7 +38,7 @@ export class IndexDataVisualizer {
     await this.randomSamplerOptionsSelect.waitFor({ state: 'hidden', timeout: 2_000 });
     await expect(this.randomSamplerOptionsButton).toBeEnabled({ timeout: 10_000 });
     await this.randomSamplerOptionsButton.click();
-    await this.randomSamplerOptionsSelect.waitFor({ state: 'visible', timeout: 5_000 });
+    await this.randomSamplerOptionsSelect.waitFor({ state: 'visible' });
   }
 
   async openRandomSamplerPopover() {
@@ -52,7 +52,7 @@ export class IndexDataVisualizer {
       await this.openRandomSamplerPopoverOnce();
       await this.randomSamplerOptionsSelect.selectOption(RANDOM_SAMPLER_OPTION_VALUES[option]);
       await this.page.keyboard.press('Escape');
-      await this.randomSamplerOptionsSelect.waitFor({ state: 'hidden', timeout: 5_000 });
+      await this.randomSamplerOptionsSelect.waitFor({ state: 'hidden' });
     }).toPass({ timeout: 20_000 });
   }
 

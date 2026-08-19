@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout';
+import { KibanaCodeEditorWrapper } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
 export class DataVisualizerSelector {
@@ -20,8 +21,8 @@ export class DataVisualizerSelector {
   private readonly dataSourceSelectorButton: Locator;
   private readonly fileUploadPage: Locator;
   private readonly esqlEditor: Locator;
-  private readonly esqlEditorTextarea: Locator;
   private readonly refreshPageButton: Locator;
+  private readonly codeEditor: KibanaCodeEditorWrapper;
 
   constructor(private readonly page: ScoutPage) {
     this.importDataCard = this.page.testSubj.locator('mlDataVisualizerCardImportData');
@@ -35,8 +36,8 @@ export class DataVisualizerSelector {
     this.dataSourceSelectorButton = this.page.testSubj.locator('mlDataSourceSelectorButton');
     this.fileUploadPage = this.page.testSubj.locator('dataVisualizerPageFileUpload');
     this.esqlEditor = this.page.testSubj.locator('DataVisualizerESQLEditor');
-    this.esqlEditorTextarea = this.esqlEditor.locator('.monaco-editor textarea');
     this.refreshPageButton = this.page.testSubj.locator('~mlDatePickerRefreshPageButton');
+    this.codeEditor = new KibanaCodeEditorWrapper(page);
   }
 
   async waitForImportDataCard() {
@@ -80,13 +81,17 @@ export class DataVisualizerSelector {
 
   async setESQLQuery(query: string) {
     await this.esqlEditor.waitFor({ state: 'visible' });
+    await this.codeEditor.waitCodeEditorReady('DataVisualizerESQLEditor');
     await this.refreshPageButton.waitFor({ state: 'visible' });
 
-    await this.esqlEditorTextarea.click({ force: true });
-    await this.esqlEditorTextarea.fill(query, { force: true });
+    // Programmatically set the Monaco model (Discover/Streams Scout pattern). fill() and
+    // insertText() can update the hidden textarea without firing onChange, so localQuery
+    // never updates and the date picker stays on Refresh.
+    await expect(async () => {
+      await this.codeEditor.setCodeEditorValue(query);
+      await expect(this.refreshPageButton.filter({ hasText: 'Update' })).toBeVisible();
+    }).toPass({ timeout: 30_000 });
 
-    // Refresh is a no-op until localQuery changes and the button label becomes Update.
-    await this.refreshPageButton.filter({ hasText: 'Update' }).waitFor({ state: 'visible' });
     await this.refreshPageButton.click();
   }
 

@@ -6,20 +6,25 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { waitForKibanaLoadingToFinish } from '../kibana_loading';
 
 export class MlNavigation {
   constructor(private readonly page: ScoutPage) {}
 
   async navigateToMl() {
     await this.page.gotoApp('ml');
-    await this.page.testSubj.locator('mlApp').waitFor({ state: 'visible' });
+    await waitForKibanaLoadingToFinish(this.page);
+    await this.page.testSubj.locator('mlApp').waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async navigateToDataVisualizer() {
     // Path-based deep link: /app/ml/datavisualizer
     await this.page.gotoApp('ml/datavisualizer');
-    await this.page.testSubj.locator('mlApp').waitFor({ state: 'visible' });
-    await this.page.testSubj.locator('mlPageDataVisualizerSelector').waitFor({ state: 'visible' });
+    await waitForKibanaLoadingToFinish(this.page);
+    await this.page.testSubj.locator('mlApp').waitFor({ state: 'visible', timeout: 30_000 });
+    await this.page.testSubj
+      .locator('mlPageDataVisualizerSelector')
+      .waitFor({ state: 'visible', timeout: 30_000 });
   }
 
   async navigateToDataDrift() {

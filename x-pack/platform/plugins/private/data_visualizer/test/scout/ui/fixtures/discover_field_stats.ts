@@ -40,9 +40,22 @@ const VIEW_MODE_TOGGLE_BUTTON = 'dscViewModeToggleButton';
 const VIEW_MODE_TOGGLE_SELECTABLE = 'dscViewModeToggleSelectable';
 const VIEW_MODE_FIELD_STATS_OPTION = 'dscViewModeFieldStatsOption';
 
+const waitForDiscoverResultsToSettle = async (page: ScoutPage) => {
+  const loadingHits = page.testSubj
+    .locator('discoverQueryTotalHits')
+    .and(page.locator('[data-fetch-status="loading"]'));
+  await loadingHits.waitFor({ state: 'hidden', timeout: 30_000 });
+  await page.testSubj.locator('unifiedHistogramRendered').waitFor({ state: 'visible' });
+};
+
 const openViewModeMenu = async (page: ScoutPage) => {
+  const selectable = page.testSubj.locator(VIEW_MODE_TOGGLE_SELECTABLE);
+  if (await selectable.isVisible()) {
+    return;
+  }
+
   await page.testSubj.click(VIEW_MODE_TOGGLE_BUTTON);
-  await page.testSubj.locator(VIEW_MODE_TOGGLE_SELECTABLE).waitFor({ state: 'visible' });
+  await selectable.waitFor({ state: 'visible' });
 };
 
 export const assertViewModeToggleNotExists = async (page: ScoutPage) => {
@@ -68,9 +81,22 @@ export const assertFieldStatsTabNotExists = async (page: ScoutPage) => {
 };
 
 export const clickViewModeFieldStatsButton = async (page: ScoutPage) => {
-  await openViewModeMenu(page);
-  await page.testSubj.click(VIEW_MODE_FIELD_STATS_OPTION);
-  await expect(page.testSubj.locator('dscFieldStatsEmbeddedContent')).toBeVisible({
-    timeout: 2000,
-  });
+  const fieldStatsContent = page.testSubj.locator('dscFieldStatsEmbeddedContent');
+  const fieldStatsOption = page.testSubj.locator(VIEW_MODE_FIELD_STATS_OPTION);
+
+  await waitForDiscoverResultsToSettle(page);
+
+  await expect(async () => {
+    if (await fieldStatsContent.isVisible()) {
+      return;
+    }
+
+    await openViewModeMenu(page);
+    await fieldStatsOption.waitFor({ state: 'visible' });
+    // Histogram / document-table layout shifts keep this popover option "not
+    // stable" for Playwright's actionability check. Dispatch the click once the
+    // option is visible, then retry until Field statistics is selected.
+    await fieldStatsOption.dispatchEvent('click');
+    await fieldStatsContent.waitFor({ state: 'visible', timeout: 10_000 });
+  }).toPass({ timeout: 30_000 });
 };

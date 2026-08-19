@@ -100,6 +100,7 @@ const runDashboardFieldStatsTests = async ({
       from: testData.DISCOVER_TIME_RANGE.start,
       to: testData.DISCOVER_TIME_RANGE.end,
     });
+    await pageObjects.discover.waitUntilSearchingHasFinished();
 
     await clickViewModeFieldStatsButton(page);
     await pageObjects.discover.saveSearchAsNew(savedSearchTitle);
@@ -171,6 +172,7 @@ const runDashboardFieldStatsTests = async ({
         from: testData.DISCOVER_TIME_RANGE.start,
         to: testData.DISCOVER_TIME_RANGE.end,
       });
+      await pageObjects.discover.waitUntilSearchingHasFinished();
 
       await assertViewModeToggleExists(page);
       await assertFieldStatsTabNotExists(page);

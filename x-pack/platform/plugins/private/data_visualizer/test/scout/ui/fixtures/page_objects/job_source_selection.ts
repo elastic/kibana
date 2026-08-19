@@ -7,6 +7,7 @@
 
 import type { ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { waitForKibanaLoadingToFinish } from '../kibana_loading';
 
 /**
  * Source selection for Index Data Visualizer / Data Drift.
@@ -46,7 +47,7 @@ export class JobSourceSelection {
     await expect(async () => {
       if (await switcher.isVisible()) {
         await this.page.keyboard.press('Escape');
-        await switcher.waitFor({ state: 'hidden', timeout: 5_000 });
+        await switcher.waitFor({ state: 'hidden' });
       }
 
       await expect(selectorButton).toBeVisible({ timeout: 10_000 });
@@ -70,6 +71,7 @@ export class JobSourceSelection {
     }).toPass({ timeout: 60_000 });
 
     await this.page.waitForURL(/index=/, { timeout: 10_000 });
+    await waitForKibanaLoadingToFinish(this.page);
     await this.page.testSubj.locator(nextPageSubj).waitFor({ state: 'visible', timeout: 30_000 });
   }
 
@@ -80,7 +82,7 @@ export class JobSourceSelection {
     await expect(async () => {
       if (await loadSearchForm.isVisible()) {
         await this.page.keyboard.press('Escape');
-        await loadSearchForm.waitFor({ state: 'hidden', timeout: 5_000 });
+        await loadSearchForm.waitFor({ state: 'hidden' });
       }
 
       await this.page.testSubj.click('mlOpenDiscoverSessionButton');
@@ -107,6 +109,7 @@ export class JobSourceSelection {
     }).toPass({ timeout: 60_000 });
 
     await this.page.waitForURL(/savedSearchId/, { timeout: 10_000 });
+    await waitForKibanaLoadingToFinish(this.page);
     await this.page.testSubj.locator(nextPageSubj).waitFor({ state: 'visible', timeout: 30_000 });
   }
 }

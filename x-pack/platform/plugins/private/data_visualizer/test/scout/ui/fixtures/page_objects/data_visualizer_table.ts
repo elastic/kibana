@@ -67,10 +67,12 @@ export class DataVisualizerTable {
   }
 
   async waitForRow(fieldName: string, options?: { timeout?: number }) {
-    await this.page.testSubj.locator(this.rowSelector(fieldName)).waitFor({
+    const row = this.page.testSubj.locator(this.rowSelector(fieldName));
+    await row.waitFor({
       state: 'visible',
       timeout: options?.timeout ?? 30_000,
     });
+    await row.scrollIntoViewIfNeeded();
   }
 
   async waitForRowHidden(fieldName: string, options?: { timeout?: number }) {
@@ -93,31 +95,45 @@ export class DataVisualizerTable {
   }
 
   async ensureDetailsOpen(fieldName: string) {
+    const row = this.page.testSubj.locator(this.rowSelector(fieldName));
     const details = this.page.testSubj.locator(this.detailsSelector(fieldName));
+    const closedToggle = this.detailsToggle(fieldName, 'chevronSingleRight');
+    const openToggle = this.detailsToggle(fieldName, 'chevronSingleDown');
+
+    await row.scrollIntoViewIfNeeded();
 
     if (await details.isVisible()) {
       return;
     }
 
     // EuiToolTip on the expander intercepts pointer events and can stall Playwright's
-    // actionability scroll/stability checks.
-    await this.detailsToggle(fieldName, 'chevronSingleRight').dispatchEvent('click');
-    await this.detailsToggle(fieldName, 'chevronSingleDown').waitFor({
+    // actionability checks. Scroll first (rows like geo.coordinates sit below the fold),
+    // then dispatch the click like FTR's moveMouseTo + click.
+    await closedToggle.scrollIntoViewIfNeeded();
+    await closedToggle.dispatchEvent('click');
+    await openToggle.waitFor({
       state: 'visible',
       timeout: 10_000,
     });
+    await details.scrollIntoViewIfNeeded();
     await details.waitFor({ state: 'visible', timeout: 10_000 });
   }
 
   async ensureDetailsClosed(fieldName: string) {
+    const row = this.page.testSubj.locator(this.rowSelector(fieldName));
     const details = this.page.testSubj.locator(this.detailsSelector(fieldName));
+    const closedToggle = this.detailsToggle(fieldName, 'chevronSingleRight');
+    const openToggle = this.detailsToggle(fieldName, 'chevronSingleDown');
+
+    await row.scrollIntoViewIfNeeded();
 
     if (!(await details.isVisible())) {
       return;
     }
 
-    await this.detailsToggle(fieldName, 'chevronSingleDown').dispatchEvent('click');
-    await this.detailsToggle(fieldName, 'chevronSingleRight').waitFor({
+    await openToggle.scrollIntoViewIfNeeded();
+    await openToggle.dispatchEvent('click');
+    await closedToggle.waitFor({
       state: 'visible',
       timeout: 10_000,
     });
@@ -220,40 +236,63 @@ export class DataVisualizerTable {
     await this.fieldTypeSelect.waitFor({ state: 'visible' });
   }
 
-  private async setMultiSelectFilter(testDataSubj: string, values: string[]) {
-    await this.page.keyboard.press('Escape');
-    await this.page.testSubj.locator(`${testDataSubj}-button`).click();
-    await this.page.testSubj.locator(`${testDataSubj}-popover`).waitFor({ state: 'visible' });
+  private async openMultiSelectPopoverOnce(testDataSubj: string) {
     const searchInput = this.page.testSubj.locator(`${testDataSubj}-searchInput`);
+    const button = this.page.testSubj.locator(`${testDataSubj}-button`);
 
-    for (const value of values) {
-      await searchInput.fill('');
-      await searchInput.pressSequentially(value);
-
-      const checkedOption = this.page.testSubj.locator(`${testDataSubj}-option-${value}-checked`);
-      if (!(await checkedOption.isVisible())) {
-        await this.page.testSubj.locator(`${testDataSubj}-option-${value}`).click();
-        await checkedOption.waitFor({ state: 'visible', timeout: 5000 });
-      }
+    if (await searchInput.isVisible()) {
+      return;
     }
+
+    // Escape can race with the toggle click (closes instead of opens). Callers retry.
+    await this.page.keyboard.press('Escape');
+    await button.click();
+    await searchInput.waitFor({ state: 'visible' });
+  }
+
+  private async setMultiSelectFilter(testDataSubj: string, values: string[]) {
+    await expect(async () => {
+      await this.openMultiSelectPopoverOnce(testDataSubj);
+      const searchInput = this.page.testSubj.locator(`${testDataSubj}-searchInput`);
+
+      for (const value of values) {
+        await searchInput.fill('');
+        await searchInput.fill(value);
+
+        const checkedOption = this.page.testSubj.locator(`${testDataSubj}-option-${value}-checked`);
+        if (!(await checkedOption.isVisible())) {
+          await this.page.testSubj.locator(`${testDataSubj}-option-${value}`).click();
+          await expect(checkedOption).toBeVisible();
+        }
+      }
+    }).toPass({ timeout: 60_000 });
 
     await this.page.keyboard.press('Escape');
   }
 
   private async removeMultiSelectFilter(testDataSubj: string, values: string[]) {
-    await this.page.testSubj.locator(`${testDataSubj}-button`).click();
-    await this.page.testSubj.locator(`${testDataSubj}-popover`).waitFor({ state: 'visible' });
+    const button = this.page.testSubj.locator(`${testDataSubj}-button`);
     const searchInput = this.page.testSubj.locator(`${testDataSubj}-searchInput`);
 
-    for (const value of values) {
-      await searchInput.fill('');
-      await searchInput.pressSequentially(value);
+    await button.click();
+    await searchInput.waitFor({ state: 'visible' });
 
-      const uncheckedOption = this.page.testSubj.locator(`${testDataSubj}-option-${value}`);
-      if (!(await uncheckedOption.isVisible())) {
-        await this.page.testSubj.locator(`${testDataSubj}-option-${value}-checked`).click();
-        await uncheckedOption.waitFor({ state: 'visible', timeout: 5000 });
-      }
+    for (const value of values) {
+      await expect(async () => {
+        if (!(await searchInput.isVisible())) {
+          await button.click();
+          await searchInput.waitFor({ state: 'visible' });
+        }
+
+        await searchInput.fill('');
+        await searchInput.fill(value);
+
+        const uncheckedOption = this.page.testSubj.locator(`${testDataSubj}-option-${value}`);
+        if (!(await uncheckedOption.isVisible())) {
+          await this.page.testSubj.locator(`${testDataSubj}-option-${value}-checked`).click();
+          await expect(uncheckedOption).toBeVisible();
+        }
+      }).toPass({ timeout: 5_000 });
     }
 
     await this.page.keyboard.press('Escape');
