@@ -1,3 +1,6 @@
+.artifacts
+docs/**/.artifacts
+/.superset
 .aws-config.json
 .signing-config.json
 .ackrc
@@ -82,6 +85,7 @@ coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
+.swc
 *.swp
 *.swo
 *.swn

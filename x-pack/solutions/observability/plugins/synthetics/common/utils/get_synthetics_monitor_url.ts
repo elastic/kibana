@@ -5,9 +5,11 @@
  * 2.0.
  */
 import { stringify } from 'querystring';
+import { CERTIFICATES_ROUTE, SYNTHETICS_APP_BASE_PATH } from '../constants/ui';
 
 const format = ({ pathname, query }: { pathname: string; query: Record<string, any> }): string => {
-  return `${pathname}?${stringify(query)}`;
+  const queryString = stringify(query);
+  return queryString ? `${pathname}?${queryString}` : pathname;
 };
 export const getSyntheticsErrorRouteFromMonitorId = ({
   configId,
@@ -24,3 +26,6 @@ export const getSyntheticsErrorRouteFromMonitorId = ({
       locationId,
     },
   });
+
+export const getSyntheticsCertificatesRoute = () =>
+  `${SYNTHETICS_APP_BASE_PATH}${CERTIFICATES_ROUTE}`;

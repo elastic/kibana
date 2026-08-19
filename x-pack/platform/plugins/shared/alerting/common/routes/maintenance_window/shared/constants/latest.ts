@@ -7,4 +7,12 @@
 
 export type { MaintenanceWindowCategoryIdTypes } from './v1';
 
-export { maintenanceWindowCategoryIdTypes } from './v1';
+export {
+  maintenanceWindowCategoryIdTypes,
+  ID_MAX_LENGTH,
+  TITLE_MAX_LENGTH,
+  SEARCH_MAX_LENGTH,
+  BULK_GET_IDS_MAX_SIZE,
+  STATUS_FILTER_MAX_SIZE,
+  CATEGORY_IDS_MAX_SIZE,
+} from './v1';

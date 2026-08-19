@@ -12,6 +12,7 @@ import type { KbnClientRequesterError } from '@kbn/kbn-client';
 import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
+import { cloneDeep } from 'lodash';
 import type { EndpointSecurityRoleDefinitions } from './roles_users';
 import { getAllEndpointSecurityRoles } from './roles_users';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
@@ -106,6 +107,14 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
       username: roleName,
       password: 'changeme',
     };
+  }
+
+  /**
+   * Get a copy of a predefined Role definition
+   * @param name
+   */
+  public getPreDefinedRole(name: keyof R): Role {
+    return cloneDeep(this.roles[name]);
   }
 
   protected async createRole(role: Role): Promise<void> {

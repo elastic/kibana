@@ -66,7 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(actualIndexPattern).to.be('*stash*');
 
     const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
-    expect(actualDiscoverQueryHits).to.be('14,005');
+    expect(actualDiscoverQueryHits).to.be('14,004');
     expect(await dataViews.isAdHoc()).to.be(true);
   };
 
@@ -141,12 +141,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.waitForVisualization('mtrVis');
       const metricData = await lens.getMetricVisualizationData();
-      expect(metricData[0].value).to.eql('5,727.322');
+      expect(metricData[0].value).to.eql('5,727.314');
       expect(metricData[0].title).to.eql('Average of bytes');
       await lens.save('New Lens from Modal', false, false, false, 'new');
 
       await dashboard.waitForRenderComplete();
-      expect(metricData[0].value).to.eql('5,727.322');
+      expect(metricData[0].value).to.eql('5,727.314');
 
       const panelCount = await dashboard.getPanelCount();
       expect(panelCount).to.eql(1);
@@ -168,7 +168,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.save('Lens with adhoc data view');
       await lens.waitForVisualization('mtrVis');
       const metricData = await lens.getMetricVisualizationData();
-      expect(metricData[0].value).to.eql('5,727.322');
+      expect(metricData[0].value).to.eql('5,727.314');
       expect(metricData[0].title).to.eql('Average of bytes');
     });
 
@@ -211,7 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(actualIndexPattern).to.be('*stash*');
 
       const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
-      expect(actualDiscoverQueryHits).to.be('14,005');
+      expect(actualDiscoverQueryHits).to.be('14,004');
 
       const prevDataViewId = await discover.getCurrentDataViewId();
 

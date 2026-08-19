@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { load } from 'js-yaml';
+import { parse } from 'yaml';
 import deepMerge from 'deepmerge';
 import { set } from '@kbn/safer-lodash-set';
 
@@ -66,9 +66,16 @@ async function fetchAgentPolicy(soClient: SavedObjectsClientContract, id: string
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
   id: string,
-  options?: { standalone?: boolean; agentPolicy?: AgentPolicy }
+  options?: {
+    standalone?: boolean;
+    agentPolicy?: AgentPolicy;
+    agentVersion?: string;
+    /** When true, redact proxy_headers and ssl.key from all proxy references in the response */
+    redactProxySecrets?: boolean;
+  }
 ): Promise<FullAgentPolicy | null> {
   const standalone = options?.standalone ?? false;
+  const redactProxySecrets = options?.redactProxySecrets ?? false;
 
   let agentPolicy: AgentPolicy | null;
   if (options?.agentPolicy?.package_policies) {
@@ -152,7 +159,8 @@ export async function getFullAgentPolicy(
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          standalone
+          standalone,
+          redactProxySecrets
         );
 
         return acc;
@@ -357,7 +365,8 @@ export function generateFleetConfig(
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  standalone = false
+  standalone = false,
+  redactProxySecrets = false
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -371,7 +380,7 @@ export function transformOutputToFullPolicyOutput(
     preset,
   } = output;
 
-  const configJs = config_yaml ? load(config_yaml) : {};
+  const configJs = config_yaml ? parse(config_yaml) : {};
 
   // build logic to read config_yaml and transform it with the new shipper data
   const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
@@ -486,9 +495,9 @@ export function transformOutputToFullPolicyOutput(
     };
   }
 
-  if (proxy) {
+  if (proxy && type !== outputType.Kafka) {
     newOutput.proxy_url = proxy.url;
-    if (proxy.proxy_headers) {
+    if (!redactProxySecrets && proxy.proxy_headers) {
       newOutput.proxy_headers = proxy.proxy_headers;
     }
 
@@ -507,7 +516,7 @@ export function transformOutputToFullPolicyOutput(
       }
       newOutput.ssl.certificate = proxy.certificate;
     }
-    if (proxy.certificate_key) {
+    if (!redactProxySecrets && proxy.certificate_key) {
       if (!newOutput.ssl) {
         newOutput.ssl = {};
       }
@@ -525,7 +534,7 @@ export function transformOutputToFullPolicyOutput(
   }
 
   if (outputTypeSupportPresets(output.type)) {
-    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
+    newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', parse);
   }
 
   return newOutput;

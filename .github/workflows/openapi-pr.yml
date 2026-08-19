@@ -1,0 +1,29 @@
+name: OpenAPI lint
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'oas_docs/**'
+      - '.github/workflows/openapi-pr.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    if: github.repository == 'elastic/kibana'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        spec:
+          - oas_docs/output/kibana.yaml
+          - oas_docs/output/kibana.serverless.yaml
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - uses: elastic/docs-actions/openapi/lint@v1
+        with:
+          spec-path: ${{ matrix.spec }}

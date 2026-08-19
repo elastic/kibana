@@ -59,6 +59,7 @@ jest.mock('../../app_context', () => {
       getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
       getInternalUserSOClientForSpaceId: jest.fn(),
       getExperimentalFeatures: jest.fn(),
+      getKibanaVersion: jest.fn(() => '1.0.0'),
     },
   };
 });
