@@ -74,8 +74,6 @@ spaceTest.describe(
           'data-render-complete',
           'true'
         );
-
-        await openedPage.close();
       }
     );
   }
