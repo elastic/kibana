@@ -8,15 +8,14 @@
  */
 
 export type { ProjectPickerProps } from './components/project_picker';
-export type {
-  ProjectPickerContentProps,
-  ProjectPickerControlsState,
-} from './components/project_picker_content';
+export type { ProjectPickerContentProps } from './components/project_picker_content';
 export type { ProjectPickerProps as ProjectScopePickerProps } from './components/project_picker_update/project_picker';
 export type {
   ProjectPickerFlyoutProps as ProjectScopePickerFlyoutContentProps,
   ProjectPickerFlyoutProps as ProjectScopePickerFlyoutProps,
 } from './components/project_picker_update/project_picker_flyout';
+export type { ProjectPickerControlsState } from './components/project_picker_update/state/reducers';
+export type { HeaderContextMenuItemProps } from './components/project_picker_update/blocks/frame/partials/header';
 export type { UseFetchProjectsResult } from './components/use_fetch_projects';
 export type {
   CPSProject,

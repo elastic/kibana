@@ -1,5 +1,5 @@
 {
-  "sha1": "b6b6025a292ced349903759319d9205d931e0eb4",
+  "sha1": "4b5d26a2d9d794f2731e7290e6e92a1f0bd12b49",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -410,7 +410,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 5
       }
     },
@@ -424,7 +424,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
-        "line": 53,
+        "line": 52,
         "column": 21
       }
     },
@@ -438,7 +438,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/index_management/test/scout/api/tests/data_streams/data_streams_get_stateful.spec.ts",
-        "line": 76,
+        "line": 75,
         "column": 52
       }
     },

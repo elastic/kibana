@@ -55,7 +55,7 @@ export const getColumnDisplayName = (
     return columnDisplay;
   }
 
-  if (columnName === '_source') {
+  if (columnName === SOURCE_COLUMN) {
     return i18n.translate('unifiedDataTable.grid.documentHeader', {
       defaultMessage: 'Summary',
     });
@@ -103,7 +103,7 @@ function buildEuiGridColumn({
   columnName,
   columnWidth = 0,
   dataView,
-  defaultColumns,
+  isSummaryOnlyColumn,
   isSortEnabled,
   isPlainRecord,
   toastNotifications,
@@ -130,7 +130,7 @@ function buildEuiGridColumn({
   columnName: string;
   columnWidth: number | undefined;
   dataView: DataView;
-  defaultColumns: boolean;
+  isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
   toastNotifications: ToastsStart;
@@ -238,7 +238,7 @@ function buildEuiGridColumn({
     displayAsText: columnDisplayName,
     actions: {
       showHide:
-        defaultColumns || columnName === dataView.timeFieldName
+        isSummaryOnlyColumn || columnName === dataView.timeFieldName
           ? false
           : {
               label: i18n.translate('unifiedDataTable.removeColumnLabel', {
@@ -247,11 +247,11 @@ function buildEuiGridColumn({
               iconType: 'cross',
               'data-test-subj': 'unifiedDataTableRemoveColumn',
             },
-      showMoveLeft: !defaultColumns,
-      showMoveRight: !defaultColumns,
+      showMoveLeft: !isSummaryOnlyColumn,
+      showMoveRight: !isSummaryOnlyColumn,
       additional: [
         ...(resetWidthButton ? [resetWidthButton] : []),
-        ...(columnName === '__source'
+        ...(columnName === SOURCE_COLUMN
           ? []
           : [
               buildCopyColumnNameButton({
@@ -341,7 +341,7 @@ export function getEuiGridColumns({
   rowsCount,
   settings,
   dataView,
-  defaultColumns,
+  isSummaryOnlyColumn,
   isSortEnabled,
   disableCellActions = false,
   isPlainRecord,
@@ -366,7 +366,7 @@ export function getEuiGridColumns({
   rowsCount: number;
   settings: UnifiedDataTableSettings | undefined;
   dataView: DataView;
-  defaultColumns: boolean;
+  isSummaryOnlyColumn: boolean;
   isSortEnabled: boolean;
   isPlainRecord?: boolean;
   disableCellActions?: boolean;
@@ -400,7 +400,7 @@ export function getEuiGridColumns({
       cellActionsHandling,
       columnWidth: getColWidth(column),
       dataView,
-      defaultColumns,
+      isSummaryOnlyColumn,
       isSortEnabled,
       isPlainRecord,
       toastNotifications: services.toastNotifications,
