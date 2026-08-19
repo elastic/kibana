@@ -29,6 +29,7 @@ import { createBashTool } from './bash';
 import { createDiscoverApisTool, createDescribeApiTool, createExecuteApiTool } from './api';
 import { createTodoTool } from '../../../tools/builtin/todo';
 import { createSetConversationMetadataTool } from '../../../tools/builtin/set_conversation_metadata';
+import { createConnectorTools } from '../../../tools/builtin/connectors';
 import { builtinToolToExecutable } from '../utils/select_tools';
 import type { BackgroundExecutionService } from '../background_execution_service';
 
@@ -85,6 +86,7 @@ export const registerInternalTools = async ({
     bashService,
     todoStateManager,
     selfClient,
+    getActions,
   } = context;
 
   const interactive = executionMode !== AgentExecutionMode.standalone;
@@ -153,6 +155,9 @@ export const registerInternalTools = async ({
       createSearchRelevantSkillsTool({ modelProvider, filteredSkills, logger, abortSignal })
     );
   }
+
+  // Connector tools — always available as internal tools (no MCP exposure).
+  tools.push(...createConnectorTools({ getActions }));
 
   await toolManager.addTools({
     type: ToolManagerToolType.executable,

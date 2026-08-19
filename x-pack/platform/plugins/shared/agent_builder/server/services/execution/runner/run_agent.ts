@@ -124,6 +124,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     trackingService,
     filesystemService,
     bashService,
+    getActions: async () => manager.deps.actions,
   };
 };
 

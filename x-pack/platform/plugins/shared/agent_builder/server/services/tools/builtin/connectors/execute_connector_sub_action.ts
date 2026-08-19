@@ -9,9 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { AuthorizationStatus, isAuthorizationMethod } from '@kbn/agent-builder-common/agents';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
-import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { getConnectorSpec, isToolAction } from '@kbn/connector-specs';
 import type { ConnectorToolsOptions } from './types';
 
@@ -57,7 +56,9 @@ export const executeConnectorSubActionArgsSchema = z
  */
 export const createExecuteConnectorSubActionTool = ({
   getActions,
-}: ConnectorToolsOptions): BuiltinToolDefinition<typeof executeConnectorSubActionArgsSchema> => ({
+}: ConnectorToolsOptions): InternalBuiltinToolDefinition<
+  typeof executeConnectorSubActionArgsSchema
+> => ({
   id: platformCoreTools.executeConnectorSubAction,
   type: ToolType.builtin,
   description:
@@ -70,25 +71,6 @@ export const createExecuteConnectorSubActionTool = ({
     'Connectors reference: https://www.elastic.co/docs/reference/kibana/connectors-kibana',
   schema: executeConnectorSubActionArgsSchema,
   tags: ['connector', 'sub-action'],
-  annotations: {
-    title: 'Execute Connector Sub-Action',
-    readOnlyHint: false,
-    destructiveHint: true,
-    idempotentHint: false,
-    openWorldHint: true,
-  },
-  availability: {
-    cacheMode: 'global',
-    handler: async ({ uiSettings }) => {
-      const enabled = await uiSettings.get<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID);
-      return enabled
-        ? { status: 'available' }
-        : {
-            status: 'unavailable',
-            reason: 'Connector tools require Agent Builder experimental features to be enabled',
-          };
-    },
-  },
   handler: async ({ connectorId, subAction, params }, context) => {
     const actions = await getActions();
     const actionsClient = await actions.getActionsClientWithRequest(context.request);

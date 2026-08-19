@@ -42,6 +42,7 @@ import type {
   IFilesystemService,
   IBashService,
 } from '../runner';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentStateManager } from '../attachments';
 import type { ExecutionConversationOrigin } from '../execution/types';
 import type { AgentBuilderHooks } from '../hooks/types';
@@ -255,6 +256,12 @@ export interface AgentHandlerContext {
    * skill-invocation counts. Provided by the plugin when telemetry is wired.
    */
   trackingService?: AgentBuilderTracking;
+  /**
+   * Lazy getter for the Actions plugin start contract.
+   * Used by internal tools (e.g. execute_connector_sub_action) to obtain a
+   * scoped actions client at handler invocation time.
+   */
+  getActions: () => Promise<ActionsPluginStart>;
 }
 
 /**

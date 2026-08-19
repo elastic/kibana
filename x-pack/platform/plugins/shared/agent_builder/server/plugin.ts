@@ -35,7 +35,6 @@ import { registerSkillToolsLoaderHook } from './hooks/skills/register_skill_tool
 import { registerTaskDefinitions } from './services/execution';
 import { createModelProviderFactory } from './services/execution/runner/model_provider';
 import { createSmlTools } from './services/tools/builtin/sml';
-import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
 
@@ -173,16 +172,6 @@ export class AgentBuilderPlugin
       },
     });
     smlTools.forEach((tool) => {
-      serviceSetups.tools.register(tool);
-    });
-
-    const connectorTools = createConnectorTools({
-      getActions: async () => {
-        const [, startDeps] = await coreSetup.getStartServices();
-        return startDeps.actions;
-      },
-    });
-    connectorTools.forEach((tool) => {
       serviceSetups.tools.register(tool);
     });
 

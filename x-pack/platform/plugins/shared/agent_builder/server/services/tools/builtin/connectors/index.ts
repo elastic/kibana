@@ -6,7 +6,7 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server/tools';
 import { createExecuteConnectorSubActionTool } from './execute_connector_sub_action';
 import type { ConnectorToolsOptions } from './types';
 
@@ -22,6 +22,6 @@ export const connectorToolIds = [platformCoreTools.executeConnectorSubAction] as
  */
 export const createConnectorTools = (
   options: ConnectorToolsOptions
-): BuiltinToolDefinition<any>[] => {
+): InternalBuiltinToolDefinition<any>[] => {
   return [createExecuteConnectorSubActionTool(options)];
 };

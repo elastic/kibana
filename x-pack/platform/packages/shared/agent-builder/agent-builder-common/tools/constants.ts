@@ -158,7 +158,6 @@ export const defaultAgentToolIds = [
   platformCoreTools.executeWorkflow,
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
-  platformCoreTools.executeConnectorSubAction,
 ];
 
 /**

@@ -342,6 +342,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
       getExecution: jest.fn(),
     },
     executionMode: AgentExecutionMode.conversation,
+    getActions: jest.fn().mockResolvedValue(actionsMock.createStart()),
   };
 };
 
