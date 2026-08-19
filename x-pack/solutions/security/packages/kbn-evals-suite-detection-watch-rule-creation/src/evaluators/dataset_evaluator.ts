@@ -17,8 +17,8 @@ import type {
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { RuleCreationExample } from '../datasets/golden';
-import type { RuleCreationClient, RuleCreationResult } from './rule_creation_client';
+import type { RuleCreationExample } from '../../datasets/golden';
+import type { RuleCreationClient, RuleCreationResult } from '../rule_creation_client';
 import {
   calculateSetMetrics,
   extractMitreTechniques,
@@ -29,7 +29,7 @@ import {
   validateInterval,
   validateRiskScore,
   validateSeverity,
-} from './helpers';
+} from '../helpers';
 
 export type RuleEvaluator = Evaluator<RuleCreationExample, RuleCreationResult>;
 

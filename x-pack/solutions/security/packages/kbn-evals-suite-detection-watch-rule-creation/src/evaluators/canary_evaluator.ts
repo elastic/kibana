@@ -10,7 +10,7 @@ import {
   createGapAddressedEvaluator,
   createQuerySyntaxValidityEvaluator,
   type RuleEvaluator,
-} from './evaluate_dataset';
+} from './dataset_evaluator';
 
 /**
  * Inverted-expectation evaluator for datasets/canary.ts: scores 1 when the quality gate

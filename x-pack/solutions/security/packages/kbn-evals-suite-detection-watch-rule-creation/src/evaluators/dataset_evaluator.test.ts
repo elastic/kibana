@@ -6,9 +6,9 @@
  */
 
 import type { EsClient } from '@kbn/scout';
-import type { RuleCreationExample } from '../datasets/golden';
-import type { RuleCreationResult } from './rule_creation_client';
-import { draftRuleSchema } from './types';
+import type { RuleCreationExample } from '../../datasets/golden';
+import type { RuleCreationResult } from '../rule_creation_client';
+import { draftRuleSchema } from '../types';
 import {
   createFieldCoverageEvaluator,
   createIntervalFormatEvaluator,
@@ -19,7 +19,7 @@ import {
   createRiskScoreValidityEvaluator,
   createRuleTypeLanguageEvaluator,
   createSeverityValidityEvaluator,
-} from './evaluate_dataset';
+} from './dataset_evaluator';
 
 // `expected` in EvaluatorParams is TExample['output'], i.e. RuleCreationExample['output'],
 // not the full example — see EvaluatorParams<TExample> in @kbn/evals/src/types.ts.
