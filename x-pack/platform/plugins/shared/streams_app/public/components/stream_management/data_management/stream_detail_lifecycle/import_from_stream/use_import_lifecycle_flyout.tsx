@@ -28,6 +28,7 @@ import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 import { getFormattedError } from '../../../../../util/errors';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import { useOverrideSettingsConfirmation } from '../common/hooks/use_override_settings_confirmation';
+import { getLifecycleFlyoutContainer } from '../common/get_lifecycle_flyout_container';
 import { ImportLifecycleFlyout } from '../data_phases/import_lifecycle_flyout';
 import type { ImportLifecycleMethod } from '../data_phases/import_lifecycle_flyout/constants';
 import { buildImportRetentionOptions } from './build_retention_options';
@@ -337,7 +338,7 @@ export const useImportLifecycleFlyout = ({
           isDisabled: isSaving || !canReadFailureStoreForImport(inspectedStream),
         }}
         type="push"
-        // container={getLifecycleFlyoutContainer()}
+        container={getLifecycleFlyoutContainer()}
         ownFocus={false}
       />
     ) : null;
