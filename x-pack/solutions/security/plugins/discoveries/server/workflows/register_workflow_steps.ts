@@ -16,9 +16,9 @@ import type { DiscoveriesPluginStartDeps } from '../types';
 import { getDefaultAlertRetrievalStepDefinition } from './steps/default_alert_retrieval_step';
 import { getDefaultValidationStepDefinition } from './steps/default_validation_step';
 import { getGenerateStepDefinition } from './steps/generate_step';
-import { getGetStatusStepDefinition } from './steps/get_status_step';
 import { getPersistDiscoveriesStepDefinition } from './steps/persist_discoveries_step';
 import { getRunStepDefinition } from './steps/run_step';
+import { getStatusStepDefinition } from './steps/status_step';
 import { withWorkflowsEnabledGuard } from './with_workflows_enabled_guard';
 
 export interface StepRegistrationResult {
@@ -200,8 +200,8 @@ export const registerWorkflowSteps = (
     workflowsExtensions,
   });
 
-  const getStatusStepDef = withWorkflowsEnabledGuard(
-    getGetStatusStepDefinition({
+  const statusStepDef = withWorkflowsEnabledGuard(
+    getStatusStepDefinition({
       getEventLogIndex,
       getStartServices,
       logger,
@@ -209,11 +209,11 @@ export const registerWorkflowSteps = (
     }),
     getStartServices
   );
-  logger.debug(() => `Registering getStatusStepDefinition with id: ${getStatusStepDef.id}`);
-  const getStatusOutcome = tryRegisterStep({
+  logger.debug(() => `Registering statusStepDefinition with id: ${statusStepDef.id}`);
+  const statusOutcome = tryRegisterStep({
     getStartServices,
     logger,
-    stepDefinition: getStatusStepDef,
+    stepDefinition: statusStepDef,
     workflowsExtensions,
   });
 
@@ -223,7 +223,7 @@ export const registerWorkflowSteps = (
     generateOutcome,
     persistDiscoveriesOutcome,
     runOutcome,
-    getStatusOutcome,
+    statusOutcome,
   ];
 
   const registeredSteps = outcomes
