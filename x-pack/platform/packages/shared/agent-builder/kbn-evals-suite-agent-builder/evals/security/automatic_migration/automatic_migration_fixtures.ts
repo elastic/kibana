@@ -11,6 +11,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 const MIGRATIONS_INDEX = '.kibana-siem-rule-migrations-migrations-default';
 const RULES_INDEX = '.kibana-siem-rule-migrations-rules-default';
+const RESOURCES_INDEX = '.kibana-siem-rule-migrations-resources-default';
 
 export interface SeededMigrationFixtures {
   migrationId: string;
@@ -25,11 +26,55 @@ interface SeedOptions {
   completed?: number;
   failed?: number;
   pending?: number;
+  migrationStatus?: string;
+  vendor?: string;
 }
 
 interface SeedResult {
   fixtures: SeededMigrationFixtures;
   cleanup: () => Promise<void>;
+}
+
+/**
+ * Seeds missing resources (no content field → hasContent: false) for a given migration.
+ * Returns a cleanup function that deletes the seeded resource docs.
+ */
+export async function seedMissingResources({
+  esClient,
+  log,
+  migrationId,
+  resources,
+}: {
+  esClient: EsClient;
+  log: ToolingLog;
+  migrationId: string;
+  resources: Array<{ type: string; name: string }>;
+}): Promise<() => Promise<void>> {
+  const operations = resources.flatMap((r) => [
+    { create: { _index: RESOURCES_INDEX } },
+    { migration_id: migrationId, type: r.type, name: r.name },
+  ]);
+  await esClient.bulk({ refresh: 'wait_for', operations });
+  log.info(
+    `[automatic-migration-eval] seeded ${resources.length} missing resources for migration ${migrationId}`
+  );
+  return async () => {
+    try {
+      await esClient.deleteByQuery({
+        index: RESOURCES_INDEX,
+        query: { term: { migration_id: migrationId } },
+        refresh: true,
+        ignore_unavailable: true,
+      });
+      log.info('[automatic-migration-eval] cleaned up seeded missing resources');
+    } catch (err) {
+      log.warning(
+        `[automatic-migration-eval] resource cleanup failed: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      );
+    }
+  };
 }
 
 export async function seedRuleMigration({
@@ -39,6 +84,8 @@ export async function seedRuleMigration({
   completed = 2,
   failed = 1,
   pending = 0,
+  migrationStatus,
+  vendor = 'splunk',
 }: SeedOptions): Promise<SeedResult> {
   try {
     const migrationId = randomUUID();
@@ -58,7 +105,7 @@ export async function seedRuleMigration({
         migration_id: migrationId,
         original_rule: {
           id: randomUUID(),
-          vendor: 'splunk',
+          vendor,
           title: `Eval rule ${status}`,
           description: 'Test rule for eval seeding',
           query: '| search index=main',
@@ -73,7 +120,12 @@ export async function seedRuleMigration({
       refresh: 'wait_for',
       operations: [
         { create: { _index: MIGRATIONS_INDEX, _id: migrationId } },
-        { name, created_by: 'eval-user', created_at: now },
+        {
+          name,
+          created_by: 'eval-user',
+          created_at: now,
+          ...(migrationStatus ? { status: migrationStatus } : {}),
+        },
         ...ruleDocs,
       ],
     });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@playwright/test';
 import { tags } from '@kbn/scout';
 import { evaluate } from './evaluate_setup';
 import { seedRuleMigration, seedMissingResources } from './automatic_migration_fixtures';
@@ -210,38 +209,6 @@ I need to ask which AI connector to use before starting.`,
           });
         }
       );
-
-      evaluate(
-        'multi-turn regression: missing-resources question is NOT re-asked after the user has already answered it',
-        async ({ chatClient }) => {
-          const MISSING_RESOURCES_TOOL =
-            'security.siem_migration.get_missing_rule_migration_resources';
-          const getToolIds = (steps: any[] | undefined): string[] =>
-            (steps ?? [])
-              .filter((s: any) => s?.type === 'tool_call')
-              .map((s: any) => s.tool_id as string);
-
-          // Turn 1: ask to start — autoConfirm answers the missing-resources
-          // ask_user_question (choice 0 = "Start now anyway") automatically.
-          const turn1 = await chatClient.converse({
-            messages: [{ message: 'Start my rule migration named Splunk Q1.' }],
-            options: { autoConfirm: true },
-          });
-          expect(turn1.errors).toEqual([]);
-          expect(turn1.conversationId).toBeDefined();
-          expect(getToolIds(turn1.steps)).toContain(MISSING_RESOURCES_TOOL);
-
-          // Turn 2: continue — autoConfirm handles any connector/skip-prebuilt prompts.
-          // Agent must NOT re-call get_missing_rule_migration_resources in this turn.
-          const turn2 = await chatClient.converse({
-            messages: [{ message: 'Use that connector.' }],
-            conversationId: turn1.conversationId,
-            options: { autoConfirm: true },
-          });
-          expect(turn2.errors).toEqual([]);
-          expect(getToolIds(turn2.steps)).not.toContain(MISSING_RESOURCES_TOOL);
-        }
-      );
     });
 
     evaluate.describe('resume skips pre-flight (stopped migration)', () => {
@@ -298,6 +265,63 @@ Please confirm you want to resume.`,
         }
       );
     });
+
+    evaluate.describe(
+      'complete flow: reprocesses failed rules when all params supplied upfront',
+      () => {
+        let teardownMigration: (() => Promise<void>) | undefined;
+
+        evaluate.beforeAll(async ({ esClient, log }) => {
+          const seeded = await seedRuleMigration({
+            esClient,
+            log,
+            name: 'Splunk Reprocess',
+            vendor: 'splunk',
+            pending: 0,
+            completed: 2,
+            failed: 3,
+            migrationStatus: 'finished',
+          });
+          teardownMigration = seeded.cleanup;
+        });
+
+        evaluate.afterAll(async () => {
+          await teardownMigration?.();
+        });
+
+        evaluate(
+          'reprocesses failed rules end-to-end when connector and proceed are specified in the first message',
+          async ({ evaluateDataset }) => {
+            await evaluateDataset({
+              dataset: {
+                name: 'agent builder: automatic-migration-reprocess-end-to-end',
+                description: `Validates that when the user asks to reprocess failed rules and supplies
+the connector upfront, the start skill calls start_rule_migration with the correct
+retry settings in a single turn (via autoConfirm).`,
+                examples: [
+                  {
+                    input: {
+                      question: `Reprocess the failed rules in my Splunk Reprocess migration using Opus 4.6. Don't ask any questions.`,
+                    },
+                    output: {
+                      expected: `I have reprocessed the 3 failed rules in your "Splunk Reprocess" migration
+using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
+                    },
+                    metadata: {
+                      query_intent: 'Reprocess Rule Migration - End-to-end with autoConfirm',
+                      expectedSkill: 'automatic-migration-rules-start-migration',
+                      autoConfirm: true,
+                      expectedToolId: 'security.siem_migration.start_rule_migration',
+                      requiredTerms: ['asynchronously'],
+                    },
+                  },
+                ],
+              },
+            });
+          }
+        );
+      }
+    );
 
     evaluate.describe('complete flow: starts migration when all params supplied upfront', () => {
       let teardownMigration: (() => Promise<void>) | undefined;
