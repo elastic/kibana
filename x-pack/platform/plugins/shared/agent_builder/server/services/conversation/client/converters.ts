@@ -203,30 +203,36 @@ export const fromEs = (document: Document): Conversation => {
 
   const roundsWithRefs = applyAttachmentRefsToRounds(deserializedRounds, refsByRound);
 
-  const conversation: Conversation =
-    existingAttachments && existingAttachments.length > 0
-      ? {
-          ...base,
-          rounds: roundsWithRefs,
-          attachments: existingAttachments,
-          ...(document._source!.state && { state: document._source!.state }),
-        }
-      : hasLegacyRoundAttachments
-      ? {
-          ...base,
-          rounds: roundsWithRefs,
-          ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
-          ...(document._source!.state && { state: document._source!.state }),
-        }
-      : {
-          ...base,
-          rounds: roundsWithRefs,
-          ...(document._source!.state && { state: document._source!.state }),
-        };
-
   // The timeline is a derived projection of the rounds, which stay the source of truth. It is
   // exposed on the conversation object but never persisted (this PR writes rounds only).
-  return { ...conversation, events: roundsToEvents(conversation) };
+  const withEvents = (conversation: Conversation): Conversation => ({
+    ...conversation,
+    events: roundsToEvents(conversation),
+  });
+
+  if (existingAttachments && existingAttachments.length > 0) {
+    return withEvents({
+      ...base,
+      rounds: roundsWithRefs,
+      attachments: existingAttachments,
+      ...(document._source!.state && { state: document._source!.state }),
+    });
+  }
+
+  if (hasLegacyRoundAttachments) {
+    return withEvents({
+      ...base,
+      rounds: roundsWithRefs,
+      ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
+      ...(document._source!.state && { state: document._source!.state }),
+    });
+  }
+
+  return withEvents({
+    ...base,
+    rounds: roundsWithRefs,
+    ...(document._source!.state && { state: document._source!.state }),
+  });
 };
 
 export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {

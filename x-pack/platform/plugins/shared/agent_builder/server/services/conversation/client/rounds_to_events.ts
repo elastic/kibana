@@ -31,6 +31,9 @@ export const roundToEvents = (
   const userMessageId = `${round.id}::user_message`;
   const executionId = `${round.id}::execution`;
   const agent = agentActor(conversation);
+  const endedAt = new Date(
+    new Date(round.started_at).getTime() + round.time_to_last_token
+  ).toISOString();
 
   const events: TimelineEvent[] = [
     {
@@ -51,26 +54,26 @@ export const roundToEvents = (
     },
   ];
 
-  const terminal = {
-    created_at: round.started_at,
+  const lifecycle = {
+    created_at: endedAt,
     actor: agent,
     execution_id: executionId,
     trigger_event_id: userMessageId,
   };
 
-  if (round.status === ConversationRoundStatus.awaitingPrompt) {
+  if (round.status === ConversationRoundStatus.completed) {
     events.push({
-      ...terminal,
-      id: `${round.id}::prompt_requested`,
-      type: TimelineEventType.promptRequested,
-      data: { prompts: round.pending_prompts ?? [] },
-    });
-  } else {
-    events.push({
-      ...terminal,
+      ...lifecycle,
       id: `${round.id}::execution_completed`,
       type: TimelineEventType.executionCompleted,
       data: executionCompletedData(round),
+    });
+  } else if (round.status === ConversationRoundStatus.awaitingPrompt) {
+    events.push({
+      ...lifecycle,
+      id: `${round.id}::prompt_requested`,
+      type: TimelineEventType.promptRequested,
+      data: { prompts: round.pending_prompts ?? [] },
     });
   }
 

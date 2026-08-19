@@ -52,6 +52,7 @@ describe('roundsToEvents', () => {
     expect(events[1]).toMatchObject({
       id: 'round-1::execution_started',
       type: TimelineEventType.executionStarted,
+      created_at: '2026-01-01T00:00:00.000Z',
       execution_id: 'round-1::execution',
       trigger_event_id: 'round-1::user_message',
       actor: { type: EventActorType.agent, id: 'agent-1' },
@@ -59,6 +60,8 @@ describe('roundsToEvents', () => {
     expect(events[2]).toMatchObject({
       id: 'round-1::execution_completed',
       type: TimelineEventType.executionCompleted,
+      // started_at (00.000Z) + time_to_last_token (20ms), not the same instant as the start.
+      created_at: '2026-01-01T00:00:00.020Z',
       execution_id: 'round-1::execution',
       trigger_event_id: 'round-1::user_message',
       actor: { type: EventActorType.agent, id: 'agent-1' },
@@ -69,6 +72,17 @@ describe('roundsToEvents', () => {
         time_to_last_token: 20,
       },
     });
+  });
+
+  it('emits only user_message + execution_started for an in-progress round (no terminal)', () => {
+    const events = roundsToEvents(
+      baseConversation([baseRound({ status: ConversationRoundStatus.inProgress })])
+    );
+
+    expect(events.map((e) => e.type)).toEqual([
+      TimelineEventType.userMessage,
+      TimelineEventType.executionStarted,
+    ]);
   });
 
   it('maps an awaiting-prompt round to user_message + execution_started + prompt_requested', () => {

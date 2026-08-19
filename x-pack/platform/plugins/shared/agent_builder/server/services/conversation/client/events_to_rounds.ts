@@ -35,9 +35,14 @@ const EMPTY_MODEL_USAGE: RoundModelUsageStats = {
  * `execution_id`, links each execution to the `user_message` that triggered it, and rebuilds one
  * round per execution, in round order.
  *
- * Best-effort: the rounds model cannot represent everything the timeline can. `execution_failed`
- * and `execution_aborted` executions have no round equivalent and are skipped; `trigger_type` and
- * an external author that carries no origin are not recoverable.
+ * Best-effort: the rounds model cannot represent everything the timeline can. These are accepted,
+ * documented losses:
+ * - `execution_failed` / `execution_aborted` and still-running executions (no terminal event) have
+ *   no round equivalent and are skipped.
+ * - `trigger_type` is not recoverable.
+ * - Only an `external` author round-trips. A Kibana-user author on a shared conversation (author set,
+ *   no origin) is emitted as a `user` actor and cannot be told apart from the owner here, so the
+ *   reconstructed round attributes the message to the conversation owner.
  */
 export const eventsToRounds = (events: TimelineEvent[]): ConversationRound[] => {
   const byId = new Map(events.map((event) => [event.id, event]));
