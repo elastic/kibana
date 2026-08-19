@@ -8,16 +8,11 @@
 import React, { type FC, useCallback, useEffect, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiPageTemplate,
-  EuiSkeletonText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiPageTemplate, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   usePageUrlState,
@@ -69,7 +64,7 @@ const ErrorMessageCallout: FC<{
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
+      <KbnDangerCallout
         size="s"
         title={
           <>
@@ -79,8 +74,6 @@ const ErrorMessageCallout: FC<{
             )}
           </>
         }
-        color="danger"
-        iconType="error"
       />
     </>
   );
@@ -170,9 +163,7 @@ export const TransformManagement: FC = () => {
         );
     return (
       <>
-        <EuiCallOut
-          iconType="warning"
-          color="warning"
+        <KbnWarningCallout
           data-test-subj="transformPageReauthorizeCallout"
           title={`${insufficientPermissionsMsg} ${actionMsg}`}
         />

@@ -154,6 +154,7 @@ const handleConversationExecution = async ({
     maxContentLength,
     accessControl,
     readOnly,
+    projectRouting,
   } = execution.agentParams;
 
   const { logger, runAgent, trackingService, analyticsService, meteringService, agentService } =
@@ -210,6 +211,7 @@ const handleConversationExecution = async ({
     browserApiTools,
     configurationOverrides,
     action,
+    projectRouting,
   });
 
   // Generate title when creating a new conversation
@@ -502,7 +504,7 @@ const handleStandaloneExecution = async ({
 }): Promise<Observable<ChatEvent>> => {
   const agentId = execution.agentId;
   const { logger, runAgent } = deps;
-  const { telemetryMetadata, maxContentLength } = execution.agentParams;
+  const { telemetryMetadata, maxContentLength, projectRouting } = execution.agentParams;
 
   const { selectedConnectorId } = await resolveServices({
     agentId,
@@ -524,6 +526,7 @@ const handleStandaloneExecution = async ({
     telemetryMetadata,
     maxContentLength,
     runAgent,
+    projectRouting,
     executionMode: AgentExecutionMode.standalone,
   });
 
