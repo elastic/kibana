@@ -30,12 +30,14 @@ export interface PresentationPanelProps<
 > {
   Component: React.FC<PropsType>;
   componentApi: ApiType;
+  componentInternalApi: {
+    setVisibility: (isVisible: boolean) => void;
+  };
   componentProps?: PropsType;
 
   showShadow?: boolean;
   showBorder?: boolean;
   showBadges?: boolean;
-  showNotifications?: boolean;
 
   /**
    * Set to true to not show PanelLoader component while Panel is loading
@@ -64,9 +66,9 @@ export interface PresentationPanelProps<
   hidePanelChrome?: boolean;
 
   /**
-   * Optional search term to highlight in the panel title
+   * Optional search terms to highlight in the panel title
    */
-  titleHighlight?: string;
+  titleHighlight?: string | string[];
 }
 
 /**

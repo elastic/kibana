@@ -8,7 +8,15 @@
 import { FetchSuppressionsStep } from './fetch_suppressions_step';
 import { createQueryService } from '../../services/query_service/query_service.mock';
 import { createAlertEpisodeSuppressionsResponse } from '../fixtures/dispatcher';
-import { createAlertEpisode, createDispatcherPipelineState } from '../fixtures/test_utils';
+import {
+  createAlertEpisode,
+  createAlertEpisodeSuppression,
+  createDispatcherPipelineState,
+  createStepLogger,
+} from '../fixtures/test_utils';
+import type { AlertEpisodeSuppression } from '../types';
+
+const logger = createStepLogger();
 
 describe('FetchSuppressionsStep', () => {
   it('fetches suppressions for provided episodes', async () => {
@@ -17,12 +25,12 @@ describe('FetchSuppressionsStep', () => {
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createAlertEpisodeSuppressionsResponse([
-        {
+        createAlertEpisodeSuppression({
           rule_id: 'r1',
           group_hash: 'h1',
           episode_id: 'e1',
           should_suppress: true,
-        },
+        }),
       ])
     );
 
@@ -30,7 +38,7 @@ describe('FetchSuppressionsStep', () => {
       episodes: [createAlertEpisode({ rule_id: 'r1', group_hash: 'h1', episode_id: 'e1' })],
     });
 
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -43,7 +51,7 @@ describe('FetchSuppressionsStep', () => {
     const step = new FetchSuppressionsStep(queryService);
 
     const state = createDispatcherPipelineState({ episodes: [] });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
@@ -55,11 +63,51 @@ describe('FetchSuppressionsStep', () => {
     const step = new FetchSuppressionsStep(queryService);
 
     const state = createDispatcherPipelineState();
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
     expect(result.data?.suppressions).toHaveLength(0);
+  });
+
+  it('parses external suppressions (source != internal, null rule_id) correctly', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new FetchSuppressionsStep(queryService);
+
+    mockEsClient.esql.query.mockResolvedValueOnce(
+      createAlertEpisodeSuppressionsResponse([
+        createAlertEpisodeSuppression({
+          rule_id: null,
+          source: 'pagerduty',
+          group_hash: 'pd-hash',
+          episode_id: 'pd-ep-1',
+          should_suppress: true,
+          last_ack_action: 'ack',
+        }),
+      ])
+    );
+
+    const state = createDispatcherPipelineState({
+      episodes: [
+        createAlertEpisode({
+          source: 'pagerduty',
+          rule_id: null,
+          group_hash: 'pd-hash',
+          episode_id: 'pd-ep-1',
+        }),
+      ],
+    });
+
+    const result = await step.execute(state, logger);
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.suppressions).toHaveLength(1);
+    const suppression = result.data?.suppressions?.[0];
+    expect(suppression?.source).toBe('pagerduty');
+    expect(suppression?.rule_id).toBeNull();
+    expect(suppression?.should_suppress).toBe(true);
+    expect(suppression?.last_ack_action).toBe('ack');
   });
 
   it('issues multiple ES|QL requests and concatenates results when input exceeds the size budget', async () => {
@@ -78,33 +126,31 @@ describe('FetchSuppressionsStep', () => {
     );
 
     mockEsClient.esql.query.mockImplementation((args: { query: string }) => {
-      const rows: Array<{
-        rule_id: string;
-        group_hash: string;
-        episode_id: string;
-        should_suppress: boolean;
-      }> = [];
+      const rows: AlertEpisodeSuppression[] = [];
       if (args.query.includes(`${longSegment}-r0::`)) {
-        rows.push({
-          rule_id: `${longSegment}-r0`,
-          group_hash: `${longSegment}-g0`,
-          episode_id: 'e0',
-          should_suppress: true,
-        });
+        rows.push(
+          createAlertEpisodeSuppression({
+            rule_id: `${longSegment}-r0`,
+            group_hash: `${longSegment}-g0`,
+            episode_id: 'e0',
+            should_suppress: true,
+          })
+        );
       }
       if (args.query.includes(`${longSegment}-r199::`)) {
-        rows.push({
-          rule_id: `${longSegment}-r199`,
-          group_hash: `${longSegment}-g199`,
-          episode_id: 'e199',
-          should_suppress: false,
-        });
+        rows.push(
+          createAlertEpisodeSuppression({
+            rule_id: `${longSegment}-r199`,
+            group_hash: `${longSegment}-g199`,
+            episode_id: 'e199',
+          })
+        );
       }
       return Promise.resolve(createAlertEpisodeSuppressionsResponse(rows));
     });
 
     const state = createDispatcherPipelineState({ episodes });
-    const result = await step.execute(state);
+    const result = await step.execute(state, logger);
 
     expect(mockEsClient.esql.query.mock.calls.length).toBeGreaterThanOrEqual(2);
     for (const [args] of mockEsClient.esql.query.mock.calls) {

@@ -11,6 +11,9 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "indices": ""
+    },
     "methods": [
       "PUT"
     ],

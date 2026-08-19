@@ -135,8 +135,14 @@ export const ContextSwitcher = ({
   }, [environmentContext, spaces.active.name, spaces.items.length]);
 
   const handleSpaceSelect = useCallback<SpacesListViewProps['onSelect']>(
-    ({ item }) => {
-      spaces.onSelect(item.id);
+    ({ item, event }) => {
+      spaces.onSelect(item.id, event);
+
+      // Keep popover open when opening in a new tab/window (cmd/ctrl/shift).
+      if (event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+
       closePopover();
     },
     [spaces, closePopover]

@@ -95,6 +95,65 @@ describe('buildIngestRequest', () => {
     expect(requests[0].scores).toHaveLength(1);
   });
 
+  it('includes space_ids when provided and omits them otherwise', () => {
+    const withSpaces = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      spaceIds: ['marketing', 'sales'],
+      source: { kind: 'event', event: createEvent() },
+    });
+    expect(withSpaces[0].space_ids).toEqual(['marketing', 'sales']);
+
+    const withoutSpaces = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: { kind: 'event', event: createEvent() },
+    });
+    expect(withoutSpaces[0].space_ids).toBeUndefined();
+  });
+
+  it('includes example metadata when taskRun.metadata is a plain object', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: {
+        kind: 'event',
+        event: createEvent({
+          taskRun: {
+            ...createEvent().taskRun,
+            metadata: { category: 'es-and-cases-creation' },
+          },
+        }),
+      },
+    });
+
+    expect(requests[0].scores[0].example).toMatchObject({
+      metadata: { category: 'es-and-cases-creation' },
+    });
+  });
+
+  it('omits example metadata when taskRun.metadata is null', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: { kind: 'event', event: createEvent() },
+    });
+
+    expect(requests[0].scores[0].example).not.toHaveProperty('metadata');
+  });
+
   it('uses explicit executionId for metadata.execution_id when provided', () => {
     const requests = buildIngestRequest({
       taskModel,

@@ -10,6 +10,7 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest, KibanaHttpMethods } from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
@@ -17,7 +18,12 @@ import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from './errors';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
+import { getInternalUiamCallerAttestationHeaders } from '../lib/get_internal_uiam_caller_attestation_headers';
 import {
+  EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER,
+  EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+  EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER,
   getOutboundEventChainHeaders,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '../trigger_events/event_context/event_chain_context';
@@ -190,7 +196,6 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
       );
     }
 
-    const authHeaders = this.getAuthHeaders();
     const jsonContentType = { 'Content-Type': 'application/json' };
 
     if (cleanParams.request) {
@@ -201,7 +206,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         path,
         body,
         query,
-        headers: { ...authHeaders, ...jsonContentType, ...customHeaders },
+        headers: { ...jsonContentType, ...customHeaders },
       };
     } else if (cleanParams.form_data) {
       // form_data mode: POST multipart/form-data (e.g. saved objects import).
@@ -212,7 +217,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         path,
         formData: form_data as Record<string, FormDataFieldSpec>,
         query,
-        headers: { ...authHeaders, ...(customHeaders as Record<string, string> | undefined) },
+        headers: customHeaders as Record<string, string> | undefined,
       };
     } else {
       // Use generated connector definitions to determine method and path (covers all 454+ Kibana APIs)
@@ -228,7 +233,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
         path,
         body,
         query,
-        headers: { ...authHeaders, ...jsonContentType, ...connectorHeaders },
+        headers: { ...jsonContentType, ...connectorHeaders },
       };
     }
 
@@ -321,10 +326,32 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // HTTP caller, so it gates naive spoofing but is not a hard trust boundary.
     const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
     const workflowRunId = this.stepExecutionRuntime.workflowExecution?.id;
+    const authenticationHeaders = this.getAuthHeaders();
+    const eventChainHeaders = getOutboundEventChainHeaders(fakeRequest, workflowRunId);
+    const attestationHeaders = getInternalUiamCallerAttestationHeaders(
+      this.stepExecutionRuntime.contextManager.getCoreStart(),
+      fakeRequest
+    );
+    const managedHeaderNames = new Set(
+      [
+        ...Object.keys(authenticationHeaders),
+        X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+        EVENT_CHAIN_DEPTH_HEADER,
+        EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER,
+        EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+        EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER,
+        UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+        ...Object.keys(attestationHeaders),
+      ].map((name) => name.toLowerCase())
+    );
     const outboundHeaders = {
-      ...headers,
+      ...Object.fromEntries(
+        Object.entries(headers).filter(([name]) => !managedHeaderNames.has(name.toLowerCase()))
+      ),
+      ...authenticationHeaders,
       [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
-      ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
+      ...eventChainHeaders,
+      ...attestationHeaders,
     };
 
     // Build full URL with query parameters

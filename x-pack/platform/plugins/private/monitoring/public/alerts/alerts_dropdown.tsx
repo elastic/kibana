@@ -85,6 +85,9 @@ export const AlertsDropdown: React.FC<{}> = () => {
   return (
     <>
       <EuiPopover
+        aria-label={i18n.translate('xpack.monitoring.alerts.dropdown.alertsAndRulesAriaLabel', {
+          defaultMessage: 'Alerts and rules',
+        })}
         panelPaddingSize="none"
         anchorPosition="downLeft"
         button={button}

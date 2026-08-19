@@ -13,13 +13,19 @@ const TOOL_ID_EXECUTE_ESQL = platformCoreTools.executeEsql;
 const {
   searchKnowledgeIndicators: TOOL_ID_KI_SEARCH,
   searchEvent: TOOL_ID_EVENT_SEARCH,
-  discoveryWrite: TOOL_ID_DISCOVERY_WRITE,
+  eventsWrite: TOOL_ID_EVENTS_WRITE,
 } = platformSignificantEventsTools;
 
-const toolCall = (toolId: string): ConverseStep => ({
+const toolCall = (
+  toolId: string,
+  params?: Record<string, unknown>,
+  results?: unknown[]
+): ConverseStep => ({
   type: 'tool_call',
   tool_id: toolId,
   tool_call_id: toolId,
+  params,
+  results,
 });
 
 const retryCall = (toolId: string): ConverseStep => ({
@@ -28,20 +34,20 @@ const retryCall = (toolId: string): ConverseStep => ({
 });
 
 const retryableWriteCall = (): ConverseStep => ({
-  ...toolCall(TOOL_ID_DISCOVERY_WRITE),
+  ...toolCall(TOOL_ID_EVENTS_WRITE),
   results: [{ data: { results: [{ index: 0, written: false, reason: 'bulk_error' }] } }],
 });
 
 const allExpectedTools: ConverseStep[] = [
-  toolCall(TOOL_ID_EVENT_SEARCH),
-  toolCall(TOOL_ID_KI_SEARCH),
+  toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }),
+  toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
   toolCall(TOOL_ID_EXECUTE_ESQL),
-  toolCall(TOOL_ID_DISCOVERY_WRITE),
+  toolCall(TOOL_ID_EVENTS_WRITE),
 ];
 
 describe('scoreToolUsage', () => {
   it('scores 1 when an empty batch makes no tool calls', () => {
-    expect(scoreToolUsage([], 0)).toEqual({
+    expect(scoreToolUsage({ steps: [], detectionCount: 0 })).toEqual({
       score: 1,
       label: 'correct',
       explanation: 'Empty batch: no tool calls made as expected',
@@ -49,43 +55,99 @@ describe('scoreToolUsage', () => {
   });
 
   it('scores 0 when an empty batch makes unexpected tool calls', () => {
-    const result = scoreToolUsage([toolCall(TOOL_ID_KI_SEARCH)], 0);
+    const result = scoreToolUsage({ steps: [toolCall(TOOL_ID_KI_SEARCH)], detectionCount: 0 });
     expect(result.score).toBe(0);
     expect(result.label).toBe('unexpected-tools');
   });
 
   it('scores 1 and labels "correct" when all expected tools were called', () => {
-    expect(scoreToolUsage(allExpectedTools, 1)).toEqual({
+    expect(scoreToolUsage({ steps: allExpectedTools, detectionCount: 1 })).toEqual({
       score: 1,
       label: 'correct',
       explanation: 'Correctly called all tools',
     });
   });
 
-  it('scores 0 and labels missing-discovery_write when discovery_write is never called', () => {
-    const steps = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_DISCOVERY_WRITE);
-    const result = scoreToolUsage(steps, 1);
+  it('scores 0 and labels missing-events_write when events_write is never called', () => {
+    const steps = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_EVENTS_WRITE);
+    const result = scoreToolUsage({ steps, detectionCount: 1 });
     expect(result.score).toBe(0);
-    expect(result.label).toBe(`missing-${TOOL_ID_DISCOVERY_WRITE}`);
+    expect(result.label).toBe(`missing-${TOOL_ID_EVENTS_WRITE}`);
   });
 
   it('gives partial credit when one of the three expected investigation tools is missing', () => {
     const steps = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_EVENT_SEARCH);
-    const result = scoreToolUsage(steps, 1);
+    const result = scoreToolUsage({ steps, detectionCount: 1 });
     expect(result.score).toBeCloseTo(2 / 3);
     expect(result.label).toBe(`missing-${TOOL_ID_EVENT_SEARCH}`);
   });
 
-  it('penalizes multiple discovery writes without a partial-failure retry', () => {
-    const result = scoreToolUsage([...allExpectedTools, toolCall(TOOL_ID_DISCOVERY_WRITE)], 1);
-    expect(result).toMatchObject({ score: 0.75, label: 'multiple-discovery-write-calls' });
+  it('requires topology search before writing a topology-bearing event after a zero-result rule search', () => {
+    const steps = [
+      toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }, [
+        { data: { total: 0, events: [] } },
+      ]),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ causal_features: [{ feature_id: 'checkout' }], blast_radius: [] }],
+      }),
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 })).toMatchObject({
+      score: 0,
+      label: 'missing-topology-search',
+    });
   });
 
-  it('allows one retry after a discovery bulk item fails', () => {
-    const steps = allExpectedTools.map((step) =>
-      step.tool_id === TOOL_ID_DISCOVERY_WRITE ? retryableWriteCall() : step
+  it('allows topology writes on a new episode when no open event candidates exist', () => {
+    const steps = [
+      toolCall(
+        TOOL_ID_EVENT_SEARCH,
+        { exclude_unconfirmed_signals: true, rule_uuids: ['rule-uuid-1'] },
+        [{ data: { total: 0, events: [] } }]
+      ),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ causal_features: [{ feature_id: 'checkout' }], blast_radius: [] }],
+      }),
+    ];
+
+    expect(
+      scoreToolUsage({ steps, detectionCount: 1, allowNewEventTopologyWrite: true }).label
+    ).toBe('correct');
+  });
+
+  it('requires query KI search', () => {
+    const steps = [
+      toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['feature'] }),
+      toolCall(TOOL_ID_EVENTS_WRITE),
+    ];
+
+    expect(scoreToolUsage({ steps, detectionCount: 1 }).label).toBe(`missing-${TOOL_ID_KI_SEARCH}`);
+  });
+
+  it('penalizes multiple event writes without a partial-failure retry', () => {
+    const result = scoreToolUsage({
+      steps: [...allExpectedTools, toolCall(TOOL_ID_EVENTS_WRITE)],
+      detectionCount: 1,
+    });
+    expect(result).toMatchObject({ score: 0.75, label: `multiple-${TOOL_ID_EVENTS_WRITE}-calls` });
+    expect(result.explanation).toBe(
+      `${TOOL_ID_EVENTS_WRITE} was called 2 times without one justified partial-failure retry`
     );
-    const result = scoreToolUsage([...steps, retryCall(TOOL_ID_DISCOVERY_WRITE)], 1);
+  });
+
+  it('allows one retry after an event bulk item fails', () => {
+    const steps = allExpectedTools.map((step) =>
+      step.tool_id === TOOL_ID_EVENTS_WRITE ? retryableWriteCall() : step
+    );
+    const result = scoreToolUsage({
+      steps: [...steps, retryCall(TOOL_ID_EVENTS_WRITE)],
+      detectionCount: 1,
+    });
     expect(result).toMatchObject({ score: 1, label: 'correct' });
   });
 });
@@ -101,8 +163,8 @@ describe('scoreToolUsageContinuation', () => {
 
   it('scores 1 when every cycle called all expected tools (reuses scoreToolUsage per cycle)', () => {
     const result = scoreToolUsageContinuation([
-      { producedEventIds: ['svc__a-1111'], steps: allExpectedTools },
-      { producedEventIds: ['svc__a-1111'], steps: allExpectedTools },
+      { producedEventIds: ['event-1'], steps: allExpectedTools },
+      { producedEventIds: ['event-1'], steps: allExpectedTools },
     ]);
     expect(result.score).toBe(1);
   });
@@ -110,8 +172,14 @@ describe('scoreToolUsageContinuation', () => {
   it('averages per-cycle scores rather than treating one bad cycle as a total failure', () => {
     const missingEventSearch = allExpectedTools.filter((s) => s.tool_id !== TOOL_ID_EVENT_SEARCH);
     const result = scoreToolUsageContinuation([
-      { producedEventIds: ['svc__a-1111'], steps: allExpectedTools },
-      { producedEventIds: ['svc__a-1111'], steps: missingEventSearch }, // missing 1 of 3 → 2/3
+      {
+        producedEventIds: ['svc__a-1111'],
+        steps: allExpectedTools,
+      },
+      {
+        producedEventIds: ['svc__a-1111'],
+        steps: missingEventSearch, // missing 1 of 3 → 2/3
+      },
     ]);
     expect(result.score).toBeCloseTo((1 + 2 / 3) / 2);
     expect(result.label).toBe('partial');
@@ -121,5 +189,63 @@ describe('scoreToolUsageContinuation', () => {
   it('treats a cycle with no recorded steps as having called nothing', () => {
     const result = scoreToolUsageContinuation([{ producedEventIds: [] }]);
     expect(result.score).toBeLessThan(1);
+  });
+
+  it('requires a topology-filtered event search for topology continuation cycles', () => {
+    const result = scoreToolUsageContinuation([
+      {
+        producedEventIds: ['event-1'],
+        expectTopologyEventSearch: true,
+        steps: allExpectedTools,
+      },
+    ]);
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('missing-topology-search');
+  });
+
+  it('accepts a topology-filtered event search for topology continuation cycles', () => {
+    const result = scoreToolUsageContinuation([
+      {
+        producedEventIds: ['event-1'],
+        expectTopologyEventSearch: true,
+        steps: [
+          ...allExpectedTools,
+          toolCall(TOOL_ID_EVENT_SEARCH, {
+            topology_feature_ids: ['transactionhistory'],
+          }),
+        ],
+      },
+    ]);
+
+    expect(result.score).toBe(1);
+  });
+
+  it('still flags missing-topology-search when expectReuse is false (new event after closed seed)', () => {
+    const stepsWithTopologyWrite = [
+      toolCall(TOOL_ID_EVENT_SEARCH, { rule_uuids: ['rule-uuid-1'] }, [
+        { data: { total: 0, events: [] } },
+      ]),
+      toolCall(TOOL_ID_KI_SEARCH, { kind: ['query'] }),
+      toolCall(TOOL_ID_EXECUTE_ESQL),
+      toolCall(TOOL_ID_EVENTS_WRITE, {
+        items: [{ causal_features: [{ feature_id: 'checkout' }], blast_radius: [] }],
+      }),
+    ];
+
+    expect(scoreToolUsage({ steps: stepsWithTopologyWrite, detectionCount: 1 }).label).toBe(
+      'missing-topology-search'
+    );
+
+    const result = scoreToolUsageContinuation([
+      {
+        producedEventIds: ['event-new'],
+        expectReuse: false,
+        steps: stepsWithTopologyWrite,
+      },
+    ]);
+
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('cycle 1: missing-topology-search (0)');
   });
 });

@@ -10,7 +10,12 @@
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { SolutionNavigationDefinition } from '@kbn/core-chrome-browser';
+import type {
+  AppDeepLinkId,
+  NavigationTreeDefinition,
+  SolutionId,
+  SolutionNavigationDefinition,
+} from '@kbn/core-chrome-browser';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -53,6 +58,16 @@ export interface NavigationPublicStart {
   addSolutionNavigation: (solutionNavigationAgg: AddSolutionNavigationArg) => void;
   /** Flag to indicate if the solution navigation is enabled.*/
   isSolutionNavEnabled$: Observable<boolean>;
+  /**
+   * Registers a solution's navigation tree as the active project navigation source.
+   * This is the single entry point into core's project navigation for serverless
+   * solution plugins, guaranteeing that customization is seeded before the nav
+   * source is registered.
+   */
+  initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
+    id: SolutionId,
+    navigationTree$: Observable<NavigationTreeDefinition<LinkId>>
+  ) => void;
 }
 
 export interface NavigationPublicSetupDependencies {

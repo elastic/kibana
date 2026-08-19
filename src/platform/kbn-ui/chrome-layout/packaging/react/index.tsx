@@ -19,24 +19,23 @@ import {
   useLayoutUpdate,
 } from '../../src/layout_config_context';
 import type { LayoutConfig, LayoutConfigProviderProps } from '../../src/layout_config_context';
-import type { ChromeStyle } from '../../src/layout.types';
+import type { LayoutAppearance } from '../../src/layout.types';
 import {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
 } from '../../src/layouts/grid_global_app_style';
-import { CommonGlobalAppStyles } from '../../src/layouts/global_app_styles';
 import { LayoutDebugOverlay } from '../../src/debug/layout_debug_overlay';
 
 // React import is needed for JSX transform.
 void React;
 
-export type { ChromeLayoutProps, ChromeStyle, GridLayoutGlobalStylesProps };
+export type { ChromeLayoutProps, LayoutAppearance, GridLayoutGlobalStylesProps };
 
 /** Alias for the external package. */
 export type ChromeLayoutConfig = LayoutConfig;
 export type ChromeLayoutConfigProviderProps = LayoutConfigProviderProps;
 
-export { ChromeLayout, GridLayoutGlobalStyles, CommonGlobalAppStyles, LayoutDebugOverlay };
+export { ChromeLayout, GridLayoutGlobalStyles, LayoutDebugOverlay };
 
 export const ChromeLayoutConfigProvider = LayoutConfigProvider;
 

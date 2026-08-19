@@ -68,6 +68,13 @@ export interface RunAttachmentsReconciliationDeps {
    * monotonic running total per surface.
    */
   onPageComplete?: (info: { processed: number }) => void;
+  /**
+   * Optional cooperative-cancellation signal. Same semantics as the cases
+   * runner's `signal`: checked at the top of every page (across both source
+   * SO types); aborting throws so the caller's catch pins the cursor for a
+   * re-walk on the next tick.
+   */
+  signal?: AbortSignal;
 }
 
 export interface RunAttachmentsReconciliationResult {
@@ -111,6 +118,7 @@ export async function runAttachmentsReconciliation({
   lastRunAt,
   pageDelayMs = 0,
   onPageComplete,
+  signal,
 }: RunAttachmentsReconciliationDeps): Promise<RunAttachmentsReconciliationResult> {
   // Tick start, captured before any I/O. Persisted as the new cursor
   // on a successful drain so attachments updated during the tick land
@@ -149,6 +157,15 @@ export async function runAttachmentsReconciliation({
 
     try {
       while (true) {
+        // Cooperative cancellation — see the cases runner for why this
+        // throws rather than returning the tick-start cursor. Guards both
+        // the current source type's pages and the switch to the next one.
+        if (signal?.aborted) {
+          throw new Error(
+            `cases-analyticsV2: attachments reconciliation aborted after processed=${processed}; cursor left pinned for re-walk`
+          );
+        }
+
         const page = await savedObjectsClient.find<
           AttachmentPersistedAttributes | UnifiedAttachmentAttributes
         >({
