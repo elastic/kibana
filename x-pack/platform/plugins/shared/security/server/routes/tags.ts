@@ -38,3 +38,13 @@ export const ROUTE_TAG_ACCEPT_JWT = 'security:acceptJWT';
  * via the UIAM service before authenticating with Elasticsearch.
  */
 export const ROUTE_TAG_ACCEPT_UIAM_OAUTH = 'security:acceptUiamOAuth';
+
+/**
+ * Tag prefix for specifying a route-specific OAuth protected resource metadata path.
+ * When present on a tagged route, the value after the prefix is appended to the base URL
+ * to form the `resource_metadata` URL in the `WWW-Authenticate` header on 401 responses,
+ * instead of the default `/.well-known/oauth-protected-resource`.
+ *
+ * Example: `security:resourceMetadataPath=/api/agent_builder/a2a/.well-known/oauth-protected-resource`
+ */
+export const ROUTE_TAG_RESOURCE_METADATA_PATH_PREFIX = 'security:resourceMetadataPath=';

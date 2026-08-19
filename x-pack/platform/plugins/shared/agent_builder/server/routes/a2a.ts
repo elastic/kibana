@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import path from 'node:path';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import type { RouteDependencies } from './types';
@@ -21,6 +20,7 @@ export const A2A_SERVER_PATH = `${publicApiPath}/a2a`;
 
 export function registerA2ARoutes({
   router,
+  config,
   getInternalServices,
   coreSetup,
   logger,
@@ -90,7 +90,16 @@ To learn more about the Agent Builder A2A server, refer to the [A2A server docum
         timeout: {
           idleSocket: AGENT_SOCKET_TIMEOUT_MS,
         },
-        tags: ['a2a', 'oas-tag:agent builder', 'security:acceptUiamOAuth'],
+        tags: [
+          'a2a',
+          'oas-tag:agent builder',
+          'security:acceptUiamOAuth',
+          ...(config.a2a?.oauth2
+            ? [
+                `security:resourceMetadataPath=${A2A_SERVER_PATH}/.well-known/oauth-protected-resource`,
+              ]
+            : []),
+        ],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',
@@ -129,19 +138,73 @@ To learn more about the Agent Builder A2A server, refer to the [A2A server docum
       })
     );
 
-  const discoveryReason =
-    'This endpoint must be publicly accessible for A2A agent card discovery.';
+  if (config.a2a?.oauth2) {
+    const { metadata } = config.a2a.oauth2;
+    const oauthMetadataBody: Record<string, unknown> = {
+      resource: metadata.resource,
+      authorization_servers: metadata.authorization_servers,
+      scopes_supported: metadata.scopes_supported,
+      bearer_methods_supported: metadata.bearer_methods_supported,
+      ...(metadata.resource_documentation
+        ? { resource_documentation: metadata.resource_documentation }
+        : {}),
+    };
+    const oauthReason =
+      'This endpoint must be publicly accessible for A2A OAuth 2.0 protected resource discovery.';
+    const oauthSecurityConfig = {
+      authc: { enabled: false as const, reason: oauthReason },
+      authz: { enabled: false as const, reason: oauthReason },
+    };
+
+    // A2A-specific PRM endpoint (RFC 9728), served under the A2A path.
+    router.get(
+      {
+        path: `${A2A_SERVER_PATH}/.well-known/oauth-protected-resource`,
+        security: oauthSecurityConfig,
+        options: { access: 'public' },
+        validate: false,
+      },
+      (_context, _request, response) => {
+        return response.ok({
+          body: oauthMetadataBody,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+    );
+
+    // Path-aware PRM discovery (RFC 9728 §2.1): MCP/A2A clients try
+    // /.well-known/oauth-protected-resource<server-path> before falling back to the root.
+    // The security plugin's catch-all for this pattern returns the MCP resource, so we
+    // register a more-specific route here that wins by Hapi's longest-literal-prefix rule.
+    router.get(
+      {
+        path: `/.well-known/oauth-protected-resource${A2A_SERVER_PATH}`,
+        security: oauthSecurityConfig,
+        options: { access: 'public' },
+        validate: false,
+      },
+      (_context, _request, response) => {
+        return response.ok({
+          body: oauthMetadataBody,
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+    );
+  }
+
+  const discoveryReason = 'This endpoint must be publicly accessible for A2A agent card discovery.';
   router.get(
     {
       path: `${A2A_SERVER_PATH}/.well-known/agent-card.json`,
       security: {
+        authc: { enabled: false as const, reason: discoveryReason },
         authz: { enabled: false as const, reason: discoveryReason },
       },
       options: { access: 'public' },
       validate: false,
     },
     (_context, request, response) => {
-      return a2aAdapter.handleAgentCardRequest(request, response, agentBuilderDefaultAgentId);
+      return a2aAdapter.handleDefaultAgentCardRequest(request, response);
     }
   );
 }
