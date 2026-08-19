@@ -12,6 +12,13 @@ import type { JsonValue } from '@kbn/utility-types';
 
 export type StepIoType = 'input' | 'output';
 
+// LRUCache<V> constrains V extends {}, which excludes null.
+// Box the value so null outputs are stored without violating the constraint.
+// get() returns undefined (cache miss) vs null (cached null output) correctly.
+interface CacheEntry {
+  value: JsonValue | null;
+}
+
 /**
  * Byte-bounded LRU cache for step IO.
  *
@@ -22,25 +29,25 @@ export type StepIoType = 'input' | 'output';
  * later requires no API change — just remove the guard in `StepIoService.write`.
  */
 export class StepIoCache {
-  private readonly lru: LRUCache<string, JsonValue | null>;
+  private readonly lru: LRUCache<string, CacheEntry>;
 
   constructor(maxBytes: number) {
     this.lru = new LRUCache({ maxSize: maxBytes });
   }
 
-  get(id: string, type: StepIoType): JsonValue | null | undefined {
-    return this.lru.get(`${type}_${id}`);
+  public get(id: string, type: StepIoType): JsonValue | null | undefined {
+    return this.lru.get(`${type}_${id}`)?.value;
   }
 
-  set(id: string, type: StepIoType, value: JsonValue | null, bytes: number): void {
-    this.lru.set(`${type}_${id}`, value, { size: bytes });
+  public set(id: string, type: StepIoType, value: JsonValue | null, bytes: number): void {
+    this.lru.set(`${type}_${id}`, { value }, { size: bytes });
   }
 
-  has(id: string, type: StepIoType): boolean {
+  public has(id: string, type: StepIoType): boolean {
     return this.lru.has(`${type}_${id}`);
   }
 
-  delete(id: string, type: StepIoType): void {
+  public delete(id: string, type: StepIoType): void {
     this.lru.delete(`${type}_${id}`);
   }
 
