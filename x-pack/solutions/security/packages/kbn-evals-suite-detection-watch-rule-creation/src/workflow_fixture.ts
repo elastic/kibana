@@ -10,6 +10,9 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 
+// The model connector (used by the workflow's ai.agent step) is not checked here — if it is
+// misconfigured the workflow execution will fail loudly on its own. Only the judge connector
+// can fail silently: a missing judge causes LLM evaluators to return N/A with no obvious error.
 export const ensureJudgeConnectorAccessible = async ({
   fetch,
   connector,
