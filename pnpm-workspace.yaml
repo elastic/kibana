@@ -1464,6 +1464,7 @@ autoInstallPeers: true
 strictPeerDependencies: false
 dedupePeerDependents: true
 verifyDepsBeforeRun: false
+storeDir: .pnpm-store
 
 # Dependency build-script gate (formerly @kbn/yarn-install-scripts). pnpm runs a
 # dependency's install/postinstall only when it's set true below. strictDepBuilds

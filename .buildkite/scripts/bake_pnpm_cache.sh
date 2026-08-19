@@ -19,8 +19,8 @@ set -euo pipefail
 # you are baking:  .buildkite/scripts/bake_pnpm_cache.sh
 
 KIBANA_DIR="${KIBANA_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
-CACHE_DIR="${KBN_PNPM_CACHE_DIR:-${CACHE_DIR:-$HOME/.kibana}}"
-STORE_DIR="$CACHE_DIR/pnpm-store"
+CACHE_DIR="${KBN_PNPM_CACHE_DIR:-${CACHE_DIR:-$HOME/cache/kibana}}"
+STORE_DIR="$CACHE_DIR/.pnpm-store"
 
 cd "$KIBANA_DIR"
 
@@ -33,9 +33,6 @@ cd "$KIBANA_DIR"
 source "$KIBANA_DIR/.buildkite/scripts/common/setup_node.sh"
 
 echo "--- baking pnpm cache into $CACHE_DIR (pnpm $(pnpm --version))"
-
-mkdir -p "$STORE_DIR"
-export npm_config_store_dir="$STORE_DIR"
 
 # CI=true gives us the same install as an agent: frozen lockfile, no vscode config.
 # --no-prebuilt skips the webpack bundles; they are ref-specific and rebuilt per
@@ -58,9 +55,14 @@ if [[ -d "$CYPRESS_CACHE_SRC" ]]; then
   mv "$CYPRESS_CACHE_SRC" "$CACHE_DIR/Cypress"
 fi
 
+if [[ -d "$CACHE_DIR/.pnpm-store" ]]; then
+  rm -rf "$CACHE_DIR/.pnpm-store"
+  mv "$KIBANA_DIR/.pnpm-store" "$CACHE_DIR/.pnpm-store"
+fi
+
 echo "--- pnpm cache ready"
 du -sh "$CACHE_DIR/pnpm-store" "$CACHE_DIR/node_modules" "$CACHE_DIR/Cypress" 2>/dev/null || true
 echo "Bake these into the agent image so they land at:"
-echo "  $CACHE_DIR/pnpm-store"
+echo "  $CACHE_DIR/.pnpm-store"
 echo "  $CACHE_DIR/node_modules"
 echo "  $CACHE_DIR/Cypress"
