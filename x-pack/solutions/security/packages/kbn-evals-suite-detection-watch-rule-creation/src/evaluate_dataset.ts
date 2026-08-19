@@ -17,7 +17,7 @@ import type {
 } from '@kbn/evals';
 import type { EsClient } from '@kbn/scout';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { RuleCreationExample } from '../datasets/rule_creation_golden';
+import type { RuleCreationExample } from '../datasets/golden';
 import type { RuleCreationClient, RuleCreationResult } from './rule_creation_client';
 import {
   calculateSetMetrics,

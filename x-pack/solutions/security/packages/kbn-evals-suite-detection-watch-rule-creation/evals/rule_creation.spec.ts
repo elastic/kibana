@@ -12,7 +12,7 @@ import { evaluate, tags } from '../src/evaluate';
 import { createEvaluateDataset } from '../src/evaluate_dataset';
 import { createCanaryEvaluator } from '../src/canary_evaluator';
 import { assertWorkflowInstalled, ensureJudgeConnectorAccessible } from '../src/workflow_fixture';
-import { goldenDataset } from '../datasets/rule_creation_golden';
+import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
 import { canaryDataset } from '../datasets/canary';
 

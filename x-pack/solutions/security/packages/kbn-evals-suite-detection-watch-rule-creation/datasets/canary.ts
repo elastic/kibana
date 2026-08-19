@@ -14,7 +14,7 @@
  * the gate has stopped discriminating. Do not remove.
  */
 
-import type { RuleCreationExample } from './rule_creation_golden';
+import type { RuleCreationExample } from './golden';
 
 export const canaryDataset: RuleCreationExample[] = [
   {

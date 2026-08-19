@@ -19,7 +19,7 @@
  *   - Sparse evidence: low confidence, agent must still produce a usable rule
  */
 
-import type { RuleCreationExample } from './rule_creation_golden';
+import type { RuleCreationExample } from './golden';
 
 export const hardCases: RuleCreationExample[] = [
   // Hard 1 — T1195.002 (Supply Chain: Compromise Software Dependencies)

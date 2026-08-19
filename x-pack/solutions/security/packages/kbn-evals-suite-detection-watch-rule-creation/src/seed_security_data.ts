@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { goldenDataset } from '../datasets/rule_creation_golden';
+import { goldenDataset } from '../datasets/golden';
 import { hardCases } from '../datasets/hard_cases';
 
 /**

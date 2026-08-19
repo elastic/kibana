@@ -6,7 +6,7 @@
  */
 
 import type { EsClient } from '@kbn/scout';
-import type { RuleCreationExample } from '../datasets/rule_creation_golden';
+import type { RuleCreationExample } from '../datasets/golden';
 import type { RuleCreationResult } from './rule_creation_client';
 import { draftRuleSchema } from './types';
 import {
