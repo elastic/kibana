@@ -119,7 +119,7 @@ workflows:
   dependencies:
     # Tier-2 depends on Tier-1 catalogs being installed first
     github-activity-issues: [github-catalog-repos]
-    github-activity-pull-quests: [github-catalog-repos]
+    github-activity-pull-requests: [github-catalog-repos]
     github-normalize-project-items: [github-catalog-project-items]
     github-project-epic-phases: [github-normalize-project-items]
     github-build-team-dimension: [github-catalog-teams]

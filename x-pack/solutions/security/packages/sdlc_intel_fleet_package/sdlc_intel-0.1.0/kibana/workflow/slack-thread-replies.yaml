@@ -117,7 +117,7 @@ steps:
             steps:
               - name: skip_parent_message
                 type: if
-                condition: "${{ foreach.item.ts != variables.threadTs }}"
+                condition: '${{ foreach.item.ts != variables.threadTs }}'
                 steps:
                   - name: upsert_reply
                     type: elasticsearch.index
@@ -175,7 +175,7 @@ steps:
 
   - name: finalize_watermark
     type: if
-    condition: "${{ variables.threadsProcessed > 0 }}"
+    condition: '${{ variables.threadsProcessed > 0 }}'
     steps:
       - name: use_last_thread_watermark
         type: data.set
