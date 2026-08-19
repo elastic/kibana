@@ -11,6 +11,7 @@ export const serviceAccountsServiceMock = {
   createStart: (): jest.Mocked<ServiceAccountsServiceStart> => ({
     create: jest.fn().mockResolvedValue({
       id: 'mock-service-account-id',
+      type: 'project' as const,
       name: 'mock-service-account-name',
       organization_id: 'mock-organization-id',
       role_assignments: {},

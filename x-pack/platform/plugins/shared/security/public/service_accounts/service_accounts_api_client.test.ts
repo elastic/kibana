@@ -15,6 +15,7 @@ describe('ServiceAccountsAPIClient', () => {
       const http = httpServiceMock.createStartContract();
       const created = {
         id: 'service-account-id',
+        type: 'project' as const,
         name: 'nightshift-relay',
         organization_id: 'organization-id',
         role_assignments: {},

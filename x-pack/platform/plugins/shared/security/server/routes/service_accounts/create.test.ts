@@ -28,6 +28,7 @@ const requestBody = {
 
 const serviceAccount = {
   id: 'service-account-id',
+  type: 'project' as const,
   name: 'nightshift-relay',
   organization_id: 'mock-organization-id',
   role_assignments: requestBody.role_assignments,
