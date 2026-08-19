@@ -181,15 +181,12 @@ describe('Single indicator', { tags: ['@ess'] }, () => {
 
       navigateToFlyoutJsonTab();
 
-      // The JSON tab renders the raw Elasticsearch hit inside a virtualised code editor, which
-      // only keeps the lines currently in view in the DOM. Assert on the document metadata that
-      // the editor always renders first (the `_index`/`_id`/`fields` preamble of the hit) rather
-      // than on a field that sits further down the document and may never be rendered.
-      cy.get(FLYOUT_JSON)
-        .should('contain.text', '_index')
-        .and('contain.text', 'ti_abusech')
-        .and('contain.text', '_id')
-        .and('contain.text', 'fields');
+      // The JSON tab renders a synthetic `{ _id, fields }` view of the indicator (not the raw
+      // Elasticsearch hit - see the IOC flyout's `indicator` memo), inside a virtualised code
+      // editor that only keeps the lines currently in view in the DOM. Assert on the two-key
+      // preamble the editor always renders, rather than on a field that sits further down the
+      // document and may never be rendered.
+      cy.get(FLYOUT_JSON).should('contain.text', '_id').and('contain.text', 'fields');
     });
   });
 
