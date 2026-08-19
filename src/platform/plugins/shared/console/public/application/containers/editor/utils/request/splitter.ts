@@ -56,8 +56,19 @@ const appendPiece = (state: SplitState, piece: RequestDataPiece): SplitState => 
   return { ...state, currentObject: state.currentObject + piece.value };
 };
 
+const trimDataObject = (dataObject: string): string => {
+  const trimmedStart = dataObject.trimStart();
+  const trailingToken = getRequestDataScannerTokens(trimmedStart).at(-1);
+  const endsWithUnclosedBlockComment =
+    trailingToken?.kind === 'blockComment' &&
+    trailingToken.end === trimmedStart.length &&
+    !trailingToken.value.endsWith('*/');
+
+  return endsWithUnclosedBlockComment ? dataObject : trimmedStart.trimEnd();
+};
+
 const completeCurrentObject = (state: SplitState, dataObjects: string[]): SplitState => {
-  const object = state.currentObject.trim();
+  const object = trimDataObject(state.currentObject);
   if (object) {
     dataObjects.push(object);
   }
@@ -113,7 +124,7 @@ export const splitRequestDataObjects = (dataString: string): string[] => {
       hasCompletedTopLevelObject: false,
     }
   );
-  const lastObject = state.currentObject.trim();
+  const lastObject = trimDataObject(state.currentObject);
 
   return lastObject ? [...dataObjects, lastObject] : dataObjects;
 };

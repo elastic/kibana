@@ -9,6 +9,9 @@
 
 import { getAutoIndentedRequests } from './auto_indent';
 
+const getAutoIndentedText = (...args: Parameters<typeof getAutoIndentedRequests>): string =>
+  getAutoIndentedRequests(...args).text;
+
 describe('getAutoIndentedRequests', () => {
   const sampleEditorTextLines = [
     '                                    ', // line 1
@@ -86,7 +89,7 @@ describe('getAutoIndentedRequests', () => {
   };
 
   it('correctly auto-indents a single request with data', () => {
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [TEST_REQUEST_1],
       sampleEditorTextLines
         .slice(TEST_REQUEST_1.startLineNumber - 1, TEST_REQUEST_1.endLineNumber)
@@ -106,7 +109,7 @@ describe('getAutoIndentedRequests', () => {
   });
 
   it('correctly auto-indents a single request with no data', () => {
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [TEST_REQUEST_2],
       sampleEditorTextLines
         .slice(TEST_REQUEST_2.startLineNumber - 1, TEST_REQUEST_2.endLineNumber)
@@ -119,7 +122,7 @@ describe('getAutoIndentedRequests', () => {
   });
 
   it('correctly auto-indents a single request with multiple data', () => {
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [TEST_REQUEST_3],
       sampleEditorTextLines
         .slice(TEST_REQUEST_3.startLineNumber - 1, TEST_REQUEST_3.endLineNumber)
@@ -145,7 +148,7 @@ describe('getAutoIndentedRequests', () => {
   });
 
   it('auto-indents multiple request with comments in between', () => {
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [TEST_REQUEST_1, TEST_REQUEST_2, TEST_REQUEST_3],
       sampleEditorTextLines.slice(1, 23).join('\n'),
       sampleEditorTextLines.join('\n')
@@ -183,7 +186,7 @@ describe('getAutoIndentedRequests', () => {
 
   it('keeps selected lines after a request whose formatted line count changes', () => {
     const unformatted = ['GET _search', '{', '"a":1,"b":2', '}', '   ', '// after'].join('\n');
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 4, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -202,7 +205,7 @@ describe('getAutoIndentedRequests', () => {
       '"size":10',
       '}',
     ].join('\n');
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 5, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -226,7 +229,7 @@ describe('getAutoIndentedRequests', () => {
     const unformatted = ['GET _search', '{', '# hash', '"a":1, /* block */', '"b":2', '}'].join(
       '\n'
     );
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 6, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -249,7 +252,7 @@ describe('getAutoIndentedRequests', () => {
     for (const { lines, comment } of cases) {
       const unformatted = ['GET _search', '{', ...lines, '}'].join('\n');
       const lineCount = unformatted.split('\n').length;
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [
           {
             startLineNumber: 1,
@@ -277,7 +280,7 @@ describe('getAutoIndentedRequests', () => {
 
     for (const { scalar, comment, lines } of cases) {
       const unformatted = ['GET _search', '{', ...lines, '}'].join('\n');
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 5, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -292,7 +295,7 @@ describe('getAutoIndentedRequests', () => {
 
   it('auto-indents a final comment before a trailing comma', () => {
     const unformatted = ['GET _search', '{', '"a":1/* c */,', '}'].join('\n');
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 4, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -316,7 +319,7 @@ describe('getAutoIndentedRequests', () => {
       ',3],"c":[/* c note */"x","y"]',
       '}',
     ].join('\n');
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 10, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -346,7 +349,7 @@ describe('getAutoIndentedRequests', () => {
     const unformatted = ['GET _search', '{', '"a":1// one', '/* two */', ',"b":2', '}'].join(
       '\r\n'
     );
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 6, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -393,7 +396,7 @@ describe('getAutoIndentedRequests', () => {
 
     for (const { unformatted, outsideComment } of cases) {
       const lineCount = unformatted.split('\n').length;
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [
           {
             startLineNumber: 1,
@@ -433,7 +436,7 @@ describe('getAutoIndentedRequests', () => {
 
     for (const { body, quotedValue } of cases) {
       const unformatted = `POST _query\n${body}`;
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 2, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -453,7 +456,7 @@ describe('getAutoIndentedRequests', () => {
 
     for (const { body, comment } of cases) {
       const unformatted = `GET _search\n${body}`;
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 4, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -468,7 +471,7 @@ describe('getAutoIndentedRequests', () => {
     for (const value of ['9007199254740993', '123456789012345678901234567890', '1e400']) {
       const body = `{\n// c\n"value":${value}\n}`;
       const unformatted = `GET _search\n${body}`;
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 5, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -488,7 +491,7 @@ describe('getAutoIndentedRequests', () => {
       '"prototype":null',
       '}',
     ].join('\n');
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 7, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -520,7 +523,7 @@ describe('getAutoIndentedRequests', () => {
 
     for (const { unformatted, inner, tail } of cases) {
       const lineCount = unformatted.split('\n').length;
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [
           {
             startLineNumber: 1,
@@ -551,7 +554,7 @@ describe('getAutoIndentedRequests', () => {
       '"script": """return 1;"""',
       '}',
     ].join('\n');
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 6, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -573,7 +576,7 @@ describe('getAutoIndentedRequests', () => {
         '"script": """return 1;"""',
         '}',
       ].join('\n');
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 6, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -595,7 +598,7 @@ describe('getAutoIndentedRequests', () => {
         '"script": """return 1;"""',
         '}',
       ].join('\n');
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 7, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -618,7 +621,7 @@ describe('getAutoIndentedRequests', () => {
         '"script": """return 1;"""',
         '}',
       ].join('\n');
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 6, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -637,7 +640,7 @@ describe('getAutoIndentedRequests', () => {
         '"script": """return 1;"""',
         '}',
       ].join('\n');
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 6, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -654,7 +657,7 @@ describe('getAutoIndentedRequests', () => {
         'GET _search',
         "{ 'url': 'https://elastic.co/#x', 'pattern': '//literal' }",
       ].join('\n');
-      const formattedData = getAutoIndentedRequests(
+      const formattedData = getAutoIndentedText(
         [{ startLineNumber: 1, endLineNumber: 2, startOffset: 0, endOffset: unformatted.length }],
         unformatted,
         unformatted
@@ -672,21 +675,122 @@ describe('getAutoIndentedRequests', () => {
     });
   });
 
-  it('leaves unparseable commented request body unchanged without toast', () => {
+  it('reports when an unparseable commented request body is left unchanged', () => {
     const unformatted = ['GET _search', '{', '  "query": // comment', '    {'].join('\n');
-    const formattedData = getAutoIndentedRequests(
+    const result = getAutoIndentedRequests(
       [{ startLineNumber: 1, endLineNumber: 4, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
     );
 
-    expect(formattedData).toBe(unformatted);
-    expect(formattedData).toContain('// comment');
+    expect(result).toEqual({ text: unformatted, hasCommentFallback: true });
+  });
+
+  describe('WHEN one selected request falls back', () => {
+    it('SHOULD report the fallback after formatting a later request', () => {
+      const firstRequest = ['GET _search', '{', '"a": /* keep */ 1', '}'].join('\n');
+      const secondRequest = ['GET _count', '{"b":2}'].join('\n');
+      const unformatted = [firstRequest, secondRequest].join('\n');
+      const result = getAutoIndentedRequests(
+        [
+          { startLineNumber: 1, endLineNumber: 4, startOffset: 0, endOffset: firstRequest.length },
+          {
+            startLineNumber: 5,
+            endLineNumber: 6,
+            startOffset: firstRequest.length + 1,
+            endOffset: unformatted.length,
+          },
+        ],
+        unformatted,
+        unformatted
+      );
+
+      expect(result).toEqual({
+        text: [firstRequest, 'GET _count', '{', '  "b": 2', '}'].join('\n'),
+        hasCommentFallback: true,
+      });
+    });
+
+    it('SHOULD report a later fallback after formatting an earlier request', () => {
+      const firstRequest = ['GET _count', '{"b":2}'].join('\n');
+      const secondRequest = ['GET _search', '{', '"a": /* keep */ 1', '}'].join('\n');
+      const unformatted = [firstRequest, secondRequest].join('\n');
+      const result = getAutoIndentedRequests(
+        [
+          { startLineNumber: 1, endLineNumber: 2, startOffset: 0, endOffset: firstRequest.length },
+          {
+            startLineNumber: 3,
+            endLineNumber: 6,
+            startOffset: firstRequest.length + 1,
+            endOffset: unformatted.length,
+          },
+        ],
+        unformatted,
+        unformatted
+      );
+
+      expect(result).toEqual({
+        text: ['GET _count', '{', '  "b": 2', '}', secondRequest].join('\n'),
+        hasCommentFallback: true,
+      });
+    });
+  });
+
+  it('preserves an unclosed block comment after a complete object', () => {
+    const unformatted = 'GET _search\n{"a":1} /* todo';
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 2, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result.hasCommentFallback).toBe(false);
+    expect(result.text).toContain('/* todo');
+    expect(result.text).toMatch(/\n  "a": 1\n/);
+  });
+
+  it('falls back before trimming an unclosed block comment', () => {
+    const unformatted = 'GET _search\n  {"a":1} /* todo  ';
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 2, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result).toEqual({ text: unformatted, hasCommentFallback: true });
+  });
+
+  it('formats a safe body after a fallback body', () => {
+    const unformatted = ['POST /_bulk', '{', '"a": /* keep */ 1', '}', '{"b":2}'].join('\n');
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 5, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result).toEqual({
+      text: ['POST /_bulk', '{', '"a": /* keep */ 1', '}', '{', '  "b": 2', '}'].join('\n'),
+      hasCommentFallback: true,
+    });
+  });
+
+  it('formats a safe body before a fallback body', () => {
+    const unformatted = ['POST /_bulk', '{"b":2}', '{', '"a": /* keep */ 1', '}'].join('\n');
+    const result = getAutoIndentedRequests(
+      [{ startLineNumber: 1, endLineNumber: 5, startOffset: 0, endOffset: unformatted.length }],
+      unformatted,
+      unformatted
+    );
+
+    expect(result).toEqual({
+      text: ['POST /_bulk', '{', '  "b": 2', '}', '{', '"a": /* keep */ 1', '}'].join('\n'),
+      hasCommentFallback: true,
+    });
   });
 
   it('keeps JSON.stringify shape for comment-free siblings in mixed multi-body requests', () => {
     const unformatted = ['POST /_bulk', '{', '"a":1 // c', '}', '{}', '{', '"b":2', '}'].join('\n');
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [{ startLineNumber: 1, endLineNumber: 8, startOffset: 0, endOffset: unformatted.length }],
       unformatted,
       unformatted
@@ -698,7 +802,7 @@ describe('getAutoIndentedRequests', () => {
   });
 
   it('correctly auto-indents a single request that contains triple quotes', () => {
-    const formattedData = getAutoIndentedRequests(
+    const formattedData = getAutoIndentedText(
       [TEST_REQUEST_5],
       sampleEditorTextLines
         .slice(TEST_REQUEST_5.startLineNumber - 1, TEST_REQUEST_5.endLineNumber)

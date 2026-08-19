@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse } from 'hjson';
 import { containsComments, removeCommentsFromData } from './comments';
 import { TRIPLE_QUOTE_STRINGS_MARKER } from './triple_quotes';
 
@@ -20,6 +21,7 @@ describe('request comments', () => {
       ],
       ['a line comment', '{\n// comment\n"a":1\n}', true],
       ['a block comment', '{/* comment */"a":1}', true],
+      ['an unclosed block comment', '{"a":1} /* todo', true],
       ['a hash comment', '{\n# comment\n"a":1\n}', true],
       ['escaped quotes', '{"value":"escaped \\" // still a string"}', false],
       ['a comment after a string', '{"value":"text" // comment\n}', true],
@@ -51,6 +53,59 @@ describe('request comments', () => {
 
       expect(containsComments(result)).toBe(false);
       expect(JSON.parse(result)).toEqual({ query: { match_all: {} } });
+    });
+
+    it('SHOULD remove an unclosed block comment without coercing a large integer', () => {
+      const result = removeCommentsFromData('{"value":9007199254740993} /* todo');
+
+      expect(result).toContain('9007199254740993');
+      expect(result).not.toContain('/* todo');
+    });
+
+    it('SHOULD remove an unclosed block comment from a non-finite number', () => {
+      const result = removeCommentsFromData('{"value":1e400} /* todo');
+
+      expect(result).toContain('1e400');
+      expect(result).not.toContain('/* todo');
+    });
+
+    it.each(['9007199254740993', '1e400'])(
+      'SHOULD preserve %s while removing a closed block comment',
+      (numberLiteral) => {
+        const result = removeCommentsFromData(`{"value":${numberLiteral}} /* todo */`);
+
+        expect(result).toContain(numberLiteral);
+        expect(result).not.toContain('/* todo */');
+      }
+    );
+
+    it('SHOULD remove an unclosed block comment after a triple-quoted string', () => {
+      const result = removeCommentsFromData('{"source":"""return 1;"""} /* todo');
+
+      expect(result).toContain('"""return 1;"""');
+      expect(result).not.toContain('/* todo');
+    });
+
+    it('SHOULD preserve line breaks while removing comments before an unclosed block comment', () => {
+      const result = removeCommentsFromData(
+        ['{', '"a":1 // line comment', '"b":2', '} /* block comment'].join('\n')
+      );
+
+      expect(result).not.toContain('line comment');
+      expect(result).not.toContain('block comment');
+      expect(parse(result)).toEqual({ a: 1, b: 2 });
+    });
+
+    it('SHOULD remove an unclosed block comment from otherwise invalid data', () => {
+      const requestData = '{"a":1 /* todo';
+
+      expect(removeCommentsFromData(requestData)).toBe('{"a":1  ');
+    });
+
+    it('SHOULD normalize parseable Hjson after removing a closed comment', () => {
+      const result = removeCommentsFromData('{foo:1 /* comment */}');
+
+      expect(JSON.parse(result)).toEqual({ foo: 1 });
     });
 
     it('SHOULD preserve comments inside triple-quoted strings', () => {

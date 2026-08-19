@@ -12,6 +12,7 @@ import { containsComments } from './comments';
 import { collapseTripleQuoteStrings, expandTripleQuoteStrings } from './triple_quotes';
 import {
   decodeStringToken,
+  getRequestDataScannerTokens,
   getRequestDataSemanticTokens,
   getRequestDataTokens,
   isCommentToken,
@@ -23,8 +24,15 @@ interface CommaMove {
   readonly commaIndex: number;
 }
 
+export type RequestDataFormatStatus = 'formatted' | 'commentFallback' | 'invalidData';
+
+export interface RequestDataFormatResult {
+  readonly text: string;
+  readonly status: RequestDataFormatStatus;
+}
+
 const getCommentTokens = (requestData: string): string[] => {
-  return getRequestDataTokens(requestData)
+  return getRequestDataScannerTokens(requestData)
     .filter(isCommentToken)
     .map(({ value }) => value);
 };
@@ -230,10 +238,13 @@ const moveCommasBeforeComments = (requestData: string): string => {
 const indentData = (
   dataString: string,
   { preserveComments = false }: { preserveComments?: boolean } = {}
-): string => {
+): RequestDataFormatResult => {
   try {
     if (!preserveComments) {
-      return JSON.stringify(parse(dataString), null, 2);
+      return {
+        text: JSON.stringify(parse(dataString), null, 2),
+        status: 'formatted',
+      };
     }
 
     const parsedData = parse(moveCommasBeforeComments(dataString), { keepWsc: true });
@@ -249,19 +260,25 @@ const indentData = (
 
     return preservesComments(dataString, formattedData) &&
       preservesSemanticTokens(dataString, formattedData)
-      ? formattedData
-      : dataString;
+      ? { text: formattedData, status: 'formatted' }
+      : { text: dataString, status: 'commentFallback' };
   } catch {
-    return dataString;
+    return {
+      text: dataString,
+      status: preserveComments ? 'commentFallback' : 'invalidData',
+    };
   }
 };
 
-export const formatRequestData = (data: string): string => {
+export const formatRequestData = (data: string): RequestDataFormatResult => {
   const { collapsedTripleQuotesData, tripleQuoteStrings, marker } =
     collapseTripleQuoteStrings(data);
-  const indentedData = indentData(collapsedTripleQuotesData, {
+  const result = indentData(collapsedTripleQuotesData, {
     preserveComments: containsComments(data),
   });
 
-  return expandTripleQuoteStrings(indentedData, tripleQuoteStrings, marker);
+  return {
+    ...result,
+    text: expandTripleQuoteStrings(result.text, tripleQuoteStrings, marker),
+  };
 };

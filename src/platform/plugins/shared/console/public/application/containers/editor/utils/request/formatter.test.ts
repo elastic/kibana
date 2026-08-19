@@ -10,10 +10,12 @@
 import { formatRequestData } from './formatter';
 import { TRIPLE_QUOTE_STRINGS_MARKER } from './triple_quotes';
 
+const formatRequestDataText = (source: string): string => formatRequestData(source).text;
+
 describe('request formatter', () => {
   describe('WHEN data contains supported comments', () => {
     it('SHOULD retain all comment kinds while formatting', () => {
-      const formatted = formatRequestData('{\n# hash\n"a":1, /* block */\n"b":2\n}');
+      const formatted = formatRequestDataText('{\n# hash\n"a":1, /* block */\n"b":2\n}');
 
       expect(formatted).toContain('# hash');
       expect(formatted).toContain('/* block */');
@@ -22,7 +24,7 @@ describe('request formatter', () => {
     });
 
     it('SHOULD move commas before chained comments', () => {
-      const formatted = formatRequestData('{\n"a":1// one\n/* two */\n,"b":2\n}');
+      const formatted = formatRequestDataText('{\n"a":1// one\n/* two */\n,"b":2\n}');
 
       expect(formatted).toContain('// one');
       expect(formatted).toContain('/* two */');
@@ -33,7 +35,7 @@ describe('request formatter', () => {
 
   describe('WHEN standalone comments have stale indentation', () => {
     it('SHOULD re-indent them to the depth of the code they precede', () => {
-      const formatted = formatRequestData(
+      const formatted = formatRequestDataText(
         '{\n"query": {\n# match every document\n"match_all": {}\n},\n        // deep note\n"size": 10\n}'
       );
 
@@ -55,7 +57,7 @@ describe('request formatter', () => {
     it('SHOULD attach comments that end a block to the preceding value', () => {
       // Hjson emits a comment that is the last thing in a block as a trailing
       // comment of the previous value, so it never becomes a standalone line.
-      const formatted = formatRequestData('{\n"a": {\n"b": 1\n// last in block\n}\n# last\n}');
+      const formatted = formatRequestDataText('{\n"a": {\n"b": 1\n// last in block\n}\n# last\n}');
 
       expect(formatted).toBe(
         ['{', '  "a": {', '    "b": 1 // last in block', '  } # last', '}'].join('\n')
@@ -63,13 +65,13 @@ describe('request formatter', () => {
     });
 
     it('SHOULD align a comment that is the only content of a block to the block inner depth', () => {
-      const formatted = formatRequestData('{\n"a": {\n// only comment\n}\n}');
+      const formatted = formatRequestDataText('{\n"a": {\n// only comment\n}\n}');
 
       expect(formatted).toBe(['{', '  "a": {', '    // only comment', '  }', '}'].join('\n'));
     });
 
     it('SHOULD align chained standalone comments to the same following line', () => {
-      const formatted = formatRequestData('{\n"a": {\n// one\n# two\n"b": 1\n}\n}');
+      const formatted = formatRequestDataText('{\n"a": {\n// one\n# two\n"b": 1\n}\n}');
 
       expect(formatted).toBe(
         ['{', '  "a": {', '    // one', '    # two', '    "b": 1', '  }', '}'].join('\n')
@@ -77,7 +79,7 @@ describe('request formatter', () => {
     });
 
     it('SHOULD NOT treat comment-like strings on their own line as comments', () => {
-      const formatted = formatRequestData('{\n// c\n"values": [\n"# not a comment"\n]\n}');
+      const formatted = formatRequestDataText('{\n// c\n"values": [\n"# not a comment"\n]\n}');
 
       expect(formatted).toContain('"# not a comment"');
       expect(formatted).toMatch(/\n  \/\/ c\n/);
@@ -85,7 +87,7 @@ describe('request formatter', () => {
 
     it('SHOULD leave multi-line block comments untouched', () => {
       const source = '{\n/*\nmulti\n*/\n"a": 1\n}';
-      const formatted = formatRequestData(source);
+      const formatted = formatRequestDataText(source);
 
       expect(formatted).toContain('\n/*\nmulti\n*/\n');
       expect(formatted).toMatch(/\n  "a": 1/);
@@ -94,7 +96,7 @@ describe('request formatter', () => {
     it('SHOULD re-indent a standalone single-line block comment', () => {
       const source = '{\n"a": {\n/* note */\n"b": 1\n}\n}';
 
-      expect(formatRequestData(source)).toBe(
+      expect(formatRequestDataText(source)).toBe(
         ['{', '  "a": {', '    /* note */', '    "b": 1', '  }', '}'].join('\n')
       );
     });
@@ -102,7 +104,7 @@ describe('request formatter', () => {
     it('SHOULD skip multi-line block comments when finding the target indentation', () => {
       const source = '{\n// leading\n       /*\nmulti\n*/\n"a": 1\n}';
 
-      expect(formatRequestData(source)).toBe(
+      expect(formatRequestDataText(source)).toBe(
         ['{', '  // leading', '       /*', 'multi', '*/', '  "a": 1', '}'].join('\n')
       );
     });
@@ -110,7 +112,7 @@ describe('request formatter', () => {
     it('SHOULD indent an array-only comment relative to its closing bracket', () => {
       const source = '{\n"values": [\n// only comment\n]\n}';
 
-      expect(formatRequestData(source)).toBe(
+      expect(formatRequestDataText(source)).toBe(
         ['{', '  "values": [', '    // only comment', '  ]', '}'].join('\n')
       );
     });
@@ -118,7 +120,7 @@ describe('request formatter', () => {
 
   describe('WHEN strings contain comment-like or triple-quote text', () => {
     it('SHOULD format the data without treating the strings as comments', () => {
-      const formatted = formatRequestData(
+      const formatted = formatRequestDataText(
         `{ 'url': 'https://elastic.co/#x', 'pattern': '//literal', 'script': """return 1;""" }`
       );
 
@@ -134,7 +136,7 @@ describe('request formatter', () => {
     });
 
     it('SHOULD preserve marker collisions', () => {
-      const formatted = formatRequestData(
+      const formatted = formatRequestDataText(
         `{
 // c
 "literal": ${TRIPLE_QUOTE_STRINGS_MARKER},
@@ -154,7 +156,26 @@ describe('request formatter', () => {
       ['a prototype-related key', '{\n// c\n"__proto__":"sentinel"\n}'],
       ['unparseable commented data', '{\n  "query": // comment\n    {'],
     ])('SHOULD preserve %s exactly', (_description, source) => {
-      expect(formatRequestData(source)).toBe(source);
+      expect(formatRequestDataText(source)).toBe(source);
+    });
+
+    it('SHOULD preserve an unclosed block comment while formatting the preceding object', () => {
+      const source = '{"a":1} /* todo';
+
+      const result = formatRequestData(source);
+
+      expect(result.status).toBe('formatted');
+      expect(result.text).toContain('/* todo');
+      expect(result.text).toMatch(/\n  "a": 1\n/);
+    });
+
+    it('SHOULD fall back when Hjson trims an unclosed block comment', () => {
+      const source = '{"a":1} /* todo  ';
+
+      expect(formatRequestData(source)).toEqual({
+        text: source,
+        status: 'commentFallback',
+      });
     });
   });
 });

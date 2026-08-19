@@ -11,6 +11,16 @@ import type { AdjustedParsedRequest } from '../../types';
 import { formatRequestData } from './formatter';
 import { splitRequestDataObjects } from './splitter';
 
+export interface AutoIndentResult {
+  readonly text: string;
+  readonly hasCommentFallback: boolean;
+}
+
+interface FormattedRequestLinesResult {
+  readonly lines: string[];
+  readonly hasCommentFallback: boolean;
+}
+
 const cleanUpWhitespaces = (line: string): string => {
   return line.trim().replaceAll(/\s+/g, ' ');
 };
@@ -18,22 +28,24 @@ const cleanUpWhitespaces = (line: string): string => {
 const getFormattedRequestLines = (
   request: AdjustedParsedRequest,
   allTextLines: string[]
-): string[] => {
+): FormattedRequestLinesResult => {
   const requestLines = allTextLines.slice(request.startLineNumber - 1, request.endLineNumber);
   const data = requestLines.slice(1).join('\n');
+  const formattedData = splitRequestDataObjects(data).map(formatRequestData);
 
-  return [
-    cleanUpWhitespaces(requestLines[0]),
-    ...splitRequestDataObjects(data).map(formatRequestData),
-  ];
+  return {
+    lines: [cleanUpWhitespaces(requestLines[0]), ...formattedData.map(({ text }) => text)],
+    hasCommentFallback: formattedData.some(({ status }) => status === 'commentFallback'),
+  };
 };
 
 const formatSelectedTextLines = (
   selectedTextLines: string[],
   allTextLines: string[],
   requests: AdjustedParsedRequest[]
-): string[] => {
+): FormattedRequestLinesResult => {
   const formattedTextLines: string[] = [];
+  let hasCommentFallback = false;
   let requestIndex = 0;
 
   for (let lineIndex = 0; lineIndex < selectedTextLines.length; lineIndex += 1) {
@@ -44,12 +56,14 @@ const formatSelectedTextLines = (
       continue;
     }
 
-    formattedTextLines.push(...getFormattedRequestLines(request, allTextLines));
+    const formattedRequest = getFormattedRequestLines(request, allTextLines);
+    formattedTextLines.push(...formattedRequest.lines);
+    hasCommentFallback ||= formattedRequest.hasCommentFallback;
     lineIndex += request.endLineNumber - request.startLineNumber;
     requestIndex += 1;
   }
 
-  return formattedTextLines;
+  return { lines: formattedTextLines, hasCommentFallback };
 };
 
 /**
@@ -59,8 +73,12 @@ export const getAutoIndentedRequests = (
   requests: AdjustedParsedRequest[],
   selectedText: string,
   allText: string
-): string => {
-  return formatSelectedTextLines(selectedText.split('\n'), allText.split('\n'), requests).join(
-    '\n'
+): AutoIndentResult => {
+  const { lines, hasCommentFallback } = formatSelectedTextLines(
+    selectedText.split('\n'),
+    allText.split('\n'),
+    requests
   );
+
+  return { text: lines.join('\n'), hasCommentFallback };
 };

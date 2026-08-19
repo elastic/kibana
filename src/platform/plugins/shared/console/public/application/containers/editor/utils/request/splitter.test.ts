@@ -50,4 +50,12 @@ describe('request data splitter', () => {
       expect(splitRequestDataObjects(source)).toEqual([source]);
     });
   });
+
+  describe('WHEN a block comment is unclosed', () => {
+    it('SHOULD retain surrounding whitespace when the comment may require fallback', () => {
+      const source = '  {"a":1} /* todo  ';
+
+      expect(splitRequestDataObjects(source)).toEqual([source]);
+    });
+  });
 });

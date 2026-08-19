@@ -14,6 +14,13 @@ import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+import {
+  endsWithConsoleBodyContinuation,
+  getLineRemainderWithoutConsoleComments,
+  isInsideConsoleComment,
+  isInsideConsoleString,
+  isRequestLineWithUrl,
+} from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
@@ -53,13 +60,6 @@ import {
   trackSentRequests,
 } from './utils/request';
 
-import {
-  endsWithConsoleBodyContinuation,
-  getLineRemainderWithoutConsoleComments,
-  isInsideConsoleComment,
-  isInsideConsoleString,
-  isRequestLineWithUrl,
-} from '@kbn/monaco/src/languages/console/utils';
 import { onlyBodyClosingTokensRegex } from './utils/constants';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
@@ -960,7 +960,10 @@ export class MonacoEditorActionsProvider {
   /**
    * This function applies indentations to the request in the selected text.
    */
-  public async autoIndent(_context: ContextValue) {
+  public async autoIndent(context: ContextValue) {
+    const {
+      services: { notifications },
+    } = context;
     const parsedRequests = await this.getSelectedParsedRequests();
     const selectionStartLineNumber = parsedRequests[0].startLineNumber;
     const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
@@ -978,7 +981,22 @@ export class MonacoEditorActionsProvider {
     const selectedText = this.getTextInRange(selectedRange);
     const allText = this.getTextInRange();
 
-    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
+    const { text: autoIndentedText, hasCommentFallback } = getAutoIndentedRequests(
+      parsedRequests,
+      selectedText,
+      allText
+    );
+
+    if (hasCommentFallback) {
+      notifications.toasts.addWarning(
+        i18n.translate(
+          'console.notification.monaco.warning.commentAutoIndentFallbackWarningMessage',
+          {
+            defaultMessage: 'Some request bodies with comments could not be safely auto-indented.',
+          }
+        )
+      );
+    }
 
     this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
       {

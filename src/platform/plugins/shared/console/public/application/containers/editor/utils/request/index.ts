@@ -8,6 +8,7 @@
  */
 
 export { getAutoIndentedRequests } from './auto_indent';
+export type { AutoIndentResult } from './auto_indent';
 export { containsComments, removeCommentsFromData } from './comments';
 export {
   getRequestEndLineNumber,
