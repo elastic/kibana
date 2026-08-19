@@ -143,20 +143,21 @@ export const CWV_THRESHOLDS = {
   cls: { good: 0.1, ni: 0.25 },
 } as const;
 
-/** Same buckets as Overview `percentile_ranks` (includes FCP). */
+/** Same buckets as Overview `percentile_ranks` (includes FCP / TTFB). */
 export const VITAL_RANK_THRESHOLDS = {
   ...CWV_THRESHOLDS,
   fcp: { good: 1800, ni: 3000 },
+  ttfb: { good: 800, ni: 1800 },
 } as const;
 
 export const rateVital = (
-  vital: keyof typeof CWV_THRESHOLDS,
+  vital: keyof typeof VITAL_RANK_THRESHOLDS,
   value: number | null
 ): RumVitalRating | null => {
   if (value == null || !Number.isFinite(value)) {
     return null;
   }
-  const threshold = CWV_THRESHOLDS[vital];
+  const threshold = VITAL_RANK_THRESHOLDS[vital];
   if (value <= threshold.good) {
     return 'good';
   }

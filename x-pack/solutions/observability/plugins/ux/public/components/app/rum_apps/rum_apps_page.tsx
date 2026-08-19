@@ -47,16 +47,18 @@ import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
-import { rumPerformanceScoreBand } from '../../../../common/rum_performance_score';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumApps } from '../../../services/rest/rum_api';
 import { fetchRumAlertStatus, fetchRumAlerts } from '../../../services/rest/rum_alerts_api';
 import { mergeRumSearch, pushRumPath } from '../../../utils/rum_search';
+import { VITAL_P75_HELP } from '../../../utils/vital_help';
+import { VitalColumnName } from '../../../utils/vital_help_label';
 import { uxAppPath } from '../../../utils/ux_app_path';
 import { EmptyStateLoading } from '../rum_dashboard/empty_state_loading';
 import { EvidencePackFlyout } from './evidence_pack_flyout';
-import { ScoreSparkline } from './score_sparkline';
+import { ScoreBreakdownFlyout } from './score_breakdown_flyout';
+import { InventoryScoreCell } from './score_cell';
 import { SessionTrafficChart } from './session_traffic_chart';
 import { useInventoryChartVisibility } from './use_inventory_chart_visibility';
 import {
@@ -89,47 +91,6 @@ const scoreColumnLabel = i18n.translate('xpack.ux.inventory.scoreColumnLabel', {
 
 const opportunityColumnLabel = i18n.translate('xpack.ux.inventory.opportunityColumnLabel', {
   defaultMessage: 'Opportunity',
-});
-
-const scoreBandLabel = (score: number): string => {
-  if (score >= 90) {
-    return i18n.translate('xpack.ux.inventory.scoreBandGoodLabel', { defaultMessage: 'Good' });
-  }
-  if (score >= 50) {
-    return i18n.translate('xpack.ux.inventory.scoreBandNeedsWorkLabel', {
-      defaultMessage: 'Needs improvement',
-    });
-  }
-  return i18n.translate('xpack.ux.inventory.scoreBandPoorLabel', { defaultMessage: 'Poor' });
-};
-
-const scoreInputLabels = (app: RumAppInventoryRow): string[] => {
-  const labels: string[] = [];
-  if (app.p75Lcp != null) {
-    labels.push(i18n.translate('xpack.ux.inventory.lcpColumnLabel', { defaultMessage: 'LCP' }));
-  }
-  if (app.p75Inp != null) {
-    labels.push(i18n.translate('xpack.ux.inventory.inpColumnLabel', { defaultMessage: 'INP' }));
-  }
-  if (app.p75Cls != null) {
-    labels.push(i18n.translate('xpack.ux.inventory.clsColumnLabel', { defaultMessage: 'CLS' }));
-  }
-  if (app.p75Fcp != null) {
-    labels.push(i18n.translate('xpack.ux.inventory.fcpColumnLabel', { defaultMessage: 'FCP' }));
-  }
-  if (app.p75Ttfb != null) {
-    labels.push(i18n.translate('xpack.ux.inventory.ttfbColumnLabel', { defaultMessage: 'TTFB' }));
-  }
-  if (app.sessions > 0) {
-    labels.push(
-      i18n.translate('xpack.ux.inventory.errorRateColumnLabel', { defaultMessage: 'Error rate' })
-    );
-  }
-  return labels;
-};
-
-const scoreScaleDescription = i18n.translate('xpack.ux.inventory.scoreScaleDescription', {
-  defaultMessage: '90+ good · 50–89 needs work · <50 poor',
 });
 
 const opportunityEmptyDescription = i18n.translate(
@@ -424,6 +385,7 @@ export function RumAppsPage() {
   const [unscopedFiring, setUnscopedFiring] = useState(0);
   const [alertsAvailable, setAlertsAvailable] = useState(false);
   const [evidenceApp, setEvidenceApp] = useState<RumAppInventoryRow | null>(null);
+  const [scoreApp, setScoreApp] = useState<RumAppInventoryRow | null>(null);
   const loadGen = useRef(0);
   const { addInspectorRequest } = useInspectorContext();
   const { hidden: chartHidden, toggle: toggleChart } = useInventoryChartVisibility();
@@ -693,63 +655,9 @@ export function RumAppsPage() {
         name: scoreColumnLabel,
         sortable: true,
         width: '200px',
-        render: (score: number | null, app) => {
-          if (score == null) {
-            return (
-              <EuiText size="s" color="subdued">
-                {dash}
-              </EuiText>
-            );
-          }
-          const inputs = scoreInputLabels(app);
-          return (
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <MetricHoverPopover
-                  title={scoreColumnLabel}
-                  button={
-                    <EuiBadge color={rumPerformanceScoreBand(score)} tabIndex={0}>
-                      {score}
-                    </EuiBadge>
-                  }
-                  items={[
-                    {
-                      title: i18n.translate('xpack.ux.inventory.scoreRatingLabel', {
-                        defaultMessage: 'Rating',
-                      }),
-                      description: scoreBandLabel(score),
-                    },
-                    {
-                      title: i18n.translate('xpack.ux.inventory.scoreBasedOnLabel', {
-                        defaultMessage: 'Based on',
-                      }),
-                      description:
-                        inputs.length > 0 ? i18n.formatList('conjunction', inputs) : dash,
-                    },
-                    {
-                      title: i18n.translate('xpack.ux.inventory.scoreScaleLabel', {
-                        defaultMessage: 'Scale',
-                      }),
-                      description: scoreScaleDescription,
-                    },
-                  ]}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ScoreSparkline
-                  scores={app.scoreTrend}
-                  score={score}
-                  ariaLabel={i18n.translate('xpack.ux.inventory.scoreSparklineAriaLabel', {
-                    defaultMessage: 'Score over the selected range',
-                  })}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <DeltaText value={app.scoreDelta} format={(next) => `${Math.round(next)}`} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
+        render: (_score: number | null, app) => (
+          <InventoryScoreCell app={app} onOpen={setScoreApp} />
+        ),
       },
       {
         id: 'sessions',
@@ -809,31 +717,49 @@ export function RumAppsPage() {
       {
         id: 'lcp',
         field: 'p75Lcp',
-        name: i18n.translate('xpack.ux.inventory.lcpColumnLabel', {
+        name: (
+          <VitalColumnName
+            label={i18n.translate('xpack.ux.inventory.lcpColumnLabel', { defaultMessage: 'LCP' })}
+            tooltip={VITAL_P75_HELP.lcp}
+          />
+        ),
+        selectorName: i18n.translate('xpack.ux.inventory.lcpColumnLabel', {
           defaultMessage: 'LCP',
         }),
         sortable: true,
-        width: '88px',
+        width: '100px',
         render: (value: number | null) => <VitalCell vital="lcp" value={value} format={formatMs} />,
       },
       {
         id: 'inp',
         field: 'p75Inp',
-        name: i18n.translate('xpack.ux.inventory.inpColumnLabel', {
+        name: (
+          <VitalColumnName
+            label={i18n.translate('xpack.ux.inventory.inpColumnLabel', { defaultMessage: 'INP' })}
+            tooltip={VITAL_P75_HELP.inp}
+          />
+        ),
+        selectorName: i18n.translate('xpack.ux.inventory.inpColumnLabel', {
           defaultMessage: 'INP',
         }),
         sortable: true,
-        width: '88px',
+        width: '100px',
         render: (value: number | null) => <VitalCell vital="inp" value={value} format={formatMs} />,
       },
       {
         id: 'cls',
         field: 'p75Cls',
-        name: i18n.translate('xpack.ux.inventory.clsColumnLabel', {
+        name: (
+          <VitalColumnName
+            label={i18n.translate('xpack.ux.inventory.clsColumnLabel', { defaultMessage: 'CLS' })}
+            tooltip={VITAL_P75_HELP.cls}
+          />
+        ),
+        selectorName: i18n.translate('xpack.ux.inventory.clsColumnLabel', {
           defaultMessage: 'CLS',
         }),
         sortable: true,
-        width: '88px',
+        width: '100px',
         render: (value: number | null) => (
           <VitalCell vital="cls" value={value} format={formatCls} />
         ),
@@ -841,21 +767,33 @@ export function RumAppsPage() {
       {
         id: 'fcp',
         field: 'p75Fcp',
-        name: i18n.translate('xpack.ux.inventory.fcpColumnLabel', {
+        name: (
+          <VitalColumnName
+            label={i18n.translate('xpack.ux.inventory.fcpColumnLabel', { defaultMessage: 'FCP' })}
+            tooltip={VITAL_P75_HELP.fcp}
+          />
+        ),
+        selectorName: i18n.translate('xpack.ux.inventory.fcpColumnLabel', {
           defaultMessage: 'FCP',
         }),
         sortable: true,
-        width: '88px',
+        width: '100px',
         render: (value: number | null) => formatMs(value),
       },
       {
         id: 'ttfb',
         field: 'p75Ttfb',
-        name: i18n.translate('xpack.ux.inventory.ttfbColumnLabel', {
+        name: (
+          <VitalColumnName
+            label={i18n.translate('xpack.ux.inventory.ttfbColumnLabel', { defaultMessage: 'TTFB' })}
+            tooltip={VITAL_P75_HELP.ttfb}
+          />
+        ),
+        selectorName: i18n.translate('xpack.ux.inventory.ttfbColumnLabel', {
           defaultMessage: 'TTFB',
         }),
         sortable: true,
-        width: '88px',
+        width: '100px',
         render: (value: number | null) => formatMs(value),
       },
       {
@@ -1092,6 +1030,7 @@ export function RumAppsPage() {
           </>
         )}
       </div>
+      {scoreApp ? <ScoreBreakdownFlyout app={scoreApp} onClose={() => setScoreApp(null)} /> : null}
       {evidenceApp ? (
         <EvidencePackFlyout
           app={evidenceApp}

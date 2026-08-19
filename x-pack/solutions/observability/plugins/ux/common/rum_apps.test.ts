@@ -74,6 +74,27 @@ describe('rumAppFromBucket', () => {
     );
     expect(row.trend).toEqual([1, 3, 2]);
   });
+
+  it('prefers Apdex ranks over p75 when scoring', () => {
+    const row = rumAppFromBucket({
+      name: 'shop',
+      sessions: 10,
+      pageViews: 40,
+      errorSessions: 2,
+      p75Lcp: 8000,
+      ranks: { lcp: { good: 80, ni: 20, poor: 0 } },
+      platformKeys: ['web'],
+    });
+    expect(row.score).toBe(
+      rumPerformanceScore({
+        lcp: 8000,
+        errorRate: 0.2,
+        ranks: { lcp: { good: 80, ni: 20, poor: 0 } },
+      })
+    );
+    expect(row.score).toBe(72);
+    expect(row.ranks).toEqual({ lcp: { good: 80, ni: 20, poor: 0 } });
+  });
 });
 
 describe('mergeRumAppRows', () => {

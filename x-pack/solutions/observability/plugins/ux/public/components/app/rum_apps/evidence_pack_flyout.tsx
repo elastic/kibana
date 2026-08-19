@@ -60,11 +60,14 @@ import { fetchRumAppSettings, fetchRumErrors, fetchRumPages } from '../../../ser
 import { fetchSessionReplaySessions } from '../../../services/rest/session_replay_api';
 import type { RumAiLocationState } from '../../../utils/rum_search';
 import { mergeRumSearch, pushRumPath, sessionsPatch } from '../../../utils/rum_search';
+import { VITAL_P75_HELP } from '../../../utils/vital_help';
+import { VitalHelpLabel } from '../../../utils/vital_help_label';
 import { uxAppPath } from '../../../utils/ux_app_path';
 import { useUxFlyoutSession, uxFlyoutProps } from '../../flyout/ux_flyout_props';
 import { formatRelativeTime, shortenPath } from '../../session_replay/session_ui';
 import { RumGithubLinks } from '../rum_settings/rum_github_links';
 import { EvidenceAnalystPanel } from './evidence_analyst_panel';
+import { ScoreBreakdownFlyout } from './score_breakdown_flyout';
 import { ScoreSparkline } from './score_sparkline';
 import { useEvidenceSummary } from './use_evidence_summary';
 
@@ -113,7 +116,13 @@ const vitalColor = (
   return 'subdued';
 };
 
-const EvidenceKpis = ({ app }: { app: RumAppInventoryRow }) => {
+const EvidenceKpis = ({
+  app,
+  onOpenScore,
+}: {
+  app: RumAppInventoryRow;
+  onOpenScore: () => void;
+}) => {
   const score = app.score;
   const room = score == null ? 0 : 100 - score;
   const delta =
@@ -132,7 +141,19 @@ const EvidenceKpis = ({ app }: { app: RumAppInventoryRow }) => {
               title={
                 <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
                   <EuiFlexItem grow={false}>
-                    <EuiBadge color={rumPerformanceScoreBand(score)}>{score}</EuiBadge>
+                    <EuiBadge
+                      color={rumPerformanceScoreBand(score)}
+                      onClick={onOpenScore}
+                      onClickAriaLabel={i18n.translate(
+                        'xpack.ux.evidence.scoreOpenBreakdownAriaLabel',
+                        {
+                          defaultMessage: 'Open score breakdown for {name}',
+                          values: { name: app.name },
+                        }
+                      )}
+                    >
+                      {score}
+                    </EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <ScoreSparkline
@@ -192,7 +213,7 @@ const EvidenceSection = ({
   children,
 }: {
   title: string;
-  metricLabel?: string;
+  metricLabel?: ReactNode;
   empty: string;
   children: ReactNode;
 }) => {
@@ -308,6 +329,7 @@ export function EvidencePackFlyout({
   const [settings, setSettings] = useState<RumAppSettings>(() => emptyRumAppSettings(app.name));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [scoreOpen, setScoreOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -434,283 +456,293 @@ export function EvidencePackFlyout({
   });
 
   return (
-    <EuiFlyout
-      {...uxFlyoutProps({ title: flyoutTitle, session: flyoutSession })}
-      onClose={onClose}
-      aria-labelledby={titleId}
-      data-test-subj="uxEvidencePackFlyout"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2 id={titleId} className="eui-textBreakWord">
-                {flyoutTitle}
-              </h2>
-            </EuiTitle>
-            <EuiSpacer size="xs" />
-            <EuiText size="s" color="subdued">
-              {i18n.translate('xpack.ux.evidence.flyoutDescription', {
-                defaultMessage:
-                  'Analyst summarizes this range first. File an issue only if it finds a defect.',
-              })}
-            </EuiText>
-          </EuiFlexItem>
-          {firing ? (
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="danger">
-                {i18n.translate('xpack.ux.evidence.firingBadgeLabel', {
-                  defaultMessage: 'Firing',
+    <>
+      <EuiFlyout
+        {...uxFlyoutProps({ title: flyoutTitle, session: flyoutSession })}
+        onClose={onClose}
+        aria-labelledby={titleId}
+        data-test-subj="uxEvidencePackFlyout"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <EuiTitle size="s">
+                <h2 id={titleId} className="eui-textBreakWord">
+                  {flyoutTitle}
+                </h2>
+              </EuiTitle>
+              <EuiSpacer size="xs" />
+              <EuiText size="s" color="subdued">
+                {i18n.translate('xpack.ux.evidence.flyoutDescription', {
+                  defaultMessage:
+                    'Analyst summarizes this range first. File an issue only if it finds a defect.',
                 })}
-              </EuiBadge>
+              </EuiText>
             </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EvidenceKpis app={app} />
-        {app.score != null || app.opportunity != null ? <EuiSpacer /> : null}
-        {error ? (
-          <EuiCallOut
-            announceOnMount
-            color="danger"
-            title={i18n.translate('xpack.ux.evidence.loadErrorTitle', {
-              defaultMessage: 'Unable to load evidence',
-            })}
-          >
-            <p>{error}</p>
-          </EuiCallOut>
-        ) : null}
-        {loading ? (
-          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 160 }}>
-            <EuiLoadingSpinner size="l" />
-          </EuiFlexGroup>
-        ) : (
-          <>
-            {!error ? (
-              <>
-                <EvidenceAnalystPanel
-                  status={summary.status}
-                  markdown={summary.markdown}
-                  error={summary.error}
-                  fileIssue={summary.fileIssue}
-                />
-                {summary.status !== 'idle' ? <EuiSpacer /> : null}
-              </>
+            {firing ? (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="danger">
+                  {i18n.translate('xpack.ux.evidence.firingBadgeLabel', {
+                    defaultMessage: 'Firing',
+                  })}
+                </EuiBadge>
+              </EuiFlexItem>
             ) : null}
-            <EvidenceSection
-              title={i18n.translate('xpack.ux.evidence.pagesTitle', {
-                defaultMessage: 'Slowest pages',
-              })}
-              metricLabel={i18n.translate('xpack.ux.evidence.pagesMetricLabel', {
-                defaultMessage: 'p75 LCP',
-              })}
-              empty={i18n.translate('xpack.ux.evidence.pagesEmptyDescription', {
-                defaultMessage: 'No page LCP in this range.',
-              })}
-            >
-              {pages.length > 0
-                ? pages.map((page) => (
-                    <EvidenceRow
-                      key={page.path}
-                      testSubj={`uxEvidencePage-${page.path}`}
-                      primary={
-                        <EuiLink
-                          data-test-subj="uxEvidencePackFlyoutLink"
-                          onClick={() => openApp('/pages', { pageUrl: page.path })}
-                        >
-                          {shortenPath(page.path)}
-                        </EuiLink>
-                      }
-                      metric={
-                        <EuiText size="s" color={vitalColor(rateVital('lcp', page.p75Lcp))}>
-                          {formatMs(page.p75Lcp)}
-                        </EuiText>
-                      }
-                    />
-                  ))
-                : null}
-            </EvidenceSection>
-            <EuiHorizontalRule margin="m" />
-            <EvidenceSection
-              title={i18n.translate('xpack.ux.evidence.errorsTitle', {
-                defaultMessage: 'Top errors',
-              })}
-              metricLabel={i18n.translate('xpack.ux.evidence.errorsMetricLabel', {
-                defaultMessage: 'Sessions',
-              })}
-              empty={i18n.translate('xpack.ux.evidence.errorsEmptyDescription', {
-                defaultMessage: 'No error groups in this range.',
+          </EuiFlexGroup>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EvidenceKpis app={app} onOpenScore={() => setScoreOpen(true)} />
+          {app.score != null || app.opportunity != null ? <EuiSpacer /> : null}
+          {error ? (
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              title={i18n.translate('xpack.ux.evidence.loadErrorTitle', {
+                defaultMessage: 'Unable to load evidence',
               })}
             >
-              {errors.length > 0
-                ? errors.map((group) => {
-                    const file = rumGithubLinksForError(settings, group, { rangeFrom, rangeTo });
-                    return (
+              <p>{error}</p>
+            </EuiCallOut>
+          ) : null}
+          {loading ? (
+            <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 160 }}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexGroup>
+          ) : (
+            <>
+              {!error ? (
+                <>
+                  <EvidenceAnalystPanel
+                    status={summary.status}
+                    markdown={summary.markdown}
+                    error={summary.error}
+                    fileIssue={summary.fileIssue}
+                  />
+                  {summary.status !== 'idle' ? <EuiSpacer /> : null}
+                </>
+              ) : null}
+              <EvidenceSection
+                title={i18n.translate('xpack.ux.evidence.pagesTitle', {
+                  defaultMessage: 'Slowest pages',
+                })}
+                metricLabel={
+                  <VitalHelpLabel
+                    label={i18n.translate('xpack.ux.evidence.pagesMetricLabel', {
+                      defaultMessage: 'p75 LCP',
+                    })}
+                    tooltip={VITAL_P75_HELP.lcp}
+                  />
+                }
+                empty={i18n.translate('xpack.ux.evidence.pagesEmptyDescription', {
+                  defaultMessage: 'No page LCP in this range.',
+                })}
+              >
+                {pages.length > 0
+                  ? pages.map((page) => (
                       <EvidenceRow
-                        key={group.key}
-                        testSubj={`uxEvidenceError-${group.key}`}
+                        key={page.path}
+                        testSubj={`uxEvidencePage-${page.path}`}
                         primary={
                           <EuiLink
                             data-test-subj="uxEvidencePackFlyoutLink"
-                            onClick={() =>
-                              openApp('/session-replay', sessionsPatch({ errorGroup: group.key }))
-                            }
+                            onClick={() => openApp('/pages', { pageUrl: page.path })}
                           >
-                            {group.type}
+                            {shortenPath(page.path)}
                           </EuiLink>
                         }
-                        secondary={
-                          file.fileHref && file.fileLabel ? (
-                            <>
-                              {group.message}
-                              {' · '}
-                              <EuiLink
-                                href={file.fileHref}
-                                target="_blank"
-                                data-test-subj="uxEvidenceErrorFileLink"
-                              >
-                                {file.fileLabel}
-                              </EuiLink>
-                            </>
-                          ) : (
-                            group.message
-                          )
+                        metric={
+                          <EuiText size="s" color={vitalColor(rateVital('lcp', page.p75Lcp))}>
+                            {formatMs(page.p75Lcp)}
+                          </EuiText>
                         }
-                        metric={<EuiText size="s">{group.sessionCount.toLocaleString()}</EuiText>}
                       />
-                    );
-                  })
-                : null}
-            </EvidenceSection>
-            <EuiHorizontalRule margin="m" />
-            <EvidenceSection
-              title={i18n.translate('xpack.ux.evidence.sessionsTitle', {
-                defaultMessage: 'Sessions to open',
-              })}
-              empty={i18n.translate('xpack.ux.evidence.sessionsEmptyDescription', {
-                defaultMessage: 'No sessions in this range.',
-              })}
-            >
-              {sessions.length > 0
-                ? sessions.map((session) => (
-                    <EvidenceRow
-                      key={session.sessionId}
-                      testSubj={`uxEvidenceSession-${session.sessionId}`}
-                      primary={
-                        <EuiLink
-                          data-test-subj="uxEvidencePackFlyoutLink"
-                          onClick={() => openApp(`/session-replay/${session.sessionId}`)}
-                        >
-                          {sessionLabel(session)}
-                        </EuiLink>
-                      }
-                      secondary={`${formatRelativeTime(session.startTime)}${
-                        session.entryPage ? ` · ${shortenPath(session.entryPage)}` : ''
-                      }`}
-                      metric={
-                        <>
-                          {session.errorCount > 0 ? (
-                            <EuiToolTip
-                              content={i18n.translate('xpack.ux.evidence.sessionErrorsTooltip', {
-                                defaultMessage: '{count, plural, one {# error} other {# errors}}',
-                                values: { count: session.errorCount },
-                              })}
+                    ))
+                  : null}
+              </EvidenceSection>
+              <EuiHorizontalRule margin="m" />
+              <EvidenceSection
+                title={i18n.translate('xpack.ux.evidence.errorsTitle', {
+                  defaultMessage: 'Top errors',
+                })}
+                metricLabel={i18n.translate('xpack.ux.evidence.errorsMetricLabel', {
+                  defaultMessage: 'Sessions',
+                })}
+                empty={i18n.translate('xpack.ux.evidence.errorsEmptyDescription', {
+                  defaultMessage: 'No error groups in this range.',
+                })}
+              >
+                {errors.length > 0
+                  ? errors.map((group) => {
+                      const file = rumGithubLinksForError(settings, group, { rangeFrom, rangeTo });
+                      return (
+                        <EvidenceRow
+                          key={group.key}
+                          testSubj={`uxEvidenceError-${group.key}`}
+                          primary={
+                            <EuiLink
+                              data-test-subj="uxEvidencePackFlyoutLink"
+                              onClick={() =>
+                                openApp('/session-replay', sessionsPatch({ errorGroup: group.key }))
+                              }
                             >
-                              <EuiBadge color="danger" tabIndex={0}>
-                                {session.errorCount}
-                              </EuiBadge>
-                            </EuiToolTip>
-                          ) : null}
-                          {session.hasReplay ? (
-                            <EuiToolTip content={playLabel} disableScreenReaderOutput>
-                              <EuiButtonIcon
-                                aria-label={playLabel}
-                                data-test-subj={`uxEvidencePlay-${session.sessionId}`}
-                                display="empty"
-                                iconType="play"
-                                onClick={() =>
-                                  openApp(`/session-replay/${session.sessionId}/replay`)
-                                }
-                                size="s"
+                              {group.type}
+                            </EuiLink>
+                          }
+                          secondary={
+                            file.fileHref && file.fileLabel ? (
+                              <>
+                                {group.message}
+                                {' · '}
+                                <EuiLink
+                                  href={file.fileHref}
+                                  target="_blank"
+                                  data-test-subj="uxEvidenceErrorFileLink"
+                                >
+                                  {file.fileLabel}
+                                </EuiLink>
+                              </>
+                            ) : (
+                              group.message
+                            )
+                          }
+                          metric={<EuiText size="s">{group.sessionCount.toLocaleString()}</EuiText>}
+                        />
+                      );
+                    })
+                  : null}
+              </EvidenceSection>
+              <EuiHorizontalRule margin="m" />
+              <EvidenceSection
+                title={i18n.translate('xpack.ux.evidence.sessionsTitle', {
+                  defaultMessage: 'Sessions to open',
+                })}
+                empty={i18n.translate('xpack.ux.evidence.sessionsEmptyDescription', {
+                  defaultMessage: 'No sessions in this range.',
+                })}
+              >
+                {sessions.length > 0
+                  ? sessions.map((session) => (
+                      <EvidenceRow
+                        key={session.sessionId}
+                        testSubj={`uxEvidenceSession-${session.sessionId}`}
+                        primary={
+                          <EuiLink
+                            data-test-subj="uxEvidencePackFlyoutLink"
+                            onClick={() => openApp(`/session-replay/${session.sessionId}`)}
+                          >
+                            {sessionLabel(session)}
+                          </EuiLink>
+                        }
+                        secondary={`${formatRelativeTime(session.startTime)}${
+                          session.entryPage ? ` · ${shortenPath(session.entryPage)}` : ''
+                        }`}
+                        metric={
+                          <>
+                            {session.errorCount > 0 ? (
+                              <EuiToolTip
+                                content={i18n.translate('xpack.ux.evidence.sessionErrorsTooltip', {
+                                  defaultMessage: '{count, plural, one {# error} other {# errors}}',
+                                  values: { count: session.errorCount },
+                                })}
+                              >
+                                <EuiBadge color="danger" tabIndex={0}>
+                                  {session.errorCount}
+                                </EuiBadge>
+                              </EuiToolTip>
+                            ) : null}
+                            {session.hasReplay ? (
+                              <EuiToolTip content={playLabel} disableScreenReaderOutput>
+                                <EuiButtonIcon
+                                  aria-label={playLabel}
+                                  data-test-subj={`uxEvidencePlay-${session.sessionId}`}
+                                  display="empty"
+                                  iconType="play"
+                                  onClick={() =>
+                                    openApp(`/session-replay/${session.sessionId}/replay`)
+                                  }
+                                  size="s"
+                                />
+                              </EuiToolTip>
+                            ) : (
+                              <span
+                                css={css`
+                                  width: ${euiTheme.size.l};
+                                `}
                               />
-                            </EuiToolTip>
-                          ) : (
-                            <span
-                              css={css`
-                                width: ${euiTheme.size.l};
-                              `}
-                            />
-                          )}
-                        </>
-                      }
-                    />
-                  ))
-                : null}
-            </EvidenceSection>
-          </>
-        )}
-      </EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="s"
-          responsive={false}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              flush="left"
-              data-test-subj="uxEvidencePackFlyoutCloseButton"
-              onClick={onClose}
-            >
-              {i18n.translate('xpack.ux.evidence.closeButtonLabel', { defaultMessage: 'Close' })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  size="s"
-                  data-test-subj="uxEvidencePackFlyoutOpenAppButton"
-                  onClick={() => openApp('/')}
-                >
-                  {i18n.translate('xpack.ux.evidence.openAppButtonLabel', {
-                    defaultMessage: 'Open app',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              {!loading && summary.status === 'done' && summary.fileIssue ? (
-                <RumGithubLinks
-                  links={githubLinks}
-                  showFile={false}
-                  fillIssue
-                  grouped={false}
-                  onAddRepository={() => openApp('/settings')}
-                />
-              ) : null}
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  fill={!(summary.status === 'done' && summary.fileIssue && githubLinks.issueHref)}
-                  onClick={askAnalyst}
-                  disabled={loading}
-                  data-test-subj="uxEvidenceAskAnalystButton"
-                >
-                  {summary.markdown
-                    ? i18n.translate('xpack.ux.evidence.continueInAnalystButtonLabel', {
-                        defaultMessage: 'Continue in Analyst',
-                      })
-                    : i18n.translate('xpack.ux.evidence.askAnalystButtonLabel', {
-                        defaultMessage: 'Ask Analyst',
-                      })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+                            )}
+                          </>
+                        }
+                      />
+                    ))
+                  : null}
+              </EvidenceSection>
+            </>
+          )}
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                flush="left"
+                data-test-subj="uxEvidencePackFlyoutCloseButton"
+                onClick={onClose}
+              >
+                {i18n.translate('xpack.ux.evidence.closeButtonLabel', { defaultMessage: 'Close' })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    size="s"
+                    data-test-subj="uxEvidencePackFlyoutOpenAppButton"
+                    onClick={() => openApp('/')}
+                  >
+                    {i18n.translate('xpack.ux.evidence.openAppButtonLabel', {
+                      defaultMessage: 'Open app',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                {!loading && summary.status === 'done' && summary.fileIssue ? (
+                  <RumGithubLinks
+                    links={githubLinks}
+                    showFile={false}
+                    fillIssue
+                    grouped={false}
+                    onAddRepository={() => openApp('/settings')}
+                  />
+                ) : null}
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    size="s"
+                    fill={
+                      !(summary.status === 'done' && summary.fileIssue && githubLinks.issueHref)
+                    }
+                    onClick={askAnalyst}
+                    disabled={loading}
+                    data-test-subj="uxEvidenceAskAnalystButton"
+                  >
+                    {summary.markdown
+                      ? i18n.translate('xpack.ux.evidence.continueInAnalystButtonLabel', {
+                          defaultMessage: 'Continue in Analyst',
+                        })
+                      : i18n.translate('xpack.ux.evidence.askAnalystButtonLabel', {
+                          defaultMessage: 'Ask Analyst',
+                        })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+      {scoreOpen ? <ScoreBreakdownFlyout app={app} onClose={() => setScoreOpen(false)} /> : null}
+    </>
   );
 }

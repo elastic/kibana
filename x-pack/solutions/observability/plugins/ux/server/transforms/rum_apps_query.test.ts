@@ -60,8 +60,14 @@ describe('parseAppTerms', () => {
           sessions: { value: 10 },
           page_views: { doc_count: 40 },
           error_sessions: { sessions: { value: 1 } },
-          lcp: { p75: { values: { '75.0': 2000 } } },
-          inp: { p75: { values: { '75.0': 150 } } },
+          lcp: {
+            p75: { values: { '75.0': 2000 } },
+            ranks: { values: { '2500.0': 80, '4000.0': 95 } },
+          },
+          inp: {
+            p75: { values: { '75.0': 150 } },
+            ranks: { values: { '200.0': 70, '500.0': 90 } },
+          },
           cls: { p75: { values: { '75.0': 0.05 } } },
           fcp: { p75: { values: { '75.0': 1200 } } },
           ttfb: { p75: { values: { '75.0': 400 } } },
@@ -71,7 +77,10 @@ describe('parseAppTerms', () => {
                 doc_count: 4,
                 sessions: { value: 4 },
                 error_sessions: { sessions: { value: 0 } },
-                lcp: { p75: { values: { '75.0': 2000 } } },
+                lcp: {
+                  p75: { values: { '75.0': 2000 } },
+                  ranks: { values: { '2500.0': 80, '4000.0': 100 } },
+                },
               },
               { doc_count: 8 },
               { doc_count: 6 },
@@ -98,10 +107,18 @@ describe('parseAppTerms', () => {
       environments: ['prod', 'staging'],
       trend: [4, 8, 6],
       scoreTrend: [
-        rumPerformanceScore({ lcp: 2000, errorRate: 0 }),
+        rumPerformanceScore({
+          lcp: 2000,
+          errorRate: 0,
+          ranks: { lcp: { good: 80, ni: 20, poor: 0 } },
+        }),
         rumPerformanceScore({ errorRate: 0 }),
         rumPerformanceScore({ errorRate: 0 }),
       ],
+      ranks: {
+        lcp: { good: 80, ni: 15, poor: 5 },
+        inp: { good: 70, ni: 20, poor: 10 },
+      },
     });
     expect(rows[0].score).toBe(
       rumPerformanceScore({
@@ -111,6 +128,10 @@ describe('parseAppTerms', () => {
         fcp: 1200,
         ttfb: 400,
         errorRate: 0.1,
+        ranks: {
+          lcp: { good: 80, ni: 15, poor: 5 },
+          inp: { good: 70, ni: 20, poor: 10 },
+        },
       })
     );
   });
@@ -140,6 +161,21 @@ describe('queryRumApps', () => {
     expect(
       (body.aggs.current as { aggs?: { sessionTraffic?: unknown } }).aggs?.sessionTraffic
     ).toBeDefined();
+  });
+
+  it('requests percentile ranks for each Core Web Vital on raw apps', async () => {
+    const search = jest.fn().mockResolvedValue({ aggregations: {} });
+    await queryRumApps({
+      client: { search } as never,
+      rangeFrom: '2026-08-15T00:00:00.000Z',
+      rangeTo: '2026-08-16T00:00:00.000Z',
+    });
+    const otelApps = search.mock.calls[0][0].aggs.current.aggs.otelApps.aggs as {
+      lcp: { aggs: { ranks: { percentile_ranks: { values: number[] } } } };
+      ttfb: { aggs: { ranks: { percentile_ranks: { values: number[] } } } };
+    };
+    expect(otelApps.lcp.aggs.ranks.percentile_ranks.values).toEqual([2500, 4000]);
+    expect(otelApps.ttfb.aggs.ranks.percentile_ranks.values).toEqual([800, 1800]);
   });
 
   it('returns fleet session traffic from the current period histogram', async () => {
@@ -233,6 +269,9 @@ describe('queryRumApps', () => {
     });
     expect(search).toHaveBeenCalledTimes(1);
     expect(search.mock.calls[0][0].index).toBe(RUM_SESSIONS_INDEX);
+    expect(search.mock.calls[0][0].aggs.current.aggs.apps.aggs.lcp).toEqual({
+      percentiles: { field: 'lcp_p75', percents: [75] },
+    });
     expect(result.source).toBe('sessions');
     expect(result.remainder).toBe(true);
   });

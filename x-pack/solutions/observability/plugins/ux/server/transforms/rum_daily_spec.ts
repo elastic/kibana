@@ -68,7 +68,7 @@ const WEB_VITAL_FILTER = {
   },
 };
 
-const vitalFilter = (name: 'lcp' | 'inp' | 'cls' | 'fcp') => ({
+const vitalFilter = (name: keyof typeof VITAL_RANK_THRESHOLDS) => ({
   bool: {
     filter: [WEB_VITAL_FILTER, { term: { 'attributes.browser.web_vital.name': name } }],
   },

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { rumPerformanceScore } from './rum_performance_score';
+import {
+  compactVitalRanks,
+  rumPerformanceScore,
+  type RumPerformanceVitals,
+} from './rum_performance_score';
 import { resolveRumAppPlatform, type RumAppPlatform } from './rum_platform';
 
 export type { RumAppPlatform };
@@ -22,6 +26,7 @@ export interface RumAppInventoryRow {
   p75Cls: number | null;
   p75Fcp: number | null;
   p75Ttfb: number | null;
+  ranks?: RumPerformanceVitals['ranks'];
   score: number | null;
   scoreTrend: number[];
   environments: string[];
@@ -58,6 +63,7 @@ export interface RumAppBucketInput {
   p75Cls?: number | null;
   p75Fcp?: number | null;
   p75Ttfb?: number | null;
+  ranks?: RumPerformanceVitals['ranks'];
   trend?: number[];
   scoreTrend?: number[];
   environments?: string[];
@@ -102,37 +108,55 @@ export const rumAppFromBucket = ({
   p75Cls = null,
   p75Fcp = null,
   p75Ttfb = null,
+  ranks,
   trend = [],
   scoreTrend = [],
   environments = [],
   platformKeys,
-}: RumAppBucketInput): RumAppInventoryRow => ({
-  name,
-  platform: resolveRumAppPlatform(platformKeys),
-  sessions,
-  pageViews,
-  errorSessions,
-  errorRate: sessions > 0 ? errorSessions / sessions : 0,
-  p75Lcp,
-  p75Inp,
-  p75Cls,
-  p75Fcp,
-  p75Ttfb,
-  score: rumPerformanceScore({
-    lcp: p75Lcp,
-    inp: p75Inp,
-    cls: p75Cls,
-    fcp: p75Fcp,
-    ttfb: p75Ttfb,
-    errorRate: sessions > 0 ? errorSessions / sessions : null,
-  }),
-  scoreTrend,
-  environments,
-  scoreDelta: null,
-  sessionsDelta: null,
-  errorRateDelta: null,
-  opportunity: null,
-  trend,
+}: RumAppBucketInput): RumAppInventoryRow => {
+  const errorRate = sessions > 0 ? errorSessions / sessions : 0;
+  const compactRanks = compactVitalRanks(ranks);
+  return {
+    name,
+    platform: resolveRumAppPlatform(platformKeys),
+    sessions,
+    pageViews,
+    errorSessions,
+    errorRate,
+    p75Lcp,
+    p75Inp,
+    p75Cls,
+    p75Fcp,
+    p75Ttfb,
+    ...(compactRanks ? { ranks: compactRanks } : {}),
+    score: rumPerformanceScore({
+      lcp: p75Lcp,
+      inp: p75Inp,
+      cls: p75Cls,
+      fcp: p75Fcp,
+      ttfb: p75Ttfb,
+      errorRate: sessions > 0 ? errorRate : null,
+      ranks: compactRanks,
+    }),
+    scoreTrend,
+    environments,
+    scoreDelta: null,
+    sessionsDelta: null,
+    errorRateDelta: null,
+    opportunity: null,
+    trend,
+  };
+};
+
+/** Inputs the inventory score used for this row. */
+export const rumAppScoreInputs = (app: RumAppInventoryRow): RumPerformanceVitals => ({
+  lcp: app.p75Lcp,
+  inp: app.p75Inp,
+  cls: app.p75Cls,
+  fcp: app.p75Fcp,
+  ttfb: app.p75Ttfb,
+  errorRate: app.sessions > 0 ? app.errorRate : null,
+  ranks: app.ranks,
 });
 
 /** Attach previous-period deltas and fleet opportunity after rows are merged. */
@@ -256,6 +280,7 @@ const mergeInventoryRow = (
     p75Cls: pickVital(indexed.p75Cls, live.p75Cls),
     p75Fcp: pickVital(indexed.p75Fcp, live.p75Fcp),
     p75Ttfb: pickVital(indexed.p75Ttfb, live.p75Ttfb),
+    ranks: indexed.ranks,
     trend: indexed.trend.length > 0 ? indexed.trend : live.trend,
     scoreTrend: indexed.scoreTrend.length > 0 ? indexed.scoreTrend : live.scoreTrend,
     environments: [...new Set([...indexed.environments, ...live.environments])],

@@ -7,8 +7,12 @@
 
 import {
   RUM_PERFORMANCE_VITALS,
+  rumApdexFromRanks,
   rumPerformanceScore,
   rumPerformanceScoreBand,
+  rumPerformanceScoreBreakdown,
+  rumScoreGaps,
+  rumScoreStrengths,
   rumVitalScore,
 } from './rum_performance_score';
 
@@ -35,6 +39,15 @@ describe('rumVitalScore', () => {
   });
 });
 
+describe('rumApdexFromRanks', () => {
+  it('gives full credit to good and half to needs-improvement', () => {
+    expect(rumApdexFromRanks({ good: 100, ni: 0 })).toBe(100);
+    expect(rumApdexFromRanks({ good: 0, ni: 100 })).toBe(50);
+    expect(rumApdexFromRanks({ good: 0, ni: 0 })).toBe(0);
+    expect(rumApdexFromRanks({ good: 70, ni: 20 })).toBe(80);
+  });
+});
+
 describe('rumPerformanceScore', () => {
   it('returns null when every vital is missing', () => {
     expect(rumPerformanceScore({})).toBeNull();
@@ -50,6 +63,12 @@ describe('rumPerformanceScore', () => {
     ).toBeNull();
   });
 
+  it('scores error-only apps as 100 minus the frustrated share', () => {
+    expect(rumPerformanceScore({ errorRate: 0 })).toBe(100);
+    expect(rumPerformanceScore({ errorRate: 0.25 })).toBe(75);
+    expect(rumPerformanceScore({ errorRate: 1 })).toBe(0);
+  });
+
   it('lets error rate pull a strong vitals score down', () => {
     const vitals = {
       lcp: RUM_PERFORMANCE_VITALS.lcp.p10,
@@ -60,7 +79,7 @@ describe('rumPerformanceScore', () => {
     expect(clean).toEqual(expect.any(Number));
     expect(broken).toEqual(expect.any(Number));
     expect(clean).toBeGreaterThan(80);
-    expect(broken).toBeLessThan(Number(clean));
+    expect(broken).toBe(Math.round(Number(clean) * 0.8));
   });
 
   it('renormalizes weights when only some vitals are present', () => {
@@ -76,6 +95,24 @@ describe('rumPerformanceScore', () => {
       })
     ).toBe(50);
   });
+
+  it('prefers Apdex-from-ranks over p75 when both exist', () => {
+    expect(
+      rumPerformanceScore({
+        lcp: 8000,
+        ranks: { lcp: { good: 80, ni: 20, poor: 0 } },
+      })
+    ).toBe(90);
+  });
+
+  it('multiplies Apdex ranks by the non-error share', () => {
+    expect(
+      rumPerformanceScore({
+        ranks: { lcp: { good: 100, ni: 0, poor: 0 } },
+        errorRate: 0.2,
+      })
+    ).toBe(80);
+  });
 });
 
 describe('rumPerformanceScoreBand', () => {
@@ -84,5 +121,37 @@ describe('rumPerformanceScoreBand', () => {
     expect(rumPerformanceScoreBand(89)).toBe('warning');
     expect(rumPerformanceScoreBand(50)).toBe('warning');
     expect(rumPerformanceScoreBand(49)).toBe('danger');
+  });
+});
+
+describe('rumPerformanceScoreBreakdown', () => {
+  it('explains weighted vitals, the error penalty, and what to fix first', () => {
+    const breakdown = rumPerformanceScoreBreakdown({
+      ranks: {
+        lcp: { good: 40, ni: 20, poor: 40 },
+        inp: { good: 100, ni: 0, poor: 0 },
+      },
+      errorRate: 0.2,
+    });
+    expect(breakdown).not.toBeNull();
+    if (breakdown == null) {
+      return;
+    }
+    expect(breakdown.vitals).toHaveLength(2);
+    expect(breakdown.vitals.find((vital) => vital.name === 'lcp')).toMatchObject({
+      method: 'ranks',
+      score: 50,
+    });
+    expect(breakdown.vitals.find((vital) => vital.name === 'inp')).toMatchObject({
+      method: 'ranks',
+      score: 100,
+    });
+    expect(rumScoreStrengths(breakdown)).toEqual([
+      expect.objectContaining({ name: 'inp', score: 100 }),
+    ]);
+    const gaps = rumScoreGaps(breakdown);
+    expect(gaps[0]).toMatchObject({ kind: 'vital', name: 'lcp' });
+    expect(gaps.some((gap) => gap.kind === 'error')).toBe(true);
+    expect(breakdown.missing).toEqual(['cls', 'fcp', 'ttfb']);
   });
 });

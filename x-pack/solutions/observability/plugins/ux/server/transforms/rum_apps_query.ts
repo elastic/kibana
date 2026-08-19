@@ -28,7 +28,8 @@ import {
   type RumAppsQueryStage,
   type RumAppsResponse,
 } from '../../common/rum_apps';
-import { rumPerformanceScore } from '../../common/rum_performance_score';
+import { ranksFromPercentileRanks, VITAL_RANK_THRESHOLDS } from '../../common/rum_app';
+import { rumPerformanceScore, type RumPerformanceVitals } from '../../common/rum_performance_score';
 import { previousEqualPeriod } from '../../common/rum_report';
 import { RUM_CANONICAL_SESSION_ID_FIELD, RUM_SESSIONS_INDEX } from '../../common/rum_sessions';
 import { RUM_SESSION_SOURCE_INDEX } from '../../common/session_replay';
@@ -57,16 +58,25 @@ const environmentSubAggs = {
   classicEnvironments: { terms: { field: SERVICE_ENVIRONMENT, size: 10 } },
 };
 
-const vitalP75 = (name: string) => ({
-  filter: {
-    bool: {
-      filter: [WEB_VITAL_FILTER, { term: { 'attributes.browser.web_vital.name': name } }],
+const vitalP75 = (name: keyof typeof VITAL_RANK_THRESHOLDS) => {
+  const { good, ni } = VITAL_RANK_THRESHOLDS[name];
+  return {
+    filter: {
+      bool: {
+        filter: [WEB_VITAL_FILTER, { term: { 'attributes.browser.web_vital.name': name } }],
+      },
     },
-  },
-  aggs: {
-    p75: { percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] } },
-  },
-});
+    aggs: {
+      p75: { percentiles: { field: 'attributes.browser.web_vital.value', percents: [75] } },
+      ranks: {
+        percentile_ranks: {
+          field: 'attributes.browser.web_vital.value',
+          values: [good, ni],
+        },
+      },
+    },
+  };
+};
 
 const vitalAggs = {
   lcp: vitalP75('lcp'),
@@ -141,6 +151,19 @@ const pageViewsOf = (bucket: { page_views?: unknown; [name: string]: unknown }):
 const p75Of = (agg: unknown): number | null =>
   percentileValue((agg as { p75?: unknown } | undefined)?.p75) ?? percentileValue(agg);
 
+const ranksOf = (agg: unknown): ReturnType<typeof ranksFromPercentileRanks> =>
+  ranksFromPercentileRanks(
+    (agg as { ranks?: { values?: Record<string, number | null> } } | undefined)?.ranks?.values
+  );
+
+const performanceRanksOf = (bucket: Record<string, unknown>): RumPerformanceVitals['ranks'] => ({
+  lcp: ranksOf(bucket.lcp),
+  inp: ranksOf(bucket.inp),
+  cls: ranksOf(bucket.cls),
+  fcp: ranksOf(bucket.fcp),
+  ttfb: ranksOf(bucket.ttfb),
+});
+
 const sessionsOf = (bucket: { sessions?: unknown; doc_count?: number }): number => {
   if (bucket.sessions != null) {
     return cardValue(bucket.sessions);
@@ -172,6 +195,7 @@ const scoreTrendOf = (agg: unknown): number[] =>
         fcp: p75Of(bucket.fcp),
         ttfb: p75Of(bucket.ttfb),
         errorRate: sessions > 0 ? errorSessions / sessions : null,
+        ranks: performanceRanksOf(bucket),
       });
     })
     .filter((score): score is number => score != null);
@@ -193,6 +217,7 @@ export const parseAppTerms = (agg: unknown): RumAppInventoryRow[] =>
       p75Cls,
       p75Fcp,
       p75Ttfb,
+      ranks: performanceRanksOf(bucket),
       trend: termsBuckets(bucket.trend).map((item) => item.doc_count),
       scoreTrend: scoreTrendOf(bucket.trend),
       environments: [
