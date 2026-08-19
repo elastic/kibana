@@ -799,7 +799,6 @@ export const getSavedObjectTypes = (
             dynamic: false,
           },
           is_default_otel: { type: 'boolean' },
-          otlp_exporter_secrets: { type: 'binary' },
         },
       },
       modelVersions: {
@@ -951,7 +950,6 @@ export const getSavedObjectTypes = (
               addedMappings: {
                 otlp_exporter: { type: 'object', dynamic: false },
                 is_default_otel: { type: 'boolean' },
-                otlp_exporter_secrets: { type: 'binary' },
               },
             },
           ],
@@ -960,7 +958,6 @@ export const getSavedObjectTypes = (
               const {
                 otlp_exporter: _,
                 is_default_otel: __,
-                otlp_exporter_secrets: ___,
                 ...rest
               } = unknownAttributes as Record<string, unknown>;
               return rest;
@@ -2091,7 +2088,6 @@ export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl' },
   { key: 'password' },
   { key: 'kibana_api_key' },
-  { key: 'otlp_exporter_secrets' },
 ]);
 
 export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([{ key: 'ssl' }]);
