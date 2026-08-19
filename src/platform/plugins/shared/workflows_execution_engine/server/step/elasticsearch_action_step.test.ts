@@ -231,7 +231,6 @@ describe('ElasticsearchActionStepImpl', () => {
       expect((result as any).output).toEqual({ errors: false, items: [] });
     });
 
-
     it('should log a warning and keep returning the full response when bulk has partial failures', async () => {
       const bulkResponse = {
         took: 1,
