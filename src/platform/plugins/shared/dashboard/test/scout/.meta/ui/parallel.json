@@ -1,5 +1,5 @@
 {
-  "sha1": "7e8bc36ed81a257bdcbe45ef4153995c3e324c3a",
+  "sha1": "a5588345d86913d4ec91862e824e54fe77f705eb",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -61,8 +61,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/dashboard_add_panel_flyout.spec.ts",
-        "line": 110,
-        "column": 16
+        "line": 74,
+        "column": 71
       }
     },
     {

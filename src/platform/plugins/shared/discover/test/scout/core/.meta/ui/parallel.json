@@ -1,5 +1,5 @@
 {
-  "sha1": "24c542ca5c9bafe64465ca9ed83503cb00473b5d",
+  "sha1": "db0b82b58cb8e21070a9607a54977fd1b2d5d17b",
   "testChannels": [
     "ci-on-commit",
     "ci-batch-3h"
@@ -273,16 +273,16 @@
       }
     },
     {
-      "id": "4710c4af03427d2-9e7e3b25088cb7c",
-      "title": "Discover cascade layout - data fetching keeps an expanded row fetch active when switching tabs quickly",
+      "id": "cfc2dcf8d973ae8-2b4166ef777e0d2",
+      "title": "Discover cascade layout - row data fetching keeps a row fetch alive when switching away from its tab while it is in flight",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_fetching.spec.ts",
-        "line": 107,
-        "column": 19
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_data_row_fetching.spec.ts",
+        "line": 37,
+        "column": 66
       }
     },
     {
@@ -742,8 +742,8 @@
       }
     },
     {
-      "id": "bd30a08bd26a48f-c5c5a049bc79180",
-      "title": "Discover field data shows top-level object keys and normalizes legacy source-column URLs",
+      "id": "bd30a08bd26a48f-7dd6b07417dee5c",
+      "title": "Discover field data shows top-level object keys and supports source-column URLs",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1725,7 +1725,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
-        "line": 33,
+        "line": 32,
         "column": 64
       }
     },
@@ -1738,7 +1738,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
-        "line": 39,
+        "line": 38,
         "column": 51
       }
     },
@@ -1751,7 +1751,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
-        "line": 47,
+        "line": 46,
         "column": 24
       }
     },
@@ -1764,8 +1764,21 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
-        "line": 60,
+        "line": 59,
         "column": 41
+      }
+    },
+    {
+      "id": "3085731bee89644-4958fe723a12a8b",
+      "title": "Discover shared links should round-trip selected columns via share URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/shared_links.spec.ts",
+        "line": 74,
+        "column": 50
       }
     },
     {
@@ -2013,6 +2026,58 @@
       }
     },
     {
+      "id": "eefb3fb2d2b16e1-2c572bea1c06da2",
+      "title": "Discover unsaved changes modal on leaving the app shows the modal when the session is saved and has unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_modal.spec.ts",
+        "line": 23,
+        "column": 25
+      }
+    },
+    {
+      "id": "eefb3fb2d2b16e1-420c02780ee6674",
+      "title": "Discover unsaved changes modal on leaving the app does not show the modal when the session is saved and has no unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_modal.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "eefb3fb2d2b16e1-fa5beec73fad908",
+      "title": "Discover unsaved changes modal on leaving the app does not show the modal when the session is not saved and has unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_modal.spec.ts",
+        "line": 35,
+        "column": 27
+      }
+    },
+    {
+      "id": "eefb3fb2d2b16e1-4a2bbbc6c6d38bd",
+      "title": "Discover unsaved changes modal on leaving the app does not show the modal when the session is not saved and has no unsaved changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/unsaved_changes_modal.spec.ts",
+        "line": 45,
+        "column": 6
+      }
+    },
+    {
       "id": "da36c7ffd981d81-aaf15abc562feec",
       "title": "Discover URL state should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID",
       "expectedStatus": "passed",
@@ -2093,8 +2158,8 @@
       }
     },
     {
-      "id": "285c753247d9434-a83f4d0b439c1d5",
-      "title": "Discover view mode toggle should show Documents tab",
+      "id": "285c753247d9434-cf9ab630580432b",
+      "title": "Discover view mode toggle should show Documents selected",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -2115,7 +2180,7 @@
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
         "line": 24,
-        "column": 31
+        "column": 56
       }
     },
     {
@@ -2127,7 +2192,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
-        "line": 33,
+        "line": 34,
         "column": 18
       }
     },
@@ -2140,7 +2205,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/view_mode_toggle.spec.ts",
-        "line": 38,
+        "line": 39,
         "column": 23
       }
     }
