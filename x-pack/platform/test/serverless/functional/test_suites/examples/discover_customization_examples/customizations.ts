@@ -6,7 +6,6 @@
  */
 
 // Original test (remove during Scout migration): src/platform/test/examples/discover_customization_examples/customizations.ts
-import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_START_TIME = 'Sep 19, 2015 @ 06:31:44.000';
