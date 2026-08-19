@@ -277,7 +277,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
             createCommandExecutionState({
               errorMessage: executionTranslations.onlyOneFromExclusiveOr(
-                exclusiveGroup.map((arg) => arg.name).join(', ')
+                exclusiveGroup.map((arg) => toCliArgumentOption(arg.name)).join(', ')
               ),
             }),
             false

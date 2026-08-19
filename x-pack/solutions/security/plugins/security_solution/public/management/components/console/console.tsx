@@ -196,7 +196,7 @@ export const Console = memo<ConsoleProps>(
                               { defaultMessage: 'Command output history' }
                             )}
                           >
-                            <ConsoleInfo />
+                            <ConsoleInfo data-test-subj={getTestId('consoleAboutPanel')} />
                             <HistoryOutput />
                           </div>
                         </EuiFlexItem>

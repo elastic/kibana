@@ -46,7 +46,9 @@ export const ConsoleInfo = memo<ConsoleInfoProps>(({ 'data-test-subj': dataTestS
                 <FormattedMessage
                   id="xpack.securitySolution.console.consoleInfo.helpCommandInfo"
                   defaultMessage="Enter {command} to see list of available commands"
-                  values={{ command: <UserCommandInput input="help" /> }}
+                  values={{
+                    command: <UserCommandInput data-test-subj={getTestId('help')} input="help" />,
+                  }}
                 />
               </li>
 
