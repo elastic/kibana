@@ -28,6 +28,12 @@ import { emitFromStepResult, injectAttachmentIds } from '../attachments/emit_att
 
 type GetCasesClientFn = (request: KibanaRequest) => Promise<CasesClient>;
 
+/**
+ * The `type` values `add_attachments` accepts are whatever authorable
+ * attachment types the registry holds — not just comments and alerts. Listing
+ * them in the schema description stops the model from assuming the two example
+ * shapes below are the only supported types.
+ */
 const describeAttachmentsField = (authorableTypeIds: string[]): string => {
   const lines = [
     'For add_attachments: generic bulk attachment payloads (NOT limited to comments and alerts).',
@@ -70,8 +76,16 @@ const buildManageAttachmentsSchema = (authorableTypeIds: string[]) =>
       .describe(describeAttachmentsField(authorableTypeIds)),
   });
 
+// Static schema used only for typing; the tool builds a schema with the
+// registry-derived type list at construction time (same shape, so the inferred
+// type is identical).
 const manageAttachmentsSchema = buildManageAttachmentsSchema([]);
 
+/**
+ * Authorable attachment type IDs registered so far — those exposing a
+ * `workflowSchema`/`schema` `ZodObject` (mirrors `selectAuthorableAttachmentSchemas`).
+ * Built-in types are registered before this tool, so the list covers them.
+ */
 const getAuthorableTypeIds = (registry: UnifiedAttachmentTypeRegistry): string[] =>
   registry
     .list()
@@ -88,6 +102,9 @@ export const manageAttachmentsTool = (
   const addAlertsStepDef = addAlertsStepDefinition(getCasesClientFn);
   const addEventsStepDef = addEventsStepDefinition(getCasesClientFn);
 
+  // Built lazily on first use: the discriminated union must snapshot the
+  // registry after solution plugins have registered their attachment types
+  // (post-start), which is guaranteed by the time a handler runs.
   let addAttachmentsStepDef: ReturnType<typeof addAttachmentsStepDefinition>;
   const getAddAttachmentsStepDef = () => {
     if (addAttachmentsStepDef === undefined) {
