@@ -172,9 +172,11 @@ export class AlertService {
     casesEventBus: CasesEventBus,
     request: KibanaRequest
   ) {
+    const idToIndex = new Map<string, string>();
     const byStatus = new Map<STATUS_VALUES, string[]>();
     for (const alert of alerts) {
       if (!AlertService.isEmptyAlert(alert)) {
+        idToIndex.set(alert.id, alert.index);
         const status = this.translateStatus(alert);
         const bucket = byStatus.get(status);
         if (bucket !== undefined) {
@@ -185,6 +187,13 @@ export class AlertService {
       }
     }
     for (const [status, alertIds] of byStatus) {
+      const indicesSet = new Set<string>();
+      for (const id of alertIds) {
+        const index = idToIndex.get(id);
+        if (index !== undefined) {
+          indicesSet.add(index);
+        }
+      }
       casesEventBus.emitAlertStatusChanged(request, {
         alertIds,
         status,
@@ -192,6 +201,7 @@ export class AlertService {
           id,
           previousStatus: previousStatusMap.get(id) ?? 'open',
         })),
+        indices: Array.from(indicesSet),
       });
     }
   }

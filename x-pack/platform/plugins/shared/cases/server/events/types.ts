@@ -56,6 +56,8 @@ export interface AlertStatusChangedEventPayload {
     readonly id: string;
     readonly previousStatus: STATUS_VALUES;
   }>;
+  /** Unique ES indices the affected alerts live in — used by consumers to filter by alert owner. */
+  readonly indices: readonly string[];
 }
 
 interface CasesDomainEventPayloadByType {

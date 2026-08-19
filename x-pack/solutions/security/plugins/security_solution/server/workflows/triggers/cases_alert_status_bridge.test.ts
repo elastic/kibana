@@ -25,6 +25,9 @@ describe('forwardCasesAlertStatusToSS', () => {
     bus.removeAllListeners();
   });
 
+  const securityIndex = '.alerts-security.alerts-default';
+  const obsIndex = '.alerts-observability.logs.alerts-default';
+
   it('emits alertStatusChanged with the correct payload', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
@@ -36,6 +39,7 @@ describe('forwardCasesAlertStatusToSS', () => {
         { id: 'a1', previousStatus: 'open' },
         { id: 'a2', previousStatus: 'open' },
       ],
+      indices: [securityIndex],
     });
 
     expect(listener).toHaveBeenCalledTimes(1);
@@ -49,6 +53,20 @@ describe('forwardCasesAlertStatusToSS', () => {
     expect(payload.truncated).toBe(false);
   });
 
+  it('does not emit when no index starts with .alerts-security.', () => {
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+      alertIds: ['a1'],
+      status: 'acknowledged',
+      previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
+      indices: [obsIndex],
+    });
+
+    expect(listener).not.toHaveBeenCalled();
+  });
+
   it('caps alertIds to MAX_ALERTS_PER_TRIGGER and sets truncated: true', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
@@ -58,6 +76,7 @@ describe('forwardCasesAlertStatusToSS', () => {
       alertIds: oversizedIds,
       status: 'closed',
       previousStatuses: [],
+      indices: [securityIndex],
     });
 
     const { payload } = listener.mock.calls[0][0];
@@ -78,6 +97,7 @@ describe('forwardCasesAlertStatusToSS', () => {
       alertIds: oversizedIds,
       status: 'open',
       previousStatuses: oversizedPrev,
+      indices: [securityIndex],
     });
 
     const { payload } = listener.mock.calls[0][0];
@@ -94,6 +114,7 @@ describe('forwardCasesAlertStatusToSS', () => {
         alertIds: ['a1'],
         status: 'open',
         previousStatuses: [],
+        indices: [securityIndex],
       })
     ).not.toThrow();
 

@@ -876,6 +876,7 @@ describe('updateAlertsStatus — event bus', () => {
     expect(payload.alertIds).toEqual(['a1']);
     expect(payload.status).toBe('closed');
     expect(payload.previousStatuses).toEqual([{ id: 'a1', previousStatus: 'open' }]);
+    expect(payload.indices).toEqual(['.siem-signals']);
 
     bus.removeAllListeners();
   });
@@ -901,14 +902,15 @@ describe('updateAlertsStatus — event bus', () => {
 
   it('logs warn and still completes update when mget prefetch fails', async () => {
     const bus = new CasesEventBus();
-    esClient.mget.mockRejectedValueOnce(new Error('mget failure'));
+    esClient.mget.mockRejectedValue(new Error('mget failure'));
 
     const alertService = new AlertService(esClient, logger, alertsClient, bus, request);
-    await expect(
-      alertService.updateAlertsStatus([
-        { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
-      ])
-    ).resolves.not.toThrow();
+    const updatePromise = alertService.updateAlertsStatus([
+      { id: 'a1', index: '.siem-signals', status: CaseStatuses.closed },
+    ]);
+    // pRetry schedules timer-based delays between retries; advance them all.
+    await jest.runAllTimersAsync();
+    await expect(updatePromise).resolves.not.toThrow();
 
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to prefetch previous alert statuses')
