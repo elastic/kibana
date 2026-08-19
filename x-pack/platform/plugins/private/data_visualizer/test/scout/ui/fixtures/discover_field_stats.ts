@@ -36,12 +36,21 @@ export const selectDiscoverSource = async (
   }
 };
 
+const VIEW_MODE_TOGGLE_BUTTON = 'dscViewModeToggleButton';
+const VIEW_MODE_TOGGLE_SELECTABLE = 'dscViewModeToggleSelectable';
+const VIEW_MODE_FIELD_STATS_OPTION = 'dscViewModeFieldStatsOption';
+
+const openViewModeMenu = async (page: ScoutPage) => {
+  await page.testSubj.click(VIEW_MODE_TOGGLE_BUTTON);
+  await page.testSubj.locator(VIEW_MODE_TOGGLE_SELECTABLE).waitFor({ state: 'visible' });
+};
+
 export const assertViewModeToggleNotExists = async (page: ScoutPage) => {
-  await expect(page.testSubj.locator('dscViewModeToggle')).toBeHidden({ timeout: 2000 });
+  await expect(page.testSubj.locator(VIEW_MODE_TOGGLE_BUTTON)).toBeHidden({ timeout: 2000 });
 };
 
 export const assertViewModeToggleExists = async (page: ScoutPage) => {
-  await expect(page.testSubj.locator('dscViewModeToggle')).toBeVisible({ timeout: 2000 });
+  await expect(page.testSubj.locator(VIEW_MODE_TOGGLE_BUTTON)).toBeVisible({ timeout: 2000 });
 };
 
 export const assertFieldStatsTableNotExists = async (page: ScoutPage) => {
@@ -54,13 +63,13 @@ export const assertFieldStatsTableNotExists = async (page: ScoutPage) => {
 };
 
 export const assertFieldStatsTabNotExists = async (page: ScoutPage) => {
-  await expect(page.testSubj.locator('dscViewModeFieldStatsButton')).toBeHidden({ timeout: 2000 });
+  await openViewModeMenu(page);
+  await expect(page.testSubj.locator(VIEW_MODE_FIELD_STATS_OPTION)).toBeHidden({ timeout: 2000 });
 };
 
 export const clickViewModeFieldStatsButton = async (page: ScoutPage) => {
-  const fieldStatsButton = page.testSubj.locator('dscViewModeFieldStatsButton');
-  await expect(fieldStatsButton).toBeVisible({ timeout: 2000 });
-  await fieldStatsButton.click();
+  await openViewModeMenu(page);
+  await page.testSubj.click(VIEW_MODE_FIELD_STATS_OPTION);
   await expect(page.testSubj.locator('dscFieldStatsEmbeddedContent')).toBeVisible({
     timeout: 2000,
   });
