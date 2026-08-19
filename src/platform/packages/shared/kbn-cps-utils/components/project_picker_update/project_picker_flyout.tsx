@@ -28,7 +28,11 @@ import type { ProjectRouting } from '@kbn/es-query';
 import { ProjectPickerList } from './blocks';
 import { ProjectPickerFrameBody, ProjectPickerFrameFooter } from './blocks/frame/partials';
 import { ProjectPickerFrameHeaderActions } from './blocks/frame/partials/header';
-import { ProjectPickerStateProvider, type ProjectPickerStateProviderProps } from './state';
+import {
+  ProjectPickerStateProvider,
+  useProjectPickerState,
+  type ProjectPickerStateProviderProps,
+} from './state';
 import { areProjectRoutingsEquivalent } from './utils';
 
 const defaultTitle = i18n.translate('cpsUtils.projectPicker.flyout.title', {
@@ -69,6 +73,67 @@ export interface ProjectPickerFlyoutProps
   discardButtonLabel?: ReactNode;
   titleId?: string;
   title?: ReactNode;
+}
+
+interface ProjectPickerFlyoutFooterActionsProps {
+  applyButtonLabel: ReactNode;
+  canApplyUnchangedProjectRouting: boolean;
+  currentProjectRouting: ProjectRouting | undefined;
+  discardButtonLabel: ReactNode;
+  hasUnsavedChanges: boolean;
+  onApplyChanges: (projectRouting: NonNullable<ProjectRouting>) => void;
+  onDiscardChanges: () => void;
+}
+
+function ProjectPickerFlyoutFooterActions({
+  applyButtonLabel,
+  canApplyUnchangedProjectRouting,
+  currentProjectRouting,
+  discardButtonLabel,
+  hasUnsavedChanges,
+  onApplyChanges,
+  onDiscardChanges,
+}: ProjectPickerFlyoutFooterActionsProps) {
+  const { isFilterProposalPending } = useProjectPickerState();
+  const canApplyChanges =
+    !isFilterProposalPending && (hasUnsavedChanges || canApplyUnchangedProjectRouting);
+
+  const handleApplyChanges = useCallback(() => {
+    if (!canApplyChanges || currentProjectRouting === undefined) {
+      return;
+    }
+
+    onApplyChanges(currentProjectRouting);
+  }, [canApplyChanges, currentProjectRouting, onApplyChanges]);
+
+  return (
+    <>
+      <ProjectPickerFrameFooter />
+      <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            data-test-subj="projectPickerFlyoutDiscardButton"
+            disabled={!hasUnsavedChanges}
+            flush="left"
+            onClick={onDiscardChanges}
+          >
+            {discardButtonLabel}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            data-test-subj="projectPickerFlyoutApplyButton"
+            fill
+            isDisabled={!canApplyChanges}
+            onClick={handleApplyChanges}
+          >
+            {applyButtonLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
 }
 
 export function ProjectPickerFlyoutContent({
@@ -116,16 +181,6 @@ export function ProjectPickerFlyoutContent({
     );
   }, [availableProjects, originProjectId, projectRouting, stagedProjectRouting]);
 
-  const canApplyChanges = hasUnsavedChanges || canApplyUnchangedProjectRouting;
-
-  const handleApplyChanges = useCallback(() => {
-    if (!canApplyChanges || currentProjectRouting === undefined) {
-      return;
-    }
-
-    onApplyChanges(currentProjectRouting);
-  }, [canApplyChanges, currentProjectRouting, onApplyChanges]);
-
   const handleDiscardChanges = useCallback(() => {
     setStagedProjectRouting(undefined);
     setPickerResetCounter((counter) => counter + 1);
@@ -172,30 +227,15 @@ export function ProjectPickerFlyoutContent({
         </ProjectPickerFrameBody>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <ProjectPickerFrameFooter />
-        <EuiHorizontalRule margin="m" />
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              data-test-subj="projectPickerFlyoutDiscardButton"
-              disabled={!hasUnsavedChanges}
-              flush="left"
-              onClick={handleDiscardChanges}
-            >
-              {discardButtonLabel}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="projectPickerFlyoutApplyButton"
-              fill
-              isDisabled={!canApplyChanges}
-              onClick={handleApplyChanges}
-            >
-              {applyButtonLabel}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ProjectPickerFlyoutFooterActions
+          applyButtonLabel={applyButtonLabel}
+          canApplyUnchangedProjectRouting={canApplyUnchangedProjectRouting}
+          currentProjectRouting={currentProjectRouting}
+          discardButtonLabel={discardButtonLabel}
+          hasUnsavedChanges={hasUnsavedChanges}
+          onApplyChanges={onApplyChanges}
+          onDiscardChanges={handleDiscardChanges}
+        />
       </EuiFlyoutFooter>
     </ProjectPickerStateProvider>
   );
