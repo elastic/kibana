@@ -14,9 +14,8 @@ import type { ProjectScopeAction } from './use_project_scope_action';
 export const ProjectScopeActionFlyout: FC<ProjectScopeAction> = ({
   availableProjects,
   closeFlyout,
-  defaultProjectRouting,
-  hasChanges,
-  onProjectRoutingChange,
+  defaultProjectRoutingGetter,
+  fetchProjectsByRouting,
   openModal,
   originProjectId,
   targetProjectRouting,
@@ -36,20 +35,20 @@ export const ProjectScopeActionFlyout: FC<ProjectScopeAction> = ({
           defaultMessage: 'Back',
         }
       )}
-      defaultProjectRouting={defaultProjectRouting}
+      canApplyUnchangedProjectRouting
+      defaultProjectRoutingGetter={defaultProjectRoutingGetter}
       discardButtonLabel={i18n.translate(
         'xpack.transform.transformList.projectScopeFlyoutBackButton',
         {
           defaultMessage: 'Back',
         }
       )}
-      isApplyDisabled={!hasChanges}
+      fetchProjectsByRouting={fetchProjectsByRouting}
       onApplyChanges={openModal}
       onClose={closeFlyout}
-      onDiscardChanges={closeFlyout}
-      onProjectRoutingChange={onProjectRoutingChange}
       originProjectId={originProjectId}
       projectRouting={targetProjectRouting || PROJECT_ROUTING.ORIGIN}
+      projectRoutingStrategy="snapshot"
       title={i18n.translate('xpack.transform.transformList.projectScopeFlyoutTitle', {
         defaultMessage: 'Change project scope',
       })}

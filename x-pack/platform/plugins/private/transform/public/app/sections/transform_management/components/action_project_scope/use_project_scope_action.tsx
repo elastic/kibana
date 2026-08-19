@@ -25,16 +25,26 @@ export const useProjectScopeAction = () => {
   const cpsManager = cps?.cpsManager;
   const { canCreateTransform } = useTransformCapabilities();
   const updateTransformsProjectScope = useUpdateTransformsProjectScope();
-  const defaultProjectRouting = cpsManager?.getDefaultProjectRouting() ?? PROJECT_ROUTING.ALL;
+  const defaultProjectRoutingGetter = useCallback(
+    () => cpsManager?.getDefaultProjectRouting() ?? PROJECT_ROUTING.ALL,
+    [cpsManager]
+  );
+  const defaultProjectRouting = defaultProjectRoutingGetter();
   const [isFlyoutVisible, setFlyoutVisible] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [items, setItems] = useState<TransformListRow[]>([]);
   const [targetProjectRouting, setTargetProjectRouting] =
     useState<NonNullable<ProjectRouting>>(defaultProjectRouting);
+  const fetchProjectsByRouting = useCallback(
+    (routing?: ProjectRouting) => cpsManager?.fetchProjects(routing) ?? Promise.resolve(null),
+    [cpsManager]
+  );
   const fetchProjects = useCallback(
     (routing?: ProjectRouting) =>
-      cpsManager?.fetchProjects(routing) ?? Promise.resolve({ origin: null, linkedProjects: [] }),
-    [cpsManager]
+      fetchProjectsByRouting(routing).then(
+        (projects) => projects ?? { origin: null, linkedProjects: [] }
+      ),
+    [fetchProjectsByRouting]
   );
   const { originProject, linkedProjects, isLoading, error } = useFetchProjects(
     fetchProjects,
@@ -87,13 +97,10 @@ export const useProjectScopeAction = () => {
     [defaultProjectRouting, isDisabled]
   );
 
-  const openModal = useCallback(() => {
-    if (!hasChanges) {
-      return;
-    }
-
+  const openModal = useCallback((projectRouting: NonNullable<ProjectRouting>) => {
+    setTargetProjectRouting(projectRouting);
     setModalVisible(true);
-  }, [hasChanges]);
+  }, []);
 
   const onProjectRoutingChange = useCallback((projectRouting: ProjectRouting) => {
     if (projectRouting !== undefined) {
@@ -102,6 +109,10 @@ export const useProjectScopeAction = () => {
   }, []);
 
   const confirmAndCloseModal = useCallback(() => {
+    if (targetProjectRouting === undefined) {
+      return;
+    }
+
     updateTransformsProjectScope({
       projectRouting: targetProjectRouting,
       transformsInfo: items.map(({ id }) => ({ id })),
@@ -117,6 +128,8 @@ export const useProjectScopeAction = () => {
     closeModal,
     confirmAndCloseModal,
     defaultProjectRouting,
+    defaultProjectRoutingGetter,
+    fetchProjectsByRouting,
     hasChanges,
     hasLinkedProjects,
     isCpsEnabled,

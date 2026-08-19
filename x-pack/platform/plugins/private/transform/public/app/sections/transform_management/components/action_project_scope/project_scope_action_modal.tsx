@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { ProjectRouting } from '@kbn/es-query';
@@ -107,12 +108,12 @@ const ProjectScopeDelta: FC<{
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color={added > 0 ? 'success' : 'subdued'}>
+        <EuiText size="s" color={added > 0 ? 'success' : 'subdued'}>
           +{added}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiText size="xs" color={removed > 0 ? 'danger' : 'subdued'}>
+        <EuiText size="s" color={removed > 0 ? 'danger' : 'subdued'}>
           -{removed}
         </EuiText>
       </EuiFlexItem>
@@ -157,16 +158,16 @@ export const ProjectScopeActionModal: FC<ProjectScopeAction> = ({
       aria-labelledby={confirmModalTitleId}
       titleProps={{ id: confirmModalTitleId }}
     >
-      <EuiText size="s">
-        <h4>
+      <EuiTitle size="xxs">
+        <h5>
           {i18n.translate(
             'xpack.transform.transformList.projectScopeModalAffectedTransformsTitle',
             {
               defaultMessage: 'Affected transforms',
             }
           )}
-        </h4>
-      </EuiText>
+        </h5>
+      </EuiTitle>
       <EuiPanel color="subdued" paddingSize="s" hasShadow={false}>
         {previewItems.map((item, index) => (
           <React.Fragment key={item.id}>
@@ -177,7 +178,7 @@ export const ProjectScopeActionModal: FC<ProjectScopeAction> = ({
               responsive={false}
             >
               <EuiFlexItem>
-                <EuiText size="xs">{item.id}</EuiText>
+                <EuiText size="s">{item.id}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <ProjectScopeDelta
@@ -188,7 +189,7 @@ export const ProjectScopeActionModal: FC<ProjectScopeAction> = ({
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            {index < previewItems.length - 1 ? <EuiSpacer size="xs" /> : null}
+            {index < previewItems.length - 1 ? <EuiSpacer size="m" /> : null}
           </React.Fragment>
         ))}
       </EuiPanel>
