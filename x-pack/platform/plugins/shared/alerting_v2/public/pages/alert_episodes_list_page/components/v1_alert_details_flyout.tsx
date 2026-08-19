@@ -50,6 +50,7 @@ import {
   fetchV1AlertById,
   type V1AlertFields,
 } from '@kbn/alerting-v2-episodes-ui/apis/classic_alerts_api';
+import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
 import * as i18n from '../translations';
 
 type TabId = 'overview' | 'fields';
@@ -126,7 +127,7 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
     isLoading,
     isError,
   } = useQuery<V1AlertFields, Error>({
-    queryKey: ['alertingV2', 'classicAlert', alertId],
+    queryKey: queryKeys.classicAlert(alertId),
     queryFn: ({ signal }) => fetchV1AlertById({ id: alertId, services, abortSignal: signal }),
     enabled: Boolean(alertId),
   });
@@ -316,9 +317,7 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
               color="transparent"
               data-test-subj="alertEpisodeV1FieldsTabPanel"
             >
-              <AlertFieldsTable
-                alert={alert as unknown as React.ComponentProps<typeof AlertFieldsTable>['alert']}
-              />
+              <AlertFieldsTable alert={alert} />
             </EuiPanel>
           )}
         </EuiFlyoutBody>

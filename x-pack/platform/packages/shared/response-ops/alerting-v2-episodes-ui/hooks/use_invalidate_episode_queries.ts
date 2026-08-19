@@ -35,6 +35,7 @@ export const useInvalidateEpisodeQueries = () => {
         queryClient.invalidateQueries({ queryKey: queryKeys.tagOptionsAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.histogramAll() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.kpisAll() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.classicAlertAll() }),
       ]),
     [queryClient]
   );

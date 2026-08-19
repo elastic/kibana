@@ -27,8 +27,10 @@ import {
   EPISODE_SEVERITY_CHART_VALUE,
   EPISODE_SEVERITIES,
   EPISODE_SEVERITY_FILTER_NONE,
+  type EpisodeSeverity,
 } from '../components/severity/severity_utils';
 import { CLASSIC_ALERT_MUTED_FIELD, CLASSIC_ALERT_SNOOZED_FIELD } from './constants';
+import { V1_SEVERITY_MAP } from './map_alert';
 
 export interface ClassicAlertsTimeRange {
   from: string;
@@ -58,11 +60,16 @@ const mapEpisodeStatusesToClassic = (statuses: string[]): string[] => {
 };
 
 const buildSeverityFilter = (severities: string[]): estypes.QueryDslQueryContainer => {
-  const values = severities
+  const v2Values = severities
     .filter((severity) => severity !== EPISODE_SEVERITY_FILTER_NONE)
     .map((severity) => severity.toLowerCase())
     .filter((severity) => SUPPORTED_SEVERITIES.has(severity));
   const includeNoSeverity = severities.includes(EPISODE_SEVERITY_FILTER_NONE);
+
+  const v1Aliases = Object.entries(V1_SEVERITY_MAP)
+    .filter(([, v2]) => v2Values.includes(v2))
+    .map(([v1]) => v1);
+  const values = [...new Set([...v2Values, ...v1Aliases])];
 
   const should: estypes.QueryDslQueryContainer[] = [];
   if (values.length) {
@@ -169,6 +176,10 @@ const SEVERITY_SORT_SCRIPT = [
   `def v = doc.containsKey('${ALERT_SEVERITY}') && !doc['${ALERT_SEVERITY}'].empty ? doc['${ALERT_SEVERITY}'].value : '';`,
   ...EPISODE_SEVERITIES.map(
     (s) => `if (v == '${s}') { return ${EPISODE_SEVERITY_CHART_VALUE[s]}; }`
+  ),
+  ...Object.entries(V1_SEVERITY_MAP).map(
+    ([v1, v2]) =>
+      `if (v == '${v1}') { return ${EPISODE_SEVERITY_CHART_VALUE[v2 as EpisodeSeverity]}; }`
   ),
   `return -1;`,
 ].join(' ');

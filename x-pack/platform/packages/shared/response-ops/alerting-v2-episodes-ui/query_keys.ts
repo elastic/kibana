@@ -87,6 +87,8 @@ export const queryKeys = {
     timeRange: TimeRange | undefined,
     breakdownField: string | undefined
   ) => [...queryKeys.histogramAll(), spaceId, filterState, timeRange, breakdownField] as const,
+  classicAlertAll: () => [...queryKeys.all, 'classic-alert'] as const,
+  classicAlert: (alertId: string) => [...queryKeys.classicAlertAll(), alertId] as const,
   currentUserProfile: () => [...queryKeys.all, 'current-user-profile'] as const,
   kpisAll: () => [...queryKeys.all, 'kpis'] as const,
   kpis: (

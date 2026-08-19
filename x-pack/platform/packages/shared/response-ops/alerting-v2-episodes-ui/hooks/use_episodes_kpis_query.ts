@@ -16,7 +16,7 @@ import { useSpaceId } from './use_space_id';
 import { useCurrentUserProfile } from './use_current_user_profile';
 import { buildEpisodesKpisQuery } from '../queries/episodes_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchV1AlertsKpis, type V1AlertsKpisRow } from '../apis/classic_alerts_api';
+import { fetchV1AlertsKpis } from '../apis/classic_alerts_api';
 import { queryKeys } from '../query_keys';
 
 export interface EpisodesKpisData {
@@ -93,7 +93,7 @@ export const useEpisodesKpisQuery = ({
           filterState,
           timeRange,
           abortSignal: signal,
-        }).catch(() => undefined as V1AlertsKpisRow | undefined),
+        }).catch(() => undefined),
       ]);
 
       const v2 = v2Rows[0];

@@ -17,7 +17,7 @@ export interface FetchRulesByIdsParams {
   ids: string[];
 }
 
-const V1_RULES_FIND_API_PATH = '/api/alerting/rules/_find' as const;
+const V1_RULES_FIND_API_PATH = '/internal/alerting/rules/_find' as const;
 const V1_RULE_SO_TYPE = 'alert' as const;
 
 const buildRuleIdsFilter = (ids: string[]): string =>
@@ -87,12 +87,12 @@ export const fetchRulesByIds = async ({
   }
 
   try {
-    const v1Response = await http.get<V1FindRulesResponse>(V1_RULES_FIND_API_PATH, {
-      query: {
+    const v1Response = await http.post<V1FindRulesResponse>(V1_RULES_FIND_API_PATH, {
+      body: JSON.stringify({
         filter: buildV1RuleIdsFilter(missingIds),
         per_page: missingIds.length,
         page: 1,
-      },
+      }),
     });
     return [...v2Rules, ...v1Response.data.map(adaptV1Rule)];
   } catch {

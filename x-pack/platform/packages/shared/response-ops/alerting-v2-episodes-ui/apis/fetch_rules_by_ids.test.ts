@@ -59,25 +59,21 @@ describe('fetchRulesByIds', () => {
 
   it('falls back to v1 rules API for IDs not found in v2', async () => {
     const v2Rule = { id: 'v2-rule', metadata: { name: 'V2 Rule' } };
-    mockHttp.get
-      .mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 })
-      .mockResolvedValueOnce({
-        data: [{ id: 'v1-rule', name: 'V1 Rule' }],
-      });
+    mockHttp.get.mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 });
+    mockHttp.post.mockResolvedValueOnce({
+      data: [{ id: 'v1-rule', name: 'V1 Rule' }],
+    });
 
     const result = await fetchRulesByIds({
       http: mockHttp,
       ids: ['v2-rule', 'v1-rule'],
     });
 
-    expect(mockHttp.get).toHaveBeenCalledTimes(2);
-    expect(mockHttp.get).toHaveBeenNthCalledWith(
-      2,
-      '/api/alerting/rules/_find',
+    expect(mockHttp.get).toHaveBeenCalledTimes(1);
+    expect(mockHttp.post).toHaveBeenCalledWith(
+      '/internal/alerting/rules/_find',
       expect.objectContaining({
-        query: expect.objectContaining({
-          filter: expect.stringContaining('alert.id: "alert:v1-rule"'),
-        }),
+        body: expect.stringContaining('alert.id: \\"alert:v1-rule\\"'),
       })
     );
     expect(result).toHaveLength(2);
@@ -97,9 +93,8 @@ describe('fetchRulesByIds', () => {
 
   it('returns v2 rules only when v1 fallback fails', async () => {
     const v2Rule = { id: 'v2-rule', metadata: { name: 'V2 Rule' } };
-    mockHttp.get
-      .mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 })
-      .mockRejectedValueOnce(new Error('v1 API unavailable'));
+    mockHttp.get.mockResolvedValueOnce({ items: [v2Rule], total: 1, page: 1, perPage: 50 });
+    mockHttp.post.mockRejectedValueOnce(new Error('v1 unavailable'));
 
     const result = await fetchRulesByIds({
       http: mockHttp,

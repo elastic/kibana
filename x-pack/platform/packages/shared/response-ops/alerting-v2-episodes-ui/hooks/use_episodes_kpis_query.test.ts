@@ -15,7 +15,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import type { GetUserProfileResponse } from '@kbn/core-user-profile-browser';
 import { useEpisodesKpisQuery } from './use_episodes_kpis_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
-import { fetchV1AlertsKpis, type V1AlertsKpisRow } from '../apis/classic_alerts_api';
+import { fetchV1AlertsKpis } from '../apis/classic_alerts_api';
 import { useSpaceId } from './use_space_id';
 
 jest.mock('../utils/execute_esql_query');
@@ -26,7 +26,7 @@ const mockExecuteEsqlQuery = jest.mocked(executeEsqlQuery);
 const mockFetchV1AlertsKpis = jest.mocked(fetchV1AlertsKpis);
 const mockUseSpaceId = jest.mocked(useSpaceId);
 mockUseSpaceId.mockReturnValue('default');
-mockFetchV1AlertsKpis.mockResolvedValue(undefined as unknown as V1AlertsKpisRow);
+mockFetchV1AlertsKpis.mockRejectedValue(new Error('v1 unavailable'));
 
 const mockUserProfile = userProfileServiceMock.createStart();
 mockUserProfile.getCurrent.mockResolvedValue({ uid: 'user-123' } as GetUserProfileResponse);
@@ -63,7 +63,7 @@ const wrapper = () => {
 afterEach(() => {
   jest.clearAllMocks();
   mockUseSpaceId.mockReturnValue('default');
-  mockFetchV1AlertsKpis.mockResolvedValue(undefined as unknown as V1AlertsKpisRow);
+  mockFetchV1AlertsKpis.mockRejectedValue(new Error('v1 unavailable'));
 });
 
 describe('useEpisodesKpisQuery', () => {

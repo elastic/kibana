@@ -8,6 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
+import type { Alert } from '@kbn/alerting-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import type {
@@ -49,7 +50,7 @@ export interface V1AlertsKpisRow {
 }
 
 /** Raw `kibana.alert.*` fields (plus `_index` / `_id`) of a single classic (v1) alert. */
-export type V1AlertFields = Record<string, unknown>;
+export type V1AlertFields = Alert;
 
 /** Body accepted by the authorized RAC alerts find route (`POST /internal/rac/alerts/find`). */
 interface RacFindBody {
@@ -296,5 +297,5 @@ export const fetchV1AlertById = async ({
     throw new Error(`Classic alert not found: ${id}`);
   }
 
-  return { ...hit._source, _index: hit._index, _id: hit._id };
+  return { ...hit._source, _index: hit._index ?? '', _id: hit._id ?? '' } as V1AlertFields;
 };

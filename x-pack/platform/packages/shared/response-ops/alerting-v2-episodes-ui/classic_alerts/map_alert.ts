@@ -25,6 +25,23 @@ import type { AlertEpisode } from '../queries/episodes_query';
 import type { HistogramEpisodeRow } from '../utils/histogram_utils';
 
 /**
+ * Maps legacy v1 severity values that don't exist in the v2 `EpisodeSeverity`
+ * enum to the nearest v2 equivalent so they are filterable, sortable, and
+ * rendered correctly in the v2 table.
+ */
+export const V1_SEVERITY_MAP: Record<string, string> = {
+  warning: 'medium',
+  minor: 'low',
+  major: 'high',
+};
+
+const normalizeV1Severity = (severity: string | undefined): string | null => {
+  if (severity == null) return null;
+  const lower = severity.toLowerCase();
+  return V1_SEVERITY_MAP[lower] ?? lower;
+};
+
+/**
  * Minimum `_source` projection for `mapClassicAlertToEpisode`.
  * Passing this to the RAC find request avoids transferring the full document.
  */
@@ -118,7 +135,7 @@ export const mapClassicAlertToEpisode = (source: ClassicAlertSource): AlertEpiso
     last_assignee_uid: null,
     last_tags: asStringArray(source[ALERT_RULE_TAGS]),
     episode_data: null,
-    severity: source[ALERT_SEVERITY] ?? null,
+    severity: normalizeV1Severity(source[ALERT_SEVERITY]),
     supports_actions: false,
     supports_timeline: false,
   };
