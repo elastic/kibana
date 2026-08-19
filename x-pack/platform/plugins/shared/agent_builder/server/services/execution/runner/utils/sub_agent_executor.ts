@@ -25,7 +25,7 @@ export const createSubAgentExecutor = ({
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.standalone,
-        interactive: false,
+        interactive: { enabled: false },
         request,
         params: {
           agentId: params.agentId,
@@ -43,7 +43,7 @@ export const createSubAgentExecutor = ({
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.conversation,
-        interactive: false,
+        interactive: { enabled: false },
         request,
         params: {
           agentId: params.agentId,
@@ -67,7 +67,7 @@ export const createSubAgentExecutor = ({
       const executionService = getExecutionService();
       return executionService.executeAgent({
         mode: AgentExecutionMode.conversation,
-        interactive: false,
+        interactive: { enabled: false },
         request,
         params: {
           connectorId: params.connectorId,

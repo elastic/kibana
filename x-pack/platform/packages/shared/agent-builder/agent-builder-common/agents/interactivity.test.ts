@@ -21,18 +21,6 @@ describe('normalizeInteractive', () => {
     });
   });
 
-  it('normalizes boolean true to { enabled: true }', () => {
-    expect(normalizeInteractive(true, AgentExecutionMode.standalone)).toEqual({
-      enabled: true,
-    });
-  });
-
-  it('normalizes boolean false to { enabled: false }', () => {
-    expect(normalizeInteractive(false, AgentExecutionMode.conversation)).toEqual({
-      enabled: false,
-    });
-  });
-
   it('returns the config object as-is when provided', () => {
     const cfg = { enabled: false };
     expect(normalizeInteractive(cfg, AgentExecutionMode.conversation)).toBe(cfg);

@@ -19,7 +19,6 @@ import type {
   ConversationOrigin,
   ConversationRoundAuthor,
   ExecutionStatus,
-  InteractiveInput,
   InteractivityConfig,
   SerializedExecutionError,
 } from '@kbn/agent-builder-common';
@@ -206,7 +205,7 @@ interface ExecuteAgentBaseParams {
   /**
    * Interactivity configuration for this execution.
    */
-  interactive?: InteractiveInput;
+  interactive?: InteractivityConfig;
 }
 
 export interface ExecuteConversationAgentParams extends ExecuteAgentBaseParams {

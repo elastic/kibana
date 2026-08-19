@@ -21,20 +21,16 @@ export interface InteractivityConfig {
   enabled: boolean;
 }
 
-export type InteractiveInput = boolean | InteractivityConfig;
-
 /**
- * Normalize the ergonomic input form to the canonical config.
+ * Resolve interactivity for a run, defaulting from the execution mode when the
+ * caller did not provide a config.
  */
 export const normalizeInteractive = (
-  input: InteractiveInput | undefined,
+  input: InteractivityConfig | undefined,
   executionMode: AgentExecutionMode
 ): InteractivityConfig => {
   if (input === undefined) {
     return { enabled: executionMode === AgentExecutionMode.conversation };
-  }
-  if (typeof input === 'boolean') {
-    return { enabled: input };
   }
   return input;
 };

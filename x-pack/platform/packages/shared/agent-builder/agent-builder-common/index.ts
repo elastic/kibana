@@ -148,7 +148,6 @@ export {
   ExecutionStatus,
   type SerializedExecutionError,
   type InteractivityConfig,
-  type InteractiveInput,
   normalizeInteractive,
   type AgentListOptions,
   type AgentCreateRequest,
