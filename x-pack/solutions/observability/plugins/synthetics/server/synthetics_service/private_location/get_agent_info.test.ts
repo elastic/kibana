@@ -36,6 +36,11 @@ const makeServer = (listAgents: jest.Mock): SyntheticsServerSetup =>
     fleet: { agentService: { asInternalUser: { listAgents } } },
   } as unknown as SyntheticsServerSetup);
 
+const openSignal = () => new AbortController().signal;
+
+const getInfo = (listAgents: jest.Mock, signal: AbortSignal = openSignal()) =>
+  getAgentInfo(makeServer(listAgents), 'policy-1', signal);
+
 describe('getAgentInfo', () => {
   it('maps enrolled agents by agent.id with check-in (epoch ms) and RAM (MiB)', async () => {
     const listAgents = pagedListAgents([
@@ -45,7 +50,7 @@ describe('getAgentInfo', () => {
       ],
     ]);
 
-    const info = await getAgentInfo(makeServer(listAgents), 'policy-1');
+    const info = await getInfo(listAgents);
 
     expect(info.size).toBe(2);
     expect(info.get('a')).toEqual({
@@ -66,7 +71,7 @@ describe('getAgentInfo', () => {
       ],
     ]);
 
-    const info = await getAgentInfo(makeServer(listAgents), 'policy-1');
+    const info = await getInfo(listAgents);
 
     expect(info.get('round-down')?.memoryMib).toBe(100);
     expect(info.get('round-up')?.memoryMib).toBe(101);
@@ -82,7 +87,7 @@ describe('getAgentInfo', () => {
       ],
     ]);
 
-    const info = await getAgentInfo(makeServer(listAgents), 'policy-1');
+    const info = await getInfo(listAgents);
 
     expect(info.get('absent')?.memoryMib).toBeNull();
     expect(info.get('no-host')?.memoryMib).toBeNull();
@@ -101,7 +106,7 @@ describe('getAgentInfo', () => {
       ],
     ]);
 
-    const info = await getAgentInfo(makeServer(listAgents), 'policy-1');
+    const info = await getInfo(listAgents);
 
     expect([...info.keys()]).toEqual(['good']);
   });
@@ -115,7 +120,7 @@ describe('getAgentInfo', () => {
       ],
     ]);
 
-    const info = await getAgentInfo(makeServer(listAgents), 'policy-1');
+    const info = await getInfo(listAgents);
 
     expect([...info.keys()]).toEqual(['ok']);
   });
@@ -125,7 +130,7 @@ describe('getAgentInfo', () => {
     const page2 = Array.from({ length: 500 }, (_, i) => agent({ id: `b${i}` }));
     const listAgents = pagedListAgents([page1, page2], 1500);
 
-    const info = await getAgentInfo(makeServer(listAgents), 'policy-1');
+    const info = await getInfo(listAgents);
 
     expect(info.size).toBe(1500);
     expect(listAgents).toHaveBeenCalledTimes(2);
@@ -142,7 +147,7 @@ describe('getAgentInfo', () => {
   it('stops on an empty page even when `total` claims more (stale-total guard)', async () => {
     const listAgents = pagedListAgents([[]], 5);
 
-    const info = await getAgentInfo(makeServer(listAgents), 'policy-1');
+    const info = await getInfo(listAgents);
 
     expect(info.size).toBe(0);
     expect(listAgents).toHaveBeenCalledTimes(1);
@@ -155,9 +160,25 @@ describe('getAgentInfo', () => {
       total: 1_000_000,
     }));
 
-    const info = await getAgentInfo(makeServer(listAgents), 'policy-1');
+    const info = await getInfo(listAgents);
 
     expect(listAgents).toHaveBeenCalledTimes(10);
     expect(info.size).toBe(10_000);
+  });
+
+  it('stops paginating when the task signal aborts', async () => {
+    const abortController = new AbortController();
+    const listAgents = jest.fn(async ({ page }: { page: number }) => {
+      if (page === 1) {
+        abortController.abort();
+      }
+      return {
+        agents: Array.from({ length: 1000 }, (_, i) => agent({ id: `p${page}-a${i}` })),
+        total: 3000,
+      };
+    });
+
+    await expect(getInfo(listAgents, abortController.signal)).rejects.toThrow();
+    expect(listAgents).toHaveBeenCalledTimes(1);
   });
 });

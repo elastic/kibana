@@ -25,6 +25,7 @@ import * as getActiveAgentIdsModule from '../synthetics_service/private_location
 import {
   RECOVERY_STABILITY_MS,
   STALE_CHECKIN_MS,
+  STALE_DATA_MS,
   healthySinceKey,
 } from '../synthetics_service/private_location/plan_rebalance';
 
@@ -79,6 +80,11 @@ const taskInstance = (state: Record<string, unknown> = {}): ConcreteTaskInstance
 const makeTask = () =>
   new RebalancePrivateLocationShardsTask(mockServerSetup, mockSyntheticsMonitorClient);
 
+const openSignal = () => new AbortController().signal;
+
+const run = (state: Record<string, unknown> = {}, signal: AbortSignal = openSignal()) =>
+  makeTask().runTask({ taskInstance: taskInstance(state), signal });
+
 describe('RebalancePrivateLocationShardsTask', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -131,7 +137,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .mockResolvedValue([location({ isAgentSharding: false })]);
       const getAgentInfo = jest.spyOn(getAgentInfoModule, 'getAgentInfo');
 
-      const result = await makeTask().runTask({ taskInstance: taskInstance({ foo: 1 }) });
+      const result = await run({ foo: 1 });
 
       expect(getAgentInfo).not.toHaveBeenCalled();
       expect(mockRebalanceShards).not.toHaveBeenCalled();
@@ -151,15 +157,14 @@ describe('RebalancePrivateLocationShardsTask', () => {
       // agent-1 has a long-standing healthy streak → recovery-eligible; agent-2
       // is freshly healthy this run → healthy but not yet recovery-eligible.
       const prior = { [healthySinceKey('ap-1', 'agent-1')]: NOW - RECOVERY_STABILITY_MS - 1 };
-      const result = await makeTask().runTask({
-        taskInstance: taskInstance({ healthySince: prior }),
-      });
+      const result = await run({ healthySince: prior });
 
       expect(mockRebalanceShards).toHaveBeenCalledWith({
         location: { id: 'loc-1', label: 'Location 1', agentPolicyId: 'ap-1' },
         healthyAgentIds: ['agent-1', 'agent-2'],
         recoveryAgentIds: ['agent-1'],
         capacities: new Map([['agent-1', 2048]]),
+        signal: expect.any(AbortSignal),
       });
       // healthy streaks are persisted into the returned state for the next run
       expect(result.state.healthySince).toEqual({
@@ -175,7 +180,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
       const getActive = jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds');
 
-      await makeTask().runTask({ taskInstance: taskInstance() });
+      await run();
 
       expect(getActive).not.toHaveBeenCalled();
       expect(mockRebalanceShards).toHaveBeenCalledTimes(1);
@@ -190,7 +195,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds')
         .mockResolvedValue(new Set(['agent-1']));
 
-      await makeTask().runTask({ taskInstance: taskInstance() });
+      await run();
 
       expect(getActive).toHaveBeenCalledTimes(1);
       expect(mockLogger.warn).not.toHaveBeenCalled();
@@ -206,7 +211,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
       jest.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
 
-      await makeTask().runTask({ taskInstance: taskInstance() });
+      await run();
 
       expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('No healthy agents'));
       expect(mockRebalanceShards).not.toHaveBeenCalled();
@@ -224,7 +229,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .mockRejectedValueOnce(new Error('fleet boom'))
         .mockResolvedValueOnce(new Map([['agent-1', agentInfo(NOW)]]));
 
-      await makeTask().runTask({ taskInstance: taskInstance() });
+      await run();
 
       expect(mockRebalanceShards).toHaveBeenCalledTimes(1);
       expect(mockRebalanceShards).toHaveBeenCalledWith(
@@ -250,7 +255,7 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .mockRejectedValueOnce(new Error('bulkUpdate boom'))
         .mockResolvedValueOnce({ total: 1, moved: 1 });
 
-      const result = await makeTask().runTask({ taskInstance: taskInstance() });
+      const result = await run();
 
       expect(mockRebalanceShards).toHaveBeenCalledTimes(2);
       expect(mockRebalanceShards).toHaveBeenLastCalledWith(
@@ -269,10 +274,71 @@ describe('RebalancePrivateLocationShardsTask', () => {
         .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
         .mockRejectedValue(new Error('so boom'));
 
-      const result = await makeTask().runTask({ taskInstance: taskInstance({ keep: 1 }) });
+      const result = await run({ keep: 1 });
 
       expect(mockLogger.error).toHaveBeenCalled();
       expect(result.state).toEqual({ keep: 1 });
+    });
+
+    it('returns the prior state without work when the task signal is already aborted', async () => {
+      const abortController = new AbortController();
+      abortController.abort();
+      const getLocations = jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations');
+
+      const result = await run({ keep: 1 }, abortController.signal);
+
+      expect(getLocations).not.toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(result.state).toEqual({ keep: 1 });
+    });
+
+    it('stops after the current location when the task is cancelled and does not treat abort as a location failure', async () => {
+      const abortController = new AbortController();
+      jest
+        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
+        .mockResolvedValue([
+          location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
+          location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
+        ]);
+      const getAgentInfo = jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
+      mockRebalanceShards.mockImplementation(async () => {
+        abortController.abort();
+        return { total: 0, moved: 0 };
+      });
+
+      const result = await run({ keep: 1 }, abortController.signal);
+
+      expect(mockRebalanceShards).toHaveBeenCalledTimes(1);
+      expect(getAgentInfo).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).not.toHaveBeenCalled();
+      expect(result.state).toEqual({ keep: 1 });
+    });
+
+    it('passes the task signal into agent listing, the liveness query, and rebalance writes', async () => {
+      const abortController = new AbortController();
+      jest.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
+      const getAgentInfo = jest
+        .spyOn(getAgentInfoModule, 'getAgentInfo')
+        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
+      const getActive = jest
+        .spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds')
+        .mockResolvedValue(new Set(['agent-1']));
+
+      await run({}, abortController.signal);
+
+      expect(getAgentInfo).toHaveBeenCalledWith(mockServerSetup, 'ap-1', abortController.signal);
+      expect(getActive).toHaveBeenCalledWith(
+        mockServerSetup,
+        ['agent-1'],
+        STALE_DATA_MS,
+        NOW,
+        abortController.signal
+      );
+      expect(mockRebalanceShards).toHaveBeenCalledWith(
+        expect.objectContaining({ signal: abortController.signal })
+      );
     });
   });
 

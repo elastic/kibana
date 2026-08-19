@@ -28,13 +28,21 @@ const mockValidApiKey = () =>
     .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
     .mockResolvedValue({ apiKey: { id: 'k', apiKey: 's', name: 'n' }, isValid: true } as never);
 
+const openSignal = () => new AbortController().signal;
+
+const getActive = (
+  server: SyntheticsServerSetup,
+  agentIds: string[],
+  signal: AbortSignal = openSignal()
+) => getRecentlyActiveAgentIds(server, agentIds, WINDOW, NOW, signal);
+
 describe('getRecentlyActiveAgentIds', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('returns an empty set (and issues no query) when there are no agents', async () => {
     const getApiKey = jest.spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService');
 
-    const active = await getRecentlyActiveAgentIds(makeServer(), [], WINDOW, NOW);
+    const active = await getActive(makeServer(), []);
 
     expect(active.size).toBe(0);
     expect(getApiKey).not.toHaveBeenCalled();
@@ -47,7 +55,7 @@ describe('getRecentlyActiveAgentIds', () => {
       aggregations: { agents: { buckets: [{ key: 'a' }, { key: 'c' }] } },
     });
 
-    const active = await getRecentlyActiveAgentIds(makeServer(), ['a', 'b', 'c'], WINDOW, NOW);
+    const active = await getActive(makeServer(), ['a', 'b', 'c']);
 
     expect([...active].sort()).toEqual(['a', 'c']);
     expect(search).toHaveBeenCalledWith(
@@ -60,7 +68,8 @@ describe('getRecentlyActiveAgentIds', () => {
             ],
           },
         },
-      })
+      }),
+      { signal: expect.any(AbortSignal) }
     );
   });
 
@@ -69,7 +78,7 @@ describe('getRecentlyActiveAgentIds', () => {
       .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
       .mockResolvedValue({ isValid: false } as never);
 
-    const active = await getRecentlyActiveAgentIds(makeServer(), ['a'], WINDOW, NOW);
+    const active = await getActive(makeServer(), ['a']);
 
     expect(active.size).toBe(0);
     expect(search).not.toHaveBeenCalled();
@@ -79,8 +88,19 @@ describe('getRecentlyActiveAgentIds', () => {
     mockValidApiKey();
     search.mockRejectedValue(new Error('es boom'));
 
-    const active = await getRecentlyActiveAgentIds(makeServer(), ['a'], WINDOW, NOW);
+    const active = await getActive(makeServer(), ['a']);
 
     expect(active.size).toBe(0);
+  });
+
+  it('rethrows when the task signal aborts the ES query (does not treat abort as empty)', async () => {
+    mockValidApiKey();
+    const abortController = new AbortController();
+    search.mockImplementation(async (_req: unknown, { signal }: { signal: AbortSignal }) => {
+      abortController.abort();
+      signal.throwIfAborted();
+    });
+
+    await expect(getActive(makeServer(), ['a'], abortController.signal)).rejects.toThrow();
   });
 });

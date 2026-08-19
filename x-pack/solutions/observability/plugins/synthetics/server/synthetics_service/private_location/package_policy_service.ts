@@ -92,7 +92,13 @@ export class PackagePolicyService {
    * cycle, ~1m). Paginated so a location with more than one page of monitors
    * isn't truncated.
    */
-  async listByAgentPolicy({ agentPolicyId }: { agentPolicyId: string }): Promise<PackagePolicy[]> {
+  async listByAgentPolicy({
+    agentPolicyId,
+    signal,
+  }: {
+    agentPolicyId: string;
+    signal?: AbortSignal;
+  }): Promise<PackagePolicy[]> {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
     const items: PackagePolicy[] = [];
     const perPage = 1000;
@@ -100,6 +106,7 @@ export class PackagePolicyService {
     let hasMore = true;
 
     while (hasMore) {
+      signal?.throwIfAborted();
       const { items: pageItems } = await this.server.fleet.packagePolicyService.list(soClient, {
         kuery: `ingest-package-policies.package.name:synthetics AND ingest-package-policies.policy_ids:"${agentPolicyId}"`,
         spaceId: ALL_SPACES_ID,

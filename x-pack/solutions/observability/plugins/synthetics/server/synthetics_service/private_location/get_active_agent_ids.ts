@@ -34,7 +34,8 @@ export const getRecentlyActiveAgentIds = async (
   server: SyntheticsServerSetup,
   agentIds: string[],
   windowMs: number,
-  now: number
+  now: number,
+  signal: AbortSignal
 ): Promise<Set<string>> => {
   const active = new Set<string>();
   if (agentIds.length === 0) {
@@ -42,6 +43,7 @@ export const getRecentlyActiveAgentIds = async (
   }
 
   try {
+    signal.throwIfAborted();
     const { apiKey, isValid } = await getAPIKeyForSyntheticsService({ server });
     if (!apiKey || !isValid) {
       return active;
@@ -51,29 +53,35 @@ export const getRecentlyActiveAgentIds = async (
       getFakeKibanaRequest({ id: apiKey.id, api_key: apiKey.apiKey })
     ).asCurrentUser;
 
-    const result = await esClient.search<unknown, { agents: { buckets: Array<{ key: string }> } }>({
-      index: SYNTHETICS_INDEX_PATTERN,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            { range: { '@timestamp': { gte: now - windowMs, format: 'epoch_millis' } } },
-            { terms: { 'agent.id': agentIds } },
-          ],
+    const result = await esClient.search<unknown, { agents: { buckets: Array<{ key: string }> } }>(
+      {
+        index: SYNTHETICS_INDEX_PATTERN,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              { range: { '@timestamp': { gte: now - windowMs, format: 'epoch_millis' } } },
+              { terms: { 'agent.id': agentIds } },
+            ],
+          },
+        },
+        aggs: {
+          agents: { terms: { field: 'agent.id', size: agentIds.length } },
         },
       },
-      aggs: {
-        agents: { terms: { field: 'agent.id', size: agentIds.length } },
-      },
-    });
+      { signal }
+    );
 
     for (const bucket of result.aggregations?.agents.buckets ?? []) {
       active.add(bucket.key);
     }
   } catch (e) {
+    if (signal.aborted) {
+      throw e;
+    }
     server.logger.debug(
       `[RebalancePrivateLocationShardsTask] synthetics-* liveness query failed; ` +
         `falling back to check-in signal only: ${e.message}`

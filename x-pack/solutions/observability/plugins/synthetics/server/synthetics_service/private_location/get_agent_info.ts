@@ -43,7 +43,8 @@ interface AgentLocalMetadata {
  */
 export const getAgentInfo = async (
   server: SyntheticsServerSetup,
-  agentPolicyId: string
+  agentPolicyId: string,
+  signal: AbortSignal
 ): Promise<Map<string, AgentInfo>> => {
   const byAgentId = new Map<string, AgentInfo>();
 
@@ -54,6 +55,7 @@ export const getAgentInfo = async (
   let fetched = 0;
 
   while (fetched < total && page <= MAX_PAGES) {
+    signal.throwIfAborted();
     const { agents, total: totalAgents } =
       await server.fleet.agentService.asInternalUser.listAgents({
         showInactive: false,

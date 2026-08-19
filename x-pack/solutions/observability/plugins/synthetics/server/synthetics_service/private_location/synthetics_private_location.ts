@@ -776,17 +776,21 @@ export class SyntheticsPrivateLocation {
     healthyAgentIds,
     recoveryAgentIds,
     capacities,
+    signal,
   }: {
     location: { id: string; label?: string; agentPolicyId: string };
     healthyAgentIds: string[];
     recoveryAgentIds?: string[];
     capacities?: ReadonlyMap<string, number>;
+    signal: AbortSignal;
   }): Promise<{ total: number; moved: number }> {
     if (healthyAgentIds.length === 0) {
       return { total: 0, moved: 0 };
     }
+    signal.throwIfAborted();
     const pkgPolicies = await this.packagePolicyService.listByAgentPolicy({
       agentPolicyId: location.agentPolicyId,
+      signal,
     });
     if (pkgPolicies.length === 0) {
       return { total: 0, moved: 0 };
@@ -798,6 +802,7 @@ export class SyntheticsPrivateLocation {
 
     let moved = 0;
     for (const [spaceId, policiesToUpdate] of updatesBySpace) {
+      signal.throwIfAborted();
       // Update in the policy's own recorded space (grouped in toConditionUpdates),
       // not via the agent-policy-derived routing — see bulkUpdateInSpace.
       const failed = await this.packagePolicyService.bulkUpdateInSpace({

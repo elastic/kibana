@@ -6,7 +6,11 @@
  */
 
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
-import type { ConcreteTaskInstance, IntervalSchedule } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  IntervalSchedule,
+  RunContext,
+} from '@kbn/task-manager-plugin/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
@@ -56,14 +60,20 @@ export class RebalancePrivateLocationShardsTask {
           'Reassigns monitors across the healthy agents of scalable private locations (by rewriting per-monitor agent conditions) for at-most-once execution and failover.',
         timeout: '10m',
         maxAttempts: 1,
-        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
-          run: async () => this.runTask({ taskInstance }),
+        createTaskRunner: ({ taskInstance, signal }: RunContext) => ({
+          run: async () => this.runTask({ taskInstance, signal }),
         }),
       },
     });
   }
 
-  async runTask({ taskInstance }: { taskInstance: ConcreteTaskInstance }): Promise<{
+  async runTask({
+    taskInstance,
+    signal,
+  }: {
+    taskInstance: ConcreteTaskInstance;
+    signal: AbortSignal;
+  }): Promise<{
     state: Record<string, unknown>;
     schedule?: IntervalSchedule;
   }> {
@@ -72,8 +82,13 @@ export class RebalancePrivateLocationShardsTask {
       (taskInstance.schedule as IntervalSchedule | undefined)?.interval ??
       DEFAULT_REBALANCE_SCHEDULE;
     const schedule = { interval };
+    // On abort, persist the last successful full run's state rather than a
+    // partial `healthySince` rebuild (keys are per-location; merging mid-loop
+    // would either drop unprocessed locations or resurrect dropped agents).
+    const abortedResult = { state: taskInstance.state, schedule };
 
     try {
+      signal.throwIfAborted();
       const soClient = coreStart.savedObjects.createInternalRepository();
       const scalableLocations = (await getPrivateLocations(soClient, ALL_SPACES_ID)).filter(
         isConditionShardedLocation
@@ -92,8 +107,9 @@ export class RebalancePrivateLocationShardsTask {
       const nextHealthySince: Record<string, number> = {};
 
       for (const location of scalableLocations) {
+        signal.throwIfAborted();
         try {
-          const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId);
+          const agents = await getAgentInfo(this.serverSetup, location.agentPolicyId, signal);
 
           // Data-plane liveness veto: only worth a `synthetics-*` query when at
           // least one agent looks stale by check-in. In steady state (all fresh)
@@ -104,7 +120,8 @@ export class RebalancePrivateLocationShardsTask {
                 this.serverSetup,
                 [...agents.keys()],
                 STALE_DATA_MS,
-                now
+                now,
+                signal
               )
             : undefined;
 
@@ -148,9 +165,13 @@ export class RebalancePrivateLocationShardsTask {
               healthyAgentIds,
               recoveryAgentIds,
               capacities,
+              signal,
             });
           this.debugLog(`location ${location.id}: moved ${moved}/${total} monitor(s)`);
         } catch (e) {
+          if (signal.aborted) {
+            throw e;
+          }
           this.debugLog(`Rebalance failed for location ${location.id}; skipping: ${e.message}`);
         }
       }
@@ -160,6 +181,9 @@ export class RebalancePrivateLocationShardsTask {
         schedule,
       };
     } catch (error) {
+      if (signal.aborted) {
+        return abortedResult;
+      }
       logger.error(
         `[RebalancePrivateLocationShardsTask] Rebalance of private location shards failed: ${error.message}`
       );
