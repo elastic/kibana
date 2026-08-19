@@ -132,8 +132,8 @@ export const executionTranslations = Object.freeze({
   missingConditionallyRequiredArgs: (argName: string, listOfMissingArgs: string): ReactNode => {
     return (
       <FormattedMessage
-        id="xpack.securitySolution.console.commandValidation.missingConditionallyRequiredExclusiveOrArg"
-        defaultMessage="Use of {argName} requires the following additonal arguments: {listOfMissingArgs}"
+        id="xpack.securitySolution.console.commandValidation.missingConditionallyRequiredArgs"
+        defaultMessage="Use of {argName} requires the following additional arguments: {listOfMissingArgs}"
         values={{
           argName: (
             <ConsoleCodeBlock bold inline>
