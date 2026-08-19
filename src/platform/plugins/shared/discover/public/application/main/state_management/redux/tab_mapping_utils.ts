@@ -15,10 +15,7 @@ import type { DiscoverTabType } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isObject, isUndefined, omitBy } from 'lodash';
 import { createDataSource } from '../../../../../common/data_sources';
-import type {
-  ProfileStateRegistry,
-  ProfileSavedStateRegistry,
-} from '../../../../../common/context_awareness';
+import type { ProfileStateRegistry } from '../../../../../common/context_awareness';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverAppState, TabState } from './types';
 import { getAllowedSampleSize } from '../../../../utils/get_allowed_sample_size';
@@ -64,13 +61,11 @@ export const fromSavedObjectTabToTabState = ({
   existingTab,
   initialAppState,
   profileStateRegistry,
-  profileSavedStateRegistry,
 }: {
   tab: DiscoverSessionTab;
   existingTab?: TabState;
   initialAppState?: DiscoverAppState;
   profileStateRegistry: ProfileStateRegistry;
-  profileSavedStateRegistry: ProfileSavedStateRegistry;
 }): TabState => {
   const appState: DiscoverAppState = initialAppState ?? fromSavedObjectTabToAppState({ tab });
 
@@ -87,7 +82,7 @@ export const fromSavedObjectTabToTabState = ({
     id: tab.id,
     label: tab.label,
     profileState: profileStateRegistry.mergeState(
-      profileSavedStateRegistry.fromSavedState(tab.tabTypeState),
+      profileStateRegistry.fromSavedState(tab.tabTypeState),
       existingTab?.profileState
     ),
     initialInternalState: {
@@ -169,14 +164,14 @@ export const fromTabStateToSavedObjectTab = ({
   services,
   currentDataView,
   tabType,
-  profileSavedStateRegistry,
+  profileStateRegistry,
 }: {
   tab: TabState;
   overridenTimeRestore?: boolean;
   services: DiscoverServices;
   currentDataView: DataView | undefined;
   tabType: DiscoverTabType | undefined;
-  profileSavedStateRegistry: ProfileSavedStateRegistry;
+  profileStateRegistry: ProfileStateRegistry;
 }): DiscoverSessionTab => {
   const allowedSampleSize = getAllowedSampleSize(tab.appState.sampleSize, services.uiSettings);
   const timeRestore = overridenTimeRestore ?? tab.attributes.timeRestore ?? false;
@@ -227,7 +222,7 @@ export const fromTabStateToSavedObjectTab = ({
     controlGroupJson: tab.attributes.controlGroupState
       ? JSON.stringify(tab.attributes.controlGroupState)
       : undefined,
-    tabTypeState: profileSavedStateRegistry.toSavedState(tabType, tab.profileState),
+    tabTypeState: profileStateRegistry.toSavedState(tabType, tab.profileState),
   };
 };
 

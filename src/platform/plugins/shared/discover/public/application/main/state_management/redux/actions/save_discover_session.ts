@@ -75,7 +75,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
             currentDataView,
             services,
             tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState: tab }),
-            profileSavedStateRegistry: services.profileSavedStateRegistry,
+            profileStateRegistry: services.profileStateRegistry,
           })
         );
 

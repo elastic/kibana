@@ -45,7 +45,7 @@ export const selectTabSavedSearch = async ({
       currentDataView,
       services,
       tabType: selectTabTypeForPersistence({ runtimeStateManager, tabState }),
-      profileSavedStateRegistry: services.profileSavedStateRegistry,
+      profileStateRegistry: services.profileStateRegistry,
     }),
     discoverSession: currentState.persistedDiscoverSession,
     services,

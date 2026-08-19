@@ -25,10 +25,7 @@ import {
 import { getDiscoverInternalStateMock } from '../../../../__mocks__/discover_state.mock';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { dataViewMockWithTimeField } from '@kbn/discover-utils/src/__mocks__';
-import {
-  createProfileStateRegistry,
-  createProfileSavedStateRegistry,
-} from '../../../../../common/context_awareness';
+import { createProfileStateRegistry } from '../../../../../common/context_awareness';
 
 const services = createDiscoverServicesMock();
 const tab1 = getTabStateMock({
@@ -112,11 +109,10 @@ describe('tab mapping utils', () => {
           services,
           currentDataView: undefined,
           tabType: undefined,
-          profileSavedStateRegistry: services.profileSavedStateRegistry,
+          profileStateRegistry: services.profileStateRegistry,
         }),
         existingTab: tab1,
         profileStateRegistry: services.profileStateRegistry,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
@@ -203,11 +199,10 @@ describe('tab mapping utils', () => {
           services,
           currentDataView: undefined,
           tabType: undefined,
-          profileSavedStateRegistry: services.profileSavedStateRegistry,
+          profileStateRegistry: services.profileStateRegistry,
         }),
         existingTab: tab1,
         profileStateRegistry: services.profileStateRegistry,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
       expect(tabState).toMatchInlineSnapshot(`
         Object {
@@ -308,11 +303,10 @@ describe('tab mapping utils', () => {
           services,
           currentDataView: undefined,
           tabType: undefined,
-          profileSavedStateRegistry: services.profileSavedStateRegistry,
+          profileStateRegistry: services.profileStateRegistry,
         }),
         existingTab: tab1,
         profileStateRegistry: services.profileStateRegistry,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
       });
 
       expect(tabState.attributes.controlGroupState).toEqual({
@@ -463,7 +457,7 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: undefined,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
+        profileStateRegistry: services.profileStateRegistry,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
@@ -507,7 +501,7 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: undefined,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
+        profileStateRegistry: services.profileStateRegistry,
       });
       expect(savedObjectTab).toMatchInlineSnapshot(`
         Object {
@@ -576,7 +570,7 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: dataViewMockWithTimeField,
         tabType: undefined,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
+        profileStateRegistry: services.profileStateRegistry,
       });
 
       // The serializedSearchSource should be created from the provided dataView,
@@ -611,7 +605,7 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: undefined,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
+        profileStateRegistry: services.profileStateRegistry,
       });
 
       // Should use initialInternalState since dataView is not provided
@@ -825,7 +819,6 @@ describe('tab mapping utils', () => {
 
   describe('tab type persistence', () => {
     const profileStateRegistry = createProfileStateRegistry();
-    const profileSavedStateRegistry = createProfileSavedStateRegistry();
 
     it('fromSavedObjectTabToTabState populates initialInternalState.tabType and merges the saved profile state', () => {
       const persistedTab = fromTabStateToSavedObjectTab({
@@ -836,7 +829,7 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: DiscoverTabType.Metrics,
-        profileSavedStateRegistry,
+        profileStateRegistry,
       });
 
       expect(persistedTab.tabTypeState).toEqual({
@@ -847,7 +840,6 @@ describe('tab mapping utils', () => {
       const tabState = fromSavedObjectTabToTabState({
         tab: persistedTab,
         profileStateRegistry,
-        profileSavedStateRegistry,
       });
 
       expect(tabState.initialInternalState?.tabType).toBe(DiscoverTabType.Metrics);
@@ -868,13 +860,12 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: DiscoverTabType.Metrics,
-        profileSavedStateRegistry,
+        profileStateRegistry,
       });
 
       const loadedTabState = fromSavedObjectTabToTabState({
         tab: persistedTab,
         profileStateRegistry,
-        profileSavedStateRegistry,
       });
 
       // No currentDataView (never initialized) and the inherited tab type from load time,
@@ -884,7 +875,7 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: loadedTabState.initialInternalState?.tabType,
-        profileSavedStateRegistry,
+        profileStateRegistry,
       });
 
       expect(resavedTab.tabTypeState).toEqual(persistedTab.tabTypeState);
@@ -902,7 +893,7 @@ describe('tab mapping utils', () => {
         currentDataView: undefined,
         // The query no longer matches the metrics profile, so nothing resolved this save.
         tabType: undefined,
-        profileSavedStateRegistry,
+        profileStateRegistry,
       });
 
       expect(savedObjectTab.tabTypeState).toBeUndefined();
@@ -916,7 +907,7 @@ describe('tab mapping utils', () => {
         services,
         currentDataView: undefined,
         tabType: DiscoverTabType.Metrics,
-        profileSavedStateRegistry,
+        profileStateRegistry,
       });
 
       // Defaults are expanded even though the tab never had explicit metrics state.

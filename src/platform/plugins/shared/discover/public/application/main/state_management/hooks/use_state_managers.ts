@@ -46,7 +46,6 @@ export const useStateManagers = ({
       urlStateStorage,
       storage: services.storage,
       profileStateRegistry: services.profileStateRegistry,
-      profileSavedStateRegistry: services.profileSavedStateRegistry,
       enabled: tabsEnabled,
     })
   );

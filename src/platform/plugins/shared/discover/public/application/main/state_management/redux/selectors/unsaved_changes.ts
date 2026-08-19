@@ -91,7 +91,6 @@ export const selectHasUnsavedChanges = (
       tab: fromSavedObjectTabToTabState({
         tab: persistedTab,
         profileStateRegistry: services.profileStateRegistry,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
         initialAppState: getInitialAppState({
           initialUrlState: fromSavedObjectTabToAppState({ tab: persistedTab }),
           persistedTab,
@@ -107,7 +106,7 @@ export const selectHasUnsavedChanges = (
       services,
       currentDataView: undefined,
       tabType,
-      profileSavedStateRegistry: services.profileSavedStateRegistry,
+      profileStateRegistry: services.profileStateRegistry,
     });
 
     const normalizedTab = fromTabStateToSavedObjectTab({
@@ -115,7 +114,7 @@ export const selectHasUnsavedChanges = (
       currentDataView,
       services,
       tabType,
-      profileSavedStateRegistry: services.profileSavedStateRegistry,
+      profileStateRegistry: services.profileStateRegistry,
     });
 
     for (const stringKey of Object.keys(TAB_COMPARATORS)) {

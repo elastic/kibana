@@ -407,13 +407,11 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const [{ buildServices }, historyService, profileStateRegistry, profileSavedStateRegistry] =
-      await Promise.all([
-        getSharedServices(),
-        getHistoryService(),
-        getProfileStateRegistry(),
-        getProfileSavedStateRegistry(),
-      ]);
+    const [{ buildServices }, historyService, profileStateRegistry] = await Promise.all([
+      getSharedServices(),
+      getHistoryService(),
+      getProfileStateRegistry(),
+    ]);
     return buildServices({
       core,
       plugins,
@@ -426,7 +424,6 @@ export class DiscoverPlugin
       urlTracker: this.urlTracker!,
       profilesManager,
       profileStateRegistry,
-      profileSavedStateRegistry,
       ebtManager,
       setHeaderActionMenu,
     });
@@ -525,9 +522,4 @@ const getEmptyEbtManager = once(async () => {
 const getProfileStateRegistry = once(async () => {
   const { createProfileStateRegistry } = await getSharedServices();
   return createProfileStateRegistry();
-});
-
-const getProfileSavedStateRegistry = once(async () => {
-  const { createProfileSavedStateRegistry } = await getSharedServices();
-  return createProfileSavedStateRegistry();
 });

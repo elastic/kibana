@@ -80,7 +80,7 @@ describe('getInitialAppState', () => {
       services,
       currentDataView: undefined,
       tabType: undefined,
-      profileSavedStateRegistry: services.profileSavedStateRegistry,
+      profileStateRegistry: services.profileStateRegistry,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -129,7 +129,7 @@ describe('getInitialAppState', () => {
       services,
       currentDataView: undefined,
       tabType: undefined,
-      profileSavedStateRegistry: services.profileSavedStateRegistry,
+      profileStateRegistry: services.profileStateRegistry,
     });
     const appState = getInitialAppState({
       hasGlobalState: false,
@@ -271,7 +271,7 @@ describe('getInitialAppState', () => {
       services,
       currentDataView: undefined,
       tabType: undefined,
-      profileSavedStateRegistry: services.profileSavedStateRegistry,
+      profileStateRegistry: services.profileStateRegistry,
     });
 
   test('should set view mode correctly', () => {

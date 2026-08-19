@@ -444,7 +444,7 @@ describe('saveDiscoverSession', () => {
             services,
             currentDataView: undefined,
             tabType: undefined,
-            profileSavedStateRegistry: services.profileSavedStateRegistry,
+            profileStateRegistry: services.profileStateRegistry,
           }),
         ],
       });
@@ -492,7 +492,7 @@ describe('saveDiscoverSession', () => {
             services,
             currentDataView: undefined,
             tabType: undefined,
-            profileSavedStateRegistry: services.profileSavedStateRegistry,
+            profileStateRegistry: services.profileStateRegistry,
           }),
         ],
       });
@@ -537,7 +537,7 @@ describe('saveDiscoverSession', () => {
             services,
             currentDataView: undefined,
             tabType: undefined,
-            profileSavedStateRegistry: services.profileSavedStateRegistry,
+            profileStateRegistry: services.profileStateRegistry,
           }),
         ],
       });

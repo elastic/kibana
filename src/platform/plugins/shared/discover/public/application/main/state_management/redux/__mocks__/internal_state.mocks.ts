@@ -93,6 +93,6 @@ export const getPersistedTabMock = ({
     services,
     currentDataView: dataView,
     tabType,
-    profileSavedStateRegistry: services.profileSavedStateRegistry,
+    profileStateRegistry: services.profileStateRegistry,
   });
 };

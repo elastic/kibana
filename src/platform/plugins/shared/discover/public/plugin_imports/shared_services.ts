@@ -15,4 +15,3 @@ export { DocumentProfileService } from '../context_awareness/profiles/document_p
 export { ProfilesManager } from '../context_awareness/profiles_manager';
 export { buildServices } from '../build_services';
 export { createProfileStateRegistry } from '../../common/context_awareness/create_profile_state_registry';
-export { createProfileSavedStateRegistry } from '../../common/context_awareness/create_profile_saved_state_registry';

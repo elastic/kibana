@@ -210,6 +210,12 @@ Each `ProfileStateDefinition<TState>` has:
 
 `getStateAdapter()` validates that the requested definition matches the registered descriptor and default state.
 
+The same registry owns transforms between runtime profile state and the saved payload for a Discover tab type.
+`createProfileStateRegistry()` registers all definitions before their transforms. A transform is rejected unless its
+`stateDefinition` exactly matches an existing registration, and transforms for the same tab type cannot claim the same
+saved field. Browser persistence uses this shared registry to hydrate profile state from saved sessions and serialize it
+back without separate saved-state service plumbing.
+
 ### State types and lifetime
 
 `ProfileStateType` is a field-level lifetime preference: `Ui` for ephemeral UI state, `Url` for Discover URL sync and local tab storage, and `Persistent` for local tab storage without URL sync.

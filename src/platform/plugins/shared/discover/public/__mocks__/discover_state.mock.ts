@@ -96,7 +96,6 @@ function createInternalStateStoreMock({
     urlStateStorage: stateStorageContainer,
     storage: services.storage,
     profileStateRegistry: services.profileStateRegistry,
-    profileSavedStateRegistry: services.profileSavedStateRegistry,
   });
   const searchSessionManager = new DiscoverSearchSessionManager({
     history: services.history,

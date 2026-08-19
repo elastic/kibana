@@ -48,7 +48,7 @@ import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
-import { ProfileStateRegistry, ProfileSavedStateRegistry } from '../../common/context_awareness';
+import { ProfileStateRegistry } from '../../common/context_awareness';
 import { DiscoverEBTManager } from '../ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
@@ -312,7 +312,6 @@ export function createDiscoverServicesMock(): DiscoverServices {
     urlTracker: createUrlTrackerMock(),
     profilesManager: profilesManagerMock,
     profileStateRegistry: new ProfileStateRegistry(),
-    profileSavedStateRegistry: new ProfileSavedStateRegistry(),
     ebtManager: new DiscoverEBTManager(),
     cps: cpsPluginMock.createStartContract(),
     setHeaderActionMenu: jest.fn(),

@@ -395,7 +395,6 @@ export const initializeTabs = createInternalStateAsyncThunk(
       ? fromSavedObjectTabToTabState({
           tab: byValueEmbeddableTab,
           profileStateRegistry: services.profileStateRegistry,
-          profileSavedStateRegistry: services.profileSavedStateRegistry,
         })
       : undefined;
 

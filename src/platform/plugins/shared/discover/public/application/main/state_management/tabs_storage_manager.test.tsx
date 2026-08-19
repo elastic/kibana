@@ -105,7 +105,6 @@ describe('TabsStorageManager', () => {
         urlStateStorage,
         storage: services.storage,
         profileStateRegistry: services.profileStateRegistry,
-        profileSavedStateRegistry: services.profileSavedStateRegistry,
         enabled: true,
       }),
     };

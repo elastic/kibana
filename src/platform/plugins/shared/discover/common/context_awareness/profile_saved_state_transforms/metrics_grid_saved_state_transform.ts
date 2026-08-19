@@ -8,7 +8,7 @@
  */
 
 import { DiscoverTabType } from '@kbn/discover-utils';
-import { createProfileSavedStateTransform } from '../profile_saved_state';
+import { createProfileSavedStateTransform } from '../profile_state';
 import { METRICS_STATE_DEF } from '../profile_state_definitions/metrics_grid_profile_state';
 
 export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransform({

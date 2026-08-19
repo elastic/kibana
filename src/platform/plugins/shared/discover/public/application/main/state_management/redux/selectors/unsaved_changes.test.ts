@@ -19,7 +19,6 @@ import { createContextAwarenessMocks } from '../../../../../context_awareness/__
 import { DataSourceCategory } from '../../../../../context_awareness';
 import {
   createProfileStateRegistry,
-  createProfileSavedStateRegistry,
   METRICS_STATE_DEF,
 } from '../../../../../../common/context_awareness';
 
@@ -293,7 +292,6 @@ describe('selectHasUnsavedChanges', () => {
     }) => {
       const services = createDiscoverServicesMock();
       services.profileStateRegistry = createProfileStateRegistry();
-      services.profileSavedStateRegistry = createProfileSavedStateRegistry();
 
       const { profilesManagerMock, dataSourceProfileProviderMock } = createContextAwarenessMocks();
       services.profilesManager = profilesManagerMock;
