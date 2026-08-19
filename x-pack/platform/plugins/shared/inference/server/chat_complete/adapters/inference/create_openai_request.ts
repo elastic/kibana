@@ -11,6 +11,7 @@ import { messagesToOpenAI, toolChoiceToOpenAI, toolsToOpenAI } from '../openai';
 import type { CreateOpenAIRequestOptions } from './types';
 import { applyProviderTransforms } from './providers';
 import { getTemperatureIfValid } from '../../utils/get_temperature';
+import { resolveChatCompletionReasoning } from '../../utils/resolve_chat_completion_reasoning';
 
 export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIRequest => {
   const {
@@ -21,6 +22,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
     simulatedFunctionCalling,
     temperature = 0,
     modelName,
+    reasoning,
   } = applyProviderTransforms(options);
 
   let request: OpenAIRequest;
@@ -31,14 +33,23 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
       toolChoice,
       tools,
     });
+    const resolvedReasoning = resolveChatCompletionReasoning({
+      reasoning,
+      hasNativeTools: false,
+    });
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
       model: modelName,
       messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
+      ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
     };
   } else {
     const openAiTools = toolsToOpenAI(tools);
     const hasTools = Array.isArray(openAiTools) && openAiTools.length > 0;
+    const resolvedReasoning = resolveChatCompletionReasoning({
+      reasoning,
+      hasNativeTools: hasTools,
+    });
 
     request = {
       ...getTemperatureIfValid(temperature, { connector: options.connector, modelName }),
@@ -50,6 +61,7 @@ export const createRequest = (options: CreateOpenAIRequestOptions): OpenAIReques
             tools: openAiTools,
           }
         : {}),
+      ...(resolvedReasoning ? { reasoning: resolvedReasoning } : {}),
     };
   }
 

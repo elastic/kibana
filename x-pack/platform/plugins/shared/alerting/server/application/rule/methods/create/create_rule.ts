@@ -49,7 +49,7 @@ import { createRuleSavedObject } from '../../../../rules_client/lib';
 import type { ValidateScheduleLimitResult } from '../get_schedule_frequency';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import { logRuleChanges } from '../common_utils/log_rule_changes';
-import { RULE_CREATED_EVENT } from './event_based_telemetry';
+import { reportRuleCreatedEvent } from '../common_utils/event_based_telemetry';
 
 export interface CreateRuleOptions {
   id?: string;
@@ -321,44 +321,4 @@ export async function createRule<Params extends RuleParams = never>(
   // TODO (http-versioning): Remove this cast, this enables us to move forward
   // without fixing all of other solution types
   return rule as SanitizedRule<Params>;
-}
-
-/**
- * Reports the rule-create EBT event. Fails open: telemetry must never break rule creation,
- * so any error is caught and logged at debug level (mirrors the UIAM provisioning pattern
- * in `reportProvisioningRunEvent`).
- */
-function reportRuleCreatedEvent(
-  context: RulesClientContext,
-  {
-    id,
-    templateId,
-    createTime,
-    alertTypeId,
-    enabled,
-    consumer,
-    producer,
-  }: {
-    id: string;
-    templateId?: string;
-    createTime: number;
-    alertTypeId: string;
-    enabled: boolean;
-    consumer: string;
-    producer: string;
-  }
-): void {
-  try {
-    context.analytics?.reportEvent(RULE_CREATED_EVENT.eventType, {
-      rule_id: id,
-      ...(templateId ? { template_id: templateId } : {}),
-      created_at: new Date(createTime).toISOString(),
-      rule_type_id: alertTypeId,
-      enabled,
-      consumer,
-      producer,
-    });
-  } catch (e) {
-    context.logger.debug(`Failed to report rule create telemetry event: ${e}`);
-  }
 }
