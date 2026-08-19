@@ -23,9 +23,9 @@ const DARK_SHELL_SHADOW =
 /** Bespoke exploration colors — not EUI tokens. Resolved by the dev-toolbar color theme toggle. */
 export interface DesignExplorationSurfacePalette {
   canvas: string;
-  surface: string;
-  surfaceNav: string;
-  shellShadow: string;
+  surface?: string;
+  surfaceNav?: string;
+  shellShadow?: string;
 }
 
 export interface DesignExplorationBespokePalette extends DesignExplorationSurfacePalette {
@@ -116,7 +116,8 @@ const TARGET_BESPOKE_COLORS: Record<ColorMode, DesignExplorationBespokePalette> 
     ...NIRBANA_BESPOKE_COLORS.LIGHT,
   },
   DARK: {
-    ...NIRBANA_BESPOKE_COLORS.DARK,
+    // Keep the exploration canvas; other dark surfaces use Borealis in the variant styles.
+    canvas: '#09121E',
   },
 };
 
@@ -148,14 +149,12 @@ export const resolveDesignExplorationKnobTokensForColorMode = (
     return tokens;
   }
 
-  const { canvas, surface, surfaceNav, shellShadow } = palette;
-
   return {
     ...tokens,
-    canvas,
-    surface,
-    surfaceNav,
-    shellShadow,
+    ...(palette.canvas !== undefined && { canvas: palette.canvas }),
+    ...(palette.surface !== undefined && { surface: palette.surface }),
+    ...(palette.surfaceNav !== undefined && { surfaceNav: palette.surfaceNav }),
+    ...(palette.shellShadow !== undefined && { shellShadow: palette.shellShadow }),
   };
 };
 

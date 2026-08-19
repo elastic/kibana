@@ -41,7 +41,8 @@ export const TARGET_VARIANT_ID = 'target';
 //   - warm orange accent instead of Linear's cool indigo
 const TARGET_ACCENT = '#F26522'; // warm orange accent (est. from reference)
 const TARGET_SURFACE_APP_LIGHT = '#f5f7fb';
-const TARGET_SURFACE_APP_DARK = '#10141a'; // soft step above dark canvas
+/** Dark html root — two steps below canvas `#09121E`. */
+const TARGET_HTML_ROOT_DARK = '#040A14';
 const TARGET_TOP_BAR_HEIGHT = 80;
 const TARGET_APP_HEADER_TRANSITION_MS = 200;
 /** Keep in sync with `mapDesignExplorationNavWidth` in design_exploration_project_side_nav. */
@@ -84,24 +85,73 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
   const { colors, levels } = euiTheme.euiTheme;
   const isDarkMode = euiTheme.colorMode === 'DARK';
 
+  // Dark mode keeps the exploration canvas and Borealis for chrome/cards.
+  // Workspace (dashboard field) mixes toward canvas so cards lift — same
+  // relationship as light: header + panels on a slightly darker field.
+  const targetSurface = isDarkMode
+    ? `color-mix(in srgb, ${knobVar('canvas')} 8%, ${colors.backgroundBasePlain})`
+    : knobVar('surface');
+  const targetSurfaceNav = isDarkMode ? colors.backgroundBaseSubdued : knobVar('surfaceNav');
+  const targetAppSurface = isDarkMode
+    ? `color-mix(in srgb, ${knobVar('canvas')} 65%, ${colors.backgroundBasePlain})`
+    : TARGET_SURFACE_APP_LIGHT;
+  const targetShellShadow = isDarkMode ? 'none' : knobVar('shellShadow');
+  const targetText = isDarkMode
+    ? `color-mix(in srgb, ${colors.textParagraph} 77%, transparent)`
+    : `color-mix(in srgb, black 64%, transparent)`;
+  const targetHeading = isDarkMode
+    ? `color-mix(in srgb, black 8%, ${colors.textParagraph})`
+    : `color-mix(in srgb, black 77%, transparent)`;
+  const targetTextNav = isDarkMode ? targetText : bespokeVar('textNav');
+  const targetTextSubdued = isDarkMode ? colors.textSubdued : bespokeVar('textSubdued');
+  const targetHairlineColor = isDarkMode
+    ? `color-mix(in srgb, black 22%, ${colors.borderBaseSubdued})`
+    : bespokeVar('borderSubdued');
+
   // Still a single shared hairline for anywhere a border remains, but it's
   // used far more sparingly than in Linbana — mainly on individual cards and
   // controls, not as internal row dividers within a shared container.
-  const TARGET_HAIRLINE = `1px solid ${bespokeVar('borderSubdued')}`;
-  const TARGET_HAIRLINE_INSET_SHADOW = `0 0 0 1px ${bespokeVar('borderSubdued')} inset`;
+  const TARGET_HAIRLINE = `1px solid ${targetHairlineColor}`;
+  const TARGET_HAIRLINE_INSET_SHADOW = `0 0 0 1px ${targetHairlineColor} inset`;
   const TARGET_ACCENT_INSET_SHADOW = `0 0 0 1px ${TARGET_ACCENT} inset`;
   const TARGET_SURFACE_HOVER_FILL = `color-mix(in srgb, ${colors.textParagraph} 4%, transparent)`;
 
   return css`
+    html:has(${scope}) {
+      background-color: ${isDarkMode ? TARGET_HTML_ROOT_DARK : knobVar('canvas')} !important;
+    }
+
     ${scope} {
       background-color: ${knobVar('canvas')} !important;
+    }
+
+    ${scope} .euiText:not([class*='subdued']):not([class*='success']):not([class*='danger']):not([class*='warning']):not([class*='primary']),
+    ${scope} .euiTableCellContent,
+    ${scope} .euiFormControlButton,
+    ${scope} .euiFormControlLayout input,
+    ${scope} .euiFormControlLayout select,
+    ${scope} .euiFormControlLayout textarea,
+    ${scope} .euiFormControlLayout .euiSuperSelectControl,
+    ${scope} .euiFieldText,
+    ${scope} .euiFieldSearch,
+    ${scope} .euiSelect,
+    ${scope} .euiFormLabel {
+      color: ${targetText} !important;
+    }
+
+    ${scope} .euiTitle,
+    ${scope} .euiTitle *:not([class*='Badge']):not([class*='euiButton']),
+    ${scope} h1,
+    ${scope} h2,
+    ${scope} h3 {
+      color: ${targetHeading} !important;
     }
 
     /* ----- Base surfaces ----- */
     /* Canvas (body) is blue-gray; app is white; side panel is a subtle step between them. */
     ${scope} [class*='css-'][class*='-euiPageSection-grow-l-top-plain'],
     ${scope} [class*='css-'][class*='-euiPageInner-'][class*='-panelled'] {
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
       box-shadow: none !important;
       border: none !important;
     }
@@ -127,7 +177,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .euiTableCellContent .euiLink[class*='-euiLink-primary'],
     ${scope} .euiTableCellContent [class*='css-'][class*='-euiLink-primary'] {
-      color: ${colors.textParagraph} !important;
+      color: ${targetText} !important;
       font-weight: 500 !important;
     }
 
@@ -153,7 +203,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .euiTableCellContent .euiButtonIcon[class*='-empty-primary'],
     ${scope} .euiTableCellContent [class*='css-'][class*='-euiButtonIcon-'][class*='-empty-primary'] {
-      color: ${colors.textParagraph} !important;
+      color: ${targetText} !important;
     }
 
     ${scope} .kbnChromeLayoutNavigation {
@@ -196,7 +246,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope}:not(:has(${TARGET_NAV_EXPANDED_SELECTOR}))
       [data-menu-item='true'][data-highlighted='true']
       .kbnChromeNav-iconWrapper {
-      background-color: ${colors.backgroundBasePlain} !important;
+      background-color: ${targetSurface} !important;
     }
 
     /* ----- Target expanded nav — layout width + grid column sync ----- */
@@ -269,7 +319,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
     [data-test-subj='kbnChromeNav-primaryNavigation']
     [data-menu-item='true'] {
-      --menu-item-text-color: ${bespokeVar('textNav')} !important;
+      --menu-item-text-color: ${targetTextNav} !important;
     }
 
     ${scope}
@@ -381,7 +431,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope}:has(${TARGET_NAV_EXPANDED_SELECTOR})
       [data-test-subj='kbnChromeNav-footer']
       [data-footer-label] {
-      --menu-item-text-color: ${bespokeVar('textNav')};
+      --menu-item-text-color: ${targetTextNav};
       box-sizing: border-box !important;
       display: flex !important;
       flex-direction: row !important;
@@ -557,7 +607,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnChromeNav-sidePanel,
     ${scope} [data-test-subj*='kbnChromeNav-sidePanel'],
     ${scope} [class*='getSidePanelWrapperStyles'] {
-      background-color: ${knobVar('surfaceNav')} !important;
+      background-color: ${targetSurfaceNav} !important;
       border-radius: ${knobVar('radiusContainer')} !important;
       box-shadow: none !important;
       outline: none !important;
@@ -593,7 +643,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [class*='css-'][class*='-section--labelStyles'] {
       font-size: 11px !important;
       font-weight: 500 !important;
-      color: ${bespokeVar('textSubdued')} !important;
+      color: ${targetTextSubdued} !important;
       text-transform: uppercase !important;
     }
 
@@ -632,7 +682,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       border: ${TARGET_HAIRLINE} !important;
       outline: none !important;
       box-shadow: none !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
 
     ${scope} .embPanel__hoverActions,
@@ -650,7 +700,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .euiFormControlLayout:not(.euiFormControlLayout--group):not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)),
     ${scope} [class*='css-'][class*='-control_panel--formControl'],
     ${scope} .euiFormControlButton:not(:focus):not(:disabled):not([aria-invalid='true']) {
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
 
     ${scope} [class*='css-'][class*='-control_panel--formControl'] {
@@ -664,7 +714,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnFilterButtonGroup .euiButtonGroupButton-isIconOnly,
     ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroupButton-isIconOnly,
     ${scope} [class*='css-'][class*='-euiButtonGroupButton-iconOnly'] {
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
     `
       : ''}
@@ -687,6 +737,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       font-weight: 600 !important;
       font-size: 14px !important;
       padding-inline: calc(${DESIGN_EXPLORATION_GAP}px + 8px) !important;
+      color: ${targetHeading} !important;
     }
 
     ${scope} [data-test-subj='embeddablePanelTitle'] {
@@ -757,7 +808,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .euiFilePicker:not(:focus-within):not(.euiFilePicker-isInvalid) {
       border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: none !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
 
     ${scope} .euiFormControlLayout--group:not(:focus-within) {
@@ -844,7 +895,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .kbnFilterButtonGroup {
       border-radius: ${knobVar('radiusControl')} !important;
       overflow: hidden;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
       width: fit-content;
     }
 
@@ -936,7 +987,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] {
       border-radius: ${knobVar('radiusControl')} !important;
       overflow: hidden;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
       position: relative;
       width: fit-content;
     }
@@ -967,7 +1018,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroupButton {
       border: none !important;
       margin-inline-start: 0 !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
 
     ${scope} [data-test-subj='dateRangePickerTimeWindowButtons'] .euiButtonGroup__tooltipWrapper {
@@ -1085,7 +1136,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-radius: 0 !important;
       box-shadow: none !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
 
     ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlIconButton:not(:has([data-test-subj='inTableSearchInput'])) .euiDataGridToolbarControl,
@@ -1116,7 +1167,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       border: none !important;
       border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: ${TARGET_HAIRLINE_INSET_SHADOW} !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
 
     ${scope} [data-test-subj='unifiedDataTableToolbar'] .unifiedDataTableToolbarControlGroup .unifiedDataTableToolbarControlButton .euiDataGridToolbarControl {
@@ -1144,7 +1195,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .euiTab.euiTab-isSelected,
     ${scope} .euiTab[aria-selected='true'] {
-      color: ${colors.textParagraph} !important;
+      color: ${targetText} !important;
     }
 
     ${scope} .euiTab.euiTab-isSelected::after,
@@ -1227,7 +1278,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} [data-test-subj='appHeader'] {
       border-block-end: ${TARGET_HAIRLINE} !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
 
     ${scope}${DASHBOARDS_APP_HAS_SELECTOR} [data-test-subj='appHeader'] {
@@ -1238,7 +1289,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       border-top: none !important;
       border-inline: none !important;
       box-shadow: none !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
     }
 
     /* Title width is driven by a hidden sizer span in the same grid cell as
@@ -1254,17 +1305,17 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .echMetricText__title span {
       font-size: 14px !important;
       font-weight: 600 !important;
-      color: ${bespokeVar('textNav')} !important;
+      color: ${targetHeading} !important;
     }
 
     ${scope} .echMetricText {
       padding: 0 !important;
-      color: ${bespokeVar('textNav')} !important;
+      color: ${targetTextNav} !important;
     }
 
     ${scope} .echMetricText__value,
     ${scope} .echMetricText__value .echMetricText__part {
-      color: ${bespokeVar('textNav')} !important;
+      color: ${targetTextNav} !important;
     }
 
     ${scope} .echMetricText__title,
@@ -1274,7 +1325,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .echMetricText__subtitle {
-      color: ${bespokeVar('textSubdued')} !important;
+      color: ${targetTextSubdued} !important;
       font-size: 12px !important;
       font-weight: 400 !important;
       padding-top: 2px !important;
@@ -1336,7 +1387,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       min-height: 0 !important;
       opacity: 1 !important;
       overflow: hidden !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
       border-block-end: ${TARGET_HAIRLINE} !important;
       transition: height ${TARGET_APP_HEADER_TRANSITION_MS}ms ease !important;
     }
@@ -1368,9 +1419,10 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .kbnChromeLayoutApplication {
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
+      border: ${TARGET_HAIRLINE} !important;
       border-radius: ${knobVar('radiusContainer')} !important;
-      box-shadow: ${knobVar('shellShadow')} !important;
+      box-shadow: ${targetShellShadow} !important;
       outline: none !important;
       margin-right: 8px !important;
     }
@@ -1382,7 +1434,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       width: 100% !important;
       border-block-end: ${TARGET_HAIRLINE} !important;
       box-shadow: none !important;
-      background-color: ${knobVar('surface')} !important;
+      background-color: ${targetSurface} !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       margin-inline: 0 !important;
@@ -1403,6 +1455,8 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope}:has(.dshDashboardViewportWrapper--isFullscreen) .kbnChromeLayoutApplication {
       --kbn-application--sticky-headers-offset: 0px !important;
       --kbnAppHeadersOffset: 0px !important;
+      border: none !important;
+      border-radius: 0 !important;
     }
 
     ${scope}:has(.dshDashboardViewportWrapper--isFullscreen)
@@ -1482,7 +1536,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .dshDashboardViewportWrapper,
     ${scope} .dshDashboardViewportWrapper--defaultBg {
-      background-color: ${isDarkMode ? TARGET_SURFACE_APP_DARK : TARGET_SURFACE_APP_LIGHT} !important;
+      background-color: ${targetAppSurface} !important;
     }
   `;
 };
