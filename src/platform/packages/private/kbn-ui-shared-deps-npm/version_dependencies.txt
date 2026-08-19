@@ -506,7 +506,7 @@ vfile-location@3.0.1
 vfile-message@2.0.4
 vfile@4.2.1
 vm-browserify@1.1.2
-watchpack@2.4.1
+watchpack@2.4.4
 web-namespaces@1.1.4
 webpack-sources@3.2.3
 webpack@5.96.1
