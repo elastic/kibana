@@ -19,7 +19,10 @@ import { createAssetManagerClient } from './factories';
 import type { EntityStoreCoreSetup } from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { ALL_ENTITY_TYPES } from '../../common/domain/definitions/entity_schema';
-import { getLatestEntitiesIndexName } from '../../common/domain/entity_index';
+import {
+  resolveLatestEntitiesIndexName,
+  resolveMetadataDataStreamName,
+} from '../domain/asset_manager/resolve_entity_store_indices';
 import { ENTITY_STORE_STATUS } from '../domain/constants';
 import type { GetStatusResult } from '../domain/types';
 import {
@@ -30,7 +33,6 @@ import {
   createReportEvent,
   type TelemetryReporter,
 } from '../telemetry/events';
-import { getMetadataEntitiesDataStreamName } from '../domain/asset_manager/metadata_data_stream';
 import { executeEsqlQuery } from '../infra/elasticsearch/esql';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
@@ -173,7 +175,7 @@ async function runTask({
     analytics: telemetryReporter,
     isServerless: false,
   });
-  const index = getLatestEntitiesIndexName(namespace);
+  const index = await resolveLatestEntitiesIndexName(esClient, namespace);
 
   // Report Entity Store usage and resolution state per entity type
   await Promise.all(
@@ -210,7 +212,7 @@ async function runTask({
   // Report metadata datastream doc count (only present when entity store v2 is enabled)
   try {
     const { count: docCount } = await esClient.count(
-      { index: getMetadataEntitiesDataStreamName(namespace) },
+      { index: await resolveMetadataDataStreamName(esClient, namespace) },
       { signal }
     );
     telemetryReporter.reportEvent(ENTITY_STORE_METADATA_USAGE_EVENT, { namespace, docCount });
