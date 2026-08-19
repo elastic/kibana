@@ -17,9 +17,9 @@ project:
   owner: '@elastic/workflows-eng'
   sourceRoot: x-pack/examples/workflows_connector_events_example
 dependsOn:
-  - '@kbn/core'
   - '@kbn/actions-plugin'
   - '@kbn/connector-specs'
+  - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/zod'
 tags:
