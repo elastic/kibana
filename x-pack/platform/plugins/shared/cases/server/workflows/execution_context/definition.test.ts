@@ -102,6 +102,73 @@ describe('Cases workflow execution context definition', () => {
     });
   });
 
+  it('records the alert index from the processed workflow event', async () => {
+    const casesClient = createCasesClientMock();
+    const definition = createCasesWorkflowExecutionContextDefinition(
+      'cases.alert',
+      jest.fn().mockResolvedValue(casesClient)
+    );
+
+    await definition.onExecutionStarted?.({
+      request: httpServerMock.createKibanaRequest(),
+      executionContext: createAlertWorkflowExecutionContext('alert-1', 'case-1'),
+      workflow,
+      workflowExecutionId: 'execution-1',
+      inputs: {
+        event: {
+          alerts: [
+            { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
+            { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
+          ],
+        },
+      },
+    });
+
+    expect(casesClient.userActions.recordWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: {
+          type: 'cases.alert',
+          id: 'alert-1',
+          index: '.alerts-security.alerts-default',
+        },
+      })
+    );
+  });
+
+  it('records the observable key and value from the workflow event', async () => {
+    const casesClient = createCasesClientMock();
+    const definition = createCasesWorkflowExecutionContextDefinition(
+      'cases.observable',
+      jest.fn().mockResolvedValue(casesClient)
+    );
+
+    await definition.onExecutionStarted?.({
+      request: httpServerMock.createKibanaRequest(),
+      executionContext: createObservableWorkflowExecutionContext('observable-1', 'case-1'),
+      workflow,
+      workflowExecutionId: 'execution-1',
+      inputs: {
+        event: {
+          observables: [
+            { id: 'observable-1', typeKey: 'ip', value: '10.0.0.8' },
+            { id: 'observable-2', typeKey: 'host', value: 'host-2' },
+          ],
+        },
+      },
+    });
+
+    expect(casesClient.userActions.recordWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        origin: {
+          type: 'cases.observable',
+          id: 'observable-1',
+          typeKey: 'ip',
+          value: '10.0.0.8',
+        },
+      })
+    );
+  });
+
   it('requires a case parent for a specific origin', async () => {
     const getCasesClient = jest.fn();
     const definition = createCasesWorkflowExecutionContextDefinition(

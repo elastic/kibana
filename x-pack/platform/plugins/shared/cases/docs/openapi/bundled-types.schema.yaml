@@ -4450,6 +4450,12 @@ components:
                 - cases.attachment
             id:
               type: string
+            index:
+              type: string
+            typeKey:
+              type: string
+            value:
+              type: string
     user_actions_find_response_properties:
       type: object
       required:

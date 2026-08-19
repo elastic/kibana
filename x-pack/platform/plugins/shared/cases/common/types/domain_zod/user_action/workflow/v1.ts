@@ -18,6 +18,9 @@ export const WorkflowPayloadSchema = z.object({
 export const WorkflowOriginSchema = z.object({
   type: z.enum(CASES_WORKFLOW_EXECUTION_CONTEXT_TYPES),
   id: z.string(),
+  index: z.string().optional(),
+  typeKey: z.string().optional(),
+  value: z.string().optional(),
 });
 
 export const WorkflowUserActionPayloadSchema = z.object({

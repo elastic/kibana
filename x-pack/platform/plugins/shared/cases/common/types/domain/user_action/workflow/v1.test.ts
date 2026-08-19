@@ -54,6 +54,27 @@ describe('Workflow user action', () => {
     expect(WorkflowUserActionSchema.parse(bulkAlertsUserAction)).toEqual(bulkAlertsUserAction);
   });
 
+  it('accepts workflow origin display and navigation fields', () => {
+    const enrichedUserAction = {
+      ...workflowUserAction,
+      payload: {
+        ...workflowUserAction.payload,
+        origin: {
+          ...workflowUserAction.payload.origin,
+          index: '.alerts-security.alerts-default',
+          typeKey: 'ip',
+          value: '10.0.0.8',
+        },
+      },
+    };
+
+    expect(WorkflowUserActionRt.decode(enrichedUserAction)).toEqual({
+      _tag: 'Right',
+      right: enrichedUserAction,
+    });
+    expect(WorkflowUserActionSchema.parse(enrichedUserAction)).toEqual(enrichedUserAction);
+  });
+
   it('strips unknown workflow fields in both schemas', () => {
     const input = {
       ...workflowUserAction,

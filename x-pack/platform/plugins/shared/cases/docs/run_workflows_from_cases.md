@@ -138,7 +138,7 @@ The Security Solution alert attachment owns the alert table shown in a case. It 
 }
 ```
 
-Alert tables outside Cases have no provider and continue to run without a Cases context. A multi-alert run uses `{ type: 'cases.alerts', id: caseId }` with the case as parent. This identifies the selected collection surface without falsely attributing the run to one alert; the exact alert IDs remain in the workflow inputs.
+Alert tables outside Cases have no provider and continue to run without a Cases context. A multi-alert run uses `{ type: 'cases.alerts', id: caseId }` with the case as parent. This identifies the selected collection surface without falsely attributing the run to one alert; the exact alert IDs remain in the workflow inputs. For a single alert, the context handler copies the matching alert index from the processed workflow event into the activity origin. Security Solution supplies one optional `getCases` rendering callback that uses the existing **Show alert details** action when the index is available and **Show table** otherwise. Bulk alert activity always uses **Show table**.
 
 ---
 
@@ -200,7 +200,7 @@ for (const type of CASES_WORKFLOW_EXECUTION_CONTEXT_TYPES) {
 }
 ```
 
-The post-start handler resolves the case from either the primary `cases.case` context or the specific origin's parent, then calls a request-scoped `client.userActions.recordWorkflowExecution()`. The client authorizes case updates, resolves the stored owner, enforces the user-action limit, and persists a standalone user action with `type: 'workflow'` plus the exact origin type and ID. It does not create an attachment or comment. The activity names the origin type and links the workflow name to the execution in a new tab.
+The post-start handler resolves the case from either the primary `cases.case` context or the specific origin's parent, then calls a request-scoped `client.userActions.recordWorkflowExecution()`. The client authorizes case updates, resolves the stored owner, enforces the user-action limit, and persists a standalone user action with `type: 'workflow'` plus the exact origin type and ID. It may also copy minimal display and navigation fields from the processed workflow event: the alert index or the observable `typeKey` and `value`. It does not create an attachment or comment. The activity names the origin type and links the workflow name to the execution in a new tab. Observable details use the configured human-readable type label and value inline.
 
 ### Adding another Cases context
 

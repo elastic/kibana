@@ -11,13 +11,22 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { WorkflowUserAction } from '../../../common/types/domain';
+import { OBSERVABLE_TYPES_BUILTIN } from '../../../common/constants';
 import { useAppUrl } from '../../common/lib/kibana';
 import { createCommonUpdateUserActionBuilder } from './common';
 import type { UserActionBuilder } from './types';
 
 type WorkflowActivity = SnakeToCamelCase<WorkflowUserAction>['payload'];
 
-const WorkflowActivityLabel: React.FC<WorkflowActivity> = ({ workflow, origin }) => {
+interface WorkflowActivityLabelProps extends WorkflowActivity {
+  observableTypeLabel?: string;
+}
+
+const WorkflowActivityLabel: React.FC<WorkflowActivityLabelProps> = ({
+  workflow,
+  origin,
+  observableTypeLabel,
+}) => {
   const { id, name, executionId } = workflow;
   const { getAppUrl } = useAppUrl(WORKFLOWS_APP_ID);
   const executionUrl = getAppUrl({
@@ -41,6 +50,21 @@ const WorkflowActivityLabel: React.FC<WorkflowActivity> = ({ workflow, origin })
         />
       );
     case 'cases.observable':
+      if (origin.typeKey != null && origin.value != null) {
+        return (
+          <FormattedMessage
+            id="xpack.cases.caseView.userActions.startedWorkflowAgainstObservableDetailsLabel"
+            defaultMessage="started workflow <link>{name}</link> against observable <strong>{typeKey}: {value}</strong>"
+            values={{
+              name,
+              typeKey: observableTypeLabel ?? origin.typeKey,
+              value: origin.value,
+              link,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            }}
+          />
+        );
+      }
       return (
         <FormattedMessage
           id="xpack.cases.caseView.userActions.startedWorkflowAgainstObservableLabel"
@@ -88,16 +112,35 @@ export const createWorkflowUserActionBuilder: UserActionBuilder = ({
   userAction,
   userProfiles,
   handleOutlineComment,
+  renderWorkflowUserActionAction,
+  casesConfiguration,
 }) => ({
   build: () => {
     const workflowUserAction = userAction as SnakeToCamelCase<WorkflowUserAction>;
+    const { origin } = workflowUserAction.payload;
+    const observableTypeLabel =
+      origin.type === 'cases.observable' && origin.typeKey != null
+        ? [...OBSERVABLE_TYPES_BUILTIN, ...casesConfiguration.observableTypes].find(
+            ({ key }) => key === origin.typeKey
+          )?.label
+        : undefined;
+    const activityAction = renderWorkflowUserActionAction?.({
+      origin,
+      userActionId: userAction.id,
+    });
 
     return createCommonUpdateUserActionBuilder({
       userAction,
       userProfiles,
       handleOutlineComment,
-      label: <WorkflowActivityLabel {...workflowUserAction.payload} />,
+      label: (
+        <WorkflowActivityLabel
+          {...workflowUserAction.payload}
+          observableTypeLabel={observableTypeLabel}
+        />
+      ),
       icon: 'dot',
+      extraActions: activityAction,
     }).build();
   },
 });

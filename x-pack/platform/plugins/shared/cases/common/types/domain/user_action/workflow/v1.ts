@@ -22,17 +22,26 @@ export const WorkflowPayloadRt = rt.strict({
   executionId: rt.string,
 });
 
-export const WorkflowOriginRt = rt.strict({
-  type: rt.union([
-    rt.literal(CASE_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-    rt.literal(OBSERVABLE_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-    rt.literal(ALERT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-    rt.literal(ALERTS_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-    rt.literal(COMMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-    rt.literal(ATTACHMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
-  ]),
-  id: rt.string,
-});
+export const WorkflowOriginRt = rt.exact(
+  rt.intersection([
+    rt.type({
+      type: rt.union([
+        rt.literal(CASE_WORKFLOW_EXECUTION_CONTEXT_TYPE),
+        rt.literal(OBSERVABLE_WORKFLOW_EXECUTION_CONTEXT_TYPE),
+        rt.literal(ALERT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
+        rt.literal(ALERTS_WORKFLOW_EXECUTION_CONTEXT_TYPE),
+        rt.literal(COMMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
+        rt.literal(ATTACHMENT_WORKFLOW_EXECUTION_CONTEXT_TYPE),
+      ]),
+      id: rt.string,
+    }),
+    rt.partial({
+      index: rt.string,
+      typeKey: rt.string,
+      value: rt.string,
+    }),
+  ])
+);
 
 export const WorkflowUserActionPayloadRt = rt.strict({
   workflow: WorkflowPayloadRt,

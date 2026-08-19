@@ -10,6 +10,7 @@ import { EuiCommentList } from '@elastic/eui';
 import { screen } from '@testing-library/react';
 import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 
+import { OBSERVABLE_TYPE_IPV4 } from '../../../common/constants';
 import { UserActionActions } from '../../../common/types/domain';
 import { renderWithTestingProviders } from '../../common/mock';
 import { useAppUrl } from '../../common/lib/kibana';
@@ -71,5 +72,64 @@ describe('createWorkflowUserActionBuilder', () => {
       '/app/workflows/workflow-1?tab=executions&executionId=execution-1'
     );
     expect(executionLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('renders the observable type label and value when they are available', () => {
+    const userAction = getUserAction('workflow', UserActionActions.create, {
+      type: 'workflow',
+      payload: {
+        workflow: {
+          id: 'workflow-1',
+          name: 'Enrich observable',
+          executionId: 'execution-1',
+        },
+        origin: {
+          type: 'cases.observable',
+          id: 'observable-1',
+          typeKey: OBSERVABLE_TYPE_IPV4.key,
+          value: '10.0.0.8',
+        },
+      },
+    });
+
+    const builder = createWorkflowUserActionBuilder({ ...builderArgs, userAction });
+    renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+    expect(screen.getByText('IPv4: 10.0.0.8')).toBeInTheDocument();
+  });
+
+  it('renders the injected workflow activity action', () => {
+    const origin = {
+      type: 'cases.alert',
+      id: 'alert-1',
+      index: '.alerts-security.alerts-default',
+    } as const;
+    const userAction = getUserAction('workflow', UserActionActions.create, {
+      type: 'workflow',
+      payload: {
+        workflow: {
+          id: 'workflow-1',
+          name: 'Investigate alert',
+          executionId: 'execution-1',
+        },
+        origin,
+      },
+    });
+    const renderWorkflowUserActionAction = jest.fn(() => (
+      <button type="button">{'Show alert details'}</button>
+    ));
+
+    const builder = createWorkflowUserActionBuilder({
+      ...builderArgs,
+      userAction,
+      renderWorkflowUserActionAction,
+    });
+    renderWithTestingProviders(<EuiCommentList comments={builder.build()} />);
+
+    expect(renderWorkflowUserActionAction).toHaveBeenCalledWith({
+      origin,
+      userActionId: userAction.id,
+    });
+    expect(screen.getByRole('button', { name: 'Show alert details' })).toBeInTheDocument();
   });
 });

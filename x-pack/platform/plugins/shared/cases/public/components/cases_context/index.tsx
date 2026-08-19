@@ -26,6 +26,7 @@ import type { UnifiedAttachmentTypeRegistry } from '../../client/attachment_fram
 import { CasesGlobalComponents } from './cases_global_components';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
+import type { WorkflowOrigin } from '../../../common/types/domain/user_action/workflow/v1';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
 import type { CasesContextStoreAction } from './state/cases_context_reducer';
 import { casesContextReducer, getInitialCasesContextState } from './state/cases_context_reducer';
@@ -35,6 +36,15 @@ import { casesQueryClient } from './query_client';
 
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
+export interface RenderWorkflowUserActionActionArgs {
+  origin: WorkflowOrigin;
+  userActionId: string;
+}
+
+export type RenderWorkflowUserActionAction = (
+  args: RenderWorkflowUserActionActionArgs
+) => ReactNode;
+
 export interface CasesContextValue {
   unifiedAttachmentTypeRegistry: UnifiedAttachmentTypeRegistry;
   owner: string[];
@@ -43,6 +53,7 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
+  renderWorkflowUserActionAction?: RenderWorkflowUserActionAction;
 }
 
 export interface CasesContextProps
@@ -51,6 +62,7 @@ export interface CasesContextProps
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
   getFilesClient: (scope: string) => ScopedFilesClient;
+  renderWorkflowUserActionAction?: RenderWorkflowUserActionAction;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -70,6 +82,7 @@ export const CasesProvider: FC<
     features = {},
     releasePhase = 'ga',
     getFilesClient,
+    renderWorkflowUserActionAction,
   },
   queryClient = casesQueryClient,
 }) => {
@@ -105,6 +118,7 @@ export const CasesProvider: FC<
       ),
       releasePhase,
       dispatch,
+      renderWorkflowUserActionAction,
     }),
     /**
      * We want to trigger a rerender only when the permissions will change.
@@ -124,6 +138,7 @@ export const CasesProvider: FC<
       permissions.reopenCase,
       permissions.createComment,
       permissions.assign,
+      renderWorkflowUserActionAction,
       // Interim bug fix until we refactor this code to avoid passing objects in deps
       // Need to revisit the re-rendering strategy in general as disabling exhaustive-deps is an anti-pattern
       features.alerts?.all,

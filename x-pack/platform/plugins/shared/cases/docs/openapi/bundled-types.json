@@ -6326,6 +6326,15 @@
               },
               "id": {
                 "type": "string"
+              },
+              "index": {
+                "type": "string"
+              },
+              "typeKey": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
               }
             }
           }

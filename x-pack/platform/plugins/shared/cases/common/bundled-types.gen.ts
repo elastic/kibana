@@ -1937,6 +1937,9 @@ export const PayloadWorkflow = lazySchema(() =>
         'cases.attachment',
       ]),
       id: z.string(),
+      index: z.string().optional(),
+      typeKey: z.string().optional(),
+      value: z.string().optional(),
     }),
   })
 );

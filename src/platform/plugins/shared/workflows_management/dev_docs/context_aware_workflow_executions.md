@@ -464,7 +464,7 @@ Cases registers the same handler for every Cases context type. After the executi
 3. Calls `client.userActions.recordWorkflowExecution()` with the case, workflow, execution, and exact origin IDs.
 4. Resolves the case and owner through the client rather than trusting an owner from the request body.
 5. Persists a standalone Cases user action with `type: 'workflow'`; no attachment or comment saved object is created.
-6. Renders the workflow name as a new-tab execution link and names the exact origin type in the activity.
+6. Renders the workflow name as a new-tab execution link and names the exact origin type in the activity. Observable details use the configured human-readable type label and render inline. The embedding application may supply one optional Cases callback for solution-owned activity actions, such as opening an alert flyout or navigating to the case alerts table.
 
 Using `CasesClient` is required because it applies:
 
