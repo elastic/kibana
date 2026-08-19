@@ -23,6 +23,9 @@ export interface PreparedRule {
   schedule: IntervalSchedule;
   consumer: string;
   ruleTypeId: string;
+  producer: string;
+  createdAt: number;
+  templateId?: string;
 }
 
 export interface ApiKeyEntry {
@@ -45,6 +48,7 @@ export interface BulkCreateRulesItem<Params extends RuleParams = never> {
   data: CreateRuleData<Params>;
   options?: CreateRuleOptions;
   allowMissingConnectorSecrets?: boolean;
+  templateId?: string;
 }
 
 export interface BulkCreateRulesParams<Params extends RuleParams = never> {

@@ -88,22 +88,15 @@ export class UserActionPersister {
 
       const userActions: UserActionEvent[] = [];
       const updatedFields = Object.keys(updatedCase.updatedAttributes);
-      // Templates v2 mirrors a customFields edit into extended_fields in the same patch (see
-      // replace_custom_field.ts / bulk_update.ts), so both keys land in `updatedAttributes`
+      // Templates v2 can mirror a customFields edit into extended_fields in the same patch (see
+      // replace_custom_field.ts / bulk_update.ts), landing both keys in `updatedAttributes`
       // together. Surfacing two activity-log entries for what the user experiences as one edit is
-      // redundant — extended_fields is what templates v2 renders and what the mirror already
-      // captures the customFields value into, so it wins and the customFields entry is dropped.
-      // customFields-only updates (templates disabled, or a field with no migrated counterpart)
-      // are unaffected since extended_fields won't be present in that case.
-      const suppressCustomFieldsUserAction =
-        updatedFields.includes(UserActionTypes.customFields) &&
-        updatedFields.includes(UserActionTypes.extended_fields);
+      // redundant, so the customFields entries whose paired storage key the extended_fields
+      // action already records are suppressed (#282474) — see getSuppressedCustomFieldKeys.
+      const suppressedCustomFieldKeys = this.getSuppressedCustomFieldKeys(updatedCase);
 
       updatedFields
         .filter((field) => UserActionPersister.userActionFieldsAllowed.has(field))
-        .filter(
-          (field) => !(suppressCustomFieldsUserAction && field === UserActionTypes.customFields)
-        )
         .forEach((field) => {
           // Special case for status as it can possibly have an associated closeReason (syncing to alerts)
           // Persist the closeReason to the status userAction
@@ -145,6 +138,7 @@ export class UserActionPersister {
               owner,
               caseId,
               templateName,
+              suppressedCustomFieldKeys,
             })
           );
         });
@@ -267,6 +261,44 @@ export class UserActionPersister {
     return [];
   }
 
+  /**
+   * Returns the customFields keys whose edit the same update also records
+   * through the canonical `extended_fields` user action — their duplicate
+   * legacy `customFields` user actions are suppressed (#282474). A paired key
+   * is only suppressed when its storage key is among the *recorded*
+   * extended_fields changes: clears delete the storage key, which the
+   * extended_fields activity does not record, so the legacy customFields
+   * action remains the only record of that edit and is kept.
+   */
+  private getSuppressedCustomFieldKeys(
+    updatedCase: BuildUserActionsDictParams['updatedCases']['cases'][number]
+  ): Set<string> | undefined {
+    const paired = updatedCase.pairedCustomFieldStorageKeys;
+    const newExtendedFields = updatedCase.updatedAttributes.extended_fields;
+
+    if (paired == null || !isExtendedFields(newExtendedFields)) {
+      return undefined;
+    }
+
+    const originalExtendedFields = updatedCase.originalCase?.attributes.extended_fields;
+    const oldExtendedFields = isExtendedFields(originalExtendedFields)
+      ? originalExtendedFields
+      : {};
+    const recordedStorageKeys = new Set(
+      Object.keys(newExtendedFields).filter(
+        (key) => oldExtendedFields[key] !== newExtendedFields[key]
+      )
+    );
+
+    const suppressed = new Set(
+      Object.entries(paired)
+        .filter(([, storageKey]) => recordedStorageKeys.has(storageKey))
+        .map(([key]) => key)
+    );
+
+    return suppressed.size > 0 ? suppressed : undefined;
+  }
+
   private buildExtendedFieldsUserActions(params: GetUserActionItemByDifference): UserActionEvent[] {
     const { originalValue, newValue, caseId, owner, user } = params;
     // Only record the fields that actually changed, not the full merged object.
@@ -356,7 +388,11 @@ export class UserActionPersister {
       typeof UserActionTypes.customFields
     > = (items: CaseCustomFields) => ({ customFields: items });
 
-    const { originalValue: originalCustomFields, newValue: newCustomFields } = params;
+    const {
+      originalValue: originalCustomFields,
+      newValue: newCustomFields,
+      suppressedCustomFieldKeys,
+    } = params;
 
     const originalCustomFieldsKeys = new Set(
       originalCustomFields.map((customField) => customField.key)
@@ -366,6 +402,12 @@ export class UserActionPersister {
 
     const updatedCustomFieldsUsersActions = compareValues?.addedItems
       .filter((customField) => {
+        // The canonical extended_fields user action of this update already
+        // records this paired edit — skip the duplicate legacy action (#282474).
+        if (suppressedCustomFieldKeys?.has(customField.key)) {
+          return false;
+        }
+
         if (customField.value != null) {
           return true;
         }
