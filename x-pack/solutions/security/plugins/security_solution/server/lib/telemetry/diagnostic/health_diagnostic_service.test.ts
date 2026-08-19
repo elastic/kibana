@@ -182,7 +182,7 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
       });
 
       describe('query attribute filtering', () => {
-        test('should emit a skipped stat for queries with unrecognised versions', async () => {
+        test('should silently skip queries with unrecognised versions — no stat doc, debug log only', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({
             data: `---
 id: unknown-version-query
@@ -198,17 +198,16 @@ enabled: true`,
 
           const result = await service.runHealthDiagnosticQueries({});
 
-          expect(result).toHaveLength(1);
-          expect(result[0]).toMatchObject({
-            name: 'unknown-version-query',
-            status: 'skipped',
-            skipReason: 'parse_failure',
-            passed: false,
-          });
+          expect(result).toHaveLength(0);
           expect(mockQueryExecutor.search).not.toHaveBeenCalled();
-          expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
-            TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT.eventType,
-            expect.objectContaining({ status: 'skipped', skipReason: 'parse_failure' })
+          expect(mockAnalytics.reportEvent).not.toHaveBeenCalled();
+          expect(mockLogger.debug).toHaveBeenCalledWith(
+            expect.stringContaining('unknown version'),
+            expect.anything()
+          );
+          expect(mockLogger.warn).not.toHaveBeenCalledWith(
+            'Skipping query that failed to parse',
+            expect.anything()
           );
         });
 
@@ -236,7 +235,7 @@ filterlist:
           expect(mockQueryExecutor.search).not.toHaveBeenCalled();
         });
 
-        test('should execute valid queries and emit skipped stats for unknown-version queries', async () => {
+        test('should execute valid queries and silently drop unknown-version queries', async () => {
           (artifactService.getArtifact as jest.Mock).mockResolvedValue({
             data: `---
 id: valid-query-1
@@ -264,15 +263,13 @@ enabled: true`,
 
           const result = await service.runHealthDiagnosticQueries({});
 
-          expect(result).toHaveLength(2);
-          const validResult = result.find((r) => r.name === 'valid-query-1');
-          const unknownResult = result.find((r) => r.name === 'unknown-version-query');
-          expect(validResult).toMatchObject({ status: 'success', passed: true });
-          expect(unknownResult).toMatchObject({
-            status: 'skipped',
-            skipReason: 'parse_failure',
-            passed: false,
+          expect(result).toHaveLength(1);
+          expect(result[0]).toMatchObject({
+            name: 'valid-query-1',
+            status: 'success',
+            passed: true,
           });
+          expect(result.find((r) => r.name === 'unknown-version-query')).toBeUndefined();
           expect(mockQueryExecutor.search).toHaveBeenCalledTimes(1);
         });
       });

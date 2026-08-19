@@ -19,7 +19,7 @@ import {
   useLayoutUpdate,
 } from '../../src/layout_config_context';
 import type { LayoutConfig, LayoutConfigProviderProps } from '../../src/layout_config_context';
-import type { ChromeStyle } from '../../src/layout.types';
+import type { LayoutAppearance } from '../../src/layout.types';
 import {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
@@ -29,7 +29,7 @@ import { LayoutDebugOverlay } from '../../src/debug/layout_debug_overlay';
 // React import is needed for JSX transform.
 void React;
 
-export type { ChromeLayoutProps, ChromeStyle, GridLayoutGlobalStylesProps };
+export type { ChromeLayoutProps, LayoutAppearance, GridLayoutGlobalStylesProps };
 
 /** Alias for the external package. */
 export type ChromeLayoutConfig = LayoutConfig;

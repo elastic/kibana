@@ -22,8 +22,7 @@ import { transformOptionsIn } from './transform_options_in';
 export const transformDashboardIn = (
   dashboardState: Partial<DashboardState>,
   isDashboardAppRequest: boolean = false,
-  serverTiming?: RequestTiming,
-  useGASchemas?: boolean
+  serverTiming?: RequestTiming
 ): {
   attributes: DashboardSavedObjectAttributes;
   references: SavedObjectReference[];
@@ -52,7 +51,7 @@ export const transformDashboardIn = (
       sections,
       references: panelReferences,
     } = panels
-      ? transformPanelsIn(panels, isDashboardAppRequest, useGASchemas)
+      ? transformPanelsIn(panels, isDashboardAppRequest)
       : {
           panelsJSON: '',
           sections: undefined,
@@ -65,8 +64,7 @@ export const transformDashboardIn = (
     );
 
     const { pinnedPanels, references: controlGroupReferences } = transformPinnedPanelsIn(
-      pinned_panels ?? [],
-      useGASchemas
+      pinned_panels ?? []
     );
 
     const attributes = {

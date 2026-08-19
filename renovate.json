@@ -367,7 +367,6 @@
         "react-router",
         "react-router-config",
         "react-router-dom",
-        "react-router-dom-v5-compat",
         "@types/react-router",
         "@types/react-router-config",
         "@types/react-router-dom",
@@ -2174,9 +2173,9 @@
     {
       "groupName": "seedrandom",
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
-      "reviewers": ["team:cloud-services"],
+      "reviewers": ["team:siem-conduit"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Security-Cloud Services"],
+      "addLabels": ["Team:security-siem-conduit"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -2224,14 +2223,6 @@
       "groupName": "esql-js",
       "matchDepNames": ["@elastic/esql"],
       "reviewers": ["team:kibana-esql"],
-      "matchBaseBranches": ["main"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "fuse.js",
-      "matchDepNames": ["fuse.js"],
-      "reviewers": ["team:observability-ui"],
       "matchBaseBranches": ["main"],
       "minimumReleaseAge": "14 days",
       "enabled": true
