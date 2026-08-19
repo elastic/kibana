@@ -465,6 +465,35 @@ describe('RulesClient', () => {
       ]);
     });
 
+    it('carries an unregistered artifact reference through an unrelated update', async () => {
+      const client = createClient();
+
+      // The type was registered when the reference was written (e.g. before a
+      // plugin rollback); the framework can no longer regenerate it, so it must
+      // survive by carry-over instead of being dropped.
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-unregistered',
+        attributes: {
+          ...baseSoAttrs,
+          artifacts: [{ id: 'slo-1', type: 'obs.slo', data: { sloId: 'so-slo-1' } }],
+        },
+        version: 'WzEsMV0=',
+        references: [{ name: 'artifact:sloId:slo-1', type: 'slo', id: 'so-slo-1' }],
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-unregistered' });
+
+      await client.updateRule({
+        id: 'rule-id-unregistered',
+        data: { metadata: { description: 'Unrelated change' } },
+      });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          references: [{ name: 'artifact:sloId:slo-1', type: 'slo', id: 'so-slo-1' }],
+        })
+      );
+    });
+
     it('throws 409 conflict when version is stale', async () => {
       const client = createClient();
 

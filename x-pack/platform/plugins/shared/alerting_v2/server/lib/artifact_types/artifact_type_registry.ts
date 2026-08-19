@@ -27,7 +27,15 @@ export class ArtifactTypeRegistry {
       throw new Error(`Artifact type "${def.type}" is already registered`);
     }
 
-    this.types.set(def.type, Object.freeze({ ...def, references: def.references?.slice() }));
+    // Copy and freeze the descriptors too: the caller keeps its own array, so a
+    // shared reference would let a plugin mutate e.g. `savedObjectType` after boot.
+    this.types.set(
+      def.type,
+      Object.freeze({
+        ...def,
+        references: def.references?.map((descriptor) => Object.freeze({ ...descriptor })),
+      })
+    );
   }
 
   public get(type: string): ArtifactTypeDefinition | undefined {

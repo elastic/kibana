@@ -53,6 +53,22 @@ describe('ArtifactTypeRegistry', () => {
     ).toThrow(/must match/);
   });
 
+  it('is immune to the caller mutating its descriptors after registration', () => {
+    const references = [{ field: 'dashboardId', savedObjectType: 'dashboard' }];
+    registry.register({
+      type: 'custom.type',
+      dataSchema: z.object({ dashboardId: z.string().max(64) }).strict(),
+      references,
+    });
+
+    references[0].savedObjectType = 'index-pattern';
+    references.length = 0;
+
+    expect(registry.get('custom.type')?.references).toEqual([
+      { field: 'dashboardId', savedObjectType: 'dashboard' },
+    ]);
+  });
+
   it('rejects unbounded string schemas', () => {
     expect(() =>
       registry.register({
