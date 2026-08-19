@@ -180,8 +180,7 @@ export interface AgentHandlerContext {
    */
   skills: SkillsService;
   /**
-   * Conversation template service, giving read access to registered
-   * templates during agent execution.
+   * Conversation template service, to interact with conversation templates.
    */
   conversationTemplates: ConversationTemplatesService;
   /**

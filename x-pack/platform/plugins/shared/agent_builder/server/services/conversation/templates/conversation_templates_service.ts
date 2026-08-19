@@ -11,11 +11,11 @@ import {
   createConversationTemplateRegistry,
 } from './conversation_templates_registry';
 
-export interface ConversationTemplatesSetup {
+export interface ConversationTemplatesServiceSetup {
   register(template: ConversationTemplate): void;
 }
 
-export interface ConversationTemplatesStart {
+export interface ConversationTemplatesServiceStart {
   get(id: string): Promise<ConversationTemplate | undefined>;
   list(): Promise<ConversationTemplate[]>;
 }
@@ -23,13 +23,13 @@ export interface ConversationTemplatesStart {
 export class ConversationTemplatesService {
   private readonly registry: ConversationTemplateRegistry = createConversationTemplateRegistry();
 
-  setup(): ConversationTemplatesSetup {
+  setup(): ConversationTemplatesServiceSetup {
     return {
       register: (template) => this.registry.register(template),
     };
   }
 
-  start(): ConversationTemplatesStart {
+  start(): ConversationTemplatesServiceStart {
     return {
       get: (id) => this.registry.get(id),
       list: () => this.registry.list(),

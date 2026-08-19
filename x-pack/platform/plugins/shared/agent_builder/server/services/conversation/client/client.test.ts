@@ -24,9 +24,9 @@ import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
-import type { ConversationTemplatesStart } from '@kbn/agent-builder-server';
+import type { ConversationTemplatesServiceStart } from '../templates';
 
-const conversationTemplates: jest.Mocked<ConversationTemplatesStart> = {
+const conversationTemplates: jest.Mocked<ConversationTemplatesServiceStart> = {
   get: jest.fn(),
   list: jest.fn(),
 };

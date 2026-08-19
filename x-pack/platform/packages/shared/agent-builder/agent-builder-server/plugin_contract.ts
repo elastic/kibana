@@ -67,8 +67,7 @@ export interface AttachmentsSetup {
  */
 export interface ConversationTemplatesSetup {
   /**
-   * Register a conversation template. Validation runs synchronously.
-   * Throws on invalid shape or on a duplicate id.
+   * Register a conversation template.
    */
   register(template: ConversationTemplate): void;
 }

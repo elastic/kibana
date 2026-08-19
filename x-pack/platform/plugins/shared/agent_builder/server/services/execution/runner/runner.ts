@@ -33,7 +33,6 @@ import type {
   ScopedRunnerRunAgentParams,
   SubAgentExecutor,
   WritableToolResultStore,
-  ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -71,6 +70,7 @@ import { createResultStore } from './store/volumes/tool_results/tool_result_stor
 import { createSkillsStore } from './store/volumes/skills/skills_store';
 import type { SkillServiceStart } from '../../skills';
 import type { PluginsServiceStart } from '../../plugins/plugin_service';
+import type { ConversationTemplatesServiceStart } from '../../conversation/templates';
 
 export interface CreateScopedRunnerDeps {
   // core services
@@ -88,7 +88,7 @@ export interface CreateScopedRunnerDeps {
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
   renderersService: RendererServiceStart;
-  conversationTemplates: ConversationTemplatesStart;
+  conversationTemplates: ConversationTemplatesServiceStart;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;

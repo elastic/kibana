@@ -37,7 +37,6 @@ import type {
   SerializedMetadataValue,
   MetadataFieldValue,
 } from '@kbn/agent-builder-common';
-import type { ConversationTemplatesStart } from '@kbn/agent-builder-server';
 import type {
   ConversationWithPermissions,
   ConversationWithoutRoundsWithPermissions,
@@ -67,6 +66,7 @@ import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
+import type { ConversationTemplatesServiceStart } from '../templates';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
@@ -84,7 +84,7 @@ import {
 /** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
 const withDeserializedMetadata = async <T extends { template_id?: string; metadata?: unknown }>(
   conversation: T,
-  conversationTemplates: ConversationTemplatesStart
+  conversationTemplates: ConversationTemplatesServiceStart
 ): Promise<T> => {
   if (!conversation.template_id || !conversation.metadata) return conversation;
   const template = await conversationTemplates.get(conversation.template_id);
@@ -159,7 +159,7 @@ export const createClient = ({
   user: UserIdAndName;
   isAdmin: boolean;
   agentRegistry: AgentRegistry;
-  conversationTemplates: ConversationTemplatesStart;
+  conversationTemplates: ConversationTemplatesServiceStart;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -181,7 +181,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly user: UserIdAndName;
   private readonly isAdmin: boolean;
   private readonly agentRegistry: AgentRegistry;
-  private readonly conversationTemplates: ConversationTemplatesStart;
+  private readonly conversationTemplates: ConversationTemplatesServiceStart;
   private readonly logger: Logger;
 
   constructor({
@@ -200,7 +200,7 @@ class ConversationClientImpl implements ConversationClient {
     isAdmin: boolean;
     space: string;
     agentRegistry: AgentRegistry;
-    conversationTemplates: ConversationTemplatesStart;
+    conversationTemplates: ConversationTemplatesServiceStart;
     logger: Logger;
   }) {
     this.storage = storage;

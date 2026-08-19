@@ -25,12 +25,7 @@ import type {
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import type {
-  HooksServiceSetup,
-  HooksServiceStart,
-  ConversationTemplatesSetup,
-  ConversationTemplatesStart,
-} from '@kbn/agent-builder-server';
+import type { HooksServiceSetup, HooksServiceStart } from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceSetup, ToolsServiceStart } from './tools';
 import type { RunnerFactory } from './execution/runner';
@@ -47,6 +42,10 @@ import type { TaskHandler } from './execution';
 import type { MeteringService, ConsumptionServiceStart } from './metering';
 import type { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 import type { CallbackDeliveryService } from './execution/callback';
+import type {
+  ConversationTemplatesServiceSetup,
+  ConversationTemplatesServiceStart,
+} from './conversation/templates';
 
 export interface InternalSetupServices {
   tools: ToolsServiceSetup;
@@ -57,7 +56,7 @@ export interface InternalSetupServices {
   skills: SkillServiceSetup;
   plugins: PluginsServiceSetup;
   metering: MeteringService;
-  conversationTemplates: ConversationTemplatesSetup;
+  conversationTemplates: ConversationTemplatesServiceSetup;
 }
 
 export interface InternalStartServices {
@@ -81,7 +80,7 @@ export interface InternalStartServices {
   consumption: ConsumptionServiceStart;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   callbackDeliveryService: CallbackDeliveryService;
-  conversationTemplates: ConversationTemplatesStart;
+  conversationTemplates: ConversationTemplatesServiceStart;
 }
 
 export interface ServiceSetupDeps {

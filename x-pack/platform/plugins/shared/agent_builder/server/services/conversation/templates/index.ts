@@ -7,7 +7,7 @@
 
 export {
   ConversationTemplatesService,
-  type ConversationTemplatesSetup,
-  type ConversationTemplatesStart,
+  type ConversationTemplatesServiceSetup,
+  type ConversationTemplatesServiceStart,
 } from './conversation_templates_service';
 export type { ConversationTemplateRegistry } from './conversation_templates_registry';
