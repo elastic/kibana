@@ -16,6 +16,11 @@ jest.mock('@kbn/inference-connectors', () => ({
   useLoadConnectors: (...args: unknown[]) => mockUseLoadConnectors(...args),
 }));
 
+// Monaco does not render in jsdom; render the value so assertions can read it.
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({ value }: { value: string }) => <div>{value}</div>,
+}));
+
 import { OpenAdWorkerConfigButton } from './open_ad_worker_config_button';
 
 const services = {
@@ -51,35 +56,36 @@ describe('OpenAdWorkerConfigButton / AdWorkerConfigFlyout', () => {
     });
   });
 
-  it('opens a flyout with the numbered steps timeline and inputs preview', () => {
+  it('opens a flyout with the steps timeline and worker-inputs preview', () => {
     open();
     expect(screen.getByTestId('adWorkerConfigFlyout')).toBeInTheDocument();
     expect(screen.getByTestId('pipelineIndicator')).toBeInTheDocument();
-    expect(screen.getByTestId('adWorkerStepRetrieval')).toBeInTheDocument();
-    expect(screen.getByTestId('adWorkerStepGeneration')).toBeInTheDocument();
-    expect(screen.getByTestId('adWorkerStepValidation')).toBeInTheDocument();
 
     const preview = screen.getByTestId('adWorkerConfigPreview');
     expect(preview).toHaveTextContent('"run_every": "15m"');
     expect(preview).toHaveTextContent('"validation_workflow_id": "default"');
+    // ES|QL enabled by default → mode + query present in the output
+    expect(preview).toHaveTextContent('"alert_retrieval_mode": "esql"');
+    expect(preview).toHaveTextContent('esql_query');
   });
 
-  it('has retrieval switch buttons; ES|QL editor is pre-populated and hides when the switch is off', () => {
+  it('shows the pre-populated ES|QL editor and omits ES|QL fields from the output when disabled', () => {
     open();
 
-    expect(screen.getByTestId('adWorkerDefaultRetrievalSwitch')).toBeInTheDocument();
-    expect(screen.getByTestId('adWorkerRetrievalWorkflowsSwitch')).toBeInTheDocument();
+    expect(screen.getByTestId('adWorkerEsqlQuery')).toHaveTextContent(
+      'FROM .alerts-security.alerts-default'
+    );
 
-    const esql = screen.getByTestId('adWorkerEsqlQuery') as HTMLTextAreaElement;
-    expect(esql.value).toContain('FROM .alerts-security.alerts-default');
+    fireEvent.click(screen.getByTestId('adWorkerEsqlSwitch'));
 
-    fireEvent.click(screen.getByTestId('adWorkerDefaultRetrievalSwitch'));
     expect(screen.queryByTestId('adWorkerEsqlQuery')).not.toBeInTheDocument();
+    const preview = screen.getByTestId('adWorkerConfigPreview');
+    expect(preview).not.toHaveTextContent('esql_query');
+    expect(preview).not.toHaveTextContent('alert_retrieval_mode');
   });
 
   it('reveals the retrieval workflows selector when its switch is enabled', () => {
     open();
-
     expect(screen.queryByTestId('adWorkerRetrievalWorkflows')).not.toBeInTheDocument();
     fireEvent.click(screen.getByTestId('adWorkerRetrievalWorkflowsSwitch'));
     expect(screen.getByTestId('adWorkerRetrievalWorkflows')).toBeInTheDocument();
@@ -87,7 +93,6 @@ describe('OpenAdWorkerConfigButton / AdWorkerConfigFlyout', () => {
 
   it('lists connectors (attack_discovery) with an "+ Add model" option', () => {
     open();
-
     expect(mockUseLoadConnectors).toHaveBeenCalledWith(
       expect.objectContaining({ featureId: 'attack_discovery' })
     );

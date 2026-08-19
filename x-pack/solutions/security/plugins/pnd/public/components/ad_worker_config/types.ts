@@ -6,18 +6,16 @@
  */
 
 /**
- * Configuration collected by the Attack Discovery Worker config flyout. Fields map to the inputs of
- * the `security.attack-discovery.run` step; `run_every` maps to the Watch Floor orchestrator's
- * scheduled trigger cadence. This POC does not persist it.
+ * Configuration collected by the Attack Discovery Worker config flyout. `run_every` maps to the
+ * Watch Floor orchestrator's scheduled trigger cadence; the rest map to `security.attack-discovery.run`
+ * inputs (see {@link toWorkerInputs}). This POC does not persist it.
  */
 export interface AttackDiscoveryWorkerConfig {
-  /** "Alert retrieval method" switch — run the built-in (ES|QL) retrieval. */
-  default_retrieval_enabled: boolean;
-  /** Retrieval strategy. The POC surfaces the ES|QL mode only (Query builder is a placeholder). */
-  alert_retrieval_mode: 'esql' | 'custom_query';
+  /** "ES|QL query" switch — retrieve alerts with the ES|QL query below. */
+  esql_enabled: boolean;
   /** ES|QL query used to retrieve alerts. Pre-populated with a sensible default. */
   esql_query: string;
-  /** "Alert retrieval workflows" switch — run custom retrieval workflows alongside the built-in one. */
+  /** "Alert retrieval workflows" switch — run custom retrieval workflows. */
   alert_retrieval_workflows_enabled: boolean;
   /** Selected custom retrieval workflow ids (when the workflows switch is on). */
   alert_retrieval_workflow_ids: string[];
@@ -36,8 +34,7 @@ export const DEFAULT_ESQL_QUERY = `FROM .alerts-security.alerts-default METADATA
 | LIMIT 100`;
 
 export const DEFAULT_AD_WORKER_CONFIG: AttackDiscoveryWorkerConfig = {
-  default_retrieval_enabled: true,
-  alert_retrieval_mode: 'esql',
+  esql_enabled: true,
   esql_query: DEFAULT_ESQL_QUERY,
   alert_retrieval_workflows_enabled: false,
   alert_retrieval_workflow_ids: [],
@@ -45,3 +42,18 @@ export const DEFAULT_AD_WORKER_CONFIG: AttackDiscoveryWorkerConfig = {
   run_every: '15m',
   validation_workflow_id: 'default',
 };
+
+/**
+ * Projects the UI config into the object passed as `security.attack-discovery.run` inputs. Fields
+ * gated by a disabled switch are omitted (e.g. no `alert_retrieval_mode` / `esql_query` when the
+ * ES|QL switch is off).
+ */
+export const toWorkerInputs = (config: AttackDiscoveryWorkerConfig): Record<string, unknown> => ({
+  ...(config.esql_enabled ? { alert_retrieval_mode: 'esql', esql_query: config.esql_query } : {}),
+  ...(config.alert_retrieval_workflows_enabled && config.alert_retrieval_workflow_ids.length > 0
+    ? { alert_retrieval_workflow_ids: config.alert_retrieval_workflow_ids }
+    : {}),
+  ...(config.connector_id ? { connector_id: config.connector_id } : {}),
+  run_every: config.run_every,
+  validation_workflow_id: config.validation_workflow_id,
+});
