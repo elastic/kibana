@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiRangeProps } from '@elastic/eui';
-import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiSwitch, useEuiTheme } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiHorizontalRule, EuiRange, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { RowHeightSettingsProps } from './row_height_settings';
@@ -103,6 +103,52 @@ const SampleSizeSettings = ({
   );
 };
 
+const OnOffButtonGroup = ({
+  label,
+  checked,
+  onChange,
+  dataTestSubj,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  dataTestSubj: string;
+}) => {
+  const onId = `${dataTestSubj}_on`;
+  const offId = `${dataTestSubj}_off`;
+
+  const options = [
+    {
+      id: onId,
+      label: i18n.translate('unifiedDataTable.jsonModeSettings.onLabel', {
+        defaultMessage: 'On',
+      }),
+      'data-test-subj': onId,
+    },
+    {
+      id: offId,
+      label: i18n.translate('unifiedDataTable.jsonModeSettings.offLabel', {
+        defaultMessage: 'Off',
+      }),
+      'data-test-subj': offId,
+    },
+  ];
+
+  return (
+    <EuiFormRow label={label} display="columnCompressed" data-test-subj={`${dataTestSubj}Settings`}>
+      <EuiButtonGroup
+        isFullWidth
+        legend={label}
+        buttonSize="compressed"
+        options={options}
+        idSelected={checked ? onId : offId}
+        onChange={(id) => onChange(id === onId)}
+        data-test-subj={`${dataTestSubj}ButtonGroup`}
+      />
+    </EuiFormRow>
+  );
+};
+
 const JsonModeDisplaySettings = ({
   jsonModeSettings,
   onChangeJsonModeSettings,
@@ -123,38 +169,22 @@ const JsonModeDisplaySettings = ({
 
   return (
     <>
-      <EuiFormRow
+      <OnOffButtonGroup
         label={hideNullsLabel}
-        display="columnCompressed"
-        data-test-subj="unifiedDataTableHideNullsSettings"
-      >
-        <EuiSwitch
-          label={hideNullsLabel}
-          showLabel={false}
-          checked={hideNulls}
-          compressed
-          onChange={(e) =>
-            onChangeJsonModeSettings?.({ ...jsonModeSettings, hideNulls: e.target.checked })
-          }
-          data-test-subj="unifiedDataTableHideNullsSwitch"
-        />
-      </EuiFormRow>
-      <EuiFormRow
+        checked={hideNulls}
+        onChange={(checked) =>
+          onChangeJsonModeSettings?.({ ...jsonModeSettings, hideNulls: checked })
+        }
+        dataTestSubj="unifiedDataTableHideNulls"
+      />
+      <OnOffButtonGroup
         label={wrapLinesLabel}
-        display="columnCompressed"
-        data-test-subj="unifiedDataTableWrapLinesSettings"
-      >
-        <EuiSwitch
-          label={wrapLinesLabel}
-          showLabel={false}
-          checked={wrapLines}
-          compressed
-          onChange={(e) =>
-            onChangeJsonModeSettings?.({ ...jsonModeSettings, wrapLines: e.target.checked })
-          }
-          data-test-subj="unifiedDataTableWrapLinesSwitch"
-        />
-      </EuiFormRow>
+        checked={wrapLines}
+        onChange={(checked) =>
+          onChangeJsonModeSettings?.({ ...jsonModeSettings, wrapLines: checked })
+        }
+        dataTestSubj="unifiedDataTableWrapLines"
+      />
     </>
   );
 };
@@ -232,24 +262,11 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   const showHeaderRowHeight =
     !isJsonMode && Boolean(onChangeHeaderRowHeight && onChangeHeaderRowHeightLines);
   const showRowHeight = !isJsonMode && Boolean(onChangeRowHeight && onChangeRowHeightLines);
-  const hasControlsAfterSampleSize =
-    Boolean(viewModeSettings) || isJsonMode || showDensity || showHeaderRowHeight || showRowHeight;
   const hasControlsAfterViewMode =
     isJsonMode || showDensity || showHeaderRowHeight || showRowHeight;
 
   return (
     <>
-      {showSampleSize && (
-        <>
-          <SampleSizeSettings
-            activeSampleSize={activeSampleSize}
-            minRangeSampleSize={minRangeSampleSize}
-            maxAllowedSampleSize={maxAllowedSampleSize}
-            onChangeActiveSampleSize={onChangeActiveSampleSize}
-          />
-          {hasControlsAfterSampleSize && <DisplaySettingsHorizontalRule />}
-        </>
-      )}
       {viewModeSettings}
       {viewModeSettings && hasControlsAfterViewMode && <DisplaySettingsHorizontalRule />}
       {isJsonMode && (
@@ -282,6 +299,14 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
           onChangeLineCountInput={onChangeRowHeightLines}
           data-test-subj="unifiedDataTableRowHeightSettings"
           lineCountInput={lineCountInput}
+        />
+      )}
+      {showSampleSize && (
+        <SampleSizeSettings
+          activeSampleSize={activeSampleSize}
+          minRangeSampleSize={minRangeSampleSize}
+          maxAllowedSampleSize={maxAllowedSampleSize}
+          onChangeActiveSampleSize={onChangeActiveSampleSize}
         />
       )}
     </>

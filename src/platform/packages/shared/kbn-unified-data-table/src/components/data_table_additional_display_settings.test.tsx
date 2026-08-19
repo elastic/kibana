@@ -322,15 +322,15 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       ).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('should show the default controls and hide the JSON-only switches while in "Table" mode', () => {
+    it('should show the default controls and hide the JSON-only settings while in "Table" mode', () => {
       renderWithAllControls();
 
       expect(screen.getByTestId('mockDensityControl')).toBeVisible();
       expect(screen.getByTestId('unifiedDataTableHeaderRowHeightSettings')).toBeVisible();
       expect(screen.getByTestId('unifiedDataTableRowHeightSettings')).toBeVisible();
       expect(screen.getByText('Sample size')).toBeVisible();
-      expect(screen.queryByTestId('unifiedDataTableHideNullsSwitch')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDataTableWrapLinesSwitch')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDataTableHideNullsSettings')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDataTableWrapLinesSettings')).not.toBeInTheDocument();
     });
 
     it('should call onChangeSourceDisplayMode when the view mode is switched to JSON', async () => {
@@ -356,22 +356,34 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       ).not.toBeInTheDocument();
       expect(screen.queryByTestId('mockDensityControl')).not.toBeInTheDocument();
 
-      // The JSON-only switches appear with "Hide nulls" off and "Wrap lines" on by default
-      expect(screen.getByTestId('unifiedDataTableHideNullsSwitch')).not.toBeChecked();
-      expect(screen.getByTestId('unifiedDataTableWrapLinesSwitch')).toBeChecked();
+      // The JSON-only button groups appear with "Hide nulls" off and "Wrap lines" on by default
+      expect(screen.getByTestId('unifiedDataTableHideNulls_off')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      expect(screen.getByTestId('unifiedDataTableWrapLines_on')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
     });
 
-    it('should reflect the provided jsonModeSettings on the switches', () => {
+    it('should reflect the provided jsonModeSettings on the button groups', () => {
       renderWithAllControls({
         sourceDisplayMode: 'json',
         jsonModeSettings: { hideNulls: true, wrapLines: false },
       });
 
-      expect(screen.getByTestId('unifiedDataTableHideNullsSwitch')).toBeChecked();
-      expect(screen.getByTestId('unifiedDataTableWrapLinesSwitch')).not.toBeChecked();
+      expect(screen.getByTestId('unifiedDataTableHideNulls_on')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+      expect(screen.getByTestId('unifiedDataTableWrapLines_off')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
     });
 
-    it('should call onChangeJsonModeSettings when a JSON switch is toggled', async () => {
+    it('should call onChangeJsonModeSettings when a JSON setting is toggled', async () => {
       const onChangeJsonModeSettings = jest.fn();
 
       renderWithAllControls({
@@ -380,7 +392,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
         onChangeJsonModeSettings,
       });
 
-      await userEvent.click(screen.getByTestId('unifiedDataTableHideNullsSwitch'));
+      await userEvent.click(screen.getByTestId('unifiedDataTableHideNulls_on'));
 
       expect(onChangeJsonModeSettings).toHaveBeenCalledWith({ hideNulls: true, wrapLines: true });
     });
