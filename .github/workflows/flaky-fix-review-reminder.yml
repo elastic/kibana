@@ -1,19 +1,15 @@
 name: Flaky fix review reminder
 
-# Daily sweep over open pull requests that carry the `flaky-test-fixer` label
-# (draft PRs opened against main by kibanamachine via the flaky-test-fixer
-# agentic workflow, then marked ready for review by a developer). When such a
-# PR has been ready for 4 days (weekends included) without a human review, this
-# pings the codeowners of the changed files in a comment.
-#
-# Although the sweep runs daily, it does not ping daily: each reminder embeds a
-# hidden marker comment, and a PR is only pinged again once 4 days have passed
-# since the later of (ready for review, our last reminder). A submitted human
-# review stops the reminders entirely; drafts are skipped until marked ready.
+# Daily sweep over open PRs labeled `flaky-test-fixer` (opened against main by
+# kibanamachine, later marked ready for review). Once such a PR has had no human
+# review for 4 days (weekends included), this pings the codeowners of the
+# changed files. Despite the daily schedule it never pings daily: reminders
+# embed a hidden marker, and a PR is only re-pinged 4+ days after the last one.
+# A submitted human review stops the reminders; drafts are skipped.
 
 on:
   schedule:
-    # daily at 07:00 UTC (early morning CET, before the EU workday)
+    # daily at 07:00 UTC
     - cron: '0 7 * * *'
   workflow_dispatch:
     inputs:
@@ -47,9 +43,7 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run == true }}
         with:
-          # No github-token needed: github-script defaults to the workflow's
-          # own GITHUB_TOKEN, whose `pull-requests: write` permission is enough
-          # to comment. Reminder comments are authored by github-actions[bot].
+          # github-script defaults to GITHUB_TOKEN; pull-requests: write suffices.
           script: |
             const flakyFixReviewReminder = require('./.github/scripts/flaky_fix_review_reminder');
             await flakyFixReviewReminder({ github, context, core });

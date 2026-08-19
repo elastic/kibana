@@ -7,46 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Sweep logic for the "flaky fix review reminder" workflow.
-//
-// It finds open, ready-for-review PRs labeled `flaky-test-fixer` that have gone
-// without a human review for at least REMINDER_AFTER_DAYS days and pings the
-// codeowners of the changed files, re-pinging on the same cadence until a
-// review lands. These PRs are opened by a bot with no human author behind them,
-// so without a nudge they routinely sit unreviewed.
+// Finds open, ready-for-review PRs labeled `flaky-test-fixer` with no human
+// review for REMINDER_AFTER_DAYS days and pings the codeowners of the changed
+// files, re-pinging on the same cadence until a review lands.
 
 const fs = require('fs');
 const path = require('path');
-// `ignore` is the same gitignore-semantics matcher used by @kbn/code-owners, so
-// codeowner resolution here matches the rest of the repo exactly. It is a tiny,
-// dependency-free package installed by the workflow before this script runs.
+// Same gitignore-semantics matcher as @kbn/code-owners.
 const ignore = require('ignore');
 
 const LABEL = 'flaky-test-fixer';
 const REMINDER_MARKER = '<!-- flaky-fix-review-reminder -->';
 // The bot that authors our reminder comments (default GITHUB_TOKEN identity).
 const REMINDER_AUTHOR = 'github-actions[bot]';
-// Days a PR may sit without a human review before we ping, and the cadence at
-// which we re-ping afterwards. Calendar days, weekends included.
+// Calendar days (weekends included) before the first ping; also the re-ping cadence.
 const REMINDER_AFTER_DAYS = 4;
-// Cap pings per run so a daily sweep can never cause a notification storm,
-// even on the first pass over a large backlog. The backlog drains at this
-// rate per day; raise it once the reminder has proven itself in production.
+// Keeps a daily sweep from causing a notification storm; raise once proven.
 const MAX_PINGS_PER_RUN = 2;
-// Used when no codeowner can be resolved for the changed files.
 const FALLBACK_OWNER = '@elastic/appex-qa';
 const DEFAULT_CODEOWNERS_PATH = path.resolve(process.cwd(), '.github/CODEOWNERS');
 const QA_CHANNEL_URL = 'https://elastic.slack.com/archives/CTH3RN2GB';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-/** Whole days between an instant and now (calendar days, weekends included). */
+/** Whole calendar days between an instant and now. */
 function daysBetween(fromIso, now = Date.now()) {
   const to = now instanceof Date ? now.getTime() : now;
   return Math.floor((to - new Date(fromIso).getTime()) / MS_PER_DAY);
 }
 
-/** The later of two ISO timestamps; tolerates either being null. */
 function laterOf(a, b) {
   if (!a) return b;
   if (!b) return a;
@@ -54,9 +43,8 @@ function laterOf(a, b) {
 }
 
 /**
- * Build codeowner entries from a CODEOWNERS file, mirroring @kbn/code-owners:
- * each entry gets its own `ignore` matcher, and entries are reversed so the
- * last matching line in the file wins (GitHub's precedence rule).
+ * Parse CODEOWNERS into per-line `ignore` matchers, reversed so the last
+ * matching line wins (GitHub's precedence rule), mirroring @kbn/code-owners.
  */
 function buildCodeownersEntries(contents) {
   const entries = [];
@@ -81,7 +69,6 @@ function buildCodeownersEntries(contents) {
   return entries.reverse();
 }
 
-/** Owning team handles for a set of changed files, de-duplicated in first-seen order. */
 function resolveOwners(entries, files) {
   const owners = new Set();
   for (const file of files) {
@@ -112,9 +99,8 @@ const isBot = (user) =>
   Boolean(user) && (user.type === 'Bot' || user.login.endsWith('[bot]'));
 
 /**
- * Whether the PR has a review that should stop reminders: a human (non-author,
- * non-bot) APPROVED / CHANGES_REQUESTED / COMMENTED review. PENDING and
- * DISMISSED reviews do not count.
+ * Whether a human (non-author, non-bot) submitted an APPROVED /
+ * CHANGES_REQUESTED / COMMENTED review; such a review stops reminders.
  */
 async function hasHumanReview({ github, owner, repo, pr }) {
   const reviews = await github.paginate(github.rest.pulls.listReviews, {
@@ -143,7 +129,7 @@ async function getReadyForReviewTime({ github, owner, repo, pr }) {
   let readyAt = null;
   for (const event of events) {
     if (event.event === 'ready_for_review' && event.created_at) {
-      readyAt = event.created_at; // keep the most recent
+      readyAt = event.created_at;
     }
   }
   return readyAt || pr.created_at;
@@ -179,14 +165,11 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
     fs.readFileSync(process.env.CODEOWNERS_PATH || DEFAULT_CODEOWNERS_PATH, 'utf8')
   );
 
-  // CODEOWNERS is read from the checked-out ref (the default branch), so we only
-  // reason about PRs that target it. flaky-test-fixer PRs are opened against the
-  // default branch, so this is a no-op guard in practice.
+  // CODEOWNERS comes from the checked-out default branch, so only consider PRs
+  // targeting it (flaky-test-fixer PRs always do).
   const { data: repository } = await github.rest.repos.get({ owner, repo });
   const baseBranch = repository.default_branch;
 
-  // Server-side label filter keeps this cheap even though the repo has hundreds
-  // of open PRs (mirrors close-stale-failed-test-issues.yml).
   const candidates = await github.paginate(github.rest.issues.listForRepo, {
     owner,
     repo,
@@ -244,8 +227,7 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
       continue;
     }
 
-    // Re-check freshness right before commenting to narrow races with reviews,
-    // label removals, and conversions back to draft.
+    // Re-check freshness right before commenting to narrow races.
     const { data: fresh } = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
     const freshLabels = fresh.labels.map((l) => (typeof l === 'string' ? l : l.name));
     if (

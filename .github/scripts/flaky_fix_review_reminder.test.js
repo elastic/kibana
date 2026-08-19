@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Zero-framework tests for the flaky-fix review reminder sweep. These scripts
-// run via actions/github-script (plain CommonJS, outside the Jest project), so
-// they are tested with Node's built-in runner:
-//
+// These scripts run via actions/github-script outside the Jest project, so
+// they use Node's built-in runner:
 //   node --test .github/scripts/flaky_fix_review_reminder.test.js
-//
-// `ignore` is a repo devDependency, so it resolves after bootstrap.
 
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
@@ -26,9 +22,7 @@ const reminder = require('./flaky_fix_review_reminder');
 const NOW = new Date('2026-08-18T12:00:00Z').getTime();
 const iso = (d) => new Date(d).toISOString();
 
-// A small, hermetic CODEOWNERS fixture exercising the precedence rules we rely
-// on: a broad directory owner, a more specific nested owner that must win, and
-// an extension rule that must win over both when it appears later in the file.
+// Hermetic CODEOWNERS fixture covering the precedence rules we rely on.
 const CODEOWNERS_FIXTURE = [
   'src/core @elastic/kibana-core',
   'x-pack/plugins/security_solution @elastic/security-solution',
