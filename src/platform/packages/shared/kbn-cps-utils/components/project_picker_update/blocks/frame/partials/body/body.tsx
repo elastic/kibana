@@ -89,6 +89,7 @@ export function ProjectPickerFrameBodyHeader() {
         <EuiFlexItem>
           <KbnWarningCallout
             announceOnMount
+            size="s"
             title={i18n.translate('cpsUtils.projectPicker.filterBox.noMatch.calloutTitle', {
               defaultMessage: 'No projects are currently being searched',
             })}
@@ -108,6 +109,7 @@ export function ProjectPickerFrameBodyHeader() {
         <EuiFlexItem>
           <KbnDangerCallout
             announceOnMount
+            size="s"
             title={i18n.translate('cpsUtils.projectPicker.filterBox.searchError.calloutTitle', {
               defaultMessage: 'Unable to update project search',
             })}
