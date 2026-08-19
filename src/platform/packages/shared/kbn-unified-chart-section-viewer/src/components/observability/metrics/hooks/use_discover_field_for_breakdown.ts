@@ -54,8 +54,8 @@ function getMatchingDimension(
   selectedDimensions: Dimension[]
 ): Dimension | undefined {
   if (!breakdownField || dimensions.length === 0) return;
-  const matchingDimension = dimensions.find((dimension) => dimension.name === breakdownField);
-  return matchingDimension && selectedDimensions.some(({ name }) => name === breakdownField)
+  const matchingDimension = dimensions.find((d) => d.name === breakdownField);
+  return matchingDimension && selectedDimensions.some((d) => d.name === breakdownField)
     ? undefined
     : matchingDimension;
 }
