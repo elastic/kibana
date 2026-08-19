@@ -582,8 +582,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
     await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
 
-    // Change the name to match the original
-    await page.testSubj.locator('duplicateServiceModal-nameField').fill('AWS CloudTrail Logs');
+    // Derive the original name from the modal's pre-filled value so the test
+    // stays anchored to whatever the current manifest produces.
+    const nameField = page.testSubj.locator('duplicateServiceModal-nameField');
+    const preFilled = await nameField.inputValue();
+    const originalName = preFilled.replace(/ \[Duplicate\]$/, '');
+    await nameField.fill(originalName);
 
     await expect(
       page.getByText('This name is already in use. Choose a different name.')
