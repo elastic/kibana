@@ -365,13 +365,9 @@ export const discovery: DatasetConfig['discovery'] = [
     },
     // Ground-truth continuation chains (ordered, by readable `rule_name`) the continuation eval
     // replays one rule per cycle. Each chain legitimately continues ONE event, so the agent
-    // should reuse a single event_id. `semantic` = same service + symptom, no rule_uuid overlap;
-    // `cascade` = upstream → downstreams across services, linked by dependency topology.
+    // should reuse a single event_id. `cascade` = upstream → downstreams across services, linked
+    // by dependency topology.
     continuationChains: {
-      semantic: [
-        'Frontend → Ledger Writer Payment Submission Error',
-        'Frontend → Ledger Writer Deposit Submission Error',
-      ],
       cascade: [
         'Transaction History Database SQL Connection Error',
         'Frontend → Transaction History Connection Failures',
