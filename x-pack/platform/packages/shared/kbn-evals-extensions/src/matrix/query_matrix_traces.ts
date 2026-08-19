@@ -12,9 +12,6 @@ import type { AggregatedModelScores } from './query_matrix_scores';
 import type { MatrixTraceData, MatrixTraceEntry, TraceStep } from './trace_types';
 import { traceKey } from './trace_types';
 
-/** Maximum number of experiments to scan for complete scores per (suite, model). */
-const MAX_EXPERIMENTS_TO_SCAN = 5;
-
 /**
  * Extracts trace data (initial question, tool trail, agent answer, step trace)
  * from a single evaluation score document.
@@ -98,50 +95,60 @@ const isCompleteScore = (score: EvaluationScoreDocument): boolean => {
 };
 
 /**
- * Processes a batch of score documents (all from the same experiment) and
- * populates `traces` with per-example and per-suite entries. Only the latest
- * complete score per suite is used.
- *
- * @returns The number of complete scores found in this batch.
+ * Merges a batch of full (unstripped) score documents for one example into
+ * `traces`. Documents arrive in unknown order and span every experiment and
+ * repetition that ever scored this example, so this filters to the requested
+ * model + execution and keeps the newest complete document.
  */
-const processScoreBatch = (
+const processExampleBatch = (
   scores: EvaluationScoreDocument[],
   modelId: string,
   suiteId: string,
+  executionId: string,
   traces: MatrixTraceData
-): number => {
-  // Sort by @timestamp descending so the latest complete run wins
-  const sorted = [...scores].sort((a, b) => {
-    const ta = Date.parse(a['@timestamp'] ?? '');
-    const tb = Date.parse(b['@timestamp'] ?? '');
-    return tb - ta;
-  });
+): boolean => {
+  // Filter to this model + this execution, newest first
+  const relevant = scores
+    .filter((score) => score.task?.model?.id === modelId)
+    .filter((score) => score.metadata?.execution_id === executionId)
+    .sort((a, b) => {
+      const ta = Date.parse(a['@timestamp'] ?? '');
+      const tb = Date.parse(b['@timestamp'] ?? '');
+      return tb - ta;
+    });
 
-  let suiteTraceAssigned = false;
-  let completeCount = 0;
+  if (relevant.length === 0) return false;
 
-  for (const score of sorted) {
-    const entry = extractTraceFromScore(score);
-    const datasetId = score.example?.dataset?.id;
-    const exampleId = score.example?.id;
+  const entry = extractTraceFromScore(relevant[0]);
+  const exampleId = relevant[0].example?.id;
+  const datasetId = relevant[0].example?.dataset?.id;
 
-    // Key by model:exampleId for per-prompt detail
-    if (exampleId) {
-      traces[traceKey(modelId, exampleId)] = entry;
-    }
-    if (datasetId) {
-      traces[traceKey(modelId, datasetId)] = entry;
-    }
+  const complete = isCompleteScore(relevant[0]);
 
-    // For the suite-level key, pick the latest **complete** run only.
-    if (!suiteTraceAssigned && isCompleteScore(score)) {
-      traces[traceKey(modelId, suiteId)] = entry;
-      suiteTraceAssigned = true;
-      completeCount++;
+  // Key by model:exampleId for per-prompt detail
+  if (exampleId) {
+    traces[traceKey(modelId, exampleId)] = entry;
+  }
+  if (datasetId) {
+    traces[traceKey(modelId, datasetId)] = entry;
+  }
+  // For the suite-level key, only complete runs qualify.
+  if (complete) {
+    traces[traceKey(modelId, suiteId)] = entry;
+  }
+
+  // If the newest doc is incomplete, fall back to the newest complete one
+  if (!complete) {
+    const firstComplete = relevant.find(isCompleteScore);
+    if (firstComplete) {
+      const fallbackEntry = extractTraceFromScore(firstComplete);
+      const fid = firstComplete.example?.id;
+      if (fid) traces[traceKey(modelId, fid)] = fallbackEntry;
+      traces[traceKey(modelId, suiteId)] = fallbackEntry;
     }
   }
 
-  return completeCount;
+  return complete;
 };
 
 /**
@@ -149,13 +156,15 @@ const processScoreBatch = (
  * plugin and extracts trace data (initial question, tool trail, agent answer,
  * step trace) for each (model, column) pair.
  *
- * Uses the same experiment IDs resolved by `queryMatrixScores` to fetch the
- * full score documents — which include `task.output.steps` and
- * `example.input.question` — and maps them into `MatrixTraceData`.
+ * The per-experiment scores route (`getExperimentScores`) strips unbounded
+ * fields (`task.output`, `example.input`, `example.metadata`) from responses,
+ * which are exactly the fields the trace detail needs. This function instead
+ * uses the per-example scores route (`getExampleScores`), which returns full
+ * documents, and filters client-side by model and execution.
  *
- * If the latest experiment has no complete scores (e.g. worker died mid-run),
- * it falls back to scanning up to `MAX_EXPERIMENTS_TO_SCAN` earlier
- * experiments for the same (suite, model) to find the latest complete run.
+ * Example IDs are enumerated from the stripped per-experiment response (which
+ * still carries `example.id` and `example.dataset.id`), then each example is
+ * fetched once and reused across all models that ran it.
  */
 export const queryMatrixTraces = async (
   evalsClient: EvalsClient,
@@ -164,62 +173,76 @@ export const queryMatrixTraces = async (
 ): Promise<MatrixTraceData> => {
   const traces: MatrixTraceData = {};
 
+  // 1. Collect (suite, model, execution) tuples with the example IDs they ran,
+  //    from the stripped experiment-scores responses (cheap, no heavy fields).
+  interface RunRef {
+    suiteId: string;
+    modelId: string;
+    executionId: string;
+    exampleIds: Set<string>;
+  }
+  const runRefs: RunRef[] = [];
+
   for (const modelScores of aggregated) {
     for (const suite of modelScores.suites) {
       const { suiteId, experimentId } = suite;
       log.debug(
-        `Fetching score documents for experiment ${experimentId} (model ${modelScores.modelId}, suite ${suiteId})`
+        `Enumerating examples for experiment ${experimentId} (model ${modelScores.modelId}, suite ${suiteId})`
       );
 
-      // First try the latest experiment
-      let scores = await evalsClient.getExperimentScores(experimentId, {
+      const stripped = await evalsClient.getExperimentScores(experimentId, {
         suiteId,
         taskModelId: modelScores.modelId,
         executionId: experimentId,
       });
 
-      let completeCount = processScoreBatch(scores, modelScores.modelId, suiteId, traces);
-
-      // If no complete scores found, scan earlier experiments
-      if (completeCount === 0) {
-        log.debug(
-          `No complete scores in latest experiment ${experimentId}, scanning earlier runs...`
-        );
-
-        const experiments = await evalsClient.listExperiments({
-          suiteId,
-          taskModelId: modelScores.modelId,
-          limit: MAX_EXPERIMENTS_TO_SCAN,
-        });
-
-        // Skip the first one (already tried), try the rest in order
-        for (const exp of experiments.slice(1)) {
-          if (exp.experiment_id === experimentId) continue;
-
-          log.debug(`Trying earlier experiment ${exp.experiment_id}...`);
-          scores = await evalsClient.getExperimentScores(exp.experiment_id, {
-            suiteId,
-            taskModelId: modelScores.modelId,
-            executionId: exp.execution_id ?? exp.experiment_id,
-          });
-
-          completeCount = processScoreBatch(scores, modelScores.modelId, suiteId, traces);
-
-          if (completeCount > 0) {
-            log.debug(
-              `Found ${completeCount} complete score(s) in earlier experiment ${exp.experiment_id}`
-            );
-            break;
-          }
-        }
+      const exampleIds = new Set<string>();
+      for (const score of stripped) {
+        if (score.example?.id) exampleIds.add(score.example.id);
       }
 
-      if (completeCount === 0) {
+      if (exampleIds.size === 0) {
         log.warning(
-          `No complete score documents found for suite ${suiteId} (model ${modelScores.modelId}) ` +
-            `across ${MAX_EXPERIMENTS_TO_SCAN} experiments — trace will be unavailable`
+          `No example IDs found for suite ${suiteId} (model ${modelScores.modelId}) — trace will be unavailable`
         );
+        continue;
       }
+
+      runRefs.push({
+        suiteId,
+        modelId: modelScores.modelId,
+        executionId: experimentId,
+        exampleIds,
+      });
+    }
+  }
+
+  // 2. Fetch full score documents once per example (the route returns every
+  //    document for that example; we share the result across runs).
+  const exampleScores = new Map<string, EvaluationScoreDocument[]>();
+  const allExampleIds = new Set<string>();
+  for (const ref of runRefs) {
+    for (const id of ref.exampleIds) allExampleIds.add(id);
+  }
+
+  for (const exampleId of allExampleIds) {
+    const scores = await evalsClient.getExampleScores(exampleId);
+    exampleScores.set(exampleId, scores);
+  }
+
+  // 3. For each run, pick the newest complete document per example and merge
+  //    into the traces map.
+  for (const ref of runRefs) {
+    let completeCount = 0;
+    for (const exampleId of ref.exampleIds) {
+      const scores = exampleScores.get(exampleId) ?? [];
+      const ok = processExampleBatch(scores, ref.modelId, ref.suiteId, ref.executionId, traces);
+      if (ok) completeCount++;
+    }
+    if (completeCount === 0) {
+      log.warning(
+        `No complete score documents found for suite ${ref.suiteId} (model ${ref.modelId}, execution ${ref.executionId}) — trace will be unavailable`
+      );
     }
   }
 

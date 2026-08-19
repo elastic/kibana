@@ -18,11 +18,13 @@ import {
   EVALS_EXPERIMENT_SCORES_URL,
   EVALS_EXPERIMENT_URL,
   EVALS_EXPERIMENTS_URL,
+  EVALS_EXAMPLE_SCORES_URL,
   EVALS_SCORES_URL,
   GetEvaluationDatasetResponse,
   GetEvaluationExperimentResponse,
   GetEvaluationExperimentScoresResponse,
   GetEvaluationExperimentsResponse,
+  GetExampleScoresResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
@@ -301,6 +303,40 @@ export class EvalsClient {
     } catch (error: unknown) {
       this.log.error(
         `Failed to retrieve scores for experiment ID ${experimentId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Retrieves scores for a single example across all experiments that include
+   * it. Unlike {@link getExperimentScores}, the response is NOT stripped of
+   * unbounded fields (`task.output`, `example.input`, `example.metadata`),
+   * because this route does not apply `_source_excludes`.
+   */
+  async getExampleScores(exampleId: string): Promise<EvaluationScoreDocument[]> {
+    try {
+      const response = await this.kbnClient.request({
+        path: this.path(
+          EVALS_EXAMPLE_SCORES_URL.replace('{exampleId}', encodeURIComponent(exampleId))
+        ),
+        method: 'GET',
+        headers: VERSIONED_HEADERS,
+      });
+      const parsed = GetExampleScoresResponse.parse(getResponseData(response));
+
+      if (parsed.total > MAX_SCORES_PER_QUERY) {
+        throw new Error(
+          `Example ${exampleId} returned ${parsed.total} scores, which exceeds MAX_SCORES_PER_QUERY (${MAX_SCORES_PER_QUERY})`
+        );
+      }
+
+      return parsed.scores;
+    } catch (error: unknown) {
+      this.log.error(
+        `Failed to retrieve scores for example ID ${exampleId}: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
