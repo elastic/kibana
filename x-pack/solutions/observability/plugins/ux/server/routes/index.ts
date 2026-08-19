@@ -24,7 +24,7 @@ import {
 } from './session_replay/settings';
 import { getRumFiltersRoute } from './rum/filters';
 import { listRumRemoteClustersRoute } from './rum/remote_clusters';
-import { getRumAppsRoute } from './rum/apps';
+import { getRumAppsRoute, getRumAppsSpanRoute } from './rum/apps';
 import { getRumAppSettingsRoute, putRumAppSettingsRoute } from './rum/app_settings';
 import { getRumOverviewRoute } from './rum/overview';
 import { getRumTrendsRoute } from './rum/trends';
@@ -73,6 +73,7 @@ function getTypedUxServerRouteRepository() {
     ...getRumFiltersRoute,
     ...listRumRemoteClustersRoute,
     ...getRumAppsRoute,
+    ...getRumAppsSpanRoute,
     ...getRumAppSettingsRoute,
     ...putRumAppSettingsRoute,
     ...getRumOverviewRoute,

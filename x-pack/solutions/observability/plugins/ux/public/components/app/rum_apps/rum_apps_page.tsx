@@ -14,7 +14,6 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiDescriptionList,
-  EuiEmptyPrompt,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFilterSelectItem,
@@ -59,6 +58,7 @@ import { EmptyStateLoading } from '../rum_dashboard/empty_state_loading';
 import { EvidencePackFlyout } from './evidence_pack_flyout';
 import { ScoreBreakdownFlyout } from './score_breakdown_flyout';
 import { InventoryScoreCell } from './score_cell';
+import { InventoryEmptyState, useRumAppsSpan } from './out_of_range_traffic';
 import { SessionTrafficChart } from './session_traffic_chart';
 import { useInventoryChartVisibility } from './use_inventory_chart_visibility';
 import {
@@ -493,6 +493,16 @@ export function RumAppsPage() {
   }, [http]);
 
   const apps = useMemo(() => data?.apps ?? [], [data]);
+  const includeBotsQuery = typeof includeBots === 'string' ? includeBots : undefined;
+  const botUaQuery = typeof botUa === 'string' ? botUa : undefined;
+  const { span, loading: spanLoading } = useRumAppsSpan({
+    enabled: !loading && !error && apps.length === 0,
+    http,
+    rangeFrom,
+    rangeTo,
+    includeBots: includeBotsQuery,
+    botUa: botUaQuery,
+  });
 
   const filteredApps = useMemo(() => {
     return apps.filter((app) => {
@@ -544,6 +554,16 @@ export function RumAppsPage() {
       history.push({
         pathname: history.location.pathname,
         search: mergeRumSearch(search, patch),
+      });
+    },
+    [history, search]
+  );
+
+  const onSelectSpanRange = useCallback(
+    (nextFrom: string, nextTo: string) => {
+      history.push({
+        pathname: history.location.pathname,
+        search: mergeRumSearch(search, { rangeFrom: nextFrom, rangeTo: nextTo }),
       });
     },
     [history, search]
@@ -913,44 +933,14 @@ export function RumAppsPage() {
                 })}
               />
             ) : !loading && apps.length === 0 ? (
-              <EuiEmptyPrompt
-                data-test-subj="uxAppsEmptyPrompt"
-                iconType="chartArea"
-                title={
-                  <h2>
-                    {i18n.translate('xpack.ux.inventory.emptyTitle', {
-                      defaultMessage: 'No RUM data in this time range',
-                    })}
-                  </h2>
-                }
-                body={
-                  <p>
-                    {i18n.translate('xpack.ux.inventory.emptyDescription', {
-                      defaultMessage:
-                        'No instrumented applications reported sessions or page views. Widen the range, or capture traffic with Elastic RUM or EDOT Browser.',
-                    })}
-                  </p>
-                }
-                actions={[
-                  <EuiButton
-                    data-test-subj="uxAppsAddRumDataButton"
-                    href={http.basePath.prepend('/app/apm/tutorial')}
-                    fill
-                  >
-                    {i18n.translate('xpack.ux.inventory.addRumDataButtonLabel', {
-                      defaultMessage: 'Add RUM data',
-                    })}
-                  </EuiButton>,
-                  <EuiButton
-                    data-test-subj="uxAppsReadDocsButton"
-                    href={docLinks.links.observability.guide}
-                    target="_blank"
-                  >
-                    {i18n.translate('xpack.ux.inventory.readDocsButtonLabel', {
-                      defaultMessage: 'Read the docs',
-                    })}
-                  </EuiButton>,
-                ]}
+              <InventoryEmptyState
+                span={span}
+                spanLoading={spanLoading}
+                onSelectRange={onSelectSpanRange}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                http={http}
+                docLinks={docLinks}
               />
             ) : (
               <EuiInMemoryTable

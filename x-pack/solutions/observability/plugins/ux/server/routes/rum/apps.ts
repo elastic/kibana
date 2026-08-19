@@ -7,9 +7,11 @@
 
 import * as t from 'io-ts';
 import type { RumAppsQueryStage, RumAppsResponse } from '../../../common/rum_apps';
+import type { RumAppsSpanResponse } from '../../../common/rum_span';
 import { canUseSessionIndex } from '../../../common/rum_sessions';
 import { rangeSpanMs } from '../../../common/rum_daily';
 import { queryRumApps } from '../../transforms/rum_apps_query';
+import { queryRumAppsSpan } from '../../transforms/rum_apps_span';
 import { resolveRumAnalytics } from '../../transforms/rum_sessions';
 import { createUxServerRoute } from '../create_ux_server_route';
 import { boundedString } from './query';
@@ -59,6 +61,40 @@ export const getRumAppsRoute = createUxServerRoute({
       useIndex,
       mergeRaw: useIndex && analytics.mergeRaw,
       watermark: analytics.status.watermark,
+    });
+  },
+});
+
+export const getRumAppsSpanRoute = createUxServerRoute({
+  endpoint: 'GET /internal/ux/rum/apps/span',
+  options: { access: 'internal' },
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  params: t.type({
+    query: t.partial({
+      rangeFrom: boundedString(64),
+      rangeTo: boundedString(64),
+      includeBots: boundedString(8),
+      botUa: boundedString(512),
+      analyticsMode: boundedString(16),
+    }),
+  }),
+  handler: async ({ context, core, params }): Promise<RumAppsSpanResponse> => {
+    const { elasticsearch } = await context.core;
+    const client = await getRumSearchClient({ context, core });
+    const { rangeFrom, rangeTo, includeBots, botUa, analyticsMode } = params.query;
+    const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
+      analyticsMode,
+      rangeTo,
+    });
+    return queryRumAppsSpan({
+      client,
+      rangeFrom,
+      rangeTo,
+      includeBots,
+      botUa,
+      useIndex: analytics.useIndex,
+      watermark: analytics.status.watermark,
+      lookbackDays: analytics.status.sourceLookbackDays,
     });
   },
 });

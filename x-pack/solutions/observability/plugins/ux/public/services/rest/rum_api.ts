@@ -12,6 +12,7 @@ import {
   type RumAppSettingsBody,
 } from '../../../common/rum_app_settings';
 import type { RumAppsQueryStage, RumAppsResponse } from '../../../common/rum_apps';
+import type { RumAppsSpanResponse } from '../../../common/rum_span';
 import type {
   RumErrorsResponse,
   RumFiltersResponse,
@@ -136,6 +137,26 @@ export const fetchRumApps = async ({
       ...(includeBots ? { includeBots } : {}),
       ...(botUa ? { botUa } : {}),
       ...(stage ? { stage } : {}),
+    },
+  });
+};
+
+export const fetchRumAppsSpan = async ({
+  http,
+  rangeFrom,
+  rangeTo,
+  includeBots,
+  botUa,
+}: Pick<
+  RumQueryParams,
+  'http' | 'rangeFrom' | 'rangeTo' | 'includeBots' | 'botUa'
+>): Promise<RumAppsSpanResponse> => {
+  return http.get<RumAppsSpanResponse>('/internal/ux/rum/apps/span', {
+    query: {
+      rangeFrom,
+      rangeTo,
+      ...(includeBots ? { includeBots } : {}),
+      ...(botUa ? { botUa } : {}),
     },
   });
 };

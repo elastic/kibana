@@ -18,6 +18,29 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
+// EUI 119 dropped minusInCircleFilled; keep a filled counterpart for the active exclude state.
+const MinusCircleFilled = ({
+  title,
+  titleId,
+  ...props
+}: React.SVGProps<SVGSVGElement> & { title?: string; titleId?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={16}
+    height={16}
+    viewBox="0 0 16 16"
+    aria-labelledby={titleId}
+    {...props}
+  >
+    {title ? <title id={titleId}>{title}</title> : null}
+    <path
+      fillRule="evenodd"
+      clipRule="evenodd"
+      d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1Zm4 7.5H4v-1h8v1Z"
+    />
+  </svg>
+);
+
 export function FacetOptionRow({
   checkboxId,
   label,
@@ -93,7 +116,7 @@ export function FacetOptionRow({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={excludeAriaLabel} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType={isExcluded ? 'minusInCircleFilled' : 'minusInCircle'}
+            iconType={isExcluded ? MinusCircleFilled : 'minusCircle'}
             color={isExcluded ? 'danger' : 'text'}
             size="xs"
             aria-label={excludeAriaLabel}
