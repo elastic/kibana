@@ -11,6 +11,7 @@ import type {
   ConversationRound,
   ConversationRoundStep,
   ConversationWithoutRounds,
+  CurrentUser,
   ToolResult,
   UserIdAndName,
   SerializedMetadataValue,
@@ -26,6 +27,12 @@ import {
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import type { ConversationPermissions } from '../../../../common/http_api/conversations';
+import {
+  hasConversationDeleteAccess,
+  hasConversationRenameAccess,
+  hasConversationUpdateAccessControlAccess,
+} from '../access_control';
 import type {
   ConversationCreateRequest,
   ConversationUpdatableFields,
@@ -41,10 +48,23 @@ import {
   applyAttachmentRefsToRounds,
 } from './migrate_attachments';
 
-export type Document = Pick<GetResponse<ConversationProperties>, '_source' | '_id'>;
+export type Document = Omit<
+  Required<
+    Pick<GetResponse<ConversationProperties>, '_source' | '_id' | '_seq_no' | '_primary_term'>
+  >,
+  '_source'
+> & {
+  _source: ConversationProperties;
+};
 
-export type VersionedDocument = Document &
-  Required<Pick<GetResponse<ConversationProperties>, '_seq_no' | '_primary_term'>>;
+export const isConversationDocument = (hit: Partial<Document>): hit is Document => {
+  return (
+    hit._id !== undefined &&
+    hit._source !== undefined &&
+    hit._seq_no !== undefined &&
+    hit._primary_term !== undefined
+  );
+};
 
 const convertBaseFromEs = (document: Document) => {
   if (!document._source) {
@@ -229,6 +249,26 @@ export const fromEs = (document: Document): Conversation => {
 
 export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
   return convertBaseFromEs(document);
+};
+
+export const withPermissions = <T extends ConversationWithoutRounds>({
+  conversation,
+  user,
+}: {
+  conversation: T;
+  user: CurrentUser;
+}): T & { permissions: ConversationPermissions } => {
+  return {
+    ...conversation,
+    permissions: {
+      rename: hasConversationRenameAccess({ conversation, user }),
+      delete: hasConversationDeleteAccess({ conversation, user }),
+      update_access_control: hasConversationUpdateAccessControlAccess({
+        conversation,
+        user,
+      }),
+    },
+  };
 };
 
 export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
