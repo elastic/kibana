@@ -166,6 +166,72 @@ describe('ElasticsearchActionStepImpl', () => {
       );
     });
 
+    it('should return a no-op response and skip the ES call when bulk operations is empty', async () => {
+      mockedBuildRequest.mockReturnValue({
+        method: 'POST',
+        path: '/my-test/_bulk',
+        bulkBody: [],
+      });
+
+      const stepWith = {
+        index: 'my-test',
+        operations: [],
+      };
+      const step = {
+        id: 'bulk_step',
+        type: 'elasticsearch.bulk',
+        stepId: 'bulk_step',
+        stepType: 'elasticsearch.bulk',
+        configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(stepWith);
+
+      // An empty operations array must not hit ES (ES rejects empty _bulk bodies)
+      expect(mockEsClient.transport.request).not.toHaveBeenCalled();
+      expect((result as any).output).toEqual({ errors: false, items: [] });
+    });
+
+    it('should return a no-op response when bulkBody is not an array', async () => {
+      mockedBuildRequest.mockReturnValue({
+        method: 'POST',
+        path: '/my-test/_bulk',
+        bulkBody: 'not-an-array' as unknown as Array<Record<string, unknown>>,
+      });
+
+      const stepWith = {
+        index: 'my-test',
+        operations: 'not-an-array',
+      };
+      const step = {
+        id: 'bulk_step',
+        type: 'elasticsearch.bulk',
+        stepId: 'bulk_step',
+        stepType: 'elasticsearch.bulk',
+        configuration: { name: 'bulk_step', type: 'elasticsearch.bulk', with: stepWith },
+      } as unknown as ElasticsearchGraphNode;
+
+      const esStep = new ElasticsearchActionStepImpl(
+        step,
+        mockStepExecutionRuntime,
+        mockWorkflowRuntime,
+        mockWorkflowLogger
+      );
+
+      const result = await (esStep as any)._run(stepWith);
+
+      expect(mockEsClient.transport.request).not.toHaveBeenCalled();
+      expect((result as any).output).toEqual({ errors: false, items: [] });
+    });
+
+
     it('should log a warning and keep returning the full response when bulk has partial failures', async () => {
       const bulkResponse = {
         took: 1,
