@@ -160,6 +160,17 @@ export function getRequiredTextFields(
   });
 }
 
+/**
+ * Mirrors Fleet's isAdvancedVar logic: a var is shown by default when show_user is true,
+ * or when it is required and has no default. Everything else goes behind "Advanced options".
+ */
+export function isAdvancedVar(def: RegistryVarsEntry): boolean {
+  if (def.show_user || (def.required && def.default === undefined)) {
+    return false;
+  }
+  return true;
+}
+
 export function getRequiredBooleanFields(
   service: AwsServiceMatrixEntry,
   activeTransport: TransportType | null

@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import { EuiButtonGroup, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { Suspense, useState } from 'react';
+import {
+  EuiButtonEmpty,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
@@ -19,6 +27,7 @@ import {
   getRequiredBooleanFields,
   getRequiredTextFields,
   hasTransportChoice,
+  isAdvancedVar,
   resolveFieldMeta,
   toDraft,
   toTyped,
@@ -48,6 +57,10 @@ export interface ServiceFieldsFormProps {
   onTransportChange: (transport: TransportType) => void;
 }
 
+// ECF trigger vars reference a "Collect logs via S3 Bucket" toggle that doesn't exist in
+// this UI. Strip the manifest description so the misleading help text isn't shown.
+const ECF_TRIGGER_VARS = new Set(['bucket_arn', 'log_group_arn']);
+
 function VarField({
   service,
   fieldName,
@@ -74,11 +87,14 @@ function VarField({
           }),
         ]
       : null;
+  const varDef = ECF_TRIGGER_VARS.has(fieldName)
+    ? { ...meta.def, description: undefined }
+    : meta.def;
   return (
     <div data-test-subj={`serviceSettingsFlyout-field-${fieldName}`}>
       <Suspense fallback={<EuiLoadingSpinner size="m" />}>
         <LazyPackagePolicyInputVarField
-          varDef={meta.def}
+          varDef={varDef}
           value={value}
           onChange={(next) => onFieldChange(fieldName, toDraft(next))}
           errors={errors}
@@ -97,15 +113,37 @@ export function ServiceFieldsForm({
   onFieldChange,
   onTransportChange,
 }: ServiceFieldsFormProps) {
+  const [isShowingAdvanced, setIsShowingAdvanced] = useState(false);
+
   const hasTransport = hasTransportChoice(service);
   const requiredTextFields = getRequiredTextFields(service, draftTransport);
-  const requiredBoolFields = getRequiredBooleanFields(service, draftTransport);
   const requiredTextFieldSet = new Set(requiredTextFields);
   const flyoutFields = getFlyoutFields(service, draftTransport);
   const otherFlyoutFields = flyoutFields.filter(
     (f) => !REGION_FIELD_NAMES.has(f) && !requiredTextFieldSet.has(f) && f !== 'regions'
   );
   const mandatoryBoolFields = getMandatoryBooleanFields(service, draftTransport);
+  const requiredBoolFields = getRequiredBooleanFields(service, draftTransport);
+
+  // Split each field group into primary (shown by default) and advanced (hidden).
+  const isAdvanced = (fieldName: string) => {
+    const meta = resolveFieldMeta(service, fieldName);
+    return meta ? isAdvancedVar(meta.def) : false;
+  };
+
+  const primaryBoolFields = requiredBoolFields.filter((f) => !isAdvanced(f));
+  const advancedBoolFields = requiredBoolFields.filter(isAdvanced);
+  const primaryOtherFields = otherFlyoutFields.filter((f) => !isAdvanced(f));
+  const advancedOtherFields = otherFlyoutFields.filter(isAdvanced);
+  const primaryMandatoryBoolFields = mandatoryBoolFields.filter((f) => !isAdvanced(f));
+  const advancedMandatoryBoolFields = mandatoryBoolFields.filter(isAdvanced);
+
+  const advancedFields = [
+    ...advancedBoolFields,
+    ...advancedOtherFields,
+    ...advancedMandatoryBoolFields,
+  ];
+  const hasAdvancedOptions = advancedFields.length > 0;
 
   const anyRequiredEmpty = requiredTextFields.some((f) => {
     const meta = resolveFieldMeta(service, f);
@@ -158,10 +196,10 @@ export function ServiceFieldsForm({
         </>
       )}
 
-      {requiredBoolFields.length > 0 && (
+      {primaryBoolFields.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          {requiredBoolFields.map((fieldName) => (
+          {primaryBoolFields.map((fieldName) => (
             <VarField
               key={fieldName}
               service={service}
@@ -173,7 +211,7 @@ export function ServiceFieldsForm({
         </>
       )}
 
-      {otherFlyoutFields.map((fieldName) => (
+      {primaryOtherFields.map((fieldName) => (
         <VarField
           key={fieldName}
           service={service}
@@ -183,10 +221,10 @@ export function ServiceFieldsForm({
         />
       ))}
 
-      {mandatoryBoolFields.length > 0 && (
+      {primaryMandatoryBoolFields.length > 0 && (
         <>
           <EuiSpacer size="m" />
-          {mandatoryBoolFields.map((fieldName) => (
+          {primaryMandatoryBoolFields.map((fieldName) => (
             <VarField
               key={fieldName}
               service={service}
@@ -195,6 +233,64 @@ export function ServiceFieldsForm({
               onFieldChange={onFieldChange}
             />
           ))}
+        </>
+      )}
+
+      {hasAdvancedOptions && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                iconType={isShowingAdvanced ? 'chevronSingleDown' : 'chevronSingleRight'}
+                onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
+                flush="left"
+                data-test-subj="serviceSettingsFlyout-advancedToggle"
+              >
+                <FormattedMessage
+                  id="xpack.ingestHub.serviceSettingsStep.flyout.advancedOptions"
+                  defaultMessage="Advanced options"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {isShowingAdvanced && (
+            <>
+              {advancedBoolFields.map((fieldName) => (
+                <VarField
+                  key={fieldName}
+                  service={service}
+                  fieldName={fieldName}
+                  draft={draft}
+                  onFieldChange={onFieldChange}
+                />
+              ))}
+              {advancedOtherFields.map((fieldName) => (
+                <VarField
+                  key={fieldName}
+                  service={service}
+                  fieldName={fieldName}
+                  draft={draft}
+                  onFieldChange={onFieldChange}
+                />
+              ))}
+              {advancedMandatoryBoolFields.length > 0 && (
+                <>
+                  <EuiSpacer size="m" />
+                  {advancedMandatoryBoolFields.map((fieldName) => (
+                    <VarField
+                      key={fieldName}
+                      service={service}
+                      fieldName={fieldName}
+                      draft={draft}
+                      onFieldChange={onFieldChange}
+                    />
+                  ))}
+                </>
+              )}
+            </>
+          )}
         </>
       )}
     </>
