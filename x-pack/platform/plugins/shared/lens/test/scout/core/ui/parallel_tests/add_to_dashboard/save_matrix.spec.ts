@@ -5,16 +5,128 @@
  * 2.0.
  */
 
+import type { KbnClient } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import {
-  createDashboardWithLibraryPanel,
   createLogstashLensEditorSuiteSetup,
   createNewLens,
   spaceTest,
   testData,
+  type LensPageObjects,
 } from '../../fixtures';
 
-const SAVE_MATRIX = [
+type VisualizeAndLens = Pick<LensPageObjects, 'visualize' | 'lens'>;
+
+interface AddToDashboardSaveScenario {
+  name: string;
+  source: 'new' | 'existing';
+  saveToLibrary: boolean;
+  dashboard: 'new' | 'existing';
+}
+
+interface AddToDashboardSaveResult {
+  lensTitle: string;
+  expectedLabel: string;
+  expectedPanelCount: number;
+}
+
+/**
+ * Creates a dashboard that already contains one panel.
+ * Seed for "add Lens to an existing dashboard" cases — API, not Dashboard UI.
+ * Markdown is a valid Dashboard API panel type; `type: 'lens'` is not.
+ */
+async function createDashboardWithSeedPanel(
+  apiServices: { dashboard: { create: (body: unknown, spaceId?: string) => Promise<string> } },
+  spaceId: string,
+  dashboardTitle: string
+): Promise<void> {
+  await apiServices.dashboard.create(
+    {
+      title: dashboardTitle,
+      panels: [
+        {
+          type: 'markdown',
+          grid: { x: 0, y: 0, w: 24, h: 15 },
+          config: { content: 'seed panel' },
+        },
+      ],
+    },
+    spaceId
+  );
+}
+
+async function findLensIdByTitle(
+  kbnClient: KbnClient,
+  spaceId: string,
+  title: string
+): Promise<string> {
+  const { saved_objects: savedObjects } = await kbnClient.savedObjects.find<{ title: string }>({
+    type: 'lens',
+    space: spaceId,
+  });
+  const lens = savedObjects.find((savedObject) => savedObject.attributes.title === title);
+  if (!lens) {
+    throw new Error(`Lens "${title}" was not found in space ${spaceId}`);
+  }
+  return lens.id;
+}
+
+/** Opens a new average-of-bytes metric or the archived Artist metric. */
+async function openLensForSaveMatrix(
+  pageObjects: VisualizeAndLens,
+  artistMetricId: string,
+  source: 'new' | 'existing'
+): Promise<void> {
+  if (source === 'new') {
+    await createNewLens(pageObjects);
+    return;
+  }
+
+  await pageObjects.lens.workspace.openEditor(artistMetricId, 'legacyMtrVis');
+}
+
+/**
+ * Seeds (when needed), opens Lens, and saves to a new or existing dashboard.
+ * Scenario branches live here so the spec body stays linear.
+ */
+async function runAddToDashboardSave({
+  pageObjects,
+  apiServices,
+  spaceId,
+  artistMetricId,
+  scenario,
+}: {
+  pageObjects: VisualizeAndLens;
+  apiServices: { dashboard: { create: (body: unknown, spaceId?: string) => Promise<string> } };
+  spaceId: string;
+  artistMetricId: string;
+  scenario: AddToDashboardSaveScenario;
+}): Promise<AddToDashboardSaveResult> {
+  const refOrVal = scenario.saveToLibrary ? 'ref' : 'val';
+  const lensTitle = `Lens ${scenario.source} ${refOrVal} ${scenario.dashboard} ${spaceId}`;
+  const dashboardTitle = `Dash ${scenario.source} ${refOrVal} ${scenario.dashboard} ${spaceId}`;
+  const saveOptions = {
+    saveAsNew: scenario.source === 'existing',
+    saveToLibrary: scenario.saveToLibrary,
+  };
+
+  if (scenario.dashboard === 'existing') {
+    await createDashboardWithSeedPanel(apiServices, spaceId, dashboardTitle);
+    await openLensForSaveMatrix(pageObjects, artistMetricId, scenario.source);
+    await pageObjects.lens.saveToExistingDashboard(lensTitle, dashboardTitle, saveOptions);
+  } else {
+    await openLensForSaveMatrix(pageObjects, artistMetricId, scenario.source);
+    await pageObjects.lens.saveToNewDashboard(lensTitle, saveOptions);
+  }
+
+  return {
+    lensTitle,
+    expectedLabel: scenario.source === 'new' ? testData.AVERAGE_OF_BYTES : testData.MAX_BYTES_LABEL,
+    expectedPanelCount: scenario.dashboard === 'existing' ? 2 : 1,
+  };
+}
+
+const BY_VALUE_SCENARIOS: AddToDashboardSaveScenario[] = [
   {
     name: 'new lens by value to a new dashboard',
     source: 'new',
@@ -39,6 +151,9 @@ const SAVE_MATRIX = [
     saveToLibrary: false,
     dashboard: 'existing',
   },
+];
+
+const BY_REFERENCE_SCENARIOS: AddToDashboardSaveScenario[] = [
   {
     name: 'new lens by reference to a new dashboard',
     source: 'new',
@@ -63,7 +178,7 @@ const SAVE_MATRIX = [
     saveToLibrary: true,
     dashboard: 'existing',
   },
-] as const;
+];
 
 spaceTest.describe('Lens add to dashboard save matrix', { tag: '@local-stateful-classic' }, () => {
   const suiteSetup = createLogstashLensEditorSuiteSetup({
@@ -71,84 +186,80 @@ spaceTest.describe('Lens add to dashboard save matrix', { tag: '@local-stateful-
     skipEmptyLensOpen: true,
   });
 
-  spaceTest.beforeAll(suiteSetup.beforeAll);
+  let artistMetricId: string;
+
+  spaceTest.beforeAll(async ({ kbnClient, scoutSpace, apiServices }) => {
+    await suiteSetup.beforeAll({ scoutSpace, apiServices });
+    artistMetricId = await findLensIdByTitle(
+      kbnClient,
+      scoutSpace.id,
+      testData.LENS_BASIC_TITLES.ARTIST_METRIC
+    );
+  });
 
   spaceTest.beforeEach(suiteSetup.beforeEach);
 
   spaceTest.afterAll(suiteSetup.afterAll);
 
-  for (const scenario of SAVE_MATRIX) {
-    spaceTest(`should allow ${scenario.name}`, async ({ pageObjects, scoutSpace }) => {
-      const { visualize, lens, dashboard } = pageObjects;
-      // Include dashboard target so by-ref library saves do not collide across cases.
-      const lensTitle = `Lens ${scenario.source} ${scenario.saveToLibrary ? 'ref' : 'val'} ${
-        scenario.dashboard
-      } ${scoutSpace.id}`;
-      const dashboardTitle = `Dash ${scenario.source} ${scenario.saveToLibrary ? 'ref' : 'val'} ${
-        scenario.dashboard
-      } ${scoutSpace.id}`;
-      const expectedLabel =
-        scenario.source === 'new' ? testData.AVERAGE_OF_BYTES : testData.MAX_BYTES_LABEL;
-      const expectedPanelCount = scenario.dashboard === 'existing' ? 2 : 1;
+  for (const scenario of BY_VALUE_SCENARIOS) {
+    spaceTest(`should allow ${scenario.name}`, async ({ pageObjects, scoutSpace, apiServices }) => {
+      const { lens, dashboard } = pageObjects;
 
-      if (scenario.dashboard === 'existing') {
-        await spaceTest.step('seed an existing dashboard with a library panel', async () => {
-          await createDashboardWithLibraryPanel(
-            pageObjects,
-            dashboardTitle,
-            testData.LENS_BASIC_TITLES.XY_VIS
-          );
-        });
-      }
-
-      await spaceTest.step('open the lens editor', async () => {
-        if (scenario.source === 'new') {
-          await createNewLens(pageObjects);
-        } else {
-          await visualize.goto();
-          await visualize.openSavedVisualization(testData.LENS_BASIC_TITLES.ARTIST_METRIC, {
-            waitFor: 'lens',
-          });
-          await lens.waitForVisualization('legacyMtrVis');
-        }
-      });
-
-      await spaceTest.step('save to dashboard from the modal', async () => {
-        if (scenario.dashboard === 'existing') {
-          await lens.saveToDashboard(lensTitle, {
-            addToDashboard: 'existing',
-            dashboardTitle,
-            saveAsNew: scenario.source === 'existing',
-            saveToLibrary: scenario.saveToLibrary,
-          });
-        } else {
-          await lens.saveToDashboard(lensTitle, {
-            addToDashboard: 'new',
-            saveAsNew: scenario.source === 'existing',
-            saveToLibrary: scenario.saveToLibrary,
-          });
-        }
-      });
-
-      await spaceTest.step(
-        'the dashboard shows the panel with the expected library link',
+      const { lensTitle, expectedLabel, expectedPanelCount } = await spaceTest.step(
+        'open Lens and save by value to a dashboard',
         async () => {
-          await dashboard.waitForRenderComplete();
-          await dashboard.expectPanelCount(expectedPanelCount);
-
-          const { title, value } = await lens.metric.getLegacyMetricData();
-          expect(title).toBe(expectedLabel);
-          // Backend-computed aggregation: assert it renders as a formatted number rather
-          // than pinning the exact FTR figure.
-          expect(value).toMatch(/^[\d,.]+$/);
-
-          if (scenario.saveToLibrary) {
-            await dashboard.expectLinkedToLibrary(lensTitle);
-          } else {
-            await dashboard.expectNotLinkedToLibrary(lensTitle);
-          }
+          return runAddToDashboardSave({
+            pageObjects,
+            apiServices,
+            spaceId: scoutSpace.id,
+            artistMetricId,
+            scenario,
+          });
         }
       );
+
+      await spaceTest.step('the dashboard shows the panel without a library link', async () => {
+        await dashboard.waitForRenderComplete();
+        await dashboard.expectPanelCount(expectedPanelCount);
+
+        const { title, value } = await lens.metric.getLegacyMetricData();
+        expect(title).toBe(expectedLabel);
+        // Backend-computed aggregation: assert it renders as a formatted number rather
+        // than pinning the exact FTR figure.
+        expect(value).toMatch(/^[\d,.]+$/);
+
+        await dashboard.expectNotLinkedToLibrary(lensTitle);
+      });
+    });
+  }
+
+  for (const scenario of BY_REFERENCE_SCENARIOS) {
+    spaceTest(`should allow ${scenario.name}`, async ({ pageObjects, scoutSpace, apiServices }) => {
+      const { lens, dashboard } = pageObjects;
+
+      const { lensTitle, expectedLabel, expectedPanelCount } = await spaceTest.step(
+        'open Lens and save by reference to a dashboard',
+        async () => {
+          return runAddToDashboardSave({
+            pageObjects,
+            apiServices,
+            spaceId: scoutSpace.id,
+            artistMetricId,
+            scenario,
+          });
+        }
+      );
+
+      await spaceTest.step('the dashboard shows the panel linked to the library', async () => {
+        await dashboard.waitForRenderComplete();
+        await dashboard.expectPanelCount(expectedPanelCount);
+
+        const { title, value } = await lens.metric.getLegacyMetricData();
+        expect(title).toBe(expectedLabel);
+        expect(value).toMatch(/^[\d,.]+$/);
+
+        await dashboard.expectLinkedToLibrary(lensTitle);
+      });
     });
   }
 });

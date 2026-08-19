@@ -74,58 +74,66 @@ export class LensEditorApp extends LensApp {
   }
 
   /**
-   * Saves from the Lens editor into a new or existing dashboard, with explicit
-   * by-value / by-reference and save-as-new controls.
-   *
-   * Local until shared `LensApp.save()` grows `saveToLibrary` (after #285654's
-   * `saveAsNew` lands). Do not override `save()`.
+   * Opens the Lens save modal and fills the title. Dismisses toasts first:
+   * clicking a toast close while the modal is open is an EUI `ownFocus`
+   * outside click and closes it.
    */
-  async saveToDashboard(
-    title: string,
-    options: (
-      | {
-          addToDashboard: 'existing';
-          dashboardTitle: string;
-        }
-      | {
-          addToDashboard: 'new';
-        }
-    ) & {
-      saveAsNew?: boolean;
-      saveToLibrary?: boolean;
-    }
-  ) {
-    // Dismiss leftover toasts before opening the modal. Clicking a toast close
-    // while the modal is open is an EUI `ownFocus` outside click and closes it.
+  private async openSaveModalWithTitle(title: string): Promise<void> {
     await this.page.components.toast().closeAll();
     await this.saveButton.click();
     await this.saveModal.waitFor({ state: 'visible' });
     await this.savedObjectTitleInput.fill(title);
+  }
 
+  /** Sets the add-to-library checkbox to `saveToLibrary` via the label click. */
+  private async setAddToLibrary(saveToLibrary: boolean): Promise<void> {
+    await this.addToLibraryCheckbox.waitFor({ state: 'attached' });
+    const isChecked = await this.addToLibraryCheckbox.isChecked();
+    if (isChecked === saveToLibrary) {
+      return;
+    }
+    await this.addToLibraryCheckboxLabel.click();
+  }
+
+  /**
+   * Saves from the Lens editor into a new dashboard.
+   * Local until shared `save()` grows `saveToLibrary`. Do not override `save()`.
+   */
+  async saveToNewDashboard(
+    title: string,
+    options?: { saveAsNew?: boolean; saveToLibrary?: boolean }
+  ): Promise<void> {
+    await this.openSaveModalWithTitle(title);
     // Existing-lens copies must flip this before the dashboard radios (they stay
-    // disabled until save-as-new is on).
-    if (options.saveAsNew) {
+    // disabled until save-as-new is on). The control is absent for a new vis.
+    if (options?.saveAsNew) {
       await this.setEuiSwitch('saveAsNewCheckbox', true);
     }
+    await this.newDashboardOption.check();
+    await this.setAddToLibrary(options?.saveToLibrary ?? false);
+    await this.confirmSaveButton.click();
+    await this.saveModal.waitFor({ state: 'hidden' });
+  }
 
-    if (options.addToDashboard === 'existing') {
-      await this.existingDashboardOption.check();
-      await this.openDashboardPicker.click();
-      await this.page.testSubj
-        .locator(`dashboard-picker-option-${options.dashboardTitle.split(' ').join('-')}`)
-        .click();
-    } else {
-      await this.newDashboardOption.check();
+  /**
+   * Saves from the Lens editor into an existing dashboard (picker by title).
+   * Local until shared `save()` grows `saveToLibrary`. Do not override `save()`.
+   */
+  async saveToExistingDashboard(
+    title: string,
+    dashboardTitle: string,
+    options?: { saveAsNew?: boolean; saveToLibrary?: boolean }
+  ): Promise<void> {
+    await this.openSaveModalWithTitle(title);
+    if (options?.saveAsNew) {
+      await this.setEuiSwitch('saveAsNewCheckbox', true);
     }
-
-    if (options.saveToLibrary !== undefined) {
-      await this.addToLibraryCheckbox.waitFor({ state: 'attached' });
-      const isChecked = await this.addToLibraryCheckbox.isChecked();
-      if (isChecked !== options.saveToLibrary) {
-        await this.addToLibraryCheckboxLabel.click();
-      }
-    }
-
+    await this.existingDashboardOption.check();
+    await this.openDashboardPicker.click();
+    await this.page.testSubj
+      .locator(`dashboard-picker-option-${dashboardTitle.split(' ').join('-')}`)
+      .click();
+    await this.setAddToLibrary(options?.saveToLibrary ?? false);
     await this.confirmSaveButton.click();
     await this.saveModal.waitFor({ state: 'hidden' });
   }

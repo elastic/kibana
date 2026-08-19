@@ -457,14 +457,11 @@ export async function convertToEsqlViaModal({
 }
 
 /**
- * Builds a new legacy-metric Lens vis (average of bytes) from the Visualize wizard.
- * Used by add-to-dashboard save-modal cases.
+ * Builds a new legacy-metric Lens vis (average of bytes).
+ * Opens the Lens editor directly — the Visualize listing bootstrap is not under test.
  */
-export async function createNewLens({ visualize, lens }: VisualizeAndLens): Promise<void> {
-  await visualize.goto();
-  await visualize.openNewVisualizationWizard();
-  await visualize.clickVisType('lens');
-  await lens.waitForLensApp();
+export async function createNewLens({ lens }: Pick<LensPageObjects, 'lens'>): Promise<void> {
+  await openEmptyLensEditor({ lens });
   await lens.configureDimension({
     dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
     operation: 'average',
@@ -472,18 +469,4 @@ export async function createNewLens({ visualize, lens }: VisualizeAndLens): Prom
   });
   await lens.switchToVisualization('lnsLegacyMetric', { search: 'legacy' });
   await lens.waitForVisualization('legacyMtrVis');
-}
-
-/**
- * Creates a dashboard that already contains one library panel, then saves it.
- * Seed for "add Lens to an existing dashboard" cases.
- */
-export async function createDashboardWithLibraryPanel(
-  { dashboard }: Pick<LensPageObjects, 'dashboard'>,
-  dashboardTitle: string,
-  panelTitle: string
-): Promise<void> {
-  await dashboard.openNewDashboard();
-  await dashboard.addPanelFromLibrary(panelTitle);
-  await dashboard.saveDashboard(dashboardTitle);
 }
