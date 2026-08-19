@@ -55,11 +55,13 @@ dependsOn:
   - '@kbn/index-management-shared-types'
   - '@kbn/code-editor'
   - '@kbn/ui-callout'
+  - '@kbn/logging-mocks'
+  - '@kbn/agent-builder-common'
+  - '@kbn/agent-builder-browser'
   - '@kbn/content-list'
   - '@kbn/content-list-provider'
   - '@kbn/content-list-provider-client'
   - '@kbn/content-management-table-list-view-common'
-  - '@kbn/logging-mocks'
 tags:
   - plugin
   - prod
