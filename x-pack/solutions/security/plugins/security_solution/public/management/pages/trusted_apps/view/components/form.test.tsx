@@ -417,7 +417,7 @@ describe('Trusted apps form', () => {
           ],
         };
         formProps.item = { ...formProps.item, ...propsItem };
-        render();
+        rerender();
 
         expect(getCondition(1).textContent).toContain(INPUT_ERRORS.pathWarning(1));
         expect(getCondition(0).textContent).not.toContain(INPUT_ERRORS.pathWarning(1));
@@ -431,7 +431,7 @@ describe('Trusted apps form', () => {
           entries: [createEntry(ConditionEntryField.PATH, 'match', '\tC:\\Windows\\notepad.exe')],
         };
         formProps.item = { ...formProps.item, ...propsItem };
-        render();
+        rerender();
 
         expect(screen.getByText(INPUT_ERRORS.leadingTrailingWhitespace(0))).not.toBeNull();
         // The value is otherwise a perfectly good path - do not confuse the user with a path warning
@@ -444,7 +444,7 @@ describe('Trusted apps form', () => {
           entries: [createEntry(ConditionEntryField.PATH, 'match', '/usr/bin/ssh  ')],
         };
         formProps.item = { ...formProps.item, ...propsItem };
-        render();
+        rerender();
 
         expect(screen.getByText(INPUT_ERRORS.leadingTrailingWhitespace(0))).not.toBeNull();
       });
@@ -456,7 +456,7 @@ describe('Trusted apps form', () => {
           entries: [createEntry(ConditionEntryField.PATH, 'match', 'C:\\Windows\\note\tpad.exe')],
         };
         formProps.item = { ...formProps.item, ...propsItem };
-        render();
+        rerender();
 
         expect(screen.getByText(INPUT_ERRORS.controlCharacters(0))).not.toBeNull();
         expect(formProps.onChange).not.toHaveBeenCalledWith(
@@ -464,15 +464,13 @@ describe('Trusted apps form', () => {
         );
       });
 
-      it('should trim leading/trailing whitespace on blur and tell the user it did so', () => {
+      it('should trim leading/trailing whitespace on blur', () => {
         const propsItem: Partial<ArtifactFormComponentProps['item']> = {
           os_types: [OperatingSystem.LINUX],
           entries: [createEntry(ConditionEntryField.PATH, 'match', ' /usr/bin/ssh ')],
         };
         formProps.item = { ...formProps.item, ...propsItem };
-        render();
-
-        expect(renderResult.queryByTestId(`${formPrefix}-whitespaceTrimmedCallout`)).toBeNull();
+        rerender();
 
         act(() => {
           fireEvent.blur(getConditionValue(getCondition()));
@@ -483,7 +481,6 @@ describe('Trusted apps form', () => {
         );
 
         rerenderWithLatestProps();
-        expect(renderResult.getByTestId(`${formPrefix}-whitespaceTrimmedCallout`)).not.toBeNull();
         expect(screen.queryByText(INPUT_ERRORS.leadingTrailingWhitespace(0))).toBeNull();
       });
 
@@ -493,13 +490,12 @@ describe('Trusted apps form', () => {
           entries: [createEntry(ConditionEntryField.PATH, 'match', '   ')],
         };
         formProps.item = { ...formProps.item, ...propsItem };
-        render();
+        rerender();
 
         act(() => {
           fireEvent.blur(getConditionValue(getCondition()));
         });
 
-        expect(renderResult.queryByTestId(`${formPrefix}-whitespaceTrimmedCallout`)).toBeNull();
         expect(screen.getByText(INPUT_ERRORS.mustHaveValue(0))).not.toBeNull();
       });
     });

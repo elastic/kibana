@@ -18,14 +18,14 @@ export const FILEPATH_WARNING = i18n.translate('utils.filename.pathWarning', {
 export const LEADING_TRAILING_WHITESPACE_WARNING = i18n.translate(
   'utils.invisibleCharacters.whitespaceWarning',
   {
-    defaultMessage: `Value starts or ends with whitespace. Whitespace is invisible here but is part of the value, so this entry will never match. It will be removed automatically.`,
+    defaultMessage: `Leading or trailing whitespace prevents matching and will be removed automatically.`,
   }
 );
 
 export const CONTROL_CHARACTERS_ERROR = i18n.translate(
   'utils.invisibleCharacters.controlCharactersError',
   {
-    defaultMessage: `Value contains invisible control characters (for example a tab or a line break). An entry containing them can never match; remove them and re-enter the value.`,
+    defaultMessage: `Control characters prevent matching. Remove them and re-enter the value.`,
   }
 );
 

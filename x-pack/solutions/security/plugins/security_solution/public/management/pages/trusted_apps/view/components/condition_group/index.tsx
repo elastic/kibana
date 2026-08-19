@@ -94,6 +94,9 @@ export const ConditionGroup = memo<ConditionGroupProps>(
                 key={index}
                 os={os}
                 entry={entry}
+                disabledFields={entries
+                  .filter((otherEntry) => otherEntry !== entry)
+                  .map((otherEntry) => otherEntry.field)}
                 validation={entryValidations?.[index]}
                 showLabels={index === 0}
                 isRemoveDisabled={index === 0 && entries.length <= 1}

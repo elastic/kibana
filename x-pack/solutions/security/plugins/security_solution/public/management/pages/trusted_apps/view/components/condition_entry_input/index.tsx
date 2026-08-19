@@ -61,11 +61,15 @@ export interface ConditionEntryValidation {
   isInvalid: boolean;
   errors: React.ReactNode[];
   warnings: React.ReactNode[];
+  /** Whether this validation should wait until the input is visited before displaying. */
+  showOnVisited?: boolean;
 }
 
 export interface ConditionEntryInputProps {
   os: OperatingSystem;
   entry: TrustedAppConditionEntry;
+  /** Fields already used by other entries in this AND group. */
+  disabledFields?: ConditionEntryField[];
   /** Validation state for this entry, rendered against the value input */
   validation?: ConditionEntryValidation;
   /** controls if remove button is enabled/disabled */
@@ -98,7 +102,9 @@ const InputGroup = styled.div`
 
 const InputItem = styled.div<{ gridArea: string }>`
   grid-area: ${({ gridArea }) => gridArea};
-  align-self: center;
+  /* Keep the controls aligned with the top of the value field when its validation message expands
+   * the row. Centering each cell makes Field and Operator move down relative to Value. */
+  align-self: start;
   margin-right: ${(props) => props.theme.euiTheme.size.s};
   vertical-align: baseline;
 `;
@@ -115,6 +121,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
   ({
     os,
     entry,
+    disabledFields = [],
     validation,
     showLabels = false,
     onRemove,
@@ -150,6 +157,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.HASH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.HASH],
           value: ConditionEntryField.HASH,
+          disabled: disabledFields.includes(ConditionEntryField.HASH),
           'data-test-subj': getTestId(
             `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.HASH]}`
           ),
@@ -158,6 +166,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           dropdownDisplay: getDropdownDisplay(ConditionEntryField.PATH),
           inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.PATH],
           value: ConditionEntryField.PATH,
+          disabled: disabledFields.includes(ConditionEntryField.PATH),
           'data-test-subj': getTestId(
             `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.PATH]}`
           ),
@@ -168,6 +177,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER),
                 inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER],
                 value: ConditionEntryField.SIGNER,
+                disabled: disabledFields.includes(ConditionEntryField.SIGNER),
                 'data-test-subj': getTestId(
                   `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER]}`
                 ),
@@ -180,6 +190,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
                 dropdownDisplay: getDropdownDisplay(ConditionEntryField.SIGNER_MAC),
                 inputDisplay: CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER_MAC],
                 value: ConditionEntryField.SIGNER_MAC,
+                disabled: disabledFields.includes(ConditionEntryField.SIGNER_MAC),
                 'data-test-subj': getTestId(
                   `field-type-${CONDITION_FIELD_TITLE[ConditionEntryField.SIGNER_MAC]}`
                 ),
@@ -187,7 +198,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
             ]
           : []),
       ];
-    }, [getTestId, os]);
+    }, [disabledFields, getTestId, os]);
 
     const handleValueUpdate = useCallback<ChangeEventHandler<HTMLInputElement>>(
       (ev) => onChange({ ...entry, value: ev.target.value }, entry),
@@ -232,6 +243,7 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
       () => [...(validation?.errors ?? []), ...(validation?.warnings ?? [])],
       [validation]
     );
+    const showValidation = !validation?.showOnVisited || isVisited;
 
     return (
       <InputGroup data-test-subj={dataTestSubj}>
@@ -270,8 +282,8 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
           <ConditionEntryCell
             showLabel={showLabels}
             label={ENTRY_PROPERTY_TITLES.value}
-            isInvalid={!!validation?.isInvalid}
-            error={valueValidationMessages}
+            isInvalid={!!validation?.isInvalid && showValidation}
+            error={showValidation ? valueValidationMessages : undefined}
           >
             <EuiFieldText
               name="value"
@@ -283,7 +295,9 @@ export const ConditionEntryInput = memo<ConditionEntryInputProps>(
               })}
               fullWidth
               required={isVisited}
-              isInvalid={!!validation?.isInvalid && valueValidationMessages.length > 0}
+              isInvalid={
+                !!validation?.isInvalid && showValidation && valueValidationMessages.length > 0
+              }
               onChange={handleValueUpdate}
               onBlur={handleValueOnBlur}
               data-test-subj={getTestId('value')}

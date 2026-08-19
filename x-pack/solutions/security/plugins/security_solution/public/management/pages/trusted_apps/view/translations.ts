@@ -237,7 +237,6 @@ export const INPUT_ERRORS = {
 export const WHITESPACE_TRIMMED_NOTICE = i18n.translate(
   'xpack.securitySolution.trustedapps.create.whitespaceTrimmedNotice',
   {
-    defaultMessage:
-      'Leading or trailing whitespace was removed from a condition value. Whitespace is invisible in this form but is part of the value, and would have stopped the entry from matching.',
+    defaultMessage: 'Leading or trailing whitespace was removed; it prevents matching.',
   }
 );

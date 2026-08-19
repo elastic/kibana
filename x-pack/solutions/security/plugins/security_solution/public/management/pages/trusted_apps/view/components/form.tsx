@@ -10,7 +10,6 @@ import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import type { EuiFieldTextProps, EuiSuperSelectOption } from '@elastic/eui';
 import {
-  EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -83,7 +82,6 @@ import {
   SELECT_OS_LABEL,
   USING_ADVANCED_MODE,
   USING_ADVANCED_MODE_DESCRIPTION,
-  WHITESPACE_TRIMMED_NOTICE,
   TRUSTED_APPS_PROCESS_DESCENDANTS,
   TRUSTED_APPLICATIONS,
   TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS,
@@ -149,6 +147,8 @@ export interface EntryValidationState {
   isInvalid: boolean;
   errors: React.ReactNode[];
   warnings: React.ReactNode[];
+  /** Empty values are only reported after their input has been visited. */
+  showOnVisited?: boolean;
 }
 
 const addResultToValidation = (
@@ -187,18 +187,21 @@ const addEntryResultToValidation = (
   validation: ValidationResult,
   index: number,
   type: 'warnings' | 'errors',
-  resultValue: React.ReactNode
+  resultValue: React.ReactNode,
+  showOnVisited = false
 ) => {
   if (!validation.entryValidations[index]) {
     validation.entryValidations[index] = {
       isInvalid: false,
       errors: [],
       warnings: [],
+      showOnVisited: false,
     };
   }
 
   validation.entryValidations[index][type].push(resultValue);
   validation.entryValidations[index].isInvalid = true;
+  validation.entryValidations[index].showOnVisited ||= showOnVisited;
 
   if (!validation.result.entries) {
     validation.result.entries = {
@@ -297,7 +300,13 @@ export const validateValues = (values: ArtifactFormComponentProps['item']): Vali
 
       if (!entry.field || !entryValue.trim()) {
         isValid = false;
-        addEntryResultToValidation(validation, index, 'errors', INPUT_ERRORS.mustHaveValue(index));
+        addEntryResultToValidation(
+          validation,
+          index,
+          'errors',
+          INPUT_ERRORS.mustHaveValue(index),
+          true
+        );
       } else if (invisibleCharacterIssue === InvisibleCharacterIssue.CONTROL_CHARACTERS) {
         // Not auto-fixable, and an entry containing control characters can never match - hard error.
         isValid = false;
@@ -386,8 +395,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       }>
     >({});
     const [hasFormChanged, setHasFormChanged] = useState(false);
-    /** Set once a condition value has had invisible leading/trailing whitespace stripped for the user */
-    const [wasWhitespaceTrimmed, setWasWhitespaceTrimmed] = useState(false);
     const showAssignmentSection = useCanAssignArtifactPerPolicy(item, mode, hasFormChanged);
     const isFormAdvancedMode: boolean = useMemo(() => isAdvancedModeEnabled(item), [item]);
     const { getTagsUpdatedBy, getMultipleTagsUpdatedBy } = useGetUpdatedTags(item);
@@ -657,10 +664,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [item, processChanged]
     );
 
-    const handleEntryValueTrimmed = useCallback(() => {
-      setWasWhitespaceTrimmed(true);
-    }, []);
-
     const handleEntryRemove = useCallback(
       (entry: NewTrustedApp['entries'][0]) => {
         const nextItem: ArtifactFormComponentProps['item'] = {
@@ -895,15 +898,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         </EuiTitle>
         <EuiSpacer size="xs" />
         {mode === 'create' && (
-          <EuiText size="s" data-test-subj={getTestId('about')}>
+          <EuiText component="div" size="s" data-test-subj={getTestId('about')}>
+            <p>{DETAILS_HEADER_DESCRIPTION}</p>
+            <EuiSpacer size="m" />
             <p>
-              {DETAILS_HEADER_DESCRIPTION}
-              {
-                <>
-                  <EuiSpacer size="m" />
-                  <TrustedAppsArtifactsDocsLink />
-                </>
-              }
+              <TrustedAppsArtifactsDocsLink />
             </p>
           </EuiText>
         )}
@@ -1016,19 +1015,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           isProcessDescendantsFeatureForTrustedAppsEnabled &&
           filterTypeSubsection}
 
-        {wasWhitespaceTrimmed && (
-          <>
-            <EuiCallOut
-              size="s"
-              iconType="info"
-              color="primary"
-              data-test-subj={getTestId('whitespaceTrimmedCallout')}
-              title={WHITESPACE_TRIMMED_NOTICE}
-            />
-            <EuiSpacer size="s" />
-          </>
-        )}
-
         <EuiFormRow
           fullWidth
           data-test-subj={getTestId('conditionsRow')}
@@ -1046,12 +1032,15 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           ) : (
             <LogicalConditionBuilder
               entries={trustedApp.entries as NewTrustedApp['entries']}
-              entryValidations={validationResult.entryValidations}
+              entryValidations={validationResult.entryValidations.map((entryValidation) =>
+                entryValidation?.showOnVisited && visited.entries
+                  ? { ...entryValidation, showOnVisited: false }
+                  : entryValidation
+              )}
               os={selectedOs}
               onAndClicked={handleAndClick}
               onEntryRemove={handleEntryRemove}
               onEntryChange={handleEntryChange}
-              onEntryValueTrimmed={handleEntryValueTrimmed}
               onVisited={handleConditionBuilderOnVisited}
               data-test-subj={getTestId('conditionsBuilder')}
             />
