@@ -89,7 +89,7 @@ export interface ComputedFeatureGenerationResult {
   errors: Array<{ feature: string; error: string }>;
 }
 
-export const DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS = 30_000;
+export const DEFAULT_COMPUTED_FEATURES_TIMEOUT_MS = 60_000;
 
 /** `signal` is absent here — it is built from `requestSignal` and `timeoutMs`. */
 export interface GenerateAllComputedFeaturesOptions
@@ -130,13 +130,7 @@ export async function generateAllComputedFeatures({
     if (result.status === 'rejected') {
       const message =
         result.reason instanceof Error ? result.reason.message : String(result.reason);
-      if (signal.aborted) {
-        const cause =
-          signal.reason instanceof Error ? signal.reason.message : 'timeout or request cancelled';
-        options.logger.warn(`Computed feature generator "${generator.type}" cancelled (${cause})`);
-      } else {
-        options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
-      }
+      options.logger.warn(`Computed feature generator "${generator.type}" failed: ${message}`);
       errors.push({ feature: generator.type, error: message });
     } else if (result.value !== undefined) {
       features.push(toComputedFeature(generator, result.value, options.stream.name));

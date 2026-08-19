@@ -80,9 +80,8 @@ describe('generateAllComputedFeatures', () => {
     expect(seen[0].aborted).toBe(true);
   });
 
-  it('logs cancelled for every generator when the shared signal is already aborted', async () => {
-    const timeoutError = new DOMException('signal timed out', 'TimeoutError');
-    const aborted = AbortSignal.abort(timeoutError);
+  it('logs all generators as failed when the shared signal is already aborted', async () => {
+    const aborted = AbortSignal.abort(new DOMException('signal timed out', 'TimeoutError'));
 
     [
       datasetAnalysisGenerator,
@@ -101,7 +100,7 @@ describe('generateAllComputedFeatures', () => {
       generateAllComputedFeatures({ ...options, requestSignal: aborted })
     ).rejects.toThrow('All computed feature generators failed');
 
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/"[^"]+" cancelled/));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/"[^"]+" failed:/));
   });
 
   it('returns empty without throwing when all generators skip and none fail', async () => {

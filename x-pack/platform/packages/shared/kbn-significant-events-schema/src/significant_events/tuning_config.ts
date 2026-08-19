@@ -64,7 +64,7 @@ export const DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG: SignificantEventsTuningCo
   rrf_rank_constant: 20,
   sampling_timeout_ms: 60_000,
   query_validation_timeout_ms: 10_000,
-  computed_features_timeout_ms: 30_000,
+  computed_features_timeout_ms: 60_000,
 };
 
 /**
