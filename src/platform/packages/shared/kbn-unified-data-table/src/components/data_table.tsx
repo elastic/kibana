@@ -1761,7 +1761,6 @@ const componentStyles = {
         },
       '.euiDataGridRowCell.euiDataGridRowCell--controlColumn[data-gridcell-column-id="colorIndicator"] .euiDataGridRowCell__content':
         {
-          height: '100%',
           borderBottom: 0,
         },
       '.euiDataGrid__scrollOverlay .euiDataGrid__scrollBarOverlayRight': {
