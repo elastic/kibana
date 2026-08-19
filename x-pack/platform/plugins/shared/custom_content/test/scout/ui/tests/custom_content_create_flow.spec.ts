@@ -10,9 +10,6 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 /**
- * Requires the custom_content feature flag. Start the server with:
- *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet custom_content
- *
  * Provides dashboards + data views so the analytics no-data page is skipped.
  */
 const DASHBOARD_ARCHIVE =
@@ -35,7 +32,10 @@ const dashboardRole: KibanaRole = {
 };
 
 test.describe('Custom content panel create flow', { tag: [...tags.stateful.classic] }, () => {
-  test.beforeAll(async ({ kbnClient }) => {
+  test.beforeAll(async ({ kbnClient, apiServices }) => {
+    await apiServices.core.settings({
+      'feature_flags.overrides': { 'dashboard.customContent.enabled': true },
+    });
     await kbnClient.importExport.load(DASHBOARD_ARCHIVE);
   });
 
@@ -44,8 +44,9 @@ test.describe('Custom content panel create flow', { tag: [...tags.stateful.class
     await pageObjects.dashboard.openNewDashboard();
   });
 
-  test.afterAll(async ({ kbnClient }) => {
+  test.afterAll(async ({ kbnClient, apiServices }) => {
     await kbnClient.importExport.unload(DASHBOARD_ARCHIVE);
+    await apiServices.core.settings({ 'feature_flags.overrides': {} });
   });
 
   test('saves template and ES|QL query and renders HTML in the panel', async ({ pageObjects }) => {
