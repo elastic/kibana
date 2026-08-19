@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { log, timerange } from '@kbn/synthtrace-client';
 
+import type { CheckAndLoadIntegrationResponse } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import { PACKAGES, buildDataStreamName, cleanUpAll, indexLogs } from '../../common';
 
@@ -31,15 +32,6 @@ const REGULAR_DATA_STREAM = buildDataStreamName({ dataset: REGULAR_DATASET });
 const NGINX_DATA_STREAM = buildDataStreamName({ dataset: NGINX_DATASET });
 const APM_APP_DATA_STREAM = buildDataStreamName({ dataset: APM_APP_DATASET });
 
-interface IntegrationCheckBody {
-  isIntegration: boolean;
-  areAssetsAvailable: boolean;
-  integration?: {
-    name: string;
-    datasets?: Record<string, string>;
-  };
-}
-
 const generateLogsForDataset = (dataset: string) =>
   timerange(START, END)
     .interval('1m')
@@ -51,6 +43,18 @@ const generateLogsForDataset = (dataset: string) =>
         'host.name': 'synth-host',
       })
     );
+
+/**
+ * Narrows the response to the installed-integration branch of the union, the only one
+ * carrying `integration`. Throws if the response is the other shape.
+ */
+function assertIsIntegration(
+  body: CheckAndLoadIntegrationResponse
+): asserts body is Extract<CheckAndLoadIntegrationResponse, { isIntegration: true }> {
+  if (!body.isIntegration) {
+    throw new Error('Expected the response to describe an installed integration');
+  }
+}
 
 apiTest.describe(
   'Dataset quality - check and load integration',
@@ -87,7 +91,7 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const body = response.body as IntegrationCheckBody;
+        const body: CheckAndLoadIntegrationResponse = response.body;
         expect(body.isIntegration).toBe(false);
         expect(body.areAssetsAvailable).toBe(false);
       }
@@ -104,11 +108,13 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const body = response.body as IntegrationCheckBody;
+        const body: CheckAndLoadIntegrationResponse = response.body;
         expect(body.isIntegration).toBe(true);
         expect(body.areAssetsAvailable).toBe(true);
-        expect(body.integration?.name).toBe(PACKAGES.nginx.name);
-        expect(typeof body.integration?.datasets?.[NGINX_DATASET]).toBe('string');
+
+        assertIsIntegration(body);
+        expect(body.integration.name).toBe(PACKAGES.nginx.name);
+        expect(typeof body.integration.datasets?.[NGINX_DATASET]).toBe('string');
       }
     );
 
@@ -123,7 +129,7 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const body = response.body as IntegrationCheckBody;
+        const body: CheckAndLoadIntegrationResponse = response.body;
         expect(body.isIntegration).toBe(false);
         expect(body.areAssetsAvailable).toBe(true);
       }

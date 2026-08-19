@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import type { DataStreamDocsStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   buildDataStreamName,
@@ -46,11 +47,6 @@ const INGEST_TO = '2025-05-19T18:01:00.000Z';
  */
 const QUERY_START = '2025-05-19T18:00:00.000Z';
 const QUERY_END = '2100-01-01T00:00:00.000Z';
-
-interface FailedDocsStat {
-  dataset: string;
-  count: number;
-}
 
 const failedDocsUrl = (): string =>
   `${testData.API.FAILED_DOCS}?${new URLSearchParams({
@@ -126,7 +122,7 @@ apiTest.describe(
                 headers: adminHeaders,
                 responseType: 'json',
               });
-              return response.body.failedDocs as FailedDocsStat[];
+              return response.body.failedDocs as DataStreamDocsStat[];
             },
             { timeout: 60_000, intervals: [2_000] }
           )

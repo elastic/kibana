@@ -9,31 +9,33 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import rison from '@kbn/rison';
 
+import type { DatasetTypesPrivileges } from '../../../../common/api_types';
+import type { DataStreamType } from '../../../../common/types/dataset_types';
 import { apiTest, testData } from '../fixtures';
 import { noAccessRole } from '../../common';
 
 const SUITE_TAG = [...tags.stateful.classic, ...tags.serverless.observability.complete];
 
-type DatasetType = 'logs' | 'metrics' | 'traces' | 'synthetics';
-
-const typesPrivilegesUrl = (types: DatasetType[]) =>
+const typesPrivilegesUrl = (types: DataStreamType[]) =>
   `${testData.API.TYPES_PRIVILEGES}?${new URLSearchParams({
     types: rison.encodeArray(types),
   }).toString()}`;
 
-const NO_PRIVILEGES = {
+type TypePrivileges = DatasetTypesPrivileges[string];
+
+const NO_PRIVILEGES: TypePrivileges = {
   canRead: false,
   canMonitor: false,
   canReadFailureStore: false,
   canManageFailureStore: false,
-} as const;
+};
 
-const FULL_PRIVILEGES = {
+const FULL_PRIVILEGES: TypePrivileges = {
   canRead: true,
   canMonitor: true,
   canReadFailureStore: true,
   canManageFailureStore: true,
-} as const;
+};
 
 apiTest.describe('Dataset quality - types privileges', { tag: SUITE_TAG }, () => {
   apiTest('returns no privileges with a single type', async ({ apiClient, samlAuth }) => {

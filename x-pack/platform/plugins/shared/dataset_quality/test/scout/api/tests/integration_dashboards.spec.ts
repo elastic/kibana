@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { v4 as uuid } from 'uuid';
 
-import type { Dashboard } from '../../../../common/api_types';
+import type { Dashboard, IntegrationDashboardsResponse } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import { PACKAGES, cleanUpAll } from '../../common';
 
@@ -67,7 +67,7 @@ apiTest.describe(
       );
 
       expect(response).toHaveStatusCode(200);
-      const { dashboards } = response.body as { dashboards: Dashboard[] };
+      const { dashboards }: IntegrationDashboardsResponse = response.body;
       expect(dashboards.length).toBeGreaterThan(0);
     });
 
@@ -85,7 +85,7 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { dashboards } = response.body as { dashboards: Dashboard[] };
+        const { dashboards }: IntegrationDashboardsResponse = response.body;
 
         // Exact count: the apache package is installed at a pinned version, so the set
         // of dashboards it ships cannot drift underneath this assertion.
@@ -112,7 +112,7 @@ apiTest.describe(
         );
 
         expect(response).toHaveStatusCode(200);
-        const { dashboards } = response.body as { dashboards: Dashboard[] };
+        const { dashboards }: IntegrationDashboardsResponse = response.body;
 
         // Whole-array equality: nginx is installed at a pinned version, so extra or
         // missing dashboards mean the route is wrong, not that the package changed.

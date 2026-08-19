@@ -9,7 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { v4 as uuid } from 'uuid';
 
-import type { IntegrationType } from '../../../../common/api_types';
+import type { IntegrationType, IntegrationsResponse } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import { cleanUpAll } from '../../common';
 
@@ -56,9 +56,8 @@ apiTest.describe(
         responseType: 'json',
       });
       expect(response).toHaveStatusCode(200);
-      preExistingIntegrationNames = getIntegrationNames(
-        (response.body as { integrations: IntegrationType[] }).integrations
-      );
+      const { integrations }: IntegrationsResponse = response.body;
+      preExistingIntegrationNames = getIntegrationNames(integrations);
 
       await Promise.all(
         REGISTRY_PACKAGES.map(async (name) => {
@@ -103,7 +102,7 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const { integrations } = response.body as { integrations: IntegrationType[] };
+        const { integrations }: IntegrationsResponse = response.body;
 
         // Union, not concatenation: a deployment may ship `system` or `synthetics`
         // pre-installed, in which case it is already in `preExistingIntegrationNames`
@@ -136,7 +135,7 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(200);
-        const { integrations } = response.body as { integrations: IntegrationType[] };
+        const { integrations }: IntegrationsResponse = response.body;
 
         const customIntegration = integrations.find(({ name }) => name === CUSTOM_INTEGRATION_NAME);
 

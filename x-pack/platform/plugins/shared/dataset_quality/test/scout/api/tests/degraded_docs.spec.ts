@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/api';
 import rison from '@kbn/rison';
 import { log, timerange } from '@kbn/synthtrace-client';
 
+import type { DataStreamDocsStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   MORE_THAN_1024_CHARS,
@@ -31,11 +32,6 @@ const DEGRADED_DOCS_URL = `${testData.API.DEGRADED_DOCS}?${new URLSearchParams({
   start: START,
   end: END,
 }).toString()}`;
-
-interface DocsStat {
-  dataset: string;
-  count: number;
-}
 
 apiTest.describe(
   'Dataset quality - degraded docs',
@@ -87,7 +83,7 @@ apiTest.describe(
       // Only the dataset that produced an ignored field is reported.
       expect(response.body.degradedDocs).toHaveLength(1);
 
-      const statsByDataset = (response.body.degradedDocs as DocsStat[]).reduce(
+      const statsByDataset = (response.body.degradedDocs as DataStreamDocsStat[]).reduce(
         (acc, { dataset, count }) => ({ ...acc, [dataset]: { count } }),
         {} as Record<string, { count: number }>
       );

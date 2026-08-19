@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { log, timerange } from '@kbn/synthtrace-client';
 
+import type { UpdateFieldLimitResponse } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   cleanUpAll,
@@ -33,14 +34,6 @@ const CUSTOM_COMPONENT_TEMPLATE_NAME = `${LOGS_TYPE}-${INTEGRATION_DATASET}@cust
 const NEW_FIELD_LIMIT = 50;
 /** `logs@settings` ships this as the default `total_fields.limit`. */
 const DEFAULT_FIELD_LIMIT = '1000';
-
-interface UpdateFieldLimitBody {
-  isComponentTemplateUpdated?: boolean;
-  isLatestBackingIndexUpdated?: boolean;
-  customComponentTemplateName?: string;
-  error?: string;
-  message?: string;
-}
 
 apiTest.describe(
   'Dataset quality - update field limit',
@@ -96,7 +89,8 @@ apiTest.describe(
         });
 
         expect(response).toHaveStatusCode(400);
-        const body = response.body as UpdateFieldLimitBody;
+        // The 400 path returns Kibana's error envelope, not `UpdateFieldLimitResponse`.
+        const body = response.body as { message: string };
         expect(body.message).toBe(
           `Data stream does not exists. Received value "${INVALID_DATA_STREAM}"`
         );
@@ -131,7 +125,7 @@ apiTest.describe(
           );
 
           expect(response).toHaveStatusCode(200);
-          const body = response.body as UpdateFieldLimitBody;
+          const body: UpdateFieldLimitResponse = response.body;
           expect(body.isComponentTemplateUpdated).toBe(true);
           expect(body.isLatestBackingIndexUpdated).toBe(true);
           expect(body.customComponentTemplateName).toBe(CUSTOM_COMPONENT_TEMPLATE_NAME);

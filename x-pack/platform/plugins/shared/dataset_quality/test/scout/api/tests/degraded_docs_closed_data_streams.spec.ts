@@ -10,6 +10,7 @@ import { expect } from '@kbn/scout/api';
 import rison from '@kbn/rison';
 import { log, timerange } from '@kbn/synthtrace-client';
 
+import type { DataStreamDocsStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   MORE_THAN_1024_CHARS,
@@ -35,11 +36,6 @@ const DEGRADED_DOCS_URL = `${testData.API.DEGRADED_DOCS}?${new URLSearchParams({
   end: END,
 }).toString()}`;
 
-interface DocsStat {
-  dataset: string;
-  count: number;
-}
-
 const degradedDocsFor = (dataset: string) =>
   timerange(START, END)
     .interval('1m')
@@ -54,7 +50,7 @@ const degradedDocsFor = (dataset: string) =>
         .defaults({ 'log.file.path': '/my-service.log' })
     );
 
-const toStatsByDataset = (docs: DocsStat[]): Record<string, { count: number }> =>
+const toStatsByDataset = (docs: DataStreamDocsStat[]): Record<string, { count: number }> =>
   docs.reduce(
     (acc, { dataset, count }) => ({ ...acc, [dataset]: { count } }),
     {} as Record<string, { count: number }>

@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { log, timerange } from '@kbn/synthtrace-client';
 
+import type { DataStreamDocsStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   LOGS_TYPE,
@@ -34,11 +35,6 @@ const TOTAL_DOCS_URL = `${testData.API.TOTAL_DOCS}?${new URLSearchParams({
   end: TO,
 }).toString()}`;
 
-interface DocsStat {
-  dataset: string;
-  count: number;
-}
-
 const docsFor = (dataset: string) =>
   timerange(FROM, TO)
     .interval('1m')
@@ -52,7 +48,7 @@ const docsFor = (dataset: string) =>
         .defaults({ 'log.file.path': '/my-service.log' })
     );
 
-const toStatsByDataset = (docs: DocsStat[]): Record<string, { count: number }> =>
+const toStatsByDataset = (docs: DataStreamDocsStat[]): Record<string, { count: number }> =>
   docs.reduce(
     (acc, { dataset, count }) => ({ ...acc, [dataset]: { count } }),
     {} as Record<string, { count: number }>

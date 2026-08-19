@@ -8,21 +8,13 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import type { DataStreamStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import { buildDataStreamName, deleteDataStreamIfExists, getLogsForDataset } from '../../common';
 
 const DATASET = 'dq.stats';
 const DATA_STREAM = buildDataStreamName({ dataset: DATASET });
 const INGEST_TO = '2023-11-20T15:01:00.000Z';
-
-interface DataStreamStat {
-  name: string;
-  integration?: string;
-  sizeBytes?: number;
-  lastActivity?: number;
-  totalDocs?: number;
-  creationDate?: number;
-}
 
 /**
  * Every request is scoped so the assertions below cannot be satisfied — or broken — by a
@@ -76,7 +68,7 @@ apiTest.describe(
               headers: adminHeaders,
               responseType: 'json',
             });
-            const stats = response.body.dataStreamsStats as DataStreamStat[];
+            const stats: DataStreamStat[] = response.body.dataStreamsStats;
             return stats.find(({ name }) => name === DATA_STREAM)?.sizeBytes;
           },
           { timeout: testData.METERING_CACHE_TIMEOUT_MS, intervals: [2_000] }
@@ -89,7 +81,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      const stats = response.body.dataStreamsStats as DataStreamStat[];
+      const stats: DataStreamStat[] = response.body.dataStreamsStats;
       expect(stats).toHaveLength(1);
 
       const [stat] = stats;
@@ -107,7 +99,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      const stats = response.body.dataStreamsStats as DataStreamStat[];
+      const stats: DataStreamStat[] = response.body.dataStreamsStats;
       expect(findThisDataset(stats).creationDate).toBeUndefined();
     });
 
@@ -118,7 +110,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      const stats = response.body.dataStreamsStats as DataStreamStat[];
+      const stats: DataStreamStat[] = response.body.dataStreamsStats;
       expect(findThisDataset(stats).creationDate).toBeGreaterThan(0);
     });
 

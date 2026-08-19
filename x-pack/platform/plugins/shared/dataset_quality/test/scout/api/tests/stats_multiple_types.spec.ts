@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import type { DataStreamStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   buildDataStreamName,
@@ -29,13 +30,6 @@ const SYNTHETICS_INDEX_TEMPLATE = 'dq-stats-synthetics';
 
 const INGEST_TO = '2023-11-20T15:01:00.000Z';
 const SYNTHETICS_TIMESTAMP = '2023-11-20T15:00:30.000Z';
-
-interface DataStreamStat {
-  name: string;
-  sizeBytes?: number;
-  lastActivity?: number;
-  totalDocs?: number;
-}
 
 const findStat = (stats: DataStreamStat[], name: string): DataStreamStat | undefined =>
   stats.find((stat) => stat.name === name);
@@ -101,7 +95,7 @@ apiTest.describe(
               headers: adminHeaders,
               responseType: 'json',
             });
-            const stats = response.body.dataStreamsStats as DataStreamStat[];
+            const stats: DataStreamStat[] = response.body.dataStreamsStats;
             return [
               findStat(stats, LOGS_DATA_STREAM)?.sizeBytes ?? 0,
               findStat(stats, SYNTHETICS_DATA_STREAM)?.sizeBytes ?? 0,
@@ -117,7 +111,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      const stats = response.body.dataStreamsStats as DataStreamStat[];
+      const stats: DataStreamStat[] = response.body.dataStreamsStats;
       expect(stats).toHaveLength(2);
 
       for (const name of [LOGS_DATA_STREAM, SYNTHETICS_DATA_STREAM]) {

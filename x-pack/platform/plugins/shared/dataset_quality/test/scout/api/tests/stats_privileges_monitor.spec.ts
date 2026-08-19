@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import type { DataStreamStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   buildDataStreamName,
@@ -27,13 +28,6 @@ import {
 const DATASETS = ['dq.priv.monitor.1', 'dq.priv.monitor.2'];
 const DATA_STREAMS = DATASETS.map((dataset) => buildDataStreamName({ dataset }));
 const INGEST_TO = '2023-11-20T15:01:00.000Z';
-
-interface DataStreamStat {
-  name: string;
-  sizeBytes?: number;
-  lastActivity?: number;
-  userPrivileges: { canMonitor: boolean };
-}
 
 apiTest.describe(
   'Dataset quality - data stream stats for a user with monitor privileges',

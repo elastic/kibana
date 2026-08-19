@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
+import type { DataStreamStat } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   addIntegrationToLogIndexTemplate,
@@ -22,14 +23,6 @@ const DATASET = 'dq.stats.cat';
 const DATA_STREAM = buildDataStreamName({ dataset: DATASET });
 const INTEGRATION = 'dq-custom-integration';
 const INGEST_TO = '2023-11-20T15:01:00.000Z';
-
-interface DataStreamStat {
-  name: string;
-  integration?: string;
-  sizeBytes?: number;
-  lastActivity?: number;
-  totalDocs?: number;
-}
 
 /**
  * Scoped so the assertions cannot be satisfied — or broken — by a data stream another
@@ -88,7 +81,7 @@ apiTest.describe(
               headers: adminHeaders,
               responseType: 'json',
             });
-            const stats = response.body.dataStreamsStats as DataStreamStat[];
+            const stats: DataStreamStat[] = response.body.dataStreamsStats;
             return stats.find(({ name }) => name === DATA_STREAM)?.sizeBytes;
           },
           { timeout: testData.METERING_CACHE_TIMEOUT_MS, intervals: [2_000] }
@@ -101,7 +94,7 @@ apiTest.describe(
       });
 
       expect(response).toHaveStatusCode(200);
-      const stats = response.body.dataStreamsStats as DataStreamStat[];
+      const stats: DataStreamStat[] = response.body.dataStreamsStats;
       expect(stats).toHaveLength(1);
 
       const [stat] = stats;

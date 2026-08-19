@@ -9,6 +9,7 @@ import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { log, timerange } from '@kbn/synthtrace-client';
 
+import type { DegradedField } from '../../../../common/api_types';
 import { apiTest, testData } from '../fixtures';
 import {
   MORE_THAN_1024_CHARS,
@@ -29,12 +30,6 @@ const DEGRADED_DATA_STREAM = buildDataStreamName({ dataset: DEGRADED_DATASET });
 
 const SERVICE_NAME = 'my-service';
 const HOST_NAME = 'synth-host';
-
-interface DegradedFieldStat {
-  name: string;
-  timeSeries: Array<{ x: number; y: number }>;
-  indexFieldWasLastPresentIn?: string;
-}
 
 const degradedFieldsUrl = (dataStream: string) =>
   `${testData.API.degradedFields(dataStream)}?${new URLSearchParams({
@@ -115,9 +110,10 @@ apiTest.describe(
 
         expect(response).toHaveStatusCode(200);
         expect(response.body.degradedFields).toHaveLength(2);
-        expect(
-          response.body.degradedFields.map(({ name }: DegradedFieldStat) => name)
-        ).toStrictEqual(['log.level', 'trace.id']);
+        expect(response.body.degradedFields.map(({ name }: DegradedField) => name)).toStrictEqual([
+          'log.level',
+          'trace.id',
+        ]);
       }
     );
 
@@ -134,7 +130,7 @@ apiTest.describe(
         expect(response).toHaveStatusCode(200);
 
         const logLevelTimeSeries = response.body.degradedFields.find(
-          ({ name }: DegradedFieldStat) => name === 'log.level'
+          ({ name }: DegradedField) => name === 'log.level'
         )?.timeSeries;
 
         // Every document of the dataset carries an over-long `log.level`, so the series
@@ -191,7 +187,7 @@ apiTest.describe(
         );
 
         const findLastPresentIn = (fieldName: string) =>
-          response.body.degradedFields.find(({ name }: DegradedFieldStat) => name === fieldName)
+          response.body.degradedFields.find(({ name }: DegradedField) => name === fieldName)
             ?.indexFieldWasLastPresentIn;
 
         expect(findLastPresentIn('log.level')).toBe(secondBackingIndex);
