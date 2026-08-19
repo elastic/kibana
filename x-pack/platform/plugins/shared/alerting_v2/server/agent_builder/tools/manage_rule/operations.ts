@@ -25,6 +25,8 @@ import {
   isSignalQueryBreachOnly,
   isRecoveryQueryConsistentWithStrategy,
   isRecoveryQueryProvidedForStrategy,
+  isNoDataQueryConsistentWithStrategy,
+  isNoDataQueryProvidedForStrategy,
 } from '@kbn/alerting-v2-schemas';
 import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import { AGENT_BUILDER_TAG } from '../../common/constants';
@@ -241,6 +243,17 @@ export const executeRuleOperations = async (
           throw new RuleOperationValidationError(
             'recovery_strategy "query" requires a recovery block in the query ' +
               '(recovery: { segment } for composed, recovery: { query } for standalone).'
+          );
+        }
+        if (!isNoDataQueryConsistentWithStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.'
+          );
+        }
+        if (!isNoDataQueryProvidedForStrategy(next)) {
+          throw new RuleOperationValidationError(
+            'no_data_strategy (other than "none") requires a no_data block in the query ' +
+              'for standalone-format rules.'
           );
         }
         break;
