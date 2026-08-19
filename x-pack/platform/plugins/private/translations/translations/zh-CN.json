@@ -21978,8 +21978,6 @@
     "xpack.fleet.awsConnectSetup.continueButton": "继续",
     "xpack.fleet.awsIdentityFederationSetup.createButton": "创建身份",
     "xpack.fleet.awsIdentityFederationSetup.existingIdentityTab": "现有身份",
-    "xpack.fleet.awsIdentityFederationSetup.externalIdLabel": "外部 ID",
-    "xpack.fleet.awsIdentityFederationSetup.externalIdRequired": "外部 ID 为必填项",
     "xpack.fleet.awsIdentityFederationSetup.launchCloudFormation": "启动 CloudFormation",
     "xpack.fleet.awsIdentityFederationSetup.newIdentityTab": "新身份",
     "xpack.fleet.awsIdentityFederationSetup.roleArnLabel": "角色 ARN",
