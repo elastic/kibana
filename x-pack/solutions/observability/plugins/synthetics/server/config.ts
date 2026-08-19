@@ -26,9 +26,9 @@ const uptimeConfig = schema.object({
   service: schema.maybe(serviceConfig),
   enabled: schema.boolean({ defaultValue: true }),
   // Operational kill-switch for the scalable private locations rebalance task.
-  // Defaults on; set to false to stop the task from scheduling/running (e.g.
+  // Defaults off; set to false to stop the task from scheduling/running (e.g.
   // during the feature-flagged rollout) without un-sharding any location.
-  rebalancePrivateLocationShardsTaskEnabled: schema.boolean({ defaultValue: true }),
+  rebalancePrivateLocationShardsTaskEnabled: schema.boolean({ defaultValue: false }),
 });
 
 export const config: PluginConfigDescriptor = {
