@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JsonValue } from '@kbn/utility-types';
 import { LRUCache } from 'lru-cache';
+import type { JsonValue } from '@kbn/utility-types';
 
 export type StepIoType = 'input' | 'output';
 
@@ -44,11 +44,11 @@ export class StepIoCache {
     this.lru.delete(`${type}_${id}`);
   }
 
-  get totalBytes(): number {
+  public get totalBytes(): number {
     return this.lru.calculatedSize;
   }
 
-  get size(): number {
+  public get size(): number {
     return this.lru.size;
   }
 }
