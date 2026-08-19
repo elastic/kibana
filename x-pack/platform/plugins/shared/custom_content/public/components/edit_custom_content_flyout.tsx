@@ -29,11 +29,8 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
-import { getServices } from '../services';
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { EsqlPreviewSection } from './esql_preview_section';
-import { buildCustomContentContextAttachment } from '../utils/chat_integration';
-import { CUSTOM_CONTENT_REFINE_SESSION_TAG } from '../../common/constants';
 
 export interface EditCustomContentFlyoutProps {
   embeddableId: string;
@@ -49,6 +46,7 @@ export interface EditCustomContentFlyoutProps {
   onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
   onClose: () => void;
   onRunPreview: (html: string) => void;
+  onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
 }
 
 export const EditCustomContentFlyout = ({
@@ -65,9 +63,9 @@ export const EditCustomContentFlyout = ({
   onSave,
   onClose,
   onRunPreview,
+  onGenerateWithChat,
 }: EditCustomContentFlyoutProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { agentBuilder } = getServices();
 
   const {
     draftEsqlQuery,
@@ -96,20 +94,8 @@ export const EditCustomContentFlyout = ({
   });
 
   const handleGenerateWithChat = useCallback(() => {
-    if (!agentBuilder) return;
-    agentBuilder.openChat({
-      attachments: [
-        buildCustomContentContextAttachment(
-          draftTemplate,
-          draftEsqlQuery || undefined,
-          embeddableId,
-          panelTitle
-        ),
-      ],
-      sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${embeddableId}`,
-    });
-    onClose();
-  }, [agentBuilder, draftTemplate, draftEsqlQuery, embeddableId, panelTitle, onClose]);
+    onGenerateWithChat?.(draftTemplate, draftEsqlQuery || undefined);
+  }, [onGenerateWithChat, draftTemplate, draftEsqlQuery]);
 
   const hasChanges = draftEsqlQuery !== (esqlQuery ?? '') || draftTemplate !== (template ?? '');
 

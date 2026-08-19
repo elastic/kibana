@@ -50,6 +50,7 @@ let capturedFlyoutProps:
   | {
       onSave: (esqlQuery: string | undefined, template: string | undefined) => void;
       onClose: () => void;
+      onGenerateWithChat?: (template: string, esqlQuery: string | undefined) => void;
     }
   | undefined;
 
@@ -279,6 +280,34 @@ describe('customContentEmbeddableFactory', () => {
       await act(async () => capturedFlyoutProps!.onClose());
 
       expect(removePanel).not.toHaveBeenCalled();
+    });
+
+    it('clicking "Generate with chat" from the flyout on a new panel does not remove it', async () => {
+      const openChat = jest.fn();
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$: new BehaviorSubject(null) },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+      const removePanel = jest.fn();
+      mockApiIsPresentationContainer.mockReturnValue(true);
+      const { embeddable } = await buildEmbeddable(baseState, { removePanel });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit({ isNewPanel: true }));
+      await waitFor(() =>
+        expect(screen.getByTestId('mockEditCustomContentFlyout')).toBeInTheDocument()
+      );
+
+      await act(async () => capturedFlyoutProps!.onGenerateWithChat?.('', undefined));
+
+      expect(removePanel).not.toHaveBeenCalled();
+      expect(openChat).toHaveBeenCalled();
+      await waitFor(() =>
+        expect(screen.queryByTestId('mockEditCustomContentFlyout')).not.toBeInTheDocument()
+      );
     });
   });
 

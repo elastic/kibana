@@ -298,18 +298,27 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
           storedReturnFocus = undefined;
         }, []);
 
-        const handleGenerateWithChat = useCallback(() => {
-          const { agentBuilder } = getServices();
-          if (!agentBuilder) return;
-          isFlyoutOpen$.next(false);
-          previewHtml$.next(null);
-          agentBuilder.openChat({
-            attachments: [
-              buildCustomContentContextAttachment('', undefined, uuid, panelTitle ?? undefined),
-            ],
-            sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
-          });
-        }, [panelTitle]);
+        const handleGenerateWithChat = useCallback(
+          (draftTemplate: string, draftEsqlQuery: string | undefined) => {
+            const { agentBuilder } = getServices();
+            if (!agentBuilder) return;
+            isNewPanel$.next(false);
+            isFlyoutOpen$.next(false);
+            previewHtml$.next(null);
+            agentBuilder.openChat({
+              attachments: [
+                buildCustomContentContextAttachment(
+                  draftTemplate,
+                  draftEsqlQuery,
+                  uuid,
+                  panelTitle ?? undefined
+                ),
+              ],
+              sessionTag: `${CUSTOM_CONTENT_REFINE_SESSION_TAG}-${uuid}`,
+            });
+          },
+          [panelTitle]
+        );
 
         const handleRunPreview = useCallback((html: string) => previewHtml$.next(html), []);
 
@@ -326,7 +335,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
               query={query}
               filters={filters}
               previewHtml={previewHtml}
-              onGenerateWithChat={handleGenerateWithChat}
+              onGenerateWithChat={() => handleGenerateWithChat('', undefined)}
             />
             {isFlyoutOpen && (
               <Suspense fallback={null}>
@@ -344,6 +353,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
                   onSave={handleFlyoutSave}
                   onClose={handleFlyoutClose}
                   onRunPreview={handleRunPreview}
+                  onGenerateWithChat={handleGenerateWithChat}
                 />
               </Suspense>
             )}
