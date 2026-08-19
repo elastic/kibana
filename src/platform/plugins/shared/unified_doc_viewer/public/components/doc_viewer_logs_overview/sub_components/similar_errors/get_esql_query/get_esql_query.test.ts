@@ -193,12 +193,13 @@ describe('getEsqlQuery', () => {
       const result = renderQuery(
         getEsqlQuery({
           serviceName: 'payment-service',
-          culprit: 'handlers\\windows\\run.cs',
+          culprit: String.raw`handlers\windows\run.cs`,
         })
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND ${fieldConstants.ERROR_CULPRIT_FIELD} == "handlers\\\\windows\\\\run.cs"`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND ${fieldConstants.ERROR_CULPRIT_FIELD} == "handlers\\windows\\run.cs"`
       );
     });
 
@@ -206,12 +207,13 @@ describe('getEsqlQuery', () => {
       const result = renderQuery(
         getEsqlQuery({
           serviceName: 'payment-service',
-          type: { fieldName: 'exception.type', value: 'System\\nRuntime' },
+          type: { fieldName: 'exception.type', value: String.raw`System\nRuntime` },
         })
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND exception.type == "System\\\\nRuntime"`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND exception.type == "System\\nRuntime"`
       );
     });
 
@@ -219,12 +221,16 @@ describe('getEsqlQuery', () => {
       const result = renderQuery(
         getEsqlQuery({
           serviceName: 'payment-service',
-          type: { fieldName: 'exception.type', value: ['C:\\temp\\run.cs', 'a\\tb'] },
+          type: {
+            fieldName: 'exception.type',
+            value: [String.raw`C:\temp\run.cs`, String.raw`a\tb`],
+          },
         })
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH(exception.type, "C:\\\\temp\\\\run.cs") AND MATCH(exception.type, "a\\\\tb")`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH(exception.type, "C:\\temp\\run.cs") AND MATCH(exception.type, "a\\tb")`
       );
     });
   });
@@ -252,7 +258,8 @@ describe('getEsqlQuery', () => {
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\\nLine 2")`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\nLine 2")`
       );
     });
 
@@ -265,7 +272,8 @@ describe('getEsqlQuery', () => {
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\\r\\nLine 2")`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\r\nLine 2")`
       );
     });
 
@@ -278,7 +286,8 @@ describe('getEsqlQuery', () => {
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Column1\\tColumn2")`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Column1\tColumn2")`
       );
     });
 
@@ -291,7 +300,8 @@ describe('getEsqlQuery', () => {
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\\rLine 2")`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Line 1\rLine 2")`
       );
     });
 
@@ -304,7 +314,8 @@ describe('getEsqlQuery', () => {
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Error: \\"Deadline Exceeded\\""`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "Error: \"Deadline Exceeded\""`
       );
     });
 
@@ -321,7 +332,8 @@ describe('getEsqlQuery', () => {
       );
 
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "failed to get product: querying products: pq: relation \\"products\\" does not exist"`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND message == "failed to get product: querying products: pq: relation \"products\" does not exist"`
       );
     });
 
@@ -338,7 +350,8 @@ describe('getEsqlQuery', () => {
 
       // Tabs are escaped to \t in MATCH_PHRASE string literal
       expect(result).toEqual(
-        `FROM index\n  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Error:\\n\\tstatus = \\"DEADLINE_EXCEEDED\\"\\n\\tdetails = \\"Deadline Exceeded\\"")`
+        String.raw`FROM index
+  | WHERE ${fieldConstants.SERVICE_NAME_FIELD} == "payment-service" AND MATCH_PHRASE(message, "Error:\n\tstatus = \"DEADLINE_EXCEEDED\"\n\tdetails = \"Deadline Exceeded\"")`
       );
     });
   });

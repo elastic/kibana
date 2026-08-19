@@ -67,15 +67,14 @@ describe('getEsqlQuery', () => {
     const result = render(
       getEsqlQuery({
         serviceName: 'orders-service',
-        spanName: 'C:\\temp\\new.cs',
+        spanName: String.raw`C:\temp\new.cs`,
         transactionName: undefined,
         transactionType: undefined,
       })
     );
 
-    expect(result).toEqual(
-      'FROM index\n  | WHERE service.name == "orders-service" AND span.name == "C:\\\\temp\\\\new.cs"'
-    );
+    expect(result).toEqual(String.raw`FROM index
+  | WHERE service.name == "orders-service" AND span.name == "C:\\temp\\new.cs"`);
   });
 
   it('returns empty query if everything is undefined', () => {

@@ -93,12 +93,13 @@ describe('span links where clauses', () => {
     it('preserves backslash-then-letter sequences without double-escaping', () => {
       const item = {
         spanId: 'span123',
-        traceId: 'trace\\n456',
+        traceId: String.raw`trace\n456`,
         details: undefined,
       } as unknown as SpanLinkDetails;
 
       expect(render(createTraceIdWhereClause(item))).toEqual(
-        'FROM apm-traces-*\n  | WHERE trace.id == "trace\\\\n456"'
+        String.raw`FROM apm-traces-*
+  | WHERE trace.id == "trace\\n456"`
       );
     });
   });

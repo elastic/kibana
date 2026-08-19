@@ -295,12 +295,12 @@ describe('getColumns', () => {
     it('preserves backslashes in the unprocessed OTel exception message without double-escaping', () => {
       const otelItem = {
         eventName: 'exception',
-        error: { exception: { message: 'failed at C:\\next\\run.cs' } },
+        error: { exception: { message: String.raw`failed at C:\next\run.cs` } },
       } as unknown as ErrorsByTraceId['traceErrors'][0];
 
       expect(renderWhereClause(otelItem, 'unprocessedOtel')).toBe(
-        `FROM apm-errors-*
-  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND event.name == "exception" AND exception.message == "failed at C:\\\\next\\\\run.cs"`
+        String.raw`FROM apm-errors-*
+  | WHERE trace.id == "trace-123" AND span.id == "span-456" AND event.name == "exception" AND exception.message == "failed at C:\\next\\run.cs"`
       );
     });
   });

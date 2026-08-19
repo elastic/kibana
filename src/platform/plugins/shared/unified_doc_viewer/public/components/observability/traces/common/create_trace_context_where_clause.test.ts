@@ -54,8 +54,11 @@ describe('createTraceContextWhereClause', () => {
   });
 
   it('preserves backslash-then-letter sequences in ids without double-escaping', () => {
-    const result = render(createTraceContextWhereClause({ traceId: 'a\\nb', spanId: 'c\\td' }));
-    expect(result).toEqual('FROM foo-*\n  | WHERE trace.id == "a\\\\nb" AND span.id == "c\\\\td"');
+    const result = render(
+      createTraceContextWhereClause({ traceId: String.raw`a\nb`, spanId: String.raw`c\td` })
+    );
+    expect(result).toEqual(String.raw`FROM foo-*
+  | WHERE trace.id == "a\\nb" AND span.id == "c\\td"`);
   });
 });
 
@@ -63,7 +66,8 @@ describe('createTraceContextWhereClauseForErrors', () => {
   it('returns a where AST node with traceId and error filters', () => {
     const result = render(createTraceContextWhereClauseForErrors({ traceId: 'abc123' }));
     expect(result).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
+      String.raw`FROM foo-*
+  | WHERE trace.id == "abc123" AND KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"exception\" OR event_name: \"error\" ")`
     );
   });
 
@@ -72,7 +76,8 @@ describe('createTraceContextWhereClauseForErrors', () => {
       createTraceContextWhereClauseForErrors({ traceId: 'abc123', spanId: 'span456' })
     );
     expect(result).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND span.id == "span456" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
+      String.raw`FROM foo-*
+  | WHERE trace.id == "abc123" AND span.id == "span456" AND KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"exception\" OR event_name: \"error\" ")`
     );
   });
 
@@ -81,7 +86,8 @@ describe('createTraceContextWhereClauseForErrors', () => {
       createTraceContextWhereClauseForErrors({ traceId: 'abc123', transactionId: 'txn789' })
     );
     expect(result).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
+      String.raw`FROM foo-*
+  | WHERE trace.id == "abc123" AND transaction.id == "txn789" AND KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"exception\" OR event_name: \"error\" ")`
     );
   });
 
@@ -94,7 +100,8 @@ describe('createTraceContextWhereClauseForErrors', () => {
       })
     );
     expect(result).toEqual(
-      'FROM foo-*\n  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456") AND KQL("processor.event: \\"error\\" OR error.log.level: \\"error\\" OR event_name: \\"exception\\" OR event_name: \\"error\\" ")'
+      String.raw`FROM foo-*
+  | WHERE trace.id == "abc123" AND (transaction.id == "txn789" OR span.id == "span456") AND KQL("processor.event: \"error\" OR error.log.level: \"error\" OR event_name: \"exception\" OR event_name: \"error\" ")`
     );
   });
 });

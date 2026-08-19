@@ -140,11 +140,13 @@ describe('useGetGenerateDiscoverLink', () => {
     const mockGetRedirectUrl = jest.fn(() => DISCOVER_URL);
     mockDiscoverLocator.getRedirectUrl = mockGetRedirectUrl;
 
-    result.current.generateDiscoverLink(esqlEquals('error.culprit', 'handlers\\windows\\run.cs'));
+    result.current.generateDiscoverLink(
+      esqlEquals('error.culprit', String.raw`handlers\windows\run.cs`)
+    );
 
     const esqlQuery = (mockGetRedirectUrl.mock.calls[0] as any)?.[0]?.query?.esql;
 
-    expect(esqlQuery).toBe(`FROM logs-*
-  | WHERE error.culprit == "handlers\\\\windows\\\\run.cs"`);
+    expect(esqlQuery).toBe(String.raw`FROM logs-*
+  | WHERE error.culprit == "handlers\\windows\\run.cs"`);
   });
 });

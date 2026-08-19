@@ -114,18 +114,22 @@ describe('appendWhereCommand', () => {
 
 describe('string literal escaping', () => {
   it('escapes a backslash exactly once when the literal is printed on its own', () => {
-    expect(LeafPrinter.string(esqlString('handlers\\run.cs'))).toBe('"handlers\\\\run.cs"');
+    expect(LeafPrinter.string(esqlString(String.raw`handlers\run.cs`))).toBe(
+      String.raw`"handlers\\run.cs"`
+    );
   });
 
   it('escapes a backslash exactly once', () => {
-    expect(render(esqlEquals('error.culprit', 'handlers\\windows\\run.cs'))).toBe(
-      'FROM logs-*\n  | WHERE error.culprit == "handlers\\\\windows\\\\run.cs"'
+    expect(render(esqlEquals('error.culprit', String.raw`handlers\windows\run.cs`))).toBe(
+      String.raw`FROM logs-*
+  | WHERE error.culprit == "handlers\\windows\\run.cs"`
     );
   });
 
   it('escapes backslashes inside IN lists exactly once', () => {
-    expect(render(esqlIn('trace.id', ['trace\\n1']))).toBe(
-      'FROM logs-*\n  | WHERE trace.id IN ("trace\\\\n1")'
+    expect(render(esqlIn('trace.id', [String.raw`trace\n1`]))).toBe(
+      String.raw`FROM logs-*
+  | WHERE trace.id IN ("trace\\n1")`
     );
   });
 });

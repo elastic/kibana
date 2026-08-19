@@ -93,12 +93,13 @@ describe('useDiscoverLinkAndEsqlQuery', () => {
     mockUseGetGenerateDiscoverLink.mockReturnValue({ generateDiscoverLink });
 
     const indexPattern = 'logs-*';
-    const whereClause = esqlEquals('error.culprit', 'handlers\\windows\\run.cs');
+    const whereClause = esqlEquals('error.culprit', String.raw`handlers\windows\run.cs`);
 
     const { result } = renderHook(() => useDiscoverLinkAndEsqlQuery({ indexPattern, whereClause }));
 
     expect(result.current.esqlQueryString).toBe(
-      'FROM logs-*\n  | WHERE error.culprit == "handlers\\\\windows\\\\run.cs"'
+      String.raw`FROM logs-*
+  | WHERE error.culprit == "handlers\\windows\\run.cs"`
     );
   });
 });
