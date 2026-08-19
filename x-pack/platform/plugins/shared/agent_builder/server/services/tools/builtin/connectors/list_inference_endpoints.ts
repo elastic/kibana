@@ -17,8 +17,7 @@ const schema = z.object({});
 /**
  * Creates the list_inference_endpoints tool.
  *
- * Lists available inference endpoints (AI connectors) by delegating to the inference plugin's
- * `getConnectorList(request)` start contract.
+ * Lists available inference endpoints (AI connectors)
  */
 export const createListInferenceEndpointsTool = ({
   getInference,
@@ -26,8 +25,7 @@ export const createListInferenceEndpointsTool = ({
   id: platformCoreTools.listInferenceEndpoints,
   type: ToolType.builtin,
   description: `
-    List available inference endpoints (AI connectors) with their IDs, names, and types.
-    Never guess an ID or select the first result — always ask the user to choose from this list.
+    List available inference endpoints (AI connectors/models) with their IDs, names, and types.
 `,
   schema,
   tags: ['connector', 'ai', 'inference'],
