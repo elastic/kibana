@@ -159,6 +159,11 @@ export const matrixCmd: Command<void> = {
       modelIds,
       branch,
       lookbackDays,
+      examplePrefixes: [
+        ...new Set(
+          config.columns.flatMap((column) => column.examplePrefixes ?? [])
+        ),
+      ],
     });
 
     if (aggregated.length === 0) {

@@ -7,12 +7,13 @@
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { EvaluationExperimentSummary } from '@kbn/evals-common';
+import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/evals-common';
 import type { EvalsClient, ExperimentStats } from '@kbn/evals';
 import {
   pickLatestExperimentPerModel,
   experimentStatsToDatasets,
   queryMatrixScores,
+  scoresByPrefixToDatasets,
 } from './query_matrix_scores';
 
 const experiment = (
@@ -225,5 +226,141 @@ describe('queryMatrixScores', () => {
 
     expect(getExperimentStats).not.toHaveBeenCalled();
     expect(result).toEqual([]);
+  });
+});
+
+describe('scoresByPrefixToDatasets', () => {
+  const score = (exampleId: string, evaluatorName: string, s: number) =>
+    ({
+      example: { id: exampleId, index: 0, dataset: { id: 'ds', name: 'DS' } },
+      task: { model: { id: 'm1' }, trace_id: 't' },
+      evaluator: { name: evaluatorName, score: s },
+      metadata: {},
+    }) as unknown as EvaluationScoreDocument;
+
+  it('buckets docs by example.id prefix and computes per-evaluator means', () => {
+    const datasets = scoresByPrefixToDatasets(
+      [
+        score('alert-analysis-a', 'correctness', 1),
+        score('alert-analysis-b', 'correctness', 0),
+        score('threat-hunting-a', 'correctness', 0.5),
+        score('threat-hunting-b', 'groundedness', 0.8),
+      ],
+      ['alert-analysis', 'threat-hunting']
+    );
+
+    const byId = new Map(datasets.map((d) => [d.datasetId, d]));
+    expect(byId.get('prefix:alert-analysis')?.evaluators).toEqual([
+      { evaluatorName: 'correctness', mean: 0.5, count: 2 },
+    ]);
+    expect(byId.get('prefix:threat-hunting')?.evaluators).toEqual(
+      expect.arrayContaining([
+        { evaluatorName: 'correctness', mean: 0.5, count: 1 },
+        { evaluatorName: 'groundedness', mean: 0.8, count: 1 },
+      ])
+    );
+  });
+
+  it('matches exact example ids and prefix-dash boundaries only', () => {
+    const datasets = scoresByPrefixToDatasets(
+      [score('alert-analysis', 'correctness', 1), score('alert-analysisx', 'correctness', 0)],
+      ['alert-analysis']
+    );
+    // 'alert-analysisx' must NOT match prefix 'alert-analysis'
+    expect(datasets).toHaveLength(1);
+    expect(datasets[0].evaluators[0].count).toBe(1);
+  });
+
+  it('skips docs without evaluator score', () => {
+    const datasets = scoresByPrefixToDatasets(
+      [{ ...score('alert-analysis-a', 'correctness', 1), evaluator: { name: 'x' } } as EvaluationScoreDocument],
+      ['alert-analysis']
+    );
+    expect(datasets).toEqual([]);
+  });
+});
+
+describe('queryMatrixScores with examplePrefixes', () => {
+  const log = new ToolingLog() as unknown as SomeDevLog;
+
+  const stats: ExperimentStats = {
+    taskModel: { id: 'm1' },
+    evaluatorModel: { id: 'judge' },
+    totalRepetitions: 1,
+    stats: [
+      {
+        datasetId: 'd1',
+        datasetName: 'D1',
+        evaluatorName: 'correctness',
+        stats: { mean: 0.9, median: 0.9, stdDev: 0, min: 0.9, max: 0.9, count: 10 },
+      },
+    ],
+  };
+
+  const createClient = (): { client: EvalsClient; getExperimentScores: jest.Mock } => {
+    const listExperiments = jest.fn().mockResolvedValue([
+      {
+        experiment_id: 'e1',
+        execution_id: 'x1',
+        timestamp: new Date().toISOString(),
+        task_model: { id: 'm1' },
+      },
+    ]);
+    const getExperimentStats = jest.fn().mockResolvedValue(stats);
+    const getExperimentScores = jest.fn().mockResolvedValue([
+      {
+        example: { id: 'alert-analysis-a', index: 0, dataset: { id: 'd1', name: 'D1' } },
+        task: { model: { id: 'm1' }, trace_id: 't' },
+        evaluator: { name: 'correctness', score: 0.6 },
+        metadata: {},
+      },
+    ]);
+    const client = { listExperiments, getExperimentStats, getExperimentScores } as unknown as EvalsClient;
+    return { client, getExperimentScores };
+  };
+
+  it('fetches per-example scores and appends synthetic prefix datasets when prefixes requested', async () => {
+    const { client, getExperimentScores } = createClient();
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      examplePrefixes: ['alert-analysis'],
+    });
+
+    expect(getExperimentScores).toHaveBeenCalledWith('e1', expect.anything());
+    const datasetIds = result[0].suites[0].datasets.map((d) => d.datasetId);
+    expect(datasetIds).toContain('d1');
+    expect(datasetIds).toContain('prefix:alert-analysis');
+  });
+
+  it('does not fetch per-example scores when no prefixes requested', async () => {
+    const { client, getExperimentScores } = createClient();
+
+    await queryMatrixScores(client, log, { suiteIds: ['suite-a'], modelIds: ['m1'] });
+
+    expect(getExperimentScores).not.toHaveBeenCalled();
+  });
+
+  it('degrades gracefully when the scores route fails', async () => {
+    const listExperiments = jest.fn().mockResolvedValue([
+      {
+        experiment_id: 'e1',
+        execution_id: 'x1',
+        timestamp: new Date().toISOString(),
+        task_model: { id: 'm1' },
+      },
+    ]);
+    const getExperimentStats = jest.fn().mockResolvedValue(stats);
+    const getExperimentScores = jest.fn().mockRejectedValue(new Error('route down'));
+    const client = { listExperiments, getExperimentStats, getExperimentScores } as unknown as EvalsClient;
+
+    const result = await queryMatrixScores(client, log, {
+      suiteIds: ['suite-a'],
+      modelIds: ['m1'],
+      examplePrefixes: ['alert-analysis'],
+    });
+
+    expect(result[0].suites[0].datasets.map((d) => d.datasetId)).toEqual(['d1']);
   });
 });

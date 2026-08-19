@@ -100,7 +100,14 @@ function* columnEvaluators(
   column: MatrixColumnConfig
 ): Generator<AggregatedEvaluatorScore> {
   const suiteSet = new Set(column.suites);
-  const datasetSet = column.datasetIds ? new Set(column.datasetIds) : undefined;
+  // `examplePrefixes` columns consume the synthetic per-prefix datasets
+  // (datasetId `prefix:<name>`) produced by queryMatrixScores; a `datasetIds`
+  // column keeps its raw dataset-id semantics unchanged.
+  const datasetSet = column.examplePrefixes
+    ? new Set(column.examplePrefixes.map((prefix) => `prefix:${prefix}`))
+    : column.datasetIds
+      ? new Set(column.datasetIds)
+      : undefined;
 
   for (const suite of modelScores.suites) {
     if (!suiteSet.has(suite.suiteId)) {

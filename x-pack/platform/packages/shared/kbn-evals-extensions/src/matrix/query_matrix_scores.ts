@@ -6,7 +6,7 @@
  */
 
 import type { SomeDevLog } from '@kbn/some-dev-log';
-import type { EvaluationExperimentSummary } from '@kbn/evals-common';
+import type { EvaluationExperimentSummary, EvaluationScoreDocument } from '@kbn/evals-common';
 import { MAX_LIST_EXPERIMENTS, type EvalsClient, type ExperimentStats } from '@kbn/evals';
 
 /** Aggregated evaluator score for a single dataset within a suite. */
@@ -50,7 +50,60 @@ export interface QueryMatrixScoresOptions {
   modelIds: string[];
   branch?: string;
   lookbackDays?: number;
+  /**
+   * When any config column sets `examplePrefixes`, per-example score documents
+   * are fetched (stripped experiment-scores route — unbounded fields excluded)
+   * and bucketed into synthetic per-prefix datasets alongside the dataset-level
+   * stats, so columns can slice a single dataset by example category.
+   */
+  examplePrefixes?: string[];
 }
+
+/**
+ * Buckets stripped per-example score documents into synthetic per-prefix
+ * datasets. Each doc carries `example.id` (e.g. `alert-analysis-b`) and
+ * `evaluator.{name,score}`; docs are grouped by prefix, then per-evaluator
+ * means are computed the same way the server-side stats route would.
+ * Pure for unit testing.
+ */
+export const scoresByPrefixToDatasets = (
+  scores: EvaluationScoreDocument[],
+  prefixes: string[]
+): AggregatedDatasetScores[] => {
+  const byPrefix = new Map<string, Map<string, { sum: number; count: number }>>();
+
+  for (const doc of scores) {
+    const exampleId = doc.example?.id ?? '';
+    const prefix = prefixes.find((p) => exampleId === p || exampleId.startsWith(`${p}-`));
+    if (!prefix) {
+      continue;
+    }
+    const evaluatorName = doc.evaluator?.name;
+    const score = doc.evaluator?.score;
+    if (!evaluatorName || typeof score !== 'number') {
+      continue;
+    }
+    let evaluators = byPrefix.get(prefix);
+    if (!evaluators) {
+      evaluators = new Map();
+      byPrefix.set(prefix, evaluators);
+    }
+    const agg = evaluators.get(evaluatorName) ?? { sum: 0, count: 0 };
+    agg.sum += score;
+    agg.count += 1;
+    evaluators.set(evaluatorName, agg);
+  }
+
+  return [...byPrefix.entries()].map(([prefix, evaluators]) => ({
+    datasetId: `prefix:${prefix}`,
+    datasetName: prefix,
+    evaluators: [...evaluators.entries()].map(([evaluatorName, agg]) => ({
+      evaluatorName,
+      mean: agg.sum / agg.count,
+      count: agg.count,
+    })),
+  }));
+};
 
 /**
  * Selects, per task model, the most recent experiment from a list (typically
@@ -126,7 +179,13 @@ export const experimentStatsToDatasets = (stats: ExperimentStats): AggregatedDat
 export const queryMatrixScores = async (
   evalsClient: EvalsClient,
   log: SomeDevLog,
-  { suiteIds, modelIds, branch, lookbackDays }: QueryMatrixScoresOptions
+  {
+    suiteIds,
+    modelIds,
+    branch,
+    lookbackDays,
+    examplePrefixes = [],
+  }: QueryMatrixScoresOptions
 ): Promise<AggregatedModelScores[]> => {
   const byModel = new Map<string, AggregatedModelScores>();
 
@@ -175,11 +234,31 @@ export const queryMatrixScores = async (
         byModel.set(modelId, model);
       }
 
+      const datasets = experimentStatsToDatasets(stats);
+      // Per-prefix synthetic datasets: one extra stripped-scores fetch per
+      // (suite, model). Cheap — unbounded fields are excluded server-side.
+      if (examplePrefixes.length > 0) {
+        try {
+          const scores = await evalsClient.getExperimentScores(latest.experiment_id, {
+            suiteId,
+            taskModelId: modelId,
+            executionId: latest.execution_id ?? latest.experiment_id,
+          });
+          datasets.push(...scoresByPrefixToDatasets(scores, examplePrefixes));
+        } catch (error) {
+          log.warning(
+            `Per-prefix scores unavailable for experiment ${latest.experiment_id} (suite ${suiteId}, model ${modelId}): ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+        }
+      }
+
       model.suites.push({
         suiteId,
         experimentId: latest.experiment_id,
         timestamp: latest.timestamp,
-        datasets: experimentStatsToDatasets(stats),
+        datasets,
       });
     }
   }

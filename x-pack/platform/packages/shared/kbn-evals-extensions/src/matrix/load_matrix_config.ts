@@ -48,6 +48,19 @@ const columnSchema = schema.object({
       maxSize: MAX_ARRAY_SIZE,
     })
   ),
+  /**
+   * Optional restriction to `example.id` prefixes. Splits a single dataset
+   * (all examples share one `example.dataset.id`) into per-category columns:
+   * e.g. ['alert-analysis'] matches examples `alert-analysis-a/b/c`. When set,
+   * the matrix query fetches per-example scores (stripped experiment-scores
+   * route) and buckets them by prefix instead of the dataset-level stats.
+   */
+  examplePrefixes: schema.maybe(
+    schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
+      minSize: 1,
+      maxSize: MAX_ARRAY_SIZE,
+    })
+  ),
   /** Optional restriction to specific `evaluator.name` values. */
   evaluators: schema.maybe(
     schema.arrayOf(schema.string({ minLength: 1, maxLength: MAX_STRING_LENGTH }), {
