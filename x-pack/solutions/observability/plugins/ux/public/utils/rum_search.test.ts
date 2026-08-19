@@ -34,6 +34,12 @@ describe('mergeRumSearch', () => {
     ).toBe('rangeFrom=now-24h&user=ada%40elastic.co&includeBots=true');
   });
 
+  it('stores custom bot keywords', () => {
+    expect(mergeRumSearch('?rangeFrom=now-24h', { botUa: 'bot,synthetics' })).toBe(
+      'rangeFrom=now-24h&botUa=bot%2Csynthetics'
+    );
+  });
+
   it('stores replay offset t', () => {
     expect(mergeRumSearch('?rangeFrom=now-24h', { t: '1500' })).toBe('rangeFrom=now-24h&t=1500');
   });

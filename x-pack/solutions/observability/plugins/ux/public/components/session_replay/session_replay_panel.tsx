@@ -266,6 +266,7 @@ export function SessionReplayPanel() {
       account: urlAccount,
       sessionQuery,
       includeBots,
+      botUa,
       kuery,
       breakpoint,
       connection,
@@ -362,6 +363,7 @@ export function SessionReplayPanel() {
         click: urlClick,
         account: urlAccount,
         includeBots,
+        botUa,
         kuery,
         breakpoint,
         connection,
@@ -406,6 +408,7 @@ export function SessionReplayPanel() {
     urlClick,
     urlAccount,
     includeBots,
+    botUa,
     kuery,
     breakpoint,
     connection,
@@ -666,6 +669,7 @@ export function SessionReplayPanel() {
         account: '',
         sessionQuery: '',
         includeBots: '',
+        botUa: '',
       }),
     });
   }, [history]);

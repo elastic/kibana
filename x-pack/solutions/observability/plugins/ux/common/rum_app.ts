@@ -562,14 +562,58 @@ export const BOT_UA_TOKENS = [
   'python-requests',
   'go-http-client',
   'okhttp',
+  'synthetics',
 ] as const;
 
-export const isBotUserAgent = (ua: string | null | undefined): boolean => {
+export const BOT_UA_TOKEN_CAP = 30;
+export const BOT_UA_PARAM_MAX = 512;
+const BOT_UA_TOKEN_RE = /^[a-z0-9][a-z0-9._-]{0,39}$/;
+
+/** Parse a comma-separated UA keyword list. Returns null when nothing valid remains. */
+export const tryParseBotUaTokens = (raw?: string): string[] | null => {
+  if (!raw?.trim()) {
+    return null;
+  }
+  const seen = new Set<string>();
+  const values: string[] = [];
+  for (const part of raw.split(',')) {
+    const token = part.trim().toLowerCase();
+    if (!BOT_UA_TOKEN_RE.test(token) || seen.has(token)) {
+      continue;
+    }
+    seen.add(token);
+    values.push(token);
+    if (values.length >= BOT_UA_TOKEN_CAP) {
+      break;
+    }
+  }
+  return values.length > 0 ? values : null;
+};
+
+/** Parse a comma-separated UA keyword list. Empty / invalid input falls back to defaults. */
+export const parseBotUaTokens = (raw?: string): string[] =>
+  tryParseBotUaTokens(raw) ?? [...BOT_UA_TOKENS];
+
+export const formatBotUaTokens = (tokens: readonly string[]): string => tokens.join(', ');
+
+export const isDefaultBotUaTokens = (tokens: readonly string[]): boolean => {
+  if (tokens.length !== BOT_UA_TOKENS.length) {
+    return false;
+  }
+  const set = new Set(tokens);
+  return BOT_UA_TOKENS.every((token) => set.has(token));
+};
+
+/** URL value for a token list. Empty means "use the defaults". */
+export const botUaSearchValue = (tokens: readonly string[]): string =>
+  isDefaultBotUaTokens(tokens) ? '' : tokens.join(',');
+
+export const isBotUserAgent = (ua: string | null | undefined, botUa?: string): boolean => {
   if (!ua) {
     return false;
   }
   const lower = ua.toLowerCase();
-  return BOT_UA_TOKENS.some((token) => lower.includes(token));
+  return parseBotUaTokens(botUa).some((token) => lower.includes(token));
 };
 
 /** Stable group key from exception type + first line of message. */

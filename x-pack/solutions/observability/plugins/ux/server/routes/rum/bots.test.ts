@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BOT_UA_TOKENS } from '../../../common/rum_app';
+import { parseBotUaTokens } from '../../../common/rum_app';
 import { botExclusionFilters } from './bots';
 
 describe('botExclusionFilters', () => {
@@ -13,23 +13,62 @@ describe('botExclusionFilters', () => {
     expect(botExclusionFilters('true')).toEqual([]);
   });
 
-  it('excludes known bot user agents by default', () => {
+  it('excludes parsed tokens with case-insensitive wildcards', () => {
+    const filters = botExclusionFilters(undefined, 'synthetics');
+    expect(filters).toEqual([
+      {
+        bool: {
+          must_not: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      should: [
+                        {
+                          wildcard: {
+                            'attributes.user_agent.original': {
+                              value: '*synthetics*',
+                              case_insensitive: true,
+                            },
+                          },
+                        },
+                        {
+                          wildcard: {
+                            'resource.attributes.user_agent.original': {
+                              value: '*synthetics*',
+                              case_insensitive: true,
+                            },
+                          },
+                        },
+                        {
+                          wildcard: {
+                            'user_agent.original': {
+                              value: '*synthetics*',
+                              case_insensitive: true,
+                            },
+                          },
+                        },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    ]);
+  });
+
+  it('uses the default token list when botUa is omitted', () => {
     const filters = botExclusionFilters(undefined);
-    expect(filters).toHaveLength(1);
-    const clause = filters[0] as {
-      bool: { must_not: Array<{ query_string: { query: string; fields: string[] } }> };
-    };
-    const queryString = clause.bool.must_not[0].query_string;
-    for (const token of BOT_UA_TOKENS) {
-      expect(queryString.query).toContain(`*${token}*`);
+    const encoded = JSON.stringify(filters);
+    for (const token of parseBotUaTokens()) {
+      expect(encoded).toContain(`*${token}*`);
     }
-    expect(queryString.fields).toEqual(
-      expect.arrayContaining([
-        'attributes.user_agent.original',
-        'resource.attributes.user_agent.original',
-        'user_agent.original',
-      ])
-    );
   });
 
   it('still excludes bots when includeBots is an unrelated value', () => {

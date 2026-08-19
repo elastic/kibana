@@ -284,6 +284,7 @@ export function EvidencePackFlyout({
   rangeFrom,
   rangeTo,
   includeBots,
+  botUa,
   onClose,
 }: {
   app: RumAppInventoryRow;
@@ -291,6 +292,7 @@ export function EvidencePackFlyout({
   rangeFrom: string;
   rangeTo: string;
   includeBots?: string;
+  botUa?: string;
   onClose: () => void;
 }) {
   const titleId = useGeneratedHtmlId();
@@ -319,6 +321,7 @@ export function EvidencePackFlyout({
           rangeTo,
           serviceName: app.name,
           includeBots,
+          botUa,
         };
         const [pageResult, errorResult, sessionResult, appSettings] = await Promise.all([
           fetchRumPages(query),
@@ -355,7 +358,7 @@ export function EvidencePackFlyout({
     return () => {
       cancelled = true;
     };
-  }, [app.name, http, includeBots, rangeFrom, rangeTo]);
+  }, [app.name, http, includeBots, botUa, rangeFrom, rangeTo]);
 
   const packArgs = useMemo(
     () => ({

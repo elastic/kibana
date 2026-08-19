@@ -48,6 +48,7 @@ export interface FetchSessionsParams {
   click?: string;
   account?: string;
   includeBots?: string;
+  botUa?: string;
   kuery?: string;
   breakpoint?: string;
   connection?: string;
@@ -83,6 +84,7 @@ export const fetchSessionReplaySessions = async ({
   click,
   account,
   includeBots,
+  botUa,
   kuery,
   breakpoint,
   connection,
@@ -117,6 +119,7 @@ export const fetchSessionReplaySessions = async ({
       ...(click ? { click } : {}),
       ...(account ? { account } : {}),
       ...(includeBots ? { includeBots } : {}),
+      ...(botUa ? { botUa } : {}),
       ...(kuery ? { kuery } : {}),
       ...(breakpoint ? { breakpoint } : {}),
       ...(connection ? { connection } : {}),

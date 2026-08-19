@@ -58,6 +58,93 @@ describe('buildSessionIndexFilters', () => {
       ])
     );
   });
+
+  it('ORs comma-separated facet values with terms', () => {
+    const filters = buildSessionIndexFilters({
+      rangeFrom: 'now-30d',
+      rangeTo: 'now',
+      browser: 'Chrome,Firefox',
+      location: 'US,DE',
+      connection: '4g,3g',
+    });
+    expect(filters).toEqual(
+      expect.arrayContaining([
+        { terms: { 'browser.name': ['Chrome', 'Firefox'] } },
+        { terms: { country_iso: ['US', 'DE'] } },
+        { terms: { connection: ['4g', '3g'] } },
+      ])
+    );
+  });
+
+  it('excludes bang-prefixed facet values', () => {
+    const filters = buildSessionIndexFilters({
+      rangeFrom: 'now-30d',
+      rangeTo: 'now',
+      browser: '!Chrome',
+      location: '!US,!DE',
+    });
+    expect(filters).toEqual(
+      expect.arrayContaining([
+        { bool: { must_not: [{ term: { 'browser.name': 'Chrome' } }] } },
+        { bool: { must_not: [{ terms: { country_iso: ['US', 'DE'] } }] } },
+      ])
+    );
+  });
+
+  it('ORs frustration kinds and does not double-apply hasErrors', () => {
+    const filters = buildSessionIndexFilters({
+      rangeFrom: 'now-30d',
+      rangeTo: 'now',
+      frustration: 'error,rage',
+      hasErrors: 'true',
+    });
+    const errorRanges = filters.filter(
+      (clause) => JSON.stringify(clause) === JSON.stringify({ range: { error_count: { gt: 0 } } })
+    );
+    expect(errorRanges).toHaveLength(1);
+    expect(filters).toEqual(expect.arrayContaining([{ range: { rage_click_count: { gt: 0 } } }]));
+  });
+
+  it('ORs comma-separated page paths', () => {
+    const filters = buildSessionIndexFilters({
+      rangeFrom: 'now-30d',
+      rangeTo: 'now',
+      pageUrl: '/checkout,/cart',
+    });
+    expect(filters).toEqual(
+      expect.arrayContaining([
+        {
+          bool: {
+            should: [
+              {
+                bool: {
+                  should: [
+                    { wildcard: { pages: { value: '*/checkout*', case_insensitive: true } } },
+                    {
+                      wildcard: { entry_page: { value: '*/checkout*', case_insensitive: true } },
+                    },
+                    { wildcard: { exit_page: { value: '*/checkout*', case_insensitive: true } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    { wildcard: { pages: { value: '*/cart*', case_insensitive: true } } },
+                    { wildcard: { entry_page: { value: '*/cart*', case_insensitive: true } } },
+                    { wildcard: { exit_page: { value: '*/cart*', case_insensitive: true } } },
+                  ],
+                  minimum_should_match: 1,
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ])
+    );
+  });
 });
 
 describe('sessionTrendsAggregation', () => {

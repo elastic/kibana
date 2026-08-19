@@ -42,6 +42,7 @@ export interface RumQueryParams {
   frustration?: string;
   user?: string;
   includeBots?: string;
+  botUa?: string;
   kuery?: string;
   breakpoint?: string;
   connection?: string;
@@ -61,6 +62,7 @@ const rumQuery = ({
   frustration,
   user,
   includeBots,
+  botUa,
   kuery,
   breakpoint,
   connection,
@@ -78,6 +80,7 @@ const rumQuery = ({
   ...(frustration ? { frustration } : {}),
   ...(user ? { user } : {}),
   ...(includeBots ? { includeBots } : {}),
+  ...(botUa ? { botUa } : {}),
   ...(kuery ? { kuery } : {}),
   ...(breakpoint ? { breakpoint } : {}),
   ...(connection ? { connection } : {}),
@@ -121,8 +124,9 @@ export const fetchRumApps = async ({
   rangeFrom,
   rangeTo,
   includeBots,
+  botUa,
   stage,
-}: Pick<RumQueryParams, 'http' | 'rangeFrom' | 'rangeTo' | 'includeBots'> & {
+}: Pick<RumQueryParams, 'http' | 'rangeFrom' | 'rangeTo' | 'includeBots' | 'botUa'> & {
   stage?: RumAppsQueryStage;
 }): Promise<RumAppsResponse> => {
   return http.get<RumAppsResponse>('/internal/ux/rum/apps', {
@@ -130,6 +134,7 @@ export const fetchRumApps = async ({
       rangeFrom,
       rangeTo,
       ...(includeBots ? { includeBots } : {}),
+      ...(botUa ? { botUa } : {}),
       ...(stage ? { stage } : {}),
     },
   });

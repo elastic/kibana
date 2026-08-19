@@ -156,6 +156,7 @@ export const listSessionReplaySessionsRoute = createUxServerRoute({
       click: t.string,
       account: t.string,
       includeBots: t.string,
+      botUa: t.string,
       kuery: t.string,
       breakpoint: t.string,
       connection: t.string,
@@ -270,7 +271,7 @@ const queryRawSessions = async (
   const filters = [
     timeFilter,
     ...serviceFilters,
-    ...botExclusionFilters(params.query.includeBots),
+    ...botExclusionFilters(params.query.includeBots, params.query.botUa),
     ...kueryFilters(kuery),
   ];
   if (params.query.breakpoint) {

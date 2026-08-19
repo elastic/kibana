@@ -202,6 +202,7 @@ export const getRumOverviewRoute = createUxServerRoute({
         browserWatermark: status.browserDaily?.watermark,
         uniqueFromRaw: true,
         includeBots: params.query.includeBots,
+        botUa: params.query.botUa,
       });
       const withPages = {
         ...result,

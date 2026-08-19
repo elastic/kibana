@@ -13,11 +13,14 @@ import {
   type SessionTrendAlign,
 } from '../../common/rum_app';
 import { eventSequenceToken, RUM_SESSIONS_INDEX } from '../../common/rum_sessions';
+import { partitionFilterValues } from '../../common/rum_filters';
 import {
   extraPathsForFind,
   mergeSessionFind,
   parseSessionFind,
+  SESSION_INDEX_PAGE_FIELDS,
   sessionIndexFindFilters,
+  wildcardContains,
 } from '../../common/session_find';
 import {
   FUNNEL_SESSION_SAMPLE_SIZE,
@@ -65,6 +68,43 @@ export const sessionIndexTimeFilter = (rangeFrom: string, rangeTo: string, water
 
 const serviceFilter = (serviceName?: string) =>
   serviceName ? [{ term: { 'service.name': serviceName } }] : [];
+
+const termMatch = (field: string, values: string[]): object | undefined => {
+  if (values.length === 0) {
+    return undefined;
+  }
+  if (values.length === 1) {
+    return { term: { [field]: values[0] } };
+  }
+  return { terms: { [field]: values } };
+};
+
+const facetTerm = (field: string, raw?: string): object | undefined => {
+  const { include, exclude } = partitionFilterValues(raw);
+  const includeClause = termMatch(field, include);
+  const excludeClause = termMatch(field, exclude);
+  if (includeClause && excludeClause) {
+    return { bool: { filter: [includeClause, { bool: { must_not: [excludeClause] } }] } };
+  }
+  if (includeClause) {
+    return includeClause;
+  }
+  if (excludeClause) {
+    return { bool: { must_not: [excludeClause] } };
+  }
+  return undefined;
+};
+
+const FRUSTRATION_CLAUSE = {
+  error: { range: { error_count: { gt: 0 } } },
+  rage: { range: { rage_click_count: { gt: 0 } } },
+  dead: { range: { dead_click_count: { gt: 0 } } },
+} as const;
+
+type SessionFrustrationKind = keyof typeof FRUSTRATION_CLAUSE;
+
+const isFrustrationKind = (value: string): value is SessionFrustrationKind =>
+  value === 'error' || value === 'rage' || value === 'dead';
 
 export const querySessionIndexFunnel = async ({
   client,
@@ -335,25 +375,62 @@ export const buildSessionIndexFilters = ({
     sessionIndexTimeFilter(rangeFrom, rangeTo, watermark ?? undefined),
     ...serviceFilter(serviceName),
   ];
-  if (browser) {
-    filters.push({ term: { 'browser.name': browser } });
+  const browserClause = facetTerm('browser.name', browser);
+  if (browserClause) {
+    filters.push(browserClause);
   }
-  if (os) {
-    filters.push({ term: { 'os.name': os } });
+  const osClause = facetTerm('os.name', os);
+  if (osClause) {
+    filters.push(osClause);
   }
-  if (location) {
-    filters.push({ term: { country_iso: location } });
+  const locationClause = facetTerm('country_iso', location);
+  if (locationClause) {
+    filters.push(locationClause);
   }
-  if (breakpoint) {
-    filters.push({ term: { 'browser.breakpoint': breakpoint } });
+  const breakpointClause = facetTerm('browser.breakpoint', breakpoint);
+  if (breakpointClause) {
+    filters.push(breakpointClause);
   }
+  const { include: pageIncludes, exclude: pageExcludes } = partitionFilterValues(pageUrl);
   const find = mergeSessionFind(parseSessionFind(query), {
-    path: pageUrl,
+    path: pageIncludes.length === 1 ? pageIncludes[0] : undefined,
     click,
     user,
     account,
   });
-  filters.push(...sessionIndexFindFilters(find, extraPathsForFind(find, pageUrl)));
+  filters.push(
+    ...sessionIndexFindFilters(
+      find,
+      extraPathsForFind(find, pageIncludes.length === 1 ? pageIncludes[0] : undefined)
+    )
+  );
+  if (pageIncludes.length > 1) {
+    filters.push({
+      bool: {
+        should: pageIncludes.map((path) => wildcardContains(SESSION_INDEX_PAGE_FIELDS, path)),
+        minimum_should_match: 1,
+      },
+    });
+  }
+  if (pageExcludes.length > 0) {
+    filters.push({
+      bool: {
+        must_not:
+          pageExcludes.length === 1
+            ? [wildcardContains(SESSION_INDEX_PAGE_FIELDS, pageExcludes[0])]
+            : [
+                {
+                  bool: {
+                    should: pageExcludes.map((path) =>
+                      wildcardContains(SESSION_INDEX_PAGE_FIELDS, path)
+                    ),
+                    minimum_should_match: 1,
+                  },
+                },
+              ],
+      },
+    });
+  }
   if (sessionIds) {
     const ids = sessionIds
       .split(',')
@@ -367,14 +444,52 @@ export const buildSessionIndexFilters = ({
   if (hasReplay === 'true') {
     filters.push(sessionIndexHasReplayQuery());
   }
-  if (hasErrors === 'true' || frustration === 'error') {
-    filters.push({ range: { error_count: { gt: 0 } } });
+  if (hasErrors === 'true') {
+    filters.push(FRUSTRATION_CLAUSE.error);
   }
-  if (hasRage === 'true' || frustration === 'rage') {
-    filters.push({ range: { rage_click_count: { gt: 0 } } });
+  if (hasRage === 'true') {
+    filters.push(FRUSTRATION_CLAUSE.rage);
   }
-  if (hasDead === 'true' || frustration === 'dead') {
-    filters.push({ range: { dead_click_count: { gt: 0 } } });
+  if (hasDead === 'true') {
+    filters.push(FRUSTRATION_CLAUSE.dead);
+  }
+  const { include: frustrationInclude, exclude: frustrationExclude } =
+    partitionFilterValues(frustration);
+  const extraFrustration = frustrationInclude.filter(isFrustrationKind).filter((kind) => {
+    if (kind === 'error') {
+      return hasErrors !== 'true';
+    }
+    if (kind === 'rage') {
+      return hasRage !== 'true';
+    }
+    return hasDead !== 'true';
+  });
+  if (extraFrustration.length === 1) {
+    filters.push(FRUSTRATION_CLAUSE[extraFrustration[0]]);
+  } else if (extraFrustration.length > 1) {
+    filters.push({
+      bool: {
+        should: extraFrustration.map((kind) => FRUSTRATION_CLAUSE[kind]),
+        minimum_should_match: 1,
+      },
+    });
+  }
+  const excludedFrustration = frustrationExclude.filter(isFrustrationKind);
+  if (excludedFrustration.length === 1) {
+    filters.push({ bool: { must_not: [FRUSTRATION_CLAUSE[excludedFrustration[0]]] } });
+  } else if (excludedFrustration.length > 1) {
+    filters.push({
+      bool: {
+        must_not: [
+          {
+            bool: {
+              should: excludedFrustration.map((kind) => FRUSTRATION_CLAUSE[kind]),
+              minimum_should_match: 1,
+            },
+          },
+        ],
+      },
+    });
   }
   if (minDurationMs != null) {
     filters.push({ range: { duration_ms: { gte: minDurationMs } } });
@@ -382,11 +497,13 @@ export const buildSessionIndexFilters = ({
   if (maxDurationMs != null) {
     filters.push({ range: { duration_ms: { lte: maxDurationMs } } });
   }
-  if (connection) {
-    filters.push({ term: { connection } });
+  const connectionClause = facetTerm('connection', connection);
+  if (connectionClause) {
+    filters.push(connectionClause);
   }
-  if (device) {
-    filters.push({ term: { device } });
+  const deviceClause = facetTerm('device', device);
+  if (deviceClause) {
+    filters.push(deviceClause);
   }
   if (errorGroup) {
     filters.push({ term: { error_groups: errorGroup } });

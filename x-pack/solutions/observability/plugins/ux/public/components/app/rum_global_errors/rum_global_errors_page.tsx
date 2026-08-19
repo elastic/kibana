@@ -242,7 +242,7 @@ function GlobalErrorsBody() {
   const { open: openAlert } = useRumAlertFlyout();
   const {
     rangeId,
-    urlParams: { rangeFrom = 'now-24h', rangeTo = 'now', includeBots, kuery },
+    urlParams: { rangeFrom = 'now-24h', rangeTo = 'now', includeBots, botUa, kuery },
   } = useLegacyUrlParams();
 
   const [groups, setGroups] = useState<RumErrorGroup[]>([]);
@@ -265,6 +265,7 @@ function GlobalErrorsBody() {
         rangeFrom,
         rangeTo,
         includeBots: typeof includeBots === 'string' ? includeBots : undefined,
+        botUa: typeof botUa === 'string' ? botUa : undefined,
         kuery,
       });
       setGroups(result.groups);
@@ -278,7 +279,7 @@ function GlobalErrorsBody() {
     } finally {
       setLoading(false);
     }
-  }, [http, rangeFrom, rangeTo, includeBots, kuery]);
+  }, [http, rangeFrom, rangeTo, includeBots, botUa, kuery]);
 
   useEffect(() => {
     void load();

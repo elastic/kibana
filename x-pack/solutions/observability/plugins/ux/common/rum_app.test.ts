@@ -6,8 +6,10 @@
  */
 
 import {
+  BOT_UA_TOKENS,
   OTHER_ERROR_TREND_ID,
   applySessionIndexTrendSessions,
+  botUaSearchValue,
   classifyErrorPattern,
   durationToMs,
   emptyPageImpact,
@@ -20,6 +22,7 @@ import {
   pagePassesCwv,
   pagePathFromKey,
   pagesViewsKpi,
+  parseBotUaTokens,
   ranksFromCounts,
   ranksFromPercentileRanks,
   rateVital,
@@ -27,6 +30,7 @@ import {
   sessionTrendAlignKey,
   stackErrorTrends,
   summarizePagesKpis,
+  tryParseBotUaTokens,
   UNGROUPED_PAGE_PATH,
   type RumPageRow,
 } from './rum_app';
@@ -104,6 +108,14 @@ describe('isBotUserAgent', () => {
     ).toBe(false);
   });
 
+  it('matches Datadog synthetics on the default list', () => {
+    expect(
+      isBotUserAgent(
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/90.0.4430.212 DatadogSynthetics'
+      )
+    ).toBe(true);
+  });
+
   it('returns false for empty or human agents', () => {
     expect(isBotUserAgent(null)).toBe(false);
     expect(isBotUserAgent(undefined)).toBe(false);
@@ -113,6 +125,30 @@ describe('isBotUserAgent', () => {
         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       )
     ).toBe(false);
+  });
+});
+
+describe('parseBotUaTokens', () => {
+  it('returns the defaults when the param is empty', () => {
+    expect(parseBotUaTokens(undefined)).toEqual([...BOT_UA_TOKENS]);
+    expect(parseBotUaTokens('')).toEqual([...BOT_UA_TOKENS]);
+  });
+
+  it('keeps a user-edited list and drops junk', () => {
+    expect(parseBotUaTokens('bot, synthetics, *evil*, bot')).toEqual(['bot', 'synthetics']);
+  });
+});
+
+describe('tryParseBotUaTokens', () => {
+  it('rejects empty or junk-only input', () => {
+    expect(tryParseBotUaTokens('')).toBeNull();
+    expect(tryParseBotUaTokens('***')).toBeNull();
+  });
+});
+
+describe('botUaSearchValue', () => {
+  it('omits the URL param when the list is the default', () => {
+    expect(botUaSearchValue(BOT_UA_TOKENS)).toBe('');
   });
 });
 

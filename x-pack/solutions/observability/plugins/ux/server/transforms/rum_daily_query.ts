@@ -183,6 +183,7 @@ const rawOverviewFilters = ({
   pageUrl,
   browser,
   includeBots,
+  botUa,
 }: {
   rangeFrom: string;
   rangeTo: string;
@@ -190,6 +191,7 @@ const rawOverviewFilters = ({
   pageUrl?: string;
   browser?: string;
   includeBots?: string;
+  botUa?: string;
 }): object[] =>
   rumBaseFilters({
     rangeFrom,
@@ -198,6 +200,7 @@ const rawOverviewFilters = ({
     pageUrl,
     browser,
     includeBots,
+    botUa,
   });
 
 const vitalFilter = (name: keyof typeof VITAL_RANK_THRESHOLDS) => ({
@@ -498,6 +501,7 @@ const queryRawOpenDayTail = async ({
   pageUrl,
   browser,
   includeBots,
+  botUa,
   pageSize,
 }: {
   client: ElasticsearchClient;
@@ -506,6 +510,7 @@ const queryRawOpenDayTail = async ({
   pageUrl?: string;
   browser?: string;
   includeBots?: string;
+  botUa?: string;
   pageSize?: number;
 }): Promise<RumOpenDayTail> => {
   const result = await client.search(
@@ -523,6 +528,7 @@ const queryRawOpenDayTail = async ({
             pageUrl,
             browser,
             includeBots,
+            botUa,
           }),
         },
       },
@@ -585,6 +591,7 @@ const queryRawOverviewSlice = async ({
   pageUrl,
   browser,
   includeBots,
+  botUa,
 }: {
   client: ElasticsearchClient;
   rangeFrom: string;
@@ -593,6 +600,7 @@ const queryRawOverviewSlice = async ({
   pageUrl?: string;
   browser?: string;
   includeBots?: string;
+  botUa?: string;
 }): Promise<RumRawOverviewSlice> => {
   const result = await client.search(
     {
@@ -609,6 +617,7 @@ const queryRawOverviewSlice = async ({
             pageUrl,
             browser,
             includeBots,
+            botUa,
           }),
         },
       },
@@ -892,6 +901,7 @@ export const queryDailyOverview = async ({
   browserWatermark,
   uniqueFromRaw,
   includeBots,
+  botUa,
 }: {
   client: ElasticsearchClient;
   rangeFrom: string;
@@ -907,6 +917,7 @@ export const queryDailyOverview = async ({
   browserWatermark?: string | null;
   uniqueFromRaw?: boolean;
   includeBots?: string;
+  botUa?: string;
 }): Promise<RumOverviewResponse> => {
   const kpiFromBrowser = Boolean(useBrowser);
   const kpiFromPages = !kpiFromBrowser && (Boolean(pageUrl) || !useService);
@@ -987,6 +998,7 @@ export const queryDailyOverview = async ({
           pageUrl: pageUrlForKpis,
           browser: browserForKpis,
           includeBots,
+          botUa,
           pageSize: 8,
         })
       : Promise.resolve(emptyOpenDayTail()),
@@ -999,6 +1011,7 @@ export const queryDailyOverview = async ({
           pageUrl: pageUrlForKpis,
           browser: browserForKpis,
           includeBots,
+          botUa,
         })
       : Promise.resolve(null),
   ]);
@@ -1044,6 +1057,7 @@ export const queryDailyPages = async ({
   serviceWatermark,
   useService,
   includeBots,
+  botUa,
 }: {
   client: ElasticsearchClient;
   rangeFrom: string;
@@ -1054,6 +1068,7 @@ export const queryDailyPages = async ({
   serviceWatermark?: string | null;
   useService?: boolean;
   includeBots?: string;
+  botUa?: string;
 }): Promise<RumPagesResponse> => {
   const fillTail = rangeIncludesOpenTail(rangeTo, watermark ?? '');
   const useServiceViews = Boolean(useService) && !pageUrl;
@@ -1085,6 +1100,7 @@ export const queryDailyPages = async ({
           serviceName,
           pageUrl,
           includeBots,
+          botUa,
           pageSize: 80,
         })
       : Promise.resolve(emptyOpenDayTail()),

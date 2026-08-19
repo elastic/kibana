@@ -16,17 +16,47 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiSelectable,
+  EuiSpacer,
+  EuiText,
+  useEuiTheme,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import type { EuiContextMenuPanelDescriptor, EuiSelectableOption } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
-import type { RumFacetBucket, RumFiltersResponse } from '../../../../common/rum_app';
+import type { RumFiltersResponse } from '../../../../common/rum_app';
+import {
+  formatFilterValues,
+  parseFilterValues,
+  setFilterValue as setFacetSelection,
+} from '../../../../common/rum_filters';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { fetchRumFilters } from '../../../services/rest/rum_api';
 import { mergeRumSearch, type RumFilterPatch } from '../../../utils/rum_search';
+import { FacetOptionRow } from './facet_option_row';
+import {
+  bucketsToOptions,
+  customPlaceholderFor,
+  excludedValueLabel,
+  EXPANDABLE_FILTER_IDS,
+  facetValueLabel,
+  filterName,
+  FILTER_IDS,
+  firstSelectedLabel,
+  FRUSTRATION_OPTIONS,
+  labelFacetOptions,
+  MENU_ONLY_FILTER_IDS,
+  PINNED_FILTER_IDS,
+  selectedFilterValues,
+  truncateValue,
+  withSelectedOptions,
+  type RumFacetFilterId,
+  type RumFilterOption,
+  type RumOtelFilterId,
+} from './filter_defs';
+import { FiltersFlyout } from './filters_flyout';
 
 const EMPTY: RumFiltersResponse = {
   browsers: [],
@@ -38,150 +68,127 @@ const EMPTY: RumFiltersResponse = {
   countries: [],
 };
 
-const PINNED_FILTER_IDS = ['location', 'browser', 'os', 'pageUrl'] as const;
-// Pinned alongside the defaults on wide screens; collapsed into "More filters" otherwise.
-const EXPANDABLE_FILTER_IDS = ['breakpoint', 'connection', 'device', 'frustration'] as const;
-const MENU_ONLY_FILTER_IDS = ['includeBots'] as const;
-const FILTER_IDS = [
-  ...PINNED_FILTER_IDS,
-  ...EXPANDABLE_FILTER_IDS,
-  ...MENU_ONLY_FILTER_IDS,
-] as const;
-
-type RumOtelFilterId = (typeof FILTER_IDS)[number];
-
-const countryLabel = (isoCode: string): string => {
-  try {
-    return (
-      new Intl.DisplayNames(undefined, { type: 'region' }).of(isoCode.toUpperCase()) ?? isoCode
-    );
-  } catch {
-    return isoCode;
-  }
-};
-
-const truncateValue = (value: string, max = 48): string => {
-  if (value.length <= max) {
-    return value;
-  }
-  return `\u2026${value.slice(-(max - 1))}`;
-};
-
-const FRUSTRATION_OPTIONS: Array<{ key: string; label: string }> = [
-  {
-    key: 'rage',
-    label: i18n.translate('xpack.ux.filters.frustration.rage', { defaultMessage: 'Rage clicks' }),
-  },
-  {
-    key: 'error',
-    label: i18n.translate('xpack.ux.filters.frustration.errors', { defaultMessage: 'Errors' }),
-  },
-  {
-    key: 'dead',
-    label: i18n.translate('xpack.ux.filters.frustration.dead', { defaultMessage: 'Dead clicks' }),
-  },
-];
-
-const filterName = (id: RumOtelFilterId): string => {
-  switch (id) {
-    case 'location':
-      return i18n.translate('xpack.ux.filters.location', { defaultMessage: 'Location' });
-    case 'browser':
-      return i18n.translate('xpack.ux.filters.browser', { defaultMessage: 'Browser' });
-    case 'os':
-      return i18n.translate('xpack.ux.filters.os', { defaultMessage: 'OS' });
-    case 'pageUrl':
-      return i18n.translate('xpack.ux.filters.page', { defaultMessage: 'Page' });
-    case 'breakpoint':
-      return i18n.translate('xpack.ux.filters.breakpoint', { defaultMessage: 'Breakpoint' });
-    case 'connection':
-      return i18n.translate('xpack.ux.filters.connection', { defaultMessage: 'Connection' });
-    case 'device':
-      return i18n.translate('xpack.ux.filters.device', { defaultMessage: 'Device memory' });
-    case 'frustration':
-      return i18n.translate('xpack.ux.filters.frustration', { defaultMessage: 'Frustration' });
-    case 'includeBots':
-      return i18n.translate('xpack.ux.filters.includeBots', { defaultMessage: 'Include bots' });
-  }
-};
-
-const bucketsToOptions = (buckets: RumFacetBucket[]) =>
-  buckets.map((bucket) => ({ key: bucket.key, count: bucket.count }));
-
-const withSelectedOption = (
-  options: Array<{ key: string; label?: string; count?: number }>,
-  value?: string,
-  labelFor?: (key: string) => string
-) => {
-  if (!value || options.some((option) => option.key === value)) {
-    return options;
-  }
-  return [{ key: value, label: labelFor?.(value) ?? value, count: 0 }, ...options];
-};
+const multiValueLabel = (value: string, extraCount: number): string =>
+  i18n.translate('xpack.ux.filters.multiValueButtonLabel', {
+    defaultMessage: '{value} +{count}',
+    values: { value, count: extraCount },
+  });
 
 const FilterOptionList = ({
+  id,
   options,
   value,
-  onPick,
+  onChange,
   customPlaceholder,
 }: {
-  options: Array<{ key: string; label?: string; count?: number }>;
+  id: RumOtelFilterId;
+  options: RumFilterOption[];
   value?: string;
-  onPick: (next?: string) => void;
+  onChange: (next?: string) => void;
   customPlaceholder?: string;
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const selections = parseFilterValues(value);
+  const included = new Set(selections.filter((item) => !item.exclude).map((item) => item.value));
+  const excluded = new Set(selections.filter((item) => item.exclude).map((item) => item.value));
+  const selectedKeys = selections.map((item) => item.value);
+  const [query, setQuery] = useState('');
   const [custom, setCustom] = useState(
-    value && !options.some((option) => option.key === value) ? value : ''
+    selectedKeys[0] && !options.some((option) => option.key === selectedKeys[0])
+      ? selectedKeys[0]
+      : ''
   );
-  const items: EuiSelectableOption[] = options.map((option) => ({
-    label: `${option.label ?? option.key}${option.count != null ? ` (${option.count})` : ''}`,
-    key: option.key,
-    checked: value === option.key ? 'on' : undefined,
-  }));
+  const listed = withSelectedOptions(options, selectedKeys);
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) {
+      return listed;
+    }
+    return listed.filter((option) => (option.label ?? option.key).toLowerCase().includes(needle));
+  }, [listed, query]);
+
+  const commit = (next: typeof selections) => {
+    onChange(formatFilterValues(next) || undefined);
+  };
 
   return (
-    <EuiSelectable
-      singleSelection
-      searchable={options.length > 8}
-      options={items}
-      onChange={(next) => {
-        const selectedOption = next.find((option) => option.checked === 'on');
-        onPick(selectedOption?.key);
-      }}
-      listProps={{ onFocusBadge: false }}
+    <div
+      css={css`
+        width: 280px;
+        padding: ${euiTheme.size.s};
+      `}
     >
-      {(list, search) => (
-        <div style={{ width: 280 }}>
-          {customPlaceholder && (
-            <div style={{ padding: 8 }}>
-              <EuiFieldSearch
-                compressed
-                placeholder={customPlaceholder}
-                value={custom}
-                onChange={(event) => setCustom(event.target.value)}
-                onSearch={(next) => {
-                  const trimmed = next.trim();
-                  onPick(trimmed || undefined);
-                }}
-                isClearable
-                data-test-subj="uxOtelFilter-customPath"
+      {customPlaceholder && (
+        <>
+          <EuiFieldSearch
+            compressed
+            placeholder={customPlaceholder}
+            value={custom}
+            onChange={(event) => setCustom(event.target.value)}
+            onSearch={(next) => {
+              const trimmed = next.trim();
+              if (trimmed) {
+                commit(setFacetSelection(selections, trimmed, false));
+                setCustom('');
+              }
+            }}
+            isClearable
+            data-test-subj="uxOtelFilter-customPath"
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {listed.length > 8 && (
+        <>
+          <EuiFieldSearch
+            compressed
+            placeholder={i18n.translate('xpack.ux.filters.searchFacetPlaceholder', {
+              defaultMessage: 'Search {facet}',
+              values: { facet: filterName(id) },
+            })}
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            isClearable
+            data-test-subj={`uxOtelFilterSearch-${id}`}
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {visible.length === 0 ? (
+        <EuiText size="s" color="subdued">
+          {i18n.translate('xpack.ux.filters.noFacetValuesLabel', {
+            defaultMessage: 'No values in this range',
+          })}
+        </EuiText>
+      ) : (
+        <div
+          css={css`
+            max-height: 280px;
+            overflow: auto;
+          `}
+        >
+          {visible.map((option) => {
+            const label = option.label ?? option.key;
+            return (
+              <FacetOptionRow
+                key={option.key}
+                checkboxId={`uxOtelFilter-${id}-${encodeURIComponent(option.key)}`}
+                label={label}
+                count={option.count}
+                isIncluded={included.has(option.key)}
+                isExcluded={excluded.has(option.key)}
+                onToggle={() => commit(setFacetSelection(selections, option.key, false))}
+                onExclude={() => commit(setFacetSelection(selections, option.key, true))}
+                testSubject={`uxOtelFilterOption-${id}-${option.key}`}
+                excludeTestSubject={`uxOtelFilterExclude-${id}-${option.key}`}
               />
-            </div>
-          )}
-          {search}
-          {list}
+            );
+          })}
         </div>
       )}
-    </EuiSelectable>
+    </div>
   );
 };
-
-const pagePathPlaceholder = i18n.translate('xpack.ux.filters.page.customPlaceholder', {
-  defaultMessage: 'Type a path, e.g. /checkout',
-});
-
-const customPlaceholderFor = (id: RumOtelFilterId): string | undefined =>
-  id === 'pageUrl' ? pagePathPlaceholder : undefined;
 
 const FacetSelect = ({
   id,
@@ -190,14 +197,19 @@ const FacetSelect = ({
   onChange,
 }: {
   id: RumOtelFilterId;
-  options: Array<{ key: string; label?: string; count?: number }>;
+  options: RumFilterOption[];
   value?: string;
   onChange: (next?: string) => void;
 }) => {
   const [open, setOpen] = useState(false);
   const label = filterName(id);
-  const selected = options.find((option) => option.key === value);
-  const buttonLabel = truncateValue(selected?.label ?? selected?.key ?? value ?? label, 28);
+  const selected = selectedFilterValues(value);
+  const first = firstSelectedLabel(options, selected);
+  const firstRaw = truncateValue(first ?? value ?? label, 28);
+  const firstExcluded = parseFilterValues(value)[0]?.exclude === true;
+  const firstLabel = firstExcluded ? excludedValueLabel(firstRaw) : firstRaw;
+  const buttonLabel =
+    selected.length > 1 ? multiValueLabel(firstLabel, selected.length - 1) : firstLabel;
 
   return (
     <EuiPopover
@@ -213,9 +225,9 @@ const FacetSelect = ({
           iconType="chevronSingleDown"
           isSelected={open}
           onClick={() => setOpen((current) => !current)}
-          hasActiveFilters={Boolean(value)}
-          numActiveFilters={value ? 1 : undefined}
-          isDisabled={options.length === 0 && !value && id !== 'pageUrl'}
+          hasActiveFilters={selected.length > 0}
+          numActiveFilters={selected.length || undefined}
+          isDisabled={options.length === 0 && selected.length === 0 && id !== 'pageUrl'}
           grow={false}
           data-test-subj={`uxOtelFilter-${id}`}
         >
@@ -224,13 +236,11 @@ const FacetSelect = ({
       }
     >
       <FilterOptionList
+        id={id}
         options={options}
         value={value}
         customPlaceholder={customPlaceholderFor(id)}
-        onPick={(next) => {
-          onChange(next);
-          setOpen(false);
-        }}
+        onChange={onChange}
       />
     </EuiPopover>
   );
@@ -248,7 +258,7 @@ const FilterPill = ({
   id: RumOtelFilterId;
   label: string;
   displayValue?: string;
-  options: Array<{ key: string; label?: string; count?: number }>;
+  options: RumFilterOption[];
   value?: string;
   onChange: (next?: string) => void;
   onRemove: () => void;
@@ -316,13 +326,11 @@ const FilterPill = ({
       anchorPosition="downLeft"
     >
       <FilterOptionList
+        id={id}
         options={options}
         value={value}
         customPlaceholder={customPlaceholderFor(id)}
-        onPick={(next) => {
-          onChange(next);
-          setOpen(false);
-        }}
+        onChange={onChange}
       />
     </EuiPopover>
   );
@@ -343,6 +351,7 @@ export function OtelFilterBar() {
       frustration,
       user,
       includeBots,
+      botUa,
       kuery,
       breakpoint,
       connection,
@@ -352,6 +361,7 @@ export function OtelFilterBar() {
 
   const [facets, setFacets] = useState<RumFiltersResponse>(EMPTY);
   const [addOpen, setAddOpen] = useState(false);
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -362,10 +372,8 @@ export function OtelFilterBar() {
       serviceName: typeof serviceName === 'string' ? serviceName : undefined,
       user,
       includeBots,
+      botUa,
       kuery,
-      breakpoint,
-      connection,
-      device,
     })
       .then((result) => {
         if (!cancelled) {
@@ -380,18 +388,7 @@ export function OtelFilterBar() {
     return () => {
       cancelled = true;
     };
-  }, [
-    http,
-    rangeFrom,
-    rangeTo,
-    serviceName,
-    user,
-    includeBots,
-    kuery,
-    breakpoint,
-    connection,
-    device,
-  ]);
+  }, [http, rangeFrom, rangeTo, serviceName, user, includeBots, botUa, kuery]);
 
   const setFilter = useCallback(
     (patch: RumFilterPatch) => {
@@ -426,42 +423,47 @@ export function OtelFilterBar() {
   };
 
   const optionSets = useMemo(() => {
-    const countryOptions = withSelectedOption(
-      bucketsToOptions(facets.countries).map((option) => ({
-        ...option,
-        label: countryLabel(option.key),
-      })),
-      locationFilter,
-      countryLabel
-    );
-    const deviceOptions = withSelectedOption(
-      bucketsToOptions(facets.devices).map((option) => ({
-        ...option,
-        label: option.key ? `${option.key} GB` : option.key,
-      })),
+    const raw: Record<RumFacetFilterId, string | undefined> = {
+      location: locationFilter,
+      browser,
+      os,
+      pageUrl,
+      breakpoint,
+      connection,
       device,
-      (key) => `${key} GB`
-    );
+      frustration,
+    };
+    const labeled = (id: RumFacetFilterId, buckets: RumFilterOption[]) =>
+      withSelectedOptions(labelFacetOptions(id, buckets), selectedFilterValues(raw[id]), (key) =>
+        facetValueLabel(id, key)
+      );
 
     return {
-      location: countryOptions,
-      browser: withSelectedOption(bucketsToOptions(facets.browsers), browser),
-      os: withSelectedOption(bucketsToOptions(facets.os), os),
-      pageUrl: withSelectedOption(bucketsToOptions(facets.pages), pageUrl),
-      breakpoint: withSelectedOption(bucketsToOptions(facets.breakpoints), breakpoint),
-      connection: withSelectedOption(bucketsToOptions(facets.connections), connection),
-      device: deviceOptions,
-      frustration: FRUSTRATION_OPTIONS,
+      location: labeled('location', bucketsToOptions(facets.countries)),
+      browser: labeled('browser', bucketsToOptions(facets.browsers)),
+      os: labeled('os', bucketsToOptions(facets.os)),
+      pageUrl: labeled('pageUrl', bucketsToOptions(facets.pages)),
+      breakpoint: labeled('breakpoint', bucketsToOptions(facets.breakpoints)),
+      connection: labeled('connection', bucketsToOptions(facets.connections)),
+      device: labeled('device', bucketsToOptions(facets.devices)),
+      frustration: labeled('frustration', FRUSTRATION_OPTIONS),
       includeBots: [],
-    } satisfies Record<RumOtelFilterId, Array<{ key: string; label?: string; count?: number }>>;
-  }, [breakpoint, browser, connection, device, facets, locationFilter, os, pageUrl]);
+    } satisfies Record<RumOtelFilterId, RumFilterOption[]>;
+  }, [breakpoint, browser, connection, device, facets, frustration, locationFilter, os, pageUrl]);
 
   const displayValue = (id: RumOtelFilterId, value: string): string | undefined => {
     if (id === 'includeBots') {
       return undefined;
     }
-    const match = optionSets[id].find((option) => option.key === value);
-    return truncateValue(match?.label ?? match?.key ?? value);
+    const selected = selectedFilterValues(value);
+    const first = firstSelectedLabel(optionSets[id], selected);
+    if (!first) {
+      return undefined;
+    }
+    const truncated = truncateValue(first);
+    const labeled =
+      parseFilterValues(value)[0]?.exclude === true ? excludedValueLabel(truncated) : truncated;
+    return selected.length > 1 ? multiValueLabel(labeled, selected.length - 1) : labeled;
   };
 
   const isWideScreen = useIsWithinBreakpoints(['xl']);
@@ -474,7 +476,15 @@ export function OtelFilterBar() {
 
   const appliedOverflow = overflowIds.filter((id) => Boolean(values[id]));
   const unusedOverflow = overflowIds.filter((id) => !values[id]);
-  const anyActive = FILTER_IDS.some((id) => Boolean(values[id]));
+  const customBotUa = Boolean(botUa);
+  const anyActive = FILTER_IDS.some((id) => Boolean(values[id])) || customBotUa;
+  const activeCount =
+    FILTER_IDS.reduce((sum, id) => {
+      if (id === 'includeBots') {
+        return values[id] ? sum + 1 : sum;
+      }
+      return sum + selectedFilterValues(values[id]).length;
+    }, 0) + (customBotUa ? 1 : 0);
 
   const moreFilterPanels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -505,12 +515,10 @@ export function OtelFilterBar() {
         title: filterName(id),
         content: (
           <FilterOptionList
+            id={id}
             options={optionSets[id]}
             customPlaceholder={customPlaceholderFor(id)}
-            onPick={(next) => {
-              setFilterValue(id, next);
-              setAddOpen(false);
-            }}
+            onChange={(next) => setFilterValue(id, next)}
           />
         ),
       })),
@@ -520,6 +528,19 @@ export function OtelFilterBar() {
     <EuiFlexGroup gutterSize="m" alignItems="center" wrap responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup compressed>
+          <EuiFilterButton
+            iconType="filter"
+            isSelected={flyoutOpen}
+            onClick={() => setFlyoutOpen(true)}
+            hasActiveFilters={anyActive}
+            numActiveFilters={activeCount || undefined}
+            grow={false}
+            data-test-subj="uxOtelFiltersFlyoutOpen"
+          >
+            {i18n.translate('xpack.ux.filters.allFiltersButtonLabel', {
+              defaultMessage: 'All filters',
+            })}
+          </EuiFilterButton>
           {pinnedIds.map((id) => (
             <FacetSelect
               key={id}
@@ -576,6 +597,28 @@ export function OtelFilterBar() {
           </EuiFlexItem>
         );
       })}
+      {customBotUa && (
+        <EuiFlexItem grow={false}>
+          <EuiBadge
+            color="hollow"
+            iconType="cross"
+            iconSide="right"
+            iconOnClick={() => setFilter({ botUa: '' })}
+            iconOnClickAriaLabel={i18n.translate('xpack.ux.filters.removeBotKeywordsAriaLabel', {
+              defaultMessage: 'Reset bot keywords',
+            })}
+            onClick={() => setFlyoutOpen(true)}
+            onClickAriaLabel={i18n.translate('xpack.ux.filters.editBotKeywordsAriaLabel', {
+              defaultMessage: 'Edit bot keywords',
+            })}
+            data-test-subj="uxOtelFilterPill-botUa"
+          >
+            {i18n.translate('xpack.ux.filters.botKeywordsLabel', {
+              defaultMessage: 'Bot keywords',
+            })}
+          </EuiBadge>
+        </EuiFlexItem>
+      )}
       {anyActive && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -589,6 +632,7 @@ export function OtelFilterBar() {
                 pageUrl: '',
                 frustration: '',
                 includeBots: '',
+                botUa: '',
                 breakpoint: '',
                 connection: '',
                 device: '',
@@ -599,6 +643,15 @@ export function OtelFilterBar() {
             {i18n.translate('xpack.ux.filters.clear', { defaultMessage: 'Clear filters' })}
           </EuiButtonEmpty>
         </EuiFlexItem>
+      )}
+      {flyoutOpen && (
+        <FiltersFlyout
+          optionSets={optionSets}
+          values={values}
+          botUa={botUa}
+          onApply={setFilter}
+          onClose={() => setFlyoutOpen(false)}
+        />
       )}
     </EuiFlexGroup>
   );

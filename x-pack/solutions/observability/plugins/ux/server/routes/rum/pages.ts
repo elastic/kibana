@@ -302,6 +302,7 @@ export const getRumPagesRoute = createUxServerRoute({
         serviceWatermark: status.serviceDaily?.watermark,
         useService: daily.useService,
         includeBots: params.query.includeBots,
+        botUa: params.query.botUa,
       });
       const pages = mergeRumPageRows(result.pages, groupingFromSettings(settings));
       return {

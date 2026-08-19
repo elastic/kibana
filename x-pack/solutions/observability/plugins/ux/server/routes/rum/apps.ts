@@ -27,6 +27,7 @@ export const getRumAppsRoute = createUxServerRoute({
       rangeFrom: boundedString(64),
       rangeTo: boundedString(64),
       includeBots: boundedString(8),
+      botUa: boundedString(512),
       analyticsMode: boundedString(16),
       stage: boundedString(16),
     }),
@@ -34,7 +35,7 @@ export const getRumAppsRoute = createUxServerRoute({
   handler: async ({ context, core, params, request }): Promise<RumAppsResponse> => {
     const { elasticsearch } = await context.core;
     const client = await getRumSearchClient({ context, core });
-    const { rangeFrom, rangeTo, includeBots, analyticsMode, stage } = params.query;
+    const { rangeFrom, rangeTo, includeBots, botUa, analyticsMode, stage } = params.query;
     const analytics = await resolveRumAnalytics(elasticsearch.client.asInternalUser, {
       analyticsMode,
       rangeTo,
@@ -52,6 +53,7 @@ export const getRumAppsRoute = createUxServerRoute({
       rangeFrom,
       rangeTo,
       includeBots,
+      botUa,
       request,
       stage: isAppsStage(stage) ? stage : undefined,
       useIndex,

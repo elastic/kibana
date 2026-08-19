@@ -411,6 +411,7 @@ export function RumAppsPage() {
       rangeFrom = 'now-24h',
       rangeTo = 'now',
       includeBots,
+      botUa,
       environment = ENVIRONMENT_ALL.value,
       platform,
     },
@@ -433,12 +434,14 @@ export function RumAppsPage() {
     setLoading(true);
     setError(null);
     const includeBotsQuery = typeof includeBots === 'string' ? includeBots : undefined;
+    const botUaQuery = typeof botUa === 'string' ? botUa : undefined;
     try {
       const result = await fetchRumApps({
         http,
         rangeFrom,
         rangeTo,
         includeBots: includeBotsQuery,
+        botUa: botUaQuery,
         stage: 'index',
       });
       if (loadGen.current !== gen) {
@@ -456,6 +459,7 @@ export function RumAppsPage() {
           rangeFrom,
           rangeTo,
           includeBots: includeBotsQuery,
+          botUa: botUaQuery,
           stage: 'remainder',
         });
         if (loadGen.current !== gen) {
@@ -475,7 +479,7 @@ export function RumAppsPage() {
       setLoading(false);
     }
     // rangeId refetches relative ranges like Last 24 hours
-  }, [addInspectorRequest, http, rangeFrom, rangeTo, includeBots, rangeId]);
+  }, [addInspectorRequest, http, rangeFrom, rangeTo, includeBots, botUa, rangeId]);
 
   useEffect(() => {
     void load();
@@ -1095,6 +1099,7 @@ export function RumAppsPage() {
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           includeBots={typeof includeBots === 'string' ? includeBots : undefined}
+          botUa={typeof botUa === 'string' ? botUa : undefined}
           onClose={() => setEvidenceApp(null)}
         />
       ) : null}

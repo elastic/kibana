@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { partitionFilterValues } from '../../../common/rum_filters';
 import { SESSION_ID_SCRIPT } from '../session_replay/session_id_script';
 import { botExclusionFilters } from './bots';
 import { kueryFilters } from './kuery';
@@ -22,20 +23,21 @@ export const rumListQueryCodec = t.partial({
   rangeFrom: boundedString(64),
   rangeTo: boundedString(64),
   serviceName: boundedString(256),
-  browser: boundedString(128),
-  os: boundedString(128),
-  /** ISO-3166 alpha-2 country code (`client.geo.country_iso_code`). */
-  location: boundedString(8),
-  pageUrl: boundedString(512),
-  frustration: boundedString(32),
+  browser: boundedString(512),
+  os: boundedString(512),
+  /** ISO-3166 alpha-2 country codes (`client.geo.country_iso_code`), comma-OR. */
+  location: boundedString(128),
+  pageUrl: boundedString(2048),
+  frustration: boundedString(64),
   errorGroup: boundedString(256),
   sessionIds: boundedString(2048),
   user: boundedString(256),
   includeBots: boundedString(8),
+  botUa: boundedString(512),
   kuery: boundedString(4096),
-  breakpoint: boundedString(32),
-  connection: boundedString(64),
-  device: boundedString(64),
+  breakpoint: boundedString(128),
+  connection: boundedString(256),
+  device: boundedString(256),
   analyticsMode: boundedString(16),
 });
 
@@ -283,6 +285,7 @@ export interface RumQueryParams {
   pageUrl?: string;
   user?: string;
   includeBots?: string;
+  botUa?: string;
   kuery?: string;
   breakpoint?: string;
   connection?: string;
@@ -301,6 +304,83 @@ const termShould = (fields: string[], value: string) => ({
   },
 });
 
+const termShouldAny = (fields: string[], values: string[]) => {
+  if (values.length === 0) {
+    return undefined;
+  }
+  if (values.length === 1) {
+    return termShould(fields, values[0]);
+  }
+  return {
+    bool: {
+      should: values.map((value) => termShould(fields, value)),
+      minimum_should_match: 1,
+    },
+  };
+};
+
+const mustNot = (clause: object) => ({ bool: { must_not: [clause] } });
+
+const combineFacetClauses = (include?: object, exclude?: object) => {
+  if (include && exclude) {
+    return { bool: { filter: [include, mustNot(exclude)] } };
+  }
+  if (include) {
+    return include;
+  }
+  if (exclude) {
+    return mustNot(exclude);
+  }
+  return undefined;
+};
+
+const facetFilter = (fields: string[], raw?: string) => {
+  const { include, exclude } = partitionFilterValues(raw);
+  return combineFacetClauses(termShouldAny(fields, include), termShouldAny(fields, exclude));
+};
+
+const pageUrlNeedle = (value: string): string =>
+  luceneEscape(value.replace(/[*?]/g, '')).slice(0, 200);
+
+const pageUrlClause = (needles: string[]) => {
+  const escaped = needles.map(pageUrlNeedle).filter(Boolean);
+  if (escaped.length === 0) {
+    return undefined;
+  }
+  const clause = (needle: string) => ({
+    query_string: {
+      query: `*${needle}*`,
+      fields: [
+        'attributes.url.path.grouped',
+        'attributes.page.url.path',
+        'attributes.page.url',
+        'attributes.url.full',
+        'attributes.http.url',
+        'url.full',
+        'page.url.path',
+        'page.url',
+        'http.url',
+      ],
+      lenient: true,
+      analyze_wildcard: true,
+    },
+  });
+  if (escaped.length === 1) {
+    return clause(escaped[0]);
+  }
+  return {
+    bool: {
+      should: escaped.map(clause),
+      minimum_should_match: 1,
+    },
+  };
+};
+
+const pageUrlFilter = (raw?: string) => {
+  const { include, exclude } = partitionFilterValues(raw);
+  return combineFacetClauses(pageUrlClause(include), pageUrlClause(exclude));
+};
+
 /** Shared time + service + OTel facet filters for RUM ES queries. */
 export const rumBaseFilters = (params: RumQueryParams): object[] => {
   const rangeFrom = params.rangeFrom || 'now-24h';
@@ -315,63 +395,50 @@ export const rumBaseFilters = (params: RumQueryParams): object[] => {
       )
     );
   }
-  if (params.browser) {
-    filters.push(
-      termShould(['resource.attributes.browser.name', 'attributes.browser.name'], params.browser)
-    );
+  const browser = facetFilter(
+    ['resource.attributes.browser.name', 'attributes.browser.name'],
+    params.browser
+  );
+  if (browser) {
+    filters.push(browser);
   }
-  if (params.os) {
-    filters.push(
-      termShould(
-        [
-          'resource.attributes.browser.platform',
-          'attributes.browser.platform',
-          'resource.attributes.os.name',
-        ],
-        params.os
-      )
-    );
+  const os = facetFilter(
+    [
+      'resource.attributes.browser.platform',
+      'attributes.browser.platform',
+      'resource.attributes.os.name',
+    ],
+    params.os
+  );
+  if (os) {
+    filters.push(os);
   }
-  if (params.location) {
-    filters.push(termShould([...CLIENT_GEO_COUNTRY_ISO_FIELDS], params.location));
+  const location = facetFilter([...CLIENT_GEO_COUNTRY_ISO_FIELDS], params.location);
+  if (location) {
+    filters.push(location);
   }
-  if (params.breakpoint) {
-    filters.push(termShould(['attributes.browser.breakpoint'], params.breakpoint));
+  const breakpoint = facetFilter(['attributes.browser.breakpoint'], params.breakpoint);
+  if (breakpoint) {
+    filters.push(breakpoint);
   }
-  if (params.connection) {
-    filters.push(termShould(['attributes.network.connection.type'], params.connection));
+  const connection = facetFilter(['attributes.network.connection.type'], params.connection);
+  if (connection) {
+    filters.push(connection);
   }
-  if (params.device) {
-    filters.push(
-      termShould(['attributes.device.memory', 'resource.attributes.device.memory'], params.device)
-    );
+  const device = facetFilter(
+    ['attributes.device.memory', 'resource.attributes.device.memory'],
+    params.device
+  );
+  if (device) {
+    filters.push(device);
   }
   if (params.user) {
     filters.push(termShould([...USER_FIELDS], params.user));
   }
-  filters.push(...botExclusionFilters(params.includeBots));
-  if (params.pageUrl) {
-    const needle = luceneEscape(params.pageUrl.trim().replace(/[*?]/g, '')).slice(0, 200);
-    if (needle) {
-      filters.push({
-        query_string: {
-          query: `*${needle}*`,
-          fields: [
-            'attributes.url.path.grouped',
-            'attributes.page.url.path',
-            'attributes.page.url',
-            'attributes.url.full',
-            'attributes.http.url',
-            'url.full',
-            'page.url.path',
-            'page.url',
-            'http.url',
-          ],
-          lenient: true,
-          analyze_wildcard: true,
-        },
-      });
-    }
+  filters.push(...botExclusionFilters(params.includeBots, params.botUa));
+  const pageUrl = pageUrlFilter(params.pageUrl);
+  if (pageUrl) {
+    filters.push(pageUrl);
   }
 
   filters.push(...kueryFilters(params.kuery));

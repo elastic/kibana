@@ -319,6 +319,7 @@ const searchRawApps = async ({
   rangeFrom,
   rangeTo,
   includeBots,
+  botUa,
   compare,
   request,
   operationName,
@@ -327,6 +328,7 @@ const searchRawApps = async ({
   rangeFrom: string;
   rangeTo: string;
   includeBots?: string;
+  botUa?: string;
   compare: boolean;
   request?: KibanaRequest;
   operationName: string;
@@ -342,7 +344,7 @@ const searchRawApps = async ({
     query: {
       bool: {
         filter: [
-          ...rumBaseFilters({ rangeFrom: wideFrom, rangeTo: wideTo, includeBots }),
+          ...rumBaseFilters({ rangeFrom: wideFrom, rangeTo: wideTo, includeBots, botUa }),
           {
             bool: {
               should: [PAGE_VIEW_FILTER, { exists: { field: RUM_CANONICAL_SESSION_ID_FIELD } }],
@@ -481,6 +483,7 @@ export const queryRumApps = async ({
   rangeFrom,
   rangeTo,
   includeBots,
+  botUa,
   request,
   stage,
   useIndex,
@@ -491,6 +494,7 @@ export const queryRumApps = async ({
   rangeFrom?: string;
   rangeTo?: string;
   includeBots?: string;
+  botUa?: string;
   request?: KibanaRequest;
   stage?: RumAppsQueryStage;
   useIndex?: boolean;
@@ -527,6 +531,7 @@ export const queryRumApps = async ({
       rangeFrom: watermark as string,
       rangeTo: currentTo,
       includeBots,
+      botUa,
       compare: false,
       request,
       operationName: 'UxApplicationsRemainder',
@@ -542,6 +547,7 @@ export const queryRumApps = async ({
       rangeFrom: currentFrom,
       rangeTo: currentTo,
       includeBots,
+      botUa,
       compare: true,
       request,
       operationName: 'UxApplications',
@@ -553,6 +559,7 @@ export const queryRumApps = async ({
     rangeFrom: watermark || currentFrom,
     rangeTo: currentTo,
     includeBots,
+    botUa,
     compare: false,
     request,
     operationName: 'UxApplicationsRemainder',

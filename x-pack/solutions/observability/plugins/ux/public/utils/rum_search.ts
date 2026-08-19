@@ -22,6 +22,7 @@ export interface RumFilterPatch {
   account?: string;
   sessionQuery?: string;
   includeBots?: string;
+  botUa?: string;
   kuery?: string;
   breakpoint?: string;
   connection?: string;
