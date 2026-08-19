@@ -9,8 +9,8 @@ import { z } from '@kbn/zod/v4';
 import { MAX_ID_LENGTH, MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType, isOtherResult } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { platformStreamsMemoryTools } from './tool_ids';
 import { getUserFromRequest } from './get_user_from_request';
 import type { MemoryToolsOptions } from './types';
@@ -167,7 +167,7 @@ const applyAppend = (
 export const createMemoryPatchTool = ({
   getMemoryService,
   getSecurity,
-}: MemoryToolsOptions): BuiltinToolDefinition<typeof memoryPatchSchema> => ({
+}: MemoryToolsOptions): BuiltinSkillBoundedTool<typeof memoryPatchSchema> => ({
   id: platformStreamsMemoryTools.memoryPatch,
   type: ToolType.builtin,
   description:
@@ -177,7 +177,6 @@ export const createMemoryPatchTool = ({
     '(C) append with append (optionally under a heading). ' +
     'Multiple operations can be batched in one call.',
   schema: memoryPatchSchema,
-  tags: ['memory'],
   confirmation: { askUser: 'never' },
   handler: async ({ id, name, operations, change_summary: changeSummary }, context) => {
     const memoryService = getMemoryService(context.esClient.asCurrentUser);
