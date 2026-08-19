@@ -39,6 +39,12 @@ import { createSmlTools } from './services/tools/builtin/sml';
 import { createConnectorTools } from './services/tools/builtin/connectors';
 import { createAdminPrivilegeSwitcher } from './capabilities/admin_privilege_switcher';
 import { registerInferenceFeatures } from './inference_features';
+import {
+  migrateAgentToolIds,
+  migrateSkillToolIds,
+} from './services/agents/persisted/tool_id_migration';
+import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
+import { createStorage as createSkillStorage } from './services/skills/persisted/client/storage';
 
 export class AgentBuilderPlugin
   implements
@@ -249,6 +255,10 @@ export class AgentBuilderPlugin
       this.logger.warn(`Failed to clean up legacy SML tasks: ${(error as Error).message}`);
     });
 
+    this.migrateCasesAttachmentsToolIds(elasticsearch).catch((error) => {
+      this.logger.error(`Cases attachments tool ID migration failed: ${(error as Error).message}`);
+    });
+
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
@@ -332,6 +342,35 @@ export class AgentBuilderPlugin
   async stop() {
     await this.teardownTracing?.();
   }
+  /**
+   * Replaces the legacy `platform.core.cases.attachments` tool ID with its two successors in all
+   * persisted agent configs and skill definitions. Idempotent — safe to run on every startup.
+   */
+  private async migrateCasesAttachmentsToolIds(
+    elasticsearch: CoreStart['elasticsearch']
+  ): Promise<void> {
+    const logger = this.logger.get('tool-id-migration');
+    const migrations = [
+      {
+        oldId: 'platform.core.cases.attachments',
+        newIds: ['platform.core.cases.get_attachments', 'platform.core.cases.manage_attachments'],
+      },
+    ];
+    const esClient = elasticsearch.client.asInternalUser;
+
+    await migrateAgentToolIds({
+      storage: createAgentStorage({ logger, esClient }),
+      migrations,
+      logger,
+    });
+
+    await migrateSkillToolIds({
+      storage: createSkillStorage({ logger, esClient }),
+      migrations,
+      logger,
+    });
+  }
+
   /**
    * Remove orphaned SML crawler task instances from older scheduled-task id prefixes.
    * Safe on every start — uses a single `bulkRemove` for the known legacy instance ids.
