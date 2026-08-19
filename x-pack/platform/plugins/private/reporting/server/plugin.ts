@@ -144,6 +144,11 @@ export class ReportingPlugin
         store,
         securityService: core.security,
         ...plugins,
+        // POC (response-ops-team#682): when the pageRenderScreenshotting plugin is enabled, its
+        // getScreenshots() (backed by page-render-service) stands in for real screenshotting
+        // everywhere reporting uses it. Disabled optional plugins are omitted from `plugins`
+        // entirely, so this is a no-op fallback to the real plugin (or undefined) otherwise.
+        screenshotting: plugins.pageRenderScreenshotting ?? plugins.screenshotting,
       });
 
       // Note: this must be called after ReportingCore.pluginStart

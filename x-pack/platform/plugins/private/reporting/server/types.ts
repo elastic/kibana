@@ -91,6 +91,13 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
   security?: SecurityPluginStart;
   screenshotting?: ScreenshottingStart;
+  /**
+   * POC (response-ops-team#682): structurally identical to `ScreenshottingStart`, backed by a
+   * remote page-render-service call instead of local Chromium. When present (i.e. the
+   * `pageRenderScreenshotting` plugin is enabled), `server/plugin.ts` prefers it over
+   * `screenshotting` — see the seam there.
+   */
+  pageRenderScreenshotting?: ScreenshottingStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
