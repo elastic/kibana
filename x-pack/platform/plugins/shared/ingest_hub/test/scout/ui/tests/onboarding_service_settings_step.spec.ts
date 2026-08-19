@@ -165,8 +165,12 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
       serviceVars: { cloudtrail: { trigger: 'aws-s3', vars: { region: 'eu-west-1' } } },
     });
 
-    // waf has no override — shows global region
-    const wafRow = page.getByRole('row', { name: /WAF/ });
+    // waf has no override — shows global region.
+    // Locate by service-link test-subj (not by row name) since the manifest-derived
+    // display name may differ across package versions (e.g. 'waf' vs 'AWS WAF logs').
+    const wafRow = page.locator('tr', {
+      has: page.testSubj.locator('serviceSettingsStep-serviceLink-waf'),
+    });
     await expect(wafRow.getByText('us-east-1')).toBeVisible();
 
     // cloudtrail has per-service override
@@ -373,8 +377,9 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
     await page.testSubj.locator('serviceSettingsStep-actionsButton-cloudtrail').click();
     await page.testSubj.locator('serviceSettingsStep-duplicateAction-cloudtrail').click();
 
+    // Regex: manifest title varies by package version ('AWS CloudTrail' vs 'AWS CloudTrail Logs').
     await expect(page.testSubj.locator('duplicateServiceModal-nameField')).toHaveValue(
-      'AWS CloudTrail Logs [Duplicate]'
+      /AWS CloudTrail.*\[Duplicate\]/
     );
   });
 
@@ -419,8 +424,8 @@ test.describe('Onboarding Service Settings step', { tag: tags.stateful.classic }
 
     // Table now shows 2 rows
     await expect(page.getByText(/Showing.*2.*services/)).toBeVisible();
-    // The new row uses the generated name
-    await expect(page.getByText('AWS CloudTrail Logs [Duplicate]')).toBeVisible();
+    // The new row uses the generated name (title varies by package version).
+    await expect(page.getByText(/AWS CloudTrail.*\[Duplicate\]/)).toBeVisible();
   });
 
   test("duplicate row's config is independent from the original", async ({ browserAuth, page }) => {
