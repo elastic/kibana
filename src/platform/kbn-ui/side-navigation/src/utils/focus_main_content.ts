@@ -10,7 +10,7 @@
 import { MAIN_CONTENT_SELECTORS } from '@kbn/ui-chrome-layout-constants';
 
 /**
- * Utility function for focusing the main Kibana content.
+ * Utility function for focusing the main content landmark.
  */
 export const focusMainContent = () => {
   const mainElement = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));

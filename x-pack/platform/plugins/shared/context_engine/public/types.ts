@@ -10,6 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import type { AiIndexHttpItem } from '../common/http_api/ai_indices';
 
 /**
@@ -24,19 +25,26 @@ export interface AnalyzeAndImproveContext {
   tag?: string;
 }
 
-/** Opens Agent Builder to analyze the given signals. Registered via {@link ContextEnginePluginStart.registerChatOpener}. */
-export type ChatOpener = (context: AnalyzeAndImproveContext) => void;
+/** Opens Agent Builder to analyze the given signals. */
+export type ChatOpener = (context: AnalyzeAndImproveContext) => void | Promise<void>;
+
+/** Options passed to Agent Builder `openChat` for an Analyze & improve hand-off. */
+export interface AnalyzeChatOptions {
+  /** Feedback agent to open. */
+  agentId?: string;
+  /** When true, start a new conversation. */
+  newConversation: boolean;
+  /** Session tag for this AI index's conversation. */
+  sessionTag: string;
+  /** Attachments passed to Agent Builder. */
+  attachments: AttachmentInput[];
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEnginePluginSetup {}
 
-export interface ContextEnginePluginStart {
-  /**
-   * Registers the opener used by the "Analyze & improve" button. Until an opener is registered
-   * the button is hidden.
-   */
-  registerChatOpener: (opener: ChatOpener) => void;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ContextEnginePluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContextEngineSetupDependencies {}
