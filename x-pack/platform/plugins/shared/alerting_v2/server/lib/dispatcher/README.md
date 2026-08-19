@@ -269,31 +269,25 @@ Do **not** add a step when:
 ### Step 1: Create the step class
 
 ```typescript
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import type {
   AlertEpisode,
   DispatcherPipelineState,
   DispatcherStep,
   DispatcherStepOutput,
 } from '../types';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 @injectable()
 export class MyNewStep implements DispatcherStep {
   public readonly name = 'my_new_step';
 
-  constructor(
-    @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract
-  ) {}
-
   public async execute(
-    state: Readonly<DispatcherPipelineState>
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     if (!state.episodes?.length) {
-      this.logger.debug({ message: `[${this.name}] No episodes available` });
+      logger.debug({ message: 'No episodes available' });
       return { type: 'continue' };
     }
 
@@ -310,6 +304,8 @@ export class MyNewStep implements DispatcherStep {
   }
 }
 ```
+
+The pipeline hands each step a logger already labelled with the step name and the tick's `task_id`, so keep messages static and put anything variable in labels instead.
 
 ### Step 2: Extend pipeline state if needed
 
@@ -353,18 +349,18 @@ import { MyNewStep } from './my_new_step';
 import {
   createAlertEpisode,
   createDispatcherPipelineState,
+  createStepLogger,
 } from '../fixtures/test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 
 describe('MyNewStep', () => {
   it('adds state when episodes exist', async () => {
-    const { loggerService } = createLoggerService();
-    const step = new MyNewStep(loggerService);
+    const step = new MyNewStep();
 
     const result = await step.execute(
       createDispatcherPipelineState({
         episodes: [createAlertEpisode({ rule_id: 'rule-1' })],
-      })
+      }),
+      createStepLogger()
     );
 
     expect(result.type).toBe('continue');
@@ -373,6 +369,8 @@ describe('MyNewStep', () => {
   });
 });
 ```
+
+To assert on log output, pass `createLoggerService().loggerService` instead and inspect its `mockLogger`.
 
 ## Adding a new destination type
 
