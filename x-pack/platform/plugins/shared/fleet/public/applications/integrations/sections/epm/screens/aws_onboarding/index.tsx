@@ -21,6 +21,11 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiNotificationBadge,
   EuiPanel,
   EuiSelect,
@@ -31,6 +36,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiStepsHorizontalProps } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import {
   AWS_SCHEMA_META,
@@ -199,6 +205,8 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   // Data format: hidden-by-default choice made once here and applied
   // everywhere downstream (see aws_services_data.ts for the full rationale).
   const [schema, setSchema] = useState<AwsSchema>('ecs');
+  const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
+  const [pendingSchema, setPendingSchema] = useState<AwsSchema>(schema);
 
   // Deploy/detect state is lifted here (rather than owned by the Deploy step)
   // so it survives navigating to the separate Detect & Review step.
@@ -334,6 +342,11 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
     setDeploymentMethod(method);
   };
 
+  const openSchemaModal = () => {
+    setPendingSchema(schema);
+    setIsSchemaModalOpen(true);
+  };
+
   return (
     // Full-bleed white page canvas per design reference, overriding
     // Kibana's default page background for this flow only. emptyShade
@@ -374,38 +387,9 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
 
       {currentStep === 1 && (
         <>
-          {/* Data format sits apart from the task controls below (search,
-              filter) — it's a real decision with downstream effects, not
-              something that just changes what's visible in the list, so it
-              doesn't belong in that row. Positioned near the title instead,
-              matching how "Deployment method" sits at the top of its own
-              step rather than mixed into a control row. */}
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="m">
-                <h2>Which AWS services do you want to monitor?</h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ width: 260 }}>
-              {/* Most users never need to touch this. Styled like Step 2's
-                  "Trigger source" select (prepend label, compressed) rather
-                  than a button that opens a modal — this changes the value
-                  immediately, no confirmation step. */}
-              <EuiSelect
-                fullWidth
-                compressed
-                prepend="Data format"
-                options={[
-                  { value: 'ecs', text: AWS_SCHEMA_META.ecs.label },
-                  { value: 'otel', text: AWS_SCHEMA_META.otel.label },
-                ]}
-                value={schema}
-                onChange={(e) => setSchema(e.target.value as AwsSchema)}
-                aria-label="Data format"
-                data-test-subj="awsOnboardingEditSchema"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTitle size="m">
+            <h2>Which AWS services do you want to monitor?</h2>
+          </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">
             <p>
@@ -414,6 +398,51 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
             </p>
           </EuiText>
           <EuiSpacer size="m" />
+
+          {/* A real decision with downstream effects, not something that
+              just changes what's visible in the list — styled like a
+              settings card (same pattern as "Deployment method" on step 3)
+              rather than a plain filter control, and edited through a
+              confirm-to-change modal rather than an immediate select. */}
+          <EuiPanel
+            hasBorder
+            paddingSize="l"
+            style={{ overflow: 'hidden' }}
+            data-test-subj="awsOnboardingDataFormatPanel"
+          >
+            <div
+              style={{
+                margin: `-${euiTheme.size.l} -${euiTheme.size.l}`,
+                padding: euiTheme.size.l,
+                background: euiTheme.colors.backgroundBaseSubdued,
+              }}
+            >
+              <EuiFlexGroup alignItems="flexStart" responsive={false}>
+                <EuiFlexItem grow={false} style={{ paddingTop: 2 }}>
+                  <EuiIcon type="tableDensityNormal" size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h3>Data format</h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <EuiText size="s">
+                    <strong>{AWS_SCHEMA_META[schema].label}</strong>{' '}
+                    <EuiText size="s" color="subdued" component="span">
+                      {AWS_SCHEMA_META[schema].description}
+                    </EuiText>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiLink onClick={openSchemaModal} data-test-subj="awsOnboardingEditSchema">
+                    Edit
+                  </EuiLink>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
+          </EuiPanel>
+          <EuiSpacer size="m" />
+
           {/* gutterSize="s" = 8px, per design. */}
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem>
@@ -485,6 +514,64 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          {isSchemaModalOpen && (
+            <EuiModal
+              onClose={() => setIsSchemaModalOpen(false)}
+              aria-label="Edit data format"
+              data-test-subj="awsOnboardingDataFormatModal"
+              style={{ width: 400 }}
+            >
+              <EuiModalHeader>
+                <EuiModalHeaderTitle>Edit data format</EuiModalHeaderTitle>
+              </EuiModalHeader>
+              <EuiModalBody>
+                <EuiText size="s">
+                  <p>
+                    The data format determines the field mappings used for the data Elastic
+                    collects from your AWS services.
+                  </p>
+                </EuiText>
+                <EuiSpacer size="m" />
+                <EuiSelect
+                  fullWidth
+                  options={[
+                    { value: 'ecs', text: AWS_SCHEMA_META.ecs.label },
+                    { value: 'otel', text: AWS_SCHEMA_META.otel.label },
+                  ]}
+                  value={pendingSchema}
+                  onChange={(e) => setPendingSchema(e.target.value as AwsSchema)}
+                  aria-label="Data format"
+                />
+                {pendingSchema !== schema && (
+                  <>
+                    <EuiSpacer size="m" />
+                    <KbnWarningCallout announceOnMount title="This will reset your progress">
+                      <p>
+                        Changing the data format clears your selected services and any
+                        configuration entered so far — it isn&apos;t an additive change.
+                      </p>
+                    </KbnWarningCallout>
+                  </>
+                )}
+              </EuiModalBody>
+              <EuiModalFooter>
+                <EuiButtonEmpty onClick={() => setIsSchemaModalOpen(false)}>
+                  Cancel
+                </EuiButtonEmpty>
+                <EuiButton
+                  fill
+                  onClick={() => {
+                    setSchema(pendingSchema);
+                    setIsSchemaModalOpen(false);
+                  }}
+                  data-test-subj="awsOnboardingSaveSchema"
+                >
+                  {pendingSchema !== schema ? 'Change format' : 'Save'}
+                </EuiButton>
+              </EuiModalFooter>
+            </EuiModal>
+          )}
         </>
       )}
 
