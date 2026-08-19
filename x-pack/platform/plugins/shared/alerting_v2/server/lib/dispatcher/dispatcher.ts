@@ -73,7 +73,7 @@ export class DispatcherService implements DispatcherServiceContract {
           eventWatermark
             ? `eventWatermark is Invalid Date; falling back to cold start ` +
               `(${OVERLAP_WINDOW_MINUTES}m ago). Rule events older than that will not be dispatched.`
-            : `Dispatcher: no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
+            : `no persisted watermark; starting from ${OVERLAP_WINDOW_MINUTES}m ago. ` +
               `Rule events older than that will not be dispatched.`,
       });
     }
@@ -93,7 +93,7 @@ export class DispatcherService implements DispatcherServiceContract {
       // or corrupt task state. Skip the scan and hold the watermark to avoid a regress.
       logger.debug({
         message: () =>
-          `Dispatcher: windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
+          `windowEnd (${windowEnd.toISOString()}) ≤ windowStart ` +
           `(${windowStart.toISOString()}); skipping scan.`,
       });
       return {
@@ -158,7 +158,7 @@ export class DispatcherService implements DispatcherServiceContract {
           });
         } else {
           logger.debug({
-            message: () => `pipeline aborted by Task Manager signal.`,
+            message: 'pipeline aborted by Task Manager signal.',
           });
         }
       }
