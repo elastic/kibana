@@ -65,12 +65,21 @@ export const toMonitorPlacements = (
  * (inputs/vars/package) and single-policy binding over unchanged and drops
  * saved-object metadata Fleet recomputes on update, so the compiled config stays
  * identical and only the runtime agent condition changes.
+ *
+ * Carries `version` (the optimistic-concurrency token from the snapshot read) so
+ * Fleet rejects the write with a conflict if the package policy changed since —
+ * a concurrent monitor edit, or the `Sync-Private-Location-Monitors` task writing
+ * the same policy on its own schedule. Without it, this full-object rewrite built
+ * from a stale snapshot would silently revert that change. On conflict the mover
+ * lands in `bulkUpdate`'s failed set and is retried from a fresh read next cycle
+ * (the rebalance is idempotent).
  */
 export const toConditionUpdate = (
   pkgPolicy: PackagePolicy,
   condition: string
 ): UpdatePackagePolicyWithId => ({
   id: pkgPolicy.id,
+  version: pkgPolicy.version,
   name: pkgPolicy.name,
   description: pkgPolicy.description,
   namespace: pkgPolicy.namespace,
