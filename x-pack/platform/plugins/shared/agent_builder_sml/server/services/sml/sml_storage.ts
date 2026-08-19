@@ -21,16 +21,15 @@ export const smlIndexName = 'ai-index-idx-sml-data';
  *
  * History:
  *   1 — original shape (pre-composite-token era)
- *   2 — composite privilege tokens, `raw` field, implicit `login:` prefix, `count` semantics
- *   3 — `permissions.kibana.privileges` becomes `nested`, one element per space carrying
+ *   2 — `permissions.kibana.privileges` becomes `nested`, one element per space carrying
  *       `{ space, name[], count }`. `raw` and the implicit `login:` action are gone.
  *
- * The bump to 3 is load-bearing, not cosmetic: `object` -> `nested` is an illegal mapping merge
+ * The bump to 2 is load-bearing, not cosmetic: `object` -> `nested` is an illegal mapping merge
  * ("can't merge a non-nested mapping with a nested mapping"), so an existing index cannot be
  * updated in place. The version mismatch drops the index and forces a full re-crawl, which is the
  * only way this shape change can land.
  */
-export const SML_SCHEMA_VERSION = 3;
+export const SML_SCHEMA_VERSION = 2;
 
 const SEMANTIC_MULTI_FIELD = {
   semantic: types.semantic_text({}),
