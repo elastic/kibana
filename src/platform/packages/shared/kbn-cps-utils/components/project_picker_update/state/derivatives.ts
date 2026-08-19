@@ -7,119 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CPSProject } from '../../../types';
+import { PROJECT_ROUTING } from '@kbn/cps-common';
 import type { StoreDerivative } from './store';
 import type { FilterEntry, ProjectPickerState } from './reducers';
-import {
-  type FilterExpressionDraft,
-  type FilterExpressionValue,
-  type FilterOperatorLiteral,
-  getFilterExpressionLookupKey,
-  getOperatorKind,
-  isNegatedOperator,
-  isValidFilterExpression,
-  OperatorKind,
-} from '../utils/filter_input_codec';
-
-export const PREVIEW_FILTER_EXPRESSION_ID = '__preview__';
-
-const getProjectFieldValue = (project: CPSProject, tagName: string): string | undefined => {
-  const normalizedKey = tagName.startsWith('_') ? tagName : `_${tagName}`;
-  return project[normalizedKey] ?? project[tagName];
-};
-
-const matchesFilterValue = (
-  fieldValue: string | undefined,
-  operator: FilterOperatorLiteral,
-  tagValue: string | string[] | undefined
-): boolean => {
-  if (getOperatorKind(operator) === OperatorKind.EXISTS) {
-    return fieldValue !== undefined;
-  }
-
-  if (fieldValue === undefined || tagValue === undefined) {
-    return false;
-  }
-  return Array.isArray(tagValue) ? tagValue.includes(fieldValue) : fieldValue === tagValue;
-};
-
-export const applyFilterExpressions = (
-  availableProjects: Map<CPSProject['_id'], CPSProject>,
-  filterExpressions: Map<string, FilterEntry>
-): string[] => {
-  if (filterExpressions.size === 0) {
-    return [];
-  }
-
-  let matchingIds = Array.from(availableProjects.keys());
-
-  for (const entry of filterExpressions.values()) {
-    if (!entry.enabled) {
-      continue;
-    }
-
-    const { operator, tagName, tagValue } = entry.expression;
-
-    if (!tagName || (getOperatorKind(operator) !== OperatorKind.EXISTS && !tagValue)) {
-      continue;
-    }
-
-    const isNegated = isNegatedOperator(operator);
-    matchingIds = matchingIds.filter((id) => {
-      const project = availableProjects.get(id);
-      if (!project) {
-        return false;
-      }
-
-      const fieldValue = getProjectFieldValue(project, tagName);
-      const matches = matchesFilterValue(fieldValue, operator, tagValue);
-      return isNegated ? !matches : matches;
-    });
-  }
-
-  return matchingIds;
-};
-
-/**
- * Previews matching project IDs for a draft filter combined with existing filters.
- * Returns `null` when the draft is incomplete.
- */
-export const previewFilterMatchingIds = (
-  availableProjects: Map<CPSProject['_id'], CPSProject>,
-  existingFilterExpressions: Map<string, FilterEntry>,
-  draft: FilterExpressionDraft,
-  filterId?: string
-): string[] | null => {
-  if (!isValidFilterExpression(draft)) {
-    return null;
-  }
-
-  const previewFilters = new Map(existingFilterExpressions);
-  if (filterId) {
-    const existing = previewFilters.get(filterId);
-    previewFilters.set(filterId, {
-      expression: draft,
-      enabled: existing?.enabled ?? true,
-    });
-  } else {
-    previewFilters.set(PREVIEW_FILTER_EXPRESSION_ID, { expression: draft, enabled: true });
-  }
-
-  return applyFilterExpressions(availableProjects, previewFilters);
-};
-
-export function isDuplicateFilterExpressionDraft(
-  filterExpressions: Map<string, FilterEntry>,
-  draft: FilterExpressionValue,
-  editingFilterId?: string
-): boolean {
-  const draftKey = getFilterExpressionLookupKey(draft);
-  if (!filterExpressions.has(draftKey)) {
-    return false;
-  }
-
-  return draftKey !== editingFilterId;
-}
+import { type FilterExpressionValue } from '../utils/filter_input_codec';
+import { PROJECT_SELECTION_DIMENSION, projectRoutingCodec } from '../utils/project_routing_codec';
+import { createFilterExpressionsMap, parseDefaultProjectRouting } from '../utils';
+import { getEnabledFiltersIdentity } from '../utils/state_utils';
 
 export const hasActiveFilterExpressions = (
   filterExpressions: Map<string, FilterEntry>
@@ -145,9 +39,9 @@ export const computeVisibleProjectIds = (
 };
 
 export const getIncludedVisibleProjectIds = (
-  state: Pick<ProjectPickerState, 'visibleProjectIds' | 'selectedProjects'>
+  state: Pick<ProjectPickerState, 'visibleProjectIds' | 'selectedProjectIds'>
 ): string[] => {
-  const selected = new Set(state.selectedProjects);
+  const selected = new Set(state.selectedProjectIds);
   return state.visibleProjectIds.filter((id) => selected.has(id));
 };
 
@@ -167,21 +61,98 @@ export const computeSelectedProjects = (
 };
 
 /**
+ * The filters chips/menus should read: the pending proposal's filters if one exists, otherwise
+ * the committed ones. Lets edits appear immediately in the UI, ahead of server confirmation.
+ */
+export const computeDisplayedFilterExpressions = (
+  state: Pick<ProjectPickerState, 'proposedFilters' | 'filterExpressions'>
+): Map<string, FilterEntry> => state.proposedFilters?.filterExpressions ?? state.filterExpressions;
+
+export const computeIsFilterProposalPending = (
+  state: Pick<ProjectPickerState, 'proposedFilters'>
+): boolean => state.proposedFilters !== null;
+
+/**
+ * Whether the committed state is semantically equivalent to the space default routing.
+ *
+ * Compares the parsed default's filters and exclusions against the committed state rather
+ * than comparing routing strings: re-encoding is not string-stable — under the `snapshot`
+ * strategy the encoder always appends an explicit `_id:…` enumeration, and even `dynamic`
+ * defaults need not re-encode byte-for-byte (e.g. `'_alias:origin AND _id:*'` collapses to
+ * `'_alias:origin'`) — so string equality would report `false` forever after a revert.
+ */
+export const computeIsUsingSpaceDefaults = (
+  state: Pick<
+    ProjectPickerState,
+    | 'defaultProjectRouting'
+    | 'availableProjects'
+    | 'originProjectId'
+    | 'filterExpressions'
+    | 'excludedOverrides'
+  >
+): boolean => {
+  // A blank default means the space has no default routing configured, so there is nothing
+  // to be "using" (and nothing the revert action could restore).
+  if (!state.defaultProjectRouting?.trim()) {
+    return false;
+  }
+
+  const parsed = parseDefaultProjectRouting(
+    state.defaultProjectRouting,
+    Array.from(state.availableProjects.keys()),
+    state.originProjectId
+  );
+
+  const filtersMatch =
+    getEnabledFiltersIdentity(createFilterExpressionsMap(parsed.filterExpressions)) ===
+    getEnabledFiltersIdentity(state.filterExpressions);
+
+  if (!filtersMatch) {
+    return false;
+  }
+
+  const defaultExclusions = new Set(parsed.excludedOverrides);
+  return (
+    state.excludedOverrides.length === defaultExclusions.size &&
+    state.excludedOverrides.every((id) => defaultExclusions.has(id))
+  );
+};
+
+export const computeCurrentProjectRouting = (state: ProjectPickerState) => {
+  const routing = projectRoutingCodec.encode({
+    filterExpressions: Array.from(state.filterExpressions.values()).reduce((acc, entry) => {
+      if (entry.enabled) {
+        acc.push(entry.expression);
+      }
+      return acc;
+    }, [] as FilterExpressionValue[]),
+    excludedProjectIds: state.excludedOverrides,
+    selectedProjectIds: state.selectedProjectIds,
+    projectRoutingStrategy: state.projectRoutingStrategy,
+  });
+
+  return routing || PROJECT_ROUTING.ALL;
+};
+
+/**
  * Derivatives are computed values that are derived from the state of the project picker.
  * Order is important here, when derivations depend on other derivations, they should be computed after the dependent derivations.
  */
 export const projectPickerDerivatives = [
   {
-    key: 'filteredProjectIds',
-    compute: (state: ProjectPickerState) =>
-      applyFilterExpressions(state.availableProjects, state.filterExpressions),
+    key: 'displayedFilterExpressions',
+    compute: (state: ProjectPickerState) => computeDisplayedFilterExpressions(state),
+  },
+  {
+    key: 'isFilterProposalPending',
+    compute: (state: ProjectPickerState) => computeIsFilterProposalPending(state),
   },
   {
     key: 'visibleProjectIds',
     compute: (state: ProjectPickerState) => computeVisibleProjectIds(state),
   },
   {
-    key: 'selectedProjects',
+    key: 'selectedProjectIds',
     compute: (state: ProjectPickerState) => computeSelectedProjects(state),
   },
   {
@@ -190,10 +161,20 @@ export const projectPickerDerivatives = [
       const dimensions = new Set<string>();
       for (const project of state.availableProjects.values()) {
         for (const key of Object.keys(project)) {
-          dimensions.add(key);
+          if (key !== PROJECT_SELECTION_DIMENSION) {
+            dimensions.add(key);
+          }
         }
       }
       return Array.from(dimensions);
     },
+  },
+  {
+    key: 'currentProjectRouting',
+    compute: (state: ProjectPickerState) => computeCurrentProjectRouting(state),
+  },
+  {
+    key: 'isUsingSpaceDefaults',
+    compute: (state: ProjectPickerState) => computeIsUsingSpaceDefaults(state),
   },
 ] as const satisfies Array<StoreDerivative<ProjectPickerState, keyof ProjectPickerState>>;
