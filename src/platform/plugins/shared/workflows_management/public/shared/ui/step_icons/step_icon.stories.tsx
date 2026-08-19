@@ -107,6 +107,9 @@ const buildWorkflowsExtensionsFromRegistry = ({
   getTriggerDefinition: (id) => triggerDefs.find((d) => d.id === id),
   getAllTriggerDefinitions: () => triggerDefs,
   hasTriggerDefinition: (id) => triggerDefs.some((d) => d.id === id),
+  getManualWorkflowEventDefinition: () => undefined,
+  getAllManualWorkflowEventDefinitions: () => [],
+  hasManualWorkflowEventDefinition: () => false,
   isReady: async () => {},
 });
 

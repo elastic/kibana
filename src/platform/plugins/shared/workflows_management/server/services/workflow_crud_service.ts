@@ -339,9 +339,16 @@ export class WorkflowCrudService {
   }): Promise<{ id: string; workflowData: WorkflowProperties; definition?: WorkflowYaml }> {
     const registeredTriggerIds =
       this.deps.workflowsExtensions?.getAllTriggerDefinitions().map((t) => t.id) ?? [];
+    const manualWorkflowEventIds =
+      this.deps.workflowsExtensions
+        ?.getAllManualWorkflowEventDefinitions()
+        .map((definition) => definition.id) ?? [];
     let zodSchema: z.ZodType;
     if (params.lightweightValidation) {
-      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds, { lightweight: true });
+      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds, {
+        lightweight: true,
+        manualWorkflowEventIds,
+      });
     } else if (params.request) {
       zodSchema = await this.deps.validationService.getWorkflowZodSchema(
         { loose: false },
@@ -349,7 +356,7 @@ export class WorkflowCrudService {
         params.request
       );
     } else {
-      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds);
+      zodSchema = getWorkflowZodSchema({}, registeredTriggerIds, { manualWorkflowEventIds });
     }
     const triggerDefinitions = params.lightweightValidation
       ? undefined

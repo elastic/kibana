@@ -103,7 +103,7 @@ function getWorkflowsConnectorTypeArgs(
       const workflowToRun: WorkflowExecutionEngineModel = toWorkflowExecutionEngineModel(workflow);
 
       // Run the workflow, @tb: maybe switch to scheduler?
-      return workflowsManagementApi.runWorkflow(workflowToRun, spaceId, inputs, request);
+      return workflowsManagementApi.runWorkflow(workflowToRun, spaceId, inputs, request, 'alert');
     };
   };
 

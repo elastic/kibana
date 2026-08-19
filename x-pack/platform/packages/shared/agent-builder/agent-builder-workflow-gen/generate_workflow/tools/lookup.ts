@@ -97,8 +97,15 @@ export const lookupStepDefinitions = async (
 export const lookupTriggerDefinitions = async (
   args: { triggerType?: string },
   { api }: LookupDeps
-): Promise<unknown> =>
-  lookupTriggerDefinitionsForAgent({
-    registeredTriggers: await api.getRegisteredTriggers(),
+): Promise<unknown> => {
+  const [registeredTriggers, manualEventDefinitions] = await Promise.all([
+    api.getRegisteredTriggers(),
+    api.getRegisteredManualWorkflowEventDefinitions(),
+  ]);
+
+  return lookupTriggerDefinitionsForAgent({
+    registeredTriggers,
+    manualEventDefinitions,
     triggerType: args.triggerType,
   });
+};

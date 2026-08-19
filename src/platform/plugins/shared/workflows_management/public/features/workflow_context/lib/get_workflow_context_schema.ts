@@ -9,7 +9,7 @@
 
 import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { DynamicWorkflowContextSchema, EventTimestampSchema, isTriggerType } from '@kbn/workflows';
+import { DynamicWorkflowContextSchema, isTriggerType } from '@kbn/workflows';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import {
   extractNormalizedInputsFromYaml,
@@ -19,10 +19,13 @@ import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
 import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import { inferZodType } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
+import { extendEventContextSchema } from '../../../../common/build_event_context_schema';
+import { manualWorkflowEventSchemas } from '../../../manual_workflow_event_schemas';
 import { triggerSchemas } from '../../../trigger_schemas';
 
-function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
-  return schema instanceof z.ZodObject;
+interface WorkflowTriggerReference {
+  type?: string;
+  eventType?: string;
 }
 
 /**
@@ -30,7 +33,7 @@ function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
  * Custom trigger event schemas are resolved via the triggerSchemas singleton (same pattern as stepSchemas for steps).
  * Uses shape spread instead of deprecated Zod v4 .merge().
  */
-function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.ZodType {
+function buildEventSchemaFromTriggers(triggers: WorkflowTriggerReference[]): z.ZodType {
   const hasAlertTrigger = triggers.some((trigger) => trigger.type === 'alert');
   let eventSchema: z.ZodType = hasAlertTrigger
     ? z.object({
@@ -39,13 +42,16 @@ function buildEventSchemaFromTriggers(triggers: Array<{ type?: string }>): z.Zod
     : BaseEventSchema;
   for (const trigger of triggers) {
     const type = trigger?.type;
-    if (typeof type === 'string' && !isTriggerType(type)) {
+    if (type === 'manual' && typeof trigger.eventType === 'string') {
+      const definition = manualWorkflowEventSchemas.getDefinition(trigger.eventType);
+      if (definition) {
+        eventSchema = extendEventContextSchema(eventSchema, definition.eventSchema);
+      }
+    } else if (typeof type === 'string' && !isTriggerType(type)) {
       const def = triggerSchemas.getTriggerDefinition(type);
-      if (def?.eventSchema && isZodObject(eventSchema) && isZodObject(def.eventSchema)) {
-        eventSchema = z.object({
-          ...eventSchema.shape,
-          ...def.eventSchema.shape,
-          ...(EventTimestampSchema as z.ZodObject<z.ZodRawShape>).shape,
+      if (def?.eventSchema) {
+        eventSchema = extendEventContextSchema(eventSchema, def.eventSchema, {
+          includeTimestamp: true,
         });
       }
     }

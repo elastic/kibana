@@ -13,7 +13,7 @@ import { registerGetTriggerDefinitionsTool } from './get_trigger_definitions_too
 
 type GetRegisteredTriggersApi = Pick<
   WorkflowsServerPluginSetup['management'],
-  'getRegisteredTriggers'
+  'getRegisteredTriggers' | 'getRegisteredManualWorkflowEventDefinitions'
 >;
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
@@ -34,6 +34,7 @@ describe('registerGetTriggerDefinitionsTool', () => {
   beforeEach(() => {
     mockApi = {
       getRegisteredTriggers: jest.fn().mockResolvedValue([mockCasesTrigger]),
+      getRegisteredManualWorkflowEventDefinitions: jest.fn().mockResolvedValue([]),
     };
 
     const agentBuilder = {
@@ -54,6 +55,7 @@ describe('registerGetTriggerDefinitionsTool', () => {
     const result = await invokeHandler(registeredTool, { triggerType: 'manual' }, {});
 
     expect(mockApi.getRegisteredTriggers).toHaveBeenCalled();
+    expect(mockApi.getRegisteredManualWorkflowEventDefinitions).toHaveBeenCalled();
     expect(result.results).toHaveLength(1);
     expect(result.results[0].type).toBe('other');
     expect(result.results[0].data).toEqual({

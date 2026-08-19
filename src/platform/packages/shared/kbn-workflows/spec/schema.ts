@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import { convertLegacyFieldsToJsonSchema } from './lib/field_conversion';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
-import { TriggerSchema } from './schema/triggers';
+import { getWorkflowTriggersSchema, TriggerSchema } from './schema/triggers';
 import { AlertEventSchema } from './schema/triggers/alert_trigger_schema';
 import {
   isManualTrigger,
@@ -1047,7 +1047,7 @@ function normalizeFieldsToJsonSchema(value: unknown): z.infer<typeof JsonModelSc
 }
 
 export const WorkflowSchema = WorkflowSchemaBase.extend({
-  triggers: z.array(TriggerSchema).min(1),
+  triggers: getWorkflowTriggersSchema(TriggerSchema),
 }).transform((data) => {
   const normalizedOutputs = normalizeFieldsToJsonSchema(data.outputs);
 

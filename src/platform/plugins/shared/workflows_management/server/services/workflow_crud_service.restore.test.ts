@@ -331,7 +331,10 @@ describe('WorkflowCrudService.restoreWorkflowVersion integration', () => {
             getCurrentUser: jest.fn().mockReturnValue({ username: 'alice' }),
           },
         } as any),
-      workflowsExtensions: { getAllTriggerDefinitions: () => [] } as any,
+      workflowsExtensions: {
+        getAllTriggerDefinitions: () => [],
+        getAllManualWorkflowEventDefinitions: () => [],
+      } as any,
       getTaskScheduler: () => null,
       executionQueryService: {
         getWorkflowExecutions: jest.fn().mockResolvedValue({ total: 0, results: [] }),

@@ -8,6 +8,7 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { PublicManualWorkflowEventRegistry } from './manual_workflow_event_registry';
 import { PublicStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
 import { PublicTriggerRegistry } from './trigger_registry';
@@ -18,6 +19,7 @@ import type {
   WorkflowsExtensionsPublicPluginStart,
   WorkflowsExtensionsPublicPluginStartDeps,
 } from './types';
+import { registerInternalManualWorkflowEventDefinitions } from '../common';
 
 export class WorkflowsExtensionsPublicPlugin
   implements
@@ -30,10 +32,12 @@ export class WorkflowsExtensionsPublicPlugin
 {
   private readonly stepRegistry: PublicStepRegistry;
   private readonly triggerRegistry: PublicTriggerRegistry;
+  private readonly manualWorkflowEventRegistry: PublicManualWorkflowEventRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.stepRegistry = new PublicStepRegistry(initializerContext.logger.get());
     this.triggerRegistry = new PublicTriggerRegistry();
+    this.manualWorkflowEventRegistry = new PublicManualWorkflowEventRegistry();
   }
 
   public setup(
@@ -42,10 +46,13 @@ export class WorkflowsExtensionsPublicPlugin
   ): WorkflowsExtensionsPublicPluginSetup {
     registerInternalStepDefinitions(this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
+    registerInternalManualWorkflowEventDefinitions(this.manualWorkflowEventRegistry);
 
     return {
       registerStepDefinition: (definition) => this.stepRegistry.register(definition),
       registerTriggerDefinition: (definition) => this.triggerRegistry.register(definition),
+      registerManualWorkflowEventDefinition: (definition) =>
+        this.manualWorkflowEventRegistry.register(definition),
     };
   }
 
@@ -53,6 +60,8 @@ export class WorkflowsExtensionsPublicPlugin
     _core: CoreStart,
     _plugins: WorkflowsExtensionsPublicPluginStartDeps
   ): WorkflowsExtensionsPublicPluginStart {
+    this.manualWorkflowEventRegistry.freeze();
+
     return {
       getAllStepDefinitions: () => {
         return this.stepRegistry.getAll();
@@ -72,8 +81,21 @@ export class WorkflowsExtensionsPublicPlugin
       hasTriggerDefinition: (triggerId: string) => {
         return this.triggerRegistry.has(triggerId);
       },
+      getAllManualWorkflowEventDefinitions: () => {
+        return this.manualWorkflowEventRegistry.getAll();
+      },
+      getManualWorkflowEventDefinition: (id: string) => {
+        return this.manualWorkflowEventRegistry.get(id);
+      },
+      hasManualWorkflowEventDefinition: (id: string) => {
+        return this.manualWorkflowEventRegistry.has(id);
+      },
       isReady: async () => {
-        await Promise.all([this.stepRegistry.whenReady(), this.triggerRegistry.whenReady()]);
+        await Promise.all([
+          this.stepRegistry.whenReady(),
+          this.triggerRegistry.whenReady(),
+          this.manualWorkflowEventRegistry.whenReady(),
+        ]);
       },
     };
   }

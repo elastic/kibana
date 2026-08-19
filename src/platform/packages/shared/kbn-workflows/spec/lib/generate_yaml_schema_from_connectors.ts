@@ -35,7 +35,7 @@ import {
   WorkflowSchemaForAutocompleteBase,
   WorkflowSettingsSchema,
 } from '../schema';
-import { getTriggerSchema } from '../schema/triggers';
+import { getTriggerSchema, getWorkflowTriggersSchema } from '../schema/triggers';
 
 export function getStepId(stepName: string): string {
   // Using step name as is, don't do any escaping to match the workflow engine behavior
@@ -50,7 +50,9 @@ export function generateYamlSchemaFromConnectors(
   /**
    * @deprecated use WorkflowSchemaForAutocomplete instead
    */
-  loose: boolean = false
+  loose: boolean = false,
+  /** Registered manual workflow event ids surfaced for `manual.eventType`. */
+  manualWorkflowEventIds: string[] = []
 ): z.ZodType {
   const recursiveStepSchema = createRecursiveStepSchema(connectors, loose);
 
@@ -66,9 +68,9 @@ export function generateYamlSchemaFromConnectors(
     }));
   }
 
-  const triggerSchema = getTriggerSchema(triggers);
+  const triggerSchema = getTriggerSchema(triggers, manualWorkflowEventIds);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z.array(triggerSchema).min(1),
+    triggers: getWorkflowTriggersSchema(triggerSchema),
   });
 
   return workflowBaseWithTriggers.extend({
@@ -81,12 +83,15 @@ export function generateYamlSchemaFromConnectors(
  * Generates a schema for trusted workflow definitions that need the shared workflow envelope
  * validation without materializing the connector-expanded step union.
  */
-export function generateLightweightYamlSchema(triggers: string[] = []): z.ZodType {
+export function generateLightweightYamlSchema(
+  triggers: string[] = [],
+  manualWorkflowEventIds: string[] = []
+): z.ZodType {
   // Trigger schemas are lightweight: custom IDs add literal trigger variants and do
   // not materialize connector or step-definition schemas.
-  const triggerSchema = getTriggerSchema(triggers);
+  const triggerSchema = getTriggerSchema(triggers, manualWorkflowEventIds);
   const workflowBaseWithTriggers = WorkflowSchemaBase.extend({
-    triggers: z.array(triggerSchema).min(1),
+    triggers: getWorkflowTriggersSchema(triggerSchema),
   });
 
   return workflowBaseWithTriggers.extend({

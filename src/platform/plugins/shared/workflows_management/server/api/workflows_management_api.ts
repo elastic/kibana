@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ExecutionStatus,
   getWorkflowJsonSchema,
+  MULTIPLE_MANUAL_EVENT_TYPES_ERROR,
   toWorkflowExecutionEngineModel,
   transformWorkflowYamlJsontoEsWorkflow,
 } from '@kbn/workflows';
@@ -54,6 +55,7 @@ import type {
   ExecutionLogsParams,
   StepLogsParams,
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
+import type { ManualWorkflowEventDefinition } from '@kbn/workflows-extensions/common';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import {
   parseWorkflowYamlToJSON,
@@ -73,6 +75,7 @@ import {
 import type { StepExecutionListResult } from './lib/search_step_executions';
 import { ManagedWorkflowDeleteForbiddenError } from './managed_workflow_delete_error';
 import { ManagedWorkflowUpdateForbiddenError } from './managed_workflow_errors';
+import { ManualWorkflowEventValidationError } from './manual_workflow_event_validation_error';
 import type {
   SearchExecutionsViewParams,
   SearchWorkflowExecutionsParams,
@@ -485,6 +488,7 @@ export class WorkflowsManagementApi {
     triggeredBy?: string,
     metadata?: Record<string, unknown>
   ): Promise<string> {
+    await this.validateManualWorkflowEvent(workflow, inputs.event, triggeredBy);
     const { event, ...manualInputs } = inputs;
     const context: Record<string, unknown> = {
       event,
@@ -715,6 +719,23 @@ export class WorkflowsManagementApi {
     }
 
     const workflowJson = transformWorkflowYamlJsontoEsWorkflow(validation.parsedWorkflow);
+    const workflowForExecution = toWorkflowExecutionEngineModel(
+      {
+        id: resolvedWorkflowId,
+        name: workflowJson.name,
+        enabled: workflowJson.enabled,
+        definition: workflowJson.definition,
+        yaml: resolvedYaml,
+        version: existingWorkflow?.version,
+        managed: existingWorkflow?.managed,
+        managedBy: existingWorkflow?.managedBy,
+        originManagedWorkflowId: existingWorkflow?.originManagedWorkflowId,
+        managedVersion: existingWorkflow?.managedVersion,
+      },
+      { isTestRun: true, isEphemeral: true }
+    );
+    await this.validateManualWorkflowEvent(workflowForExecution, inputs.event);
+
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
@@ -723,21 +744,7 @@ export class WorkflowsManagementApi {
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
-      toWorkflowExecutionEngineModel(
-        {
-          id: resolvedWorkflowId,
-          name: workflowJson.name,
-          enabled: workflowJson.enabled,
-          definition: workflowJson.definition,
-          yaml: resolvedYaml,
-          version: existingWorkflow?.version,
-          managed: existingWorkflow?.managed,
-          managedBy: existingWorkflow?.managedBy,
-          originManagedWorkflowId: existingWorkflow?.originManagedWorkflowId,
-          managedVersion: existingWorkflow?.managedVersion,
-        },
-        { isTestRun: true, isEphemeral: true }
-      ),
+      workflowForExecution,
       context,
       request
     );
@@ -1014,6 +1021,62 @@ export class WorkflowsManagementApi {
 
   public async getRegisteredTriggers(): Promise<ServerTriggerDefinition[]> {
     return this.workflowsService.getRegisteredCustomTriggerDefinitions();
+  }
+
+  public async getRegisteredManualWorkflowEventDefinitions(): Promise<
+    ManualWorkflowEventDefinition[]
+  > {
+    const workflowsExtensions = await this.workflowsService.getWorkflowsExtensions();
+    return workflowsExtensions.getAllManualWorkflowEventDefinitions();
+  }
+
+  private async validateManualWorkflowEvent(
+    workflow: WorkflowExecutionEngineModel,
+    event: unknown,
+    triggeredBy?: string
+  ): Promise<void> {
+    const typedManualTriggers =
+      workflow.definition?.triggers?.filter(
+        (trigger) => trigger.type === 'manual' && trigger.eventType !== undefined
+      ) ?? [];
+    if (typedManualTriggers.length > 1) {
+      throw new ManualWorkflowEventValidationError(MULTIPLE_MANUAL_EVENT_TYPES_ERROR);
+    }
+    if (triggeredBy !== undefined && triggeredBy !== 'manual') {
+      return;
+    }
+
+    const manualTrigger = typedManualTriggers[0];
+    if (!manualTrigger || manualTrigger.type !== 'manual') {
+      return;
+    }
+    const { eventType } = manualTrigger;
+    if (!eventType) {
+      return;
+    }
+
+    const workflowsExtensions = await this.workflowsService.getWorkflowsExtensions();
+    const definition = workflowsExtensions.getManualWorkflowEventDefinition(eventType);
+    if (!definition) {
+      throw new ManualWorkflowEventValidationError(
+        `Manual workflow event type "${eventType}" is not registered.`
+      );
+    }
+
+    const result = await definition.eventSchema.safeParseAsync(event);
+    if (result.success) {
+      return;
+    }
+
+    const details = result.error.issues
+      .map(({ path: issuePath, message }) => {
+        const pathSuffix = issuePath.length > 0 ? `.${issuePath.map(String).join('.')}` : '';
+        return `inputs.event${pathSuffix}: ${message}`;
+      })
+      .join('; ');
+    throw new ManualWorkflowEventValidationError(
+      `Invalid payload for manual workflow event type "${eventType}": ${details}`
+    );
   }
 
   public async getWorkflowJsonSchema(

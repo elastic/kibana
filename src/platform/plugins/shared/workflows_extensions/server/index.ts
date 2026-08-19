@@ -26,6 +26,7 @@ export type {
   WorkflowsExtensionsServerPluginSetupDeps,
   WorkflowsExtensionsServerPluginStartDeps,
 } from './types';
+export type { ManualWorkflowEventDefinition } from '../common';
 
 export type { EventChainContext } from './event_chain_context';
 
@@ -74,6 +75,7 @@ export {
 } from './step_registry/types';
 
 export { TriggerRegistry } from './trigger_registry';
+export { ServerManualWorkflowEventRegistry } from './manual_workflow_event_registry';
 
 export { WORKFLOW_EXECUTION_FAILED_TRIGGER_ID } from './triggers';
 export type { WorkflowExecutionFailedEvent } from './triggers';

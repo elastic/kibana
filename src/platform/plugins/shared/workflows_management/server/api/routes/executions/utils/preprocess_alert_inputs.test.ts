@@ -9,6 +9,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { AlertEventSchema } from '@kbn/workflows';
 import { preprocessAlertInputs } from './preprocess_alert_inputs';
 import type { WorkflowsRequestHandlerContext } from '../../../../types';
 
@@ -168,6 +169,7 @@ describe('preprocessAlertInputs', () => {
       expect(event.rule.id).toBe('rule-uuid-123');
       expect(event.rule.name).toBe('Test Rule');
       expect(event.spaceId).toBe('default');
+      expect(AlertEventSchema.safeParse(result.event).success).toBe(true);
     });
 
     it('should handle alerts from multiple rules and use the first rule', async () => {

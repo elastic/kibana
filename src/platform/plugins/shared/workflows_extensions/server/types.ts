@@ -20,7 +20,7 @@ import type {
 } from '@kbn/workflows/server/types';
 import type { z } from '@kbn/zod/v4';
 import type { ServerStepDefinition } from './step_registry/types';
-import type { CommonTriggerDefinition } from '../common';
+import type { CommonTriggerDefinition, ManualWorkflowEventDefinition } from '../common';
 import type { WorkflowsExtensionsStartContract } from '../common/types';
 
 /** Server-side alias: same as CommonTriggerDefinition (used when registering on the server). */
@@ -49,6 +49,11 @@ export interface WorkflowsExtensionsServerPluginSetup {
    * @throws Error if trigger id is already registered, validation fails, or registration is attempted after setup
    */
   registerTriggerDefinition(definition: ServerTriggerDefinition): void;
+
+  /**
+   * Register a typed event that can be selected by a manual workflow trigger.
+   */
+  registerManualWorkflowEventDefinition(definition: ManualWorkflowEventDefinition): void;
 
   /**
    * Register the workflows client provider.
@@ -89,6 +94,21 @@ export type WorkflowsExtensionsServerPluginStart =
      * @returns The trigger definition, or undefined if not registered
      */
     getTriggerDefinition(triggerId: string): ServerTriggerDefinition | undefined;
+
+    /**
+     * Get all registered manual workflow event definitions.
+     */
+    getAllManualWorkflowEventDefinitions(): ManualWorkflowEventDefinition[];
+
+    /**
+     * Get a registered manual workflow event definition by id.
+     */
+    getManualWorkflowEventDefinition(id: string): ManualWorkflowEventDefinition | undefined;
+
+    /**
+     * Check whether a manual workflow event definition is registered.
+     */
+    hasManualWorkflowEventDefinition(id: string): boolean;
 
     /**
      * Get the workflows client for the current request.

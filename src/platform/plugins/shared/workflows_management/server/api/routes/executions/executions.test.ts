@@ -18,6 +18,7 @@ import { registerExecutionRoutes } from '.';
 import type { WorkflowsManagementConfig } from '../../../config';
 import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import { ManagedWorkflowExecutionReadForbiddenError } from '../../managed_workflow_execution_read_error';
+import { ManualWorkflowEventValidationError } from '../../manual_workflow_event_validation_error';
 import type { RouteDependencies } from '../types';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
@@ -259,6 +260,26 @@ describe('Execution Routes', () => {
 
       expect(mockResponse.customError).toHaveBeenCalled();
       expect(result).toMatchObject({ type: 'customError', body: expect.objectContaining({}) });
+    });
+
+    it('returns a client error when the manual event payload is invalid', async () => {
+      mockApi.getWorkflow.mockResolvedValue(mockWorkflow);
+      mockApi.runWorkflow.mockRejectedValue(
+        new ManualWorkflowEventValidationError(
+          'Invalid payload for manual workflow event type "cases.updated".'
+        )
+      );
+      const h = handler('POST', path)!;
+      const request = { params: { id: 'wf-1' }, body: { inputs: {} } };
+
+      const result = await h(mockContext, request as any, mockResponse as any);
+
+      expect(mockResponse.badRequest).toHaveBeenCalledWith({
+        body: {
+          message: 'Invalid payload for manual workflow event type "cases.updated".',
+        },
+      });
+      expect(result).toMatchObject({ type: 'badRequest' });
     });
   });
 

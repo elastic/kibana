@@ -14,6 +14,7 @@ import { getWorkflowJsonSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
 import { getWorkflowZodSchema, getWorkflowZodSchemaLoose } from '../../../../common/schema';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import { manualWorkflowEventSchemas } from '../../../manual_workflow_event_schemas';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 const WorkflowSchemaUriStrict = 'file:///workflow-schema.json';
@@ -54,9 +55,12 @@ export const useWorkflowJsonSchema = ({
       }
       const connectorTypes = connectorsData?.connectorTypes ?? {};
       const registeredTriggerIds = triggerSchemas.getRegisteredIds();
+      const manualWorkflowEventIds = manualWorkflowEventSchemas.getRegisteredIds();
       const zodSchema = loose
         ? getWorkflowZodSchemaLoose(connectorTypes)
-        : getWorkflowZodSchema(connectorTypes, registeredTriggerIds); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
+        : getWorkflowZodSchema(connectorTypes, registeredTriggerIds, {
+            manualWorkflowEventIds,
+          }); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getWorkflowJsonSchema(zodSchema);
 
       return {

@@ -10,6 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ValidateWorkflowResponseDto } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
+import type { ManualWorkflowEventDefinition } from '@kbn/workflows-extensions/common';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 
@@ -37,6 +38,10 @@ export class WorkflowValidationService {
     return this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
   }
 
+  getRegisteredManualWorkflowEventDefinitions(): ManualWorkflowEventDefinition[] {
+    return this.deps.workflowsExtensions?.getAllManualWorkflowEventDefinitions() ?? [];
+  }
+
   async validateWorkflow(
     yaml: string,
     spaceId: string,
@@ -54,6 +59,9 @@ export class WorkflowValidationService {
   ): Promise<z.ZodType> {
     const { connectorTypes } = await this.getAvailableConnectors(spaceId, request);
     const registeredTriggerIds = this.getRegisteredCustomTriggerDefinitions().map((t) => t.id);
-    return getWorkflowZodSchema(connectorTypes, registeredTriggerIds);
+    const manualWorkflowEventIds = this.getRegisteredManualWorkflowEventDefinitions().map(
+      (definition) => definition.id
+    );
+    return getWorkflowZodSchema(connectorTypes, registeredTriggerIds, { manualWorkflowEventIds });
   }
 }

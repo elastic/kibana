@@ -32,6 +32,7 @@ import { TelemetryService } from './common/lib/telemetry/telemetry_service';
 import type { WorkflowsBaseTelemetry } from './common/service/telemetry';
 import type { DeepLinksParams } from './deep_links';
 import { getDeepLinks } from './deep_links';
+import { manualWorkflowEventSchemas } from './manual_workflow_event_schemas';
 import { triggerSchemas } from './trigger_schemas';
 import type {
   WorkflowsPublicPluginSetup,
@@ -127,6 +128,7 @@ export class WorkflowsPlugin
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
     triggerSchemas.initialize(plugins.workflowsExtensions);
+    manualWorkflowEventSchemas.initialize(plugins.workflowsExtensions);
 
     this.subscribeToWorkflowsSettingChange(core);
 

@@ -11,7 +11,8 @@ import type { WorkflowValidationDeps } from './types';
 import { WorkflowValidationService } from './workflow_validation_service';
 
 const makeDeps = (
-  listedTriggers: Array<{ id: string }> = []
+  listedTriggers: Array<{ id: string }> = [],
+  listedManualWorkflowEvents: Array<{ id: string }> = []
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
@@ -23,6 +24,7 @@ const makeDeps = (
     deps: {
       workflowsExtensions: {
         getAllTriggerDefinitions: () => listedTriggers as any,
+        getAllManualWorkflowEventDefinitions: () => listedManualWorkflowEvents as any,
       } as any,
       getActionsClient: jest.fn().mockResolvedValue(actionsClient) as any,
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest) as any,
@@ -54,6 +56,17 @@ describe('WorkflowValidationService', () => {
     });
   });
 
+  describe('getRegisteredManualWorkflowEventDefinitions', () => {
+    it('returns manual workflow events from workflows extensions', () => {
+      const { deps } = makeDeps([], [{ id: 'cases.updated' }]);
+      const service = new WorkflowValidationService(deps);
+
+      expect(service.getRegisteredManualWorkflowEventDefinitions()).toEqual([
+        { id: 'cases.updated' },
+      ]);
+    });
+  });
+
   describe('getAvailableConnectors', () => {
     it('delegates to the library helper with the plumbed clients and spaceId', async () => {
       const { deps, actionsClient, actionsClientWithRequest } = makeDeps();
@@ -79,6 +92,22 @@ describe('WorkflowValidationService', () => {
       expect(schema).toBeDefined();
       expect(typeof (schema as any).parse).toBe('function');
       expect(actionsClient.getAll).toHaveBeenCalledTimes(1);
+    });
+
+    it('includes registered manual workflow event ids', async () => {
+      const { deps } = makeDeps([], [{ id: 'cases.updated' }]);
+      const service = new WorkflowValidationService(deps);
+      const request = {} as any;
+
+      const schema = await service.getWorkflowZodSchema({ loose: false }, 'default', request);
+
+      expect(
+        schema.safeParse({
+          name: 'Manual event workflow',
+          triggers: [{ type: 'manual', eventType: 'cases.updated' }],
+          steps: [],
+        }).success
+      ).toBe(true);
     });
   });
 

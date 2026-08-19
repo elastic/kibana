@@ -67,11 +67,34 @@ export const WorkflowInputSchema = z.union([
 ]);
 export type WorkflowInput = z.infer<typeof WorkflowInputSchema>;
 
+export const MANUAL_WORKFLOW_EVENT_TYPE_MAX_LENGTH = 512;
+
 export const ManualTriggerSchema = z.object({
   type: z.literal('manual'),
+  eventType: z.string().min(1).max(MANUAL_WORKFLOW_EVENT_TYPE_MAX_LENGTH).optional(),
   inputs: WorkflowInputSchema.optional(),
 });
 export type ManualTrigger = z.infer<typeof ManualTriggerSchema>;
+
+/**
+ * Builds the manual trigger schema with registered event ids surfaced as suggestions while
+ * retaining string compatibility for workflows created before an event definition is registered.
+ */
+export const getManualTriggerSchema = (manualWorkflowEventIds: string[] = []): z.ZodObject => {
+  if (manualWorkflowEventIds.length === 0) {
+    return ManualTriggerSchema;
+  }
+
+  const registeredEventIds = manualWorkflowEventIds as [string, ...string[]];
+  return ManualTriggerSchema.extend({
+    eventType: z
+      .union([
+        z.enum(registeredEventIds),
+        z.string().min(1).max(MANUAL_WORKFLOW_EVENT_TYPE_MAX_LENGTH),
+      ])
+      .optional(),
+  });
+};
 
 export const ManualTriggerEventSchema = BaseEventSchema.extend({
   inputs: z.unknown().optional(),

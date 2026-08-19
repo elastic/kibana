@@ -61,6 +61,10 @@ describe('workflow_execute_hit_selection_payload', () => {
       event: {
         documents: [
           {
+            '@timestamp': '2024-01-02T00:00:00Z',
+            message: 'hello',
+            _id: 'doc-1',
+            _index: 'logs-*',
             id: 'doc-1',
             index: 'logs-*',
             timestamp: '2024-01-02T00:00:00Z',
@@ -71,5 +75,14 @@ describe('workflow_execute_hit_selection_payload', () => {
         dataView: 'logs-*',
       },
     });
+  });
+
+  it('buildDocumentTriggerInputFromRecords skips records without document metadata', () => {
+    expect(
+      buildDocumentTriggerInputFromRecords(
+        [{ id: 'missing-metadata', raw: { _source: { message: 'hello' } }, flattened: {} }],
+        { submittedQuery: '', dataViewTitle: undefined }
+      )
+    ).toBeNull();
   });
 });

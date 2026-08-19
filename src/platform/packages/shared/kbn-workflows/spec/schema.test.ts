@@ -37,6 +37,7 @@ import {
 } from './schema';
 import { BaseEventSchema } from './schema/common/base_event';
 import { JsonModelSchema } from './schema/common/json_model_schema';
+import { MULTIPLE_MANUAL_EVENT_TYPES_ERROR } from './schema/triggers';
 import { isManualTrigger } from './schema/triggers/manual_trigger_schema';
 import { getShape } from '../common/utils/zod';
 
@@ -307,6 +308,31 @@ describe('WorkflowOutputStepSchema', () => {
 });
 
 describe('WorkflowSchema with workflow.output', () => {
+  it('rejects multiple typed manual triggers', () => {
+    const result = WorkflowSchema.safeParse({
+      name: 'test-workflow',
+      triggers: [
+        { type: 'manual', eventType: 'cases.case' },
+        { type: 'manual', eventType: 'workflows.alert' },
+      ],
+      steps: [
+        {
+          name: 'emit_immediately',
+          type: 'workflow.output',
+          with: { message: 'Hello, World!' },
+        },
+      ],
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toContainEqual(
+      expect.objectContaining({
+        message: MULTIPLE_MANUAL_EVENT_TYPES_ERROR,
+        path: ['triggers', 1, 'eventType'],
+      })
+    );
+  });
+
   it('should accept a workflow with workflow.output step', () => {
     const result = WorkflowSchema.safeParse({
       name: 'test-workflow',
