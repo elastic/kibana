@@ -262,15 +262,30 @@ export class DataDrift {
     const input = this.indexPatternInput(id);
     await input.waitFor({ state: 'visible' });
 
-    // fill() commits the full value in one input event, so the field's first-character
-    // auto-append of "*" does not run. typeWithDelay uses insertText, which can update
-    // the DOM without React state and leave this controlled input empty.
+    // This controlled field auto-appends "*" after the first character. Type without a
+    // trailing wildcard (same as FTR) so that matches user input. pressSequentially fires
+    // real key events so React state updates; fill()/insertText can set the DOM value
+    // without onChange, then a re-render clears the field.
+    const hasWildcard = pattern.endsWith('*');
+    const trimmedPattern = hasWildcard ? pattern.slice(0, -1) : pattern;
+
     const maxAttempts = 3;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      if (attempt > 1) {
-        await input.fill('');
+      await input.click();
+      await this.page.keyboard.press('ControlOrMeta+A');
+      await this.page.keyboard.press('Backspace');
+
+      if (trimmedPattern.length > 0) {
+        await input.pressSequentially(trimmedPattern[0]);
+        await expect(input).toHaveValue(`${trimmedPattern[0]}*`);
+        if (trimmedPattern.length > 1) {
+          await input.pressSequentially(trimmedPattern.slice(1));
+        }
       }
-      await input.fill(pattern);
+
+      if (!hasWildcard) {
+        await input.press('Delete');
+      }
 
       try {
         await this.waitForIndexPatternInput(id, pattern);
@@ -322,12 +337,10 @@ export class DataDrift {
 
   async selectTimeField(timeFieldName: string) {
     const timestampFieldWrapper = this.page.testSubj.locator('mlDataDriftTimestampField');
-    await expect
-      .poll(async () => {
-        const className = await timestampFieldWrapper.getAttribute('class');
-        return !className?.includes('euiComboBox-isDisabled');
-      })
-      .toBe(true);
+    await timestampFieldWrapper.waitFor({ state: 'visible', timeout: 30_000 });
+    await expect(timestampFieldWrapper).not.toHaveClass(/euiComboBox-isDisabled/, {
+      timeout: 10_000,
+    });
     await setComboBoxValue(this.page, 'mlDataDriftTimestampField', timeFieldName, {
       optionVisibilityTimeoutMs: 30_000,
     });

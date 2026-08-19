@@ -86,6 +86,12 @@ export class DataVisualizerTable {
       .innerText();
   }
 
+  private detailsToggle(fieldName: string, direction: 'chevronSingleRight' | 'chevronSingleDown') {
+    return this.page.testSubj.locator(
+      this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-${direction}`)
+    );
+  }
+
   async ensureDetailsOpen(fieldName: string) {
     const details = this.page.testSubj.locator(this.detailsSelector(fieldName));
 
@@ -93,16 +99,13 @@ export class DataVisualizerTable {
       return;
     }
 
-    const expandToggle = this.page.testSubj.locator(
-      this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-chevronSingleRight`)
-    );
-    await expandToggle.hover();
-    await expandToggle.click();
-    await this.page.testSubj
-      .locator(
-        this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-chevronSingleDown`)
-      )
-      .waitFor({ state: 'visible', timeout: 10_000 });
+    // EuiToolTip on the expander intercepts pointer events and can stall Playwright's
+    // actionability scroll/stability checks.
+    await this.detailsToggle(fieldName, 'chevronSingleRight').dispatchEvent('click');
+    await this.detailsToggle(fieldName, 'chevronSingleDown').waitFor({
+      state: 'visible',
+      timeout: 10_000,
+    });
     await details.waitFor({ state: 'visible', timeout: 10_000 });
   }
 
@@ -113,16 +116,11 @@ export class DataVisualizerTable {
       return;
     }
 
-    await this.page.testSubj
-      .locator(
-        this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-chevronSingleDown`)
-      )
-      .click();
-    await this.page.testSubj
-      .locator(
-        this.rowSelector(fieldName, `dataVisualizerDetailsToggle-${fieldName}-chevronSingleRight`)
-      )
-      .waitFor({ state: 'visible', timeout: 10_000 });
+    await this.detailsToggle(fieldName, 'chevronSingleDown').dispatchEvent('click');
+    await this.detailsToggle(fieldName, 'chevronSingleRight').waitFor({
+      state: 'visible',
+      timeout: 10_000,
+    });
     await details.waitFor({ state: 'hidden', timeout: 10_000 });
   }
 
