@@ -32,9 +32,6 @@
     "x-pack/solutions/security/packages/kbn-cloud-security-posture": "'kbn-cloud-security-posture' should be snake_case"
   },
   "@elastic/appex-qa": {
-    "src/dev/code_coverage/ingest_coverage/integration_tests/mocks/CODEOWNERS": "'CODEOWNERS' should be snake_case",
-    "src/dev/code_coverage/ingest_coverage/integration_tests/mocks/jest-combined": "'jest-combined' should be snake_case",
-    "src/dev/code_coverage/ingest_coverage/integration_tests/mocks/jest-combined/bulk-data.json": "'bulk-data.json' should be snake_case",
     "src/platform/packages/private/kbn-scout-info/llms/generate-scout-page-objects.md": "'generate-scout-page-objects.md' should be snake_case",
     "src/platform/packages/private/kbn-scout-info/llms/generate-scout-skeleton-from-ftr-test.md": "'generate-scout-skeleton-from-ftr-test.md' should be snake_case",
     "src/platform/packages/private/kbn-scout-info/llms/scout-api-services.md": "'scout-api-services.md' should be snake_case",
