@@ -146,6 +146,7 @@ export function createChartCompatibleResultEvaluator<
   return {
     name,
     kind: 'CODE',
+    higherIsBetter: true,
     evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
       let visualizations: ExtractedVisualization[];
       try {

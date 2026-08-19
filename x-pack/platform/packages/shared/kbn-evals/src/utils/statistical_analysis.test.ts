@@ -27,6 +27,7 @@ const createMockScore = ({
   evaluatorName = 'Correctness',
   repetitionIndex = 0,
   score = 0.5,
+  higherIsBetter,
 }: Partial<{
   datasetId: string;
   datasetName: string;
@@ -34,6 +35,7 @@ const createMockScore = ({
   evaluatorName: string;
   repetitionIndex: number;
   score: number | null;
+  higherIsBetter: boolean;
 }> = {}): EvaluationScoreDocument => ({
   '@timestamp': '2025-01-01T00:00:00Z',
   experiment_id: 'exp-1',
@@ -58,6 +60,7 @@ const createMockScore = ({
     explanation: 'Mock evaluation',
     metadata: { successful: 1, failed: 0 },
     trace_id: 'trace-eval-456',
+    ...(higherIsBetter !== undefined && { higher_is_better: higherIsBetter }),
     model: baseEvaluatorModel,
   },
   metadata: {
@@ -215,5 +218,52 @@ describe('computePairedTTestResults', () => {
     const fromPairs = computePairedTTestResults(pairs);
 
     expect(fromPairs).toEqual(fromDocs);
+  });
+
+  it('defaults higherIsBetter via legacy name heuristic when score docs omit the field', () => {
+    const quality = computePairedTTestResults(
+      [createMockScore({ evaluatorName: 'Correctness', score: 0.8 })],
+      [createMockScore({ evaluatorName: 'Correctness', score: 0.9 })]
+    );
+    expect(quality[0].higherIsBetter).toBe(true);
+
+    const latency = computePairedTTestResults(
+      [createMockScore({ evaluatorName: 'Latency', score: 150 })],
+      [createMockScore({ evaluatorName: 'Latency', score: 100 })]
+    );
+    expect(latency[0].higherIsBetter).toBe(false);
+  });
+
+  it('propagates higherIsBetter: true from quality evaluator metadata', () => {
+    const scoresA = [createMockScore({ score: 0.7, higherIsBetter: true })];
+    const scoresB = [createMockScore({ score: 0.9, higherIsBetter: true })];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.higherIsBetter).toBe(true);
+  });
+
+  it('propagates higherIsBetter: false from lower-is-better evaluator metadata', () => {
+    const scoresA = [
+      createMockScore({ evaluatorName: 'Latency', score: 150, higherIsBetter: false }),
+    ];
+    const scoresB = [
+      createMockScore({ evaluatorName: 'Latency', score: 100, higherIsBetter: false }),
+    ];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.higherIsBetter).toBe(false);
+  });
+
+  it('prefers a defined higherIsBetter when only one side has the field', () => {
+    const scoresA = [
+      createMockScore({ evaluatorName: 'Latency', score: 150, higherIsBetter: false }),
+    ];
+    const scoresB = [createMockScore({ evaluatorName: 'Latency', score: 100 })];
+
+    const [result] = computePairedTTestResults(scoresA, scoresB);
+
+    expect(result.higherIsBetter).toBe(false);
   });
 });

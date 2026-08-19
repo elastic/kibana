@@ -15,6 +15,7 @@ export const createPrebuiltRuleMatchEvaluator = (): Evaluator<
 > => ({
   name: 'Prebuilt Rule Match',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: async ({
     output,
     expected,

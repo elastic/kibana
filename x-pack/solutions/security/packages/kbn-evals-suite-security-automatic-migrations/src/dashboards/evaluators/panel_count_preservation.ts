@@ -16,6 +16,7 @@ export const createPanelCountPreservationEvaluator = (): Evaluator<
 > => ({
   name: 'Panel Count Preservation',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: async ({
     output,
     expected,

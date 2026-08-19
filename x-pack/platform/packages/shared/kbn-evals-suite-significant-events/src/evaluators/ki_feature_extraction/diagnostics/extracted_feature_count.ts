@@ -17,6 +17,7 @@ import { getFeaturesFromOutput } from '../types';
 export const extractedFeatureCountEvaluator = {
   name: 'extracted_feature_count',
   kind: 'CODE' as const,
+  higherIsBetter: true,
   evaluate: async ({ output }) => {
     const features = getFeaturesFromOutput(output);
     const evidenceCounts = features.map((feature) => feature.evidence?.length ?? 0);

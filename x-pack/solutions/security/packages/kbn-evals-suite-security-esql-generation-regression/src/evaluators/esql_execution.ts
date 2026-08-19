@@ -175,6 +175,7 @@ export function createEsqlExecutionEvaluator<
   return {
     name,
     kind: 'CODE',
+    higherIsBetter: true,
     evaluate: async (params): Promise<EvaluationResult> => {
       let queries: string[];
 

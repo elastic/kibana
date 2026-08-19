@@ -16,6 +16,7 @@ export const createLookupJoinPresenceEvaluator = (): Evaluator<
 > => ({
   name: 'Lookup Join Presence',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: async ({
     output,
     expected,

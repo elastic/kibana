@@ -95,6 +95,10 @@ components:
         pValue:
           type: number
           nullable: true
+        higherIsBetter:
+          type: boolean
+          description: >-
+            Whether a higher score is an improvement for this evaluator.
       required:
         - datasetId
         - datasetName
@@ -103,3 +107,4 @@ components:
         - meanA
         - meanB
         - pValue
+        - higherIsBetter

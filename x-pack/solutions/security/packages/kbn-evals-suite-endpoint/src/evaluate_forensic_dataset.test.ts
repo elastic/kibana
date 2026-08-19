@@ -15,6 +15,7 @@ describe('wrapSkillInvocationForDistractors', () => {
   const inner: Evaluator<ForensicDatasetExample, TaskOutput> = {
     name: 'Skill Invoked (test)',
     kind: 'CODE',
+    higherIsBetter: true,
     evaluate: async () => ({ score: 0, label: 'not_invoked' }),
   };
 

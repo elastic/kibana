@@ -22,6 +22,7 @@ export function createExecuteEsqlGroundingEvaluator<
   return {
     name: 'execute_esql_grounding',
     kind: 'CODE',
+    higherIsBetter: true,
     evaluate: ({ output }) => {
       const { noOfToolCalls, noOfToolCallsWithResults } = summarizeEsqlGrounding(
         output.steps ?? []

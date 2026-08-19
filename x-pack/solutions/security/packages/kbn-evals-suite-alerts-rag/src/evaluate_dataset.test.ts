@@ -19,6 +19,7 @@ import type { AlertsRagExample } from './dataset';
 const stubTraceEvaluator = (name: string): Evaluator => ({
   name,
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: jest.fn(),
 });
 

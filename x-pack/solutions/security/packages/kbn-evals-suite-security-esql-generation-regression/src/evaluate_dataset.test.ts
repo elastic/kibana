@@ -16,6 +16,7 @@ function buildEvaluator(name: string): Evaluator {
   return {
     name,
     kind: 'CODE',
+    higherIsBetter: true,
     evaluate: jest.fn().mockResolvedValue({ score: 0 }),
   };
 }

@@ -14,6 +14,7 @@ export const createHallucinationDetectionEvaluator = (
 ): Evaluator<RuleExample, RuleMigrationResult> => ({
   name: 'Hallucination Detection',
   kind: 'LLM',
+  higherIsBetter: true,
   evaluate: async ({ input, output, expected, metadata }): Promise<EvaluationResult> => {
     const ruleInput = input as RuleInput;
     const query = output?.rule?.elastic_rule?.query;

@@ -53,6 +53,7 @@ const createEvent = (
     experimentRunId: 'run-1',
     traceId: 'trace-eval-1',
     exampleId: 'example-1',
+    higherIsBetter: true,
   },
   exampleId: 'example-1',
   ...overrides,
@@ -154,7 +155,7 @@ describe('buildIngestRequest', () => {
     expect(requests[0].scores[0].example).not.toHaveProperty('metadata');
   });
 
-  it('maps evaluationRun.higherIsBetter to evaluator.higher_is_better when set', () => {
+  it('maps evaluationRun.higherIsBetter to evaluator.higher_is_better', () => {
     const requests = buildIngestRequest({
       taskModel,
       evaluatorModel,
@@ -178,7 +179,7 @@ describe('buildIngestRequest', () => {
     });
   });
 
-  it('omits evaluator.higher_is_better when evaluationRun.higherIsBetter is undefined', () => {
+  it('persists higher_is_better: true for quality evaluators', () => {
     const requests = buildIngestRequest({
       taskModel,
       evaluatorModel,
@@ -188,7 +189,7 @@ describe('buildIngestRequest', () => {
       source: { kind: 'event', event: createEvent() },
     });
 
-    expect(requests[0].scores[0].evaluator).not.toHaveProperty('higher_is_better');
+    expect(requests[0].scores[0].evaluator.higher_is_better).toBe(true);
   });
 
   it('uses explicit executionId for metadata.execution_id when provided', () => {

@@ -16,6 +16,7 @@ export const createCustomQueryAccuracyEvaluator = (): Evaluator<
 > => ({
   name: 'Custom Query Accuracy',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: async ({
     output,
     expected,

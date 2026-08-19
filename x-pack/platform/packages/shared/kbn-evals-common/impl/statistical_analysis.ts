@@ -15,6 +15,37 @@ export interface PairedScore {
   evaluatorName: string;
   scoreA: number;
   scoreB: number;
+  higherIsBetter?: boolean;
+}
+
+/**
+ * Legacy name→polarity heuristic used before `evaluator.higher_is_better` was persisted.
+ * Kept only as a fallback for historical score docs that omit the field.
+ */
+const LOWER_IS_BETTER_NAME_PATTERN = /\b(tokens?|latency|costs?|duration|time|errors?)\b/i;
+
+function isHigherIsBetterFromEvaluatorName(evaluatorName: string): boolean {
+  return !LOWER_IS_BETTER_NAME_PATTERN.test(evaluatorName);
+}
+
+/**
+ * Resolve metric polarity for a paired baseline/target comparison of the same evaluator.
+ * - Both missing: legacy name-based heuristic (backward compatible with pre-metadata scores)
+ * - Only one side defined: use that side
+ * - Both defined: prefer baseline
+ */
+export function resolveHigherIsBetter(
+  baselineHigherIsBetter: boolean | undefined,
+  targetHigherIsBetter: boolean | undefined,
+  evaluatorName: string
+): boolean {
+  if (baselineHigherIsBetter !== undefined) {
+    return baselineHigherIsBetter;
+  }
+  if (targetHigherIsBetter !== undefined) {
+    return targetHigherIsBetter;
+  }
+  return isHigherIsBetterFromEvaluatorName(evaluatorName);
 }
 
 const MAX_BETA_ITERATIONS = 100;
@@ -76,12 +107,19 @@ export function pairScores(
 
     referenceMap.delete(key);
 
+    const higherIsBetter = resolveHigherIsBetter(
+      scoreA.evaluator.higher_is_better,
+      match.evaluator.higher_is_better,
+      scoreA.evaluator.name
+    );
+
     pairs.push({
       datasetId: scoreA.example.dataset.id,
       datasetName: scoreA.example.dataset.name,
       evaluatorName: scoreA.evaluator.name,
       scoreA: scoreA.evaluator.score!,
       scoreB: match.evaluator.score!,
+      higherIsBetter,
     });
   }
 
@@ -149,6 +187,10 @@ export function computePairedTTestResults(
       pValue = tStatisticToPValue(tStatistic, differences.length - 1);
     }
 
+    const higherIsBetter =
+      group.find((pair) => pair.higherIsBetter !== undefined)?.higherIsBetter ??
+      resolveHigherIsBetter(undefined, undefined, group[0].evaluatorName);
+
     results.push({
       datasetId: group[0].datasetId,
       datasetName: group[0].datasetName,
@@ -157,6 +199,7 @@ export function computePairedTTestResults(
       meanA: mean(scoresAArr),
       meanB: mean(scoresBArr),
       pValue,
+      higherIsBetter,
     });
   }
 

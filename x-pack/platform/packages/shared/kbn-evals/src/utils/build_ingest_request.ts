@@ -87,9 +87,7 @@ function buildScorePayload(event: EvaluationCompleteEvent): IngestScore {
       ...(result?.explanation !== undefined && { explanation: result.explanation }),
       ...(isPlainObject(result?.metadata) && { metadata: result.metadata }),
       ...(evaluationRun.traceId !== undefined && { trace_id: evaluationRun.traceId }),
-      ...(evaluationRun.higherIsBetter !== undefined && {
-        higher_is_better: evaluationRun.higherIsBetter,
-      }),
+      higher_is_better: evaluationRun.higherIsBetter,
     },
   };
 }

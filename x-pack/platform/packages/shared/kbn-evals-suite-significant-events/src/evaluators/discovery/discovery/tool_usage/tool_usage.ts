@@ -167,6 +167,7 @@ export const scoreToolUsage = ({
 export const createDiscoveryToolUsageEvaluator = (): DiscoveryEvaluator => ({
   name: 'trajectory',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: ({ input, output }) => {
     const detections = output.inputDetections ?? input.detections ?? [];
     return Promise.resolve(
@@ -219,5 +220,6 @@ export const scoreToolUsageContinuation = (cycles: ContinuationCycle[]): ToolUsa
 export const continuationTrajectoryEvaluator: ContinuationEvaluator = {
   name: 'trajectory',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: ({ output }) => Promise.resolve(scoreToolUsageContinuation(output.cycles ?? [])),
 };

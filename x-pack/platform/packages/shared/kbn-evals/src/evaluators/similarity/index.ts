@@ -80,6 +80,7 @@ export function createSimilarityEvaluator(config?: { threshold?: number }): Eval
   return {
     name: 'similarity',
     kind: 'CODE',
+    higherIsBetter: true,
     evaluate: async ({ output, expected }) => {
       const expectedText =
         typeof expected === 'string'

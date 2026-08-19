@@ -108,7 +108,7 @@ export interface Evaluator<
   /**
    * Whether a higher score is an improvement.
    */
-  higherIsBetter?: boolean;
+  higherIsBetter: boolean;
 }
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;
@@ -179,10 +179,7 @@ export interface EvaluationRun {
   experimentRunId: string;
   traceId?: string | null;
   exampleId?: string;
-  /**
-   * Whether a higher score is an improvement.
-   */
-  higherIsBetter?: boolean;
+  higherIsBetter: boolean;
 }
 
 export interface DatasetRunResult {

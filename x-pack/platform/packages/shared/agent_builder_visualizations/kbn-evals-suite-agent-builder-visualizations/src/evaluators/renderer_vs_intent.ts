@@ -31,6 +31,7 @@ export function createRendererVsIntentEvaluator<
   return {
     name,
     kind: 'CODE',
+    higherIsBetter: true,
     evaluate: async ({ output, expected }): Promise<EvaluationResult> => {
       const expectedRenderer = expectedRendererExtractor(expected);
       if (!expectedRenderer) {

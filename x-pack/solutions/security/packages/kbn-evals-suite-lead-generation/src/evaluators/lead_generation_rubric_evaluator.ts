@@ -21,6 +21,7 @@ export const createLeadGenerationRubricEvaluator = ({
 }): Evaluator<LeadGenerationDatasetExample, LeadGenerationTaskOutput> => ({
   name: 'LeadGenerationRubric',
   kind: 'LLM',
+  higherIsBetter: true,
   evaluate: async ({ output, expected }) => {
     const errors = (output as LeadGenerationTaskOutput | undefined)?.errors;
     if (errors && errors.length > 0) {

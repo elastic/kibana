@@ -44,6 +44,10 @@ export interface SubScore {
 export interface EvaluatorConfig {
   name: string;
   kind: EvaluatorKind;
+  /**
+   * Whether a higher score is an improvement.
+   */
+  higherIsBetter: boolean;
   version?: string;
   connectorId?: string;
   /** When set, the evaluator is composite: one output evaluator is produced per sub-score. */
@@ -119,6 +123,7 @@ export class EvaluatorApiClient {
       return outputs.map(({ name, pickScore, describe }) => ({
         name,
         kind: config.kind,
+        higherIsBetter: config.higherIsBetter,
         evaluate: async (params) => {
           try {
             const result = await evaluateForTrace(params);

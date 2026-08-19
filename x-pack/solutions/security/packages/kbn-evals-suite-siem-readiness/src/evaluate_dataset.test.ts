@@ -12,6 +12,7 @@ import { createEvaluateSiemReadinessDataset } from './evaluate_dataset';
 const buildEvaluator = (name: string): Evaluator => ({
   name,
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: jest.fn().mockResolvedValue({ score: 0 }),
 });
 

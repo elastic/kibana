@@ -26,6 +26,7 @@ export const createNlDescriptionFaithfulnessEvaluator = (
 ): Evaluator<RuleExample, RuleMigrationResult> => ({
   name: 'NL Description Faithfulness',
   kind: 'LLM',
+  higherIsBetter: true,
   evaluate: async ({ input, output, expected, metadata }): Promise<EvaluationResult> => {
     const ruleInput = input as RuleInput;
 

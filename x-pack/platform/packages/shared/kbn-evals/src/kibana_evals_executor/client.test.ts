@@ -129,11 +129,13 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'AlwaysOne',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async () => ({ score: 1 }),
       },
       {
         name: 'HasValue',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -197,6 +199,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'HasValue',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -232,6 +235,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'HasValue',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];
@@ -246,7 +250,7 @@ describe('KibanaEvalsClient', () => {
     expect(exp.evaluationRuns.length).toBeGreaterThan(0);
   });
 
-  it('copies evaluator.higherIsBetter onto each EvaluationRun when defined', async () => {
+  it('copies evaluator.higherIsBetter onto each EvaluationRun', async () => {
     const client = createClient();
     const dataset: EvaluationDataset = {
       name: 'ds',
@@ -264,6 +268,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'Quality',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async () => ({ score: 1 }),
       },
     ];
@@ -272,7 +277,7 @@ describe('KibanaEvalsClient', () => {
     const byName = Object.fromEntries(exp.evaluationRuns.map((run) => [run.name, run]));
 
     expect(byName.Latency.higherIsBetter).toBe(false);
-    expect(byName.Quality).not.toHaveProperty('higherIsBetter');
+    expect(byName.Quality.higherIsBetter).toBe(true);
   });
 
   it('prefers a task-provided traceId over the client task-span id for the stored run and evaluator output', async () => {
@@ -291,6 +296,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -324,6 +330,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -354,6 +361,7 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'CapturesTraceId',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async ({ output }) => {
           seenOutputTraceId = output?.traceId;
           return { score: 1 };
@@ -428,6 +436,7 @@ describe('KibanaEvalsClient', () => {
     const evaluator: Evaluator<EvaluationDataset['examples'][number], { ok: boolean }> = {
       name: 'AlwaysOne',
       kind: 'CODE',
+      higherIsBetter: true,
       evaluate: async () => ({ score: 1 }),
     };
 
@@ -473,7 +482,14 @@ describe('KibanaEvalsClient', () => {
         datasets: [{ name: 'ds', description: 'desc', examples: [{ input: { q: 1 } }] }],
         task: async () => ({ ok: true }),
       },
-      [{ name: 'AlwaysOne', kind: 'CODE', evaluate: async () => ({ score: 1 }) }]
+      [
+        {
+          name: 'AlwaysOne',
+          kind: 'CODE',
+          higherIsBetter: true,
+          evaluate: async () => ({ score: 1 }),
+        },
+      ]
     );
 
     expect(exp.datasetId).toBe('server-assigned-id');
@@ -540,11 +556,13 @@ describe('KibanaEvalsClient', () => {
       {
         name: 'AlwaysOne',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async () => ({ score: 1 }),
       },
       {
         name: 'HasValue',
         kind: 'CODE',
+        higherIsBetter: true,
         evaluate: async ({ output }) => ({ score: typeof output?.value === 'number' ? 1 : 0 }),
       },
     ];

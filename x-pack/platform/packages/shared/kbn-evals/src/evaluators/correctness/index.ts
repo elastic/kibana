@@ -119,6 +119,7 @@ export function createCorrectnessAnalysisEvaluator({
       };
     },
     kind: 'LLM',
+    higherIsBetter: true,
     name: 'correctness',
   };
 }
@@ -158,6 +159,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
       };
     },
     kind: 'LLM',
+    higherIsBetter: true,
     name,
   });
 

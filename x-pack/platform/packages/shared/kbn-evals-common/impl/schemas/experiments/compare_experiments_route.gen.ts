@@ -25,6 +25,10 @@ export const PairedTTestResult = lazySchema(() =>
     meanA: z.number(),
     meanB: z.number(),
     pValue: z.number().nullable(),
+    /**
+     * Whether a higher score is an improvement for this evaluator.
+     */
+    higherIsBetter: z.boolean(),
   })
 );
 export type PairedTTestResult = z.infer<typeof PairedTTestResult>;

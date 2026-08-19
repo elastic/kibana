@@ -281,7 +281,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
-                  ...(higherIsBetter !== undefined && { higherIsBetter }),
+                  higherIsBetter,
                 };
                 evaluationRuns.push(evalRun);
 

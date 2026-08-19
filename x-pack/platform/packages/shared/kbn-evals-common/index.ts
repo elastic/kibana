@@ -28,5 +28,9 @@ export type {
 } from './impl/query_builders';
 export { getDatasetId } from './impl/dataset_ids';
 export { ALL_SPACES_ID, DEFAULT_SPACE_ID, resolveDatasetHomeSpace } from './impl/spaces';
-export { pairScores, computePairedTTestResults } from './impl/statistical_analysis';
+export {
+  pairScores,
+  computePairedTTestResults,
+  resolveHigherIsBetter,
+} from './impl/statistical_analysis';
 export type { PairedScore } from './impl/statistical_analysis';

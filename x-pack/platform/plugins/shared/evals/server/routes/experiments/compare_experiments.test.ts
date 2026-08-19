@@ -23,6 +23,7 @@ const makeScoreDoc = ({
   evaluatorName = 'Correctness',
   score = 0.8,
   repetitionIndex = 0,
+  higherIsBetter,
 }: {
   experimentId?: string;
   datasetId?: string;
@@ -31,6 +32,7 @@ const makeScoreDoc = ({
   evaluatorName?: string;
   score?: number | null;
   repetitionIndex?: number;
+  higherIsBetter?: boolean;
 } = {}) => ({
   '@timestamp': '2025-01-01T00:00:00Z',
   experiment_id: experimentId,
@@ -51,6 +53,7 @@ const makeScoreDoc = ({
     explanation: null,
     metadata: null,
     trace_id: null,
+    ...(higherIsBetter !== undefined && { higher_is_better: higherIsBetter }),
     model: { id: 'claude-3', family: 'claude', provider: 'anthropic' },
   },
   metadata: {
@@ -218,11 +221,48 @@ describe('GET /internal/evals/experiments/compare', () => {
     expect(response.payload.results[0].datasetId).toBe('ds-shared');
     expect(response.payload.results[0].evaluatorName).toBe('Correctness');
     expect(response.payload.results[0].sampleSize).toBe(2);
+    expect(response.payload.results[0].higherIsBetter).toBe(true);
     expect(response.payload.pairing.totalPairs).toBe(2);
     expect(response.payload.pairing.skippedMissingPairs).toBe(0);
     expect(response.payload.pairing.skippedNullScores).toBe(0);
     expect(response.payload.pairing.truncatedA).toBe(false);
     expect(response.payload.pairing.truncatedB).toBe(false);
+  });
+
+  it('returns higherIsBetter: false for lower-is-better evaluator metadata', async () => {
+    const { handler, context, evaluationScoreService } = setup();
+    const sharedDataset = {
+      datasetId: 'ds-shared',
+      datasetName: 'Shared',
+      evaluatorName: 'Latency',
+      higherIsBetter: false as const,
+    };
+    evaluationScoreService.search
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 150 }) },
+            { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-2', score: 200 }) },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      } as any)
+      .mockResolvedValueOnce({
+        hits: {
+          hits: [
+            { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-1', score: 100 }) },
+            { _source: makeScoreDoc({ ...sharedDataset, exampleId: 'ex-2', score: 120 }) },
+          ],
+          total: { value: 2, relation: 'eq' },
+        },
+      } as any);
+
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.results).toHaveLength(1);
+    expect(response.payload.results[0].evaluatorName).toBe('Latency');
+    expect(response.payload.results[0].higherIsBetter).toBe(false);
   });
 
   it('filters out hits with no _source', async () => {

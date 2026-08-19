@@ -26,6 +26,7 @@ const asExpected = (expected: unknown): ExpectedVerdict | undefined =>
 export const classificationAccuracy: Evaluator = {
   name: 'ClassificationAccuracy',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: async ({ output, expected }) => {
     const predicted = asVerdict(output).classification;
     const goldenLabel = asExpected(expected)?.classification;
@@ -53,6 +54,7 @@ export const classificationAccuracy: Evaluator = {
 export const validVerdict: Evaluator = {
   name: 'ValidVerdict',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: async ({ output }) => {
     const verdict = asVerdict(output);
     const classificationValid =

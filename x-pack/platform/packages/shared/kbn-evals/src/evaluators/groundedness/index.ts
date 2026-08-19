@@ -109,6 +109,7 @@ export function createGroundednessAnalysisEvaluator({
       };
     },
     kind: 'LLM',
+    higherIsBetter: true,
     name: QUALITATIVE_EVALUATOR_NAME,
   };
 }
@@ -139,6 +140,7 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
       };
     },
     kind: 'LLM',
+    higherIsBetter: true,
     name: QUANTITATIVE_EVALUATOR_NAME,
   };
 }

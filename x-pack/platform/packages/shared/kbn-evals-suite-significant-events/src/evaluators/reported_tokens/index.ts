@@ -32,6 +32,7 @@ const createReportedTokensEvaluator = <TExample extends Example, TTaskOutput ext
 }): Evaluator<TExample, TTaskOutput> => ({
   name,
   kind: 'CODE',
+  higherIsBetter: false,
   evaluate: async ({ output }) => {
     const tokens = readReportedTokens(output);
 

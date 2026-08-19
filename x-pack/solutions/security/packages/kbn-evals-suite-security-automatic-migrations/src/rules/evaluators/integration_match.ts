@@ -12,6 +12,7 @@ import type { RuleMigrationResult } from '../migration_client';
 export const createIntegrationMatchEvaluator = (): Evaluator<RuleExample, RuleMigrationResult> => ({
   name: 'Integration Match',
   kind: 'CODE',
+  higherIsBetter: true,
   evaluate: async ({
     output,
     expected,

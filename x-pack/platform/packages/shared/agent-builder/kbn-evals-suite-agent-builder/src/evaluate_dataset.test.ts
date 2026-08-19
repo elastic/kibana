@@ -114,10 +114,11 @@ describe('extractSearchRetrievedDocs', () => {
 });
 
 describe('createEvaluateExternalDataset', () => {
-  function createTraceEvaluator(name: string): Evaluator<Example, unknown> {
+  function createTraceEvaluator(name: string, higherIsBetter = true): Evaluator<Example, unknown> {
     return {
       name,
       kind: 'CODE',
+      higherIsBetter,
       evaluate: async () => ({ score: 1 }),
     };
   }
@@ -127,24 +128,27 @@ describe('createEvaluateExternalDataset', () => {
       criteria: () => ({
         name: 'Criteria',
         kind: 'LLM',
+        higherIsBetter: true,
         evaluate: async () => ({ score: 1 }),
       }),
       correctnessAnalysis: () => ({
         name: 'CorrectnessAnalysis',
         kind: 'LLM',
+        higherIsBetter: true,
         evaluate: async () => ({ score: 1 }),
       }),
       groundednessAnalysis: () => ({
         name: 'GroundednessAnalysis',
         kind: 'LLM',
+        higherIsBetter: true,
         evaluate: async () => ({ score: 1 }),
       }),
       traceBasedEvaluators: {
-        inputTokens: createTraceEvaluator('InputTokens'),
-        outputTokens: createTraceEvaluator('OutputTokens'),
-        latency: createTraceEvaluator('Latency'),
-        toolCalls: createTraceEvaluator('ToolCalls'),
-        cachedTokens: createTraceEvaluator('CachedTokens'),
+        inputTokens: createTraceEvaluator('InputTokens', false),
+        outputTokens: createTraceEvaluator('OutputTokens', false),
+        latency: createTraceEvaluator('Latency', false),
+        toolCalls: createTraceEvaluator('ToolCalls', false),
+        cachedTokens: createTraceEvaluator('CachedTokens', false),
       },
     };
   }

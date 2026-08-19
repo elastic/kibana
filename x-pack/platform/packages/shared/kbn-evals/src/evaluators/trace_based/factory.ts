@@ -39,7 +39,7 @@ export interface TraceBasedEvaluatorConfig {
   /**
    * Whether a higher score is an improvement.
    */
-  higherIsBetter?: boolean;
+  higherIsBetter: boolean;
 }
 
 export function createTraceBasedEvaluator({
@@ -62,7 +62,7 @@ export function createTraceBasedEvaluator({
   } = config;
 
   return {
-    ...(higherIsBetter !== undefined && { higherIsBetter }),
+    higherIsBetter,
     evaluate: async ({ output }) => {
       const traceId = (output as any)?.traceId;
 

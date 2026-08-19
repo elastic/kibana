@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { computeCompareDiff, isHigherIsBetterFromName, isImproved } from './compare_diff';
+import { computeCompareDiff, isImproved } from './compare_diff';
 
 describe('compare_diff', () => {
   describe('computeCompareDiff', () => {
@@ -36,19 +36,6 @@ describe('compare_diff', () => {
     it('returns false for zero diff regardless of polarity', () => {
       expect(isImproved(0, true)).toBe(false);
       expect(isImproved(0, false)).toBe(false);
-    });
-  });
-
-  describe('isHigherIsBetterFromName', () => {
-    it('defaults quality-style names to higher-is-better', () => {
-      expect(isHigherIsBetterFromName('Correctness')).toBe(true);
-      expect(isHigherIsBetterFromName('Faithfulness')).toBe(true);
-    });
-
-    it('classifies known cost/latency names as lower-is-better', () => {
-      expect(isHigherIsBetterFromName('Latency')).toBe(false);
-      expect(isHigherIsBetterFromName('Input Tokens')).toBe(false);
-      expect(isHigherIsBetterFromName('Output Tokens')).toBe(false);
     });
   });
 });

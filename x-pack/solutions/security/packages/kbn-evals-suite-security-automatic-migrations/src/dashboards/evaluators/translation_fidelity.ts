@@ -16,6 +16,7 @@ export function createTranslationFidelityEvaluator(
   return {
     name: 'translation_fidelity',
     kind: 'LLM',
+    higherIsBetter: true,
     evaluate: async ({ input, output, expected, metadata }): Promise<EvaluationResult> => {
       if (!output?.dashboards?.length) {
         return { score: 0, label: 'FAIL', explanation: 'No translated dashboards in output' };

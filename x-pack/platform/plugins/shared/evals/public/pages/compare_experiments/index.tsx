@@ -40,7 +40,7 @@ import {
   useEvaluationExperiment,
   useExperimentDatasetExamples,
 } from '../../hooks/use_evals_api';
-import { computeCompareDiff, isHigherIsBetterFromName, isImproved } from './compare_diff';
+import { computeCompareDiff, isImproved } from './compare_diff';
 import * as i18n from './translations';
 
 const SIGNIFICANCE_THRESHOLD = 0.05;
@@ -90,24 +90,25 @@ const formatDiff = (value: number): string => {
 const SignificanceBadge: React.FC<{
   pValue: number | null;
   diff: number;
-  evaluatorName: string;
-}> = ({ pValue, diff, evaluatorName }) => {
+  higherIsBetter: boolean;
+}> = ({ pValue, diff, higherIsBetter }) => {
   if (pValue === null || !Number.isFinite(pValue)) {
     return <EuiBadge color="hollow">{i18n.BADGE_INSUFFICIENT_DATA}</EuiBadge>;
   }
   if (pValue >= SIGNIFICANCE_THRESHOLD) {
     return <EuiBadge color="hollow">{i18n.BADGE_NOT_SIGNIFICANT}</EuiBadge>;
   }
-  const higherIsBetter = isHigherIsBetterFromName(evaluatorName);
   const color = isImproved(diff, higherIsBetter) ? 'success' : 'danger';
   return <EuiBadge color={color}>{i18n.BADGE_SIGNIFICANT}</EuiBadge>;
 };
 
-const DiffValue: React.FC<{ diff: number; evaluatorName: string }> = ({ diff, evaluatorName }) => {
+const DiffValue: React.FC<{ diff: number; higherIsBetter: boolean }> = ({
+  diff,
+  higherIsBetter,
+}) => {
   const { euiTheme } = useEuiTheme();
   if (!Number.isFinite(diff)) return <span>-</span>;
 
-  const higherIsBetter = isHigherIsBetterFromName(evaluatorName);
   const improved = isImproved(diff, higherIsBetter);
   let color: string | undefined;
   if (diff !== 0) {
@@ -255,6 +256,7 @@ const ExampleDrilldownFlyout: React.FC<{
   datasetId: string;
   datasetName: string;
   evaluatorName: string;
+  higherIsBetter: boolean;
   executionIdA?: string;
   executionIdB?: string;
   onClose: () => void;
@@ -264,6 +266,7 @@ const ExampleDrilldownFlyout: React.FC<{
   datasetId,
   datasetName,
   evaluatorName,
+  higherIsBetter,
   executionIdA,
   executionIdB,
   onClose,
@@ -409,7 +412,7 @@ const ExampleDrilldownFlyout: React.FC<{
             return '-';
           }
           const diff = computeCompareDiff(item.scoreA, item.scoreB);
-          return <DiffValue diff={diff} evaluatorName={item.evaluatorName} />;
+          return <DiffValue diff={diff} higherIsBetter={higherIsBetter} />;
         },
       },
       {
@@ -448,7 +451,7 @@ const ExampleDrilldownFlyout: React.FC<{
         ),
       },
     ],
-    [hasRepetitions]
+    [hasRepetitions, higherIsBetter]
   );
 
   return (
@@ -495,7 +498,7 @@ const ExampleDrilldownFlyout: React.FC<{
 
                 const diff = computeCompareDiff(item.scoreA!, item.scoreB!);
                 if (diff === 0) return {};
-                if (isImproved(diff, isHigherIsBetterFromName(item.evaluatorName))) {
+                if (isImproved(diff, higherIsBetter)) {
                   return {
                     style: {
                       backgroundColor: hexToRgba(
@@ -586,6 +589,7 @@ export const CompareExperimentsPage: React.FC = () => {
     datasetId: string;
     datasetName: string;
     evaluatorName: string;
+    higherIsBetter: boolean;
   } | null>(null);
 
   const [sortField, setSortField] = useState<keyof PairedTTestResult>('datasetName');
@@ -596,6 +600,7 @@ export const CompareExperimentsPage: React.FC = () => {
       datasetId: result.datasetId,
       datasetName: result.datasetName,
       evaluatorName: result.evaluatorName,
+      higherIsBetter: result.higherIsBetter,
     });
   }, []);
 
@@ -733,7 +738,7 @@ export const CompareExperimentsPage: React.FC = () => {
         render: (item: PairedTTestResult) => (
           <DiffValue
             diff={computeCompareDiff(item.meanA, item.meanB)}
-            evaluatorName={item.evaluatorName}
+            higherIsBetter={item.higherIsBetter}
           />
         ),
         align: 'right' as const,
@@ -751,7 +756,7 @@ export const CompareExperimentsPage: React.FC = () => {
           <SignificanceBadge
             pValue={item.pValue}
             diff={computeCompareDiff(item.meanA, item.meanB)}
-            evaluatorName={item.evaluatorName}
+            higherIsBetter={item.higherIsBetter}
           />
         ),
       },
@@ -964,6 +969,7 @@ export const CompareExperimentsPage: React.FC = () => {
           datasetId={flyoutState.datasetId}
           datasetName={flyoutState.datasetName}
           evaluatorName={flyoutState.evaluatorName}
+          higherIsBetter={flyoutState.higherIsBetter}
           executionIdA={executionIdForDetail}
           executionIdB={executionIdForDetailB}
           onClose={() => setFlyoutState(null)}

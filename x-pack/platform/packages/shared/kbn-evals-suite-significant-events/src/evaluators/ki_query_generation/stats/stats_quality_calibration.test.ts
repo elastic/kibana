@@ -17,6 +17,7 @@ const createMockCriteriaFn = () => {
       ({
         name: 'mock_criteria',
         kind: 'LLM',
+        higherIsBetter: true,
         evaluate: innerEvaluate,
       } as unknown as Evaluator)
   );

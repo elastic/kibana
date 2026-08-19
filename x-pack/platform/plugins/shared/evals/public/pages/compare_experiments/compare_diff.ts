@@ -17,12 +17,3 @@ export const computeCompareDiff = (meanBaseline: number, meanTarget: number): nu
  */
 export const isImproved = (diff: number, higherIsBetter: boolean): boolean =>
   higherIsBetter ? diff > 0 : diff < 0;
-
-const LOWER_IS_BETTER_PATTERN = /\b(tokens?|latency|costs?|duration|time|errors?)\b/i;
-
-/**
- * Temporary name→polarity adapter until `higherIsBetter` is stored on score docs.
- * Prefer the explicit boolean API for new call sites and tests.
- */
-export const isHigherIsBetterFromName = (evaluatorName: string): boolean =>
-  !LOWER_IS_BETTER_PATTERN.test(evaluatorName);
