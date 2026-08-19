@@ -247,7 +247,10 @@ export function getFakeKibanaRequest(
     // @kbn/task-manager-plugin, instead of yielding an unauthenticated request.
     context.logger.debug(
       'ES API key is not provided to create a fake request, falling back to UIAM API key.',
-      { tags: logTags }
+      {
+        labels: { ...(ruleId && { ruleId }), spaceId },
+        tags: UIAM_LOGS_USAGE_TAGS,
+      }
     );
     const uiamApiKeyValue = getUiamApiKeySecret(uiamApiKey);
     requestHeaders.authorization = `ApiKey ${uiamApiKeyValue}`;
