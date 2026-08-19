@@ -61,6 +61,8 @@ describe('createActionPolicyManagementSkill', () => {
     const skill = createActionPolicyManagementSkill(createDeps());
 
     expect(skill.content).toContain('Action Policy Discovery');
+    expect(skill.content).toContain('space-scoped saved object');
+    expect(skill.content).not.toContain('Part 1: Action Policies');
     expect(skill.content).toContain('Default Notification Setup');
     expect(skill.content).toContain('action-policy-single-rule.md');
     expect(skill.content).toContain('action-policy-multi-rule.md');

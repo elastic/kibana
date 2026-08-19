@@ -98,6 +98,12 @@ Do **not** use this skill for:
 
 ---
 
+## Action Policies
+
+An action policy is a **space-scoped saved object** that controls how alert episodes are matched, grouped, throttled, and dispatched to workflow destinations. They are not embedded in rules: one policy can match episodes from many rules.
+
+---
+
 ## Action Policy Discovery
 
 When a user asks about existing action policies:
