@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { EuiPageTemplate } from '@elastic/eui';
+import type { SignalEntry } from '@kbn/significant-events-schema';
 import {
   checkoutDetection,
   checkoutDetectionSignal,
@@ -39,7 +40,10 @@ type FlyoutScenario =
   | 'eventInvestigationCompleted'
   | 'eventInvestigationRunning'
   | 'detection'
-  | 'detectionUnconfirmed'
+  | 'detectionRefutes'
+  | 'detectionOffTopic'
+  | 'detectionInconclusive'
+  | 'detectionNotChecked'
   | 'detectionEntitiesLoading'
   | 'detectionEntitiesError'
   | 'entityWithoutEvidence'
@@ -50,10 +54,10 @@ interface NightshiftFlyoutStoryProps {
 }
 
 const noop = () => undefined;
-const unconfirmedDetectionSignal = {
+const signalWithVerdict = (verdict: SignalEntry['verdict']): SignalEntry => ({
   ...checkoutDetectionSignal,
-  confirmed: false,
-};
+  verdict,
+});
 
 const renderScenario = (scenario: FlyoutScenario): React.ReactElement => {
   switch (scenario) {
@@ -150,15 +154,25 @@ const renderScenario = (scenario: FlyoutScenario): React.ReactElement => {
           onClose={noop}
         />
       );
-    case 'detectionUnconfirmed':
+    case 'detectionRefutes':
+    case 'detectionOffTopic':
+    case 'detectionInconclusive':
+    case 'detectionNotChecked': {
+      const verdictByScenario = {
+        detectionRefutes: 'refutes',
+        detectionOffTopic: 'off_topic',
+        detectionInconclusive: 'inconclusive',
+        detectionNotChecked: 'not_checked',
+      } as const;
       return (
         <DetectionFlyout
           detection={checkoutDetection}
           event={checkoutEvent}
-          signal={unconfirmedDetectionSignal}
+          signal={signalWithVerdict(verdictByScenario[scenario])}
           onClose={noop}
         />
       );
+    }
     case 'entityWithoutEvidence':
       return <EntityFlyout feature={entityWithoutEvidence} onClose={noop} />;
     case 'streamEntityWithoutChat':
@@ -253,8 +267,20 @@ export const Detection: Story = {
   args: { scenario: 'detection' },
 };
 
-export const DetectionUnconfirmed: Story = {
-  args: { scenario: 'detectionUnconfirmed' },
+export const DetectionRefutes: Story = {
+  args: { scenario: 'detectionRefutes' },
+};
+
+export const DetectionOffTopic: Story = {
+  args: { scenario: 'detectionOffTopic' },
+};
+
+export const DetectionInconclusive: Story = {
+  args: { scenario: 'detectionInconclusive' },
+};
+
+export const DetectionNotChecked: Story = {
+  args: { scenario: 'detectionNotChecked' },
 };
 
 export const DetectionEntitiesLoading: Story = {
