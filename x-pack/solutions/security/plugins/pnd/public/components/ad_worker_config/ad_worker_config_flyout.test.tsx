@@ -61,18 +61,19 @@ describe('OpenAdWorkerConfigButton / AdWorkerConfigFlyout', () => {
     expect(preview).toHaveTextContent('"validation_workflow_id": "default"');
   });
 
-  it('shows Query-builder fields by default and the ES|QL editor after switching mode', () => {
+  it('defaults to ES|QL mode with a pre-populated query, and shows the placeholder in Query-builder mode', () => {
     renderButton();
     fireEvent.click(screen.getByTestId('openAdWorkerConfig'));
 
-    // default mode = custom_query (Query builder): size field present, ES|QL editor absent
-    expect(screen.getByTestId('adWorkerSize')).toBeInTheDocument();
+    // ES|QL editor present by default, pre-populated
+    const esql = screen.getByTestId('adWorkerEsqlQuery') as HTMLTextAreaElement;
+    expect(esql).toBeInTheDocument();
+    expect(esql.value).toContain('FROM .alerts-security.alerts-default');
+
+    fireEvent.click(screen.getByTestId('queryModeQueryBuilderModeButton'));
+
     expect(screen.queryByTestId('adWorkerEsqlQuery')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('queryModeEsqlModeButton'));
-
-    expect(screen.getByTestId('adWorkerEsqlQuery')).toBeInTheDocument();
-    expect(screen.queryByTestId('adWorkerSize')).not.toBeInTheDocument();
+    expect(screen.getByTestId('adWorkerQueryBuilderPlaceholder')).toBeInTheDocument();
   });
 
   it('loads connectors scoped to the attack_discovery feature', () => {
