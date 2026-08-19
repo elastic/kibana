@@ -109,18 +109,17 @@ type ProfileStateDescriptorEntry<TState extends SerializableRecord> = [
   ProfileStateDescriptor<TState>[keyof TState]
 ];
 
-interface RegisteredTransform {
-  stateDefinition: ProfileStateDefinition<SerializableRecord>;
-  savedFields: ReadonlySet<string>;
-  toSavedState: (state: SerializableRecord) => SerializableRecord;
-  fromSavedState: (saved: SerializableRecord) => Partial<SerializableRecord>;
-}
-
 const getProfileStateDescriptorEntries = <TState extends SerializableRecord>(
   descriptor: ProfileStateDescriptor<TState>
 ): Array<ProfileStateDescriptorEntry<TState>> => {
   return Object.entries(descriptor) as Array<ProfileStateDescriptorEntry<TState>>;
 };
+
+type RegisteredTransform = ProfileSavedStateTransform<
+  keyof TabTypeStateMap,
+  SerializableRecord,
+  keyof TabTypeStateMap[keyof TabTypeStateMap]
+>;
 
 /**
  * Registry of profile state definitions and saved state transforms supported by Discover.
@@ -170,37 +169,28 @@ export class ProfileStateRegistry {
   >(transform: ProfileSavedStateTransform<TTabType, TState, TField>) {
     if (!this.hasDefinition(transform.stateDefinition)) {
       throw new Error(
-        `A matching state definition with key ${transform.stateDefinition.key} must be registered before its saved state transform.`
+        `State with key ${transform.stateDefinition.key} must be registered before this transform.`
       );
     }
 
     const existingTransforms = this.transformsByTabType.get(transform.tabType) ?? [];
-    const claimedFields = new Set(
-      existingTransforms.flatMap(({ savedFields }) => [...savedFields])
+    const claimedFields = new Set<keyof TabTypeStateMap[TTabType]>(
+      existingTransforms.flatMap(({ savedFields }) => savedFields)
     );
 
-    for (const field of transform.savedFields as readonly string[]) {
+    for (const field of transform.savedFields) {
       if (claimedFields.has(field)) {
         throw new Error(
-          `Field "${String(field)}" of tab type "${String(
+          `Field "${String(field)}" of tab type "${
             transform.tabType
-          )}" is already claimed by another transform.`
+          }" is already claimed by another transform.`
         );
       }
     }
 
     this.transformsByTabType.set(transform.tabType, [
       ...existingTransforms,
-      {
-        stateDefinition: transform.stateDefinition,
-        savedFields: new Set(transform.savedFields as readonly string[]),
-        toSavedState: transform.toSavedState as unknown as (
-          state: SerializableRecord
-        ) => SerializableRecord,
-        fromSavedState: transform.fromSavedState as unknown as (
-          saved: SerializableRecord
-        ) => Partial<SerializableRecord>,
-      },
+      transform as unknown as RegisteredTransform,
     ]);
   }
 
@@ -239,7 +229,7 @@ export class ProfileStateRegistry {
       return profileStateMap;
     }
 
-    const { type, ...payload } = tabTypeState as SerializableRecord & { type: string };
+    const { type, ...payload } = tabTypeState;
     const transforms = this.transformsByTabType.get(type) ?? [];
 
     for (const transform of transforms) {
@@ -251,7 +241,12 @@ export class ProfileStateRegistry {
         }
       }
 
-      profileStateMap[transform.stateDefinition.key] = transform.fromSavedState(narrowedPayload);
+      profileStateMap[transform.stateDefinition.key] = transform.fromSavedState(
+        narrowedPayload as Pick<
+          TabTypeStateMap[typeof type],
+          (typeof transform.savedFields)[number]
+        >
+      );
     }
 
     return profileStateMap;
