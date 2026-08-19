@@ -28,7 +28,7 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
   // We capture it from the load response in beforeAll.
   let dashboardId: string;
 
-  spaceTest.beforeAll(async ({ kbnClient, scoutSpace }) => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
 
     // Load dashboard saved objects into the worker's space. scoutSpace.savedObjects.load()
@@ -49,15 +49,17 @@ spaceTest.describe('Background Search management UI', { tag: '@local-stateful-cl
       );
     }
     dashboardId = delayed5s.id;
-    await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
   });
 
   spaceTest.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsPrivilegedUser();
   });
 
-  spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
-    await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
+  spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+    await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+  });
+
+  spaceTest.afterAll(async ({ scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
   });
 

@@ -53,8 +53,8 @@ spaceTest.describe('Discover background search restore', { tag: '@local-stateful
     await pageObjects.discover.waitUntilSearchingHasFinished();
   });
 
-  spaceTest.afterEach(async ({ kbnClient, scoutSpace }) => {
-    await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
+  spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+    await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
   });
 
   spaceTest.afterAll(async ({ scoutSpace }) => {

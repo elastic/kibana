@@ -56,8 +56,11 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultTime(LOGSTASH_MONTH_TIME_RANGE);
     });
 
-    spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
-      await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
+    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });

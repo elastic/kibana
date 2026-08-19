@@ -23,48 +23,13 @@ import { expect } from '@kbn/scout/ui';
 import type { BackgroundSearchTestFixtures } from '../fixtures';
 import {
   spaceTest,
+  deleteAllBackgroundSearches,
   BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT,
   DISCOVER_DEFAULT_KBN_ARCHIVE,
   FLIGHTS_SAMPLE_DATA_SET,
   LOGSTASH_TIME_RANGE,
   STALLING_DSL_FILTER,
 } from '../fixtures';
-
-const SESSION_HEADERS = {
-  'elastic-api-version': '1',
-  'kbn-xsrf': 'anything',
-  'kbn-system-request': 'true',
-};
-
-/**
- * Delete every background search belonging to the logged-in browser user.
- *
- * `/internal/session` is scoped to the user that created a session, so the shared
- * `deleteAllBackgroundSearches()` helper — which runs as the `kbnClient` superuser — cannot see
- * what the browser stored. `page.request` reuses the browser's session cookie instead.
- *
- * This spec needs the cleanup to actually happen: its two tests each assert on a single-row
- * table, so a session leaking from one into the other makes the row locators ambiguous.
- */
-const deleteBackgroundSearchesAsBrowserUser = async (page: ScoutPage, spaceId: string) => {
-  // Playwright's request context has no baseURL configured, so build absolute URLs off the page.
-  const sessionApi = (path: string) =>
-    new URL(`${spaceId === 'default' ? '' : `/s/${spaceId}`}/internal/session${path}`, page.url())
-      .href;
-
-  const response = await page.request.post(sessionApi('/_find'), {
-    headers: SESSION_HEADERS,
-    data: { page: 1, perPage: 10_000, sortField: 'created', sortOrder: 'asc' },
-  });
-  const { saved_objects: savedObjects }: { saved_objects: Array<{ id: string }> } =
-    await response.json();
-
-  await Promise.all(
-    savedObjects.map(({ id }) =>
-      page.request.delete(sessionApi(`/${id}`), { headers: SESSION_HEADERS })
-    )
-  );
-};
 
 /**
  * Reopen the flyout until the single background search row reports `complete` — only then does
@@ -117,8 +82,8 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest.afterEach(async ({ page, scoutSpace }) => {
-      await deleteBackgroundSearchesAsBrowserUser(page, scoutSpace.id);
+    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
     });
 
     spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {

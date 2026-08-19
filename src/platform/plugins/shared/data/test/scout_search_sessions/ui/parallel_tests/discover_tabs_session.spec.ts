@@ -39,8 +39,8 @@ spaceTest.describe(
       await pageObjects.discover.goto({ queryMode: 'esql' });
     });
 
-    spaceTest.afterEach(async ({ kbnClient, scoutSpace }) => {
-      await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
+    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
     });
 
     spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {

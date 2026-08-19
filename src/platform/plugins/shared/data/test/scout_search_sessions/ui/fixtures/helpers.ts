@@ -8,7 +8,7 @@
  */
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { KbnClient } from '@kbn/scout';
+import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 import { SESSION_API_PATH } from './constants';
 
 // Version header required by the background search internal API.
@@ -19,32 +19,54 @@ const SESSION_HEADERS = {
   'kbn-system-request': 'true',
 };
 
-const spacePrefix = (spaceId: string) => (spaceId === 'default' ? '' : `/s/${spaceId}`);
+export interface DeleteAllBackgroundSearchesOptions {
+  page: ScoutPage;
+  kbnUrl: KibanaUrl;
+  spaceId: string;
+}
 
 /**
- * Delete every background search in the given Kibana space. Specs that create background
- * searches must call this in `afterAll` — leftover sessions interfere with other suites
+ * Delete every background search owned by the logged-in browser user in the given Kibana space.
+ *
+ * The requests go through `page.request` so they carry the browser's session cookie: every
+ * `/internal/session` operation is scoped to the user that created a session, so running this as
+ * the `kbnClient` superuser instead would find — and therefore delete — nothing.
+ *
+ * Specs that store background searches must call this in `afterEach`, where the page is still
+ * available. Leftover sessions show up in the next test's management table and in other suites
  * that assert on the `_find` API.
  */
-export const deleteAllBackgroundSearches = async (kbnClient: KbnClient, spaceId: string) => {
-  const prefix = spacePrefix(spaceId);
-  const { data } = await kbnClient.request<{ saved_objects: Array<{ id: string }> }>({
-    method: 'POST',
-    path: `${prefix}${SESSION_API_PATH}/_find`,
+export const deleteAllBackgroundSearches = async ({
+  page,
+  kbnUrl,
+  spaceId,
+}: DeleteAllBackgroundSearchesOptions) => {
+  const sessionApi = (path: string = '') =>
+    kbnUrl.get(
+      spaceId === 'default'
+        ? `${SESSION_API_PATH}${path}`
+        : `s/${spaceId}${SESSION_API_PATH}${path}`
+    );
+
+  const response = await page.request.post(sessionApi('/_find'), {
     headers: SESSION_HEADERS,
-    body: { page: 1, perPage: 10_000, sortField: 'created', sortOrder: 'asc' },
+    data: { page: 1, perPage: 10_000, sortField: 'created', sortOrder: 'asc' },
   });
 
-  if (data.saved_objects.length === 0) return;
+  // A user without the `store_search_session` privilege cannot reach the API at all, and by the
+  // same token has no background searches to clean up.
+  if (response.status() === 403) return;
+
+  if (!response.ok()) {
+    throw new Error(`Failed to list background searches: ${response.status()}`);
+  }
+
+  const { saved_objects: savedObjects }: { saved_objects: Array<{ id: string }> } =
+    await response.json();
 
   await Promise.all(
-    data.saved_objects.map(({ id }) =>
-      kbnClient.request({
-        method: 'DELETE',
-        path: `${prefix}${SESSION_API_PATH}/${id}`,
-        headers: SESSION_HEADERS,
-        ignoreErrors: [404],
-      })
+    savedObjects.map(({ id }) =>
+      page.request.delete(sessionApi(`/${id}`), { headers: SESSION_HEADERS })
     )
   );
 };

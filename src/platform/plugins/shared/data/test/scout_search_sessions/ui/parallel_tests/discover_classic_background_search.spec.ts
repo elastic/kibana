@@ -43,8 +43,11 @@ spaceTest.describe(
       await browserAuth.loginAsPrivilegedUser();
     });
 
-    spaceTest.afterAll(async ({ kbnClient, scoutSpace }) => {
-      await deleteAllBackgroundSearches(kbnClient, scoutSpace.id);
+    spaceTest.afterEach(async ({ page, kbnUrl, scoutSpace }) => {
+      await deleteAllBackgroundSearches({ page, kbnUrl, spaceId: scoutSpace.id });
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });
