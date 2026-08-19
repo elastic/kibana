@@ -240,13 +240,6 @@ function useSequentialAccordion(ids: [string, string], completions: [boolean, bo
 // Every field on this step is constrained to half the card's content width.
 const HALF_WIDTH: React.CSSProperties = { maxWidth: '50%' };
 
-const REGION_OPTIONS = [
-  { value: 'us-east', text: 'US-East' },
-  { value: 'us-west', text: 'US-West' },
-  { value: 'eu-west-1', text: 'EU-West-1' },
-  { value: 'ap-southeast-1', text: 'AP-Southeast-1' },
-];
-
 const STATUS_BADGE_SIZE = 32;
 
 // Colored circle behind the spinner/checkmark (light primary while
@@ -356,37 +349,28 @@ const ConfirmableFieldText: React.FunctionComponent<{
 const CloudFormationWidget: React.FunctionComponent<{
   services: AwsServiceEntry[];
   schema: AwsSchema;
-  region: string;
-  onRegionChange: (value: string) => void;
   isLaunched: boolean;
   onLaunch: () => void;
   receivedCount: number;
   stackName: string;
   onStackNameChange: (value: string) => void;
-  stackVersion: string;
-  onStackVersionChange: (value: string) => void;
   isOpen: boolean;
   onToggle: () => void;
   onCompleteChange: (isComplete: boolean) => void;
 }> = ({
   services,
   schema,
-  region,
-  onRegionChange,
   isLaunched,
   onLaunch,
   receivedCount,
   stackName,
   onStackNameChange,
-  stackVersion,
-  onStackVersionChange,
   isOpen,
   onToggle,
   onCompleteChange,
 }) => {
   const allReceived = services.length > 0 && receivedCount >= services.length;
-  const isComplete =
-    allReceived && stackName.trim().length > 0 && stackVersion.trim().length > 0;
+  const isComplete = allReceived && stackName.trim().length > 0;
 
   useEffect(() => {
     onCompleteChange(isComplete);
@@ -417,30 +401,6 @@ const CloudFormationWidget: React.FunctionComponent<{
           Launch CloudFormation to deploy.
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
-
-      <EuiFormRow
-        label={
-          <span>
-            Select region{' '}
-            <EuiIconTip
-              content="The AWS region where the CloudFormation stack is deployed."
-              position="right"
-            />
-          </span>
-        }
-        style={HALF_WIDTH}
-        fullWidth
-      >
-        <EuiSelect
-          fullWidth
-          options={REGION_OPTIONS}
-          value={region}
-          onChange={(e) => onRegionChange(e.target.value)}
-          disabled={isLaunched}
-          aria-label="Select region"
-        />
-      </EuiFormRow>
       <EuiSpacer size="m" />
 
       {!isLaunched ? (
@@ -588,7 +548,7 @@ const CloudFormationWidget: React.FunctionComponent<{
         <>
           <EuiSpacer size="l" />
           <EuiText size="s">
-            <p>Copy the stack name and stack version from AWS Console and paste it below:</p>
+            <p>Copy the stack name from AWS Console and paste it below:</p>
           </EuiText>
           <EuiSpacer size="s" />
           <EuiFormRow
@@ -610,27 +570,6 @@ const CloudFormationWidget: React.FunctionComponent<{
               placeholder="e.g.: elastic-cloud-forwarder-xxxx"
               ariaLabel="Stack name"
               dataTestSubj="awsOnboardingStackName"
-            />
-          </EuiFormRow>
-          <EuiFormRow
-            label={
-              <span>
-                Stack version{' '}
-                <EuiIconTip
-                  content="The version of the CloudFormation stack deployed in your account."
-                  position="right"
-                />
-              </span>
-            }
-            style={HALF_WIDTH}
-            fullWidth
-          >
-            <ConfirmableFieldText
-              value={stackVersion}
-              onChange={onStackVersionChange}
-              placeholder="e.g.: 1.0.0"
-              ariaLabel="Stack version"
-              dataTestSubj="awsOnboardingStackVersion"
             />
           </EuiFormRow>
         </>
@@ -1301,15 +1240,11 @@ export const StepAuthentication: React.FunctionComponent<{
   onCredentialsValidChange: (isValid: boolean) => void;
   deployIdentityName: string;
   onDeployIdentityNameChange: (value: string) => void;
-  deployRegion: string;
-  onDeployRegionChange: (value: string) => void;
   isDeployed: boolean;
   onLaunchCloudFormation: () => void;
   receivedCount: number;
   stackName: string;
   onStackNameChange: (value: string) => void;
-  stackVersion: string;
-  onStackVersionChange: (value: string) => void;
   isAgentEnrolled: boolean;
   onAgentEnrolled: () => void;
   isManagedDeployed: boolean;
@@ -1324,15 +1259,11 @@ export const StepAuthentication: React.FunctionComponent<{
   onCredentialsValidChange,
   deployIdentityName,
   onDeployIdentityNameChange,
-  deployRegion,
-  onDeployRegionChange,
   isDeployed,
   onLaunchCloudFormation,
   receivedCount,
   stackName,
   onStackNameChange,
-  stackVersion,
-  onStackVersionChange,
   isAgentEnrolled,
   onAgentEnrolled,
   isManagedDeployed,
@@ -1528,15 +1459,11 @@ export const StepAuthentication: React.FunctionComponent<{
           <CloudFormationWidget
             services={services}
             schema={schema}
-            region={deployRegion}
-            onRegionChange={onDeployRegionChange}
             isLaunched={isDeployed}
             onLaunch={onLaunchCloudFormation}
             receivedCount={receivedCount}
             stackName={stackName}
             onStackNameChange={onStackNameChange}
-            stackVersion={stackVersion}
-            onStackVersionChange={onStackVersionChange}
             isOpen={managedAccordion.isOpen('cloudFormation')}
             onToggle={() => managedAccordion.toggle('cloudFormation')}
             onCompleteChange={setIsCloudFormationComplete}

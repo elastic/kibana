@@ -211,7 +211,10 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   // Deploy/detect state is lifted here (rather than owned by the Deploy step)
   // so it survives navigating to the separate Detect & Review step.
   const [deployIdentityName, setDeployIdentityName] = useState('');
-  const [deployRegion, setDeployRegion] = useState('us-east');
+  // Fixed, not user-editable — taken from the Global region chosen in
+  // Service Settings (step 2). Kept as a value here (rather than inlined)
+  // since Detect & Review's summary still needs to display it.
+  const deployRegion = 'us-east';
   const [isDeployed, setIsDeployed] = useState(false);
   const [receivedCount, setReceivedCount] = useState(0);
   const deployTimers = useRef<number[]>([]);
@@ -220,7 +223,6 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
   // Step 3 (managed): Next is disabled until the CloudFormation stack name
   // is entered.
   const [stackName, setStackName] = useState('');
-  const [stackVersion, setStackVersion] = useState('');
   // Step 3 (managed): the Managed Integrations card deploys its own data
   // streams (fast arrival animation), so step 4's summary is already settled.
   const [isManagedDeployed, setIsManagedDeployed] = useState(false);
@@ -594,15 +596,11 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
           onCredentialsValidChange={setIsCredentialsValid}
           deployIdentityName={deployIdentityName}
           onDeployIdentityNameChange={setDeployIdentityName}
-          deployRegion={deployRegion}
-          onDeployRegionChange={setDeployRegion}
           isDeployed={isDeployed}
           onLaunchCloudFormation={onLaunchCloudFormation}
           receivedCount={receivedCount}
           stackName={stackName}
           onStackNameChange={setStackName}
-          stackVersion={stackVersion}
-          onStackVersionChange={setStackVersion}
           isAgentEnrolled={isAgentEnrolled}
           onAgentEnrolled={onAgentEnrolled}
           isManagedDeployed={isManagedDeployed}
@@ -657,14 +655,13 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 selected.size === 0 ||
                 // Authenticate & Deploy: credentials for the selected method must
                 // be filled, and (managed only) CloudFormation must be launched
-                // and both stack fields entered — they only appear once every
+                // and the stack name entered — it only appears once every
                 // service is receiving data.
                 (currentStep === 3 &&
                   (!isCredentialsValid ||
                     (deploymentMethod === 'managed' &&
                       (!isDeployed ||
                         stackName.trim().length === 0 ||
-                        stackVersion.trim().length === 0 ||
                         !isManagedDeployed)) ||
                     (deploymentMethod === 'agent' && !isAgentEnrolled)))
               }
