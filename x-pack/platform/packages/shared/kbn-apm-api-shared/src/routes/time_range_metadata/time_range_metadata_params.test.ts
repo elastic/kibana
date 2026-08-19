@@ -31,5 +31,4 @@ describe('timeRangeMetadataRoute params', () => {
 
     expectParseError(result);
   });
-
 });
