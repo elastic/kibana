@@ -1208,7 +1208,7 @@ describe('SmlService', () => {
       expect(result.results.map(({ id }) => id)).toEqual(['entry-1', 'entry-2']);
     });
 
-    it('projects a hit down to the autocomplete result shape', async () => {
+    it('projects a hit as an autocomplete result', async () => {
       const service = createSmlService();
       service.setup({ logger });
       const smlService = service.start({ logger });

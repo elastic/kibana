@@ -34,10 +34,8 @@ export interface UseSmlAutocompleteOptions {
 }
 
 /**
- * Typeahead hook for the @ menu. Hits POST `/sml/_autocomplete`, which
- * prefix-matches the typed text against each row's `type` and `title`.
- *
- * For full retrieval (LLM tool, content search), see `useSmlSearch`.
+ * Typeahead hook for the @ menu, backed by POST `/sml/_autocomplete`. Debounces
+ * keystrokes and keeps the previous results while the next request is in flight.
  */
 export const useSmlAutocomplete = (query: string, options?: UseSmlAutocompleteOptions) => {
   const { services } = useKibana();
