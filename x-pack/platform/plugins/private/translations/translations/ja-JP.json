@@ -17257,8 +17257,6 @@
     "xpack.cases.jsonEditorField.defaultLabel": "JSONエディター",
     "xpack.cases.markdownEditor.noSimultaneousUploads.message": "ファイルの同時アップロードはサポートされていません。",
     "xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle": "ビジュアライゼーションを追加",
-    "xpack.cases.markdownEditor.plugins.lens.betaDescription": "このモジュールはGAではありません。現時点ではコメントごとに1つのLensのみを挿入できます。不具合を報告して支援してください。",
-    "xpack.cases.markdownEditor.plugins.lens.betaLabel": "ベータ",
     "xpack.cases.markdownEditor.plugins.lens.closeButtonLabel": "閉じる",
     "xpack.cases.markdownEditor.plugins.lens.createVisualizationButtonLabel": "新規作成",
     "xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel": "一致するLensが見つかりません。",

@@ -12,7 +12,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 
 import { LensEditor } from './plugin';
-import { useCasesConfig, useKibana } from '../../../../common/lib/kibana';
+import { useCasesConfig, useKibana, useToasts } from '../../../../common/lib/kibana';
 import { useMarkdownEditorPluginClickedEBT } from '../../../../analytics/use_markdown_editor_ebt';
 import { useLensDraftComment } from './use_lens_draft_comment';
 import { useIsMainApplication } from '../../../../common/hooks';
@@ -102,6 +102,7 @@ describe('lens markdown plugin', () => {
     (useCasesConfig as jest.Mock).mockReturnValue({
       attachmentsEnabled: false,
     });
+    (useToasts as jest.Mock).mockReturnValue({ addDanger });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: { currentAppId$: of('cases') },
@@ -224,11 +225,11 @@ describe('lens markdown plugin', () => {
     await renderEditor();
 
     await waitFor(() => {
-      expect(contentManagementGet).toHaveBeenCalled();
+      expect(addDanger).toHaveBeenCalledWith({ title: FAILED_TO_LOAD_VISUALIZATION });
     });
+    expect(contentManagementGet).toHaveBeenCalled();
     expect(onSave).not.toHaveBeenCalled();
     expect(getIncomingEmbeddablePackage.mock.calls.some(([, drain]) => drain === true)).toBe(false);
-    expect(addDanger).toHaveBeenCalledWith({ title: FAILED_TO_LOAD_VISUALIZATION });
   });
 
   it('updates the existing block when a draft position is set and the incoming package resolves by-value', async () => {

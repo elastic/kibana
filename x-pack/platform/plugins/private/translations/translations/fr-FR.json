@@ -17184,8 +17184,6 @@
     "xpack.cases.jsonEditorField.defaultLabel": "Éditeur JSON",
     "xpack.cases.markdownEditor.noSimultaneousUploads.message": "Les téléchargements simultanés de fichiers ne sont pas pris en charge.",
     "xpack.cases.markdownEditor.plugins.lens.addVisualizationModalTitle": "Ajouter une visualisation",
-    "xpack.cases.markdownEditor.plugins.lens.betaDescription": "Ce module n'est pas disponible. Pour l'instant, vous ne pouvez insérer qu'un seul Lens par commentaire. Nous vous remercions de bien vouloir nous aider en nous signalant les bugs.",
-    "xpack.cases.markdownEditor.plugins.lens.betaLabel": "Bêta",
     "xpack.cases.markdownEditor.plugins.lens.closeButtonLabel": "Fermer",
     "xpack.cases.markdownEditor.plugins.lens.createVisualizationButtonLabel": "Créer",
     "xpack.cases.markdownEditor.plugins.lens.insertLensSavedObjectModal.searchSelection.notFoundLabel": "Impossible de trouver un Lens correspondant.",
