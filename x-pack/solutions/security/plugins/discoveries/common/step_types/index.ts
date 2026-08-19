@@ -17,6 +17,8 @@ export {
 
 export { GenerateStepCommonDefinition, GenerateStepTypeId } from './generate_step';
 
+export { GetStatusStepCommonDefinition, GetStatusStepTypeId } from './get_status_step';
+
 export {
   PersistDiscoveriesStepCommonDefinition,
   PersistDiscoveriesStepTypeId,
