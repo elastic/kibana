@@ -2141,7 +2141,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         // Pair 'recover' no-data strategy with recovery_strategy 'none' so
         // the recovery step does not emit a recovered event for the group —
         // confirming the no_data event comes from the no-data step and the
-        // director drives the episode toward recovery.
+        // director resolves the episode directly to inactive.
         recovery_strategy: 'none',
         no_data_strategy: 'recover',
       })

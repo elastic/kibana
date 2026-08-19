@@ -64,6 +64,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     userAction: builderArgs.userAction,
     userProfiles: builderArgs.userProfiles,
     caseData: builderArgs.caseData,
+    permissions: builderArgs.permissions,
     handleDeleteComment: builderArgs.handleDeleteComment,
     getId,
     getAttachmentViewProps,
