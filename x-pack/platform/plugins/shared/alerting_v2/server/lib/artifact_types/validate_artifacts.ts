@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { DEFAULT_ARTIFACT_DATA_FIELD_LIMIT } from '@kbn/alerting-v2-constants';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError } from '@kbn/zod/v4';
 import { ALERTING_ERROR_CODES } from '../errors/error_codes';
@@ -28,33 +27,12 @@ const invalidArtifactData = (
   });
 
 /**
- * Bounds an artifact whose type nobody registered. A registered type is bounded
- * by its own `dataSchema`, which `assertBoundedSchema` proves is fully bounded
- * before it can be registered at all; without a schema there is nothing to
- * derive a limit from, so every field gets the same generic ceiling.
- */
-function validateUnregisteredArtifact(artifact: RuleArtifactLike): void {
-  for (const [field, value] of Object.entries(artifact.data)) {
-    const isString = typeof value === 'string';
-    // A structured value is measured serialized so that nesting a payload in an
-    // object or array cannot buy more room than a plain string field gets.
-    const size = isString ? value.length : (JSON.stringify(value) ?? '').length;
-
-    if (size > DEFAULT_ARTIFACT_DATA_FIELD_LIMIT) {
-      throw invalidArtifactData(
-        artifact,
-        `Artifact "${artifact.id}" of type "${artifact.type}" has invalid data: ${field}: ${
-          isString ? 'must be at most' : 'must serialize to at most'
-        } ${DEFAULT_ARTIFACT_DATA_FIELD_LIMIT} characters. Register the artifact type to declare its own limits.`
-      );
-    }
-  }
-}
-
-/**
- * Validates each artifact's `data`: against its registered `dataSchema` when the
- * type is registered, against a generic per-field size ceiling when it is not.
- * Throws a controlled badRequest on failure.
+ * Validates each artifact's `data` against its registered `dataSchema`. An
+ * unregistered type passes through untouched — the type's plugin may be
+ * disabled or rolled back, and rejecting here would fail writes that were
+ * legal under the schema the type once registered. Limits are enforced once,
+ * at registration, where `assertBoundedSchema` proves every registrable
+ * schema is fully bounded. Throws a controlled badRequest on failure.
  */
 export function validateArtifactsAgainstRegistry(
   artifacts: RuleArtifactLike[] | undefined,
@@ -67,7 +45,6 @@ export function validateArtifactsAgainstRegistry(
   for (const artifact of artifacts) {
     const def = registry.get(artifact.type);
     if (!def) {
-      validateUnregisteredArtifact(artifact);
       continue;
     }
 

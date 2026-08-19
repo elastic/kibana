@@ -12,8 +12,10 @@ export const RUNBOOK_ARTIFACT_TYPE = 'runbook';
 export const DASHBOARD_ARTIFACT_TYPE = 'dashboard';
 
 /**
- * Maximum length for a field inside the `data` of an artifact whose type nobody
- * registered. A registered type declares its own limits in its `dataSchema`.
+ * Default maximum length for a short string field in a built-in artifact's
+ * `dataSchema` (e.g. a dashboard id). Unregistered types are never validated:
+ * they pass through verbatim so a disabled or rolled-back plugin cannot fail
+ * writes that were legal under the schema it once registered.
  */
 export const DEFAULT_ARTIFACT_DATA_FIELD_LIMIT = 1024;
 
@@ -35,5 +37,9 @@ export const MAX_ARTIFACT_ARRAY_ITEMS = 1_000;
  * checked at `registerArtifactType` time. Strictly greater than
  * {@link MAX_ARTIFACT_STRING_LENGTH} so a schema may declare a single max-length
  * string alongside the key names and punctuation that surround it.
+ *
+ * "Bytes" is an approximation: the walk charges `maxLength` characters per
+ * string, so JSON escaping of non-ASCII values can serialize larger. This is a
+ * registration-time guardrail for schema authors, not an exact runtime cap.
  */
 export const MAX_ARTIFACT_DATA_BYTES = 131_072;

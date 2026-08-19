@@ -17,6 +17,12 @@ type JsonSchemaNode = Record<string, unknown>;
 /**
  * Converts a Zod `dataSchema` to JSON Schema and rejects unbounded / oversized
  * constructs. Called once at `registerArtifactType`; never at request time.
+ *
+ * Supported subset: `.strict()` objects, strings with `.max()`, arrays with
+ * `.max()`, numbers, booleans, literals and enums (`z.literal`, `z.enum`), and
+ * unions (`z.union`, `.nullable()`, emitted as anyOf/oneOf). Intersections
+ * (`allOf`), negations (`not`), recursion, and `z.any` / `z.unknown` are
+ * rejected.
  */
 export function assertBoundedSchema(dataSchema: z.ZodType, typeName: string): void {
   let json: JsonSchemaNode;
@@ -61,16 +67,40 @@ function assertBoundedNode(
     );
   }
 
-  // Zod maps z.any() / z.unknown() to unconstrained {} (no type).
-  if (node.type === undefined && !hasCombinator(node) && node.properties === undefined) {
-    throw new Error(
-      `Artifact type "${typeName}" dataSchema at ${path} is unconstrained (z.any / z.unknown are not allowed)`
+  // Literal sets (z.literal / z.enum) are inherently bounded: the worst case
+  // is the longest literal, serialized.
+  const literals = literalValues(node);
+  if (literals !== undefined) {
+    if (literals.length === 0) {
+      throw new Error(`Artifact type "${typeName}" dataSchema at ${path} has an empty enum`);
+    }
+    return Math.max(...literals.map((value) => (JSON.stringify(value) ?? 'null').length));
+  }
+
+  // Unions (z.union, .nullable()) are bounded by their largest branch; every
+  // branch must itself be bounded.
+  const branches = unionBranches(node);
+  if (branches !== undefined) {
+    if (branches.length === 0) {
+      throw new Error(`Artifact type "${typeName}" dataSchema at ${path} has an empty union`);
+    }
+    return Math.max(
+      ...branches.map((branch, index) =>
+        assertBoundedNode(branch, `${path}|${index}`, typeName, seen)
+      )
     );
   }
 
-  if (hasCombinator(node)) {
+  if (node.allOf !== undefined || node.not !== undefined) {
     throw new Error(
-      `Artifact type "${typeName}" dataSchema at ${path} uses combinators (anyOf/oneOf/allOf/not); not supported`
+      `Artifact type "${typeName}" dataSchema at ${path} uses allOf/not; supported constructs are strict objects, bounded strings/arrays, numbers, booleans, enums/literals, and unions`
+    );
+  }
+
+  // Zod maps z.any() / z.unknown() to unconstrained {} (no type).
+  if (node.type === undefined && node.properties === undefined) {
+    throw new Error(
+      `Artifact type "${typeName}" dataSchema at ${path} is unconstrained (z.any / z.unknown are not allowed)`
     );
   }
 
@@ -96,13 +126,25 @@ function assertBoundedNode(
   );
 }
 
-function hasCombinator(node: JsonSchemaNode): boolean {
-  return (
-    node.anyOf !== undefined ||
-    node.oneOf !== undefined ||
-    node.allOf !== undefined ||
-    node.not !== undefined
-  );
+function literalValues(node: JsonSchemaNode): unknown[] | undefined {
+  if (node.const !== undefined) {
+    return [node.const];
+  }
+  if (Array.isArray(node.enum)) {
+    return node.enum;
+  }
+  return undefined;
+}
+
+function unionBranches(node: JsonSchemaNode): JsonSchemaNode[] | undefined {
+  const branches = node.anyOf ?? node.oneOf;
+  if (branches === undefined) {
+    return undefined;
+  }
+  if (!Array.isArray(branches)) {
+    return [];
+  }
+  return branches as JsonSchemaNode[];
 }
 
 function assertBoundedString(node: JsonSchemaNode, path: string, typeName: string): number {

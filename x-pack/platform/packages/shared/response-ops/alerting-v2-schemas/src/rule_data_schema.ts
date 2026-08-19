@@ -388,9 +388,9 @@ const artifactSchema = z
   .check((ctx) => {
     // Only type-agnostic structure belongs here. How large a `data` value may be
     // depends on the artifact type, which this schema deliberately does not know:
-    // registered types are bounded by their own `dataSchema`, and unregistered
-    // ones by a generic per-field ceiling. Both are applied server-side, where
-    // the artifact-type registry is available.
+    // registered types are bounded by their own `dataSchema` (applied server-side,
+    // where the artifact-type registry is available) and unregistered types pass
+    // through verbatim so a disabled or rolled-back plugin cannot fail writes.
     if (Object.keys(ctx.value.data).length > MAX_ARTIFACT_DATA_FIELDS) {
       ctx.issues.push({
         code: 'custom',

@@ -55,6 +55,32 @@ describe('assertBoundedSchema', () => {
         )
       ).not.toThrow();
     });
+
+    it('accepts enums and literals, which need no maxLength', () => {
+      expect(() =>
+        assert(
+          z
+            .object({
+              severity: z.enum(['low', 'medium', 'high']),
+              kind: z.literal('static'),
+            })
+            .strict()
+        )
+      ).not.toThrow();
+    });
+
+    it('accepts nullable fields and unions of bounded branches', () => {
+      expect(() =>
+        assert(
+          z
+            .object({
+              notes: z.string().max(100).nullable(),
+              value: z.union([z.string().max(64), z.number()]),
+            })
+            .strict()
+        )
+      ).not.toThrow();
+    });
   });
 
   describe('per-node caps', () => {
@@ -146,6 +172,27 @@ describe('assertBoundedSchema', () => {
       expect(() => assert(z.object({ payload: z.unknown() }).strict())).toThrow(
         /unconstrained|unsupported/
       );
+    });
+
+    it('rejects a union with an unbounded branch', () => {
+      expect(() =>
+        assert(z.object({ value: z.union([z.string().max(8), z.string()]) }).strict())
+      ).toThrow(/string is missing maxLength/);
+    });
+
+    it('rejects intersections, naming the supported subset', () => {
+      expect(() =>
+        assert(
+          z
+            .object({
+              value: z.intersection(
+                z.object({ a: z.string().max(8) }).strict(),
+                z.object({ b: z.string().max(8) }).strict()
+              ),
+            })
+            .strict()
+        )
+      ).toThrow(/allOf\/not; supported constructs/);
     });
   });
 });

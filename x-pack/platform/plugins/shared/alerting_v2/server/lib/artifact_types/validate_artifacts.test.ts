@@ -34,36 +34,32 @@ describe('validateArtifactsAgainstRegistry', () => {
     const validate = (data: Record<string, unknown>) =>
       validateArtifactsAgainstRegistry([{ id: 'a1', type: 'unknown', data }], registry);
 
-    it('accepts data of any shape within the generic per-field ceiling', () => {
+    it('passes data of any shape through untouched', () => {
       expect(() =>
         validate({ anything: true, nested: { deep: [1, 2, 3] }, note: 'a'.repeat(1024) })
       ).not.toThrow();
     });
 
-    it('rejects a field above the generic ceiling and points at registration', () => {
-      expect(() => validate({ note: 'a'.repeat(1025) })).toThrow(
-        'note: must be at most 1024 characters. Register the artifact type to declare its own limits.'
-      );
+    it('never rejects on size, so a rollback of the owning plugin cannot fail writes', () => {
+      // Legal under a since-unregistered schema (e.g. `content: z.string().max(50_000)`).
+      expect(() => validate({ content: 'a'.repeat(50_000) })).not.toThrow();
     });
 
-    it('measures a structured value serialized, so nesting cannot buy more room', () => {
-      expect(() => validate({ list: new Array(1024).fill(1) })).toThrow(
-        'list: must serialize to at most 1024 characters'
-      );
+    it('does not measure structured values either', () => {
+      expect(() => validate({ list: new Array(1024).fill(1) })).not.toThrow();
     });
+  });
 
-    it('reports INVALID_ARTIFACT_DATA with the offending artifact', () => {
-      try {
-        validate({ note: 'a'.repeat(1025) });
-        throw new Error('expected validation to throw');
-      } catch (error) {
-        expect(Boom.isBoom(error)).toBe(true);
-        expect((error as Boom.Boom).data).toEqual({
-          code: ALERTING_ERROR_CODES.INVALID_ARTIFACT_DATA,
-          details: { artifact_id: 'a1', artifact_type: 'unknown' },
-        });
-      }
-    });
+  it('still validates a registered type when unregistered artifacts ride along', () => {
+    expect(() =>
+      validateArtifactsAgainstRegistry(
+        [
+          { id: 'a1', type: 'unknown', data: { note: 'a'.repeat(50_000) } },
+          { id: 'r1', type: 'runbook', data: { content: '' } },
+        ],
+        registry
+      )
+    ).toThrow('has invalid data');
   });
 
   it('rejects invalid data for registered types with INVALID_ARTIFACT_DATA', () => {

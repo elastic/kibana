@@ -9,7 +9,6 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
   DASHBOARD_ARTIFACT_TYPE,
-  DEFAULT_ARTIFACT_DATA_FIELD_LIMIT,
   RUNBOOK_ARTIFACT_TYPE,
   RUNBOOK_CONTENT_LIMIT,
 } from '@kbn/alerting-v2-constants';
@@ -152,36 +151,27 @@ apiTest.describe('Rule artifacts API', { tag: '@local-stateful-classic' }, () =>
   });
 
   apiTest(
-    'validation: bounds an unregistered type by the generic per-field ceiling',
+    'validation: an unregistered type is never rejected, even with large data',
     async ({ apiClient }) => {
-      // An unregistered type has no schema to derive a limit from, so it stays
-      // bounded by the generic ceiling rather than being unbounded.
+      // The owning plugin may be disabled or rolled back; a payload that was
+      // legal under its registered schema (e.g. content up to 50k) must still
+      // write. Limits are enforced once, at registration.
+      const artifacts = [
+        { id: 'custom-1', type: 'obs.custom', data: { blob: 'a'.repeat(RUNBOOK_CONTENT_LIMIT) } },
+      ];
       const response = await apiClient.post(testData.RULE_API_PATH, {
         headers: writerHeaders,
-        body: buildCreateRuleData({
-          artifacts: [
-            {
-              id: 'custom-1',
-              type: 'obs.custom',
-              data: { blob: 'a'.repeat(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT + 1) },
-            },
-          ],
-        }),
+        body: buildCreateRuleData({ metadata: { name: 'rule-large-unregistered' }, artifacts }),
       });
 
-      expect(response).toHaveStatusCode(400);
-      expect(response.body.code).toBe('INVALID_ARTIFACT_DATA');
-      expect(response.body.message).toContain(
-        `blob: must be at most ${DEFAULT_ARTIFACT_DATA_FIELD_LIMIT} characters`
-      );
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.artifacts).toStrictEqual(artifacts);
     }
   );
 
   apiTest(
-    'validation: a registered type may exceed the generic ceiling its own schema allows',
+    'validation: a registered type accepts data at its declared limit',
     async ({ apiClient }) => {
-      // A runbook declares 50k, well above the generic ceiling that bounds
-      // unregistered types, and must not be measured against it.
       const response = await apiClient.post(testData.RULE_API_PATH, {
         headers: writerHeaders,
         body: buildCreateRuleData({
