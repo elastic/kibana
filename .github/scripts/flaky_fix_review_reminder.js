@@ -89,7 +89,7 @@ function buildCommentBody(ownerHandles) {
     `Hey ${mentions} 👋 this flaky test fix has been open for a while and needs an owner decision. Any of these helps:`,
     '',
     '* ✅ Review and merge if it looks good',
-    '* ✏️ Need tweaks? Mention `@copilot` in a comment',
+    '* ✏️ Need to make changes or resolve merge conflicts? Ask `@copilot`',
     '* ❌ Not worth shipping? Just close it (drop a comment to help our workflow improve)',
     '',
     `Questions? Find the Applications DX team in [#kibana-qa](${QA_CHANNEL_URL}).`,
