@@ -1416,6 +1416,8 @@ const InternalUnifiedDataTable = React.forwardRef<
       };
     }, [showSummaryColumn, paginationMode, throttledHandleOnScroll]);
 
+    const isLoaded = loadingState === DataLoadingState.loaded;
+
     if (!rowCount && loadingState === DataLoadingState.loading) {
       return (
         <div
@@ -1437,7 +1439,12 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     if (!rowCount) {
       return (
-        <div className="euiDataGrid__noResults" css={styles.emptyRow} data-document-number={0}>
+        <div
+          className="euiDataGrid__noResults"
+          css={styles.emptyRow}
+          data-table-loaded={isLoaded}
+          data-document-number={0}
+        >
           <EuiText size="xs" color="subdued" textAlign="center">
             <EuiIcon type="discoverApp" size="m" color="subdued" aria-hidden="true" />
             <EuiSpacer size="s" />
@@ -1458,6 +1465,7 @@ const InternalUnifiedDataTable = React.forwardRef<
             ref={setDataGridWrapper}
             key={isCompareActive ? 'comparisonTable' : 'docTable'}
             data-test-subj="discoverDocTable"
+            data-table-loaded={isLoaded}
             data-document-number={displayedRows.length}
             className={classnames(className, 'unifiedDataTable__table')}
             css={[styles.dataTable, inTableSearchTermCss]}
