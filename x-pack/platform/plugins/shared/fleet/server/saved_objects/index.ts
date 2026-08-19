@@ -15,6 +15,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+  DATASET_CLAIMS_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -135,6 +136,35 @@ import { packagePolicyV17AdvancedFieldsForEndpointV818 } from './model_versions/
 import { backfillPackagePolicyLatestRevision } from './model_versions/package_policy_latest_revision_backfill';
 import { disableBrowserInputWhenBothEnabled } from './model_versions/synthetics_disable_browser_input';
 import { bumpProfilingSymbolizerPolicy } from './model_versions/bump_profiling_symbolizer_policy';
+
+const datasetClaimSchemaV1 = schema.object({
+  package_name: schema.string(),
+  status: schema.oneOf([schema.literal('pending'), schema.literal('active')]),
+  origin: schema.oneOf([
+    schema.literal('install'),
+    schema.literal('adoption'),
+    schema.literal('backfill'),
+  ]),
+  attempt_id: schema.string(),
+  index_patterns: schema.arrayOf(schema.string()),
+  package_version: schema.maybe(schema.string()),
+  install_source: schema.maybe(
+    schema.oneOf([
+      schema.literal('registry'),
+      schema.literal('upload'),
+      schema.literal('bundled'),
+      schema.literal('custom'),
+    ])
+  ),
+  adopted_streams: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        previous_default_pipeline: schema.maybe(schema.string()),
+      })
+    )
+  ),
+});
 
 /*
  * Saved object types and mappings
@@ -2030,6 +2060,34 @@ export const getSavedObjectTypes = (
               { unknowns: 'ignore' }
             ),
             create: CloudOnboardingDeploymentSchemaV1,
+          },
+        },
+      },
+    },
+    [DATASET_CLAIMS_SAVED_OBJECT_TYPE]: {
+      name: DATASET_CLAIMS_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      hiddenFromHttpApis: true,
+      // Elasticsearch names are global while Kibana assets can be space-specific, and a claim
+      // describes an Elasticsearch name.
+      namespaceType: 'agnostic',
+      management: { importableAndExportable: false },
+      mappings: {
+        dynamic: false,
+        properties: {
+          package_name: { type: 'keyword', ignore_above: 1024 },
+          status: { type: 'keyword', ignore_above: 1024 },
+          origin: { type: 'keyword', ignore_above: 1024 },
+          attempt_id: { type: 'keyword', ignore_above: 1024 },
+        },
+      },
+      modelVersions: {
+        '1': {
+          changes: [],
+          schemas: {
+            forwardCompatibility: datasetClaimSchemaV1.extends({}, { unknowns: 'ignore' }),
+            create: datasetClaimSchemaV1,
           },
         },
       },

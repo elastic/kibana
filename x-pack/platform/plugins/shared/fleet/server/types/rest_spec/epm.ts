@@ -1324,3 +1324,20 @@ export const RollbackPackageRequestSchema = {
     }),
   }),
 };
+
+export const DatasetClaimRequestSchema = {
+  body: schema.object({
+    baseName: schema.string({ maxLength: 256 }),
+    packageName: schema.string({ maxLength: 256 }),
+    packageVersion: schema.maybe(schema.string({ maxLength: 64 })),
+    installSource: schema.maybe(
+      schema.oneOf([
+        schema.literal('registry'),
+        schema.literal('upload'),
+        schema.literal('bundled'),
+        schema.literal('custom'),
+      ])
+    ),
+    datasetIsPrefix: schema.maybe(schema.boolean()),
+  }),
+};

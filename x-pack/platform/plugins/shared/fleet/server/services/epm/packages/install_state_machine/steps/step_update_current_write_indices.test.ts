@@ -132,6 +132,7 @@ describe('stepUpdateCurrentWriteIndices', () => {
       expect.anything(),
       expect.anything(),
       [],
+      [],
       { ignoreMappingUpdateErrors: undefined, skipDataStreamRollover: undefined }
     );
   });
@@ -159,7 +160,33 @@ describe('stepUpdateCurrentWriteIndices', () => {
       expect.anything(),
       expect.anything(),
       indexTemplates,
+      [],
       { ignoreMappingUpdateErrors: true, skipDataStreamRollover: true }
+    );
+  });
+
+  it('passes an empty allowlist when the context has none', async () => {
+    await stepUpdateCurrentWriteIndices({
+      savedObjectsClient: soClient,
+      // @ts-ignore
+      savedObjectsImporter: jest.fn(),
+      esClient,
+      logger: loggerMock.create(),
+      packageInstallContext,
+      installedPkg,
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: DEFAULT_SPACE_ID,
+      esReferences: [],
+      ownedDataStreams: undefined,
+    } as never);
+
+    expect(mockedUpdateCurrentWriteIndices).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.anything(),
+      [],
+      expect.anything()
     );
   });
 });

@@ -23,6 +23,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import pRetry from 'p-retry';
 import type { LicenseType } from '@kbn/licensing-types';
 import { addSpanLabels } from '@kbn/apm-utils';
+import { v4 as uuidv4 } from 'uuid';
 
 import type {
   KibanaAssetReference,
@@ -95,6 +96,11 @@ import { formatVerificationResultForSO } from './package_verification';
 import { getInstallation, getInstallationObject } from './get';
 import { getPackageSavedObjects } from './get';
 import { removeOldAssets } from './cleanup';
+import {
+  finalizeDatasetClaims,
+  getPackageClaimNames,
+  releaseAttemptClaims,
+} from './dataset_ownership';
 import { getBundledPackageByPkgKey } from './bundled_packages';
 import { convertStringToTitle, generateDescription } from './custom_integrations/utils';
 import { INITIAL_VERSION } from './custom_integrations/constants';
@@ -284,6 +290,7 @@ export async function handleInstallPackageFailure({
   spaceId,
   request,
   keepFailedInstallation,
+  datasetClaimAttemptId,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   error: FleetError | Boom.Boom | Error;
@@ -294,11 +301,29 @@ export async function handleInstallPackageFailure({
   spaceId: string;
   request?: KibanaRequest;
   keepFailedInstallation?: boolean;
+  datasetClaimAttemptId?: string;
 }) {
+  const logger = appContextService.getLogger();
+
+  const safeReleaseAttemptClaims = async () => {
+    if (!datasetClaimAttemptId) return;
+    try {
+      await releaseAttemptClaims(savedObjectsClient, pkgName, datasetClaimAttemptId);
+    } catch (releaseError) {
+      logger.error(
+        `Failed to release dataset claims for attempt ${datasetClaimAttemptId} of ${pkgName}: ${
+          (releaseError as Error).message
+        }`
+      );
+    }
+  };
+
   if (error instanceof ConcurrentInstallOperationError) {
+    // This attempt acquired claims before the package lock. Release them so they are not stranded.
+    await safeReleaseAttemptClaims();
     return;
   }
-  const logger = appContextService.getLogger();
+
   const pkgkey = Registry.pkgToPkgKey({
     name: pkgName,
     version: pkgVersion,
@@ -334,6 +359,7 @@ export async function handleInstallPackageFailure({
         return;
       }
       await removeInstallation({ savedObjectsClient, pkgName, pkgVersion, esClient });
+      // Claims are deleted inside removeInstallation. Do not release here.
       return;
     }
 
@@ -365,7 +391,7 @@ export async function handleInstallPackageFailure({
       }
       const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
       logger.error(`Rolling back to ${prevVersion} after error installing ${pkgkey}`);
-      await installPackage({
+      const rollbackResult = await installPackage({
         installSource: 'registry',
         savedObjectsClient,
         pkgkey: prevVersion,
@@ -374,6 +400,12 @@ export async function handleInstallPackageFailure({
         force: true,
         request,
       });
+      // installPackage returns `{ error }` instead of throwing. Treat that as a failed
+      // rollback so pending claims from this attempt stay in place.
+      if (rollbackResult.error) {
+        throw rollbackResult.error;
+      }
+      await safeReleaseAttemptClaims();
     }
   } catch (e) {
     // If an error happens while removing the integration or while doing a rollback update the status to failed
@@ -811,6 +843,10 @@ export async function installPackageWithStateMachine(options: {
       .getSavedObjectsTagging()
       .createTagClient({ client: savedObjectClientWithSpace });
 
+    // One id per install attempt. Claims are stamped with it so a failed attempt releases exactly
+    // what it created and nothing another attempt owns.
+    const datasetClaimAttemptId = uuidv4();
+
     // try installing the package, if there was an error, call error handler and rethrow
     return await _stateMachineInstallPackage({
       savedObjectsClient,
@@ -833,6 +869,7 @@ export async function installPackageWithStateMachine(options: {
       useStreaming,
       installedAsDependencyOf,
       skipDependencyCheck,
+      datasetClaimAttemptId,
     })
       .then(async (assets) => {
         logger.debug(`Removing old assets from previous versions of ${pkgName}`);
@@ -841,6 +878,25 @@ export async function installPackageWithStateMachine(options: {
           pkgName,
           currentVersion: packageInfo.version,
         });
+        if (!useStreaming) {
+          try {
+            await finalizeDatasetClaims({
+              soClient: savedObjectsClient,
+              packageName: pkgName,
+              packageVersion: packageInfo.version,
+              claims: getPackageClaimNames(packageInfo).map(({ baseName, indexPattern }) => ({
+                baseName,
+                indexPatterns: [indexPattern],
+              })),
+            });
+          } catch (finalizeError) {
+            // A claim left pending still counts as held, so the package keeps its datasets.
+            // Rethrowing here would run failure handling over an install that actually succeeded.
+            logger.error(
+              `Failed to finalize dataset claims for ${pkgName}: ${finalizeError.message}`
+            );
+          }
+        }
         sendEvent({
           ...telemetryEvent!,
           status: 'success',
@@ -867,6 +923,7 @@ export async function installPackageWithStateMachine(options: {
           esClient,
           request,
           keepFailedInstallation,
+          datasetClaimAttemptId,
         });
         sendEventWithLatestState(
           telemetryEvent,

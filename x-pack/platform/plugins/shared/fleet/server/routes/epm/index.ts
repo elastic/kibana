@@ -89,6 +89,7 @@ import {
   InstallRuleAssetsRequestSchema,
   NamespacePreflightCheckRequestSchema,
   NamespacePreflightCheckResponseSchema,
+  DatasetClaimRequestSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -135,6 +136,7 @@ import {
   postBulkNamespaceCustomizationHandler,
 } from './bulk_handler';
 import { deletePackageDatastreamAssetsHandler } from './package_datastream_assets_handler';
+import { datasetClaimsHandler } from './dataset_claims_handler';
 import { getIlmPoliciesHandler } from './ilm_policies_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -155,6 +157,12 @@ export const INSTALL_PACKAGES_SECURITY: RouteSecurity = {
 // Upload accepts an ingest pipeline from the uploaded archive verbatim. Registry packages are
 // signed and custom integrations get a Fleet-generated pipeline, so only this route needs superuser.
 export const INSTALL_PACKAGES_BY_UPLOAD_SECURITY: RouteSecurity = {
+  authz: {
+    requiredPrivileges: [ReservedPrivilegesSet.superuser],
+  },
+};
+
+export const DATASET_CLAIMS_SECURITY: RouteSecurity = {
   authz: {
     requiredPrivileges: [ReservedPrivilegesSet.superuser],
   },
@@ -1939,5 +1947,18 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       getIlmPoliciesHandler
+    );
+
+  router.versioned
+    .post({
+      path: EPM_API_ROUTES.DATASET_CLAIMS_PATTERN,
+      security: DATASET_CLAIMS_SECURITY,
+      summary: `Adopt a dataset for a package`,
+      description: `Assign ownership of a generated dataset name to a package, permitting an install that would otherwise be rejected as a takeover. Only available to superusers.`,
+      options: { tags: ['oas-tag:Elastic Package Manager (EPM)'] },
+    })
+    .addVersion(
+      { version: API_VERSIONS.public.v1, validate: { request: DatasetClaimRequestSchema } },
+      datasetClaimsHandler
     );
 };

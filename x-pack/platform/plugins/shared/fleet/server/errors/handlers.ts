@@ -21,6 +21,10 @@ import {
 } from '../../common/errors';
 
 import { appContextService } from '../services';
+import {
+  DatasetClaimConflictError,
+  DatasetOwnershipConflictError,
+} from '../services/epm/packages/dataset_ownership/errors';
 
 import {
   AgentPolicyNameExistsError,
@@ -128,6 +132,12 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 409;
   }
   if (error instanceof PackageSavedObjectConflictError) {
+    return 409;
+  }
+  if (error instanceof DatasetOwnershipConflictError) {
+    return 409;
+  }
+  if (error instanceof DatasetClaimConflictError) {
     return 409;
   }
   if (error instanceof PackagePolicyNameExistsError) {

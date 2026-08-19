@@ -1,0 +1,86 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { v4 as uuidv4 } from 'uuid';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+
+import { DATASET_CLAIMS_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import type { DatasetClaimAttributes } from '../../services/epm/packages/dataset_ownership';
+import type { DatasetClaimRequestSchema, FleetRequestHandler } from '../../types';
+
+export const datasetClaimsHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof DatasetClaimRequestSchema.body>
+> = async (context, request, response) => {
+  const soClient = (await context.core).savedObjects.client;
+  const { baseName, packageName, packageVersion, installSource, datasetIsPrefix } = request.body;
+
+  // A claim id is a generated Elasticsearch base name such as `logs-payroll.records`, never a bare
+  // dataset. Rejecting anything else stops an operator adopting an id no install will ever match.
+  if (!baseName.includes('-')) {
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: `"${baseName}" is not a generated dataset name. Expected a value such as "logs-payroll.records".`,
+      },
+    });
+  }
+
+  const indexPatterns = [datasetIsPrefix ? `${baseName}.*-*` : `${baseName}-*`];
+
+  let existing: DatasetClaimAttributes | undefined;
+  try {
+    existing = (
+      await soClient.get<DatasetClaimAttributes>(DATASET_CLAIMS_SAVED_OBJECT_TYPE, baseName)
+    ).attributes;
+  } catch (error) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(error)) throw error;
+  }
+
+  if (existing && existing.package_name !== packageName) {
+    return response.customError({
+      statusCode: 409,
+      body: {
+        message:
+          `Dataset "${baseName}" is claimed by package "${existing.package_name}". ` +
+          `Uninstall that package before assigning the dataset to "${packageName}".`,
+      },
+    });
+  }
+
+  if (existing) {
+    // Same package. Promote to an adoption claim so it authorizes takeover, and make it active so a
+    // claim left pending by a failed attempt cannot be used as authorization.
+    if (existing.origin !== 'adoption' || existing.status !== 'active') {
+      await soClient.update<DatasetClaimAttributes>(DATASET_CLAIMS_SAVED_OBJECT_TYPE, baseName, {
+        origin: 'adoption',
+        status: 'active',
+      });
+    }
+    return response.ok({ body: { baseName, packageName, created: false } });
+  }
+
+  await soClient.create<DatasetClaimAttributes>(
+    DATASET_CLAIMS_SAVED_OBJECT_TYPE,
+    {
+      package_name: packageName,
+      status: 'active',
+      origin: 'adoption',
+      attempt_id: `adoption-${uuidv4()}`,
+      // A placeholder until the package installs: finalizeDatasetClaims refreshes the patterns from
+      // the manifest at the end of a successful install.
+      index_patterns: indexPatterns,
+      package_version: packageVersion,
+      install_source: installSource,
+    },
+    { id: baseName, overwrite: false }
+  );
+
+  return response.ok({ body: { baseName, packageName, created: true } });
+};

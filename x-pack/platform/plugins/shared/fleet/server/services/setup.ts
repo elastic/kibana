@@ -67,6 +67,7 @@ import { createCCSIndexPatterns } from './setup/fleet_synced_integrations';
 import { ensureCorrectAgentlessSettingsIds } from './agentless_settings_ids';
 import { getSpaceAwareSaveobjectsClients } from './epm/kibana/assets/saved_objects';
 import { ensureFleetGlobalEsAssets } from './setup/ensure_fleet_global_es_assets';
+import { backfillDatasetClaims, sweepOrphanedDatasetClaims } from './setup/backfill_dataset_claims';
 import {
   ensurePreconfiguredDownloadSources,
   getPreconfiguredDownloadSourcesFromConfig,
@@ -325,6 +326,21 @@ async function createSetupSideEffects(
     backfillPolicyBaseIdError = { error };
   }
 
+  let datasetClaimsError;
+  try {
+    logger.debug('Releasing orphaned dataset ownership claims');
+    const { deleted } = await sweepOrphanedDatasetClaims(soClient, logger);
+    logger.debug(`Dataset claims sweep: ${deleted.length} released`);
+
+    logger.debug('Backfilling dataset ownership claims');
+    const { created, skipped, conflicts } = await backfillDatasetClaims(soClient, esClient, logger);
+    logger.debug(
+      `Dataset claims backfill: ${created} created, ${skipped.length} skipped, ${conflicts.length} conflicts`
+    );
+  } catch (error) {
+    datasetClaimsError = { error };
+  }
+
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
 
@@ -340,6 +356,7 @@ async function createSetupSideEffects(
       : []),
     ...(ensureCorrectAgentlessSettingsIdsError ? [ensureCorrectAgentlessSettingsIdsError] : []),
     ...(backfillPolicyBaseIdError ? [backfillPolicyBaseIdError] : []),
+    ...(datasetClaimsError ? [datasetClaimsError] : []),
   ];
 
   logger.info('Scheduling async setup tasks');

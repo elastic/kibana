@@ -8,7 +8,11 @@
 import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 
-import { INSTALL_PACKAGES_BY_UPLOAD_SECURITY, INSTALL_PACKAGES_SECURITY } from '.';
+import {
+  INSTALL_PACKAGES_BY_UPLOAD_SECURITY,
+  INSTALL_PACKAGES_SECURITY,
+  DATASET_CLAIMS_SECURITY,
+} from '.';
 
 import type { FleetRequestHandlerContext } from '../..';
 
@@ -826,5 +830,13 @@ describe('INSTALL_PACKAGES_BY_UPLOAD_SECURITY', () => {
 
   it('leaves the shared install route security untouched', () => {
     expect(INSTALL_PACKAGES_SECURITY.authz).not.toEqual(INSTALL_PACKAGES_BY_UPLOAD_SECURITY.authz);
+  });
+});
+
+describe('DATASET_CLAIMS_SECURITY', () => {
+  it('requires superuser, so a Fleet-all user cannot adopt a dataset', () => {
+    expect(DATASET_CLAIMS_SECURITY).toEqual({
+      authz: { requiredPrivileges: [ReservedPrivilegesSet.superuser] },
+    });
   });
 });

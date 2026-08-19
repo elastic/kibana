@@ -2114,6 +2114,73 @@ describe('EPM template', () => {
   });
 
   describe('updateCurrentWriteIndices', () => {
+    const templateEntry = {
+      templateName: 'test',
+      indexTemplate: {
+        index_patterns: ['logs-*-*'],
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any,
+    };
+    const allTestStreams = [
+      'test.prefix1-default',
+      'test-non-replicated',
+      'test-replicated',
+      'test-constant.keyword-default',
+      'logs.prefix1-default',
+    ];
+
+    it('skips data streams that are not in the allowlist', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          { name: 'logs-mine-default', replicated: false, indices: [{ index_name: '.ds-mine' }] },
+          {
+            name: 'logs-foreign-teamb',
+            replicated: false,
+            indices: [{ index_name: '.ds-foreign' }],
+          },
+        ],
+      } as never);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
+      const logger = loggerMock.create();
+
+      await updateCurrentWriteIndices(esClient, logger, [templateEntry], ['logs-mine-default']);
+
+      expect(esClient.indices.putSettings).not.toHaveBeenCalledWith(
+        expect.objectContaining({ index: 'logs-foreign-teamb' })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('logs-foreign-teamb'));
+    });
+
+    it('does nothing when the allowlist is empty', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          { name: 'logs-foreign-teamb', replicated: false, indices: [{ index_name: '.ds-f' }] },
+        ],
+      } as never);
+      esClient.indices.simulateTemplate.mockResponse({
+        template: {
+          settings: { index: {} },
+          mappings: { properties: {} },
+        },
+      } as any);
+      const logger = loggerMock.create();
+
+      await updateCurrentWriteIndices(esClient, logger, [templateEntry], []);
+
+      expect(esClient.indices.putMapping).not.toHaveBeenCalled();
+      expect(esClient.indices.putSettings).not.toHaveBeenCalled();
+    });
+
     it('update all the index matching, index template index pattern', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
       esClient.indices.getDataStream.mockResponse({
@@ -2126,18 +2193,23 @@ describe('EPM template', () => {
         },
       } as any);
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: { properties: {} },
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
       expect(esClient.indices.getDataStream).toBeCalledWith({
         name: 'test.*-*',
         expand_wildcards: ['open', 'hidden'],
@@ -2166,18 +2238,23 @@ describe('EPM template', () => {
       } as any);
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test-*'],
-            template: {
-              settings: { index: {} },
-              mappings: { properties: {} },
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
       expect(putMappingsCall).toHaveLength(1);
@@ -2234,20 +2311,25 @@ describe('EPM template', () => {
         },
       } as any);
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test-constant.keyword-*'],
-            template: {
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test-constant.keyword-*'],
               template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
+                template: {
+                  settings: { index: {} },
+                  mappings: { properties: {} },
+                },
               },
-            },
-          } as any,
-        },
-      ]);
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
       expect(esClient.indices.get).toBeCalledWith({
         index: '.ds-test-constant.keyword-default-0002',
       });
@@ -2285,20 +2367,25 @@ describe('EPM template', () => {
         template: {},
       } as any);
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test-constant.keyword-*'],
-            template: {
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test-constant.keyword-*'],
               template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
+                template: {
+                  settings: { index: {} },
+                  mappings: { properties: {} },
+                },
               },
-            },
-          } as any,
-        },
-      ]);
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
       const putMappingsCalls = esClient.indices.putMapping.mock.calls;
       expect(putMappingsCalls).toHaveLength(1);
       expect(putMappingsCalls[0][0]).toEqual({
@@ -2323,18 +2410,23 @@ describe('EPM template', () => {
         } as any);
       });
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: { properties: {} },
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       expect(esClient.transport.request).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2376,18 +2468,23 @@ describe('EPM template', () => {
       });
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: {},
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       expect(esClient.transport.request).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2427,18 +2524,23 @@ describe('EPM template', () => {
       });
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: {},
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       expect(esClient.transport.request).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2480,18 +2582,23 @@ describe('EPM template', () => {
       });
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: {},
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       expect(esClient.transport.request).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2534,6 +2641,7 @@ describe('EPM template', () => {
             } as any,
           },
         ],
+        allTestStreams,
         {
           skipDataStreamRollover: true,
         }
@@ -2559,18 +2667,23 @@ describe('EPM template', () => {
       });
       const logger = loggerMock.create();
       await expect(
-        updateCurrentWriteIndices(esClient, logger, [
-          {
-            templateName: 'test',
-            indexTemplate: {
-              index_patterns: ['test.*-*'],
-              template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
-              },
-            } as any,
-          },
-        ])
+        updateCurrentWriteIndices(
+          esClient,
+          logger,
+          [
+            {
+              templateName: 'test',
+              indexTemplate: {
+                index_patterns: ['test.*-*'],
+                template: {
+                  settings: { index: {} },
+                  mappings: { properties: {} },
+                },
+              } as any,
+            },
+          ],
+          allTestStreams
+        )
       ).rejects.toThrow();
 
       // Rollover must NOT be triggered for total_fields errors — it cannot fix them.
@@ -2612,6 +2725,7 @@ describe('EPM template', () => {
               } as any,
             },
           ],
+          allTestStreams,
           { ignoreMappingUpdateErrors: true }
         )
       ).resolves.not.toThrow();
@@ -2631,18 +2745,23 @@ describe('EPM template', () => {
       });
       const logger = loggerMock.create();
       try {
-        await updateCurrentWriteIndices(esClient, logger, [
-          {
-            templateName: 'test',
-            indexTemplate: {
-              index_patterns: ['test.*-*'],
-              template: {
-                settings: { index: {} },
-                mappings: { properties: {} },
-              },
-            } as any,
-          },
-        ]);
+        await updateCurrentWriteIndices(
+          esClient,
+          logger,
+          [
+            {
+              templateName: 'test',
+              indexTemplate: {
+                index_patterns: ['test.*-*'],
+                template: {
+                  settings: { index: {} },
+                  mappings: { properties: {} },
+                },
+              } as any,
+            },
+          ],
+          allTestStreams
+        );
         fail('expected updateCurrentWriteIndices to throw error');
       } catch (err) {
         // noop
@@ -2674,6 +2793,7 @@ describe('EPM template', () => {
             } as any,
           },
         ],
+        allTestStreams,
         {
           ignoreMappingUpdateErrors: true,
         }
@@ -2704,18 +2824,23 @@ describe('EPM template', () => {
       } as any);
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: {},
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       expect(esClient.transport.request).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2755,18 +2880,23 @@ describe('EPM template', () => {
       } as any);
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'test',
-          indexTemplate: {
-            index_patterns: ['test.*-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'test',
+            indexTemplate: {
+              index_patterns: ['test.*-*'],
+              template: {
+                settings: { index: {} },
+                mappings: {},
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       expect(esClient.transport.request).not.toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2806,18 +2936,23 @@ describe('EPM template', () => {
       } as any);
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'logs.prefix1',
-          indexTemplate: {
-            index_patterns: ['logs.prefix1-*'],
-            template: {
-              settings: { index: {} },
-              mappings: {},
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'logs.prefix1',
+            indexTemplate: {
+              index_patterns: ['logs.prefix1-*'],
+              template: {
+                settings: { index: {} },
+                mappings: {},
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       expect(esClient.transport.request).not.toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2848,18 +2983,23 @@ describe('EPM template', () => {
       } as any);
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'logs.prefix1',
-          indexTemplate: {
-            index_patterns: ['logs.prefix1-*'],
-            template: {
-              settings: { index: {} },
-              mappings: { properties: {} },
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'logs.prefix1',
+            indexTemplate: {
+              index_patterns: ['logs.prefix1-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
       expect(putMappingsCall).toHaveLength(1);
@@ -2881,18 +3021,23 @@ describe('EPM template', () => {
       } as any);
 
       const logger = loggerMock.create();
-      await updateCurrentWriteIndices(esClient, logger, [
-        {
-          templateName: 'logs.prefix1',
-          indexTemplate: {
-            index_patterns: ['logs.prefix1-*'],
-            template: {
-              settings: { index: {} },
-              mappings: { properties: {} },
-            },
-          } as any,
-        },
-      ]);
+      await updateCurrentWriteIndices(
+        esClient,
+        logger,
+        [
+          {
+            templateName: 'logs.prefix1',
+            indexTemplate: {
+              index_patterns: ['logs.prefix1-*'],
+              template: {
+                settings: { index: {} },
+                mappings: { properties: {} },
+              },
+            } as any,
+          },
+        ],
+        allTestStreams
+      );
 
       const putMappingsCall = esClient.indices.putMapping.mock.calls.map(([{ index }]) => index);
       expect(putMappingsCall).toHaveLength(1);

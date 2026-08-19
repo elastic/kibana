@@ -1,0 +1,10 @@
+- name: data_stream.type
+  type: constant_keyword
+- name: data_stream.dataset
+  type: constant_keyword
+- name: data_stream.namespace
+  type: constant_keyword
+- name: '@timestamp'
+  type: date
+- name: labels.dataset_ownership_marker
+  type: keyword
