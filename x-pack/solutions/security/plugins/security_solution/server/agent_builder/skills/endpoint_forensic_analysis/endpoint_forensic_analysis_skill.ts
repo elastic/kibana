@@ -61,7 +61,7 @@ const discoverTelemetrySchema = z.object({
 
 const extractIocsSchema = z.object({
   hosts: z
-    .array(z.string())
+    .array(z.string().max(255))
     .min(1)
     .max(50)
     .describe('Named host.name values to extract IoCs from (at least one required, max 50)'),
@@ -253,6 +253,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
           `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
           `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension, @timestamp`,
+          `| SORT @timestamp ASC`,
           `| LIMIT 500`,
         ].join(' ');
 

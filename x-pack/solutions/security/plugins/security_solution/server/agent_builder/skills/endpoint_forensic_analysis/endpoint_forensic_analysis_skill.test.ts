@@ -65,6 +65,27 @@ describe('endpointForensicAnalysisSkill', () => {
       false
     );
     expect(schema.safeParse({ hosts: ['WKSTN-RECV01'] }).success).toBe(true);
+    expect(schema.safeParse({ hosts: ['a'.repeat(256)] }).success).toBe(false);
+  });
+
+  it('sorts IoC extraction by @timestamp ASC before LIMIT so first_seen is the earliest event', async () => {
+    const inlineTools = (await endpointForensicAnalysisSkill.getInlineTools?.()) ?? [];
+    const extractIocs = inlineTools.find(
+      (tool) => tool.id === 'security.endpoint_forensic.extract_iocs'
+    ) as { handler: (args: unknown, context: unknown) => Promise<unknown> } | undefined;
+
+    expect(extractIocs?.handler).toBeDefined();
+
+    const esqlQuery = jest.fn().mockResolvedValue({ columns: [], values: [] });
+    await extractIocs!.handler(
+      { hosts: ['WKSTN-RECV01'] },
+      { esClient: { asCurrentUser: { esql: { query: esqlQuery } } } }
+    );
+
+    expect(esqlQuery).toHaveBeenCalledTimes(1);
+    const query = esqlQuery.mock.calls[0][0].query as string;
+    expect(query).toMatch(/\| SORT @timestamp ASC \| LIMIT 500/);
+    expect(query.indexOf('| SORT @timestamp ASC')).toBeLessThan(query.indexOf('| LIMIT 500'));
   });
 
   it('routes conflicting antivirus / configuration issues to elastic-defend-configuration-troubleshooting', () => {
