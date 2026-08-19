@@ -8,6 +8,7 @@
 import { platformSignificantEventsTools } from '@kbn/agent-builder-common';
 import type { ConverseStep } from '@kbn/evals';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
+import { isToolId } from './tool_usage';
 
 interface EventsWriteToolResult {
   data?: {
@@ -31,7 +32,13 @@ type EventsWriteItemResult =
     };
 
 const toolCallSteps = (steps: ConverseStep[], toolId: string) =>
-  steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId && step.params);
+  steps.filter(
+    (step) =>
+      step.type === 'tool_call' &&
+      typeof step.tool_id === 'string' &&
+      isToolId(step.tool_id, toolId) &&
+      step.params
+  );
 
 const getBulkItems = (params: Record<string, unknown> | undefined): Partial<SignificantEvent>[] => {
   if (!Array.isArray(params?.items)) {
@@ -80,7 +87,7 @@ const parseEventsWriteStep = (
 
 /**
  * Extract events from `events_write` tool call steps for continuation seeding.
- * Includes existing_active_event outcomes so follow-up cycles can resolve the episode.
+ * Includes existing_active_event and unchanged_outcome results so follow-up cycles retain the episode.
  */
 export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): SignificantEvent[] =>
   toolCallSteps(steps, platformSignificantEventsTools.eventsWrite).flatMap((step) => {
@@ -92,7 +99,9 @@ export const extractDiscoveriesFromToolCall = (steps: ConverseStep[]): Significa
     const { items, results } = parsed;
     return results
       .map((result, index) =>
-        !result.written && result.reason !== 'existing_active_event'
+        !result.written &&
+        result.reason !== 'existing_active_event' &&
+        result.reason !== 'unchanged_outcome'
           ? undefined
           : ({
               ...items[index],

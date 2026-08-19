@@ -9,9 +9,11 @@ import type { Client } from '@elastic/elasticsearch';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createGcsRepository } from '@kbn/es-snapshot-loader';
+import type { KbnClient } from '@kbn/test';
 import type { GcsConfig } from './snapshot_run_config';
 import { resolveBasePath } from './snapshot_run_config';
 import { ensureLogsIndexTemplate } from './logs_index_template';
+import { SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM } from './snapshot_indices';
 
 const LOGS_STREAM_NAME = 'logs';
 const REPLAY_TEMP_PREFIX = 'sigevents-replay-temp-';
@@ -533,3 +535,69 @@ export async function replayIntoManagedStream(
     await cleanupReplayArtifacts({ esClient, log, artifacts });
   }
 }
+
+export const resetMemoryPages = async ({
+  esClient,
+  log,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+}): Promise<void> => {
+  // Delete the data stream instead of deleting through its write alias. The memory stream is
+  // versioned and stale documents in older backing indices can otherwise remain searchable.
+  await esClient.indices
+    .deleteDataStream({ name: SIGNIFICANT_EVENTS_MEMORIES_DATA_STREAM })
+    .catch((error: unknown) => {
+      if (
+        !(
+          typeof error === 'object' &&
+          error !== null &&
+          'statusCode' in error &&
+          error.statusCode === 404
+        )
+      ) {
+        throw error;
+      }
+    });
+  log.debug('Reset significant events memory data stream');
+};
+
+export const replayIntoMemoryPages = async ({
+  esClient,
+  log,
+  memoryPages,
+  kbnClient,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  kbnClient: KbnClient;
+  memoryPages: Array<{ name: string; content: string }>;
+}): Promise<void> => {
+  for (const page of memoryPages ?? []) {
+    // Seed through the memory API so the data stream is provisioned and the page
+    // is embedded (with lexical fallback) exactly as production pages are.
+    const response = await kbnClient.request<{
+      id: string;
+      name: string;
+    }>({
+      path: '/internal/streams/memory/entries',
+      method: 'POST',
+      body: page,
+    });
+    if (response.data.name !== page.name || !response.data.id) {
+      throw new Error(`Memory seed returned an invalid page for "${page.name}"`);
+    }
+    const readResponse = await kbnClient.request<{
+      id: string;
+      name: string;
+    }>({
+      path: `/internal/streams/memory/entries/${response.data.id}`,
+      method: 'GET',
+    });
+    if (readResponse.data.id !== response.data.id) {
+      throw new Error(`Seeded memory page "${page.name}" could not be read by ID`);
+    }
+
+    log.info(`Seeded memory page "${page.name}"`);
+  }
+};

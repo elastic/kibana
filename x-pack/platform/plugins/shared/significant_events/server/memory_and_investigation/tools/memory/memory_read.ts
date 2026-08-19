@@ -13,6 +13,7 @@ import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { platformStreamsMemoryTools } from './tool_ids';
 import type { MemoryToolsOptions } from './types';
+import type { MemoryEntry } from '../../lib/memory';
 
 const memoryReadSchema = z.object({
   name: z
@@ -82,7 +83,8 @@ export const createMemoryReadTool = ({
   description:
     'Read a specific memory page by name or ID. Supports targeted reads: ' +
     'request a specific heading section or a line range to avoid loading the full document. ' +
-    'Always returns the list of headings and total line count for navigation.',
+    'Always returns the list of headings and total line count for navigation. ' +
+    'When both name and id are available, provide both so a stale ID can fall back to the name.',
   schema: memoryReadSchema,
   handler: async ({ name, id, heading, offset, limit }, context) => {
     const memoryService = getMemoryService(context.esClient.asCurrentUser);
@@ -98,9 +100,17 @@ export const createMemoryReadTool = ({
     }
 
     try {
-      const entry = id
-        ? await memoryService.get({ id })
-        : await memoryService.getByName({ name: name! });
+      let entry: MemoryEntry | undefined;
+      if (id) {
+        try {
+          entry = await memoryService.get({ id });
+        } catch (error) {
+          if (!name) throw error;
+          entry = await memoryService.getByName({ name });
+        }
+      } else {
+        entry = await memoryService.getByName({ name: name! });
+      }
 
       if (!entry) {
         return {

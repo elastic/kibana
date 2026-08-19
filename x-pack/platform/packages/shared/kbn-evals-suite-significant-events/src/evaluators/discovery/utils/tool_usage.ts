@@ -48,6 +48,11 @@ export function getToolCallCount(steps: ConverseStep[]): number {
   return steps.filter((step) => step.type === 'tool_call').length;
 }
 
+/** Agent Builder live traces use underscores; eval fixtures use dotted ids. */
+export function isToolId(toolId: string, canonical: string): boolean {
+  return toolId.replace(/\./g, '_') === canonical.replace(/\./g, '_');
+}
+
 const getRetryableBulkErrorCount = (step: ConverseStep): number => {
   if (step.type !== 'tool_call' || !Array.isArray(step.results)) return 0;
   return step.results.reduce<number>((count, result) => {
@@ -79,7 +84,12 @@ export function summarizePersistenceCalls(
   steps: ConverseStep[],
   toolId: string
 ): PersistenceCallSummary {
-  const calls = steps.filter((step) => step.type === 'tool_call' && step.tool_id === toolId);
+  const calls = steps.filter(
+    (step) =>
+      step.type === 'tool_call' &&
+      typeof step.tool_id === 'string' &&
+      isToolId(step.tool_id, toolId)
+  );
   if (calls.length === 1) {
     return { count: 1, valid: true, retriedPartialFailure: false };
   }
@@ -97,7 +107,11 @@ export function summarizePersistenceCalls(
 export function extractEventSearchCandidateCount(steps: ConverseStep[]): number | null {
   let candidateCount: number | null = null;
   for (const step of steps) {
-    if (step.type !== 'tool_call' || step.tool_id !== platformSignificantEventsTools.searchEvent) {
+    if (
+      step.type !== 'tool_call' ||
+      typeof step.tool_id !== 'string' ||
+      !isToolId(step.tool_id, platformSignificantEventsTools.searchEvent)
+    ) {
       continue;
     }
     const results = Array.isArray(step.results) ? step.results : [];
@@ -140,7 +154,11 @@ export function summarizeEsqlGrounding(steps: ConverseStep[]): EsqlGroundingSumm
   let noOfToolCallsWithResults = 0;
 
   for (const step of steps) {
-    if (step.type !== 'tool_call' || step.tool_id !== platformCoreTools.executeEsql) {
+    if (
+      step.type !== 'tool_call' ||
+      typeof step.tool_id !== 'string' ||
+      !isToolId(step.tool_id, platformCoreTools.executeEsql)
+    ) {
       continue;
     }
     noOfToolCalls++;

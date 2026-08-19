@@ -28,7 +28,7 @@ export interface ContinuationCycle {
 
   /** Whether this cycle should reuse an established event ID. Defaults to true. */
   expectReuse?: boolean;
-  /** Whether this cycle must perform a topology-filtered event search. */
+  /** Whether follow-up cycles must perform a topology-filtered event search. */
   expectTopologyEventSearch?: boolean;
   /** Event IDs explicitly supplied by the agent to events_write, before handler deduplication. */
   requestedEventIds?: string[];

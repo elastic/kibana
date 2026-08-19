@@ -96,6 +96,52 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
 
+  it('retains an unchanged continuation for the next cycle', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-unchanged',
+        params: { items: [{ event_id: 'event-1', title: 'Existing event', status: 'open' }] },
+        results: [
+          {
+            data: {
+              results: [
+                { index: 0, event_id: 'event-1', written: false, reason: 'unchanged_outcome' },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1', title: 'Existing event' }),
+    ]);
+  });
+
+  it('extracts events from live Agent Builder underscore tool ids', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: 'platform_sig_events_events_write',
+        tool_call_id: 'ew-underscore',
+        params: { items: [{ title: 'Live event', status: 'open' }] },
+        results: [
+          {
+            data: {
+              results: [{ index: 0, event_uuid: 'uuid-1', event_id: 'event-1', written: true }],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1', title: 'Live event' }),
+    ]);
+  });
+
   it('skips misaligned bulk results', () => {
     const steps: ConverseStep[] = [
       {

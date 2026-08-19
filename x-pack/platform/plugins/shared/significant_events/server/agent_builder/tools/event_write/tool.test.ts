@@ -116,6 +116,14 @@ describe('events_write tool', () => {
     expect(result.items[0].event_id).toBeUndefined();
   });
 
+  it('accepts 40-medium for known-ongoing events', () => {
+    const result = eventsWriteSchema.safeParse({
+      items: [{ ...input, severity: '40-medium' }],
+    });
+
+    expect(result.success).toBe(true);
+  });
+
   it('returns aligned results and tracks each item', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       {
