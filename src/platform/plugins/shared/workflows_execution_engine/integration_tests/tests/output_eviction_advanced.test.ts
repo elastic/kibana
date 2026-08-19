@@ -85,6 +85,7 @@ steps:
       fixture = new WorkflowRunFixture();
       (fixture.configMock as Record<string, unknown>).eviction = {
         minPayloadSize: new ByteSizeValue(10 * 1024),
+        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       };
       await fixture.runWorkflow({ workflowYaml: yaml });
     });
@@ -228,6 +229,7 @@ steps:
       fixture = new WorkflowRunFixture();
       (fixture.configMock as Record<string, unknown>).eviction = {
         minPayloadSize: new ByteSizeValue(10 * 1024),
+        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       };
       await fixture.runWorkflow({ workflowYaml: yaml });
     });
@@ -380,6 +382,7 @@ steps:
       fixture = new WorkflowRunFixture();
       (fixture.configMock as Record<string, unknown>).eviction = {
         minPayloadSize: new ByteSizeValue(10 * 1024),
+        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       };
       await fixture.runWorkflow({ workflowYaml: yaml });
     });

@@ -24,6 +24,7 @@ describe('workflow output eviction', () => {
       // Set a very low threshold (1 byte) so that all connector step outputs get evicted
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         minPayloadSize: new ByteSizeValue(1),
+        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       };
     });
 
@@ -144,6 +145,7 @@ steps:
       // Set threshold very high so nothing gets evicted
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         minPayloadSize: new ByteSizeValue(100 * 1024 * 1024), // 100MB
+        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       };
     });
 
@@ -218,6 +220,7 @@ steps:
     workflowRunFixture = new WorkflowRunFixture();
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       minPayloadSize: new ByteSizeValue(1),
+      maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
     };
     await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
   });
@@ -306,6 +309,7 @@ steps:
     workflowRunFixture = new WorkflowRunFixture();
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       minPayloadSize: new ByteSizeValue(1),
+      maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
     };
     await workflowRunFixture.runWorkflow({ workflowYaml: yaml });
   });
@@ -360,6 +364,7 @@ describe('workflow input eviction', () => {
     // Low threshold so connector outputs get evicted
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       minPayloadSize: new ByteSizeValue(1),
+      maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
     };
   });
 
@@ -440,6 +445,7 @@ describe('workflow eviction with pause and resume', () => {
       workflowRunFixture = new WorkflowRunFixture();
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         minPayloadSize: new ByteSizeValue(1),
+        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       };
 
       const yaml = `
@@ -495,6 +501,7 @@ steps:
       workflowRunFixture = new WorkflowRunFixture();
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         minPayloadSize: new ByteSizeValue(1),
+        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       };
 
       const yaml = `
@@ -556,6 +563,7 @@ steps:
       workflowRunFixture = new WorkflowRunFixture();
       (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
         minPayloadSize: new ByteSizeValue(1),
+        maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
       };
 
       const yaml = `
@@ -637,6 +645,7 @@ describe('workflow output eviction with pause and resume', () => {
     // Low threshold so connector outputs get evicted
     (workflowRunFixture.configMock as Record<string, unknown>).eviction = {
       minPayloadSize: new ByteSizeValue(1),
+      maxCacheSize: new ByteSizeValue(10 * 1024 * 1024),
     };
   });
 
