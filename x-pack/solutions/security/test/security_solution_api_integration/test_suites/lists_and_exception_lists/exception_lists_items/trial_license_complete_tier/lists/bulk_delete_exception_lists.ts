@@ -35,20 +35,22 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllExceptions(supertest, log);
       });
 
-      it('should delete multiple exception lists by list_id', async () => {
-        await createList({ list_id: 'list-1' });
-        await createList({ list_id: 'list-2' });
+      it('should delete multiple exception lists by id and leave others untouched', async () => {
+        const { body: list1 } = await createList({ list_id: 'list-1' });
+        const { body: list2 } = await createList({ list_id: 'list-2' });
         await createList({ list_id: 'list-3' });
 
         const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { list_ids: ['list-1', 'list-2'] } })
+          .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list1.id, list2.id] } })
           .expect(200);
 
+        expect(body.success).to.eql(true);
         expect(body.errors).to.eql([]);
-        expect(body.deleted.map((list: { list_id: string }) => list.list_id).sort()).to.eql([
+        expect(body.results.map((list: { list_id: string }) => list.list_id).sort()).to.eql([
           'list-1',
           'list-2',
         ]);
+        expect(body.summary).to.eql({ total: 2, succeeded: 2, failed: 0, skipped: 0 });
 
         // the third list should still exist
         await supertest
@@ -57,42 +59,18 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
       });
 
-      it('should delete multiple exception lists by id', async () => {
-        const { body: list1 } = await createList({ list_id: 'list-1' });
-        const { body: list2 } = await createList({ list_id: 'list-2' });
-
-        const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { ids: [list1.id, list2.id] } })
-          .expect(200);
-
-        expect(body.errors).to.eql([]);
-        expect(body.deleted.map((list: { id: string }) => list.id).sort()).to.eql(
-          [list1.id, list2.id].sort()
-        );
-      });
-
       it('should deduplicate repeated ids', async () => {
         const { body: list } = await createList({ list_id: 'list-1' });
 
         const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { ids: [list.id, list.id] } })
+          .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id, list.id] } })
           .expect(200);
 
+        expect(body.success).to.eql(true);
         expect(body.errors).to.eql([]);
-        expect(body.deleted).to.have.length(1);
-        expect(body.deleted[0].id).to.eql(list.id);
-      });
-
-      it('should deduplicate repeated list_ids', async () => {
-        await createList({ list_id: 'list-1' });
-
-        const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { list_ids: ['list-1', 'list-1'] } })
-          .expect(200);
-
-        expect(body.errors).to.eql([]);
-        expect(body.deleted).to.have.length(1);
-        expect(body.deleted[0].list_id).to.eql('list-1');
+        expect(body.results).to.have.length(1);
+        expect(body.results[0].id).to.eql(list.id);
+        expect(body.summary).to.eql({ total: 1, succeeded: 1, failed: 0, skipped: 1 });
       });
 
       it('should reject an exception list item saved object id without deleting its list or item', async () => {
@@ -105,17 +83,16 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { ids: [createdItem.id] } })
+          .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [createdItem.id] } })
           .expect(200);
 
-        expect(body.deleted).to.eql([]);
+        expect(body.success).to.eql(false);
+        expect(body.results).to.eql([]);
         expect(body.errors).to.eql([
           {
-            id: createdItem.id,
-            error: {
-              message: `exception list id: "${createdItem.id}" does not exist`,
-              status_code: 404,
-            },
+            lists: [{ id: createdItem.id }],
+            message: `exception list id: "${createdItem.id}" does not exist`,
+            status_code: 404,
           },
         ]);
         await supertest
@@ -129,37 +106,41 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should report a partial failure when some lists do not exist', async () => {
-        await createList({ list_id: 'list-1' });
+        const { body: list1 } = await createList({ list_id: 'list-1' });
 
         const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { list_ids: ['list-1', 'does-not-exist'] } })
+          .bulkDeleteExceptionLists({
+            body: { action: 'delete', ids: [list1.id, 'does-not-exist'] },
+          })
           .expect(200);
 
-        expect(body.deleted).to.have.length(1);
-        expect(body.deleted[0].list_id).to.eql('list-1');
+        expect(body.success).to.eql(false);
+        expect(body.results).to.have.length(1);
+        expect(body.results[0].list_id).to.eql('list-1');
         expect(body.errors).to.eql([
           {
-            list_id: 'does-not-exist',
-            error: {
-              message: 'exception list list_id: "does-not-exist" does not exist',
-              status_code: 404,
-            },
+            lists: [{ id: 'does-not-exist' }],
+            message: 'exception list id: "does-not-exist" does not exist',
+            status_code: 404,
           },
         ]);
+        expect(body.summary).to.eql({ total: 2, succeeded: 1, failed: 1, skipped: 0 });
       });
 
       it('should return only errors when none of the lists exist', async () => {
         const { body } = await exceptionsApi
           .bulkDeleteExceptionLists({
-            body: { list_ids: ['does-not-exist-1', 'does-not-exist-2'] },
+            body: { action: 'delete', ids: ['does-not-exist-1', 'does-not-exist-2'] },
           })
           .expect(200);
 
-        expect(body.deleted).to.eql([]);
+        expect(body.success).to.eql(false);
+        expect(body.results).to.eql([]);
         expect(body.errors).to.have.length(2);
+        expect(body.summary).to.eql({ total: 2, succeeded: 0, failed: 2, skipped: 0 });
       });
 
-      it('should return a 400 when neither ids nor list_ids are provided', async () => {
+      it('should return a 400 when the request body is empty', async () => {
         const { body } = await exceptionsApi
           .bulkDeleteExceptionLists({ body: {} as never })
           .expect(400);
@@ -169,45 +150,25 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should return a 400 when ids is empty', async () => {
         const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { ids: [] } })
+          .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [] } })
           .expect(400);
 
         expect(body.statusCode).to.eql(400);
       });
 
-      it('should return a 400 when list_ids is empty', async () => {
+      it('should return a 400 for an unsupported action', async () => {
         const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { list_ids: [] } })
-          .expect(400);
-
-        expect(body.statusCode).to.eql(400);
-      });
-
-      it('should return a 400 when both ids and list_ids are provided', async () => {
-        const { body: list1 } = await createList({ list_id: 'list-1' });
-
-        const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { ids: [list1.id], list_ids: ['list-1'] } })
+          .bulkDeleteExceptionLists({ body: { action: 'archive', ids: ['list-1'] } as never })
           .expect(400);
 
         expect(body.statusCode).to.eql(400);
       });
 
       it('should return a 400 when the batch exceeds the maximum size', async () => {
-        const listIds = Array.from({ length: 101 }, (_, index) => `list-${index}`);
-
-        const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { list_ids: listIds } })
-          .expect(400);
-
-        expect(body.statusCode).to.eql(400);
-      });
-
-      it('should return a 400 when an ids batch exceeds the maximum size', async () => {
         const ids = Array.from({ length: 101 }, (_, index) => `id-${index}`);
 
         const { body } = await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { ids } })
+          .bulkDeleteExceptionLists({ body: { action: 'delete', ids } })
           .expect(400);
 
         expect(body.statusCode).to.eql(400);
@@ -215,7 +176,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should cascade delete the items belonging to a deleted list', async () => {
         const item = { ...getCreateExceptionListItemMinimalSchemaMock(), list_id: 'list-1' };
-        await createList({ list_id: 'list-1' });
+        const { body: list } = await createList({ list_id: 'list-1' });
         await supertest
           .post(EXCEPTION_LIST_ITEM_URL)
           .set('kbn-xsrf', 'true')
@@ -223,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         await exceptionsApi
-          .bulkDeleteExceptionLists({ body: { list_ids: ['list-1'] } })
+          .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
           .expect(200);
 
         const { body } = await supertest
@@ -235,16 +196,17 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should delete lists in the agnostic namespace', async () => {
-        await createList({ list_id: 'list-1', namespace_type: 'agnostic' });
+        const { body: list } = await createList({ list_id: 'list-1', namespace_type: 'agnostic' });
 
         const { body } = await exceptionsApi
           .bulkDeleteExceptionLists({
-            body: { list_ids: ['list-1'], namespace_type: 'agnostic' },
+            body: { action: 'delete', ids: [list.id], namespace_type: 'agnostic' },
           })
           .expect(200);
 
+        expect(body.success).to.eql(true);
         expect(body.errors).to.eql([]);
-        expect(body.deleted).to.have.length(1);
+        expect(body.results).to.have.length(1);
       });
 
       describe('@skipInServerless with read rules and all exceptions role', () => {
@@ -258,13 +220,13 @@ export default ({ getService }: FtrProviderContext) => {
           const restrictedUser = { username: 'rules_read_exceptions_all', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);
 
-          await createList({ list_id: 'list-1' });
+          const { body: list } = await createList({ list_id: 'list-1' });
 
           const { body } = await restrictedApis
-            .bulkDeleteExceptionLists({ body: { list_ids: ['list-1'] } })
+            .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
             .expect(200);
 
-          expect(body.deleted).to.have.length(1);
+          expect(body.results).to.have.length(1);
         });
       });
 
@@ -279,10 +241,10 @@ export default ({ getService }: FtrProviderContext) => {
           const restrictedUser = { username: 'rules_read_exceptions_read', password: 'changeme' };
           const restrictedApis = exceptionsApi.withUser(restrictedUser);
 
-          await createList({ list_id: 'list-1' });
+          const { body: list } = await createList({ list_id: 'list-1' });
 
           await restrictedApis
-            .bulkDeleteExceptionLists({ body: { list_ids: ['list-1'] } })
+            .bulkDeleteExceptionLists({ body: { action: 'delete', ids: [list.id] } })
             .expect(403);
         });
       });
