@@ -120,6 +120,7 @@ export const RuleSummaryFlyout = ({
               <EuiFlexItem grow={false}>
                 <RuleActionsMenu
                   rule={rule}
+                  canWrite={canWrite}
                   onEdit={onEdit}
                   onClone={onClone}
                   onDelete={onDelete}
