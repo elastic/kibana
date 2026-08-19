@@ -25,7 +25,6 @@ dependsOn:
   - '@kbn/cps-utils'
   - '@kbn/es-query'
   - '@kbn/cps-common'
-  - '@kbn/core-security-server'
   - '@kbn/cloud-plugin'
   - '@kbn/i18n'
 tags:
