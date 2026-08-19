@@ -13,7 +13,6 @@ import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import { PLUGIN_ID } from '../common';
 import type { AppPluginStartDependencies } from './types';
 import type { ExampleLink } from './common/example_page';
@@ -51,7 +50,7 @@ export const renderApp = (
   ];
 
   ReactDOM.render(
-    <KibanaRootContextProvider {...startServices}>
+    startServices.rendering.addContext(
       <I18nProvider>
         <SearchExamplePage exampleLinks={LINKS}>
           <Router history={history}>
@@ -85,7 +84,7 @@ export const renderApp = (
           </Router>
         </SearchExamplePage>
       </I18nProvider>
-    </KibanaRootContextProvider>,
+    ),
     element
   );
 
