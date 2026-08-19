@@ -246,6 +246,35 @@ describe('KibanaEvalsClient', () => {
     expect(exp.evaluationRuns.length).toBeGreaterThan(0);
   });
 
+  it('copies evaluator.higherIsBetter onto each EvaluationRun when defined', async () => {
+    const client = createClient();
+    const dataset: EvaluationDataset = {
+      name: 'ds',
+      description: 'desc',
+      examples: [{ input: { q: 1 }, output: { expected: 1 } }],
+    };
+    const task = async () => ({ value: 1 });
+    const evaluators: Array<Evaluator<EvaluationDataset['examples'][number], { value: number }>> = [
+      {
+        name: 'Latency',
+        kind: 'CODE',
+        higherIsBetter: false,
+        evaluate: async () => ({ score: 100 }),
+      },
+      {
+        name: 'Quality',
+        kind: 'CODE',
+        evaluate: async () => ({ score: 1 }),
+      },
+    ];
+
+    const [exp] = await client.runExperiment({ datasets: [dataset], task }, evaluators);
+    const byName = Object.fromEntries(exp.evaluationRuns.map((run) => [run.name, run]));
+
+    expect(byName.Latency.higherIsBetter).toBe(false);
+    expect(byName.Quality).not.toHaveProperty('higherIsBetter');
+  });
+
   it('prefers a task-provided traceId over the client task-span id for the stored run and evaluator output', async () => {
     const client = createClient();
     const dataset: EvaluationDataset = {

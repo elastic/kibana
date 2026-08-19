@@ -154,6 +154,43 @@ describe('buildIngestRequest', () => {
     expect(requests[0].scores[0].example).not.toHaveProperty('metadata');
   });
 
+  it('maps evaluationRun.higherIsBetter to evaluator.higher_is_better when set', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: {
+        kind: 'event',
+        event: createEvent({
+          evaluationRun: {
+            ...createEvent().evaluationRun,
+            higherIsBetter: false,
+          },
+        }),
+      },
+    });
+
+    expect(requests[0].scores[0].evaluator).toMatchObject({
+      name: 'Correctness',
+      higher_is_better: false,
+    });
+  });
+
+  it('omits evaluator.higher_is_better when evaluationRun.higherIsBetter is undefined', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: { kind: 'event', event: createEvent() },
+    });
+
+    expect(requests[0].scores[0].evaluator).not.toHaveProperty('higher_is_better');
+  });
+
   it('uses explicit executionId for metadata.execution_id when provided', () => {
     const requests = buildIngestRequest({
       taskModel,

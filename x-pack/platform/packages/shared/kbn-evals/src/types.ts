@@ -179,6 +179,10 @@ export interface EvaluationRun {
   experimentRunId: string;
   traceId?: string | null;
   exampleId?: string;
+  /**
+   * Whether a higher score is an improvement.
+   */
+  higherIsBetter?: boolean;
 }
 
 export interface DatasetRunResult {

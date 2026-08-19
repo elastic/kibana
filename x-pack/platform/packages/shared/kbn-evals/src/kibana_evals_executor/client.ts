@@ -265,17 +265,23 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                   this.options.log.info(
                     `✅ Evaluator "${evaluator.name}" on run (exampleIndex=${exampleIndex}, repetition=${rep}) completed`
                   );
-                  return { evaluatorName: evaluator.name, result, evaluatorTraceId };
+                  return {
+                    evaluatorName: evaluator.name,
+                    higherIsBetter: evaluator.higherIsBetter,
+                    result,
+                    evaluatorTraceId,
+                  };
                 })
               );
 
-              for (const { evaluatorName, result, evaluatorTraceId } of results) {
+              for (const { evaluatorName, higherIsBetter, result, evaluatorTraceId } of results) {
                 const evalRun = {
                   name: evaluatorName,
                   result,
                   experimentRunId: runKey,
                   traceId: evaluatorTraceId,
                   exampleId: example.id,
+                  ...(higherIsBetter !== undefined && { higherIsBetter }),
                 };
                 evaluationRuns.push(evalRun);
 
