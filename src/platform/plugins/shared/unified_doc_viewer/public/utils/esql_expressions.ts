@@ -24,7 +24,9 @@ import { esqlColumn } from './esql_column';
  * wherever precedence requires it.
  *
  * Pass the result to `ComposerQuery.where` as a single interpolated node, so the
- * clause is printed and re-parsed as one expression.
+ * clause is printed and re-parsed as one expression. That round trip also leaves
+ * the query holding its own copy of the tree, so one memoized clause can feed
+ * several queries without them sharing nodes.
  */
 
 /**
@@ -44,25 +46,18 @@ export const isNonEmptyArray = <T>(values: T[]): values is NonEmptyArray<T> => v
 export const esqlString = (value: string): ESQLStringLiteral =>
   Builder.expression.literal.string(value);
 
-/** `field == "value"`. */
 export const esqlEquals = (field: string, value: string): ESQLAstExpression =>
   Builder.expression.func.binary('==', [esqlColumn(field), esqlString(value)]);
 
-/** A variadic function call such as `MATCH(col, "value")` or `KQL("...")`. */
+/** A function call such as `MATCH(col, "value")` or `KQL("...")`. */
 export const esqlFunction = (name: string, args: ESQLAstItem[]): ESQLAstExpression =>
   Builder.expression.func.call(name, args);
 
-/**
- * Combine expressions with `AND`, matching the left-associative shape the
- * printer emits.
- */
+/** Combines expressions into one `AND` node, preserving each operand's grouping. */
 export const esqlAnd = (expressions: NonEmptyArray<ESQLAstExpression>): ESQLAstExpression =>
   expressions.reduce((left, right) => Builder.expression.func.binary('and', [left, right]));
 
-/**
- * Combine expressions with `OR`, matching the left-associative shape the
- * printer emits.
- */
+/** Combines expressions into one `OR` node, preserving each operand's grouping. */
 export const esqlOr = (expressions: NonEmptyArray<ESQLAstExpression>): ESQLAstExpression =>
   expressions.reduce((left, right) => Builder.expression.func.binary('or', [left, right]));
 

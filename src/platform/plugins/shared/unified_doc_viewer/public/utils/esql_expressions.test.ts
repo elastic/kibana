@@ -27,7 +27,7 @@ const render = (clause: ESQLAstExpression): string => {
 };
 
 describe('esqlAnd', () => {
-  it('combines expressions left-associatively', () => {
+  it('prints a chain of three without redundant parentheses', () => {
     const clause = esqlAnd([esqlEquals('a', '1'), esqlEquals('b', '2'), esqlEquals('c', '3')]);
 
     expect(render(clause)).toBe('FROM logs-*\n  | WHERE a == "1" AND b == "2" AND c == "3"');
@@ -52,7 +52,7 @@ describe('esqlOr', () => {
     );
   });
 
-  it('combines three expressions left-associatively', () => {
+  it('prints a chain of three without redundant parentheses', () => {
     const clause = esqlOr([esqlEquals('a', '1'), esqlEquals('b', '2'), esqlEquals('c', '3')]);
 
     expect(render(clause)).toBe('FROM logs-*\n  | WHERE a == "1" OR b == "2" OR c == "3"');
