@@ -86,7 +86,7 @@ export const createAttachmentReadTool = ({
               attachment_id: attachmentId,
               mime_type: representation.mimeType,
               name: imageData.name,
-              description: `Image attachment "${name}" (${representation.mimeType}). The image is provided as visual input in the message following this tool result.`,
+              description: `Image attachment "${name}" (${representation.mimeType}). The image was provided as visual input for this turn. Call attachment_read again to view it in the current turn.`,
             },
           },
         ],
