@@ -872,14 +872,14 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     /* All EUI buttons share the 8px control radius. Split/group join rules below
        still square the inner corners. */
-    ${scope} .euiButton,
-    ${scope} .euiButtonEmpty,
-    ${scope} .euiButtonIcon,
+    ${scope} .euiButton:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary),
+    ${scope} .euiButtonEmpty:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary),
+    ${scope} .euiButtonIcon:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary),
     ${scope} .euiSplitButton,
-    ${scope} .euiButtonDisplay,
-    ${scope} [class*='-euiButtonDisplay']:not([class*='euiButtonDisplayContent']),
-    ${scope} [class*='-euiButtonEmpty'],
-    ${scope} [class*='-euiButtonIcon'] {
+    ${scope} .euiButtonDisplay:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary),
+    ${scope} [class*='-euiButtonDisplay']:not([class*='euiButtonDisplayContent']):not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary),
+    ${scope} [class*='-euiButtonEmpty']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary),
+    ${scope} [class*='-euiButtonIcon']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary) {
       border-radius: ${knobVar('radiusControl')} !important;
     }
 
@@ -931,16 +931,54 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} .euiFilterGroup {
+      position: relative !important;
+      border: none !important;
       border-radius: ${knobVar('radiusControl')} !important;
       overflow: hidden;
+      box-shadow: none !important;
+    }
+
+    ${scope} .euiFilterGroup::after {
+      content: '' !important;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border: none !important;
+      box-shadow: ${TARGET_HAIRLINE_INSET_SHADOW} !important;
+      border-radius: inherit;
+      pointer-events: none;
     }
 
     ${scope} .euiFilterGroup .euiFilterButton,
     ${scope} .euiFilterGroup .euiFilterButton__wrapper,
     ${scope} .euiFilterGroup .euiPopover,
     ${scope} .euiFilterGroup .euiButtonDisplay,
-    ${scope} .euiFilterGroup [class*='-euiButtonDisplay'] {
+    ${scope} .euiFilterGroup [class*='-euiButtonDisplay'],
+    ${scope} .euiFilterGroup [class*='-euiFilterButton'] {
+      border: none !important;
       border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+
+    ${scope} .euiFilterGroup .euiFilterButton::before,
+    ${scope} .euiFilterGroup .euiFilterButton::after,
+    ${scope} .euiFilterGroup [class*='euiFilterButton']::before,
+    ${scope} .euiFilterGroup [class*='euiFilterButton']::after,
+    ${scope} .euiFilterGroup .euiButtonDisplay::before,
+    ${scope} .euiFilterGroup .euiButtonDisplay::after,
+    ${scope} .euiFilterGroup [class*='-euiButtonDisplay']::before,
+    ${scope} .euiFilterGroup [class*='-euiButtonDisplay']::after {
+      content: none !important;
+      display: none !important;
+      border: none !important;
+      border-inline-start: none !important;
+      background: none !important;
+      box-shadow: none !important;
+    }
+
+    /* One divider only, on the group’s direct children — not nested wrappers. */
+    ${scope} .euiFilterGroup > *:not(:last-child) {
+      border-inline-end: ${TARGET_HAIRLINE} !important;
     }
 
     /* Primary / accent buttons: flat fill, no gradient, no border. */
@@ -990,15 +1028,41 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope}
-    .euiFormControlLayout:has([data-test-subj='queryInput'], [data-test-subj='dateRangePickerControlButton']):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])) {
+    .euiFormControlLayout:has([data-test-subj='queryInput']):not(:focus-within):not(:has(:invalid, [aria-invalid='true'])) {
       border: none !important;
       border-radius: ${knobVar('radiusControl')} !important;
       box-shadow: ${TARGET_HAIRLINE_INSET_SHADOW} !important;
     }
 
     ${scope}
-    .euiFormControlLayout:has([data-test-subj='queryInput'], [data-test-subj='dateRangePickerControlButton']):focus-within:not(:has(:invalid, [aria-invalid='true'])) {
+    .euiFormControlLayout:has([data-test-subj='queryInput']):focus-within:not(:has(:invalid, [aria-invalid='true'])) {
       border: none !important;
+      box-shadow: ${TARGET_ACCENT_INSET_SHADOW} !important;
+    }
+
+    /* Date picker button is opaque, so layout inset-shadow never shows.
+       Draw the hairline on top, same overlay as the time-window group. */
+    ${scope} [data-test-subj='dateRangePickerControlWrapper'] .euiFormControlLayout:not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled)) {
+      position: relative !important;
+      border: none !important;
+      border-radius: ${knobVar('radiusControl')} !important;
+      overflow: hidden !important;
+      background-color: ${targetSurface} !important;
+      box-shadow: none !important;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerControlWrapper'] .euiFormControlLayout:not(:has(:invalid, [aria-invalid='true'])):not(:has(:disabled))::after {
+      content: '' !important;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border: none !important;
+      box-shadow: ${TARGET_HAIRLINE_INSET_SHADOW} !important;
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    ${scope} [data-test-subj='dateRangePickerControlWrapper'] .euiFormControlLayout:focus-within:not(:has(:invalid, [aria-invalid='true']))::after {
       box-shadow: ${TARGET_ACCENT_INSET_SHADOW} !important;
     }
 
@@ -1296,6 +1360,11 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       padding-top: ${DESIGN_EXPLORATION_PADDING}px !important;
     }
 
+    ${scope} .euiTab__content,
+    ${scope} [class*='css-'][class*='-euiTab__content'] {
+      line-height: 32px !important;
+    }
+
     ${scope} [class*='css-'][class*='-euiTab__content-m'] {
       font-weight: 500 !important;
     }
@@ -1317,7 +1386,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     /* ----- App header ----- */
     /* Flat, static, no glass/blur — same philosophy as Linbana. */
     ${scope} [data-test-subj='appHeader'] > div:not([data-test-subj='appHeaderTabs']) {
-      padding-block-start: ${knobVar('padding')} !important;
+      padding-block-start: ${DESIGN_EXPLORATION_PADDING}px !important;
     }
 
     ${scope} [data-test-subj='appHeaderTabs'] {
@@ -1369,18 +1438,14 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       border-radius: ${knobVar('radiusControl')} !important;
     }
 
-    ${scope} [class*='css-'][class*='-tab_with_background--TabWithBackground'] {
+    ${scope} [class*='css-'][class*='-tab_with_background--TabWithBackground'],
+    ${scope} [data-test-subj='unifiedTabs_tabsBar'] [data-test-subj^='unifiedTabs_tab_'] {
       margin-inline: 0 !important;
-    }
-
-    ${scope} [data-test-subj='unifiedTabs_tabsBar'] [data-test-subj^='unifiedTabs_tab_'] > div,
-    ${scope} [data-test-subj='unifiedTabs_tabsBar'] .unifiedTabs__tabLabel {
       padding-inline: 0 !important;
     }
 
     ${scope} [class*='css-'][class*='-tab--getTabContentCss'] {
       height: 32px !important;
-      padding-inline: 0 !important;
     }
 
     ${scope} [class*='css-'][class*='-tab--getTabContainerCss'] .unifiedTabs__tabActions {
