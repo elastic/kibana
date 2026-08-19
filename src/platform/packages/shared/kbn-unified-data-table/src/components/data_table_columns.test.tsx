@@ -498,7 +498,7 @@ describe('Data table columns', function () {
         columns: ['_source'],
         settings: {},
         dataView: dataViewWithTimefieldMock,
-        defaultColumns: false,
+        isSummaryOnlyColumn: false,
         isSortEnabled: false,
         isPlainRecord: false,
         valueToStringConverter: dataTableContextMock.valueToStringConverter,
