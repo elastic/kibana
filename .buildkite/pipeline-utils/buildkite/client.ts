@@ -48,6 +48,7 @@ export interface BuildkiteAgentTargetingRule {
   minCpuPlatform?: string;
   preemptible?: boolean;
   diskSizeGb?: number;
+  diskType?: string;
 }
 
 export type BuildkiteSignalReason =

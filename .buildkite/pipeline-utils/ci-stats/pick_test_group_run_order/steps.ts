@@ -10,11 +10,7 @@
 import type { BuildkiteClient, BuildkiteGroupStep, BuildkiteStep } from '../../buildkite';
 import { AGENT_DISK_GIB, RETRIES, STEP_KEYS, TEST_STEP_TIMEOUT_MINUTES } from './const';
 import type { FunctionalGroup } from './types';
-import {
-  ELASTIC_IMAGES_PROD_PROJECT,
-  expandAgentQueue,
-  KIBANA_MINIMAL_IMAGE,
-} from '#pipeline-utils';
+import { expandAgentQueue, KIBANA_MINIMAL_IMAGE, N4A_SPOT_ZONES } from '#pipeline-utils';
 
 interface JestStepOptions {
   command: string;
@@ -45,7 +41,9 @@ export function buildJestStep(opts: JestStepOptions): BuildkiteStep | undefined 
       ...(opts.key === STEP_KEYS.JEST_UNIT
         ? {
             image: KIBANA_MINIMAL_IMAGE,
-            imageProject: ELASTIC_IMAGES_PROD_PROJECT,
+            machineType: 'n4a-standard-4',
+            diskType: 'hyperdisk-balanced',
+            spotZones: N4A_SPOT_ZONES,
             diskSizeGb: 50,
           }
         : {}),
