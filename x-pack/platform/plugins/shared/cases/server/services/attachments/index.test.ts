@@ -23,7 +23,7 @@ import {
   persistableStateAttachmentAttributes,
 } from '../../attachment_framework/mocks';
 import { createAlertAttachment, createUserAttachment } from './test_utils';
-import { createErrorSO, createSOFindResponse } from '../test_utils';
+import { createErrorSO, createSOFindResponse, mockPointInTimeFinder } from '../test_utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
@@ -2100,6 +2100,93 @@ describe('AttachmentService', () => {
 
       const filterAsString = JSON.stringify(unifiedCallArgs.filter);
       expect(filterAsString).not.toMatch(/"value":\s*"file"/);
+    });
+  });
+
+  describe('countAlertsAttachedToCase', () => {
+    const mockFinder = mockPointInTimeFinder(unsecuredSavedObjectsClient);
+
+    it('counts unique origin alert ids', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'a', index: 'origin-index' }), score: 0 },
+          { ...createAlertAttachment({ alertId: 'a', index: 'origin-index' }), score: 0 },
+          { ...createAlertAttachment({ alertId: 'b', index: 'origin-index' }), score: 0 },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(2);
+    });
+
+    it('excludes alerts from linked-project indices', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'origin', index: 'origin-index' }), score: 0 },
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(1);
+    });
+
+    it('returns 0 when every attached alert is a linked-project index', async () => {
+      mockFinder(
+        createSOFindResponse([
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+      });
+
+      expect(res).toBe(0);
+    });
+
+    it('counts linked-project alerts when originOnly is false', async () => {
+      mockFinder(
+        createSOFindResponse([
+          { ...createAlertAttachment({ alertId: 'origin', index: 'origin-index' }), score: 0 },
+          {
+            ...createAlertAttachment({
+              alertId: 'linked',
+              index: 'keepcps-2907-linked-99-e5ebb4:.alerts-security.alerts-default',
+            }),
+            score: 0,
+          },
+        ])
+      );
+
+      const res = await service.countAlertsAttachedToCase({
+        caseId: 'test-id',
+        owner: SECURITY_SOLUTION_OWNER,
+        originOnly: false,
+      });
+
+      expect(res).toBe(2);
     });
   });
 });
