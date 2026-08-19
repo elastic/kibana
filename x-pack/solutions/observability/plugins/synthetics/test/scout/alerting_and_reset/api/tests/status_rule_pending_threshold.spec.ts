@@ -22,6 +22,9 @@ const RULE_TAG = 'scout-status-pending-threshold';
 const STATUS_RULE_TYPE_ID = 'xpack.synthetics.alerts.monitorStatus';
 const STATUS_RULE_CONSUMER = 'uptime';
 const ALERTS_INDEX = '.alerts-observability.uptime.alerts-default*';
+/** HTTP monitors are pending only after a 1-minute grace period. */
+const SLOW_TEST_TIMEOUT_MS = 180_000;
+const PENDING_WAIT_MS = 120_000;
 
 interface AlertDoc {
   'kibana.alert.status'?: string;
@@ -99,12 +102,17 @@ apiTest.describe(
 
     const waitUntilMonitorIsPending = async (apiClient: ApiClientFixture) => {
       await tryForTime(
-        90_000,
+        PENDING_WAIT_MS,
         async () => {
           const body = await inspectStatusRule(apiClient);
           const pending = Object.values(body.pendingConfigs ?? {});
           const match = pending.find((config) => config.configId === monitorId);
-          expect(match).toBeDefined();
+          if (!match) {
+            throw new Error(
+              `Monitor ${monitorId} is not pending yet ` +
+                `(pending=${Object.keys(body.pendingConfigs ?? {}).join(',') || 'none'})`
+            );
+          }
           return match;
         },
         { intervalMs: 2_000 }
@@ -128,16 +136,80 @@ apiTest.describe(
         .filter((source): source is AlertDoc => source != null);
     };
 
-    const runRuleAndWaitForExecutions = async (
+    const createEnabledStatusRule = async (
+      apiServices: SyntheticsApiServicesFixture,
+      pendingThreshold: number,
+      name: string
+    ) => {
+      // Create disabled so the first `_run_soon` is evaluation 1 (an enabled
+      // create can race an automatic run against a 1d schedule).
+      const created = await apiServices.alerting.rules.create({
+        name,
+        ruleTypeId: STATUS_RULE_TYPE_ID,
+        consumer: STATUS_RULE_CONSUMER,
+        params: {
+          condition: pendingCondition(pendingThreshold),
+          monitorIds: [monitorId],
+        },
+        schedule: { interval: '1d' },
+        enabled: false,
+        tags: [RULE_TAG],
+      });
+      expect(created).toHaveStatusCode(200);
+      const ruleId = created.data.id as string;
+      const dateStart = new Date();
+      await apiServices.alerting.rules.enable(ruleId);
+      return { ruleId, dateStart };
+    };
+
+    const getExecutionTotal = async (
       apiServices: SyntheticsApiServicesFixture,
       ruleId: string,
-      count: number,
       dateStart: Date
     ) => {
+      const executionLog = (await apiServices.alerting.rules.getExecutionLog(
+        ruleId,
+        undefined,
+        dateStart
+      )) as { total?: number };
+      return executionLog.total ?? 0;
+    };
+
+    const runFirstExecution = async (
+      apiServices: SyntheticsApiServicesFixture,
+      ruleId: string,
+      dateStart: Date
+    ) => {
+      try {
+        await apiServices.alerting.waiting.waitForExecutionCount(
+          ruleId,
+          1,
+          undefined,
+          5_000,
+          dateStart
+        );
+      } catch {
+        await apiServices.alerting.rules.runSoon(ruleId);
+        await apiServices.alerting.waiting.waitForExecutionCount(
+          ruleId,
+          1,
+          undefined,
+          60_000,
+          dateStart
+        );
+      }
+    };
+
+    const runAdditionalExecution = async (
+      apiServices: SyntheticsApiServicesFixture,
+      ruleId: string,
+      dateStart: Date
+    ) => {
+      const before = await getExecutionTotal(apiServices, ruleId, dateStart);
       await apiServices.alerting.rules.runSoon(ruleId);
       await apiServices.alerting.waiting.waitForExecutionCount(
         ruleId,
-        count,
+        before + 1,
         undefined,
         60_000,
         dateStart
@@ -198,8 +270,8 @@ apiTest.describe(
 
     apiTest(
       'inspect_status_rule reports the monitor as pending after the no-data grace period',
-      { timeout: 180_000 },
       async ({ apiClient }) => {
+        apiTest.setTimeout(SLOW_TEST_TIMEOUT_MS);
         await waitUntilMonitorIsPending(apiClient);
         const body = await inspectStatusRule(apiClient);
         const match = Object.values(body.pendingConfigs ?? {}).find(
@@ -211,32 +283,15 @@ apiTest.describe(
 
     apiTest(
       'does not fire on the first pending evaluation when pendingThreshold is 2',
-      { timeout: 180_000 },
       async ({ apiClient, apiServices, esClient }) => {
+        apiTest.setTimeout(SLOW_TEST_TIMEOUT_MS);
         await waitUntilMonitorIsPending(apiClient);
 
-        const created = await apiServices.alerting.rules.create({
-          name: 'Scout pending threshold 2',
-          ruleTypeId: STATUS_RULE_TYPE_ID,
-          consumer: STATUS_RULE_CONSUMER,
-          params: {
-            condition: pendingCondition(2),
-            monitorIds: [monitorId],
-          },
-          schedule: { interval: '1d' },
-          enabled: true,
-          tags: [RULE_TAG],
-        });
-        expect(created).toHaveStatusCode(200);
-        thresholdTwoRuleId = created.data.id;
-        thresholdTwoDateStart = new Date();
+        const created = await createEnabledStatusRule(apiServices, 2, 'Scout pending threshold 2');
+        thresholdTwoRuleId = created.ruleId;
+        thresholdTwoDateStart = created.dateStart;
 
-        await runRuleAndWaitForExecutions(
-          apiServices,
-          thresholdTwoRuleId,
-          1,
-          thresholdTwoDateStart
-        );
+        await runFirstExecution(apiServices, thresholdTwoRuleId, thresholdTwoDateStart);
 
         const alerts = await getAlertsForRule(esClient, thresholdTwoRuleId);
         expect(alerts.filter((alert) => alert['kibana.alert.status'] === 'active')).toHaveLength(0);
@@ -245,14 +300,9 @@ apiTest.describe(
 
     apiTest(
       'fires on the second consecutive pending evaluation when pendingThreshold is 2',
-      { timeout: 180_000 },
       async ({ apiServices, esClient }) => {
-        await runRuleAndWaitForExecutions(
-          apiServices,
-          thresholdTwoRuleId,
-          2,
-          thresholdTwoDateStart
-        );
+        apiTest.setTimeout(SLOW_TEST_TIMEOUT_MS);
+        await runAdditionalExecution(apiServices, thresholdTwoRuleId, thresholdTwoDateStart);
 
         await tryForTime(60_000, async () => {
           const alerts = await getAlertsForRule(esClient, thresholdTwoRuleId);
@@ -268,27 +318,17 @@ apiTest.describe(
 
     apiTest(
       'fires on the first pending evaluation when pendingThreshold is 1',
-      { timeout: 180_000 },
       async ({ apiClient, apiServices, esClient }) => {
+        apiTest.setTimeout(SLOW_TEST_TIMEOUT_MS);
         await waitUntilMonitorIsPending(apiClient);
 
-        const created = await apiServices.alerting.rules.create({
-          name: 'Scout pending threshold 1',
-          ruleTypeId: STATUS_RULE_TYPE_ID,
-          consumer: STATUS_RULE_CONSUMER,
-          params: {
-            condition: pendingCondition(1),
-            monitorIds: [monitorId],
-          },
-          schedule: { interval: '1d' },
-          enabled: true,
-          tags: [RULE_TAG],
-        });
-        expect(created).toHaveStatusCode(200);
-        const ruleId = created.data.id as string;
+        const { ruleId, dateStart } = await createEnabledStatusRule(
+          apiServices,
+          1,
+          'Scout pending threshold 1'
+        );
 
-        const dateStart = new Date();
-        await runRuleAndWaitForExecutions(apiServices, ruleId, 1, dateStart);
+        await runFirstExecution(apiServices, ruleId, dateStart);
 
         await tryForTime(60_000, async () => {
           const alerts = await getAlertsForRule(esClient, ruleId);

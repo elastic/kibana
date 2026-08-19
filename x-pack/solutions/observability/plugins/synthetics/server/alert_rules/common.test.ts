@@ -45,6 +45,14 @@ describe('updateState', () => {
     `);
   });
 
+  it('keeps pendingConfigs meta on the first execution when prior state is empty', () => {
+    const pendingConfigs = {
+      'mon-1-loc-1': { pendingCount: 1, configId: 'mon-1', locationId: 'loc-1' },
+    };
+    const result = updateState({} as SyntheticsCommonState, true, { pendingConfigs });
+    expect(result.meta).toEqual({ pendingConfigs });
+  });
+
   it('updates the correct field in subsequent calls', () => {
     spy
       .mockImplementationOnce(() => 'first date string')
