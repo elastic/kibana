@@ -10,7 +10,7 @@ pageLoadAssetSize:
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 17111
+  alertingVTwo: 18827
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 906
@@ -31,7 +31,8 @@ pageLoadAssetSize:
   console: 24516
   contentConnectors: 2789
   contentManagement: 6737
-  contextEngine: 1527
+  contextEngine: 7385
+  contextEngineAgentBuilder: 4999
   controls: 4166
   core: 320
   cps: 6032
@@ -132,6 +133,7 @@ pageLoadAssetSize:
   navigation: 332
   newsfeed: 10708
   nightshift: 1961
+  nightshiftInvestigations: 5000
   noDataPage: 630
   notificationCenter: 332
   observability: 3614
