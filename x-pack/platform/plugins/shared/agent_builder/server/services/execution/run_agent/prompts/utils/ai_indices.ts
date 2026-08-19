@@ -10,38 +10,27 @@ import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
 import { smlAiIndexDescription, smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
 
 interface KnownAiIndex {
-  /** Backing Elasticsearch index or data stream, i.e. what the model puts in a `FROM` clause. */
+  /** The Elasticsearch index or data stream to query, i.e. what goes in a `FROM` clause. */
   name: string;
   description: string;
-  /** Retrieval advice specific to this index, appended to the description. */
+  /** Extra advice for this index, printed after the description. */
   guidance?: string;
 }
 
-/**
- * The AI indices we can describe without asking the Context Engine.
- *
- * An agent declares AI indices by Context Engine id, and only the Context Engine can turn an id
- * into a backing index name. Its start contract exposes no way to read that catalog, so ids absent
- * from this map are reported as undescribed rather than rendered: an id is not an index name, and a
- * model handed a bare id tends to guess a `FROM` target that does not exist.
- */
+// The AI indices we can name without asking the Context Engine.
 const knownAiIndices: Record<string, KnownAiIndex> = {
   [agentBuilderDefaultAiIndexId]: {
     name: smlIndexName,
     description: smlAiIndexDescription,
     guidance:
-      'Entries here can be attached to the conversation, which loads the full specification of ' +
-      'an entry; querying the index returns only its summary. Attach an entry before acting on it.',
+      "Entries can be attached to the conversation, which loads an entry's full specification; " +
+      'querying the index returns only its summary. Attach an entry before acting on it.',
   },
 };
 
 /**
- * Teaches the agent what AI indices are, which ones it can reach, and how to scope them to the
- * running space. Renders nothing for agents with no AI indices.
- *
- * The space filter has to tolerate indices that never map `spaces`, because Elasticsearch reuses
- * the ES|QL `filter` as the `index_filter` during field resolution: an index that cannot match is
- * dropped from the query along with its results, and no error is reported.
+ * Builds the AI INDICES section: what AI indices are, which ones this agent can reach, and how to
+ * limit results to the current space. Returns an empty string when the agent has none.
  */
 export const getAiIndicesInstructions = ({
   aiIndices,
@@ -67,8 +56,8 @@ export const getAiIndicesInstructions = ({
   if (described.length < aiIndices.length) {
     catalog.push(
       described.length > 0
-        ? 'Further AI indices are available to this agent. Find them with `list_indices` and the pattern `ai-index-*`.'
-        : 'The AI indices available to this agent are not named here. Find them with `list_indices` and the pattern `ai-index-*`.'
+        ? 'This agent has further AI indices. Find them with `list_indices` and the pattern `ai-index-*`.'
+        : "This agent's AI indices are not named here. Find them with `list_indices` and the pattern `ai-index-*`."
     );
   }
 
@@ -86,26 +75,32 @@ export const getAiIndicesInstructions = ({
   return cleanPrompt(`
 ## AI INDICES
 
-An AI index holds Knowledge Indicators (KIs): records that describe a larger body of data — a Kibana asset, a class of documents, an entity — and that often carry the queries needed to reach the live data behind them. They are ordinary Elasticsearch indices named \`ai-index-idx-*\`, or data streams named \`ai-index-ds-*\`, and you read them with \`execute_esql\`. Search them before scanning the data they describe: they are much smaller, already summarized, and cheaper to read. Their fields differ from one AI index to the next, so check what an index holds before filtering on a field.
+An AI index holds Knowledge Indicators: facts recorded ahead of time about a body of data, so you can find your way around it without reading the data itself. A KI tells you what a class of information covers and what it leaves out, and often hands you a query to fill in and run against the live data. AI indices are Elasticsearch indices named \`ai-index-idx-*\`, or data streams named \`ai-index-ds-*\`, and you read them with \`execute_esql\`.
+
+Search them before scanning the data they describe: they are far smaller and cheaper to read. Three things follow:
+
+- A KI points at data more often than it contains it. Run the query it gives you rather than answering from the KI alone, and treat any figure written into one as possibly out of date.
+- KIs speed retrieval up, they do not replace it. If no KI covers the question, query the underlying data directly rather than concluding there is nothing to find.
+- Fields differ from one AI index to the next, so check what an index holds before filtering on one.
 
 ${catalog.join('\n\n')}
 
 ### Space scoping
 
-Documents in an AI index may be restricted to a single Kibana space. This conversation is running in the space \`${spaceId}\`.
+Documents in an AI index may be restricted to a single Kibana space. This conversation runs in the space \`${spaceId}\`.
 
-The \`spaces\` field is optional: some AI indices define it, others do not, and an index without it holds documents that are visible from every space. A document whose \`spaces\` contains \`*\` is likewise visible everywhere.
+The \`spaces\` field is optional: some AI indices define it, others do not, and an index without it holds documents visible from every space. A document whose \`spaces\` contains \`*\` is likewise visible everywhere.
 
-When you query AI indices with \`execute_esql\`, pass this \`filter\` so results are limited to the current space:
+When you query AI indices with \`execute_esql\`, pass this \`filter\` to limit results to the current space:
 
 \`\`\`json
 ${spaceFilter}
 \`\`\`
 
-Two things to keep in mind:
+Two caveats:
 
-- Use that filter as written. The final clause is what keeps indices that have no \`spaces\` field in the query — without it Elasticsearch drops those indices entirely and returns fewer results with no error to tell you.
-- Do not express the space condition as a \`WHERE\` clause instead. \`WHERE\` would discard every document from indices that do not define \`spaces\`, which is the opposite of what you want.
+- Use that filter as written. The final clause keeps indices with no \`spaces\` field in the query — without it Elasticsearch drops those indices entirely and returns fewer results with no error.
+- Do not express the space condition as a \`WHERE\` clause. \`WHERE\` discards every document from indices that do not define \`spaces\`, the opposite of what you want.
 
 `);
 };

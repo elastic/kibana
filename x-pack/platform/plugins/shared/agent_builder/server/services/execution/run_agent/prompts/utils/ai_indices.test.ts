@@ -25,6 +25,24 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).toContain('`ai-index-ds-*`');
   });
 
+  it('sends the agent to the underlying data when no KI covers the question', () => {
+    const instructions = getAiIndicesInstructions({
+      aiIndices: [agentBuilderDefaultAiIndexId],
+      spaceId: 'default',
+    });
+
+    expect(instructions).toContain('query the underlying data directly');
+  });
+
+  it('warns that a value written into a KI may be out of date', () => {
+    const instructions = getAiIndicesInstructions({
+      aiIndices: [agentBuilderDefaultAiIndexId],
+      spaceId: 'default',
+    });
+
+    expect(instructions).toContain('possibly out of date');
+  });
+
   it('names the backing index of the default AI index and what it holds', () => {
     const instructions = getAiIndicesInstructions({
       aiIndices: [agentBuilderDefaultAiIndexId],

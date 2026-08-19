@@ -21,8 +21,8 @@ export interface PromptFactoryParams {
   configuration: ResolvedConfiguration;
   capabilities: ResolvedAgentCapabilities;
   /**
-   * Space the conversation runs in. Fixed for the life of a conversation, so including it keeps the
-   * system prefix stable across rounds.
+   * Kibana space the conversation runs in. It never changes mid-conversation, so naming it in the
+   * system prompt does not break prompt caching.
    */
   spaceId: string;
   processedConversation: ProcessedConversation;

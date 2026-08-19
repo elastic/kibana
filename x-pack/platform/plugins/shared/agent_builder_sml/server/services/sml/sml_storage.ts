@@ -13,8 +13,8 @@ import type { SmlDocument } from './types';
 export const smlIndexName = 'ai-index-idx-sml-data';
 
 /**
- * What this index holds, in prose. Shared by the Context Engine AI index registration and by the
- * Agent Builder system prompt, which describes the same index to the model.
+ * Plain description of what this index holds. Shared by the Context Engine AI index registration
+ * and the Agent Builder system prompt, so the two cannot drift apart.
  */
 export const smlAiIndexDescription =
   'Kibana resources available for use in Agent Builder, including dashboards, visualizations, ' +

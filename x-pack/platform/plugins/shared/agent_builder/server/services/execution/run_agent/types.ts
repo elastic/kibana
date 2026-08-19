@@ -8,9 +8,8 @@
 export interface ResolvedConfiguration {
   instructions: string;
   /**
-   * Context Engine ids of the AI indices this agent may use. Only their presence reaches the
-   * prompt — the ids are not index names, and the model resolves the concrete indices at runtime
-   * through `list_indices`.
+   * Context Engine ids of the AI indices this agent may use. These are ids, not Elasticsearch
+   * index names.
    */
   aiIndices: string[];
 }
