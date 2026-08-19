@@ -160,7 +160,9 @@ export class ProfileStateRegistry {
     );
   }
 
-  /** Registers a saved state transform for an existing matching state definition. */
+  /**
+   * Registers a saved state transform for an existing matching state definition.
+   */
   public registerTransform<
     TTabType extends keyof TabTypeStateMap,
     TState extends SerializableRecord,
@@ -202,7 +204,9 @@ export class ProfileStateRegistry {
     ]);
   }
 
-  /** Builds saved state from each transform's effective runtime state. */
+  /**
+   * Builds saved state from each transform's effective runtime state.
+   */
   public toSavedState(
     tabType: DiscoverTabType | undefined,
     profileStateMap: ProfileStateMap
@@ -225,7 +229,9 @@ export class ProfileStateRegistry {
     return { type: tabType, ...payload } as DiscoverSessionTabTypeState;
   }
 
-  /** Restores registered profile state and ignores unclaimed saved fields. */
+  /**
+   * Restores registered profile state and ignores unclaimed saved fields.
+   */
   public fromSavedState(tabTypeState: DiscoverSessionTabTypeState | undefined): ProfileStateMap {
     const profileStateMap: ProfileStateMap = {};
 

@@ -14,7 +14,7 @@ import { METRICS_STATE_DEF } from '../profile_state_definitions/metrics_grid_pro
 export const METRICS_GRID_SAVED_STATE_TRANSFORM = createProfileSavedStateTransform({
   tabType: DiscoverTabType.Metrics,
   stateDefinition: METRICS_STATE_DEF,
-  savedFields: ['dimensions'] as const,
+  savedFields: ['dimensions'],
   toSavedState: ({ dimensions }) => ({ dimensions }),
   fromSavedState: ({ dimensions }) => ({ dimensions }),
 });
