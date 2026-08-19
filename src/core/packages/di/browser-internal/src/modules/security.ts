@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Context, useContainer, useService } from './src/react';
-export {
-  Application,
-  type ApplicationDefinition,
-  type ApplicationHandler,
-  ApplicationParameters,
-} from './src/services/application';
-export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
-export { CurrentUser } from './src/services/security';
-export { GlobalUiSettingsClient, UiSettingsClient } from './src/services/settings';
+import type { ContainerModuleLoadOptions } from 'inversify';
+import { cacheInScope } from '@kbn/core-di-internal';
+import { CoreStart, CurrentUser } from '@kbn/core-di-browser';
+
+export function loadSecurity({ bind }: ContainerModuleLoadOptions): void {
+  bind(CurrentUser)
+    .toResolvedValue(({ authc }) => authc.getCurrentUser(), [CoreStart('security')])
+    .inRequestScope()
+    .onActivation(cacheInScope(CurrentUser));
+}
