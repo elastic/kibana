@@ -45,6 +45,7 @@ dependsOn:
   - '@kbn/index-lifecycle-management-common-shared'
   - '@kbn/licensing-types'
   - '@kbn/test-eui-helpers'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod

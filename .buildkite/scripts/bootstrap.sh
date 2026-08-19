@@ -112,16 +112,13 @@ if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files "$BOOTSTRAP_LABEL"
 fi
 
-# Opt-in per job to free disk on constrained agents.
-# CLEAR_INSTALL_CACHE is the pnpm-era name; CLEAR_YARN_CACHE remains for older pipelines.
-if [[ "${CLEAR_INSTALL_CACHE:-${CLEAR_YARN_CACHE:-}}" ]]; then
-  if [[ "$USE_PNPM" == true ]]; then
-    echo "Clearing pnpm store at $(pnpm store path)"
-    rm -rf "$(pnpm store path)"
-  else
-    echo "Clearing yarn cache at /opt/buildkite-agent/.cache/yarn"
-    rm -rf /opt/buildkite-agent/.cache/yarn
-  fi
-  echo "Available disk space after clearing install cache:"
+# Yarn cache is only needed during install. Drop it afterwards to reclaim disk.
+# Build steps that still run package installs afterwards can opt out with KEEP_INSTALL_CACHE=1.
+if [[ -z "${KEEP_INSTALL_CACHE:-}" ]]; then
+  echo "--- Clearing yarn cache"
+  echo 'Removing /opt/buildkite-agent/.cache/yarn' && rm -rf /opt/buildkite-agent/.cache/yarn
+  echo 'Removing /opt/buildkite-agent/.yarn-local-mirror' && rm -rf /opt/buildkite-agent/.yarn-local-mirror
+  echo 'Removing ./.yarn-local-mirror' && rm -rf ./.yarn-local-mirror
+  echo "Available disk space after clearing yarn cache:"
   df -h . || echo "Failed to get disk space"
 fi

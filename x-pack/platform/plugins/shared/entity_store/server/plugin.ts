@@ -19,6 +19,7 @@ import { createRequestHandlerContext } from './request_context_factory';
 import { PLUGIN_ID } from '../common';
 import { registerTasks } from './tasks/register_tasks';
 import { scheduleLegacySecurityAssetsMigrationIfNeeded } from './tasks/legacy_security_assets_migration_task';
+import { isLegacySecurityAssetsMigrationEnabled } from './infra/feature_flags';
 import { registerTriggers } from './workflow/triggers';
 import { registerSteps } from './workflow/steps';
 import { registerUiSettings } from './infra/feature_flags/register';
@@ -133,10 +134,12 @@ export class EntityStorePlugin
 
     // Upgrade path: migrate Security-scoped `.entities.v2.*.security_*` assets for spaces
     // that already have the store enabled, without waiting for a human to re-run install.
+    // Gated by FF so the cutover can be verified on a large env before customer traffic.
     void scheduleLegacySecurityAssetsMigrationIfNeeded({
       coreStart: core,
       taskManager: plugins.taskManager,
       logger: this.logger,
+      isMigrationEnabled: () => isLegacySecurityAssetsMigrationEnabled(core.featureFlags),
     });
 
     const logger = this.logger;
