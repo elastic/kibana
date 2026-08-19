@@ -7,8 +7,10 @@
 
 import {
   EuiExpression,
+  EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
   EuiTitle,
@@ -23,6 +25,7 @@ import { WindowValueExpression } from './common/condition_window_value';
 import { DEFAULT_CONDITION, ForTheLastExpression } from './common/for_the_last_expression';
 import type { StatusRuleParamsProps } from './status_rule_ui';
 import { LocationsValueExpression } from './common/condition_locations_value';
+import { PopoverExpression } from './common/popover_expression';
 import { DEFAULT_PENDING_THRESHOLD } from '../../../../../common/rules/status_rule';
 
 interface Props {
@@ -69,7 +72,7 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
           pendingThreshold: newCondition.pendingThreshold ?? DEFAULT_PENDING_THRESHOLD,
         };
       } else if ('alertOnNoData' in newCondition) {
-        const { alertOnNoData, pendingThreshold: _pendingThreshold, ...rest } = newCondition;
+        const { alertOnNoData: _alertOnNoData, ...rest } = newCondition;
         newCondition = rest;
       } else {
         throw new Error(
@@ -177,35 +180,24 @@ export const StatusRuleExpression: React.FC<Props> = ({ ruleParams, setRuleParam
         locationsThreshold={locationsThreshold}
       />
       <EuiSpacer size="m" />
-      <EuiFlexItem grow={false}>
-        <EuiSwitch
-          compressed
-          label={ALERT_ON_NO_DATA_SWITCH_LABEL}
-          checked={isAlertOnNoData}
-          onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
-        />
-      </EuiFlexItem>
-      {isAlertOnNoData && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexItem grow={false}>
-            <ValueExpression
-              value={pendingThreshold}
-              valueLabel={i18n.translate(
-                'xpack.synthetics.rules.status.pendingThresholdValueLabel',
-                {
-                  defaultMessage:
-                    '{threshold} {threshold, plural, one {consecutive check} other {consecutive checks}}',
-                  values: { threshold: pendingThreshold },
-                }
-              )}
-              onChangeSelectedValue={onPendingThresholdChange}
-              description={PENDING_THRESHOLD_DESCRIPTION}
-              errors={[]}
-            />
-          </EuiFlexItem>
-        </>
-      )}
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiSwitch
+            compressed
+            label={ALERT_ON_NO_DATA_SWITCH_LABEL}
+            checked={isAlertOnNoData}
+            onChange={(e) => onAlertOnNoDataChange(e.target.checked)}
+            data-test-subj="syntheticsStatusRuleAlertOnNoData"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <PendingThresholdExpression
+            value={pendingThreshold}
+            disabled={!isAlertOnNoData}
+            onChange={onPendingThresholdChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
@@ -257,12 +249,43 @@ const ALERT_ON_NO_DATA_SWITCH_LABEL = i18n.translate(
   }
 );
 
-const PENDING_THRESHOLD_DESCRIPTION = i18n.translate(
-  'xpack.synthetics.statusRule.pendingThreshold.description',
-  {
-    defaultMessage: 'Alert when pending for at least',
-  }
-);
+const PendingThresholdExpression = ({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: number;
+  disabled: boolean;
+  onChange: (value: number) => void;
+}) => {
+  return (
+    <PopoverExpression
+      disabled={disabled}
+      title={i18n.translate('xpack.synthetics.statusRule.pendingThreshold.forDescription', {
+        defaultMessage: 'for',
+      })}
+      value={i18n.translate('xpack.synthetics.rules.status.pendingThresholdValueLabel', {
+        defaultMessage:
+          '{threshold} {threshold, plural, one {consecutive check} other {consecutive checks}}',
+        values: { threshold: value },
+      })}
+    >
+      <EuiPopoverTitle>
+        {i18n.translate('xpack.synthetics.statusRule.pendingThreshold.popoverTitleLabel', {
+          defaultMessage: 'Consecutive checks',
+        })}
+      </EuiPopoverTitle>
+      <EuiFieldNumber
+        data-test-subj="syntheticsStatusRulePendingThreshold"
+        min={1}
+        max={100}
+        compressed
+        value={value}
+        onChange={(evt) => onChange(Number(evt.target.value))}
+      />
+    </PopoverExpression>
+  );
+};
 
 const FIRST_UP_RECOVERY_STRATEGY_SWITCH_LABEL = i18n.translate(
   'xpack.synthetics.statusRule.euiSwitch.firstUpRecoveryStrategy',
