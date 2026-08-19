@@ -578,6 +578,11 @@ export const createDatasetFlyoutStrings = {
       defaultMessage: 'Target size for NDJSON read segments.',
     }),
 
+  settingsTargetSplitSizeLabel: () =>
+    i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsTargetSplitSizeLabel', {
+      defaultMessage: 'Target split size',
+    }),
+
   settingsOptimizedReaderLabel: () =>
     i18n.translate('xpack.dataFederation.createDatasetFlyout.settingsOptimizedReaderLabel', {
       defaultMessage: 'Optimized reader',

@@ -6,14 +6,22 @@
  */
 
 import type { FunctionComponent, MouseEvent } from 'react';
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiCode, EuiFormRow, EuiLink } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, monaco } from '@kbn/code-editor';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 
 import { datasetWizardStrings } from '../create_dataset_wizard/dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../create_dataset_wizard/dataset_wizard_form_state';
+import type {
+  DatasetErrorModeFormValue,
+  DatasetFormatFormValue,
+} from './create_dataset_flyout_form_state';
+import {
+  DATASET_SETTINGS_CUSTOM_JSON_SCHEMA_URI,
+  getDatasetSettingsCustomJsonSchema,
+} from './settings_custom_json_schema';
 import {
   EMPTY_SETTINGS_CUSTOM_JSON,
   validateSettingsCustomJson,
@@ -25,14 +33,52 @@ const preventFakeLinkNavigation = (event: MouseEvent) => {
   event.preventDefault();
 };
 
+const configureDatasetSettingsCustomJsonSchema = (
+  editor: monaco.editor.IStandaloneCodeEditor,
+  schema: ReturnType<typeof getDatasetSettingsCustomJsonSchema>
+) => {
+  const modelUri = editor.getModel()?.uri.toString();
+
+  if (!modelUri) {
+    return;
+  }
+
+  const existingSchemas = monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas ?? [];
+
+  monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+    ...monaco.languages.json.jsonDefaults.diagnosticsOptions,
+    validate: true,
+    allowComments: true,
+    enableSchemaRequest: false,
+    schemaValidation: 'warning',
+    schemas: [
+      ...existingSchemas.filter((entry) => entry.uri !== DATASET_SETTINGS_CUSTOM_JSON_SCHEMA_URI),
+      {
+        uri: DATASET_SETTINGS_CUSTOM_JSON_SCHEMA_URI,
+        fileMatch: [modelUri],
+        schema,
+      },
+    ],
+  });
+};
+
 export interface DatasetSettingsCustomJsonEditorProps {
   control: Control<DatasetWizardFormValues>;
+  format: Exclude<DatasetFormatFormValue, ''>;
+  errorMode?: DatasetErrorModeFormValue;
   testSubjPrefix?: string;
 }
 
 export const DatasetSettingsCustomJsonEditor: FunctionComponent<
   DatasetSettingsCustomJsonEditorProps
-> = ({ control, testSubjPrefix = 'datasetWizard' }) => {
+> = ({ control, format, errorMode = '', testSubjPrefix = 'datasetWizard' }) => {
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+
+  const jsonSchema = useMemo(
+    () => getDatasetSettingsCustomJsonSchema(format, errorMode),
+    [errorMode, format]
+  );
+
   const { field, fieldState } = useController({
     name: 'settings_custom_json',
     control,
@@ -40,6 +86,20 @@ export const DatasetSettingsCustomJsonEditor: FunctionComponent<
       validate: validateSettingsCustomJson,
     },
   });
+
+  const handleEditorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorRef.current = editor;
+      configureDatasetSettingsCustomJsonSchema(editor, jsonSchema);
+    },
+    [jsonSchema]
+  );
+
+  useEffect(() => {
+    if (editorRef.current) {
+      configureDatasetSettingsCustomJsonSchema(editorRef.current, jsonSchema);
+    }
+  }, [jsonSchema]);
 
   return (
     <EuiFormRow
@@ -74,8 +134,15 @@ export const DatasetSettingsCustomJsonEditor: FunctionComponent<
           lineNumbers: 'on',
           tabSize: 2,
           automaticLayout: true,
+          quickSuggestions: {
+            other: true,
+            comments: false,
+            strings: true,
+          },
+          suggestOnTriggerCharacters: true,
         }}
         aria-label={datasetWizardStrings.settingsCustomJsonAriaLabel()}
+        editorDidMount={handleEditorDidMount}
         onChange={(value) => field.onChange(value)}
       />
     </EuiFormRow>

@@ -131,6 +131,8 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
                   {advancedFields.length > 0 ? <EuiSpacer size="l" /> : null}
                   <DatasetSettingsCustomJsonEditor
                     control={control}
+                    format={format}
+                    errorMode={errorMode}
                     testSubjPrefix={testSubjPrefix}
                   />
                 </>
