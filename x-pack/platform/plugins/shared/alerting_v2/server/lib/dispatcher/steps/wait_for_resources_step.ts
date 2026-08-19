@@ -6,6 +6,7 @@
  */
 
 import { inject, injectable } from 'inversify';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import {
   ResourceManager,
   type ResourceManagerContract,
@@ -18,10 +19,11 @@ export class WaitForResourcesStep implements DispatcherStep {
 
   constructor(@inject(ResourceManager) private readonly resourceManager: ResourceManagerContract) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const logger = state.logger.withLabels({ step: this.name });
-
-    logger.debug({ message: 'Waiting for resources' });
+  public async execute(
+    _: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    logger.debug({ message: 'Waiting for resources to be ready' });
 
     await this.resourceManager.waitUntilReady();
 

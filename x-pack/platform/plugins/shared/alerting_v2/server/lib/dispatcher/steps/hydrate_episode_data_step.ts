@@ -6,21 +6,18 @@
  */
 
 import { inject, injectable } from 'inversify';
-import type {
-  AlertEpisode,
-  DispatcherStep,
-  DispatcherPipelineState,
-  DispatcherStepOutput,
-} from '../types';
+import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
-import {
-  LoggerServiceToken,
-  type LoggerServiceContract,
-} from '../../services/logger_service/logger_service';
 import { getEpisodeDataQueries } from '../queries';
+import type {
+  AlertEpisode,
+  DispatcherPipelineState,
+  DispatcherStep,
+  DispatcherStepOutput,
+} from '../types';
 import { parseDataJson } from './utils/parse_episode_data';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 
 interface RawEpisodeData {
   episode_id: string;
@@ -31,16 +28,14 @@ interface RawEpisodeData {
 export class HydrateEpisodeDataStep implements DispatcherStep {
   public readonly name = 'hydrate_episode_data';
 
-  private readonly logger: LoggerServiceContract;
-
   constructor(
-    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(LoggerServiceToken) loggerService: LoggerServiceContract
-  ) {
-    this.logger = loggerService.forSubsystem('dispatcher');
-  }
+    @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
+  ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { dispatchable = [] } = state;
 
     if (dispatchable.length === 0) {
@@ -51,9 +46,14 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
 
     const { gte, lte } = computeTimestampBounds(dispatchable);
 
+    const { signal } = state.input;
+
     const responses = await Promise.all(
       getEpisodeDataQueries(episodeIds, { gte, lte }).map((request) =>
-        this.queryService.executeQueryRows<RawEpisodeData>({ query: request.query })
+        this.queryService.executeQueryRows<RawEpisodeData>({
+          query: request.query,
+          abortSignal: signal,
+        })
       )
     );
 
@@ -65,10 +65,12 @@ export class HydrateEpisodeDataStep implements DispatcherStep {
     const hydrated = dataByEpisodeId.size;
     const requested = episodeIds.length;
     if (hydrated < requested) {
-      this.logger.warn({
+      logger.warn({
         code: ALERTING_LOG_CODES.HYDRATE_EPISODE_DATA_STEP_MISSING_RULE_EVENTS_ROW,
-        message: 'Episodes missing matching rule-events row',
-        labels: { step: this.name },
+        message: 'Episodes missing matching rule-events row; their data will be absent',
+        error: new Error(
+          `${requested - hydrated} of ${requested} episodes had no matching .rule-events row`
+        ),
       });
     }
 

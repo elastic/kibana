@@ -32,9 +32,11 @@ export class ApplyThrottlingStep implements DispatcherStep {
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract
   ) {}
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    logger: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
     const { groups = [], policies = new Map<ActionPolicyId, ActionPolicy>(), input } = state;
-    const logger = state.logger.withLabels({ step: this.name });
 
     if (groups.length === 0) {
       return { type: 'continue', data: { dispatch: [], throttled: [] } };
