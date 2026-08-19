@@ -204,21 +204,30 @@ function withFixtureAndNow(fn) {
 const context = { repo: { owner: 'elastic', repo: 'kibana' } };
 const silentCore = { info() {}, warning() {} };
 
-test('sweep pings only due, ready, unreviewed PRs and re-pings on cadence', async () => {
+test('sweep pings the first due, ready, unreviewed PR with its codeowners', async () => {
   await withFixtureAndNow(async () => {
     const state = scenarioState();
     process.env.DRY_RUN = 'false';
-    await reminder(
-      { github: makeGithub(state), context, core: silentCore }
-    );
+    await reminder({ github: makeGithub(state), context, core: silentCore });
 
-    const posted = state.posted.map((c) => c.issue_number).sort((a, b) => a - b);
-    assert.deepEqual(posted, [1, 5]);
+    // #1 is the first due PR; the cap of MAX_PINGS_PER_RUN stops the run there.
+    const posted = state.posted.map((c) => c.issue_number);
+    assert.deepEqual(posted, [1]);
+    assert.match(state.posted[0].body, /@elastic\/security-solution/);
+  });
+});
 
-    const first = state.posted.find((c) => c.issue_number === 1).body;
-    assert.match(first, /@elastic\/security-solution/);
-    const fifth = state.posted.find((c) => c.issue_number === 5).body;
-    assert.match(fifth, /@elastic\/kibana-core/);
+test('a PR already pinged 4+ days ago is re-pinged', async () => {
+  await withFixtureAndNow(async () => {
+    const state = scenarioState();
+    // Take #1 out of the running so the re-ping candidate #5 is reached.
+    state.reviews[1] = [{ state: 'APPROVED', user: { login: 'dev', type: 'User' } }];
+    process.env.DRY_RUN = 'false';
+    await reminder({ github: makeGithub(state), context, core: silentCore });
+
+    const posted = state.posted.map((c) => c.issue_number);
+    assert.deepEqual(posted, [5]);
+    assert.match(state.posted[0].body, /@elastic\/kibana-core/);
   });
 });
 
@@ -235,7 +244,6 @@ test('dry run logs intentions without commenting', async () => {
 
     assert.equal(state.posted.length, 0);
     assert.ok(logs.some((l) => l.includes('[dry run] would ping #1')));
-    assert.ok(logs.some((l) => l.includes('[dry run] would ping #5')));
   });
 });
 
