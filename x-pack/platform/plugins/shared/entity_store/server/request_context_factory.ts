@@ -14,7 +14,7 @@ import type {
 } from './types';
 import { AssetManagerClient } from './domain/asset_manager';
 import { EntityMaintainersClient } from './domain/entity_maintainers';
-import { FeatureFlags } from './infra/feature_flags';
+import { FeatureFlags, isLegacySecurityAssetsMigrationEnabled } from './infra/feature_flags';
 import { EngineDescriptorClient, EntityStoreGlobalStateClient } from './domain/saved_objects';
 import { LogsExtractionClient } from './domain/logs_extraction';
 import { createRemoteLogsExtractionClient } from './domain/logs_extraction/remote';
@@ -133,6 +133,8 @@ export async function createRequestHandlerContext({
       security: startPlugins.security,
       analytics,
       savedObjectsClient: core.savedObjects.client,
+      isLegacySecurityAssetsMigrationEnabled: () =>
+        isLegacySecurityAssetsMigrationEnabled(coreStart.featureFlags),
     }),
     entityMaintainersClient: new EntityMaintainersClient({
       logger,
