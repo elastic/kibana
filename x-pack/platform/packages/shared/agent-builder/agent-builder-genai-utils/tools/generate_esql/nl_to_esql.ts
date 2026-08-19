@@ -19,6 +19,7 @@ import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
+import { getDefaultEsqlCacheKey } from './cache_key';
 
 export class GenerateEsqlNoDataError extends Error {
   readonly code = 'NO_DATA' as const;
@@ -146,6 +147,7 @@ export const generateEsql = async ({
   const docBase = await EsqlDocumentBase.load();
   const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
+  const cacheSessionId = sessionId ?? getDefaultEsqlCacheKey();
   const cacheControl: ChatCompleteCacheControl = { type: 'ephemeral', ttl: '5m' };
 
   const graph = createNlToEsqlGraph({
@@ -155,7 +157,7 @@ export const generateEsql = async ({
     documentation,
     esqlCallbacks,
     includeDatasets,
-    sessionId,
+    sessionId: cacheSessionId,
     cacheControl,
   });
 
@@ -164,15 +166,9 @@ export const generateEsql = async ({
     {
       attributes: {
         [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
-        ...(cacheControl
-          ? {
-              [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
-              [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl
-                ? cacheControl.ttl
-                : undefined,
-            }
-          : {}),
-        ...(sessionId ? { [ElasticGenAIAttributes.CacheControlSessionId]: sessionId } : {}),
+        [ElasticGenAIAttributes.CacheControlType]: cacheControl.type,
+        [ElasticGenAIAttributes.CacheControlTTL]: cacheControl.ttl,
+        [ElasticGenAIAttributes.CacheControlSessionId]: cacheSessionId,
       },
     },
     async () => {

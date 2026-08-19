@@ -5,20 +5,17 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { generateEsql, GenerateEsqlNoDataError } from '@kbn/agent-builder-genai-utils';
+import {
+  generateEsql,
+  GenerateEsqlNoDataError,
+  setDefaultEsqlCacheKey,
+} from '@kbn/agent-builder-genai-utils';
 import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
-
-/** Builds an EIS session id scoped to ES|QL generation. Hashes the org id when present;
- * falls back to a random UUID when org id is unavailable.
- */
-export const buildEsqlSessionId = (organizationId?: string): string =>
-  `esql-gen-${organizationId ? toHashedId(organizationId) : uuidv4()}`;
 
 const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
   try {
@@ -80,7 +77,9 @@ export const generateEsqlTool = ({
   /** Raw organization id used to derive a stable EIS session id for prompt-cache stickiness. */
   organizationId?: string;
 } = {}): BuiltinToolDefinition<typeof nlToEsqlToolSchema> => {
-  const sessionId = buildEsqlSessionId(organizationId);
+  if (organizationId) {
+    setDefaultEsqlCacheKey(toHashedId(organizationId));
+  }
   return {
     id: platformCoreTools.generateEsql,
     type: ToolType.builtin,
@@ -115,7 +114,6 @@ export const generateEsqlTool = ({
         disableNamedParams,
         timeRange,
         includeDatasets: experimentalFeatures.datasets,
-        sessionId,
         modelProvider,
         esClient: esClient.asCurrentUser,
         logger,
