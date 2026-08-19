@@ -18,10 +18,10 @@ project:
   sourceRoot: x-pack/solutions/security/packages/kbn-evals-suite-security-watch-escalation-chain
 dependsOn:
   - '@kbn/core'
-  - '@kbn/esql-language'
   - '@kbn/evals'
   - '@kbn/tooling-log'
   - '@kbn/workflows'
+  - '@kbn/zod'
 tags:
   - functional-tests
   - package
