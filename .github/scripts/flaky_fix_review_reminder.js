@@ -180,11 +180,11 @@ module.exports = async function flakyFixReviewReminder({ github, context, core }
     repo,
     state: 'open',
     labels: LABEL,
-    state: 'open',
-    labels: LABEL,
     sort: 'created',
     direction: 'asc',
     per_page: 100,
+  });
+
   let pinged = 0;
   let considered = 0;
 
