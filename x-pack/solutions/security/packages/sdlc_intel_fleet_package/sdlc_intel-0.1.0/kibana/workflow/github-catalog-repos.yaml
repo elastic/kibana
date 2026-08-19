@@ -81,36 +81,39 @@ steps:
         with:
           duration: 60s
 
-      - name: index_repos
-        type: foreach
-        foreach: '{{ steps.fetch_repos.output.data.organization.repositories.nodes | json }}'
-        steps:
-          - name: upsert_repo
-            type: elasticsearch.index
-            with:
-              index: '{{ consts.reposIndex }}'
-              id: '{{ foreach.item.id }}'
-              document:
-                '@timestamp': '{{ execution.startedAt }}'
-                sync:
-                  run_id: '{{ execution.id }}'
-                  source: '{{ consts.syncSource }}'
-                entity:
-                  type: repo
-                  id: '{{ foreach.item.id }}'
-                  url: '{{ foreach.item.url }}'
-                org:
-                  login: '{{ consts.orgLogin }}'
-                repo:
-                  name: '{{ foreach.item.name }}'
-                  full_name: '{{ foreach.item.nameWithOwner }}'
-                  description: '{{ foreach.item.description }}'
-                  default_branch: '{{ foreach.item.defaultBranchRef.name }}'
-                  is_private: '{{ foreach.item.isPrivate }}'
-                github:
-                  created_at: '{{ foreach.item.createdAt }}'
-                  updated_at: '{{ foreach.item.updatedAt }}'
-                payload: '${{ foreach.item }}'
+      - name: build_bulk_ops
+        type: data.set
+        with:
+          operations: |-
+            {% assign nodes = steps.fetch_repos.output.data.organization.repositories.nodes %}
+            [
+            {%- for node in nodes -%}
+              {
+                "id": "{{ node.id }}",
+                "@timestamp": "{{ execution.startedAt }}",
+                "sync": {"run_id": "{{ execution.id }}", "source": "{{ consts.syncSource }}"},
+                "entity": {"type": "repo", "id": "{{ node.id }}", "url": "{{ node.url }}"},
+                "org": {"login": "{{ consts.orgLogin }}"},
+                "repo": {
+                  "name": "{{ node.name }}",
+                  "full_name": "{{ node.nameWithOwner }}",
+                  "description": {{ node.description | json }},
+                  "default_branch": "{{ node.defaultBranchRef.name }}",
+                  "is_private": {{ node.isPrivate }}
+                },
+                "github": {"created_at": "{{ node.createdAt }}", "updated_at": "{{ node.updatedAt }}"},
+                "payload": {{ node | json }}
+              }{% unless forloop.last %},{% endunless %}
+            {%- endfor -%}
+            ]
+
+      - name: bulk_index_page
+        type: elasticsearch.bulk
+        with:
+          index: '{{ consts.reposIndex }}'
+          id_field: id
+          operations: '${{ steps.build_bulk_ops.output.operations | json_parse }}'
+
 
       - name: advance_cursor
         type: data.set
