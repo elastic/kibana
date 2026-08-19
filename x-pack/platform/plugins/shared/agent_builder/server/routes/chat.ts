@@ -103,6 +103,15 @@ export const conversePayloadSchema = schema.object({
       })
     )
   ),
+  project_routing: schema.maybe(
+    schema.string({
+      maxLength: 2048,
+      meta: {
+        description:
+          "Cross-project search routing expression resolved from the header project picker, applied to the run's searches. Serverless (CPS) only; ignored elsewhere.",
+      },
+    })
+  ),
   conversation_id: schema.maybe(
     schema.string({
       validate: (v) => (uuidValidate(v) ? undefined : 'conversation_id must be a valid UUID'),
@@ -507,6 +516,7 @@ export function registerChatRoutes({
       browser_api_tools: browserApiTools,
       configuration_overrides: configurationOverrides,
       action,
+      project_routing: projectRouting,
     } = payload;
 
     const connectorId = resolveConnectorIdFromPayload(payload);
@@ -533,6 +543,7 @@ export function registerChatRoutes({
         browserApiTools,
         configurationOverrides,
         action,
+        projectRouting,
         nextInput: {
           message: input,
           prompts,

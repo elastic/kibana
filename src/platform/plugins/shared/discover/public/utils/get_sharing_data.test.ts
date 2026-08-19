@@ -15,6 +15,7 @@ import type { DiscoverServices } from '../build_services';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { buildDataViewMock, dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { createDiscoverServicesMock } from '../__mocks__/services';
 import { getColumnsWithTimeField, getSharingData, showPublicUrlSwitch } from './get_sharing_data';
 
@@ -66,6 +67,28 @@ describe('getSharingData', () => {
         "getSearchSource": [Function],
       }
     `);
+  });
+
+  test('excludes Summary from selected reporting columns and fields', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    const result = await getSharingData(
+      searchSourceMock,
+      { columns: ['column_a', SOURCE_COLUMN] },
+      services
+    );
+
+    expect(result.columns).toEqual(['column_a']);
+    expect(result.getSearchSource({}).fields).toEqual([
+      { field: 'column_a', include_unmapped: true },
+    ]);
+  });
+
+  test('exports all fields when Summary is the only column', async () => {
+    const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
+    const result = await getSharingData(searchSourceMock, { columns: [SOURCE_COLUMN] }, services);
+
+    expect(result.columns).toEqual([]);
+    expect(result.getSearchSource({}).fields).toEqual([{ field: '*', include_unmapped: true }]);
   });
 
   test('getSearchSource does not add fields to the searchSource', async () => {
