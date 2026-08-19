@@ -54,6 +54,8 @@ const feedbackModalCss = css`
   overflow-y: auto;
 `;
 
+const RESEARCH_PANEL_SURVEY_URL = 'https://ela.st/user-interviews-opt-in';
+
 const createFeedbackDeps = (
   core: CoreStart,
   organizationId: string | undefined,
@@ -110,6 +112,7 @@ const createFeedbackDeps = (
               text: toMountPoint(
                 core.rendering.addContext(
                   <FeedbackSuccessToastBody
+                    surveyUrl={RESEARCH_PANEL_SURVEY_URL}
                     onDismiss={() => {
                       if (toastRef.current) {
                         core.notifications.toasts.remove(toastRef.current);

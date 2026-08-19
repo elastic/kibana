@@ -75,7 +75,10 @@ export const SuccessToast: EmbeddableStoryObj = {
   render: () => (
     <>
       <FeedbackSuccessToastTitle />
-      <FeedbackSuccessToastBody onDismiss={action('onDismiss')} />
+      <FeedbackSuccessToastBody
+        onDismiss={action('onDismiss')}
+        surveyUrl="https://www.elastic.co/"
+      />
     </>
   ),
 };

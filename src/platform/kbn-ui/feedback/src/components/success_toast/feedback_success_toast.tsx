@@ -13,8 +13,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export const FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS = 60_000;
 
-export const FEEDBACK_RESEARCH_PANEL_URL = 'https://ela.st/user-interviews-opt-in';
-
 export const FeedbackSuccessToastTitle = () => (
   <span data-test-subj="feedbackSuccessToastTitle">
     <FormattedMessage
@@ -26,9 +24,13 @@ export const FeedbackSuccessToastTitle = () => (
 
 export interface FeedbackSuccessToastBodyProps {
   onDismiss: () => void;
+  surveyUrl: string;
 }
 
-export const FeedbackSuccessToastBody = ({ onDismiss }: FeedbackSuccessToastBodyProps) => (
+export const FeedbackSuccessToastBody = ({
+  onDismiss,
+  surveyUrl,
+}: FeedbackSuccessToastBodyProps) => (
   <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="feedbackSuccessToastBody">
     <EuiFlexItem>
       <EuiText>
@@ -45,7 +47,7 @@ export const FeedbackSuccessToastBody = ({ onDismiss }: FeedbackSuccessToastBody
             color="success"
             iconType="external"
             iconSide="right"
-            href={FEEDBACK_RESEARCH_PANEL_URL}
+            href={surveyUrl}
             target="_blank"
             data-test-subj="feedbackSuccessToastParticipateButton"
           >

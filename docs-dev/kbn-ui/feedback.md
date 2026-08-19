@@ -32,7 +32,7 @@ The button lives in the global header and opens the form on click. It is disable
 
 ### Success toast [kbn-ui-feedback-success-toast]
 
-After a successful submission, hosts should show `FeedbackSuccessToastTitle` and `FeedbackSuccessToastBody`. Pass `onDismiss` so the "Maybe later" action can close the toast.
+After a successful submission, hosts should show `FeedbackSuccessToastTitle` and `FeedbackSuccessToastBody`. Pass `surveyUrl` for the research-panel link and `onDismiss` so the "Maybe later" action can close the toast.
 
 :::{storybook}
 :id: kibana:kbn_ui:feedback--success-toast

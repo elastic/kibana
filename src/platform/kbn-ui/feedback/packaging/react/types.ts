@@ -91,6 +91,7 @@ export interface FeedbackContainerProps {
 /** Props accepted by the `FeedbackSuccessToastBody` component. */
 export interface FeedbackSuccessToastBodyProps {
   onDismiss: () => void;
+  surveyUrl: string;
 }
 
 /** Header feedback trigger button (compiled to a function declaration in `.d.ts`). */
@@ -109,6 +110,3 @@ export declare function FeedbackSuccessToastBody(
 
 /** How long the feedback submission success toast remains on screen. */
 export declare const FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS: number;
-
-/** Opt-in URL for the research panel, used by the success toast. */
-export declare const FEEDBACK_RESEARCH_PANEL_URL: string;

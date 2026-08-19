@@ -11,11 +11,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
-import {
-  FeedbackSuccessToastBody,
-  FeedbackSuccessToastTitle,
-  FEEDBACK_RESEARCH_PANEL_URL,
-} from './feedback_success_toast';
+import { FeedbackSuccessToastBody, FeedbackSuccessToastTitle } from './feedback_success_toast';
+
+const SURVEY_URL = 'https://example.com/research-panel';
 
 describe('FeedbackSuccessToast', () => {
   it('should render the success title', () => {
@@ -27,20 +25,20 @@ describe('FeedbackSuccessToast', () => {
   });
 
   it('should render the research panel copy and participate link', () => {
-    renderWithI18n(<FeedbackSuccessToastBody onDismiss={jest.fn()} />);
+    renderWithI18n(<FeedbackSuccessToastBody onDismiss={jest.fn()} surveyUrl={SURVEY_URL} />);
 
     expect(screen.getByTestId('feedbackSuccessToastBody')).toHaveTextContent(
       'Want to help shape the future of Elastic? Sign up to join our research panel!'
     );
     expect(screen.getByTestId('feedbackSuccessToastParticipateButton')).toHaveAttribute(
       'href',
-      FEEDBACK_RESEARCH_PANEL_URL
+      SURVEY_URL
     );
   });
 
   it('should call onDismiss when Maybe later is clicked', async () => {
     const onDismiss = jest.fn();
-    renderWithI18n(<FeedbackSuccessToastBody onDismiss={onDismiss} />);
+    renderWithI18n(<FeedbackSuccessToastBody onDismiss={onDismiss} surveyUrl={SURVEY_URL} />);
 
     await userEvent.click(screen.getByTestId('feedbackSuccessToastMaybeLaterButton'));
 

@@ -104,6 +104,9 @@ function InterceptDisplayManager({
     (terminationType: InterceptApiAckProps['ackType']) => {
       if (!currentIntercept) return null;
 
+      // Capture before reset so onFinish still receives the collected responses.
+      const response = { ...feedbackStore.current };
+
       // reset the intercept render state first before acknowledging the intercept,
       // so that we don't have a situation where another intercept is to be displayed,
       // but because we've signaled that a new intercept can be displayed,
@@ -124,7 +127,7 @@ function InterceptDisplayManager({
         }
         case 'completed': {
           currentIntercept.onFinish?.({
-            response: feedbackStore.current,
+            response,
             runId: currentIntercept.runId,
             interceptId: currentIntercept.id,
           });
@@ -165,26 +168,29 @@ function InterceptDisplayManager({
     return handleTerminationInteraction('dismissed');
   }, [handleTerminationInteraction]);
 
+  const isLastStep = useMemo(() => {
+    return !!currentIntercept && currentStepIndex === currentIntercept.steps.length - 1;
+  }, [currentIntercept, currentStepIndex]);
+
   const onInterceptStepInput = useCallback(
     function (this: InterceptSteps, value: unknown) {
-      feedbackStore.current[this.id] = value;
-      currentIntercept!.onProgress?.({
-        stepId: this.id,
-        stepResponse: value,
-        runId: currentIntercept!.runId,
-        interceptId: currentIntercept!.id,
-      });
-      seekNextStep();
+      // Progress is not reported for the start or completion steps.
+      if (this.id !== 'start' && this.id !== 'completion') {
+        feedbackStore.current[this.id] = value;
+        currentIntercept!.onProgress?.({
+          stepId: this.id,
+          stepResponse: value,
+          runId: currentIntercept!.runId,
+          interceptId: currentIntercept!.id,
+        });
+      }
+      seekNextStep(isLastStep);
     },
-    [currentIntercept, seekNextStep]
+    [currentIntercept, seekNextStep, isLastStep]
   );
 
   const currentInterceptStep = useMemo(() => {
     return currentIntercept?.steps?.[currentStepIndex ?? 0];
-  }, [currentIntercept, currentStepIndex]);
-
-  const isLastStep = useMemo(() => {
-    return !!currentIntercept && currentStepIndex === currentIntercept.steps.length - 1;
   }, [currentIntercept, currentStepIndex]);
 
   const isStartStep = currentStepIndex === 0;

@@ -11,6 +11,5 @@ export {
   FeedbackSuccessToastTitle,
   FeedbackSuccessToastBody,
   FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS,
-  FEEDBACK_RESEARCH_PANEL_URL,
 } from './feedback_success_toast';
 export type { FeedbackSuccessToastBodyProps } from './feedback_success_toast';
