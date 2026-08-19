@@ -13,25 +13,9 @@ import { hardCases } from '../datasets/hard_cases';
 /**
  * Security data backing the golden dataset's expected queries.
  *
- * WHY THIS EXISTS (measured 2026-08-11 against the eval stack):
- * The Scout stack boots with ZERO security documents — `.alerts-security.alerts-*` = 0,
- * `logs-endpoint.events.*` = 0, and the only `logs-*` index is Agent Builder's own OTel
- * telemetry. `generate_esql` then fails with "Could not discover a suitable index", which is a
- * TRUTHFUL error about an empty stack rather than an agent defect. Measured effect: 12/16
- * `security.create_detection_rule` calls failed (75%), and `Tool Routing` was scoring the
- * fixture rather than routing quality.
- *
- * WHY NOT A STOCK es_archive:
- * No shipped archive fits this dataset. Checked:
- *   - `session_view/process_events_merged` — index name matches `logs-endpoint.events.process`,
- *     but it maps only 6 fields (event.action, host.id, message, process.entry_leader.entity_id,
- *     process.tty.char_device.{major,minor}) and ZERO of the fields the dataset queries. Seeding
- *     it moved the failure from "no index" to `Unknown column "event.code"` — still a fixture
- *     defect. Index-name match is not field-coverage match.
- *   - `security_solution/ecs_compliant` — mappings-only (no data.json), so it creates an EMPTY
- *     index; entity-analytics pairs it with a separate data generator.
- *   - `endpoint/resolver/*`, `signals/*` — wrong index names and shapes.
- *
+ * The Scout stack boots with zero security documents, causing `generate_esql` to fail with
+ * "Could not discover a suitable index" — a truthful empty-stack error, not an agent defect.
+ * No shipped es_archive fits: existing archives either map the wrong fields or contain no data.
  * The dataset's reference queries span three index patterns, so all three are seeded here.
  */
 
@@ -40,21 +24,13 @@ const ENDPOINT_INDEX = 'logs-endpoint.events.process-default';
 const POWERSHELL_INDEX = 'logs-windows.powershell_operational-default';
 const CLOUDTRAIL_INDEX = 'logs-aws.cloudtrail-default';
 
-/**
- * Index patterns a reference query may legitimately target. Derived from the constants above so a
- * new fixture index cannot drift out of sync with the hygiene guard in
- * reference_query_hygiene.test.ts.
- */
+/** Index patterns a reference query may legitimately target. Derived from the constants above so a new fixture index cannot drift out of sync with the hygiene guard. */
 export const SEEDED_INDEX_PATTERNS = [ENDPOINT_INDEX, POWERSHELL_INDEX, CLOUDTRAIL_INDEX].map(
   (index) => index.replace(/-default$/, '')
 );
 
-/**
- * NOTE: no explicit mappings are declared here. These indices are `logs-*` data streams, and the
- * built-in `logs` index template already maps the ECS fields the datasets query (verified:
- * `event.code` resolves as `keyword` and ES|QL `WHERE event.code == "1"` matches). Declaring a
- * second mapping would silently drift from the template the product actually uses.
- */
+// No explicit mappings: these are `logs-*` data streams and the built-in `logs` template already
+// maps the ECS fields the datasets query. A second mapping would drift from what the product uses.
 
 interface SeededIndex {
   index: string;
@@ -330,23 +306,9 @@ export const buildFixtures = (): SeededIndex[] => [
   },
 ];
 
-/**
- * Asserts every reference query matches at least one seeded row.
- *
- * WHY (measured 2026-08-12): 6 of 7 references returned ZERO rows against the seeded stack while
- * every static gate stayed green, because the two static guards check different things:
- * `reference_query_hygiene` checks query *shape*, `reference_fixture_parity` checks that referenced
- * *fields* are seeded. Neither runs the query, so a reference could read only seeded fields and
- * still match nothing — two causes seen live: a threshold no fixture volume could clear
- * (`WHERE attempt_count > 5` against a single row) and scenarios nobody seeded (no `mmc.exe`
- * parent, no `kubectl`, no npm, no Route53).
- *
- * The effect was silent: `Gap Addressed` scored 1.00 while grading against a reference matching no
- * data. Only executing the query catches that, so this runs at seed time where the client exists.
- *
- * Broken fixtures are excluded — they are deliberately unsatisfiable, so requiring rows of them
- * would assert the opposite of their purpose.
- */
+// Asserts every reference query matches at least one seeded row. Static guards check query shape
+// and field coverage but never execute the query — a threshold against too few rows or a missing
+// scenario still passes them. Broken fixtures are excluded: they are deliberately unsatisfiable.
 const assertReferencesMatchRows = async ({
   esClient,
   log,
@@ -390,19 +352,10 @@ const assertReferencesMatchRows = async ({
   log.info(`Verified all ${references.length} reference queries match seeded data`);
 };
 
-/**
- * Explicit mappings for fields dynamic inference gets wrong.
- *
- * Measured 2026-08-12: `powershell.file.script_block_text` was dynamically mapped as
- * `keyword` with `ignore_above: 1024`, so a 1211-char script block was silently DROPPED —
- * the document indexed, the field read back null, and `gap-t1027` (which requires
- * `LENGTH(...) > 1000`) matched zero rows with no error. A keyword field can never satisfy that
- * reference, so the mapping has to be declared rather than inferred.
- *
- * Applied as a component-less index template scoped to the fixture data streams. It intentionally
- * declares ONLY the fields dynamic mapping gets wrong; everything else still comes from the stock
- * `logs` template, so this cannot drift into a parallel definition of the whole schema.
- */
+// Dynamic mapping maps `powershell.file.script_block_text` as `keyword` with `ignore_above: 1024`,
+// silently dropping long script blocks and causing LENGTH() queries to match zero rows. Declared
+// as `wildcard` here. Only fields dynamic mapping gets wrong are declared; the rest comes from the
+// stock `logs` template.
 const SCRIPT_BLOCK_MAPPING_TEMPLATE = {
   name: 'kbn-evals-rule-creation-script-block',
   // Must outrank the built-in `logs` template (priority 100).
@@ -448,15 +401,9 @@ export const seedSecurityData = async ({
 }): Promise<() => Promise<void>> => {
   const fixtures = buildFixtures();
 
-  // Must be applied BEFORE any write: a data stream's mappings are resolved when its first backing
-  // index is created, so a template installed afterwards would not affect already-seeded data.
-  //
-  // Deleting any pre-existing fixture stream first is load-bearing, not defensive tidying: a stream
-  // left behind by an earlier run (a failed run's teardown never fires) keeps the mappings it was
-  // created with, and field mappings are immutable. Measured 2026-08-12 — the template was
-  // installed correctly and `powershell.file.script_block_text` still resolved as
-  // `keyword`/`ignore_above: 1024` from the stale backing index, silently dropping the >1000-char
-  // script block that `gap-t1027` requires.
+  // Template must be applied before the first write: data stream mappings are resolved when the
+  // backing index is created and are immutable after that. Deleting any stale stream first ensures
+  // a leftover from a previously failed teardown cannot retain old mappings.
   await esClient.indices.deleteDataStream(
     { name: fixtures.map((f) => f.index) },
     { ignore: [404] }
@@ -464,17 +411,14 @@ export const seedSecurityData = async ({
   await esClient.indices.putIndexTemplate(SCRIPT_BLOCK_MAPPING_TEMPLATE);
 
   for (const { index, docs } of fixtures) {
-    // `logs-*` is governed by a data-stream-only index template, so `indices.create` fails with
-    // illegal_argument_exception ("matches with template [logs] that creates data streams only").
-    // Bulk-indexing lazily auto-creates the backing data stream instead. Writes into a data stream
-    // must use create-semantics ops (`create`, not `index`) and carry an `@timestamp`.
+    // `logs-*` is data-stream-only; `indices.create` fails. Bulk-indexing auto-creates the stream.
+    // Data stream writes require create-semantics ops and an `@timestamp`.
     const result = await esClient.bulk({
       refresh: true,
       operations: docs.flatMap((doc) => [{ create: { _index: index } }, doc]),
     });
 
-    // Without this, a rejected bulk leaves the stack empty and the failure only surfaces later as
-    // an unexplained low score.
+    // A rejected bulk leaves the stack empty; the failure would surface as an unexplained low score.
     if (result.errors) {
       const firstError = result.items.find((item) => item.create?.error)?.create?.error;
       throw new Error(
@@ -484,8 +428,8 @@ export const seedSecurityData = async ({
       );
     }
 
-    // Assert on the pattern the DATASET queries (`<index>-*`-style), not the literal index name.
-    // An index can exist and hold documents while the pattern under test resolves to nothing.
+    // Assert on the pattern the dataset queries, not the literal index: an index can exist while
+    // its wildcard pattern resolves to nothing.
     const pattern = `${index.replace(/-default$/, '')}-*`;
     const { count } = await esClient.count({ index: pattern });
     if (count === 0) {
