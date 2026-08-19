@@ -10,9 +10,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useActions, useValues } from 'kea';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 
 import { CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX } from '../../../../../common/constants';
 import { stripSearchPrefix } from '../../../../../common/utils/strip_search_prefix';
@@ -71,22 +72,21 @@ export const SearchIndexIndexMappings: React.FC = () => {
             )}
             <EuiFlexItem grow>
               {isAccessControlIndexNotFound ? (
-                <EuiCallOut
+                <KbnInfoCallout
                   announceOnMount
                   size="m"
                   title={i18n.translate(
                     'xpack.enterpriseSearch.content.searchIndex.mappings.noIndex.title',
                     { defaultMessage: 'Access Control Index not found' }
                   )}
-                  iconType="info"
-                >
-                  <p>
-                    {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.noIndex', {
+                  text={i18n.translate(
+                    'xpack.enterpriseSearch.content.searchIndex.mappings.noIndex',
+                    {
                       defaultMessage:
                         "An Access Control Index won't be created until you enable document-level security and run your first access control sync.",
-                    })}
-                  </p>
-                </EuiCallOut>
+                    }
+                  )}
+                />
               ) : (
                 <>
                   {IndexMappingComponent ? (
@@ -99,10 +99,8 @@ export const SearchIndexIndexMappings: React.FC = () => {
                       }}
                     />
                   ) : (
-                    <EuiCallOut
+                    <KbnDangerCallout
                       announceOnMount
-                      color="danger"
-                      iconType="warn"
                       title={i18n.translate(
                         'xpack.enterpriseSearch.content.searchIndex.mappings.noMappingsComponent',
                         { defaultMessage: 'Mappings component not found' }

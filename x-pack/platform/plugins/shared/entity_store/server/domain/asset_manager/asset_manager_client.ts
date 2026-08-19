@@ -57,13 +57,20 @@ import {
   getLatestEntitiesIndexName,
   getLatestEntityIndexPattern,
   getLegacySecurityEntityIndexPattern,
+  getLegacySecurityLatestEntitiesIndexName,
   getLegacySecurityLatestEntityIndexPattern,
 } from '../../../common/domain/entity_index';
 import { getLatestIndexTemplateId } from './latest_index_template';
 import { getUpdatesIndexTemplateId } from './updates_index_template';
 import { getComponentTemplateName, getUpdatesComponentTemplateName } from './component_templates';
-import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
-import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import {
+  getUpdatesEntitiesDataStreamName,
+  getLegacySecurityUpdatesEntitiesDataStreamName,
+} from './updates_data_stream';
+import {
+  getMetadataEntitiesDataStreamName,
+  getLegacySecurityMetadataEntitiesDataStreamName,
+} from './metadata_data_stream';
 import type { LogsExtractionClient } from '../logs_extraction';
 import type { RemoteLogExtractionStateClient } from '../saved_objects/remote_log_extraction_state';
 import type { ManagedEntityDefinition } from '../../../common/domain/definitions/entity_schema';
@@ -91,6 +98,7 @@ interface AssetManagerDependencies {
   security: SecurityPluginStart;
   analytics: TelemetryReporter;
   savedObjectsClient: SavedObjectsClientContract;
+  isLegacySecurityAssetsMigrationEnabled?: () => Promise<boolean>;
 }
 
 export class AssetManagerClient {
@@ -107,6 +115,7 @@ export class AssetManagerClient {
   private readonly security: SecurityPluginStart;
   private readonly analytics: TelemetryReporter;
   private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly isLegacySecurityAssetsMigrationEnabled: () => Promise<boolean>;
 
   constructor(deps: AssetManagerDependencies) {
     this.logger = deps.logger;
@@ -122,6 +131,8 @@ export class AssetManagerClient {
     this.security = deps.security;
     this.analytics = deps.analytics;
     this.savedObjectsClient = deps.savedObjectsClient;
+    this.isLegacySecurityAssetsMigrationEnabled =
+      deps.isLegacySecurityAssetsMigrationEnabled ?? (async () => false);
   }
 
   public async init(
@@ -169,6 +180,7 @@ export class AssetManagerClient {
           migrationEsClient: this.internalEsClient,
           logger: this.logger,
           namespace: this.namespace,
+          allowLegacyMigration: await this.isLegacySecurityAssetsMigrationEnabled(),
         }),
       ]);
 
@@ -561,14 +573,35 @@ export class AssetManagerClient {
   private async getIndexComponents(): Promise<EngineComponentStatus[]> {
     const resource: EngineComponentResource = 'index';
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const legacyLatestIndex = getLegacySecurityLatestEntitiesIndexName(this.namespace);
     const updatesDataStreamName = getUpdatesEntitiesDataStreamName(this.namespace);
-    const [latestExists, updatesExists] = await Promise.all([
-      this.esClient.indices.exists({ index: latestIndex }),
-      this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStreamName })),
-    ]);
+    const legacyUpdatesDataStreamName = getLegacySecurityUpdatesEntitiesDataStreamName(
+      this.namespace
+    );
+    const [latestExists, legacyLatestExists, updatesExists, legacyUpdatesExists] =
+      await Promise.all([
+        this.esClient.indices.exists({ index: latestIndex }),
+        this.esClient.indices.exists({ index: legacyLatestIndex }),
+        this.tryAsBoolean(this.esClient.indices.getDataStream({ name: updatesDataStreamName })),
+        this.tryAsBoolean(
+          this.esClient.indices.getDataStream({ name: legacyUpdatesDataStreamName })
+        ),
+      ]);
     return [
-      { id: latestIndex, installed: latestExists, resource },
-      { id: updatesDataStreamName, installed: updatesExists, resource },
+      {
+        id: latestExists ? latestIndex : legacyLatestExists ? legacyLatestIndex : latestIndex,
+        installed: latestExists || legacyLatestExists,
+        resource,
+      },
+      {
+        id: updatesExists
+          ? updatesDataStreamName
+          : legacyUpdatesExists
+          ? legacyUpdatesDataStreamName
+          : updatesDataStreamName,
+        installed: updatesExists || legacyUpdatesExists,
+        resource,
+      },
     ];
   }
 
@@ -636,17 +669,31 @@ export class AssetManagerClient {
    */
   public async reinstallSharedAssetsIfMissing(): Promise<boolean> {
     const latestIndex = getLatestEntitiesIndexName(this.namespace);
+    const legacyLatestIndex = getLegacySecurityLatestEntitiesIndexName(this.namespace);
     const updatesDataStream = getUpdatesEntitiesDataStreamName(this.namespace);
+    const legacyUpdatesDataStream = getLegacySecurityUpdatesEntitiesDataStreamName(this.namespace);
     const metadataDataStream = getMetadataEntitiesDataStreamName(this.namespace);
+    const legacyMetadataDataStream = getLegacySecurityMetadataEntitiesDataStreamName(
+      this.namespace
+    );
+
+    const dataStreamExists = async (name: string): Promise<boolean> =>
+      this.esClient.indices
+        .getDataStream({ name }, { ignore: [404] })
+        .then((r) => (r?.data_streams?.length ?? 0) > 0);
 
     const [latestExists, updatesExists, metadataExists] = await Promise.all([
-      this.esClient.indices.exists({ index: latestIndex }),
       this.esClient.indices
-        .getDataStream({ name: updatesDataStream }, { ignore: [404] })
-        .then((r) => (r?.data_streams?.length ?? 0) > 0),
-      this.esClient.indices
-        .getDataStream({ name: metadataDataStream }, { ignore: [404] })
-        .then((r) => (r?.data_streams?.length ?? 0) > 0),
+        .exists({ index: latestIndex })
+        .then(
+          async (exists) => exists || this.esClient.indices.exists({ index: legacyLatestIndex })
+        ),
+      dataStreamExists(updatesDataStream).then(
+        async (exists) => exists || dataStreamExists(legacyUpdatesDataStream)
+      ),
+      dataStreamExists(metadataDataStream).then(
+        async (exists) => exists || dataStreamExists(legacyMetadataDataStream)
+      ),
     ]);
 
     if (latestExists && updatesExists && metadataExists) {
@@ -667,6 +714,7 @@ export class AssetManagerClient {
       migrationEsClient: this.internalEsClient,
       logger: this.logger,
       namespace: this.namespace,
+      allowLegacyMigration: await this.isLegacySecurityAssetsMigrationEnabled(),
     });
     return true;
   }

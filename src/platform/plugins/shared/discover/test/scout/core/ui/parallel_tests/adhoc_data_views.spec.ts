@@ -8,6 +8,7 @@
  */
 
 import { expect } from '@kbn/scout/ui';
+import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
 import { spaceTest, tags } from '../fixtures';
 
 spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnostic }, () => {
@@ -27,23 +28,26 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
 
   spaceTest(
     'adding a runtime field to an ad hoc data view changes the data view ID',
-    async ({ discoverScoutSpace, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
       const { discover, unifiedFieldList } = pageObjects;
 
-      await discoverScoutSpace.createDiscoverSession({
-        title: 'logstash-adhoc',
-        tabs: [
-          {
-            id: 'main',
-            label: 'Untitled',
-            data_source: {
-              type: 'data_view_spec',
-              index_pattern: 'logstash*',
-              time_field: '@timestamp',
+      await apiServices.discover.create(
+        {
+          title: 'logstash-adhoc',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Untitled',
+              data_source: {
+                type: 'data_view_spec',
+                index_pattern: 'logstash*',
+                time_field: '@timestamp',
+              },
             },
-          },
-        ],
-      });
+          ],
+        } satisfies DiscoverSessionApiDataInput,
+        discoverScoutSpace.id
+      );
       await discover.loadSavedSearch('logstash-adhoc');
       const firstId = await discover.getCurrentDataViewId();
 
@@ -60,30 +64,33 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
 
   spaceTest(
     'navigates to surrounding docs view and back, preserving the ad hoc data view',
-    async ({ discoverScoutSpace, page, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
       const { discover, dataGrid } = pageObjects;
 
-      await discoverScoutSpace.createDiscoverSession({
-        title: 'logstash-adhoc-surrounding',
-        tabs: [
-          {
-            id: 'main',
-            label: 'Untitled',
-            data_source: {
-              type: 'data_view_spec',
-              index_pattern: 'logstash*',
-              time_field: '@timestamp',
-              field_settings: {
-                '_bytes-runtimefield': {
-                  type: 'keyword',
-                  script: 'emit(doc["bytes"].value.toString())',
+      await apiServices.discover.create(
+        {
+          title: 'logstash-adhoc-surrounding',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Untitled',
+              data_source: {
+                type: 'data_view_spec',
+                index_pattern: 'logstash*',
+                time_field: '@timestamp',
+                field_settings: {
+                  '_bytes-runtimefield': {
+                    type: 'keyword',
+                    script: 'emit(doc["bytes"].value.toString())',
+                  },
                 },
               },
+              column_order: ['_bytes-runtimefield'],
             },
-            column_order: ['_bytes-runtimefield'],
-          },
-        ],
-      });
+          ],
+        } satisfies DiscoverSessionApiDataInput,
+        discoverScoutSpace.id
+      );
       await discover.loadSavedSearch('logstash-adhoc-surrounding');
 
       await dataGrid.openDocumentDetails({ rowIndex: 0 });
@@ -104,30 +111,33 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
 
   spaceTest(
     'navigates to single doc view and back, preserving the ad hoc data view',
-    async ({ discoverScoutSpace, page, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
       const { discover, dataGrid } = pageObjects;
 
-      await discoverScoutSpace.createDiscoverSession({
-        title: 'logstash-adhoc-single-doc',
-        tabs: [
-          {
-            id: 'main',
-            label: 'Untitled',
-            data_source: {
-              type: 'data_view_spec',
-              index_pattern: 'logstash*',
-              time_field: '@timestamp',
-              field_settings: {
-                '_bytes-runtimefield': {
-                  type: 'keyword',
-                  script: 'emit(doc["bytes"].value.toString())',
+      await apiServices.discover.create(
+        {
+          title: 'logstash-adhoc-single-doc',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Untitled',
+              data_source: {
+                type: 'data_view_spec',
+                index_pattern: 'logstash*',
+                time_field: '@timestamp',
+                field_settings: {
+                  '_bytes-runtimefield': {
+                    type: 'keyword',
+                    script: 'emit(doc["bytes"].value.toString())',
+                  },
                 },
               },
+              column_order: ['_bytes-runtimefield'],
             },
-            column_order: ['_bytes-runtimefield'],
-          },
-        ],
-      });
+          ],
+        } satisfies DiscoverSessionApiDataInput,
+        discoverScoutSpace.id
+      );
       await discover.loadSavedSearch('logstash-adhoc-single-doc');
 
       await dataGrid.openDocumentDetails({ rowIndex: 0 });
@@ -148,30 +158,33 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
 
   spaceTest(
     'saving preserves the data view ID but saving as copy generates a new data view ID',
-    async ({ discoverScoutSpace, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
       const { discover } = pageObjects;
 
-      await discoverScoutSpace.createDiscoverSession({
-        title: 'logstash-adhoc-save',
-        tabs: [
-          {
-            id: 'main',
-            label: 'Untitled',
-            data_source: {
-              type: 'data_view_spec',
-              index_pattern: 'logstash*',
-              time_field: '@timestamp',
-              field_settings: {
-                '_bytes-runtimefield': {
-                  type: 'keyword',
-                  script: 'emit(doc["bytes"].value.toString())',
+      await apiServices.discover.create(
+        {
+          title: 'logstash-adhoc-save',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Untitled',
+              data_source: {
+                type: 'data_view_spec',
+                index_pattern: 'logstash*',
+                time_field: '@timestamp',
+                field_settings: {
+                  '_bytes-runtimefield': {
+                    type: 'keyword',
+                    script: 'emit(doc["bytes"].value.toString())',
+                  },
                 },
               },
+              column_order: ['_bytes-runtimefield'],
             },
-            column_order: ['_bytes-runtimefield'],
-          },
-        ],
-      });
+          ],
+        } satisfies DiscoverSessionApiDataInput,
+        discoverScoutSpace.id
+      );
       await discover.loadSavedSearch('logstash-adhoc-save');
 
       const idBeforeSave = await discover.getCurrentDataViewId();
@@ -188,33 +201,36 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
 
   spaceTest(
     'search results differ between original and updated runtime field definitions on dashboard',
-    async ({ discoverScoutSpace, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, pageObjects }) => {
       const { discover, unifiedFieldList, dataGrid, dashboard } = pageObjects;
 
       await spaceTest.step(
         'creates ad hoc data view with runtime field and saves search',
         async () => {
-          await discoverScoutSpace.createDiscoverSession({
-            title: 'logst*-ss-_bytes-runtimefield',
-            tabs: [
-              {
-                id: 'main',
-                label: 'Untitled',
-                data_source: {
-                  type: 'data_view_spec',
-                  index_pattern: 'logst*',
-                  time_field: '@timestamp',
-                  field_settings: {
-                    '_bytes-runtimefield': {
-                      type: 'keyword',
-                      script: 'emit(doc["bytes"].value.toString())',
+          await apiServices.discover.create(
+            {
+              title: 'logst*-ss-_bytes-runtimefield',
+              tabs: [
+                {
+                  id: 'main',
+                  label: 'Untitled',
+                  data_source: {
+                    type: 'data_view_spec',
+                    index_pattern: 'logst*',
+                    time_field: '@timestamp',
+                    field_settings: {
+                      '_bytes-runtimefield': {
+                        type: 'keyword',
+                        script: 'emit(doc["bytes"].value.toString())',
+                      },
                     },
                   },
+                  column_order: ['_bytes-runtimefield'],
                 },
-                column_order: ['_bytes-runtimefield'],
-              },
-            ],
-          });
+              ],
+            } satisfies DiscoverSessionApiDataInput,
+            discoverScoutSpace.id
+          );
           await discover.loadSavedSearch('logst*-ss-_bytes-runtimefield');
           await discover.waitUntilTabIsLoaded();
         }
@@ -262,30 +278,33 @@ spaceTest.describe('Discover — adhoc data views', { tag: tags.deploymentAgnost
 
   spaceTest(
     'editing a runtime field via the column menu changes the data view ID',
-    async ({ discoverScoutSpace, page, pageObjects }) => {
+    async ({ apiServices, discoverScoutSpace, page, pageObjects }) => {
       const { discover, dataGrid } = pageObjects;
 
-      await discoverScoutSpace.createDiscoverSession({
-        title: 'logst-runtimefield-edit',
-        tabs: [
-          {
-            id: 'main',
-            label: 'Untitled',
-            data_source: {
-              type: 'data_view_spec',
-              index_pattern: 'logst*',
-              time_field: '@timestamp',
-              field_settings: {
-                '_bytes-runtimefield': {
-                  type: 'keyword',
-                  script: 'emit(doc["bytes"].value.toString())',
+      await apiServices.discover.create(
+        {
+          title: 'logst-runtimefield-edit',
+          tabs: [
+            {
+              id: 'main',
+              label: 'Untitled',
+              data_source: {
+                type: 'data_view_spec',
+                index_pattern: 'logst*',
+                time_field: '@timestamp',
+                field_settings: {
+                  '_bytes-runtimefield': {
+                    type: 'keyword',
+                    script: 'emit(doc["bytes"].value.toString())',
+                  },
                 },
               },
+              column_order: ['_bytes-runtimefield'],
             },
-            column_order: ['_bytes-runtimefield'],
-          },
-        ],
-      });
+          ],
+        } satisfies DiscoverSessionApiDataInput,
+        discoverScoutSpace.id
+      );
       await discover.loadSavedSearch('logst-runtimefield-edit');
       await discover.waitUntilTabIsLoaded();
 
