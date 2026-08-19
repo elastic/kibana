@@ -49,5 +49,6 @@ export function registerBuiltinArtifactTypes(registry: ArtifactTypeRegistry): vo
         dashboardId: nonBlankString(DEFAULT_ARTIFACT_DATA_FIELD_LIMIT),
       })
       .strict(),
+    references: [{ field: 'dashboardId', savedObjectType: 'dashboard' }],
   });
 }

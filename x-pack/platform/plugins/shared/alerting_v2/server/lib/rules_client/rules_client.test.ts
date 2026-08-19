@@ -148,6 +148,7 @@ describe('RulesClient', () => {
           createdBy: 'elastic_profile_uid',
         }),
         id: 'rule-id-1',
+        references: [],
       });
 
       expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith({
@@ -172,8 +173,29 @@ describe('RulesClient', () => {
       );
     });
 
-    it('rejects artifact data that its registered type does not allow', async () => {
+    it('writes dashboard artifact references and rejects invalid registered artifact data', async () => {
       const client = createClient();
+      rulesSavedObjectService.create.mockResolvedValueOnce({ id: 'rule-id-dash' });
+
+      await client.createRule({
+        data: {
+          ...baseCreateData,
+          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboardId: 'so-dashboard-1' } }],
+        },
+        options: { id: 'rule-id-dash' },
+      });
+
+      expect(rulesSavedObjectService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          references: [
+            {
+              name: 'artifact:dashboardId:dash-1',
+              type: 'dashboard',
+              id: 'so-dashboard-1',
+            },
+          ],
+        })
+      );
 
       await expect(
         client.createRule({
@@ -186,6 +208,29 @@ describe('RulesClient', () => {
         output: { statusCode: 400 },
         data: { code: 'INVALID_ARTIFACT_DATA' },
       });
+    });
+
+    it('injects remapped dashboard reference ids on get', async () => {
+      const client = createClient();
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-1',
+        attributes: {
+          ...baseSoAttrs,
+          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboardId: 'old-id' } }],
+        },
+        references: [
+          {
+            name: 'artifact:dashboardId:dash-1',
+            type: 'dashboard',
+            id: 'remapped-id',
+          },
+        ],
+      });
+
+      const res = await client.getRule({ id: 'rule-id-1' });
+      expect(res.artifacts).toEqual([
+        { id: 'dash-1', type: 'dashboard', data: { dashboardId: 'remapped-id' } },
+      ]);
     });
 
     it('cleans up the saved object if scheduling fails', async () => {
@@ -268,6 +313,7 @@ describe('RulesClient', () => {
           }),
         }),
         id: 'rule-id-desc',
+        references: [],
       });
 
       expect(res.metadata.description).toBe('My description');
@@ -330,6 +376,7 @@ describe('RulesClient', () => {
           schedule: expect.objectContaining({ every: '5m' }),
         }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 
@@ -355,6 +402,7 @@ describe('RulesClient', () => {
         id: 'rule-id-disabled',
         attrs: expect.objectContaining({ enabled: false }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 
@@ -379,9 +427,42 @@ describe('RulesClient', () => {
           metadata: expect.objectContaining({ description: 'New description' }),
         }),
         version: 'WzEsMV0=',
+        references: [],
       });
 
       expect(res.metadata.description).toBe('New description');
+    });
+
+    it('keeps an imported artifact reference on an update that does not touch artifacts', async () => {
+      const client = createClient();
+
+      // Import rewrites references[].id but leaves the stored data on the old id.
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-imported',
+        attributes: {
+          ...baseSoAttrs,
+          artifacts: [{ id: 'dash-1', type: 'dashboard', data: { dashboardId: 'pre-import-id' } }],
+        },
+        version: 'WzEsMV0=',
+        references: [{ name: 'artifact:dashboardId:dash-1', type: 'dashboard', id: 'remapped-id' }],
+      });
+      rulesSavedObjectService.update.mockResolvedValueOnce({ id: 'rule-id-imported' });
+
+      const res = await client.updateRule({
+        id: 'rule-id-imported',
+        data: { metadata: { description: 'Unrelated change' } },
+      });
+
+      expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          references: [
+            { name: 'artifact:dashboardId:dash-1', type: 'dashboard', id: 'remapped-id' },
+          ],
+        })
+      );
+      expect(res.artifacts).toEqual([
+        { id: 'dash-1', type: 'dashboard', data: { dashboardId: 'remapped-id' } },
+      ]);
     });
 
     it('throws 409 conflict when version is stale', async () => {
@@ -765,6 +846,7 @@ describe('RulesClient', () => {
         id: 'rule-id-clear-artifacts',
         attrs: expect.objectContaining({ artifacts: [] }),
         version: 'WzEsMV0=',
+        references: [],
       });
     });
 
@@ -853,6 +935,7 @@ describe('RulesClient', () => {
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
           id: 'rule-id-1',
+          references: [],
         });
         expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith({
           services: { taskManager },
@@ -932,6 +1015,7 @@ describe('RulesClient', () => {
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
           version: 'WzEsMV0=',
+          references: [],
         });
         expect(res.created).toBe(false);
       });

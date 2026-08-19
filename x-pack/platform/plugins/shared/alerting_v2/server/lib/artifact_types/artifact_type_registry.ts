@@ -12,7 +12,8 @@ import type { ArtifactTypeDefinition } from './types';
 
 /**
  * Server-side registry of artifact type definitions. Populated during plugin
- * setup via `registerArtifactType`; read-only afterward for request validation.
+ * setup via `registerArtifactType`; read-only afterward for request validation
+ * and reference extract/inject.
  */
 @injectable()
 export class ArtifactTypeRegistry {
@@ -26,7 +27,7 @@ export class ArtifactTypeRegistry {
       throw new Error(`Artifact type "${def.type}" is already registered`);
     }
 
-    this.types.set(def.type, Object.freeze({ ...def }));
+    this.types.set(def.type, Object.freeze({ ...def, references: def.references?.slice() }));
   }
 
   public get(type: string): ArtifactTypeDefinition | undefined {

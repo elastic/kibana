@@ -5,10 +5,21 @@
  * 2.0.
  */
 
-export type { ArtifactTypeDefinition, RuleArtifactLike } from './types';
+export type {
+  ArtifactReferenceDescriptor,
+  ArtifactTypeDefinition,
+  RuleArtifactLike,
+} from './types';
 export { ArtifactTypeRegistry } from './artifact_type_registry';
 export type { ArtifactTypeRegistryContract } from './artifact_type_registry';
 export { assertValidDefinition } from './assert_valid_definition';
 export { assertBoundedSchema } from './assert_bounded_schema';
+export {
+  buildArtifactReferenceName,
+  parseArtifactReferenceName,
+  extractArtifactReferences,
+  rebuildArtifactReferences,
+  injectArtifactReferences,
+} from './artifact_references';
 export { registerBuiltinArtifactTypes } from './register_builtin_artifact_types';
 export { validateArtifactsAgainstRegistry } from './validate_artifacts';

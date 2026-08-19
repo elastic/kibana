@@ -51,7 +51,7 @@ export type {
   RulesClientApi,
   ActionPolicyClientApi,
 } from './types';
-export type { ArtifactTypeDefinition } from './lib/artifact_types';
+export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
 export type { FindRulesArgs } from './lib/rules_client';
 export type { FindActionPoliciesArgs } from './lib/action_policy_client';
 
