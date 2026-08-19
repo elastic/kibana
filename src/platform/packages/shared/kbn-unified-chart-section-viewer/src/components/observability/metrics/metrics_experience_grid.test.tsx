@@ -34,7 +34,11 @@ import type { ParsedMetricItem, Dimension, UnifiedMetricsGridProps } from '../..
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import * as metricsExperienceStateProvider from './context/metrics_experience_state_provider';
 import { METRICS_GRID_SETTINGS_DEFAULTS, METRICS_GRID_SORT_DEFAULTS } from '@kbn/discover-utils';
-import { FEATURE_FLAGS } from '../../../common/constants';
+import {
+  FEATURE_FLAGS,
+  METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ,
+  METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ,
+} from '../../../common/constants';
 import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags_mock';
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
@@ -332,7 +336,7 @@ describe('MetricsExperienceGrid', () => {
 
     expect(getByTestId('toggleActions')).toBeInTheDocument();
     expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
-    expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
+    expect(getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ)).toBeInTheDocument();
     expect(getByTestId('metricsExperienceToolbarFullScreen')).toBeInTheDocument();
   });
 
@@ -484,13 +488,13 @@ describe('MetricsExperienceGrid', () => {
       wrapper: TestWrapper,
     });
 
-    const inputButton = getByTestId('metricsExperienceToolbarSearch');
+    const inputButton = getByTestId(METRICS_TOOLBAR_SEARCH_BUTTON_DATA_TEST_SUBJ);
 
     act(() => {
       inputButton.click();
     });
 
-    const input = getByTestId('metricsExperienceGridToolbarSearch');
+    const input = getByTestId(METRICS_TOOLBAR_SEARCH_INPUT_DATA_TEST_SUBJ);
     expect(input).toBeInTheDocument();
 
     act(() => {

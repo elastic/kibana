@@ -21,6 +21,7 @@ import {
   FEATURE_FLAG_DEFAULTS,
 } from '../../../common/constants';
 import { useFeatureFlag } from '../../../hooks';
+import { useSearchAction } from '../right_side_actions/use_search_action';
 
 interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderToggleActions'> {
   allDimensions: Dimension[];
@@ -31,6 +32,7 @@ interface UseToolbarActionsProps extends Pick<UnifiedMetricsGridProps, 'renderTo
   /** Forwarded to {@link DimensionsSelector}; see its prop docs. */
   metricItems?: ParsedMetricItem[];
   onOpenGridSettings: () => void;
+  onKeyDown: (e: React.KeyboardEvent<HTMLElement>) => void;
 }
 
 export const useToolbarActions = ({
@@ -42,6 +44,7 @@ export const useToolbarActions = ({
   isLoading = false,
   metricItems,
   onOpenGridSettings,
+  onKeyDown,
 }: UseToolbarActionsProps) => {
   const {
     selectedDimensions,
@@ -50,8 +53,17 @@ export const useToolbarActions = ({
     onToggleFullscreen,
     metricsSort,
     onMetricsSortChange,
+    searchTerm,
+    onSearchTermChange,
   } = useMetricsExperienceState();
   const onDimensionsSelectionChange = onDimensionsChangeProp ?? onDimensionsChange;
+
+  const { searchButton, searchInput } = useSearchAction({
+    value: searchTerm,
+    isFullscreen,
+    onSearchTermChange,
+    onKeyDown,
+  });
 
   const isEditGridEnabled = useFeatureFlag(
     FEATURE_FLAGS.IS_EDIT_GRID_SETTINGS_ENABLED,
@@ -118,6 +130,7 @@ export const useToolbarActions = ({
         });
 
     return [
+      ...(searchButton ? [searchButton] : []),
       ...(isEditGridEnabled
         ? [
             {
@@ -143,11 +156,13 @@ export const useToolbarActions = ({
     onToggleFullscreen,
     onOpenGridSettings,
     isEditGridEnabled,
+    searchButton,
   ]);
 
   return {
     toggleActions,
     leftSideActions,
     rightSideActions,
+    searchInput: hideRightSideActions ? undefined : searchInput,
   };
 };

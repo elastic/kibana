@@ -18,7 +18,6 @@ import { useMetricsExperienceState } from './context/metrics_experience_state_pr
 import { ChartsGrid } from '../../charts_grid';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useToolbarActions } from '../../toolbar/hooks/use_toolbar_actions';
-import { SearchButton } from '../../toolbar/right_side_actions/search_button';
 import { MetricsExperienceGridContent } from './metrics_experience_grid_content';
 import { ChartSectionSearchError } from '../../chart_section_search_error/chart_section_search_error';
 import { GridSettingsFlyout } from '../../flyout';
@@ -50,7 +49,6 @@ export const MetricsExperienceGrid = ({
   const {
     searchTerm,
     isFullscreen,
-    onSearchTermChange,
     onToggleFullscreen,
     selectedDimensions,
     onDimensionsChange,
@@ -138,15 +136,6 @@ export const MetricsExperienceGrid = ({
     isDiscoverLoading,
   ]);
 
-  const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
-    allDimensions,
-    metricItems,
-    renderToggleActions,
-    onDimensionsChange: onToolbarDimensionsChange,
-    isLoading: isDiscoverLoading,
-    onOpenGridSettings: toggleGridSettingsFlyout,
-  });
-
   const onKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLElement>) => {
       if (e.key === keys.ESCAPE && isFullscreen && !areSelectorPortalsOpen()) {
@@ -156,6 +145,16 @@ export const MetricsExperienceGrid = ({
     },
     [isFullscreen, onToggleFullscreen]
   );
+
+  const { toggleActions, leftSideActions, rightSideActions, searchInput } = useToolbarActions({
+    allDimensions,
+    metricItems,
+    renderToggleActions,
+    onDimensionsChange: onToolbarDimensionsChange,
+    isLoading: isDiscoverLoading,
+    onOpenGridSettings: toggleGridSettingsFlyout,
+    onKeyDown,
+  });
 
   if (metricItems.length === 0 && isDiscoverLoading) {
     return <EmptyState isLoading={isDiscoverLoading} />;
@@ -184,17 +183,7 @@ export const MetricsExperienceGrid = ({
           toggleActions,
           leftSide: leftSideActions,
           rightSide: rightSideActions,
-          additionalControls: {
-            prependRight: (
-              <SearchButton
-                isFullscreen={isFullscreen}
-                value={searchTerm}
-                onSearchTermChange={onSearchTermChange}
-                onKeyDown={onKeyDown}
-                data-test-subj="metricsExperienceGridToolbarSearch"
-              />
-            ),
-          },
+          additionalControls: { prependRight: searchInput },
         }}
         toolbarWrapAt={isFullscreen ? 'l' : 'xl'}
         isComponentVisible={isComponentVisible}
