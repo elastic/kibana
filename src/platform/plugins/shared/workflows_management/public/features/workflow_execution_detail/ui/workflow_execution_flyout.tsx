@@ -1285,6 +1285,8 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         isLoadingChildExecutions={isLoadingChildExecutions}
                         autoExpandErrorForStepId={autoExpandErrorForStepId}
                         errorArrivalPulseStepId={errorArrivalPulseStepId}
+                        workflowName={workflowName}
+                        onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
                       />
                     )}
                     {activeTab === 'json' && workflowExecution && (

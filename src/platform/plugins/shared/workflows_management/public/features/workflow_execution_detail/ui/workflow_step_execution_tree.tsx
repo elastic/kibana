@@ -318,6 +318,7 @@ function convertTreeToOpenNodes(
       licenseManagementHref: string;
       onOpenLicenseManagement: () => void;
       onDiagnoseStep: (stepExecution: WorkflowStepExecutionDto) => void;
+      isDiagnoseHandoffInFlight?: boolean;
     };
   }
 ): OpenTreeNode[] {
@@ -783,6 +784,7 @@ function convertTreeToOpenNodes(
           (options.diagnose.state === 'a' || options.diagnose.state === 'b')
             ? () => options.diagnose!.onDiagnoseStep(stepExecution)
             : undefined,
+        isDiagnoseLoading: options?.diagnose?.isDiagnoseHandoffInFlight,
         errorPanelRequiredLicenseTier: options?.diagnose?.requiredLicenseTier,
         errorPanelLicenseManagementHref: options?.diagnose?.licenseManagementHref,
         onOpenLicenseManagement: options?.diagnose?.onOpenLicenseManagement,
@@ -1127,6 +1129,10 @@ export interface WorkflowStepExecutionTreeProps {
   errorArrivalPulseStepId?: string | null;
   /** Status icon anchoring. Default inline-left after metadata. */
   statusPlacement?: StatusPlacement;
+  /** Display name for Diagnose conversation titles. */
+  workflowName?: string;
+  /** Close step subflyout(s) before opening Agent Builder diagnose chat. */
+  onBeforeDiagnose?: () => void;
 }
 
 export const WorkflowStepExecutionTree = ({
@@ -1140,6 +1146,8 @@ export const WorkflowStepExecutionTree = ({
   autoExpandErrorForStepId,
   errorArrivalPulseStepId,
   statusPlacement = 'inline',
+  workflowName,
+  onBeforeDiagnose,
 }: WorkflowStepExecutionTreeProps) => {
   const styles = useMemoCss(componentStyles);
   const [expandedGapIds, setExpandedGapIds] = useState<Set<string>>(new Set());
@@ -1149,16 +1157,25 @@ export const WorkflowStepExecutionTree = ({
   const onDiagnoseStep = useCallback(
     (stepExecution: WorkflowStepExecutionDto) => {
       if (!execution) return;
+      onBeforeDiagnose?.();
       const contextPackage = buildDiagnosisContextPackage({
         failedStep: stepExecution,
         allStepExecutions: execution.stepExecutions,
         definition,
-        workflowId: execution.workflowId,
+        workflowId: execution.workflowId ?? '',
         executionId: execution.id,
       });
-      diagnoseAvailability.openDiagnose(contextPackage);
+      diagnoseAvailability.openDiagnose({
+        contextPackage,
+        workflowName:
+          workflowName ||
+          execution.workflowName ||
+          execution.workflowDefinition?.name ||
+          execution.workflowId ||
+          'Workflow',
+      });
     },
-    [definition, diagnoseAvailability, execution]
+    [definition, diagnoseAvailability, execution, onBeforeDiagnose, workflowName]
   );
 
   const diagnoseOptions = useMemo(
@@ -1168,6 +1185,7 @@ export const WorkflowStepExecutionTree = ({
       licenseManagementHref: diagnoseAvailability.licenseManagementHref,
       onOpenLicenseManagement: diagnoseAvailability.openLicenseManagement,
       onDiagnoseStep,
+      isDiagnoseHandoffInFlight: diagnoseAvailability.isDiagnoseHandoffInFlight,
     }),
     [diagnoseAvailability, onDiagnoseStep]
   );

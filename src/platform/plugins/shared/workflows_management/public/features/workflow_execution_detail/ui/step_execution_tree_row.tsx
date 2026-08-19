@@ -113,6 +113,7 @@ export interface StepExecutionTreeRowProps {
   /** AI diagnose CTA state for the inline error panel (A–D). */
   errorPanelDiagnoseState?: ErrorPanelDiagnoseState;
   onDiagnoseFailedStep?: () => void;
+  isDiagnoseLoading?: boolean;
   errorPanelRequiredLicenseTier?: string;
   errorPanelLicenseManagementHref?: string;
   onOpenLicenseManagement?: () => void;
@@ -225,6 +226,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
     onViewFailedStepInput,
     errorPanelDiagnoseState,
     onDiagnoseFailedStep,
+    isDiagnoseLoading,
     errorPanelRequiredLicenseTier,
     errorPanelLicenseManagementHref,
     onOpenLicenseManagement,
@@ -650,6 +652,7 @@ export const StepExecutionTreeRow = React.memo<StepExecutionTreeRowProps>(
             onViewInput={onViewFailedStepInput}
             diagnoseState={errorPanelDiagnoseState}
             onDiagnose={onDiagnoseFailedStep}
+            isDiagnoseLoading={isDiagnoseLoading}
             requiredLicenseTier={errorPanelRequiredLicenseTier}
             licenseManagementHref={errorPanelLicenseManagementHref}
             onOpenLicenseManagement={onOpenLicenseManagement}

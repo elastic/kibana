@@ -327,6 +327,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               selectedId={selectedStepExecutionId ?? null}
               childExecutionsMap={childExecutions}
               isLoadingChildExecutions={isLoadingChildExecutions}
+              onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
             />
           }
           fixedPanelSize={sidebarWidth}

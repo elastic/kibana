@@ -96,7 +96,7 @@ export const registerUISettings = (
         'workflowsManagement.uiSettings.errorPanelAiDiagnose.description',
         {
           defaultMessage:
-            'Enables the "Diagnose with AI Agent" action on failed-step error panels in the execution flyout.',
+            'Enables the "Diagnose with AI" action on failed-step error panels in the execution flyout.',
         }
       ),
       name: i18n.translate('workflowsManagement.uiSettings.errorPanelAiDiagnose.name', {

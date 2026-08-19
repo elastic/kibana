@@ -53,7 +53,7 @@ describe('FailedStepErrorPanel', () => {
     expect(onViewInput).toHaveBeenCalled();
     expect(screen.getByTestId('workflowFailedStepCopyError')).toHaveTextContent('Copy error');
     expect(screen.queryByTestId('workflowFailedStepDiagnose')).not.toBeInTheDocument();
-    expect(container.textContent).not.toMatch(/Diagnose with AI Agent/i);
+    expect(container.textContent).not.toMatch(/Diagnose with AI/i);
     expect(screen.queryByTestId('workflowFailedStepDiagnoseLicenseTeaser')).not.toBeInTheDocument();
   });
 
@@ -63,8 +63,8 @@ describe('FailedStepErrorPanel', () => {
     renderPanel({ diagnoseState: 'a', onDiagnose, onViewInput });
 
     const diagnose = screen.getByTestId('workflowFailedStepDiagnose');
-    expect(diagnose).toHaveTextContent('Diagnose with AI Agent');
-    expect(diagnose).toHaveAttribute('aria-label', 'Diagnose with AI Agent');
+    expect(diagnose).toHaveTextContent('Diagnose with AI');
+    expect(diagnose).toHaveAttribute('aria-label', 'Diagnose with AI');
     await userEvent.click(diagnose);
     expect(onDiagnose).toHaveBeenCalled();
 
@@ -75,6 +75,17 @@ describe('FailedStepErrorPanel', () => {
     const { primary, secondary } = getPrimaryAndSecondary();
     expect(primary).toHaveAttribute('data-test-subj', 'workflowFailedStepDiagnose');
     expect(secondary).toHaveAttribute('data-test-subj', 'workflowFailedStepViewInput');
+  });
+
+  it('shows loading and disables Diagnose while handoff is in flight', () => {
+    renderPanel({
+      diagnoseState: 'a',
+      onDiagnose: jest.fn(),
+      onViewInput: jest.fn(),
+      isDiagnoseLoading: true,
+    });
+    const diagnose = screen.getByTestId('workflowFailedStepDiagnose');
+    expect(diagnose).toBeDisabled();
   });
 
   it('state B renders the same CTAs as state A', () => {
@@ -107,7 +118,7 @@ describe('FailedStepErrorPanel', () => {
     expect(screen.queryByTestId('workflowFailedStepDiagnose')).not.toBeInTheDocument();
 
     const teaser = screen.getByTestId('workflowFailedStepDiagnoseLicenseTeaser');
-    expect(teaser).toHaveTextContent(/Diagnose with AI Agent/);
+    expect(teaser).toHaveTextContent(/Diagnose with AI/);
     expect(teaser).toHaveTextContent(/requires enterprise license/);
 
     const link = screen.getByTestId('workflowFailedStepDiagnoseLicenseLink');

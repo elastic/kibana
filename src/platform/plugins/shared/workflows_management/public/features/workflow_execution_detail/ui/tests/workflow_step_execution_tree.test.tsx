@@ -38,6 +38,7 @@ jest.mock('../../lib/use_error_panel_diagnose_availability', () => ({
     rawState: 'd',
     requiredLicenseTier: 'enterprise',
     diagnoseFeatureEnabled: false,
+    isDiagnoseHandoffInFlight: false,
     openDiagnose: jest.fn(),
     openLicenseManagement: jest.fn(),
     licenseManagementHref: '/app/management/license_management',

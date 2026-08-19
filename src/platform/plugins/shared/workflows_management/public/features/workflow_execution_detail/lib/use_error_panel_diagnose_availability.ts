@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
-import { i18n } from '@kbn/i18n';
 import { WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID } from '@kbn/workflows/common/constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
@@ -20,6 +18,20 @@ import {
   effectiveErrorPanelDiagnoseState,
   type ErrorPanelDiagnoseState,
 } from './derive_error_panel_diagnose_availability';
+import {
+  clearPendingDiagnoseHandoff,
+  loadPendingDiagnoseHandoff,
+  savePendingDiagnoseHandoff,
+} from './diagnose_pending_handoff';
+import {
+  diagnoseHandoffErrorToastTitle,
+  openFailureDiagnosisChat,
+} from './open_failure_diagnosis_chat';
+
+export interface OpenDiagnoseOptions {
+  contextPackage: DiagnosisContextPackage;
+  workflowName: string;
+}
 
 export interface ErrorPanelDiagnoseAvailability {
   /** Availability after feature-flag gating (drives CTA layout). */
@@ -29,7 +41,9 @@ export interface ErrorPanelDiagnoseAvailability {
   /** Required AB license tier id (e.g. `enterprise`) — not a display string. */
   requiredLicenseTier: string;
   diagnoseFeatureEnabled: boolean;
-  openDiagnose: (contextPackage: DiagnosisContextPackage) => void;
+  /** True while a diagnose handoff is in flight (disables the button). */
+  isDiagnoseHandoffInFlight: boolean;
+  openDiagnose: (options: OpenDiagnoseOptions) => void;
   openLicenseManagement: () => void;
   licenseManagementHref: string;
 }
@@ -39,8 +53,9 @@ export interface ErrorPanelDiagnoseAvailability {
  * errors and missing Agent Builder degrade to state D.
  */
 export const useErrorPanelDiagnoseAvailability = (): ErrorPanelDiagnoseAvailability => {
-  const { workflowsManagement, application } = useKibana().services;
+  const { workflowsManagement, application, http, notifications } = useKibana().services;
   const agentBuilder = workflowsManagement?.agentBuilder;
+  const isAgentBuilderAvailable = agentBuilder != null;
   const hasShowPrivilege = application.capabilities.agentBuilder?.show === true;
   const diagnoseFeatureEnabled = useUiSetting<boolean>(
     WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID,
@@ -51,43 +66,65 @@ export const useErrorPanelDiagnoseAvailability = (): ErrorPanelDiagnoseAvailabil
     hasRequiredLicense: boolean;
     hasLlmConnector: boolean;
   } | null>(null);
+  const [isDiagnoseHandoffInFlight, setIsDiagnoseHandoffInFlight] = useState(false);
+  const handoffInFlightRef = useRef(false);
+  const agentBuilderRef = useRef(agentBuilder);
+  agentBuilderRef.current = agentBuilder;
+  const httpRef = useRef(http);
+  httpRef.current = http;
+  const notificationsRef = useRef(notifications);
+  notificationsRef.current = notifications;
 
-  useEffect(() => {
-    if (!agentBuilder || !hasShowPrivilege) {
+  const refreshAccess = useCallback(async () => {
+    const ab = agentBuilderRef.current;
+    if (!ab || !hasShowPrivilege) {
       setAccess(null);
-      return;
+      return null;
     }
 
-    let cancelled = false;
-    void agentBuilder
-      .getAgentBuilderAccess()
-      .then((result) => {
-        if (!cancelled) {
-          setAccess({
-            hasRequiredLicense: result.hasRequiredLicense,
-            hasLlmConnector: result.hasLlmConnector,
-          });
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setAccess(null);
-        }
-      });
+    try {
+      // Prefer a live connector probe so State B can resume after setup.
+      // AB's getAgentBuilderAccess caches the first result for the session.
+      const connectors = await httpRef.current.get<{ connectors?: unknown[] }>(
+        '/internal/inference/connectors'
+      );
+      const hasLlmConnector = (connectors?.connectors?.length ?? 0) > 0;
+      const abAccess = await ab.getAgentBuilderAccess();
+      const next = {
+        hasRequiredLicense: abAccess.hasRequiredLicense,
+        // Prefer live probe when AB cache still says false after connector setup.
+        hasLlmConnector: abAccess.hasLlmConnector || hasLlmConnector,
+      };
+      setAccess(next);
+      return next;
+    } catch {
+      try {
+        const result = await ab.getAgentBuilderAccess();
+        const next = {
+          hasRequiredLicense: result.hasRequiredLicense,
+          hasLlmConnector: result.hasLlmConnector,
+        };
+        setAccess(next);
+        return next;
+      } catch {
+        setAccess(null);
+        return null;
+      }
+    }
+  }, [hasShowPrivilege]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [agentBuilder, hasShowPrivilege]);
+  useEffect(() => {
+    void refreshAccess();
+  }, [refreshAccess, isAgentBuilderAvailable]);
 
   const rawState = useMemo(
     () =>
       deriveErrorPanelDiagnoseAvailability({
-        pluginPresent: agentBuilder != null,
+        pluginPresent: isAgentBuilderAvailable,
         hasShowPrivilege,
         access,
       }),
-    [agentBuilder, hasShowPrivilege, access]
+    [isAgentBuilderAvailable, hasShowPrivilege, access]
   );
 
   const state = useMemo(
@@ -95,37 +132,101 @@ export const useErrorPanelDiagnoseAvailability = (): ErrorPanelDiagnoseAvailabil
     [rawState, diagnoseFeatureEnabled]
   );
 
+  const runHandoff = useCallback((options: OpenDiagnoseOptions) => {
+    const ab = agentBuilderRef.current;
+    if (!ab || handoffInFlightRef.current) {
+      return;
+    }
+
+    handoffInFlightRef.current = true;
+    setIsDiagnoseHandoffInFlight(true);
+
+    const releaseInFlight = () => {
+      handoffInFlightRef.current = false;
+      setIsDiagnoseHandoffInFlight(false);
+    };
+
+    try {
+      openFailureDiagnosisChat({
+        agentBuilder: ab,
+        http: httpRef.current,
+        contextPackage: options.contextPackage,
+        workflowName: options.workflowName,
+      });
+    } catch (error) {
+      clearPendingDiagnoseHandoff();
+      const errorObj = error instanceof Error ? error : new Error(String(error));
+      notificationsRef.current.toasts.addError(errorObj, {
+        title: diagnoseHandoffErrorToastTitle(),
+      });
+      releaseInFlight();
+      return;
+    }
+
+    // Keep loading visible briefly so rapid double-clicks cannot open two chats.
+    window.setTimeout(releaseInFlight, 400);
+  }, []);
+
   const openDiagnose = useCallback(
-    (contextPackage: DiagnosisContextPackage) => {
-      if (!agentBuilder) {
+    (options: OpenDiagnoseOptions) => {
+      if (!agentBuilderRef.current || handoffInFlightRef.current) {
         return;
       }
-      // States A and B both open chat. When no LLM connector is configured (B),
-      // Agent Builder's EmbeddableAccessBoundary routes into AddLlmConnectionPrompt
-      // (existing AB onboarding) — do not build a parallel setup UI here.
-      //
-      // TODO(AB attachment API): prefer a dedicated workflow-failure attachment
-      // type once registered on the AB allow-list; text attachment carries the
-      // full diagnosis package until then.
-      agentBuilder.openChat({
-        newConversation: true,
-        sessionTag: `workflow-execution-diagnose:${contextPackage.executionId}`,
-        attachments: [
-          {
-            type: AttachmentType.text,
-            description: i18n.translate(
-              'workflows.executionFlyout.failedStep.diagnoseAttachmentDescription',
-              { defaultMessage: 'Workflow step failure diagnosis context' }
-            ),
-            data: {
-              content: JSON.stringify(contextPackage, null, 2),
-            },
-          },
-        ],
-      });
+
+      // State B: keep the assembled context so completing LLM setup resumes the
+      // same handoff without another click. Abandon = leave pending unused
+      // (no conversation is created while the AB access boundary blocks chat).
+      if (rawState === 'b') {
+        savePendingDiagnoseHandoff({
+          contextPackage: options.contextPackage,
+          workflowName: options.workflowName,
+        });
+      } else {
+        clearPendingDiagnoseHandoff();
+      }
+
+      runHandoff(options);
     },
-    [agentBuilder]
+    [rawState, runHandoff]
   );
+
+  // State B: after LLM connector setup, resume the original handoff once.
+  useEffect(() => {
+    if (!isAgentBuilderAvailable || !diagnoseFeatureEnabled) {
+      return;
+    }
+
+    const tryResumePending = async () => {
+      const pending = loadPendingDiagnoseHandoff();
+      if (!pending || handoffInFlightRef.current) {
+        return;
+      }
+
+      const nextAccess = await refreshAccess();
+      if (!nextAccess?.hasRequiredLicense || !nextAccess.hasLlmConnector) {
+        return;
+      }
+      if (handoffInFlightRef.current) {
+        return;
+      }
+
+      clearPendingDiagnoseHandoff();
+      runHandoff(pending);
+    };
+
+    const onFocus = () => {
+      void tryResumePending();
+    };
+
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    void tryResumePending();
+
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [isAgentBuilderAvailable, diagnoseFeatureEnabled, refreshAccess, runHandoff]);
 
   const openLicenseManagement = useCallback(() => {
     application.navigateToApp('management', { deepLinkId: 'license_management' });
@@ -141,6 +242,7 @@ export const useErrorPanelDiagnoseAvailability = (): ErrorPanelDiagnoseAvailabil
       rawState,
       requiredLicenseTier: AGENT_BUILDER_REQUIRED_LICENSE_TIER,
       diagnoseFeatureEnabled,
+      isDiagnoseHandoffInFlight,
       openDiagnose,
       openLicenseManagement,
       licenseManagementHref,
@@ -149,6 +251,7 @@ export const useErrorPanelDiagnoseAvailability = (): ErrorPanelDiagnoseAvailabil
       state,
       rawState,
       diagnoseFeatureEnabled,
+      isDiagnoseHandoffInFlight,
       openDiagnose,
       openLicenseManagement,
       licenseManagementHref,

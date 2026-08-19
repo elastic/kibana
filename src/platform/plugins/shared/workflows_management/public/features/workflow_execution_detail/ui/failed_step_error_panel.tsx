@@ -41,6 +41,8 @@ interface FailedStepErrorPanelProps {
   diagnoseState?: ErrorPanelDiagnoseState;
   /** Required when diagnoseState is A or B. */
   onDiagnose?: () => void;
+  /** Disables Diagnose and shows a loading state while the AB handoff runs. */
+  isDiagnoseLoading?: boolean;
   /** Required when diagnoseState is C — license management deep link. */
   requiredLicenseTier?: string;
   licenseManagementHref?: string;
@@ -48,8 +50,8 @@ interface FailedStepErrorPanelProps {
 }
 
 const diagnosePrimaryLabel = i18n.translate(
-  'workflows.executionFlyout.failedStep.diagnoseWithAiAgent',
-  { defaultMessage: 'Diagnose with AI Agent' }
+  'workflows.executionFlyout.failedStep.diagnoseWithAi',
+  { defaultMessage: 'Diagnose with AI' }
 );
 
 /**
@@ -66,6 +68,7 @@ export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
     messageOverride,
     diagnoseState = 'd',
     onDiagnose,
+    isDiagnoseLoading = false,
     requiredLicenseTier = 'enterprise',
     licenseManagementHref,
     onOpenLicenseManagement,
@@ -98,6 +101,8 @@ export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
         fill={false}
         iconType="sparkles"
         onClick={onDiagnose}
+        isLoading={isDiagnoseLoading}
+        isDisabled={isDiagnoseLoading}
         data-test-subj="workflowFailedStepDiagnose"
         aria-label={diagnosePrimaryLabel}
       >
@@ -184,7 +189,7 @@ export const FailedStepErrorPanel = React.memo<FailedStepErrorPanelProps>(
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
                     id="workflows.executionFlyout.failedStep.diagnoseLicenseTeaser"
-                    defaultMessage="Diagnose with AI Agent — {licenseLink}"
+                    defaultMessage="Diagnose with AI — {licenseLink}"
                     values={{
                       licenseLink: (
                         // eslint-disable-next-line @elastic/eui/href-or-on-click
