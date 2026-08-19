@@ -7,6 +7,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
@@ -53,23 +54,49 @@ const DATA_TYPE_OPTIONS = [
   { id: 'metrics', label: 'Metrics' },
 ];
 
+// EuiSuperSelect forwards any extra option properties straight through to
+// the underlying EuiListItemLayout for each row, so `css` and
+// `showIndicator` below aren't part of the documented EuiSuperSelectOption
+// type but are a supported (if undocumented) escape hatch — used here to
+// drop the built-in selected-row tint and replace the built-in check icon
+// (which centers on the *whole*, two-line row) with one aligned to the
+// title specifically.
+// !important because the built-in selected/hover rules are scoped under
+// a :not([aria-disabled]) selector, which out-specificities a plain class
+// override.
+const NO_SELECTED_TINT_CSS = css`
+  background-color: transparent !important;
+  &:hover {
+    background-color: transparent !important;
+  }
+`;
+
 // Each option shows its full description in the dropdown (not just once
 // selected) since the choice has real downstream effects and isn't a plain
 // filter — same idiom as e.g. ILM's phase picker.
-const DATA_FORMAT_OPTIONS: Array<EuiSuperSelectOption<AwsSchema>> = (['otel', 'ecs'] as const).map(
-  (value) => ({
+function getDataFormatOptions(
+  selectedSchema: AwsSchema
+): Array<EuiSuperSelectOption<AwsSchema> & { css?: unknown; showIndicator?: boolean }> {
+  return (['otel', 'ecs'] as const).map((value) => ({
     value,
     inputDisplay: AWS_SCHEMA_META[value].label,
+    showIndicator: false,
+    css: NO_SELECTED_TINT_CSS,
     dropdownDisplay: (
-      <>
-        <strong>{AWS_SCHEMA_META[value].label}</strong>
-        <EuiText size="s" color="subdued">
-          <p>{AWS_SCHEMA_META[value].description}</p>
-        </EuiText>
-      </>
+      <EuiFlexGroup gutterSize="xs" alignItems="flexStart" responsive={false}>
+        <EuiFlexItem grow={false} style={{ width: 16, paddingTop: 2 }}>
+          {value === selectedSchema && <EuiIcon type="check" color="primary" size="m" />}
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <strong>{AWS_SCHEMA_META[value].label}</strong>
+          <EuiText size="s" color="subdued">
+            <p>{AWS_SCHEMA_META[value].description}</p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     ),
-  })
-);
+  }));
+}
 
 function serviceMatches(
   service: AwsServiceEntry,
@@ -436,12 +463,12 @@ export const AwsOnboardingPage: React.FunctionComponent = () => {
                 data-test-subj="awsOnboardingSearch"
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ width: 240 }}>
+            <EuiFlexItem grow={false} style={{ width: 340 }}>
               <EuiSuperSelect
                 compressed
                 fullWidth
                 prepend="Data format"
-                options={DATA_FORMAT_OPTIONS}
+                options={getDataFormatOptions(schema)}
                 valueOfSelected={schema}
                 onChange={onSchemaChange}
                 aria-label="Data format"
