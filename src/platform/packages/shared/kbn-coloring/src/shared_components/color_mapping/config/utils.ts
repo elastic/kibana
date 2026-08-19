@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_OTHER_ASSIGNMENT_INDEX } from './default_color_mapping';
 import type {
   Config,
   CategoricalConfig,
   GradientConfig,
   CategoricalColor,
   ColorCode,
+  OtherAssignment,
+  OtherBucketAssignment,
 } from './types';
 
 export function isCategoricalColorConfig(config: Config): config is CategoricalConfig {
@@ -22,6 +23,36 @@ export function isCategoricalColorConfig(config: Config): config is CategoricalC
 
 export function isGradientColorConfig(config: Config): config is GradientConfig {
   return config.colorMode.type === 'gradient';
+}
+
+export function isOtherAssignment(
+  assignment: OtherAssignment | OtherBucketAssignment
+): assignment is OtherAssignment {
+  return assignment.rules.length === 1 && assignment.rules[0].type === 'other';
+}
+
+export function isOtherBucketAssignment(
+  assignment: OtherAssignment | OtherBucketAssignment
+): assignment is OtherBucketAssignment {
+  return assignment.rules.length === 1 && assignment.rules[0].type === 'others_bucket';
+}
+
+export function getOtherAssignment(specialAssignments: Config['specialAssignments']) {
+  for (const [index, assignment] of specialAssignments.entries()) {
+    if (isOtherAssignment(assignment)) {
+      return { assignment, index };
+    }
+  }
+  return undefined;
+}
+
+export function getOtherBucketAssignment(specialAssignments: Config['specialAssignments']) {
+  for (const [index, assignment] of specialAssignments.entries()) {
+    if (isOtherBucketAssignment(assignment)) {
+      return { assignment, index };
+    }
+  }
+  return undefined;
 }
 
 export function getOtherAssignmentColor(
@@ -35,15 +66,17 @@ export function getOtherAssignmentColor(
       isLoop: false;
       color: CategoricalColor | ColorCode;
     } {
+  const otherAssignment = getOtherAssignment(specialAssignments)?.assignment;
+
   if (
     // prevents misconfigured color mapping from having a no assignment and a different other color.
     // loop is default and only configuration with no assignments.
     assignments.length === 0 ||
-    // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
-    specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
+    !otherAssignment ||
+    otherAssignment.color.type === 'loop'
   ) {
     return { isLoop: true };
   } else {
-    return { isLoop: false, color: specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color };
+    return { isLoop: false, color: otherAssignment.color };
   }
 }

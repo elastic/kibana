@@ -11,10 +11,9 @@ import { createSlice } from 'redux-toolkit-v1';
 import type { PayloadAction } from 'redux-toolkit-v1';
 import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '../config';
-import {
-  DEFAULT_OTHER_ASSIGNMENT_INDEX,
-  DEFAULT_OTHER_ASSIGNMENT,
-} from '../config/default_color_mapping';
+import { DEFAULT_OTHER_ASSIGNMENT } from '../config/default_color_mapping';
+import type { OtherAssignment, OtherBucketAssignment } from '../config/types';
+import { getOtherAssignment, getOtherBucketAssignment } from '../config/utils';
 
 export interface RootState {
   colorMapping: ColorMapping.Config;
@@ -44,7 +43,10 @@ export const colorMappingSlice = createSlice({
       state.paletteId = action.payload.paletteId;
       state.colorMode = { ...action.payload.colorMode };
       if (state.assignments.length === 0) {
-        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
+        const defaultOther = getOtherAssignment(state.specialAssignments);
+        if (!defaultOther) {
+          state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
+        }
       }
     },
     updatePalette: (
@@ -62,13 +64,13 @@ export const colorMappingSlice = createSlice({
 
     addNewAssignment: (state, action: PayloadAction<ColorMapping.Assignment>) => {
       if (state.assignments.length === 0) {
-        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
+        state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
       }
       state.assignments.push({ ...action.payload });
     },
     addNewAssignments: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
       if (state.assignments.length === 0) {
-        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = { ...DEFAULT_OTHER_ASSIGNMENT };
+        state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
       }
       state.assignments.push(...action.payload);
     },
@@ -130,33 +132,57 @@ export const colorMappingSlice = createSlice({
 
     updateSpecialAssignmentColor: (
       state,
-      action: PayloadAction<{
-        assignmentIndex: number;
-        color: ColorMapping.Config['specialAssignments'][number]['color'];
-      }>
+      action: PayloadAction<
+        | {
+            rule: 'other';
+            color: NonNullable<OtherAssignment>['color'];
+          }
+        | {
+            rule: 'others_bucket';
+            color: NonNullable<OtherBucketAssignment>['color'];
+          }
+      >
     ) => {
-      state.specialAssignments[action.payload.assignmentIndex] = {
-        ...state.specialAssignments[action.payload.assignmentIndex],
-        color: action.payload.color,
-        touched: true,
-      };
-    },
-    removeAssignment: (state, action: PayloadAction<number>) => {
-      state.assignments.splice(action.payload, 1);
-      if (state.assignments.length === 0) {
-        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
-          ...DEFAULT_OTHER_ASSIGNMENT,
+      if (action.payload.rule === 'other') {
+        const assignment = getOtherAssignment(state.specialAssignments);
+        if (!assignment) {
+          return;
+        }
+        state.specialAssignments[assignment.index] = {
+          ...assignment.assignment,
+          color: action.payload.color,
+          touched: true,
+        };
+      } else {
+        const assignment = getOtherBucketAssignment(state.specialAssignments);
+        if (!assignment) {
+          return;
+        }
+        state.specialAssignments[assignment.index] = {
+          ...assignment.assignment,
+          color: action.payload.color,
           touched: true,
         };
       }
     },
+
+    removeAssignment: (state, action: PayloadAction<number>) => {
+      state.assignments.splice(action.payload, 1);
+      if (state.assignments.length === 0) {
+        const defaultOther = getOtherAssignment(state.specialAssignments);
+        if (!defaultOther) {
+          state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
+        }
+      }
+    },
     removeAllAssignments: (state) => {
       state.assignments = [];
-      state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
-        ...DEFAULT_OTHER_ASSIGNMENT,
-        touched: true,
-      };
+      const defaultOther = getOtherAssignment(state.specialAssignments);
+      if (!defaultOther) {
+        state.specialAssignments = [...state.specialAssignments, DEFAULT_OTHER_ASSIGNMENT];
+      }
     },
+
     updateGradientColorStep: (
       state,
       action: PayloadAction<{

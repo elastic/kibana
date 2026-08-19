@@ -12,16 +12,8 @@ import { KbnPalette } from '@kbn/palettes';
 import type { ColorMapping } from '.';
 import { getColor, getGradientColorScale } from '../color/color_handling';
 import { getOtherAssignmentColor } from './utils';
-import { OTHER_BUCKET_VALUE } from '../special_tokens';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
-
-// neutral palette is ordered from light to dark in both themes, so we mirror
-// the index to keep a comparable contrast against the background for each
-// theme
-export const DEFAULT_NEUTRAL_DARK_MODE_PALETTE_INDEX = 3;
-
-export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
 
 export const DEFAULT_OTHER_ASSIGNMENT: ColorMapping.AssignmentBase<
   ColorMapping.RuleOthers,
@@ -32,50 +24,30 @@ export const DEFAULT_OTHER_ASSIGNMENT: ColorMapping.AssignmentBase<
   touched: false,
 };
 
-export const isOtherBucketRule = (rule: ColorMapping.ColorRule) =>
-  rule.type === 'raw' && rule.value === OTHER_BUCKET_VALUE;
-
-export const withOtherBucketAssignment = (
-  config: ColorMapping.Config,
-  isDarkMode: boolean
-): ColorMapping.Config => {
-  if (config.assignments.every((assignment) => !assignment.rules.some(isOtherBucketRule))) {
-    return {
-      ...config,
-      assignments: [
-        ...config.assignments,
-        {
-          rules: [{ type: 'raw', value: OTHER_BUCKET_VALUE }],
-          color: getOtherBucketColor(isDarkMode),
-          touched: false,
-        },
-      ],
-    };
-  }
-  return config;
+export const DEFAULT_OTHERS_BUCKET_ASSIGNMENT: ColorMapping.AssignmentBase<
+  ColorMapping.RuleOthersBucket,
+  ColorMapping.ThemeColor
+> = {
+  rules: [{ type: 'others_bucket' }],
+  color: {
+    type: 'theme',
+    color: {
+      LIGHT: { type: 'categorical', paletteId: KbnPalette.Neutral, colorIndex: 1 },
+      // neutral palette is ordered from light to dark in both themes, so we mirror
+      // the index to keep a comparable contrast against the background for each
+      // theme
+      DARK: { type: 'categorical', paletteId: KbnPalette.Neutral, colorIndex: 3 },
+    },
+  },
+  touched: false,
 };
-
-export const withoutOtherBucketAssignment = (config: ColorMapping.Config): ColorMapping.Config => {
-  return {
-    ...config,
-    assignments: config.assignments.filter(
-      (assignment) => !assignment.rules.some(isOtherBucketRule)
-    ),
-  };
-};
-
-export const getOtherBucketColor = (isDarkMode: boolean): ColorMapping.CategoricalColor => ({
-  type: 'categorical',
-  paletteId: KbnPalette.Neutral,
-  colorIndex: isDarkMode ? DEFAULT_NEUTRAL_DARK_MODE_PALETTE_INDEX : DEFAULT_NEUTRAL_PALETTE_INDEX,
-});
 
 /**
  * The default color mapping used in Kibana, starts with the EUI color palette
  */
 export const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignments: [],
-  specialAssignments: [DEFAULT_OTHER_ASSIGNMENT],
+  specialAssignments: [DEFAULT_OTHER_ASSIGNMENT, DEFAULT_OTHERS_BUCKET_ASSIGNMENT],
   paletteId: KbnPalette.Default,
   colorMode: {
     type: 'categorical',
@@ -115,6 +87,7 @@ export function getColorsFromMapping(
     const palette = palettes.get(paletteId);
 
     const otherColor = getOtherAssignmentColor(specialAssignments, assignments);
+
     const otherColors = otherColor.isLoop
       ? Array.from({ length: palette.colorCount }, (d, i) => palette.getColor(i))
       : [getColor(otherColor.color, palettes)];
