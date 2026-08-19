@@ -92,7 +92,11 @@ describe('selectCurrentTabType', () => {
 
 describe('selectTabTypeForPersistence', () => {
   it('falls back to the inherited tab type when the tab has never resolved a profile', () => {
+    const scopedProfilesManager = createScopedProfilesManager();
     const runtimeStateManager = getRuntimeStateManagerMock();
+    runtimeStateManager.tabs.byId['tab-1'] = getTabRuntimeStateMock();
+    runtimeStateManager.tabs.byId['tab-1'].scopedProfilesManager$.next(scopedProfilesManager);
+
     const tabState = getTabStateMock({
       id: 'tab-1',
       initialInternalState: { tabType: DiscoverTabType.Metrics },
