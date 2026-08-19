@@ -53,6 +53,17 @@ import {
 import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
 import * as i18n from '../translations';
 
+/**
+ * Bridges V1AlertFields (Record<string, unknown>) to the Alert type that
+ * AlertFieldsTable expects. The component only iterates Object.entries, so
+ * the shapes are compatible at runtime; the cast is needed because Alert
+ * types known fields as JsonValue[] (the ES fields-API convention) while
+ * _source returns plain values.
+ */
+type AlertFieldsTableAlert = React.ComponentProps<typeof AlertFieldsTable>['alert'];
+const toAlertFieldsTableAlert = (fields: V1AlertFields): AlertFieldsTableAlert =>
+  fields as unknown as AlertFieldsTableAlert;
+
 type TabId = 'overview' | 'fields';
 
 export interface V1AlertDetailsFlyoutProps {
@@ -317,7 +328,7 @@ export const V1AlertDetailsFlyout = ({ alertId, onClose, services }: V1AlertDeta
               color="transparent"
               data-test-subj="alertEpisodeV1FieldsTabPanel"
             >
-              <AlertFieldsTable alert={alert} />
+              <AlertFieldsTable alert={toAlertFieldsTableAlert(alert)} />
             </EuiPanel>
           )}
         </EuiFlyoutBody>

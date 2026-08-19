@@ -53,6 +53,7 @@ describe('V1AlertDetailsFlyout', () => {
   it('renders the overview and fields tabs when the alert loads', async () => {
     mockFetchV1AlertById.mockResolvedValue({
       _index: '.internal.alerts-observability.apm.alerts-default-000001',
+      _id: 'alert-1',
       'kibana.alert.status': 'active',
       'kibana.alert.rule.name': 'CPU usage',
       'kibana.alert.rule.rule_type_id': 'apm.error_rate',
@@ -85,6 +86,7 @@ describe('V1AlertDetailsFlyout', () => {
   it('omits the "View details" button for non-observability (stack) alerts', async () => {
     mockFetchV1AlertById.mockResolvedValue({
       _index: '.internal.alerts-stack.alerts-default-000001',
+      _id: 'alert-1',
       'kibana.alert.status': 'active',
       'kibana.alert.rule.name': 'Stack rule',
       'kibana.alert.rule.rule_type_id': '.index-threshold',
