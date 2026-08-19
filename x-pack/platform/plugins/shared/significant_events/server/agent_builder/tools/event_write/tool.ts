@@ -60,8 +60,10 @@ export const eventsWriteItemSchema = significantEventSchema
           ID of an existing event to append a new version to (continuation/snapshot mode).
 
           Omit to trigger find-or-create: the handler scans all currently-active events for one
-          with the same exact stream+rule identity. If found, the write is skipped and the
-          existing event_id is returned (written: false, reason: existing_active_event).
+          whose rule set contains the submitted rules (subset match) and shares at least one
+          stream name. If found, the write is skipped and the existing event_id is returned
+          (written: false, reason: existing_active_event). Otherwise a new event is created with
+          a generated event_id.
           Otherwise a new event is created with a generated event_id.
         `
       ),
