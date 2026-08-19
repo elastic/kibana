@@ -8,9 +8,7 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../../../..',
-  roots: [
-    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack',
-  ],
+  roots: ['<rootDir>/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/security_solution/public/flyout_v2/attack',
   coverageReporters: ['text', 'html'],
