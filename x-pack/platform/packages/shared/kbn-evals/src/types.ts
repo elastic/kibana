@@ -105,6 +105,10 @@ export interface Evaluator<
   name: string;
   kind: EvaluatorKind;
   evaluate: EvaluatorCallback<TExample, TTaskOutput>;
+  /**
+   * Whether a higher score is an improvement.
+   */
+  higherIsBetter?: boolean;
 }
 export interface DefaultEvaluators {
   criteria: (criteria: EvaluationCriterion[]) => Evaluator;

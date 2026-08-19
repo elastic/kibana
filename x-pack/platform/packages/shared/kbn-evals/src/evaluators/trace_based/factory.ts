@@ -36,6 +36,10 @@ export interface TraceBasedEvaluatorConfig {
     buildQuery: (traceId: string) => string;
     isTraceComplete: (response: EsqlResponse) => boolean;
   };
+  /**
+   * Whether a higher score is an improvement. Defaults to `true`.
+   */
+  higherIsBetter?: boolean;
 }
 
 export function createTraceBasedEvaluator({
@@ -47,10 +51,18 @@ export function createTraceBasedEvaluator({
   log: ToolingLog;
   config: TraceBasedEvaluatorConfig;
 }): Evaluator {
-  const { name, buildQuery, extractResult, isResultValid, isNotReported, notReportedProbe } =
-    config;
+  const {
+    name,
+    buildQuery,
+    extractResult,
+    isResultValid,
+    isNotReported,
+    notReportedProbe,
+    higherIsBetter = true,
+  } = config;
 
   return {
+    higherIsBetter,
     evaluate: async ({ output }) => {
       const traceId = (output as any)?.traceId;
 
