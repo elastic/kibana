@@ -8,13 +8,12 @@
  */
 
 import { esql } from '@elastic/esql';
-import { appendWhereCommand } from '../../../../../utils/esql_expressions';
 import { getEsqlQuery } from './get_esql_query';
 
 const render = (condition: ReturnType<typeof getEsqlQuery>): string => {
   const query = esql.from('index');
   if (condition) {
-    appendWhereCommand(query, condition);
+    query.where`${condition}`;
   }
   return query.print('pipe-multiline');
 };

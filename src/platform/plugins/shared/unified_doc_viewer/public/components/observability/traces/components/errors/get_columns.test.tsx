@@ -13,7 +13,6 @@ import '@testing-library/jest-dom';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import { appendWhereCommand } from '../../../../../utils/esql_expressions';
 import { getColumns } from './get_columns';
 import type { ErrorsByTraceId } from '@kbn/apm-types';
 import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_link_and_esql_query';
@@ -269,7 +268,7 @@ describe('getColumns', () => {
       };
 
       const query = esql.from('apm-errors-*');
-      appendWhereCommand(query, whereClause);
+      query.where`${whereClause}`;
       return query.print('pipe-multiline');
     };
 

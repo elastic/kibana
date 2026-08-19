@@ -11,7 +11,6 @@ import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { useMemo } from 'react';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
-import { appendWhereCommand } from '../../utils/esql_expressions';
 import {
   applyUnmappedFieldsPolicy,
   type UnmappedFieldsPolicy,
@@ -33,7 +32,6 @@ export function useDiscoverLinkAndEsqlQuery({
     unmappedFieldsPolicy,
   });
 
-  // Build a fresh query per call because `appendWhereCommand` mutates in place.
   const esqlQueryString = useMemo(() => {
     if (!indexPattern || !whereClause) return undefined;
 
@@ -41,7 +39,7 @@ export function useDiscoverLinkAndEsqlQuery({
     if (unmappedFieldsPolicy) {
       applyUnmappedFieldsPolicy(query, unmappedFieldsPolicy);
     }
-    appendWhereCommand(query, whereClause);
+    query.where`${whereClause}`;
     return query.print('pipe-multiline');
   }, [indexPattern, unmappedFieldsPolicy, whereClause]);
 

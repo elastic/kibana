@@ -18,8 +18,6 @@ import {
   SPAN_LINKS_TRACE_ID,
   SPAN_LINKS_SPAN_ID,
 } from '@kbn/discover-utils';
-import { appendWhereCommand } from '../../../../../utils/esql_expressions';
-
 // Mock dependencies
 jest.mock('../../../../../hooks/use_data_sources', () => ({
   useDataSourcesContext: () => ({
@@ -184,7 +182,7 @@ const renderClause = (condition: ESQLAstExpression | undefined): string | undefi
     return undefined;
   }
   const query = esql.from('apm-traces-*');
-  appendWhereCommand(query, condition);
+  query.where`${condition}`;
   return query.print('pipe-multiline');
 };
 

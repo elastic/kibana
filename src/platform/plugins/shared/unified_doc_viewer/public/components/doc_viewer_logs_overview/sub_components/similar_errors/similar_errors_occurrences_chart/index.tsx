@@ -25,7 +25,6 @@ import { useDataSourcesContext } from '../../../../../hooks/use_data_sources';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { ContentFrameworkChart } from '../../../../content_framework/chart';
 import { esqlColumn } from '../../../../../utils/esql_column';
-import { appendWhereCommand } from '../../../../../utils/esql_expressions';
 import { applyUnmappedFieldsPolicy } from '../../../../../utils/esql_unmapped_fields';
 
 const chartTitle = i18n.translate(
@@ -123,7 +122,7 @@ export function SimilarErrorsOccurrencesChart({
     const timestamp = esqlColumn(fieldConstants.TIMESTAMP_FIELD);
     const query = esql.from(indexes.logs);
     applyUnmappedFieldsPolicy(query, 'NULLIFY');
-    appendWhereCommand(query, baseEsqlQuery);
+    query.where`${baseEsqlQuery}`;
     query.pipe`STATS occurrences = COUNT(*) BY ${timestamp} = BUCKET(${timestamp}, 100, ?_tstart, ?_tend)`;
     query.sort(fieldConstants.TIMESTAMP_FIELD);
 

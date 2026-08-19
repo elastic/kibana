@@ -10,8 +10,6 @@
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import { appendWhereCommand } from '../../../../../../utils/esql_expressions';
-
 import {
   createServiceNameWhereClause,
   createSpanNameWhereClause,
@@ -22,7 +20,7 @@ const indexPattern = 'apm-traces-*';
 
 const render = (condition: ESQLAstExpression): string => {
   const query = esql.from(indexPattern);
-  appendWhereCommand(query, condition);
+  query.where`${condition}`;
   return query.print('pipe-multiline');
 };
 

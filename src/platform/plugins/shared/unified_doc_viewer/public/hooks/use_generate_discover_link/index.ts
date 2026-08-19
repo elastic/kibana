@@ -10,7 +10,6 @@ import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { castArray } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../plugin';
-import { appendWhereCommand } from '../../utils/esql_expressions';
 import {
   applyUnmappedFieldsPolicy,
   type UnmappedFieldsPolicy,
@@ -40,13 +39,12 @@ export function useGetGenerateDiscoverLink({
       return undefined;
     }
 
-    // Build a fresh query per call because `appendWhereCommand` mutates in place.
     const query = esql.from(indices.join());
     if (unmappedFieldsPolicy) {
       applyUnmappedFieldsPolicy(query, unmappedFieldsPolicy);
     }
     if (whereClause) {
-      appendWhereCommand(query, whereClause);
+      query.where`${whereClause}`;
     }
 
     const url = discoverLocator.getRedirectUrl({

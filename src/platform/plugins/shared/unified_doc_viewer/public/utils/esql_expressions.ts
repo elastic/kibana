@@ -8,25 +8,23 @@
  */
 
 import { Builder } from '@elastic/esql';
-import type { ComposerQuery } from '@elastic/esql';
 import type { ESQLAstExpression, ESQLAstItem, ESQLStringLiteral } from '@elastic/esql/types';
 import { esqlColumn } from './esql_column';
 
 /**
- * Build ES|QL expression nodes directly with the AST `Builder` instead of the
- * `esql.exp` / `query.where` tagged templates.
+ * ES|QL expression nodes built with the AST `Builder` rather than composed with
+ * the `esql.exp` tagged template.
  *
- * Workaround until https://github.com/elastic/kibana/issues/283422 is resolved.
- * The tagged templates print every interpolated node to text and re-parse the
- * whole expression. That round trip corrupts string literals whose value
- * contains a backslash followed by `r`, `n` or `t` (e.g. Windows paths like
- * `handlers\run.cs`): the parser's decoder treats the escaped backslash plus
- * the following letter as a single control-character escape. Constructing the
- * AST here keeps values as literal nodes that are only escaped once, at print
- * time, matching the pre-migration behavior that resolved params after parsing.
+ * The template prints each interpolated node on its own and glues the pieces
+ * together as text before re-parsing, which loses the grouping a nested operand
+ * carried: combining `a == 1` with `b == 2 OR c == 3` yields
+ * `a == 1 AND b == 2 OR c == 3`, and because `AND` binds tighter than `OR` that
+ * re-associates to `(a == 1 AND b == 2) OR c == 3`. Building the tree here keeps
+ * the shape, and printing a whole tree is safe because the printer parenthesizes
+ * wherever precedence requires it.
  *
- * Once the parser is fixed and `@elastic/esql` is bumped, these helpers can be
- * removed and the call sites can go back to the tagged templates.
+ * Pass the result to `ComposerQuery.where` as a single interpolated node, so the
+ * clause is printed and re-parsed as one expression.
  */
 
 /**
@@ -42,11 +40,11 @@ export type NonEmptyArray<T> = [T, ...T[]];
 /** Narrows a mapped array so it can flow into `esqlAnd`, `esqlOr` or `esqlIn`. */
 export const isNonEmptyArray = <T>(values: T[]): values is NonEmptyArray<T> => values.length > 0;
 
-/** A string literal node, escaped only once at print time (never re-parsed). */
+/** A string literal node; the printer escapes the value. */
 export const esqlString = (value: string): ESQLStringLiteral =>
   Builder.expression.literal.string(value);
 
-/** `field == "value"` with `value` carried as a literal node (never re-parsed). */
+/** `field == "value"`. */
 export const esqlEquals = (field: string, value: string): ESQLAstExpression =>
   Builder.expression.func.binary('==', [esqlColumn(field), esqlString(value)]);
 
@@ -78,14 +76,3 @@ export const esqlIn = (field: string, values: NonEmptyArray<string>): ESQLAstExp
     esqlColumn(field),
     Builder.expression.list.tuple({ values: values.map(esqlString) }),
   ]);
-
-/**
- * Append a `WHERE` command built from an AST node.
- *
- * `ComposerQuery.where` re-parses the printed clause and would reintroduce the
- * literal corruption described above, so we push the command onto the AST
- * directly. Mutates `query` in place, like the `ComposerQuery` methods.
- */
-export const appendWhereCommand = (query: ComposerQuery, clause: ESQLAstExpression): void => {
-  query.ast.commands.push(Builder.command({ name: 'where', args: [clause] }));
-};

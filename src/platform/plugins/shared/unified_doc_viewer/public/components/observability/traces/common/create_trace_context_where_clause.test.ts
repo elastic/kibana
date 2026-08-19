@@ -9,7 +9,6 @@
 
 import { esql } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
-import { appendWhereCommand } from '../../../../utils/esql_expressions';
 import {
   createTraceContextWhereClause,
   createTraceContextWhereClauseForErrors,
@@ -17,7 +16,7 @@ import {
 
 const render = (condition: ESQLAstExpression): string => {
   const query = esql.from('foo-*');
-  appendWhereCommand(query, condition);
+  query.where`${condition}`;
   return query.print('pipe-multiline');
 };
 

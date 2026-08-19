@@ -9,13 +9,12 @@
 
 import { esql } from '@elastic/esql';
 import { fieldConstants } from '@kbn/discover-utils';
-import { appendWhereCommand } from '../../../../../utils/esql_expressions';
 import { getEsqlQuery } from '.';
 
 const renderQuery = (condition: ReturnType<typeof getEsqlQuery>): string => {
   const query = esql.from('index');
   if (condition) {
-    appendWhereCommand(query, condition);
+    query.where`${condition}`;
   }
   return query.print('pipe-multiline');
 };

@@ -11,7 +11,6 @@ import { esql, LeafPrinter } from '@elastic/esql';
 import type { ESQLAstExpression } from '@elastic/esql/types';
 import { esqlColumn } from './esql_column';
 import {
-  appendWhereCommand,
   esqlAnd,
   esqlEquals,
   esqlFunction,
@@ -23,7 +22,7 @@ import {
 
 const render = (clause: ESQLAstExpression): string => {
   const query = esql.from('logs-*');
-  appendWhereCommand(query, clause);
+  query.where`${clause}`;
   return query.print('pipe-multiline');
 };
 
@@ -96,19 +95,6 @@ describe('esqlFunction', () => {
 
   it('prints a call without arguments', () => {
     expect(render(esqlFunction('NOW', []))).toBe('FROM logs-*\n  | WHERE NOW()');
-  });
-});
-
-describe('appendWhereCommand', () => {
-  it('mutates the query in place, appending after the commands already on it', () => {
-    const query = esql.from('logs-*');
-
-    appendWhereCommand(query, esqlEquals('a', '1'));
-    appendWhereCommand(query, esqlEquals('b', '2'));
-
-    expect(query.print('pipe-multiline')).toBe(
-      'FROM logs-*\n  | WHERE a == "1"\n  | WHERE b == "2"'
-    );
   });
 });
 
