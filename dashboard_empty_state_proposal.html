@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard empty state proposal</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --background: #f7f8fc;
+        --surface: #ffffff;
+        --surface-subdued: #f5f7fa;
+        --text: #1a1c21;
+        --text-subdued: #5f6673;
+        --border: #d3dae6;
+        --border-strong: #a8b0bd;
+        --primary: #1750c2;
+        --primary-hover: #0b43a9;
+        --ai: #7b3fe4;
+        --ai-subdued: #f6f1ff;
+        --focus: #006bb4;
+        --shadow: 0 1px 2px rgb(25 34 48 / 8%), 0 5px 14px rgb(25 34 48 / 5%);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 760px;
+        min-height: 100vh;
+        overflow: hidden;
+        color: var(--text);
+        background: var(--background);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button {
+        color: inherit;
+      }
+
+      .screen {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        grid-template-rows: 34px 1fr;
+        height: 100vh;
+      }
+
+      .global-header {
+        z-index: 2;
+        display: flex;
+        grid-column: 1 / -1;
+        align-items: center;
+        gap: 10px;
+        padding: 0 12px;
+        background: #f1f4f9;
+        border-bottom: 1px solid #e3e7ee;
+        box-shadow: 0 1px 3px rgb(25 34 48 / 6%);
+        font-size: 11px;
+      }
+
+      .elastic-mark {
+        display: grid;
+        width: 18px;
+        height: 18px;
+        place-items: center;
+        border-radius: 50%;
+        color: white;
+        background: conic-gradient(from 205deg, #f04e98, #f4bd22, #00bfb3, #1750c2, #f04e98);
+        font-size: 8px;
+        font-weight: 800;
+      }
+
+      .space-badge {
+        display: grid;
+        width: 20px;
+        height: 20px;
+        margin-left: 8px;
+        place-items: center;
+        border-radius: 3px;
+        background: #5bc8ca;
+        font-size: 9px;
+        font-weight: 700;
+      }
+
+      .crumb {
+        color: var(--text-subdued);
+      }
+
+      .header-tools {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-left: auto;
+        color: #343741;
+      }
+
+      .avatar {
+        display: grid;
+        width: 19px;
+        height: 19px;
+        place-items: center;
+        border-radius: 50%;
+        color: #a42c39;
+        background: #f4c7cd;
+        font-size: 8px;
+        font-weight: 700;
+      }
+
+      .side-nav {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 0;
+        background: #fbfcfe;
+        border-right: 1px solid #e3e7ee;
+      }
+
+      .nav-item {
+        display: grid;
+        width: 28px;
+        height: 28px;
+        place-items: center;
+        border: 0;
+        border-radius: 3px;
+        color: #69707d;
+        background: transparent;
+        cursor: pointer;
+      }
+
+      .nav-item.active {
+        color: #1750c2;
+        background: #e8f1fb;
+      }
+
+      .nav-item.bottom {
+        margin-top: auto;
+      }
+
+      .app {
+        display: grid;
+        min-height: 0;
+        grid-template-rows: 36px 42px 1fr;
+        background: var(--surface);
+      }
+
+      .dashboard-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 7px;
+        padding: 0 14px;
+        border-bottom: 1px solid #e8ebf0;
+      }
+
+      .small-action,
+      .save-action {
+        height: 27px;
+        padding: 0 9px;
+        border: 0;
+        border-radius: 3px;
+        background: transparent;
+        font-size: 10px;
+        cursor: pointer;
+      }
+
+      .small-action:hover {
+        background: var(--surface-subdued);
+      }
+
+      .save-action {
+        border: 1px solid var(--border);
+        background: var(--surface);
+      }
+
+      .query-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px;
+        background: #f9fafc;
+        border-bottom: 1px solid #e8ebf0;
+      }
+
+      .square-control,
+      .query-input,
+      .time-control,
+      .refresh-control {
+        height: 28px;
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        background: var(--surface);
+        box-shadow: 0 1px 1px rgb(25 34 48 / 4%);
+      }
+
+      .square-control {
+        display: grid;
+        width: 28px;
+        place-items: center;
+        color: #536173;
+      }
+
+      .query-input {
+        display: flex;
+        flex: 1;
+        align-items: center;
+        gap: 7px;
+        padding: 0 10px;
+        color: #77808e;
+        font-size: 10px;
+      }
+
+      .time-control,
+      .refresh-control {
+        padding: 0 12px;
+        font-size: 9px;
+      }
+
+      .refresh-control {
+        color: var(--primary);
+        background: #eef5fc;
+      }
+
+      .canvas {
+        position: relative;
+        display: grid;
+        min-height: 0;
+        place-items: center;
+        padding: 32px;
+        background:
+          radial-gradient(circle at center, rgb(238 243 252 / 32%) 0, transparent 42%),
+          var(--surface);
+      }
+
+      .empty-state {
+        width: min(620px, 76vw);
+        margin-top: -44px;
+        text-align: center;
+      }
+
+      .illustration {
+        width: 130px;
+        height: 91px;
+        margin: 0 auto 15px;
+        filter: drop-shadow(0 6px 5px rgb(25 34 48 / 8%));
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 19px;
+        line-height: 1.25;
+        letter-spacing: -0.015em;
+        text-wrap: balance;
+      }
+
+      .intro {
+        margin: 6px 0 20px;
+        color: var(--text-subdued);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .creation-menu {
+        overflow: hidden;
+        width: 100%;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        box-shadow: var(--shadow);
+        text-align: left;
+      }
+
+      .creation-option {
+        position: relative;
+        display: grid;
+        width: 100%;
+        min-height: 67px;
+        grid-template-columns: 38px minmax(130px, 0.78fr) 1fr 22px;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border: 0;
+        border-bottom: 1px solid #e6e9ef;
+        background: var(--surface);
+        cursor: pointer;
+        text-align: left;
+        transition-property: background-color;
+        transition-duration: 140ms;
+        transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      .creation-option:last-child {
+        border-bottom: 0;
+      }
+
+      .creation-option:hover {
+        background: #f7f9fc;
+      }
+
+      .creation-option:focus-visible {
+        z-index: 1;
+        outline: 2px solid var(--focus);
+        outline-offset: -2px;
+      }
+
+      .creation-option:active {
+        background: #eef3fa;
+      }
+
+      .option-icon {
+        display: grid;
+        width: 36px;
+        height: 36px;
+        place-items: center;
+        border-radius: 5px;
+        color: #374151;
+        background: #eef1f6;
+      }
+
+      .ai-option .option-icon {
+        color: var(--ai);
+        background: var(--ai-subdued);
+      }
+
+      .ai-option {
+        border-bottom: 0;
+        background: #fbf9ff;
+      }
+
+      .ai-option:hover {
+        background: #f7f2ff;
+      }
+
+      .option-title {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 13px;
+        font-weight: 650;
+      }
+
+      .recommended {
+        padding: 2px 6px;
+        border-radius: 9px;
+        color: #5d25b8;
+        background: #efe5ff;
+        font-size: 9px;
+        font-weight: 600;
+      }
+
+      .option-description {
+        color: var(--text-subdued);
+        font-size: 11px;
+        line-height: 1.35;
+      }
+
+      .arrow {
+        color: #8b93a1;
+        font-size: 16px;
+        transition: transform 140ms cubic-bezier(0.2, 0, 0, 1);
+      }
+
+      .creation-option:hover .arrow {
+        transform: translateX(2px);
+        color: var(--primary);
+      }
+
+      .suggestion-area {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px 14px 66px;
+        background: #fbf9ff;
+        border-bottom: 1px solid #e6e9ef;
+      }
+
+      .suggestion-label {
+        flex: 0 0 auto;
+        color: #4b326d;
+        font-size: 9px;
+        font-weight: 600;
+      }
+
+      .examples {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .example-chip {
+        padding: 4px 8px;
+        border: 1px solid #d8cbea;
+        border-radius: 12px;
+        color: #5d4778;
+        background: transparent;
+        cursor: pointer;
+        font-size: 9px;
+      }
+
+      .example-chip:hover {
+        background: #f0e9fa;
+      }
+
+      .footer-hint {
+        margin: 12px 0 0;
+        color: #7a8290;
+        font-size: 10px;
+      }
+
+      .footer-hint button {
+        padding: 0;
+        border: 0;
+        color: var(--primary);
+        background: transparent;
+        cursor: pointer;
+        text-decoration: underline;
+        text-underline-offset: 2px;
+      }
+
+      .toast {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        padding: 10px 14px;
+        border-radius: 4px;
+        color: white;
+        background: #252a34;
+        box-shadow: 0 5px 18px rgb(25 34 48 / 22%);
+        font-size: 11px;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition-property: opacity, transform;
+        transition-duration: 180ms;
+      }
+
+      .toast.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @media (max-height: 650px) {
+        .empty-state {
+          margin-top: -15px;
+          transform: scale(0.92);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="screen">
+      <header class="global-header" aria-label="Global navigation">
+        <div class="elastic-mark" aria-hidden="true">E</div>
+        <div class="space-badge" aria-hidden="true">D</div>
+        <span class="crumb">/</span>
+        <span class="crumb">Dashboards</span>
+        <span class="crumb">/</span>
+        <span>Editing New Dashboard</span>
+        <div class="header-tools" aria-hidden="true">
+          <span>⌕</span>
+          <span>?</span>
+          <span>◒</span>
+          <span>▣</span>
+          <span class="avatar">OM</span>
+        </div>
+      </header>
+
+      <nav class="side-nav" aria-label="Primary">
+        <button class="nav-item" aria-label="Analytics">▥</button>
+        <button class="nav-item" aria-label="Discover">◉</button>
+        <button class="nav-item active" aria-label="Dashboards">▦</button>
+        <button class="nav-item" aria-label="Alerts">△</button>
+        <button class="nav-item" aria-label="Files">□</button>
+        <button class="nav-item bottom" aria-label="Collapse navigation">◧</button>
+        <button class="nav-item" aria-label="Settings">⋮</button>
+      </nav>
+
+      <main class="app">
+        <div class="dashboard-actions">
+          <button class="small-action">↪ Exit edit</button>
+          <button class="small-action">＋ Add</button>
+          <button class="small-action" aria-label="More dashboard actions">⋮</button>
+          <button class="save-action">▣&nbsp;&nbsp; Save&nbsp;&nbsp;⌄</button>
+        </div>
+
+        <div class="query-bar" aria-label="Dashboard query controls">
+          <button class="square-control" aria-label="Filters">≡</button>
+          <button class="square-control" aria-label="Add filter">＋</button>
+          <div class="query-input">⌕ <span>Filter your data using KQL syntax</span></div>
+          <button class="time-control">Last 15 minutes&nbsp;&nbsp; <small>15 min</small></button>
+          <button class="refresh-control">⟳&nbsp; Refresh</button>
+        </div>
+
+        <section class="canvas" aria-labelledby="empty-state-title">
+          <div class="empty-state">
+            <svg class="illustration" viewBox="0 0 160 112" role="img" aria-label="Dashboard illustration">
+              <g fill="none" stroke="#28384f" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                <path fill="#e8edf5" d="M30 32l81 7 12 57-82-8z" />
+                <path fill="#fff" d="M39 24l80 8-8 57-81-8z" />
+                <path fill="#dbe5f2" d="M46 34l30 3-4 26-31-3z" />
+                <path fill="#f4f7fb" d="M80 38l27 3-2 12-27-3z" />
+                <path d="M47 56l2-13 4 1-2 12m5 1l2-9 4 1-1 8m5 1l1-5 4 1-1 5" />
+                <circle cx="94" cy="65" r="17" fill="#bcd2ee" />
+                <circle cx="94" cy="65" r="12" fill="#edf4fb" />
+                <path fill="#fff" d="M108 77l18 18-7 7-18-19z" />
+                <path fill="#8ea8ca" d="M21 69l10-8 8 12-10 8z" />
+              </g>
+              <circle cx="91" cy="62" r="5" fill="#f2c94c" opacity=".45" />
+            </svg>
+
+            <h1 id="empty-state-title">Create your first visualization</h1>
+            <p class="intro">Choose a starting point. You can change the visualization or data source later.</p>
+
+            <div class="creation-menu" aria-label="Visualization creation methods">
+              <button class="creation-option ai-option" id="ai-option">
+                <span class="option-icon" aria-hidden="true">✣</span>
+                <span class="option-title">
+                  Ask AI
+                  <span class="recommended">Recommended</span>
+                </span>
+                <span class="option-description">Describe what you want to learn from your data</span>
+                <span class="arrow" aria-hidden="true">›</span>
+              </button>
+
+              <div class="suggestion-area">
+                <span class="suggestion-label">Try asking</span>
+                <div class="examples" aria-label="Example prompts">
+                  <button class="example-chip">Dashboard for my service health</button>
+                  <button class="example-chip">Top error messages over time</button>
+                </div>
+              </div>
+
+              <button class="creation-option" data-destination="Opening the point-and-click editor">
+                <span class="option-icon" aria-hidden="true">▥</span>
+                <span class="option-title">Build visually</span>
+                <span class="option-description">Drag and drop fields in the Lens editor</span>
+                <span class="arrow" aria-hidden="true">›</span>
+              </button>
+
+              <button class="creation-option" data-destination="Opening the ES|QL editor">
+                <span class="option-icon" aria-hidden="true">⌁</span>
+                <span class="option-title">Write ES|QL</span>
+                <span class="option-description">Start with a query and choose how to display the results</span>
+                <span class="arrow" aria-hidden="true">›</span>
+              </button>
+            </div>
+
+            <p class="footer-hint">
+              Already have visualizations?
+              <button id="library-link">Add one from the library</button>
+            </p>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const aiOption = document.querySelector("#ai-option");
+      const toast = document.querySelector("#toast");
+      let toastTimer;
+
+      const showToast = (message) => {
+        window.clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.add("visible");
+        toastTimer = window.setTimeout(() => toast.classList.remove("visible"), 2200);
+      };
+
+      aiOption.addEventListener("click", () => showToast("Opening chat"));
+
+      document.querySelectorAll(".example-chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          showToast(`Opening chat with: ${chip.textContent.trim()}`);
+        });
+      });
+
+      document.querySelectorAll("[data-destination]").forEach((option) => {
+        option.addEventListener("click", () => showToast(option.dataset.destination));
+      });
+
+      document.querySelector("#library-link").addEventListener("click", () => {
+        showToast("Opening the visualization library");
+      });
+    </script>
+  </body>
+</html>
