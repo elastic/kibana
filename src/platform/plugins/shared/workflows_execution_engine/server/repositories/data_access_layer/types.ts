@@ -15,12 +15,6 @@ import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflow
 /** Backing store for execution documents. */
 export type ExecutionStorageSource = 'system_index' | 'data_stream';
 
-/**
- * Data stream client handle for `data_stream` backends.
- * Concrete typing from `@kbn/data-streams` will be wired when that backend lands.
- */
-export type ExecutionDataStreamClient = unknown;
-
 /** Search body without index — DAL resolves the target. */
 export type ExecutionsSearchRequest = Omit<estypes.SearchRequest, 'index'>;
 
@@ -83,7 +77,7 @@ export interface ReadonlyDataClient<TExecution extends { id: string }> {
    * Throws on storage errors.
    */
   getByIds(
-    ids: (string | { id: string; index: string })[],
+    ids: string[],
     options?: GetExecutionsByIdsOptions<TExecution>
   ): Promise<GetExecutionsByIdsResponse<TExecution>>;
 }

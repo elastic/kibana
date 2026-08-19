@@ -307,11 +307,6 @@ export class WorkflowsService {
     return this.coreStart;
   }
 
-  public async getWorkflowDataClient(): Promise<WorkflowExecutionsDataClient> {
-    await this.ensureInitialized();
-    return this.workflowExecutionsDataClient;
-  }
-
   public async getPluginsStart(): Promise<WorkflowsServerPluginStartDeps> {
     await this.ensureInitialized();
     return this.pluginsStart;

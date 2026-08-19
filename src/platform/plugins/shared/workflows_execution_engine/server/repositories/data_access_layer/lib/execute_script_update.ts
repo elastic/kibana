@@ -43,7 +43,7 @@ const mapScriptUpdateResult = (result: string | undefined): ScriptUpdateResult =
     return result;
   }
 
-  return 'updated';
+  throw new Error(`Unexpected script update result: ${JSON.stringify(result)}`);
 };
 
 export const executeScriptUpdate = async ({

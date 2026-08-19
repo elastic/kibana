@@ -46,7 +46,7 @@ export class DeferredDataClient<TExecution extends { id: string }>
   }
 
   getByIds(
-    ids: (string | { id: string; index: string })[],
+    ids: string[],
     options?: GetExecutionsByIdsOptions<TExecution> | undefined
   ): Promise<GetExecutionsByIdsResponse<TExecution>> {
     return this.dataClientPromise.then((dataClient) => dataClient.getByIds(ids, options));

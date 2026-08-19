@@ -8,7 +8,7 @@
  */
 
 import { PlainIndexDataClientBundle } from './plain_index/plain_index_data_client_bundle';
-import { createUnsupportedStorageSourceError } from '../lib/validate_factory_params';
+import { createUnsupportedStorageSourceError } from '../lib/unsupported_storage_source';
 import type { CreateDataClientDeps, DataClientBundle } from '../types';
 
 export function createDataClientBundle(deps: CreateDataClientDeps): DataClientBundle {
