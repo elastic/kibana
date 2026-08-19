@@ -155,7 +155,7 @@ test.describe(
       await test.step('inline flyout seeds from the layer query, not the stale slot', async () => {
         await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
         await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-        expect(await codeEditor.getCodeEditorValue()).toBe(LAYER_QUERY);
+        await expect.poll(() => codeEditor.getCodeEditorValue()).toBe(LAYER_QUERY);
       });
 
       await test.step('edit the query, apply, and save the dashboard', async () => {
@@ -189,7 +189,7 @@ test.describe(
         await dashboard.ensureEditMode();
         await dashboard.clickPanelAction('embeddablePanelAction-editPanel');
         await codeEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-        expect(await codeEditor.getCodeEditorValue()).toBe(UPDATED_QUERY);
+        await expect.poll(() => codeEditor.getCodeEditorValue()).toBe(UPDATED_QUERY);
       });
 
       await test.step('persisted panel: stale slot copy did not survive the save', async () => {
