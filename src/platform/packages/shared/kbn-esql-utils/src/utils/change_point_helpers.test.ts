@@ -10,6 +10,7 @@ import {
   hasChangePointCommand,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
+  getChangePointByColumns,
   buildChangePointLineDataQuery,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
@@ -96,6 +97,30 @@ describe('getChangePointSeriesColumns', () => {
   ( WHERE referer == "http://a.com" | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket )
 | WHERE type IS NOT NULL`;
     expect(getChangePointSeriesColumns(forkQuery)).toBeUndefined();
+  });
+});
+
+describe('getChangePointByColumns', () => {
+  it('returns undefined when there is no CHANGE_POINT BY', () => {
+    expect(getChangePointByColumns(undefined)).toBeUndefined();
+    expect(
+      getChangePointByColumns(
+        'FROM idx | STATS avg_bytes = AVG(bytes) BY bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket'
+      )
+    ).toBeUndefined();
+  });
+
+  it('returns BY columns from the query', () => {
+    expect(
+      getChangePointByColumns(
+        'FROM idx | STATS avg_bytes = AVG(bytes) BY host, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket BY host'
+      )
+    ).toEqual(['host']);
+    expect(
+      getChangePointByColumns(
+        'FROM idx | STATS avg_bytes = AVG(bytes) BY host, service, bucket = BUCKET(@timestamp, 1 day) | CHANGE_POINT avg_bytes ON bucket BY host, service'
+      )
+    ).toEqual(['host', 'service']);
   });
 });
 
