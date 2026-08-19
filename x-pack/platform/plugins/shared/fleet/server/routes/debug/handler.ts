@@ -22,7 +22,8 @@ export const fetchIndexHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const res = await fetchIndex(esClient, request.body.index);
+  const { spaceId } = await context.fleet;
+  const res = await fetchIndex(esClient, request.body.index, spaceId);
   return res.ok ? response.ok({ body: res.body }) : response.badRequest({ body: res.body });
 };
 
