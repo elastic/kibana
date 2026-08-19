@@ -105,6 +105,10 @@ export class RepairSLO {
       });
     }
 
+    if (group.actions.length === 0) {
+      group.actions.push({ type: 'noop' });
+    }
+
     return group;
   }
 
