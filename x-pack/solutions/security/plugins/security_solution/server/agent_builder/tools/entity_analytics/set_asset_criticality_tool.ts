@@ -97,6 +97,13 @@ export const setAssetCriticalityTool = (
       `,
     schema,
     tags: ['security', 'entity-analytics', 'asset-criticality'],
+    annotations: {
+      title: 'Set Asset Criticality',
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
     availability: {
       cacheMode: 'space',
       handler: async ({ request }: ToolAvailabilityContext) => {

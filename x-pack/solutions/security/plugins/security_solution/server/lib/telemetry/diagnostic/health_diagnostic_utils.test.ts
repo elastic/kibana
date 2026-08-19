@@ -672,6 +672,7 @@ describe('Security Solution - Health Diagnostic Queries - utils', () => {
       ...(id !== undefined ? { id } : {}),
       name: 'bad-query',
       _raw: { version: 99 },
+      failureReason: 'invalid_descriptor',
     });
 
     test('returns v2 queries unchanged when v1 is empty', () => {

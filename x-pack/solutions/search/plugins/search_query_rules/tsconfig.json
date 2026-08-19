@@ -31,7 +31,8 @@
     "@kbn/react-query",
     "@kbn/core-chrome-browser",
     "@kbn/app-header",
-    "@kbn/core-chrome-browser-context-mocks"
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/ui-callout"
   ],
   "exclude": ["target/**/*"]
 }
