@@ -93,9 +93,9 @@ export const rumReportScheduleSavedObjectType: SavedObjectsType = {
     properties: {
       name: { type: 'text' },
       enabled: { type: 'boolean' },
-      cadence: { type: 'keyword' },
-      connectorId: { type: 'keyword' },
-      templateId: { type: 'keyword' },
+      cadence: { type: 'keyword', ignore_above: 32 },
+      connectorId: { type: 'keyword', ignore_above: 128 },
+      templateId: { type: 'keyword', ignore_above: 32 },
       createdAt: { type: 'date' },
     },
   },

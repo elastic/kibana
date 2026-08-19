@@ -36,9 +36,9 @@ export const rumAlertNotificationsSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      workflowId: { type: 'keyword' },
-      policyId: { type: 'keyword' },
-      connectorId: { type: 'keyword' },
+      workflowId: { type: 'keyword', ignore_above: 128 },
+      policyId: { type: 'keyword', ignore_above: 128 },
+      connectorId: { type: 'keyword', ignore_above: 128 },
       updatedAt: { type: 'date' },
     },
   },
