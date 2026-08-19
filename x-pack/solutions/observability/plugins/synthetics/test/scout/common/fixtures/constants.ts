@@ -18,6 +18,7 @@ export const SYNTHETICS_API_URLS = {
   CERTS: '/internal/synthetics/certs',
   CERTS_FACETS: '/internal/synthetics/certs/facets',
   INSPECT_TLS_RULE: '/internal/synthetics/inspect_tls_rule',
+  INSPECT_STATUS_RULE: '/internal/synthetics/inspect_status_rule',
   GET_SYNTHETICS_MONITOR: '/api/synthetics/monitors/{monitorId}',
   TEST_NOW_MONITOR: '/api/synthetics/monitor/test',
   FILTERS: '/internal/synthetics/monitor/filters',
