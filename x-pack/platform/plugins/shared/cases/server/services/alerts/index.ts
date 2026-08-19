@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
+import pRetry from 'p-retry';
 import { isEmpty } from 'lodash';
 
 import type { ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
@@ -99,7 +100,9 @@ export class AlertService {
       let previousStatusMap: Map<string, STATUS_VALUES> | undefined;
       if (this.casesEventBus && this.request) {
         try {
-          previousStatusMap = await this.prefetchPreviousStatuses(alerts);
+          previousStatusMap = await pRetry(() => this.prefetchPreviousStatuses(alerts), {
+            retries: 3,
+          });
         } catch (err) {
           this.logger.warn(
             `Failed to prefetch previous alert statuses for Cases event bus: ${err}`
