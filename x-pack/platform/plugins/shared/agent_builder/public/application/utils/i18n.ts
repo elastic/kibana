@@ -2763,6 +2763,9 @@ export const labels = {
     notSetBadge: i18n.translate('xpack.agentBuilder.overview.customizations.notSetBadge', {
       defaultMessage: 'Not set',
     }),
+    aiIndicesTitle: i18n.translate('xpack.agentBuilder.agentOverview.aiIndicesTitle', {
+      defaultMessage: 'AI indices',
+    }),
     preExecutionWorkflowTitle: i18n.translate(
       'xpack.agentBuilder.overview.customizations.preExecutionWorkflowTitle',
       { defaultMessage: 'Pre-execution workflows' }

@@ -23,6 +23,8 @@ import { css } from '@emotion/react';
 import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
 import { getEbtProps } from '@kbn/ebt-click';
 import { labels } from '../../../utils/i18n';
+import { useIsContextEngineEnabled } from '../../../hooks/use_is_context_engine_enabled';
+import { useInheritedAiIndices } from '../../../hooks/ai_indices/use_inherited_ai_indices';
 
 const { agentOverview: overviewLabels } = labels;
 
@@ -46,6 +48,9 @@ export interface SettingsSectionProps {
   workflowIds: string[];
   canEditAgent: boolean;
   onOpenEditFlyout: () => void;
+  agentId: string;
+  /** AI indices assigned to the agent itself; the ones its type contributes are loaded here. */
+  assignedAiIndices: string[];
 }
 
 export const SettingsSection: React.FC<SettingsSectionProps> = ({
@@ -55,8 +60,20 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
   workflowIds,
   canEditAgent,
   onOpenEditFlyout,
+  agentId,
+  assignedAiIndices,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isContextEngineEnabled = useIsContextEngineEnabled();
+  const { inheritedAiIndicesByAgentId } = useInheritedAiIndices({
+    enabled: isContextEngineEnabled,
+  });
+  const inheritedAiIndices = inheritedAiIndicesByAgentId[agentId] ?? [];
+  // Inherited indices are named as defaults, matching how the edit form labels them.
+  const aiIndicesSummary = [
+    ...inheritedAiIndices.map((id) => labels.aiIndices.defaultIndexBadge(id)),
+    ...assignedAiIndices.filter((id) => !inheritedAiIndices.includes(id)),
+  ].join(', ');
 
   const textDisabledStyles = css`
     color: ${euiTheme.colors.textDisabled};
@@ -225,6 +242,49 @@ export const SettingsSection: React.FC<SettingsSectionProps> = ({
                         >
                           {hasWorkflows ? overviewLabels.enabledBadge : overviewLabels.notSetBadge}
                         </EuiBadge>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </>
+              )}
+
+              {/* AI indices row */}
+              {isContextEngineEnabled && (
+                <>
+                  <EuiHorizontalRule margin="none" />
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                      <EuiFlexItem grow>
+                        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                          <EuiFlexItem grow={false}>
+                            <EuiText
+                              size="s"
+                              color={
+                                aiIndicesSummary ? 'textPrimary' : euiTheme.colors.textDisabled
+                              }
+                            >
+                              {overviewLabels.aiIndicesTitle}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem
+                            grow={false}
+                            css={aiIndicesSummary ? undefined : textDisabledStyles}
+                          >
+                            <EuiIcon type="info" size="s" aria-hidden={true} />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        {aiIndicesSummary ? (
+                          <EuiText size="s" data-test-subj="agentOverviewAiIndices">
+                            {aiIndicesSummary}
+                          </EuiText>
+                        ) : (
+                          <EuiBadge color="default" data-test-subj="agentOverviewAiIndices">
+                            {overviewLabels.notSetBadge}
+                          </EuiBadge>
+                        )}
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

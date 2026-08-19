@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import '@testing-library/jest-dom';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { EuiProvider } from '@elastic/eui';
+import { FormProvider, useForm } from 'react-hook-form';
+import { AiIndicesSection } from './ai_indices_section';
+import type { EditDetailsFormData } from './types';
+
+jest.mock('../../../../hooks/use_is_context_engine_enabled', () => ({
+  useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
+}));
+jest.mock('../../../../hooks/ai_indices/use_list_ai_indices', () => ({
+  useListAiIndices: () => ({ aiIndices: mockAiIndices, isLoading: false, error: undefined }),
+}));
+jest.mock('../../../../hooks/ai_indices/use_inherited_ai_indices', () => ({
+  useInheritedAiIndices: () => ({
+    inheritedAiIndicesByAgentId: { [AGENT_ID]: mockInheritedIds },
+    isLoading: false,
+    error: undefined,
+  }),
+}));
+
+const AGENT_ID = 'my-agent';
+
+let mockIsContextEngineEnabled = true;
+let mockInheritedIds: string[] = [];
+let mockAiIndices: Array<{ id: string; description?: string; managed: boolean }> = [];
+
+const onSubmit = jest.fn();
+
+const TestForm: React.FC<{ assignedIds?: string[] }> = ({ assignedIds = [] }) => {
+  const form = useForm<EditDetailsFormData>({
+    defaultValues: { configuration: { ai_indices: assignedIds } },
+  });
+
+  return (
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <AiIndicesSection agentId={AGENT_ID} isDisabled={false} />
+        <button type="submit">submit</button>
+      </form>
+    </FormProvider>
+  );
+};
+
+const renderSection = (props: Parameters<typeof TestForm>[0] = {}) =>
+  render(
+    <EuiProvider>
+      <IntlProvider locale="en">
+        <TestForm {...props} />
+      </IntlProvider>
+    </EuiProvider>
+  );
+
+const submittedAiIndices = () => onSubmit.mock.calls[0][0].configuration.ai_indices;
+
+describe('AiIndicesSection (edit settings flyout)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockIsContextEngineEnabled = true;
+    mockInheritedIds = [];
+    mockAiIndices = [{ id: 'sales-outreach', managed: false }];
+  });
+
+  it('renders nothing when the Context Engine is off', () => {
+    mockIsContextEngineEnabled = false;
+
+    renderSection();
+
+    expect(screen.queryByTestId('editDetailsAiIndicesSection')).not.toBeInTheDocument();
+  });
+
+  it('renders the panel when the Context Engine is on', () => {
+    renderSection();
+
+    expect(screen.getByTestId('editDetailsAiIndicesSection')).toBeInTheDocument();
+  });
+
+  // The flyout's own summary already states whether Context is on, so the pill would repeat it.
+  it('leaves the Context status to the overview', () => {
+    renderSection({ assignedIds: ['sales-outreach'] });
+
+    expect(screen.queryByTestId('agentBuilderContextStatus-on')).not.toBeInTheDocument();
+  });
+
+  it('lists the AI indices the agent type contributes', () => {
+    mockInheritedIds = ['sig-events'];
+
+    renderSection();
+
+    expect(screen.getByTestId('agentBuilderDefaultAiIndex-sig-events')).toBeInTheDocument();
+  });
+
+  it('submits the AI indices the user picks', async () => {
+    renderSection();
+
+    await userEvent.click(screen.getByTestId('agentBuilderAdditionalAiIndicesButton'));
+    await userEvent.click(await screen.findByTestId('agentBuilderAiIndexOption-sales-outreach'));
+    await userEvent.click(screen.getByText('submit'));
+
+    expect(submittedAiIndices()).toEqual(['sales-outreach']);
+  });
+
+  it('keeps the assigned AI indices when nothing is changed', async () => {
+    renderSection({ assignedIds: ['sales-outreach'] });
+
+    await userEvent.click(screen.getByText('submit'));
+
+    expect(submittedAiIndices()).toEqual(['sales-outreach']);
+  });
+});

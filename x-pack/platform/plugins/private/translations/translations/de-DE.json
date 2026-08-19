@@ -11689,8 +11689,6 @@
     "xpack.agentBuilder.featureRegistry.subFeatures.management": "Management",
     "xpack.agentBuilder.featureRegistry.subFeatures.manageSkills.privilege": "Fähigkeiten erstellen und bearbeiten",
     "xpack.agentBuilder.featureRegistry.subFeatures.manageTools.privilege": "Benutzerdefinierte Tools erstellen und bearbeiten",
-    "xpack.agentBuilder.labels.viewMore.ariaLabel": "{hiddenCount} weitere {hiddenCount, plural, one {label} other {labels}} ({totalCount} insgesamt) anzeigen",
-    "xpack.agentBuilder.labels.viewMore.buttonLabel": "Mehr anzeigen",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.ariaLabel": "Sortieren und filtern",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.filterActive": "Diesem Agenten zugewiesen",
     "xpack.agentBuilder.libraryPanel.sortFilterButton.filterAll": "Alle",
