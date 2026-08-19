@@ -10,7 +10,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -21,18 +20,13 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import {
-  getBlastRadiusEbtDetail,
-  NIGHTSHIFT_EBT_ACTIONS,
-  NIGHTSHIFT_EBT_ELEMENTS,
-} from '../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
 import { nightshiftInteractiveSurfaceTransition } from '../common/transition';
 import type { BlastRadiusChip } from './blast_radius_chips';
 
 export const MAX_VISIBLE_BLAST_RADIUS_ENTITIES = 10;
 
 interface BlastRadiusEntityButtonProps {
-  chipKey: string;
   count: number;
   isSelected: boolean;
   name: string;
@@ -40,7 +34,6 @@ interface BlastRadiusEntityButtonProps {
 }
 
 function BlastRadiusEntityButton({
-  chipKey,
   count,
   isSelected,
   name,
@@ -61,7 +54,6 @@ function BlastRadiusEntityButton({
           ? NIGHTSHIFT_EBT_ACTIONS.CLEAR_BLAST_RADIUS_FILTER
           : NIGHTSHIFT_EBT_ACTIONS.FILTER_BY_BLAST_RADIUS,
         element: NIGHTSHIFT_EBT_ELEMENTS.BLAST_RADIUS,
-        detail: getBlastRadiusEbtDetail(chipKey),
       })}
       css={css`
         align-items: center;
@@ -128,24 +120,14 @@ function BlastRadiusEntityButton({
 
 export interface BlastRadiusEntitiesProps {
   entities: BlastRadiusChip[];
-  /** Streams that could not be reached, so `entities` is known to be incomplete. */
-  failedStreamNames?: string[];
-  /** Every stream failed, so nothing could be resolved at all. */
-  isError?: boolean;
   isLoading?: boolean;
-  onRetry?: () => void;
   onSelect: (chipKey: string) => void;
   selectedEntityKey?: string;
 }
 
-const NO_STREAM_NAMES: string[] = [];
-
 export function BlastRadiusEntities({
   entities,
-  failedStreamNames = NO_STREAM_NAMES,
-  isError = false,
   isLoading = false,
-  onRetry,
   onSelect,
   selectedEntityKey,
 }: BlastRadiusEntitiesProps): React.ReactElement | null {
@@ -178,10 +160,8 @@ export function BlastRadiusEntities({
   }, [entities, expanded, hasOverflow, selectedEntityKey]);
   const hiddenCount = Math.max(entities.length - visibleEntities.length, 0);
 
-  const hasFailures = isError || failedStreamNames.length > 0;
-
-  // A failed lookup must not read as "nothing was impacted", so the panel stays up to explain it.
-  if (entities.length === 0 && !isLoading && !hasFailures) {
+  // Unresolvable services fail silently, so there is nothing to show and nothing to explain.
+  if (entities.length === 0 && !isLoading) {
     return null;
   }
 
@@ -219,48 +199,6 @@ export function BlastRadiusEntities({
           </EuiFlexGroup>
         )}
 
-        {hasFailures && !isLoading && (
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            data-test-subj="blast-radius-error"
-            iconType="warning"
-            size="s"
-            title={
-              isError
-                ? i18n.translate('xpack.nightshift.blastRadiusErrorTitle', {
-                    defaultMessage: 'Unable to load impacted services',
-                  })
-                : i18n.translate('xpack.nightshift.blastRadiusPartialErrorTitle', {
-                    defaultMessage: 'Some impacted services could not be loaded',
-                  })
-            }
-            text={
-              isError ? undefined : (
-                <p data-test-subj="blast-radius-failed-streams">
-                  {i18n.translate('xpack.nightshift.blastRadiusPartialErrorDescription', {
-                    defaultMessage: 'No response from {streamNames}.',
-                    values: { streamNames: failedStreamNames.join(', ') },
-                  })}
-                </p>
-              )
-            }
-          >
-            <EuiButtonEmpty
-              color="warning"
-              data-test-subj="blast-radius-retry"
-              flush="left"
-              iconType="refresh"
-              onClick={() => onRetry?.()}
-              size="s"
-            >
-              {i18n.translate('xpack.nightshift.blastRadiusRetryButtonText', {
-                defaultMessage: 'Retry',
-              })}
-            </EuiButtonEmpty>
-          </EuiCallOut>
-        )}
-
         {!isLoading && entities.length > 0 && (
           <EuiFlexGroup
             alignItems="center"
@@ -274,7 +212,6 @@ export function BlastRadiusEntities({
             {visibleEntities.map(({ count, key, name }) => (
               <EuiFlexItem grow={false} key={key}>
                 <BlastRadiusEntityButton
-                  chipKey={key}
                   count={count}
                   isSelected={selectedEntityKey === key}
                   name={name}

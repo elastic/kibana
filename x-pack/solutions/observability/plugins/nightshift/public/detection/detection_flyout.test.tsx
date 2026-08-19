@@ -130,11 +130,7 @@ describe('DetectionFlyout', () => {
     mockOpenChat.mockClear();
     mockStreamFeatures.mockReturnValue({
       features: [webFrontendFeature],
-      failedStreamNames: [],
       isInitialLoading: false,
-      isFetching: false,
-      isError: false,
-      refetch: jest.fn(),
     });
   });
 
@@ -258,35 +254,40 @@ describe('DetectionFlyout', () => {
   });
 
   it('hides the impacted services section when no entry resolves to a service', () => {
-    mockStreamFeatures.mockReturnValue({
-      features: [],
-      failedStreamNames: [],
-      isInitialLoading: false,
-      isFetching: false,
-      isError: false,
-      refetch: jest.fn(),
-    });
+    mockStreamFeatures.mockReturnValue({ features: [], isInitialLoading: false });
     renderFlyout();
 
     expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
+    expect(screen.queryByText(/could not be loaded/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Retry')).not.toBeInTheDocument();
   });
 
-  it('names the unreachable streams while keeping the services that did resolve', () => {
+  it('includes services named only by the event causal features', () => {
+    const paymentsFeature = {
+      ...webFrontendFeature,
+      uuid: 'feat-payments',
+      id: 'payments-api',
+      stream_name: 'logs.payments',
+      title: 'payments-api',
+    };
     mockStreamFeatures.mockReturnValue({
-      features: [webFrontendFeature],
-      failedStreamNames: ['logs.payments', 'logs.checkout'],
+      features: [webFrontendFeature, paymentsFeature],
       isInitialLoading: false,
-      isFetching: false,
-      isError: false,
-      refetch: jest.fn(),
     });
-    renderFlyout();
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        causal_features: [
+          { feature_id: 'feat-payments', name: 'payments-api', stream_name: 'logs.payments' },
+        ],
+      },
+    });
 
-    expect(screen.getByText('Some impacted services could not be loaded')).toBeInTheDocument();
-    expect(screen.getByTestId('nightshiftDetectionFlyoutEntitiesFailedStreams')).toHaveTextContent(
-      'No response from logs.payments, logs.checkout.'
-    );
-    expect(screen.getAllByTestId('nightshiftDetectionFlyoutEntityChip').length).toBeGreaterThan(0);
+    expect(
+      screen
+        .getAllByTestId('nightshiftDetectionFlyoutEntityChip')
+        .map(({ textContent }) => textContent)
+    ).toEqual(['web-frontend', 'payments-api']);
   });
 
   it('renders the Lens occurrence chart in the trend section', () => {

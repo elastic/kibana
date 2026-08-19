@@ -20,53 +20,26 @@ const mockFeature = (id: string, streamName: string): Feature => ({
   confidence: 80,
 });
 
-const loaded = (features: Feature[]): PromiseSettledResult<Feature[]> => ({
-  status: 'fulfilled',
-  value: features,
-});
-
-const unreachable = (reason: Error): PromiseSettledResult<Feature[]> => ({
-  status: 'rejected',
-  reason,
-});
-
 describe('collectStreamFeatures', () => {
-  it('reports no failures when every stream resolves', () => {
-    const checkout = mockFeature('checkout-api', 'logs.checkout');
-    const payments = mockFeature('payments-api', 'logs.payments');
-
-    expect(
-      collectStreamFeatures(
-        ['logs.checkout', 'logs.payments'],
-        [loaded([checkout]), loaded([payments])]
-      )
-    ).toEqual({ features: [checkout, payments], failedStreamNames: [] });
-  });
-
-  // The whole point of the partial state: a short list must not pass for a complete one.
-  it('keeps the features that resolved and names the streams that did not', () => {
+  // Silent failure: an unreachable stream must not blank out the services of the reachable ones,
+  // and must not surface an error either.
+  it('keeps the features of the streams that answered and ignores the ones that did not', () => {
     const checkout = mockFeature('checkout-api', 'logs.checkout');
 
     expect(
-      collectStreamFeatures(
-        ['logs.checkout', 'logs.payments', 'logs.orders'],
-        [loaded([checkout]), unreachable(new Error('gateway timeout')), loaded([])]
-      )
-    ).toEqual({ features: [checkout], failedStreamNames: ['logs.payments'] });
+      collectStreamFeatures([
+        { status: 'fulfilled', value: [checkout] },
+        { status: 'rejected', reason: new Error('gateway timeout') },
+      ])
+    ).toEqual([checkout]);
   });
 
-  it('throws the first reason when every stream fails', () => {
-    const firstFailure = new Error('gateway timeout');
-
-    expect(() =>
-      collectStreamFeatures(
-        ['logs.checkout', 'logs.payments'],
-        [unreachable(firstFailure), unreachable(new Error('connection refused'))]
-      )
-    ).toThrow(firstFailure);
-  });
-
-  it('returns nothing rather than throwing when there are no streams to load', () => {
-    expect(collectStreamFeatures([], [])).toEqual({ features: [], failedStreamNames: [] });
+  it('returns nothing when every stream fails', () => {
+    expect(
+      collectStreamFeatures([
+        { status: 'rejected', reason: new Error('gateway timeout') },
+        { status: 'rejected', reason: new Error('connection refused') },
+      ])
+    ).toEqual([]);
   });
 });

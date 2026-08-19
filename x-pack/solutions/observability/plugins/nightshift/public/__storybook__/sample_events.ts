@@ -34,6 +34,16 @@ export const checkoutEvent: SignificantEventResponse = {
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
     },
+    {
+      feature_id: 'payment-gateway',
+      name: 'payment-gateway',
+      stream_name: 'logs.payment-gateway',
+    },
+    {
+      feature_id: 'checkout-api-mirror',
+      name: 'Checkout-API',
+      stream_name: 'logs.checkout-api-mirror',
+    },
   ],
   blast_radius: [
     {
@@ -42,12 +52,17 @@ export const checkoutEvent: SignificantEventResponse = {
       name: 'checkout-api',
       stream_name: 'logs.checkout-api',
     },
-    // Spans a second stream so one event alone can show a partial knowledge-indicator failure.
     {
       type: 'entity',
       feature_id: 'inventory-service',
       name: 'inventory-service',
       stream_name: 'logs.inventory-service',
+    },
+    {
+      type: 'infrastructure',
+      feature_id: 'es-data-tier',
+      title: 'Elasticsearch data tier',
+      stream_name: 'logs.elasticsearch',
     },
   ],
 };
@@ -209,6 +224,66 @@ export const checkoutFeature: Feature = {
     related_apm_service: 'checkout-api',
   },
 };
+
+export const inventoryFeature: Feature = {
+  ...checkoutFeature,
+  uuid: 'inventory-service',
+  id: 'inventory-service',
+  stream_name: 'logs.inventory-service',
+  title: 'inventory-service',
+  description: 'The inventory service tracks product availability across warehouses.',
+  properties: { 'service.name': 'inventory-service' },
+  confidence: 88,
+  evidence: ['service.name = inventory-service'],
+  meta: undefined,
+};
+
+/** Named only by `checkoutEvent.causal_features`, so it proves both arrays feed impacted services. */
+export const paymentGatewayFeature: Feature = {
+  ...checkoutFeature,
+  uuid: 'payment-gateway',
+  id: 'payment-gateway',
+  stream_name: 'logs.payment-gateway',
+  title: 'payment-gateway',
+  description: 'The payment gateway authorizes card transactions for checkout.',
+  properties: { 'service.name': 'payment-gateway' },
+  confidence: 91,
+  evidence: ['service.name = payment-gateway'],
+  meta: undefined,
+};
+
+/** Same service seen in a second stream under a differently cased title, so it must not chip twice. */
+export const checkoutApiMirrorFeature: Feature = {
+  ...checkoutFeature,
+  uuid: 'checkout-api-mirror',
+  id: 'checkout-api-mirror',
+  stream_name: 'logs.checkout-api-mirror',
+  title: 'Checkout-API',
+  meta: undefined,
+};
+
+/** Backs an `infrastructure` blast radius row, which is never an impacted service. */
+export const elasticsearchDataTierFeature: Feature = {
+  ...checkoutFeature,
+  uuid: 'es-data-tier',
+  id: 'es-data-tier',
+  stream_name: 'logs.elasticsearch',
+  subtype: 'infrastructure',
+  title: 'Elasticsearch data tier',
+  description: 'The Elasticsearch data tier backing catalog search.',
+  properties: {},
+  confidence: 76,
+  evidence: [],
+  meta: undefined,
+};
+
+export const nightshiftFeatures: Feature[] = [
+  checkoutFeature,
+  inventoryFeature,
+  paymentGatewayFeature,
+  checkoutApiMirrorFeature,
+  elasticsearchDataTierFeature,
+];
 
 export const completedInvestigation = {
   workflow_execution_id: 'checkout-investigation',

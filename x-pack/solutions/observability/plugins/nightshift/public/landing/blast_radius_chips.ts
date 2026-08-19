@@ -15,7 +15,7 @@ export interface BlastRadiusChip {
 }
 
 interface BlastRadiusChipOptions {
-  /** Knowledge indicators used to resolve each event's blast radius into impacted services. */
+  /** Knowledge indicators used to resolve each event's feature references into impacted services. */
   features: Feature[];
 }
 
@@ -26,8 +26,9 @@ export const eventHasBlastRadiusChip = (
 ): boolean => getImpactedServices(event, features).some(({ key }) => key === chipKey);
 
 /**
- * Landing blast-radius pills. Each pill is one impacted service — the subset of `blast_radius[]`
- * that resolves to a `service` knowledge indicator — counted across the events it appears in.
+ * Landing blast-radius pills. Each pill is one impacted service — the `blast_radius[]` entity rows
+ * and `causal_features[]` that resolve to a `service` knowledge indicator, deduplicated by label —
+ * counted across the events it appears in.
  */
 export const buildBlastRadiusChips = (
   events: SignificantEvent[],

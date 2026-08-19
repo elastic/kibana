@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { BlastRadiusEntry, Feature, SignificantEvent } from '@kbn/significant-events-schema';
+import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
 
 /**
- * Knowledge-indicator subtype that qualifies a blast radius entry as an impacted service.
+ * Knowledge-indicator subtype that qualifies a feature reference as an impacted service.
  *
  * `Feature.subtype` is an unconstrained `z.string()` written by the model that derives knowledge
  * indicators, so this is a value match rather than a typed one. Comparison is case-insensitive so
@@ -16,49 +16,43 @@ import type { BlastRadiusEntry, Feature, SignificantEvent } from '@kbn/significa
  */
 export const IMPACTED_SERVICE_SUBTYPE = 'service';
 
-/**
- * A `dependency` row names an edge — `source` → `target` behind a single `feature_id` — so it has
- * no unambiguous subject to render as one service. Every other row type is a candidate.
- */
-type ImpactedServiceCandidate = Exclude<BlastRadiusEntry, { type: 'dependency' }>;
-
 export interface ImpactedService {
   key: string;
   name: string;
-  streamName: string;
   feature: Feature;
 }
 
-const isCandidateEntry = (entry: BlastRadiusEntry): entry is ImpactedServiceCandidate =>
-  entry.type !== 'dependency';
-
-const getCandidateEntries = (event: SignificantEvent): ImpactedServiceCandidate[] =>
-  (event.blast_radius ?? []).filter(isCandidateEntry);
-
-/** `entity` rows carry a required `name`; `infrastructure` rows only an optional `title`. */
-const getEntryName = (entry: ImpactedServiceCandidate, feature: Feature): string =>
-  entry.type === 'entity' ? entry.name : entry.title ?? feature.title ?? feature.id;
-
 /**
- * A single `feature_id` can name more than one service, so the name is part of the key.
+ * Feature references an event offers as impacted services: its `blast_radius[]` entity rows and
+ * its `causal_features[]`.
  *
- * `getBlastRadiusEbtDetail` derives the privacy-safe analytics category from the leading entry
- * type, so the prefix has to stay.
+ * `blast_radius[]` also carries `infrastructure` rows (components) and `dependency` rows (edges
+ * between two services behind one `feature_id`); neither is a service an operator can act on, so
+ * only `entity` rows qualify. `causal_features[]` has no row type — every entry names one feature.
  */
-export const getImpactedServiceKey = (entry: ImpactedServiceCandidate, name: string): string =>
-  `${entry.type}:${entry.feature_id}:${name}`;
+const getCandidateReferences = (
+  event: SignificantEvent
+): Array<{ feature_id: string; stream_name?: string }> => [
+  ...(event.blast_radius ?? []).filter((entry) => entry.type === 'entity'),
+  ...(event.causal_features ?? []),
+];
 
 /** Streams whose knowledge indicators must be loaded before impacted services can be resolved. */
 export const getImpactedServiceStreamNames = (events: SignificantEvent[]): string[] => [
   ...new Set(
-    events.flatMap((event) => getCandidateEntries(event).map(({ stream_name }) => stream_name))
+    events.flatMap((event) =>
+      getCandidateReferences(event)
+        .map(({ stream_name: streamName }) => streamName)
+        .filter((streamName): streamName is string => Boolean(streamName))
+    )
   ),
 ];
 
 /**
- * Indexes features under both `uuid` and `id`, because `blast_radius[].feature_id` is written with
- * either. `uuid` is the canonical identifier, so it wins when one feature's `id` collides with
- * another's `uuid`; among `id`s alone the first feature in the list wins.
+ * Indexes features under both `uuid` and `id`, because `blast_radius[].feature_id` and
+ * `causal_features[].feature_id` are written with either. `uuid` is the canonical identifier, so it
+ * wins when one feature's `id` collides with another's `uuid`; among `id`s alone the first feature
+ * in the list wins.
  */
 const indexFeaturesByReference = (features: Feature[]): Map<string, Feature> => {
   const byReference = new Map<string, Feature>();
@@ -76,17 +70,22 @@ const indexFeaturesByReference = (features: Feature[]): Map<string, Feature> => 
 };
 
 /**
- * Impacted services are the `blast_radius[]` rows backed by a `service` knowledge indicator.
- * `causal_features[]` is deliberately not used: it names what *caused* the incident.
+ * Impacted services are the feature references of an event — `blast_radius[]` entity rows and
+ * `causal_features[]` alike — that resolve to a `service` knowledge indicator. Both arrays
+ * routinely name the same service, and neither alone is complete.
  *
- * The knowledge indicator decides whether a row is a service, not the row's own `type`:
- * `blast_radius[].type` is written per event by the agent while `subtype` comes from the knowledge
- * indicator pipeline, so an `infrastructure` row resolving to a service is still an impacted
- * service.
+ * The label is the knowledge indicator's own, not the free-text `name` on the row, and one service
+ * appears once: entries collapse on the case-insensitive label. A knowledge indicator's `uuid` is
+ * derived from `(stream_name, id)`, so the same service observed in two streams has two uuids —
+ * deduplicating on it would leave the visibly duplicated chips this collapsing exists to remove.
+ * Two genuinely distinct services sharing a label therefore collapse too, and the surviving entry
+ * carries the first resolved feature.
  *
- * Rows whose `feature_id` resolves to no stored feature are dropped — without the feature there is
- * no subtype to check, and keeping them would break the services-only guarantee. Nothing falls back
- * to a stream name, so an event with no resolvable rows contributes no services at all.
+ * References that resolve to no stored feature are dropped — without the feature there is no
+ * subtype to check, and keeping them would break the services-only guarantee. So is a feature left
+ * with no label: `title` and `id` are both unbounded below, and a blank one would render as a chip
+ * carrying a count and no name. Nothing falls back to a stream name, so an event with no resolvable
+ * references contributes no services at all.
  */
 export const getImpactedServices = (
   event: SignificantEvent,
@@ -95,16 +94,20 @@ export const getImpactedServices = (
   const featuresByReference = indexFeaturesByReference(features);
   const byKey = new Map<string, ImpactedService>();
 
-  for (const entry of getCandidateEntries(event)) {
-    const feature = featuresByReference.get(entry.feature_id);
+  for (const { feature_id: featureId } of getCandidateReferences(event)) {
+    const feature = featuresByReference.get(featureId);
     if (feature?.subtype?.toLowerCase() !== IMPACTED_SERVICE_SUBTYPE) {
       continue;
     }
 
-    const name = getEntryName(entry, feature);
-    const key = getImpactedServiceKey(entry, name);
+    const name = feature.title?.trim() || feature.id.trim();
+    if (!name) {
+      continue;
+    }
+
+    const key = name.toLowerCase();
     if (!byKey.has(key)) {
-      byKey.set(key, { key, name, streamName: feature.stream_name, feature });
+      byKey.set(key, { key, name, feature });
     }
   }
 

@@ -102,9 +102,6 @@ function setLifecycle({
   mockUseFetchStreamFeatures.mockReturnValue({
     features: [serviceFeature('feat-web-frontend', 'web-frontend')],
     isInitialLoading: false,
-    isFetching: false,
-    isError: false,
-    refetch: jest.fn(),
   });
   return { refetch };
 }

@@ -48,24 +48,31 @@ const impactedService = (name: string, streamName = 'logs.app') => ({
   stream_name: streamName,
 });
 
+const causalService = (name: string, streamName = 'logs.app') => ({
+  feature_id: `feat-${name}`,
+  name,
+  stream_name: streamName,
+});
+
 /** Every impacted-service entry in a fixture resolves to a matching service knowledge indicator. */
 const featuresForEvents = (events: SignificantEvent[]): Feature[] =>
   events.flatMap((event) =>
-    (event.blast_radius ?? [])
-      .filter((entry) => entry.type === 'entity')
-      .map(
-        (entry): Feature => ({
-          uuid: entry.feature_id,
-          id: entry.feature_id,
-          stream_name: entry.stream_name,
-          type: 'entity',
-          subtype: 'service',
-          title: entry.type === 'entity' ? entry.name : entry.feature_id,
-          description: '',
-          properties: {},
-          confidence: 90,
-        })
-      )
+    [
+      ...(event.blast_radius ?? []).filter((entry) => entry.type === 'entity'),
+      ...(event.causal_features ?? []),
+    ].map(
+      ({ feature_id: featureId, name, stream_name: streamName }): Feature => ({
+        uuid: featureId,
+        id: featureId,
+        stream_name: streamName ?? 'logs.app',
+        type: 'entity',
+        subtype: 'service',
+        title: name,
+        description: '',
+        properties: {},
+        confidence: 90,
+      })
+    )
   );
 
 const openChat = jest.fn();
@@ -112,9 +119,6 @@ function setEvents({
   mockUseFetchStreamFeatures.mockReturnValue({
     features: featuresForEvents(events),
     isInitialLoading: false,
-    isFetching: false,
-    isError: false,
-    refetch: jest.fn(),
   });
 }
 
@@ -363,21 +367,47 @@ describe('NightshiftApp', () => {
     expect(screen.getByRole('button', { name: /service-resolved/i })).toBeInTheDocument();
   });
 
-  it('surfaces a retry when the impacted services lookup fails', () => {
-    const refetch = jest.fn();
-    setEvents({ events: [mockEvent({ event_id: '1' })] });
-    mockUseFetchStreamFeatures.mockReturnValue({
-      features: [],
-      isInitialLoading: false,
-      isFetching: false,
-      isError: true,
-      refetch,
+  it('builds chips from causal features as well as blast radius entities', () => {
+    setEvents({
+      events: [
+        mockEvent({
+          event_id: '1',
+          blast_radius: [impactedService('service-downstream')],
+          causal_features: [causalService('service-cause')],
+        }),
+      ],
     });
+    const { container } = renderWithIntl();
+
+    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: /service-downstream/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /service-cause/i })).toBeInTheDocument();
+  });
+
+  it('shows one chip counted once when both arrays name the same service', () => {
+    setEvents({
+      events: [
+        mockEvent({
+          event_id: '1',
+          blast_radius: [impactedService('service-a')],
+          causal_features: [causalService('service-a')],
+        }),
+      ],
+    });
+    const { container } = renderWithIntl();
+
+    expect(container.querySelectorAll('[data-test-subj="blast-radius-chip"]')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'service-a: 1' })).toBeInTheDocument();
+  });
+
+  it('shows no impacted services panel, callout or retry when nothing resolves', () => {
+    setEvents({ events: [mockEvent({ event_id: '1' })] });
+    mockUseFetchStreamFeatures.mockReturnValue({ features: [], isInitialLoading: false });
     renderWithIntl();
 
-    expect(screen.getByText('Unable to load impacted services')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('blast-radius-retry'));
-    expect(refetch).toHaveBeenCalled();
+    expect(screen.queryByText('Impacted services')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('blast-radius-error')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('blast-radius-retry')).not.toBeInTheDocument();
   });
 
   it('filters significant events by blast radius', () => {
@@ -399,7 +429,7 @@ describe('NightshiftApp', () => {
 
     const blastRadiusButton = screen.getByRole('button', { name: /service-b/i });
     expect(blastRadiusButton).toHaveAttribute('data-ebt-action', 'filterByBlastRadius');
-    expect(blastRadiusButton).toHaveAttribute('data-ebt-detail', 'entity');
+    expect(blastRadiusButton).toHaveAttribute('data-ebt-element', 'nightshiftBlastRadius');
     fireEvent.click(blastRadiusButton);
 
     expect(screen.getByText('Service B event')).toBeInTheDocument();

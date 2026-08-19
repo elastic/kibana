@@ -16,23 +16,18 @@ import { useFetchStreamFeatures } from './use_fetch_stream_features';
 
 export interface ImpactedServicesResult {
   services: ImpactedService[];
-  /** Streams that could not be reached, so `services` is known to be incomplete. */
-  failedStreamNames: string[];
   isInitialLoading: boolean;
-  isFetching: boolean;
-  isError: boolean;
-  refetch: () => void;
 }
 
 /**
  * Resolves one event's impacted services, loading the knowledge indicators of the streams its
- * blast radius points at. Impacted services are event-level: every detection of an event shares
- * this list.
+ * blast radius and causal features point at. Impacted services are event-level: every detection of
+ * an event shares this list.
  */
 export const useImpactedServices = (event: SignificantEvent): ImpactedServicesResult => {
   const streamNames = useMemo(() => getImpactedServiceStreamNames([event]), [event]);
-  const { features, ...queryState } = useFetchStreamFeatures(streamNames);
+  const { features, isInitialLoading } = useFetchStreamFeatures(streamNames);
   const services = useMemo(() => getImpactedServices(event, features), [event, features]);
 
-  return { services, ...queryState };
+  return { services, isInitialLoading };
 };

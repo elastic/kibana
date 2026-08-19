@@ -197,13 +197,7 @@ export function NightshiftApp(): React.ReactElement {
 
   // Chips cover every event on the page, resolved included, so filtering by a service that only
   // appears in resolved events is still reachable.
-  const {
-    features,
-    failedStreamNames: blastRadiusFailedStreamNames,
-    isInitialLoading: isLoadingBlastRadius,
-    isError: isBlastRadiusError,
-    refetch: refetchBlastRadius,
-  } = useFetchStreamFeatures(
+  const { features, isInitialLoading: isLoadingBlastRadius } = useFetchStreamFeatures(
     useMemo(() => getImpactedServiceStreamNames(shownEvents), [shownEvents])
   );
   const blastRadius = useMemo(
@@ -485,10 +479,7 @@ export function NightshiftApp(): React.ReactElement {
 
           <BlastRadiusEntities
             entities={blastRadius}
-            failedStreamNames={blastRadiusFailedStreamNames}
-            isError={isBlastRadiusError}
             isLoading={isLoadingBlastRadius}
-            onRetry={refetchBlastRadius}
             onSelect={handleBlastRadiusSelect}
             selectedEntityKey={activeBlastRadiusChip}
           />

@@ -11,49 +11,21 @@ import { isComputedFeature, type Feature } from '@kbn/significant-events-schema'
 import { useKibana } from './use_kibana';
 
 const NO_FEATURES: Feature[] = [];
-const NO_STREAM_NAMES: string[] = [];
-
-export interface StreamFeaturesQueryData {
-  features: Feature[];
-  failedStreamNames: string[];
-}
 
 /**
- * Splits per-stream loads into the features that resolved and the streams that did not.
+ * Keeps the features of every stream that answered and drops the streams that did not.
  *
- * One unreachable stream must not blank out the services resolved from the others, so a partial
- * failure returns what loaded and names the rest. A total failure rethrows instead: an empty
- * impact list would otherwise read as "nothing was impacted".
+ * An unreachable stream fails silently: its services are simply absent. Nothing is surfaced to the
+ * operator, so this must never reject — one refused stream would otherwise blank out the services
+ * resolved from all the others.
  */
-export const collectStreamFeatures = (
-  streamNames: string[],
-  settled: Array<PromiseSettledResult<Feature[]>>
-): StreamFeaturesQueryData => {
-  const failedStreamNames = streamNames.filter((_, index) => settled[index].status === 'rejected');
-  if (streamNames.length > 0 && failedStreamNames.length === streamNames.length) {
-    throw (settled[0] as PromiseRejectedResult).reason;
-  }
-
-  return {
-    features: settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : [])),
-    failedStreamNames,
-  };
-};
+export const collectStreamFeatures = (settled: Array<PromiseSettledResult<Feature[]>>): Feature[] =>
+  settled.flatMap((result) => (result.status === 'fulfilled' ? result.value : []));
 
 export interface StreamFeaturesResult {
   features: Feature[];
-  /**
-   * Streams that could not be reached. Their services are missing from `features`, so a caller
-   * rendering an impact list has to say so rather than present a short list as a complete one.
-   */
-  failedStreamNames: string[];
   /** True only until the first load settles; a refetch keeps the previous features on screen. */
   isInitialLoading: boolean;
-  /** True for any request in flight, including a retry after an error. */
-  isFetching: boolean;
-  /** True only when every stream failed; a partial failure reports `failedStreamNames` instead. */
-  isError: boolean;
-  refetch: () => void;
 }
 
 const fetchStreamFeatures = async (
@@ -79,7 +51,7 @@ const fetchStreamFeatures = async (
 
 /**
  * Loads every stream's knowledge indicators under a single cache entry so the returned array keeps
- * a stable identity across renders — callers memoize impacted entities on it, and a fresh array
+ * a stable identity across renders — callers memoize impacted services on it, and a fresh array
  * each render would retrigger their effects.
  */
 export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesResult => {
@@ -88,15 +60,11 @@ export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesRes
   } = useKibana().services;
   const uniqueStreamNames = [...new Set(streamNames)].sort();
 
-  const { data, isInitialLoading, isFetching, isError, refetch } = useQuery<
-    StreamFeaturesQueryData,
-    Error
-  >({
+  const { data, isInitialLoading } = useQuery<Feature[], Error>({
     queryKey: ['nightshift.streamFeatures', uniqueStreamNames],
     enabled: uniqueStreamNames.length > 0,
     queryFn: async ({ signal }) =>
       collectStreamFeatures(
-        uniqueStreamNames,
         await Promise.allSettled(
           uniqueStreamNames.map((streamName) =>
             fetchStreamFeatures(significantEventsRepositoryClient, streamName, signal)
@@ -106,11 +74,7 @@ export const useFetchStreamFeatures = (streamNames: string[]): StreamFeaturesRes
   });
 
   return {
-    features: data?.features ?? NO_FEATURES,
-    failedStreamNames: data?.failedStreamNames ?? NO_STREAM_NAMES,
+    features: data ?? NO_FEATURES,
     isInitialLoading,
-    isFetching,
-    isError,
-    refetch,
   };
 };

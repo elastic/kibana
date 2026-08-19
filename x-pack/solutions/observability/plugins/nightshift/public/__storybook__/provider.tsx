@@ -19,11 +19,11 @@ import {
   type NightshiftSignificantEventsQueryData,
 } from '../hooks/use_fetch_significant_events';
 import {
-  checkoutFeature,
   checkoutLifecycle,
   checkoutOccurrences,
   dismissedShippingEvent,
   nightshiftEvents,
+  nightshiftFeatures,
   inventoryEvent,
   checkoutEvent,
   resolvedPaymentEvent,
@@ -41,15 +41,7 @@ export type NightshiftStorybookScenario =
   | 'error';
 
 export type NightshiftLifecycleScenario = 'populated' | 'loading' | 'empty' | 'error';
-export type NightshiftStreamFeaturesScenario =
-  | 'populated'
-  | 'loading'
-  | 'empty'
-  | 'error'
-  | 'partialError';
-
-/** The one stream `partialError` refuses to serve, so the others still resolve their services. */
-const UNREACHABLE_STREAM_NAME = 'logs.inventory-service';
+export type NightshiftStreamFeaturesScenario = 'populated' | 'loading' | 'empty' | 'error';
 
 const performanceApi = {
   onPageReady: () => undefined,
@@ -180,15 +172,9 @@ const createServices = ({
         if (streamFeaturesScenario === 'empty') {
           return { features: [] };
         }
-        if (
-          streamFeaturesScenario === 'partialError' &&
-          options?.params?.path?.name === UNREACHABLE_STREAM_NAME
-        ) {
-          throw new Error(`The ${UNREACHABLE_STREAM_NAME} features request failed`);
-        }
       }
 
-      return { features: [checkoutFeature] };
+      return { features: nightshiftFeatures };
     },
   };
 

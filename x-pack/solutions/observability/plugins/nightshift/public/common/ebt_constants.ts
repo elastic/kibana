@@ -43,12 +43,3 @@ export const NIGHTSHIFT_EBT_DETAILS = {
   NEEDS_ACTION: 'needsAction',
   RESOLVED: 'resolved',
 } as const;
-
-const BLAST_RADIUS_ENTRY_TYPES = ['dependency', 'entity', 'infrastructure'] as const;
-
-/**
- * Returns a fixed, privacy-safe category instead of the chip key, which can
- * contain customer-provided entity and stream names.
- */
-export const getBlastRadiusEbtDetail = (chipKey: string): string =>
-  BLAST_RADIUS_ENTRY_TYPES.find((type) => chipKey.startsWith(`${type}:`)) ?? 'stream';
