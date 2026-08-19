@@ -454,10 +454,7 @@ class SmlIndexerImpl implements SmlIndexer {
       filter.push({ term: { ingestion_method: ingestionMethod } });
     }
     if (spaces && spaces.length > 0) {
-      // Space scoping is now a direct term match on the nested `.space` field. It used to be a
-      // `prefix` query against the composite `<space>|<action>` token, which is no longer a
-      // meaningful string — and a prefix match on a nested leaf would not select the root document
-      // anyway.
+      // Space scoping is a direct term match on the nested `.space` field
       filter.push({
         nested: {
           path: 'permissions.kibana.privileges',
