@@ -96306,7 +96306,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Forces recovery when no data is present.
               enum:
                 - recover
               type: string
@@ -96803,7 +96803,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Forces recovery when no data is present.
               enum:
                 - recover
               type: string
@@ -97193,7 +97193,7 @@ components:
               enum:
                 - emit
               type: string
-            - description: Resolves the alert episode to inactive on the first no-data run.
+            - description: Forces recovery when no data is present.
               enum:
                 - recover
               type: string
