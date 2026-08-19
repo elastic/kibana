@@ -368,7 +368,13 @@ describe('IntegrationResolverImpl', () => {
 
   describe('unknown version queries', () => {
     it('returns SkippedQuery for ParseFailureQuery', async () => {
-      const unknown = { version: 99, id: 'future', name: 'future', _raw: {} };
+      const unknown = {
+        version: 99,
+        id: 'future',
+        name: 'future',
+        _raw: {},
+        failureReason: 'invalid_descriptor' as const,
+      };
       const results = await resolver.resolve([unknown]);
 
       expect(results).toHaveLength(1);
@@ -587,7 +593,13 @@ describe('IntegrationResolverImpl', () => {
       const v1 = createMockQueryV1(QueryType.DSL);
       const v2 = createMockQueryV2(QueryType.DSL, { integrations: ['endpoint'] });
       const v3api = createMockApiQueryV3({ integrations: ['fleet_server'] });
-      const unknown = { version: 99, id: 'x', name: 'x', _raw: {} };
+      const unknown = {
+        version: 99,
+        id: 'x',
+        name: 'x',
+        _raw: {},
+        failureReason: 'invalid_descriptor' as const,
+      };
 
       const results = await resolver.resolve([v1, v2, v3api, unknown]);
 
