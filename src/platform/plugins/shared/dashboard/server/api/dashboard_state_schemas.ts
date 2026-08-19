@@ -14,53 +14,23 @@ import {
   asCodeQuerySchema,
   getAsCodeTagsSchema,
 } from '@kbn/as-code-shared-schemas';
+import {
+  panelGridSchema,
+  optionsSchema,
+  accessControlSchema,
+  sectionGridSchema,
+  basePanelSchema,
+  MAX_PANELS,
+} from '@kbn/as-code-dashboard-schema';
 import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
 import { isDashboardSection } from '../../common';
-import {
-  DEFAULT_DASHBOARD_OPTIONS,
-  DEFAULT_PANEL_HEIGHT,
-  DEFAULT_PANEL_WIDTH,
-} from '../../common/constants';
 import type { DashboardPanel, DashboardSection } from './types';
 
-const MAX_PANELS = 1000;
-
-export const panelGridSchema = z
-  .object({
-    x: z.number().meta({ description: 'The x coordinate of the panel in grid units.' }),
-    y: z.number().meta({ description: 'The y coordinate of the panel in grid units.' }),
-    w: z.number().min(1).max(DASHBOARD_GRID_COLUMN_COUNT).default(DEFAULT_PANEL_WIDTH).meta({
-      description:
-        'The width of the panel in grid units. Minimum `1`, maximum `48`. Defaults to `24`.',
-    }),
-    h: z.number().min(1).default(DEFAULT_PANEL_HEIGHT).meta({
-      description: 'The height of the panel in grid units. Minimum `1`. Defaults to `15`.',
-    }),
-  })
-  .strict()
-  .meta({
-    id: 'kbn-dashboard-panel-grid',
-    title: 'Panel grid',
-    description: 'The position and size of the panel on the dashboard grid.',
-  });
-
-const basePanelSchema = z
-  .object({
-    id: z.string().optional().meta({ description: 'The unique ID of the panel.' }),
-    type: z.string(),
-    grid: panelGridSchema,
-    // TODO: enforce Serializable type, see https://github.com/elastic/kibana/pull/269196
-    config: z.object({}).loose() as z.ZodType<{}>,
-  })
-  .strict()
-  .meta({
-    id: 'kbn-dashboard-panel-type-unknown',
-  });
+export { panelGridSchema, optionsSchema, accessControlSchema, sectionGridSchema };
 
 export function getPanelSchema() {
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
@@ -86,12 +56,6 @@ export function getPanelSchema() {
 
   return z.discriminatedUnion('type', panelSchemas as [PanelSchema, ...PanelSchema[]]);
 }
-
-const sectionGridSchema = z
-  .object({
-    y: z.number().meta({ description: 'The y coordinate of the section in grid units.' }),
-  })
-  .strict();
 
 export function getSectionSchema<T extends ReturnType<typeof getPanelSchema>>(panelSchema: T) {
   return z
@@ -127,62 +91,6 @@ export function getPinnedPanelsSchema(
       >) // keeps derived types happy
     : getControlsGroupSchema();
 }
-
-export const optionsSchema = z
-  .object({
-    auto_apply_filters: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.auto_apply_filters).meta({
-      description:
-        "When `true`, control filter changes are applied automatically. When `false`, control filter changes are applied manually through the dashboard's search update button. Defaults to `true`.",
-    }),
-    hide_panel_titles: z
-      .boolean()
-      .default(DEFAULT_DASHBOARD_OPTIONS.hide_panel_titles)
-      .meta({ description: 'When `true`, panel titles are hidden. Defaults to `false`.' }),
-    hide_panel_borders: z
-      .boolean()
-      .default(DEFAULT_DASHBOARD_OPTIONS.hide_panel_borders)
-      .meta({ description: 'When `true`, panel borders are hidden. Defaults to `false`.' }),
-    use_margins: z
-      .boolean()
-      .default(DEFAULT_DASHBOARD_OPTIONS.use_margins)
-      .meta({ description: 'When `true`, panels are separated by a margin. Defaults to `true`.' }),
-    sync_colors: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.sync_colors).meta({
-      description:
-        'When `true`, colors are synchronized across panels that share a data source. Defaults to `false`.',
-    }),
-    sync_tooltips: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.sync_tooltips).meta({
-      description: 'When `true`, tooltips are synchronized across panels. Defaults to `false`.',
-    }),
-    sync_cursor: z.boolean().default(DEFAULT_DASHBOARD_OPTIONS.sync_cursor).meta({
-      description:
-        'When `true`, the cursor position is synchronized across panels. Defaults to `true`.',
-    }),
-  })
-  .strict()
-  .default(DEFAULT_DASHBOARD_OPTIONS)
-  .meta({
-    id: 'kbn-dashboard-options',
-    title: 'Options',
-    description: 'Display and behavior settings for the dashboard.',
-  });
-
-export const accessControlSchema = z
-  .object({
-    access_mode: z
-      .union([z.literal('write_restricted'), z.literal('default')])
-      .optional()
-      .meta({
-        description:
-          'Controls edit access to the dashboard. Set to `write_restricted` to prevent edits by users without explicit write permission. Defaults to `default` (all viewers can edit).',
-      }),
-  })
-  .strict()
-  .optional()
-  .meta({
-    description: 'Access control settings for the dashboard.',
-    id: 'kbn-dashboard-access-control',
-    title: 'Access control',
-  });
 
 export function getDashboardStateSchema(
   isDashboardAppRequest: boolean,

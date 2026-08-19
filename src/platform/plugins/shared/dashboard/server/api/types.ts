@@ -22,14 +22,23 @@ export type Warnings = z.output<typeof warningsSchema>;
 
 /** Display options for a dashboard. */
 export type DashboardOptions = z.output<typeof optionsSchema>;
+/** Display options for a dashboard (input shape — fields with defaults are optional). */
+export type DashboardOptionsInput = z.input<typeof optionsSchema>;
 /** Grid position and size data for a panel. */
 export type GridData = z.output<typeof panelGridSchema>;
+/** Grid position and size data for a panel (input shape — fields with defaults are optional). */
+export type GridDataInput = z.input<typeof panelGridSchema>;
 /** A panel in a dashboard containing an embeddable visualization. */
 export type DashboardPanel = z.output<ReturnType<typeof getPanelSchema>>;
 /** A section in a dashboard that groups panels. */
 export type DashboardSection = z.output<ReturnType<typeof getSectionSchema>>;
 /** The complete state of a dashboard including panels, filters, and settings. */
 export type DashboardState = z.output<ReturnType<typeof getDashboardStateSchema>>;
+/** The complete state of a dashboard (input shape — fields with defaults are optional). */
+export type DashboardStateInput = z.input<ReturnType<typeof getDashboardStateSchema>>;
 export type DashboardPinnedPanelsState = z.output<ReturnType<typeof getPinnedPanelsSchema>>;
+/** The input shape of pinned panels state (fields with defaults are optional). */
+export type DashboardPinnedPanelsStateInput = z.input<ReturnType<typeof getPinnedPanelsSchema>>;
 export type DashboardPinnedPanel = DashboardPinnedPanelsState[number];
+export type DashboardPinnedPanelInput = NonNullable<DashboardPinnedPanelsStateInput>[number];
 export type Operation = 'create' | 'read' | 'update' | 'search';

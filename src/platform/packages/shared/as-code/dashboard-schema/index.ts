@@ -1,0 +1,38 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+export {
+  panelGridSchema,
+  optionsSchema,
+  accessControlSchema,
+  sectionGridSchema,
+  getSectionSchema,
+  basePanelSchema,
+} from './src/schemas';
+
+export type {
+  PanelGrid,
+  DashboardOptions,
+  AccessControl,
+  SectionGrid,
+  BasePanel,
+  PanelGridInput,
+  DashboardOptionsInput,
+  AccessControlInput,
+  SectionGridInput,
+  BasePanelInput,
+} from './src/types';
+
+export {
+  DASHBOARD_GRID_COLUMN_COUNT,
+  DEFAULT_PANEL_WIDTH,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_DASHBOARD_OPTIONS,
+  MAX_PANELS,
+} from './src/constants';

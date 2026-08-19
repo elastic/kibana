@@ -4484,6 +4484,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/as-code-dashboard-schema@link:src/platform/packages/shared/as-code/dashboard-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/as-code-data-views-schema@link:src/platform/packages/shared/as-code/data-views-schema":
   version "0.0.0"
   uid ""

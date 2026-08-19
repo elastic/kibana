@@ -16,12 +16,17 @@ export type { DashboardSearchRequestParams, DashboardSearchResponseBody } from '
 export type { DashboardUpdateResponseBody } from './update';
 export type {
   DashboardState,
+  DashboardStateInput,
   DashboardPanel,
   DashboardPinnedPanelsState,
+  DashboardPinnedPanelsStateInput,
   DashboardPinnedPanel,
+  DashboardPinnedPanelInput,
   DashboardSection,
   DashboardOptions,
+  DashboardOptionsInput,
   GridData,
+  GridDataInput,
 } from './types';
 
 export { create } from './create/create';

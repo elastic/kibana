@@ -11,8 +11,13 @@ export type {
   DashboardCapabilities,
   DashboardLocatorParams,
   DashboardState,
+  DashboardStateInput,
   DashboardPinnedPanelsState,
+  DashboardPinnedPanelsStateInput,
   DashboardPinnedPanel,
+  DashboardPinnedPanelInput,
+  DashboardOptionsInput,
+  GridDataInput,
 } from './types';
 
 export { DASHBOARD_API_PATH } from './constants';
