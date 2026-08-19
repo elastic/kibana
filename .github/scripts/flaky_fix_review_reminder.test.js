@@ -253,3 +253,20 @@ test('a spoofed marker from a non-bot user does not suppress reminders', async (
     assert.ok(state.posted.some((c) => c.issue_number === 1));
   });
 });
+
+test('pings per run are capped at MAX_PINGS_PER_RUN', async () => {
+  await withFixtureAndNow(async () => {
+    const state = scenarioState();
+    // Make a third PR due so the sweep would ping 3 without the cap.
+    state.candidates.push({ number: 8, pull_request: {} });
+    state.prs[8] = { ...state.prs[1], number: 8 };
+    state.reviews[8] = [];
+    state.timeline[8] = [{ event: 'ready_for_review', created_at: iso('2026-08-12') }];
+    state.files[8] = ['src/core/server/index.ts'];
+
+    process.env.DRY_RUN = 'false';
+    await reminder({ github: makeGithub(state), context, core: silentCore });
+
+    assert.equal(state.posted.length, 2);
+  });
+});

@@ -1,15 +1,19 @@
 name: Flaky fix review reminder
 
-# Daily sweep that pings the codeowners of the changed files when a
-# `flaky-test-fixer` PR has been ready for review for 4 days (weekends
-# included) without a review. These PRs are opened by kibanamachine with no
-# human author behind them, so without a nudge they often sit unreviewed.
+# Daily sweep over open pull requests that carry the `flaky-test-fixer` label
+# (draft PRs opened against main by kibanamachine via the flaky-test-fixer
+# agentic workflow, then marked ready for review by a developer). When such a
+# PR has been ready for 4 days (weekends included) without a human review, this
+# pings the codeowners of the changed files in a comment.
 #
-# The reminder re-pings on the same 4-day cadence until a review is submitted.
-# Draft PRs are skipped until they are marked ready for review.
+# Although the sweep runs daily, it does not ping daily: each reminder embeds a
+# hidden marker comment, and a PR is only pinged again once 4 days have passed
+# since the later of (ready for review, our last reminder). A submitted human
+# review stops the reminders entirely; drafts are skipped until marked ready.
 
 on:
   schedule:
+    # daily at 07:00 UTC (early morning CET, before the EU workday)
     - cron: '0 7 * * *'
   workflow_dispatch:
     inputs:
@@ -24,7 +28,7 @@ permissions:
 
 jobs:
   remind:
-    name: Ping codeowners on unreviewed flaky-fix PRs
+    name: Ping codeowners of PRs labeled flaky-test-fixer with no review for 4+ days
     runs-on: ubuntu-latest
     if: github.repository == 'elastic/kibana'
     concurrency:
@@ -43,7 +47,9 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry_run == true }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # No github-token needed: github-script defaults to the workflow's
+          # own GITHUB_TOKEN, whose `pull-requests: write` permission is enough
+          # to comment. Reminder comments are authored by github-actions[bot].
           script: |
             const flakyFixReviewReminder = require('./.github/scripts/flaky_fix_review_reminder');
             await flakyFixReviewReminder({ github, context, core });

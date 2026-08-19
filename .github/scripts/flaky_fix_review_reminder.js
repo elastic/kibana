@@ -29,9 +29,10 @@ const REMINDER_AUTHOR = 'github-actions[bot]';
 // Days a PR may sit without a human review before we ping, and the cadence at
 // which we re-ping afterwards. Calendar days, weekends included.
 const REMINDER_AFTER_DAYS = 4;
-// Cap pings per run to avoid a notification storm / secondary rate limits on the
-// first sweep over the backlog.
-const MAX_PINGS_PER_RUN = 50;
+// Cap pings per run so a daily sweep can never cause a notification storm,
+// even on the first pass over a large backlog. The backlog drains at this
+// rate per day; raise it once the reminder has proven itself in production.
+const MAX_PINGS_PER_RUN = 2;
 // Used when no codeowner can be resolved for the changed files.
 const FALLBACK_OWNER = '@elastic/appex-qa';
 const DEFAULT_CODEOWNERS_PATH = path.resolve(process.cwd(), '.github/CODEOWNERS');
