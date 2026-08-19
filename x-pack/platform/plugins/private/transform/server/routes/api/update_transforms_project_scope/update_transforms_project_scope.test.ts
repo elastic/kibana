@@ -81,6 +81,63 @@ describe('updateTransformsProjectScope', () => {
     });
   });
 
+  it('falls back to per-transform fetches when a batch fetch fails because one transform is missing', async () => {
+    const esClient = createEsClient();
+    esClient.transform.getTransform
+      .mockRejectedValueOnce({
+        meta: {
+          body: {
+            error: {
+              type: 'resource_not_found_exception',
+              reason: 'Transform missing-transform could not be found.',
+              root_cause: [],
+              caused_by: {},
+              response: {},
+            },
+          },
+        },
+      })
+      .mockResolvedValueOnce({ transforms: [createTransform('transform-1')] })
+      .mockRejectedValueOnce({
+        meta: {
+          body: {
+            error: {
+              type: 'resource_not_found_exception',
+              reason: 'Transform missing-transform could not be found.',
+              root_cause: [],
+              caused_by: {},
+              response: {},
+            },
+          },
+        },
+      })
+      .mockResolvedValueOnce({ transforms: [createTransform('transform-2')] });
+
+    const results = await updateTransformsProjectScope(
+      {
+        projectRouting: '_id:linked-project',
+        transformsInfo: [{ id: 'transform-1' }, { id: 'missing-transform' }, { id: 'transform-2' }],
+      },
+      esClient
+    );
+
+    expect(esClient.transform.getTransform).toHaveBeenCalledTimes(4);
+    expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(1, {
+      allow_no_match: true,
+      size: 3,
+      transform_id: 'transform-1,missing-transform,transform-2',
+    });
+    expect(esClient.transform.updateTransform).toHaveBeenCalledTimes(2);
+    expect(results['transform-1']).toEqual({ success: true });
+    expect(results['transform-2']).toEqual({ success: true });
+    expect(results['missing-transform']).toMatchObject({
+      success: false,
+      error: {
+        type: 'resource_not_found_exception',
+      },
+    });
+  });
+
   it('returns a per-transform failure result when an update fails', async () => {
     const esClient = createEsClient([
       createTransform('transform-1'),

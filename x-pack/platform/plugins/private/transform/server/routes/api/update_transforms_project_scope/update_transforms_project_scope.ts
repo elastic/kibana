@@ -52,6 +52,12 @@ const getErrorBody = (error: unknown): NonNullable<ResponseStatus['error']> => {
   };
 };
 
+const isResourceNotFoundError = (error: unknown): boolean => {
+  const esError = (error as { meta?: { body?: { error?: { type?: string } } } }).meta?.body?.error;
+
+  return esError?.type === 'resource_not_found_exception';
+};
+
 const createMissingTransformError = (transformId: TransformId): ResponseStatus['error'] => ({
   type: 'resource_not_found_exception',
   reason: `Transform ${transformId} could not be found.`,
@@ -67,6 +73,45 @@ const createMissingSourceError = (transformId: TransformId): ResponseStatus['err
   caused_by: {},
   response: {},
 });
+
+const getTransformsIndividually = async ({
+  esClient,
+  results,
+  transformIds,
+  transformsById,
+}: {
+  esClient: ElasticsearchClient;
+  results: UpdateTransformsProjectScopeResponseSchema;
+  transformIds: TransformId[];
+  transformsById: Map<TransformId, estypes.TransformGetTransformTransformSummary>;
+}): Promise<void> => {
+  for (const transformId of transformIds) {
+    try {
+      const response = await esClient.transform.getTransform({
+        allow_no_match: true,
+        size: 1,
+        transform_id: transformId,
+      });
+      const transform = response.transforms[0];
+
+      if (transform) {
+        transformsById.set(transform.id, transform);
+      } else {
+        results[transformId] = {
+          success: false,
+          error: createMissingTransformError(transformId),
+        };
+      }
+    } catch (error) {
+      results[transformId] = {
+        success: false,
+        error: isResourceNotFoundError(error)
+          ? createMissingTransformError(transformId)
+          : getErrorBody(error),
+      };
+    }
+  }
+};
 
 const getTransformsById = async ({
   esClient,
@@ -92,6 +137,16 @@ const getTransformsById = async ({
         transformsById.set(transform.id, transform);
       }
     } catch (error) {
+      if (isResourceNotFoundError(error)) {
+        await getTransformsIndividually({
+          esClient,
+          results,
+          transformIds: transformIdChunk,
+          transformsById,
+        });
+        continue;
+      }
+
       for (const transformId of transformIdChunk) {
         results[transformId] = { success: false, error: getErrorBody(error) };
       }
