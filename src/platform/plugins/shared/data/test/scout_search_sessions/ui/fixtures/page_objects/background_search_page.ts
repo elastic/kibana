@@ -20,8 +20,10 @@ export const BACKGROUND_SEARCH_FLYOUT_ENTRYPOINT = 'openBackgroundSearchFlyoutBu
 const SUBMIT_BUTTON = 'querySubmitButton';
 const CANCEL_BUTTON = 'queryCancelButton';
 // While a search is in flight the split button switches from `querySubmitButton-*` to
-// `queryCancelButton-*`, and only then does it offer "Send to background".
-const SEND_TO_BACKGROUND_BUTTON = 'queryCancelButton-secondary-button';
+// `queryCancelButton-*`, and only then does it offer "Send to background". Dashboards are the
+// exception: they don't put the split button into the loading state.
+const SEND_TO_BACKGROUND_FROM_CANCEL = 'queryCancelButton-secondary-button';
+const SEND_TO_BACKGROUND_FROM_SUBMIT = 'querySubmitButton-secondary-button';
 const MANAGEMENT_TABLE = 'searchSessionsMgmtUiTable';
 const SAVED_TOAST_LINK = 'backgroundSearchToastLink';
 const COMPLETED_TOAST_LINK = 'backgroundSearchCompletedToastLink';
@@ -33,10 +35,18 @@ const COMPLETED_TOAST_LINK = 'backgroundSearchCompletedToastLink';
 const ERROR_OR_WARNING_PATTERN =
   /Your background search is still running|Timed out|Search Error|Cannot retrieve search results|Unable to connect to the Kibana server|Failed to edit name of the background search|Failed to fetch background search info/;
 
+export interface SendToBackgroundOptions {
+  /**
+   * Read the secondary button from the submit-state split button instead of the cancel-state
+   * one. Dashboards do not put the split button into the loading state.
+   */
+  isSubmitButton?: boolean;
+}
+
 /**
  * Page object for the in-app background search controls: the "Send to background" secondary
- * submit button, the background search flyout, and the completion toast. These render inside
- * Discover and Dashboard.
+ * submit button, the background search flyout, and the save/completion toasts. These render
+ * inside Discover and Dashboard.
  *
  * The standalone management application at /app/management/kibana/search_sessions is covered
  * by `BackgroundSearchManagementPage` instead.
@@ -67,7 +77,7 @@ export class BackgroundSearchPage {
    * Re-run the current query and send the resulting in-flight search to the background, then
    * wait for the confirmation toast.
    */
-  async sendToBackground() {
+  async sendToBackground({ isSubmitButton = false }: SendToBackgroundOptions = {}) {
     const submitButton = this.page.testSubj.locator(SUBMIT_BUTTON);
     // While a search is in flight the submit button is swapped for the cancel button, so wait
     // for it to come back before clicking.
@@ -77,9 +87,13 @@ export class BackgroundSearchPage {
     // Confirm the search is actually in flight before reaching for the secondary action.
     // Without this, a query that returns instantly makes the next click race a DOM swap and
     // fail with a confusing "element is not enabled / was detached" error.
-    await this.page.testSubj.locator(CANCEL_BUTTON).waitFor({ state: 'visible' });
+    if (!isSubmitButton) {
+      await this.page.testSubj.locator(CANCEL_BUTTON).waitFor({ state: 'visible' });
+    }
 
-    await this.page.testSubj.locator(SEND_TO_BACKGROUND_BUTTON).click();
+    await this.page.testSubj
+      .locator(isSubmitButton ? SEND_TO_BACKGROUND_FROM_SUBMIT : SEND_TO_BACKGROUND_FROM_CANCEL)
+      .click();
     await this.savedToastLink.waitFor({ state: 'visible' });
   }
 

@@ -10,8 +10,6 @@
 /**
  * Sending a running Discover (classic) search to the background.
  *
- * Migrated from x-pack/platform/test/search_sessions_integration/tests/apps/discover/classic.ts.
- *
  * Local-only: `STALLING_DSL_FILTER` relies on the `test-error-query` Elasticsearch module,
  * which is not present on Elastic Cloud.
  */
