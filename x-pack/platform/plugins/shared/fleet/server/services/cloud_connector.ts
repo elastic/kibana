@@ -545,27 +545,28 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
       }
 
-      const externalIdValue = awsVars.external_id?.value;
-      const externalId: CloudConnectorSecretReference | undefined = isCloudConnectorSecretReference(
-        externalIdValue
-      )
-        ? externalIdValue
-        : undefined;
-      if (!externalId) {
-        logger.error('Package policy must contain valid external_id secret reference');
-        throw new CloudConnectorInvalidVarsError(
-          'Package policy must contain valid external_id secret reference'
-        );
-      }
+      // external_id is optional for AWS. When present, it must be a valid
+      // secret reference.
+      if (awsVars.external_id !== undefined) {
+        const externalIdValue = awsVars.external_id?.value;
+        const externalId: CloudConnectorSecretReference | undefined =
+          isCloudConnectorSecretReference(externalIdValue) ? externalIdValue : undefined;
+        if (!externalId) {
+          logger.error('Package policy must contain valid external_id secret reference');
+          throw new CloudConnectorInvalidVarsError(
+            'Package policy must contain valid external_id secret reference'
+          );
+        }
 
-      const isValidExternalId =
-        externalId?.id &&
-        externalId?.isSecretRef &&
-        CloudConnectorService.EXTERNAL_ID_REGEX.test(externalId.id);
+        const isValidExternalId =
+          externalId?.id &&
+          externalId?.isSecretRef &&
+          CloudConnectorService.EXTERNAL_ID_REGEX.test(externalId.id);
 
-      if (!isValidExternalId) {
-        logger.error('External ID secret reference must be a valid secret reference');
-        throw new CloudConnectorInvalidVarsError('External ID secret reference is not valid');
+        if (!isValidExternalId) {
+          logger.error('External ID secret reference must be a valid secret reference');
+          throw new CloudConnectorInvalidVarsError('External ID secret reference is not valid');
+        }
       }
     } else if (cloudConnector.cloudProvider === 'azure') {
       // Type assertion is safe here because we perform runtime validation below
