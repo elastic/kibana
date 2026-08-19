@@ -20,7 +20,7 @@ export {
 } from './src/components/row_height_settings';
 export { getDisplayedColumns, SOURCE_COLUMN } from './src/utils/columns';
 export { getTextBasedColumnsMeta } from './src/utils/get_columns_meta';
-export { ROWS_HEIGHT_OPTIONS, DataGridDensity, DEFAULT_PAGINATION_MODE } from './src/constants';
+export { ROWS_HEIGHT_OPTIONS, DataGridDensity, DEFAULT_PAGINATION_MODE, defaultTimeColumnWidth } from './src/constants';
 
 export { JSONCodeEditorCommonMemoized } from './src/components/json_code_editor/json_code_editor_common';
 export { SourceDocument } from './src/components/source_document';
@@ -49,5 +49,15 @@ export { RowHeightMode } from './src/components/row_height_settings';
 
 export type { UnifiedDataTableRestorableState } from './src/restorable_state';
 export { UnifiedDataTableSummaryColumnHeader } from './src/components/data_table_summary_column_header';
+
+export { getColumnDisplayName } from './src/components/data_table_columns';
+export {
+  buildCopyColumnNameButton,
+  buildCopyColumnValuesButton,
+} from './src/components/build_copy_column_button';
+export { buildEditFieldButton } from './src/components/build_edit_field_button';
+export { isSortable } from './src/hooks/use_sorting';
+export { getSchemaByKbnType } from './src/components/data_table_schema';
+export { convertValueToString } from './src/utils/convert_value_to_string';
 
 export { type EuiDataGridRefProps } from '@elastic/eui';

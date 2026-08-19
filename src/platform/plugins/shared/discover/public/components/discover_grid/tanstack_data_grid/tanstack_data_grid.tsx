@@ -48,6 +48,7 @@ import {
   formatFieldValueText,
   canPrependTimeFieldColumn,
   getVisibleColumns,
+  prepareDataViewForEditing,
 } from '@kbn/discover-utils';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import {
@@ -74,7 +75,21 @@ import {
   DEFAULT_COL_WIDTH,
   MIN_COL_WIDTH,
 } from './tanstack_data_grid.styles';
+import {
+  computeTanStackColumnLayout,
+  getTimeColumnWidth,
+  type TanStackColumnLayout,
+} from './tanstack_column_layout';
+import { TanStackColumnHeaderActions } from './tanstack_column_header_actions';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import {
+  convertValueToString,
+  getColumnDisplayName,
+  getSchemaByKbnType,
+  isSortable,
+  type ValueToStringConverter,
+} from '@kbn/unified-data-table';
 
 declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
@@ -123,6 +138,8 @@ export interface TanStackDataGridProps {
   onUpdateHeaderRowHeight?: UnifiedDataTableProps['onUpdateHeaderRowHeight'];
   configHeaderRowHeight?: UnifiedDataTableProps['configHeaderRowHeight'];
   services: UnifiedDataTableProps['services'];
+  onFieldEdited?: UnifiedDataTableProps['onFieldEdited'];
+  shouldKeepAdHocDataViewImmutable?: UnifiedDataTableProps['shouldKeepAdHocDataViewImmutable'];
   consumer?: UnifiedDataTableProps['consumer'];
   externalAdditionalControls?: React.ReactNode;
   gridImplementationSwitch?: React.ReactNode;
@@ -653,6 +670,7 @@ const VirtualRow = React.memo(
       setPopoverState?: (state: { fieldName: string; value: unknown; rect: DOMRect } | null) => void;
       findTerm?: string;
       findActiveMatch?: FindMatch | null;
+      getColumnStyle: TanStackColumnLayout['getColumnStyle'];
     }
   >(function VirtualRow(
     {
@@ -670,6 +688,7 @@ const VirtualRow = React.memo(
       setPopoverState,
       findTerm,
       findActiveMatch,
+      getColumnStyle,
     },
     ref
   ) {
@@ -707,6 +726,7 @@ const VirtualRow = React.memo(
               findTerm={findTerm}
               findActiveMatch={findActiveMatch}
               rowIndex={virtualRow.index}
+              getColumnStyle={getColumnStyle}
             />
           ))}
         </div>
@@ -728,6 +748,7 @@ const VirtualCell = React.memo(
     findTerm,
     findActiveMatch,
     rowIndex,
+    getColumnStyle,
   }: {
     cell: Cell<DataTableRecord, unknown>;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
@@ -738,16 +759,22 @@ const VirtualCell = React.memo(
     findTerm?: string;
     findActiveMatch?: FindMatch | null;
     rowIndex?: number;
+    getColumnStyle: TanStackColumnLayout['getColumnStyle'];
   }) => {
     const isControl = cell.column.columnDef.meta?.isControl;
     const isSelect = cell.column.columnDef.meta?.isSelect;
     const isSummary = cell.column.columnDef.meta?.isSummary;
+    const columnStyle = getColumnStyle({
+      id: cell.column.id,
+      isSummary,
+      isTimestamp: cell.column.columnDef.meta?.isTimestamp,
+    });
 
     if (isControl || isSelect) {
       return (
         <div
           css={[isSelect ? styles.selectCell : styles.controlCell, isFocused && styles.focusedCell]}
-          style={{ width: cell.column.getSize() }}
+          style={{ width: isSelect ? SELECT_COL_WIDTH : CONTROL_COL_WIDTH, flexShrink: 0 }}
           role="gridcell"
         >
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -772,7 +799,7 @@ const VirtualCell = React.memo(
         <div
           css={[styles.summaryCell, styles.expandableCell, isFocused && styles.focusedCell]}
           role="gridcell"
-          style={{ flex: '1 1 0' }}
+          style={columnStyle}
           tabIndex={0}
           onClick={(e) => openSummaryPopover(e.currentTarget)}
           onKeyDown={(e) => {
@@ -818,7 +845,7 @@ const VirtualCell = React.memo(
           styles.expandableCell,
           isFocused && styles.focusedCell,
         ]}
-        style={{ width: cell.column.getSize() }}
+        style={columnStyle}
         role="gridcell"
         data-row-id={rowId}
         data-col-id={colId}
@@ -924,12 +951,14 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     onUpdateHeaderRowHeight,
     configHeaderRowHeight,
     services,
+    onFieldEdited,
+    shouldKeepAdHocDataViewImmutable,
     consumer = 'discover',
     externalAdditionalControls,
     gridImplementationSwitch,
   }) => {
     const { euiTheme } = useEuiTheme();
-    const { fieldFormats, storage } = services;
+    const { fieldFormats, storage, toastNotifications, dataViewFieldEditor, data } = services;
     const parentRef = useRef<HTMLDivElement | null>(null);
     const styles = useMemo(() => getTanStackDataGridStyles(euiTheme), [euiTheme]);
 
@@ -1245,103 +1274,63 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
 
     const stopPropagation = useCallback((e: React.SyntheticEvent) => e.stopPropagation(), []);
 
-    // ── Column header context menu ──
-    const [headerMenuState, setHeaderMenuState] = useState<{
-      colId: string;
-      anchorPosition: { top: number; left: number };
-    } | null>(null);
+    const valueToStringConverter: ValueToStringConverter = useCallback(
+      (rowIndex, columnId, options) =>
+        convertValueToString({
+          rowIndex,
+          rows,
+          dataView,
+          columnId,
+          fieldFormats,
+          columnsMeta,
+          options,
+        }),
+      [columnsMeta, dataView, fieldFormats, rows]
+    );
 
-    const handleHeaderContextMenu = useCallback((e: React.MouseEvent, colId: string) => {
-      e.preventDefault();
-      setHeaderMenuState({ colId, anchorPosition: { top: e.clientY, left: e.clientX } });
+    const closeFieldEditor = useRef<() => void | undefined>();
+
+    useEffect(() => {
+      return () => {
+        closeFieldEditor.current?.();
+      };
     }, []);
 
-    const closeHeaderMenu = useCallback(() => setHeaderMenuState(null), []);
+    const editField = useMemo(
+      () =>
+        onFieldEdited
+          ? async (fieldName: string) => {
+              const editedDataView = shouldKeepAdHocDataViewImmutable
+                ? await prepareDataViewForEditing(dataView, data.dataViews)
+                : dataView;
+              closeFieldEditor.current =
+                onFieldEdited &&
+                (await services.dataViewFieldEditor?.openEditor({
+                  ctx: {
+                    dataView: editedDataView,
+                  },
+                  fieldName,
+                  onSave: async () => {
+                    await onFieldEdited({
+                      editedDataView,
+                    });
+                  },
+                }));
+            }
+          : undefined,
+      [
+        data.dataViews,
+        dataView,
+        onFieldEdited,
+        services.dataViewFieldEditor,
+        shouldKeepAdHocDataViewImmutable,
+      ]
+    );
 
-    const headerMenuItems = useMemo(() => {
-      if (!headerMenuState) return [];
-      const { colId } = headerMenuState;
-      const colIndex = effectiveColumns.indexOf(colId);
-      const items: Array<{ name: string; icon: string; onClick: () => void }> = [];
-
-      if (colIndex > 0 && onSetColumns) {
-        items.push({
-          name: 'Move left',
-          icon: 'sortLeft',
-          onClick: () => {
-            const newCols = [...effectiveColumns];
-            [newCols[colIndex - 1], newCols[colIndex]] = [newCols[colIndex], newCols[colIndex - 1]];
-            persistVisibleColumns(newCols);
-            closeHeaderMenu();
-          },
-        });
-      }
-
-      if (colIndex < effectiveColumns.length - 1 && colIndex >= 0 && onSetColumns) {
-        items.push({
-          name: 'Move right',
-          icon: 'sortRight',
-          onClick: () => {
-            const newCols = [...effectiveColumns];
-            [newCols[colIndex], newCols[colIndex + 1]] = [newCols[colIndex + 1], newCols[colIndex]];
-            persistVisibleColumns(newCols);
-            closeHeaderMenu();
-          },
-        });
-      }
-
-      items.push({
-        name: 'Copy column name',
-        icon: 'copyClipboard',
-        onClick: () => {
-          navigator.clipboard.writeText(colId);
-          closeHeaderMenu();
-        },
-      });
-
-      items.push({
-        name: 'Copy column values',
-        icon: 'copyClipboard',
-        onClick: () => {
-          const values = rows.map((r) => formatCellValue(r.flattened[colId])).join('\n');
-          navigator.clipboard.writeText(values);
-          closeHeaderMenu();
-        },
-      });
-
-      if (onResize) {
-        items.push({
-          name: 'Reset width',
-          icon: 'empty',
-          onClick: () => {
-            onResize({ columnId: colId, width: undefined });
-            closeHeaderMenu();
-          },
-        });
-      }
-
-      if (onSetColumns && colId !== timeFieldName) {
-        items.push({
-          name: 'Remove column',
-          icon: 'cross',
-          onClick: () => {
-            persistVisibleColumns(effectiveColumns.filter((c) => c !== colId));
-            closeHeaderMenu();
-          },
-        });
-      }
-
-      return items;
-    }, [
-      headerMenuState,
-      effectiveColumns,
-      onSetColumns,
-      persistVisibleColumns,
-      onResize,
-      rows,
-      timeFieldName,
-      closeHeaderMenu,
-    ]);
+    const hasEditDataViewPermission = useCallback(
+      () => Boolean(dataViewFieldEditor?.userPermissions?.editIndexPattern()),
+      [dataViewFieldEditor]
+    );
 
     // ── Build TanStack column defs ──
     const tanstackColumns: ColumnDef<DataTableRecord>[] = useMemo(() => {
@@ -1413,7 +1402,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
             id: timeFieldName,
             accessorFn: (r) => r.flattened[timeFieldName],
             header: timeFieldName,
-            size: settings?.columns?.[timeFieldName]?.width ?? 210,
+            size: getTimeColumnWidth(timeFieldName, columnSizing, settings),
             minSize: MIN_COL_WIDTH,
             enableSorting: false,
             meta: { isTimestamp: true, fieldName: timeFieldName },
@@ -1445,14 +1434,26 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
         for (const colId of effectiveColumns) {
           if (colId === SOURCE_COLUMN_ID) continue;
           const isTimeField = colId === timeFieldName;
+          const dataViewField = dataView.getFieldByName(colId);
+          const columnSchema = getSchemaByKbnType(dataViewField?.type);
+          const columnIsSortable =
+            isSortEnabled &&
+            isSortable({
+              isPlainRecord,
+              columnName: colId,
+              columnSchema,
+              dataViewField,
+            });
 
           defs.push({
             id: colId,
             accessorFn: (r) => r.flattened[colId],
             header: settings?.columns?.[colId]?.display ?? colId,
-            size: settings?.columns?.[colId]?.width ?? DEFAULT_COL_WIDTH,
+            size: isTimeField
+              ? getTimeColumnWidth(timeFieldName, columnSizing, settings)
+              : settings?.columns?.[colId]?.width ?? DEFAULT_COL_WIDTH,
             minSize: MIN_COL_WIDTH,
-            enableSorting: isSortEnabled,
+            enableSorting: columnIsSortable,
             meta: { isTimestamp: isTimeField, fieldName: colId },
             cell: function DataCell({ getValue }) {
               const val = getValue();
@@ -1494,8 +1495,54 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
       shouldShowFieldHandler,
       showTimeCol,
       styles,
+      isPlainRecord,
+      columnSizing,
       timeFieldName,
     ]);
+
+    const dataColumns = useMemo(() => {
+      if (isSummaryMode) {
+        const cols: Array<{ id: string; isSummary?: boolean; isTimestamp?: boolean }> = [];
+        if (showTimeCol && timeFieldName) {
+          cols.push({ id: timeFieldName, isTimestamp: true });
+        }
+        cols.push({ id: SOURCE_COLUMN_ID, isSummary: true });
+        return cols;
+      }
+
+      return effectiveColumns
+        .filter((colId) => colId !== SOURCE_COLUMN_ID)
+        .map((colId) => ({
+          id: colId,
+          isTimestamp: colId === timeFieldName,
+        }));
+    }, [effectiveColumns, isSummaryMode, showTimeCol, timeFieldName]);
+
+    const [containerWidth, setContainerWidth] = useState(0);
+
+    useEffect(() => {
+      const scrollEl = parentRef.current;
+      if (!scrollEl) return;
+
+      const updateWidth = () => setContainerWidth(scrollEl.clientWidth);
+      updateWidth();
+
+      const observer = new ResizeObserver(updateWidth);
+      observer.observe(scrollEl);
+      return () => observer.disconnect();
+    }, [rows.length]);
+
+    const columnLayout = useMemo(
+      () =>
+        computeTanStackColumnLayout({
+          containerWidth,
+          dataColumns,
+          timeFieldName: showTimeCol ? timeFieldName : undefined,
+          columnSizing,
+          settings,
+        }),
+      [containerWidth, dataColumns, columnSizing, settings, showTimeCol, timeFieldName]
+    );
 
     // ── React Table instance ──
     const table = useReactTable({
@@ -1670,7 +1717,9 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
     const canRenderDocumentView = Boolean(setExpandedDoc && renderDocumentView);
     const isLoading = loadingState === DataLoadingState.loading;
     const isEmpty = !isLoading && rows.length === 0;
-    const totalWidth = isSummaryMode ? '100%' : table.getTotalSize();
+    const totalWidth = columnLayout.gridWidth;
+    const getColumnStyle = columnLayout.getColumnStyle;
+    const headerSortEnabled = isSortEnabled && !(isPlainRecord && isSummaryMode);
 
     const densityVars = useMemo(
       () =>
@@ -1897,20 +1946,45 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                     const isControl = header.column.columnDef.meta?.isControl;
                     const isSelect = header.column.columnDef.meta?.isSelect;
                     const isSummary = header.column.columnDef.meta?.isSummary;
-                    const canSort = header.column.getCanSort();
                     const sortDir = header.column.getIsSorted();
                     const colId = header.column.id;
                     const isDraggable =
                       !isControl && !isSelect && !isSummary && Boolean(onSetColumns);
                     const isDragging = dragState.dragging === colId;
                     const isDragOver = dragState.over === colId && dragState.dragging !== colId;
+                    const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
+                      dataView,
+                      fieldName: colId,
+                      columnMeta: columnsMeta?.[colId],
+                    });
+                    const columnDisplayName = getColumnDisplayName(
+                      colId,
+                      dataViewField?.displayName,
+                      settings?.columns?.[colId]?.display ??
+                        (typeof header.column.columnDef.header === 'string'
+                          ? header.column.columnDef.header
+                          : undefined)
+                    );
+                    const columnIndex = effectiveColumns.indexOf(colId);
+
+                    const headerColumnStyle =
+                      isSelect || isControl
+                        ? {
+                            width: isSelect ? SELECT_COL_WIDTH : CONTROL_COL_WIDTH,
+                            flexShrink: 0,
+                          }
+                        : getColumnStyle({
+                            id: colId,
+                            isSummary,
+                            isTimestamp: header.column.columnDef.meta?.isTimestamp,
+                          });
 
                     if (isSelect) {
                       return (
                         <div
                           key={header.id}
                           css={styles.selectHeaderCell}
-                          style={{ width: header.getSize() }}
+                          style={headerColumnStyle}
                           role="columnheader"
                         >
                           <EuiCheckbox
@@ -1925,37 +1999,18 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                       );
                     }
 
-                    const sortHandler = canSort
-                      ? header.column.getToggleSortingHandler()
-                      : undefined;
-
                     return (
                       <div
                         key={header.id}
                         css={[
                           isControl ? styles.controlHeaderCell : styles.headerCell,
-                          canSort && styles.headerCellSortable,
+                          !isControl && !isSelect && styles.headerCellWithActions,
                           isDraggable && styles.headerCellDraggable,
                           isDragging && styles.headerCellDragging,
                           isDragOver && styles.headerCellDragOver,
                         ]}
-                        style={{
-                          width: isSummary ? undefined : header.getSize(),
-                          flex: isSummary ? '1 1 0' : undefined,
-                        }}
+                        style={headerColumnStyle}
                         role="columnheader"
-                        tabIndex={canSort ? 0 : undefined}
-                        onClick={sortHandler}
-                        onKeyDown={
-                          sortHandler
-                            ? (e) => {
-                                if (e.key === keys.ENTER || e.key === keys.SPACE) {
-                                  e.preventDefault();
-                                  sortHandler(e);
-                                }
-                              }
-                            : undefined
-                        }
                         draggable={isDraggable}
                         onDragStart={isDraggable ? () => handleDragStart(colId) : undefined}
                         onDragOver={
@@ -1968,11 +2023,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         }
                         onDrop={isDraggable ? handleDragEnd : undefined}
                         onDragEnd={handleDragEnd}
-                        onContextMenu={
-                          !isControl && !isSelect && !isSummary
-                            ? (e: React.MouseEvent) => handleHeaderContextMenu(e, colId)
-                            : undefined
-                        }
                       >
                         {!isControl && (
                           <>
@@ -2023,6 +2073,32 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                                   aria-hidden={true}
                                 />
                               </span>
+                            )}
+                            {!isControl && !isSelect && (
+                              <TanStackColumnHeaderActions
+                                columnId={colId}
+                                columnDisplayName={columnDisplayName}
+                                columnIndex={columnIndex}
+                                visibleColumnIds={effectiveColumns}
+                                dataView={dataView}
+                                columnsMeta={columnsMeta}
+                                settings={settings}
+                                columnSizing={columnSizing}
+                                isSummaryMode={isSummaryMode}
+                                isSortEnabled={headerSortEnabled}
+                                isPlainRecord={isPlainRecord}
+                                sort={sort}
+                                onSort={onSort}
+                                persistVisibleColumns={persistVisibleColumns}
+                                onResize={onResize}
+                                timeFieldName={timeFieldName}
+                                toastNotifications={toastNotifications}
+                                valueToStringConverter={valueToStringConverter}
+                                rowsCount={rows.length}
+                                editField={editField}
+                                hasEditDataViewPermission={hasEditDataViewPermission}
+                                headerActionsCss={styles.headerActionsButton}
+                              />
                             )}
                           </>
                         )}
@@ -2081,6 +2157,7 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
                         setPopoverState={setPopoverState}
                         findTerm={findTerm}
                         findActiveMatch={findActiveMatch}
+                        getColumnStyle={getColumnStyle}
                       />
                     );
                   })}
@@ -2124,67 +2201,6 @@ export const TanStackDataGrid: React.FC<TanStackDataGridProps> = React.memo(
           />
         )}
 
-        {/* Column header context menu */}
-        {headerMenuState && (
-          <>
-            <div
-              css={{ position: 'fixed', inset: 0, zIndex: 9998 }}
-              onClick={closeHeaderMenu}
-              onKeyDown={(e) => {
-                if (e.key === keys.ENTER || e.key === keys.SPACE || e.key === keys.ESCAPE) {
-                  e.preventDefault();
-                  closeHeaderMenu();
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label="Close menu"
-            />
-            <div
-              css={{
-                position: 'fixed',
-                top: headerMenuState.anchorPosition.top,
-                left: headerMenuState.anchorPosition.left,
-                zIndex: 9999,
-                backgroundColor: euiTheme.colors.backgroundBasePlain,
-                borderRadius: euiTheme.border.radius.medium,
-                boxShadow:
-                  euiTheme.levels.menu === 1000
-                    ? '0 1px 5px rgba(0,0,0,.1), 0 3px 15px rgba(0,0,0,.1)'
-                    : undefined,
-                border: euiTheme.border.thin,
-                padding: `${euiTheme.size.xs} 0`,
-                minWidth: 200,
-              }}
-              data-test-subj="columnHeaderMenu"
-            >
-              {headerMenuItems.map((item) => (
-                <button
-                  key={item.name}
-                  css={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: euiTheme.size.s,
-                    width: '100%',
-                    padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
-                    border: 'none',
-                    background: 'none',
-                    cursor: 'pointer',
-                    fontSize: euiTheme.size.m,
-                    textAlign: 'left',
-                    '&:hover': {
-                      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
-                    },
-                  }}
-                  onClick={item.onClick}
-                >
-                  <EuiIcon type={item.icon} size="s" aria-hidden={true} />
-                  {item.name}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
       </div>
     );
   }

@@ -409,6 +409,21 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     cursor: 'grab',
   }),
 
+  headerCellWithActions: css({
+    '&:hover [data-test-subj^="dataGridHeaderCellActionButton-"]': {
+      opacity: 1,
+    },
+  }),
+
+  headerActionsButton: css({
+    flexShrink: 0,
+    opacity: 0.5,
+    transition: 'opacity 100ms ease',
+    '&:hover, &:focus': {
+      opacity: 1,
+    },
+  }),
+
   // -- Empty state --
   emptyState: css({
     display: 'flex',
