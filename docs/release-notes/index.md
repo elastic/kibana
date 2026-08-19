@@ -32,6 +32,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a public API to create, update, and delete case templates (`POST`, `PUT`, and `DELETE /api/cases/templates`), including a dry-run mode that validates a template without saving it [#280144]({{kib-pull}}280144).
 * Improve the case view, cases list, and field library with a sticky attributes panel, collapsible activity and attachment sections, and clearer cases list filters [#282197]({{kib-pull}}282197).
 * Add an Agent Builder tool to attach saved dashboards, maps, Discover sessions, and Lens visualizations to a case [#279680]({{kib-pull}}279680).
+% !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (not yet on the 9.5 branch as of 2026-08-19). Re-verify against the next BC before publishing.
+% * Warn in the field library and template editors when a required case field has no default value, since automated case creation can't fill it in, and show a field's name and type as permanent as soon as you create it [#285453]({{kib-pull}}285453).
 
 **Dashboards and Visualizations**:
 * Restore **Defer loading panels below "the fold"** (`labs:dashboard:deferBelowFold`) so off-screen dashboard panels wait to fetch data until they scroll into view. The setting is off by default [#284004]({{kib-pull}}284004).
@@ -78,6 +80,7 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 % * Fix matching fields missing from Cases Activity search results [#284940]({{kib-pull}}284940).
 % * Fix cases created from v2 templates by a system action not inheriting the template's external connector, sync and observables settings, and assignees [#284854]({{kib-pull}}284854).
 % * Fix case attachment UI issues, including delete controls on saved-object attachments and the more-actions menu for read-only access [#285456]({{kib-pull}}285456).
+% * Fix legacy custom fields and their v2 field-definition counterparts falling out of sync, by linking each legacy field to its definition and keeping both representations equal on every write [#282772]({{kib-pull}}282772).
 
 **Dashboards and Visualizations**:
 * Fix Lens metric trendline breakdown ordering to rank by the trendline's own metric instead of falling back to alphabetical order [#283159]({{kib-pull}}283159).
@@ -100,6 +103,8 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 
 **Developer tools**:
 * Fix Dev Tools Console showing autocomplete suggestions inside non-query triple-quoted strings [#282424]({{kib-pull}}282424).
+% !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
+% * Fix Dev Tools Console autocomplete not triggering at request-body completion positions, and fix template expansion and text corruption when accepting a suggestion mid-string [#284530]({{kib-pull}}284530).
 
 **Discover**:
 * Fix formatted numbers showing a sign when the rounded value is zero [#282919]({{kib-pull}}282919).
