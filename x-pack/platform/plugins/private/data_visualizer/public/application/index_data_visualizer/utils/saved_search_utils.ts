@@ -43,6 +43,32 @@ export function toFilterArray(
   return Array.isArray(resolved) ? resolved : [resolved];
 }
 
+function hasFieldKey(filter: Filter): boolean {
+  return filter.meta?.key != null;
+}
+
+function sameKeyedIdentity(a: Filter, b: Filter): boolean {
+  return (
+    a.meta?.key === b.meta?.key && JSON.stringify(a.meta?.params) === JSON.stringify(b.meta?.params)
+  );
+}
+
+function sameToggleState(a: Filter, b: Filter): boolean {
+  return !!a.meta?.negate === !!b.meta?.negate && !!a.meta?.disabled === !!b.meta?.disabled;
+}
+
+function filtersShareIdentity(a: Filter, b: Filter): boolean {
+  if (hasFieldKey(a) || hasFieldKey(b)) {
+    return sameKeyedIdentity(a, b);
+  }
+  // Default compareFilters ignores negate/disabled, so this is identity for custom DSL.
+  return compareFilters(a, b);
+}
+
+function filtersAreDuplicates(a: Filter, b: Filter): boolean {
+  return filtersShareIdentity(a, b) && sameToggleState(a, b);
+}
+
 /**
  * Filters from `candidates` that are not already represented in `existing`.
  *
@@ -51,19 +77,20 @@ export function toFilterArray(
  * raw query comparison via dedupFilters never matches after hydration and can
  * re-add forever. Keyless "Edit as Query DSL" filters have no meta.key — fall
  * back to structural query comparison for those.
+ *
+ * Identity is not enough: negate/disabled are compared so toggling a saved
+ * filter is not dropped as a duplicate of the original.
  */
 export function filtersNotAlreadyPresent(existing: Filter[], candidates: Filter[]): Filter[] {
   return candidates.filter((candidate) => {
-    return !existing.some((existingFilter) => {
-      if (existingFilter.meta?.key != null || candidate.meta?.key != null) {
-        return (
-          existingFilter.meta?.key === candidate.meta?.key &&
-          JSON.stringify(existingFilter.meta?.params) === JSON.stringify(candidate.meta?.params)
-        );
-      }
-      return compareFilters(existingFilter, candidate);
-    });
+    return !existing.some((existingFilter) => filtersAreDuplicates(existingFilter, candidate));
   });
+}
+
+function excludeOverriddenSavedFilters(savedFilters: Filter[], overrides: Filter[]): Filter[] {
+  return savedFilters.filter(
+    (saved) => !overrides.some((override) => filtersShareIdentity(saved, override))
+  );
 }
 
 /**
@@ -160,7 +187,10 @@ export function getEsQueryFromSavedSearch({
     // stored in the saved search but were also hydrated into the filter manager after render.
     const filterManagerFilters = filterManager?.getFilters?.() ?? [];
     const extraFilters = filtersNotAlreadyPresent(savedFilters, filterManagerFilters);
-    const filtersForQuery = [...savedFilters, ...extraFilters, ...(userFilters ?? [])];
+    // A filter-manager copy that differs only by negate/disabled is an override of the
+    // saved filter, not an extra clause. Drop the saved original so the toggle wins.
+    const savedFiltersForQuery = excludeOverriddenSavedFilters(savedFilters, extraFilters);
+    const filtersForQuery = [...savedFiltersForQuery, ...extraFilters, ...(userFilters ?? [])];
     try {
       // buildEsQuery throws an exception for a fallible operation (anti-pattern).
       // We MUST always wrap it in a try block to prevent a failed parse from being unhandled &
