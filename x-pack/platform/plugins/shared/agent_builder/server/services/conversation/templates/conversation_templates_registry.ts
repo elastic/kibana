@@ -12,6 +12,7 @@ export interface ConversationTemplateRegistry {
   register(template: ConversationTemplate): void;
   has(id: string): Promise<boolean>;
   get(id: string): Promise<ConversationTemplate | undefined>;
+  getMany(ids: string[]): Promise<Map<string, ConversationTemplate>>;
   list(): Promise<ConversationTemplate[]>;
 }
 
@@ -32,6 +33,15 @@ class ConversationTemplateRegistryImpl implements ConversationTemplateRegistry {
 
   async get(id: string): Promise<ConversationTemplate | undefined> {
     return this.templates.get(id);
+  }
+
+  async getMany(ids: string[]): Promise<Map<string, ConversationTemplate>> {
+    const result = new Map<string, ConversationTemplate>();
+    for (const id of ids) {
+      const template = this.templates.get(id);
+      if (template) result.set(id, template);
+    }
+    return result;
   }
 
   async list(): Promise<ConversationTemplate[]> {

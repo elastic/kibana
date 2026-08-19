@@ -88,7 +88,18 @@ const withDeserializedMetadata = async <T extends { template_id?: string; metada
 ): Promise<T> => {
   if (!conversation.template_id || !conversation.metadata) return conversation;
   const template = await conversationTemplates.get(conversation.template_id);
-  if (!template) return conversation;
+  return applyDeserializedMetadata(conversation, template);
+};
+
+/**
+ * Synchronous counterpart to `withDeserializedMetadata` for callers that have
+ * already resolved the template (e.g. via `getMany` in a batched flow).
+ */
+const applyDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
+  conversation: T,
+  template: ConversationTemplate | undefined
+): T => {
+  if (!conversation.template_id || !conversation.metadata || !template) return conversation;
   return {
     ...conversation,
     metadata: deserializeMetadata(
@@ -252,8 +263,24 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return Promise.all(
-      response.hits.hits.map((hit) => this.toResponseConversationWithoutRounds(hit as Document))
+    const hits = response.hits.hits as Document[];
+
+    // Batch-resolve the templates referenced by this page's hits to perform a single call
+    const templateIds = [
+      ...new Set(
+        hits.map((hit) => hit._source?.template_id).filter((id): id is string => Boolean(id))
+      ),
+    ];
+    const templatesById =
+      templateIds.length === 0
+        ? new Map<string, ConversationTemplate>()
+        : await this.conversationTemplates.getMany(templateIds);
+
+    return hits.map((hit) =>
+      this.toResponseConversationWithoutRounds(
+        hit,
+        hit._source?.template_id ? templatesById.get(hit._source.template_id) : undefined
+      )
     );
   }
 
@@ -669,10 +696,11 @@ class ConversationClientImpl implements ConversationClient {
     );
   }
 
-  private async toResponseConversationWithoutRounds(
-    document: Document
-  ): Promise<ConversationWithoutRoundsWithPermissions> {
-    return withDeserializedMetadata(
+  private toResponseConversationWithoutRounds(
+    document: Document,
+    template: ConversationTemplate | undefined
+  ): ConversationWithoutRoundsWithPermissions {
+    return applyDeserializedMetadata(
       {
         ...fromEsWithoutRounds(document),
         permissions: getConversationPermissions({
@@ -681,7 +709,7 @@ class ConversationClientImpl implements ConversationClient {
           isAdmin: this.isAdmin,
         }),
       },
-      this.conversationTemplates
+      template
     );
   }
 

@@ -38,11 +38,11 @@ import type {
 } from '@kbn/agent-builder-server/runner';
 import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
-import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { AgentExecutionMode, type ConversationTemplate } from '@kbn/agent-builder-common';
 import type { AttachmentServiceStart } from '../services/attachments';
+import type { ConversationTemplatesServiceStart } from '../services/conversation/templates';
 import type { CreateRunnerDeps, CreateScopedRunnerDeps } from '../services/execution/runner/runner';
 import type { ModelProviderFactoryMock, ModelProviderMock } from './model_provider';
 import { createModelProviderFactoryMock, createModelProviderMock } from './model_provider';
@@ -81,10 +81,18 @@ export const createToolProviderMock = (): ToolProviderMock => {
 
 export const createInMemoryConversationTemplates = (
   templates: ConversationTemplate[] = []
-): ConversationTemplatesService => {
+): ConversationTemplatesServiceStart => {
   const byId = new Map(templates.map((t) => [t.id, t]));
   return {
     get: async (id) => byId.get(id),
+    getMany: async (ids) => {
+      const result = new Map<string, ConversationTemplate>();
+      for (const id of ids) {
+        const t = byId.get(id);
+        if (t) result.set(id, t);
+      }
+      return result;
+    },
     list: async () => [...byId.values()],
   };
 };

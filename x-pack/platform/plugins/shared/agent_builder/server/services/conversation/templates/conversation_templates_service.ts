@@ -17,6 +17,7 @@ export interface ConversationTemplatesServiceSetup {
 
 export interface ConversationTemplatesServiceStart {
   get(id: string): Promise<ConversationTemplate | undefined>;
+  getMany(ids: string[]): Promise<Map<string, ConversationTemplate>>;
   list(): Promise<ConversationTemplate[]>;
 }
 
@@ -32,6 +33,7 @@ export class ConversationTemplatesService {
   start(): ConversationTemplatesServiceStart {
     return {
       get: (id) => this.registry.get(id),
+      getMany: (ids) => this.registry.getMany(ids),
       list: () => this.registry.list(),
     };
   }

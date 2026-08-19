@@ -28,6 +28,7 @@ import type { ConversationTemplatesServiceStart } from '../templates';
 
 const conversationTemplates: jest.Mocked<ConversationTemplatesServiceStart> = {
   get: jest.fn(),
+  getMany: jest.fn().mockResolvedValue(new Map()),
   list: jest.fn(),
 };
 const getTemplateMock = conversationTemplates.get;
@@ -121,6 +122,7 @@ describe('ConversationClient', () => {
     };
 
     conversationTemplates.get.mockReset();
+    conversationTemplates.getMany.mockReset().mockResolvedValue(new Map());
     conversationTemplates.list.mockReset();
 
     client = createClient({
