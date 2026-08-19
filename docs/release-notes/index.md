@@ -67,7 +67,7 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 * Fix Cases free-text search failing when a case's extended fields produced too many runtime-field values [#284475]({{kib-pull}}284475).
 * Fix case Activity recording a row for every unchanged template or global field default when you create a case [#284310]({{kib-pull}}284310).
 * Fix assigning users to a case creating duplicate activity entries [#284035]({{kib-pull}}284035).
-* Fix Field Library toggle filters missing from **More filters** on the **All cases** page [#283645]({{kib-pull}}283645).
+* Fix field library toggle filters missing from **More filters** on the **All cases** page [#283645]({{kib-pull}}283645).
 * Fix duplicate required-on-close validation errors when a template references a global field that is also required on close [#283922]({{kib-pull}}283922).
 * Fix a template `$ref` field silently dropping its local display and validation overrides [#283072]({{kib-pull}}283072).
 * Prevent changing a field definition's name or type after creation, which previously orphaned stored case values [#282770]({{kib-pull}}282770).
