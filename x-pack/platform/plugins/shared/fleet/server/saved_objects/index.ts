@@ -799,6 +799,7 @@ export const getSavedObjectTypes = (
             dynamic: false,
           },
           is_default_otel: { type: 'boolean' },
+          otlp_exporter_secrets: { type: 'binary' },
         },
       },
       modelVersions: {
