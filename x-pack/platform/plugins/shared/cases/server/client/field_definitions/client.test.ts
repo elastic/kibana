@@ -336,11 +336,108 @@ describe('createFieldDefinitionsSubClient', () => {
 
       expect(
         clientArgs.services.fieldDefinitionsService.updateFieldDefinition
-      ).toHaveBeenCalledWith('fd-1', { ...input, definition: 'not: [valid' });
+      ).toHaveBeenCalledWith(
+        'fd-1',
+        { ...input, definition: 'not: [valid' },
+        { version: undefined }
+      );
+    });
+
+    it('threads the read version through to the update for OCC against the demotion/identity guards', async () => {
+      // TOCTOU guard: a concurrent configure write that links this definition (e.g. a legacyKey
+      // repair) between this guard's read and the update below must be caught as a version
+      // conflict rather than silently committing past the guard.
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue({
+        ...so,
+        version: 'v7',
+      });
+
+      await client.updateFieldDefinition('fd-1', input);
+
+      expect(
+        clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+      ).toHaveBeenCalledWith('fd-1', input, { version: 'v7' });
+    });
+
+    describe('A4 demotion guard (isGlobal)', () => {
+      const globalSO = makeFieldDefinitionSO({ isGlobal: true, legacyKey: 'legacy_key_1' });
+
+      const configureFindWith = (customFields: unknown[]) =>
+        ({
+          saved_objects: [
+            {
+              id: 'config-1',
+              type: 'cases-configure',
+              references: [],
+              attributes: { customFields },
+            },
+          ],
+          total: 1,
+          page: 1,
+          per_page: 20,
+        } as never);
+
+      beforeEach(() => {
+        clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(globalSO);
+        clientArgs.services.fieldDefinitionsService.updateFieldDefinition.mockResolvedValue(
+          globalSO
+        );
+        clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue(
+          [globalSO]
+        );
+      });
+
+      it('throws 409 when demoting an actively linked global definition to non-global', async () => {
+        // FAILURE SCENARIO: the configured v1 field "legacy_key_1" mirrors into this
+        // definition — demoting it would stop the field rendering on all cases.
+        clientArgs.services.caseConfigureService.find.mockResolvedValue(
+          configureFindWith([
+            { key: 'legacy_key_1', type: 'text', label: 'My Field', required: false },
+          ])
+        );
+
+        await expect(
+          client.updateFieldDefinition('fd-1', { ...input, isGlobal: false })
+        ).rejects.toThrow('Cannot remove the global flag from field definition "my_field"');
+        expect(
+          clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+        ).not.toHaveBeenCalled();
+      });
+
+      it('allows the demotion when no configured custom field links to the definition', async () => {
+        clientArgs.services.caseConfigureService.find.mockResolvedValue(
+          configureFindWith([
+            { key: 'unrelated_key', type: 'text', label: 'Other', required: false },
+          ])
+        );
+
+        await client.updateFieldDefinition('fd-1', { ...input, isGlobal: false });
+
+        expect(
+          clientArgs.services.fieldDefinitionsService.updateFieldDefinition
+        ).toHaveBeenCalled();
+      });
+
+      it('does not run the active-link check when isGlobal is not being demoted', async () => {
+        await client.updateFieldDefinition('fd-1', { ...input, isGlobal: true });
+
+        expect(clientArgs.services.caseConfigureService.find).not.toHaveBeenCalled();
+      });
     });
   });
 
   describe('deleteFieldDefinition', () => {
+    beforeEach(() => {
+      // No configuration exists — the active-link guard finds nothing to protect.
+      clientArgs.services.caseConfigureService.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 20,
+      } as never);
+    });
+
     it('deletes the field definition when no active templates reference it', async () => {
       const so = makeFieldDefinitionSO();
       clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
@@ -350,7 +447,22 @@ describe('createFieldDefinitionsSubClient', () => {
 
       expect(
         clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
-      ).toHaveBeenCalledWith('fd-1');
+      ).toHaveBeenCalledWith('fd-1', { version: undefined });
+    });
+
+    it('threads the read version through to the delete for OCC against the active-link guard', async () => {
+      const so = makeFieldDefinitionSO();
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue({
+        ...so,
+        version: 'v3',
+      });
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([]);
+
+      await client.deleteFieldDefinition('fd-1');
+
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).toHaveBeenCalledWith('fd-1', { version: 'v3' });
     });
 
     it('throws 409 when a single template references the field', async () => {
@@ -396,6 +508,73 @@ describe('createFieldDefinitionsSubClient', () => {
       expect(
         clientArgs.services.templatesService.getActiveTemplatesReferencingField
       ).toHaveBeenCalledWith('securitySolution', 'priority');
+    });
+
+    it('throws 409 when the definition is actively linked to a configured custom field (A4)', async () => {
+      // FAILURE SCENARIO: the configured v1 field "legacy_key_1" mirrors into this
+      // definition — deleting it would leave the active v1 field without a v2 identity.
+      const so = makeFieldDefinitionSO({ legacyKey: 'legacy_key_1' });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([]);
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+        so,
+      ]);
+      clientArgs.services.caseConfigureService.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'config-1',
+            type: 'cases-configure',
+            references: [],
+            attributes: {
+              customFields: [
+                { key: 'legacy_key_1', type: 'text', label: 'My Field', required: false },
+              ],
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      } as never);
+
+      await expect(client.deleteFieldDefinition('fd-1')).rejects.toThrow(
+        'Cannot delete field definition "my_field": it is linked to an active custom field'
+      );
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).not.toHaveBeenCalled();
+    });
+
+    it('deletes when the configured custom fields do not resolve to this definition', async () => {
+      const so = makeFieldDefinitionSO({ legacyKey: 'some_other_key' });
+      clientArgs.services.fieldDefinitionsService.getFieldDefinition.mockResolvedValue(so);
+      clientArgs.services.templatesService.getActiveTemplatesReferencingField.mockResolvedValue([]);
+      clientArgs.services.fieldDefinitionsService.getFieldDefinitionSavedObjects.mockResolvedValue([
+        so,
+      ]);
+      clientArgs.services.caseConfigureService.find.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'config-1',
+            type: 'cases-configure',
+            references: [],
+            attributes: {
+              customFields: [
+                { key: 'legacy_key_1', type: 'text', label: 'My Field', required: false },
+              ],
+            },
+          },
+        ],
+        total: 1,
+        page: 1,
+        per_page: 20,
+      } as never);
+
+      await client.deleteFieldDefinition('fd-1');
+
+      expect(
+        clientArgs.services.fieldDefinitionsService.deleteFieldDefinition
+      ).toHaveBeenCalledWith('fd-1', { version: undefined });
     });
   });
 });
