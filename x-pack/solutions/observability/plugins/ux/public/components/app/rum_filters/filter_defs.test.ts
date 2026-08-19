@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  facetValueLabel,
-  firstSelectedLabel,
-  withSelectedOptions,
-} from './filter_defs';
+import { facetValueLabel, firstSelectedLabel, withSelectedOptions } from './filter_defs';
 
 describe('withSelectedOptions', () => {
   it('prepends selected values missing from the facet', () => {
