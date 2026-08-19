@@ -24,7 +24,8 @@ interface CreateOrUpdateComponentTemplateOpts {
 
 /**
  * Reads the content hash stamped in `_meta` on the currently-installed component
- * template, or `undefined` if the template does not exist or carries no stamp.
+ * template, or `undefined` if the template does not exist, carries no stamp, or
+ * cannot be read.
  */
 const getInstalledComponentTemplateHash = async (
   esClient: ElasticsearchClient,
@@ -40,10 +41,13 @@ const getInstalledComponentTemplateHash = async (
     const meta = existing?.component_template?._meta;
     return meta?.[RESOURCE_CONTENT_HASH_META_FIELD];
   } catch (err) {
-    if (err?.statusCode === 404) {
-      return undefined;
-    }
-    throw err;
+    // Any failure reading the installed hash (404, permissions, exhausted
+    // retries) leaves the installed content unknown, which falls through to the
+    // PUT. The check must never block an install that would otherwise succeed.
+    logger.debug(
+      `Could not read installed component template ${name} content hash; will install (${err.message})`
+    );
+    return undefined;
   }
 };
 

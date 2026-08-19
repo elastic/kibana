@@ -120,6 +120,23 @@ describe('createOrUpdateIlmPolicy', () => {
     expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
   });
 
+  it(`should PUT when the installed policy cannot be read`, async () => {
+    clusterClient.ilm.getLifecycle.mockRejectedValue(new Error('security_exception'));
+
+    await createOrUpdateIlmPolicy({
+      logger,
+      esClient: clusterClient,
+      name: 'test-policy',
+      policy: IlmPolicy,
+      dataStreamAdapter,
+    });
+
+    expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Could not read installed ILM policy test-policy content hash; will install (security_exception)`
+    );
+  });
+
   it(`should retry on transient ES errors`, async () => {
     clusterClient.ilm.putLifecycle
       .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
