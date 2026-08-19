@@ -1,33 +1,30 @@
-# Stress test workflow for the LRU-based StepIoService
+# Memory pressure stress test for the workflow execution engine.
 #
-# Generates enough step outputs to exceed the default 10 MB maxCacheSize budget,
-# forcing the LRU to evict stale entries and rehydrate on demand from ES.
+# Generates enough step outputs to exceed the default 10 MB step-IO cache budget,
+# forcing the engine to evict stale entries and rehydrate on demand from ES.
 #
 # Memory profile:
 #   base_payload output  :  ~10 KB  (held warm — referenced every iteration)
 #   produce_chunk output :  ~10 KB  x 1100 iterations  =  ~11 MB total generated
-#   LRU budget (default) :  10 MB   -> eviction starts around iteration 1000
+#   Cache budget (default):  10 MB  -> eviction starts around iteration 1000
 #   Evicted entries       :  old produce_chunk outputs (not re-referenced)
 #
 # What to observe:
 #   - Workflow completes without errors despite exceeding the cache budget
 #   - ES getStepExecutionsByIds calls appear once eviction kicks in (~iteration 1000)
-#   - Heap stays near the 10 MB LRU ceiling rather than growing to 11+ MB
-#   - Old code required evictStaleLoopOutputs on every loop exit; new code needs nothing
+#   - Heap stays near the 10 MB cache ceiling rather than growing to 11+ MB
 #
-# foreach section stresses scope-stack rehydration:
-#   Old code: pinForeachSource / unpinForeachScope per iteration.
-#   New code: scope stack walked uniformly; no per-step-type branching.
+# foreach section stresses scope-stack rehydration across iterations.
 
-name: lru-stress-test
+name: memory-pressure-stress-test
 enabled: false
 triggers:
   - type: manual
 
 steps:
   # -- Base payload (~10 KB) ------------------------------------------------
-  # Referenced by every iteration. LRU keeps it warm because it is the
-  # most-recently-read entry and is never displaced despite the cache pressure.
+  # Referenced by every iteration. Kept warm in the cache because it is the
+  # most-recently-read entry and is never displaced despite the memory pressure.
   - name: base_payload
     type: data.set
     with:
@@ -135,8 +132,8 @@ steps:
         XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
   # -- foreach pressure: scope-stack rehydration (10 heavy iterations) ------
-  # Exercises the uniform scope-stack path in computeRehydrationTargets.
-  # Old code had foreach-specific pin/unpin; new code walks the stack uniformly.
+  # Each iteration reads the large base_payload output via the scope-stack path,
+  # exercising rehydration of the foreach loop-source entry.
   - name: foreach_pressure
     type: foreach
     foreach: '[1,2,3,4,5,6,7,8,9,10]'
@@ -149,9 +146,8 @@ steps:
 
   # -- while pressure: 1100 iterations, ~11 MB total output -----------------
   # Each iteration writes a ~10 KB produce_chunk output.
-  # After ~1000 iterations the LRU evicts the oldest entries automatically.
+  # After ~1000 iterations the cache evicts the oldest entries automatically.
   # base_payload and the latest advance output stay warm throughout.
-  # Old code called evictStaleLoopOutputs on every exit; new code: nothing.
   - name: iter_init
     type: data.set
     with:
@@ -175,7 +171,7 @@ steps:
 
   # -- Summary ---------------------------------------------------------------
   # Reads variables (served from state) and base_payload (rehydrated from ES
-  # if evicted, or from cache if LRU kept it warm).
+  # if evicted, or served from cache if still warm).
   - name: summary
     type: console
     with:
