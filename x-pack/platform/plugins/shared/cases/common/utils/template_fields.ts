@@ -16,11 +16,115 @@ import {
 import type { Field, InlineField, RefField, Validation } from '../types/domain/template/fields';
 import type { FieldDefinition } from '../types/domain/field_definition/latest';
 import { CustomFieldTypes } from '../types/domain/custom_field/v1';
+import { SAFE_SNAKE_KEY, AUTHORABLE_SNAKE_KEY, MAX_SNAKE_KEY_LENGTH } from '../constants';
 
 export const getFieldSnakeKey = (name: string, type: string): string => `${name}_as_${type}`;
 
+/**
+ * Returns true if `key` is safe to interpolate into a Painless string literal (read / storage
+ * path). Uses the lenient charset — hyphens and other index-legacy characters are allowed.
+ */
+export const isSafeExtendedFieldKey = (key: string): boolean =>
+  key.length > 0 && key.length <= MAX_SNAKE_KEY_LENGTH && SAFE_SNAKE_KEY.test(key);
+
+/**
+ * Why an authoring-time key check failed: `'charset'` — a character outside
+ * `AUTHORABLE_SNAKE_KEY`; `'length'` — the derived key exceeds `MAX_SNAKE_KEY_LENGTH`.
+ * Distinguished so error messages can tell the author what to actually fix — a 300-character
+ * clean snake_case name satisfies the charset rule and would be misled by a charset message.
+ */
+export type AuthorableKeyViolation = 'charset' | 'length';
+
+/**
+ * Checks `key` against the **authoring** rules (strict charset + max length) and returns the
+ * first violation, or `null` when the key is authorable. Charset is reported before length:
+ * fixing the charset can change the author's intended name, so it's the more actionable error.
+ */
+export const getAuthorableKeyViolation = (key: string): AuthorableKeyViolation | null => {
+  if (key.length === 0 || !AUTHORABLE_SNAKE_KEY.test(key)) return 'charset';
+  if (key.length > MAX_SNAKE_KEY_LENGTH) return 'length';
+  return null;
+};
+
+/**
+ * Returns true if `key` satisfies the **authoring** charset (strict subset of
+ * `isSafeExtendedFieldKey` — no hyphens). Use this when validating a new field name at write
+ * time; use `isSafeExtendedFieldKey` when reading back keys that may predate the strict rule.
+ */
+export const isAuthorableExtendedFieldKey = (key: string): boolean =>
+  getAuthorableKeyViolation(key) === null;
+
+/**
+ * Derives the storage key for `(name, type)` and returns the first authoring violation, or
+ * `null` when the name is authorable — see {@link getAuthorableKeyViolation}. This is the
+ * canonical way to validate a field name before writing it: derive first, check once, rather
+ * than maintaining a separate per-name rule.
+ */
+export const getAuthorableFieldNameViolation = (
+  name: string,
+  type: string
+): AuthorableKeyViolation | null => getAuthorableKeyViolation(getFieldSnakeKey(name, type));
+
+/** Boolean convenience over {@link getAuthorableFieldNameViolation}. */
+export const isAuthorableExtendedFieldName = (name: string, type: string): boolean =>
+  getAuthorableFieldNameViolation(name, type) === null;
+
+/**
+ * Normalizes a field definition name for case-insensitive lookup and uniqueness.
+ *
+ * Matches the field-definitions API, which compares names with `toLowerCase()` — not
+ * `toLocaleLowerCase()`, which `ensureUniqueTemplateName` uses for template titles.
+ * `trim()` is stricter than the API uniqueness check. Callers use the result to skip
+ * duplicate work or to gate deletes of in-use definitions, never to reject a
+ * create/update write.
+ */
+export const normalizeFieldDefinitionName = (name: string): string => name.trim().toLowerCase();
+
 export const getFieldCamelKey = (name: string, type: string): string =>
   camelCase(getFieldSnakeKey(name, type));
+
+/**
+ * Folds a field name the same way {@link getFieldCamelKey} folds the full storage key —
+ * lodash `camelCase`, under which `my-field`, `my_field`, and `myField` are all `myField`.
+ * Two names with equal folds and equal types collide on the UI's camel read key, silently
+ * showing each other's values; write-time validation uses this to reject such twins.
+ */
+export const getFoldedFieldName = (name: string): string => camelCase(name);
+
+/**
+ * Collects the normalized (case-insensitive) `$ref` names from a template's fields array.
+ *
+ * Used to exclude a global field from the global-fields section when the active template
+ * already renders it via `$ref` — normalized so a ref differing only in case from the field
+ * definition's name (e.g. after a case-only rename) still excludes it, matching the
+ * case-insensitive resolution in {@link resolveTemplateFields} / `useResolvedFields`.
+ */
+export const collectNormalizedRefNames = (
+  fields: readonly Field[] | undefined
+): ReadonlySet<string> =>
+  (fields ?? []).reduce((refNames, field) => {
+    if (isRefField(field)) refNames.add(normalizeFieldDefinitionName(field.$ref));
+    return refNames;
+  }, new Set<string>());
+
+/**
+ * Filters out the `$ref` entries of a template's fields array that target one of
+ * `excludedDefinitionNames` (normalized — see {@link normalizeFieldDefinitionName}).
+ *
+ * Used by the create form when a field definition's linked legacy custom field is itself
+ * rendered as an input: the `$ref` to that definition must not produce a second control or a
+ * second submitted value for the same logical field. Only `$ref` entries are dropped by
+ * definition identity — inline template fields are template-local and pass through even when
+ * their names coincide with an excluded definition.
+ */
+export const excludeRefFieldsToDefinitions = (
+  fields: readonly Field[] | undefined,
+  excludedDefinitionNames: ReadonlySet<string>
+): Field[] =>
+  (fields ?? []).filter(
+    (field) =>
+      !isRefField(field) || !excludedDefinitionNames.has(normalizeFieldDefinitionName(field.$ref))
+  );
 
 /**
  * Parses an array of field definitions into resolved inline fields, skipping any
@@ -167,9 +271,10 @@ export const applyRefFieldOverride = (
 /**
  * Resolves a template `fields` array into a flat list of inline fields by:
  * - passing inline fields through as-is,
- * - looking up `$ref` fields by name in `libraryDefs`, parsing their YAML definition,
- *   and applying the ref entry's `name` alias and `metadata.default` override (see
- *   {@link applyRefFieldOverride}).
+ * - looking up `$ref` fields by name in `libraryDefs` (case-insensitive, matching the
+ *   uniqueness semantics the field-definitions API enforces on names), parsing their
+ *   YAML definition, and applying the ref entry's `name` alias and `metadata.default`
+ *   override (see {@link applyRefFieldOverride}).
  *
  * Fields that cannot be resolved or that produce another ref are silently dropped.
  */
@@ -180,7 +285,8 @@ export const resolveTemplateFields = (
   definitionFields.flatMap((field): InlineField[] => {
     if (isInlineField(field)) return [field];
     const refField = field as RefField;
-    const fd = libraryDefs.find((d) => d.name === refField.$ref);
+    const normalizedRef = normalizeFieldDefinitionName(refField.$ref);
+    const fd = libraryDefs.find((d) => normalizeFieldDefinitionName(d.name) === normalizedRef);
     if (!fd) return [];
     try {
       const parsed = parseYaml(fd.definition);
@@ -298,70 +404,31 @@ const isEmptyExtendedFieldValue = (value: unknown): boolean => value == null;
  * - A `customFields` entry whose value is `null` or `undefined` is skipped — the case left the
  *   field empty; the v2 field then renders empty rather than being forced to a value.
  *
+ * `resolveStorageKey` supplies the key to write under — the linked field definition's
+ * `${name}_as_${type}` (never `${legacyKey}_as_${type}`; see `field_link_resolution.ts`'s
+ * `toResolved`, the single source of truth for this derivation). A field with no resolvable
+ * link (`undefined`) is skipped entirely rather than guessed at, matching the rest of the
+ * migration's "never guess" linkage philosophy — this file is `common/` (shared with client
+ * code) and cannot import the server-only link-resolution module directly, hence the callback.
+ *
  * Returns only the entries to write (keys missing or empty). Callers are responsible for
- * spreading the result over the existing map; see {@link mergeCustomFieldsIntoExtendedFields}
- * for the combined helper.
+ * spreading the result over the existing map.
  */
 export const buildExtendedFieldsBackfill = (
   customFields: LegacyCaseCustomField[] | undefined,
-  existingExtendedFields: Record<string, unknown> | null | undefined
+  existingExtendedFields: Record<string, unknown> | null | undefined,
+  resolveStorageKey: (customField: LegacyCaseCustomField) => string | undefined
 ): Record<string, string> => {
   const existing = existingExtendedFields ?? {};
   const additions: Record<string, string> = {};
 
   for (const cf of customFields ?? []) {
     const hasValue = cf.value !== null && cf.value !== undefined;
-    if (hasValue) {
-      const snakeKey = getFieldSnakeKey(cf.key, getV2FieldType(cf.type));
-      if (isEmptyExtendedFieldValue(existing[snakeKey])) {
-        additions[snakeKey] = String(cf.value);
-      }
+    const storageKey = hasValue ? resolveStorageKey(cf) : undefined;
+    if (storageKey !== undefined && isEmptyExtendedFieldValue(existing[storageKey])) {
+      additions[storageKey] = String(cf.value);
     }
   }
 
   return additions;
-};
-
-/**
- * Mirrors `customFields` values into an existing `extended_fields` map with
- * **customFields-win** semantics — the live write-time counterpart of {@link buildExtendedFieldsBackfill}.
- *
- * Rules applied for each customField entry:
- * - non-null / non-undefined value → override (or add) the mirror key with `String(value)`.
- * - null / undefined value → delete the mirror key so the v2 field renders empty rather than
- *   retaining a stale value.
- *
- * Returns:
- * - `existingExtendedFields` unchanged (same reference) when every key in the result would be
- *   identical to the current map — callers use reference equality to detect a no-op and skip
- *   the SO write.
- * - a new merged map otherwise.
- *
- * Note: the one-shot migration backfill ({@link buildExtendedFieldsBackfill}) retains
- * existing-wins semantics so it never clobbers values written through the v2 system.
- */
-export const mergeCustomFieldsIntoExtendedFields = (
-  customFields: LegacyCaseCustomField[] | undefined,
-  existingExtendedFields: Record<string, unknown> | null | undefined
-): Record<string, string> | null | undefined => {
-  const existing = existingExtendedFields ?? {};
-  const merged: Record<string, string> = { ...existing } as Record<string, string>;
-
-  for (const cf of customFields ?? []) {
-    const snakeKey = getFieldSnakeKey(cf.key, getV2FieldType(cf.type));
-    if (cf.value !== null && cf.value !== undefined) {
-      merged[snakeKey] = String(cf.value);
-    } else {
-      delete merged[snakeKey];
-    }
-  }
-
-  // Return the same reference when the result is value-identical — signals no-op to callers.
-  const existingKeys = Object.keys(existing);
-  const mergedKeys = Object.keys(merged);
-  const isNoOp =
-    existingKeys.length === mergedKeys.length &&
-    mergedKeys.every((k) => merged[k] === (existing as Record<string, string>)[k]);
-
-  return isNoOp ? (existingExtendedFields as Record<string, string> | null | undefined) : merged;
 };

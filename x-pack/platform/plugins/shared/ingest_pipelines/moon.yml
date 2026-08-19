@@ -51,6 +51,7 @@ dependsOn:
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/code-editor-mock'
   - '@kbn/scout'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
