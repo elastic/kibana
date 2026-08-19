@@ -20,8 +20,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Event Log service API', () => {
     it('should check if logging entries is enabled', async () => {
+      const configValue = config
+        .get('kbnTestServer.serverArgs')
+        .find((val: string) => val === '--xpack.eventLog.logEntries=true');
       const result = await isEventLogServiceLoggingEntries();
-      expect(result.body.isLoggingEntries).to.be.eql(false);
+      expect(configValue).to.be.eql(`--xpack.eventLog.logEntries=${result.body.isLoggingEntries}`);
     });
 
     it('should check if indexing entries is enabled', async () => {
