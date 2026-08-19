@@ -13,11 +13,35 @@ import { appendLimitToQuery } from '@kbn/esql-utils';
 import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
   CUSTOM_CONTENT_MAX_TEMPLATE_BYTES,
-  CUSTOM_CONTENT_CSS_VARS_GUIDANCE,
-  CUSTOM_CONTENT_SANDBOX_GUIDANCE,
-  CUSTOM_CONTENT_LIQUID_DATA_MODEL_GUIDANCE,
   stripMarkdownFences,
 } from '@kbn/custom-content-common';
+
+const CSS_VARS_GUIDANCE = `Use these CSS custom properties — they resolve to the correct EUI palette for both light and dark themes at render time:
+- Required body reset: body { margin: 0; padding: 16px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: var(--cc-color-text); background: var(--cc-color-background); }
+- Card/surface backgrounds: var(--cc-color-surface).
+- Accent colors: var(--cc-color-primary) (blue), var(--cc-color-accent) (teal), var(--cc-color-accent-2) (pink), var(--cc-color-warning) (yellow).
+- Danger/error: var(--cc-color-danger). Border color: var(--cc-color-border).`;
+
+const SANDBOX_GUIDANCE = `ABSOLUTE, NON-NEGOTIABLE RULE: the template renders inside a sandboxed iframe with scripting disabled. ANY JavaScript you write — a <script> tag, an inline event handler (onclick, onmouseover, ...), or building any part of the markup at runtime via document.getElementById/innerHTML/addEventListener/JSON.parse/fetch — will NEVER RUN. It is completely dead code and will render as a BLANK PANEL.
+- Write every element directly as static HTML/SVG — never assemble markup as a string in JavaScript and inject it via innerHTML.
+- If the prompt asks for hover interactivity (e.g. tooltips), this IS possible with CSS :hover alone — do NOT reach for JavaScript. Use a nested element that is invisible by default (\`opacity: 0\`) and reveal it with a \`:hover\` rule.
+- Do NOT use <a> anchor tags or href attributes of any kind.
+- Do NOT load any external resources. No CDN scripts, no Google Fonts, no image URLs.
+- Do NOT use <img> tags with an external \`src\` — the panel's CSP blocks all outbound network requests. For images, icons, or illustrations draw them with inline SVG, pure CSS shapes, or a Unicode emoji/symbol instead.
+- For diagrams and progress indicators, use pure CSS or inline SVG.`;
+
+const LIQUID_DATA_MODEL_GUIDANCE = `DATA MODEL available in the template:
+- rows: array of row objects. Access a column with its EXACT name using bracket notation: row["exact column name"].
+  Each column access resolves to an object: .value is the raw cell value, .pct is that column's value as a percentage (0–100) of its max across all rows (numeric columns only).
+- max: object of column max values, also keyed by exact column name. e.g. max["total_revenue"]
+
+LIQUID SYNTAX:
+- Loop rows:     {% for row in rows %}...{% endfor %}
+- Empty state:   {% if rows.size == 0 %}...{% endif %}
+- Conditionals:  {% if row["revenue"].value >= 10000 %}...{% elsif row["revenue"].value >= 5000 %}...{% else %}...{% endif %}
+- Output value:  {{ row["column name"].value }}
+- Bar width:     <div style="width: {{ row["column name"].pct }}%; ..."></div>
+- Filters:       {{ row["column name"].value | round: 2 }}`;
 import { sanitizeCellValue } from './sanitize_cell_value';
 
 const SAMPLE_ROW_COUNT = 3;
@@ -30,7 +54,7 @@ function formatSampleTable(columns: Array<{ name: string }>, rows: unknown[][]):
 }
 
 function colorSection(): string {
-  return `VISUAL DESIGN — ${CUSTOM_CONTENT_CSS_VARS_GUIDANCE}
+  return `VISUAL DESIGN — ${CSS_VARS_GUIDANCE}
 - Clean, modern design. Comfortable padding. Do NOT add a border around cards, containers, or the panel by default — separate elements using background-color contrast and spacing only. Only add a border (e.g. var(--cc-color-border)) if the user explicitly asks for one.`;
 }
 
@@ -42,7 +66,7 @@ Your job is to generate a single self-contained HTML document that presents the 
 OUTPUT RULES — follow these exactly:
 - Output ONLY valid HTML. No markdown fences, no explanation, no commentary before or after.
 - The HTML must be fully self-contained: all CSS inline in <style> tags.
-${CUSTOM_CONTENT_SANDBOX_GUIDANCE}
+${SANDBOX_GUIDANCE}
 
 ${colorSection()}
 
@@ -58,12 +82,12 @@ function buildSystemPromptTemplate(): string {
 
 Generate a reusable HTML template using Liquid template syntax. The template is filled with real ES|QL query results at render time — do NOT embed literal data values.
 
-${CUSTOM_CONTENT_LIQUID_DATA_MODEL_GUIDANCE}
+${LIQUID_DATA_MODEL_GUIDANCE}
 
 OUTPUT RULES:
 - Output ONLY the HTML template. No markdown fences, no explanation.
 - All CSS inline in <style> tags.
-${CUSTOM_CONTENT_SANDBOX_GUIDANCE}
+${SANDBOX_GUIDANCE}
 - Aggregation/grouping/sorting cannot happen in the template — it only receives \`rows\` and \`max\` as given. If the data needs grouping that isn't already reflected in \`rows\`, that has to happen upstream in the ES|QL query (STATS ... BY ...).
 - For charts use pure CSS or inline SVG.
 
@@ -94,10 +118,13 @@ export const createCustomContentTemplateResolver = ({
     prompt,
     esqlQuery,
     existingTemplate,
+    hasExistingQuery,
   }: {
     prompt: string;
     esqlQuery?: string;
     existingTemplate?: string;
+    /** True when the panel already has an ES|QL query that is not changing. Selects the Liquid system prompt without re-sampling. */
+    hasExistingQuery?: boolean;
   }): Promise<string> => {
     let columns: Array<{ name: string; type: string }> = [];
     let values: unknown[][] = [];
@@ -113,7 +140,8 @@ export const createCustomContentTemplateResolver = ({
       }
     }
 
-    const systemPrompt = esqlQuery ? buildSystemPromptTemplate() : buildSystemPromptStatic();
+    const systemPrompt =
+      esqlQuery || hasExistingQuery ? buildSystemPromptTemplate() : buildSystemPromptStatic();
 
     let userContent: string;
     if (esqlQuery) {
