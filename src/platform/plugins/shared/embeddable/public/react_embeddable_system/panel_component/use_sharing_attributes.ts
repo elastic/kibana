@@ -37,8 +37,8 @@ export function useSharingAttributes(
     blockingError,
     defaultDescription,
     description,
-    title,
     defaultTitle,
+    title,
     dataLoading,
     rendered,
   ] = useBatchedPublishingSubjects(
