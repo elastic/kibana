@@ -116,13 +116,8 @@ export class AlertService {
         { concurrency: MAX_CONCURRENT_SEARCHES }
       );
 
-      if (this.casesEventBus && this.request) {
-        this.emitStatusChangedEvents(
-          alerts,
-          previousStatusMap ?? new Map(),
-          this.casesEventBus,
-          this.request
-        );
+      if (this.casesEventBus && this.request && previousStatusMap !== undefined) {
+        this.emitStatusChangedEvents(alerts, previousStatusMap, this.casesEventBus, this.request);
       }
 
       return updateResults.reduce((acc, updatedCount) => acc + updatedCount, 0);
