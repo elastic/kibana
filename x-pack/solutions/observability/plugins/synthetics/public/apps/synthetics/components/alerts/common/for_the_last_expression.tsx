@@ -14,7 +14,10 @@ import {
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { getConditionType } from '../../../../../../common/rules/status_rule';
+import {
+  DEFAULT_PENDING_THRESHOLD,
+  getConditionType,
+} from '../../../../../../common/rules/status_rule';
 import type { StatusRuleParamsProps } from '../status_rule_ui';
 
 interface Props {
@@ -66,12 +69,13 @@ const OPTIONS: Option[] = [
   },
 ];
 
-export const DEFAULT_CONDITION = {
+export const DEFAULT_CONDITION: StatusRuleCondition = {
   window: { numberOfChecks: 5 },
   groupBy: 'locationId',
   downThreshold: 3,
   locationsThreshold: 1,
-  recoveryStrategy: 'firstUp' as const,
+  pendingThreshold: DEFAULT_PENDING_THRESHOLD,
+  recoveryStrategy: 'firstUp',
 };
 const getCheckedOption = (option: Option, condition?: StatusRuleCondition) => {
   const { useTimeWindow, isLocationBased } = getConditionType(condition);
