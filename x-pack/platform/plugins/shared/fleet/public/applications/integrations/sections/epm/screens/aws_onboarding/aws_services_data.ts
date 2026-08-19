@@ -33,7 +33,7 @@ export const AWS_SCHEMA_META: Record<AwsSchema, { label: string; description: st
     description: 'Elastic Common Schema field mappings — the default, broadest content coverage.',
   },
   otel: {
-    label: 'OpenTelemetry (OTel)',
+    label: 'OTel-native',
     description: 'OpenTelemetry semantic conventions. Some services have limited content today.',
   },
 };
