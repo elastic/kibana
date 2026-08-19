@@ -7,7 +7,6 @@
 
 import React, { useEffect } from 'react';
 import {
-  EuiCallOut,
   EuiCodeBlock,
   EuiFieldText,
   EuiFormRow,
@@ -18,6 +17,7 @@ import {
   EuiCode,
   EuiFieldPassword,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -185,7 +185,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         </SecretFormRow>
       )}
       <EuiSpacer size="m" />
-      <EuiCallOut
+      <KbnInfoCallout
         title={
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.serviceTokenCalloutText"
@@ -200,7 +200,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
   "remote": true
 }`}
         </EuiCodeBlock>
-      </EuiCallOut>
+      </KbnInfoCallout>
       <EuiSpacer size="m" />
       <SSLFormSection
         type={inputs.typeInput.value as FormType}
@@ -212,7 +212,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
       <EuiSpacer size="m" />
       {enableSyncIntegrations ? (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             data-test-subj="syncIntegrationsServerlessCallout"
             title={i18n.translate(
@@ -222,8 +222,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                   'Integration sync is not supported when the remote cluster is a serverless project.',
               }
             )}
-            iconType="warning"
-            color="warning"
             size="s"
             heading="p"
           />
@@ -274,9 +272,8 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                 />
               </EuiFormRow>
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnInfoCallout
                 announceOnMount
-                iconType="info"
                 title={
                   <FormattedMessage
                     id="xpack.fleet.settings.editOutputFlyout.remoteClusterConfigurationCalloutTitle"
@@ -391,7 +388,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                     />
                   </>
                 )}
-              </EuiCallOut>
+              </KbnInfoCallout>
               <EuiSpacer size="m" />
               <EuiFormRow
                 fullWidth
@@ -442,7 +439,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               </EuiFormRow>
 
               <EuiSpacer size="m" />
-              <EuiCallOut
+              <KbnInfoCallout
                 announceOnMount
                 title={
                   <FormattedMessage
@@ -469,7 +466,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
      }
    }`}
                 </EuiCodeBlock>
-              </EuiCallOut>
+              </KbnInfoCallout>
               <EuiSpacer size="m" />
             </>
           )}

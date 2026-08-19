@@ -16,6 +16,13 @@ import { retryTransientEsErrors } from '../lib/retry_transient_es_errors';
 
 export type StepExecutionField = keyof EsWorkflowStepExecution;
 
+/**
+ * Step documents share the workflow-execution document's concurrent-writer problem: the run's own
+ * periodic flush and `markNonTerminalStepsFailed` (cancel / task-recovery paths) can update the
+ * same step doc at once. See the matching note in `workflow_execution_repository.ts`.
+ */
+const UPDATE_RETRY_ON_CONFLICT = 3;
+
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
 
@@ -151,7 +158,7 @@ export class StepExecutionRepository {
           refresh: false, // Performance optimization: documents become searchable after next refresh (~1s)
           index: this.indexName,
           body: stepExecutions.flatMap((stepExecution) => [
-            { update: { _id: stepExecution.id } },
+            { update: { _id: stepExecution.id, retry_on_conflict: UPDATE_RETRY_ON_CONFLICT } },
             { doc: stepExecution, doc_as_upsert: true },
           ]),
         }),
