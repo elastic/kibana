@@ -18,7 +18,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiCallOut,
   EuiSpacer,
   EuiSelect,
   type EuiComboBoxOptionOption,
@@ -27,6 +26,7 @@ import {
   EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 
 import styled from 'styled-components';
 
@@ -280,7 +280,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       <>
         {isManaged && (
           <>
-            <EuiCallOut
+            <KbnInfoCallout
               announceOnMount
               title={
                 <FormattedMessage
@@ -288,7 +288,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                   defaultMessage="This is a managed package policy. You cannot modify it here."
                 />
               }
-              iconType="lock"
             />
             <EuiSpacer size="m" />
           </>
@@ -547,10 +546,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       {showOptInImpactWarning && (
                         <>
                           <EuiSpacer size="s" />
-                          <EuiCallOut
+                          <KbnWarningCallout
                             announceOnMount
-                            iconType="warning"
-                            color="warning"
                             size="s"
                             data-test-subj="packagePolicyNamespaceCustomizationOptInImpactWarning"
                             title={i18n.translate(
@@ -561,25 +558,24 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 values: { count: otherPoliciesCount },
                               }
                             )}
-                          >
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
-                              defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling them here will apply them to all of them."
-                              values={{
-                                packageTitle: packageInfo.title,
-                                namespace: <strong>{currentNamespace}</strong>,
-                              }}
-                            />
-                          </EuiCallOut>
+                            text={
+                              <FormattedMessage
+                                id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
+                                defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling them here will apply them to all of them."
+                                values={{
+                                  packageTitle: packageInfo.title,
+                                  namespace: <strong>{currentNamespace}</strong>,
+                                }}
+                              />
+                            }
+                          />
                         </>
                       )}
                       {showOptOutImpactWarning && (
                         <>
                           <EuiSpacer size="s" />
-                          <EuiCallOut
+                          <KbnWarningCallout
                             announceOnMount
-                            iconType="warning"
-                            color="warning"
                             size="s"
                             data-test-subj="packagePolicyNamespaceCustomizationOptOutImpactWarning"
                             title={i18n.translate(
@@ -590,16 +586,17 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 values: { count: otherPoliciesCount },
                               }
                             )}
-                          >
-                            <FormattedMessage
-                              id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
-                              defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling them here will remove them from all of them."
-                              values={{
-                                packageTitle: packageInfo.title,
-                                namespace: <strong>{currentNamespace}</strong>,
-                              }}
-                            />
-                          </EuiCallOut>
+                            text={
+                              <FormattedMessage
+                                id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
+                                defaultMessage="Namespace index templates are shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling them here will remove them from all of them."
+                                values={{
+                                  packageTitle: packageInfo.title,
+                                  namespace: <strong>{currentNamespace}</strong>,
+                                }}
+                              />
+                            }
+                          />
                         </>
                       )}
                     </EuiFlexItem>

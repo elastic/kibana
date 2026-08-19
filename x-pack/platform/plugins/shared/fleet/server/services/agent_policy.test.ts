@@ -3613,6 +3613,34 @@ describe('Agent policy', () => {
       });
     });
 
+    it('should omit credentials_external_id when the AWS connector has no external_id', async () => {
+      const connectorWithoutExternalId = {
+        ...baseConnector,
+        attributes: {
+          ...baseConnector.attributes,
+          vars: {
+            role_arn: { type: 'text' as const, value: 'arn:aws:iam::123456:role/test' },
+          },
+        },
+      };
+
+      await agentPolicyService.createVerifierPolicy(
+        soClient,
+        esClient,
+        connectorWithoutExternalId as any,
+        baseVerificationInfo
+      );
+
+      const { streams: awsStreams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+      const vars = awsStreams[0].vars!;
+
+      expect(vars.credentials_role_arn).toEqual({
+        type: 'text',
+        value: 'arn:aws:iam::123456:role/test',
+      });
+      expect(vars.credentials_external_id).toBeUndefined();
+    });
+
     it('should include Azure credential vars for azure provider', async () => {
       const azureConnector = {
         ...baseConnector,
