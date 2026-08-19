@@ -31,7 +31,7 @@ import {
   ANALYZER_GRAPH_TEST_ID,
 } from './test_ids';
 import { Resolver } from '../../../../resolver/view';
-import { withDocumentIndex } from '../../../../resolver/utils/with_document_index';
+import { withDocumentIndex } from '../../../../flyout_v2/shared/utils/non_local_index';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
 import { useIsAnalyzerEnabled } from '../../../../detections/hooks/use_is_analyzer_enabled';

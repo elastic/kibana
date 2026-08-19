@@ -20,7 +20,7 @@ import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './te
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import type { StatsNode } from '../hooks/use_alert_prevalence_from_process_tree';
 import { useAlertPrevalenceFromProcessTree } from '../hooks/use_alert_prevalence_from_process_tree';
-import { withDocumentIndex } from '../../../../resolver/utils/with_document_index';
+import { withDocumentIndex } from '../../../shared/utils/non_local_index';
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
