@@ -56,6 +56,7 @@ interface FilterInputStandardSelectProps
     | 'fullWidth'
     | 'isInvalid'
     | 'popoverProps'
+    | 'css'
   > {
   control: Control<Exclude<FilterInput, { tagValue: undefined }>>;
   name: Exclude<keyof FilterInput, 'tagValue'>;

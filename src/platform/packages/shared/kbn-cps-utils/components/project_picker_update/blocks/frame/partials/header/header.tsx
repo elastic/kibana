@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback, useState } from 'react';
 import type { ProjectPickerState } from '../../../../state/reducers';
 import { useProjectPickerActions, useProjectPickerState } from '../../../../state';
-import { strings } from '../../../../../strings';
 
 interface HeaderContextMenuClickActionContext {
   state: ProjectPickerState;
@@ -108,13 +107,11 @@ export function ProjectPickerFrameHeaderActions({
       <EuiFlexGroup responsive={false} alignItems="center">
         {state.isUsingSpaceDefaults && (
           <EuiFlexItem>
-            <EuiToolTip content={strings.getProjectPickerReadonlyCallout()}>
-              <EuiBadge tabIndex={0} color="primary">
-                {i18n.translate('cpsUtils.projectPicker.frameHeader.usingSpaceDefaultsBadge', {
-                  defaultMessage: 'Using space defaults',
-                })}
-              </EuiBadge>
-            </EuiToolTip>
+            <EuiBadge color="primary">
+              {i18n.translate('cpsUtils.projectPicker.frameHeader.usingSpaceDefaultsBadge', {
+                defaultMessage: 'Using space defaults',
+              })}
+            </EuiBadge>
           </EuiFlexItem>
         )}
         <EuiFlexItem>
