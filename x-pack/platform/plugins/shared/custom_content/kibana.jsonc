@@ -13,7 +13,8 @@
       "embeddable",
       "inference",
       "data",
-      "esql"
+      "esql",
+      "uiActions"
     ],
     "optionalPlugins": [
       "agentBuilder"
