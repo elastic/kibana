@@ -249,12 +249,14 @@ const QueryDescriptor: z.ZodType<HealthDiagnosticQuery> = z
       typeof version === 'number' && !VALID_VERSIONS.includes(version as ValidVersion)
         ? 'unknown_version'
         : 'invalid_descriptor';
+    // z.catch() must return the schema's output type; cast here so the outer
+    // z.ZodType<HealthDiagnosticQuery> annotation covers ParseFailureQuery at call sites.
     return {
       id: raw?.id as string | undefined,
       name: raw?.name as string | undefined,
       _raw: ctx.input,
       failureReason,
-    };
+    } as unknown as IndexQuery;
   });
 
 export const parseHealthDiagnosticQueries = (input: unknown): HealthDiagnosticQuery[] =>

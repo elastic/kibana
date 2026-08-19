@@ -29,6 +29,7 @@ export class IntegrationResolverImpl implements IntegrationResolver {
   async resolve(queries: HealthDiagnosticQuery[]): Promise<ResolvedQuery[]> {
     const needsFleet = queries.some(
       (q) =>
+        'kind' in q &&
         (q.kind === 'index' || q.kind === 'api') &&
         (q as IndexQuery | ApiQuery).integrations !== undefined &&
         ((q as IndexQuery | ApiQuery).integrations ?? []).length > 0
@@ -54,6 +55,9 @@ export class IntegrationResolverImpl implements IntegrationResolver {
 
     const resolved = await Promise.all(
       queries.map(async (query): Promise<ResolvedQuery[]> => {
+        if (!('kind' in query)) {
+          return [this.resolveUnknown(query)];
+        }
         if (query.kind === 'index') {
           if (query.type === QueryType.ESQL && /^[\s\r\n]*FROM/i.test(query.query)) {
             return [{ kind: 'skipped', query, reason: 'unsupported_query' } as SkippedQuery];
