@@ -7,27 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Build-time type validation — causes build failure if types diverge.
-import './type_validation';
-
 export {
-  FeedbackTriggerButton,
-  FeedbackContainer,
   FeedbackSuccessToastTitle,
   FeedbackSuccessToastBody,
   FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS,
   FEEDBACK_RESEARCH_PANEL_URL,
-} from '../../src';
-export type {
-  FeedbackTriggerButtonProps,
-  FeedbackContainerProps,
-  FeedbackSuccessToastBodyProps,
-} from '../../src';
-export type {
-  FeedbackRegistryEntry,
-  FeedbackContext,
-  FeedbackSubmittedData,
-  FeedbackQuestion,
-  FeedbackFormData,
-  AppDetails,
-} from '../../src/types';
+} from './feedback_success_toast';
+export type { FeedbackSuccessToastBodyProps } from './feedback_success_toast';

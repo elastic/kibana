@@ -7,9 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FeedbackTriggerButton, FeedbackContainer } from './src';
+export {
+  FeedbackTriggerButton,
+  FeedbackContainer,
+  FeedbackSuccessToastTitle,
+  FeedbackSuccessToastBody,
+  FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS,
+  FEEDBACK_RESEARCH_PANEL_URL,
+} from './src';
 
-export type { FeedbackTriggerButtonProps, FeedbackContainerProps } from './src';
+export type {
+  FeedbackTriggerButtonProps,
+  FeedbackContainerProps,
+  FeedbackSuccessToastBodyProps,
+} from './src';
 
 export type {
   FeedbackRegistryEntry,

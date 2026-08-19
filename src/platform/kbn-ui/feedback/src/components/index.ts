@@ -26,3 +26,11 @@ export { FeedbackFooter } from './footer';
 export { FeedbackContainerSkeleton } from './feedback_container_skeleton';
 export { FeedbackContainer } from './feedback_container';
 export type { FeedbackContainerProps } from './feedback_container';
+
+export {
+  FeedbackSuccessToastTitle,
+  FeedbackSuccessToastBody,
+  FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS,
+  FEEDBACK_RESEARCH_PANEL_URL,
+} from './success_toast';
+export type { FeedbackSuccessToastBodyProps } from './success_toast';

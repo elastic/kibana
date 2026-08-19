@@ -94,7 +94,35 @@ const createFeedbackDeps = (
     },
     showToast: (title: string, color: 'success' | 'error') => {
       if (color === 'success') {
-        core.notifications.toasts.addSuccess({ title });
+        void import('@kbn/ui-feedback').then(
+          ({
+            FeedbackSuccessToastTitle,
+            FeedbackSuccessToastBody,
+            FEEDBACK_SUCCESS_TOAST_LIFE_TIME_MS: toastLifeTimeMs,
+          }) => {
+            const toastRef: {
+              current: ReturnType<typeof core.notifications.toasts.add> | undefined;
+            } = { current: undefined };
+
+            toastRef.current = core.notifications.toasts.add({
+              color: 'success',
+              title: toMountPoint(core.rendering.addContext(<FeedbackSuccessToastTitle />), core),
+              text: toMountPoint(
+                core.rendering.addContext(
+                  <FeedbackSuccessToastBody
+                    onDismiss={() => {
+                      if (toastRef.current) {
+                        core.notifications.toasts.remove(toastRef.current);
+                      }
+                    }}
+                  />
+                ),
+                core
+              ),
+              toastLifeTimeMs,
+            });
+          }
+        );
       }
       if (color === 'error') {
         core.notifications.toasts.addDanger({ title });
