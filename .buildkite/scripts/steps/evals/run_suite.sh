@@ -202,48 +202,25 @@ EOF
         fanout_preemptible=false
       fi
 
-      # Suites that don't fit one step declare `shards` in evals.suites.json; get_fanout_matrix.js
-      # turns them (crossed with the resolved connectors) into the fanout steps. These arrays mirror
-      # the shards only to fail fast below if a shard lists a spec file that no longer exists.
-      # An explicit grep/grep-invert is a manual override, so it takes precedence over the shards.
-      # Expanded into parallel arrays rather than read positionally from a delimited row, because
-      # bash collapses runs of tabs when splitting and would shift a shard with an empty field.
-      shard_ids=()
-      shard_spec_files=()
-      shard_count=0
-      if [[ -z "${EVAL_GREP:-}" && -z "${EVAL_GREP_INVERT:-}" ]]; then
-        shard_count="$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '(.shards // []) | length' 2>/dev/null || echo 0)"
-        [[ "$shard_count" =~ ^[0-9]+$ ]] || shard_count=0
-      fi
-
-      for ((shard_index = 0; shard_index < shard_count; shard_index++)); do
-        shard_ids+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '.shards[$i].id // ""')")
-        shard_spec_files+=("$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r --argjson i "$shard_index" '(.shards[$i].specFiles // []) | join(" ")')")
-      done
-
-      # No shards configured: a single step per connector, honouring any manual grep overrides.
-      if ((shard_count == 0)); then
-        shard_ids=("")
-        shard_spec_files=("")
-      fi
-
-      # A moved or renamed spec would just stop being run by its shard, and the step would still go
-      # green having run the rest. Fail the whole fanout here instead, before any stack is booted.
-      if ((shard_count > 0)); then
-        suite_root="$(dirname "$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.configPath // ""')")"
+      # The fanout matrix's third column lists the spec files each step runs (space-joined; empty for
+      # a whole-suite step). A moved or renamed spec would otherwise just stop running with the step
+      # still green, so check every referenced file here, before any stack is booted, and fail fast.
+      suite_root="$(dirname "$(printf '%s' "${EVAL_SUITE_INFO}" | jq -r '.configPath // ""')")"
+      if [[ -n "${suite_root}" && "${suite_root}" != "." ]]; then
         missing_spec_files=()
-        for ((shard_index = 0; shard_index < shard_count; shard_index++)); do
-          read -r -a shard_spec_file_list <<<"${shard_spec_files[$shard_index]}"
-          for spec_file in ${shard_spec_file_list[@]+"${shard_spec_file_list[@]}"}; do
+        while IFS=$'\t' read -r _connector_id _shard_id row_spec_files; do
+          [[ -z "$row_spec_files" ]] && continue
+          read -r -a row_spec_file_list <<<"$row_spec_files"
+          for spec_file in ${row_spec_file_list[@]+"${row_spec_file_list[@]}"}; do
             if [[ ! -f "${suite_root}/${spec_file}" ]]; then
-              missing_spec_files+=("${shard_ids[$shard_index]}: ${spec_file}")
+              missing_spec_files+=("${spec_file}")
             fi
           done
-        done
+        done <<<"$FANOUT_MATRIX"
         if ((${#missing_spec_files[@]} > 0)); then
-          echo "Shard spec files missing from ${suite_root}/:" >&2
-          printf '  %s\n' "${missing_spec_files[@]}" >&2
-          echo "Update the suite's shards in .buildkite/pipelines/evals/evals.suites.json." >&2
+          echo "Spec files missing from ${suite_root}/:" >&2
+          printf '  %s\n' "${missing_spec_files[@]}" | sort -u >&2
+          echo "Update the suite's shards/specs in .buildkite/pipelines/evals/evals.suites.json." >&2
           exit 1
         fi
       fi

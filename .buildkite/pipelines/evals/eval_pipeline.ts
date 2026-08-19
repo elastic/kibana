@@ -22,6 +22,14 @@ export interface EvalsSuiteShard {
   specFiles: string[];
 }
 
+// Per-spec model config, independent of shards. `files` are spec paths relative to the suite config
+// directory; `models` (optional) is the model-group list those specs run against, falling back to
+// `weeklyEisModelGroups` then the requested `EVAL_MODEL_GROUPS`. Only used in per-spec mode.
+export interface EvalsSuiteSpec {
+  files: string[];
+  models?: string[];
+}
+
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
@@ -32,10 +40,7 @@ export interface EvalsSuiteMetadataEntry {
   defaultModelGroups?: string[] | null;
   shards?: EvalsSuiteShard[];
   stepTimeoutInMinutes?: number;
-  // Per-spec model overrides, keyed by spec id (the spec filename minus `.spec.ts`). Resolved at
-  // fanout time by `get_fanout_matrix.js`: a spec falls back to `weeklyEisModelGroups`, then to the
-  // requested `EVAL_MODEL_GROUPS`. Only consulted in per-spec mode (weekly / `models:weekly-eis-models`).
-  specModelGroups?: Record<string, string[]>;
+  specs?: EvalsSuiteSpec[];
 }
 
 function pathExistsInGitTree(repoRelativePath: string): boolean {

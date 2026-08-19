@@ -204,26 +204,30 @@ results and triage.
 #### Per-spec model groups
 
 By default every model in a suite's list runs against every spec. A suite can instead pin a model
-list per spec with `specModelGroups` in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json),
-keyed by **spec id** (the spec filename minus `.spec.ts`, e.g. `discovery`):
+list per spec with `specs` in [`evals.suites.json`](../../../../../.buildkite/pipelines/evals/evals.suites.json).
+Each entry lists spec `files` (paths relative to the suite config directory) and the `models` those
+specs run against. `specs` (model config) and `shards` (CI batching) are independent: a spec's models
+come from `specs`, its CI step from `shards`, and either can be absent.
 
 ```jsonc
 {
   "id": "significant-events",
-  "shards": [ /* spec files live here; batching only */ ],
   "weeklyEisModelGroups": [ /* suite fallback + provisioning universe */ ],
-  "specModelGroups": {
-    "discovery": ["eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4"],
-    "ki_feature_extraction": ["eis/openai-gpt-5.4-mini", "eis/google-gemini-3.0-flash"]
-  }
+  "specs": [
+    { "files": ["evals/discovery/discovery.spec.ts"], "models": ["eis/anthropic-claude-4.6-opus", "eis/openai-gpt-5.4"] },
+    { "files": ["evals/ki_feature_extraction/ki_feature_extraction.spec.ts"], "models": ["eis/openai-gpt-5.4-mini"] }
+  ],
+  "shards": [ /* optional; batching only, purely about CI step timeouts */ ]
 }
 ```
 
-A spec resolves its models in this order: its own `specModelGroups` list, then the suite's
-`weeklyEisModelGroups`, then the requested `EVAL_MODEL_GROUPS`. Each `specModelGroups` model must be
-within `weeklyEisModelGroups` (the list CI provisions connectors for). Per-spec resolution applies to
-the weekly run and the `models:weekly-eis-models` label; an explicit `models:<model-group>` selection
-overrides it and runs that set against every spec. Suites without `specModelGroups` fan out unchanged.
+A spec resolves its models in this order: its own `specs` list, then the suite's
+`weeklyEisModelGroups`, then the requested `EVAL_MODEL_GROUPS`. `models` is optional (omit it to use
+the weekly list), and each model must be within `weeklyEisModelGroups` (the list CI provisions
+connectors for). The set of specs to run is discovered from the suite directory, so per-spec model
+config works with or without shards. Per-spec resolution applies to the weekly run and the
+`models:weekly-eis-models` label; an explicit `models:<model-group>` selection overrides it and runs
+that set against every spec. Suites without `specs` model overrides fan out unchanged.
 
 ---
 
