@@ -12,8 +12,7 @@ import { test } from '../fixtures';
 
 // cloudtrail: dual-transport (S3 + CloudWatch); required fields are bucket_arn (S3) / log_group_arn (CW)
 // waf: static ECF deployment method → always showInUI:true regardless of manifest version
-// firewall_metrics: regions-only optionalConfig — explicitly showInUI:false; kept in one test where
-//   that test passes vacuously (no rows shown, Continue still enabled due to no required fields)
+// s3access: managed_integration, showInUI:true, no required text vars → used for no-attention-callout test
 
 const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';
 const SERVICE_SETTINGS_SESSION_KEY = 'onboarding.aws.serviceSettingsStep';
