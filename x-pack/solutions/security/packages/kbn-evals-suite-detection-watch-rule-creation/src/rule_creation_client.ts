@@ -14,6 +14,7 @@ import {
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
+import { API_VERSIONS, buildRespondToActionUrl } from '@kbn/inbox-common';
 import {
   DRAFT_STEP_ID,
   REVIEW_STEP_ID,
@@ -21,7 +22,6 @@ import {
   WORKFLOWS_API_VERSION,
 } from './constants';
 import { draftRuleSchema, type DraftRule } from './types';
-import { respondToWorkflowApproval } from './workflow_fixture';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -175,13 +175,28 @@ export class RuleCreationClient {
     // Must match buildWorkflowSourceId in workflows_management/server/inbox/to_inbox_action.ts
     // (plugin-private, no shared export).
     const sourceId = `${RULE_CREATION_WORKFLOW_ID}:${workflowExecutionId}:${reviewStep.id}`;
-    await respondToWorkflowApproval({ fetch: this.fetch, sourceId, approved, log: this.log });
+    await this.respondToApprovalGate({ sourceId, approved });
 
     return this.pollExecution({
       workflowExecutionId,
       isDone: (status) => TerminalExecutionStatuses.includes(status),
       maxWaitMs,
       pollIntervalMs,
+    });
+  }
+
+  private async respondToApprovalGate({
+    sourceId,
+    approved,
+  }: {
+    sourceId: string;
+    approved: boolean;
+  }): Promise<void> {
+    this.log.info(`Sending approval=${approved} for inbox source ${sourceId}`);
+    await this.fetch(buildRespondToActionUrl('workflows', sourceId), {
+      method: 'POST',
+      headers: { 'elastic-api-version': API_VERSIONS.internal.v1, 'kbn-xsrf': 'true' },
+      body: JSON.stringify({ input: { approved } }),
     });
   }
 

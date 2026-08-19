@@ -8,7 +8,6 @@
 import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { API_VERSIONS, buildRespondToActionUrl } from '@kbn/inbox-common';
 import { RULE_CREATION_WORKFLOW_ID, WORKFLOWS_API_VERSION } from './constants';
 
 export const ensureConnectorAccessible = async ({
@@ -32,26 +31,6 @@ export const ensureConnectorAccessible = async ({
         `Original error: ${err instanceof Error ? err.message : String(err)}`
     );
   }
-};
-
-/** Approves or rejects a paused waitForInput step via the inbox respond route. */
-export const respondToWorkflowApproval = async ({
-  fetch,
-  sourceId,
-  approved,
-  log,
-}: {
-  fetch: HttpHandler;
-  sourceId: string;
-  approved: boolean;
-  log: ToolingLog;
-}): Promise<void> => {
-  log.info(`Sending approval=${approved} for inbox source ${sourceId}`);
-  await fetch(buildRespondToActionUrl('workflows', sourceId), {
-    method: 'POST',
-    headers: { 'elastic-api-version': API_VERSIONS.internal.v1, 'kbn-xsrf': 'true' },
-    body: JSON.stringify({ input: { approved } }),
-  });
 };
 
 /**
