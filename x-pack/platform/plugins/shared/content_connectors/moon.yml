@@ -63,6 +63,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/deeplinks-management'
+  - '@kbn/ui-callout'
 tags:
   - plugin
   - prod
