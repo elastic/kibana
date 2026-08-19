@@ -93,7 +93,7 @@ For the {{elastic-sec}} 9.5.2 release information, refer to [{{elastic-sec}} Sol
 * Fix deleting a package policy from an agent policy with many agents blocking on a full synchronous redeploy instead of deploying asynchronously [#282580]({{kib-pull}}282580).
 * Fix Fleet bulk upgrades installing the bundled package version instead of the latest registry version [#282829]({{kib-pull}}282829).
 * Fix Fleet lookups that treated version-specific policy IDs as base policy IDs, which could return HTTP 404 for Fleet Server policy revisions and miss agents [#283071]({{kib-pull}}283071).
-* Fix the agentless enrollment flyout failing to detect enrolled agents assigned to version-specific policies [#283434]({{kib-pull}}283434).
+* Fix the managed integration enrollment flyout failing to detect enrolled agents assigned to version-specific policies [#283434]({{kib-pull}}283434).
 * Fix expired Fleet enrollment tokens still showing as **Active**, and add an **Expired** status to the enrollment tokens list [#284280]({{kib-pull}}284280).
 * Fix disabling namespace index templates for a package policy with a custom ILM policy failing with an ILM update error [#284818]({{kib-pull}}284818).
 % !!DEFERRED!! Not yet confirmed in build candidate 9.5.2-6859b2a4 (backport merged after BC cutoff). Re-verify against the next BC before publishing.
