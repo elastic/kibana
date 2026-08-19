@@ -9,7 +9,7 @@
 
 import { z } from '@kbn/zod';
 import { LENS_FORMAT_NUMBER_DECIMALS_DEFAULT, LENS_FORMAT_COMPACT_DEFAULT } from './constants';
-import { durationFormatSchema, legacyDurationFormatSchema } from './duration_units';
+import { durationFormatSchema } from './duration_units';
 
 const numericFormatSchema = z
   .object({
@@ -88,18 +88,9 @@ const customFormatSchema = z
 
 /**
  * Format configuration for dimension values.
- * Accepts both GA and legacy unit names for the `duration` type so that neither is rejected at
- * the HTTP validation layer. The route handlers enforce exactly one set at runtime based on the
- * `asCode.useGASchemas` feature flag.
  */
 export const formatTypeSchema = z
-  .union([
-    numericFormatSchema,
-    byteFormatSchema,
-    durationFormatSchema,
-    legacyDurationFormatSchema,
-    customFormatSchema,
-  ])
+  .union([numericFormatSchema, byteFormatSchema, durationFormatSchema, customFormatSchema])
   .meta({
     id: 'formatType',
     title: 'Format Type',

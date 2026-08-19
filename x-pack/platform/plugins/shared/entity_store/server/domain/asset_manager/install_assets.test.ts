@@ -8,14 +8,23 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { uninstallElasticsearchAssets } from './install_assets';
-import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
+import {
+  getLatestEntitiesIndexName,
+  getLegacySecurityLatestEntitiesIndexName,
+} from '../../../common/domain/entity_index';
 import {
   getHistorySnapshotIndexName,
   getHistorySnapshotIndexPattern,
   getLegacySecurityHistorySnapshotIndexPattern,
 } from './history_snapshot_index';
-import { getUpdatesEntitiesDataStreamName } from './updates_data_stream';
-import { getMetadataEntitiesDataStreamName } from './metadata_data_stream';
+import {
+  getUpdatesEntitiesDataStreamName,
+  getLegacySecurityUpdatesEntitiesDataStreamName,
+} from './updates_data_stream';
+import {
+  getMetadataEntitiesDataStreamName,
+  getLegacySecurityMetadataEntitiesDataStreamName,
+} from './metadata_data_stream';
 
 jest.mock('../../infra/elasticsearch');
 
@@ -33,6 +42,7 @@ describe('uninstallElasticsearchAssets', () => {
 
   const createEsClient = (historyIndices: string[] = [historyIndexA, historyIndexB]) => ({
     indices: {
+      getAlias: jest.fn().mockRejectedValue({ meta: { statusCode: 404 } }),
       resolveIndex: jest.fn().mockImplementation(async ({ name }: { name: string }) => {
         if (name === historyPattern) {
           return {
@@ -62,6 +72,10 @@ describe('uninstallElasticsearchAssets', () => {
     expect(deleteIndex).toHaveBeenCalledWith(
       expect.anything(),
       getLatestEntitiesIndexName(namespace)
+    );
+    expect(deleteIndex).toHaveBeenCalledWith(
+      expect.anything(),
+      getLegacySecurityLatestEntitiesIndexName(namespace)
     );
   });
 
@@ -95,10 +109,14 @@ describe('uninstallElasticsearchAssets', () => {
       namespace,
     });
 
-    expect(deleteIndex).toHaveBeenCalledTimes(1);
+    expect(deleteIndex).toHaveBeenCalledTimes(2);
     expect(deleteIndex).toHaveBeenCalledWith(
       expect.anything(),
       getLatestEntitiesIndexName(namespace)
+    );
+    expect(deleteIndex).toHaveBeenCalledWith(
+      expect.anything(),
+      getLegacySecurityLatestEntitiesIndexName(namespace)
     );
   });
 
@@ -113,6 +131,10 @@ describe('uninstallElasticsearchAssets', () => {
       expect.anything(),
       getUpdatesEntitiesDataStreamName(namespace)
     );
+    expect(deleteDataStream).toHaveBeenCalledWith(
+      expect.anything(),
+      getLegacySecurityUpdatesEntitiesDataStreamName(namespace)
+    );
   });
 
   it('deletes the metadata data stream so Clear Entity Data removes relationship history', async () => {
@@ -126,6 +148,10 @@ describe('uninstallElasticsearchAssets', () => {
       expect.anything(),
       getMetadataEntitiesDataStreamName(namespace)
     );
+    expect(deleteDataStream).toHaveBeenCalledWith(
+      expect.anything(),
+      getLegacySecurityMetadataEntitiesDataStreamName(namespace)
+    );
     // Verify the resolved name matches the entity metadata datastream that
     // relationship maintainers write to.
     expect(getMetadataEntitiesDataStreamName(namespace)).toBe('.entities.v2.metadata.default');
@@ -138,7 +164,7 @@ describe('uninstallElasticsearchAssets', () => {
       namespace,
     });
 
-    expect(deleteIndex).toHaveBeenCalledTimes(3);
-    expect(deleteDataStream).toHaveBeenCalledTimes(2);
+    expect(deleteIndex).toHaveBeenCalledTimes(4);
+    expect(deleteDataStream).toHaveBeenCalledTimes(4);
   });
 });

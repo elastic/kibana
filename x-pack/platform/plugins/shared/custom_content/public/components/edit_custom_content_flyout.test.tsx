@@ -31,7 +31,6 @@ jest.mock('./esql_preview_section', () => ({
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { getServices } from '../services';
 import { EditCustomContentFlyout } from './edit_custom_content_flyout';
-import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../../common/panel_context_attachment';
 
 const mockUseEditFlyoutState = useEditFlyoutState as jest.Mock;
 
@@ -50,8 +49,6 @@ const baseFlyoutState = {
   handleRender: jest.fn(),
 };
 
-const openChat = jest.fn();
-
 const defaultProps = {
   embeddableId: 'panel-1',
   esqlQuery: undefined as string | undefined,
@@ -64,14 +61,13 @@ const defaultProps = {
   onSave: jest.fn(),
   onClose: jest.fn(),
   onRunPreview: jest.fn(),
+  onGenerateWithChat: jest.fn(),
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseEditFlyoutState.mockReturnValue(baseFlyoutState);
-  (getServices as jest.Mock).mockReturnValue({
-    agentBuilder: { openChat },
-  });
+  (getServices as jest.Mock).mockReturnValue({});
 });
 
 describe('EditCustomContentFlyout', () => {
@@ -186,43 +182,49 @@ describe('EditCustomContentFlyout', () => {
     });
   });
 
-  describe('Refine with chat', () => {
+  describe('chat button', () => {
     it('is hidden when AI is not available', () => {
       mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, isAiAvailable: false });
       render(<EditCustomContentFlyout {...defaultProps} />);
-      expect(screen.queryByRole('button', { name: 'Refine with chat' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /with chat/i })).not.toBeInTheDocument();
     });
 
-    it('sets the chat config and opens the chat when clicked', async () => {
+    it('shows "Generate with chat" when the template is empty', () => {
+      mockUseEditFlyoutState.mockReturnValue({ ...baseFlyoutState, draftTemplate: '' });
+      render(<EditCustomContentFlyout {...defaultProps} />);
+      expect(screen.getByRole('button', { name: 'Generate with chat' })).toBeInTheDocument();
+    });
+
+    it('shows "Refine with chat" when the template has content', () => {
+      mockUseEditFlyoutState.mockReturnValue({
+        ...baseFlyoutState,
+        draftTemplate: '<p>hi</p>',
+      });
+      render(<EditCustomContentFlyout {...defaultProps} />);
+      expect(screen.getByRole('button', { name: 'Refine with chat' })).toBeInTheDocument();
+    });
+
+    it('calls onGenerateWithChat with the draft template and esqlQuery when clicked', async () => {
+      const onGenerateWithChat = jest.fn();
       mockUseEditFlyoutState.mockReturnValue({
         ...baseFlyoutState,
         draftEsqlQuery: 'FROM logs',
         draftTemplate: '<p>hi</p>',
       });
-      render(<EditCustomContentFlyout {...defaultProps} />);
+      render(<EditCustomContentFlyout {...defaultProps} onGenerateWithChat={onGenerateWithChat} />);
 
       await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
 
-      expect(openChat).toHaveBeenCalledWith(
-        expect.objectContaining({
-          sessionTag: 'custom_content-panel-1',
-          attachments: [
-            expect.objectContaining({
-              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-              data: expect.objectContaining({ embeddable_id: 'panel-1' }),
-            }),
-          ],
-        })
-      );
+      expect(onGenerateWithChat).toHaveBeenCalledWith('<p>hi</p>', 'FROM logs');
     });
 
-    it('closes the flyout when clicked', async () => {
-      const onClose = jest.fn();
-      render(<EditCustomContentFlyout {...defaultProps} onClose={onClose} />);
+    it('calls onGenerateWithChat when clicked with an empty template', async () => {
+      const onGenerateWithChat = jest.fn();
+      render(<EditCustomContentFlyout {...defaultProps} onGenerateWithChat={onGenerateWithChat} />);
 
-      await userEvent.click(screen.getByRole('button', { name: 'Refine with chat' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Generate with chat' }));
 
-      expect(onClose).toHaveBeenCalled();
+      expect(onGenerateWithChat).toHaveBeenCalledWith('', undefined);
     });
   });
 });
