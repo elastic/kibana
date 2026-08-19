@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable playwright/expect-expect */
-
 import { tags, test as scoutTest } from '@kbn/scout';
 import { spaceTest } from '../fixtures';
 import { assertDataDriftPageContent } from '../fixtures/data_drift_steps';
