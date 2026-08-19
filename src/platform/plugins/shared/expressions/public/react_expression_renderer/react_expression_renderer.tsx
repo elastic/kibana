@@ -52,7 +52,7 @@ export function ReactExpressionRenderer({
     <div {...dataAttrs} className={className} css={styles}>
       {isEmpty && <PanelLoader />}
       {isLoading && (
-        <EuiProgress size="xs" color="accent" position="absolute" css={{ zIndex: 1 }} />
+        <EuiProgress size="xs" color="subdued" position="absolute" css={{ zIndex: 1 }} />
       )}
       {!isLoading && error && renderError?.(error.message, error)}
       <div

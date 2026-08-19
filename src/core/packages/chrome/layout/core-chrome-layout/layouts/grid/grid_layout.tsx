@@ -10,7 +10,11 @@
 import type { ReactNode } from 'react';
 import React from 'react';
 import type { ChromeLayoutConfig } from '@kbn/ui-chrome-layout';
-import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/ui-chrome-layout';
+import {
+  ChromeLayout,
+  ChromeLayoutConfigProvider,
+  DesignExplorationChromeGlobalStyles,
+} from '@kbn/ui-chrome-layout';
 import {
   ChromeComponentsProvider,
   ClassicHeader,
@@ -18,6 +22,7 @@ import {
   ChromeAppHeaderRenderer,
   ProjectHeader,
   GridLayoutProjectSideNav,
+  DesignExplorationProjectSideNav,
   HeaderTopBanner,
   ChromelessHeader,
   AppMenuBar,
@@ -33,7 +38,7 @@ import {
   useSidebarWidth,
   useSideNavWidth,
 } from '@kbn/core-chrome-browser-hooks';
-import { isNextChrome } from '@kbn/core-chrome-feature-flags';
+import { isDesignExploration, isNextChrome } from '@kbn/core-chrome-feature-flags';
 import { useGlobalFooter, useHasHeaderBanner } from '@kbn/core-chrome-browser-hooks/internal';
 import type { LayoutService, LayoutServiceStartDeps } from '../../layout_service';
 import { AppWrapper } from '../../app_containers';
@@ -44,6 +49,8 @@ const layoutConfigs: {
   classic: ChromeLayoutConfig;
   project: ChromeLayoutConfig;
   projectNext: ChromeLayoutConfig;
+  /** Design exploration: headerless chrome — controls live in the primary nav. */
+  projectNextHeaderless: ChromeLayoutConfig;
 } = {
   classic: {
     appearance: 'plain',
@@ -78,6 +85,18 @@ const layoutConfigs: {
     footerHeight: 0,
     navigationWidth: 0,
   },
+  projectNextHeaderless: {
+    chromeStyle: 'project',
+    headerHeight: 0,
+    bannerHeight: 32,
+    applicationTopBarHeight: 0,
+    applicationMarginTop: 8,
+    applicationMarginRight: 8,
+    applicationMarginBottom: 8,
+    sidebarWidth: 0,
+    footerHeight: 0,
+    navigationWidth: 0,
+  },
 };
 
 /**
@@ -95,6 +114,8 @@ export class GridLayout implements LayoutService {
     const appComponent = application.getComponent();
     const appBannerComponent = overlays.banners.getComponent();
     const nextChrome = isNextChrome(featureFlags);
+    const designExplorationEnabled =
+      isDesignExploration(featureFlags) && isNextChrome(featureFlags);
 
     const componentDeps: ChromeComponentsDeps = {
       application,
@@ -115,7 +136,13 @@ export class GridLayout implements LayoutService {
       const navigationWidth = useSideNavWidth();
 
       const layoutConfigKey =
-        chromeStyle === 'classic' ? 'classic' : nextChrome ? 'projectNext' : 'project';
+        chromeStyle === 'classic'
+          ? 'classic'
+          : nextChrome
+            ? designExplorationEnabled
+              ? 'projectNextHeaderless'
+              : 'projectNext'
+            : 'project';
 
       const layoutConfig = {
         ...layoutConfigs[layoutConfigKey],
@@ -132,6 +159,12 @@ export class GridLayout implements LayoutService {
       if (chromeVisible) {
         if (chromeStyle === 'classic') {
           header = <ClassicHeader />;
+        } else if (designExplorationEnabled) {
+          // Headerless: Deployment/Search/Help/Profile live in the primary nav.
+          navigation = <DesignExplorationProjectSideNav />;
+          if (!hasInlineAppHeader && hasChromeAppHeaderContent) {
+            applicationTopBar = <ChromeAppHeaderRenderer />;
+          }
         } else {
           header = nextChrome ? <ChromeNextGlobalHeader /> : <ProjectHeader />;
           if (nextChrome) {
@@ -153,6 +186,7 @@ export class GridLayout implements LayoutService {
       return (
         <>
           <KibanaGridLayoutGlobalStyles appearance={layoutConfig.appearance ?? 'plain'} />
+          {designExplorationEnabled && <DesignExplorationChromeGlobalStyles />}
           <ChromeLayoutConfigProvider value={layoutConfig}>
             <ChromeLayout
               header={header}

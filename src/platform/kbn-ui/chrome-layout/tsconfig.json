@@ -22,6 +22,7 @@
   ],
   "kbn_references": [
     "@kbn/ui-chrome-layout-constants",
-    "@kbn/ui-chrome-layout-utils"
+    "@kbn/ui-chrome-layout-utils",
+    "@kbn/core-chrome-feature-flags"
   ]
 }

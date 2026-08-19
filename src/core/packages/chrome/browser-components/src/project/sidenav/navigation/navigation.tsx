@@ -59,7 +59,7 @@ export const Navigation = (props: ChromeNavigationProps) => {
 // eslint-disable-next-line import/no-default-export
 export default Navigation;
 
-const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
+export const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | null => {
   const chrome = useChromeService();
   const basePath = useBasePath();
   const isNextChrome = useIsNextChrome();
@@ -83,7 +83,7 @@ const useNavigationItems = (): (NavigationItems & { solutionId: SolutionId }) | 
   return useObservable(items$, null);
 };
 
-const useCustomizeNavigation = (): (() => void) | undefined => {
+export const useCustomizeNavigation = (): (() => void) | undefined => {
   const chrome = useChromeService();
   const handler$ = useMemo(() => chrome.project.getCustomizeNavigationHandler$(), [chrome]);
   const handler = useObservable(handler$, null);

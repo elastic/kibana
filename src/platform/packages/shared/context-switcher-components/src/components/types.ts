@@ -65,6 +65,13 @@ export interface ContextSwitcherProps {
   footerLinks?: LinksListItem[];
   /** Called when the popover opens. */
   onOpen?: () => void;
+  /** Render trigger as a grid icon button (e.g. design-exploration nav chrome). */
+  iconOnly?: boolean;
+  /**
+   * When `iconOnly`, also show the trigger label (space name) beside the grid icon.
+   * Used for expanded primary nav chrome.
+   */
+  showLabel?: boolean;
 }
 
 export interface LinksListItem {

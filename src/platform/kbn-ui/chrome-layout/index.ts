@@ -25,3 +25,29 @@ export {
   GridLayoutGlobalStyles,
   type GridLayoutGlobalStylesProps,
 } from './src/layouts/grid_global_app_style';
+
+export {
+  DESIGN_EXPLORATION_BODY_ATTR,
+  DESIGN_EXPLORATION_VARIANT_ATTR,
+  DESIGN_EXPLORATION_GAP,
+  DESIGN_EXPLORATION_RADIUS_CONTAINER,
+  DESIGN_EXPLORATION_RADIUS_CONTROL,
+  DesignExplorationChromeGlobalStyles,
+  designExplorationScope,
+  designExplorationScopedInPanels,
+} from './src/design_exploration/design_exploration_chrome_styles';
+
+export { DesignExplorationKnobsPanel } from './src/design_exploration/design_exploration_knobs_panel';
+
+export {
+  TARGET_NAV_COLLAPSED_WIDTH,
+  TARGET_NAV_EXPANDED_WIDTH,
+  TARGET_SIDE_PANEL_WIDTH,
+} from './src/design_exploration/variant_target';
+
+export {
+  DESIGN_EXPLORATION_KNOB_DEFINITIONS,
+  DESIGN_EXPLORATION_KNOBS_SESSION_KEY,
+  designExplorationKnobVar,
+  getDesignExplorationKnobValues,
+} from './src/design_exploration/design_exploration_knobs';

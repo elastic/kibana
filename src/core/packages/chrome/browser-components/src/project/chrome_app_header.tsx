@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import type {
   ChromeBreadcrumb,
   AppHeaderBack,
+  AppHeaderTitle,
   ChromeAppHeaderConfig,
 } from '@kbn/core-chrome-browser';
 import { useChromeService } from '@kbn/core-chrome-browser-context';
@@ -58,10 +59,19 @@ function isCurrentLocation(href: string): boolean {
 }
 
 interface FallbackProps {
+  title?: AppHeaderTitle;
   back?: AppHeaderBack[];
   menu?: AppMenuConfig;
   hasBadges: boolean;
   hasLegacyActionMenu: boolean;
+}
+
+function getTitleFromBreadcrumbs(breadcrumbs: ChromeBreadcrumb[]): AppHeaderTitle | undefined {
+  if (breadcrumbs.length === 0) {
+    return undefined;
+  }
+
+  return getBreadcrumbText(breadcrumbs[breadcrumbs.length - 1]);
 }
 
 function useFallbackProps(): FallbackProps {
@@ -96,6 +106,7 @@ function useFallbackProps(): FallbackProps {
     const hasMenu = !!appMenu?.items?.length;
 
     return {
+      title: getTitleFromBreadcrumbs(breadcrumbs),
       back: hasBack ? backTargets : undefined,
       menu: hasMenu ? appMenu : undefined,
       hasBadges: !!legacyBadge || breadcrumbsBadges.length > 0,
@@ -153,6 +164,7 @@ function useResolvedChromeAppHeader() {
 
   const back = resolveEffectiveBack(config, fallback.back);
   const menu = config?.menu ?? fallback.menu;
+  const title = config?.title ?? fallback.title;
   const hasContent =
     hasExplicitAppHeaderContent(config) ||
     hasEffectiveBack(back) ||
@@ -160,7 +172,7 @@ function useResolvedChromeAppHeader() {
     fallback.hasBadges ||
     fallback.hasLegacyActionMenu;
 
-  return { config, back, menu, hasContent };
+  return { config, back, menu, title, hasContent };
 }
 
 export function useHasChromeAppHeaderContent(): boolean {
@@ -189,7 +201,7 @@ function useMeasuredAppHeaderHeight(): React.RefCallback<HTMLDivElement> {
 }
 
 export const ChromeAppHeaderRenderer = React.memo(() => {
-  const { config, back, menu, hasContent } = useResolvedChromeAppHeader();
+  const { config, back, menu, title, hasContent } = useResolvedChromeAppHeader();
   const measureRef = useMeasuredAppHeaderHeight();
 
   if (!hasContent) return null;
@@ -222,7 +234,7 @@ export const ChromeAppHeaderRenderer = React.memo(() => {
     >
       <Suspense fallback={null}>
         <AppHeaderViewLazy
-          title={config?.title}
+          title={title}
           back={back}
           tabs={config?.tabs}
           badges={config?.badges}

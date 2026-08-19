@@ -35,6 +35,12 @@ const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   display: flex;
   flex-direction: column;
   width: ${SIDE_PANEL_WIDTH - SIDE_PANEL_CONTENT_GAP}px;
+  height: calc(
+    100% - ${layoutVar('application.marginTop', '0px')} - ${layoutVar(
+        'application.marginBottom',
+        '0px'
+      )}
+  );
   margin-top: ${layoutVar('application.marginTop', '0px')};
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
   background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};

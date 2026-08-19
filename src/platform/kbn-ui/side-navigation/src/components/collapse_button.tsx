@@ -43,36 +43,35 @@ export const SideNavCollapseButton: FC<Props> = ({ isCollapsed, toggle }) => {
   const iconType = isCollapsed ? 'transitionLeftIn' : 'transitionLeftOut';
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(() => sideNavCollapseButtonStyles(euiTheme), [euiTheme]);
+  const ariaLabel = isCollapsed
+    ? i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
+        defaultMessage: 'Expand navigation menu',
+      })
+    : i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
+        defaultMessage: 'Collapse navigation menu',
+      });
+  const visibleFooterLabel = isCollapsed
+    ? i18n.translate('kbnUI.sideNavigation.expandButtonShortLabel', {
+        defaultMessage: 'Expand',
+      })
+    : i18n.translate('kbnUI.sideNavigation.collapseButtonShortLabel', {
+        defaultMessage: 'Collapse',
+      });
 
   return (
-    <div className="sideNavCollapseButtonWrapper" css={styles.sideNavCollapseButtonWrapper}>
-      <EuiToolTip
-        content={
-          isCollapsed
-            ? i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
-                defaultMessage: 'Expand navigation menu',
-              })
-            : i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
-                defaultMessage: 'Collapse navigation menu',
-              })
-        }
-        disableScreenReaderOutput
-      >
+    <div
+      className="sideNavCollapseButtonWrapper"
+      css={styles.sideNavCollapseButtonWrapper}
+      data-footer-label={visibleFooterLabel}
+    >
+      <EuiToolTip content={ariaLabel} disableScreenReaderOutput>
         <EuiButtonIcon
           data-test-subj="sideNavCollapseButton"
           css={styles.sideNavCollapseButton}
           size="s"
           color="text"
           iconType={iconType}
-          aria-label={
-            isCollapsed
-              ? i18n.translate('kbnUI.sideNavigation.expandButtonLabel', {
-                  defaultMessage: 'Expand navigation menu',
-                })
-              : i18n.translate('kbnUI.sideNavigation.collapseButtonLabel', {
-                  defaultMessage: 'Collapse navigation menu',
-                })
-          }
+          aria-label={ariaLabel}
           aria-pressed={!isCollapsed}
           aria-expanded={!isCollapsed}
           aria-controls={PRIMARY_NAVIGATION_ID}

@@ -77,6 +77,20 @@ export interface NavigationProps {
    */
   showTopSeparator?: boolean;
   /**
+   * (optional) Chrome controls rendered at the top of the side nav, above primary items.
+   */
+  navTopControls?: ReactNode;
+  /**
+   * (optional) Chrome controls rendered at the start of the side nav footer,
+   * before solution footer items.
+   */
+  navFooterLeadingControls?: ReactNode;
+  /**
+   * (optional) Chrome controls rendered at the bottom of the side nav footer,
+   * after solution footer items and before the collapse button.
+   */
+  navFooterControls?: ReactNode;
+  /**
    * (optional) Callback fired when the customize button is clicked.
    * When not provided, the button is hidden.
    */
@@ -98,6 +112,9 @@ export const Navigation = ({
   setWidth,
   showTopSeparator = false,
   sidePanelFooter,
+  navTopControls,
+  navFooterLeadingControls,
+  navFooterControls,
   ...rest
 }: NavigationProps) => {
   const forcedCollapsed = useIsWithinBreakpoints(['xs', 's']);
@@ -157,6 +174,7 @@ export const Navigation = ({
     >
       <SideNav isCollapsed={isCollapsed}>
         {showTopSeparator && <div css={topSeparatorStyles} aria-hidden />}
+        {navTopControls}
         {logo && (
           <SideNav.Logo
             isCollapsed={isCollapsed}
@@ -394,9 +412,10 @@ export const Navigation = ({
         <SideNav.Footer isCollapsed={isCollapsed} collapseButton={collapseButton}>
           {({ footerNavigationInstructionsId }) => (
             <>
+              {navFooterLeadingControls}
               {items.footerItems.slice(0, MAX_FOOTER_ITEMS).map((item, index) => {
                 const { sections, secondaryMenuTitle, ...itemProps } = item;
-                const isFirstItem = index === 0;
+                const isFirstItem = index === 0 && !navFooterLeadingControls;
                 const ariaDescribedBy = isFirstItem ? footerNavigationInstructionsId : undefined;
 
                 return (
@@ -467,6 +486,7 @@ export const Navigation = ({
                   </SideNav.Popover>
                 );
               })}
+              {navFooterControls}
             </>
           )}
         </SideNav.Footer>

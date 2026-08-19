@@ -17,18 +17,23 @@ import {
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiPopover,
+  type PopoverAnchorPosition,
 } from '@elastic/eui';
 import { useIsServerless, useKibanaVersion } from '@kbn/react-env';
 import { useHelpMenuItems } from './help_links_hooks';
 
 interface HeaderHelpMenuProps {
+  anchorPosition?: PopoverAnchorPosition;
   renderButton?: (props: {
     isOpen: boolean;
     toggleMenu: () => void;
   }) => NonNullable<React.ReactNode>;
 }
 
-export const HeaderHelpMenu = ({ renderButton }: HeaderHelpMenuProps = {}) => {
+export const HeaderHelpMenu = ({
+  anchorPosition = 'downRight',
+  renderButton,
+}: HeaderHelpMenuProps = {}) => {
   const [isOpen, setIsOpen] = useState(false);
   const isServerless = useIsServerless();
   const kibanaVersion = useKibanaVersion();
@@ -55,7 +60,7 @@ export const HeaderHelpMenu = ({ renderButton }: HeaderHelpMenuProps = {}) => {
 
   return (
     <EuiPopover
-      anchorPosition="downRight"
+      anchorPosition={anchorPosition}
       button={button}
       closePopover={closeMenu}
       data-test-subj="helpMenuButton"

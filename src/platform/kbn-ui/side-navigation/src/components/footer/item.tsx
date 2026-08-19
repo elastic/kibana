@@ -93,7 +93,7 @@ export const FooterItem = forwardRef<HTMLAnchorElement, FooterItemProps>(
     };
 
     const menuItem = (
-      <div css={buttonWrapperStyles}>
+      <div css={buttonWrapperStyles} data-footer-label={label}>
         <Suspense fallback={<EuiButtonIcon buttonRef={ref} {...buttonProps} />}>
           <EuiButtonIcon buttonRef={ref} {...buttonProps} iconType={iconType || 'empty'} />
         </Suspense>

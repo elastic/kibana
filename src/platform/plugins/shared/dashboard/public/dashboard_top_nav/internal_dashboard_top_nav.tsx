@@ -143,7 +143,7 @@ export function InternalDashboardTopNav({
   forceHideUnifiedSearch,
   redirectTo,
   setCustomHeaderActionMenu,
-  showBorderBottom = true,
+  showBorderBottom = false,
   showResetChange = true,
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
@@ -514,6 +514,7 @@ export function InternalDashboardTopNav({
           query={query as Query | undefined}
           screenTitle={title}
           useDefaultBehaviors={true}
+          fillSubmitButton={true}
           savedQueryId={savedQueryId}
           indexPatterns={allDataViews ?? []}
           allowSavingQueries
