@@ -10,9 +10,7 @@ import type { TestConfigurationPreviewField } from './test_configuration_preview
 export const seedAutomaticFieldTypesFromInferred = (
   inferredFields: readonly TestConfigurationPreviewField[]
 ): Record<string, string> =>
-  Object.fromEntries(
-    inferredFields.map((field) => [field.name, field.type ?? 'keyword'])
-  );
+  Object.fromEntries(inferredFields.map((field) => [field.name, field.type ?? 'keyword']));
 
 export const automaticFieldTypesToMappings = (
   fieldTypes: Record<string, string>
@@ -36,6 +34,21 @@ export const mappingsToAutomaticFieldTypes = (
       .filter(([, mapping]) => typeof mapping?.type === 'string')
       .map(([name, mapping]) => [name, mapping.type as string])
   );
+};
+
+export const mergeMissingAutomaticFieldTypes = (
+  currentFieldTypes: Record<string, string>,
+  inferredFieldTypes: Record<string, string>
+): Record<string, string> => {
+  const merged = { ...currentFieldTypes };
+
+  for (const [name, type] of Object.entries(inferredFieldTypes)) {
+    if (!(name in merged)) {
+      merged[name] = type;
+    }
+  }
+
+  return merged;
 };
 
 export const countModifiedAutomaticFieldTypesForFlow3 = (

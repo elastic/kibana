@@ -234,12 +234,12 @@ export const datasetWizardStrings = {
 
   commonSettingsTitle: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.commonSettingsTitle', {
-      defaultMessage: 'Common settings',
+      defaultMessage: 'Common settings (optional)',
     }),
 
   advancedSettingsTitleFlow3: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsTitleFlow3', {
-      defaultMessage: 'Advanced settings',
+      defaultMessage: 'Advanced settings (optional)',
     }),
 
   settingsCustomJsonLabel: () =>
@@ -249,27 +249,37 @@ export const datasetWizardStrings = {
 
   settingsCustomJsonHelpText: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonHelpText', {
-      defaultMessage: 'Optional JSON overrides for advanced dataset settings. Example:',
-    }),
-
-  settingsCustomJsonHelpTextDocsPrefix: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonHelpTextDocsPrefix', {
-      defaultMessage: 'See the',
-    }),
-
-  settingsCustomJsonHelpTextDocsSuffix: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonHelpTextDocsSuffix', {
-      defaultMessage: 'for the full list of available properties.',
+      defaultMessage: 'Optional JSON overrides for advanced dataset settings.',
     }),
 
   settingsCustomJsonDocsLinkLabel: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonDocsLinkLabel', {
-      defaultMessage: 'documentation',
+      defaultMessage: 'Learn more',
     }),
 
   settingsCustomJsonAriaLabel: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomJsonAriaLabel', {
       defaultMessage: 'Custom dataset settings JSON editor',
+    }),
+
+  settingsCustomFieldsLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.settingsCustomFieldsLabel', {
+      defaultMessage: 'Custom settings',
+    }),
+
+  advancedSettingsJsonViewLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsJsonViewLabel', {
+      defaultMessage: 'JSON view',
+    }),
+
+  advancedSettingsListViewLabel: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsListViewLabel', {
+      defaultMessage: 'Form view',
+    }),
+
+  advancedSettingsViewToggleLegend: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.advancedSettingsViewToggleLegend', {
+      defaultMessage: 'Advanced settings view',
     }),
 
   settingsCustomJsonInvalidSyntax: () =>
@@ -350,17 +360,22 @@ export const datasetWizardStrings = {
   schemaMappingsDescriptionFlow3: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.schemaMappingsDescriptionFlow3', {
       defaultMessage:
-        'Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. If you want to preview the schema and customize it, you can click below to pull the inferred schema and edit it if needed.',
+        "Optional definition of how documents should be indexed. Elastic infers the schema at query time by default. You can manually map desired fields below, and we'll infer the rest of the schema, or click to infer the schema now and review and update the fields as needed.",
     }),
 
-  pullInferredSchemaButton: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.pullInferredSchemaButton', {
-      defaultMessage: 'Pull inferred schema',
+  inferSchemaButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.inferSchemaButton', {
+      defaultMessage: 'Infer schema',
     }),
 
-  resetInferredSchemaButton: () =>
-    i18n.translate('xpack.dataFederation.datasetWizard.resetInferredSchemaButton', {
-      defaultMessage: 'Reset to inferred schema',
+  inferMissingFieldsButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.inferMissingFieldsButton', {
+      defaultMessage: 'Infer missing fields',
+    }),
+
+  addFieldButton: () =>
+    i18n.translate('xpack.dataFederation.datasetWizard.addFieldButton', {
+      defaultMessage: 'Add field',
     }),
 
   schemaMappingModeLegend: () =>
@@ -492,7 +507,8 @@ export const datasetWizardStrings = {
 
   glueCatalogRegionHelp: () =>
     i18n.translate('xpack.dataFederation.datasetWizard.glueCatalogRegionHelp', {
-      defaultMessage: 'Override only if the Glue catalog is in a different region from the S3 bucket',
+      defaultMessage:
+        'Override only if the Glue catalog is in a different region from the S3 bucket',
     }),
 
   glueAwsAccountIdLabel: () =>

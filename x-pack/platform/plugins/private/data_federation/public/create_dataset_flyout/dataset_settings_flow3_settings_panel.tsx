@@ -9,19 +9,18 @@ import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiAccordion, EuiPanel, EuiSpacer, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
-import type { Control } from 'react-hook-form';
+import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 
 import type {
   DatasetErrorModeFormValue,
   DatasetFormatFormValue,
 } from './create_dataset_flyout_form_state';
-import { DatasetSettingsCustomJsonEditor } from './dataset_settings_custom_json_editor';
+import { DatasetSettingsAdvancedViewToggle } from './dataset_settings_advanced_view_toggle';
 import { DatasetSettingsFieldsLayout } from './dataset_settings_fields_layout';
 import {
   getFlow3AdvancedFields,
   getFlow3CommonFields,
-  getFlow3bAdvancedFields,
 } from './dataset_settings_flow3_layout';
 import type { DatasetWizardFlowVariant } from '../create_dataset_wizard/dataset_wizard_flow_variant';
 import { isDatasetWizardFlow3B } from '../create_dataset_wizard/dataset_wizard_flow_variant';
@@ -35,6 +34,8 @@ const accordionButtonCss = css`
 
 export interface DatasetSettingsFlow3SettingsPanelProps {
   control: Control<DatasetWizardFormValues>;
+  getValues?: UseFormGetValues<DatasetWizardFormValues>;
+  setValue?: UseFormSetValue<DatasetWizardFormValues>;
   format: Exclude<DatasetFormatFormValue, ''>;
   flowVariant: DatasetWizardFlowVariant;
   commonSettingsTitle: string;
@@ -46,6 +47,8 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
   DatasetSettingsFlow3SettingsPanelProps
 > = ({
   control,
+  getValues,
+  setValue,
   format,
   flowVariant,
   commonSettingsTitle,
@@ -59,13 +62,10 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
     () => getFlow3CommonFields(format, errorMode),
     [errorMode, format]
   );
-  const advancedFields = useMemo(() => {
-    if (isFlow3b) {
-      return getFlow3bAdvancedFields(format, errorMode);
-    }
-
-    return getFlow3AdvancedFields(format, errorMode);
-  }, [errorMode, format, isFlow3b]);
+  const advancedFields = useMemo(
+    () => getFlow3AdvancedFields(format, errorMode),
+    [errorMode, format]
+  );
 
   const advancedSettingsAccordionId = useGeneratedHtmlId({
     prefix: isFlow3b
@@ -118,24 +118,22 @@ export const DatasetSettingsFlow3SettingsPanel: FunctionComponent<
             paddingSize="none"
           >
             <EuiPanel color="subdued" paddingSize="m" hasShadow={false}>
-              {advancedFields.length > 0 ? (
+              {isFlow3b && getValues && setValue ? (
+                <DatasetSettingsAdvancedViewToggle
+                  control={control}
+                  getValues={getValues}
+                  setValue={setValue}
+                  format={format}
+                  errorMode={errorMode}
+                  testSubjPrefix={testSubjPrefix}
+                />
+              ) : advancedFields.length > 0 ? (
                 <DatasetSettingsFieldsLayout
                   control={control}
                   fields={advancedFields}
                   testSubjPrefix={testSubjPrefix}
                   columns={2}
                 />
-              ) : null}
-              {isFlow3b ? (
-                <>
-                  {advancedFields.length > 0 ? <EuiSpacer size="l" /> : null}
-                  <DatasetSettingsCustomJsonEditor
-                    control={control}
-                    format={format}
-                    errorMode={errorMode}
-                    testSubjPrefix={testSubjPrefix}
-                  />
-                </>
               ) : null}
             </EuiPanel>
           </EuiAccordion>

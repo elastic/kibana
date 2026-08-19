@@ -6,9 +6,9 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { EuiButtonGroupProps } from '@elastic/eui';
-import { EuiButton, EuiButtonGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButtonGroup, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
@@ -21,15 +21,14 @@ import {
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues, SchemaMappingMode } from '../dataset_wizard_form_state';
 import { emptyDatasetWizardFormValues } from '../dataset_wizard_form_state';
-import {
-  countModifiedAutomaticFieldTypesForFlow3,
-  seedAutomaticFieldTypesFromInferred,
-} from '../automatic_field_types_utils';
 import { InferredSchemaPreviewTable } from '../inferred_schema_preview_table';
 import { getTestConfigurationPreviewFields } from '../test_configuration_preview_utils';
 import { AwsGlueTableSchemaMappingsEditor } from './aws_glue_table_schema_mappings_editor';
 import { InferredSchemaMappingsEditor } from './inferred_schema_mappings_editor';
-import { SchemaMappingsStepFlow1, isAwsGlueTableSchemaMappingSupported } from './schema_mappings_step_flow_1';
+import {
+  SchemaMappingsStepFlow1,
+  isAwsGlueTableSchemaMappingSupported,
+} from './schema_mappings_step_flow_1';
 
 export { isAwsGlueTableSchemaMappingSupported };
 
@@ -56,15 +55,7 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
     control,
     name: 'schema_mapping_mode',
   });
-  const { field: automaticFieldTypesField } = useController({
-    control,
-    name: 'automatic_field_types',
-  });
   const hideAwsGlueTable = isDatasetWizardFlow3(flowVariant);
-  const [hasGeneratedSchema, setHasGeneratedSchema] = useState(
-    () => hideAwsGlueTable && Object.keys(automaticFieldTypesField.value ?? {}).length > 0
-  );
-  const [schemaEditorKey, setSchemaEditorKey] = useState(0);
 
   const isAwsGlueTableSupported = useMemo(
     () => isAwsGlueTableSchemaMappingSupported(dataSources, dataSource),
@@ -114,22 +105,6 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
     return getTestConfigurationPreviewFields(previewValues);
   }, [settings]);
 
-  const hasSchemaModifications = useMemo(
-    () =>
-      countModifiedAutomaticFieldTypesForFlow3(
-        automaticSchemaSampleFields,
-        automaticFieldTypesField.value ?? {}
-      ) > 0,
-    [automaticFieldTypesField.value, automaticSchemaSampleFields]
-  );
-
-  const handleResetInferredSchema = useCallback(() => {
-    automaticFieldTypesField.onChange(
-      seedAutomaticFieldTypesFromInferred(automaticSchemaSampleFields)
-    );
-    setSchemaEditorKey((currentKey) => currentKey + 1);
-  }, [automaticFieldTypesField, automaticSchemaSampleFields]);
-
   return (
     <div data-test-subj="datasetWizardSchemaMappingsStep">
       <EuiTitle size="s">
@@ -139,9 +114,7 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
       <EuiText
         size="s"
         color="subdued"
-        data-test-subj={
-          hideAwsGlueTable ? 'datasetWizardSchemaMappingModeDescription' : undefined
-        }
+        data-test-subj={hideAwsGlueTable ? 'datasetWizardSchemaMappingModeDescription' : undefined}
       >
         <p>
           {hideAwsGlueTable
@@ -152,26 +125,10 @@ export const SchemaMappingsStepFlow2: FunctionComponent<SchemaMappingsStepProps>
       <EuiSpacer size="l" />
 
       {hideAwsGlueTable ? (
-        hasGeneratedSchema ? (
-          <InferredSchemaMappingsEditor
-            key={schemaEditorKey}
-            control={control}
-            hasSchemaModifications={hasSchemaModifications}
-            onReset={handleResetInferredSchema}
-          />
-        ) : (
-          <EuiButton
-            data-test-subj="datasetWizardPullInferredSchema"
-            onClick={() => {
-              automaticFieldTypesField.onChange(
-                seedAutomaticFieldTypesFromInferred(automaticSchemaSampleFields)
-              );
-              setHasGeneratedSchema(true);
-            }}
-          >
-            {datasetWizardStrings.pullInferredSchemaButton()}
-          </EuiButton>
-        )
+        <InferredSchemaMappingsEditor
+          control={control}
+          inferredFields={automaticSchemaSampleFields}
+        />
       ) : (
         <>
           <EuiButtonGroup

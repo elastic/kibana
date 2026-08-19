@@ -6,6 +6,7 @@
  */
 
 import {
+  buildDefaultSettingsCustomJson,
   getDatasetSettingsCustomJsonSchema,
   getVisibleCustomJsonApiKeys,
 } from './settings_custom_json_schema';
@@ -70,6 +71,43 @@ describe('settings_custom_json_schema', () => {
       expect(csvSchema.properties?.delimiter).toBeDefined();
       expect(parquetSchema.properties?.delimiter).toBeUndefined();
       expect(parquetSchema.properties?.optimized_reader).toBeDefined();
+    });
+  });
+
+  describe('buildDefaultSettingsCustomJson', () => {
+    it('includes all visible csv settings with api-typed defaults', () => {
+      const json = buildDefaultSettingsCustomJson('csv', 'fail_fast');
+      const parsed = JSON.parse(json) as Record<string, unknown>;
+
+      expect(parsed).toMatchObject({
+        partition_detection: 'auto',
+        schema_resolution: 'union_by_name',
+        hive_partitioning: false,
+        delimiter: ',',
+        mode: 'quoted',
+        header_row: true,
+        error_mode: 'fail_fast',
+        quote: '"',
+      });
+      expect(parsed.max_errors).toBeUndefined();
+      expect(parsed.target_split_size).toBeUndefined();
+    });
+
+    it('includes error limit fields when error mode allows them', () => {
+      const json = buildDefaultSettingsCustomJson('csv', 'skip_row');
+      const parsed = JSON.parse(json) as Record<string, unknown>;
+
+      expect(parsed.max_errors).toBe(0);
+      expect(parsed.max_error_ratio).toBe(0);
+    });
+
+    it('includes parquet-specific settings for parquet format', () => {
+      const json = buildDefaultSettingsCustomJson('parquet', 'fail_fast');
+      const parsed = JSON.parse(json) as Record<string, unknown>;
+
+      expect(parsed.optimized_reader).toBe(true);
+      expect(parsed.late_materialization).toBe(true);
+      expect(parsed.delimiter).toBeUndefined();
     });
   });
 });

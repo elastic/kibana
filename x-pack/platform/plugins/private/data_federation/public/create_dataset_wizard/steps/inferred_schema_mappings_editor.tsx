@@ -8,32 +8,40 @@
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { css } from '@emotion/react';
 import type { MappedFieldsEditorProps } from '@kbn/index-management-shared-types';
-import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButton, useEuiTheme } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { debounce } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import type { DataFederationKibanaServices } from '../../types';
-import { automaticFieldTypesToMappings, mappingsToAutomaticFieldTypes } from '../automatic_field_types_utils';
+import {
+  automaticFieldTypesToMappings,
+  mappingsToAutomaticFieldTypes,
+  mergeMissingAutomaticFieldTypes,
+  seedAutomaticFieldTypesFromInferred,
+} from '../automatic_field_types_utils';
 import { datasetWizardStrings } from '../dataset_wizard_i18n';
 import type { DatasetWizardFormValues } from '../dataset_wizard_form_state';
+import type { TestConfigurationPreviewField } from '../test_configuration_preview_utils';
 
 export interface InferredSchemaMappingsEditorProps {
   control: Control<DatasetWizardFormValues>;
-  hasSchemaModifications: boolean;
-  onReset: () => void;
+  inferredFields: readonly TestConfigurationPreviewField[];
 }
+
+const ACTIONS_MOUNT_TEST_SUBJ = 'datasetWizardSchemaFieldsActionsMount';
 
 export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappingsEditorProps> = ({
   control,
-  hasSchemaModifications,
-  onReset,
+  inferredFields,
 }) => {
   const { euiTheme } = useEuiTheme();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [resetButtonMount, setResetButtonMount] = useState<HTMLElement | null>(null);
+  const addFieldButtonRef = useRef<HTMLElement | null>(null);
+  const [actionsMount, setActionsMount] = useState<HTMLElement | null>(null);
   const {
     services: { indexManagement, scopedHistory },
   } = useKibana<DataFederationKibanaServices>();
@@ -41,15 +49,27 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     control,
     name: 'automatic_field_types',
   });
-  const [mappings] = useState(() => automaticFieldTypesToMappings(field.value ?? {}));
+
+  const [schemaEditorKey, setSchemaEditorKey] = useState(0);
+  const [seedFieldTypes, setSeedFieldTypes] = useState<Record<string, string>>(
+    () => field.value ?? {}
+  );
+  const [hasFields, setHasFields] = useState(() => Object.keys(field.value ?? {}).length > 0);
   const latestFieldTypesRef = useRef<Record<string, string>>(field.value ?? {});
+
+  const mappings = useMemo(() => automaticFieldTypesToMappings(seedFieldTypes), [seedFieldTypes]);
+
+  const inferredFieldTypes = useMemo(
+    () => seedAutomaticFieldTypesFromInferred(inferredFields),
+    [inferredFields]
+  );
 
   const debouncedSyncToForm = useMemo(
     () =>
       debounce((nextFieldTypes: Record<string, string>) => {
         field.onChange(nextFieldTypes);
       }, 250),
-    [field.onChange]
+    [field]
   );
 
   useEffect(
@@ -72,58 +92,76 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
       const nextMappings = (getData() ?? {}) as Record<string, unknown>;
       const nextFieldTypes = mappingsToAutomaticFieldTypes(nextMappings);
       latestFieldTypesRef.current = nextFieldTypes;
+      setHasFields(Object.keys(nextFieldTypes).length > 0);
       debouncedSyncToForm(nextFieldTypes);
     },
     [debouncedSyncToForm]
   );
 
+  const applyFieldTypes = useCallback(
+    (nextFieldTypes: Record<string, string>) => {
+      debouncedSyncToForm.cancel();
+      latestFieldTypesRef.current = nextFieldTypes;
+      field.onChange(nextFieldTypes);
+      setSeedFieldTypes(nextFieldTypes);
+      setHasFields(Object.keys(nextFieldTypes).length > 0);
+      setSchemaEditorKey((currentKey) => currentKey + 1);
+    },
+    [debouncedSyncToForm, field]
+  );
+
+  const handleInferSchema = useCallback(() => {
+    applyFieldTypes(inferredFieldTypes);
+  }, [applyFieldTypes, inferredFieldTypes]);
+
+  const handleInferMissingFields = useCallback(() => {
+    applyFieldTypes(
+      mergeMissingAutomaticFieldTypes(latestFieldTypesRef.current, inferredFieldTypes)
+    );
+  }, [applyFieldTypes, inferredFieldTypes]);
+
+  const handleAddField = useCallback(() => {
+    addFieldButtonRef.current?.click();
+  }, []);
+
+  // Hides the editor's own "Add field" control and portals a matching outlined
+  // primary button into a sibling mount, alongside Infer schema / Infer missing
+  // fields. The extra node is untracked by the editor, so it won't fight React
+  // reconciliation the way relocating existing nodes would.
   useLayoutEffect(() => {
     const root = containerRef.current;
     if (!root) {
       return;
     }
 
-    const setupFooter = (): boolean => {
+    const setupMount = (): boolean => {
       const addFieldButton = root.querySelector<HTMLElement>('[data-test-subj="addFieldButton"]');
       if (!addFieldButton?.parentElement) {
         return false;
       }
 
-      let footer = root.querySelector<HTMLElement>('[data-test-subj="datasetWizardSchemaFieldsFooter"]');
-      if (!footer) {
-        footer = document.createElement('div');
-        footer.dataset.testSubj = 'datasetWizardSchemaFieldsFooter';
-        footer.style.display = 'flex';
-        footer.style.alignItems = 'center';
-        footer.style.gap = euiTheme.size.s;
-        footer.style.marginTop = euiTheme.size.m;
+      addFieldButtonRef.current = addFieldButton;
 
-        const spacer = addFieldButton.previousElementSibling;
-        addFieldButton.parentElement.insertBefore(footer, spacer ?? addFieldButton);
-        spacer?.remove();
-
-        const resetMount = document.createElement('div');
-        resetMount.dataset.testSubj = 'datasetWizardResetInferredSchemaMount';
-        footer.appendChild(addFieldButton);
-        footer.appendChild(resetMount);
+      let mount = root.querySelector<HTMLElement>(`[data-test-subj="${ACTIONS_MOUNT_TEST_SUBJ}"]`);
+      if (!mount) {
+        mount = document.createElement('span');
+        mount.dataset.testSubj = ACTIONS_MOUNT_TEST_SUBJ;
+        mount.style.display = 'inline-flex';
+        mount.style.alignItems = 'center';
+        mount.style.gap = euiTheme.size.s;
+        addFieldButton.insertAdjacentElement('afterend', mount);
       }
 
-      const resetMount = footer.querySelector<HTMLElement>(
-        '[data-test-subj="datasetWizardResetInferredSchemaMount"]'
-      );
-      if (resetMount) {
-        setResetButtonMount(resetMount);
-      }
-
+      setActionsMount(mount);
       return true;
     };
 
-    if (setupFooter()) {
+    if (setupMount()) {
       return;
     }
 
     const observer = new MutationObserver(() => {
-      if (setupFooter()) {
+      if (setupMount()) {
         observer.disconnect();
       }
     });
@@ -133,22 +171,54 @@ export const InferredSchemaMappingsEditor: FunctionComponent<InferredSchemaMappi
     return () => {
       observer.disconnect();
     };
-  }, [euiTheme.size.m, euiTheme.size.s, mappings]);
+  }, [euiTheme.size.s, schemaEditorKey]);
 
   return (
-    <div ref={containerRef} data-test-subj="datasetWizardInferredSchemaMappingsEditor">
-      <MappedFieldsEditorComponent value={mappings} onChange={onMappingsChange} />
-      {resetButtonMount
+    <div
+      ref={containerRef}
+      data-test-subj="datasetWizardInferredSchemaMappingsEditor"
+      css={css`
+        [data-test-subj='addFieldButton'] {
+          display: none;
+        }
+      `}
+    >
+      <MappedFieldsEditorComponent
+        key={schemaEditorKey}
+        value={mappings}
+        onChange={onMappingsChange}
+      />
+      {actionsMount
         ? createPortal(
-            <EuiButtonEmpty
-              iconType="refresh"
-              data-test-subj="datasetWizardResetInferredSchema"
-              onClick={onReset}
-              disabled={!hasSchemaModifications}
-            >
-              {datasetWizardStrings.resetInferredSchemaButton()}
-            </EuiButtonEmpty>,
-            resetButtonMount
+            <>
+              <EuiButton
+                iconType="plusCircle"
+                color="primary"
+                data-test-subj="datasetWizardAddField"
+                onClick={handleAddField}
+              >
+                {datasetWizardStrings.addFieldButton()}
+              </EuiButton>
+              <EuiButton
+                iconType="refresh"
+                color="text"
+                data-test-subj="datasetWizardInferSchema"
+                onClick={handleInferSchema}
+              >
+                {datasetWizardStrings.inferSchemaButton()}
+              </EuiButton>
+              {hasFields ? (
+                <EuiButton
+                  iconType="plusInCircle"
+                  color="text"
+                  data-test-subj="datasetWizardInferMissingFields"
+                  onClick={handleInferMissingFields}
+                >
+                  {datasetWizardStrings.inferMissingFieldsButton()}
+                </EuiButton>
+              ) : null}
+            </>,
+            actionsMount
           )
         : null}
     </div>

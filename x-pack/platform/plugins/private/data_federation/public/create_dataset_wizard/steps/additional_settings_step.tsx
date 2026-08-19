@@ -6,18 +6,22 @@
  */
 
 import type { FunctionComponent, MutableRefObject } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiForm, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiText, EuiTitle } from '@elastic/eui';
 import type { Control, UseFormGetValues, UseFormSetValue } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import { DatasetSettingsAccordions } from '../../create_dataset_flyout/dataset_settings_accordions';
 import { DatasetSettingsCommonPanel } from '../../create_dataset_flyout/dataset_settings_common_panel';
 import { DatasetSettingsFlow3SettingsPanel } from '../../create_dataset_flyout/dataset_settings_flow3_settings_panel';
 import { applySettingsForFormat } from '../../create_dataset_flyout/dataset_settings_defaults';
+import { buildDefaultSettingsCustomJson } from '../../create_dataset_flyout/settings_custom_json_schema';
 import { EMPTY_SETTINGS_CUSTOM_JSON } from '../../create_dataset_flyout/settings_custom_json_utils';
 import { FORMAT_SUPER_SELECT_OPTIONS } from '../../create_dataset_flyout/dataset_settings_options';
-import type { DatasetFormatFormValue } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
+import type {
+  DatasetErrorModeFormValue,
+  DatasetFormatFormValue,
+} from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { emptyCreateDatasetSettingsFormValues } from '../../create_dataset_flyout/create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from '../../create_dataset_flyout/create_dataset_flyout_i18n';
 import { AutoDetectedSuffix } from '../auto_detected_suffix';
@@ -68,6 +72,21 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
 
   const format = formatField.value as DatasetFormatFormValue;
   const hasFormatSelected = isKnownFormat(format);
+  const errorMode = useWatch({ control, name: 'settings.error_mode' }) as DatasetErrorModeFormValue;
+  const previousErrorModeRef = useRef<DatasetErrorModeFormValue | undefined>(undefined);
+
+  const setDefaultCustomJson = useCallback(
+    (
+      nextFormat: Exclude<DatasetFormatFormValue, ''>,
+      nextErrorMode: DatasetErrorModeFormValue = ''
+    ) => {
+      setValue('settings_custom_json', buildDefaultSettingsCustomJson(nextFormat, nextErrorMode), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    },
+    [setValue]
+  );
 
   const applyFormatDefaultsToForm = useCallback(
     (nextFormat: Exclude<DatasetFormatFormValue, ''>) => {
@@ -75,13 +94,11 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
       setValue('settings', withDefaults, { shouldDirty: true, shouldValidate: true });
 
       if (isDatasetWizardFlow3B(flowVariant)) {
-        setValue('settings_custom_json', EMPTY_SETTINGS_CUSTOM_JSON, {
-          shouldDirty: true,
-          shouldValidate: true,
-        });
+        setDefaultCustomJson(nextFormat, withDefaults.error_mode);
+        previousErrorModeRef.current = withDefaults.error_mode;
       }
     },
-    [flowVariant, getValues, setValue]
+    [flowVariant, getValues, setDefaultCustomJson, setValue]
   );
 
   const handleFormatSelection = useCallback(
@@ -96,6 +113,25 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
     },
     [applyFormatDefaultsToForm, autoDetectedFormat]
   );
+
+  useEffect(() => {
+    if (!isDatasetWizardFlow3B(flowVariant) || !hasFormatSelected) {
+      previousErrorModeRef.current = errorMode;
+      return;
+    }
+
+    if (previousErrorModeRef.current === undefined) {
+      previousErrorModeRef.current = errorMode;
+      return;
+    }
+
+    if (previousErrorModeRef.current === errorMode) {
+      return;
+    }
+
+    previousErrorModeRef.current = errorMode;
+    setDefaultCustomJson(format, errorMode);
+  }, [errorMode, flowVariant, format, hasFormatSelected, setDefaultCustomJson]);
 
   useEffect(() => {
     const inferredFormat = inferFormatFromResource(resource);
@@ -234,6 +270,8 @@ export const AdditionalSettingsStep: FunctionComponent<AdditionalSettingsStepPro
           isDatasetWizardFlow3(flowVariant) ? (
             <DatasetSettingsFlow3SettingsPanel
               control={control}
+              getValues={getValues}
+              setValue={setValue}
               format={format}
               flowVariant={flowVariant}
               commonSettingsTitle={datasetWizardStrings.commonSettingsTitle()}

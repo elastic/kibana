@@ -10,8 +10,15 @@ import type { JSONSchema7, JSONSchema7Definition } from 'json-schema';
 import type {
   DatasetErrorModeFormValue,
   DatasetFormatFormValue,
+  CreateDatasetSettingsFormValues,
+} from './create_dataset_flyout_form_state';
+import {
+  buildDatasetSettingsFromFormValues,
+  emptyCreateDatasetSettingsFormValues,
 } from './create_dataset_flyout_form_state';
 import { createDatasetFlyoutStrings } from './create_dataset_flyout_i18n';
+import { getDefaultSettingsForFormat } from './dataset_settings_defaults';
+import type { DatasetSettings } from '../../common/dataset_types';
 import {
   DATASET_SETTINGS_CUSTOM_JSON_API_KEYS,
   type DatasetSettingsCustomJsonApiKey,
@@ -208,4 +215,38 @@ export const getDatasetSettingsCustomJsonSchema = (
     additionalProperties: false,
     properties,
   };
+};
+
+const CUSTOM_JSON_FALLBACK_DEFAULTS: Partial<Record<DatasetSettingsCustomJsonApiKey, unknown>> = {
+  max_errors: 0,
+};
+
+export const buildDefaultSettingsCustomJson = (
+  format: Exclude<DatasetFormatFormValue, ''>,
+  errorMode: DatasetErrorModeFormValue = ''
+): string => {
+  const formatDefaults = getDefaultSettingsForFormat(format);
+  const resolvedErrorMode = errorMode || formatDefaults.error_mode || '';
+
+  const formValues: CreateDatasetSettingsFormValues = {
+    ...emptyCreateDatasetSettingsFormValues(),
+    format,
+    ...formatDefaults,
+    ...(resolvedErrorMode ? { error_mode: resolvedErrorMode } : {}),
+  };
+
+  const apiSettings = buildDatasetSettingsFromFormValues(formValues) ?? {};
+  const visibleKeys = getVisibleCustomJsonApiKeys(format, resolvedErrorMode);
+
+  const jsonObject = visibleKeys.reduce<Record<string, unknown>>((acc, key) => {
+    const value = apiSettings[key as keyof DatasetSettings] ?? CUSTOM_JSON_FALLBACK_DEFAULTS[key];
+
+    if (value !== undefined) {
+      acc[key] = value;
+    }
+
+    return acc;
+  }, {});
+
+  return JSON.stringify(jsonObject, null, 2);
 };

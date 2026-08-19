@@ -7,7 +7,7 @@
 
 import type { FunctionComponent, MouseEvent } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiCode, EuiFormRow, EuiLink } from '@elastic/eui';
+import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor, monaco } from '@kbn/code-editor';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
@@ -27,7 +27,7 @@ import {
   validateSettingsCustomJson,
 } from './settings_custom_json_utils';
 
-const CUSTOM_JSON_EDITOR_HEIGHT = 140;
+const CUSTOM_JSON_EDITOR_HEIGHT = 285;
 
 const preventFakeLinkNavigation = (event: MouseEvent) => {
   event.preventDefault();
@@ -66,12 +66,13 @@ export interface DatasetSettingsCustomJsonEditorProps {
   control: Control<DatasetWizardFormValues>;
   format: Exclude<DatasetFormatFormValue, ''>;
   errorMode?: DatasetErrorModeFormValue;
+  hideLabel?: boolean;
   testSubjPrefix?: string;
 }
 
 export const DatasetSettingsCustomJsonEditor: FunctionComponent<
   DatasetSettingsCustomJsonEditorProps
-> = ({ control, format, errorMode = '', testSubjPrefix = 'datasetWizard' }) => {
+> = ({ control, format, errorMode = '', hideLabel = false, testSubjPrefix = 'datasetWizard' }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
 
   const jsonSchema = useMemo(
@@ -103,13 +104,10 @@ export const DatasetSettingsCustomJsonEditor: FunctionComponent<
 
   return (
     <EuiFormRow
-      label={datasetWizardStrings.settingsCustomJsonLabel()}
+      label={hideLabel ? undefined : datasetWizardStrings.settingsCustomJsonLabel()}
       helpText={
         <>
           {datasetWizardStrings.settingsCustomJsonHelpText()}{' '}
-          <EuiCode>{'{ "quote": "\\"" }'}</EuiCode>
-          <br />
-          {datasetWizardStrings.settingsCustomJsonHelpTextDocsPrefix()}{' '}
           <EuiLink
             href="#"
             external
@@ -117,8 +115,7 @@ export const DatasetSettingsCustomJsonEditor: FunctionComponent<
             data-test-subj={`${testSubjPrefix}SettingsCustomJsonDocsLink`}
           >
             {datasetWizardStrings.settingsCustomJsonDocsLinkLabel()}
-          </EuiLink>{' '}
-          {datasetWizardStrings.settingsCustomJsonHelpTextDocsSuffix()}
+          </EuiLink>
         </>
       }
       fullWidth

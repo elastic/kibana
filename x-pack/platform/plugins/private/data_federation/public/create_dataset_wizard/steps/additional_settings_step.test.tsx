@@ -20,6 +20,7 @@ import {
   type DatasetWizardFlowVariant,
 } from '../dataset_wizard_flow_variant';
 import { NULL_VALUE_EMPTY_STRING_PRESET } from '../../create_dataset_flyout/dataset_settings_options';
+import { buildDefaultSettingsCustomJson } from '../../create_dataset_flyout/settings_custom_json_schema';
 import { AdditionalSettingsStep } from './additional_settings_step';
 
 jest.mock('@kbn/code-editor', () => ({
@@ -456,7 +457,7 @@ describe('AdditionalSettingsStep', () => {
         expect(getByTestId('datasetWizardSettingsMaxErrorRatio')).toBeInTheDocument();
       });
     });
-    it('uses the same flow 3 settings layout for flow 3b', async () => {
+    it('uses flow 3b layout with view toggle defaulting to JSON', async () => {
       const { getByTestId, queryByTestId } = render(
         <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B} />
       );
@@ -464,13 +465,84 @@ describe('AdditionalSettingsStep', () => {
       await waitFor(() => {
         expect(getByTestId('datasetWizardFlow3CommonSettingsPanel')).toBeInTheDocument();
         expect(getByTestId('datasetWizardFlow3bAdvancedSettingsAccordion')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardAdvancedSettingsViewToggle')).toBeInTheDocument();
         expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toBeInTheDocument();
-      expect(getByTestId('datasetWizardSettingsCustomJsonDocsLink')).toBeInTheDocument();
-      expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toHaveValue('{\n\n}');
+        expect(getByTestId('datasetWizardSettingsCustomJsonDocsLink')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toHaveValue(
+          buildDefaultSettingsCustomJson('csv', 'fail_fast')
+        );
       });
 
       expect(queryByTestId('datasetWizardAccordionStructureAndSchema')).toBeNull();
-      expect(queryByTestId('datasetWizardSettingsQuote')).toBeNull();
+    });
+
+    it('switches to list view showing advanced fields in a single column', async () => {
+      const { getByTestId, queryByTestId } = render(
+        <TestHarness resource="s3://bucket/data.csv" flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B} />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardAdvancedSettingsViewToggle')).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('list'));
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsQuote')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardSettingsPartitionDetection')).toBeInTheDocument();
+        expect(getByTestId('datasetWizardSettingsErrorMode')).toBeInTheDocument();
+      });
+
+      expect(queryByTestId('datasetWizardSettingsCustomJsonEditor')).toBeNull();
+    });
+
+    it('preserves values when switching between views', async () => {
+      const Harness = () => {
+        const syncedResourceRef = useRef<string | null>(null);
+        const { control, getValues, setValue, watch } = useForm<DatasetWizardFormValues>({
+          defaultValues: emptyDatasetWizardFormValues(),
+        });
+        const customJson = watch('settings_custom_json');
+
+        return (
+          <EuiProvider>
+            <AdditionalSettingsStep
+              control={control}
+              getValues={getValues}
+              setValue={setValue}
+              resource="s3://bucket/data.csv"
+              syncedResourceRef={syncedResourceRef}
+              isEditMode={false}
+              flowVariant={DATASET_WIZARD_FLOW_VARIANT_3B}
+            />
+            <div data-test-subj="customJsonSnapshot">{customJson}</div>
+          </EuiProvider>
+        );
+      };
+
+      const { getByTestId } = render(<Harness />);
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardAdvancedSettingsViewToggle')).toBeInTheDocument();
+      });
+
+      const defaultJson = getByTestId('customJsonSnapshot').textContent ?? '';
+      expect(defaultJson).toContain('"partition_detection"');
+
+      fireEvent.click(getByTestId('list'));
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsPartitionDetection')).toBeInTheDocument();
+      });
+
+      fireEvent.click(getByTestId('json'));
+
+      await waitFor(() => {
+        expect(getByTestId('datasetWizardSettingsCustomJsonEditor')).toBeInTheDocument();
+      });
+
+      const restoredJson = getByTestId('customJsonSnapshot').textContent ?? '';
+      expect(restoredJson).toContain('"partition_detection"');
     });
   });
 });

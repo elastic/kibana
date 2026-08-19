@@ -9,6 +9,7 @@ import {
   automaticFieldTypesToMappings,
   countModifiedAutomaticFieldTypesForFlow3,
   mappingsToAutomaticFieldTypes,
+  mergeMissingAutomaticFieldTypes,
   seedAutomaticFieldTypesFromInferred,
 } from './automatic_field_types_utils';
 
@@ -49,6 +50,20 @@ describe('automatic_field_types_utils', () => {
     ).toEqual({
       test: 'rank_features',
     });
+  });
+
+  it('merges only the inferred fields missing from the current field types', () => {
+    expect(
+      mergeMissingAutomaticFieldTypes(
+        { message: 'keyword' },
+        { '@timestamp': 'date', message: 'text' }
+      )
+    ).toEqual({
+      message: 'keyword',
+      '@timestamp': 'date',
+    });
+
+    expect(mergeMissingAutomaticFieldTypes({}, {})).toEqual({});
   });
 
   it('counts schema edits against the inferred baseline in flow 3', () => {
