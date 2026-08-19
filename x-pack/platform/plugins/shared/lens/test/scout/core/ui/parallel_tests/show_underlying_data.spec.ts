@@ -216,7 +216,8 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
         await lens.dimensions.openDimensionEditor(Y_TRIGGER);
         await lens.workspace.enableFilter();
         await lens.dimensions.setDimensionFilterLanguageToLucene();
-        await lens.workspace.setFilterBy('machine.ram:*');
+        await lens.workspace.setDimensionFilterQuery('machine.ram:*');
+        await expect(lens.workspace.dimensionFilterTrigger).toHaveText('machine.ram:*');
         await lens.closeDimensionEditor();
         await lens.waitForVisualization(testData.XY_CHART);
       });
@@ -310,8 +311,8 @@ spaceTest.describe('Lens show underlying data', { tag: '@local-stateful-classic'
           keepOpen: true,
         });
         await lens.workspace.enableFilter();
-        await lens.workspace.setFilterBy('bytes > 4000');
-        // Commit the formula global filter before Open in Discover (FTR used 1s sleeps).
+        await lens.workspace.setDimensionFilterQuery('bytes > 4000');
+        await expect(lens.workspace.dimensionFilterTrigger).toHaveText('bytes > 4000');
         await lens.closeDimensionEditor();
         await lens.waitForVisualization(testData.XY_CHART);
       });
