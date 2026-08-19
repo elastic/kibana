@@ -201,7 +201,7 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const normalizeFromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
+export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
   const base = convertBaseFromEs(document, user);
   const readBy = { read_by: migrateReadBy(document._source) };
 

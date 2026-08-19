@@ -73,7 +73,7 @@ import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
 import { updateReadBy } from './read_by';
 import {
-  normalizeFromEs,
+  fromEs,
   fromEsWithoutRounds,
   withPermissions,
   toEs,
@@ -259,9 +259,7 @@ class ConversationClientImpl implements ConversationClient {
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
-    const conversation = fromNormalized(
-      withDeserializedMetadata(normalizeFromEs(document, this.user))
-    );
+    const conversation = fromNormalized(withDeserializedMetadata(fromEs(document, this.user)));
 
     return withPermissions({ conversation, user: this.user });
   }
@@ -304,7 +302,7 @@ class ConversationClientImpl implements ConversationClient {
         access: 'converse',
       });
 
-      return withDeserializedMetadata(fromNormalized(normalizeFromEs(document, this.user)));
+      return withDeserializedMetadata(fromNormalized(fromEs(document, this.user)));
     } catch (error) {
       if (isConversationNotFoundError(error)) {
         return undefined;
@@ -821,7 +819,7 @@ class ConversationClientImpl implements ConversationClient {
 
         return {
           id,
-          source: normalizeFromEs(document, this.user),
+          source: fromEs(document, this.user),
           occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },

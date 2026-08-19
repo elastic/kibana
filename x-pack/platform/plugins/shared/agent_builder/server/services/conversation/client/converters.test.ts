@@ -21,7 +21,7 @@ import {
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
 import { getToolResultId } from '@kbn/agent-builder-server/tools/utils';
 import {
-  normalizeFromEs,
+  fromEs,
   toEs,
   createRequestToEs,
   type Document as ConversationDocument,
@@ -59,7 +59,7 @@ describe('conversation model converters', () => {
     getToolResultIdMock.mockReturnValue('some-result-id');
   });
 
-  describe('normalizeFromEs', () => {
+  describe('fromEs', () => {
     const documentBase = (): ConversationDocument => {
       return {
         _id: 'conv_id',
@@ -102,7 +102,7 @@ describe('conversation model converters', () => {
     it('deserializes the conversation with new conversation_rounds field', () => {
       const serialized = documentBase();
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized).toEqual({
         id: 'conv_id',
@@ -174,7 +174,7 @@ describe('conversation model converters', () => {
       ];
       serialized._source!.state = createTestState();
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized).toEqual({
         id: 'conv_id',
@@ -237,7 +237,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.rounds[0].steps).toEqual([
         {
@@ -283,7 +283,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const results = deserialized.rounds[0].steps
         .filter(isToolCallStep)
@@ -320,7 +320,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const results = deserialized.rounds[0].steps
         .filter(isToolCallStep)
@@ -351,7 +351,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.internal);
@@ -369,7 +369,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.internal);
@@ -387,7 +387,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBeUndefined();
@@ -406,7 +406,7 @@ describe('conversation model converters', () => {
         },
       ];
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       const step = deserialized.rounds[0].steps.filter(isToolCallStep)[0];
       expect(step.tool_origin).toBe(ToolOrigin.registry);
@@ -432,7 +432,7 @@ describe('conversation model converters', () => {
       ];
       serialized._source!.state = createTestState();
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.attachments).toEqual([
         {
@@ -457,7 +457,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       // No attachments field - old format
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.attachments).toBeUndefined();
     });
@@ -466,7 +466,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.state = createTestState();
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.state).toEqual(serialized._source!.state);
     });
@@ -475,7 +475,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       // No state field - old format
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.state).toBeUndefined();
     });
@@ -483,7 +483,7 @@ describe('conversation model converters', () => {
     it('defaults access control to private for legacy conversations', () => {
       const serialized = documentBase();
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Private,
@@ -497,7 +497,7 @@ describe('conversation model converters', () => {
         access_mode: ConversationAccessControlMode.Public,
       };
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
@@ -519,7 +519,7 @@ describe('conversation model converters', () => {
         ],
       };
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.access_control).toEqual({
         access_mode: ConversationAccessControlMode.Public,
@@ -540,7 +540,7 @@ describe('conversation model converters', () => {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       };
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.origin).toEqual({
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
@@ -550,7 +550,7 @@ describe('conversation model converters', () => {
     it('defaults read_only to false when the document has no such field', () => {
       const serialized = documentBase();
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.read_only).toBe(false);
     });
@@ -559,7 +559,7 @@ describe('conversation model converters', () => {
       const serialized = documentBase();
       serialized._source!.read_only = true;
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.read_only).toBe(true);
     });
@@ -575,7 +575,7 @@ describe('conversation model converters', () => {
         type: ConversationOriginType.Slack,
       };
 
-      const deserialized = normalizeFromEs(serialized, requestingUser);
+      const deserialized = fromEs(serialized, requestingUser);
 
       expect(deserialized.rounds[0].origin).toEqual({
         type: 'slack',
@@ -844,7 +844,7 @@ describe('conversation model converters', () => {
       const conversation = conversationBase();
       conversation.read_only = true;
 
-      const roundTripped = normalizeFromEs(
+      const roundTripped = fromEs(
         {
           _id: conversation.id,
           _seq_no: 1,
@@ -1024,7 +1024,7 @@ describe('conversation model converters', () => {
   // ---------------------------------------------------------------------------
 
   describe('metadata, template_id, and template_version round-trips', () => {
-    describe('normalizeFromEs', () => {
+    describe('fromEs', () => {
       it('deserializes metadata, template_id, and template_version when present in the document', () => {
         const doc: ConversationDocument = {
           _id: 'conv-tmpl',
@@ -1045,7 +1045,7 @@ describe('conversation model converters', () => {
           },
         };
 
-        const result = normalizeFromEs(doc, requestingUser);
+        const result = fromEs(doc, requestingUser);
 
         expect(result.template_id).toBe('phishing');
         expect(result.template_version).toBe(2);
@@ -1069,7 +1069,7 @@ describe('conversation model converters', () => {
           },
         };
 
-        const result = normalizeFromEs(doc, requestingUser);
+        const result = fromEs(doc, requestingUser);
 
         expect(result.template_id).toBeUndefined();
         expect(result.template_version).toBeUndefined();
