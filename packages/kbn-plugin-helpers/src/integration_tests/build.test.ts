@@ -14,7 +14,7 @@ import { loadJsonFile } from '@kbn/utils';
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
-import extract from 'extract-zip';
+import { extract } from 'zip-lib';
 import del from 'del';
 import globby from 'globby';
 
@@ -89,7 +89,7 @@ describe('scripts/generate_plugin', () => {
      succ plugin archive created"
   `);
 
-    await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+    await extract(PLUGIN_ARCHIVE, TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
     files.sort((a, b) => a.localeCompare(b));
@@ -169,7 +169,7 @@ describe('scripts/generate_plugin', () => {
     expect(logs).toContain('browser bundle created');
     expect(logs).toContain('plugin archive created');
 
-    await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+    await extract(PLUGIN_ARCHIVE, TMP_DIR);
 
     const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
 
