@@ -28,3 +28,25 @@ export const getChartTypeConfigPromptContent = (chartType: SupportedChartType) =
     ...rules.map((rule) => `- ${rule}`),
   ].join('\n');
 };
+
+/**
+ * Compact review-side view of the registry: all chart-specific rules (config +
+ * coloring) for the given chart types, without the palette previews used during
+ * generation. Intended for judge/review prompts that evaluate authored charts
+ * against the rules they were generated under.
+ */
+export const getChartTypeReviewPromptContent = (chartTypes: SupportedChartType[]): string =>
+  chartTypes
+    .map((chartType) => {
+      const config = chartTypeRegistry[chartType].prompt.config;
+      const rules = [...(config?.rules ?? []), ...(config?.coloringRules ?? [])];
+      if (!rules.length) {
+        return '';
+      }
+      return [
+        `RULES FOR ${chartType.toUpperCase()} CHARTS:`,
+        ...rules.map((rule) => `- ${rule}`),
+      ].join('\n');
+    })
+    .filter(Boolean)
+    .join('\n\n');

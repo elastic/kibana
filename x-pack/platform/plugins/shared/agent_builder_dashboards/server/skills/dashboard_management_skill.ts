@@ -6,9 +6,10 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import { generateDashboardTool } from '../tools';
+import { generateDashboardTool, reviewDashboardTool } from '../tools';
 import { dashboardGeneration } from './generation_guidance';
 import { kibanaRendering } from './rendering_guidance';
+import { dashboardTools } from '../../common';
 
 export const createDashboardManagementSkill = (getCustomContentEnabled: () => Promise<boolean>) =>
   defineSkillType({
@@ -32,6 +33,18 @@ Do **not** use this skill when:
 ${dashboardGeneration.guidance}
 
 ${kibanaRendering.guidance}
+
+## Dashboard Review Workflow
+
+After any ${dashboardTools.generateDashboard} call that created or edited panel content (operations: \`add_panels\`, \`edit_panels\`, \`add_section\` with inline panels), call ${dashboardTools.reviewDashboard} in a **separate turn** — never in the same response as \`generate_dashboard\`.
+
+Apply all \`critical\` and \`warning\` findings automatically via a follow-up \`generate_dashboard\` call. Surface \`suggestion\` findings to the user rather than applying them without consent.
+
+After applying fixes, call \`review_dashboard\` at most once more. If findings remain after that second review, report them to the user instead of looping further.
+
+When calling \`review_dashboard\` after a self-review fix cycle, set the \`focus\` field to identify the panels you changed so the judge can prioritise them.
+
+Do **not** call \`review_dashboard\` after operations that only change layout or metadata (\`set_metadata\`, \`move_panels\`, \`update_panel_layouts\`, \`remove_panels\`, control add/remove).
 `,
     referencedContent: [
       ...(dashboardGeneration.referencedContent ?? []),
@@ -39,6 +52,6 @@ ${kibanaRendering.guidance}
     ],
     getInlineTools: async () => {
       const customContentEnabled = await getCustomContentEnabled();
-      return [generateDashboardTool({ customContentEnabled })];
+      return [generateDashboardTool({ customContentEnabled }), reviewDashboardTool()];
     },
   });

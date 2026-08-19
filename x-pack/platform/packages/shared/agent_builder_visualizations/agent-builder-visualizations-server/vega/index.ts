@@ -11,3 +11,4 @@ export { createVegaGraph } from './graph';
 export { normalizeVegaSpec, VEGA_LITE_SCHEMA } from './normalize_spec';
 export { escapeVegaFieldReferences } from './field_escaping';
 export { createAuthorVegaSpecPrompt } from './prompts';
+export { extractEsqlFromSpec } from './recover_esql';

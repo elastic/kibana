@@ -6,7 +6,12 @@
  */
 
 export { buildLensConfig } from './lens/build_lens_config';
-export { getChartTypeSelectionPromptContent } from './lens/chart_type_guidance';
+export {
+  getChartTypeSelectionPromptContent,
+  getChartTypeReviewPromptContent,
+} from './lens/chart_type_guidance';
+export { titleRulesPromptContent, numberFormatRulesPromptContent } from './lens/config_rules';
+export { getPalettePreviewsPromptContent } from './lens/color_palettes';
 export { getEsqlDataSourceCarriers } from './lens/graph_lens';
 export type { VisualizationConfig } from './lens/types';
-export { buildVegaConfig } from './vega';
+export { buildVegaConfig, extractEsqlFromSpec } from './vega';

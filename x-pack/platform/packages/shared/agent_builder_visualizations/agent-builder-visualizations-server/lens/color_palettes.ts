@@ -56,6 +56,39 @@ const getCategoricalPalettePreviews = (): string[] =>
   );
 
 /**
+ * Palette reference for review prompts: canonical dynamic palette previews at
+ * the given stop counts (gradient palettes sample differently per count, so
+ * callers should pass the counts actually present in the reviewed configs) and
+ * the valid categorical palette ids. Returns '' when nothing is requested.
+ */
+export const getPalettePreviewsPromptContent = ({
+  dynamicStepCounts,
+  includeCategorical,
+}: {
+  dynamicStepCounts: number[];
+  includeCategorical: boolean;
+}): string => {
+  const lines: string[] = [];
+
+  for (const stepCount of [...dynamicStepCounts].sort((a, b) => a - b)) {
+    lines.push(
+      `Canonical dynamic palettes at ${stepCount} stops:`,
+      ...getDynamicPalettePreviews(stepCount),
+      ''
+    );
+  }
+
+  if (includeCategorical) {
+    lines.push(
+      `Categorical palettes (id (name): ${CATEGORICAL_PALETTE_PREVIEW_STEPS}-color preview; configs must reference the id):`,
+      ...getCategoricalPalettePreviews()
+    );
+  }
+
+  return lines.join('\n').trimEnd();
+};
+
+/**
  * Returns coloring guidance for the visualization config prompt: the general
  * coloring policy, the chart type's `coloringRules` from the registry, and —
  * when the chart supports dynamic/categorical coloring — the palette rules and
