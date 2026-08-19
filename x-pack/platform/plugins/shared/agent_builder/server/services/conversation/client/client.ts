@@ -58,6 +58,7 @@ import type {
   ConversationUpdatableFields,
   ConversationUpdateRequest,
   ConversationListOptions,
+  NormalizedConversation,
   UpsertRoundRequest,
   GetEventsOptions,
 } from './types';
@@ -70,12 +71,13 @@ import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/v
 import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
 import { applyAttachmentRefsToRounds } from './migrate_attachments';
+import { updateReadBy } from './read_by';
 import {
-  fromEs,
+  normalizeFromEs,
   fromEsWithoutRounds,
   withPermissions,
   toEs,
-  updateConversation,
+  fromNormalized,
   createRequestToEs,
   isConversationDocument,
   type Document,
@@ -129,6 +131,7 @@ export interface ConversationClient {
     request: UpsertRoundRequest,
     options?: { access: ConversationAccess }
   ): Promise<Conversation>;
+  markRead(conversationId: string, read: boolean): Promise<Conversation>;
   list(options?: ConversationListOptions): Promise<ConversationWithoutRoundsWithPermissions[]>;
   delete(conversationId: string): Promise<boolean>;
   updateAccessControl(
@@ -223,6 +226,7 @@ class ConversationClientImpl implements ConversationClient {
         'updated_at',
         'status',
         'read',
+        'read_by',
         'pinned',
         'read_only',
         'access_control',
@@ -246,20 +250,19 @@ class ConversationClientImpl implements ConversationClient {
         throw createInternalError('Conversation list search returned an incomplete hit');
       }
 
-      return withPermissions({
-        conversation: withDeserializedMetadata(fromEsWithoutRounds(hit)),
-        user: this.user,
-      });
+      const conversation = withDeserializedMetadata(fromEsWithoutRounds(hit, this.user));
+
+      return withPermissions({ conversation, user: this.user });
     });
   }
 
   async get(conversationId: string): Promise<ConversationWithPermissions> {
     const document = await this.getDocumentWithAccess({ conversationId, access: 'converse' });
+    const conversation = fromNormalized(
+      withDeserializedMetadata(normalizeFromEs(document, this.user))
+    );
 
-    return withPermissions({
-      conversation: withDeserializedMetadata(fromEs(document)),
-      user: this.user,
-    });
+    return withPermissions({ conversation, user: this.user });
   }
 
   async exists(conversationId: string): Promise<boolean> {
@@ -295,9 +298,12 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     try {
-      return withDeserializedMetadata(
-        fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
-      );
+      const document = await this.getDocumentWithAccess({
+        conversationId: hit._id,
+        access: 'converse',
+      });
+
+      return withDeserializedMetadata(fromNormalized(normalizeFromEs(document, this.user)));
     } catch (error) {
       if (isConversationNotFoundError(error)) {
         return undefined;
@@ -459,10 +465,25 @@ class ConversationClientImpl implements ConversationClient {
             }
           : {}),
         ...(workspaceId && !current.workspace_id ? { workspace_id: workspaceId } : {}),
+        read_by: [],
         read: false,
       }),
     });
     return withDeserializedMetadata(result);
+  }
+
+  async markRead(conversationId: string, read: boolean): Promise<Conversation> {
+    return this.writeConversation({
+      conversationId,
+      access: 'converse',
+      fields: (current) =>
+        updateReadBy({
+          userId: this.user.id,
+          readBy: current.read_by,
+          currentRead: current.read ?? false,
+          nextRead: read,
+        }),
+    });
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -693,7 +714,7 @@ class ConversationClientImpl implements ConversationClient {
     }
 
     let allowed = false;
-    const conversation = fromEsWithoutRounds(document);
+    const conversation = fromEsWithoutRounds(document, this.user);
 
     switch (access) {
       case 'converse':
@@ -751,7 +772,7 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     conversationId: string;
     access: ConversationAccess;
-    fields: (current: Conversation) => Omit<ConversationUpdatableFields, 'id'>;
+    fields: (current: NormalizedConversation) => Omit<ConversationUpdatableFields, 'id'>;
     maxRetries?: number;
   }): Promise<Conversation> {
     const writer = this.createWriter({ access, maxRetries });
@@ -759,19 +780,16 @@ class ConversationClientImpl implements ConversationClient {
     try {
       const { document } = await writer.readModifyWrite({
         id: conversationId,
-        mutate: (current) =>
-          updateConversation({
-            conversation: current,
-            update: {
-              ...fields(current),
-              id: conversationId,
-            },
-            space: this.space,
-            updateDate: new Date(),
-          }),
+        mutate: (current) => ({
+          ...current,
+          ...fields(current),
+          id: conversationId,
+          space: this.space,
+          updated_at: new Date().toISOString(),
+        }),
       });
 
-      return document;
+      return fromNormalized(document);
     } catch (error) {
       // retries are exhausted
       if (isElasticsearchWriteConflict(error)) {
@@ -792,14 +810,14 @@ class ConversationClientImpl implements ConversationClient {
   }: {
     access: ConversationAccess;
     maxRetries: number;
-  }): OccWriter<Conversation> {
-    return new OccWriter<Conversation>({
+  }): OccWriter<NormalizedConversation> {
+    return new OccWriter<NormalizedConversation>({
       get: async (id) => {
         const document = await this.getDocumentWithAccess({ conversationId: id, access });
 
         return {
           id,
-          source: fromEs(document),
+          source: normalizeFromEs(document, this.user),
           occ: { seqNo: document._seq_no, primaryTerm: document._primary_term },
         };
       },

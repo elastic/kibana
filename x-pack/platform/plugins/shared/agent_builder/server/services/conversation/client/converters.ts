@@ -35,12 +35,13 @@ import {
 } from '../access_control';
 import type {
   ConversationCreateRequest,
-  ConversationUpdatableFields,
   LegacyAgentStateFields,
   PersistentConversationRound,
   PersistentConversationRoundStep,
+  NormalizedConversation,
 } from './types';
 import type { ConversationProperties } from './storage';
+import { isReadBy, migrateReadBy } from './read_by';
 import {
   createAttachmentRefs,
   migrateRoundAttachments,
@@ -66,7 +67,7 @@ export const isConversationDocument = (hit: Partial<Document>): hit is Document 
   );
 };
 
-const convertBaseFromEs = (document: Document) => {
+const convertBaseFromEs = (document: Document, user: UserIdAndName) => {
   if (!document._source) {
     throw new Error('No source found on get conversation response');
   }
@@ -82,7 +83,7 @@ const convertBaseFromEs = (document: Document) => {
     created_at: document._source.created_at,
     updated_at: document._source.updated_at,
     status: document._source.status,
-    read: document._source.read,
+    read: isReadBy({ source: document._source, user }),
     pinned: document._source.pinned,
     read_only: document._source.read_only ?? false,
     access_control: normalizeConversationAccessControl(document._source.access_control),
@@ -199,8 +200,12 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const fromEs = (document: Document): Conversation => {
-  const base = convertBaseFromEs(document);
+export const normalizeFromEs = (
+  document: Document,
+  user: UserIdAndName
+): NormalizedConversation => {
+  const base = convertBaseFromEs(document, user);
+  const readBy = { read_by: migrateReadBy(document._source!) };
 
   // Migration: prefer legacy 'rounds' field, fallback to new 'conversation_rounds' field
   const rawRounds = document._source!.rounds ?? document._source!.conversation_rounds;
@@ -225,6 +230,7 @@ export const fromEs = (document: Document): Conversation => {
   if (existingAttachments && existingAttachments.length > 0) {
     return {
       ...base,
+      ...readBy,
       rounds: roundsWithRefs,
       attachments: existingAttachments,
       ...(document._source!.state && { state: document._source!.state }),
@@ -234,6 +240,7 @@ export const fromEs = (document: Document): Conversation => {
   if (hasLegacyRoundAttachments) {
     return {
       ...base,
+      ...readBy,
       rounds: roundsWithRefs,
       ...(attachmentsForRefs.length > 0 && { attachments: attachmentsForRefs }),
       ...(document._source!.state && { state: document._source!.state }),
@@ -242,13 +249,17 @@ export const fromEs = (document: Document): Conversation => {
 
   return {
     ...base,
+    ...readBy,
     rounds: roundsWithRefs,
     ...(document._source!.state && { state: document._source!.state }),
   };
 };
 
-export const fromEsWithoutRounds = (document: Document): ConversationWithoutRounds => {
-  return convertBaseFromEs(document);
+export const fromEsWithoutRounds = (
+  document: Document,
+  user: UserIdAndName
+): ConversationWithoutRounds => {
+  return convertBaseFromEs(document, user);
 };
 
 export const withPermissions = <T extends ConversationWithoutRounds>({
@@ -271,7 +282,16 @@ export const withPermissions = <T extends ConversationWithoutRounds>({
   };
 };
 
-export const toEs = (conversation: Conversation, space: string): ConversationProperties => {
+/** Strips server-internal fields before a conversation crosses the public API boundary. */
+export const fromNormalized = (conversation: NormalizedConversation): Conversation => {
+  const { read_by: _readBy, ...conversationWithoutReadBy } = conversation;
+  return conversationWithoutReadBy;
+};
+
+export const toEs = (
+  conversation: NormalizedConversation,
+  space: string
+): ConversationProperties => {
   return {
     agent_id: conversation.agent_id,
     user_id: conversation.user.id,
@@ -286,7 +306,9 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
     attachments: conversation.attachments ?? [],
     state: conversation.state,
     status: conversation.status,
-    read: conversation.read,
+    // Explicitly omit read to ensure migration
+    read: undefined,
+    read_by: conversation.read_by ?? [],
     pinned: conversation.pinned,
     read_only: conversation.read_only,
     access_control: normalizeConversationAccessControl(conversation.access_control),
@@ -303,27 +325,6 @@ export const toEs = (conversation: Conversation, space: string): ConversationPro
       ? { template_version: conversation.template_version }
       : {}),
   };
-};
-
-export const updateConversation = ({
-  conversation,
-  update,
-  space,
-  updateDate,
-}: {
-  conversation: Conversation;
-  update: ConversationUpdatableFields;
-  space: string;
-  updateDate: Date;
-}) => {
-  const updated = {
-    ...conversation,
-    ...update,
-    space,
-    updated_at: updateDate.toISOString(),
-  };
-
-  return updated;
 };
 
 export const createRequestToEs = ({
@@ -349,7 +350,7 @@ export const createRequestToEs = ({
     attachments: conversation.attachments ?? [],
     state: conversation.state,
     status: conversation.status,
-    read: false,
+    read_by: [],
     pinned: false,
     read_only: conversation.read_only ?? false,
     access_control: normalizeConversationAccessControl(conversation.access_control),

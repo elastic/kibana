@@ -352,8 +352,6 @@ export function registerConversationRoutes({
           throw e;
         }
 
-        // publicClient.create() returns Conversation (no permissions). Fetch via get()
-        // to return ConversationWithPermissions — consistent with GET /conversations/{id}.
         const conversation = await client.get(created.id);
 
         return response.ok<CreateConversationResponse>({ body: conversation });

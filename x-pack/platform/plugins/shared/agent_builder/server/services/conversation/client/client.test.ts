@@ -70,6 +70,7 @@ describe('ConversationClient', () => {
     attachments,
     workspaceId,
     read = false,
+    readBy = [{ userId: 'unrelated-reader-id' }],
   }: {
     id?: string;
     agentId?: string;
@@ -85,6 +86,7 @@ describe('ConversationClient', () => {
     attachments?: unknown[];
     workspaceId?: string;
     read?: boolean;
+    readBy?: Array<{ userId: string }>;
   } = {}): Document =>
     ({
       _id: id,
@@ -98,6 +100,7 @@ describe('ConversationClient', () => {
         created_at: '2024-09-04T06:44:17.944Z',
         updated_at: '2025-08-04T06:44:19.123Z',
         read,
+        ...(readBy ? { read_by: readBy } : {}),
         conversation_rounds: rounds,
         ...(attachments ? { attachments } : {}),
         ...(workspaceId ? { workspace_id: workspaceId } : {}),
@@ -107,6 +110,40 @@ describe('ConversationClient', () => {
         },
       },
     } as Document);
+
+  const expectNoReadBy = (conversation: unknown) => {
+    expect(conversation).not.toHaveProperty('read_by');
+  };
+
+  const expectNoReadByInList = (conversations: unknown[]) => {
+    conversations.forEach(expectNoReadBy);
+  };
+
+  const expectOwnerPermissions = (conversation: { permissions?: unknown }) => {
+    expect(conversation.permissions).toEqual({
+      rename: true,
+      delete: true,
+      update_access_control: true,
+    });
+  };
+
+  const expectParticipantPermissions = (conversation: { permissions?: unknown }) => {
+    expect(conversation.permissions).toEqual({
+      rename: false,
+      delete: false,
+      update_access_control: false,
+    });
+  };
+
+  const expectOwnerPermissionsInList = (conversations: Array<{ permissions?: unknown }>) => {
+    conversations.forEach(expectOwnerPermissions);
+  };
+
+  const expectNoRoundsInList = (conversations: unknown[]) => {
+    conversations.forEach((conversation) => {
+      expect(conversation).not.toHaveProperty('rounds');
+    });
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -154,8 +191,12 @@ describe('ConversationClient', () => {
 
       const result = await client.list();
 
+      expectNoReadByInList(result);
+      expectOwnerPermissionsInList(result);
+      expectNoRoundsInList(result);
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
+          seq_no_primary_term: true,
           _source: expect.arrayContaining(['access_control', 'origin']),
         })
       );
@@ -178,8 +219,11 @@ describe('ConversationClient', () => {
         },
       });
 
-      await client.list();
+      const result = await client.list();
 
+      expectNoReadByInList(result);
+      expectOwnerPermissionsInList(result);
+      expectNoRoundsInList(result);
       expect(agentRegistry.getIds).toHaveBeenCalled();
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -249,8 +293,11 @@ describe('ConversationClient', () => {
         },
       });
 
-      await client.list({ agentId: 'agent-2' });
+      const result = await client.list({ agentId: 'agent-2' });
 
+      expectNoReadByInList(result);
+      expectOwnerPermissionsInList(result);
+      expectNoRoundsInList(result);
       expect(mockEsClient.search).toHaveBeenCalledWith(
         expect.objectContaining({
           query: expect.objectContaining({
@@ -310,6 +357,8 @@ describe('ConversationClient', () => {
 
       const result = await client.get('conversation-1');
 
+      expectNoReadBy(result);
+      expectParticipantPermissions(result);
       expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
       expect(result.id).toBe('conversation-1');
     });
@@ -432,11 +481,7 @@ describe('ConversationClient', () => {
           op_type: 'create',
         })
       );
-      expect(result.permissions).toEqual({
-        rename: true,
-        delete: true,
-        update_access_control: true,
-      });
+      expectNoReadBy(result);
     });
 
     it('throws an already-exists error when the id already exists', async () => {
@@ -521,6 +566,7 @@ describe('ConversationClient', () => {
         external_conversation_id: 'team:T123/channel:C123/thread:1712345678.000100',
       });
 
+      expectNoReadBy(result);
       expect(result?.id).toBe('conversation-1');
       expect(mockEsClient.search).toHaveBeenNthCalledWith(
         1,
@@ -580,6 +626,7 @@ describe('ConversationClient', () => {
           document: expect.objectContaining({ title: 'Renamed' }),
         })
       );
+      expectNoReadBy(result);
       expect(result.title).toBe('Renamed');
     });
 
@@ -603,34 +650,6 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it('allows public non-owner conversations to be marked read with converse access', async () => {
-      mockEsClient.search.mockResolvedValue({
-        hits: {
-          hits: [
-            createConversationDocument({
-              userId: 'other-user-id',
-              username: 'other-user',
-              accessMode: ConversationAccessControlMode.Public,
-            }),
-          ],
-        },
-      });
-
-      const result = await client.update(
-        { id: 'conversation-1', read: true },
-        { access: 'converse' }
-      );
-
-      expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
-      expect(mockEsClient.index).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'conversation-1',
-          document: expect.objectContaining({ read: true }),
-        })
-      );
-      expect(result.read).toBe(true);
-    });
-
     it('preserves the original owner when a non-owner writes with converse access', async () => {
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -644,7 +663,7 @@ describe('ConversationClient', () => {
         },
       });
 
-      await client.update({ id: 'conversation-1', read: true }, { access: 'converse' });
+      await client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' });
 
       // Holds because `toEs` takes no caller; pinned so a `currentUser` argument cannot slip in.
       expect(mockEsClient.index).toHaveBeenCalledWith(
@@ -688,7 +707,7 @@ describe('ConversationClient', () => {
       });
 
       await expect(
-        client.update({ id: 'conversation-1', read: true }, { access: 'converse' })
+        client.update({ id: 'conversation-1', title: 'Updated title' }, { access: 'converse' })
       ).rejects.toThrow('Conversation conversation-1 not found');
 
       expect(agentRegistry.get).toHaveBeenCalledWith('agent-1', { access: 'use' });
@@ -755,7 +774,7 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
     });
 
-    it('re-applies the requested value over the fresh document when retryOnConflict is set', async () => {
+    it('re-applies the requested read state over the fresh document when retrying after conflict', async () => {
       mockEsClient.search
         .mockResolvedValueOnce({ hits: { hits: [createConversationDocument()] } })
         // a round landed first, adding a round and marking the conversation unread
@@ -765,6 +784,7 @@ describe('ConversationClient', () => {
               createConversationDocument({
                 seqNo: 2,
                 read: false,
+                readBy: [],
                 rounds: [createRound({ id: 'round-concurrent' })],
               }),
             ],
@@ -773,18 +793,110 @@ describe('ConversationClient', () => {
       mockEsClient.index.mockRejectedValueOnce(createConflictError());
       mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
 
-      const result = await client.update(
-        { id: 'conversation-1', read: true },
-        { access: 'converse', retryOnConflict: true }
-      );
+      const result = await client.markRead('conversation-1', true);
 
       expect(mockEsClient.index).toHaveBeenCalledTimes(2);
 
       const { document } = mockEsClient.index.mock.calls[1][0];
-      expect(document.read).toBe(true);
+      expect(document.read_by).toEqual([{ userId: 'user-1' }]);
       // the concurrently written round is preserved
       expect(document.conversation_rounds).toHaveLength(1);
+      expectNoReadBy(result);
       expect(result.read).toBe(true);
+    });
+  });
+
+  describe('markRead', () => {
+    it('adds only the calling user to read_by', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              userId: 'other-user-id',
+              username: 'other-user',
+              accessMode: ConversationAccessControlMode.Public,
+              readBy: [],
+            }),
+          ],
+        },
+      });
+
+      const result = await client.markRead('conversation-1', true);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.read_by).toEqual([{ userId: 'user-1' }]);
+      expectNoReadBy(result);
+      expect(result.read).toBe(true);
+    });
+
+    it('does not clobber read_by entries written by another user', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({ hits: { hits: [createConversationDocument()] } })
+        // another user marked it read concurrently
+        .mockResolvedValue({
+          hits: {
+            hits: [
+              createConversationDocument({
+                seqNo: 2,
+                readBy: [{ userId: 'other-user-id' }],
+              }),
+            ],
+          },
+        });
+      mockEsClient.index.mockRejectedValueOnce(createConflictError());
+      mockEsClient.index.mockResolvedValue({ _seq_no: 3, _primary_term: 1 });
+
+      await client.markRead('conversation-1', true);
+
+      const { document } = mockEsClient.index.mock.calls[1][0];
+      expect(document.read_by).toEqual(
+        expect.arrayContaining([{ userId: 'other-user-id' }, { userId: 'user-1' }])
+      );
+    });
+
+    it('removes only the calling user when marking unread', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              readBy: [{ userId: 'user-1' }, { userId: 'other-id' }],
+            }),
+          ],
+        },
+      });
+
+      await client.markRead('conversation-1', false);
+
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.read_by).toEqual([{ userId: 'other-id' }]);
+    });
+
+    it('is a no-op when the calling user has no stable id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: {
+          hits: [
+            createConversationDocument({
+              readBy: [],
+              accessMode: ConversationAccessControlMode.Public,
+            }),
+          ],
+        },
+      });
+
+      client = createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: {} as never,
+        agentRegistry: agentRegistry as unknown as AgentRegistry,
+        user: { username: 'no-profile-user', isAdmin: false },
+      });
+
+      const result = await client.markRead('conversation-1', true);
+
+      expectNoReadBy(result);
+      const { document } = mockEsClient.index.mock.calls[0][0];
+      expect(document.read_by).toEqual([]);
+      expect(result.read).toBe(false);
     });
   });
 
@@ -857,6 +969,7 @@ describe('ConversationClient', () => {
 
       const result = await client.upsertRound({ id: 'conversation-1', round });
 
+      expectNoReadBy(result);
       expect(mockEsClient.index).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({ title: 'Renamed by user' }),
@@ -1699,15 +1812,8 @@ describe('ConversationClient', () => {
 
       const result = await client.get('conversation-1');
 
-      expect(result.permissions).toEqual({
-        rename: true,
-        delete: true,
-        update_access_control: true,
-      });
-      expect(result.access_control).toEqual({
-        access_mode: ConversationAccessControlMode.Private,
-        entries: [],
-      });
+      expectNoReadBy(result);
+      expectOwnerPermissions(result);
     });
 
     it('returns public participant permissions with conversations from get', async () => {
@@ -1717,11 +1823,8 @@ describe('ConversationClient', () => {
 
       const result = await client.get('conversation-1');
 
-      expect(result.permissions).toEqual({
-        rename: false,
-        delete: false,
-        update_access_control: false,
-      });
+      expectNoReadBy(result);
+      expectParticipantPermissions(result);
     });
 
     it('returns per-conversation permissions from list', async () => {
@@ -1736,11 +1839,12 @@ describe('ConversationClient', () => {
 
       const results = await client.list();
 
+      expectNoReadByInList(results);
+      expectNoRoundsInList(results);
       expect(results.map(({ permissions }) => permissions)).toEqual([
         { rename: true, delete: true, update_access_control: true },
         { rename: false, delete: false, update_access_control: false },
       ]);
-      results.forEach((conversation) => expect(conversation).not.toHaveProperty('rounds'));
       expect(results.map(({ id }) => id)).toEqual(['owned', 'participating']);
     });
 
@@ -1751,11 +1855,8 @@ describe('ConversationClient', () => {
 
       const result = await client.get('conversation-1');
 
-      expect(result.permissions).toEqual({
-        rename: false,
-        delete: false,
-        update_access_control: false,
-      });
+      expectNoReadBy(result);
+      expectParticipantPermissions(result);
       await expect(client.delete('conversation-1')).rejects.toThrow(
         'Conversation conversation-1 not found'
       );
@@ -1768,11 +1869,8 @@ describe('ConversationClient', () => {
 
       const result = await client.get('conversation-1');
 
-      expect(result.permissions).toEqual({
-        rename: false,
-        delete: false,
-        update_access_control: false,
-      });
+      expectNoReadBy(result);
+      expectParticipantPermissions(result);
       await expect(
         client.update({ id: 'conversation-1', title: 'renamed' }, { access: 'rename' })
       ).rejects.toThrow('Conversation conversation-1 not found');

@@ -64,7 +64,7 @@ describe('conversation access control', () => {
       expect(
         isConversationOwner({
           owner: { username: user.username },
-          user: { username: user.username, isAdmin: false },
+          user: { username: user.username },
         })
       ).toBe(true);
     });
@@ -73,7 +73,7 @@ describe('conversation access control', () => {
       expect(
         isConversationOwner({
           owner: { userId: 'owner-profile-id', username: user.username },
-          user: { username: user.username, isAdmin: false },
+          user: { username: user.username },
         })
       ).toBe(false);
       expect(
@@ -82,7 +82,6 @@ describe('conversation access control', () => {
           user: {
             id: 'realm:["native","native1","alice"]',
             username: user.username,
-            isAdmin: false,
           },
         })
       ).toBe(false);
@@ -122,7 +121,6 @@ describe('conversation access control', () => {
           user: {
             id: 'realm:["native","native1","alice"]',
             username: user.username,
-            isAdmin: false,
           },
         })
       ).toBe(false);
@@ -154,7 +152,7 @@ describe('conversation access control', () => {
       expect(
         isConversationMember({
           conversation: sharedWith(entry()),
-          user: { username: user.username, isAdmin: false },
+          user: { username: user.username },
         })
       ).toBe(false);
     });
