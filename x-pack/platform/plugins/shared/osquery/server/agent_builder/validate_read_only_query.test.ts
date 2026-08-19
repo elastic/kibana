@@ -253,4 +253,74 @@ describe('validateReadOnlyQuery', () => {
       ).toBeNull();
     });
   });
+
+  describe('set-operator clause boundaries', () => {
+    it('rejects a denied table behind EXCEPT', () => {
+      expect(
+        validateReadOnlyQuery(
+          "SELECT * FROM processes EXCEPT SELECT * FROM curl WHERE url = 'http://169.254.169.254/'",
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+
+    it('rejects a denied table behind INTERSECT', () => {
+      expect(
+        validateReadOnlyQuery('SELECT * FROM processes INTERSECT SELECT * FROM carves', ALLOWED)
+      ).toMatch(/not read-only/i);
+    });
+
+    it('still accepts a benign EXCEPT over allowlisted tables', () => {
+      expect(
+        validateReadOnlyQuery(
+          'SELECT pid FROM processes EXCEPT SELECT pid FROM process_open_sockets',
+          ALLOWED
+        )
+      ).toBeNull();
+    });
+  });
+
+  describe('bracket quoting', () => {
+    it('rejects a denied table in SQLite bracket quotes', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM processes, [curl]', ALLOWED)).toMatch(
+        /not read-only/i
+      );
+    });
+
+    it('rejects a denied table in bracket quotes after a JOIN', () => {
+      expect(
+        validateReadOnlyQuery(
+          'SELECT * FROM processes JOIN [yara] ON processes.pid = yara.pid',
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+  });
+
+  describe('dotted references resolve to the physical table', () => {
+    it('rejects a denied table behind a schema qualifier', () => {
+      expect(
+        validateReadOnlyQuery(
+          'WITH main AS (SELECT pid FROM processes) SELECT * FROM main.curl',
+          ALLOWED
+        )
+      ).toMatch(/not read-only/i);
+    });
+
+    it('accepts a dotted reference to an allowlisted physical table', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM main.processes', ALLOWED)).toBeNull();
+    });
+  });
+
+  describe('denylist additions', () => {
+    it('rejects prometheus_metrics', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM prometheus_metrics', ALLOWED)).toMatch(
+        /not read-only/i
+      );
+    });
+
+    it('rejects wifi_survey', () => {
+      expect(validateReadOnlyQuery('SELECT * FROM wifi_survey', ALLOWED)).toMatch(/not read-only/i);
+    });
+  });
 });

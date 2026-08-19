@@ -25,7 +25,8 @@ describe('Endpoint Osquery eval isolation', () => {
 
     expect(baseConfig).toContain('--xpack.fleet.packages.0.name=endpoint');
     expect(serverArgs).not.toContain('osquery_manager');
-    expect(serverArgs).not.toContain('--xpack.osquery.enableExperimental');
+    // Tools register without the integration so capability detection is testable.
+    expect(serverArgs).toContain('--xpack.osquery.enableExperimental=["agentBuilderTools"]');
   });
 
   it('installs osquery_manager only in the endpoint-osquery Scout config', () => {
@@ -35,7 +36,7 @@ describe('Endpoint Osquery eval isolation', () => {
 
     expect(osqueryConfig).toContain('../../evals_endpoint/stateful/classic.stateful.config');
     expect(osqueryConfig).toContain('--xpack.fleet.packages.1.name=osquery_manager');
-    expect(osqueryConfig).toContain('--xpack.osquery.enableExperimental=["agentBuilderTools"]');
+    expect(osqueryConfig).not.toContain('--xpack.osquery.enableExperimental');
   });
 
   it('registers a separate endpoint-osquery suite so unrelated endpoint evals do not inherit Osquery', () => {

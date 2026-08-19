@@ -9,6 +9,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { OsqueryAppContext } from './osquery_app_context_services';
 import { fetchOsqueryPackagePolicyIds } from '../routes/utils';
+import { buildPolicyIdKuery } from '../../common/utils/build_policy_id_kuery';
 
 export interface OsqueryAgentPolicyIds {
   /** Agent policy ids that include the osquery_manager package policy. */
@@ -61,8 +62,12 @@ export const getOsqueryAgentPolicyIds = async (
   }
 };
 
-/** KQL clause matching agents enrolled into any osquery-capable agent policy. */
+/**
+ * KQL clause matching agents enrolled into any osquery-capable agent policy.
+ * `buildPolicyIdKuery` also matches Fleet's version-suffixed policy ids
+ * (`<policyId>#<major.minor>`), which a plain `policy_id:"<id>"` term misses.
+ */
 export const buildOsqueryPolicyKuery = (agentPolicyIds: string[]): string =>
-  agentPolicyIds.map((id) => `policy_id:"${id}"`).join(' or ');
+  buildPolicyIdKuery(agentPolicyIds);
 
 export const OSQUERY_PACKAGE_POLICY_SAVED_OBJECT_TYPE = PACKAGE_POLICY_SAVED_OBJECT_TYPE;

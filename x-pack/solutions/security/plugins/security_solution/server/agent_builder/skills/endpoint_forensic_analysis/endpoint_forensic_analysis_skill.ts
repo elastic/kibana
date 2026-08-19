@@ -43,9 +43,12 @@ const escapeEsqlString = (value: string) => value.replace(/\\/g, '\\\\').replace
 
 const discoverTelemetrySchema = z.object({
   hosts: z
-    .array(z.string())
+    .array(z.string().max(255))
+    .max(50)
     .optional()
-    .describe('Named host.name values extracted from the analyst question'),
+    .describe(
+      'Named host.name values extracted from the analyst question (max 50 hosts, 255 chars each)'
+    ),
   time_window_hours: z
     .number()
     .int()
@@ -115,10 +118,10 @@ This skill MUST NOT invoke response actions. On response-action requests, explai
 Before selecting a query path, determine what data sources are available:
 
 1. Call \`osquery.check_integration\` to see if the Osquery integration is installed and agents are enrolled.
-2. **If Osquery IS installed and agents are enrolled**: for **live-state** questions (current processes, open sockets, loaded DLLs, registry keys as of now), route to the Osquery path (steps 2b–6b below). For **historical** questions (what happened in the past), use ES|QL on Defend telemetry.
-3. **If Osquery IS installed but NO agents are enrolled** (\`installed: true\`, \`agents_enrolled: false\`): live interrogation is impossible even though the integration exists. Route all questions to the ES|QL / Defend telemetry path and tell the analyst live host interrogation needs an agent enrolled in an Osquery-capable agent policy. Do **not** call \`osquery.run_live_query\` — it has no agent to run on.
-4. **If Osquery is NOT installed**: route all questions to the ES|QL / Defend telemetry path. Inform the analyst that live host interrogation requires the Osquery integration.
-5. **If \`enrollment_status\` is \`unknown\`**: the capability check itself failed (Fleet or package-policy error) — this is NOT the same as "no agents". Say the check was inconclusive, answer from ES|QL / Defend telemetry, and suggest retrying the capability check.
+2. **If \`enrollment_status\` is \`unknown\`**: the capability check itself failed (Fleet or package-policy error) — this is NOT the same as "no agents", and it is NOT "not installed": a failed check can also return \`installed: false\`. Say the check was inconclusive, answer from ES|QL / Defend telemetry, and suggest retrying the capability check. Evaluate this rule BEFORE any installed/not-installed rule.
+3. **If Osquery IS installed and agents are enrolled**: for **live-state** questions (current processes, open sockets, loaded DLLs, registry keys as of now), route to the Osquery path (step 2b below). For **historical** questions (what happened in the past), use ES|QL on Defend telemetry.
+4. **If Osquery IS installed but NO agents are enrolled** (\`installed: true\`, \`agents_enrolled: false\`): live interrogation is impossible even though the integration exists. Route all questions to the ES|QL / Defend telemetry path and tell the analyst live host interrogation needs an agent enrolled in an Osquery-capable agent policy. Do **not** call \`osquery.run_live_query\` — it has no agent to run on.
+5. **If Osquery is NOT installed**: route all questions to the ES|QL / Defend telemetry path. Inform the analyst that live host interrogation requires the Osquery integration.
 
 Use Osquery when the question asks for **current state** ("what processes are currently running", "which sockets are open right now").
 Use ES|QL when the question asks for **historical events** ("what happened at 3am", "timeline of the attack", "patient zero").
@@ -136,12 +139,14 @@ Always scope \`@timestamp\`. Cite index and query in answers.
 
 ### 2b. Query with Osquery (live state — when integration is installed)
 For live-state questions, use these Osquery tools in sequence (skip \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` — it is ES|QL-only):
+- If the analyst references a pack by name, call \`osquery.list_packs\` FIRST — before authoring or dispatching any query — and use the pack's prebuilt queries rather than composing a custom one.
 - \`osquery.list_saved_queries\` to find prebuilt queries matching the investigative need
 - \`osquery.get_table_schema\` to verify column names before authoring a custom query
 - \`osquery.resolve_agent_ids\` to turn host names into Elastic Agent IDs — \`run_live_query\` takes \`agent_ids\`, not host names. Do NOT query the \`.fleet-agents\` index via ES|QL/search; it requires ES-level privileges most roles lack and fails with a security_exception.
 - \`osquery.run_live_query\` to dispatch a read-only SELECT query to enrolled agents (waits ~30s inline for rows)
 - \`osquery.get_live_query_results\` when \`run_live_query\` returns \`status: dispatched\` — pass the \`action_id\` and wait up to 60s for agent rows
-- \`osquery.list_packs\` to find Elastic-built packs when the analyst references a pack by name
+
+This path ends once the live-state rows are returned and displayed — do NOT continue into steps 3–7 (patient zero, timeline, IoCs, lateral movement, persistence): those are historical ES|QL reconstruction and were not requested by a live-state question. Only combine paths when the analyst explicitly asks for both live and historical analysis.
 
 After rows return, **display them in chat** as a markdown table (columns from the first row, cap at 20 rows with a note if truncated).
 
@@ -158,6 +163,10 @@ After reconstructing the attack on a host, call \`${ENDPOINT_FORENSIC_EXTRACT_IO
 
 | Indicator type | Value | First seen | Source event |
 |---|---|---|---|
+
+- Fill the **First seen** column from the tool's \`first_seen_by_category\` field (earliest \`@timestamp\` for each category); use "—" only when the tool returned rows but the category had no hits.
+- The **Source event** column should reference the telemetry indices queried (e.g. \`logs-endpoint.events.*\`); do not invent per-row event IDs.
+- If the tool result contains an \`error\` field, do NOT report "no indicators found" — say the IoC extraction failed, report the error, and answer from the telemetry you already have. An empty IoC table means absence; an \`error\` means unknown.
 
 Always surface at least the categories the tool returns (file hash, network destination, registry persistence key, renamed extension). If a category has no hits, show "—". Never present IoCs as a prose paragraph — use the table so downstream hunts and response actions can cite specific values.
 
@@ -243,7 +252,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
         const esqlQuery = [
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
           `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
-          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension`,
+          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension, @timestamp`,
           `| LIMIT 500`,
         ].join(' ');
 
@@ -254,6 +263,8 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           registry_persistence_keys: [],
           file_extensions: [],
         };
+        const firstSeenByCategory: Record<string, string> = {};
+        let iocsError: string | undefined;
 
         try {
           const { columns, values } = await context.esClient.asCurrentUser.esql.query({
@@ -270,6 +281,34 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
           const domainIdx = colIndex('destination.domain');
           const regIdx = colIndex('registry.path');
           const extIdx = colIndex('file.extension');
+          const tsIdx = colIndex('@timestamp');
+
+          // Only persistence-location paths are IoCs; other registry.path
+          // values are ordinary telemetry.
+          const isPersistenceRegistryPath = (path: string): boolean =>
+            /\\software\\microsoft\\windows\\currentversion\\run\b/i.test(path) ||
+            /\\software\\microsoft\\windows\\currentversion\\runonce\b/i.test(path) ||
+            /\\software\\wow6432node\\microsoft\\windows\\currentversion\\run\b/i.test(path) ||
+            /\\software\\wow6432node\\microsoft\\windows\\currentversion\\runonce\b/i.test(path) ||
+            /\\software\\microsoft\\windows\\currentversion\\explorer\\shell folders\b/i.test(
+              path
+            ) ||
+            /\\software\\microsoft\\windows nt\\currentversion\\winlogon\b/i.test(path) ||
+            /\\software\\microsoft\\windows\\currentversion\\explorer\\user shell folders\b/i.test(
+              path
+            ) ||
+            /\\system\\currentcontrolset\\services\b/i.test(path);
+
+          const firstSeen = (v: unknown[]): string | null => {
+            const ts = tsIdx >= 0 ? v[tsIdx] : null;
+            return typeof ts === 'string' ? ts : null;
+          };
+          const trackCategory = (category: string, v: unknown[]) => {
+            const ts = firstSeen(v);
+            if (ts && (!firstSeenByCategory[category] || ts < firstSeenByCategory[category])) {
+              firstSeenByCategory[category] = ts;
+            }
+          };
 
           for (const row of values) {
             const v = row as unknown[];
@@ -284,11 +323,13 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
 
             if (hash && typeof hash === 'string' && !iocs.file_hashes.includes(hash)) {
               iocs.file_hashes.push(hash);
+              trackCategory('file_hashes', v);
             }
             if (exe && typeof exe === 'string' && parentName && typeof parentName === 'string') {
               const chain = `${parentName} → ${exe}`;
               if (!iocs.process_chain.includes(chain)) {
                 iocs.process_chain.push(chain);
+                trackCategory('process_chain', v);
               }
             }
             if (
@@ -298,6 +339,7 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
               !iocs.process_chain.includes(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`)
             ) {
               iocs.process_chain.push(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`);
+              trackCategory('process_chain', v);
             }
             const netDest = domain ?? ip;
             if (
@@ -306,20 +348,25 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
               !iocs.network_destinations.includes(netDest)
             ) {
               iocs.network_destinations.push(netDest);
+              trackCategory('network_destinations', v);
             }
             if (
               regPath &&
               typeof regPath === 'string' &&
+              isPersistenceRegistryPath(regPath) &&
               !iocs.registry_persistence_keys.includes(regPath)
             ) {
               iocs.registry_persistence_keys.push(regPath);
+              trackCategory('registry_persistence_keys', v);
             }
             if (ext && typeof ext === 'string' && !iocs.file_extensions.includes(ext)) {
               iocs.file_extensions.push(ext);
+              trackCategory('file_extensions', v);
             }
           }
-        } catch {
-          // Index missing or query error — return empty structure so the agent can report "no hits"
+        } catch (e) {
+          // Surface the failure so the model reports unknown, not absence.
+          iocsError = `IoC extraction query failed: ${e instanceof Error ? e.message : String(e)}`;
         }
 
         return {
@@ -330,6 +377,8 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                 hosts,
                 time_window_hours: timeWindowHours,
                 iocs,
+                first_seen_by_category: firstSeenByCategory,
+                ...(iocsError !== undefined && { error: iocsError }),
                 guidance:
                   'Present as a markdown table (one row per indicator type), then offer a cross-environment hunt with these values.',
               },

@@ -97,6 +97,24 @@ export const getLiveQueryResultsTool = (
         logger,
       });
 
+      // Unreadable results are not pending — do not report an empty state.
+      if (pollResult.status === 'error') {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.error,
+              data: {
+                message: `Results for action ${actionId} could not be read: ${
+                  pollResult.error ?? 'polling failed'
+                }. The query may still be running; retry once the data streams are readable.`,
+                action_id: actionId,
+              },
+            },
+          ],
+        };
+      }
+
       return {
         results: [
           {

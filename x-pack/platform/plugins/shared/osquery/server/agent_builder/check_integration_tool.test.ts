@@ -25,6 +25,46 @@ describe('checkIntegrationTool agent_id handling', () => {
     expect(kuery).toContain('agent.id:"agent-\\"1\\" or agent.id:\\"*\\\\"');
   });
 
+  it('does not report capability when the kuery matched a different agent', async () => {
+    const { context } = buildToolContext({
+      grantedPrivileges: ['osquery-read'],
+      agents: [{ id: 'some-other-agent-entirely' }],
+      agentsTotal: 1,
+    });
+    const tool = checkIntegrationTool(context, loggerMock.create());
+
+    const result = (await tool.handler({ agent_id: 'agent-*' }, {
+      request: toolRequest,
+      spaceId: 'default',
+    } as never)) as {
+      results: Array<{ data: { agent_osquery_capable?: boolean; enrollment_status?: string } }>;
+    };
+
+    const data = result.results[0].data;
+    expect(data.agent_osquery_capable).toBe(false);
+    expect(data.enrollment_status).toBe('not_enrolled');
+  });
+
+  it('reports capability when the list returns the exact requested agent', async () => {
+    const { context } = buildToolContext({
+      grantedPrivileges: ['osquery-read'],
+      agents: [{ id: 'ad2681a0-1a5b-4b42-9a5f-000000000001' }],
+      agentsTotal: 1,
+    });
+    const tool = checkIntegrationTool(context, loggerMock.create());
+
+    const result = (await tool.handler({ agent_id: 'ad2681a0-1a5b-4b42-9a5f-000000000001' }, {
+      request: toolRequest,
+      spaceId: 'default',
+    } as never)) as {
+      results: Array<{ data: { agent_osquery_capable?: boolean; enrollment_status?: string } }>;
+    };
+
+    const data = result.results[0].data;
+    expect(data.agent_osquery_capable).toBe(true);
+    expect(data.enrollment_status).toBe('enrolled');
+  });
+
   it('passes a plain agent id through unchanged', async () => {
     const { context, listAgents } = buildToolContext({
       grantedPrivileges: ['osquery-read'],

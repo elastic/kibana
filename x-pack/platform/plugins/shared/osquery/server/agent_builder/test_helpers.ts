@@ -49,9 +49,9 @@ export const buildToolContext = ({
       privileges: {
         kibana: kibana.map((privilege) => ({
           privilege,
-          // api.get() is mocked below as an identity-ish prefix, so a granted
-          // privilege name appearing in the requested string means authorized.
-          authorized: grantedPrivileges.some((granted) => privilege.includes(granted)),
+          // Exact match: substring matching would let `osquery-read` authorize
+          // the distinct `osquery-readLiveQueries` privilege.
+          authorized: grantedPrivileges.some((granted) => `api:${granted}` === privilege),
         })),
       },
     }));

@@ -27,9 +27,10 @@ export const CHECK_INTEGRATION_TOOL_ID = osqueryTool('check_integration');
 const checkIntegrationSchema = z.object({
   agent_id: z
     .string()
+    .max(64)
     .optional()
     .describe(
-      'Specific agent ID to check Osquery capability for. If omitted, checks space-wide enrollment.'
+      'Specific agent ID to check Osquery capability for (max 64 chars). If omitted, checks space-wide enrollment.'
     ),
 });
 
@@ -185,15 +186,16 @@ export const checkIntegrationTool = (
       // count: "can THIS host run Osquery", i.e. is it enrolled in a policy
       // that carries the integration.
       if (agentId) {
-        // agentId is model-supplied text interpolated into a KQL quoted string.
+        // escapeKueryValue does not escape KQL wildcards, so the kuery can
+        // match more than the requested agent — verify exact identity.
         const escapedAgentId = escapeKueryValue(agentId);
-        const { agents, total } = await scopedAgentClient.listAgents({
+        const { agents } = await scopedAgentClient.listAgents({
           kuery: `agent.id:"${escapedAgentId}" and (${policyKuery})`,
           perPage: 1,
           showInactive: true,
         });
 
-        const capable = (agents?.length ?? 0) > 0 || (total ?? 0) > 0;
+        const capable = (agents ?? []).some((agent) => agent.id === agentId);
 
         return toolResult({
           installed: true,

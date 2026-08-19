@@ -146,6 +146,16 @@ describe('Osquery Agent Builder tool privilege parity', () => {
     }
   );
 
+  it('get_live_query_results is denied for a caller with osquery-read only', async () => {
+    const entry = TOOL_PRIVILEGE_CONTRACT.find((e) => e.name === 'get_live_query_results');
+    if (!entry) throw new Error('missing get_live_query_results contract row');
+
+    const first = firstResult(await invoke(entry, ['osquery-read']));
+
+    expect(first.type).toBe('error');
+    expect(first.data.message).toMatch(/Insufficient Osquery privileges/);
+  });
+
   it('covers every registered Osquery Agent Builder tool', () => {
     // Keep in sync with registerAgentBuilderTools().
     const registered = [

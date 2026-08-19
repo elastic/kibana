@@ -19,8 +19,18 @@ const blankStringLiterals = (sql: string): string =>
  * Osquery tables whose SELECT performs host-side effects. The schema catalog
  * is an availability list, not a read-only list — these entries pass the
  * catalog check but must never be reachable here.
+ *
+ * These perform host-side network, radio, file-carving or scanning work even
+ * inside a SELECT.
  */
-const NON_READ_ONLY_TABLES = new Set(['curl', 'curl_certificate', 'carves', 'yara']);
+const NON_READ_ONLY_TABLES = new Set([
+  'curl',
+  'curl_certificate',
+  'carves',
+  'yara',
+  'prometheus_metrics',
+  'wifi_survey',
+]);
 
 /**
  * Table references in a FROM/JOIN clause, including comma-separated lists and
@@ -31,6 +41,9 @@ const NON_READ_ONLY_TABLES = new Set(['curl', 'curl_certificate', 'carves', 'yar
  * unchecked. A table nested in a subquery — `WHERE pid IN (SELECT 1 FROM curl
  * WHERE ...)` — must also be extracted, or it escapes both the catalog
  * allowlist and NON_READ_ONLY_TABLES.
+ *
+ * Set operators (UNION / EXCEPT / INTERSECT) terminate a clause like WHERE
+ * does, so each branch's tables are extracted.
  */
 const extractTableRefs = (sql: string): string[] => {
   const refs: string[] = [];
@@ -39,13 +52,14 @@ const extractTableRefs = (sql: string): string[] => {
   // parenthesized group and finds FROM/JOIN at every nesting level. Without
   // the `[()]` boundary a table immediately before `)` is dropped entirely.
   const clauseRe =
-    /\b(?:FROM|JOIN)(?:\s+|(?=[`"]))([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|JOIN|ON|USING)\b|[()]|$)/gi;
+    /\b(?:FROM|JOIN)(?:\s+|(?=[`"[]))([^()]*?)(?=\b(?:WHERE|GROUP|ORDER|LIMIT|HAVING|UNION|EXCEPT|INTERSECT|JOIN|ON|USING)\b|[()]|$)/gi;
 
   for (const clause of sql.matchAll(clauseRe)) {
     for (const item of clause[1].split(',')) {
       // First identifier of each item; drops any alias (`processes p`,
-      // `processes AS p`) and optional backtick/double quoting.
-      const match = item.trim().match(/^[`"]?([a-zA-Z_][a-zA-Z0-9_]*)[`"]?/);
+      // `processes AS p`) and SQLite's backtick/double/bracket quoting.
+      // Dotted refs are captured whole; `physicalTableName` resolves them.
+      const match = item.trim().match(/^[`"[]?([a-zA-Z_][a-zA-Z0-9_.]*)[`"\]]?/);
       if (match) {
         refs.push(match[1].toLowerCase());
       }
@@ -53,6 +67,16 @@ const extractTableRefs = (sql: string): string[] => {
   }
 
   return refs;
+};
+
+/**
+ * The physical table name of a (possibly qualified) reference: SQLite resolves
+ * the last dot-segment, so `main.curl` is the `curl` table, not a CTE `main`.
+ */
+const physicalTableName = (ref: string): string => {
+  const segments = ref.split('.');
+
+  return segments[segments.length - 1].toLowerCase();
 };
 
 /**
@@ -130,14 +154,16 @@ export const validateReadOnlyQuery = (
     return 'Query must reference at least one Osquery table via FROM / JOIN';
   }
 
-  const nonReadOnly = [...new Set(tableRefs)].filter((t) => NON_READ_ONLY_TABLES.has(t));
+  const physicalRefs = tableRefs.map(physicalTableName);
+
+  const nonReadOnly = [...new Set(physicalRefs)].filter((t) => NON_READ_ONLY_TABLES.has(t));
   if (nonReadOnly.length > 0) {
     return `Table(s) are not read-only and cannot be used in a live query: ${nonReadOnly.join(
       ', '
-    )}. These tables perform host-side actions (HTTP requests, file carving, YARA scans) even in a SELECT.`;
+    )}. These tables perform host-side actions (HTTP requests, file carving, YARA scans, network or radio side effects) even in a SELECT.`;
   }
 
-  const unknown = [...new Set(tableRefs)].filter(
+  const unknown = [...new Set(physicalRefs)].filter(
     (t) => !allowedTables.has(t) && !cteAliases.has(t)
   );
   if (unknown.length > 0) {

@@ -24,7 +24,7 @@ import { buildSpaceIdFilter } from '../utils/build_space_id_filter';
 const RESULTS_INDEX_PATTERN = `logs-${OSQUERY_INTEGRATION_NAME}.result*`;
 const ACTION_RESPONSES_INDEX_PATTERN = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
 
-export type LiveQueryPollStatus = 'completed' | 'partial' | 'pending';
+export type LiveQueryPollStatus = 'completed' | 'partial' | 'pending' | 'error';
 
 export interface PollActionResponsesOptions {
   budgetMs: number;
@@ -48,6 +48,8 @@ export interface PollActionResponsesResult {
   expected?: number;
   rows: Array<Record<string, unknown>>;
   status: LiveQueryPollStatus;
+  /** Last search error, when `status` is `error`. */
+  error?: string;
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
@@ -83,6 +85,8 @@ export const pollActionResponses = async (
   const spaceFilter = buildSpaceIdFilter(spaceId);
   let responded = 0;
   let rows: Array<Record<string, unknown>> = [];
+  let searchSucceeded = false;
+  let lastError: string | undefined;
 
   const allAgentsResponded = () =>
     expectedAgentCount !== undefined && expectedAgentCount > 0 && responded >= expectedAgentCount;
@@ -129,6 +133,8 @@ export const pollActionResponses = async (
         rows = hits.map((hit) => extractRowFromHit((hit._source ?? {}) as Record<string, unknown>));
       }
 
+      searchSucceeded = true;
+
       // Only stop early once every dispatched agent has reported. Stopping at
       // the first response reports a multi-agent query as complete while other
       // agents are still running.
@@ -140,8 +146,20 @@ export const pollActionResponses = async (
         break;
       }
     } catch (pollErr) {
+      lastError = pollErr instanceof Error ? pollErr.message : String(pollErr);
       logger?.debug(`Live-query poll error (will retry): ${pollErr}`);
     }
+  }
+
+  // No search ever succeeded: the rows are unreadable, not merely absent.
+  if (!searchSucceeded) {
+    return {
+      responded,
+      ...(expectedAgentCount !== undefined && { expected: expectedAgentCount }),
+      rows,
+      status: 'error' as const,
+      ...(lastError !== undefined && { error: lastError }),
+    };
   }
 
   const status: LiveQueryPollStatus = allAgentsResponded()

@@ -26,11 +26,10 @@ export const OSQUERY_TOOL_PRIVILEGES = {
   /** `POST /api/osquery/live_queries` — dispatching a direct (non saved-query) live query. */
   writeLiveQueries: [`${PLUGIN_ID}-writeLiveQueries`],
   /**
-   * `GET /api/osquery/live_queries/{id}/results/{actionId}` — reading live query results.
-   * The route accepts `readLiveQueries`; `read` also grants results access.
+   * `GET /api/osquery/live_queries/{id}/results/{actionId}`. The route accepts
+   * only `readLiveQueries`; adding `read` here would widen the tool past it.
    */
-  readLiveQueries: [`${PLUGIN_ID}-read`, `${PLUGIN_ID}-readLiveQueries`],
-  /** `GET /api/osquery/saved_queries` */
+  readLiveQueries: [`${PLUGIN_ID}-readLiveQueries`],
   readSavedQueries: [`${PLUGIN_ID}-readSavedQueries`],
   /** `GET /api/osquery/packs` */
   readPacks: [`${PLUGIN_ID}-readPacks`],

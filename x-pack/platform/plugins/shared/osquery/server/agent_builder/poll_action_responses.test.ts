@@ -78,6 +78,40 @@ describe('pollActionResponses', () => {
     expect(result.status).toBe('completed');
   });
 
+  it('reports status error when every search attempt fails', async () => {
+    const search = jest.fn().mockRejectedValue(new Error('es search failed'));
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.error).toMatch(/es search failed/);
+    expect(result.rows).toEqual([]);
+  });
+
+  it('still reports a terminal status when a later iteration succeeds after failures', async () => {
+    const search = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('transient'))
+      .mockResolvedValueOnce(responsesSearchResult(1))
+      .mockResolvedValueOnce({ hits: { hits: [{ _source: { pid: 1 } }] } });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 50,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).not.toBe('error');
+    expect(result.status).toBe('partial');
+    expect(result.rows).toEqual([{ pid: 1 }]);
+  });
+
   it('does not complete early when one agent produced multiple response docs', async () => {
     // Raw doc count reads 3 >= 3 here; cardinality correctly reads 2 of 3.
     const search = jest

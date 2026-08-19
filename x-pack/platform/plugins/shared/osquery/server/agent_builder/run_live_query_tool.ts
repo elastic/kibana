@@ -33,15 +33,16 @@ const MAX_RESULT_ROWS = 100;
 const runLiveQuerySchema = z.object({
   query: z
     .string()
+    .max(1000)
     .describe(
-      'Read-only Osquery SQL query (e.g. "SELECT pid, name, path FROM processes WHERE on_disk = 0"). Only tables from the osquery schema catalog are allowed.'
+      'Read-only Osquery SQL query (e.g. "SELECT pid, name, path FROM processes WHERE on_disk = 0"). Only tables from the osquery schema catalog are allowed. Max 1000 characters.'
     ),
   agent_ids: z
-    .array(z.string())
+    .array(z.string().max(64))
     .min(1)
     .max(100)
     .describe(
-      'Specific agent IDs to run the query on (from Elastic Agent / osquerybeat enrollment). Max 100 — resolve subsets with osquery.resolve_agent_ids and batch further runs separately.'
+      'Specific agent IDs to run the query on (from Elastic Agent / osquerybeat enrollment). Max 100 agents, 64 chars per ID — resolve subsets with osquery.resolve_agent_ids and batch further runs separately.'
     ),
   timeout: z
     .number()
@@ -175,7 +176,34 @@ export const runLiveQueryTool = (
         maxRows: MAX_RESULT_ROWS,
         logger,
       });
-      const { rows, responded, status: pollStatus } = pollResult;
+      const { rows, responded, status: pollStatus, error: pollError } = pollResult;
+
+      // Unreadable results are not pending — report the dispatch plus the error.
+      if (pollStatus === 'error') {
+        return {
+          results: [
+            {
+              tool_result_id: getToolResultId(),
+              type: ToolResultType.other,
+              data: {
+                action_id: queryActionId,
+                parent_action_id: parentActionId,
+                agent_count: agentCount,
+                status: 'dispatched' as const,
+                query,
+                timeout_seconds: timeout ?? 60,
+                responded_agents: responded,
+                row_count: 0,
+                rows: [],
+                error: `Results could not be read: ${pollError ?? 'polling failed'}`,
+                guidance:
+                  'The query was dispatched but reading its results is currently failing. Retry osquery.get_live_query_results with this action_id, or check the Osquery data streams.',
+              },
+            },
+          ],
+        };
+      }
+
       const status =
         pollStatus === 'completed'
           ? 'completed'

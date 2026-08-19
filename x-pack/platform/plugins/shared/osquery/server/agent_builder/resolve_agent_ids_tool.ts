@@ -24,11 +24,11 @@ export const RESOLVE_AGENT_IDS_TOOL_ID = osqueryTool('resolve_agent_ids');
 
 const resolveAgentIdsSchema = z.object({
   hostnames: z
-    .array(z.string())
+    .array(z.string().max(255))
     .min(1)
     .max(50)
     .describe(
-      'Host names to resolve to Elastic Agent IDs (e.g. ["SRV-DC01", "WKSTN-RECV01"]). Max 50 — each hostname issues its own Fleet query.'
+      'Host names to resolve to Elastic Agent IDs (e.g. ["SRV-DC01", "WKSTN-RECV01"]). Max 50 hosts, 255 chars per hostname — each issues its own Fleet query.'
     ),
 });
 
