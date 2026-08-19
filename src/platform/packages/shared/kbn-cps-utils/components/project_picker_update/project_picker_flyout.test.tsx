@@ -126,7 +126,7 @@ describe('ProjectPickerFlyoutContent', () => {
     expect(screen.getByTestId('projectPickerFlyoutApplyButton')).toBeDisabled();
   });
 
-  it('can apply the current routing on mount when opted in', async () => {
+  it('can apply the current routing when canApplyUnchangedProjectRouting is true', async () => {
     const user = userEvent.setup();
     const { onApplyChanges } = renderFlyout({
       canApplyUnchangedProjectRouting: true,
