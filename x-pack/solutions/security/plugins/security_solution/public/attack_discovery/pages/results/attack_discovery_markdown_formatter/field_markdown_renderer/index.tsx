@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { CellActionsRenderer } from '../../../../../common/components/cell_actions/cell_actions_renderer';
-import { getEmptyStringTag } from '../../../../../common/components/empty_value';
+import { DraggableBadge } from '../../../../../common/components/draggables';
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 import { useFlyoutApi } from '../../../../../flyout_v2/use_flyout_api';
 import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry/events/flyout_v2/types';
@@ -19,81 +18,63 @@ import { DEFAULT_ALERTS_INDEX } from '../../../../../../common/constants';
 import { ENTITY_TYPE_BY_FIELD, getFlyoutPanelProps } from './helpers';
 import { useEntityEuidFromAlerts } from './use_entity_euid_from_alerts';
 import { useMarkdownFormatterContext } from '../context';
-import { getAlertIdAriaLabel } from './translations';
+import { getAlertIdChipAriaLabel } from './translations';
 import type { ParsedField } from '../types';
 
 export const ALERTS_INDEX_PATTERN = `${DEFAULT_ALERTS_INDEX}-*` as const;
 
-/** Alert-document `_id` fields whose values open the alert-details flyout when clicked. */
+/** Alert-document `_id` fields whose chips open the alert-details flyout when clicked. */
 const ALERT_ID_FIELDS: ReadonlySet<string> = new Set(['_id', 'kibana.alert.uuid']);
 
 const contextId = 'FieldMarkdownRenderer';
 
 const inlineFieldWrapperCss = css`
-  display: inline-flex;
-  align-items: baseline;
-  vertical-align: baseline;
-`;
+  display: inline-block;
+  vertical-align: middle;
 
-const boldValueCss = (color: string) => css`
-  color: ${color};
-  font-weight: bold;
-
-  &:hover,
-  &:focus-visible {
-    text-decoration: underline;
+  .euiBadge {
+    vertical-align: middle;
   }
 `;
 
-/** Constrains long values (UUIDs, hashes) to a readable width. */
-const truncatedValueCss = (color: string) => css`
-  ${boldValueCss(color)};
+/** Constrains long chip labels (UUIDs, hashes) to a readable width.
+ *  10rem keeps the value theme-relative (scales with the root font size). */
+const chipLabelCss = css`
   display: inline-block;
   max-width: 10rem;
   overflow: hidden;
   text-overflow: ellipsis;
-  vertical-align: text-bottom;
+  vertical-align: middle;
   white-space: nowrap;
 `;
 
-const valueButtonCss = (color: string) => css`
-  ${boldValueCss(color)};
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  font: inherit;
-  font-weight: bold;
-  text-align: start;
-`;
-
-export const FieldMarkdownRenderer = ({ name, value }: ParsedField) => {
+export const FieldMarkdownRenderer = ({ icon, name, value }: ParsedField) => {
   const { disableActions, scopeId, alertIds } = useMarkdownFormatterContext();
   const { openFlyout, openRightPanel } = useExpandableFlyoutApi();
   const { openDocumentFlyoutFromPattern, openHostFlyout, openUserFlyout } = useFlyoutApi();
   const { euiTheme } = useEuiTheme();
   const enableNewFlyout = useIsNewFlyoutEnabled();
 
-  // Detect whether the value is visually truncated so the full-value tooltip is only shown when
-  // needed. This avoids a redundant tooltip for short values that already fit.
+  // Detect whether the chip label is visually truncated so the full-value tooltip is only shown
+  // when needed — avoids a redundant tooltip for short values that already fit in the chip.
   // Re-run whenever `value` or `disableActions` changes: a different value changes the text width,
-  // and a different `disableActions` switches the render path (attaching `fieldValueRef` to a
+  // and a different `disableActions` switches the render path (attaching `chipLabelRef` to a
   // different DOM node), so the measurement needs to be refreshed in both cases.
-  const fieldValueRef = useRef<HTMLSpanElement>(null);
+  const chipLabelRef = useRef<HTMLSpanElement>(null);
   const [isValueTruncated, setIsValueTruncated] = useState(false);
 
   useLayoutEffect(() => {
-    const el = fieldValueRef.current;
+    const el = chipLabelRef.current;
     setIsValueTruncated(el != null && el.scrollWidth > el.clientWidth);
-  }, [disableActions, name, value]);
+  }, [value, disableActions]);
 
   const stringValue = typeof value === 'string' ? value : undefined;
 
   // Build a Set for O(1) membership checks — alertIds may have O(100) entries and this component
-  // renders once per field value in the markdown, so a linear `includes` scan adds up.
+  // renders once per chip in the markdown, so a linear `includes` scan adds up.
   const alertIdSet = useMemo(() => new Set(alertIds ?? []), [alertIds]);
 
-  // Alert ids are clickable only when the value is a known alert id for this attack.
+  // Alert-id chips are clickable only when the value is a known alert id for this attack.
   const isClickableAlertId =
     ALERT_ID_FIELDS.has(name) &&
     !disableActions &&
@@ -159,12 +140,15 @@ export const FieldMarkdownRenderer = ({ name, value }: ParsedField) => {
   const entityButton: React.ReactElement | null = useMemo(
     () =>
       flyoutPanelProps != null ? (
-        <button
-          css={valueButtonCss(euiTheme.colors.textParagraph)}
+        <EuiButtonEmpty
+          css={css`
+            font-size: ${euiTheme.font.scale.s}rem;
+          `}
           data-test-subj="entityButton"
-          disabled={isLoading}
+          flush="both"
+          isDisabled={isLoading}
           onClick={onEntityClick}
-          type="button"
+          size="xs"
         >
           {value}
           {isLoading && (
@@ -175,16 +159,9 @@ export const FieldMarkdownRenderer = ({ name, value }: ParsedField) => {
               `}
             />
           )}
-        </button>
+        </EuiButtonEmpty>
       ) : null,
-    [
-      euiTheme.colors.textParagraph,
-      euiTheme.size.xs,
-      flyoutPanelProps,
-      isLoading,
-      onEntityClick,
-      value,
-    ]
+    [euiTheme.font.scale.s, euiTheme.size.xs, flyoutPanelProps, isLoading, onEntityClick, value]
   );
 
   if (disableActions) {
@@ -195,14 +172,16 @@ export const FieldMarkdownRenderer = ({ name, value }: ParsedField) => {
           data-test-subj="fieldMarkdownRendererToolTip"
           position="top"
         >
-          <span
-            ref={fieldValueRef}
-            css={truncatedValueCss(euiTheme.colors.textParagraph)}
-            data-test-subj="disabledActionsText"
+          <EuiBadge
+            color="hollow"
+            data-test-subj="disabledActionsBadge"
+            iconType={icon}
             tabIndex={0}
           >
-            {value === '' ? getEmptyStringTag() : value}
-          </span>
+            <span ref={chipLabelRef} css={chipLabelCss}>
+              {value}
+            </span>
+          </EuiBadge>
         </EuiToolTip>
       </span>
     );
@@ -211,35 +190,46 @@ export const FieldMarkdownRenderer = ({ name, value }: ParsedField) => {
   if (isClickableAlertId && stringValue != null) {
     return (
       <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
-        <CellActionsRenderer
+        <DraggableBadge
+          contextId="fieldMarkdownRenderer"
           scopeId={scopeId}
+          eventId=""
+          iconType={icon}
+          isAggregatable={false}
           field={name}
           tooltipContent={isValueTruncated ? `${name}: ${stringValue}` : undefined}
           value={value}
         >
-          <button
-            aria-label={getAlertIdAriaLabel(stringValue)}
-            css={valueButtonCss(euiTheme.colors.textParagraph)}
+          <EuiButtonEmpty
+            aria-label={getAlertIdChipAriaLabel(stringValue)}
+            css={css`
+              font-size: ${euiTheme.font.scale.s}rem;
+            `}
             data-test-subj="alertIdButton"
+            flush="both"
             onClick={onAlertIdClick}
-            type="button"
+            size="xs"
           >
-            <span ref={fieldValueRef} css={truncatedValueCss(euiTheme.colors.textParagraph)}>
+            <span ref={chipLabelRef} css={chipLabelCss}>
               {stringValue}
             </span>
-          </button>
-        </CellActionsRenderer>
+          </EuiButtonEmpty>
+        </DraggableBadge>
       </span>
     );
   }
 
   return (
     <span css={inlineFieldWrapperCss} data-test-subj="fieldMarkdownRendererInlineWrapper">
-      <CellActionsRenderer
+      <DraggableBadge
+        contextId="fieldMarkdownRenderer"
         scopeId={scopeId}
+        eventId=""
+        iconType={icon}
+        isAggregatable={false}
         field={name}
         tooltipContent={
-          // When entityButton is rendered, fieldValueRef is never attached (entity names are
+          // When entityButton is rendered, chipLabelRef is never attached (entity names are
           // shown untruncated), so isValueTruncated is always false for entity fields.
           // Guard explicitly so the intent is clear and the null/empty checks are not dead code.
           entityButton == null && isValueTruncated && value != null && value !== ''
@@ -248,18 +238,15 @@ export const FieldMarkdownRenderer = ({ name, value }: ParsedField) => {
         }
         value={value}
       >
-        {/* Entity buttons render the full value; all other values are constrained to 10rem. */}
+        {/* Entity buttons (host/user) render the full value untruncated — entity names are short
+            and meaningful context. For all other fields the label is constrained to chipLabelCss. */}
         {entityButton ??
-          (value != null ? (
-            <span
-              ref={fieldValueRef}
-              css={truncatedValueCss(euiTheme.colors.textParagraph)}
-              data-test-subj="fieldMarkdownRendererValue"
-            >
-              {value === '' ? getEmptyStringTag() : value}
+          (value !== '' && value != null ? (
+            <span ref={chipLabelRef} css={chipLabelCss}>
+              {value}
             </span>
           ) : undefined)}
-      </CellActionsRenderer>
+      </DraggableBadge>
     </span>
   );
 };

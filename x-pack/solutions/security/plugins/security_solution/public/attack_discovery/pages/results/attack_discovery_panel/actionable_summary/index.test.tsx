@@ -117,14 +117,14 @@ describe('ActionableSummary', () => {
       );
     });
 
-    it('renders disabled text with the original hostname value', () => {
-      expect(screen.getAllByTestId('disabledActionsText')[0]).toHaveTextContent(
+    it('renders a disabled badge with the original hostname value', () => {
+      expect(screen.getAllByTestId('disabledActionsBadge')[0]).toHaveTextContent(
         '5e454c38-439c-4096-8478-0a55511c76e3'
       );
     });
 
-    it('renders disabled text with the original username value', () => {
-      expect(screen.getAllByTestId('disabledActionsText')[1]).toHaveTextContent(
+    it('renders a disabled badge with the original username value', () => {
+      expect(screen.getAllByTestId('disabledActionsBadge')[1]).toHaveTextContent(
         '3bdc7952-a334-4d95-8092-cd176546e18a'
       );
     });
@@ -174,12 +174,12 @@ describe('ActionableSummary', () => {
       );
     });
 
-    it('renders disabled text with the hostname value', () => {
-      expect(screen.getAllByTestId('disabledActionsText')[0]).toHaveTextContent('foo.hostname');
+    it('renders a disabled badge with the hostname value', () => {
+      expect(screen.getAllByTestId('disabledActionsBadge')[0]).toHaveTextContent('foo.hostname');
     });
 
-    it('renders disabled text with the username value', () => {
-      expect(screen.getAllByTestId('disabledActionsText')[1]).toHaveTextContent('bar.username');
+    it('renders a disabled badge with the username value', () => {
+      expect(screen.getAllByTestId('disabledActionsBadge')[1]).toHaveTextContent('bar.username');
     });
   });
 });
