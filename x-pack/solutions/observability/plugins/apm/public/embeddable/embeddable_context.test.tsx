@@ -9,7 +9,7 @@ import React, { useContext } from 'react';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { useLocation } from 'react-router-dom-v5-compat';
+import { useLocation } from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { ApmEmbeddableContext } from './embeddable_context';
@@ -336,8 +336,8 @@ describe('ApmEmbeddableContext', () => {
     });
   });
 
-  describe('nested v6 router context', () => {
-    it('renders without crashing when mounted inside a page that already has a v6 router context (CompatRouter)', () => {
+  describe('nested router context', () => {
+    it('renders without crashing when mounted inside a page that already has a router context', () => {
       const outerHistory = createMemoryHistory();
 
       render(
