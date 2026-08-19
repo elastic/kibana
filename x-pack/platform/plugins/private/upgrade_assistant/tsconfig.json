@@ -46,7 +46,8 @@
     "@kbn/upgrade-assistant-pkg-common",
     "@kbn/reindex-service-plugin",
     "@kbn/core-doc-links-browser-mocks",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/ui-callout"
   ],
   "exclude": [
     "target/**/*",

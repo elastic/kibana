@@ -434,7 +434,7 @@ describe('ConversationClient', () => {
       );
     });
 
-    it('throws a not found error when the id already exists', async () => {
+    it('throws an already-exists error when the id already exists', async () => {
       const conflictError = Object.assign(new Error('version conflict'), { statusCode: 409 });
       mockEsClient.index.mockRejectedValueOnce(conflictError);
 
@@ -446,7 +446,7 @@ describe('ConversationClient', () => {
           rounds: [],
         })
       ).rejects.toMatchObject({
-        message: 'Conversation conversation-1 not found',
+        message: 'Conversation conversation-1 already exists',
       });
     });
 
