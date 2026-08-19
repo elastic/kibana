@@ -5,12 +5,14 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 # Dual-cache agent images bake package managers under:
-#   ~/.kibana/caches/yarn/{.yarn-local-mirror,node_modules}
-#   ~/.kibana/caches/pnpm/{pnpm-store,node_modules,Cypress}
+#   ~/.cache/kibana/yarn/{.yarn-local-mirror,node_modules}
+#   ~/.cache/kibana/pnpm/{pnpm-store,node_modules,Cypress}
 # Older images still use the flat ~/.kibana/{.yarn-local-mirror,node_modules[,pnpm-store,Cypress]} layout.
 # Detect the checkout's package manager so the same bootstrap (and VM image) works on
 # main (pnpm) and legacy release branches (yarn).
-CACHES_ROOT="${HOME}/.kibana/caches"
+CACHES_ROOT="${HOME}/.cache/kibana"
+mkdir -p "${CACHES_ROOT}"
+
 YARN_IMAGE_CACHE="${CACHES_ROOT}/yarn"
 PNPM_IMAGE_CACHE="${CACHES_ROOT}/pnpm"
 LEGACY_IMAGE_CACHE="${HOME}/.kibana"
@@ -100,9 +102,9 @@ if ! ("${BOOTSTRAP_CMD[@]}" "${BOOTSTRAP_PARAMS[@]}"); then
 
   echo "--- ${BOOTSTRAP_LABEL}, attempt 2"
   if [[ "$USE_PNPM" == true ]]; then
-    pnpm kbn bootstrap --force-install || pnpm kbn bootstrap
+    pnpm kbn bootstrap --force-install
   else
-    yarn kbn bootstrap --force-install || yarn kbn bootstrap
+    yarn kbn bootstrap --force-install
   fi
 fi
 
