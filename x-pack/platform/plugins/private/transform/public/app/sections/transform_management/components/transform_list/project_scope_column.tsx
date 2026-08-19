@@ -119,6 +119,10 @@ const CustomProjectScopeLabel = ({ cpsManager, projectRouting }: ProjectScopeCol
     return unknownProjectScopeLabel;
   }
 
+  if (originProject && linkedProjects.length === 0) {
+    return originProjectLabel;
+  }
+
   return `${projectCount}/${cpsManager.getTotalProjectCount()}`;
 };
 
