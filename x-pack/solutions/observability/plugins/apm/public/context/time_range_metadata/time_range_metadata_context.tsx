@@ -46,14 +46,31 @@ export function ApmTimeRangeMetadataContextProvider({ children }: { children?: R
     routePath.startsWith('/dependencies/operation') ||
     routePath.startsWith('/dependencies/operations');
 
+  const { data: serviceGroupData } = useFetcher(
+    (callApmApi) => {
+      if (serviceGroupId) {
+        return callApmApi('GET /internal/apm/service-group', {
+          params: { query: { serviceGroup: serviceGroupId } },
+        });
+      }
+    },
+    [serviceGroupId]
+  );
+
+  const serviceGroupKuery = serviceGroupData?.serviceGroup.kuery;
+  const effectiveKuery = serviceGroupKuery
+    ? kuery
+      ? `(${kuery}) AND (${serviceGroupKuery})`
+      : serviceGroupKuery
+    : kuery;
+
   return (
     <TimeRangeMetadataContextProvider
       uiSettings={uiSettings}
       useSpanName={isOperationView}
       start={start}
       end={end}
-      kuery={kuery}
-      serviceGroupId={serviceGroupId}
+      kuery={effectiveKuery}
     >
       {children}
     </TimeRangeMetadataContextProvider>
@@ -67,7 +84,6 @@ export function TimeRangeMetadataContextProvider({
   start,
   end,
   kuery,
-  serviceGroupId,
 }: {
   children?: React.ReactNode;
   uiSettings: IUiSettingsClient;
@@ -75,7 +91,6 @@ export function TimeRangeMetadataContextProvider({
   start: string;
   end: string;
   kuery: string;
-  serviceGroupId?: string;
 }) {
   const fetcherResult = useFetcher(
     (callApmApi) => {
@@ -86,12 +101,11 @@ export function TimeRangeMetadataContextProvider({
             end,
             kuery,
             useSpanName,
-            serviceGroupId,
           },
         },
       });
     },
-    [start, end, kuery, useSpanName, serviceGroupId]
+    [start, end, kuery, useSpanName]
   );
 
   return (

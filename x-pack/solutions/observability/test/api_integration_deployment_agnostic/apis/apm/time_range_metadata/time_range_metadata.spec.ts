@@ -53,24 +53,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     };
   }
 
-  async function createServiceGroup({ groupName, kuery }: { groupName: string; kuery: string }) {
-    const response = await apmApiClient.writeUser({
-      endpoint: 'POST /internal/apm/service-group',
-      params: {
-        query: {},
-        body: { groupName, kuery },
-      },
-    });
-    return response.body.id as string;
-  }
-
-  async function deleteServiceGroup(serviceGroupId: string) {
-    await apmApiClient.writeUser({
-      endpoint: 'DELETE /internal/apm/service-group',
-      params: { query: { serviceGroupId } },
-    });
-  }
-
   describe('Time range metadata', () => {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     describe('without data', () => {
@@ -509,31 +491,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('when a service group is specified', () => {
-        let matchingGroupId: string;
-        let nonexistentGroupId: string;
-
-        before(async () => {
-          matchingGroupId = await createServiceGroup({
-            groupName: 'test-matching-service',
-            kuery: 'service.name: "my-service"',
-          });
-          nonexistentGroupId = await createServiceGroup({
-            groupName: 'test-nonexistent-service',
-            kuery: 'service.name: "nonexistent-service-xyz"',
-          });
-        });
-
-        after(async () => {
-          await deleteServiceGroup(matchingGroupId);
-          await deleteServiceGroup(nonexistentGroupId);
-        });
-
-        it('returns metric sources with docs when the service group kuery matches existing data', async () => {
+      describe('when a kuery filter is specified', () => {
+        it('returns metric sources with docs when the kuery matches existing data', async () => {
           const response = await getTimeRangeMetadata({
             start,
             end,
-            serviceGroupId: matchingGroupId,
+            kuery: 'service.name: "my-service"',
           });
           expect(
             response.sources.filter(
@@ -542,11 +505,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           ).to.be.greaterThan(0);
         });
 
-        it('returns no metric sources with docs when the service group kuery matches nothing', async () => {
+        it('returns no metric sources with docs when the kuery matches nothing', async () => {
           const response = await getTimeRangeMetadata({
             start,
             end,
-            serviceGroupId: nonexistentGroupId,
+            kuery: 'service.name: "nonexistent-service-xyz"',
           });
           expect(
             response.sources.filter(

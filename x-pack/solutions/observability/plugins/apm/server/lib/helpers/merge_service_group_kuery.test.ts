@@ -5,27 +5,7 @@
  * 2.0.
  */
 
-import { mergeServiceGroupKuery, combineServiceGroupKueries } from './merge_service_group_kuery';
-
-describe('mergeServiceGroupKuery', () => {
-  it('returns user kuery when service group kuery is undefined', () => {
-    expect(mergeServiceGroupKuery('service.name: foo', undefined)).toBe('service.name: foo');
-  });
-
-  it('returns user kuery when service group kuery is empty', () => {
-    expect(mergeServiceGroupKuery('service.name: foo', '')).toBe('service.name: foo');
-  });
-
-  it('returns service group kuery when user kuery is empty', () => {
-    expect(mergeServiceGroupKuery('', 'labels.env: production')).toBe('labels.env: production');
-  });
-
-  it('combines both kueries with AND when both are non-empty', () => {
-    expect(mergeServiceGroupKuery('service.name: foo', 'labels.env: production')).toBe(
-      '(service.name: foo) AND (labels.env: production)'
-    );
-  });
-});
+import { combineServiceGroupKueries } from './merge_service_group_kuery';
 
 describe('combineServiceGroupKueries', () => {
   it('returns empty string when there are no service groups', () => {
