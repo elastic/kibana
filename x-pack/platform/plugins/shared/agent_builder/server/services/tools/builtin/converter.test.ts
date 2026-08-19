@@ -140,7 +140,7 @@ describe('convertTool (builtin)', () => {
     expect(result.annotations).toEqual(annotations);
   });
 
-  it('propagates default annotations from builtin tool', () => {
+  it('propagates annotations from builtin tool', () => {
     const tool = makeBuiltinRegistration();
     const result = convertTool({
       tool,
