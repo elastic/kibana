@@ -18,6 +18,7 @@ let mockStoreWidth = 0;
 let mockStoreHeight = 0;
 let mockNodesInitialized = false;
 let mockCapturedOnInit: ((instance: unknown) => void) | undefined;
+let mockCapturedFlowProps: Record<string, unknown> = {};
 
 // A minimal two-node layout (trigger + one step). graphBounds derived from this:
 // minX=0, minY=0, maxX=200, maxY=214 => centerX=100.
@@ -41,11 +42,13 @@ jest.mock('@xyflow/react', () => ({
   ReactFlow: ({
     onInit,
     children,
+    ...rest
   }: {
     onInit?: (i: unknown) => void;
     children?: React.ReactNode;
   }) => {
     mockCapturedOnInit = onInit;
+    mockCapturedFlowProps = rest;
     return <div data-test-subj="reactflow-mock">{children}</div>;
   },
   Background: () => null,
@@ -289,5 +292,30 @@ describe('WorkflowGraphCanvas Fit to view button', () => {
       { x: 0, y: 0, width: 200, height: 214 },
       { duration: 200, padding: 0.08 }
     );
+  });
+});
+
+describe('WorkflowGraphCanvas preview mode', () => {
+  beforeEach(() => {
+    mockCapturedFlowProps = {};
+  });
+
+  // React Flow's `preventScrolling` defaults to true, which calls
+  // `preventDefault` on wheel events over the pane. The inline preview sits
+  // inside scrollable chat content, so it must let the wheel reach the page.
+  it('lets wheel events through to the page in preview mode', () => {
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} previewMode />);
+
+    expect(mockCapturedFlowProps.preventScrolling).toBe(false);
+    expect(mockCapturedFlowProps.panOnScroll).toBe(false);
+    expect(mockCapturedFlowProps.zoomOnScroll).toBe(false);
+    expect(mockCapturedFlowProps.zoomOnPinch).toBe(false);
+  });
+
+  it('keeps swallowing wheel events in the interactive editor', () => {
+    render(<WorkflowGraphCanvasWithoutProvider {...baseProps} />);
+
+    expect(mockCapturedFlowProps.preventScrolling).toBe(true);
+    expect(mockCapturedFlowProps.panOnScroll).toBe(true);
   });
 });

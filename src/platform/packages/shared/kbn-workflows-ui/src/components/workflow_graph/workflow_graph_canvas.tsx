@@ -693,6 +693,11 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
               zoomOnScroll={false}
               zoomOnPinch={!previewMode}
               zoomOnDoubleClick={false}
+              // React Flow calls `preventDefault` on wheel events over the pane
+              // by default, which swallows page scroll whenever the cursor sits
+              // on the graph. The preview is a static strip inside scrollable
+              // chat content, so the wheel must reach the page.
+              preventScrolling={!previewMode}
               translateExtent={previewMode ? undefined : translateExtent}
               minZoom={0.1}
             >
