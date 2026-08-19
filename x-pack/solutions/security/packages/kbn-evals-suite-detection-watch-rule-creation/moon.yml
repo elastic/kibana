@@ -22,7 +22,6 @@ dependsOn:
   - '@kbn/esql-language'
   - '@kbn/scout'
   - '@kbn/tooling-log'
-  - '@kbn/agent-builder-common'
   - '@kbn/workflows'
   - '@kbn/core'
   - '@kbn/zod'
