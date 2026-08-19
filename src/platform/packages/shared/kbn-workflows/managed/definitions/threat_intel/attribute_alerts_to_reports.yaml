@@ -1,10 +1,10 @@
 version: "1"
-# Every 1h: count Indicator Match and technique-overlap alerts per report (last 7d).
-# Driver `size: 100` per pass; hourly cadence drains the backlog. Layer 1 counts
-# come from one nested terms agg; layer 2 still needs per-report terms_lookup.
-# Reports and alerts are scoped to `workflow.spaceId`.
+# Every 1h: for recently enriched threat reports, count how many Detection Engine
+# alerts in the last 7d tie back to that report, then write the totals onto the doc.
+# IOC promotion drives Indicator Match hits; extracted ATT&CK techniques drive overlap
+# with other rules. Scoped to the workflow's Kibana space; up to 100 reports per pass.
 name: Attribute alerts to reports
-description: Count Detection Engine hits per report (indicator match and technique overlap)
+description: Count environment alerts linked to each threat report and store totals on the report
 tags:
   - threat-intel
 enabled: true
