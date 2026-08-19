@@ -6,15 +6,16 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import type { WorkflowStatus } from '../../common/workflows/triggers/constants';
 
 export interface PreviousStatus {
   readonly id: string;
-  readonly previousStatus: string;
+  readonly previousStatus: WorkflowStatus;
 }
 
 export interface AlertStatusChangedPayload {
   readonly alertIds: string[];
-  readonly status: string;
+  readonly status: WorkflowStatus;
   readonly previousStatuses: PreviousStatus[];
   readonly truncated: boolean;
 }
@@ -33,7 +34,7 @@ export interface AlertAssigneesChangedPayload {
 
 export interface AttackStatusChangedPayload {
   readonly attackIds: string[];
-  readonly status: string;
+  readonly status: WorkflowStatus;
   readonly previousStatuses: PreviousStatus[];
 }
 

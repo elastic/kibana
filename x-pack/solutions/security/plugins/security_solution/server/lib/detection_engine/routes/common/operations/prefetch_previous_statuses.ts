@@ -8,19 +8,26 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
-import { MAX_ALERTS_PER_TRIGGER } from '../../../../../../common/workflows/triggers';
+import {
+  MAX_ALERTS_PER_TRIGGER,
+  WORKFLOW_STATUS_VALUES,
+} from '../../../../../../common/workflows/triggers';
+import type { WorkflowStatus } from '../../../../../../common/workflows/triggers';
 
 export interface PreviousStatus {
   id: string;
-  previousStatus: string;
+  previousStatus: WorkflowStatus;
 }
 
 const resolveIndex = (index: string | string[]): string =>
   Array.isArray(index) ? index.join(',') : index;
 
-export const extractWorkflowStatus = (source: unknown): string => {
+const isWorkflowStatus = (v: unknown): v is WorkflowStatus =>
+  typeof v === 'string' && (WORKFLOW_STATUS_VALUES as readonly string[]).includes(v);
+
+export const extractWorkflowStatus = (source: unknown): WorkflowStatus | undefined => {
   const v = (source as Record<string, unknown> | null | undefined)?.[ALERT_WORKFLOW_STATUS];
-  return typeof v === 'string' ? v : 'open';
+  return isWorkflowStatus(v) ? v : undefined;
 };
 
 export const prefetchPreviousStatusesByIds = async (
@@ -37,7 +44,10 @@ export const prefetchPreviousStatusesByIds = async (
   const idToIndex = new Map<string, string>();
   for (const doc of mgetResponse.docs) {
     if ('found' in doc && doc.found && doc._id != null) {
-      previousStatuses.push({ id: doc._id, previousStatus: extractWorkflowStatus(doc._source) });
+      const ps = extractWorkflowStatus(doc._source);
+      if (ps !== undefined) {
+        previousStatuses.push({ id: doc._id, previousStatus: ps });
+      }
       if (doc._index != null) {
         idToIndex.set(doc._id, doc._index);
       }
@@ -77,7 +87,10 @@ export const prefetchPreviousStatusesByQuery = async (
   for (const hit of searchResponse.hits.hits) {
     if (hit._id != null) {
       ids.push(hit._id);
-      previousStatuses.push({ id: hit._id, previousStatus: extractWorkflowStatus(hit._source) });
+      const ps = extractWorkflowStatus(hit._source);
+      if (ps !== undefined) {
+        previousStatuses.push({ id: hit._id, previousStatus: ps });
+      }
       if (hit._index != null) {
         idToIndex.set(hit._id, hit._index);
       }

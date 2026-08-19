@@ -40,24 +40,31 @@ const makeSearchResponse = (
 });
 
 describe('extractWorkflowStatus', () => {
-  it('returns "open" for null source', () => {
-    expect(extractWorkflowStatus(null)).toBe('open');
+  it('returns undefined for null source', () => {
+    expect(extractWorkflowStatus(null)).toBeUndefined();
   });
 
-  it('returns "open" for undefined source', () => {
-    expect(extractWorkflowStatus(undefined)).toBe('open');
+  it('returns undefined for undefined source', () => {
+    expect(extractWorkflowStatus(undefined)).toBeUndefined();
   });
 
-  it('returns "open" when the status field is missing', () => {
-    expect(extractWorkflowStatus({ other: 'field' })).toBe('open');
+  it('returns undefined when the status field is missing', () => {
+    expect(extractWorkflowStatus({ other: 'field' })).toBeUndefined();
   });
 
-  it('returns "open" when the status field is not a string', () => {
-    expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 42 })).toBe('open');
+  it('returns undefined when the status field is not a string', () => {
+    expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 42 })).toBeUndefined();
   });
 
-  it('returns the status string when present', () => {
+  it('returns undefined when the status is a string not in the enum', () => {
+    expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'triaged' })).toBeUndefined();
+  });
+
+  it('returns the status when it is a valid WorkflowStatus value', () => {
     expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'acknowledged' })).toBe('acknowledged');
+    expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'open' })).toBe('open');
+    expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'in-progress' })).toBe('in-progress');
+    expect(extractWorkflowStatus({ [ALERT_WORKFLOW_STATUS]: 'closed' })).toBe('closed');
   });
 });
 
@@ -142,7 +149,7 @@ describe('prefetchPreviousStatusesByIds', () => {
     expect(previousStatuses).toEqual([{ id: 'id1', previousStatus: 'open' }]);
   });
 
-  it('defaults previousStatus to "open" when source status is not a string', async () => {
+  it('omits the previousStatus entry when source status is not a valid WorkflowStatus', async () => {
     esClient.mget.mockResolvedValue({
       docs: [
         {
@@ -157,7 +164,7 @@ describe('prefetchPreviousStatusesByIds', () => {
 
     const { previousStatuses } = await prefetchPreviousStatusesByIds(esClient, 'index', ['id1']);
 
-    expect(previousStatuses).toEqual([{ id: 'id1', previousStatus: 'open' }]);
+    expect(previousStatuses).toEqual([]);
   });
 
   it('calls mget with a string index as-is', async () => {

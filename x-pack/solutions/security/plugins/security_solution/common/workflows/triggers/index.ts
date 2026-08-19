@@ -9,7 +9,9 @@ export {
   MAX_ALERTS_PER_TRIGGER,
   MAX_TAGS_PER_OPERATION,
   MAX_ASSIGNEES_PER_OPERATION,
+  WORKFLOW_STATUS_VALUES,
 } from './constants';
+export type { WorkflowStatus } from './constants';
 export { AlertStatusChangedTriggerId, alertStatusChangedTriggerDef } from './alert_status_changed';
 export { AlertTagsChangedTriggerId, alertTagsChangedTriggerDef } from './alert_tags_changed';
 export {

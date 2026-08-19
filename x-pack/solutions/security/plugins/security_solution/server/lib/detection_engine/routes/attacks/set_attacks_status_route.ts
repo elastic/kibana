@@ -169,12 +169,11 @@ export const setAttacksStatusRoute = (
               .map((hit) => hit._id)
               .filter((id): id is string => id != null);
 
-            const attackPreviousStatuses = attackDocs.hits.hits
-              .filter((hit) => hit._id != null)
-              .map((hit) => ({
-                id: hit._id as string,
-                previousStatus: extractWorkflowStatus(hit._source),
-              }));
+            const attackPreviousStatuses = attackDocs.hits.hits.flatMap((hit) => {
+              if (hit._id == null) return [];
+              const ps = extractWorkflowStatus(hit._source);
+              return ps !== undefined ? [{ id: hit._id, previousStatus: ps }] : [];
+            });
 
             const relatedAlertIds = attackDocs.hits.hits.flatMap((hit) => {
               const source = hit._source as Record<string, unknown> | undefined;

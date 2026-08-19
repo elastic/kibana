@@ -17,6 +17,9 @@ export const MAX_ASSIGNEES_PER_OPERATION = 100;
 
 export const workflowStatusEnum = z.enum(['open', 'acknowledged', 'in-progress', 'closed']);
 
+export type WorkflowStatus = z.infer<typeof workflowStatusEnum>;
+export const WORKFLOW_STATUS_VALUES = workflowStatusEnum.options;
+
 export const previousStatusSchema = z.object({
   id: z.string().min(1).max(MAX_ID_LENGTH),
   previousStatus: workflowStatusEnum,
