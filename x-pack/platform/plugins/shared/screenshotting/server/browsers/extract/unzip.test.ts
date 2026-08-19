@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import mockFs from 'mock-fs';
@@ -49,7 +49,8 @@ describe('unzip', () => {
       '/output': {},
     });
     await expect(unzip('/path_traversal.zip', '/output')).rejects.toBeInstanceOf(ExtractError);
-    await expect(readFile('/escaped.txt')).rejects.toThrow();
+    expect(existsSync('/escaped.txt')).toBe(false);
+    expect(existsSync('/output/escaped.txt')).toBe(false);
   });
 
   it('rejects zip symlinks whose target lands outside the origin path', async () => {
@@ -63,7 +64,8 @@ describe('unzip', () => {
     await expect(unzip('/symlink_escape.zip', '/output')).rejects.toThrowError(
       new ExtractError(new Error(errorMessage))
     );
-    await expect(readFile('/escaped.txt')).rejects.toThrow();
+    expect(existsSync('/escaped.txt')).toBe(false);
+    expect(existsSync('/output/escaped.txt')).toBe(false);
   });
 
   it('extracts zip symlinks whose target stays inside the origin path', async () => {
