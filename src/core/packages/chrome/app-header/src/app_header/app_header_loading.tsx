@@ -34,8 +34,9 @@ export interface AppHeaderLoadingProps {
   back?: AppHeaderBack | AppHeaderBack[];
   menu?: AppHeaderLoadingMenu;
   /**
-   * Defaults to `true`. Set to `false` only when the surrounding full-page layout
-   * provides its own sticky-header mechanism for the correct scrolling container.
+   * Uses CSS `position: sticky` to keep title and back visible while the page scrolls. Defaults to
+   * `true`; set `false` only when the surrounding layout already pins the header in the correct
+   * scroll container. A header-height wrapper prevents CSS sticky.
    */
   sticky?: boolean;
   /**
