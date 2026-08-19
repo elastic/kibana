@@ -198,7 +198,7 @@ describe('migrateAgentToolIds', () => {
 
     await migrateAgentToolIds({ storage, logger });
 
-    expect((client.bulk as jest.Mock)).not.toHaveBeenCalled();
+    expect(client.bulk as jest.Mock).not.toHaveBeenCalled();
   });
 
   it('reads the old tool ID from the legacy configuration field', async () => {
@@ -231,9 +231,7 @@ describe('migrateAgentToolIds', () => {
     await migrateAgentToolIds({ storage, logger });
 
     expect((client.search as jest.Mock).mock.calls).toHaveLength(2);
-    const totalBulkOps = (client.bulk as jest.Mock).mock.calls.flatMap(
-      ([req]) => req.operations
-    );
+    const totalBulkOps = (client.bulk as jest.Mock).mock.calls.flatMap(([req]) => req.operations);
     expect(totalBulkOps).toHaveLength(2);
   });
 
@@ -247,7 +245,9 @@ describe('migrateAgentToolIds', () => {
     const ops = (client.bulk as jest.Mock).mock.calls[0][0].operations;
     const toolIds = (ops[0].index.document.config ?? ops[0].index.document.configuration).tools[0]
       .tool_ids;
-    expect(toolIds.filter((id: string) => id === 'platform.core.cases.get_attachments')).toHaveLength(1);
+    expect(
+      toolIds.filter((id: string) => id === 'platform.core.cases.get_attachments')
+    ).toHaveLength(1);
   });
 });
 
@@ -276,7 +276,7 @@ describe('migrateSkillToolIds', () => {
 
     await migrateSkillToolIds({ storage, logger });
 
-    expect((client.bulk as jest.Mock)).not.toHaveBeenCalled();
+    expect(client.bulk as jest.Mock).not.toHaveBeenCalled();
   });
 
   it('paginates across multiple pages', async () => {
@@ -293,9 +293,7 @@ describe('migrateSkillToolIds', () => {
     await migrateSkillToolIds({ storage, logger });
 
     expect((client.search as jest.Mock).mock.calls).toHaveLength(2);
-    const totalBulkOps = (client.bulk as jest.Mock).mock.calls.flatMap(
-      ([req]) => req.operations
-    );
+    const totalBulkOps = (client.bulk as jest.Mock).mock.calls.flatMap(([req]) => req.operations);
     expect(totalBulkOps).toHaveLength(2);
   });
 });
