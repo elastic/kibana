@@ -148,9 +148,6 @@ describe('conversation_handoff', () => {
   });
 
   describe('carried attachment id', () => {
-    // The destination editor reuses this id so the conversation keeps one
-    // workflow attachment instead of gaining a second one on save.
-    // https://github.com/elastic/security-team/issues/18821
     it('records the create session attachment id against the saved workflow', () => {
       setLastCreateAttachmentId('draft-uuid');
       carryConversationToWorkflow('workflow-a');

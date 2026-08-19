@@ -42,9 +42,8 @@ export const consumeSidebarRestoreFor = (workflowId: string): boolean => {
   return true;
 };
 
-// Attachment id of the create session that produced a saved workflow, keyed by
-// that workflow id. The destination editor reuses it so the conversation keeps
-// one workflow attachment instead of gaining a second one on save.
+// Create-session attachment id, keyed by the workflow it was saved as. The
+// destination editor reuses it instead of starting a second attachment.
 const carriedAttachmentIds = new Map<string, string>();
 
 export const getCarriedAttachmentId = (workflowId: string): string | undefined =>

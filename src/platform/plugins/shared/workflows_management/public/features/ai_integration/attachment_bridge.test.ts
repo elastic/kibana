@@ -455,10 +455,8 @@ describe('AttachmentBridge: onProposalReceived workflowId', () => {
 });
 
 describe('AttachmentBridge: resumed conversation', () => {
-  // The server only emits `conversation_id_set` when it creates a new
-  // conversation. On a resumed one the bridge must still scope itself, using
-  // the active conversation published by the chat UI.
-  // https://github.com/elastic/security-team/issues/19002
+  // `conversation_id_set` only fires for newly created conversations, so a
+  // resumed one scopes itself from the active conversation instead.
   const setup = (activeConversation: ActiveConversation | null) => {
     const chat$ = new Subject<BrowserChatEvent>();
     const activeConversation$ = new BehaviorSubject<ActiveConversation | null>(activeConversation);
@@ -524,8 +522,7 @@ describe('AttachmentBridge: resumed conversation', () => {
   });
 
   it('keeps the current scope when the chat UI reports a new, id-less conversation', () => {
-    // A new conversation emits `{ id: undefined }` before the server mints an
-    // id. That must not tear down the scope of the conversation in flight.
+    // A new conversation emits `{ id: undefined }` before the server mints one.
     const { bridge, perConversation$, activeConversation$, manager } = setup({
       id: 'conv-restored',
     });

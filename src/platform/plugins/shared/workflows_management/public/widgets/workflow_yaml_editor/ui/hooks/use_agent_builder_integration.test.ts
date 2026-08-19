@@ -10,6 +10,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
+import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
@@ -53,9 +54,8 @@ jest.mock('../../../../features/ai_integration', () => ({
   setSidebarOpen: jest.fn(),
   consumeSidebarRestoreFor: jest.fn().mockReturnValue(false),
   getCarriedAttachmentId: jest.fn().mockReturnValue(undefined),
-  findLinkedWorkflowAttachmentId: jest.requireActual('../../../../features/ai_integration')
-    .findLinkedWorkflowAttachmentId,
-  needsOriginLink: jest.requireActual('../../../../features/ai_integration').needsOriginLink,
+  findLinkedWorkflowAttachment: jest.requireActual('../../../../features/ai_integration')
+    .findLinkedWorkflowAttachment,
 }));
 
 type AiIntegrationModule = typeof import('../../../../features/ai_integration');
@@ -1117,10 +1117,6 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('proposal telemetry conversation id', () => {
-    // The server only emits `conversation_id_set` for newly created
-    // conversations, so a resumed one must take its id from the active
-    // conversation published by the chat UI.
-    // https://github.com/elastic/security-team/issues/19002
     const getOnProposalReceived = () => {
       const bridge = mockAttachmentBridge.mock.results.at(-1)?.value;
       return bridge.start.mock.calls.at(-1)[4].onProposalReceived;
@@ -1152,19 +1148,23 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('attachment linking across the first save', () => {
-    // The editor mints its attachment id from the route: a uuid on
-    // /workflows/create, the workflow id once saved. Syncing under the new id
-    // adds a second workflow.yaml attachment to the same conversation.
-    // https://github.com/elastic/security-team/issues/18821
+    // The editor's own attachment id changes on save, so syncing under it adds
+    // a second workflow.yaml attachment to the same conversation.
     const DRAFT_ID = 'draft-uuid';
 
-    const workflowAttachment = (id: string, origin?: string) =>
+    const workflowAttachment = (id: string, origin?: string): VersionedAttachment => ({
+      id,
+      type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+      versions: [],
+      current_version: 1,
+      origin,
+    });
+
+    const activeConversation = (attachments?: VersionedAttachment[]) =>
       ({
-        id,
-        type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-        versions: [],
-        ...(origin ? { origin } : {}),
-      } as never);
+        id: 'conv-1',
+        ...(attachments ? { conversation: { attachments } } : {}),
+      } as ActiveConversation);
 
     const renderSavedEditor = async (agentBuilder: ReturnType<typeof createMockAgentBuilder>) => {
       setupKibanaMock(agentBuilder);
@@ -1179,8 +1179,6 @@ describe('useAgentBuilderIntegration', () => {
     };
 
     it('uses the carried draft id for the very first sync after a save', async () => {
-      // The editor pushes an attachment at mount, before the conversation
-      // loads, so the carried id has to be resolved during render.
       const agentBuilder = createMockAgentBuilder();
       mockGetCarriedAttachmentId.mockReturnValue(DRAFT_ID);
       await renderSavedEditor(agentBuilder);
@@ -1188,8 +1186,7 @@ describe('useAgentBuilderIntegration', () => {
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(
         expect.objectContaining({ id: DRAFT_ID })
       );
-      // The session tag still keys off the workflow, so the conversation
-      // handoff from the create route keeps working.
+      // The session tag still keys off the workflow, so the handoff holds.
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(
         expect.objectContaining({ sessionTag: 'workflow-editor:workflow-a' })
       );
@@ -1197,18 +1194,15 @@ describe('useAgentBuilderIntegration', () => {
 
     it('holds the sync until a bound conversation has loaded', async () => {
       const agentBuilder = createMockAgentBuilder();
-      agentBuilder.events.ui.activeConversation$.next({ id: 'conv-1' } as never);
+      agentBuilder.events.ui.activeConversation$.next(activeConversation());
       await renderSavedEditor(agentBuilder);
 
       expect(agentBuilder.addAttachment).not.toHaveBeenCalled();
 
       act(() => {
-        agentBuilder.events.ui.activeConversation$.next({
-          id: 'conv-1',
-          conversation: {
-            attachments: [workflowAttachment(DRAFT_ID, 'workflow-a')],
-          },
-        } as never);
+        agentBuilder.events.ui.activeConversation$.next(
+          activeConversation([workflowAttachment(DRAFT_ID, 'workflow-a')])
+        );
       });
 
       expect(agentBuilder.addAttachment).toHaveBeenCalledTimes(1);
@@ -1222,12 +1216,9 @@ describe('useAgentBuilderIntegration', () => {
       await renderSavedEditor(agentBuilder);
 
       act(() => {
-        agentBuilder.events.ui.activeConversation$.next({
-          id: 'conv-1',
-          conversation: {
-            attachments: [workflowAttachment(DRAFT_ID, 'workflow-a')],
-          },
-        } as never);
+        agentBuilder.events.ui.activeConversation$.next(
+          activeConversation([workflowAttachment(DRAFT_ID, 'workflow-a')])
+        );
       });
 
       agentBuilder.addAttachment.mockClear();
@@ -1248,10 +1239,9 @@ describe('useAgentBuilderIntegration', () => {
 
       act(() => {
         // Carried over by `carryConversationToWorkflow`; no origin yet.
-        agentBuilder.events.ui.activeConversation$.next({
-          id: 'conv-1',
-          conversation: { attachments: [workflowAttachment(DRAFT_ID)] },
-        } as never);
+        agentBuilder.events.ui.activeConversation$.next(
+          activeConversation([workflowAttachment(DRAFT_ID)])
+        );
       });
 
       expect(agentBuilder.updateAttachmentOrigin).toHaveBeenCalledWith(
@@ -1276,12 +1266,9 @@ describe('useAgentBuilderIntegration', () => {
       await renderSavedEditor(agentBuilder);
 
       act(() => {
-        agentBuilder.events.ui.activeConversation$.next({
-          id: 'conv-1',
-          conversation: {
-            attachments: [workflowAttachment(DRAFT_ID, 'workflow-a')],
-          },
-        } as never);
+        agentBuilder.events.ui.activeConversation$.next(
+          activeConversation([workflowAttachment(DRAFT_ID, 'workflow-a')])
+        );
       });
 
       expect(agentBuilder.updateAttachmentOrigin).not.toHaveBeenCalled();
@@ -1292,10 +1279,7 @@ describe('useAgentBuilderIntegration', () => {
       await renderSavedEditor(agentBuilder);
 
       act(() => {
-        agentBuilder.events.ui.activeConversation$.next({
-          id: 'conv-1',
-          conversation: { attachments: [] },
-        } as never);
+        agentBuilder.events.ui.activeConversation$.next(activeConversation([]));
       });
 
       agentBuilder.addAttachment.mockClear();

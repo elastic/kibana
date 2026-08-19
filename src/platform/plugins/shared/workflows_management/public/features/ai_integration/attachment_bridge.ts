@@ -80,12 +80,9 @@ export class AttachmentBridge {
        */
       getChatEvents$?: (conversationId: string) => Observable<BrowserChatEvent>;
       /**
-       * Active conversation binding published by the chat UI. This is the
-       * primary trigger for scoping, because the chat UI sets it for any
-       * conversation it renders — including a restored one. The server only
-       * emits `conversation_id_set` for newly created conversations, so
-       * relying on that event alone leaves resumed conversations unscoped and
-       * their YAML changes unapplied.
+       * Active conversation binding. The chat UI sets it for any conversation
+       * it renders, including a restored one, while `conversation_id_set` only
+       * fires for newly created ones.
        */
       activeConversation$?: Observable<ActiveConversation | null>;
       onProposalReceived?: (params: {
@@ -106,9 +103,8 @@ export class AttachmentBridge {
 
     this.activeConversationSubscription =
       options?.activeConversation$?.subscribe((activeConversation) => {
-        // An `undefined` id means a new conversation the server hasn't minted
-        // an id for yet. Keep the current scoped subscription until a real id
-        // arrives, either here or via `conversation_id_set`.
+        // A new conversation has no id yet — keep the current scope until one
+        // arrives, here or via `conversation_id_set`.
         if (activeConversation?.id) {
           this.onConversationIdKnown(activeConversation.id);
         }
@@ -147,11 +143,7 @@ export class AttachmentBridge {
     });
   }
 
-  /**
-   * Repoint the attachment-id guard. The editor resolves the attachment it
-   * shares with the conversation only once that conversation has loaded, which
-   * can happen after `start`.
-   */
+  /** Repoint the guard once the conversation reveals which attachment to track. */
   setAttachmentId(attachmentId: string): void {
     this.attachmentId = attachmentId;
   }

@@ -9,33 +9,37 @@
 
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
-import { findLinkedWorkflowAttachmentId, needsOriginLink } from './attachment_link';
+import { findLinkedWorkflowAttachment } from './attachment_link';
 
 const workflowAttachment = (
   id: string,
   overrides: Partial<VersionedAttachment> = {}
-): VersionedAttachment =>
-  ({
-    id,
-    type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-    versions: [],
-    ...overrides,
-  } as unknown as VersionedAttachment);
+): VersionedAttachment => ({
+  id,
+  type: WORKFLOW_YAML_ATTACHMENT_TYPE,
+  versions: [],
+  current_version: 1,
+  ...overrides,
+});
 
-const otherAttachment = (id: string): VersionedAttachment =>
-  ({ id, type: 'screen_context', versions: [] } as unknown as VersionedAttachment);
+const screenContextAttachment = (): VersionedAttachment => ({
+  id: 'screen-context',
+  type: 'screen_context',
+  versions: [],
+  current_version: 1,
+});
 
-describe('findLinkedWorkflowAttachmentId', () => {
+describe('findLinkedWorkflowAttachment', () => {
   it('returns undefined when the conversation has no attachments', () => {
     expect(
-      findLinkedWorkflowAttachmentId({ attachments: undefined, attachmentId: 'workflow-a' })
+      findLinkedWorkflowAttachment({ attachments: undefined, attachmentId: 'workflow-a' })
     ).toBeUndefined();
   });
 
   it('returns undefined when the conversation holds no workflow attachment', () => {
     expect(
-      findLinkedWorkflowAttachmentId({
-        attachments: [otherAttachment('screen-context')],
+      findLinkedWorkflowAttachment({
+        attachments: [screenContextAttachment()],
         attachmentId: 'workflow-a',
       })
     ).toBeUndefined();
@@ -43,40 +47,38 @@ describe('findLinkedWorkflowAttachmentId', () => {
 
   it('prefers an attachment whose id already matches this session', () => {
     expect(
-      findLinkedWorkflowAttachmentId({
+      findLinkedWorkflowAttachment({
         attachments: [workflowAttachment('draft-uuid'), workflowAttachment('workflow-a')],
         attachmentId: 'workflow-a',
         workflowId: 'workflow-a',
-      })
+      })?.id
     ).toBe('workflow-a');
   });
 
   it('matches the draft attachment by origin after the first save', () => {
-    // The editor would mint `workflow-a`, but the conversation already holds
-    // the create session's attachment linked to that workflow.
     expect(
-      findLinkedWorkflowAttachmentId({
+      findLinkedWorkflowAttachment({
         attachments: [workflowAttachment('draft-uuid', { origin: 'workflow-a' })],
         attachmentId: 'workflow-a',
         workflowId: 'workflow-a',
-      })
+      })?.id
     ).toBe('draft-uuid');
   });
 
   it('matches the carried draft attachment before its origin is set', () => {
     expect(
-      findLinkedWorkflowAttachmentId({
+      findLinkedWorkflowAttachment({
         attachments: [workflowAttachment('draft-uuid')],
         attachmentId: 'workflow-a',
         workflowId: 'workflow-a',
         carriedAttachmentId: 'draft-uuid',
-      })
+      })?.id
     ).toBe('draft-uuid');
   });
 
   it('ignores a workflow attachment linked to a different workflow', () => {
     expect(
-      findLinkedWorkflowAttachmentId({
+      findLinkedWorkflowAttachment({
         attachments: [workflowAttachment('draft-uuid', { origin: 'workflow-b' })],
         attachmentId: 'workflow-a',
         workflowId: 'workflow-a',
@@ -86,43 +88,11 @@ describe('findLinkedWorkflowAttachmentId', () => {
 
   it('ignores a deleted attachment', () => {
     expect(
-      findLinkedWorkflowAttachmentId({
+      findLinkedWorkflowAttachment({
         attachments: [workflowAttachment('draft-uuid', { origin: 'workflow-a', active: false })],
         attachmentId: 'workflow-a',
         workflowId: 'workflow-a',
       })
     ).toBeUndefined();
-  });
-});
-
-describe('needsOriginLink', () => {
-  it('is true for an attachment with no origin', () => {
-    expect(
-      needsOriginLink({
-        attachments: [workflowAttachment('draft-uuid')],
-        attachmentId: 'draft-uuid',
-        workflowId: 'workflow-a',
-      })
-    ).toBe(true);
-  });
-
-  it('is false once the origin points at the workflow', () => {
-    expect(
-      needsOriginLink({
-        attachments: [workflowAttachment('draft-uuid', { origin: 'workflow-a' })],
-        attachmentId: 'draft-uuid',
-        workflowId: 'workflow-a',
-      })
-    ).toBe(false);
-  });
-
-  it('is false when the attachment is not in the conversation yet', () => {
-    expect(
-      needsOriginLink({
-        attachments: [],
-        attachmentId: 'draft-uuid',
-        workflowId: 'workflow-a',
-      })
-    ).toBe(false);
   });
 });

@@ -12,68 +12,38 @@ import { isAttachmentActive } from '@kbn/agent-builder-common/attachments';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
 export interface FindLinkedWorkflowAttachmentParams {
-  /** Conversation-level attachments of the conversation the editor is bound to. */
   attachments: VersionedAttachment[] | undefined;
-  /** Attachment id this editor session would mint on its own. */
+  /** Attachment id this editor session would use on its own. */
   attachmentId: string;
   /** Saved workflow id, or undefined on the `/workflows/create` route. */
   workflowId?: string;
-  /**
-   * Attachment id of the create session that produced `workflowId`, handed over
-   * by {@link carryConversationToWorkflow} across the first save.
-   */
+  /** Create-session attachment id handed over across the first save. */
   carriedAttachmentId?: string;
 }
 
 /**
- * Returns the id of the workflow attachment this editor session must keep
- * writing into, or `undefined` when the conversation holds none yet.
- *
- * The editor mints its attachment id from the route: a uuid on
- * `/workflows/create`, the workflow id on a saved workflow. The id therefore
- * changes when the user saves a new workflow, and a session that syncs under
- * the new id adds a second `workflow.yaml` attachment to the same
- * conversation. Resolving the id from the conversation instead keeps one
- * attachment with a growing version list.
+ * Returns the workflow attachment this session must keep writing into, or
+ * `undefined` when the conversation holds none. The editor's own id changes
+ * when a new workflow is saved, so resolving from the conversation is what
+ * keeps one attachment instead of two.
  */
-export const findLinkedWorkflowAttachmentId = ({
+export const findLinkedWorkflowAttachment = ({
   attachments,
   attachmentId,
   workflowId,
   carriedAttachmentId,
-}: FindLinkedWorkflowAttachmentParams): string | undefined => {
+}: FindLinkedWorkflowAttachmentParams): VersionedAttachment | undefined => {
   const candidates = (attachments ?? []).filter(
     (attachment) =>
       attachment.type === WORKFLOW_YAML_ATTACHMENT_TYPE && isAttachmentActive(attachment)
   );
-  if (candidates.length === 0) return undefined;
 
-  const exact = candidates.find((attachment) => attachment.id === attachmentId);
-  if (exact) return exact.id;
-
-  // Set once the create session's attachment has been linked to the saved
-  // workflow, so it survives a page reload where the handoff state is gone.
-  const byOrigin = workflowId && candidates.find((attachment) => attachment.origin === workflowId);
-  if (byOrigin) return byOrigin.id;
-
-  const carried =
-    carriedAttachmentId && candidates.find((attachment) => attachment.id === carriedAttachmentId);
-  return carried ? carried.id : undefined;
-};
-
-/**
- * Returns true when `attachmentId` names an attachment in the conversation that
- * is not yet linked to `workflowId`, so the caller must set its origin.
- */
-export const needsOriginLink = ({
-  attachments,
-  attachmentId,
-  workflowId,
-}: {
-  attachments: VersionedAttachment[] | undefined;
-  attachmentId: string;
-  workflowId: string;
-}): boolean => {
-  const attachment = (attachments ?? []).find((candidate) => candidate.id === attachmentId);
-  return Boolean(attachment && isAttachmentActive(attachment) && attachment.origin !== workflowId);
+  return (
+    candidates.find((attachment) => attachment.id === attachmentId) ??
+    // Survives a reload, where the handoff state is gone.
+    (workflowId ? candidates.find((attachment) => attachment.origin === workflowId) : undefined) ??
+    (carriedAttachmentId
+      ? candidates.find((attachment) => attachment.id === carriedAttachmentId)
+      : undefined)
+  );
 };
