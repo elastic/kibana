@@ -51,7 +51,9 @@ function toInvestigationStatus(status: ExecutionStatus, logger: Logger): Investi
     default: {
       // TypeScript will error here if a new ExecutionStatus value is added without a case above.
       const _exhaustiveCheck: never = status;
-      logger.warn(`Unknown workflow ExecutionStatus "${_exhaustiveCheck}" for investigation, treating as running`);
+      logger.warn(
+        `Unknown workflow ExecutionStatus "${_exhaustiveCheck}" for investigation, treating as running`
+      );
       return 'running';
     }
   }
@@ -194,7 +196,7 @@ export class NightshiftInvestigationsClient {
       completed_at: isTerminal ? execution.finishedAt : undefined,
       conclusions:
         status === 'completed'
-          ? (asString(rawOutput?.conclusion) ?? asString(rawOutput?.summary))
+          ? asString(rawOutput?.conclusion) ?? asString(rawOutput?.summary)
           : undefined,
       error: (() => {
         if (status !== 'failed') return undefined;

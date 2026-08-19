@@ -227,9 +227,7 @@ describe('NightshiftInvestigationsClient.get()', () => {
       mockManagement.getWorkflowExecution.mockResolvedValue(
         makeExecution({
           status: ExecutionStatus.RUNNING,
-          stepExecutions: [
-            { output: { structured_output: { conclusion: 'Should be ignored.' } } },
-          ],
+          stepExecutions: [{ output: { structured_output: { conclusion: 'Should be ignored.' } } }],
         })
       );
       const result = await makeClient().get('inv-1');

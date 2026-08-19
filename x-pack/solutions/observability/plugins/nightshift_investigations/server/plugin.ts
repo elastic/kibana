@@ -13,10 +13,10 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerRoutes } from '@kbn/server-route-repository';
+import type { KibanaRequest } from '@kbn/core/server';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { nightshiftInvestigationsRouteRepository } from './routes';
 import { triggerInvestigationStepDefinition } from './step_definitions/trigger_investigation';
-import type { KibanaRequest } from '@kbn/core/server';
 import type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
