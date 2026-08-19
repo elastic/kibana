@@ -12,6 +12,7 @@ jest.mock('../../utils/common', () => ({
   buildFrameworkRequest: jest.fn().mockResolvedValue({}),
 }));
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { NOTE_URL } from '../../../../../common/constants';
 import {
   serverMock,
@@ -45,11 +46,13 @@ const makePersistNoteResponse = (noteId: string, updatedBy?: string) => ({
 describe('persistNoteRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: SecuritySolutionRequestHandlerContextMock;
+  let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
+    mockLogger = loggingSystemMock.createLogger();
     (persistNote as jest.Mock).mockResolvedValue(makePersistNoteResponse('created-note-id'));
   });
 
@@ -64,7 +67,11 @@ describe('persistNoteRoute', () => {
     beforeEach(() => {
       server = serverMock.create();
       mockEventBus = { emitNoteCreated: jest.fn(), emitNoteUpdated: jest.fn() };
-      persistNoteRoute(server.router, mockEventBus as unknown as SecuritySolutionEventBus);
+      persistNoteRoute(
+        server.router,
+        mockLogger,
+        mockEventBus as unknown as SecuritySolutionEventBus
+      );
     });
 
     test('emits noteCreated when creating a note linked to an event', async () => {
@@ -102,6 +109,52 @@ describe('persistNoteRoute', () => {
         })
       );
       expect(mockEventBus.emitNoteCreated).not.toHaveBeenCalled();
+    });
+
+    test('skips emit and logs warn when noteId is missing after persist', async () => {
+      (persistNote as jest.Mock).mockResolvedValue({ note: { createdBy: 'test-user' } });
+      const request = requestMock.create({
+        method: 'patch',
+        path: NOTE_URL,
+        body: noteBody,
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitNoteCreated).not.toHaveBeenCalled();
+      expect(mockEventBus.emitNoteUpdated).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Skipping workflow trigger: noteId missing after note persist'
+      );
+    });
+
+    test('skips noteCreated and logs warn when createdBy is missing after persist', async () => {
+      (persistNote as jest.Mock).mockResolvedValue({ note: { noteId: 'created-note-id' } });
+      const request = requestMock.create({
+        method: 'patch',
+        path: NOTE_URL,
+        body: noteBody,
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitNoteCreated).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Skipping noteCreated trigger: createdBy missing (noteId: created-note-id)'
+      );
+    });
+
+    test('skips noteUpdated and logs warn when updatedBy and createdBy are both missing', async () => {
+      (persistNote as jest.Mock).mockResolvedValue({ note: { noteId: 'existing-note-id' } });
+      const request = requestMock.create({
+        method: 'patch',
+        path: NOTE_URL,
+        body: { ...noteBody, noteId: 'existing-note-id' },
+      });
+      await server.inject(request, requestContextMock.convertContext(context));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(mockEventBus.emitNoteUpdated).not.toHaveBeenCalled();
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Skipping noteUpdated trigger: updatedBy missing (noteId: existing-note-id)'
+      );
     });
 
     test('does not emit when the note has no eventId', async () => {

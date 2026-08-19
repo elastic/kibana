@@ -8,6 +8,7 @@
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import type { Logger } from '@kbn/core/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { NOTE_URL } from '../../../../../common/constants';
@@ -24,6 +25,7 @@ import type { SecuritySolutionEventBus } from '../../../../events/event_bus';
 
 export const persistNoteRoute = (
   router: SecuritySolutionPluginRouter,
+  logger: Logger,
   eventBus?: SecuritySolutionEventBus
 ) => {
   router.versioned
@@ -59,18 +61,35 @@ export const persistNoteRoute = (
           });
 
           if (eventBus && note.eventId) {
-            if (noteId == null) {
-              void eventBus.emitNoteCreated(request, {
-                noteId: res.note.noteId ?? '',
-                createdBy: res.note.createdBy ?? '',
-                documentId: note.eventId,
-              });
+            const persistedNoteId = res.note.noteId;
+            if (!persistedNoteId) {
+              logger.warn('Skipping workflow trigger: noteId missing after note persist');
+            } else if (noteId == null) {
+              const actor = res.note.createdBy;
+              if (!actor) {
+                logger.warn(
+                  `Skipping noteCreated trigger: createdBy missing (noteId: ${persistedNoteId})`
+                );
+              } else {
+                void eventBus.emitNoteCreated(request, {
+                  noteId: persistedNoteId,
+                  createdBy: actor,
+                  documentId: note.eventId,
+                });
+              }
             } else {
-              void eventBus.emitNoteUpdated(request, {
-                noteId: res.note.noteId ?? '',
-                updatedBy: res.note.updatedBy ?? res.note.createdBy ?? '',
-                documentId: note.eventId,
-              });
+              const actor = res.note.updatedBy ?? res.note.createdBy;
+              if (!actor) {
+                logger.warn(
+                  `Skipping noteUpdated trigger: updatedBy missing (noteId: ${persistedNoteId})`
+                );
+              } else {
+                void eventBus.emitNoteUpdated(request, {
+                  noteId: persistedNoteId,
+                  updatedBy: actor,
+                  documentId: note.eventId,
+                });
+              }
             }
           }
 

@@ -110,7 +110,7 @@ export const initRoutes = (
 
   registerResolverRoutes(router, getStartServices, platformCpsEnabled);
 
-  registerTimelineRoutes(router, config, getStartServices, eventBus);
+  registerTimelineRoutes(router, config, getStartServices, logger, eventBus);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status

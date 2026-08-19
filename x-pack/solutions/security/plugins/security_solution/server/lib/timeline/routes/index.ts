@@ -6,6 +6,7 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-server';
+import type { Logger } from '@kbn/core/server';
 import type { StartPlugins } from '../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { ConfigType } from '../../..';
@@ -35,6 +36,7 @@ export function registerTimelineRoutes(
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   startServices: StartServicesAccessor<StartPlugins>,
+  logger: Logger,
   eventBus?: SecuritySolutionEventBus
 ) {
   createTimelinesRoute(router);
@@ -54,7 +56,7 @@ export function registerTimelineRoutes(
 
   installPrepackedTimelinesRoute(router, config);
 
-  persistNoteRoute(router, eventBus);
+  persistNoteRoute(router, logger, eventBus);
   deleteNoteRoute(router);
   getNotesRoute(router, startServices);
 
