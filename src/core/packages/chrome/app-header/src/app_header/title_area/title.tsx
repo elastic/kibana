@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiIcon,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiScreenReaderOnly,
@@ -116,6 +117,8 @@ const useTitleStyles = () => {
 
     const readModeTrigger = css`
       ${titleFrame};
+      grid-template-columns: minmax(0, max-content) ${euiTheme.size.base};
+      column-gap: ${euiTheme.size.xs};
       cursor: text;
       appearance: none;
 
@@ -137,12 +140,20 @@ const useTitleStyles = () => {
       }
     `;
 
+    const editIcon = css`
+      grid-area: 1 / 2;
+      align-self: center;
+      color: ${euiTheme.colors.textSubdued};
+    `;
+
     // Edit mode keeps a reasonable minimum width so a short or empty title still gives a
     // comfortable click/typing target instead of collapsing to the content (or to nothing
     // when empty). Long titles exceed the floor and size to content as usual.
     const editingTitleFrame = css`
       ${titleFrame};
-      grid-template-columns: minmax(calc(${euiTheme.size.base} * 8), max-content);
+      grid-template-columns: minmax(calc(${euiTheme.size.base} * 8), max-content) ${euiTheme.size
+          .base};
+      column-gap: ${euiTheme.size.xs};
 
       &::after {
         border-width: ${euiTheme.border.width.thin};
@@ -251,6 +262,7 @@ const useTitleStyles = () => {
       editingTitleFrame,
       invalidTitleFrame,
       readModeTrigger,
+      editIcon,
       input,
       statusIcon,
       titleSizer,
@@ -493,6 +505,7 @@ export const Title = React.memo<TitleProps>(({ title, titleOffset, size = 's' })
               onClick={(event) => startEditing(event.detail === 0)}
             >
               {readContent}
+              <EuiIcon type="pencil" size="m" css={styles.editIcon} aria-hidden="true" />
             </button>
           ) : (
             // Non-editable title: shares the same frame as the editable read view (its

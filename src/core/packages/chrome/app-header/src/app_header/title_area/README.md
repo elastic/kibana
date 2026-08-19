@@ -59,16 +59,23 @@ user types, feed the typed value into the sizer; do not measure.
 - Edit mode sizes to `draft` (or `placeholder` while the draft is empty).
 - The `<input>` has `size={1}` so its intrinsic width can't inflate the track.
 
-### The hover/edit affordance bleeds via pseudo-elements, not layout
+### The edit affordance
+
+Editable titles include a subdued pencil inside the title button. The text and icon are
+one control and one keyboard tab stop; the icon is decorative and hidden from assistive
+technology. Read and edit mode both reserve the icon column so badges do not shift when
+the input replaces the title.
+
+The hover background and focus border bleed via pseudo-elements rather than adding
+padding around the control.
 
 The grey background and the border are drawn by `::before` (background, `z-index: -1`)
 and `::after` (border, on top) on `titleFrame`. They are absolutely positioned and
 **bleed outward** (negative `inset`) past the text on every side. They never enter
 layout, so:
 
-- A resting title keeps the exact position and trailing spacing of a plain heading —
-  no extra gap before the badges. (Do not add margins/padding to create the hover box;
-  that reintroduces the gap and the layout shift.)
+- A resting title keeps the exact leading position of a plain heading. (Do not add
+  margins/padding to create the hover box; that reintroduces layout shift.)
 - `::after` paints above the status-icon scrim so the invalid red border is never
   hidden by the gradient.
 
