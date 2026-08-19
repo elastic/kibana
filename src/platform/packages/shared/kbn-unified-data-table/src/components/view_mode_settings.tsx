@@ -42,7 +42,7 @@ export function ViewModeSettings({
     {
       id: 'summary',
       label: i18n.translate('unifiedDataTable.viewMode.default', {
-        defaultMessage: 'Default',
+        defaultMessage: 'Table',
       }),
       'data-test-subj': `${dataTestSubj}_viewMode_summary`,
     },

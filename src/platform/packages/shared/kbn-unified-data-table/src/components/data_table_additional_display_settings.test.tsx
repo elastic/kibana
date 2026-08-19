@@ -313,7 +313,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       expect(screen.queryByTestId('unifiedDataTableViewModeSettings')).not.toBeInTheDocument();
     });
 
-    it('should render the view mode toggle with "Default" selected initially', () => {
+    it('should render the view mode toggle with "Table" selected initially', () => {
       renderWithAllControls();
 
       expect(screen.getByTestId('unifiedDataTableViewModeSettings')).toBeVisible();
@@ -322,7 +322,7 @@ describe('UnifiedDataTableAdditionalDisplaySettings', () => {
       ).toHaveAttribute('aria-pressed', 'true');
     });
 
-    it('should show the default controls and hide the JSON-only switches while in "Default" mode', () => {
+    it('should show the default controls and hide the JSON-only switches while in "Table" mode', () => {
       renderWithAllControls();
 
       expect(screen.getByTestId('mockDensityControl')).toBeVisible();
