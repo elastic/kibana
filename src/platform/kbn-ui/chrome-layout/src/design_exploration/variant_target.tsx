@@ -605,7 +605,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope} [data-test-subj='designExplorationNavTopControls'] {
-      padding-top: 24px !important;
+      padding-top: 32px !important;
     }
 
     ${scope}
