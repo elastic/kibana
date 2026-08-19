@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -93,14 +94,11 @@ export default function Warnings() {
     <EuiFlexGroup data-test-subj="datasetQualityWarningsContainer" gutterSize="s" wrap>
       {!loading && nonAggregatableDatasets.length > 0 && (
         <EuiFlexItem>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount={false}
             title={nonAggregatableWarningTitle}
-            color="warning"
-            iconType="warning"
-          >
-            <p>{nonAggregatableWarningDescription(nonAggregatableDatasets)}</p>
-          </EuiCallOut>
+            text={nonAggregatableWarningDescription(nonAggregatableDatasets)}
+          />
         </EuiFlexItem>
       )}
       {!statsLoading && !canUserReadFailureStore && canAccessAnyDataset && (
