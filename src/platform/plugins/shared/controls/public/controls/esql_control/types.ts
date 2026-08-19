@@ -15,6 +15,7 @@ import type { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishesESQLVariable, QueryESQLControl, StaticESQLControl } from '@kbn/esql-types';
 import type {
+  CanCancelRequests,
   CanIndicateRelatedSiblings,
   HasEditCapabilities,
   HasType,
@@ -34,6 +35,7 @@ import type { OptionsListPublishesOptions, OptionsListSelectionsApi } from '../t
 export type ESQLControlApi<State> = DefaultEmbeddableApi<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl
 > &
+  CanCancelRequests &
   PublishesESQLVariable &
   PublishesESQLQuery &
   PublishesUnsavedChanges &
@@ -57,7 +59,7 @@ export type ESQLOptionsListComponentState = Pick<
    * being impacted by default embeddable title handling, we switch to `label` for the implementation
    */
   label: string;
-} & Omit<TemporaryState<string>, 'requestSize'>;
+} & Omit<TemporaryState<string>, 'requestSize' | 'isPartial'>;
 
 export type ESQLOptionsListComponentApi = HasType &
   HasUniqueId &
@@ -67,7 +69,7 @@ export type ESQLOptionsListComponentApi = HasType &
   SettersOf<
     Omit<
       TemporaryState<string>,
-      'availableOptions' | 'requestSize' | 'searchStringValid' | 'totalCardinality'
+      'availableOptions' | 'requestSize' | 'searchStringValid' | 'totalCardinality' | 'isPartial'
     >
   > &
   OptionsListSelectionsApi & {

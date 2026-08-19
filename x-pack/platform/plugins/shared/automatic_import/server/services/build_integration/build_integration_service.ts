@@ -144,7 +144,7 @@ const createManifest = (
     },
     policy_templates: policyTemplates,
     owner: {
-      github: '@elastic/integration-experience',
+      github: '@elastic/cloud-services',
       type: 'community',
     },
   };

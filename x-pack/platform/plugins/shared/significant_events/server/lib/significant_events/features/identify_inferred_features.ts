@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { ToolsStart } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
 import type { BoundInferenceClient, ChatCompletionTokenCount } from '@kbn/inference-common';
 import type { StreamType } from '@kbn/streams-schema';
@@ -33,7 +34,14 @@ import {
   type SignificantEventsTuningConfig,
 } from '@kbn/significant-events-schema';
 import { PromptsConfigService } from '@kbn/streams-plugin/server';
+import type { ToolCallback, ToolDefinition } from '@kbn/inference-common';
 import type { KnowledgeIndicatorClient } from '../../knowledge_indicators';
+import { MemoryServiceImpl } from '../../../memory_and_investigation/lib/memory';
+import { createMemoryDiscoveryTools, type MemoryDiscoveryTools } from '../memory_discovery_tools';
+import {
+  createKiExtractionContextTools,
+  type KiExtractionContextTools,
+} from '../ki_extraction_context_tools';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
 import {
@@ -437,7 +445,7 @@ async function tryIdentifyFeatures(
 // ---------------------------------------------------------------------------
 
 interface RunInferredIterationOptions {
-  esClient: ElasticsearchClient;
+  samplingEsClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
   streamName: string;
   samplingSource: string;
@@ -452,11 +460,13 @@ interface RunInferredIterationOptions {
   logger: Logger;
   signal: AbortSignal;
   tuning: IterationTuningParams;
-  diverseOffset: number;
+  iteration: number;
+  additionalTools?: Record<string, ToolDefinition>;
+  additionalToolCallbacks?: Record<string, ToolCallback>;
 }
 
 type InferredIterationResult =
-  | { hasDocuments: false; nextDiverseOffset: number }
+  | { hasDocuments: false }
   | {
       hasDocuments: true;
       docsCount: number;
@@ -464,7 +474,6 @@ type InferredIterationResult =
       totalFilters: number;
       filtersCapped: boolean;
       hasFilteredDocuments: boolean;
-      nextDiverseOffset: number;
       outcome:
         | { state: 'failure' }
         | {
@@ -481,7 +490,7 @@ type InferredIterationResult =
     };
 
 async function runInferredIteration({
-  esClient,
+  samplingEsClient,
   kiClient,
   streamName,
   samplingSource,
@@ -496,7 +505,9 @@ async function runInferredIteration({
   logger,
   signal,
   tuning,
-  diverseOffset,
+  iteration,
+  additionalTools,
+  additionalToolCallbacks,
 }: RunInferredIterationOptions): Promise<InferredIterationResult> {
   const {
     sample_size: sampleSize = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.sample_size,
@@ -513,7 +524,7 @@ async function runInferredIteration({
   } = tuning;
 
   const batchResult = await fetchSampleDocuments({
-    esClient,
+    esClient: samplingEsClient,
     index: samplingSource,
     start,
     end,
@@ -523,12 +534,12 @@ async function runInferredIteration({
     entityFilteredRatio,
     diverseRatio,
     maxEntityFilters,
-    diverseOffset,
+    iteration,
     samplingTimeoutMs,
   });
 
   if (batchResult.documents.length === 0) {
-    return { hasDocuments: false, nextDiverseOffset: batchResult.nextOffset };
+    return { hasDocuments: false };
   }
 
   const { totalFilters, filtersCapped, hasFilteredDocuments } = batchResult;
@@ -584,6 +595,8 @@ async function runInferredIteration({
       searchRecordsByCandidate.set(recordKey, searchRecord);
       return hits;
     },
+    additionalTools,
+    additionalToolCallbacks,
   });
 
   if (!inferResult.success) {
@@ -594,7 +607,6 @@ async function runInferredIteration({
       totalFilters,
       filtersCapped,
       hasFilteredDocuments,
-      nextDiverseOffset: batchResult.nextOffset,
       outcome: { state: 'failure' },
     };
   }
@@ -623,7 +635,6 @@ async function runInferredIteration({
     totalFilters,
     filtersCapped,
     hasFilteredDocuments,
-    nextDiverseOffset: batchResult.nextOffset,
     outcome: {
       state: 'success',
       tokensUsed,
@@ -644,6 +655,12 @@ async function runInferredIteration({
 
 export interface IdentifyInferredFeaturesOptions {
   esClient: ElasticsearchClient;
+  /**
+   * Client used to sample documents from `samplingSource`. Separate from `esClient` because the
+   * sampling source can live on a remote CPS-connected project, while `esClient` reads the
+   * plugin's own (origin-only) indices.
+   */
+  samplingEsClient: ElasticsearchClient;
   kiClient: KnowledgeIndicatorClient;
   soClient: SavedObjectsClientContract;
   inferenceClient: BoundInferenceClient;
@@ -658,8 +675,9 @@ export interface IdentifyInferredFeaturesOptions {
   runId: string;
   iteration?: number;
   tuning?: IterationTuningParams;
-  diverseOffset?: number;
   trackFeaturesIdentified?: (data: FeaturesIdentifiedTelemetry) => void;
+  agentBuilderTools?: ToolsStart;
+  request?: KibanaRequest;
 }
 
 export interface IdentifyInferredFeaturesResult {
@@ -668,11 +686,11 @@ export interface IdentifyInferredFeaturesResult {
   docIds: string[];
   discoveredFeatures: FeatureUpsert[];
   iterationResult: IterationResult;
-  nextDiverseOffset: number;
 }
 
 export async function identifyInferredFeatures({
   esClient,
+  samplingEsClient,
   kiClient,
   soClient,
   inferenceClient,
@@ -687,8 +705,9 @@ export async function identifyInferredFeatures({
   runId,
   iteration = 1,
   tuning = {},
-  diverseOffset = 0,
   trackFeaturesIdentified,
+  agentBuilderTools,
+  request,
 }: IdentifyInferredFeaturesOptions): Promise<IdentifyInferredFeaturesResult> {
   const [
     { hits: allFeatures },
@@ -702,10 +721,45 @@ export async function identifyInferredFeatures({
 
   const discoveredFeatures = allFeatures.filter((f) => !isComputedFeature(f) && f.run_id === runId);
 
+  // Expose read-only grounding tools to feature extraction so it can anchor new
+  // KI features in durable prior knowledge:
+  // - memory: prior learnings, known-benign patterns, past false positives.
+  // - significant_event_search: prior Significant Events (already-tracked /
+  //   demoted patterns). Only available when Agent Builder tools are wired.
+  const memoryTools = createMemoryDiscoveryTools({
+    memoryService: new MemoryServiceImpl({ logger: logger.get('memory'), esClient }),
+  });
+
+  const kiExtractionContextTools =
+    agentBuilderTools && request
+      ? await createKiExtractionContextTools({
+          agentBuilderTools,
+          request,
+          logger: logger.get('ki_extraction_context'),
+        })
+      : undefined;
+
+  const groundingToolsets = [memoryTools, kiExtractionContextTools].filter(
+    (toolset): toolset is MemoryDiscoveryTools | KiExtractionContextTools => toolset !== undefined
+  );
+
+  const additionalTools: Record<string, ToolDefinition> = Object.assign(
+    {},
+    ...groundingToolsets.map((toolset) => toolset.tools)
+  );
+  const additionalToolCallbacks: Record<string, ToolCallback> = Object.assign(
+    {},
+    ...groundingToolsets.map((toolset) => toolset.callbacks)
+  );
+  const combinedSystemPrompt = groundingToolsets.reduce(
+    (prompt, toolset) => `${prompt}\n${toolset.promptSnippet}`,
+    systemPrompt
+  );
+
   const startedAt = Date.now();
 
   const iterationResult = await runInferredIteration({
-    esClient,
+    samplingEsClient,
     kiClient,
     streamName,
     samplingSource,
@@ -716,11 +770,13 @@ export async function identifyInferredFeatures({
     discoveredFeatures,
     excludedFeatures,
     inferenceClient,
-    systemPrompt,
+    systemPrompt: combinedSystemPrompt,
     logger,
     signal,
     tuning,
-    diverseOffset,
+    iteration,
+    additionalTools,
+    additionalToolCallbacks,
   });
 
   if (!iterationResult.hasDocuments) {
@@ -738,7 +794,6 @@ export async function identifyInferredFeatures({
         newFeatures: [],
         updatedFeatures: [],
       },
-      nextDiverseOffset: iterationResult.nextDiverseOffset,
     };
   }
 
@@ -779,7 +834,6 @@ export async function identifyInferredFeatures({
       docIds,
       discoveredFeatures,
       iterationResult: failedEntry,
-      nextDiverseOffset: iterationResult.nextDiverseOffset,
     };
   }
 
@@ -842,6 +896,5 @@ export async function identifyInferredFeatures({
     docIds,
     discoveredFeatures: Array.from(discoveredMap.values()),
     iterationResult: iterationEntry,
-    nextDiverseOffset: iterationResult.nextDiverseOffset,
   };
 }

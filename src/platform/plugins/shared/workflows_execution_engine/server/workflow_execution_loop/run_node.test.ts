@@ -17,6 +17,10 @@ import { runNode } from './run_node';
 import * as runStackMonitorModule from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { CancellableNode, NodeImplementation } from '../step/node_implementation';
+import {
+  createMockWorkflowExecutionCursor,
+  type MockWorkflowExecutionCursor,
+} from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowScopeStack } from '../workflow_context_manager/workflow_scope_stack';
@@ -31,8 +35,15 @@ const mockCatchError = catchErrorModule.catchError as jest.Mock;
 const mockHandleExecutionDelay = handleExecutionDelayModule.handleExecutionDelay as jest.Mock;
 const mockRunStackMonitor = runStackMonitorModule.runStackMonitor as jest.Mock;
 
+type RunNodeTestParams = Omit<
+  jest.Mocked<WorkflowExecutionLoopParams>,
+  'workflowExecutionCursor'
+> & {
+  workflowExecutionCursor: MockWorkflowExecutionCursor;
+};
+
 describe('runNode', () => {
-  let mockParams: jest.Mocked<WorkflowExecutionLoopParams>;
+  let mockParams: RunNodeTestParams;
   let taskAbortController: AbortController;
   let workflowExecution: EsWorkflowExecution;
   let mockNode: GraphNodeUnion;
@@ -93,16 +104,22 @@ describe('runNode', () => {
       run: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<NodeImplementation>;
 
+    const workflowExecutionCursor = createMockWorkflowExecutionCursor({
+      currentNode: mockNode,
+      currentStackFrames: emptyStackFrames,
+      isExecuting: true,
+    });
+
     mockParams = {
       workflowRuntime: {
-        getCurrentNode: jest.fn().mockReturnValue(mockNode),
-        exitScope: jest.fn(),
+        executionCursor: workflowExecutionCursor,
         enterScope: jest.fn(),
         getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
         getCurrentNodeScope: jest.fn().mockReturnValue(emptyStackFrames),
         setWorkflowError: jest.fn(),
         saveState: jest.fn().mockResolvedValue(undefined),
       },
+      workflowExecutionCursor,
       stepExecutionRuntimeFactory: {
         createStepExecutionRuntime: jest.fn().mockReturnValue(mockStepExecutionRuntime),
       },
@@ -120,7 +137,7 @@ describe('runNode', () => {
         releaseTransientlyRehydratedOutputs: jest.fn(),
       },
       signal: taskAbortController.signal,
-    } as unknown as jest.Mocked<WorkflowExecutionLoopParams>;
+    } as unknown as RunNodeTestParams;
   });
 
   describe('when workflow is running', () => {
@@ -159,10 +176,9 @@ describe('runNode', () => {
       expect(mockNodeImplementation.run).toHaveBeenCalled();
     });
 
-    it('should save state after step execution', async () => {
+    it('should flush step event logs after step execution', async () => {
       await runNode(mockParams);
 
-      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
 
@@ -177,7 +193,6 @@ describe('runNode', () => {
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledWith({
         signal: mockParams.signal,
       });
-      expect(mockParams.workflowRuntime.enterScope).toHaveBeenCalled();
     });
   });
 
@@ -299,7 +314,6 @@ describe('runNode', () => {
 
       expect(mockNodeImplementation.run).not.toHaveBeenCalled();
       expect(mockParams.workflowRuntime.getWorkflowExecution).toHaveBeenCalled();
-      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
     });
 
     it('should skip step execution if workflow status is FAILED', async () => {
@@ -321,12 +335,21 @@ describe('runNode', () => {
 
   describe('when there is no current node', () => {
     it('should return early without executing step', async () => {
-      (mockParams.workflowRuntime.getCurrentNode as jest.Mock).mockReturnValue(undefined);
+      mockParams.workflowExecutionCursor.setMockCurrentNode(null);
 
       await runNode(mockParams);
 
       expect(mockNodeImplementation.run).not.toHaveBeenCalled();
-      expect(mockParams.workflowRuntime.saveState).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when execution cursor is stopped', () => {
+    it('should return early without executing step', async () => {
+      mockParams.workflowExecutionCursor.setMockIsExecuting(false);
+
+      await runNode(mockParams);
+
+      expect(mockNodeImplementation.run).not.toHaveBeenCalled();
     });
   });
 
@@ -337,8 +360,9 @@ describe('runNode', () => {
 
       await runNode(mockParams);
 
-      expect(mockParams.workflowRuntime.setWorkflowError).toHaveBeenCalledWith(error);
-      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+      expect(mockParams.workflowExecutionCursor.error).toEqual(
+        expect.objectContaining({ message: 'Step execution failed' })
+      );
       expect(mockStepExecutionRuntime.flushEventLogs).toHaveBeenCalledTimes(1);
     });
 
@@ -356,9 +380,7 @@ describe('runNode', () => {
     it('should abort monitoring when step completes', async () => {
       await runNode(mockParams);
 
-      // The monitoring abort controller should be aborted in the finally block
-      // We can't directly test this, but we can verify the flow completed
-      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+      expect(mockNodeImplementation.run).toHaveBeenCalled();
     });
 
     it('should handle monitoring preventing step execution via abort signal', async () => {
@@ -429,7 +451,6 @@ describe('runNode', () => {
       await runNode(mockParams);
 
       expect(mockNodeImplementation.run).toHaveBeenCalled();
-      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
     });
 
     it('should handle onCancel errors gracefully without throwing', async () => {
@@ -473,7 +494,7 @@ describe('runNode', () => {
       await runNode(mockParams);
 
       expect(mockOnCancel).toHaveBeenCalledTimes(1);
-      expect(mockParams.workflowRuntime.saveState).toHaveBeenCalled();
+      expect(mockParams.workflowExecutionCursor.captureError).toHaveBeenCalled();
     });
 
     it('should handle synchronous onCancel that throws', async () => {
@@ -511,8 +532,8 @@ describe('runNode', () => {
 
       await runNode(mockParams);
 
-      // Error is caught → setWorkflowError, but the finally block still fires.
-      expect(mockParams.workflowRuntime.setWorkflowError).toHaveBeenCalled();
+      // Error is caught → captureError on the cursor, but the finally block still fires.
+      expect(mockParams.workflowExecutionCursor.captureError).toHaveBeenCalled();
       expect(mockStepExecutionRuntime.contextManager.releaseReadPins).toHaveBeenCalledTimes(1);
     });
 

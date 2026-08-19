@@ -436,6 +436,7 @@ export type RegistrySearchResult = Pick<
   | 'categories'
   | 'discovery'
   | 'deprecated'
+  | 'group'
 >;
 
 // from /categories
@@ -515,7 +516,6 @@ export interface RegistryDataStream {
   [RegistryDataStreamKeys.elasticsearch]?: RegistryElasticsearch;
   [RegistryDataStreamKeys.dataset_is_prefix]?: boolean;
   [RegistryDataStreamKeys.routing_rules]?: RegistryDataStreamRoutingRules[];
-  [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.lifecycle]?: RegistryDataStreamLifecycle;
   [RegistryDataStreamKeys.agent]?: RegistryAgent;
   [RegistryDataStreamKeys.provider_permissions]?: RegistryProviderPermissions[];

@@ -11,6 +11,10 @@
         "0"
       ]
     },
+    "data_autocomplete_rules": {
+      "id": "",
+      "timeout": ""
+    },
     "methods": [
       "POST"
     ],

@@ -54,6 +54,7 @@ export interface BaseExecutionParams {
    * Optional connector response content length override for buffered LLM calls.
    */
   maxContentLength?: number;
+  projectRouting?: string;
 }
 
 /**
@@ -78,7 +79,9 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   /** Create conversation with specified ID if not found. */
   autoCreateConversationWithId?: boolean;
   /** Access mode to apply when creating a new conversation. Ignored for existing conversations. */
-  accessControl?: ConversationAccessControl;
+  accessControl?: Pick<ConversationAccessControl, 'access_mode'>;
+  /** Read-only flag to apply when creating a new conversation. Ignored for existing conversations. */
+  readOnly?: boolean;
   /** External origin that initiated this execution, used to resolve the conversation and attribute the round. */
   origin?: ExecutionConversationOrigin;
   /** Callback delivery configuration for this execution. */

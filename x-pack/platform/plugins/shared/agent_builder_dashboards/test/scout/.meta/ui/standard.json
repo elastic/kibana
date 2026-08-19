@@ -1,0 +1,41 @@
+{
+  "sha1": "53a6498c08726b396ff47c3b7b19514ce8736f36",
+  "testChannels": [
+    "ci-on-commit",
+    "ci-batch-3h"
+  ],
+  "tests": [
+    {
+      "id": "7e2c1e1b9eb3771-9ed4b0c85c88f58",
+      "title": "Dashboard Chat entry points prefills Chat from an empty-dashboard prompt without sending",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder_dashboards/test/scout/ui/tests/dashboard_chat_entry_points.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "7e2c1e1b9eb3771-9ae1760ce3df34e",
+      "title": "Dashboard Chat entry points opens Chat from the add-panel flyout without a prefilled prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder_dashboards/test/scout/ui/tests/dashboard_chat_entry_points.spec.ts",
+        "line": 83,
+        "column": 13
+      }
+    }
+  ]
+}

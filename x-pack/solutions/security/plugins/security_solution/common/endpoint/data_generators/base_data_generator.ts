@@ -69,6 +69,91 @@ const USERS = [
   'Genevieve',
 ];
 
+const FILE_SYSTEM_PATH_NAMES = [
+  'AppData',
+  'Applications',
+  'Library',
+  'System',
+  'Users',
+  'Volumes',
+  'analytics',
+  'application',
+  'apps',
+  'base',
+  'bin',
+  'capabilities',
+  'chrome',
+  'cli',
+  'config',
+  'core',
+  'cores',
+  'custom-branding',
+  'data',
+  'data-streams',
+  'deprecations',
+  'dev',
+  'di',
+  'doc-links',
+  'docs',
+  'elasticsearch',
+  'environment',
+  'etc',
+  'examples',
+  'execution-context',
+  'fatal-errors',
+  'feature-flags',
+  'home',
+  'http',
+  'i18n',
+  'injected-metadata',
+  'integrations',
+  'licenses',
+  'lifecycle',
+  'logging',
+  'metrics',
+  'mount-utils',
+  'node',
+  'node_modules',
+  'notifications',
+  'opt',
+  'overlays',
+  'packages',
+  'platform',
+  'plugins',
+  'preboot',
+  'pricing',
+  'private',
+  'rendering',
+  'root',
+  'saved-objects',
+  'sbin',
+  'scripts',
+  'security',
+  'setup_node_env',
+  'spaces',
+  'src',
+  'stateless',
+  'status',
+  'target',
+  'test',
+  'test-helpers',
+  'theme',
+  'tmp',
+  'typings',
+  'ui-settings',
+  'usage-data',
+  'user-activity',
+  'user-profile',
+  'user-settings',
+  'user-storage',
+  'users',
+  'users_roles',
+  'usr',
+  'var',
+  'windows',
+  'x-pack',
+];
+
 const toEsSearchHit = <T extends object = object>(
   hitSource: T,
   index: string = 'some-index'
@@ -219,6 +304,16 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   protected randomHostname(): string {
     return `Host-${this.randomString(10)}`;
+  }
+
+  /**
+   * Generate a random system path
+   * @protected
+   *
+   * @param paths number of path segments to generate
+   */
+  protected randomFileSystemPath(paths: number = 3): string {
+    return this.randomArray(paths, () => this.randomChoice(FILE_SYSTEM_PATH_NAMES)).join('/');
   }
 
   /**

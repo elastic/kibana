@@ -78,11 +78,11 @@ export class OtelKubernetesFlowPage {
     }
   }
 
-  public async assertDataReceivedIndicator(): Promise<void> {
+  public async assertDataReceivedIndicator(timeout = 15 * 60_000): Promise<void> {
     await expect(
       this.exploreLogsButton,
       'Explore logs action link should be visible after data is detected'
-    ).toBeVisible();
+    ).toBeVisible({ timeout });
   }
 
   public async clickExploreLogsCTA() {

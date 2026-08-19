@@ -2,7 +2,7 @@
   "type": "shared-common",
   "id": "@kbn/ml-data-grid",
   "owner": [
-    "@elastic/ml-ui"
+    "@elastic/search-ml-ux"
   ],
   "group": "platform",
   "visibility": "private"

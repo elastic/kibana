@@ -14,7 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import { ACTION_INSPECT_PANEL, type QuickActionIds } from '@kbn/embeddable-plugin/public';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  type MetricsGridSettings,
+} from '@kbn/discover-utils';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import { stableStringify } from '@kbn/std';
@@ -117,7 +121,8 @@ export const MetricsGrid = ({
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
+  const { flyoutState, onFlyoutStateChange, profileId, gridSettings, onMetricExplored } =
+    useMetricsExperienceState();
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
@@ -255,6 +260,9 @@ export const MetricsGrid = ({
                   userSource={userSource}
                   description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
+                  profileId={profileId}
+                  gridSettings={gridSettings}
+                  onMetricExplored={onMetricExplored}
                 />
               </EuiFlexItem>
             );
@@ -294,6 +302,9 @@ interface ChartItemProps
   whereStatements?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
+  profileId: string;
+  gridSettings: MetricsGridSettings;
+  onMetricExplored?: (metricUniqueKey: string) => void;
 }
 
 const ChartItem = React.memo(
@@ -320,12 +331,29 @@ const ChartItem = React.memo(
     onFocusCell,
     onViewDetails,
     userMessages,
+    profileId,
+    gridSettings,
+    onMetricExplored,
   }: ChartItemProps) => {
-    const { profileId, gridSettings } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
       [euiTheme.colors.vis]
+    );
+
+    const recordExploredMetric = useCallback<React.MouseEventHandler<HTMLDivElement>>(
+      (event) => {
+        // Only count clicks on panel action controls (Inspect, View details, Explore in
+        // Discover, Copy to dashboard, and the overflow menu that hosts Cases), not clicks
+        // on the chart body, legend, or time series selection.
+        const isActionClick = (event.target as HTMLElement).closest(
+          '[data-test-subj^="embeddablePanelAction-"], [data-test-subj="embeddablePanelToggleMenuIcon"]'
+        );
+        if (isActionClick) {
+          onMetricExplored?.(getMetricUniqueKey(metricItem));
+        }
+      },
+      [onMetricExplored, metricItem]
     );
 
     const applicableDimensions = useStableApplicableDimensions(
@@ -375,6 +403,7 @@ const ChartItem = React.memo(
         isFocused={isFocused}
         isSelected={isSelected}
         onFocus={onFocusCell}
+        onClickCapture={recordExploredMetric}
       >
         <Chart
           id={metricItem.metricName}
@@ -454,6 +483,7 @@ const A11yGridCell = React.forwardRef(
       isFocused,
       isSelected,
       onFocus,
+      onClickCapture,
     }: React.PropsWithChildren<{
       id: string;
       rowIndex: number;
@@ -462,6 +492,7 @@ const A11yGridCell = React.forwardRef(
       isFocused: boolean;
       isSelected: boolean;
       onFocus: (rowIndex: number, colIndex: number) => void;
+      onClickCapture?: React.MouseEventHandler<HTMLDivElement>;
     }>,
     ref: React.Ref<HTMLDivElement>
   ) => {
@@ -484,6 +515,7 @@ const A11yGridCell = React.forwardRef(
         data-chart-index={index}
         tabIndex={isFocused ? 0 : -1}
         onFocus={handleFocusCell}
+        onClickCapture={onClickCapture}
         css={css`
           outline: none;
           cursor: pointer;

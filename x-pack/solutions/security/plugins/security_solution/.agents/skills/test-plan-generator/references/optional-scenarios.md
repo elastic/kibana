@@ -16,6 +16,7 @@ This file contains the Gherkin templates for optional test plan sections, and th
 - [Gherkin rules](#gherkin-rules-strictly-enforced)
 - [Tags](#tags)
 - [Priority levels](#priority-levels)
+  - [Consult the team's critical-workflows map](#consult-the-teams-critical-workflows-map)
 - [Formatting for GitHub comments](#formatting-for-github-comments)
 
 ---
@@ -221,6 +222,10 @@ Priority is assigned based on **impact**, not scenario type. An edge case or err
 - **P0 (Critical):** Failure blocks core functionality, causes data loss, or creates a security risk.
 - **P1 (High):** Failure significantly degrades an important workflow or user-facing feature.
 - **P2 (Medium):** Failure has limited impact or affects only non-critical paths.
+
+### Consult the team's critical-workflows map
+
+Before finalizing priority, look up the owning team's critical-workflows map — it lists workflows the team treats as P0/P1 by domain, which the abstract definitions above cannot encode. See [`critical-workflows.md`](critical-workflows.md) for the file-lookup convention, precedence, and the no-map fallback rule.
 
 ---
 
