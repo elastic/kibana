@@ -52,19 +52,32 @@ const createFilterExpressions = (
     ])
   );
 
-const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => ({
-  filterExpressions: new Map(),
-  filteringDimensions: [],
-  availableProjects: new Map(),
-  excludedOverrides: [],
-  filteredProjectIds: [],
-  visibleProjectIds: [],
-  selectedProjects: [],
-  ...overrides,
-  defaultProjectRouting: overrides.defaultProjectRouting ?? '_alias:*',
-  hasUserModifiedRouting: overrides.hasUserModifiedRouting ?? false,
-  originProjectId: overrides.originProjectId,
-});
+const createState = (overrides: Partial<ProjectPickerState> = {}): ProjectPickerState => {
+  const filterExpressions = overrides.filterExpressions ?? new Map();
+
+  return {
+    controlsState: 'enabled',
+    originProjectId: 'origin',
+    defaultProjectRouting: '',
+    projectRoutingStrategy: 'dynamic',
+    hasUserModifiedRouting: false,
+    filterExpressions,
+    filteringDimensions: [],
+    availableProjects: new Map(),
+    excludedOverrides: [],
+    proposedFilters: null,
+    filteredProjectIds: [],
+    isFilterSearchLoading: false,
+    filterSearchError: null,
+    visibleProjectIds: [],
+    selectedProjectIds: [],
+    currentProjectRouting: '',
+    isUsingSpaceDefaults: false,
+    displayedFilterExpressions: filterExpressions,
+    isFilterProposalPending: false,
+    ...overrides,
+  };
+};
 
 const defaultActions = {
   invertFilterExpressionOperator: jest.fn(),
@@ -115,7 +128,7 @@ describe('ProjectPickerFilterDisplay', () => {
   it('should render a badge for each applied filter expression', () => {
     renderComponent({
       filterExpressions: createFilterExpressions([[typeSecurityExpression], [envProdExpression]]),
-      selectedProjects: ['p1'],
+      selectedProjectIds: ['p1'],
     });
 
     expect(screen.getByText('_type:security')).toBeInTheDocument();
@@ -127,7 +140,7 @@ describe('ProjectPickerFilterDisplay', () => {
 
     renderComponent({
       filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      selectedProjects: ['p1'],
+      selectedProjectIds: ['p1'],
     });
 
     await user.click(screen.getByText('_type:security'));
@@ -143,7 +156,7 @@ describe('ProjectPickerFilterDisplay', () => {
     const user = userEvent.setup();
     const { onEditFilter } = renderComponent({
       filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
-      selectedProjects: ['p1'],
+      selectedProjectIds: ['p1'],
     });
 
     await user.click(screen.getByText('_type:security'));
@@ -160,7 +173,7 @@ describe('ProjectPickerFilterDisplay', () => {
       const user = userEvent.setup();
 
       renderComponent({
-        isReadOnly: true,
+        controlsState: 'disabled',
         filterExpressions: createFilterExpressions([[typeSecurityExpression]]),
       });
 
@@ -179,7 +192,7 @@ describe('ProjectPickerFilterDisplay', () => {
 
       renderComponent({
         filterExpressions: createFilterExpressions([[typeSecurityExpression, false]]),
-        selectedProjects: ['p1'],
+        selectedProjectIds: ['p1'],
       });
 
       expect(screen.getByRole('button', { name: 'Remove filter' })).toBeInTheDocument();
@@ -202,7 +215,7 @@ describe('ProjectPickerFilterDisplay', () => {
             [typeSecurityExpression],
             [envProdExpression],
           ]),
-          selectedProjects: ['p1'],
+          selectedProjectIds: ['p1'],
         },
         { currentFilterInputId: typeSecurityKey }
       );
