@@ -5,8 +5,19 @@
  * 2.0.
  */
 
-import { makeIdentity, mergeSignalsLatestPerRule, mergeEpisodeContext } from './episode_context';
-import type { SignalEntry, BlastRadiusEntry, CausalFeature } from '@kbn/significant-events-schema';
+import {
+  extractRuleUuidsFromEvents,
+  makeIdentity,
+  mergeEpisodeContext,
+  mergeSignalsLatestPerRule,
+  preserveStableNarrative,
+} from './episode_context';
+import type {
+  BlastRadiusEntry,
+  CausalFeature,
+  SignificantEvent,
+  SignalEntry,
+} from '@kbn/significant-events-schema';
 import { MAX_SIGNAL_DESCRIPTION_LENGTH } from '@kbn/significant-events-schema';
 
 const TS_EARLIER = '2024-01-01T00:00:00.000Z';
@@ -199,5 +210,81 @@ describe('mergeEpisodeContext', () => {
     );
     expect(blastRadius).toHaveLength(1);
     expect(blastRadius[0].feature_id).toBe('feat-1');
+  });
+});
+
+describe('preserveStableNarrative', () => {
+  const makeDetection = (ruleUuid: string): SignalEntry => ({
+    type: 'detection',
+    stream_name: 'logs.app',
+    description: `Signal for ${ruleUuid}`,
+    verdict: 'confirms',
+    metadata: {
+      detection_id: `det-${ruleUuid}`,
+      rule_uuid: ruleUuid,
+      change_point_type: 'spike',
+      p_value: 0.01,
+    },
+  });
+
+  const makeLatest = (ruleUuids: string[]): SignificantEvent =>
+    ({
+      '@timestamp': TS_EARLIER,
+      event_uuid: 'event-uuid',
+      event_id: 'event-id',
+      status: 'open',
+      severity: '60-high',
+      stream_names: ['logs.app'],
+      signals: ruleUuids.map(makeDetection),
+      title: 'Stored title',
+      symptom_hypothesis: 'Stored hypothesis',
+      summary: 'Stored summary',
+      confidence: 0.8,
+    } as SignificantEvent);
+
+  it('returns undefined when latestEvent is missing', () => {
+    expect(preserveStableNarrative(['rule-1'], undefined, ['rule-1'])).toBeUndefined();
+  });
+
+  it('freezes stored narrative when submitted UUIDs are empty', () => {
+    const latest = makeLatest(['rule-1']);
+    expect(preserveStableNarrative([], latest, extractRuleUuidsFromEvents([latest]))).toEqual({
+      title: 'Stored title',
+      symptom_hypothesis: 'Stored hypothesis',
+      narrativePreserved: true,
+    });
+  });
+
+  it('freezes when submitted UUIDs are a subset of stored rules', () => {
+    const latest = makeLatest(['rule-1', 'rule-2']);
+    expect(
+      preserveStableNarrative(['rule-1'], latest, extractRuleUuidsFromEvents([latest]))
+    ).toEqual({
+      title: 'Stored title',
+      symptom_hypothesis: 'Stored hypothesis',
+      narrativePreserved: true,
+    });
+  });
+
+  it('freezes a historically known rule missing from the latest snapshot', () => {
+    const older = makeLatest(['rule-legacy']);
+    const latest = makeLatest(['rule-current']);
+    latest.title = 'Latest title';
+    latest.symptom_hypothesis = 'Latest hypothesis';
+
+    expect(
+      preserveStableNarrative(['rule-legacy'], latest, extractRuleUuidsFromEvents([older, latest]))
+    ).toEqual({
+      title: 'Latest title',
+      symptom_hypothesis: 'Latest hypothesis',
+      narrativePreserved: true,
+    });
+  });
+
+  it('does not freeze when a submitted UUID is new to the episode', () => {
+    const latest = makeLatest(['rule-1']);
+    expect(
+      preserveStableNarrative(['rule-new'], latest, extractRuleUuidsFromEvents([latest]))
+    ).toBeUndefined();
   });
 });

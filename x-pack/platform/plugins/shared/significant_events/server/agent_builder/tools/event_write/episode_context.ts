@@ -25,6 +25,19 @@ export const extractRuleUuids = (signals: SignalEntry[] | undefined): string[] =
   return [...new Set(uuids)];
 };
 
+export const extractRuleUuidsFromEvents = (
+  events: Array<Pick<SignificantEvent, 'signals'> | undefined>
+): Set<string> => new Set(events.flatMap((event) => extractRuleUuids(event?.signals)));
+
+/** True when any submitted detection UUID is absent from the known episode set. */
+export const addsNewDetectionRules = (
+  submittedRuleUuids: string[],
+  knownRuleUuids: Iterable<string>
+): boolean => {
+  const known = knownRuleUuids instanceof Set ? knownRuleUuids : new Set(knownRuleUuids);
+  return submittedRuleUuids.some((uuid) => !known.has(uuid));
+};
+
 /**
  * Collision-safe (for current stream name and UUID formats) length-prefixed stream-and-rules identity used for duplicate detection.
  * Uses exact-set matching: `['A']` produces a distinct key from `['A', 'B']`.
@@ -127,10 +140,14 @@ export const mergeEpisodeContext = (
 };
 
 /**
- * When a continuation introduces no new rule UUIDs beyond those the event already carries, freezes
- * the event's stored `title` and `symptom_hypothesis` to prevent identity hijack — the scenario
- * where an unrelated condition's narrative replaces the original event title/hypothesis while the
- * old rules are still listed in `signals`.
+ * When a continuation introduces no new rule UUIDs beyond those any stored version already
+ * carries, freezes the event's stored `title` and `symptom_hypothesis` to prevent identity hijack
+ * — the scenario where an unrelated condition's narrative replaces the original event
+ * title/hypothesis while the old rules are still listed in `signals`.
+ *
+ * `knownRuleUuids` must be the union of detection UUIDs across prior docs (including latest), the
+ * same set `shouldSkipAsNoOp` uses, so a historically known rule missing from the latest snapshot
+ * is not treated as new.
  *
  * Returns frozen values plus `narrativePreserved: true` when the guard fires, or `undefined` when
  * the caller may use the submitted narrative unchanged.
@@ -140,17 +157,14 @@ export const mergeEpisodeContext = (
  */
 export const preserveStableNarrative = (
   submittedRuleUuids: string[],
-  latestEvent: SignificantEvent | undefined
+  latestEvent: SignificantEvent | undefined,
+  knownRuleUuids: Iterable<string>
 ):
   | (Pick<SignificantEvent, 'title' | 'symptom_hypothesis'> & { narrativePreserved: true })
   | undefined => {
   if (latestEvent === undefined) return undefined;
+  if (addsNewDetectionRules(submittedRuleUuids, knownRuleUuids)) return undefined;
 
-  const storedRuleSet = new Set(extractRuleUuids(latestEvent.signals));
-  const hasNewRules = submittedRuleUuids.some((uuid) => !storedRuleSet.has(uuid));
-  if (hasNewRules) return undefined;
-
-  // No new rules — freeze the stored narrative to block identity hijack.
   return {
     title: latestEvent.title,
     symptom_hypothesis: latestEvent.symptom_hypothesis,

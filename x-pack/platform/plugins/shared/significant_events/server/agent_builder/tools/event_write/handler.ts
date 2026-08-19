@@ -22,14 +22,14 @@ import {
 } from '../bulk_write';
 import { emitSignificantEventWriteTriggers } from '../../../workflows/triggers/emit_significant_event_triggers';
 import {
+  addsNewDetectionRules,
   extractRuleUuids,
+  extractRuleUuidsFromEvents,
   makeIdentity,
   mergeEpisodeContext,
   mergeSignalsLatestPerRule,
   preserveStableNarrative,
 } from './episode_context';
-
-export { makeIdentity, mergeEpisodeContext, mergeSignalsLatestPerRule } from './episode_context';
 
 export type EventsWriteInput = Pick<
   SignificantEvent,
@@ -128,10 +128,8 @@ const shouldSkipAsNoOp = (
 ): boolean => {
   if (latestEvent === undefined) return false;
 
-  const priorRuleUuids = new Set(priorDocs.flatMap((event) => extractRuleUuids(event.signals)));
-  const addsRule = extractRuleUuids(candidate.input.signals).some(
-    (ruleUuid) => !priorRuleUuids.has(ruleUuid)
-  );
+  const knownRuleUuids = extractRuleUuidsFromEvents([...priorDocs, latestEvent]);
+  const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
 
   return (
     latestEvent.status === candidate.input.status &&
@@ -376,7 +374,11 @@ const buildPendingWrite = (
   // prevent identity hijack — the scenario where an unrelated condition's narrative replaces the
   // original event identity while the old rules are still listed in signals (#1082).
   const frozenNarrative = isContinuation
-    ? preserveStableNarrative(extractRuleUuids(candidate.input.signals), latestEvent)
+    ? preserveStableNarrative(
+        extractRuleUuids(candidate.input.signals),
+        latestEvent,
+        extractRuleUuidsFromEvents([...priorDocs, latestEvent])
+      )
     : undefined;
 
   return {
