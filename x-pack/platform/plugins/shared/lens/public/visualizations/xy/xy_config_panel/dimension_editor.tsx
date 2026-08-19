@@ -175,12 +175,6 @@ export function DataDimensionEditor(
       ? { ...DEFAULT_COLOR_MAPPING_CONFIG, paletteId: getDefaultPalette(layer.seriesType) }
       : undefined;
 
-    const datasourceLayer = props.frame.datasourceLayers[layer.layerId];
-    const hasOtherBucket = layer.splitAccessors?.some(
-      (splitAccessor) =>
-        datasourceLayer?.getOperationForColumnId(splitAccessor)?.hasOthersAggregation
-    );
-
     return !layer.collapseFn ? (
       <div className="lnsIndexPatternDimensionEditor--padded">
         <ColorMappingByTerms
@@ -196,7 +190,6 @@ export function DataDimensionEditor(
           categories={splitCategories}
           formatter={formatter}
           allowCustomMatch={allowCustomMatch}
-          hasOthersAggregation={hasOtherBucket}
         />
       </div>
     ) : null;

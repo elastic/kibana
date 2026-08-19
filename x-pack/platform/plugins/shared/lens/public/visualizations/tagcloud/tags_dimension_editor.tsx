@@ -91,12 +91,6 @@ export function TagsDimensionEditor({
         paletteService={paletteService}
         formatter={formatter}
         isInlineEditing={isInlineEditing}
-        hasOthersAggregation={
-          state.tagAccessor
-            ? frame.datasourceLayers[state.layerId]?.getOperationForColumnId(state.tagAccessor)
-                ?.hasOthersAggregation
-            : undefined
-        }
       />
     </div>
   );

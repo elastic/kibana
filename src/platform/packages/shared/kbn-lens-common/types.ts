@@ -290,7 +290,6 @@ export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
   hasReducedTimeRange: boolean;
   inMetricDimension?: boolean;
-  hasOthersAggregation?: boolean;
 }
 
 export interface DataSourceInfo {

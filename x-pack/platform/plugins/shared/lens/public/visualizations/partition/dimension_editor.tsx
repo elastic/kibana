@@ -142,9 +142,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
           paletteService={props.paletteService}
           formatter={formatter}
           isInlineEditing={props.isInlineEditing}
-          hasOthersAggregation={
-            props.datasource?.getOperationForColumnId(props.accessor)?.hasOthersAggregation
-          }
         />
       )}
 

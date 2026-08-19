@@ -204,9 +204,6 @@ export function columnToOperation(
     hasArraySupport:
       isColumnOfType<LastValueIndexPatternColumn>('last_value', column) &&
       column.params.showArrayValues,
-    hasOthersAggregation: isColumnOfType<TermsIndexPatternColumn>('terms', column)
-      ? column.params.otherBucket
-      : undefined,
   };
 }
 
