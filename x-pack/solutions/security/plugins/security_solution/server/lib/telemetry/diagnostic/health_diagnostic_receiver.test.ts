@@ -331,7 +331,7 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
       });
     });
 
-    test('ESQL query with lowercase from clause is blocked', (done) => {
+    test('ESQL query with lowercase FROM clause is blocked', (done) => {
       const execQuery = mkExecV1(QueryType.ESQL, {
         query: 'from logs-* | stats count() by user.name',
       });
