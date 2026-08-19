@@ -85,19 +85,6 @@ test('buildCommentBody mentions the owners and includes the marker', () => {
   assert.ok(body.includes('@copilot'));
 });
 
-test('a PR whose files resolve no codeowners is not pinged', async () => {
-  await withFixtureAndNow(async () => {
-    const state = scenarioState();
-    state.files[1] = ['totally/unowned/path.xyz'];
-    process.env.DRY_RUN = 'false';
-    await reminder({ github: makeGithub(state), context, core: silentCore });
-
-    assert.ok(!state.posted.some((c) => c.issue_number === 1));
-    // Other due PRs are unaffected.
-    assert.ok(state.posted.some((c) => c.issue_number === 5));
-  });
-});
-
 // --- Full sweep integration against a mocked Octokit -----------------------
 
 function makeGithub(state) {
@@ -108,20 +95,24 @@ function makeGithub(state) {
       repos: { get: async () => ({ data: { default_branch: 'main' } }) },
       issues: {
         listForRepo: async () => ({ data: state.candidates }),
-        listEventsForTimeline: async ({ issue_number }) => ({
-          data: state.timeline[issue_number] || [],
+        listEventsForTimeline: async ({ issue_number: issueNumber }) => ({
+          data: state.timeline[issueNumber] || [],
         }),
-        listComments: async ({ issue_number }) => ({ data: state.comments[issue_number] || [] }),
+        listComments: async ({ issue_number: issueNumber }) => ({
+          data: state.comments[issueNumber] || [],
+        }),
         createComment: async (args) => {
           state.posted.push(args);
           return { data: {} };
         },
       },
       pulls: {
-        get: async ({ pull_number }) => ({ data: state.prs[pull_number] }),
-        listReviews: async ({ pull_number }) => ({ data: state.reviews[pull_number] || [] }),
-        listFiles: async ({ pull_number }) => ({
-          data: (state.files[pull_number] || []).map((filename) => ({ filename })),
+        get: async ({ pull_number: pullNumber }) => ({ data: state.prs[pullNumber] }),
+        listReviews: async ({ pull_number: pullNumber }) => ({
+          data: state.reviews[pullNumber] || [],
+        }),
+        listFiles: async ({ pull_number: pullNumber }) => ({
+          data: (state.files[pullNumber] || []).map((filename) => ({ filename })),
         }),
       },
     },
@@ -175,7 +166,7 @@ function scenarioState() {
       // #5 was already pinged by us 4 days ago -> due for a re-ping.
       5: [
         {
-          user: { login: 'github-actions[bot]' },
+          user: { login: 'kibanamachine' },
           body: `...\n${reminder.REMINDER_MARKER}`,
           created_at: iso('2026-08-14'),
         },
@@ -203,6 +194,19 @@ function withFixtureAndNow(fn) {
 
 const context = { repo: { owner: 'elastic', repo: 'kibana' } };
 const silentCore = { info() {}, warning() {} };
+
+test('a PR whose files resolve no codeowners is not pinged', async () => {
+  await withFixtureAndNow(async () => {
+    const state = scenarioState();
+    state.files[1] = ['totally/unowned/path.xyz'];
+    process.env.DRY_RUN = 'false';
+    await reminder({ github: makeGithub(state), context, core: silentCore });
+
+    assert.ok(!state.posted.some((c) => c.issue_number === 1));
+    // Other due PRs are unaffected.
+    assert.ok(state.posted.some((c) => c.issue_number === 5));
+  });
+});
 
 test('sweep pings the first due, ready, unreviewed PR with its codeowners', async () => {
   await withFixtureAndNow(async () => {
