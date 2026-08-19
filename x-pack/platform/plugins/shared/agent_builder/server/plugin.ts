@@ -344,7 +344,7 @@ export class AgentBuilderPlugin
   private async runMigrations(elasticsearch: CoreStart['elasticsearch']): Promise<void> {
     const logger = this.logger.get('migrations');
     const esClient = elasticsearch.client.asInternalUser;
-    runToolIdMigrations(logger, esClient);
+    await runToolIdMigrations(logger, esClient);
   }
 
   /**
