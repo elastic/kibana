@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/mitre-attack-plugin",
+  "owner": [
+    "@elastic/detection-rule-management"
+  ],
+  "group": "security",
+  "visibility": "private",
+  "description": "Saved Objects-backed MITRE ATT&CK data for Security Solution",
+  "plugin": {
+    "id": "mitreAttack",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "mitreAttack"
+    ],
+    "requiredPlugins": [],
+    "optionalPlugins": []
+  }
+}

@@ -7639,6 +7639,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/mitre-attack-plugin@link:x-pack/solutions/security/plugins/mitre_attack":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-agg-utils@link:x-pack/platform/packages/private/ml/agg_utils":
   version "0.0.0"
   uid ""

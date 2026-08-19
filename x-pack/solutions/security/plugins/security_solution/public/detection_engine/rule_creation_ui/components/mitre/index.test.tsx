@@ -15,6 +15,10 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
 }));
 
+jest.mock('../../../rule_management/api/hooks/use_mitre_configuration', () => ({
+  useMitreConfiguration: jest.fn(() => ({ mitreConfig: null, isLoading: false })),
+}));
+
 describe('AddMitreThreat', () => {
   it('renders correctly', () => {
     const Component = () => {

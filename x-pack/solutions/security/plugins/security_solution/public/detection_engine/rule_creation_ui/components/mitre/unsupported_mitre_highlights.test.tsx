@@ -19,7 +19,7 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({
+const mockMitreConfig = {
   tactics: [
     {
       name: 'Tactic 1',
@@ -66,6 +66,10 @@ jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques
       value: 'subtechnique1',
     },
   ],
+};
+
+jest.mock('../../../rule_management/api/hooks/use_mitre_configuration', () => ({
+  useMitreConfiguration: jest.fn(() => ({ mitreConfig: mockMitreConfig, isLoading: false })),
 }));
 
 const MITRE_FRAMEWORK = 'MITRE ATT&CK';

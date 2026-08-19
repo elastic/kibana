@@ -17,14 +17,13 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => ({
+const mockMitreConfig = {
   tactics: [
     {
       id: 'TA0005',
       name: 'Defense Evasion',
       label: 'Defense Evasion (TA0005)',
       reference: 'https://attack.mitre.org/tactics/TA0005/',
-      text: 'Defense Evasion',
       value: 'defenseEvasion',
     },
   ],
@@ -49,6 +48,10 @@ jest.mock('../../../../../common/detection_engine/mitre/mitre_tactics_techniques
       value: 'bypassUserAccountControl',
     },
   ],
+};
+
+jest.mock('../../../rule_management/api/hooks/use_mitre_configuration', () => ({
+  useMitreConfiguration: jest.fn(() => ({ mitreConfig: mockMitreConfig, isLoading: false })),
 }));
 
 const MITRE_FRAMEWORK = 'MITRE ATT&CK';
