@@ -13,6 +13,11 @@ const sandboxRootCss = css`
   flex-direction: column;
 `;
 
+const timeFieldSelectCss = css`
+  width: 200px;
+  min-width: 0;
+`;
+
 const loadingCenterCss = css`
   min-height: 200px;
 `;
@@ -74,6 +79,7 @@ export const useQuerySandboxStyles = ({ euiTheme }: UseEuiTheme) => {
     headerBlockCss,
     editorBodyCss,
     editorResizeHandleCss,
+    timeFieldSelectCss,
     loadingCenterCss,
     resultsSectionCss,
   };

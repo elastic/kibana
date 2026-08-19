@@ -148,6 +148,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     headerBlockCss,
     editorBodyCss,
     editorResizeHandleCss,
+    timeFieldSelectCss,
     loadingCenterCss,
     resultsSectionCss,
   } = useQuerySandboxStyles(euiThemeContext);
@@ -358,7 +359,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
       </div>
 
       <EuiPanel hasBorder paddingSize="m" data-test-subj="querySandboxEditorPanel">
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
           <EuiFlexItem grow={false}>
             <EuiToolTip
               content={i18n.translate(
@@ -381,7 +382,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
               </EuiButton>
             </EuiToolTip>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
+          <EuiFlexItem grow={false} css={timeFieldSelectCss}>
             <EuiSelect
               options={timeFieldOptions}
               value={currentTimeFieldIsOption ? timeField : ''}
