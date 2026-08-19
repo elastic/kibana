@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
+import { apiTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 
-import { apiTest, testData } from '../fixtures';
+import { COMMON_HEADERS } from '../fixtures/constants';
 
 const GET_SETUP_PATH = 'internal/spaces/_initial_solution_setup';
 const COMPLETE_SETUP_PATH = 'internal/spaces/_complete_initial_solution_setup';
@@ -25,12 +25,12 @@ apiTest.describe('Initial solution setup API', { tag: tags.stateful.classic }, (
   apiTest('enforces authorization and completes setup', async ({ apiClient, apiServices }) => {
     await apiTest.step('viewer cannot read or complete setup', async () => {
       const getResponse = await apiClient.get(GET_SETUP_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...viewerCookieHeader },
+        headers: { ...COMMON_HEADERS, ...viewerCookieHeader },
       });
       expect(getResponse).toHaveStatusCode(403);
 
       const postResponse = await apiClient.post(COMPLETE_SETUP_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...viewerCookieHeader },
+        headers: { ...COMMON_HEADERS, ...viewerCookieHeader },
         body: { solution: 'es' },
       });
       expect(postResponse).toHaveStatusCode(403);
@@ -38,7 +38,7 @@ apiTest.describe('Initial solution setup API', { tag: tags.stateful.classic }, (
 
     await apiTest.step('admin sees pending setup', async () => {
       const response = await apiClient.get(GET_SETUP_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...adminCookieHeader },
+        headers: { ...COMMON_HEADERS, ...adminCookieHeader },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -47,7 +47,7 @@ apiTest.describe('Initial solution setup API', { tag: tags.stateful.classic }, (
 
     await apiTest.step('admin completes setup', async () => {
       const response = await apiClient.post(COMPLETE_SETUP_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...adminCookieHeader },
+        headers: { ...COMMON_HEADERS, ...adminCookieHeader },
         body: { solution: 'es' },
       });
 
@@ -60,7 +60,7 @@ apiTest.describe('Initial solution setup API', { tag: tags.stateful.classic }, (
 
     await apiTest.step('setup remains complete', async () => {
       const response = await apiClient.get(GET_SETUP_PATH, {
-        headers: { ...testData.COMMON_HEADERS, ...adminCookieHeader },
+        headers: { ...COMMON_HEADERS, ...adminCookieHeader },
       });
 
       expect(response).toHaveStatusCode(200);
