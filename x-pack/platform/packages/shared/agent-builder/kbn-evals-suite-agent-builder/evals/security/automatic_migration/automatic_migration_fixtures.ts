@@ -16,14 +16,26 @@ const RESOURCES_INDEX = '.kibana-siem-rule-migrations-resources-default';
 export interface SeededMigrationFixtures {
   migrationId: string;
   migrationName: string;
-  ruleCounts: { total: number; completed: number; failed: number; pending: number };
+  ruleCounts: {
+    total: number;
+    completed: number;
+    partial: number;
+    untranslatable: number;
+    failed: number;
+    pending: number;
+  };
 }
 
 interface SeedOptions {
   esClient: EsClient;
   log: ToolingLog;
   name?: string;
+  /** Fully translated completed rules (translation_result: 'full') */
   completed?: number;
+  /** Partially translated rules (translation_result: 'partial', status: 'completed') */
+  partial?: number;
+  /** Untranslatable rules (translation_result: 'untranslatable', status: 'completed') */
+  untranslatable?: number;
   failed?: number;
   pending?: number;
   migrationStatus?: string;
@@ -82,6 +94,8 @@ export async function seedRuleMigration({
   log,
   name = 'Splunk Q1',
   completed = 2,
+  partial = 0,
+  untranslatable = 0,
   failed = 1,
   pending = 0,
   migrationStatus,
@@ -89,16 +103,41 @@ export async function seedRuleMigration({
 }: SeedOptions): Promise<SeedResult> {
   try {
     const migrationId = randomUUID();
-    const total = completed + failed + pending;
+    const total = completed + partial + untranslatable + failed + pending;
     const now = new Date().toISOString();
 
-    const statuses = [
-      ...Array<string>(failed).fill('failed'),
-      ...Array<string>(pending).fill('pending'),
-      ...Array<string>(completed).fill('completed'),
+    interface RuleSpec {
+      status: string;
+      translation_result?: string;
+      title: string;
+    }
+    const ruleSpecs: RuleSpec[] = [
+      ...Array.from({ length: failed }, (_, i) => ({
+        status: 'failed',
+        title: `Eval rule failed ${i + 1}`,
+      })),
+      ...Array.from({ length: pending }, (_, i) => ({
+        status: 'pending',
+        title: `Eval rule pending ${i + 1}`,
+      })),
+      ...Array.from({ length: completed }, (_, i) => ({
+        status: 'completed',
+        translation_result: 'full',
+        title: `Eval rule completed ${i + 1}`,
+      })),
+      ...Array.from({ length: partial }, (_, i) => ({
+        status: 'completed',
+        translation_result: 'partial',
+        title: `Eval rule partial ${i + 1}`,
+      })),
+      ...Array.from({ length: untranslatable }, (_, i) => ({
+        status: 'completed',
+        translation_result: 'untranslatable',
+        title: `Eval rule untranslatable ${i + 1}`,
+      })),
     ];
 
-    const ruleDocs = statuses.flatMap((status) => [
+    const ruleDocs = ruleSpecs.flatMap(({ status, translation_result, title }) => [
       { create: { _index: RULES_INDEX } },
       {
         '@timestamp': now,
@@ -106,12 +145,13 @@ export async function seedRuleMigration({
         original_rule: {
           id: randomUUID(),
           vendor,
-          title: `Eval rule ${status}`,
+          title,
           description: 'Test rule for eval seeding',
           query: '| search index=main',
           query_language: 'spl',
         },
         status,
+        ...(translation_result ? { translation_result } : {}),
         updated_at: now,
       },
     ]);
@@ -138,7 +178,7 @@ export async function seedRuleMigration({
       fixtures: {
         migrationId,
         migrationName: name,
-        ruleCounts: { total, completed, failed, pending },
+        ruleCounts: { total, completed, partial, untranslatable, failed, pending },
       },
       cleanup: async () => {
         try {

@@ -323,6 +323,127 @@ using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
       }
     );
 
+    evaluate.describe(
+      'complete flow: reprocesses not_fully_translated rules when all params supplied upfront',
+      () => {
+        let teardownMigration: (() => Promise<void>) | undefined;
+
+        evaluate.beforeAll(async ({ esClient, log }) => {
+          const seeded = await seedRuleMigration({
+            esClient,
+            log,
+            name: 'Splunk Partial',
+            vendor: 'splunk',
+            completed: 2,
+            partial: 2,
+            untranslatable: 1,
+            failed: 0,
+            pending: 0,
+            migrationStatus: 'finished',
+          });
+          teardownMigration = seeded.cleanup;
+        });
+
+        evaluate.afterAll(async () => {
+          await teardownMigration?.();
+        });
+
+        evaluate(
+          'reprocesses not_fully_translated rules end-to-end when connector and proceed are specified in the first message',
+          async ({ evaluateDataset }) => {
+            await evaluateDataset({
+              dataset: {
+                name: 'agent builder: automatic-migration-reprocess-not-fully-translated-end-to-end',
+                description: `Validates that when the user asks to reprocess partially translated rules
+and supplies the connector upfront, the start skill calls start_rule_migration with
+retry: "not_fully_translated" in a single turn (via autoConfirm).
+The seeded migration has 2 partially translated and 1 untranslatable rule.`,
+                examples: [
+                  {
+                    input: {
+                      question: `Reprocess the partially translated rules in my Splunk Partial migration using Opus 4.6. Don't ask any questions.`,
+                    },
+                    output: {
+                      expected: `I have reprocessed the partially translated and untranslatable rules in your
+"Splunk Partial" migration using the Opus 4.6 connector. The reprocessing is running asynchronously.`,
+                    },
+                    metadata: {
+                      query_intent:
+                        'Reprocess not_fully_translated Rule Migration - End-to-end with autoConfirm',
+                      expectedSkill: 'automatic-migration-rules-start-migration',
+                      autoConfirm: true,
+                      expectedToolId: 'security.siem_migration.start_rule_migration',
+                      requiredTerms: ['asynchronously'],
+                    },
+                  },
+                ],
+              },
+            });
+          }
+        );
+      }
+    );
+
+    evaluate.describe(
+      'complete flow: reprocesses selected rules by title when all params supplied upfront',
+      () => {
+        let teardownMigration: (() => Promise<void>) | undefined;
+
+        evaluate.beforeAll(async ({ esClient, log }) => {
+          const seeded = await seedRuleMigration({
+            esClient,
+            log,
+            name: 'Splunk Selected',
+            vendor: 'splunk',
+            completed: 3,
+            failed: 2,
+            pending: 0,
+            migrationStatus: 'finished',
+          });
+          teardownMigration = seeded.cleanup;
+        });
+
+        evaluate.afterAll(async () => {
+          await teardownMigration?.();
+        });
+
+        evaluate(
+          'reprocesses selected rules end-to-end: resolves titles to ids via get_migration_rules then calls start_rule_migration',
+          async ({ evaluateDataset }) => {
+            await evaluateDataset({
+              dataset: {
+                name: 'agent builder: automatic-migration-reprocess-selected-end-to-end',
+                description: `Validates that when the user names specific rules to reprocess, the start
+skill calls get_migration_rules to resolve titles to ids, then calls start_rule_migration
+with retry: "selected" and selection.ids in a single turn (via autoConfirm).
+The seeded migration has 3 completed and 2 failed rules with predictable titles.`,
+                examples: [
+                  {
+                    input: {
+                      question: `In my Splunk Selected migration, reprocess only "Eval rule completed 1" and "Eval rule failed 1" using Opus 4.6. Don't ask any questions.`,
+                    },
+                    output: {
+                      expected: `I have reprocessed the 2 selected rules ("Eval rule completed 1" and
+"Eval rule failed 1") in your "Splunk Selected" migration using the Opus 4.6 connector.
+The reprocessing is running asynchronously.`,
+                    },
+                    metadata: {
+                      query_intent:
+                        'Reprocess selected Rule Migration - End-to-end with autoConfirm',
+                      expectedSkill: 'automatic-migration-rules-start-migration',
+                      autoConfirm: true,
+                      expectedToolId: 'security.siem_migration.start_rule_migration',
+                      requiredTerms: ['asynchronously'],
+                    },
+                  },
+                ],
+              },
+            });
+          }
+        );
+      }
+    );
+
     evaluate.describe('complete flow: starts migration when all params supplied upfront', () => {
       let teardownMigration: (() => Promise<void>) | undefined;
       let teardownResources: (() => Promise<void>) | undefined;
