@@ -119,7 +119,7 @@ const DESTRUCTIVE_DEFAULTS: Omit<McpToolAnnotations, 'title'> = {
   readOnlyHint: false,
   destructiveHint: true,
   idempotentHint: false,
-  openWorldHint: false,
+  openWorldHint: true,
 };
 
 const getDefaultAnnotationsForToolType = (tool: StaticToolRegistration): McpToolAnnotations => {

@@ -5,18 +5,18 @@ pageLoadAssetSize:
   agentBuilderDashboards: 3074
   agentBuilderPlatform: 21685
   agentBuilderSml: 328
-  agentBuilderVisualizations: 1284
+  agentBuilderVisualizations: 1282
   agentBuilderWorkflows: 761
   aiAssistantManagementSelection: 355
   aiops: 317
   alerting: 8789
-  alertingVTwo: 17111
+  alertingVTwo: 48749
   apm: 31419
   apmShared: 1896
   apmSourcesAccess: 906
   automaticImport: 13257
   banners: 1157
-  canvas: 6000
+  canvas: 5965
   cases: 2799
   charts: 1188
   clientApps: 1017
@@ -36,7 +36,7 @@ pageLoadAssetSize:
   core: 320
   cps: 5002
   crossClusterReplication: 7691
-  customContent: 1848
+  customContent: 1617
   customIntegrations: 636
   dashboard: 452
   dashboardMarkdown: 4012
@@ -79,7 +79,7 @@ pageLoadAssetSize:
   expressionTagcloud: 6629
   expressionXY: 566
   features: 1218
-  feedback: 3622
+  feedback: 4484
   fieldFormats: 4136
   fieldsMetadata: 1568
   files: 3957
@@ -100,7 +100,7 @@ pageLoadAssetSize:
   inference: 5564
   inferenceWorkflows: 895
   infra: 45673
-  ingestHub: 7958
+  ingestHub: 7906
   ingestPipelines: 270
   inputControlVis: 3216
   inspectComponent: 1152
@@ -137,15 +137,15 @@ pageLoadAssetSize:
   observability: 3614
   observabilityAgentBuilder: 679
   observabilityAIAssistant: 1967
-  observabilityAIAssistantApp: 6377
+  observabilityAIAssistantApp: 5918
   observabilityAiAssistantManagement: 2011
   observabilityLogsExplorer: 1083
-  observabilityOnboarding: 7767
+  observabilityOnboarding: 7685
   observabilityShared: 7496
   osquery: 13046
   painlessLab: 2282
-  pnd: 4501
-  presentationUtil: 669
+  pnd: 4489
+  presentationUtil: 350
   productDocBase: 4218
   productIntercept: 4738
   profiling: 12944
@@ -185,7 +185,7 @@ pageLoadAssetSize:
   serverlessWorkplaceAI: 3338
   sessionView: 379
   share: 379
-  shared-core: 348361
+  shared-core: 338339
   shared-misc: 114567
   shared-packages: 4546017
   shared-plugins: 13536562
@@ -225,7 +225,7 @@ pageLoadAssetSize:
   visTypeTagcloud: 3118
   visTypeTimelion: 6660
   visTypeTimeseries: 12718
-  visTypeVega: 4860
+  visTypeVega: 3994
   visTypeVislib: 21971
   visTypeXy: 24402
   visualizationListing: 1339
