@@ -21,9 +21,7 @@ class ConversationTemplateRegistryImpl implements ConversationTemplateRegistry {
   register(template: ConversationTemplate): void {
     validateTemplateDefinition(template);
     if (this.templates.has(template.id)) {
-      throw new Error(
-        `Conversation template with id "${template.id}" is already registered`
-      );
+      throw new Error(`Conversation template with id "${template.id}" is already registered`);
     }
     this.templates.set(template.id, template);
   }

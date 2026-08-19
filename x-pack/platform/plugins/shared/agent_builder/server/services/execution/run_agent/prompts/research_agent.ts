@@ -8,6 +8,7 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
 import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
+import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import {
   getSkillsInstructions,
   getRelevantSkillsPointerInstructions,
@@ -21,7 +22,6 @@ import { getFileSystemInstructions } from './utils/filestore';
 import type { PromptFactoryParams, ResearchAgentPromptRuntimeParams } from './types';
 import { renderVisualizationPrompt } from './utils/visualizations';
 import { renderRenderersPrompt } from './utils/renderers';
-import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 
 type ResearchAgentPromptParams = PromptFactoryParams & ResearchAgentPromptRuntimeParams;
 
