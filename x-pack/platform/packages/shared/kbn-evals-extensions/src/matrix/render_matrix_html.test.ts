@@ -22,16 +22,35 @@ const mockConfig: MatrixConfig = {
   excludeEvaluators: [],
   overall: { label: 'Overall', mode: 'weighted' },
   showOverall: true,
-  columns: [{ id: 'alert', label: 'Alert Analysis', suites: ['suite-1'], weight: 1 }],
+  columns: [
+    {
+      id: 'alert',
+      label: 'Alert Analysis',
+      group: 'Agent Builder',
+      suites: ['suite-1'],
+      weight: 1,
+    },
+    {
+      id: 'threat',
+      label: 'Threat Hunting',
+      group: 'Agent Builder',
+      suites: ['suite-2'],
+      weight: 1,
+    },
+  ],
   composites: [],
   models: [{ id: 'test-model', label: 'Test Model', openSource: false }],
 };
 
 const mockMatrix: Matrix = {
-  columns: [{ id: 'alert', label: 'Alert Analysis' }],
+  columns: [
+    { id: 'alert', label: 'Alert Analysis', group: 'Agent Builder' },
+    { id: 'threat', label: 'Threat Hunting', group: 'Agent Builder' },
+  ],
   composites: [],
   displayColumns: [
     { id: 'alert', label: 'Alert Analysis', kind: 'base' },
+    { id: 'threat', label: 'Threat Hunting', kind: 'base' },
     { id: '__overall__', label: 'Overall', kind: 'overall' },
   ],
   overallLabel: 'Overall',
@@ -40,8 +59,11 @@ const mockMatrix: Matrix = {
       modelId: 'test-model',
       modelLabel: 'Test Model',
       openSource: false,
-      cells: { alert: { kind: 'score', value: 8.5 } },
-      overall: { kind: 'score', value: 8.5 },
+      cells: {
+        alert: { kind: 'score', value: 8.5 },
+        threat: { kind: 'score', value: 7.4 },
+      },
+      overall: { kind: 'score', value: 7.95 },
     },
   ],
   openSource: [],
@@ -136,6 +158,30 @@ describe('renderMatrixHtml', () => {
     // The 'triage' column resolves its trace via the suite ID fallback.
     expect(html).toContain('Triage this alert');
     expect(html).toContain('alert.load');
+  });
+
+  it('renders grouped column headers when groups are present', () => {
+    const html = renderMatrixHtml(mockMatrix, mockConfig);
+    expect(html).toContain('colspan="2"');
+    expect(html).toContain('Agent Builder');
+  });
+
+  it('does not render a grouped header when no groups are present', () => {
+    const ungroupedConfig: MatrixConfig = {
+      ...mockConfig,
+      columns: [{ id: 'alert', label: 'Alert Analysis', suites: ['suite-1'], weight: 1 }],
+    };
+    const ungroupedMatrix: Matrix = {
+      ...mockMatrix,
+      columns: [{ id: 'alert', label: 'Alert Analysis' }],
+      displayColumns: [
+        { id: 'alert', label: 'Alert Analysis', kind: 'base' },
+        { id: '__overall__', label: 'Overall', kind: 'overall' },
+      ],
+    };
+    const html = renderMatrixHtml(ungroupedMatrix, ungroupedConfig);
+    expect(html).not.toContain('colspan="2"');
+    expect(html).not.toContain('Agent Builder');
   });
 
   it('strips non-http(s) link targets from markdown answers', () => {

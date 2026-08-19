@@ -205,8 +205,33 @@ const stepHtml = (step: TraceStep, index: number): string => {
   )}</div>`;
 };
 
-const renderSummaryTable = (matrix: Matrix): string => {
-  const header = `<tr><th>Model</th>${matrix.displayColumns
+const renderSummaryTable = (matrix: Matrix, config: MatrixConfig): string => {
+  const groupedColumns = matrix.displayColumns.map((col) => {
+    const source = col.kind === 'overall' ? undefined : config.columns.find((c) => c.id === col.id);
+    return { ...col, group: source?.group };
+  });
+  const hasGroups = groupedColumns.some((col) => col.group);
+
+  const groupHeader = hasGroups
+    ? `<tr><th></th>${(() => {
+        let html = '';
+        let i = 0;
+        while (i < groupedColumns.length) {
+          const group = groupedColumns[i].group;
+          let span = 1;
+          while (i + span < groupedColumns.length && groupedColumns[i + span].group === group) {
+            span += 1;
+          }
+          html += group
+            ? `<th colspan="${span}">${esc(group)}</th>`
+            : `<th colspan="${span}"></th>`;
+          i += span;
+        }
+        return html;
+      })()}</tr>`
+    : '';
+
+  const header = `${groupHeader}<tr><th>Model</th>${matrix.displayColumns
     .map((c) => `<th>${esc(c.label)}</th>`)
     .join('')}</tr>`;
   const rows = [...matrix.proprietary, ...matrix.openSource]
@@ -325,7 +350,7 @@ export const renderMatrixHtml = (
     .filter(Boolean)
     .join(' · ');
 
-  const summaryTable = renderSummaryTable(matrix);
+  const summaryTable = renderSummaryTable(matrix, config);
   const modelCards =
     (matrix.proprietary.length > 0
       ? renderModelCard(matrix.proprietary, matrix, config, traces)
