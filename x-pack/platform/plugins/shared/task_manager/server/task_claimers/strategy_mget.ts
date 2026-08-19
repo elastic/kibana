@@ -68,6 +68,13 @@ interface OwnershipClaimingOpts {
 
 const SIZE_MULTIPLIER_FOR_TASK_FETCH = 4;
 
+// The candidate search only needs task metadata to run capacity accounting and
+// staleness checks; `state`/`params` can be arbitrarily large and are re-fetched
+// in full (for the tasks actually claimed) by the bulkGet at the end of the
+// claim cycle, so excluding them here shrinks every candidate search response
+// without changing how many searches are issued.
+const CANDIDATE_SEARCH_SOURCE_EXCLUDES = ['task.state', 'task.params'];
+
 export async function claimAvailableTasksMget(
   opts: TaskClaimerOpts
 ): Promise<ClaimOwnershipResult> {
@@ -163,9 +170,42 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const leftOverTasks: ConcreteTaskInstance[] = [];
   const tasksWithMalformedData: ConcreteTaskInstance[] = [];
 
+  // for batchable task types, only the task that opens a new batch (every
+  // `batchSize`-th task of that type) is charged capacity; the rest of the
+  // batch rides along on that one slot. If the opening task doesn't fit, the
+  // whole batch is left over, even though its continuation tasks cost nothing.
+  const batchTaskCountByType = new Map<string, number>();
+  const batchAdmittedByType = new Map<string, boolean>();
+
   let capacityAccumulator = 0;
   for (const task of candidateTasks) {
+    const definition = definitions.get(task.taskType);
     const taskCost = getTaskCost(task, definitions);
+
+    if (definition?.createBatchTaskRunner) {
+      const batchSize = definition.batchSize ?? 1;
+      const tasksSeenForType = batchTaskCountByType.get(task.taskType) ?? 0;
+      const opensNewBatch = tasksSeenForType % batchSize === 0;
+      batchTaskCountByType.set(task.taskType, tasksSeenForType + 1);
+
+      if (opensNewBatch) {
+        const admitted = capacityAccumulator + taskCost <= initialCapacity;
+        batchAdmittedByType.set(task.taskType, admitted);
+        if (admitted) {
+          tasksToRun.push(task);
+          capacityAccumulator += taskCost;
+        } else {
+          leftOverTasks.push(task);
+          capacityAccumulator = initialCapacity;
+        }
+      } else if (batchAdmittedByType.get(task.taskType)) {
+        tasksToRun.push(task);
+      } else {
+        leftOverTasks.push(task);
+      }
+      continue;
+    }
+
     if (capacityAccumulator + taskCost <= initialCapacity) {
       tasksToRun.push(task);
       capacityAccumulator += taskCost;
@@ -343,6 +383,7 @@ async function searchAvailableTasks({
       sort, // note: we could optimize this to not sort on priority, for this case
       size,
       seq_no_primary_term: true,
+      _source_excludes: CANDIDATE_SEARCH_SOURCE_EXCLUDES,
     });
   }
 
@@ -370,6 +411,38 @@ async function searchAvailableTasks({
       sort,
       size: capacity * SIZE_MULTIPLIER_FOR_TASK_FETCH,
       seq_no_primary_term: true,
+      _source_excludes: CANDIDATE_SEARCH_SOURCE_EXCLUDES,
+    });
+  }
+
+  // add searches for batchable types: each gets a dedicated search fetching
+  // up to `batchSize` docs per available slot, so a single poll cycle can
+  // fill several batches for the type. No over-fetch multiplier here since
+  // batch sizes can be large enough that a 4x multiplier is wasteful.
+  for (const [type, { batchSize, slots }] of claimPartitions.batchTypes) {
+    const queryForBatchTasks = mustBeAllOf(
+      // Task must be enabled
+      EnabledTask,
+      // Specific task type
+      OneOfTaskTypes('task.taskType', [type]),
+      // Either a task with idle status and runAt <= now or
+      // status running or claiming with a retryAt <= now.
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
+      // must have a status that isn't 'unrecognized'
+      RecognizedTask
+    );
+
+    const query = matchesClauses(
+      queryForBatchTasks,
+      filterDownBy(InactiveTasks),
+      partitions.length ? tasksWithPartitions(partitions) : undefined
+    );
+    searches.push({
+      query,
+      sort,
+      size: batchSize * slots,
+      seq_no_primary_term: true,
+      _source_excludes: CANDIDATE_SEARCH_SOURCE_EXCLUDES,
     });
   }
 
@@ -387,6 +460,10 @@ interface ClaimPartitions {
   //       'taskTypeA,taskTypeB' => 2
   //     }
   limitedTypes: Map<string, number>;
+  // Map where key is a batchable task type (createBatchTaskRunner) and value is
+  // its batchSize and the number of batch "slots" currently available for it,
+  // i.e. how many batches of that type could be run concurrently given capacity.
+  batchTypes: Map<string, { batchSize: number; slots: number }>;
 }
 
 interface BuildClaimPartitionsOpts {
@@ -400,6 +477,7 @@ function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
   const result: ClaimPartitions = {
     unlimitedTypes: [],
     limitedTypes: new Map(),
+    batchTypes: new Map(),
   };
 
   const { types, excludedTaskTypes, getCapacity, definitions } = opts;
@@ -408,6 +486,18 @@ function buildClaimPartitions(opts: BuildClaimPartitionsOpts): ClaimPartitions {
     if (definition == null) continue;
 
     if (excludedTaskTypes.has(type)) continue;
+
+    if (definition.createBatchTaskRunner) {
+      // batchable types get their own dedicated search, sized to cover as
+      // many batches as could currently be run, rather than folding into the
+      // unlimited/limited partitions above.
+      const availableCapacity = getCapacity(definition.type);
+      const slots = Math.floor(availableCapacity / definition.cost);
+      if (slots > 0 && definition.batchSize) {
+        result.batchTypes.set(definition.type, { batchSize: definition.batchSize, slots });
+      }
+      continue;
+    }
 
     if (definition.maxConcurrency == null) {
       result.unlimitedTypes.push(definition.type);

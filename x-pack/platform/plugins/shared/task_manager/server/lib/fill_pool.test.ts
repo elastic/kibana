@@ -69,8 +69,8 @@ describe('fillPool', () => {
     const tasks = [1, 2, 3, 4, 5];
     const fetchAvailableTasks = mockFetchAvailableTasks(tasks);
     const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
-    const converter = (instance: ConcreteTaskInstance) =>
-      instance.id as unknown as TaskManagerRunner;
+    const converter = (docs: ConcreteTaskInstance[]) =>
+      docs.map((instance) => instance.id as unknown as TaskManagerRunner);
 
     await fillPool(fetchAvailableTasks, converter, run);
 
@@ -80,8 +80,8 @@ describe('fillPool', () => {
   describe('error handling', () => {
     test('throws exception from fetchAvailableTasks', async () => {
       const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
-      const converter = (instance: ConcreteTaskInstance) =>
-        instance.id as unknown as TaskManagerRunner;
+      const converter = (docs: ConcreteTaskInstance[]) =>
+        docs.map((instance) => instance.id as unknown as TaskManagerRunner);
 
       try {
         const fetchAvailableTasks = () => {
@@ -97,8 +97,8 @@ describe('fillPool', () => {
 
     test('throws exception from run', async () => {
       const run = sinon.spy(() => Promise.reject('run is not working'));
-      const converter = (instance: ConcreteTaskInstance) =>
-        instance.id as unknown as TaskManagerRunner;
+      const converter = (docs: ConcreteTaskInstance[]) =>
+        docs.map((instance) => instance.id as unknown as TaskManagerRunner);
 
       try {
         const tasks = [1, 2, 3, 4, 5];
@@ -115,8 +115,8 @@ describe('fillPool', () => {
         const tasks = [1, 2, 3, 4, 5];
         const fetchAvailableTasks = mockFetchAvailableTasks(tasks);
         const run = sinon.spy(async () => TaskPoolRunResult.RanOutOfCapacity);
-        const converter = (instance: ConcreteTaskInstance) => {
-          throw new Error(`can not convert ${instance.id}`);
+        const converter = (docs: ConcreteTaskInstance[]) => {
+          throw new Error(`can not convert ${docs[0]?.id}`);
         };
 
         await fillPool(fetchAvailableTasks, converter, run);

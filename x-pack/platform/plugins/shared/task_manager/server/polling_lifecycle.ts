@@ -11,6 +11,7 @@ import { distinctUntilChanged, startWith, pairwise } from 'rxjs';
 import { pipe } from 'fp-ts/pipeable';
 import { map as mapOptional, none } from 'fp-ts/Option';
 import { tap } from 'rxjs';
+import { groupBy } from 'lodash';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 import type { FakeRequestEnricher } from '@kbn/core-security-server';
@@ -39,10 +40,11 @@ import { fillPool, FillPoolResult } from './lib/fill_pool';
 import type { Middleware } from './lib/middleware';
 import { intervalFromNow } from './lib/intervals';
 import type { ConcreteTaskInstance, TaskEventLogger } from './task';
+import { TaskStatus } from './task';
 import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool, TaskPoolRunResult } from './task_pool';
-import type { TaskRunner } from './task_running';
-import { TaskManagerRunner } from './task_running';
+import type { TaskRunner, MemberRunnerOverrides } from './task_running';
+import { TaskManagerRunner, TaskManagerBatchRunner } from './task_running';
 import type { TaskStore } from './task_store';
 import type { ApiKeyStrategy } from './api_key_strategy';
 import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
@@ -332,7 +334,10 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.events$.next(event);
   };
 
-  private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
+  private createTaskRunnerForTask = (
+    instance: ConcreteTaskInstance,
+    overrides?: MemberRunnerOverrides
+  ): TaskRunner => {
     return new TaskManagerRunner({
       logger: this.logger,
       instance,
@@ -349,7 +354,63 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
       apiKeyStrategy: this.apiKeyStrategy,
       eventLogger: this.eventLogger,
       enrichFakeRequest: this.enrichFakeRequest,
+      ...overrides,
     });
+  };
+
+  /**
+   * Converts the full set of claimed task docs into pool-ready task runners.
+   *
+   * Docs that have exhausted their attempts are removed directly here (before
+   * any runner is constructed), since that check needs per-doc granularity
+   * that's lost once several docs of a batchable type are grouped into a
+   * single `TaskManagerBatchRunner`. Remaining docs are grouped by task type;
+   * types with `createBatchTaskRunner` are chunked into `batchSize`-sized
+   * `TaskManagerBatchRunner`s (matching the boundary the claimer charged
+   * capacity against — see `strategy_mget.ts`), everything else maps 1:1 to a
+   * `TaskManagerRunner` as before.
+   */
+  private createTaskRunnersForTasks = (docs: ConcreteTaskInstance[]): TaskRunner[] => {
+    const runnableDocs: ConcreteTaskInstance[] = [];
+    for (const doc of docs) {
+      if (isDocOutOfAttempts(doc, this.definitions, this.taskClaiming.maxAttempts)) {
+        this.logger.debug(
+          `Removing task ${doc.taskType} "${doc.id}" because the max attempts have been reached.`
+        );
+        this.bufferedStore.remove(doc.id).catch((err) => {
+          this.logger.error(
+            `Failed to remove task ${doc.taskType} "${doc.id}" after reaching max attempts: ${err.message}`
+          );
+        });
+        continue;
+      }
+      runnableDocs.push(doc);
+    }
+
+    const docsByType = groupBy(runnableDocs, (doc) => doc.taskType);
+    const runners: TaskRunner[] = [];
+    for (const [taskType, typeDocs] of Object.entries(docsByType)) {
+      const definition = this.definitions.get(taskType);
+      if (definition?.createBatchTaskRunner) {
+        const batchSize = definition.batchSize ?? typeDocs.length;
+        for (let i = 0; i < typeDocs.length; i += batchSize) {
+          runners.push(
+            new TaskManagerBatchRunner({
+              logger: this.logger,
+              definitions: this.definitions,
+              taskType,
+              docs: typeDocs.slice(i, i + batchSize),
+              createMemberRunner: this.createTaskRunnerForTask,
+            })
+          );
+        }
+      } else {
+        for (const doc of typeDocs) {
+          runners.push(this.createTaskRunnerForTask(doc));
+        }
+      }
+    }
+    return runners;
   };
 
   private pollForWork = async (): Promise<TimedFillPoolResult> => {
@@ -369,8 +430,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
         return result;
       },
-      // wrap each task in a Task Runner
-      this.createTaskRunnerForTask,
+      // wrap claimed docs in Task Runners, grouping batchable types into TaskManagerBatchRunners
+      this.createTaskRunnersForTasks,
       // place tasks in the Task Pool
       async (tasks: TaskRunner[]) => {
         const { paused, pausedTaskTypes } = this.executionControlService.getState();
@@ -386,21 +447,16 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         // tasks of those types that were already claimed in this cycle.
         const pausedTypes = new Set(pausedTaskTypes);
         const tasksToRun = [];
-        const removeTaskPromises = [];
         for (const task of tasks) {
           if (pausedTypes.has(task.taskType)) {
             this.logger.debug(
               `Not running claimed task ${task} because task type "${task.taskType}" was paused mid-cycle.`
             );
-          } else if (task.isAdHocTaskAndOutOfAttempts) {
-            this.logger.debug(`Removing ${task} because the max attempts have been reached.`);
-            removeTaskPromises.push(task.removeTask());
           } else {
             tasksToRun.push(task);
           }
         }
-        // Wait for all the promises at once to speed up the polling cycle
-        const [result] = await Promise.all([this.pool.run(tasksToRun), ...removeTaskPromises]);
+        const result = await this.pool.run(tasksToRun);
         // Emit the load after fetching tasks, giving us a good metric for evaluating how
         // busy Task manager tends to be in this Kibana instance
         this.emitEvent(asTaskManagerStatEvent('load', asOk(this.pool.usedCapacityPercentage)));
@@ -477,6 +533,26 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         );
       });
   }
+}
+
+/**
+ * Returns true whenever the task is ad hoc and has ran out of attempts.
+ * Mirrors `TaskManagerRunner.isAdHocTaskAndOutOfAttempts`, but operates directly
+ * on the claimed doc so it can be applied before docs are grouped into
+ * `TaskManagerBatchRunner`s, where the per-task granularity would be lost.
+ */
+function isDocOutOfAttempts(
+  doc: ConcreteTaskInstance,
+  definitions: TaskTypeDictionary,
+  defaultMaxAttempts: number
+): boolean {
+  const maxAttempts = definitions.get(doc.taskType)?.maxAttempts ?? defaultMaxAttempts;
+  if (doc.status === TaskStatus.Running) {
+    // Claimed docs already have attempts incremented (mget claim strategy), matching
+    // TaskManagerRunner's behavior for tasks already marked as running.
+    return !doc.schedule && doc.attempts > maxAttempts;
+  }
+  return !doc.schedule && doc.attempts >= maxAttempts;
 }
 
 export async function claimAvailableTasks(

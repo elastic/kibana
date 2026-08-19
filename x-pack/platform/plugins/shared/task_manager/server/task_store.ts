@@ -97,6 +97,12 @@ export interface SearchOpts {
   sort?: estypes.Sort;
   query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
+  // Excludes the given fields from the returned _source, for a smaller response payload
+  // when the caller only needs the doc's metadata (e.g. claim-candidate searches).
+  _source_excludes?: string[];
+  // Internal: populated from _source_excludes before building an msearch request body,
+  // since msearch items only support source filtering nested under `_source`.
+  _source?: estypes.SearchSourceConfig;
 }
 
 export interface AggregationOpts {
@@ -1071,8 +1077,15 @@ export class TaskStore {
   }
 
   private async _msearch(opts: SearchOpts[] = []): Promise<FetchResult> {
-    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], ...opt }) =>
-      ensureQueryOnlyReturnsTaskObjects({ sort, ...opt })
+    const queries = opts.map(({ sort = [{ 'task.runAt': 'asc' }], _source_excludes, ...opt }) =>
+      ensureQueryOnlyReturnsTaskObjects({
+        sort,
+        ...opt,
+        // unlike the top-level _search API (where the client routes `_source_excludes` to a
+        // query-string param), each msearch item is a raw request body, which only recognizes
+        // source filtering nested under `_source`.
+        ...(_source_excludes ? { _source: { excludes: _source_excludes } } : {}),
+      })
     );
     const searches = queries.flatMap((query) => [{}, query]);
 

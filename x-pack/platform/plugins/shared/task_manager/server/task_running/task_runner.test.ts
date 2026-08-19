@@ -18,7 +18,7 @@ import {
 } from '.';
 import type { TaskEvent, TaskRun } from '../task_events';
 import { asTaskRunEvent, TaskPersistence, asTaskManagerStatEvent } from '../task_events';
-import type { ConcreteTaskInstance, TaskEventLogger } from '../task';
+import type { ConcreteTaskInstance, TaskEventLogger, TaskRunCreatorFunction } from '../task';
 import { getDeleteTaskRunResult, TaskStatus, TaskCost, InstanceTaskCost } from '../task';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
@@ -324,6 +324,54 @@ describe('TaskManagerRunner', () => {
       expect(span!.attributes['transaction.type']).toBe(TASK_MANAGER_RUN_TRANSACTION_TYPE);
       expect(span!.attributes['kibana.task.type']).toBe('bar');
       expect(span!.status.code).not.toBe(SpanStatusCode.ERROR);
+    });
+    test('uses createTaskRunnerOverride instead of definition.createTaskRunner when provided', async () => {
+      const definitionCreateTaskRunner = jest.fn(() => ({
+        async run() {
+          return { state: {} };
+        },
+      }));
+      const overrideRun = jest.fn(async () => ({ state: { fromOverride: true } }));
+      const { runner } = await readyToRunStageSetup({
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: definitionCreateTaskRunner,
+          },
+        },
+        createTaskRunnerOverride: () => ({ run: overrideRun }),
+      });
+
+      const result = await runner.run();
+
+      expect(definitionCreateTaskRunner).not.toHaveBeenCalled();
+      expect(overrideRun).toHaveBeenCalledTimes(1);
+      expect(result).toMatchObject({ tag: 'ok', value: { state: { fromOverride: true } } });
+    });
+    test('does not start the long-running retryAt heartbeat when isBatchMember is true', async () => {
+      const { runner } = await readyToRunStageSetup({
+        instance: { schedule: undefined },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+        isBatchMember: true,
+      });
+
+      const updateSpy = jest.spyOn(
+        runner as unknown as { updateRetryAtOnIntervalForLongRunningTasks: () => void },
+        'updateRetryAtOnIntervalForLongRunningTasks'
+      );
+
+      await runner.run();
+
+      expect(updateSpy).not.toHaveBeenCalled();
     });
     test('makes calls to APM and logs errors as expected when task fails', async () => {
       const { runner, logger } = await readyToRunStageSetup({
@@ -3644,6 +3692,8 @@ describe('TaskManagerRunner', () => {
     onTaskEvent?: jest.Mock<(event: TaskEvent<unknown, unknown>) => void>;
     allowReadingInvalidState?: boolean;
     enrichFakeRequest?: jest.Mock;
+    createTaskRunnerOverride?: TaskRunCreatorFunction;
+    isBatchMember?: true;
   }
 
   function withAnyTiming(taskRun: TaskRun) {
@@ -3724,6 +3774,8 @@ describe('TaskManagerRunner', () => {
       apiKeyStrategy: new EsApiKeyStrategy(),
       eventLogger: eventLoggerMock,
       enrichFakeRequest: opts.enrichFakeRequest,
+      createTaskRunnerOverride: opts.createTaskRunnerOverride,
+      isBatchMember: opts.isBatchMember,
     });
 
     if (stage === TaskRunningStage.READY_TO_RUN) {

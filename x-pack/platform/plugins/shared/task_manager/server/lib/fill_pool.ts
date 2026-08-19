@@ -10,7 +10,7 @@ import type { ConcreteTaskInstance } from '../task';
 import type { WithTaskTiming } from '../task_events';
 import { startTaskTimer } from '../task_events';
 import { TaskPoolRunResult } from '../task_pool';
-import type { TaskManagerRunner } from '../task_running';
+import type { TaskRunner } from '../task_running';
 import type { Result } from './result_type';
 import { isOk } from './result_type';
 
@@ -31,19 +31,21 @@ export type TimedFillPoolResult = WithTaskTiming<ClaimAndFillPoolResult>;
 /**
  * Given a function that runs a batch of tasks (e.g. taskPool.run), a function
  * that fetches task records (e.g. store.fetchAvailableTasks), and a function
- * that converts task records to the appropriate task runner, this function
- * fills the pool with work.
+ * that converts claimed task records into pool-ready task runners, this
+ * function fills the pool with work.
  *
  * This is annoyingly general in order to simplify testing.
  *
  * @param run - a function that runs a batch of tasks (e.g. taskPool.run)
  * @param fetchAvailableTasks - a function that fetches task records (e.g. store.fetchAvailableTasks)
- * @param converter - a function that converts task records to the appropriate task runner
+ * @param converter - a function that converts the full set of claimed task records into task
+ *   runners. Takes the full array (rather than mapping doc-by-doc) so that task types with a
+ *   `createBatchTaskRunner` can be grouped into `TaskManagerBatchRunner`s spanning several docs.
  */
 export async function fillPool(
   fetchAvailableTasks: () => Promise<Result<ClaimOwnershipResult, FillPoolResult>>,
-  converter: (taskInstance: ConcreteTaskInstance) => TaskManagerRunner,
-  run: (tasks: TaskManagerRunner[]) => Promise<TaskPoolRunResult>
+  converter: (docs: ConcreteTaskInstance[]) => TaskRunner[],
+  run: (tasks: TaskRunner[]) => Promise<TaskPoolRunResult>
 ): Promise<TimedFillPoolResult> {
   const stopTaskTimer = startTaskTimer();
   const augmentTimingTo = (
@@ -61,12 +63,10 @@ export async function fillPool(
       return augmentTimingTo(FillPoolResult.NoTasksClaimed, claimResults.value.stats);
     }
 
-    const taskPoolRunResult = await run(claimResults.value.docs.map(converter)).then(
-      (runResult) => ({
-        result: runResult,
-        stats: claimResults.value.stats,
-      })
-    );
+    const taskPoolRunResult = await run(converter(claimResults.value.docs)).then((runResult) => ({
+      result: runResult,
+      stats: claimResults.value.stats,
+    }));
 
     switch (taskPoolRunResult.result) {
       case TaskPoolRunResult.RanOutOfCapacity:

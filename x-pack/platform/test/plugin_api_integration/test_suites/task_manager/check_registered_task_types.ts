@@ -35,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     'sampleRecurringTaskWhichOverrunsRetryAt',
     'sampleRecurringTaskThatDeletesItself',
     'sampleTask',
+    'sampleBatchTask',
     'sampleRecurringTask',
     'sampleTaskWithLimitedConcurrency',
     'sampleTaskWithSingleConcurrency',

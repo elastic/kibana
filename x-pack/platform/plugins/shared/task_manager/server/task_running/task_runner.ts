@@ -46,6 +46,7 @@ import type {
   SuccessfulRunResult,
   TaskDefinition,
   TaskEventLogger,
+  TaskRunCreatorFunction,
 } from '../task';
 import { isFailedRunResult, TaskStatus, TaskCost, getTaskCostFromInstance } from '../task';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
@@ -124,6 +125,22 @@ type Opts = {
   apiKeyStrategy: ApiKeyStrategy;
   eventLogger: TaskEventLogger;
   enrichFakeRequest?: FakeRequestEnricher;
+  /**
+   * When provided, used in place of `definition.createTaskRunner` to create the
+   * task's `run`/`cancel` implementation. Used by `TaskManagerBatchRunner` to run
+   * a single member of a batch through the normal single-task result-processing
+   * path, injecting a pre-computed result rather than calling the (absent)
+   * per-task `createTaskRunner` on a batchable definition.
+   */
+  createTaskRunnerOverride?: TaskRunCreatorFunction;
+  /**
+   * When true, this runner is a member of a batch owned by a
+   * `TaskManagerBatchRunner`, which is responsible for the long-running retryAt
+   * heartbeat for the whole batch. Member runners skip their own heartbeat to
+   * avoid redundant (and racy, since they'd all update the same underlying
+   * batch member docs independently) `retryAt` updates.
+   */
+  isBatchMember?: boolean;
 } & Pick<Middleware, 'beforeRun'>;
 
 export enum TaskRunResult {
@@ -181,6 +198,8 @@ export class TaskManagerRunner implements TaskRunner {
   private isCancelled = false;
   private readonly enrichFakeRequest?: FakeRequestEnricher;
   private taskRunEventCustomFields?: Record<string, unknown>;
+  private readonly createTaskRunnerOverride?: TaskRunCreatorFunction;
+  private readonly isBatchMember: boolean;
 
   /**
    * Creates an instance of TaskManagerRunner.
@@ -208,6 +227,8 @@ export class TaskManagerRunner implements TaskRunner {
     apiKeyStrategy,
     eventLogger,
     enrichFakeRequest,
+    createTaskRunnerOverride,
+    isBatchMember = false,
   }: Opts) {
     this.instance = asPending(sanitizeInstance(instance));
     this.definitions = definitions;
@@ -229,6 +250,8 @@ export class TaskManagerRunner implements TaskRunner {
     this.apiKeyStrategy = apiKeyStrategy;
     this.eventLogger = eventLogger;
     this.enrichFakeRequest = enrichFakeRequest;
+    this.createTaskRunnerOverride = createTaskRunnerOverride;
+    this.isBatchMember = isBatchMember;
   }
 
   /**
@@ -352,6 +375,11 @@ export class TaskManagerRunner implements TaskRunner {
       throw new Error(`Running task ${this} failed because it has no definition`);
     }
 
+    const createTaskRunner = this.createTaskRunnerOverride ?? definition.createTaskRunner;
+    if (!createTaskRunner) {
+      throw new Error(`Running task ${this} failed because its definition has no createTaskRunner`);
+    }
+
     if (!isReadyToRun(this.instance)) {
       throw new Error(
         `Running task ${this} failed as it ${
@@ -421,8 +449,12 @@ export class TaskManagerRunner implements TaskRunner {
           )
         );
 
-        // For long running tasks, update retryAt on an interval to allow for quicker task recovery
-        const stopUpdatingLongRunningTasks = this.updateRetryAtOnIntervalForLongRunningTasks();
+        // For long running tasks, update retryAt on an interval to allow for quicker task
+        // recovery. Batch members skip this: the owning TaskManagerBatchRunner is responsible
+        // for the heartbeat of the batch as a whole.
+        const stopUpdatingLongRunningTasks = this.isBatchMember
+          ? undefined
+          : this.updateRetryAtOnIntervalForLongRunningTasks();
 
         try {
           const sanitizedTaskInstance = omit(modifiedContext.taskInstance, [
@@ -452,7 +484,7 @@ export class TaskManagerRunner implements TaskRunner {
 
           const abortController = new AbortController();
 
-          this.task = definition.createTaskRunner({
+          this.task = createTaskRunner({
             taskInstance: sanitizedTaskInstance,
             fakeRequest,
             signal: abortController.signal,
@@ -490,7 +522,7 @@ export class TaskManagerRunner implements TaskRunner {
             withSpan({ name: 'run', type: 'task manager' }, () => this.task!.run())
           );
 
-          stopUpdatingLongRunningTasks();
+          stopUpdatingLongRunningTasks?.();
 
           const validatedResult = this.validateResult(result);
           const processedResult = await withSpan(
@@ -500,7 +532,7 @@ export class TaskManagerRunner implements TaskRunner {
           if (apmTrans) apmTrans.end('success');
           return processedResult;
         } catch (err) {
-          stopUpdatingLongRunningTasks();
+          stopUpdatingLongRunningTasks?.();
 
           const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
           const errorMessage =

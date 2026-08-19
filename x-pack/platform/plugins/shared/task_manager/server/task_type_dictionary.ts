@@ -7,7 +7,13 @@
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
-import type { TaskDefinition, TaskRunCreatorFunction, TaskPriority, TaskCost } from './task';
+import type {
+  TaskDefinition,
+  TaskRunCreatorFunction,
+  BatchTaskRunCreatorFunction,
+  TaskPriority,
+  TaskCost,
+} from './task';
 import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
@@ -96,8 +102,26 @@ export interface TaskRegisterDefinition {
   /**
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
+   *
+   * Exactly one of `createTaskRunner` / `createBatchTaskRunner` must be provided.
    */
-  createTaskRunner: TaskRunCreatorFunction;
+  createTaskRunner?: TaskRunCreatorFunction;
+
+  /**
+   * Creates an object that has a run function which performs the work for a
+   * whole batch of task instances of this type in one call. When provided,
+   * `batchSize` is also required. See `BatchTaskRunCreatorFunction` for details.
+   *
+   * Exactly one of `createTaskRunner` / `createBatchTaskRunner` must be provided.
+   */
+  createBatchTaskRunner?: BatchTaskRunCreatorFunction;
+
+  /**
+   * The number of task instances to include in a single batch when this task
+   * type is run via `createBatchTaskRunner`. Required (and only allowed) when
+   * `createBatchTaskRunner` is set.
+   */
+  batchSize?: number;
 
   /**
    * Up to how many times the task should retry when it fails to run. This will
@@ -189,6 +213,42 @@ export class TaskTypeDictionary {
     }
 
     for (const taskType of taskTypesToRegister) {
+      const { createTaskRunner, createBatchTaskRunner, batchSize } = taskDefinitions[taskType];
+
+      if (!createTaskRunner && !createBatchTaskRunner) {
+        throw new Error(
+          `Task type "${taskType}" must define either createTaskRunner or createBatchTaskRunner.`
+        );
+      }
+
+      if (createTaskRunner && createBatchTaskRunner) {
+        throw new Error(
+          `Task type "${taskType}" cannot define both createTaskRunner and createBatchTaskRunner.`
+        );
+      }
+
+      if (createBatchTaskRunner && batchSize == null) {
+        throw new Error(
+          `Task type "${taskType}" defines createBatchTaskRunner but is missing batchSize.`
+        );
+      }
+
+      if (batchSize != null && !createBatchTaskRunner) {
+        throw new Error(
+          `Task type "${taskType}" defines batchSize but is missing createBatchTaskRunner.`
+        );
+      }
+
+      if (createBatchTaskRunner && taskDefinitions[taskType].maxConcurrency != null) {
+        // maxConcurrency limits the number of task *instances* claimed for a type
+        // (see selectTasksByCapacity), which conflicts with batching, where many
+        // instances intentionally share a single slot. Combining the two isn't
+        // supported yet.
+        throw new Error(
+          `Task type "${taskType}" cannot combine createBatchTaskRunner with maxConcurrency.`
+        );
+      }
+
       if (taskDefinitions[taskType].maxConcurrency !== undefined) {
         if (!CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE.includes(taskType)) {
           // maxConcurrency is designed to limit how many tasks of the same type a single Kibana
