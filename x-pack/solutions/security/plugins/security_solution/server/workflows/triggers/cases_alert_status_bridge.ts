@@ -12,6 +12,11 @@ import type { SecuritySolutionEventBus } from '../../events/event_bus';
 
 // Cases is multi-owner; only forward events for alerts that live in Security indices.
 const SECURITY_ALERT_INDEX_PREFIX = '.alerts-security.';
+// RAC detection alerts land in a concrete backing index (.internal.alerts-security.*),
+// not the read alias (.alerts-security.*), so we need to match both.
+const SECURITY_ALERT_BACKING_INDEX_PREFIX = '.internal.alerts-security.';
+// Legacy pre-RAC signals.
+const SIEM_SIGNALS_INDEX_PREFIX = '.siem-signals';
 
 interface CasesAlertStatusPayload {
   readonly alertIds: readonly string[];
@@ -29,7 +34,11 @@ export const forwardCasesAlertStatusToSS = (
   request: KibanaRequest,
   payload: CasesAlertStatusPayload
 ): void => {
-  if (!payload.indices.some((index) => index.startsWith(SECURITY_ALERT_INDEX_PREFIX))) {
+  const isSecurityIndex = (index: string): boolean =>
+    index.startsWith(SECURITY_ALERT_INDEX_PREFIX) ||
+    index.startsWith(SECURITY_ALERT_BACKING_INDEX_PREFIX) ||
+    index.startsWith(SIEM_SIGNALS_INDEX_PREFIX);
+  if (!payload.indices.some(isSecurityIndex)) {
     return;
   }
   try {

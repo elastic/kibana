@@ -25,7 +25,9 @@ describe('forwardCasesAlertStatusToSS', () => {
     bus.removeAllListeners();
   });
 
-  const securityIndex = '.alerts-security.alerts-default';
+  const securityAliasIndex = '.alerts-security.alerts-default';
+  const securityBackingIndex = '.internal.alerts-security.alerts-default-000001';
+  const siemSignalsIndex = '.siem-signals-default-000001';
   const obsIndex = '.alerts-observability.logs.alerts-default';
 
   it('emits alertStatusChanged with the correct payload', () => {
@@ -39,7 +41,7 @@ describe('forwardCasesAlertStatusToSS', () => {
         { id: 'a1', previousStatus: 'open' },
         { id: 'a2', previousStatus: 'open' },
       ],
-      indices: [securityIndex],
+      indices: [securityAliasIndex],
     });
 
     expect(listener).toHaveBeenCalledTimes(1);
@@ -53,7 +55,7 @@ describe('forwardCasesAlertStatusToSS', () => {
     expect(payload.truncated).toBe(false);
   });
 
-  it('does not emit when no index starts with .alerts-security.', () => {
+  it('does not emit when no index is a Security index', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
 
@@ -67,6 +69,36 @@ describe('forwardCasesAlertStatusToSS', () => {
     expect(listener).not.toHaveBeenCalled();
   });
 
+  it('emits when index is a RAC backing index (.internal.alerts-security.*)', () => {
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+      alertIds: ['a1'],
+      status: 'closed',
+      previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
+      indices: [securityBackingIndex],
+    });
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener.mock.calls[0][0].payload.alertIds).toEqual(['a1']);
+  });
+
+  it('emits when index is a legacy siem-signals index', () => {
+    const listener = jest.fn();
+    bus.onAlertStatusChanged(listener);
+
+    forwardCasesAlertStatusToSS(bus, mockLogger as Logger, mockRequest, {
+      alertIds: ['a1'],
+      status: 'closed',
+      previousStatuses: [{ id: 'a1', previousStatus: 'open' }],
+      indices: [siemSignalsIndex],
+    });
+
+    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener.mock.calls[0][0].payload.alertIds).toEqual(['a1']);
+  });
+
   it('caps alertIds to MAX_ALERTS_PER_TRIGGER and sets truncated: true', () => {
     const listener = jest.fn();
     bus.onAlertStatusChanged(listener);
@@ -76,7 +108,7 @@ describe('forwardCasesAlertStatusToSS', () => {
       alertIds: oversizedIds,
       status: 'closed',
       previousStatuses: [],
-      indices: [securityIndex],
+      indices: [securityAliasIndex],
     });
 
     const { payload } = listener.mock.calls[0][0];
@@ -97,7 +129,7 @@ describe('forwardCasesAlertStatusToSS', () => {
       alertIds: oversizedIds,
       status: 'open',
       previousStatuses: oversizedPrev,
-      indices: [securityIndex],
+      indices: [securityAliasIndex],
     });
 
     const { payload } = listener.mock.calls[0][0];
@@ -114,7 +146,7 @@ describe('forwardCasesAlertStatusToSS', () => {
         alertIds: ['a1'],
         status: 'open',
         previousStatuses: [],
-        indices: [securityIndex],
+        indices: [securityAliasIndex],
       })
     ).not.toThrow();
 
