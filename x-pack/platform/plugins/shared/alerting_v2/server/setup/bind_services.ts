@@ -308,10 +308,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceScopedToken);
-      const { esql } = get<PluginInitializerContext<PluginConfig>['config']>(
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
         PluginInitializer('config')
-      ).get<PluginConfig>();
-      return new QueryService(esClient, loggerService, esql.responseFormat);
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inRequestScope();
 
@@ -320,10 +320,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const loggerService = get(LoggerServiceToken);
       // Rule-execution queries run against user data and must respect the space project routing.
       const esClient = get(EsServiceScopedSpaceRoutingToken);
-      const { esql } = get<PluginInitializerContext<PluginConfig>['config']>(
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
         PluginInitializer('config')
-      ).get<PluginConfig>();
-      return new QueryService(esClient, loggerService, esql.responseFormat);
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inRequestScope();
 
@@ -331,10 +331,10 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       const loggerService = get(LoggerServiceToken);
       const esClient = get(EsServiceInternalToken);
-      const { esql } = get<PluginInitializerContext<PluginConfig>['config']>(
+      const pluginConfigAccessor = get<PluginInitializerContext<PluginConfig>['config']>(
         PluginInitializer('config')
-      ).get<PluginConfig>();
-      return new QueryService(esClient, loggerService, esql.responseFormat);
+      );
+      return new QueryService(esClient, loggerService, pluginConfigAccessor);
     })
     .inSingletonScope();
 

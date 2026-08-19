@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import { errors } from '@elastic/elasticsearch';
 import type { DeeplyMockedApi } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { QueryService } from './query_service';
 import { createQueryService } from './query_service.mock';
@@ -537,6 +538,32 @@ describe('QueryService', () => {
       );
     });
 
+    it('forwards maxResponseSize to the transport options', async () => {
+      mockEsClient.esql.query.mockResolvedValue({
+        columns: [{ name: 'host', type: 'keyword' }],
+        values: [['host-a']],
+      });
+
+      const maxResponseSize = 1024;
+
+      for await (const _batch of queryService.executeQueryStream({
+        query: mockQuery,
+        maxResponseSize,
+      })) {
+        /** do nothing */
+      }
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+        {
+          query: mockQuery,
+          drop_null_columns: true,
+          filter: undefined,
+          params: undefined,
+        },
+        expect.objectContaining({ maxResponseSize })
+      );
+    });
+
     it('throws and logs error when the query fails', async () => {
       mockEsClient.esql.query.mockRejectedValue(new Error('ES query failed'));
 
@@ -560,6 +587,26 @@ describe('QueryService', () => {
           // consume
         }
       }).rejects.toThrow(/aborted/i);
+
+      expect(mockLogger.debug).toHaveBeenCalled();
+      expect(mockLogger.error).not.toHaveBeenCalled();
+    });
+
+    it('logs debug instead of error when the transport aborts mid-flight', async () => {
+      const abortController = new AbortController();
+      mockEsClient.esql.query.mockImplementation((async () => {
+        abortController.abort();
+        throw new errors.RequestAbortedError('Request aborted');
+      }) as typeof mockEsClient.esql.query);
+
+      await expect(async () => {
+        for await (const _batch of queryService.executeQueryStream({
+          query: mockQuery,
+          abortSignal: abortController.signal,
+        })) {
+          // consume
+        }
+      }).rejects.toThrow(errors.RequestAbortedError);
 
       expect(mockLogger.debug).toHaveBeenCalled();
       expect(mockLogger.error).not.toHaveBeenCalled();
