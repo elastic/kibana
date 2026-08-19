@@ -97,11 +97,14 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     : TARGET_SURFACE_APP_LIGHT;
   const targetShellShadow = isDarkMode ? 'none' : knobVar('shellShadow');
   const targetText = isDarkMode
-    ? `color-mix(in srgb, ${colors.textParagraph} 77%, transparent)`
-    : `color-mix(in srgb, black 64%, transparent)`;
+    ? `color-mix(in srgb, ${colors.textParagraph} 80%, transparent)`
+    : `color-mix(in srgb, black 73%, transparent)`;
+  const targetLink = isDarkMode
+    ? `color-mix(in srgb, ${colors.textParagraph} 94%, transparent)`
+    : `color-mix(in srgb, black 82%, transparent)`;
   const targetHeading = isDarkMode
-    ? `color-mix(in srgb, black 8%, ${colors.textParagraph})`
-    : `color-mix(in srgb, black 77%, transparent)`;
+    ? `color-mix(in srgb, white 8%, ${colors.textHeading})`
+    : `color-mix(in srgb, black 85%, transparent)`;
   const targetTextNav = isDarkMode ? targetText : bespokeVar('textNav');
   const targetTextSubdued = isDarkMode ? colors.textSubdued : bespokeVar('textSubdued');
   const targetHairlineColor = isDarkMode
@@ -111,10 +114,18 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
   // Still a single shared hairline for anywhere a border remains, but it's
   // used far more sparingly than in Linbana — mainly on individual cards and
   // controls, not as internal row dividers within a shared container.
+  // Steel blue overlay so hover/active reads cool, not charcoal gray.
+  const TARGET_INTERACTIVE_BLUE = '#7E96B4';
+  const targetHoverFill = isDarkMode
+    ? `color-mix(in srgb, ${TARGET_INTERACTIVE_BLUE} 10%, transparent)`
+    : `color-mix(in srgb, ${TARGET_INTERACTIVE_BLUE} 8%, transparent)`;
+  const targetActiveFill = isDarkMode
+    ? `color-mix(in srgb, ${TARGET_INTERACTIVE_BLUE} 16%, transparent)`
+    : `color-mix(in srgb, ${TARGET_INTERACTIVE_BLUE} 12%, transparent)`;
   const TARGET_HAIRLINE = `1px solid ${targetHairlineColor}`;
   const TARGET_HAIRLINE_INSET_SHADOW = `0 0 0 1px ${targetHairlineColor} inset`;
   const TARGET_ACCENT_INSET_SHADOW = `0 0 0 1px ${TARGET_ACCENT} inset`;
-  const TARGET_SURFACE_HOVER_FILL = `color-mix(in srgb, ${colors.textParagraph} 4%, transparent)`;
+  const TARGET_SURFACE_HOVER_FILL = targetHoverFill;
 
   return css`
     html:has(${scope}) {
@@ -177,23 +188,26 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
 
     ${scope} .euiTableCellContent .euiLink[class*='-euiLink-primary'],
     ${scope} .euiTableCellContent [class*='css-'][class*='-euiLink-primary'] {
-      color: ${targetText} !important;
+      color: ${targetLink} !important;
       font-weight: 500 !important;
     }
 
-    ${scope} .euiLink:not(:disabled) {
+    ${scope} .euiLink:not(:disabled):not([class*='success']):not([class*='danger']):not([class*='warning']):not([class*='subdued']) {
+      color: ${targetLink} !important;
       text-decoration: underline dotted !important;
       text-decoration-thickness: 1px !important;
       text-underline-offset: 0.15em !important;
     }
 
-    ${scope} .euiLink:not(:disabled):hover,
-    ${scope} .euiLink:not(:disabled):focus-visible,
+    ${scope} .euiLink:not(:disabled):not([class*='success']):not([class*='danger']):not([class*='warning']):not([class*='subdued']):hover,
+    ${scope} .euiLink:not(:disabled):not([class*='success']):not([class*='danger']):not([class*='warning']):not([class*='subdued']):focus,
+    ${scope} .euiLink:not(:disabled):not([class*='success']):not([class*='danger']):not([class*='warning']):not([class*='subdued']):focus-visible,
     ${scope} .euiTableCellContent .euiLink:not(:disabled):hover,
+    ${scope} .euiTableCellContent .euiLink:not(:disabled):focus,
     ${scope} .euiTableCellContent .euiLink:not(:disabled):focus-visible {
       color: ${colors.textPrimary} !important;
       text-decoration: underline solid !important;
-      text-decoration-thickness: from-font !important;
+      text-decoration-thickness: 1px !important;
       text-underline-offset: 0.15em !important;
     }
 
@@ -244,9 +258,21 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     }
 
     ${scope}:not(:has(${TARGET_NAV_EXPANDED_SELECTOR}))
+      [data-menu-item='true'][data-highlighted='true'] {
+      --menu-item-text-color: ${targetLink} !important;
+      color: ${targetLink} !important;
+    }
+
+    ${scope}:not(:has(${TARGET_NAV_EXPANDED_SELECTOR}))
       [data-menu-item='true'][data-highlighted='true']
       .kbnChromeNav-iconWrapper {
-      background-color: ${targetSurface} !important;
+      background-color: ${targetActiveFill} !important;
+    }
+
+    ${scope}:not(:has(${TARGET_NAV_EXPANDED_SELECTOR}))
+      [data-menu-item='true'][data-highlighted='false']:hover
+      .kbnChromeNav-iconWrapper {
+      background-color: ${targetHoverFill} !important;
     }
 
     /* ----- Target expanded nav — layout width + grid column sync ----- */
@@ -382,14 +408,23 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
     [data-test-subj='kbnChromeNav-primaryNavigation']
     [data-menu-item='true'][data-highlighted='true'] {
-      background-color: color-mix(in srgb, ${colors.textParagraph} 8%, transparent) !important;
+      --menu-item-text-color: ${targetLink} !important;
+      background-color: ${targetActiveFill} !important;
+    }
+
+    ${scope}
+    .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
+    [data-test-subj='kbnChromeNav-primaryNavigation']
+    [data-menu-item='true'][data-highlighted='true']
+    > .euiText {
+      color: ${targetLink} !important;
     }
 
     ${scope}
     .kbnChromeNav-root:has([data-test-subj='sideNavCollapseButton'][aria-pressed='true'])
     [data-test-subj='kbnChromeNav-primaryNavigation']
     [data-menu-item='true'][data-highlighted='false']:hover {
-      background-color: color-mix(in srgb, ${colors.textParagraph} 5%, transparent) !important;
+      background-color: ${targetHoverFill} !important;
     }
 
     ${scope}
@@ -496,13 +531,14 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope}:has(${TARGET_NAV_EXPANDED_SELECTOR})
       [data-test-subj='kbnChromeNav-footer']
       [data-footer-label]:has([data-highlighted='true']) {
-      background-color: color-mix(in srgb, ${colors.textParagraph} 8%, transparent) !important;
+      --menu-item-text-color: ${targetLink};
+      background-color: ${targetActiveFill} !important;
     }
 
     ${scope}:has(${TARGET_NAV_EXPANDED_SELECTOR})
       [data-test-subj='kbnChromeNav-footer']
       [data-footer-label]:has([data-highlighted='false']:hover) {
-      background-color: color-mix(in srgb, ${colors.textParagraph} 5%, transparent) !important;
+      background-color: ${targetHoverFill} !important;
     }
 
     ${scope}:has(${TARGET_NAV_EXPANDED_SELECTOR})
@@ -537,7 +573,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope}:has(${TARGET_NAV_EXPANDED_SELECTOR})
       [data-test-subj='kbnChromeNav-footer']
       .sideNavCollapseButtonWrapper[data-footer-label]:has([data-test-subj='sideNavCollapseButton']:hover) {
-      background-color: color-mix(in srgb, ${colors.textParagraph} 5%, transparent) !important;
+      background-color: ${targetHoverFill} !important;
     }
 
     ${scope}:has(${TARGET_NAV_EXPANDED_SELECTOR})
@@ -651,14 +687,25 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     [data-test-subj^='kbnChromeNav-sidePanelItem-'][data-highlighted='true'],
     ${scope} [data-test-subj*='kbnChromeNav-sidePanel']
       [data-test-subj^='kbnChromeNav-sidePanelItem-'][data-highlighted='true'] {
-      background-color: color-mix(in srgb, ${colors.textParagraph} 8%, transparent) !important;
+      --menu-item-text-color: ${targetLink} !important;
+      color: ${targetLink} !important;
+      background-color: ${targetActiveFill} !important;
+    }
+
+    ${scope} .kbnChromeNav-sidePanel
+    [data-test-subj^='kbnChromeNav-sidePanelItem-'][data-highlighted='true']
+    .euiText,
+    ${scope} [data-test-subj*='kbnChromeNav-sidePanel']
+      [data-test-subj^='kbnChromeNav-sidePanelItem-'][data-highlighted='true']
+      .euiText {
+      color: ${targetLink} !important;
     }
 
     ${scope} .kbnChromeNav-sidePanel
     [data-test-subj^='kbnChromeNav-sidePanelItem-'][data-highlighted='false']:hover,
     ${scope} [data-test-subj*='kbnChromeNav-sidePanel']
       [data-test-subj^='kbnChromeNav-sidePanelItem-'][data-highlighted='false']:hover {
-      background-color: color-mix(in srgb, ${colors.textParagraph} 5%, transparent) !important;
+      background-color: ${targetHoverFill} !important;
     }
 
     /* ----- Dashboard grid & panels ----- */
@@ -830,10 +877,45 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .euiButtonIcon,
     ${scope} .euiSplitButton,
     ${scope} .euiButtonDisplay,
-    ${scope} [class*='-euiButtonDisplay'],
+    ${scope} [class*='-euiButtonDisplay']:not([class*='euiButtonDisplayContent']),
     ${scope} [class*='-euiButtonEmpty'],
     ${scope} [class*='-euiButtonIcon'] {
       border-radius: ${knobVar('radiusControl')} !important;
+    }
+
+    ${scope} .euiButton:not([class*='fill']):not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):hover,
+    ${scope} .euiButtonEmpty:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):hover,
+    ${scope} .euiButtonIcon:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):hover,
+    ${scope} .euiButtonDisplay:not([class*='fill']):not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):hover,
+    ${scope} [class*='-euiButtonEmpty']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):hover,
+    ${scope} [class*='-euiButtonIcon']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):hover,
+    ${scope} [class*='-euiButtonDisplay']:not([class*='euiButtonDisplayContent']):not([class*='fill']):not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):hover,
+    ${scope} .euiSplitButton:not(:has([class*='fill'])):hover {
+      background-color: ${targetHoverFill} !important;
+    }
+
+    ${scope} .euiButton:not([class*='fill']):not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):active,
+    ${scope} .euiButtonEmpty:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):active,
+    ${scope} .euiButtonIcon:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):active,
+    ${scope} .euiButtonDisplay:not([class*='fill']):not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):active,
+    ${scope} [class*='-euiButtonEmpty']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):active,
+    ${scope} [class*='-euiButtonIcon']:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary):not(:disabled):active,
+    ${scope} .euiButtonEmpty:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary)[aria-pressed='true'],
+    ${scope} .euiButtonIcon:not(.euiSplitButtonActionPrimary):not(.euiSplitButtonActionSecondary)[aria-pressed='true'] {
+      background-color: ${targetActiveFill} !important;
+    }
+
+    /* Inner label layer. The euiButtonDisplay substring also matches
+       euiButtonDisplayContent, which stacked a second rounded fill. */
+    ${scope} .euiButtonDisplayContent,
+    ${scope} [class*='euiButtonDisplayContent'],
+    ${scope} .euiButtonEmpty__content,
+    ${scope} .euiButton__content,
+    ${scope} .euiFilterButton__text {
+      background: transparent !important;
+      background-color: transparent !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
     }
 
     ${scope} .euiButtonGroup,
@@ -845,6 +927,19 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
     ${scope} .euiButtonGroup .euiButtonGroupButton,
     ${scope} .euiButtonGroup [class*='-euiButtonDisplay'],
     ${scope} .euiButtonGroup .euiButtonIcon {
+      border-radius: 0 !important;
+    }
+
+    ${scope} .euiFilterGroup {
+      border-radius: ${knobVar('radiusControl')} !important;
+      overflow: hidden;
+    }
+
+    ${scope} .euiFilterGroup .euiFilterButton,
+    ${scope} .euiFilterGroup .euiFilterButton__wrapper,
+    ${scope} .euiFilterGroup .euiPopover,
+    ${scope} .euiFilterGroup .euiButtonDisplay,
+    ${scope} .euiFilterGroup [class*='-euiButtonDisplay'] {
       border-radius: 0 !important;
     }
 
@@ -870,6 +965,22 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       border-start-start-radius: 0 !important;
       border-end-start-radius: 0 !important;
       padding-right: 4px !important;
+    }
+
+    /* Empty/text split buttons: fill lives on the shell only. Inner actions
+       keep their own hover and stack a second translucent layer. */
+    ${scope} .euiSplitButtonActionPrimary:not([class*='fill']),
+    ${scope} .euiSplitButtonActionPrimary:not([class*='fill']):hover,
+    ${scope} .euiSplitButtonActionPrimary:not([class*='fill']):active,
+    ${scope} .euiSplitButtonActionPrimary:not([class*='fill'])[aria-pressed='true'],
+    ${scope} .euiSplitButtonActionPrimary:not([class*='fill']) .euiButtonDisplay,
+    ${scope} .euiSplitButtonActionPrimary:not([class*='fill']) [class*='-euiButtonDisplay'],
+    ${scope} .euiSplitButtonActionSecondary:not([class*='fill']),
+    ${scope} .euiSplitButtonActionSecondary:not([class*='fill']):hover,
+    ${scope} .euiSplitButtonActionSecondary:not([class*='fill']):active,
+    ${scope} .euiSplitButtonActionSecondary:not([class*='fill'])[aria-pressed='true'] {
+      background: transparent !important;
+      background-color: transparent !important;
     }
 
     ${scope} [data-test-subj='globalQueryBar'] {
@@ -1340,7 +1451,7 @@ export const createTargetStyles = (euiTheme: UseEuiTheme) => {
       [class*='app_menu_action_button--buttonCss'],
     ${scope} [data-test-subj='appHeader'] [data-test-subj^='app-menu-action-button-']:focus
       [class*='app_menu_action_button--buttonCss'] {
-      background-color: transparent !important;
+      background-color: ${targetHoverFill} !important;
       border-radius: ${knobVar('radiusControl')} !important;
     }
 
