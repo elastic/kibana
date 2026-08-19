@@ -10,6 +10,8 @@
     "@kbn/core",
     "@kbn/esql-language",
     "@kbn/evals",
-    "@kbn/tooling-log"
+    "@kbn/tooling-log",
+    "@kbn/expect",
+    "@kbn/zod"
   ]
 }
