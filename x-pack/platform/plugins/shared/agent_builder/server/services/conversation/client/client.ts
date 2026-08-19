@@ -66,7 +66,7 @@ import { createSpaceDslFilter } from '../../../utils/spaces';
 import { isVersionConflictError } from '../../../utils/is_version_conflict_error';
 import type { ConversationStorage } from './storage';
 import { conversationIndexName, createStorage } from './storage';
-import { getTemplate } from '../templates/registry';
+import type { ConversationTemplatesStart } from '@kbn/agent-builder-server';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, deserializeMetadata } from '../templates/serialize';
 import { reconcileAttachments, upsertRound as upsertRoundInList } from './round_writes';
@@ -82,11 +82,12 @@ import {
 } from './converters';
 
 /** Applies `deserializeMetadata` to a conversation that has a `template_id` and `metadata`. */
-const withDeserializedMetadata = <T extends { template_id?: string; metadata?: unknown }>(
-  conversation: T
-): T => {
+const withDeserializedMetadata = async <T extends { template_id?: string; metadata?: unknown }>(
+  conversation: T,
+  conversationTemplates: ConversationTemplatesStart
+): Promise<T> => {
   if (!conversation.template_id || !conversation.metadata) return conversation;
-  const template = getTemplate(conversation.template_id);
+  const template = await conversationTemplates.get(conversation.template_id);
   if (!template) return conversation;
   return {
     ...conversation,
@@ -150,6 +151,7 @@ export const createClient = ({
   user,
   isAdmin,
   agentRegistry,
+  conversationTemplates,
 }: {
   space: string;
   logger: Logger;
@@ -157,6 +159,7 @@ export const createClient = ({
   user: UserIdAndName;
   isAdmin: boolean;
   agentRegistry: AgentRegistry;
+  conversationTemplates: ConversationTemplatesStart;
 }): ConversationClient => {
   const storage = createStorage({ logger, esClient });
   return new ConversationClientImpl({
@@ -166,6 +169,7 @@ export const createClient = ({
     isAdmin,
     space,
     agentRegistry,
+    conversationTemplates,
     logger,
   });
 };
@@ -177,6 +181,7 @@ class ConversationClientImpl implements ConversationClient {
   private readonly user: UserIdAndName;
   private readonly isAdmin: boolean;
   private readonly agentRegistry: AgentRegistry;
+  private readonly conversationTemplates: ConversationTemplatesStart;
   private readonly logger: Logger;
 
   constructor({
@@ -186,6 +191,7 @@ class ConversationClientImpl implements ConversationClient {
     isAdmin,
     space,
     agentRegistry,
+    conversationTemplates,
     logger,
   }: {
     storage: ConversationStorage;
@@ -194,6 +200,7 @@ class ConversationClientImpl implements ConversationClient {
     isAdmin: boolean;
     space: string;
     agentRegistry: AgentRegistry;
+    conversationTemplates: ConversationTemplatesStart;
     logger: Logger;
   }) {
     this.storage = storage;
@@ -202,6 +209,7 @@ class ConversationClientImpl implements ConversationClient {
     this.isAdmin = isAdmin;
     this.space = space;
     this.agentRegistry = agentRegistry;
+    this.conversationTemplates = conversationTemplates;
     this.logger = logger;
   }
 
@@ -244,8 +252,8 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return response.hits.hits.map((hit) =>
-      this.toResponseConversationWithoutRounds(hit as Document)
+    return Promise.all(
+      response.hits.hits.map((hit) => this.toResponseConversationWithoutRounds(hit as Document))
     );
   }
 
@@ -284,7 +292,8 @@ class ConversationClientImpl implements ConversationClient {
 
     try {
       return withDeserializedMetadata(
-        fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' }))
+        fromEs(await this.getDocumentWithAccess({ conversationId: hit._id, access: 'converse' })),
+        this.conversationTemplates
       );
     } catch (error) {
       if (isConversationNotFoundError(error)) {
@@ -304,7 +313,7 @@ class ConversationClientImpl implements ConversationClient {
     let resolvedTemplateId: string | undefined;
     let resolvedTemplateVersion: number | undefined;
     if (templateId) {
-      const template = getTemplate(templateId);
+      const template = await this.conversationTemplates.get(templateId);
       if (!template) {
         throw createBadRequestError(`Template not found: ${templateId}`);
       }
@@ -389,7 +398,7 @@ class ConversationClientImpl implements ConversationClient {
       fields: () => fields,
     });
 
-    return withDeserializedMetadata(result);
+    return withDeserializedMetadata(result, this.conversationTemplates);
   }
 
   async addAttachmentsToLastRound(
@@ -420,7 +429,7 @@ class ConversationClientImpl implements ConversationClient {
         };
       },
     });
-    return withDeserializedMetadata(result);
+    return withDeserializedMetadata(result, this.conversationTemplates);
   }
 
   async upsertRound(
@@ -450,7 +459,7 @@ class ConversationClientImpl implements ConversationClient {
         read: false,
       }),
     });
-    return withDeserializedMetadata(result);
+    return withDeserializedMetadata(result, this.conversationTemplates);
   }
 
   async delete(conversationId: string): Promise<boolean> {
@@ -483,7 +492,7 @@ class ConversationClientImpl implements ConversationClient {
   }
 
   async applyTemplate(conversationId: string, templateId: string): Promise<Conversation> {
-    const template = getTemplate(templateId);
+    const template = await this.conversationTemplates.get(templateId);
     if (!template) {
       throw createBadRequestError(`Template not found: ${templateId}`);
     }
@@ -520,46 +529,57 @@ class ConversationClientImpl implements ConversationClient {
       },
     });
 
-    return withDeserializedMetadata(result);
+    return withDeserializedMetadata(result, this.conversationTemplates);
   }
 
   async patchMetadata(
     conversationId: string,
     updates: Record<string, unknown>
   ): Promise<Conversation> {
+    // Resolve the template outside the OCC loop — templates.get is async
+    // (persistence-ready), while OCC's `mutate` callback is synchronous.
+    // Read-access check here mirrors what `writeConversation` will re-verify.
+    const currentDoc = await this.getDocumentWithAccess({ conversationId, access: 'owner' });
+    const currentTemplateId = fromEs(currentDoc).template_id;
+    if (!currentTemplateId) {
+      throw createBadRequestError(
+        `Conversation "${conversationId}" has no template — apply a template before writing metadata`
+      );
+    }
+    const template = await this.conversationTemplates.get(currentTemplateId);
+    if (!template) {
+      throw createBadRequestError(
+        `Template "${currentTemplateId}" referenced by this conversation was not found`
+      );
+    }
+
+    // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
+    validateMetadataUpdate(template.id, template.fields, updates);
+
+    const serialized = Object.fromEntries(
+      Object.entries(updates).map(([k, v]) => {
+        const def = template.fields[k];
+        return [k, serializeMetadataValue(v as MetadataFieldValue, def.input_type)];
+      })
+    );
+
     const result = await this.writeConversation({
       conversationId,
       access: 'owner',
       fields: (current) => {
-        if (!current.template_id) {
+        // Defensive: a concurrent template swap between preflight and write
+        // would invalidate `serialized`; reject rather than write incoherent metadata.
+        if (current.template_id !== template.id) {
           throw createBadRequestError(
-            `Conversation "${conversationId}" has no template — apply a template before writing metadata`
+            `Conversation "${conversationId}" template changed during write; retry the update`
           );
         }
-
-        const template = getTemplate(current.template_id);
-        if (!template) {
-          throw createBadRequestError(
-            `Template "${current.template_id}" referenced by this conversation was not found`
-          );
-        }
-
-        // validateMetadataUpdate throws with accumulated per-field errors if any key is invalid.
-        validateMetadataUpdate(template.id, template.fields, updates);
-
-        const serialized = Object.fromEntries(
-          Object.entries(updates).map(([k, v]) => {
-            const def = template.fields[k];
-            return [k, serializeMetadataValue(v as MetadataFieldValue, def.input_type)];
-          })
-        );
-
         const storedMetadata = (current.metadata ?? {}) as Record<string, SerializedMetadataValue>;
         return { metadata: { ...storedMetadata, ...serialized } };
       },
     });
 
-    return withDeserializedMetadata(result);
+    return withDeserializedMetadata(result, this.conversationTemplates);
   }
 
   async appendEvents(
@@ -635,28 +655,34 @@ class ConversationClientImpl implements ConversationClient {
     };
   }
 
-  private toResponseConversation(document: Document): ConversationWithPermissions {
-    return withDeserializedMetadata({
-      ...fromEs(document),
-      permissions: getConversationPermissions({
-        conversation: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    });
+  private async toResponseConversation(document: Document): Promise<ConversationWithPermissions> {
+    return withDeserializedMetadata(
+      {
+        ...fromEs(document),
+        permissions: getConversationPermissions({
+          conversation: document._source!,
+          user: this.user,
+          isAdmin: this.isAdmin,
+        }),
+      },
+      this.conversationTemplates
+    );
   }
 
-  private toResponseConversationWithoutRounds(
+  private async toResponseConversationWithoutRounds(
     document: Document
-  ): ConversationWithoutRoundsWithPermissions {
-    return withDeserializedMetadata({
-      ...fromEsWithoutRounds(document),
-      permissions: getConversationPermissions({
-        conversation: document._source!,
-        user: this.user,
-        isAdmin: this.isAdmin,
-      }),
-    });
+  ): Promise<ConversationWithoutRoundsWithPermissions> {
+    return withDeserializedMetadata(
+      {
+        ...fromEsWithoutRounds(document),
+        permissions: getConversationPermissions({
+          conversation: document._source!,
+          user: this.user,
+          isAdmin: this.isAdmin,
+        }),
+      },
+      this.conversationTemplates
+    );
   }
 
   private async getDocument(conversationId: string): Promise<VersionedDocument | undefined> {

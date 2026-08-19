@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConversationOriginType } from '@kbn/agent-builder-common';
 import { getUserFromRequest, isAdminFromRequest } from '../utils';
+import { createInMemoryConversationTemplates } from '../../test_utils';
 import { createClient } from './client';
 import { ConversationServiceImpl } from './conversation_service';
 
@@ -35,6 +36,7 @@ const createService = ({ agents = {} }: { agents?: object } = {}) => {
       },
     } as never,
     agents: agents as never,
+    conversationTemplates: createInMemoryConversationTemplates(),
   });
 };
 

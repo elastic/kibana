@@ -33,6 +33,7 @@ import type {
   ScopedRunnerRunAgentParams,
   SubAgentExecutor,
   WritableToolResultStore,
+  ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
 import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
@@ -87,6 +88,7 @@ export interface CreateScopedRunnerDeps {
   agentsService: AgentsServiceStart;
   attachmentsService: AttachmentServiceStart;
   renderersService: RendererServiceStart;
+  conversationTemplates: ConversationTemplatesStart;
   promptManager: PromptManager;
   stateManager: ConversationStateManager;
   trackingService?: TrackingService;

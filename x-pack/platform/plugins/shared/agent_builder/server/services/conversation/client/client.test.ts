@@ -24,9 +24,13 @@ import { createRound } from '../../../test_utils';
 import { createClient, type ConversationClient } from './client';
 import type { Document } from './converters';
 
-jest.mock('../templates/registry');
-import { getTemplate } from '../templates/registry';
-const getTemplateMock = getTemplate as jest.MockedFn<typeof getTemplate>;
+import type { ConversationTemplatesStart } from '@kbn/agent-builder-server';
+
+const conversationTemplates: jest.Mocked<ConversationTemplatesStart> = {
+  get: jest.fn(),
+  list: jest.fn(),
+};
+const getTemplateMock = conversationTemplates.get;
 
 const testSpace = 'default';
 
@@ -116,6 +120,9 @@ describe('ConversationClient', () => {
       getIds: jest.fn().mockResolvedValue(['agent-1']),
     };
 
+    conversationTemplates.get.mockReset();
+    conversationTemplates.list.mockReset();
+
     client = createClient({
       space: testSpace,
       logger: loggerMock.create(),
@@ -126,6 +133,7 @@ describe('ConversationClient', () => {
         id: 'user-1',
         username: 'test-user',
       },
+      conversationTemplates,
     });
   });
 
@@ -477,7 +485,7 @@ describe('ConversationClient', () => {
           count: { input_type: 'NUMBER', required: false },
         },
       };
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
 
       await client.create({
         id: 'conversation-1',
@@ -1170,7 +1178,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws a bad-request error when the template id is unknown', async () => {
-      getTemplateMock.mockReturnValue(undefined);
+      getTemplateMock.mockResolvedValue(undefined);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
       });
@@ -1197,7 +1205,7 @@ describe('ConversationClient', () => {
         },
         2
       );
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
       });
@@ -1223,7 +1231,7 @@ describe('ConversationClient', () => {
         new_key: { input_type: 'TEXT', description: 'New key', default_value: 'new_value' },
       });
 
-      getTemplateMock.mockImplementation((id: string) =>
+      getTemplateMock.mockImplementation(async (id: string) =>
         id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
       );
 
@@ -1252,7 +1260,7 @@ describe('ConversationClient', () => {
         tmpl_b_key: { input_type: 'TEXT', description: 'Template B key', default_value: 'b_val' },
       });
 
-      getTemplateMock.mockImplementation((id: string) =>
+      getTemplateMock.mockImplementation(async (id: string) =>
         id === 'tmpl-a' ? templateA : id === 'tmpl-b' ? templateB : undefined
       );
 
@@ -1291,7 +1299,7 @@ describe('ConversationClient', () => {
       );
 
       // Registry always returns the latest version; existing conversation stores v1's fields.
-      getTemplateMock.mockReturnValue(templateV2);
+      getTemplateMock.mockResolvedValue(templateV2);
       // The conversation currently stores v1's fields
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -1331,7 +1339,7 @@ describe('ConversationClient', () => {
       const template = makeTemplate('tmpl-bool', {
         mfa_enabled: { input_type: 'TOGGLE', description: 'MFA flag', default_value: false },
       });
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
       });
@@ -1351,7 +1359,7 @@ describe('ConversationClient', () => {
       const template = makeTemplate('tmpl-arr', {
         tags: { input_type: 'TEXT_ARRAY', description: 'Tags', default_value: ['a', 'b'] },
       });
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate()] },
       });
@@ -1368,7 +1376,7 @@ describe('ConversationClient', () => {
     });
 
     it('enforces owner access — throws for conversations owned by another user', async () => {
-      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a'));
+      getTemplateMock.mockResolvedValue(makeTemplate('tmpl-a'));
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [createConversationDocument({ userId: 'other-user', username: 'other' })],
@@ -1411,7 +1419,7 @@ describe('ConversationClient', () => {
         },
         notified: { input_type: 'TOGGLE', description: 'Notified' },
       });
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
 
       mockEsClient.search.mockResolvedValue({
         hits: {
@@ -1445,7 +1453,7 @@ describe('ConversationClient', () => {
           default_value: 'open',
         },
       });
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
 
       // The OCC read (inside writeConversation → readModifyWrite) returns a doc that already
       // has `status: 'closed'` written concurrently.
@@ -1474,7 +1482,7 @@ describe('ConversationClient', () => {
       const template = makeTemplate('tmpl-a', {
         severity: { input_type: 'SELECT', description: 'Sev', options: ['low', 'high'] },
       });
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
 
       mockEsClient.search.mockResolvedValue({
         hits: { hits: [createConversationDocumentWithTemplate({ templateId: 'tmpl-a' })] },
@@ -1489,7 +1497,7 @@ describe('ConversationClient', () => {
     });
 
     it('enforces owner access — throws for conversations owned by another user', async () => {
-      getTemplateMock.mockReturnValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
+      getTemplateMock.mockResolvedValue(makeTemplate('tmpl-a', { x: { input_type: 'TEXT' } }));
       mockEsClient.search.mockResolvedValue({
         hits: {
           hits: [createConversationDocument({ userId: 'other-user', username: 'other' })],
@@ -1525,7 +1533,7 @@ describe('ConversationClient', () => {
         },
         3
       );
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
 
       await client.create({
         id: 'conversation-1',
@@ -1556,7 +1564,7 @@ describe('ConversationClient', () => {
         },
         label: { input_type: 'TEXT', description: 'Label', default_value: 'active' },
       });
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
 
       await client.create({
         id: 'conversation-1',
@@ -1580,7 +1588,7 @@ describe('ConversationClient', () => {
       const template = makeTemplate('tmpl-arr', {
         tags: { input_type: 'TEXT_ARRAY', description: 'Tags', default_value: ['alpha', 'beta'] },
       });
-      getTemplateMock.mockReturnValue(template);
+      getTemplateMock.mockResolvedValue(template);
 
       await client.create({
         id: 'conversation-1',
@@ -1600,7 +1608,7 @@ describe('ConversationClient', () => {
     });
 
     it('throws a bad-request error when the template id is unknown', async () => {
-      getTemplateMock.mockReturnValue(undefined);
+      getTemplateMock.mockResolvedValue(undefined);
 
       await expect(
         client.create({
@@ -1974,6 +1982,7 @@ describe('ConversationClient', () => {
           id: 'admin-user-id',
           username: 'admin-user',
         },
+        conversationTemplates,
       });
     });
 

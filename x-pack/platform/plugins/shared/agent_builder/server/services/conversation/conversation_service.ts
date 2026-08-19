@@ -13,6 +13,7 @@ import type {
 } from '@kbn/core/server';
 import type { ConversationRoundAuthor } from '@kbn/agent-builder-common';
 import type { ExecutionConversationOrigin } from '@kbn/agent-builder-server/execution';
+import type { ConversationTemplatesStart } from '@kbn/agent-builder-server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { getUserFromRequest, isAdminFromRequest } from '../utils';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -34,6 +35,7 @@ interface ConversationServiceDeps {
   elasticsearch: ElasticsearchServiceStart;
   spaces?: SpacesPluginStart;
   agents: AgentsServiceStart;
+  conversationTemplates: ConversationTemplatesStart;
 }
 
 export class ConversationServiceImpl implements ConversationService {
@@ -42,13 +44,22 @@ export class ConversationServiceImpl implements ConversationService {
   private readonly elasticsearch: ElasticsearchServiceStart;
   private readonly spaces?: SpacesPluginStart;
   private readonly agents: AgentsServiceStart;
+  private readonly conversationTemplates: ConversationTemplatesStart;
 
-  constructor({ logger, security, elasticsearch, spaces, agents }: ConversationServiceDeps) {
+  constructor({
+    logger,
+    security,
+    elasticsearch,
+    spaces,
+    agents,
+    conversationTemplates,
+  }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
     this.elasticsearch = elasticsearch;
     this.spaces = spaces;
     this.agents = agents;
+    this.conversationTemplates = conversationTemplates;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
@@ -60,7 +71,15 @@ export class ConversationServiceImpl implements ConversationService {
     const space = getCurrentSpaceId({ request, spaces: this.spaces });
     const agentRegistry = await this.agents.getRegistry({ request });
 
-    return createClient({ user, isAdmin, esClient, logger: this.logger, space, agentRegistry });
+    return createClient({
+      user,
+      isAdmin,
+      esClient,
+      logger: this.logger,
+      space,
+      agentRegistry,
+      conversationTemplates: this.conversationTemplates,
+    });
   }
 
   /**

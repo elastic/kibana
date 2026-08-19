@@ -38,9 +38,10 @@ import type {
 } from '@kbn/agent-builder-server/runner';
 import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AttachmentsService } from '@kbn/agent-builder-server/runner/attachments_service';
+import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import { AgentExecutionMode, type ConversationTemplate } from '@kbn/agent-builder-common';
 import type { AttachmentServiceStart } from '../services/attachments';
 import type { CreateRunnerDeps, CreateScopedRunnerDeps } from '../services/execution/runner/runner';
 import type { ModelProviderFactoryMock, ModelProviderMock } from './model_provider';
@@ -75,6 +76,16 @@ export const createToolProviderMock = (): ToolProviderMock => {
     has: jest.fn(),
     get: jest.fn(),
     list: jest.fn(),
+  };
+};
+
+export const createInMemoryConversationTemplates = (
+  templates: ConversationTemplate[] = []
+): ConversationTemplatesService => {
+  const byId = new Map(templates.map((t) => [t.id, t]));
+  return {
+    get: async (id) => byId.get(id),
+    list: async () => [...byId.values()],
   };
 };
 
@@ -326,6 +337,7 @@ export const createAgentHandlerContextMock = (): AgentHandlerContextMock => {
     bashService: undefined,
     skills: createSkillsServiceMock(),
     plugins: createPluginsServiceMock(),
+    conversationTemplates: createInMemoryConversationTemplates(),
     toolManager: createToolManagerMock(),
     experimentalFeatures: {
       skills: false,
@@ -433,6 +445,7 @@ export const createScopedRunnerDepsMock = (): CreateScopedRunnerDepsMock => {
     todoStateManager: createTodoStateManager(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
+    conversationTemplates: createInMemoryConversationTemplates(),
     promptManager: createPromptManagerMock(),
     stateManager: createStateManagerMock(),
     hooks: createHooksServiceStartMock(),
@@ -472,6 +485,7 @@ export const createRunnerDepsMock = (): CreateRunnerDepsMock => {
     logger: loggerMock.create(),
     attachmentsService: createAttachmentsServiceStartMock(),
     renderersService: { getRegisteredRenderers: () => [], getRenderer: () => undefined },
+    conversationTemplates: createInMemoryConversationTemplates(),
     hooks: createHooksServiceStartMock(),
     skillServiceStart: createSkillServiceStartMock(),
     pluginsServiceStart: createPluginsServiceStartMock(),

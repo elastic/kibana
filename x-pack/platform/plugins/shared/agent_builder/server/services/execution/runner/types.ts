@@ -15,7 +15,11 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import type { Runner, HooksServiceStart } from '@kbn/agent-builder-server';
+import type {
+  Runner,
+  HooksServiceStart,
+  ConversationTemplatesStart,
+} from '@kbn/agent-builder-server';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
@@ -50,6 +54,7 @@ export interface RunnerFactoryDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   /** Lazy getter for the execution service (breaks circular dep with runner). */
   getExecutionService: () => AgentExecutionService;
+  conversationTemplates: ConversationTemplatesStart;
 }
 
 export interface RunnerFactory {
