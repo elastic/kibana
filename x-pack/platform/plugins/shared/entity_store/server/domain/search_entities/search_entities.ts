@@ -8,7 +8,8 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
-import { getLatestEntitiesIndexName, type Entity, type EntityType } from '../../../common';
+import { type Entity, type EntityType } from '../../../common';
+import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 
 const MAX_SEARCH_RESPONSE_SIZE = 10_000;
 
@@ -79,10 +80,6 @@ export async function searchEntitiesV2(
   const { esClient, namespace, entityTypes, filterQuery, page, perPage, sortField, sortOrder } =
     options;
 
-  const index = [getLatestEntitiesIndexName(namespace)];
-  const from = (page - 1) * perPage;
-  const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
-
   let parsedQuery: object | undefined;
   if (filterQuery) {
     try {
@@ -91,6 +88,10 @@ export async function searchEntitiesV2(
       throw new Error('Invalid filterQuery: must be valid JSON');
     }
   }
+
+  const index = [await resolveLatestEntitiesIndexName(esClient, namespace)];
+  const from = (page - 1) * perPage;
+  const sort = sortField ? [{ [sortField]: sortOrder }] : undefined;
 
   const entityTypeFilter =
     entityTypes.length > 0 ? { terms: { 'entity.EngineMetadata.Type': entityTypes } } : undefined;

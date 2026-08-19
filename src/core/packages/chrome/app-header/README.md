@@ -35,6 +35,17 @@ with other hooks. Most apps should use `ChromeAppHeaderRegistration`.
 Use `chrome.next.appHeader.set` only when a React adapter is not practical. It is the imperative
 primitive behind the React APIs.
 
+## Migrating route headers
+
+Use `AppHeader` instead of `EuiPageHeader`, `EuiPageTemplate.Header`, or
+`KibanaPageTemplate.Header` for top-level application route headers. `EuiPageHeader` and
+`EuiPageTemplate.Header` remain appropriate for nested content and other UI that is not the route
+header. `KibanaPageTemplate.Header` and the `KibanaPageTemplate` `pageHeader` prop are deprecated;
+do not add new consumers.
+
+See the [AppHeader migration guide](https://github.com/elastic/kibana/issues/283673) for migration
+steps, examples, and tracking.
+
 ## Back navigation
 
 Pass the destination as `back`. Kibana handles same-origin `href` values as SPA navigation, so an
@@ -47,8 +58,9 @@ Pass the destination as `back`. Kibana handles same-origin `href` values as SPA 
 Use the object form when the back button needs a destination label or click behavior that differs
 from following `href`. If the handler replaces navigation, call `event.preventDefault()`.
 
-If a page already owns an in-page back (for example `EuiPageHeader` breadcrumbs or a custom back
-control) and would also get a Chrome Next compatibility back from breadcrumbs, mount:
+As a temporary compatibility fix, if an unmigrated page already owns an in-page back (for example
+`EuiPageHeader` breadcrumbs or a custom back control) and would also get a Chrome Next compatibility
+back from breadcrumbs, mount:
 
 ```tsx
 <>
