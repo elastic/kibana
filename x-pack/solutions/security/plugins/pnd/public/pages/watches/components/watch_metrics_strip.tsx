@@ -9,7 +9,6 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, useEuiTheme } from '@elastic/eui';
 import type { Watch } from '@kbn/pnd-common';
-import { RunSparkline } from './run_sparkline';
 import * as i18n from '../settings_translations';
 
 const EM_DASH = '—';
@@ -40,21 +39,7 @@ export const WatchMetricsStrip: React.FC<WatchMetricsStripProps> = ({ watch }) =
       node: (
         <EuiStat
           reverse
-          title={
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              gutterSize="s"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>{runs7d ?? EM_DASH}</EuiFlexItem>
-              {runs7d != null ? (
-                <EuiFlexItem grow={false}>
-                  <RunSparkline seed={watch.id} color={watch.color} />
-                </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          }
+          title={runs7d ?? EM_DASH}
           description={i18n.METRIC_INCIDENTS_7D}
           titleSize="s"
           textAlign="left"

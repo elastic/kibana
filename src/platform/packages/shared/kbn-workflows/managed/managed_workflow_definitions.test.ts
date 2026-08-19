@@ -13,10 +13,12 @@ import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   EXAMPLE_MANAGED_WORKFLOW_ID,
+  PND_WATCH_FLOOR_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
 } from './definitions';
+import WATCH_FLOOR_YAML from './definitions/pnd/watch_floor.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
 import { WorkflowSchemaBase } from '../spec/schema';
 
@@ -39,6 +41,10 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
+  },
+  [PND_WATCH_FLOOR_WORKFLOW_ID]: {
+    settingsVersion: 1,
+    autonomyLevel: 'manual',
   },
   [SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID]: {
     detectionIntervalMinutes: 30,
@@ -104,6 +110,26 @@ function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
 
 /** Matches the `__SCREAMING_SNAKE__` placeholders that yamlTemplate definitions substitute. */
 const UNREPLACED_TOKEN_PATTERN = /__[A-Z][A-Z0-9_]*__/g;
+
+function createContentFingerprint(content: string): string {
+  let fingerprint = 0;
+  for (const character of content) {
+    fingerprint = (fingerprint * 31 + character.charCodeAt(0)) % 0xffffffff;
+  }
+  return fingerprint.toString(16).padStart(8, '0');
+}
+
+it('requires an explicit Watch Floor version decision when imported YAML changes', () => {
+  const definition = managedWorkflowDefinitions.find(
+    ({ id }) => id === PND_WATCH_FLOOR_WORKFLOW_ID
+  );
+  if (!definition) throw new Error('Watch Floor definition is not registered');
+  const contentFingerprint = createContentFingerprint(WATCH_FLOOR_YAML);
+
+  // yamlTemplate hashing sees only the function source, not this imported string. Update this
+  // fingerprint only together with an intentional definition-version decision.
+  expect(`${definition.version}:${contentFingerprint}`).toBe('1:a65d9483');
+});
 
 function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): void {
   let parsedYaml: unknown;

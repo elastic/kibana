@@ -27,7 +27,6 @@ export {
   ApprovalRequirement,
   WatchApprovalGate,
   WatchAutonomyLevel,
-  WatchGeneralSettings,
   WatchLedgerEntry,
   WatchRunOutcome,
   WatchScopeRoutingSettings,
@@ -56,6 +55,7 @@ export {
 export { ListWatchesResponse } from './watches/list_watches_route.gen';
 export { GetWatchResponse } from './watches/get_watch_route.gen';
 export { UpdateWatchRequestBody, UpdateWatchResponse } from './watches/update_watch_route.gen';
+export { SynchronizeSpaceEnablementResponse } from './watches/synchronize_space_enablement_route.gen';
 export { ListWorkersResponse } from './workers/list_workers_route.gen';
 export { ListSkillsResponse } from './skills/list_skills_route.gen';
 export { ListInvestigationsResponse } from './investigations/list_investigations_route.gen';

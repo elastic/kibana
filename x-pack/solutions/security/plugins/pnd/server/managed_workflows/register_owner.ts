@@ -6,13 +6,12 @@
  */
 
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
-
-const PLUGIN_ID = 'pnd';
+import { PND_MANAGED_WORKFLOW_OWNER_ID } from '../../common/constants';
 
 export const registerOwner = ({
   workflowsExtensions,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
 }): void => {
-  workflowsExtensions.registerManagedWorkflowOwner(PLUGIN_ID);
+  workflowsExtensions.registerManagedWorkflowOwner(PND_MANAGED_WORKFLOW_OWNER_ID);
 };

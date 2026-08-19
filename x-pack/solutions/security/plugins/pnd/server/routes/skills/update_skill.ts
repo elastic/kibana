@@ -13,7 +13,7 @@ import {
   PND_SKILL_URL_TEMPLATE,
   type WatchSkill,
 } from '@kbn/pnd-common';
-import { getWatchWriteRoutePrivileges } from '../watches/watch_route_security';
+import { PND_API_PRIVILEGE_WRITE } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
 import { storeUnavailableResponse } from '../store_route_guard';
 
@@ -38,7 +38,7 @@ export const registerUpdateSkillRoute = ({
       access: INTERNAL_API_ACCESS,
       security: {
         authz: {
-          requiredPrivileges: getWatchWriteRoutePrivileges(),
+          requiredPrivileges: [PND_API_PRIVILEGE_WRITE],
         },
       },
       summary: 'Update a PND skill',

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { WATCH_AUTONOMY_LEVELS } from '../../constants';
 import {
   MOCK_INVESTIGATIONS,
   MOCK_PROPOSALS,
   SKILLS_SEED,
   WATCHES_SEED,
-  WATCH_SETTINGS_SEED,
   WORKERS_SEED,
 } from '../samples';
 import type { Investigation, Proposal, Watch } from '.';
@@ -21,7 +19,6 @@ import {
   ListInvestigationProposalsResponse,
   ListInvestigationsResponse,
   ListWatchesResponse,
-  WatchSettings,
   WatchSkill,
   WatchWorker,
 } from '.';
@@ -38,25 +35,8 @@ describe('PND schema smoke tests', () => {
 
   it('parses individual seed watches through GetWatchResponse', () => {
     for (const watch of WATCHES_SEED) {
-      const result = GetWatchResponse.parse({ watch });
+      const result = GetWatchResponse.parse({ watch, settingsRevision: null });
       expect(result.watch.id).toBe(watch.id);
-    }
-  });
-
-  it('parses seed watch settings through WatchSettings', () => {
-    for (const [watchId, settings] of Object.entries(WATCH_SETTINGS_SEED)) {
-      // Ledger timestamps are stamped by the store, so drop the seed-only field before parsing.
-      const { runsLedger, ...rest } = settings;
-      const result = WatchSettings.parse({
-        ...rest,
-        runsLedger: runsLedger?.map(({ timeSecondsAgo, ...entry }) => ({
-          ...entry,
-          time: new Date().toISOString(),
-        })),
-      });
-      expect(result.watchId).toBe(watchId);
-      // One shared scale for every watch — only the selected level is per-watch.
-      expect(WATCH_AUTONOMY_LEVELS).toContain(result.autonomy);
     }
   });
 
@@ -80,43 +60,22 @@ describe('PND schema smoke tests', () => {
     }
   });
 
-  // A catalog entry claims the watches it serves, and each watch lists what it attaches. The two
-  // directions must agree, or the Workers/Skills pages and the per-watch tables disagree about
-  // which watch uses what.
-  it('keeps worker watchIds and per-watch worker attachments in agreement', () => {
+  it('keeps worker watch ids within the managed catalog', () => {
     const watchIds = new Set(WATCHES_SEED.map(({ id }) => id));
 
     for (const worker of WORKERS_SEED) {
       for (const watchId of worker.watchIds) {
         expect(watchIds).toContain(watchId);
-        expect(WATCH_SETTINGS_SEED[watchId]?.workers?.map(({ workerId }) => workerId)).toContain(
-          worker.id
-        );
-      }
-
-      for (const [watchId, settings] of Object.entries(WATCH_SETTINGS_SEED)) {
-        if (settings.workers?.some(({ workerId }) => workerId === worker.id)) {
-          expect(worker.watchIds).toContain(watchId);
-        }
       }
     }
   });
 
-  it('keeps skill watchIds and per-watch skill attachments in agreement', () => {
+  it('keeps skill watch ids within the managed catalog', () => {
     const watchIds = new Set(WATCHES_SEED.map(({ id }) => id));
 
     for (const skill of SKILLS_SEED) {
       for (const watchId of skill.watchIds) {
         expect(watchIds).toContain(watchId);
-        expect(WATCH_SETTINGS_SEED[watchId]?.skills?.map(({ skillId }) => skillId)).toContain(
-          skill.id
-        );
-      }
-
-      for (const [watchId, settings] of Object.entries(WATCH_SETTINGS_SEED)) {
-        if (settings.skills?.some(({ skillId }) => skillId === skill.id)) {
-          expect(skill.watchIds).toContain(watchId);
-        }
       }
     }
   });

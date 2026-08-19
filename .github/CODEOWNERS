@@ -3223,6 +3223,9 @@ x-pack/solutions/security/plugins/security_solution/server/workflows/step_types/
 # Significant Events managed workflows
 src/platform/packages/shared/kbn-workflows/managed/definitions/significant_events @elastic/obs-sig-events-team
 
+# PND managed workflows
+src/platform/packages/shared/kbn-workflows/managed/definitions/pnd @elastic/security-solution
+
 # Alert analysis workflow
 src/platform/packages/shared/kbn-workflows/managed/definitions/alert_analysis @elastic/security-threat-hunting
 
