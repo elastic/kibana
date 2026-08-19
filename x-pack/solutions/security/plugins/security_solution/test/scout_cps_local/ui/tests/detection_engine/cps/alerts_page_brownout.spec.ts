@@ -42,8 +42,11 @@ const BROWNOUT_TEST_TIMEOUT_MS = 3 * 60 * 1000;
 test.describe('CPS brownout — alerts page degraded state', { tag: CPS_TAGS }, () => {
   test(
     'alerts page shows a warning callout (not a hard error) when a linked project is unresponsive',
-    { timeout: BROWNOUT_TEST_TIMEOUT_MS },
     async ({ kbnUrl, cpsSpace, browserAuth, page }) => {
+      // The field-caps call hangs ~60–90s during a brownout. Extend the test timeout
+      // beyond the global 60s default so the hang plus assertions can complete.
+      test.setTimeout(BROWNOUT_TEST_TIMEOUT_MS);
+
       // Create a space with _alias:* routing so field-caps fans out to the linked cluster.
       const spaceId = await cpsSpace.create({
         spaceId: `cps-brownout-${randomUUID().slice(0, 8)}`,
